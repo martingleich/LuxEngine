@@ -1,0 +1,17 @@
+/*.sdf
+/*.suo
+/**/Debug/
+/**/Release/
+/*.opensdf
+bin
+lib
+*.db
+/**/*~
+*.opendb
+*.user
+*.suo
+/doc/doc
+*.log
+NoUnitTest
+*.ipch
+/todo

@@ -1,0 +1,6 @@
+#ifndef INCLUDED_TGA_CONFIG_H
+#define INCLUDED_TGA_CONFIG_H
+
+#define TGA_NO_ERROR_MSG 0
+
+#endif

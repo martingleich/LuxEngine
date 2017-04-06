@@ -1,0 +1,5 @@
+#include "..\..\..\src\video\CubeTextureD3D9.cpp"
+#include "..\..\..\src\video\TextureD3D9.cpp"
+#include "..\..\..\src\video\HardwareBufferManagerD3D9.cpp"
+#include "..\..\..\src\video\ShaderD3D9.cpp"
+#include "..\..\..\src\video\VideoDriverD3D9.cpp"
