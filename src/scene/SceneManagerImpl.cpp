@@ -15,6 +15,7 @@
 #include "scene/nodes/EmptySceneNodeImpl.h"
 
 #include "scene/components/RotationAnimatorImpl.h"
+#include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/CameraFPSAnimatorImpl.h"
 
 #include "scene/mesh/MeshCacheImpl.h"
@@ -117,6 +118,7 @@ SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	m_RefFactory->RegisterType(LUX_NEW(CameraSceneNodeImpl));
 	m_RefFactory->RegisterType(LUX_NEW(EmptySceneNode));
 
+	m_RefFactory->RegisterType(LUX_NEW(LinearMoveComponent));
 	m_RefFactory->RegisterType(LUX_NEW(SceneNodeAnimatorRotationImpl));
 	m_RefFactory->RegisterType(LUX_NEW(CameraFPSAnimatorImpl));
 
@@ -236,6 +238,21 @@ StrongRef<CameraFPSAnimator> SceneManagerImpl::AddCameraFPSAnimator(CameraSceneN
 
 	StrongRef<scene::CameraFPSAnimator> animator = LUX_NEW(scene::CameraFPSAnimatorImpl)(moveSpeed, rotSpeed,
 		maxVerticalAngle, noVerticalMovement);
+	addTo->AddComponent(animator);
+
+	return animator;
+}
+
+StrongRef<SceneNodeComponent> SceneManagerImpl::AddLinearMoveAnimator(SceneNode* addTo,
+	const math::line3df& line,
+	float duration,
+	bool jumpBack,
+	u32 count)
+{
+	if(!addTo)
+		return nullptr;
+
+	auto animator = LUX_NEW(scene::LinearMoveComponent)(line, duration, jumpBack, count);
 	addTo->AddComponent(animator);
 
 	return animator;

@@ -24,12 +24,18 @@
     <ClInclude Include="..\..\..\src\scene\components\RotationAnimatorImpl.h">
       <Filter>Quelldateien</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\scene\components\LinearMoveAnimator.h">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\scene\components\CameraFPSAnimatorImpl.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\scene\components\RotationAnimatorImpl.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\components\LinearMoveAnimator.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

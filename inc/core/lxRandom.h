@@ -207,6 +207,13 @@ public:
 		return radius * math::vector2f(baseLine, height);
 	}
 
+	//! Generate a random vector on the circle curve
+	inline math::vector2f GetVector2CircleBorder(float radius = 1.0f) const
+	{
+		const auto angle = GetAngle();
+		return math::vector2f::BuildFromPolar(angle, radius);
+	}
+
 	//! Generate a random vector inside the unit cube
 	/**
 	\return A random vector

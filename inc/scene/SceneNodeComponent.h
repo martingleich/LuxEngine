@@ -13,6 +13,7 @@ namespace SceneNodeComponentType
 {
 LUX_API extern const core::Name Rotation;
 LUX_API extern const core::Name CameraFPS;
+LUX_API extern const core::Name LinearMove;
 }
 
 //! A scene node component

@@ -2,6 +2,7 @@
 #define INCLUDED_ISCENE_H
 #include "math/vector3.h"
 #include "math/quaternion.h"
+#include "math/line3d.h"
 
 #include "core/lxName.h"
 #include "core/lxArray.h"
@@ -94,6 +95,12 @@ public:
 	// Erstellt einen Rotationsanimator
 	// vRot = Rotationsgeschwindigkeit in Rad/Sekunde
 	virtual StrongRef<SceneNodeComponent> AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis=math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f)) = 0;
+
+	virtual StrongRef<SceneNodeComponent> AddLinearMoveAnimator(SceneNode* addTo,
+		const math::line3df& line,
+		float duration,
+		bool jumpBack = false,
+		u32 count = std::numeric_limits<u32>::max()) = 0;
 
 	// Erstellt eine Component, mit dem sich die Kamera kontrollieren lässt
 	virtual StrongRef<CameraFPSAnimator> AddCameraFPSAnimator(CameraSceneNode* addTo, float moveSpeed=4.0f, math::anglef rotSpeed = math::anglef::Degree(90.0f),

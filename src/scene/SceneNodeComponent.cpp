@@ -10,6 +10,7 @@ namespace SceneNodeComponentType
 
 const core::Name Rotation = "rotation";
 const core::Name CameraFPS = "camera_fps";
+const core::Name LinearMove = "linear_move";
 
 }
 

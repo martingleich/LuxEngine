@@ -29,10 +29,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\inc\scene\components\CameraFPSAnimator.h" />
     <ClInclude Include="..\..\..\src\scene\components\CameraFPSAnimatorImpl.h" />
+    <ClInclude Include="..\..\..\src\scene\components\LinearMoveAnimator.h" />
     <ClInclude Include="..\..\..\src\scene\components\RotationAnimatorImpl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\scene\components\CameraFPSAnimatorImpl.cpp" />
+    <ClCompile Include="..\..\..\src\scene\components\LinearMoveAnimator.cpp" />
     <ClCompile Include="..\..\..\src\scene\components\RotationAnimatorImpl.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
