@@ -142,12 +142,24 @@ StrongRef<SceneNode> SceneManagerImpl::AddSceneNode(core::Name type, SceneNode* 
 	if(!parent)
 		parent = GetRootSceneNode();
 
-	StrongRef<SceneNode> out = (StrongRef<SceneNode>)m_RefFactory->Create(ReferableType::SceneNode, type);
+	StrongRef<SceneNode> out = m_RefFactory->Create(ReferableType::SceneNode, type);
 	if(out) {
 		if(!out->SetParent(parent))
 			return nullptr;
 	} else {
 		log::Error("Can't created scene node type ~s.", type);
+	}
+
+	return out;
+}
+
+StrongRef<SceneNodeComponent> SceneManagerImpl::AddComponent(core::Name type, SceneNode* node)
+{
+	StrongRef<SceneNodeComponent> out = m_RefFactory->Create(ReferableType::SceneNodeComponent, type);
+	if(out) {
+		node->AddComponent(out);
+	} else {
+		log::Error("Can't created scene node component type ~s.", type);
 	}
 
 	return out;

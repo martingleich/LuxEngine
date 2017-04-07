@@ -88,11 +88,7 @@ StrongRef<Referable> ReferableFactoryImpl::Create(Name type, Name subType)
 		return nullptr;
 	}
 
-	lxID id;
-	id.value = m_NextID;
-	StrongRef<Referable> out = Create(type, subType, id);
-	if(out)
-		++m_NextID;
+	StrongRef<Referable> out = Create(type, subType, MakeId());
 
 	return out;
 }
@@ -116,6 +112,14 @@ StrongRef<Referable> ReferableFactoryImpl::Create(Name type, Name subType, lxID 
 size_t ReferableFactoryImpl::GetTypeCount() const
 {
 	return m_Referables.Size();
+}
+
+lxID ReferableFactoryImpl::MakeId()
+{
+	lxID id;
+	id.value = m_NextID;
+	++m_NextID;
+	return id;
 }
 
 } // namespace core

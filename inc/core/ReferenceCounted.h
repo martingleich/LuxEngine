@@ -231,7 +231,15 @@ public:
 	template <typename T2>
 	operator StrongRef<T2>() const
 	{
-		return StrongRef<T2>(reinterpret_cast<T2*>((void*)m_Object));
+		T2* cast_out = dynamic_cast<T2*>(m_Object);
+		assert(cast_out);
+		return StrongRef<T2>(cast_out);
+	}
+
+	template <typename T2>
+	T2* As() const
+	{
+		return dynamic_cast<T2*>(m_Object);
 	}
 };
 

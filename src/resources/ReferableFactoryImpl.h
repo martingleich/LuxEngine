@@ -26,6 +26,8 @@ public:
 
 	size_t GetTypeCount() const;
 
+	lxID MakeId();
+
 private:
 	struct ReferableType
 	{

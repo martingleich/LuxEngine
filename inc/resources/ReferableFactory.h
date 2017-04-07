@@ -81,6 +81,9 @@ public:
 	\return The total number of types
 	*/
 	virtual u32 GetTypeCount() const = 0;
+
+	//! Creates a new unused id.
+	virtual lxID MakeId() = 0; 
 };
 
 }

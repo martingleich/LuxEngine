@@ -59,7 +59,7 @@ public:
 	virtual StrongRef<SceneNode> AddEmptySceneNode(SceneNode* parent = nullptr);
 
 	virtual StrongRef<SceneNode> AddSceneNode(core::Name type, SceneNode* parent = nullptr);
-
+	virtual StrongRef<SceneNodeComponent> AddComponent(core::Name type, SceneNode* node);
 
 	//--------------------------------------------------------------------------
 
