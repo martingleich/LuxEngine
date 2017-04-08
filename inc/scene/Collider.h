@@ -12,11 +12,16 @@ class Query;
 class QueryCallback;
 class SceneNode;
 
-class Collider : public ReferenceCounted
+class Collider : public Referable
 {
 public:
 	virtual EResult ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result) = 0;
 	virtual const math::aabbox3df& GetBoundingBox() const = 0;
+
+	core::Name GetReferableType() const
+	{
+		return ReferableType::Collider;
+	}
 };
 
 }

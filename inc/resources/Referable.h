@@ -11,6 +11,7 @@ namespace ReferableType
 LUX_API extern const core::Name Resource;
 LUX_API extern const core::Name SceneNode;
 LUX_API extern const core::Name SceneNodeComponent;
+LUX_API extern const core::Name Collider;
 }
 
 //! A referable object
