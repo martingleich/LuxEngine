@@ -108,7 +108,7 @@ public:
 	\param context [optional] Value passed to the callback function.
 	\return A newly created plane.
 	*/
-	virtual StrongRef<scene::Mesh> CreatePlaneMesh(float sizeX=1.0f, float sizeY=1.0f, s32 tesX=1, s32 tesY=1, float texX=1.0f, float texY=1.0f, float(*function)(void* ctx, float x, float y) = nullptr, void* context = nullptr) = 0;
+	virtual StrongRef<scene::Mesh> CreatePlaneMesh(float sizeX=1.0f, float sizeY=1.0f, s32 tesX=2, s32 tesY=2, float texX=1.0f, float texY=1.0f, float(*function)(void* ctx, float x, float y) = nullptr, void* context = nullptr) = 0;
 
 	//! Creates a new sphere mesh
 	/**

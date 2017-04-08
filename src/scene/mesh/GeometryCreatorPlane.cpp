@@ -48,7 +48,7 @@ StrongRef<video::SubMesh> GeometryCreatorPlane::CreateSubMesh(
 	if(sizeX < 0.0f || sizeY < 0.0f)
 		return nullptr;
 
-	if(tesX < 1 || tesY < 1)
+	if(tesX <= 1 || tesY <= 1)
 		return nullptr;
 
 	const u32 vertexCount = tesX * tesY;
