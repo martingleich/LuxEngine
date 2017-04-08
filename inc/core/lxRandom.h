@@ -33,6 +33,12 @@ public:
 		ReSeed(seed);
 	}
 
+	static Randomizer& Instance()
+	{
+		static Randomizer r;
+		return r;
+	}
+
 	//! Seed the random number generator, with the current time
 	void ReSeed()
 	{
