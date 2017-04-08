@@ -63,12 +63,12 @@ public:
 
 	//------------------------------------------------------------------
 	// Lichter
-	int AddLight(const LightData& light);
-	const LightData& GetLight(u32 index);
-	void EnableLight(u32 index, bool bTurnOn);
-	u32  GetLightCount() const;
+	size_t AddLight(const LightData& light);
+	const LightData& GetLight(size_t index);
+	void EnableLight(size_t index, bool bTurnOn);
+	size_t GetLightCount() const;
 	void DeleteAllLights();
-	u32  GetMaximalLightCount() const;
+	size_t GetMaximalLightCount() const;
 
 	virtual SubMesh* CreateSubMesh(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
@@ -331,7 +331,7 @@ private:
 	Color m_ClearColor;
 	float m_ClearDepth;
 
-	int m_LastSetLight;
+	size_t m_LastSetLight;
 	core::array<LightData> m_LightList;
 
 	IDirect3D9* m_D3D;

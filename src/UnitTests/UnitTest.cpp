@@ -289,7 +289,7 @@ bool Suite::Run(SuiteResult& result)
 	return true;
 }
 
-const std::string& Suite::GetDependency(int i) const
+const std::string& Suite::GetDependency(size_t i) const
 {
 	return m_Dependencies[i];
 }
@@ -299,7 +299,7 @@ size_t Suite::GetDependencyCount() const
 	return m_Dependencies.size();
 }
 
-const Test& Suite::GetTest(int i) const
+const Test& Suite::GetTest(size_t i) const
 {
 	return *m_Tests[i];
 }

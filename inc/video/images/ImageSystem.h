@@ -124,14 +124,14 @@ public:
 	/**
 	\return The number of image writers
 	*/
-	virtual u32 GetImageWriterCount() const = 0;
+	virtual size_t GetImageWriterCount() const = 0;
 
 	//! Retrieve a image writer based on an index
 	/**
 	\param index The index of the image writer.
 	\return The specified image writer or NULL if no such loader exists
 	*/
-	virtual ImageWriter* GetImageWriter(u32 index) = 0;
+	virtual ImageWriter* GetImageWriter(size_t index) = 0;
 
 	//! Retrieve a image writer based on the file extension of the given file
 	/**

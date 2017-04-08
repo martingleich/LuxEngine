@@ -34,8 +34,8 @@ public:
 	virtual void LoadParams(const core::PackagePuffer& Puffer) = 0;
 	virtual void Disable() = 0;
 
-	virtual bool Init(const char* pcVSCode, const char* pcVSEntryPoint, int VSLength, const char* pcVSProfile,
-		const char* pcPSCode, const char* pcPSEntryPoint, int PSLength, const char* pcPSProfile) = 0;
+	virtual bool Init(const char* pcVSCode, const char* pcVSEntryPoint, size_t VSLength, const char* pcVSProfile,
+		const char* pcPSCode, const char* pcPSEntryPoint, size_t PSLength, const char* pcPSProfile) = 0;
 
 	virtual const core::ParamPackage& GetParamPackage() = 0;
 };

@@ -5,7 +5,7 @@ namespace format
 {
 namespace internal
 {
-	static slice ConvertFixed(int dstByte, char* dst, int srcByte, const char* src, size_t srcSize)
+	static slice ConvertFixed(size_t dstByte, char* dst, size_t srcByte, const char* src, size_t srcSize)
 	{
 		assert(srcSize%srcByte == 0);
 
@@ -367,8 +367,8 @@ slice ConvertString(Context& dst, StringType srcType, const char* srcData, size_
 		if(dst.stringType == StringType::Unicode)
 			return slice(srcSize, srcData);
 
-		int dstByte = GetBytePerChar(dst.stringType);
-		int srcByte = GetBytePerChar(srcType);
+		size_t dstByte = GetBytePerChar(dst.stringType);
+		size_t srcByte = GetBytePerChar(srcType);
 		char* data = dst.AllocByte(srcSize*dstByte);
 		return internal::ConvertFixed(dstByte, data, srcByte, srcData, srcSize);
 	}

@@ -110,7 +110,7 @@ void MeshSceneNodeImpl::Render()
 
 }
 
-video::Material& MeshSceneNodeImpl::GetMaterial(u32 index)
+video::Material& MeshSceneNodeImpl::GetMaterial(size_t index)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
 		return m_Mesh->GetSubMesh(index)->GetMaterial();
@@ -122,7 +122,7 @@ video::Material& MeshSceneNodeImpl::GetMaterial(u32 index)
 	return  m_Materials[index];
 }
 
-u32 MeshSceneNodeImpl::GetMaterialCount() const
+size_t MeshSceneNodeImpl::GetMaterialCount() const
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr)
 		return m_Mesh->GetSubMeshCount();

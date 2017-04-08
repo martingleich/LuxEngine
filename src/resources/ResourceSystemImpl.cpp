@@ -82,7 +82,7 @@ struct ResourceBlock
 
 	u32 Size() const
 	{
-		return resources.Size();
+		return (u32)resources.Size();
 	}
 
 	StrongRef<Resource> GetResource(u32 id)
@@ -103,7 +103,7 @@ struct ResourceBlock
 	{
 		for(auto it = resources.First(); it != resources.End(); ++it) {
 			if(it->resource == resource)
-				return core::IteratorDistance(resources.First(), it);
+				return (u32)core::IteratorDistance(resources.First(), it);
 		}
 
 		return ResourceSystem::INVALID_ID;
@@ -119,7 +119,7 @@ struct ResourceBlock
 		if(it == resources.End())
 			return ResourceSystem::INVALID_ID;
 
-		return core::IteratorDistance(resources.First(), it);
+		return (u32)core::IteratorDistance(resources.First(), it);
 	}
 
 	bool AddResource(const string& name, Resource* resource)
@@ -154,15 +154,15 @@ struct ResourceBlock
 		return result;
 	}
 
-	size_t RemoveUnused()
+	u32 RemoveUnused()
 	{
-		const size_t oldCount = resources.Size();
+		const u32 oldCount = (u32)resources.Size();
 		if(resources.Size() > 0) {
 			auto newEnd1 = core::RemoveIf(resources.First(), resources.End(), [](const Entry& e) -> bool { return e.resource->GetReferenceCount() == 1; });
 			resources.Resize(core::IteratorDistance(resources.First(), newEnd1));
 		}
 
-		const size_t newCount = resources.Size();
+		const u32 newCount = (u32)resources.Size();
 
 		return (oldCount - newCount);
 	}
@@ -196,7 +196,7 @@ u32 ResourceSystemImpl::GetResourceCount(Name type) const
 	if(typeID == ResourceSystem::INVALID_ID)
 		return 0;
 	else
-		return self->resources[typeID].Size();
+		return (u32)self->resources[typeID].Size();
 }
 
 const string& ResourceSystemImpl::GetResourceName(Name type, u32 id) const
@@ -390,7 +390,7 @@ void ResourceSystemImpl::SetCaching(Name type, bool caching)
 
 u32 ResourceSystemImpl::GetResourceLoaderCount() const
 {
-	return self->loaders.Size();
+	return (u32)self->loaders.Size();
 }
 
 StrongRef<ResourceLoader> ResourceSystemImpl::GetResourceLoader(u32 id) const
@@ -424,7 +424,7 @@ bool ResourceSystemImpl::AddResourceLoader(ResourceLoader* loader)
 
 u32 ResourceSystemImpl::GetTypeCount() const
 {
-	return self->types.Size();
+	return (u32)self->types.Size();
 }
 
 Name ResourceSystemImpl::GetType(u32 id) const
@@ -455,7 +455,7 @@ u32 ResourceSystemImpl::GetTypeID(Name type) const
 	TypeEntry entry(type);
 	auto it = core::Linear_Search(entry, self->types.First(), self->types.End());
 	if(it != self->types.End())
-		return core::IteratorDistance(self->types.First(), it);
+		return (u32)core::IteratorDistance(self->types.First(), it);
 	else
 		return ResourceSystem::INVALID_ID;
 }

@@ -67,7 +67,7 @@ FileSystemImpl::FileSystemImpl()
 	DWORD ret;
 	do {
 		path.Resize(MAX_PATH);
-		ret = GetModuleFileNameW(NULL, (wchar_t*)path.Data(), path.Allocated());
+		ret = GetModuleFileNameW(NULL, (wchar_t*)path.Data(), (DWORD)path.Allocated());
 		if(ret == ERROR_INSUFFICIENT_BUFFER)
 			path.Resize((path.Allocated() + 1) * 2);
 		else if(ret > 0) {

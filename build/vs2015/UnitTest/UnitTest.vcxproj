@@ -106,6 +106,18 @@
     <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">
+    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -142,6 +154,9 @@
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe" -project</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">
     <ClCompile>
@@ -152,6 +167,9 @@
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -187,6 +205,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe" -project</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\LuxEngine\LuxEngine.vcxproj">

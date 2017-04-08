@@ -12,9 +12,9 @@ class FileSystem;
 class INIFile : public ReferenceCounted
 {
 public:
-	typedef u32 SectionID;
-	typedef u32 ElementID;
-	static const u32 InvalidID = 0xFFFFFFFF;
+	typedef size_t SectionID;
+	typedef size_t ElementID;
+	static const size_t InvalidID = 0xFFFFFFFF;
 
 	enum class ECommentPos
 	{
@@ -46,7 +46,7 @@ public:
 	virtual void SetCommentChars(const string& Chars) = 0;
 	virtual char GetCommentChar() const = 0;
 
-	virtual int GetSectionCount() = 0;
+	virtual size_t GetSectionCount() = 0;
 	virtual bool SortSections(ESorting sorting, bool recursive = false) = 0;
 	virtual bool AddSection(const char* name, const char* comment = nullptr) = 0;
 	virtual bool RemoveSection(const char* section) = 0;
@@ -55,7 +55,7 @@ public:
 	virtual const string& GetSectionName(SectionID id) = 0;
 	virtual const string& GetSectionComment(const char* section) = 0;
 
-	virtual int GetElementCount(const char* section) = 0;
+	virtual size_t GetElementCount(const char* section) = 0;
 	virtual bool SortElements(const char* section, ESorting sorting) = 0;
 	virtual bool AddElement(const char* section, const char* name, const char* value, const char* comment = nullptr) = 0;
 	virtual bool RemoveElement(const char* section, const char* element) = 0;

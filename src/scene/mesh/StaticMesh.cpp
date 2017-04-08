@@ -19,17 +19,17 @@ void StaticMesh::Clear()
 	m_BoundingBox.Set(0.0f, 0.0f, 0.0f);
 }
 
-u32 StaticMesh::GetSubMeshCount() const
+size_t StaticMesh::GetSubMeshCount() const
 {
 	return m_MeshBuffers.Size();
 }
 
-const video::SubMesh* StaticMesh::GetSubMesh(u32 i) const
+const video::SubMesh* StaticMesh::GetSubMesh(size_t i) const
 {
 	return m_MeshBuffers[i];
 }
 
-StrongRef<video::SubMesh> StaticMesh::GetSubMesh(u32 i)
+StrongRef<video::SubMesh> StaticMesh::GetSubMesh(size_t i)
 {
 	return m_MeshBuffers[i];
 }
@@ -48,7 +48,7 @@ void StaticMesh::RecalculateBoundingBox()
 {
 	if(m_MeshBuffers.Size() > 0) {
 		m_BoundingBox = m_MeshBuffers[0]->GetBoundingBox();
-		for(u32 i = 0; i < m_MeshBuffers.Size(); ++i)
+		for(size_t i = 0; i < m_MeshBuffers.Size(); ++i)
 			m_BoundingBox.AddBox(m_MeshBuffers[i]->GetBoundingBox());
 	} else {
 		m_BoundingBox.Set(0.0f, 0.0f, 0.0f);
@@ -61,7 +61,7 @@ void StaticMesh::AddSubMesh(video::SubMesh* subMesh)
 		m_MeshBuffers.Push_Back(subMesh);
 }
 
-void StaticMesh::RemoveSubMesh(u32 index)
+void StaticMesh::RemoveSubMesh(size_t index)
 {
 	m_MeshBuffers.Erase(m_MeshBuffers.First() + index);
 }
@@ -73,7 +73,7 @@ void StaticMesh::RemoveSubMesh(video::SubMesh* subMesh)
 		m_MeshBuffers.Erase(it);
 }
 
-video::Material& StaticMesh::GetMaterial(u32 index)
+video::Material& StaticMesh::GetMaterial(size_t index)
 {
 	if(index < m_MeshBuffers.Size())
 		return m_MeshBuffers[index]->GetMaterial();
@@ -81,7 +81,7 @@ video::Material& StaticMesh::GetMaterial(u32 index)
 		return video::WorkMaterial;
 }
 
-const video::Material& StaticMesh::GetMaterial(u32 index) const
+const video::Material& StaticMesh::GetMaterial(size_t index) const
 {
 	if(index < m_MeshBuffers.Size())
 		return m_MeshBuffers[index]->GetMaterial();

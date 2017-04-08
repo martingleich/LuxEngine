@@ -16,6 +16,9 @@ Caches materialsrenders and is used to created new ones.
 class MaterialLibrary : public ReferenceCounted
 {
 public:
+	static const size_t INVALID_ID = 0xFFFFFFFF;
+
+public:
 	virtual ~MaterialLibrary()
 	{
 	}
@@ -24,9 +27,9 @@ public:
 	/**
 	\param renderer The material renderer
 	\param name The name of the material renderer
-	\return The index of the new renderer, or -1 if an error occured
+	\return The index of the new renderer, or INVALID_ID if an error occured
 	*/
-	virtual int AddMaterialRenderer(MaterialRenderer* renderer, const string& name) = 0;
+	virtual size_t AddMaterialRenderer(MaterialRenderer* renderer, const string& name) = 0;
 
 	//! Clone an old material renderer
 	/**
@@ -62,19 +65,19 @@ public:
 		const MaterialRenderer* baseMaterial, const string& name) = 0;
 
 	//! Returns a material renderer by its index
-	virtual StrongRef<MaterialRenderer> GetMaterialRenderer(u32 index) const = 0;
+	virtual StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const = 0;
 
 	//! Returns a material renderer by its name
 	virtual StrongRef<MaterialRenderer> GetMaterialRenderer(const string& name) const = 0;
 
 	//! Returns the id of a material renderer
-	virtual int GetRendererID(MaterialRenderer* renderer) const = 0;
+	virtual size_t GetRendererID(MaterialRenderer* renderer) const = 0;
 
 	//! Returns the name of a material renderer
 	virtual const string& GetRendererName(MaterialRenderer* renderer) const = 0;
 
 	//! Returns the total number of material renderers
-	virtual u32 GetMaterialRendererCount() const = 0;
+	virtual size_t GetMaterialRendererCount() const = 0;
 };
 
 }

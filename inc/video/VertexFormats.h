@@ -134,7 +134,7 @@ public:
 
 	void AddStream()
 	{
-		u32 firstElem = m_Data.IsEmpty() ? 0 : (m_Data.Size() - 1);
+		u32 firstElem = m_Data.IsEmpty() ? 0 : ((u32)m_Data.Size() - 1);
 		m_Streams.Push_Back(Stream(firstElem));
 
 		m_CurrentStream = &m_Streams[m_Streams.Size() - 1];
@@ -176,7 +176,7 @@ public:
 
 	u32 GetElemCount() const
 	{
-		return m_Data.Size();
+		return (u32)m_Data.Size();
 	}
 
 	u32 GetElemCount(u32 stream) const
@@ -189,7 +189,7 @@ public:
 
 	u32 GetStreamCount() const
 	{
-		return m_Streams.Size();
+		return (u32)m_Streams.Size();
 	}
 
 	VertexElement GetElement(u32 stream, u32 elem) const
@@ -260,7 +260,7 @@ public:
 			}
 		};
 
-		for(u32 streamId = m_Streams.Size(); streamId < m_Streams.Size(); ++streamId) {
+		for(size_t streamId = m_Streams.Size(); streamId < m_Streams.Size(); ++streamId) {
 			const auto& stream = m_Streams[streamId];
 
 			core::Heapsort(m_Data.Data() + stream.firstElement,

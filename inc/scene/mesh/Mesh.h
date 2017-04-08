@@ -25,21 +25,21 @@ public:
 	virtual void Clear() = 0;
 
 	//! Return the number of Submeshs
-	virtual u32 GetSubMeshCount() const = 0;
+	virtual size_t GetSubMeshCount() const = 0;
 
 	//! Retrieve a sub mesh by index
 	/**
 	\param i The index of the sub mesh to return
 	\return The submesh
 	*/
-	virtual const video::SubMesh* GetSubMesh(u32 i) const = 0;
+	virtual const video::SubMesh* GetSubMesh(size_t i) const = 0;
 
 	//! Retrieve a sub mesh by index
 	/**
 	\param i The index of the sub mesh to return
 	\return The submesh
 	*/
-	virtual StrongRef<video::SubMesh> GetSubMesh(u32 i) = 0;
+	virtual StrongRef<video::SubMesh> GetSubMesh(size_t i) = 0;
 
 	//! Returns the Bounding-box of the whole mesh
 	virtual const math::aabbox3df& GetBoundingBox() const = 0;
@@ -52,7 +52,7 @@ public:
 	virtual void AddSubMesh(video::SubMesh* subMesh) = 0;
 
 	//! Removes a Submesh by index
-	virtual void RemoveSubMesh(u32 index) = 0;
+	virtual void RemoveSubMesh(size_t index) = 0;
 
 	//! Removes a submesh by pointer
 	virtual void RemoveSubMesh(video::SubMesh* subMesh) = 0;
@@ -67,10 +67,10 @@ public:
 	virtual void SetBoundingBox(const math::aabbox3df& box) = 0;
 
 	//! Get a submesh material by index.
-	virtual video::Material& GetMaterial(u32 index) = 0;
+	virtual video::Material& GetMaterial(size_t index) = 0;
 
 	//! Get a submesh material by index.
-	virtual const video::Material& GetMaterial(u32 index) const = 0;
+	virtual const video::Material& GetMaterial(size_t index) const = 0;
 
 	virtual core::Name GetResourceType() const
 	{

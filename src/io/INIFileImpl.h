@@ -45,7 +45,7 @@ public:
 	void SetCommentChars(const string& Chars);
 	char GetCommentChar() const;
 
-	int GetSectionCount();
+	size_t GetSectionCount();
 	bool SortSections(ESorting sorting, bool recursive = false);
 	bool AddSection(const char* name, const char* comment = nullptr);
 	bool RemoveSection(const char* section);
@@ -54,7 +54,7 @@ public:
 	const string& GetSectionName(SectionID id);
 	const string& GetSectionComment(const char* section);
 
-	int GetElementCount(const char* section);
+	size_t GetElementCount(const char* section);
 	bool SortElements(const char* section, ESorting sorting);
 	bool AddElement(const char* section, const char* name, const char* value, const char* comment = nullptr);
 	bool RemoveElement(const char* section, const char* element);
@@ -82,7 +82,7 @@ private:
 		string name;
 		string comment;
 		ElementID firstElem;
-		u32 elemCount;
+		size_t elemCount;
 		bool sorted : 1;
 		ESorting sorting;
 	};
@@ -122,7 +122,7 @@ private:
 	bool ReadElement(string& work, SINIElement& element);
 	bool IsComment(const string& work, string::ConstIterator& CommentBegin);
 
-	void WriteComment(const string& comment, int identDepth, ECommentPos pos);
+	void WriteComment(const string& comment, size_t identDepth, ECommentPos pos);
 
 	SectionID GetSectionID(const char* Section);
 	ElementID GetElemID(const char* Section, const char* Element, SectionID& outSection);

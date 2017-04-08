@@ -757,18 +757,18 @@ EStringType string::Classify() const
 bool string::IsShortString() const
 {
 	// Check the most siginficant bit.
-	return ((m_Allocated&(1 << (sizeof(m_Allocated) * 8 - 1))) != 0) || m_Allocated == 0;
+	return ((m_Allocated&((size_t)1 << (sizeof(m_Allocated) * 8 - 1))) != 0) || m_Allocated == 0;
 }
 
 size_t string::GetAllocated() const
 {
-	static const size_t flag = (1 << (sizeof(m_Allocated) * 8 - 1));
+	static const size_t flag = ((size_t)1 << (sizeof(m_Allocated) * 8 - 1));
 	return (m_Allocated & (flag - 1));
 }
 
 void string::SetAllocated(size_t a, bool short_string)
 {
-	static const size_t flag = (1 << (sizeof(m_Allocated) * 8 - 1));
+	static const size_t flag = ((size_t)1 << (sizeof(m_Allocated) * 8 - 1));
 	m_Allocated = a | (short_string ? flag : 0);
 }
 

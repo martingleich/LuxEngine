@@ -20,18 +20,18 @@ MaterialLibraryImpl::~MaterialLibraryImpl()
 {
 }
 
-int MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer, const string& name)
+size_t MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer, const string& name)
 {
 	if(!renderer)
-		return -1;
+		return INVALID_ID;
 
 	if(name.IsEmpty()) {
 		m_AnonRenderers.Push_Back(renderer);
 		return ANON_BASE_ID + (m_AnonRenderers.Size() - 1);
 	} else {
-		int i = m_MaterialRenderers.Size();
+		size_t i = m_MaterialRenderers.Size();
 		if(i >= ANON_BASE_ID)
-			return -1;
+			return INVALID_ID;
 
 		m_MaterialRenderers.Push_Back(Entry(renderer, name));
 		return m_MaterialRenderers.Size() - 1;
@@ -127,8 +127,11 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(const
 		return nullptr;
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(u32 index) const
+StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(size_t index) const
 {
+	if(index == INVALID_ID)
+		return nullptr;
+
 	if(index >= ANON_BASE_ID) {
 		index -= ANON_BASE_ID;
 		if(index < m_AnonRenderers.Size())
@@ -157,24 +160,24 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(const strin
 		return nullptr;
 }
 
-int MaterialLibraryImpl::GetRendererID(MaterialRenderer* renderer) const
+size_t MaterialLibraryImpl::GetRendererID(MaterialRenderer* renderer) const
 {
-	for(u32 i = 0; i < m_MaterialRenderers.Size(); ++i) {
+	for(size_t i = 0; i < m_MaterialRenderers.Size(); ++i) {
 		if(renderer == m_MaterialRenderers[i].renderer)
 			return i;
 	}
 
-	for(u32 i = 0; i < m_AnonRenderers.Size(); ++i) {
+	for(size_t i = 0; i < m_AnonRenderers.Size(); ++i) {
 		if(renderer == m_AnonRenderers[i])
 			return ANON_BASE_ID + i;
 	}
 
-	return -1;
+	return INVALID_ID;
 }
 
 const string& MaterialLibraryImpl::GetRendererName(MaterialRenderer* renderer) const
 {
-	for(u32 i = 0; i < m_MaterialRenderers.Size(); ++i) {
+	for(size_t i = 0; i < m_MaterialRenderers.Size(); ++i) {
 		if(renderer == m_MaterialRenderers[i].renderer)
 			return m_MaterialRenderers[i].name;
 	}
@@ -182,7 +185,7 @@ const string& MaterialLibraryImpl::GetRendererName(MaterialRenderer* renderer) c
 	return string::EMPTY;
 }
 
-u32 MaterialLibraryImpl::GetMaterialRendererCount() const
+size_t MaterialLibraryImpl::GetMaterialRendererCount() const
 {
 	return m_MaterialRenderers.Size();
 }

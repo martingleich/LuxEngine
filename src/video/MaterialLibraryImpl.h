@@ -19,19 +19,19 @@ public:
 	MaterialLibraryImpl(VideoDriver* driver, io::FileSystem* fileSys);
 	~MaterialLibraryImpl();
 
-	int AddMaterialRenderer(MaterialRenderer* renderer, const string& name);
+	size_t AddMaterialRenderer(MaterialRenderer* renderer, const string& name);
 	StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const string& oldName);
 	StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const MaterialRenderer* pOld);
 	StrongRef<MaterialRenderer> AddShaderMaterialRenderer(const string& VSPath, const string& VSEntryPoint, video::EVertexShaderType VSType,
 		const string& PSPath, const string& PSEntryPoint, video::EPixelShaderType PSType,
 		const MaterialRenderer* baseMaterial, const string& name);
-	StrongRef<MaterialRenderer> GetMaterialRenderer(u32 index) const;
+	StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const;
 	StrongRef<MaterialRenderer> GetMaterialRenderer(const string& wname) const;
 
-	int GetRendererID(MaterialRenderer* renderer) const;
+	size_t GetRendererID(MaterialRenderer* renderer) const;
 	const string& GetRendererName(MaterialRenderer* renderer) const;
 
-	u32 GetMaterialRendererCount() const;
+	size_t GetMaterialRendererCount() const;
 
 private:
 	struct Entry
@@ -64,7 +64,7 @@ private:
 	StrongRef<VideoDriver> m_VideoDriver;
 	StrongRef<io::FileSystem> m_FileSystem;
 
-	static const int ANON_BASE_ID = 1048576;
+	static const size_t ANON_BASE_ID = 1048576;
 
 };
 

@@ -15,7 +15,7 @@ void png_read_function(png_structp png_ptr, png_bytep data, png_size_t count)
 	if(!f)
 		png_error(png_ptr, "No read file defined");
 
-	if(count != f->ReadBinary(count, data))
+	if(count != (png_size_t)f->ReadBinary((u32)count, data))
 		png_error(png_ptr, "Unexpected end of file");
 }
 
@@ -168,7 +168,7 @@ bool ImageLoaderPNG::LoadImageToMemory(io::File* file, void* dest)
 
 	png_read_update_info(m_Png, m_PngInfo);
 
-	png_uint_32 rowbytes;
+	png_size_t rowbytes;
 	int channels;
 
 	rowbytes = png_get_rowbytes(m_Png, m_PngInfo);

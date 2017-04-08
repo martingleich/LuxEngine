@@ -86,9 +86,8 @@ void LightSceneNodeImpl::Render()
 {
 	video::VideoDriver* driver = GetSceneManager()->GetDriver();
 
-	int index = driver->AddLight(m_LightData);
-	if(index > 0)
-		driver->EnableLight(index, true);
+	size_t index = driver->AddLight(m_LightData);
+	driver->EnableLight(index, true);
 }
 
 core::Name LightSceneNodeImpl::GetReferableSubType() const

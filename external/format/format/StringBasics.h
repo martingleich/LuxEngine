@@ -238,7 +238,7 @@ inline int CodePointToUtf8(uint32_t c, uint8_t* out)
 		assert(false);
 	}
 
-	return out-orig;
+	return (int)(out-orig);
 }
 
 inline std::vector<uint16_t> CodePointsToUtf16(const uint32_t* data, size_t count)

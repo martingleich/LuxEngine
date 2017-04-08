@@ -16,17 +16,17 @@ public:
 	{
 	}
 	void Clear();
-	u32 GetSubMeshCount() const;
-	const video::SubMesh* GetSubMesh(u32 i) const;
-	StrongRef<video::SubMesh> GetSubMesh(u32 i);
+	size_t GetSubMeshCount() const;
+	const video::SubMesh* GetSubMesh(size_t i) const;
+	StrongRef<video::SubMesh> GetSubMesh(size_t i);
 	const math::aabbox3df& GetBoundingBox() const;
 	void SetBoundingBox(const math::aabbox3df& box);
 	void RecalculateBoundingBox();
 	void AddSubMesh(video::SubMesh* subMesh);
-	void RemoveSubMesh(u32 index);
+	void RemoveSubMesh(size_t index);
 	void RemoveSubMesh(video::SubMesh* subMesh);
-	video::Material& GetMaterial(u32 index);
-	const video::Material& GetMaterial(u32 index) const;
+	video::Material& GetMaterial(size_t index);
+	const video::Material& GetMaterial(size_t index) const;
 
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;

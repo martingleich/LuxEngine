@@ -139,5 +139,5 @@ int main(int argc, const char* argv[])
 
 	std::cin.get();
 
-	return failed;
+	return failed?-1:0;
 }

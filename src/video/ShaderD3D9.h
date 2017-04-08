@@ -62,7 +62,7 @@ private:
 
 	ShaderParam m_paramInvalid;        // Fehlercode
 
-	u32 m_MaterialParamCount;
+	size_t m_MaterialParamCount;
 	core::array<SParamEntry> m_Params;
 	char* m_pNames;
 	core::ParamPackage m_ParamPackage;
@@ -86,8 +86,8 @@ private:
 private:
 	void GetStructureElemType(D3DXHANDLE StructHandle, u32 index, ID3DXConstantTable* Table, core::Type& outType, u32& outSize, u32& registerID, const char*& Nameconst, const void*& default);
 	u32 LoadParams(ID3DXConstantTable* from, bool IsParam, core::array<SHelperEntry>& target, u32& StringSize, u32 ParamCount, u32 SceneCount);
-	bool CreatePixelShader(const char* Code, const char* EntryPoint, int length, const char* Profile);
-	bool CreateVertexShader(const char* Code, const char* EntryPoint, int length, const char* Profile);
+	bool CreatePixelShader(const char* Code, const char* EntryPoint, size_t length, const char* Profile);
+	bool CreateVertexShader(const char* Code, const char* EntryPoint, size_t length, const char* Profile);
 	void GetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type, u32 Size, void* out);
 	void SetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type, u32 Size, const void* data);
 	void CastTypeToShader(core::Type type, const void* in, void* out);
@@ -97,8 +97,8 @@ public:
 	ShaderImpl(VideoDriver* Driver);
 	~ShaderImpl();
 
-	bool Init(const char* VSCode, const char* VSEntryPoint, int VSLength, const char* VSProfile,
-		const char* PSCode, const char* PSEntryPoint, int PSLength, const char* PSProfile);
+	bool Init(const char* VSCode, const char* VSEntryPoint, size_t VSLength, const char* VSProfile,
+		const char* PSCode, const char* PSEntryPoint, size_t PSLength, const char* PSProfile);
 
 	const ShaderParam& GetParam(const char* pcName);
 	const ShaderParam& GetParam(u32 index);

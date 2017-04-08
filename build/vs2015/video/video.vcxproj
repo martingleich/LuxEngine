@@ -277,7 +277,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\x64\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\x64\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">
@@ -293,7 +293,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\lib\x64\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\lib\x64\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\x64\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\x64\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -332,6 +332,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\x64\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\x64\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

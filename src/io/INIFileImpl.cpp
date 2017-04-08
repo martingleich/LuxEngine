@@ -377,7 +377,7 @@ INIFileImpl::ElementID INIFileImpl::GetElemID(INIFileImpl::SectionID sectionID, 
 		return InvalidID;
 
 	ElementID FirstElem = m_Sections[sectionID].firstElem;
-	u32 ElemCount = m_Sections[sectionID].elemCount;
+	size_t ElemCount = m_Sections[sectionID].elemCount;
 	if(m_CurrentSection != sectionID)
 		m_CurrentElement = 0;
 
@@ -407,14 +407,14 @@ void INIFileImpl::Reload()
 	LoadData();
 }
 
-void INIFileImpl::WriteComment(const string& comment, int identDepth, INIFileImpl::ECommentPos pos)
+void INIFileImpl::WriteComment(const string& comment, size_t identDepth, INIFileImpl::ECommentPos pos)
 {
 	if(comment.IsEmpty())
 		return;
 
 	char commentChar = GetCommentChar();
 
-	for(int i = 0; i < identDepth; ++i)
+	for(size_t i = 0; i < identDepth; ++i)
 		m_File->WriteBinary("\t", 1);
 	m_File->WriteBinary(&commentChar, 1);
 	m_File->WriteBinary(" ", 1);
@@ -423,7 +423,7 @@ void INIFileImpl::WriteComment(const string& comment, int identDepth, INIFileImp
 		char c = *it;
 		m_File->WriteBinary(&c, 1);
 		if(*it == '\n' && it != comment.Last()) {
-			for(int j = 0; j < identDepth; ++j)
+			for(size_t j = 0; j < identDepth; ++j)
 				m_File->WriteBinary("\t", 1);
 			m_File->WriteBinary(&commentChar, 1);
 			m_File->WriteBinary(" ", 1);
@@ -460,7 +460,7 @@ bool INIFileImpl::Commit()
 			// Write section
 			WriteComment(section.comment, 0, ECommentPos::Before);
 			m_File->WriteBinary("[", 1);
-			m_File->WriteBinary(section.name.Data(), section.name.Size());
+			m_File->WriteBinary(section.name.Data(), (u32)section.name.Size());
 			m_File->WriteBinary("]" NEWLINE, sizeof(NEWLINE) + 1 - 1);
 		}
 
@@ -468,9 +468,9 @@ bool INIFileImpl::Commit()
 		if(m_ElementCommentPos == ECommentPos::Before)
 			WriteComment(element.comment, 1, ECommentPos::Before);
 		m_File->WriteBinary("\t", 1);
-		m_File->WriteBinary(element.name.Data(), element.name.Size());
+		m_File->WriteBinary(element.name.Data(), (u32)element.name.Size());
 		m_File->WriteBinary("=", 1);
-		m_File->WriteBinary(element.value.Data(), element.value.Size());
+		m_File->WriteBinary(element.value.Data(), (u32)element.value.Size());
 		if(m_ElementCommentPos == ECommentPos::After)
 			WriteComment(element.comment, 1, ECommentPos::After);
 		m_File->WriteBinary(NEWLINE, sizeof(NEWLINE) - 1);
@@ -483,7 +483,7 @@ bool INIFileImpl::Commit()
 }
 
 
-int INIFileImpl::GetSectionCount()
+size_t INIFileImpl::GetSectionCount()
 {
 	return m_Sections.Size();
 }
@@ -625,7 +625,7 @@ const string& INIFileImpl::GetSectionComment(const char* section)
 	return m_Sections[sectionID].name;
 }
 
-int INIFileImpl::GetElementCount(const char* section)
+size_t INIFileImpl::GetElementCount(const char* section)
 {
 	ElementID elementID = GetSectionID(section);
 	if(elementID == InvalidID)

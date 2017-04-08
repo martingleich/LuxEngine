@@ -1,5 +1,6 @@
 #ifndef INCLUDED_LXITERATOR_H
 #define INCLUDED_LXITERATOR_H 
+#include <stdint.h>
 
 namespace lux
 {
@@ -44,15 +45,15 @@ typename _iter_traits<IterType>::_iter_cat _iterCat(IterType& it)
 }
 
 template <typename IterType>
-size_t _IteratorDistance(IterType a, IterType b, RandomAccessIteratorTag)
+intptr_t _IteratorDistance(IterType a, IterType b, RandomAccessIteratorTag)
 {
 	return b - a;
 }
 
 template <typename IterType>
-size_t _IteratorDistance(IterType a, IterType b, BidirectionalIteratorTag)
+intptr_t _IteratorDistance(IterType a, IterType b, BidirectionalIteratorTag)
 {
-	s32 count = 0;
+	intptr_t count = 0;
 	while(a != b) {
 		count++;
 		a++;
@@ -62,7 +63,7 @@ size_t _IteratorDistance(IterType a, IterType b, BidirectionalIteratorTag)
 }
 
 template <typename IterType>
-size_t _IteratorDistance(IterType a, IterType b, InputIteratorTag)
+intptr_t _IteratorDistance(IterType a, IterType b, InputIteratorTag)
 {
 	size_t count = 0;
 	while(a != b) {
@@ -74,7 +75,7 @@ size_t _IteratorDistance(IterType a, IterType b, InputIteratorTag)
 }
 
 template <typename IterType>
-size_t _IteratorDistance(IterType a, IterType b, ForwardIteratorTag)
+intptr_t _IteratorDistance(IterType a, IterType b, ForwardIteratorTag)
 {
 	size_t count = 0;
 	while(a != b) {
@@ -136,7 +137,7 @@ The distance is defined as the smallest value x, with (a += x) == b
 \return The distance between the iterators
 */
 template <typename IterType>
-int IteratorDistance(IterType a, IterType b)
+intptr_t IteratorDistance(IterType a, IterType b)
 {
 	return _IteratorDistance(a, b, _iterCat(a));
 }

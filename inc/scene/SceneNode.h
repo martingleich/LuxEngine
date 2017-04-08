@@ -281,13 +281,13 @@ public:
 	}
 
 	// Die Anzahl der Materialien des Knotens
-	virtual u32 GetMaterialCount() const
+	virtual size_t GetMaterialCount() const
 	{
 		return 0;
 	}
 
 	// Liefert ein material des Knotens
-	virtual video::Material& GetMaterial(u32 mat)
+	virtual video::Material& GetMaterial(size_t mat)
 	{
 		LUX_UNUSED(mat);
 		return video::WorkMaterial;

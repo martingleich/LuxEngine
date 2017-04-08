@@ -23,13 +23,13 @@ public:
 	{
 		static const Sprite INVALID; //!< The invalid sprite
 
-		int id; //!< The id of the sprite
+		s32 id; //!< The id of the sprite
 
 		Sprite() :
 			id(0)
 		{
 		}
-		Sprite(int i) :
+		Sprite(s32 i) :
 			id(i)
 		{
 		}

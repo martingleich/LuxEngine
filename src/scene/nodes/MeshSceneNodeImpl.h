@@ -48,10 +48,10 @@ public:
 	}
 
 	// Liefert ein material des Knotens
-	virtual video::Material& GetMaterial(u32 index);
+	virtual video::Material& GetMaterial(size_t index);
 
 	// Liefert die Anzahl der Materialien
-	virtual u32 GetMaterialCount() const;
+	virtual size_t GetMaterialCount() const;
 
 	// Das gesetzte Modell
 	virtual StrongRef<Mesh> GetMesh()

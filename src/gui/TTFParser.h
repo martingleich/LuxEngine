@@ -10,7 +10,7 @@ namespace lux
 class TTFParser
 {
 public:
-	TTFParser(void* data, u32 size)
+	TTFParser(void* data, size_t size)
 	{
 		m_Data = (u8*)data;
 		m_Cursor = m_Data;
@@ -178,7 +178,7 @@ public:
 
 	u32 GetCursor()
 	{
-		return m_Cursor - m_Data;
+		return (u32)(m_Cursor - m_Data);
 	}
 
 	void SetCursor(u32 byte)

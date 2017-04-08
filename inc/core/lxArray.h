@@ -52,26 +52,26 @@ public:
 			Iterator Temp = *this; --m_Current; return Temp;
 		}
 
-		Iterator& operator+=(int num)
+		Iterator& operator+=(intptr_t num)
 		{
 			m_Current += num;
 			return *this;
 		}
 
-		Iterator  operator+ (int num) const
+		Iterator  operator+ (intptr_t num) const
 		{
 			Iterator temp = *this; return temp += num;
 		}
-		Iterator& operator-=(int num)
+		Iterator& operator-=(intptr_t num)
 		{
 			return (*this) += (-num);
 		}
-		Iterator  operator- (int num) const
+		Iterator  operator- (intptr_t num) const
 		{
 			return (*this) + (-num);
 		}
 
-		int operator-(Iterator other) const
+		intptr_t operator-(Iterator other) const
 		{
 			return m_Current - other.m_Current;
 		}
@@ -148,26 +148,26 @@ public:
 			ConstIterator Temp = *this; --m_Current; return Temp;
 		}
 
-		ConstIterator& operator+=(int num)
+		ConstIterator& operator+=(intptr_t num)
 		{
 			m_Current += num;
 			return *this;
 		}
 
-		ConstIterator  operator+ (int num) const
+		ConstIterator  operator+ (intptr_t num) const
 		{
 			ConstIterator temp = *this; return temp += num;
 		}
-		ConstIterator& operator-=(int num)
+		ConstIterator& operator-=(intptr_t num)
 		{
 			return (*this) += (-num);
 		}
-		ConstIterator  operator- (int num) const
+		ConstIterator  operator- (intptr_t num) const
 		{
 			return (*this) + (-num);
 		}
 
-		int operator-(ConstIterator other) const
+		intptr_t operator-(ConstIterator other) const
 		{
 			return m_Current - other.m_Current;
 		}

@@ -66,7 +66,8 @@ public:
 	*/
 	virtual u32 WriteString(const string& str)
 	{
-		return WriteBinary(str.Data(), str.Size());
+		assert(str.Size() < std::numeric_limits<u32>::max());
+		return WriteBinary(str.Data(), (u32)str.Size());
 	}
 
 	//! Write the content of a virtual file to this file

@@ -24,8 +24,8 @@ public:
 	bool WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, const io::path& file);
 
 	void AddExternalImageWriter(ImageWriter* writer);
-	u32 GetImageWriterCount() const;
-	ImageWriter* GetImageWriter(u32 index);
+	size_t GetImageWriterCount() const;
+	ImageWriter* GetImageWriter(size_t index);
 	ImageWriter* GetImageWriter(const io::path& name);
 
 	Texture* AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic = false);

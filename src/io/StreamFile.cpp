@@ -31,12 +31,12 @@ u32 StreamFile::ReadBinary(u32 numBytes, void* out)
 	if((u32)ftell(m_File) > m_FileSize - numBytes)
 		numBytes = m_FileSize - ftell(m_File);
 
-	size_t read = fread(out, numBytes, 1, m_File)*numBytes;
+	u32 read = (u32)fread(out, numBytes, 1, m_File)*numBytes;
 	if(read != numBytes) {
 		u8* cur = (u8*)out + read;
 		u32 count = numBytes - read;
 		while(count > 0) {
-			u32 block = fread(cur, 1024, 1, m_File) * 1024;
+			u32 block = (u32)fread(cur, 1024, 1, m_File) * 1024;
 			read += block;
 			if(block != 1024)
 				return (u32)read;

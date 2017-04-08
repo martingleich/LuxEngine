@@ -435,11 +435,11 @@ void SceneManagerImpl::DrawAll()
 
 	m_Driver->DeleteAllLights();
 
-	u32 maxLightCount = m_Driver->GetMaximalLightCount();
+	size_t maxLightCount = m_Driver->GetMaximalLightCount();
 	maxLightCount = math::Min(maxLightCount, m_LightList.Size());
 
 	// TODO: Lichter nach Kameradistanz sortieren, und am besten passedne Lichter auswählen
-	for(u32 i = 0; i < maxLightCount; ++i) {
+	for(size_t i = 0; i < maxLightCount; ++i) {
 		m_LightList[i]->Render();
 	}
 

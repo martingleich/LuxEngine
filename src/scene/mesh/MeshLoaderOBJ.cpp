@@ -200,9 +200,9 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 				// Nächsten Vertexblock einlesen
 				u32 WLength = CopyWord(pcLinePtr, pcEndPtr, VertexWord, WORD_BUFFER_LENGTH);
 				RetrieveVertexIndices(VertexWord, VertexWord + WLength + 1, Idx,
-					vertexBuffer.Size(),
-					TCoordBuffer.Size(),
-					NormalBuffer.Size());
+					(u32)vertexBuffer.Size(),
+					(u32)TCoordBuffer.Size(),
+					(u32)NormalBuffer.Size());
 				v.position = vertexBuffer[Idx[0]];
 				if(Idx[1] != -1)
 					v.texture = TCoordBuffer[Idx[1]];

@@ -136,7 +136,7 @@ public:
 			return tmp;
 		}
 
-		ConstIterator& operator+=(int i)
+		ConstIterator& operator+=(intptr_t i)
 		{
 			if(i < 0)
 				*this -= -i;
@@ -145,7 +145,7 @@ public:
 			return *this;
 		}
 
-		ConstIterator& operator-=(int i)
+		ConstIterator& operator-=(intptr_t i)
 		{
 			if(i < 0)
 				*this += -i;
@@ -154,14 +154,14 @@ public:
 			return *this;
 		}
 
-		ConstIterator operator+(int i)
+		ConstIterator operator+(intptr_t i)
 		{
 			ConstIterator out(*this);
 			out += i;
 			return out;
 		}
 
-		ConstIterator operator-(int i)
+		ConstIterator operator-(intptr_t i)
 		{
 			ConstIterator out(*this);
 			out -= i;

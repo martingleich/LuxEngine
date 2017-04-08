@@ -40,14 +40,14 @@ ShaderImpl::~ShaderImpl()
 	LUX_FREE_ARRAY(m_pNames);
 }
 
-bool ShaderImpl::Init(const char* pcVSCode, const char* pcVSEntryPoint, int VSLength, const char* pcVSProfile,
-	const char* pcPSCode, const char* pcPSEntryPoint, int PSLength, const char* pcPSProfile)
+bool ShaderImpl::Init(const char* pcVSCode, const char* pcVSEntryPoint, size_t VSLength, const char* pcVSProfile,
+	const char* pcPSCode, const char* pcPSEntryPoint, size_t PSLength, const char* pcPSProfile)
 {
 	if(!pcVSCode || !pcPSCode)    false;
 
 	// Länge anpassen
-	if(VSLength < 0) VSLength = strlen(pcVSCode);
-	if(PSLength < 0) PSLength = strlen(pcPSCode);
+	if(VSLength == 0) VSLength = strlen(pcVSCode);
+	if(PSLength == 0) PSLength = strlen(pcPSCode);
 
 	// Wenn keine Einsprungpunkte angegeben sind Standardnamen verwenden
 	if(!pcVSEntryPoint) pcVSEntryPoint = "mainVS";
@@ -81,7 +81,7 @@ bool ShaderImpl::Init(const char* pcVSCode, const char* pcVSEntryPoint, int VSLe
 	m_pNames = LUX_NEW_ARRAY(char, NameMemory);
 	u32 NameCursor = 0;
 	m_Params.Reserve(Helper.Size());
-	u32 count = Helper.Size();
+	u32 count = (u32)Helper.Size();
 	if(count > 0xFFFF) {
 		assertNeverReach("Helper array overflow");
 		count = 0xFFFF;
@@ -184,7 +184,7 @@ u32 ShaderImpl::LoadParams(ID3DXConstantTable* pFrom, bool IsParam, core::array<
 
 		if(!Found) {
 			SHelperEntry HEntry;
-			HEntry.NameLength = strlen(name) + 1;
+			HEntry.NameLength = (u32)strlen(name) + 1;
 			HEntry.pName = name;
 			HEntry.type = type;
 			HEntry.TypeSize = (u8)Size;
@@ -202,12 +202,12 @@ u32 ShaderImpl::LoadParams(ID3DXConstantTable* pFrom, bool IsParam, core::array<
 	return NewParams;
 }
 
-bool ShaderImpl::CreateVertexShader(const char* pcCode, const char* pcEntryPoint, int length, const char* pcProfile)
+bool ShaderImpl::CreateVertexShader(const char* pcCode, const char* pcEntryPoint, size_t length, const char* pcProfile)
 {
 	ID3DXBuffer* pOutput = 0;
 	ID3DXBuffer* pErrors = 0;
 
-	HRESULT hr = D3DXCompileShader(pcCode, length,
+	HRESULT hr = D3DXCompileShader(pcCode, (UINT)length,
 			NULL, NULL, pcEntryPoint,
 			pcProfile,
 			0, &pOutput, &pErrors,
@@ -240,12 +240,12 @@ bool ShaderImpl::CreateVertexShader(const char* pcCode, const char* pcEntryPoint
 	return true;
 }
 
-bool ShaderImpl::CreatePixelShader(const char* pcCode, const char* pcEntryPoint, int length, const char* pcProfile)
+bool ShaderImpl::CreatePixelShader(const char* pcCode, const char* pcEntryPoint, size_t length, const char* pcProfile)
 {
 	ID3DXBuffer* pOutput = 0;
 	ID3DXBuffer* pErrors = 0;
 
-	if(FAILED(D3DXCompileShader(pcCode, length,
+	if(FAILED(D3DXCompileShader(pcCode, (UINT)length,
 		NULL, NULL, pcEntryPoint,
 		pcProfile,
 		0, &pOutput, &pErrors,
@@ -299,7 +299,7 @@ const ShaderParam& ShaderImpl::GetParam(u32 index)
 
 u32 ShaderImpl::GetParamCount() const
 {
-	return m_Params.Size();
+	return (u32)m_Params.Size();
 }
 
 void ShaderImpl::Enable()
@@ -326,7 +326,7 @@ void ShaderImpl::LoadParams(const core::PackagePuffer& Puffer)
 	}
 
 	// Load Scenevalues
-	for(u32 i = m_MaterialParamCount; i < m_Params.Size(); ++i) {
+	for(size_t i = m_MaterialParamCount; i < m_Params.Size(); ++i) {
 		if(m_Params[i].IsSceneValue()) {
 			m_Params[i].Param.SetShaderValue(m_SceneValues->GetParamValue(m_Params[i].index));
 		}

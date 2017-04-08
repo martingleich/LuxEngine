@@ -265,7 +265,7 @@ int CALLBACK EnumFontFamExProc(
 	LUX_UNUSED(fontType);
 	LUX_UNUSED(lParam);
 
-	u32* count = (u32*)lParam;
+	size_t* count = (size_t*)lParam;
 	*count = *count + 1;
 	return 1;
 }
@@ -275,14 +275,14 @@ static bool DoesFontFamilyExist(impl::Context* ctx, const string& name)
 	LOGFONTW logFont;
 	ZeroMemory(&logFont, sizeof(logFont));
 	auto utf16Buffer = core::UTF8ToUTF16(name.Data());
-	u32 charCount = math::Min<size_t>(LF_FACESIZE, utf16Buffer.Size());
+	size_t charCount = math::Min<size_t>(LF_FACESIZE, utf16Buffer.Size());
 
 	memcpy(logFont.lfFaceName, utf16Buffer.Data(), charCount*2);
 	logFont.lfFaceName[charCount] = 0;
 	logFont.lfCharSet = ANSI_CHARSET;
 	logFont.lfPitchAndFamily = 0;
 
-	u32 fontCounts = 0;
+	size_t fontCounts = 0;
 	EnumFontFamiliesExW(
 		ctx->dc,
 		&logFont,
@@ -313,7 +313,7 @@ static bool RegisterFileFont(io::File* file, HANDLE& outHandle, string& outFontF
 	DWORD fontCount;
 	outHandle = AddFontMemResourceEx(
 		data,
-		data.GetSize(),
+		(DWORD)data.GetSize(),
 		NULL,
 		&fontCount);
 

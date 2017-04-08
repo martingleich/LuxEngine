@@ -69,7 +69,7 @@ static bool LoadTexture(
 	{
 		IDirect3DTexture9* Tex;
 		hr = D3DXCreateTextureFromFileInMemoryEx(device,
-			buffer, bufferSize,
+			buffer, (UINT)bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT, 0,
@@ -86,7 +86,7 @@ static bool LoadTexture(
 	{
 		IDirect3DCubeTexture9* Tex;
 		hr = D3DXCreateCubeTextureFromFileInMemoryEx(device,
-			buffer, bufferSize,
+			buffer, (UINT)bufferSize,
 			D3DX_DEFAULT, 1, 0,
 			format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT,
@@ -101,7 +101,7 @@ static bool LoadTexture(
 	{
 		IDirect3DVolumeTexture9* tex;
 		hr = D3DXCreateVolumeTextureFromFileInMemoryEx(device,
-			buffer, bufferSize,
+			buffer, (UINT)bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT,
@@ -229,7 +229,7 @@ bool ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 	buffer.size = file->GetSize() - file->GetCursor();
 	if(file->GetBuffer() == nullptr) {
 		void* tmp = LUX_NEW_ARRAY(u8, buffer.size);
-		size_t read = file->ReadBinary(buffer.size, tmp);
+		size_t read = file->ReadBinary((u32)buffer.size, tmp);
 		if(read != buffer.size)
 			return false;
 		buffer.ptr = tmp;
@@ -243,7 +243,7 @@ bool ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 		return false;
 
 	D3DXIMAGE_INFO info;
-	hr = D3DXGetImageInfoFromFileInMemory(buffer.ptr, buffer.size, &info);
+	hr = D3DXGetImageInfoFromFileInMemory(buffer.ptr, (UINT)buffer.size, &info);
 	if(FAILED(hr))
 		return false;
 

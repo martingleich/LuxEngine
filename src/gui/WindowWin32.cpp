@@ -163,10 +163,10 @@ bool WindowWin32::Init(HWND Window)
 		this->OnStateChange(EStateChange::Normal);
 
 	wchar_t text[200];
-	int length;
+	size_t length;
 	DWORD_PTR result;
 	text[0] = 0;
-	length = SendMessageTimeoutW(m_Window, WM_GETTEXT,
+	length = (size_t)SendMessageTimeoutW(m_Window, WM_GETTEXT,
 		200, reinterpret_cast<LPARAM>(text),
 		SMTO_ABORTIFHUNG, 2000, &result);
 	string newTitle = core::UTF16ToString(text);

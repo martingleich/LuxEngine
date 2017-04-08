@@ -432,7 +432,7 @@ void ParamPackage::SetDefaultValue(u32 param, const void* default)
 
 u32 ParamPackage::GetParamCount() const
 {
-	return m_Params.Size();
+	return (u32)m_Params.Size();
 }
 
 u32 ParamPackage::GetTextureCount() const

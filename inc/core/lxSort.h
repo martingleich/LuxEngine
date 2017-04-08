@@ -10,11 +10,11 @@ namespace core
 
 // Versenkt ein element im Heap
 template <typename ElementType, typename Compare>
-inline void Heapsink(ElementType* data, int elem, int max, const Compare& compare)
+inline void Heapsink(ElementType* data, size_t elem, size_t max, const Compare& compare)
 {
 	// Solange es ein linkes Kind gibt
 	while((elem << 1) < max) {
-		int j = elem << 1;
+		size_t j = elem << 1;
 		if(j + 1 < max && compare.Smaller(data[j], data[j + 1]))
 			j = j + 1;
 
@@ -37,10 +37,10 @@ inline void Heapsort(ElementType* data, size_t size, const Compare& compare)
 		return;
 
 	ElementType* virtualData = data - 1;
-	int virtualSize = size + 2;
-	int i;
+	size_t virtualSize = size + 2;
+	size_t i;
 
-	for(i = (size - 1) / 2; i >= 0; --i)
+	for(i = (size - 1) / 2; i != ((size_t)0-1); --i)
 		Heapsink(virtualData, i + 1, virtualSize - 1, compare);
 
 	for(i = size - 1; i > 0; --i) {

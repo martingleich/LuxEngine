@@ -168,20 +168,12 @@ public:
 
 	virtual void SetClearValues(Color color, float depth) = 0;
 
-	// Fügt ein neues Licht zu Liste hinzu und liefert seinen index
-	// oder -1 bei einem Fehler
-	virtual int AddLight(const LightData& light) = 0;
-	// Fragt ein Licht ab
-	virtual const LightData& GetLight(u32 index) = 0;
-	// Setzt den Status eines Lichts auf bTurnOn
-	virtual void EnableLight(u32 index, bool turnOn) = 0;
-	// Die Anzahl der vorhandenen Lichter
-	virtual u32  GetLightCount() const = 0;
-	// Löscht alle Lichter
+	virtual size_t AddLight(const LightData& light) = 0;
+	virtual const LightData& GetLight(size_t index) = 0;
+	virtual void EnableLight(size_t index, bool turnOn) = 0;
+	virtual size_t  GetLightCount() const = 0;
 	virtual void DeleteAllLights() = 0;
-
-	// Maximale Anzahl der gleichzeitig aktiven Lichter
-	virtual u32 GetMaximalLightCount() const = 0;
+	virtual size_t GetMaximalLightCount() const = 0;
 
 	virtual bool SetRendertarget(Texture* texture) = 0;
 	virtual Texture* GetRendertarget() = 0;

@@ -180,7 +180,7 @@ VideoDriverD3D9::VideoDriverD3D9(core::Timer* timer, core::ReferableFactory* f) 
 	m_Timer(timer),
 	m_RefFactory(f),
 	m_HasStencilBuffer(false),
-	m_LastSetLight(-1),
+	m_LastSetLight(0xFFFFFFFF),
 	m_ClearColor(0x00000000),
 	m_ClearDepth(1.0f),
 	m_3DTransformsChanged(false),
@@ -618,7 +618,7 @@ bool VideoDriverD3D9::EndScene()
 	return true;
 }
 
-int VideoDriverD3D9::AddLight(const LightData& light)
+size_t VideoDriverD3D9::AddLight(const LightData& light)
 {
 	m_LightList.Push_Back(light);
 
@@ -658,45 +658,48 @@ int VideoDriverD3D9::AddLight(const LightData& light)
 	D3DLight.Theta = light.innerCone * 2.0f;
 	D3DLight.Phi = light.outerCone * 2.0f;
 
-	++m_LastSetLight;
+	if(m_LastSetLight != 0xFFFFFFFF)
+		++m_LastSetLight;
+	else
+		m_LastSetLight = 0;
 
-	if(SUCCEEDED(m_D3DDevice->SetLight(m_LastSetLight, &D3DLight))) {
+	if(SUCCEEDED(m_D3DDevice->SetLight((DWORD)m_LastSetLight, &D3DLight))) {
 		// Klappt jetzt sicher
-		m_D3DDevice->LightEnable(m_LastSetLight, true);
-		return m_LastSetLight;
+		m_D3DDevice->LightEnable((DWORD)m_LastSetLight, true);
 	}
 
-	return -1;
+	return m_LastSetLight;
 }
 
-const LightData& VideoDriverD3D9::GetLight(u32 index)
+const LightData& VideoDriverD3D9::GetLight(size_t index)
 {
-	assert(index < m_LightList.Size());
-
 	return m_LightList[index];
 }
 
-void VideoDriverD3D9::EnableLight(u32 index, bool turnOn)
+void VideoDriverD3D9::EnableLight(size_t index, bool turnOn)
 {
-	if((int)(index) <= m_LastSetLight)
-		m_D3DDevice->LightEnable(index, turnOn);
+	if(index < m_LastSetLight)
+		m_D3DDevice->LightEnable((DWORD)index, turnOn);
 }
 
-u32 VideoDriverD3D9::GetLightCount() const
+size_t VideoDriverD3D9::GetLightCount() const
 {
 	return m_LightList.Size();
 }
 
 void VideoDriverD3D9::DeleteAllLights()
 {
-	for(int iLight = 0; iLight < m_LastSetLight + 1; ++iLight)
-		m_D3DDevice->LightEnable(iLight, false);
+	if(m_LastSetLight == 0xFFFFFFFF)
+		return;
 
-	m_LastSetLight = -1;
+	for(size_t i = 0; i < m_LastSetLight; ++i)
+		m_D3DDevice->LightEnable((DWORD)i, false);
+
+	m_LastSetLight = 0xFFFFFFFF;
 	m_LightList.Resize(0);
 }
 
-u32 VideoDriverD3D9::GetMaximalLightCount() const
+size_t VideoDriverD3D9::GetMaximalLightCount() const
 {
 	return m_Caps.MaxActiveLights;
 }

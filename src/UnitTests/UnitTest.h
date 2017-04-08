@@ -161,9 +161,9 @@ class Suite
 	friend class Environment;
 public:
 	Suite(Environment& env, const Info& info);
-	const std::string& GetDependency(int i) const;
+	const std::string& GetDependency(size_t i) const;
 	size_t GetDependencyCount() const;
-	const Test& GetTest(int i) const;
+	const Test& GetTest(size_t i) const;
 	size_t GetTestCount() const;
 	const Environment& GetEnvironment() const;
 	const Info& GetInfo() const;

@@ -45,8 +45,8 @@ public:
 		const u32 fileCursor = file->GetCursor();
 		StrongRef<ResourceLoader> result;
 
-		size_t count = m_ResourceSystem->GetResourceLoaderCount();
-		for(size_t i = 0; i < count; ++i) {
+		u32 count = m_ResourceSystem->GetResourceLoaderCount();
+		for(u32 i = 0; i < count; ++i) {
 			auto loader = m_ResourceSystem->GetResourceLoader(count - i - 1);
 			if(loader == this)
 				continue;
@@ -171,14 +171,14 @@ public:
 		bool isValid = true;
 		io::path image_path[6];
 		StrongRef<Image> images[6];
-		for(u32 i = 0; i < 6; ++i) {
+		for(size_t i = 0; i < 6; ++i) {
 			image_path[i] = basePath + core::StringConverter::ToString(i + 1) + "." + ext;
 			if(!fileSys->ExistFile(image_path[i]))
 				isValid = false;
 		}
 
 		if(isValid) {
-			for(u32 i = 0; i < 6; ++i)
+			for(size_t i = 0; i < 6; ++i)
 				images[i] = m_ResSys->GetResource(core::ResourceType::Image, image_path[i]);
 		} else {
 			log::Error("Can't open file: ~s.", filename);
@@ -514,12 +514,12 @@ void ImageSystemImpl::AddExternalImageWriter(ImageWriter* writer)
 		m_WriterList.Push_Back(writer);
 }
 
-u32 ImageSystemImpl::GetImageWriterCount() const
+size_t ImageSystemImpl::GetImageWriterCount() const
 {
 	return m_WriterList.Size();
 }
 
-ImageWriter* ImageSystemImpl::GetImageWriter(u32 index)
+ImageWriter* ImageSystemImpl::GetImageWriter(size_t index)
 {
 	if(index >= m_WriterList.Size())
 		return nullptr;
@@ -528,7 +528,10 @@ ImageWriter* ImageSystemImpl::GetImageWriter(u32 index)
 
 ImageWriter* ImageSystemImpl::GetImageWriter(const io::path& name)
 {
-	for(int i = m_WriterList.Size() - 1; i >= 0; --i) {
+	if(m_WriterList.IsEmpty())
+		return nullptr;
+
+	for(size_t i = m_WriterList.Size() - 1; i >= 0; --i) {
 		if(m_WriterList[i]->CanWriteFile(name))
 			return m_WriterList[i];
 	}
