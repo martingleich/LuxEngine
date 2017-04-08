@@ -21,7 +21,7 @@ UNIT_SUITE(TransformationTest)
 
 		t2.translation = math::vector3f(-2.0f, 3.0f, 1.0f);
 		t2.scale = 3.0f;
-		t2.orientation.FromAngleAxis(math::anglef::Degree(60.0f), math::vector3f(1.0f, 2.0f, -2.0f).Normalize());
+		t2.orientation = math::quaternionf::FromAngleAxis(math::anglef::Degree(60.0f), math::vector3f(1.0f, 2.0f, -2.0f));
 	}
 
 	UNIT_TEST(ToMatrix)

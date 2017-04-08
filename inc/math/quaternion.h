@@ -30,7 +30,7 @@ public:
 	//! Constructor from rotationaxis and rotationangle in rad
 	quaternion(const math::vector3<T>& axis, angle<T> Angle)
 	{
-		FromAngleAxis(Angle, axis);
+		*this = FromAngleAxis(Angle, axis);
 	}
 
 	//!Copyconstuctor
