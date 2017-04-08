@@ -68,7 +68,7 @@ public:
 	virtual void SetReadMaterialsOnly(bool state)
 	{
 		m_OnlyReadMaterials = state;
-		if(state)
+		if(!m_OnlyReadMaterials)
 			CopyMaterials();
 	}
 

@@ -17,7 +17,7 @@ UNIT_SUITE(QuaternionTest)
 		math::anglef Angle = math::anglef::Degree(45.0f);
 
 		math::quaternionf x;
-		x.FromAngleAxis(Angle, math::vector3f(1.0f, 0.0f, 1.0f).Normalize());
+		x = math::quaternionf::FromAngleAxis(Angle, math::vector3f(1.0f, 0.0f, 1.0f).Normalize());
 
 		UNIT_ASSERT(q1.Equal(x));
 	}

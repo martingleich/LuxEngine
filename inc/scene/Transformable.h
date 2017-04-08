@@ -217,7 +217,7 @@ public:
 	void SetDirection(const math::vector3f& dir, const math::vector3f& local = math::vector3f::UNIT_Z)
 	{
 		math::Transformation t = GetRelativeTransform();
-		t.orientation.FromTo(local, dir);
+		t.orientation = math::quaternionf::FromTo(local, dir);
 		SetRelativeTransform(t);
 	}
 

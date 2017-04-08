@@ -217,7 +217,7 @@ public:
 	/**
 	\return The normal of this quaternion
 	*/
-	quaternion<T> GetNormalized() const
+	quaternion<T> Normal() const
 	{
 		quaternion<T> tmp = *this;
 		return tmp.Normalize();
@@ -270,16 +270,22 @@ public:
 	\param Axis The rotation axis
 	\return A reference to this quaternion
 	*/
-	quaternion<T>& FromAngleAxis(angle<T> Angle, const vector3<T>& axis)
+	static quaternion FromAngleAxis(angle<T> Angle, const vector3<T>& axis)
 	{
+		T length = axis.GetLength();
+		if(IsZero(length))
+			return quaternion();
+
+		quaternion<T> out;
+		T invLength = 1 / length;
 		const angle<T> HalfAngle = Angle / 2;
 		const T s = (T)Sin(HalfAngle);
-		w = (T)Cos(HalfAngle);
-		x = axis.x * s;
-		y = axis.y * s;
-		z = axis.z * s;
 
-		return *this;
+		return quaternion(
+			axis.x * s * invLength,
+			axis.y * s * invLength,
+			axis.z * s * invLength,
+			(T)Cos(HalfAngle));
 	}
 
 	//! Read the rotation angle and rotation axis from this quaternion
@@ -310,7 +316,7 @@ public:
 	\param Euler The Euler rotation
 	\return Selfreference
 	*/
-	quaternion<T>& FromEuler(const vector3<T>& Euler)
+	static quaternion<T> FromEuler(const vector3<T>& Euler)
 	{
 		T Angle;
 		Angle = Euler.x / 2;
@@ -330,14 +336,15 @@ public:
 		const T cpsy = cp * sy;
 		const T spsy = sp * sy;
 
-		x = sr*cpcy - cr*spsy;
-		y = cr*spcy + sr*cpsy;
-		z = cr*cpsy - sr*spcy;
-		w = cr*cpcy + sr*spsy;
+		quaterion out(
+			sr*cpcy - cr*spsy,
+			cr*spcy + sr*cpsy,
+			cr*cpsy - sr*spcy,
+			cr*cpcy + sr*spsy);
 
 		// An sich sollte, die Länge 1 sein, aber weil Rundungsfehler
 		// (sin(a)*cos(b)*cos(c)-cos(a)*sin(b)*sin(c))² + (cos(a)*sin(b)*cos(c)+sin(a)*cos(b)*sin(c))²+(cos(a)*cos(b)*sin(c)-sin(a)*sin(b)*cos(c))²+(cos(a)*cos(b)*cos(c)+sin(a)*sin(b)*sin(c))² = 1
-		return Normalize();
+		return out.Normal();
 	}
 
 	//! Get the Eulerrotation from this quaternion
@@ -530,7 +537,8 @@ public:
 	\param to The endvector
 	\return Selfreference
 	*/
-	quaternion<T>& FromTo(const vector3<T>& from,
+	static quaternion<T> FromTo(
+		const vector3<T>& from,
 		const vector3<T>& to)
 	{
 		vector3<T> v0 = from;
@@ -540,7 +548,7 @@ public:
 
 		const T d = v0.Dot(v1);
 		if(d >= 1) {
-			return MakeIdent();
+			return quaternion();
 		} else if(d <= -1.0f) {
 			vector3<T> axis = math::vector3<T>::UNIT_X;
 			axis = axis.Cross(v0);
@@ -549,13 +557,13 @@ public:
 				axis = axis.Cross(v0);
 			}
 
-			return Set(axis.x, axis.y, axis.z, 0).Normalize();
+			return quaternion(axis.x, axis.y, axis.z, 0).Normal();
 		}
 
 		const T s = (T)sqrt((1 + d) * 2);
 		const T InvS = 1 / s;
 		const vector3<T> c = v0.Cross(v1) * InvS;
-		return Set(c.x, c.y, c.z, s / 2).Normalize();
+		return quaternion(c.x, c.y, c.z, s / 2).Normal();
 	}
 };
 
