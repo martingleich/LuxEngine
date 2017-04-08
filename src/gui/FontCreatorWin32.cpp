@@ -177,7 +177,7 @@ static void GenerateFont(impl::Context* ctx)
 	u32 cur_x = 0;
 	u32 cur_y = 0;
 	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {
-		const wchar_t c = it.key();
+		const u32 c = it.key();
 		const impl::CharInfo& info = it.value();
 
 		if(cur_x + info.b + 2 > width) {
@@ -190,7 +190,9 @@ static void GenerateFont(impl::Context* ctx)
 			(LONG)(cur_y)
 		};
 
-		TextOutW(ctx->dc, text.x, text.y, &c, 1);
+		u16 utf16[2];
+		core::CodePointToUTF16(c, utf16);
+		TextOutW(ctx->dc, text.x, text.y, (LPCWSTR)utf16, 1);
 
 		gui::CharInfo out;
 		out.A = info.a;
@@ -438,7 +440,7 @@ void FontCreatorWin32::GetFontInfo(void* void_ctx, u32& fontHeight)
 	fontHeight = ctx->fontHeight;
 }
 
-bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, wchar_t character, CharInfo& outInfo)
+bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo)
 {
 	impl::Context* ctx = (impl::Context*)void_ctx;
 	if(!ctx)

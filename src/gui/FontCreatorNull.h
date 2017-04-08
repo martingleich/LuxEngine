@@ -63,7 +63,7 @@ private:
 		const core::array<u32>& charSet) = 0;
 	virtual void GetFontInfo(void*, u32& fontHeight) = 0;
 	virtual bool GetFontImage(void*, FontPixel*& image, math::dimension2du& imageSize) = 0;
-	virtual bool GetFontCharInfo(void*, wchar_t character, CharInfo& outInfo) = 0;
+	virtual bool GetFontCharInfo(void*, u32 character, CharInfo& outInfo) = 0;
 	virtual void EndFontCreation(void*) = 0;
 };
 

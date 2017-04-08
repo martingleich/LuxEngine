@@ -30,7 +30,7 @@ public:
 		const core::array<u32>& charSet);
 	bool GetFontImage(void* void_ctx, FontPixel*& image, math::dimension2du& imageSize);
 	void GetFontInfo(void*, u32& fontHeight);
-	bool GetFontCharInfo(void* void_ctx, wchar_t character, CharInfo& outInfo);
+	bool GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo);
 	void EndFontCreation(void* void_ctx);
 };
 
