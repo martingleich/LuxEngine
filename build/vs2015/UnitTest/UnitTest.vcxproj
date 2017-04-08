@@ -116,7 +116,7 @@
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe -project</Command>
+      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe" -project</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">
@@ -169,7 +169,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe</Command>
+      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
