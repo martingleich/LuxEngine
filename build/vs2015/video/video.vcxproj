@@ -245,7 +245,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\x86\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\x86\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">
@@ -261,7 +261,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\x86\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\x86\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -313,7 +313,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)..\..\..\external\d3d9\x86\d3d9.lib;$(ProjectDir)..\..\..\external\d3d9\x86\d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
