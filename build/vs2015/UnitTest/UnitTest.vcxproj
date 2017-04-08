@@ -198,6 +198,7 @@
     <ClCompile Include="..\..\..\src\UnitTests\Tests\AlgorithmTest.cpp" />
     <ClCompile Include="..\..\..\src\UnitTests\Tests\ArrayTest.cpp" />
     <ClCompile Include="..\..\..\src\UnitTests\Tests\FileSystemTest.cpp" />
+    <ClCompile Include="..\..\..\src\UnitTests\Tests\FormatTest.cpp" />
     <ClCompile Include="..\..\..\src\UnitTests\Tests\HashMapTest.cpp" />
     <ClCompile Include="..\..\..\src\UnitTests\Tests\MatrixTest.cpp" />
     <ClCompile Include="..\..\..\src\UnitTests\Tests\PathTest.cpp" />

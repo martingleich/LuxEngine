@@ -51,6 +51,9 @@
     <ClCompile Include="..\..\..\src\UnitTests\Tests\UTF8Test.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\UnitTests\Tests\FormatTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\UnitTests\UnitTest.h">
