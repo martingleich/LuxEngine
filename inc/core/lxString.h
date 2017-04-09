@@ -656,6 +656,7 @@ struct HashType<string>
 };
 }
 
-}    // namespace lux
+}    
+
 
 #endif

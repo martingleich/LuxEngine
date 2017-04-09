@@ -114,7 +114,9 @@ private:
 	CharInfo m_ErrorChar;
 };
 
-}    // namespace gui
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

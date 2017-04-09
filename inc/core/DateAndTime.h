@@ -53,7 +53,9 @@ inline void conv_data(format::Context& ctx, const DateAndTime& date, format::Pla
 	format::CopyConvertAddString(ctx, format::StringType::Ascii, temp, 24);
 }
 
-}    // namespace core
-}    // namespace lux
+}    
+
+}    
+
 
 #endif // #ifndef INCLUDED_DATE_AND_TIME_H

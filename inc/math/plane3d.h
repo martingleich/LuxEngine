@@ -201,7 +201,9 @@ public:
 //! typedef for plane with float precision
 typedef plane3d<float> plane3df;
 
-}    // namespace math
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

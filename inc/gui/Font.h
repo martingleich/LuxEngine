@@ -181,10 +181,12 @@ public:
 };
 
 
-}    // namespace gui
+}    
+
 
 DECLARE_FLAG_CLASS(lux::gui::Font::EAlign);
 
-}    // namespace lux
+}    
+
 
 #endif

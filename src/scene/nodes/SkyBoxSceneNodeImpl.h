@@ -30,7 +30,9 @@ private:
 	video::Material m_Material;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

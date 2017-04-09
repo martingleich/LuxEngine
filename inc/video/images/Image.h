@@ -100,7 +100,9 @@ public:
 	virtual void Clear() = 0;
 };
 
-} // namespace video
-} // namespace lux
+} 
+
+} 
+
 
 #endif // INCLUDED_IMAGE_H

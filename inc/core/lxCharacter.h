@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXCHARACTER
-#define INCLUDED_LXCHARACTER
+#ifndef INCLUDED_LXCHARACTER_H
+#define INCLUDED_LXCHARACTER_H
 #include <cwctype>
 
 namespace lux
@@ -87,4 +87,4 @@ inline bool IsLower(u32 c)
 }
 }
 
-#endif // #ifndef INCLUDED_LXCHARACTER
+#endif // #ifndef INCLUDED_LXCHARACTER_H

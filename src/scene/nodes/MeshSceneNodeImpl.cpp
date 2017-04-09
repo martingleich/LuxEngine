@@ -188,5 +188,7 @@ StrongRef<Referable> MeshSceneNodeImpl::Clone() const
 	return out;
 }
 
-} // namespace scene
-} // namespace lux
+} 
+
+} 
+

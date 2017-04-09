@@ -455,5 +455,7 @@ bool WindowWin32::HandleMessages(UINT Message,
 	return false;
 }
 
-} // namespace gui
-} // namespace lux
+} 
+
+} 
+

@@ -175,7 +175,9 @@ public:
 	virtual void RemovePipelineOverwrite(ESceneNodeRenderPass pass, const video::PipelineOverwrite& over) = 0;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

@@ -42,7 +42,9 @@ private:
 	math::aabbox3df m_BoundingBox;
 };
 
-}    // namespace scene
-}    // namespace lu
+}    
+
+}    
+
 
 #endif

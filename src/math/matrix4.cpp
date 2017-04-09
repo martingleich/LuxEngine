@@ -810,5 +810,7 @@ inline bool matrix4::operator!=(const matrix4& other) const
 	return !(*this == other);
 }
 
-}        // namespace math
-}        // namespace lux
+}        
+
+}        
+

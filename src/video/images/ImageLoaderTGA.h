@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGELOADER_TGA
-#define INCLUDED_IMAGELOADER_TGA
+#ifndef INCLUDED_IMAGELOADER_TGA_H
+#define INCLUDED_IMAGELOADER_TGA_H
 #include "resources/ResourceLoader.h"
 #include "math/dimension2d.h"
 #include "video/Color.h"
@@ -33,4 +33,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_IMAGELOADER_TGA
+#endif // #ifndef INCLUDED_IMAGELOADER_TGA_H

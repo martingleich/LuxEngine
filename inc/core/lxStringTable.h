@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_STRING_TABLE
-#define INCLUDED_LX_STRING_TABLE
+#ifndef INCLUDED_LX_STRING_TABLE_H
+#define INCLUDED_LX_STRING_TABLE_H
 #include "lxMemory.h"
 #include "core/lxString.h"
 
@@ -86,4 +86,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_LX_STRING_TABLE
+#endif // #ifndef INCLUDED_LX_STRING_TABLE_H

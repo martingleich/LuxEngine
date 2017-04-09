@@ -20,7 +20,7 @@ public:
 	math::vector3f       translation;        //!< The translation
 
 public:
-	static const Transformation DEFAULT;    //! The default transformation
+	LUX_API static const Transformation DEFAULT;    //! The default transformation
 
 public:
 	//! default Constructor

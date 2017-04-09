@@ -222,8 +222,10 @@ public:
 LUX_API extern Material IdentityMaterial;
 LUX_API extern Material WorkMaterial;
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+
 
 #endif
 

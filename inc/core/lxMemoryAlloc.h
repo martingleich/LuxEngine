@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_MEMORY_ALLOC
-#define INCLUDED_LX_MEMORY_ALLOC
+#ifndef INCLUDED_LX_MEMORY_ALLOC_H
+#define INCLUDED_LX_MEMORY_ALLOC_H
 #include "core\LuxBase.h"
 
 //#define LUX_MEMORY_ALLOC_DEBUG
@@ -62,4 +62,4 @@ inline void operator delete(void* ptr, const lux::core::MemoryDebugInfo&)
 	::operator delete(ptr);
 }
 
-#endif // #ifndef INCLUDED_LX_MEMORY_ALLOC
+#endif // #ifndef INCLUDED_LX_MEMORY_ALLOC_H

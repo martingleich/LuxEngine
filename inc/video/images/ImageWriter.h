@@ -33,4 +33,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_IIMAGEWRITER
+#endif // #ifndef INCLUDED_IMAGEWRITER_H

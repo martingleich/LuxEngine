@@ -55,7 +55,9 @@ public:
 	virtual StrongRef<Referable> Clone() const = 0;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

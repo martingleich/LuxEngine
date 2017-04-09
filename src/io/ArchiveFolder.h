@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ARCHIVEFOLDER
-#define INCLUDED_ARCHIVEFOLDER
+#ifndef INCLUDED_ARCHIVEFOLDER_H
+#define INCLUDED_ARCHIVEFOLDER_H
 #include "io/ArchiveLoader.h"
 #include "core/lxArray.h"
 
@@ -68,4 +68,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_ARCHIVEFOLDER
+#endif // #ifndef INCLUDED_ARCHIVEFOLDER_H

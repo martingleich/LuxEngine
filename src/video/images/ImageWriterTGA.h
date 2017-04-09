@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGE_WRITER_TGA
-#define INCLUDED_IMAGE_WRITER_TGA
+#ifndef INCLUDED_IMAGE_WRITER_TGA_H
+#define INCLUDED_IMAGE_WRITER_TGA_H
 #include "video/images/ImageWriter.h"
 
 namespace lux
@@ -17,4 +17,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_IMAGE_WRITER_TGA
+#endif // #ifndef INCLUDED_IMAGE_WRITER_TGA_H

@@ -43,7 +43,9 @@ public:
 	StrongRef<Referable> Clone() const;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

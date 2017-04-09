@@ -30,14 +30,14 @@ public:
 	};
 
 public:
-	Query(SceneNode* rootNode);
+	LUX_API Query(SceneNode* rootNode);
 
 	//! Execute the query.
 	/**
 	\param callback The callback which is called for each collision, must be the implementation matching the query-type.
 	See QueryCallback for more information.
 	*/
-	virtual bool Execute(QueryCallback* callback);
+	LUX_API virtual bool Execute(QueryCallback* callback);
 
 	virtual core::Name GetType() const = 0;
 

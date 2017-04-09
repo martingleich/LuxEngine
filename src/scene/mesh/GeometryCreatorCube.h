@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GEOMETRY_CREATOR_CUBE
-#define INCLUDED_GEOMETRY_CREATOR_CUBE
+#ifndef INCLUDED_GEOMETRY_CREATOR_CUBE_H
+#define INCLUDED_GEOMETRY_CREATOR_CUBE_H
 #include "scene/mesh/GeometryCreatorLib.h"
 #include "core/ParamPackage.h"
 
@@ -46,4 +46,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_GEOMETRY_CREATOR_CUBE
+#endif // #ifndef INCLUDED_GEOMETRY_CREATOR_CUBE_H

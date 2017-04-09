@@ -38,7 +38,9 @@ public:
 	virtual void AllowVerticalMovement(bool allow) = 0;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

@@ -168,8 +168,11 @@ private:
 	size_t m_Size;
 };
 
-} // namespace mem
-} // namespace core
-} // namespace lux
+} 
+
+} 
+
+} 
+
 
 #endif

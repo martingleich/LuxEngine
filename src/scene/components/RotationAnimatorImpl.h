@@ -22,7 +22,9 @@ private:
 	math::anglef m_RotSpeed;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

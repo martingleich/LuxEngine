@@ -59,7 +59,9 @@ inline void QuickSort(ElementType* data, size_t size, const Compare& compare)
 }
 
 
-}    // namespace core
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ARCHIVE_LOADER
-#define INCLUDED_ARCHIVE_LOADER
+#ifndef INCLUDED_ARCHIVE_LOADER_H_H
+#define INCLUDED_ARCHIVE_LOADER_H
 #include "io/Archive.h"
 
 namespace lux
@@ -20,4 +20,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_ARCHIVE_LOADER
+#endif // #ifndef INCLUDED_ARCHIVE_LOADER_H

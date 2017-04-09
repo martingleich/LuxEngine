@@ -20,7 +20,7 @@ public:
 	\param dstFormat The desination format.
 	\return Is the source format in the destination format convertable.
 	*/
-	static bool IsConvertable(ColorFormat srcFormat, ColorFormat dstFormat);
+	LUX_API static bool IsConvertable(ColorFormat srcFormat, ColorFormat dstFormat);
 
 	//! Convert image data from one format into another
 	/**
@@ -33,7 +33,7 @@ public:
 	\param srcPitch The pitch of the source image.
 	\param dstPitch The pitch of the destination image.
 	*/
-	static bool ConvertByFormat(
+	LUX_API static bool ConvertByFormat(
 		const void* src, ColorFormat srcFormat,
 		void* dst, ColorFormat dstFormat,
 		u32 width, u32 height, u32 srcPitch = 0, u32 dstPitch = 0);

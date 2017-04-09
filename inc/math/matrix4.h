@@ -469,7 +469,8 @@ inline matrix4 operator* (float f, const matrix4& m)
 
 const core::Type core::TypeInfo<math::matrix4>::typeId = core::Type::Matrix;
 
-}    // namespace lux
+}    
+
 
 #endif
 

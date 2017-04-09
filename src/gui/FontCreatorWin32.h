@@ -36,4 +36,4 @@ public:
 
 }
 }
-#endif // #ifndef INCLUDED_FONT_CREATOR_WIN32_H
+#endif 

@@ -114,5 +114,7 @@ void IndexBufferImpl::GetIndices(void* ptr, u32 count, u32 n) const
 	memcpy(ptr, Pointer(n, count), count*m_Stride);
 }
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+

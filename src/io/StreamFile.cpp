@@ -112,5 +112,7 @@ u32 StreamFile::GetCursor() const
 	return ftell(m_File);
 }
 
-}    // namespace io
-}    // namespace lux
+}    
+
+}    
+

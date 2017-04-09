@@ -14,5 +14,4 @@ namespace math
 {
 
 
-}    // namespace math
-}    // namespace lux
+}    }    

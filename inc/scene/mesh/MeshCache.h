@@ -53,7 +53,9 @@ public:
 	virtual StrongRef<GeometryCreatorLib> GetGeometryCreatorLib() = 0;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

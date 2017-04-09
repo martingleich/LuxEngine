@@ -49,7 +49,9 @@ public:
 	virtual bool GetReadMaterialsOnly() const = 0;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

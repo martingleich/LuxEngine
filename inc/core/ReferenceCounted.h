@@ -541,6 +541,7 @@ StrongRef<T>::StrongRef(const WeakRef<T>& other) : StrongRef(*other)
 
 }
 
-}    // namespace lux
+}    
+
 
 #endif

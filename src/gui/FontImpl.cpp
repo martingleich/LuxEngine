@@ -382,5 +382,7 @@ StrongRef<Referable> FontImpl::Clone() const
 	return LUX_NEW(FontImpl)(*this);
 }
 
-} // namespace gui
-} // namespace lux
+} 
+
+} 
+

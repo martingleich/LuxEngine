@@ -477,7 +477,7 @@ inline size_t NextPrime(size_t x)
 	return x;
 }
 
-}    // namespace math
-}    // namespace lux
+}    
+}    
 
 #endif

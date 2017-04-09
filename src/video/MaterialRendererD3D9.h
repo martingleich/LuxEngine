@@ -286,7 +286,9 @@ public:
 	}
 };
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

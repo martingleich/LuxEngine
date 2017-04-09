@@ -63,7 +63,9 @@ public:
 	virtual void Unlock() = 0;
 };
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

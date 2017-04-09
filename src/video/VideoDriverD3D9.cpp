@@ -2059,5 +2059,7 @@ D3DCOLORVALUE VideoDriverD3D9::SColorToD3DColor(const Colorf& color)
 	return out;
 }
 
-}    // Namespace video
-}    // Namespace lux
+}    
+
+}    
+

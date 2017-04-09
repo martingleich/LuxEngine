@@ -37,5 +37,7 @@ core::Name SceneNodeAnimatorRotationImpl::GetReferableSubType() const
 	return SceneNodeComponentType::Rotation;
 }
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+

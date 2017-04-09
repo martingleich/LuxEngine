@@ -362,7 +362,9 @@ private:
 	core::ReferableFactory* m_RefFactory;
 };
 
-}    // Namespace video
-}    // Namespace lux
+}    
+
+}    
+
 
 #endif

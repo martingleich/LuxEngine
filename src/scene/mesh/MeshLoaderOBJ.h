@@ -102,7 +102,9 @@ private:
 	core::array<SObjMtl*> m_Materials;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

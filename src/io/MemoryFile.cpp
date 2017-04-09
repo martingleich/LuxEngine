@@ -126,7 +126,9 @@ u32 MemoryFile::GetCursor() const
 	return m_Cursor;
 }
 
-}    // namespace io
-}    // namespace lux
+}    
+
+}    
+
 
 

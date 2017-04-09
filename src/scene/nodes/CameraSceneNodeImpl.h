@@ -76,7 +76,9 @@ private:
 	float m_fFarPlane;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

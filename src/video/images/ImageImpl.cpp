@@ -129,5 +129,7 @@ StrongRef<Referable> ImageImpl::Clone() const
 }
 
 
-} // namespace video
-} // namespace lux
+} 
+
+} 
+

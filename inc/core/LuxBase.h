@@ -1,5 +1,5 @@
-#ifndef LUXBASE_H_INCLUDED
-#define LUXBASE_H_INCLUDED
+#ifndef INCLUDED_LUXBASE_H
+#define INCLUDED_LUXBASE_H
 
 
 //---------------------------------------------

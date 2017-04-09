@@ -183,7 +183,9 @@ private:
 
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

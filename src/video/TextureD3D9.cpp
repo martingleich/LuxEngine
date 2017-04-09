@@ -248,5 +248,7 @@ StrongRef<Referable> TextureD3D9::Clone() const
 	return new TextureD3D9(m_Device);
 }
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+

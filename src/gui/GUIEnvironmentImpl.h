@@ -45,7 +45,9 @@ private:
 };
 
 
-} // namespace gui
-} // namespace lux
+} 
+
+} 
+
 
 #endif

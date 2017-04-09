@@ -578,7 +578,9 @@ protected:
 	}
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

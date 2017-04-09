@@ -121,5 +121,7 @@ StrongRef<Referable> CubeTextureD3D9::Clone() const
 	return new CubeTextureD3D9(m_D3DDevice);
 }
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+

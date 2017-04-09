@@ -209,7 +209,9 @@ void Fill(Iterator first, Iterator end, Value v)
 	}
 }
 
-} // namespace core
-} // namespace lux
+} 
+
+} 
+
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IOCONSTANTS
-#define INCLUDED_IOCONSTANTS
+#ifndef INCLUDED_IOCONSTANTS_H
+#define INCLUDED_IOCONSTANTS_H
 #include "core/EnumClassFlags.h"
 
 namespace lux
@@ -36,4 +36,4 @@ enum class EArchiveCapabilities
 DECLARE_FLAG_CLASS(io::EArchiveCapabilities);
 }
 
-#endif // #ifndef INCLUDED_IOCONSTANTS	
+#endif // #ifndef INCLUDED_IOCONSTANTS_H

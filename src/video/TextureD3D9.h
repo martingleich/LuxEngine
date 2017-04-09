@@ -54,7 +54,9 @@ public:
 	StrongRef<Referable> Clone() const;
 };
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

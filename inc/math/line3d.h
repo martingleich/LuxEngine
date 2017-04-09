@@ -200,7 +200,5 @@ public:
 //! typdef for 3D Line with floating precision
 typedef line3d<float> line3df;
 
-}    // namespace math
-}    // namespace lux
-
+}    }    
 #endif

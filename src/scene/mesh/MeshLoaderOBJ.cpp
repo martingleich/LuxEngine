@@ -838,5 +838,7 @@ const char*  MeshLoaderOBJ::ReadBool(const char* pFrom, const char* pTo, bool& o
 	return pFrom;
 }
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+

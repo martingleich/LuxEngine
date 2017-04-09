@@ -193,5 +193,7 @@ core::Name CameraFPSAnimatorImpl::GetReferableSubType() const
 	return SceneNodeComponentType::CameraFPS;
 }
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+

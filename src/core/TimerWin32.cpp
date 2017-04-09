@@ -123,5 +123,7 @@ DateAndTime::EWeekDay TimerWin32::TimeStructToWeekDay(int tm) const
 	}
 }
 
-}    // namespace core
-}    // namespace lux
+}    
+
+}    
+

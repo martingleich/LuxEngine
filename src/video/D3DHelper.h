@@ -1,5 +1,5 @@
-#ifndef INCLUDED_D3DHELPER
-#define INCLUDED_D3DHELPER
+#ifndef INCLUDED_D3DHELPER_H
+#define INCLUDED_D3DHELPER_H
 #include "StrippedD3D9.h"
 #include "video/Color.h"
 
@@ -47,4 +47,4 @@ inline D3DFORMAT GetD3DFormat(ColorFormat Format, bool Alpha)
 }
 }
 
-#endif // #ifndef INCLUDED_D3DHELPER
+#endif // #ifndef INCLUDED_D3DHELPER_H

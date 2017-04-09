@@ -645,5 +645,7 @@ core::ResourceSystem* SceneManagerImpl::GetResourceSystem() const
 }
 
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+

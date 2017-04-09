@@ -589,12 +589,14 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 	ConvertAddString(ctx, StringType::Ascii, "]", 1);
 }
 
-}    // namespace math
+}    
+
 
 const core::Type core::TypeInfo<math::vector3<float>>::typeId = core::Type::Vector3;
 const core::Type core::TypeInfo<math::vector3<int>>::typeId = core::Type::Vector3Int;
 
-}    // namespace lux
+}    
+
 
 #endif
 

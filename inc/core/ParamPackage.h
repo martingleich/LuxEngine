@@ -415,7 +415,9 @@ public:
 	}
 };
 
-}    // namespace core
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

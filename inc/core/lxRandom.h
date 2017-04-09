@@ -293,6 +293,7 @@ private:
 };
 
 } // namspace core
-} // namespace lux
+} 
+
 
 #endif

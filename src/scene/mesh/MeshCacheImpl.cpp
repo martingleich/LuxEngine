@@ -44,5 +44,7 @@ StrongRef<GeometryCreatorLib> MeshCacheImpl::GetGeometryCreatorLib()
 	return m_GeoCreatorLib;
 }
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+

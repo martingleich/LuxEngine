@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_NAME
-#define INCLUDED_LX_NAME
+#ifndef INCLUDED_LX_NAME_H
+#define INCLUDED_LX_NAME_H
 #include "stringconverter.h"
 #include "core/lxStringTable.h"
 #include "lxUtil.h"
@@ -100,4 +100,4 @@ inline void conv_data(format::Context& ctx, Name name, format::Placeholder& plac
 }
 }
 
-#endif // #ifndef INCLUDED_LX_NAME
+#endif // #ifndef INCLUDED_LX_NAME_H

@@ -68,7 +68,9 @@ private:
 
 };
 
-} // namespace video
-} // namespace lux
+} 
+
+} 
+
 
 #endif // INCLUDED_CMATERIALLIBRARY_H

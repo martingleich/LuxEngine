@@ -70,5 +70,7 @@ StrongRef<FontCreator> GUIEnvironmentImpl::GetFontCreator()
 	return m_FontCreator;
 }
 
-} // namespace gui
-} // namespace lux
+} 
+
+} 
+

@@ -198,7 +198,9 @@ protected:
 	float m_RemainingTime;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

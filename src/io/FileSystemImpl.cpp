@@ -450,5 +450,7 @@ bool FileSystemImpl::CreateWin32Directory(Win32Path& _path, bool recursive)
 	return subDirs.IsEmpty();
 }
 
-}    // namespace io
-}    // namespace lux
+}    
+
+}    
+

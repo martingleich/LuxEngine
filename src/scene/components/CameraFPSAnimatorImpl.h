@@ -54,7 +54,9 @@ private:
 	math::vector2f m_MouseMove;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

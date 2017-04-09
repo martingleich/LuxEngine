@@ -32,7 +32,9 @@ private:
 	StrongRef<GeometryCreatorLib> m_GeoCreatorLib;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

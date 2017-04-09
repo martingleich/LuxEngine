@@ -101,7 +101,9 @@ public:
 	float falloff;
 };
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

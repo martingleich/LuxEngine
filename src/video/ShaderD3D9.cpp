@@ -731,5 +731,7 @@ ShaderParam ShaderImpl::ElemParam(const ShaderParam* Param, const char* pcName)
 */
 
 #endif
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+

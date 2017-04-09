@@ -809,7 +809,9 @@ struct HashType<array<T>>
 	}
 };
 
-}    // namespace core
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

@@ -195,10 +195,12 @@ public:
 	//virtual StrongRef<Archive> CreateArchive(File* file) = 0;
 };
 
-}    // namespace io
+}    
+
 
 DECLARE_FLAG_CLASS(io::EFileMode);
 
-}    // namespace lux
+}    
+
 
 #endif

@@ -54,7 +54,9 @@ public:
 		LRESULT& result);
 };
 
-} // namespace gui
-} // namespace lux
+} 
+
+} 
+
 
 #endif // !INCLUDED_WINDOWWIN32_H

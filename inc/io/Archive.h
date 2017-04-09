@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ARCHIVE
-#define INCLUDED_ARCHIVE
+#ifndef INCLUDED_ARCHIVE_H
+#define INCLUDED_ARCHIVE_H
 #include "core/ReferenceCounted.h"
 #include "io/ioConstants.h"
 #include "io/path.h"
@@ -55,4 +55,4 @@ public:
 
 }
 }
-#endif // #ifndef INCLUDED_ARCHIVE
+#endif // #ifndef INCLUDED_ARCHIVE_H

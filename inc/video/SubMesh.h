@@ -129,7 +129,9 @@ public:
 	virtual void RecalculateBoundingBox() = 0;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GEOMETRY_CREATOR_LIB
-#define INCLUDED_GEOMETRY_CREATOR_LIB
+#ifndef INCLUDED_GEOMETRY_CREATOR_LIB_H
+#define INCLUDED_GEOMETRY_CREATOR_LIB_H
 #include "scene/mesh/MeshCache.h"
 
 namespace lux
@@ -154,4 +154,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_GEOMETRY_CREATOR_LIB
+#endif // #ifndef INCLUDED_GEOMETRY_CREATOR_LIB_H

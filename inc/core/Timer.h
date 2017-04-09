@@ -79,7 +79,9 @@ public:
 	virtual void Tick() = 0;
 };
 
-}    // namespace core
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

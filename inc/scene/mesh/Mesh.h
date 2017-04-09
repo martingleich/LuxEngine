@@ -78,7 +78,9 @@ public:
 	}
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

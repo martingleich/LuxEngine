@@ -122,5 +122,7 @@ lxID ReferableFactoryImpl::MakeId()
 	return id;
 }
 
-} // namespace core
-} // namespace lux
+} 
+
+} 
+

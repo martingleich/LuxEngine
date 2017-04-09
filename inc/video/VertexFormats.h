@@ -78,7 +78,8 @@ struct VertexElement
 	}
 };
 
-} // namespace video
+} 
+
 
 namespace core
 {
@@ -99,7 +100,8 @@ struct HashType<video::VertexElement>
 	}
 };
 
-} // namespace core
+} 
+
 
 namespace video
 {
@@ -569,7 +571,8 @@ private:
 	size_t m_Hash;
 };
 
-}    // namespace video
+}    
+
 
 namespace core
 {
@@ -583,6 +586,7 @@ struct HashType<video::VertexFormat>
 };
 
 }
-}    // namespace lux
+}    
+
 
 #endif // #ifndef INCLUDED_VERTEX_FORMATS_H

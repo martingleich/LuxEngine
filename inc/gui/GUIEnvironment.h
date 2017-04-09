@@ -24,7 +24,9 @@ public:
 	virtual StrongRef<FontCreator> GetFontCreator() = 0;
 };
 
-} // namespace gui
-} // namespace lux
+} 
+
+} 
+
 
 #endif // INCLUDED_GUIENVIRONMENT_H

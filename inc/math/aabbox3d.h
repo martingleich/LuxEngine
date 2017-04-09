@@ -282,7 +282,5 @@ typedef aabbox3d<float> aabbox3df;
 template <typename T>
 const aabbox3d<T> aabbox3d<T>::EMPTY = aabbox3d<T>(0, 0, 0, 0, 0, 0);
 
-}    // namespace math
-}    // namespace lux
-
-#endif // #ifdef INCLUDED_AABBOX3D_H
+}    }    
+#endif 

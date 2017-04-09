@@ -274,5 +274,7 @@ bool ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 }
 
 
-} // namespace video
-} // namespace lux
+} 
+
+} 
+

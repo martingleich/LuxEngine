@@ -210,7 +210,9 @@ public:
 typedef triangle3d<float> triangle3df;
 
 
-}    // namespace math
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

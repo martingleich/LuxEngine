@@ -442,7 +442,9 @@ private:
 };
 
 
-} // namespace core
-} // namespace lux
+} 
+
+} 
+
 
 #endif

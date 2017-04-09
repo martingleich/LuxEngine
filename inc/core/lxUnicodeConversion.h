@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_UNICODE_CONVERSION
-#define INCLUDED_LX_UNICODE_CONVERSION
+#ifndef INCLUDED_LX_UNICODE_CONVERSION_H
+#define INCLUDED_LX_UNICODE_CONVERSION_H
 #include "lxString.h"
 #include "lxArray.h"
 
@@ -72,4 +72,4 @@ u16* CodePointToUTF16(u32 c, u16* dst);
 }
 }
 
-#endif // #ifndef INCLUDED_LX_UNICODE_CONVERSION
+#endif // #ifndef INCLUDED_LX_UNICODE_CONVERSION_H

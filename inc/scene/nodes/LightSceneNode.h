@@ -81,7 +81,9 @@ public:
 	virtual const math::vector3f& GetDirection() = 0;
 };
 
-}    // namespace scene
-}    // namespace lux
+}    
+
+}    
+
 
 #endif

@@ -385,7 +385,9 @@ public:
 };
 
 
-} // namespace video
-} // namespace lux
+} 
+
+} 
+
 
 #endif // INCLUDED_PIPELINESETTINGS_H

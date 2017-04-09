@@ -275,6 +275,8 @@ inline float ShaderParam::ShaderValueAccess::Matrix(int iRow, int iCol)
 	return this->operator lux::math::matrix4()(iRow, iCol);
 }
 
-}    // namespace video
-}    // namespace lux
+}    
+
+}    
+
 #endif
