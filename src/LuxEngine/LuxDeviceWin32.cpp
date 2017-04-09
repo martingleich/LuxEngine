@@ -94,7 +94,7 @@ LRESULT WINAPI LuxDeviceWin32::WindowProc(HWND windowHandle,
 	WPARAM WParam,
 	LPARAM LParam)
 {
-	LONG userData = GetWindowLongPtrW(windowHandle, GWLP_USERDATA);
+	LONG_PTR userData = GetWindowLongPtrW(windowHandle, GWLP_USERDATA);
 	LuxDeviceWin32* luxDevice = reinterpret_cast<LuxDeviceWin32*>(userData);
 	if(uiMessage == WM_NCCREATE) {
 		luxDevice = reinterpret_cast<LuxDeviceWin32*>(reinterpret_cast<CREATESTRUCTW*>(LParam)->lpCreateParams);

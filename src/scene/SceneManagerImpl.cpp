@@ -356,10 +356,10 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 	{
 		// TODO Culling
 
-		const u32 dwCount = node->GetMaterialCount();
-		for(u32 dwMat = 0; dwMat < dwCount; ++dwMat) {
+		const size_t count = node->GetMaterialCount();
+		for(size_t i = 0; i < count; ++i) {
 			// Ist ein material transparent, dann gilt der ganze Knoten als transparent
-			video::MaterialRenderer* renderer = node->GetMaterial(dwMat).GetRenderer();
+			video::MaterialRenderer* renderer = node->GetMaterial(i).GetRenderer();
 			if(renderer && renderer->IsTransparent()) {
 				m_TransparentNodeList.Push_Back(STransparentNodeEntry(node, m_AbsoluteCamPos));
 				wasTaken = true;
