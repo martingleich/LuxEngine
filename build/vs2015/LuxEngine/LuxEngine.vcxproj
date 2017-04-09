@@ -140,8 +140,17 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>$(ProjectDir)lux.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def</ModuleDefinitionFile>
     </Link>
+    <PreLinkEvent>
+      <Command>"$(SolutionDir)..\..\scripts\GenerateDef.bat" "$(SolutionDir)..\..\lib\$(Platform)\$(Configuration)" "$(SolutionDir)..\..\export.txt" "$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def"</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Generate def file for linking.</Message>
+    </PreLinkEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)..\..\scripts\ValidateDependencies.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">
     <ClCompile>
@@ -158,8 +167,17 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>$(ProjectDir)lux.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def</ModuleDefinitionFile>
     </Link>
+    <PreLinkEvent>
+      <Command>"$(SolutionDir)..\..\scripts\GenerateDef.bat" "$(SolutionDir)..\..\lib\$(Platform)\$(Configuration)" "$(SolutionDir)..\..\export.txt" "$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def"</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Generate def file for linking.</Message>
+    </PreLinkEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)..\..\scripts\ValidateDependencies.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -173,9 +191,17 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def</ModuleDefinitionFile>
     </Link>
+    <PreLinkEvent>
+      <Command>"$(SolutionDir)..\..\scripts\GenerateDef.bat" "$(SolutionDir)..\..\lib\$(Platform)\$(Configuration)" "$(SolutionDir)..\..\export.txt" "$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def"</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Generate def file for linking.</Message>
+    </PreLinkEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)..\..\scripts\ValidateDependencies.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">
     <ClCompile>
@@ -189,9 +215,17 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def</ModuleDefinitionFile>
     </Link>
+    <PreLinkEvent>
+      <Command>"$(SolutionDir)..\..\scripts\GenerateDef.bat" "$(SolutionDir)..\..\lib\$(Platform)\$(Configuration)" "$(SolutionDir)..\..\export.txt" "$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def"</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Generate def file for linking.</Message>
+    </PreLinkEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)..\..\scripts\ValidateDependencies.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -209,8 +243,17 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>$(ProjectDir)lux.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def</ModuleDefinitionFile>
     </Link>
+    <PreLinkEvent>
+      <Command>"$(SolutionDir)..\..\scripts\GenerateDef.bat" "$(SolutionDir)..\..\lib\$(Platform)\$(Configuration)" "$(SolutionDir)..\..\export.txt" "$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def"</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Generate def file for linking.</Message>
+    </PreLinkEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)..\..\scripts\ValidateDependencies.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -228,9 +271,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def</ModuleDefinitionFile>
     </Link>
+    <PreLinkEvent>
+      <Message>Generate def file for linking.</Message>
+      <Command>"$(SolutionDir)..\..\scripts\GenerateDef.bat" "$(SolutionDir)..\..\lib\$(Platform)\$(Configuration)" "$(SolutionDir)..\..\export.txt" "$(SolutionDir)..\..\tmp\$(Platform)$(Configuration).def"</Command>
+    </PreLinkEvent>
+    <PreBuildEvent>
+      <Command>"$(SolutionDir)..\..\scripts\ValidateDependencies.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\components\components.vcxproj">

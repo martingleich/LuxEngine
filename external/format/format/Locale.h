@@ -14,9 +14,8 @@ public:
 	{
 	}
 
-private:
-	FacetType(const FacetType&);
-	FacetType& operator=(const FacetType&);
+	FacetType(const FacetType&) = delete;
+	FacetType& operator=(const FacetType&) = delete;
 };
 
 extern FacetType NumericalFormat;

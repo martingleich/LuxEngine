@@ -18,9 +18,6 @@ The passed FormatOptions can be changed to change the behavior of the align oper
 following the conv_data call.
 */
 
-void write_integer(Context& ctx, int base, bool sign, uintmax_t value, Placeholder& placeholder);
-void conv_data_integer(Context& ctx, bool sign, uintmax_t value, Placeholder& placeholder);
-
 void conv_data(Context& ctx, const char* data, Placeholder& placeholder);
 void conv_data(Context& ctx, const std::string& data, Placeholder& placeholder);
 void conv_data(Context& ctx, intmax_t data, Placeholder& placeholder);

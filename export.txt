@@ -1,0 +1,56 @@
+# This file contains all symbols to export from the engine.
+# Exporting from this file is preferable to the use of LUX_API, 
+# since it's more reliable, when using multiple lib projects.
+# Each line describes a exported object, this may be any symbol,
+# each symbol must be fully qualified. If a line ends with :: all 
+# symbols in this namespace or class are exported.
+# The file must end with an empty line.
+
+format::locale::GetLocale
+format::locale::SetLocale
+
+format::locale::English
+format::locale::German
+format::locale::NumericalFormat
+format::locale::BooleanFormat
+
+format::locale::NumericalFormat_English
+format::locale::NumericalFormat_German
+
+format::locale::BooleanFormat_English
+format::locale::BooleanFormat_German
+format::locale::BooleanFormat_Digit
+
+format::Context::GetCollumn
+format::conv_data
+
+format::internal::ParseUntilPlaceholder
+format::internal::ReplaceSubPlaceholder
+format::internal::AlignString
+
+format::cstring_sink::
+format::MsgBox_sink::
+format::ostream_sink::
+format::OutputDebugString_sink::
+format::stdstring_sink::
+
+################################################################
+
+lux::core::StringLengthUTF8
+lux::core::RetractCursorUTF8
+lux::core::AdvanceCursorUTF8
+lux::core::GetCharacterUTF8
+lux::core::StringLenghtUTF16
+lux::core::AdvanceCursorUTF16
+lux::core::GetCharacterUTF16
+lux::core::IsEqualCaseInsensitive
+
+################################################################
+
+lux::video::ColorConverter::IsConvertable
+lux::video::ColorConverter::ConvertByFormat
+
+################################################################
+
+lux::scene::Query::Query
+lux::scene::Query::Execute

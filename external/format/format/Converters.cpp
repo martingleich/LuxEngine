@@ -4,6 +4,10 @@
 
 namespace format
 {
+
+static void write_integer(Context& ctx, int base, bool sign, uintmax_t value, Placeholder& placeholder);
+static void conv_data_integer(Context& ctx, bool sign, uintmax_t value, Placeholder& placeholder);
+
 void conv_data(Context& ctx, const char* data, Placeholder& placeholder)
 {
 	if(placeholder.type == 'a' || placeholder.type == 's') {
