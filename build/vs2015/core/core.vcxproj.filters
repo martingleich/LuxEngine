@@ -39,9 +39,6 @@
     <ClInclude Include="..\..\..\inc\core\ParamPackage.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\inc\Result.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\inc\core\lxhashmap.h">
       <Filter>Headerdateien\container</Filter>
     </ClInclude>
@@ -132,6 +129,18 @@
     <ClInclude Include="..\..\..\inc\core\lxFormat.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\inc\core\lxID.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\core\Referable.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\core\ReferableFactory.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\ReferableFactoryImpl.h">
+      <Filter>Quelldateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\Logger.cpp">
@@ -165,6 +174,15 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\lxUnicode.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\Referable.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\ReferableFactoryImpl.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\ReferenceCounted.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

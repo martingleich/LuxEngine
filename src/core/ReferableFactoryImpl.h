@@ -1,6 +1,6 @@
 #ifndef INCLUDED_REFERABLEFACTORY_IMPL_H
 #define INCLUDED_REFERABLEFACTORY_IMPL_H
-#include "resources/ReferableFactory.h"
+#include "core/ReferableFactory.h"
 #include "core/lxArray.h"
 #include "core/lxName.h"
 

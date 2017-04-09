@@ -54,3 +54,5 @@ lux::video::ColorConverter::ConvertByFormat
 
 lux::scene::Query::Query
 lux::scene::Query::Execute
+
+lux::math::Transformation::DEFAULT

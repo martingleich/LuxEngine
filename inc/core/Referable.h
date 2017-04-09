@@ -2,7 +2,7 @@
 #define INCLUDED_REFERABLE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
-#include "resources/lxID.h"
+#include "core/lxID.h"
 
 namespace lux
 {

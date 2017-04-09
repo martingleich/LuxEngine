@@ -15,16 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\inc\resources\Referable.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\inc\resources\ReferableFactory.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\inc\resources\ResourceSystem.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\inc\resources\lxID.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\inc\resources\Resource.h">
@@ -36,17 +27,8 @@
     <ClInclude Include="..\..\..\src\resources\ResourceSystemImpl.h">
       <Filter>Quelldateien</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\resources\ReferableFactoryImpl.h">
-      <Filter>Quelldateien</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\resources\Referable.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\resources\ReferableFactoryImpl.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\resources\ResourceSystemImpl.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>

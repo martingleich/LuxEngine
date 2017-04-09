@@ -35,18 +35,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\inc\resources\lxID.h" />
-    <ClInclude Include="..\..\..\inc\resources\Referable.h" />
-    <ClInclude Include="..\..\..\inc\resources\ReferableFactory.h" />
     <ClInclude Include="..\..\..\inc\resources\Resource.h" />
     <ClInclude Include="..\..\..\inc\resources\ResourceLoader.h" />
     <ClInclude Include="..\..\..\inc\resources\ResourceSystem.h" />
-    <ClInclude Include="..\..\..\src\resources\ReferableFactoryImpl.h" />
     <ClInclude Include="..\..\..\src\resources\ResourceSystemImpl.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\resources\Referable.cpp" />
-    <ClCompile Include="..\..\..\src\resources\ReferableFactoryImpl.cpp" />
     <ClCompile Include="..\..\..\src\resources\ResourceSystemImpl.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

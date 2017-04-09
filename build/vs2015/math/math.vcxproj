@@ -51,6 +51,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp" />
     <ClCompile Include="..\..\..\src\math\matrix4.cpp" />
+    <ClCompile Include="..\..\..\src\math\Transformation.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{528FACDB-CA52-4357-A699-D828B1C3F9D9}</ProjectGuid>

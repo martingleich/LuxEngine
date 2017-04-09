@@ -6,7 +6,7 @@
 #include "video/images/ImageSystem.h"
 #include "video/MaterialLibrary.h"
 
-#include "resources/ReferableFactory.h"
+#include "core/ReferableFactory.h"
 
 #include "scene/nodes/CameraSceneNodeImpl.h"
 #include "scene/nodes/MeshSceneNodeImpl.h"

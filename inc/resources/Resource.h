@@ -1,6 +1,6 @@
 #ifndef INCLUDED_RESOURCE_H
 #define INCLUDED_RESOURCE_H
-#include "resources/Referable.h"
+#include "core/Referable.h"
 
 namespace lux
 {

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_REFERABLEFACTORY_H
 #define INCLUDED_REFERABLEFACTORY_H
-#include "resources/Referable.h"
+#include "core/Referable.h"
 
 namespace lux
 {

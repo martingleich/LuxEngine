@@ -39,6 +39,7 @@
     <ClInclude Include="..\..\..\inc\core\lxFormat.h" />
     <ClInclude Include="..\..\..\inc\core\lxHash.h" />
     <ClInclude Include="..\..\..\inc\core\lxhashmap.h" />
+    <ClInclude Include="..\..\..\inc\core\lxID.h" />
     <ClInclude Include="..\..\..\inc\core\lxIterator.h" />
     <ClInclude Include="..\..\..\inc\core\lxList.h" />
     <ClInclude Include="..\..\..\inc\core\lxMemory.h" />
@@ -56,13 +57,15 @@
     <ClInclude Include="..\..\..\inc\core\lxUnicodeConversion.h" />
     <ClInclude Include="..\..\..\inc\core\lxUtil.h" />
     <ClInclude Include="..\..\..\inc\core\ParamPackage.h" />
+    <ClInclude Include="..\..\..\inc\core\Referable.h" />
+    <ClInclude Include="..\..\..\inc\core\ReferableFactory.h" />
     <ClInclude Include="..\..\..\inc\core\ReferenceCounted.h" />
     <ClInclude Include="..\..\..\inc\core\Result.h" />
     <ClInclude Include="..\..\..\inc\core\stringconverter.h" />
     <ClInclude Include="..\..\..\inc\core\Timer.h" />
     <ClInclude Include="..\..\..\inc\EnumClassFlags.h" />
     <ClInclude Include="..\..\..\inc\LuxBase.h" />
-    <ClInclude Include="..\..\..\inc\Result.h" />
+    <ClInclude Include="..\..\..\src\core\ReferableFactoryImpl.h" />
     <ClInclude Include="..\..\..\src\core\TimerWin32.h" />
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +78,9 @@
     <ClCompile Include="..\..\..\src\core\lxUnicode.cpp" />
     <ClCompile Include="..\..\..\src\core\lxUnicodeConversion.cpp" />
     <ClCompile Include="..\..\..\src\core\ParamPackage.cpp" />
+    <ClCompile Include="..\..\..\src\core\Referable.cpp" />
+    <ClCompile Include="..\..\..\src\core\ReferableFactoryImpl.cpp" />
+    <ClCompile Include="..\..\..\src\core\ReferenceCounted.cpp" />
     <ClCompile Include="..\..\..\src\core\StringConverter.cpp" />
     <ClCompile Include="..\..\..\src\core\TimerWin32.cpp" />
   </ItemGroup>

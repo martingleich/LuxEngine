@@ -1,7 +1,7 @@
 #ifndef INCLUDED_RESOURCESYSTEM
 #define INCLUDED_RESOURCESYSTEM
+#include "core/ReferableFactory.h"
 #include "ResourceLoader.h"
-#include "ReferableFactory.h"
 
 namespace lux
 {

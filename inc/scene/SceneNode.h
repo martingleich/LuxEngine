@@ -8,7 +8,7 @@
 #include "core/lxString.h"
 #include "video/Material.h"
 #include "core/lxList.h"
-#include "resources/Referable.h"
+#include "core/Referable.h"
 #include "scene/Collider.h"
 
 namespace lux

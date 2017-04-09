@@ -1,4 +1,4 @@
-#include "resources/Referable.h"
+#include "core/Referable.h"
 
 namespace lux
 {

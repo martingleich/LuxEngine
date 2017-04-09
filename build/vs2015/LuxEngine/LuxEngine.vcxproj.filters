@@ -26,8 +26,5 @@
     <ClCompile Include="..\..\..\src\LuxEngine\LuxDeviceWin32.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\math\Transformation.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

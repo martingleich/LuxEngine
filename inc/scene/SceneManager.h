@@ -1,17 +1,18 @@
-#ifndef INCLUDED_ISCENE_H
-#define INCLUDED_ISCENE_H
+#ifndef INCLUDED_SCENE_H
+#define INCLUDED_SCENE_H
 #include "math/vector3.h"
 #include "math/quaternion.h"
 #include "math/line3d.h"
 
 #include "core/lxName.h"
 #include "core/lxArray.h"
+#include "core/ReferableFactory.h"
 
 #include "video/Color.h"
 #include "video/PipelineSettings.h"
 
 #include "input/EventReceiver.h"
-#include "resources/ReferableFactory.h"
+
 #include "resources/ResourceSystem.h"
 
 namespace lux

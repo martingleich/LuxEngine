@@ -325,7 +325,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\LuxEngine\LuxDeviceWin32.cpp" />
-    <ClCompile Include="..\..\..\src\math\Transformation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

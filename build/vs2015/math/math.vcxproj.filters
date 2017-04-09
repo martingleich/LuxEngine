@@ -68,5 +68,8 @@
     <ClCompile Include="..\..\..\src\math\matrix4.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\math\Transformation.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

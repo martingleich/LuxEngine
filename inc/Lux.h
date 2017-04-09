@@ -135,11 +135,12 @@ namespace input
 #include "gui/CursorControl.h"
 #include "gui/FontCreator.h"
 
-#include "resources/lxID.h"
+#include "core/lxID.h"
+#include "core/Referable.h"
+#include "core/ReferableFactory.h"
+
 #include "resources/Resource.h"
 #include "resources/ResourceLoader.h"
-#include "resources/Referable.h"
-#include "resources/ReferableFactory.h"
 #include "resources/ResourceSystem.h"
 
 #include "LuxEngine/LuxDevice.h"

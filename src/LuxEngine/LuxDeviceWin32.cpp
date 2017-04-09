@@ -11,7 +11,7 @@
 #include "io/FileSystemImpl.h"
 #include "resources/ResourceSystemImpl.h"
 #include "video/MaterialLibraryImpl.h"
-#include "resources/ReferableFactoryImpl.h"
+#include "core/ReferableFactoryImpl.h"
 
 #include "gui/WindowWin32.h"
 #include "gui/CursorControlWin32.h"

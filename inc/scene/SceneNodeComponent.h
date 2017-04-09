@@ -1,6 +1,6 @@
 #ifndef INCLUDED_SCENENODE_COMPONENT_H
 #define INCLUDED_SCENENODE_COMPONENT_H
-#include "resources/Referable.h"
+#include "core/Referable.h"
 #include "input/EventReceiver.h"
 
 namespace lux
