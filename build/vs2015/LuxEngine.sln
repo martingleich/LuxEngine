@@ -72,6 +72,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scene", "scene\scene.vcxpro
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuxEngine", "LuxEngine\LuxEngine.vcxproj", "{015956E4-275A-40B6-91C1-699C32A31D31}"
+	ProjectSection(ProjectDependencies) = postProject
+		{15839C19-E4B5-4325-83BB-2FA175358BE2} = {15839C19-E4B5-4325-83BB-2FA175358BE2}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{C1E144D3-290F-4160-944B-731C07284C53}"
 EndProject

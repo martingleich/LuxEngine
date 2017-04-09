@@ -1,6 +1,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
+#pragma warning(push)
+#pragma warning(disable: 4091)
 #include <DbgHelp.h>
+#pragma warning(pop)
 #include <cstdio>
 #include <vector>
 #pragma comment(lib, "Dbghelp.lib")

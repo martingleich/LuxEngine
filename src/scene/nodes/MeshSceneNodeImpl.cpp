@@ -150,14 +150,14 @@ void MeshSceneNodeImpl::CopyMaterials()
 		if(m_OnlyReadMaterials)
 			return;
 
-		u32 MaterialCount = m_Mesh->GetSubMeshCount();
-		u32 OldCount = m_Materials.Size();
+		size_t MaterialCount = m_Mesh->GetSubMeshCount();
+		size_t OldCount = m_Materials.Size();
 
 		if(MaterialCount < OldCount)
 			m_Materials.Resize(MaterialCount);
 
 		// Wenn mit der Submesh ein Fehler auftritt wird das Standartmaterial benutzt
-		for(u32 i = 0; i < MaterialCount; ++i) {
+		for(size_t i = 0; i < MaterialCount; ++i) {
 			video::SubMesh* subMesh = m_Mesh->GetSubMesh(i);
 			video::Material* material;
 			if(subMesh)
