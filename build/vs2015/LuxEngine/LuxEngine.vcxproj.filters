@@ -920,8 +920,5 @@
     <ClCompile Include="..\..\..\src\scene\components\RotationAnimatorImpl.cpp">
       <Filter>scene\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\video\D3DMultiFile.cpp">
-      <Filter>video\d3d9</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

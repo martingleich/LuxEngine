@@ -863,8 +863,8 @@ inline void conv_data(format::Context& ctx, ColorFormat format, format::Placehol
 
 }    // video
 
-const core::Type core::TypeInfo<video::Color>::typeId = core::Type::Color;
-const core::Type core::TypeInfo<video::Colorf>::typeId = core::Type::ColorF;
+template<> inline core::Type core::GetTypeInfo<video::Colorf>() { return core::Type::ColorF; }
+template<> inline core::Type core::GetTypeInfo<video::Color>() { return core::Type::Color; }
 
 namespace math
 {

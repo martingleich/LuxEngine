@@ -140,24 +140,13 @@ private:
 };
 
 //! Available Types for params
-
-//! This class contains information about a type
 template <typename T>
-class TypeInfo
-{
-public:
-	static const Type typeId; //!< The typeId
-};
+Type GetTypeInfo() { return Type::Unknown; }
 
-///\cond INTERNAL
-const Type TypeInfo<int>::typeId = Type::Integer;
-const Type TypeInfo<u32>::typeId = Type::U32;
-const Type TypeInfo<float>::typeId = Type::Float;
-const Type TypeInfo<bool>::typeId = Type::Bool;
-template <typename T>
-const Type TypeInfo<T>::typeId = Type::Unknown;
-// Andere typen in der zugehörigen Datei
-///\endcond
+template <> inline Type GetTypeInfo<int>() { return Type::Integer; }
+template <> inline Type GetTypeInfo<u32>() { return Type::U32; }
+template <> inline Type GetTypeInfo<float>() { return Type::Float; }
+template <> inline Type GetTypeInfo<bool>() { return Type::Bool; }
 
 } // !namespace core
 } // !namespace lux

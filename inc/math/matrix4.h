@@ -467,7 +467,7 @@ inline matrix4 operator* (float f, const matrix4& m)
 ///\endcond
 }
 
-const core::Type core::TypeInfo<math::matrix4>::typeId = core::Type::Matrix;
+template<> inline core::Type core::GetTypeInfo<math::matrix4>() { return core::Type::Matrix; };
 
 }    
 

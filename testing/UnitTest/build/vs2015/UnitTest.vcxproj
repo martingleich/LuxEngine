@@ -95,27 +95,27 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">
-    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">
-    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\..\..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -123,12 +123,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\Tests;$(ProjectDir)..\..\..\..\src\;$(ProjectDir)..\..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe" -project</Command>
+      <Command>"$(OutDir)UnitTest.exe" -project</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">
@@ -136,13 +136,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\Tests;$(ProjectDir)..\..\..\..\src\;$(ProjectDir)..\..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>"$(OutDir)UnitTest.exe" -project</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -152,10 +151,10 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\Tests;$(ProjectDir)..\..\..\..\src\;$(ProjectDir)..\..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <PostBuildEvent>
-      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe" -project</Command>
+      <Command>"$(OutDir)UnitTest.exe" -project</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">
@@ -165,10 +164,10 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\Tests;$(ProjectDir)..\..\..\..\src\;$(ProjectDir)..\..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <PostBuildEvent>
-      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe"</Command>
+      <Command>"$(OutDir)UnitTest.exe" -project</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -178,7 +177,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\Tests;$(ProjectDir)..\..\..\..\src\;$(ProjectDir)..\..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -187,7 +186,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe"</Command>
+      <Command>"$(OutDir)UnitTest.exe" -project</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -199,48 +198,43 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>UnitTestEx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\src\UnitTests;$(ProjectDir)..\..\..\src\;$(ProjectDir)..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\Tests;$(ProjectDir)..\..\..\..\src\;$(ProjectDir)..\..\..\..\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"$(ProjectDir)..\..\..\bin\$(Platform)\$(Configuration)\UnitTest.exe" -project</Command>
+      <Command>"$(OutDir)UnitTest.exe" -project</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LuxEngine\LuxEngine.vcxproj">
-      <Project>{015956e4-275a-40b6-91c1-699c32a31d31}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\src\UnitTests\main.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\AlgorithmTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\ArrayTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\FileSystemTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\FormatTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\HashMapTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\MatrixTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\PathTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\QuaternionTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\StringConverterTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\StringTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\TransformationTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\Tests\UTF8Test.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\UnitTest.cpp" />
-    <ClCompile Include="..\..\..\src\UnitTests\UnitTestEx.cpp">
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\Tests\AlgorithmTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\ArrayTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\FileSystemTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\FormatTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\HashMapTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\MatrixTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\PathTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\QuaternionTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\StringConverterTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\StringTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\TransformationTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\UTF8Test.cpp" />
+    <ClCompile Include="..\..\src\UnitTest.cpp" />
+    <ClCompile Include="..\..\src\UnitTestEx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\UnitTests\UnitTest.h" />
-    <ClInclude Include="..\..\..\src\UnitTests\UnitTestEx.h" />
+    <ClInclude Include="..\..\src\UnitTest.h" />
+    <ClInclude Include="..\..\src\UnitTestEx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\build\vs2015\LuxEngine\LuxEngine.vcxproj">
+      <Project>{015956e4-275a-40b6-91c1-699c32a31d31}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

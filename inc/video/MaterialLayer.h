@@ -109,7 +109,9 @@ public:
 
 } // !namespace video
 
-const core::Type core::TypeInfo<video::MaterialLayer>::typeId = core::Type::Texture;
+
+template<> inline core::Type core::GetTypeInfo<video::MaterialLayer>() { return core::Type::Texture; }
+
 } // !namespace lux
 
 #endif // !INCLUDED_SMATERIALLAYER_H

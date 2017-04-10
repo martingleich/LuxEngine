@@ -591,9 +591,8 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 
 }    
 
-
-const core::Type core::TypeInfo<math::vector3<float>>::typeId = core::Type::Vector3;
-const core::Type core::TypeInfo<math::vector3<int>>::typeId = core::Type::Vector3Int;
+template<> inline core::Type core::GetTypeInfo<math::vector3<float>>() { return core::Type::Vector3; };
+template<> inline core::Type core::GetTypeInfo<math::vector3<int>>() { return core::Type::Vector3Int; };
 
 }    
 

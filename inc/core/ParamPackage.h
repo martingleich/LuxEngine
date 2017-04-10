@@ -55,7 +55,7 @@ public:
 	template <typename T>
 	operator T()
 	{
-		assert(core::TypeInfo<T>::typeId == m_Type);
+		assert(core::GetTypeInfo<T>() == m_Type);
 
 		if(IsValid())
 			return *((T*)m_Data);
@@ -65,7 +65,7 @@ public:
 	template <typename T>
 	T Default(const T& default)
 	{
-		if(core::TypeInfo<T>::typeId != m_Type || !IsValid())
+		if(core::GetTypeInfo<T>() != m_Type || !IsValid())
 			return default;
 		else
 			return (T)(*this);
@@ -90,7 +90,7 @@ public:
 	template <typename T>
 	PackageParam& operator= (const T& varVal)
 	{
-		assert(core::TypeInfo<T>::typeId == m_Type);
+		assert(core::GetTypeInfo<T>() == m_Type);
 		if(IsValid())
 			*((T*)m_Data) = varVal;
 
@@ -224,7 +224,7 @@ public:
 	template <typename T>
 	void AddParam(const char* name, const T& default, u16 reserved = -1)
 	{
-		core::Type type = core::TypeInfo<T>::typeId;
+		core::Type type = core::GetTypeInfo<T>();
 		if(type == core::Type::Unknown) {
 			assertNeverReach("Unsupported type");
 			return;
