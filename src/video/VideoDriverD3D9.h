@@ -1,5 +1,6 @@
 #ifndef INCLUDED_VIDEODRIVERD3D9_H
 #define INCLUDED_VIDEODRIVERD3D9_H
+#include "core/ReferableFactory.h"
 #include "video/VideoDriver.h"
 #include "video/Material.h"
 #include "video/LightData.h"

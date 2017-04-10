@@ -1,4 +1,5 @@
 #pragma once
+#include <limits>
 #include "Sink.h"
 
 namespace format

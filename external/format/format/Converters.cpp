@@ -1,4 +1,5 @@
-﻿#include "Converters.h"
+﻿#include "ConvInternal.h"
+#include "Converters.h"
 #include "FormatConfig.h"
 #include "StringBasics.h"
 

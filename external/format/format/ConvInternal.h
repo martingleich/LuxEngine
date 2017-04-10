@@ -1,7 +1,7 @@
 #pragma once
+#include <cassert>
 #include "StringBasics.h"
 #include "Context.h"
-#include <cassert>
 #include "Locale.h"
 #include "Placeholder.h"
 

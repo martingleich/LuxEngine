@@ -1,4 +1,5 @@
 #pragma once
+#include <cstring>
 
 namespace format
 {
@@ -9,13 +10,13 @@ struct Placeholder
 	private:
 		int value;
 		bool enabled;
-		bool default;
+		bool hasDefaultValue;
 		bool placeholder;
 
 	public:
 		Option() :
 			enabled(false),
-			default(false),
+			hasDefaultValue(false),
 			placeholder(false),
 			value(0)
 		{
@@ -43,7 +44,7 @@ struct Placeholder
 
 		bool HasValue() const
 		{
-			return enabled && !default;
+			return enabled && !hasDefaultValue;
 		}
 
 		bool IsDefault() const
@@ -51,7 +52,7 @@ struct Placeholder
 			if(!enabled)
 				return false;
 
-			return default;
+			return hasDefaultValue;
 		}
 
 		bool IsPlaceholder() const
@@ -62,18 +63,18 @@ struct Placeholder
 		void SetDefault()
 		{
 			placeholder = false;
-			default = true;
+			hasDefaultValue = true;
 		}
 
 		void SetPlaceholder()
 		{
-			default = false;
+			hasDefaultValue = false;
 			placeholder = true;
 		}
 
 		void SetValue(int i)
 		{
-			default = false;
+			hasDefaultValue = false;
 			placeholder = false;
 			value = i;
 		}
@@ -81,7 +82,7 @@ struct Placeholder
 		int GetValue(int _default = 0) const
 		{
 			if(enabled) {
-				if(default)
+				if(hasDefaultValue)
 					return _default;
 				else
 					return value;

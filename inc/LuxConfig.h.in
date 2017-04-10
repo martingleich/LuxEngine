@@ -1,0 +1,2 @@
+#define LuxEngine_VERSION_MAJOR @LuxEngine_VERSION_MAJOR@
+#define LuxEngine_VERSION_MINOR @LuxEngine_VERSION_MINOR@

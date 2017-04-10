@@ -6,6 +6,7 @@
 #include "Placeholder.h"
 #include "Slice.h"
 #include "Context.h"
+#include "Sink.h"
 
 namespace format
 {

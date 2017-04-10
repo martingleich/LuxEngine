@@ -3,7 +3,6 @@
 #include "Placeholder.h"
 #include "Exception.h"
 #include "StringBasics.h"
-#include "ConvInternal.h"
 
 namespace format
 {

@@ -1,5 +1,6 @@
 #pragma once
 #include "RAII.h"
+#include "ConvInternal.h"
 
 namespace format
 {
@@ -187,7 +188,7 @@ inline void vformat(Context& ctx, StringType fmtStringType, const char* str, con
 template <typename SinkT, typename... Types>
 inline size_t formatEx(SinkT&& sink, StringType dstStringType, const locale::Locale* locale, int sinkFlags, StringType fmtStringType, const char* str, const Types&... args)
 {
-	typedef std::remove_const<std::remove_cv<std::remove_reference<SinkT>::type>::type>::type CleanSinkT;
+	typedef std::remove_const<typename std::remove_cv<typename std::remove_reference<SinkT>::type>::type>::type CleanSinkT;
 	if(!str)
 		return (size_t)-1;
 

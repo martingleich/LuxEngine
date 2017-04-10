@@ -1,6 +1,5 @@
 #include "Format.h"
 #include "Context.h"
-#include "ConvInternal.h"
 
 namespace format
 {
@@ -16,8 +15,8 @@ namespace internal
 		const char* backtrack = cur;
 		out = 0;
 		while(c >= '0' && c <= '9') {
-			if(out > (INT_MAX - (int)c + '0') / 10)
-				throw syntax_exception("Integer literal is to big.");
+			if(out > (std::numeric_limits<int>::max() - (int)c + '0') / 10)
+				throw syntax_exception("Integer literal is too big.");
 			out *= 10;
 			out += c - '0';
 			backtrack = cur;

@@ -89,7 +89,7 @@ namespace internal
 	template <>
 	inline int GetAsInt(long long arg)
 	{
-		assert(arg <= INT_MAX);
+		assert(arg <= (long long)std::numeric_limits<int>::max());
 		return (int)arg;
 	}
 
@@ -114,14 +114,14 @@ namespace internal
 	template <>
 	inline int GetAsInt(unsigned long long arg)
 	{
-		assert(arg <= INT_MAX);
+		assert(arg <= (unsigned long long)std::numeric_limits<int>::max());
 		return (int)arg;
 	}
 
 	template <>
 	inline int GetAsInt(unsigned int arg)
 	{
-		assert(arg <= INT_MAX);
+		assert(arg <= (unsigned int)std::numeric_limits<int>::max());
 		return arg;
 	}
 
