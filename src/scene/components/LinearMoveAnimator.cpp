@@ -1,5 +1,8 @@
-#include "LinearMoveAnimator.h"
+#include "scene/components/LinearMoveAnimator.h"
 #include "scene/SceneNode.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::LinearMoveComponent)
 
 namespace lux
 {
@@ -10,14 +13,24 @@ LinearMoveComponent::LinearMoveComponent(
 	const math::line3df& line,
 	float duration,
 	bool jumpBack,
-	u32 count) :
-	m_Line(line),
-	m_Period(2 * duration),
-	m_Time(0.0f),
-	m_Count(count),
-	m_Direction(false),
-	m_JumpBack(jumpBack)
+	u32 count)
 {
+	Init(line, duration, jumpBack, count);
+}
+
+void LinearMoveComponent::Init(
+	const math::line3df& line,
+	float duration,
+	bool jumpBack,
+	u32 count)
+{
+	m_Line = line;
+	m_Period = 2 * duration;
+	m_JumpBack = jumpBack;
+	m_Direction = false;
+	m_Time = 0.0f;
+	m_Count = count;
+
 	if(m_Count != std::numeric_limits<u32>::max())
 		m_Count++;
 }

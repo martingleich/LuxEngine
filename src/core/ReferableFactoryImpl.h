@@ -14,12 +14,14 @@ class ReferableFactoryImpl : public ReferableFactory
 public:
 	ReferableFactoryImpl();
 
+	static ReferableFactoryImpl* Instance();
+
 	bool RegisterType(Referable* default);
 	void UnregisterType(Name type, Name subType);
 
-	bool SetDefault(Referable* default);
-	StrongRef<Referable> GetDefault(Name type, Name subType) const;
-	StrongRef<Referable> GetDefault(size_t id) const;
+	bool SetPrototype(Referable* default);
+	StrongRef<Referable> GetPrototype(Name type, Name subType) const;
+	StrongRef<Referable> GetPrototype(size_t id) const;
 
 	StrongRef<Referable> Create(Name type, Name subType);
 	StrongRef<Referable> Create(Name type, Name subType, lxID id);
@@ -33,7 +35,7 @@ private:
 	{
 		Name type;
 		Name subType;
-		StrongRef<Referable> referable;
+		StrongRef<Referable> prototype;
 
 		bool operator<(const ReferableType& other) const
 		{

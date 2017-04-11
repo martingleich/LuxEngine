@@ -24,6 +24,7 @@ public:
 	bool IsKeyDown(EAction Action) const;
 	float GetMoveSpeed() const;
 	void SetMoveSpeed(float fSpeed);
+	void SetMaxVerticalAngle(math::anglef a) { m_MaxVerticalAngle = a; }
 	math::anglef GetRotationSpeed() const;
 	void SetRotationSpeed(math::anglef fSpeed);
 	bool VerticalMovementAllowed() const;

@@ -645,9 +645,6 @@
     <ClInclude Include="..\..\..\src\scene\components\CameraFPSAnimatorImpl.h">
       <Filter>scene\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\scene\components\LinearMoveAnimator.h">
-      <Filter>scene\components</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\scene\components\RotationAnimatorImpl.h">
       <Filter>scene\components</Filter>
     </ClInclude>
@@ -659,6 +656,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\inc\scene\zones\ZonePoint.h">
       <Filter>scene\zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\ReferableRegister.h">
+      <Filter>core\referable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\video\images\ImageListImpl.h">
+      <Filter>images</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\components\LinearMoveAnimator.h">
+      <Filter>scene\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -931,6 +937,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\scene\components\RotationAnimatorImpl.cpp">
       <Filter>scene\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\nodes\EmptySceneNodeImpl.cpp">
+      <Filter>scene\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\video\images\ImageListImpl.cpp">
+      <Filter>images</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

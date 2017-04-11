@@ -83,8 +83,6 @@ WCharAlias StringToUTF16W(const string& data)
 
 u8* CodePointToUTF8(u32 c, u8* dst)
 {
-	u8* orig = dst;
-
 	if(c <= 0x7F) {
 		*dst++ = ((u8)c);
 	} else if(c <= 0x7FF) {

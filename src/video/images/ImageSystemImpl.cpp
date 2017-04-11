@@ -221,9 +221,6 @@ ImageSystemImpl::ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver*
 
 	AddExternalImageWriter(LUX_NEW(ImageWriterBMP));
 	AddExternalImageWriter(LUX_NEW(ImageWriterTGA));
-
-	m_ResourceSystem->GetReferableFactor()->RegisterType(LUX_NEW(video::ImageImpl));
-	m_ResourceSystem->GetReferableFactor()->RegisterType(LUX_NEW(video::ImageListImpl));
 }
 
 ImageSystemImpl::~ImageSystemImpl()

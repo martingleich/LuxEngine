@@ -1,5 +1,4 @@
 #include "SceneManagerImpl.h"
-
 #include "io/FileSystem.h"
 
 #include "video/VideoDriver.h"
@@ -8,11 +7,10 @@
 
 #include "core/ReferableFactory.h"
 
-#include "scene/nodes/CameraSceneNodeImpl.h"
-#include "scene/nodes/MeshSceneNodeImpl.h"
+#include "scene/nodes/CameraSceneNode.h"
+#include "scene/nodes/MeshSceneNode.h"
+#include "scene/nodes/LightSceneNode.h"
 #include "scene/nodes/SkyBoxSceneNodeImpl.h"
-#include "scene/nodes/LightSceneNodeImpl.h"
-#include "scene/nodes/EmptySceneNodeImpl.h"
 
 #include "scene/components/RotationAnimatorImpl.h"
 #include "scene/components/LinearMoveAnimator.h"
@@ -22,6 +20,8 @@
 
 //#include "scene/mesh/MeshLoader3DS.h"
 #include "scene/mesh/MeshLoaderOBJ.h"
+
+#include "core/ReferableRegister.h"
 
 #include "core/Logger.h"
 
@@ -33,6 +33,7 @@ namespace scene
 class RootSceneNode : public SceneNode
 {
 public:
+	RootSceneNode() {}
 	RootSceneNode(SceneManager* mngr)
 	{
 		SetSceneManager(mngr);
@@ -51,6 +52,8 @@ public:
 		return new RootSceneNode(nullptr);
 	}
 };
+
+LUX_REGISTER_REFERABLE_CLASS(RootSceneNode)
 
 SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry() : node(nullptr), texture(nullptr)
 {
@@ -108,19 +111,8 @@ SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 {
 	if(m_MeshCache == nullptr) {
 		m_MeshCache = LUX_NEW(MeshCacheImpl)(resourceSystem, driver);
-		//m_ResourceSystem->AddResourceLoader(LUX_NEW(MeshLoader3DS)(this));
 		m_ResourceSystem->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(this));
 	}
-
-	m_RefFactory->RegisterType(LUX_NEW(MeshSceneNodeImpl));
-	m_RefFactory->RegisterType(LUX_NEW(LightSceneNodeImpl));
-	m_RefFactory->RegisterType(LUX_NEW(SkyBoxSceneNodeImpl));
-	m_RefFactory->RegisterType(LUX_NEW(CameraSceneNodeImpl));
-	m_RefFactory->RegisterType(LUX_NEW(EmptySceneNode));
-
-	m_RefFactory->RegisterType(LUX_NEW(LinearMoveComponent));
-	m_RefFactory->RegisterType(LUX_NEW(SceneNodeAnimatorRotationImpl));
-	m_RefFactory->RegisterType(LUX_NEW(CameraFPSAnimatorImpl));
 
 	m_RootSceneNode = LUX_NEW(RootSceneNode)(this);
 
@@ -235,8 +227,9 @@ StrongRef<SceneNodeComponent> SceneManagerImpl::AddRotationAnimator(SceneNode* a
 	if(!addTo)
 		return nullptr;
 
-	StrongRef<SceneNodeComponent> animator = LUX_NEW(scene::SceneNodeAnimatorRotationImpl)(axis, rotSpeed);
-	addTo->AddComponent(animator);
+	StrongRef<scene::SceneNodeAnimatorRotationImpl> animator = AddComponent(scene::SceneNodeComponentType::Rotation, addTo);
+	animator->SetAxis(axis);
+	animator->SetRotationSpeed(rotSpeed);
 
 	return animator;
 }
@@ -248,9 +241,11 @@ StrongRef<CameraFPSAnimator> SceneManagerImpl::AddCameraFPSAnimator(CameraSceneN
 	if(!addTo)
 		return nullptr;
 
-	StrongRef<scene::CameraFPSAnimator> animator = LUX_NEW(scene::CameraFPSAnimatorImpl)(moveSpeed, rotSpeed,
-		maxVerticalAngle, noVerticalMovement);
-	addTo->AddComponent(animator);
+	StrongRef<scene::CameraFPSAnimator> animator = AddComponent(scene::SceneNodeComponentType::CameraFPS, addTo);
+	animator->SetMoveSpeed(moveSpeed);
+	animator->SetRotationSpeed(rotSpeed);
+	animator->AllowVerticalMovement(!noVerticalMovement);
+	animator->SetMaxVerticalAngle(maxVerticalAngle);
 
 	return animator;
 }
@@ -264,8 +259,8 @@ StrongRef<SceneNodeComponent> SceneManagerImpl::AddLinearMoveAnimator(SceneNode*
 	if(!addTo)
 		return nullptr;
 
-	auto animator = LUX_NEW(scene::LinearMoveComponent)(line, duration, jumpBack, count);
-	addTo->AddComponent(animator);
+	StrongRef<LinearMoveComponent> animator = AddComponent(scene::SceneNodeComponentType::LinearMove, addTo);
+	animator->Init(line, duration, jumpBack, count);
 
 	return animator;
 }
@@ -645,7 +640,7 @@ core::ResourceSystem* SceneManagerImpl::GetResourceSystem() const
 }
 
 
-}    
+}
 
-}    
+}
 

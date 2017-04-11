@@ -1,6 +1,5 @@
 #include "LuxDeviceWin32.h"
 
-
 #include "core/TimerWin32.h"
 #include "core/Logger.h"
 #include "core/lxRandom.h"
@@ -24,6 +23,8 @@
 #include "video/MaterialRendererD3D9.h"
 
 #include "core/lxUnicodeConversion.h"
+
+#include "core/ReferableRegister.h"
 
 #include <WinUser.h>
 
@@ -196,16 +197,12 @@ LUX_API StrongRef<LuxDevice> CreateDevice()
 bool LuxDeviceWin32::BuildCoreDevice()
 {
 	// If there are logs which aren't written, write them to the default file.
-	if(log::EngineLog.HasUnsetLogs()) {
-		if(log::FilePrinter->IsInit() == false)
-			log::FilePrinter->Init();
-
+	if(log::EngineLog.HasUnsetLogs())
 		log::EngineLog.SetNewPrinter(log::FilePrinter, true);
-	}
 
 	m_Timer = LUX_NEW(core::TimerWin32);
 	m_Filesystem = LUX_NEW(io::FileSystemImpl);
-	m_ReferableFactory = LUX_NEW(core::ReferableFactoryImpl);
+	m_ReferableFactory = core::ReferableFactoryImpl::Instance();
 	m_Window = LUX_NEW(gui::WindowWin32);
 	m_ResourceSystem = LUX_NEW(core::ResourceSystemImpl)(m_Filesystem, m_ReferableFactory);
 
@@ -221,6 +218,9 @@ bool LuxDeviceWin32::BuildCoreDevice()
 
 	m_ResourceSystem->SetCaching(core::ResourceType::ImageList, false);
 	m_ResourceSystem->SetCaching(core::ResourceType::Image, false);
+
+	// Register all referable objects.
+	lux::core::impl::RunAllRegisterReferableFunctions();
 
 	// Datum und Uhrzeit schreiben
 	log::Info("Lux core was build.");

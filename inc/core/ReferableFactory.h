@@ -24,10 +24,10 @@ public:
 	//! Register a new type
 	/**
 	The type name, resource type, type id are automatic read from the object.
-	\param default The new default object for this type, every new object is cloned from this one
+	\param prototype The new prototype object for this type, every new object is cloned from this one
 	\return True if the type was registed otherwise false.
 	*/
-	virtual bool RegisterType(Referable* default) = 0;
+	virtual bool RegisterType(Referable* prototype) = 0;
 
 	//! Unregister a type
 	/**
@@ -36,27 +36,27 @@ public:
 	*/
 	virtual void UnregisterType(Name type, Name subType) = 0;
 
-	//! Set the passed referable as default for its own type.
+	//! Set the passed referable as prototype for its own type.
 	/**
-	\param default The new default type.
-	\return Was the new default set
+	\param prototype The new prototype type.
+	\return Was the new prototype set
 	*/
-	virtual bool SetDefault(Referable* default) = 0;
+	virtual bool SetPrototype(Referable* prototype) = 0;
 
-	//! Gets the default object
+	//! Gets the prototype object
 	/**
 	\param type The type
 	\param subType The sub type
-	\return The default object
+	\return The prototype object
 	*/
-	virtual StrongRef<Referable> GetDefault(Name type, Name subType) const = 0;
+	virtual StrongRef<Referable> GetPrototype(Name type, Name subType) const = 0;
 
-	//! Gets the default object
+	//! Gets the prototype object
 	/**
 	\param id The internal id of the object.
-	\return The default object
+	\return The prototype object
 	*/
-	virtual StrongRef<Referable> GetDefault(size_t id) const = 0;
+	virtual StrongRef<Referable> GetPrototype(size_t id) const = 0;
 
 	//! Create a new object
 	/**

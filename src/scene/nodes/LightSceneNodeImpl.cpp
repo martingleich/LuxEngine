@@ -1,6 +1,9 @@
 #include "LightSceneNodeImpl.h"
 #include "scene/SceneManager.h"
 #include "video/VideoDriver.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::LightSceneNodeImpl)
 
 namespace lux
 {

@@ -409,6 +409,7 @@
     <ClInclude Include="..\..\..\inc\video\VertexTypes.h" />
     <ClInclude Include="..\..\..\inc\video\VideoDriver.h" />
     <ClInclude Include="..\..\..\src\core\ReferableFactoryImpl.h" />
+    <ClInclude Include="..\..\..\src\core\ReferableRegister.h" />
     <ClInclude Include="..\..\..\src\core\TimerWin32.h" />
     <ClInclude Include="..\..\..\src\gui\CursorControlWin32.h" />
     <ClInclude Include="..\..\..\src\gui\FontCreatorNull.h" />
@@ -438,7 +439,7 @@
     <ClInclude Include="..\..\..\src\LuxEngine\LuxDeviceWin32.h" />
     <ClInclude Include="..\..\..\src\resources\ResourceSystemImpl.h" />
     <ClInclude Include="..\..\..\src\scene\components\CameraFPSAnimatorImpl.h" />
-    <ClInclude Include="..\..\..\src\scene\components\LinearMoveAnimator.h" />
+    <ClInclude Include="..\..\..\inc\scene\components\LinearMoveAnimator.h" />
     <ClInclude Include="..\..\..\src\scene\components\RotationAnimatorImpl.h" />
     <ClInclude Include="..\..\..\src\scene\mesh\GeometryCreatorArrow.h" />
     <ClInclude Include="..\..\..\src\scene\mesh\GeometryCreatorCube.h" />
@@ -467,6 +468,7 @@
     <ClInclude Include="..\..\..\src\video\HardwareBufferManagerD3D9.h" />
     <ClInclude Include="..\..\..\src\video\HardwareBufferManagerNull.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageImpl.h" />
+    <ClInclude Include="..\..\..\src\video\images\ImageListImpl.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageLoaderBMP.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageLoaderD3DX.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageLoaderPNG.h" />
@@ -543,6 +545,7 @@
     <ClCompile Include="..\..\..\src\scene\mesh\MeshLoaderOBJ.cpp" />
     <ClCompile Include="..\..\..\src\scene\mesh\StaticMesh.cpp" />
     <ClCompile Include="..\..\..\src\scene\nodes\CameraSceneNodeImpl.cpp" />
+    <ClCompile Include="..\..\..\src\scene\nodes\EmptySceneNodeImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\nodes\LightSceneNodeImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\nodes\MeshSceneNodeImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\nodes\SkyBoxSceneNodeImpl.cpp" />
@@ -570,6 +573,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\video\HardwareBufferManagerNull.cpp" />
     <ClCompile Include="..\..\..\src\video\images\ImageImpl.cpp" />
+    <ClCompile Include="..\..\..\src\video\images\ImageListImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\images\ImageLoaderBMP.cpp" />
     <ClCompile Include="..\..\..\src\video\images\ImageLoaderD3DX.cpp" />
     <ClCompile Include="..\..\..\src\video\images\ImageLoaderPNG.cpp" />

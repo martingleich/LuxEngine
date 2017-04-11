@@ -1,10 +1,38 @@
 #include "ReferableFactoryImpl.h"
 #include "core/Logger.h"
+#include "core/ReferableRegister.h"
 
 namespace lux
 {
 namespace core
 {
+
+namespace impl
+{
+static ReferableRegisterBlock* g_FirstReferableBlock = nullptr;
+void RegisterReferable(ReferableRegisterBlock* block)
+{
+	if(g_FirstReferableBlock)
+		block->nextBlock = g_FirstReferableBlock;
+
+	g_FirstReferableBlock = block;
+}
+
+void RunAllRegisterReferableFunctions()
+{
+	for(auto block = g_FirstReferableBlock; block; block = block->nextBlock)
+		ReferableFactoryImpl::Instance()->RegisterType(block->prototypeCreator());
+}
+}
+
+ReferableFactoryImpl* ReferableFactoryImpl::Instance()
+{
+	static StrongRef<ReferableFactoryImpl> instance = nullptr;
+	if(!instance)
+		instance = LUX_NEW(ReferableFactoryImpl);
+
+	return instance;
+}
 
 core::array<ReferableFactoryImpl::ReferableType>::Iterator ReferableFactoryImpl::FindEntry(Name type, Name subType) const
 {
@@ -20,15 +48,15 @@ ReferableFactoryImpl::ReferableFactoryImpl() :
 {
 }
 
-bool ReferableFactoryImpl::RegisterType(Referable* default)
+bool ReferableFactoryImpl::RegisterType(Referable* prototype)
 {
 	ReferableType entry;
-	entry.type = default->GetReferableType();
-	entry.subType = default->GetReferableSubType();
-	entry.referable = default;
+	entry.type = prototype->GetReferableType();
+	entry.subType = prototype->GetReferableSubType();
+	entry.prototype = prototype;
 
 	if(entry.type == Name::INVALID || entry.subType == Name::INVALID) {
-		log::Error("Invalid referable type or name.");
+		log::Error("Invalid prototype type or name.");
 		return false;
 	}
 
@@ -40,6 +68,8 @@ bool ReferableFactoryImpl::RegisterType(Referable* default)
 		log::Debug("Registered new ~s: ~s.", entry.type, entry.subType);
 		return true;
 	}
+
+	log::Error("Multiple registered referable type: ~s: ~s.", entry.type, entry.subType);
 
 	return false;
 }
@@ -53,30 +83,30 @@ void ReferableFactoryImpl::UnregisterType(Name type, Name name)
 	}
 }
 
-bool ReferableFactoryImpl::SetDefault(Referable* default)
+bool ReferableFactoryImpl::SetPrototype(Referable* prototype)
 {
-	auto it = FindEntry(default->GetReferableType(), default->GetReferableSubType());
+	auto it = FindEntry(prototype->GetReferableType(), prototype->GetReferableSubType());
 	if(it != m_Referables.End()) {
-		it->referable = default;
+		it->prototype = prototype;
 		return true;
 	}
 
 	return false;
 }
 
-StrongRef<Referable> ReferableFactoryImpl::GetDefault(Name type, Name name) const
+StrongRef<Referable> ReferableFactoryImpl::GetPrototype(Name type, Name name) const
 {
 	auto it = FindEntry(type, name);
 	if(it != m_Referables.End())
-		return it->referable;
+		return it->prototype;
 	else
 		return nullptr;
 }
 
-StrongRef<Referable> ReferableFactoryImpl::GetDefault(size_t id) const
+StrongRef<Referable> ReferableFactoryImpl::GetPrototype(size_t id) const
 {
 	if(id < m_Referables.Size())
-		return m_Referables[id].referable;
+		return m_Referables[id].prototype;
 	else
 		return nullptr;
 }
@@ -95,13 +125,13 @@ StrongRef<Referable> ReferableFactoryImpl::Create(Name type, Name subType)
 
 StrongRef<Referable> ReferableFactoryImpl::Create(Name type, Name subType, lxID id)
 {
-	StrongRef<Referable> default = GetDefault(type, subType);
+	StrongRef<Referable> prototype = GetPrototype(type, subType);
 	StrongRef<Referable> out = nullptr;
-	if(default)
-		out = default->Clone();
+	if(prototype)
+		out = prototype->Clone();
 
 	if(!out)
-		log::Warning("Not clonable default referable: ~s.~s.", type, subType);
+		log::Warning("Not clonable prototype prototype: ~s.~s.", type, subType);
 
 	if(out)
 		out->SetID(id);
@@ -122,7 +152,7 @@ lxID ReferableFactoryImpl::MakeId()
 	return id;
 }
 
-} 
+}
 
-} 
+}
 

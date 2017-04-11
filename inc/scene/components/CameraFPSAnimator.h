@@ -36,6 +36,7 @@ public:
 	virtual void SetRotationSpeed(math::anglef speed) = 0;
 	virtual bool VerticalMovementAllowed() const = 0;
 	virtual void AllowVerticalMovement(bool allow) = 0;
+	virtual void SetMaxVerticalAngle(math::anglef a) = 0;
 };
 
 }    

@@ -472,7 +472,6 @@ bool string::StartsWith(const string_type& data, ConstIterator first) const
 	if(data.data[0] == 0)
 		return true;
 
-	const char* dataCur = data.data;
 	const char* strCur = first.Pointer();
 	for(auto it = data.data; *it != 0; ++it, ++strCur) {
 		if(*it != *strCur)
@@ -733,7 +732,7 @@ EStringType string::Classify() const
 			++spaceCount;
 	}
 
-	EStringType out;
+	EStringType out = (EStringType)0;
 	if(m_Length == 0)
 		out |= EStringType::Empty;
 

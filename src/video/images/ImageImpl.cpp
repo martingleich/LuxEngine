@@ -1,5 +1,8 @@
 #include "ImageImpl.h"
 #include "core/lxMemory.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::video::ImageImpl);
 
 namespace lux
 {
@@ -45,7 +48,7 @@ void ImageImpl::Init(const math::dimension2du& size, ColorFormat format, void* d
 
 	m_Dimension = size;
 	m_Format = format;
-	m_DeleteOnDrop = m_DeleteOnDrop;
+	m_DeleteOnDrop = deleteOnDrop;
 	m_Locked = false;
 	m_BytePerPixel = m_Format.GetBytePerPixel();
 	m_Pitch = m_Dimension.width * m_BytePerPixel;

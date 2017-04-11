@@ -1,5 +1,8 @@
 #include "CameraFPSAnimatorImpl.h"
 #include "scene/nodes/CameraSceneNode.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraFPSAnimatorImpl)
 
 namespace lux
 {

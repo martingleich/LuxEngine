@@ -2,6 +2,9 @@
 #include "video/VideoDriver.h"
 #include "scene/SceneManager.h"
 #include "video/SubMesh.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::MeshSceneNodeImpl)
 
 namespace lux
 {

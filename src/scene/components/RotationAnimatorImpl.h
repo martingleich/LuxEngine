@@ -17,6 +17,9 @@ public:
 	virtual StrongRef<Referable> Clone() const;
 	virtual core::Name GetReferableSubType() const;
 
+	void SetAxis(const math::vector3f& axis);
+	void SetRotationSpeed(math::anglef& speed);
+
 private:
 	math::vector3f m_Axis;
 	math::anglef m_RotSpeed;

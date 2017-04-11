@@ -2,6 +2,9 @@
 #include "scene/SceneManager.h"
 #include "video/VideoDriver.h"
 #include "core/Logger.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraSceneNodeImpl)
 
 namespace lux
 {
@@ -194,7 +197,7 @@ StrongRef<Referable> CameraSceneNodeImpl::Clone() const
 	return out;
 }
 
-}    
+}
 
-}    
+}
 

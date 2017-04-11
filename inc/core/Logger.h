@@ -225,7 +225,7 @@ public:
 			return;
 
 		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel) {
-			if(sizeof...(data)) {
+			ifconst(sizeof...(data)) {
 				string out;
 				core::string_sink sink(out);
 				format::format(sink, format, data...);

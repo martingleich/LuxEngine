@@ -3,6 +3,9 @@
 #include "video/MaterialLibrary.h"
 #include "video/VideoDriver.h"
 #include "scene/nodes/CameraSceneNode.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::SkyBoxSceneNodeImpl)
 
 namespace lux
 {

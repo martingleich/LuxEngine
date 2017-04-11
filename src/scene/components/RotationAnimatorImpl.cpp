@@ -1,4 +1,7 @@
 #include "RotationAnimatorImpl.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::SceneNodeAnimatorRotationImpl)
 
 namespace lux
 {
@@ -25,6 +28,16 @@ void SceneNodeAnimatorRotationImpl::Animate(float time)
 	quat *= math::quaternionf(m_Axis, time*m_RotSpeed);
 	quat.Normalize();
 	node->SetOrientation(quat);
+}
+
+void SceneNodeAnimatorRotationImpl::SetAxis(const math::vector3f& axis)
+{
+	m_Axis = axis;
+}
+
+void SceneNodeAnimatorRotationImpl::SetRotationSpeed(math::anglef& speed)
+{
+	m_RotSpeed = speed;
 }
 
 StrongRef<Referable> SceneNodeAnimatorRotationImpl::Clone() const
