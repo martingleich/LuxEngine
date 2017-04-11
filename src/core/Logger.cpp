@@ -68,11 +68,11 @@ void WriteWideCharAsUTF8ToFile(FILE* file, const wchar_t* str)
 }
 
 extern LogSystem EngineLog(ELogLevel::Info);
-extern Logger Debug(EngineLog, ELogLevel::Debug);
-extern Logger Info(EngineLog, ELogLevel::Info);
-extern Logger Warning(EngineLog, ELogLevel::Warning);
-extern Logger Error(EngineLog, ELogLevel::Error);
-extern Logger Log(EngineLog, ELogLevel::None);
+extern Logger Debug(EngineLog, ELogLevel::Debug, ConsolePrinter);
+extern Logger Info(EngineLog, ELogLevel::Info, ConsolePrinter);
+extern Logger Warning(EngineLog, ELogLevel::Warning, ConsolePrinter);
+extern Logger Error(EngineLog, ELogLevel::Error, ConsolePrinter);
+extern Logger Log(EngineLog, ELogLevel::None, ConsolePrinter);
 
 bool LogSystem::HasUnsetLogs() const
 {

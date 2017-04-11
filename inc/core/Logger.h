@@ -185,9 +185,10 @@ private:
 	LogSystem& m_LogSystem;
 
 public:
-	Logger(LogSystem& LogSystem, ELogLevel ll) :
+	Logger(LogSystem& LogSystem, ELogLevel ll, Printer* printer = nullptr) :
 		m_MyLogLevel(ll),
-		m_LogSystem(LogSystem)
+		m_LogSystem(LogSystem),
+		m_Printer(printer)
 	{
 		m_LogSystem.AddLogger(this);
 	}
@@ -220,6 +221,9 @@ public:
 	template <typename... T>
 	void Write(const char* format, T... data)
 	{
+		if(!m_Printer)
+			return;
+
 		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel) {
 			if(sizeof...(data)) {
 				string out;
