@@ -374,8 +374,10 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 		m_LightList.Push_Back((LightSceneNode*)node);
 		wasTaken = true;
 		break;
+	default:
+		wasTaken = false;
+		break;
 	}
-
 
 	return wasTaken;
 }

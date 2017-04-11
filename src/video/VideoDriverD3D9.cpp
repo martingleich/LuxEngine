@@ -267,6 +267,8 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 				case D3DFMT_D15S1:        //Nicht ganz exakt aber was solls
 					numZBits = 16;
 					break;
+				default:
+					numZBits = 0; // This will fail later on.
 				}
 
 				FallbackFormat = aZStencilFormat[format];
@@ -277,7 +279,6 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 					PresentParams.AutoDepthStencilFormat = aZStencilFormat[format];
 
 					// Ist ein Stencilbuffer vorhanden
-					m_HasStencilBuffer = false;
 					switch(PresentParams.AutoDepthStencilFormat) {
 					case D3DFMT_D15S1:
 					case D3DFMT_D24S8:
@@ -286,6 +287,8 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 					case D3DFMT_D24FS8:
 						m_HasStencilBuffer = true;
 						break;
+					default:
+						m_HasStencilBuffer = false;
 					}
 
 					// Information nach außen zurückgeben
@@ -1371,6 +1374,8 @@ void VideoDriverD3D9::SetTransform(ETransformState transform, const math::matrix
 		m_D3DDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)(m.DataRowMajor()));
 		m_SceneValues->SetMatrix(scene::SceneValues::MAT_WORLD, m);
 		break;
+	default:
+		return;
 	}
 
 	m_Transforms[transform] = m;
@@ -2012,9 +2017,8 @@ u32 VideoDriverD3D9::GetBitsPerPixel(D3DFORMAT Format)
 	case D3DFMT_D16: return 16;
 	case D3DFMT_D24X8: return 32;
 	case D3DFMT_D24X4S4: return 32;
+	default: return 0;
 	}
-
-	return 0;
 }
 
 u32 VideoDriverD3D9::GetD3DRepeatMode(ETextureRepeat repeat)

@@ -32,8 +32,8 @@ struct Context
 
 	core::array<u32> characters;
 
-	core::HashMap<wchar_t, CharInfo> charInfos;
-	core::HashMap<wchar_t, gui::CharInfo> outCharInfo;
+	core::HashMap<u32, CharInfo> charInfos;
+	core::HashMap<u32, gui::CharInfo> outCharInfo;
 
 	FontPixel* image;
 	bool antialiased;

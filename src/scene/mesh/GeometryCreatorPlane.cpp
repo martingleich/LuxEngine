@@ -57,7 +57,7 @@ StrongRef<video::SubMesh> GeometryCreatorPlane::CreateSubMesh(
 	if(vertexCount > 0xFFFF)
 		return nullptr;
 
-	auto GetVertexIndex = [=](u16 x, u16 y) -> u16 { return y * tesX + x; };
+	auto GetVertexIndex = [=](s32 x, s32 y) -> u16 { return (u16)(y * tesX + x); };
 
 	StrongRef<video::SubMesh> subMesh = driver->CreateSubMesh(
 		video::VertexFormat::STANDARD, video::EHardwareBufferMapping::Static, vertexCount,

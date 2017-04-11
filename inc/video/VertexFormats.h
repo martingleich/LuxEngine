@@ -78,7 +78,7 @@ struct VertexElement
 	}
 };
 
-} 
+}
 
 
 namespace core
@@ -100,7 +100,7 @@ struct HashType<video::VertexElement>
 	}
 };
 
-} 
+}
 
 
 namespace video
@@ -337,9 +337,9 @@ private:
 			return VertexElement::EType::Byte4;
 		case VertexElement::EUsage::Sample:
 			return VertexElement::EType::Byte4;
+		default:
+			return VertexElement::EType::Unknown;
 		}
-
-		return VertexElement::EType::Unknown;
 	}
 
 private:
@@ -350,7 +350,8 @@ private:
 			offset(0),
 			usage(VertexElement::EUsage::Unknown),
 			type(VertexElement::EType::Unknown)
-		{}
+		{
+		}
 
 		Element(u32 _offset, VertexElement::EUsage _usage, VertexElement::EType _type) :
 			offset(_offset),
@@ -370,7 +371,8 @@ private:
 			elemCount(0),
 			stride(0),
 			firstElement(0)
-		{}
+		{
+		}
 
 		Stream(u32 firstElem) :
 			elemCount(0),
@@ -571,7 +573,7 @@ private:
 	size_t m_Hash;
 };
 
-}    
+}
 
 
 namespace core
@@ -586,7 +588,7 @@ struct HashType<video::VertexFormat>
 };
 
 }
-}    
+}
 
 
 #endif // #ifndef INCLUDED_VERTEX_FORMATS_H

@@ -120,6 +120,8 @@ private:
 
 		void OnClose(gui::Window& window)
 		{
+			LUX_UNUSED(window);
+
 			if(device)
 				device->CloseDevice();
 		}

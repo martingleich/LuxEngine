@@ -85,6 +85,8 @@ public:
 	{
 	}
 
+	virtual ~Printer() {}
+
 	void SetContextLevel(ELogLevel Level)
 	{
 		m_ContextLevel = Level;

@@ -128,9 +128,12 @@ bool SpriteBankImpl::DrawSprite(SpriteBank::Sprite index, const math::vector2i& 
 		return false;
 
 	math::vector2f dia = math::vector2f(r->GetWidht()*t->GetDimension().width, r->GetHeight()*t->GetDimension().height);
-	return m_Driver->Draw2DImage(t,
-		math::recti(pos.x, pos.y, pos.x + (int)dia.x, pos.y + (int)dia.y),
-		*r,
+	math::recti loc;
+	if(centered)
+		loc = math::recti(pos.x - (int)dia.x / 2, pos.y - (int)dia.y / 2, pos.x + (int)dia.x / 2, pos.y + (int)dia.y / 2);
+	else
+		loc = math::recti(pos.x, pos.y, pos.x + (int)dia.x, pos.y + (int)dia.y);
+	return m_Driver->Draw2DImage(t, loc, *r,
 		video::Color::White, true);
 }
 

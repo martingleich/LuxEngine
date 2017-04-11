@@ -95,6 +95,8 @@ void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix)
 		case MAT_VIEW_INV:
 			m_UpdateMatrizes |= 2 | 32 | 128 | 256 | 512 | 2048 | 8192 | 16384 | 32768;
 			m_UpdateMatrizes &= ~16;
+		default:
+			assertNeverReach("There's something fishy.");
 		}
 	}
 #endif
@@ -116,6 +118,8 @@ void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix, con
 			m_UpdateMatrizes |= 32 | 128 | 256 | 512 | 2048 | 8192 | 16384 | 32768;
 			m_UpdateMatrizes &= ~(2 | 16);
 			break;
+		default:
+			assertNeverReach("There's something fishy.");
 		}
 	}
 }
@@ -194,7 +198,7 @@ const math::matrix4& SceneValuesImpl::GetMatrix(EMatrizes type) const
 			m_UpdateMatrizes ^= 1 << MAT_WORLD_VIEW_INV_TRANS;
 			break;
 		default:
-			assertNeverReach("Cant generate matrix");
+			assertNeverReach("Can't generate matrix");
 		}
 
 		m_UpdateMatrizes ^= (1 << type);

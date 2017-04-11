@@ -96,15 +96,15 @@ void SkyBoxSceneNodeImpl::SetSkyTexture(video::CubeTexture* pSkyTexture)
 	m_SkyTexture = pSkyTexture;
 }
 
-video::Material& SkyBoxSceneNodeImpl::GetMaterial(u32 dwMat)
+video::Material& SkyBoxSceneNodeImpl::GetMaterial(size_t id)
 {
-	if(dwMat == 0)
+	if(id == 0)
 		return m_Material;
 	else
 		return video::IdentityMaterial;
 }
 
-u32 SkyBoxSceneNodeImpl::GetMaterialCount()
+size_t SkyBoxSceneNodeImpl::GetMaterialCount() const
 {
 	return 1;
 }

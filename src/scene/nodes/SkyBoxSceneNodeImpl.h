@@ -19,8 +19,8 @@ public:
 	void OnRegisterSceneNode();
 	void Render();
 	void SetSkyTexture(video::CubeTexture* skyTexture);
-	video::Material& GetMaterial(u32 id);
-	u32 GetMaterialCount();
+	video::Material& GetMaterial(size_t id);
+	size_t GetMaterialCount() const;
 
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;

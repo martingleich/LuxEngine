@@ -208,10 +208,10 @@ bool ShaderImpl::CreateVertexShader(const char* pcCode, const char* pcEntryPoint
 	ID3DXBuffer* pErrors = 0;
 
 	HRESULT hr = D3DXCompileShader(pcCode, (UINT)length,
-			NULL, NULL, pcEntryPoint,
-			pcProfile,
-			0, &pOutput, &pErrors,
-			&m_pVertexShaderConstants);
+		NULL, NULL, pcEntryPoint,
+		pcProfile,
+		0, &pOutput, &pErrors,
+		&m_pVertexShaderConstants);
 	if(FAILED(hr)) {
 		log::Error("Failed to compile vertexshader.");
 
@@ -442,6 +442,9 @@ void ShaderImpl::CastTypeToShader(core::Type type, const void* in, void* out)
 		f[8] = pf[2];   f[9] = pf[6];    f[10] = pf[10];    f[11] = pf[14];
 		f[12] = pf[3];    f[13] = pf[7];  f[14] = pf[11]; f[15] = pf[15];
 	}
+	break;
+	default:
+		assertNeverReach("Unsupported shader variable type.");
 	}
 }
 
@@ -476,6 +479,9 @@ void ShaderImpl::CastShaderToType(core::Type type, const void* in, void* out)
 		f[8] = pf[2];   f[9] = pf[6];    f[10] = pf[10];    f[11] = pf[14];
 		f[12] = pf[3];    f[13] = pf[7];  f[14] = pf[11]; f[15] = pf[15];
 	}
+	break;
+	default:
+		assertNeverReach("Unsupported shader variable type.");
 	}
 }
 
@@ -535,6 +541,8 @@ void ShaderImpl::GetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 				pf[12] = f[3];    pf[13] = f[7]; pf[14] = f[11];
 			}
 			break;
+		default:
+			assertNeverReach("Unsupported shader variable type.");
 		}
 	} else {
 		Register = RegisterPS;
@@ -581,6 +589,9 @@ void ShaderImpl::GetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 				pf[12] = f[3];    pf[13] = f[7]; pf[14] = f[11];
 			}
 			break;
+
+		default:
+			assertNeverReach("Unsupported shader variable type.");
 		}
 	}
 }
@@ -618,6 +629,9 @@ void ShaderImpl::SetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 		case core::Type::Internal_MatrixCol:
 			hr = m_D3DDevice->SetVertexShaderConstantF(Register, (float*)v, 4);
 			break;
+
+		default:
+			assertNeverReach("Unsupported shader variable type.");
 		}
 	}
 	if(RegisterPS != -1) {
@@ -641,6 +655,9 @@ void ShaderImpl::SetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 		case core::Type::Internal_MatrixCol:
 			hr = m_D3DDevice->SetPixelShaderConstantF(Register, (float*)v, 4);
 			break;
+
+		default:
+			assertNeverReach("Unsupported shader variable type.");
 		}
 	}
 }
@@ -731,7 +748,7 @@ ShaderParam ShaderImpl::ElemParam(const ShaderParam* Param, const char* pcName)
 */
 
 #endif
-}    
+		}
 
-}    
+	}
 

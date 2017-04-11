@@ -50,9 +50,9 @@ static ColorFormat ConvertD3DToLuxFormat(D3DFORMAT Format)
 		return ColorFormat::A1R5G5B5;
 	case D3DFMT_R5G6B5:
 		return ColorFormat::R5G6B5;
+	default:
+		return ColorFormat::UNKNOWN;
 	}
-
-	return ColorFormat::UNKNOWN;
 }
 
 static bool LoadTexture(
@@ -204,6 +204,9 @@ static void CopyTextureData(
 			texture->UnlockBox(0);
 		}
 	}
+	break;
+	default:
+		assertNeverReach("Unsupported texture type.");
 	}
 }
 
@@ -274,7 +277,7 @@ bool ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 }
 
 
-} 
+}
 
-} 
+}
 

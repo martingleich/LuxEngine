@@ -116,13 +116,13 @@ StrongRef<video::SubMesh> GeometryCreatorSphereUV::CreateSubMesh(video::VideoDri
 	vertexBuffer->AddVertex(&Vertex);
 
 	for(s32 quad = 0; quad < segments; ++quad) {
-		indices[0] = (rings - 1) * (segments + 1) + 1;
-		indices[1] = temp * (quad + 1);
-		indices[2] = temp * quad;
+		indices[0] = (u16)((rings - 1) * (segments + 1) + 1);
+		indices[1] = (u16)(temp * (quad + 1));
+		indices[2] = (u16)(temp * quad);
 
-		indices[3] = indices[0] - 1;
-		indices[4] = indices[1] - 1;
-		indices[5] = indices[4] + temp;
+		indices[3] = (u16)(indices[0] - 1);
+		indices[4] = (u16)(indices[1] - 1);
+		indices[5] = (u16)(indices[4] + temp);
 
 		if(inside) {
 			Swap(indices[1], indices[2]);
@@ -132,11 +132,11 @@ StrongRef<video::SubMesh> GeometryCreatorSphereUV::CreateSubMesh(video::VideoDri
 		indexBuffer->AddIndices(indices, 6);
 
 		for(s32 i = 0; i < rings - 2; i++) {
-			indices[0] = temp * (quad + 1) + i;
-			indices[1] = temp * quad + 1 + i;
-			indices[2] = indices[1] - 1;
+			indices[0] = (u16)(temp * (quad + 1) + i);
+			indices[1] = (u16)(temp * quad + 1 + i);
+			indices[2] = (u16)(indices[1] - 1);
 
-			indices[3] = indices[0] + 1;
+			indices[3] = (u16)(indices[0] + 1);
 			indices[4] = indices[1];
 			indices[5] = indices[0];
 

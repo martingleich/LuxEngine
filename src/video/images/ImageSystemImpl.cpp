@@ -63,6 +63,9 @@ public:
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType)
 	{
+		if(requestedType && requestedType != core::ResourceType::Texture && requestedType != core::ResourceType::CubeTexture)
+			return core::Name::INVALID;
+
 		core::Name type = GetFileType(file);
 		if(type == core::ResourceType::Image)
 			return core::ResourceType::Texture;

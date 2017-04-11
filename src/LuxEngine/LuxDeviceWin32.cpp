@@ -82,6 +82,8 @@ lux::string GetWin32ErrorString(DWORD error)
 
 void conv_data(format::Context& ctx, const LogWin32Error& v, format::Placeholder& placeholder)
 {
+	LUX_UNUSED(placeholder);
+
 	using namespace format;
 	lux::string str = GetWin32ErrorString(v.error);
 	format::CopyConvertAddString(ctx, StringType::Unicode, str.Data_c(), str.Size());
