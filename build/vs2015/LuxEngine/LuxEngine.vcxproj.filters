@@ -88,6 +88,9 @@
     <Filter Include="scene\components">
       <UniqueIdentifier>{1174495b-eb14-48c6-b9e4-295a8f32b29d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="scene\zones">
+      <UniqueIdentifier>{967037f3-6214-4f3f-a2f7-9f2df51e2f54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\inc\math\aabbox3d.h">
@@ -647,6 +650,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\scene\components\RotationAnimatorImpl.h">
       <Filter>scene\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\zones\Zone.h">
+      <Filter>scene\zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\zones\ZoneCylinder.h">
+      <Filter>scene\zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\zones\ZonePoint.h">
+      <Filter>scene\zones</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

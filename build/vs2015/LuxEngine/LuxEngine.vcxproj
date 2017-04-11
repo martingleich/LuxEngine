@@ -375,6 +375,9 @@
     <ClInclude Include="..\..\..\inc\scene\SceneNode.h" />
     <ClInclude Include="..\..\..\inc\scene\SceneNodeComponent.h" />
     <ClInclude Include="..\..\..\inc\scene\Transformable.h" />
+    <ClInclude Include="..\..\..\inc\scene\zones\Zone.h" />
+    <ClInclude Include="..\..\..\inc\scene\zones\ZoneCylinder.h" />
+    <ClInclude Include="..\..\..\inc\scene\zones\ZonePoint.h" />
     <ClInclude Include="..\..\..\inc\video\BaseTexture.h" />
     <ClInclude Include="..\..\..\inc\video\Color.h" />
     <ClInclude Include="..\..\..\inc\video\ColorConverter.h" />
