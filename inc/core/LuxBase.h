@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LUXBASE_H
 #define INCLUDED_LUXBASE_H
 
-
 //---------------------------------------------
 // PLATFORM
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
@@ -56,15 +55,16 @@
 #endif
 
 #include <utility>
+#include <cstdint>
 
 namespace lux
 {
-typedef unsigned __int8   u8;    //!< A type for unsigned 8 bit integers
-typedef unsigned __int16 u16;    //!< A type for unsigned 16 bit integers
-typedef unsigned __int32 u32;    //!< A type for unsigned 32 bit integers
-typedef signed __int8     s8;    //!< A type for signed 8 bit integers
-typedef signed __int16   s16;    //!< A type for signed 16 bit integers
-typedef signed __int32   s32;    //!< A type for signed 32 bit integers
+typedef std::uint8_t  u8;    //!< A type for unsigned 8 bit integers
+typedef std::uint16_t u16;   //!< A type for unsigned 16 bit integers
+typedef std::uint32_t u32;   //!< A type for unsigned 32 bit integers
+typedef std::int8_t   s8;    //!< A type for signed 8 bit integers
+typedef std::int16_t  s16;   //!< A type for signed 16 bit integers
+typedef std::int32_t  s32;   //!< A type for signed 32 bit integers
 }
 
 // Define-Funktionen
