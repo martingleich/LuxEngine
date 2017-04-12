@@ -308,9 +308,11 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const string& nam
 		log::Error("Can't open file: ~s.", name);
 	else {
 		out = GetResource(type, file);
-		ResourceOrigin origin;
-		origin.str = name;
-		out->SetOrigin(nullptr, origin);
+		if(out) {
+			ResourceOrigin origin;
+			origin.str = name;
+			out->SetOrigin(nullptr, origin);
+		}
 		return out;
 	}
 	return nullptr;

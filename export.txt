@@ -27,6 +27,8 @@ format::conv_data
 format::internal::ParseUntilPlaceholder
 format::internal::ReplaceSubPlaceholder
 format::internal::AlignString
+format::internal::TryFormatArgFree
+format::ConvertAddString
 
 format::cstring_sink::
 format::MsgBox_sink::
