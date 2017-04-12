@@ -8,8 +8,26 @@ namespace lux
 namespace video
 {
 
+struct Context
+{
+	jmp_buf jmpbuf;
 
-void png_read_function(png_structp png_ptr, png_bytep data, png_size_t count)
+	png_struct* png;
+	png_info* pngInfo;
+
+	int depth;
+	int colorType;
+	u32 width;
+	u32 height;
+	ColorFormat format;
+
+	~Context()
+	{
+		png_destroy_read_struct(&png, &pngInfo, NULL);
+	}
+};
+
+static void png_read_function(png_structp png_ptr, png_bytep data, png_size_t count)
 {
 	io::File* f = (io::File*)png_get_io_ptr(png_ptr);
 	if(!f)
@@ -19,17 +37,137 @@ void png_read_function(png_structp png_ptr, png_bytep data, png_size_t count)
 		png_error(png_ptr, "Unexpected end of file");
 }
 
-void png_error_handler(png_structp png_ptr, png_const_charp msg)
+static void png_error_handler(png_structp png_ptr, png_const_charp msg)
 {
 	LUX_UNUSED(msg);
-	ImageLoaderPNG::MainProgInfo* info = (ImageLoaderPNG::MainProgInfo*)png_get_error_ptr(png_ptr);
-	longjmp(info->jmpbuf, 1);
+	Context* ctx = (Context*)png_get_error_ptr(png_ptr);
+	longjmp(ctx->jmpbuf, 1);
 }
 
-void png_warning_handler(png_structp png_ptr, png_const_charp msg)
+static void png_warning_handler(png_structp png_ptr, png_const_charp msg)
 {
 	LUX_UNUSED(png_ptr);
 	LUX_UNUSED(msg);
+}
+
+static bool LoadImageFormat(Context& ctx)
+{
+	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
+	// scope of setjmp.
+#pragma warning(suppress: 4611)
+	if(setjmp(ctx.jmpbuf)) {
+		return false;
+	}
+
+	png_read_info(ctx.png, ctx.pngInfo);
+
+	png_uint_32 width;
+	png_uint_32 height;
+	int depth;
+	int color_type;
+	png_get_IHDR(ctx.png, ctx.pngInfo, &width, &height, &depth, &color_type, NULL, NULL, NULL);
+
+	ctx.width = width;
+	ctx.height = height;
+
+	if(color_type == PNG_COLOR_TYPE_GRAY)
+		ctx.format = ColorFormat::R8G8B8;
+	else if(color_type == PNG_COLOR_TYPE_PALETTE) {
+		if(png_get_valid(ctx.png, ctx.pngInfo, PNG_INFO_tRNS))
+			ctx.format = ColorFormat::A8R8G8B8;
+		else
+			ctx.format = ColorFormat::R8G8B8;
+	} else if(color_type == PNG_COLOR_TYPE_RGB)
+		ctx.format = ColorFormat::R8G8B8;
+	else if(color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+		ctx.format = ColorFormat::A8R8G8B8;
+	else if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+		ctx.format = ColorFormat::A8R8G8B8;
+	else {
+		if(png_get_valid(ctx.png, ctx.pngInfo, PNG_INFO_tRNS))
+			ctx.format = ColorFormat::A8R8G8B8;
+		else
+			ctx.format = ColorFormat::R8G8B8;
+	}
+
+	ctx.depth = depth;
+	ctx.colorType = color_type;
+
+	return true;
+}
+
+static bool LoadImageToMemory(Context& ctx, void* dest)
+{
+	if(!dest)
+		return false;
+
+	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
+	// scope of setjmp.
+#pragma warning(suppress: 4611)
+	if(setjmp(ctx.jmpbuf)) {
+		return false;
+	}
+
+	if(ctx.colorType == PNG_COLOR_TYPE_PALETTE)
+		png_set_palette_to_rgb(ctx.png);
+	if(ctx.colorType == PNG_COLOR_TYPE_GRAY && ctx.depth < 8)
+		png_set_expand_gray_1_2_4_to_8(ctx.png);
+	if(png_get_valid(ctx.png, ctx.pngInfo, PNG_INFO_tRNS))
+		png_set_tRNS_to_alpha(ctx.png);
+
+	if(ctx.depth == 16)
+		png_set_strip_16(ctx.png);
+	if(ctx.colorType == PNG_COLOR_TYPE_GRAY ||
+		ctx.colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+		png_set_gray_to_rgb(ctx.png);
+
+	if(ctx.format.HasAlpha()) {
+		png_set_bgr(ctx.png);
+	}
+
+	if(!ctx.format.HasAlpha())
+		png_set_strip_alpha(ctx.png);
+
+	png_read_update_info(ctx.png, ctx.pngInfo);
+
+	png_size_t rowbytes;
+	int channels;
+
+	rowbytes = png_get_rowbytes(ctx.png, ctx.pngInfo);
+	channels = (int)png_get_channels(ctx.png, ctx.pngInfo);
+
+	u32 pitchLux = ctx.format.GetBytePerPixel() * ctx.width;
+	if(rowbytes != pitchLux) {
+		return false;
+	}
+
+	png_bytepp row_pointers = (png_bytepp)alloca(ctx.height * sizeof(png_bytep));
+	for(u32 i = 0; i < ctx.height; ++i)
+		row_pointers[i] = (png_bytep)dest + i * rowbytes;
+
+	png_read_image(ctx.png, row_pointers);
+
+	return true;
+}
+
+static bool Init(Context& ctx, io::File* file)
+{
+	if(!file)
+		return false;
+
+	ctx.png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+		&ctx, png_error_handler, png_warning_handler);
+	if(!ctx.png)
+		return false;
+
+	ctx.pngInfo = png_create_info_struct(ctx.png);
+	if(!ctx.pngInfo) {
+		png_destroy_read_struct(&ctx.png, NULL, NULL);
+		return false;
+	}
+	png_set_read_fn(ctx.png, file, &png_read_function);
+
+	return true;
 }
 
 const string& ImageLoaderPNG::GetName() const
@@ -59,169 +197,29 @@ bool ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
 	if(!img)
 		return false;
 
-	result = LoadImageFormat(file);
+	// Context is destroyed at end of scope.
+	Context ctx;
+	if(!Init(ctx, file))
+		return false;
+
+	result = LoadImageFormat(ctx);
 	if(!result)
 		return false;
 
 	img->Init(
-		math::dimension2du(m_Width, m_Height),
-		m_Format);
+		math::dimension2du(ctx.width, ctx.height),
+		ctx.format);
 
 	void* data = img->Lock();
 	if(!data)
 		return false;
-	result = LoadImageToMemory(file, data);
+
+	result = LoadImageToMemory(ctx, data);
 	img->Unlock();
 	if(!result)
 		return false;
 
 	return true;
-}
-
-bool ImageLoaderPNG::LoadImageFormat(io::File* file)
-{
-	Init(file);
-
-
-	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
-	// scope of setjmp.
-#pragma warning(suppress: 4611)
-	if(setjmp(m_Info.jmpbuf)) {
-		Exit();
-		return false;
-	}
-
-	png_read_info(m_Png, m_PngInfo);
-
-	png_uint_32 width;
-	png_uint_32 height;
-	int depth;
-	int color_type;
-	png_get_IHDR(m_Png, m_PngInfo, &width, &height, &depth, &color_type, NULL, NULL, NULL);
-
-	m_Width = width;
-	m_Height = height;
-
-	if(color_type == PNG_COLOR_TYPE_GRAY)
-		m_Format = ColorFormat::R8G8B8;
-	else if(color_type == PNG_COLOR_TYPE_PALETTE) {
-		if(png_get_valid(m_Png, m_PngInfo, PNG_INFO_tRNS))
-			m_Format = ColorFormat::A8R8G8B8;
-		else
-			m_Format = ColorFormat::R8G8B8;
-	} else if(color_type == PNG_COLOR_TYPE_RGB)
-		m_Format = ColorFormat::R8G8B8;
-	else if(color_type == PNG_COLOR_TYPE_RGB_ALPHA)
-		m_Format = ColorFormat::A8R8G8B8;
-	else if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-		m_Format = ColorFormat::A8R8G8B8;
-	else {
-		if(png_get_valid(m_Png, m_PngInfo, PNG_INFO_tRNS))
-			m_Format = ColorFormat::A8R8G8B8;
-		else
-			m_Format = ColorFormat::R8G8B8;
-	}
-
-	m_Depth = depth;
-	m_ColorType = color_type;
-
-	return true;
-}
-
-bool ImageLoaderPNG::LoadImageToMemory(io::File* file, void* dest)
-{
-	if(!file)
-		return false;
-	if(!dest)
-		return false;
-
-	if(m_CurFile != file)
-		return false;
-
-	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
-	// scope of setjmp.
-#pragma warning(suppress: 4611)
-	if(setjmp(m_Info.jmpbuf)) {
-		Exit();
-		return false;
-	}
-
-	if(m_ColorType == PNG_COLOR_TYPE_PALETTE)
-		png_set_palette_to_rgb(m_Png);
-	if(m_ColorType == PNG_COLOR_TYPE_GRAY && m_Depth < 8)
-		png_set_expand_gray_1_2_4_to_8(m_Png);
-	if(png_get_valid(m_Png, m_PngInfo, PNG_INFO_tRNS))
-		png_set_tRNS_to_alpha(m_Png);
-
-	if(m_Depth == 16)
-		png_set_strip_16(m_Png);
-	if(m_ColorType == PNG_COLOR_TYPE_GRAY ||
-		m_ColorType == PNG_COLOR_TYPE_GRAY_ALPHA)
-		png_set_gray_to_rgb(m_Png);
-
-	if(m_Format.HasAlpha()) {
-		png_set_bgr(m_Png);
-	}
-
-	if(!m_Format.HasAlpha())
-		png_set_strip_alpha(m_Png);
-
-	png_read_update_info(m_Png, m_PngInfo);
-
-	png_size_t rowbytes;
-	int channels;
-
-	rowbytes = png_get_rowbytes(m_Png, m_PngInfo);
-	channels = (int)png_get_channels(m_Png, m_PngInfo);
-
-	u32 pitchLux = m_Format.GetBytePerPixel() * m_Width;
-	if(rowbytes != pitchLux) {
-		Exit();
-		return false;
-	}
-
-	png_bytepp row_pointers = (png_bytepp)alloca(m_Height * sizeof(png_bytep));
-	for(u32 i = 0; i < m_Height; ++i)
-		row_pointers[i] = (png_bytep)dest + i * rowbytes;
-
-	png_read_image(m_Png, row_pointers);
-
-	Exit();
-
-	return true;
-}
-
-void ImageLoaderPNG::Init(io::File* file)
-{
-	if(!file)
-		return;
-
-	if(file == m_CurFile)
-		return;
-	m_CurFile = nullptr;
-
-	Exit();
-
-	m_Png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-		&m_Info, png_error_handler, png_warning_handler);
-	if(!m_Png)
-		return;
-
-	m_PngInfo = png_create_info_struct(m_Png);
-	if(!m_PngInfo) {
-		png_destroy_read_struct(&m_Png, NULL, NULL);
-		return;
-	}
-	png_set_read_fn(m_Png, file, &png_read_function);
-
-	m_CurFile = file;
-}
-
-void ImageLoaderPNG::Exit()
-{
-	png_destroy_read_struct(&m_Png, &m_PngInfo, NULL);
-	m_Png = nullptr;
-	m_PngInfo = nullptr;
 }
 
 }
