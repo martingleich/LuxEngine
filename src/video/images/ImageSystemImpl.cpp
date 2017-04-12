@@ -130,11 +130,74 @@ private:
 
 class MultiImageToCubeTextureLoader : public core::ResourceLoader
 {
+private:
+	enum class ENameScheme
+	{
+		Invalid, // No valid name scheme
+		Numeric, // file1, file2, file3
+		Names, // file_front, file_back, file_top, file_bottom, file_left, file_right
+		Axes, // file_posx, file_negx, file_negy
+	};
+
 public:
 	MultiImageToCubeTextureLoader(core::ResourceSystem* resSys, ImageSystemImpl* imagSys) :
 		m_ImageSystem(imagSys),
 		m_ResSys(resSys)
 	{
+	}
+
+	static const char* GetName(size_t i)
+	{
+		static const char* NAMES[] = {"right", "left", "top", "bottom", "front", "back"};
+		return NAMES[i];
+	}
+
+	static const char* GetAxis(size_t i)
+	{
+		static const char* AXES[] = {"posx", "negx", "posy", "negy", "posz", "negz"};
+		return AXES[i];
+	}
+
+	string GetName(ENameScheme scheme, size_t id, const io::path& basePath, const string& name, const string& ext)
+	{
+		switch(scheme) {
+		case ENameScheme::Numeric:
+			return basePath + name + core::StringConverter::ToString(id + 1) + "." + ext;
+		case ENameScheme::Names:
+			return basePath + name + GetName(id) + "." + ext;
+		case ENameScheme::Axes:
+			return basePath + name + GetAxis(id) + "." + ext;
+		default:
+			assertNeverReach("Unsupported cube texture naming scheme.");
+			return "";
+		}
+	}
+
+	ENameScheme GetNameSchema(const io::path& path, string& outBaseName, size_t& outId)
+	{
+		io::path basePath = io::GetFileDir(path);
+		string nameonly = io::GetFilenameOnly(path, false);
+		string ext = io::GetFileExtension(path);
+		if(*nameonly.Last() > '1' && *nameonly.Last() <= '6') {
+			outBaseName = nameonly.SubString(nameonly.First(), nameonly.Last());
+			outId = *nameonly.Last() - '1';
+			return ENameScheme::Numeric;
+		}
+		for(size_t i = 0; i < 6; ++i)
+			if(nameonly.EndsWith(GetName(i))) {
+				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetName(i)));
+				outId = i;
+				return ENameScheme::Names;
+			}
+
+		for(size_t i = 0; i < 6; ++i)
+			if(nameonly.EndsWith(GetAxis(i))) {
+				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetAxis(i)));
+				outId = i;
+				return ENameScheme::Axes;
+			}
+
+		return ENameScheme::Invalid;
 	}
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType)
@@ -145,17 +208,17 @@ public:
 		auto fileSys = m_ImageSystem->m_Filesystem;
 		auto filename = file->GetName();
 		if(fileSys->ExistFile(filename)) {
-			io::path basePath = io::GetFileDir(filename);
-			string nameonly = io::GetFilenameOnly(filename, false);
-			if(*nameonly.Last() != '1')
+			string baseName;
+			size_t id;
+			ENameScheme scheme = GetNameSchema(filename, baseName, id);
+			if(scheme == ENameScheme::Invalid)
 				return core::Name::INVALID;
-			nameonly = nameonly.SubString(nameonly.First(), nameonly.Last());
-			basePath += nameonly;
-			string ext = io::GetFileExtension(filename);
 
-			io::path p = basePath + core::StringConverter::ToString(2) + "." + ext;
-			if(fileSys->ExistFile(p))
-				return core::ResourceType::CubeTexture;
+			string otherName = GetName(scheme, (id + 1) % 6, io::GetFileDir(filename), baseName, io::GetFileExtension(filename));
+			if(!fileSys->ExistFile(otherName))
+				return core::Name::INVALID;
+
+			return core::ResourceType::CubeTexture;
 		}
 
 		return core::Name::INVALID;
@@ -165,17 +228,18 @@ public:
 	{
 		auto fileSys = m_ImageSystem->m_Filesystem;
 		auto filename = file->GetName();
+
 		io::path basePath = io::GetFileDir(filename);
-		string nameonly = io::GetFilenameOnly(filename, false);
-		nameonly = nameonly.SubString(nameonly.First(), nameonly.Last());
-		basePath += nameonly;
 		string ext = io::GetFileExtension(filename);
+		string baseName;
+		size_t id;
+		ENameScheme scheme = GetNameSchema(filename, baseName, id);
 
 		bool isValid = true;
 		io::path image_path[6];
 		StrongRef<Image> images[6];
 		for(size_t i = 0; i < 6; ++i) {
-			image_path[i] = basePath + core::StringConverter::ToString(i + 1) + "." + ext;
+			image_path[i] = GetName(scheme, i, basePath, baseName, ext);
 			if(!fileSys->ExistFile(image_path[i]))
 				isValid = false;
 		}
