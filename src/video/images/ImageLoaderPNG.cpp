@@ -1,6 +1,8 @@
 #include "ImageLoaderPNG.h"
 #include "video/images/Image.h"
 #include "io/File.h"
+#include "math/dimension2d.h"
+#include "video/Color.h"
 #include "../external/libpng/src/png.h"
 
 namespace lux
@@ -17,8 +19,7 @@ struct Context
 
 	int depth;
 	int colorType;
-	u32 width;
-	u32 height;
+	math::dimension2du size;
 	ColorFormat format;
 
 	~Context()
@@ -67,8 +68,7 @@ static bool LoadImageFormat(Context& ctx)
 	int color_type;
 	png_get_IHDR(ctx.png, ctx.pngInfo, &width, &height, &depth, &color_type, NULL, NULL, NULL);
 
-	ctx.width = width;
-	ctx.height = height;
+	ctx.size.Set(width, height);
 
 	if(color_type == PNG_COLOR_TYPE_GRAY)
 		ctx.format = ColorFormat::R8G8B8;
@@ -136,13 +136,13 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 	rowbytes = png_get_rowbytes(ctx.png, ctx.pngInfo);
 	channels = (int)png_get_channels(ctx.png, ctx.pngInfo);
 
-	u32 pitchLux = ctx.format.GetBytePerPixel() * ctx.width;
+	u32 pitchLux = ctx.format.GetBytePerPixel() * ctx.size.width;
 	if(rowbytes != pitchLux) {
 		return false;
 	}
 
-	png_bytepp row_pointers = (png_bytepp)alloca(ctx.height * sizeof(png_bytep));
-	for(u32 i = 0; i < ctx.height; ++i)
+	png_bytepp row_pointers = (png_bytepp)alloca(ctx.size.height * sizeof(png_bytep));
+	for(u32 i = 0; i < ctx.size.height; ++i)
 		row_pointers[i] = (png_bytep)dest + i * rowbytes;
 
 	png_read_image(ctx.png, row_pointers);
@@ -202,13 +202,10 @@ bool ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
 	if(!Init(ctx, file))
 		return false;
 
-	result = LoadImageFormat(ctx);
-	if(!result)
+	if(!LoadImageFormat(ctx))
 		return false;
 
-	img->Init(
-		math::dimension2du(ctx.width, ctx.height),
-		ctx.format);
+	img->Init(ctx.size, ctx.format);
 
 	void* data = img->Lock();
 	if(!data)

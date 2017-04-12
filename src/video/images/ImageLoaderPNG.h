@@ -1,9 +1,6 @@
-#pragma once
 #ifndef INCLUDED_IMAGE_LOADER_PNG_H
 #define INCLUDED_IMAGE_LOADER_PNG_H
 #include "resources/ResourceLoader.h"
-#include "math/dimension2d.h"
-#include "video/Color.h"
 
 namespace lux
 {
