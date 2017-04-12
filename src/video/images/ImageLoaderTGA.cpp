@@ -11,6 +11,8 @@ namespace lux
 namespace video
 {
 
+namespace
+{
 struct Context
 {
 	tga_struct* tga;
@@ -30,6 +32,7 @@ struct Context
 		tga_destroy(tga);
 	}
 };
+}
 
 static uint32_t tga_proc_read(tga_struct* tga, uint32_t size, void* buffer)
 {

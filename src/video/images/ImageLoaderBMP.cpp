@@ -1,4 +1,6 @@
 #include "ImageLoaderBMP.h"
+#include "math/dimension2d.h"
+#include "video/Color.h"
 #include "io/File.h"
 #include "video/images/Image.h"
 
@@ -6,18 +8,61 @@ namespace lux
 {
 namespace video
 {
-
-ImageLoaderBMP::ImageLoaderBMP() :
-	m_ColorTable(nullptr),
-	m_DataOffset(0)
+namespace
 {
-}
-
-ImageLoaderBMP::~ImageLoaderBMP()
+#pragma pack(push, 1)
+struct BITMAPFILEHEADER
 {
-}
+	u16 type;
+	u32 Size;
+	u32 Reserved;
+	u32 offset;
+};
 
-u32 ImageLoaderBMP::GetRightZeros(u32 x)
+struct BITMAPINFOHEADER
+{
+	u32 Size;
+	s32 Width;
+	s32 height;
+	u16 Planes;
+	u16 BitCount;
+	u32 Compression;
+	u32 SizeImage;
+	s32 XPelsPerMeter;
+	s32 YPelsPerMeter;
+	u32 ClrUsed;
+	u32 ClrImportant;
+};
+
+struct SColorMasks
+{
+	u32 mRed;
+	u32 mGreen;
+	u32 mBlue;
+	u32 oRed;
+	u32 oGreen;
+	u32 oBlue;
+};
+#pragma pack(pop)
+
+struct Context
+{
+	math::dimension2du size;
+	ColorFormat format;
+	u8* colorTable;
+	u32 dataOffset;
+	BITMAPFILEHEADER header;
+	BITMAPINFOHEADER info;
+	SColorMasks colorMasks;
+
+	Context() :
+		colorTable(nullptr),
+		dataOffset(0)
+	{
+	}
+};
+}
+static u32 GetRightZeros(u32 x)
 {
 	u32 o = 0;
 	while(((x >> o) & 1) == 0)
@@ -25,6 +70,259 @@ u32 ImageLoaderBMP::GetRightZeros(u32 x)
 
 	return o;
 }
+
+static bool LoadImageFormat(Context& ctx, io::File* file)
+{
+	ctx.colorTable = nullptr;
+
+	ctx.dataOffset = file->GetCursor();
+
+	file->ReadBinary(sizeof(BITMAPFILEHEADER), &ctx.header);
+
+	if(ctx.header.type != 0x4D42)
+		return false;
+
+	file->ReadBinary(sizeof(BITMAPINFOHEADER), &ctx.info);
+
+	if(ctx.info.Size != 40 && ctx.info.Size != ctx.header.offset - sizeof(BITMAPFILEHEADER))
+		return false;
+
+	ctx.size.Set(ctx.info.Width, math::Abs(ctx.info.height));
+
+	/*
+	if(ctx.info.BitCount < 16)
+		return false;
+	*/
+
+	if(ctx.info.Compression != 0 && ctx.info.Compression != 3)
+		return false;
+
+	if(ctx.info.Compression == 3) {
+		if(ctx.info.BitCount != 32 && ctx.info.BitCount != 16)
+			return false;
+
+		file->ReadBinary(12, &ctx.colorMasks);
+		if(ctx.info.BitCount == 32) {
+			if(ctx.colorMasks.mRed == 0x00FF0000 && ctx.colorMasks.mGreen == 0x0000FF00 && ctx.colorMasks.mBlue == 0x000000FF)
+				ctx.info.Compression = 0;
+		} else {
+			if(ctx.colorMasks.mRed == 0x7C00 && ctx.colorMasks.mGreen == 0x03E0 && ctx.colorMasks.mBlue == 0x001F)
+				ctx.info.Compression = 0;
+		}
+
+		if(ctx.info.Compression == 3) {
+			ctx.colorMasks.oRed = GetRightZeros(ctx.colorMasks.mRed);
+			ctx.colorMasks.oGreen = GetRightZeros(ctx.colorMasks.mGreen);
+			ctx.colorMasks.oBlue = GetRightZeros(ctx.colorMasks.mBlue);
+		}
+	}
+
+	// Read Colortable
+	if(ctx.info.BitCount <= 8) {
+		if(ctx.info.ClrUsed == 0)
+			ctx.info.ClrUsed = 1 << ctx.info.BitCount;
+
+		ctx.colorTable = LUX_NEW_ARRAY(u8, ctx.info.ClrUsed * 4);
+		file->ReadBinary(ctx.info.ClrUsed * 4, ctx.colorTable);
+	}
+
+	ctx.format = ColorFormat::R8G8B8;
+
+	ctx.dataOffset += ctx.header.offset;
+
+	return true;
+}
+
+static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
+{
+	// Move to color data
+	file->Seek(ctx.dataOffset, io::ESeekOrigin::Start);
+
+	const int ImagePitch = ctx.size.width * ctx.format.GetBytePerPixel();
+	const int ImageSize = ctx.size.height * ImagePitch;
+
+	u8* cursor;
+	int  pitch;
+	if(ctx.info.height > 0) {
+		cursor = (u8*)dest + ImageSize - ImagePitch;
+		pitch = -ImagePitch;
+	} else {
+		cursor = (u8*)dest;
+		pitch = ImagePitch;
+	}
+
+	u32 filePitch = (ctx.size.width * ctx.info.BitCount) / 8;
+
+	if(filePitch % 4 != 0)
+		filePitch = filePitch + (4 - filePitch % 4);    // Auf 4-Byte ausrichten
+
+	u8* lineData = LUX_NEW_ARRAY(u8, filePitch);
+
+	for(u32 j = 0; j < ctx.size.height; ++j) {
+		// Read one line from the file
+		file->ReadBinary(filePitch, lineData);
+
+		u8* pD = (u8*)cursor;
+
+		// Decode and write line to output
+		if(ctx.info.BitCount == 32) {
+			u32* pS = (u32*)lineData;
+
+			if(ctx.info.Compression == 3) {
+				for(u32 i = 0; i < ctx.size.width; ++i) {
+					*(pD++) = (u8)((*pS & ctx.colorMasks.mRed) >> ctx.colorMasks.oRed);
+					*(pD++) = (u8)((*pS & ctx.colorMasks.mGreen) >> ctx.colorMasks.oGreen);
+					*(pD++) = (u8)((*pS & ctx.colorMasks.mBlue) >> ctx.colorMasks.oBlue);
+
+					pS++;
+				}
+			} else {
+				for(u32 i = 0; i < ctx.size.width; ++i) {
+					*(pD++) = (u8)((*pS & 0x00FF0000) >> 16);
+					*(pD++) = (u8)((*pS & 0x0000FF00) >> 8);
+					*(pD++) = (u8)((*pS & 0x000000FF) >> 0);
+
+					pS++;
+				}
+			}
+
+			cursor += pitch;
+		} else if(ctx.info.BitCount == 24) {
+			u8* pS = (u8*)lineData;
+
+			for(u32 i = 0; i < ctx.size.width; ++i) {
+				// data is in BGR order
+				*(pD++) = *(pS + 2);
+				*(pD++) = *(pS + 1);
+				*(pD++) = *(pS + 0);
+
+				pS += 3;
+			}
+
+			cursor += pitch;
+		} else if(ctx.info.BitCount == 16) {
+			u16* pS = (u16*)lineData;
+
+			if(ctx.info.Compression == 3) {
+				for(u32 i = 0; i < ctx.size.width; ++i) {
+					*(pD++) = (u8)((*pS & ctx.colorMasks.mRed) >> ctx.colorMasks.oRed);
+					*(pD++) = (u8)((*pS & ctx.colorMasks.mGreen) >> ctx.colorMasks.oGreen);
+					*(pD++) = (u8)((*pS & ctx.colorMasks.mBlue) >> ctx.colorMasks.oBlue);
+
+					++pS;
+				}
+			} else {
+				for(u32 i = 0; i < ctx.size.width; ++i) {
+					*(pD++) = (u8)((*pS & 0x00007C00) >> 11);
+					*(pD++) = (u8)((*pS & 0x000003E0) >> 5);
+					*(pD++) = (u8)((*pS & 0x0000001F) >> 0);
+
+					++pS;
+				}
+			}
+
+			cursor += pitch;
+		} else if(ctx.info.BitCount == 8) {
+			u8* pS = (u8*)lineData;
+
+			for(u32 i = 0; i < ctx.size.width; ++i) {
+				u8 e = *pS;
+				*(pD++) = ctx.colorTable[4 * e + 2];
+				*(pD++) = ctx.colorTable[4 * e + 1];
+				*(pD++) = ctx.colorTable[4 * e + 0];
+
+				++pS;
+			}
+
+			cursor += pitch;
+		} else if(ctx.info.BitCount == 4) {
+			u8* pS = (u8*)lineData;
+
+			for(u32 i = 0; i < ctx.size.width / 2; ++i) {
+				u8 e = 4 * ((*pS >> 4) & 0x0F);
+				*(pD++) = ctx.colorTable[e + 2];
+				*(pD++) = ctx.colorTable[e + 1];
+				*(pD++) = ctx.colorTable[e + 0];
+
+				e = 4 * ((e >> 0) & 0x0F);
+				*(pD++) = ctx.colorTable[e + 2];
+				*(pD++) = ctx.colorTable[e + 1];
+				*(pD++) = ctx.colorTable[e + 0];
+
+
+				++pS;
+			}
+
+			if((ctx.size.width & 1) != 0) {
+				u8 e = 4 * ((*pS & 0xF0) >> 4);
+
+				*(pD++) = ctx.colorTable[e + 2];
+				*(pD++) = ctx.colorTable[e + 1];
+				*(pD++) = ctx.colorTable[e + 0];
+			}
+
+			cursor += pitch;
+		} else if(ctx.info.BitCount == 1) {
+			u8* pS = (u8*)lineData;
+			for(u32 i = 0; i < ctx.size.width / 8; ++i) {
+				u8 x = *pS;
+
+				u8 e = ((x & 0x80) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+				e = ((x & 0x40) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+				e = ((x & 0x20) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+				e = ((x & 0x10) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+				e = ((x & 0x08) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+				e = ((x & 0x04) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+				e = ((x & 0x02) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+				e = ((x & 0x01) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+
+				++pS;
+			}
+
+			u8 x = *pS;
+			u8 e;
+			switch(ctx.size.width % 8) {
+			case 7:
+				e = ((x & 0x02) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+			case 6:
+				e = ((x & 0x04) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+			case 5:
+				e = ((x & 0x08) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+			case 4:
+				e = ((x & 0x10) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+			case 3:
+				e = ((x & 0x20) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+			case 2:
+				e = ((x & 0x40) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+			case 1:
+				e = ((x & 0x80) != 0);
+				*(pD++) = ctx.colorTable[e + 2]; *(pD++) = ctx.colorTable[e + 1]; *(pD++) = ctx.colorTable[e + 0];
+			}
+
+			cursor += pitch;
+		}
+	}
+
+	LUX_FREE_ARRAY(lineData);
+	LUX_FREE_ARRAY(ctx.colorTable);
+
+	return true;
+}
+
 
 core::Name ImageLoaderBMP::GetResourceType(io::File* file, core::Name requestedType)
 {
@@ -46,7 +344,6 @@ const string& ImageLoaderBMP::GetName() const
 	return name;
 }
 
-
 bool ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
 {
 	bool result;
@@ -55,16 +352,17 @@ bool ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
 	if(!img)
 		return false;
 
-	result = LoadImageFormat(file);
+	Context ctx;
+	result = LoadImageFormat(ctx, file);
 	if(!result)
 		return false;
 
-	img->Init(m_Size, m_Format);
+	img->Init(ctx.size, ctx.format);
 
 	void* data = img->Lock();
 	if(!data)
 		return false;
-	result = LoadImageToMemory(file, data);
+	result = LoadImageToMemory(ctx, file, data);
 	img->Unlock();
 	if(!result)
 		return false;
@@ -72,261 +370,5 @@ bool ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
 	return true;
 }
 
-bool ImageLoaderBMP::LoadImageFormat(io::File* file)
-{
-	m_ColorTable = nullptr;
-
-	m_DataOffset = file->GetCursor();
-
-	file->ReadBinary(sizeof(BITMAPFILEHEADER), &m_Header);
-
-	if(m_Header.type != 0x4D42)
-		return false;
-
-	file->ReadBinary(sizeof(BITMAPINFOHEADER), &m_Info);
-
-	if(m_Info.Size != 40 && m_Info.Size != m_Header.offset - sizeof(BITMAPFILEHEADER))
-		return false;
-
-	m_Size.Set(m_Info.Width, math::Abs(m_Info.height));
-
-	/*
-	if(m_Info.BitCount < 16)
-		return false;
-	*/
-
-	if(m_Info.Compression != 0 && m_Info.Compression != 3)
-		return false;
-
-	if(m_Info.Compression == 3) {
-		if(m_Info.BitCount != 32 && m_Info.BitCount != 16)
-			return false;
-
-		file->ReadBinary(12, &m_ColorMasks);
-		if(m_Info.BitCount == 32) {
-			if(m_ColorMasks.mRed == 0x00FF0000 && m_ColorMasks.mGreen == 0x0000FF00 && m_ColorMasks.mBlue == 0x000000FF)
-				m_Info.Compression = 0;
-		} else {
-			if(m_ColorMasks.mRed == 0x7C00 && m_ColorMasks.mGreen == 0x03E0 && m_ColorMasks.mBlue == 0x001F)
-				m_Info.Compression = 0;
-		}
-
-		if(m_Info.Compression == 3) {
-			m_ColorMasks.oRed = GetRightZeros(m_ColorMasks.mRed);
-			m_ColorMasks.oGreen = GetRightZeros(m_ColorMasks.mGreen);
-			m_ColorMasks.oBlue = GetRightZeros(m_ColorMasks.mBlue);
-		}
-	}
-
-	// Read Colortable
-	if(m_Info.BitCount <= 8) {
-		if(m_Info.ClrUsed == 0)
-			m_Info.ClrUsed = 1 << m_Info.BitCount;
-
-		m_ColorTable = LUX_NEW_ARRAY(u8, m_Info.ClrUsed * 4);
-		file->ReadBinary(m_Info.ClrUsed * 4, m_ColorTable);
-	}
-
-	m_Format = ColorFormat::R8G8B8;
-
-	m_DataOffset += m_Header.offset;
-
-	return true;
-}
-
-bool ImageLoaderBMP::LoadImageToMemory(io::File* file, void* dest)
-{
-	if(!file)
-		return false;
-	if(!dest)
-		return false;
-
-	// Move to color data
-	file->Seek(m_DataOffset, io::ESeekOrigin::Start);
-
-	const int ImagePitch = m_Size.width * m_Format.GetBytePerPixel();
-	const int ImageSize = m_Size.height * ImagePitch;
-
-	u8* cursor;
-	int  pitch;
-	if(m_Info.height > 0) {
-		cursor = (u8*)dest + ImageSize - ImagePitch;
-		pitch = -ImagePitch;
-	} else {
-		cursor = (u8*)dest;
-		pitch = ImagePitch;
-	}
-
-	u32 filePitch = (m_Size.width * m_Info.BitCount) / 8;
-
-	if(filePitch % 4 != 0)
-		filePitch = filePitch + (4 - filePitch % 4);    // Auf 4-Byte ausrichten
-
-	u8* lineData = LUX_NEW_ARRAY(u8, filePitch);
-
-	for(u32 j = 0; j < m_Size.height; ++j) {
-		// Read one line from the file
-		file->ReadBinary(filePitch, lineData);
-
-		u8* pD = (u8*)cursor;
-
-		// Decode and write line to output
-		if(m_Info.BitCount == 32) {
-			u32* pS = (u32*)lineData;
-
-			if(m_Info.Compression == 3) {
-				for(u32 i = 0; i < m_Size.width; ++i) {
-					*(pD++) = (u8)((*pS & m_ColorMasks.mRed) >> m_ColorMasks.oRed);
-					*(pD++) = (u8)((*pS & m_ColorMasks.mGreen) >> m_ColorMasks.oGreen);
-					*(pD++) = (u8)((*pS & m_ColorMasks.mBlue) >> m_ColorMasks.oBlue);
-
-					pS++;
-				}
-			} else {
-				for(u32 i = 0; i < m_Size.width; ++i) {
-					*(pD++) = (u8)((*pS & 0x00FF0000) >> 16);
-					*(pD++) = (u8)((*pS & 0x0000FF00) >> 8);
-					*(pD++) = (u8)((*pS & 0x000000FF) >> 0);
-
-					pS++;
-				}
-			}
-
-			cursor += pitch;
-		} else if(m_Info.BitCount == 24) {
-			u8* pS = (u8*)lineData;
-
-			for(u32 i = 0; i < m_Size.width; ++i) {
-				// data is in BGR order
-				*(pD++) = *(pS + 2);
-				*(pD++) = *(pS + 1);
-				*(pD++) = *(pS + 0);
-
-				pS += 3;
-			}
-
-			cursor += pitch;
-		} else if(m_Info.BitCount == 16) {
-			u16* pS = (u16*)lineData;
-
-			if(m_Info.Compression == 3) {
-				for(u32 i = 0; i < m_Size.width; ++i) {
-					*(pD++) = (u8)((*pS & m_ColorMasks.mRed) >> m_ColorMasks.oRed);
-					*(pD++) = (u8)((*pS & m_ColorMasks.mGreen) >> m_ColorMasks.oGreen);
-					*(pD++) = (u8)((*pS & m_ColorMasks.mBlue) >> m_ColorMasks.oBlue);
-
-					++pS;
-				}
-			} else {
-				for(u32 i = 0; i < m_Size.width; ++i) {
-					*(pD++) = (u8)((*pS & 0x00007C00) >> 11);
-					*(pD++) = (u8)((*pS & 0x000003E0) >> 5);
-					*(pD++) = (u8)((*pS & 0x0000001F) >> 0);
-
-					++pS;
-				}
-			}
-
-			cursor += pitch;
-		} else if(m_Info.BitCount == 8) {
-			u8* pS = (u8*)lineData;
-
-			for(u32 i = 0; i < m_Size.width; ++i) {
-				u8 e = *pS;
-				*(pD++) = m_ColorTable[4 * e + 2];
-				*(pD++) = m_ColorTable[4 * e + 1];
-				*(pD++) = m_ColorTable[4 * e + 0];
-
-				++pS;
-			}
-
-			cursor += pitch;
-		} else if(m_Info.BitCount == 4) {
-			u8* pS = (u8*)lineData;
-
-			for(u32 i = 0; i < m_Size.width / 2; ++i) {
-				u8 e = 4 * ((*pS >> 4) & 0x0F);
-				*(pD++) = m_ColorTable[e + 2];
-				*(pD++) = m_ColorTable[e + 1];
-				*(pD++) = m_ColorTable[e + 0];
-
-				e = 4 * ((e >> 0) & 0x0F);
-				*(pD++) = m_ColorTable[e + 2];
-				*(pD++) = m_ColorTable[e + 1];
-				*(pD++) = m_ColorTable[e + 0];
-
-
-				++pS;
-			}
-
-			if((m_Size.width & 1) != 0) {
-				u8 e = 4 * ((*pS & 0xF0) >> 4);
-
-				*(pD++) = m_ColorTable[e + 2];
-				*(pD++) = m_ColorTable[e + 1];
-				*(pD++) = m_ColorTable[e + 0];
-			}
-
-			cursor += pitch;
-		} else if(m_Info.BitCount == 1) {
-			u8* pS = (u8*)lineData;
-			for(u32 i = 0; i < m_Size.width / 8; ++i) {
-				u8 x = *pS;
-
-				u8 e = ((x & 0x80) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-				e = ((x & 0x40) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-				e = ((x & 0x20) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-				e = ((x & 0x10) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-				e = ((x & 0x08) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-				e = ((x & 0x04) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-				e = ((x & 0x02) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-				e = ((x & 0x01) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-
-				++pS;
-			}
-
-			u8 x = *pS;
-			u8 e;
-			switch(m_Size.width % 8) {
-			case 7:
-				e = ((x & 0x02) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-			case 6:
-				e = ((x & 0x04) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-			case 5:
-				e = ((x & 0x08) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-			case 4:
-				e = ((x & 0x10) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-			case 3:
-				e = ((x & 0x20) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-			case 2:
-				e = ((x & 0x40) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-			case 1:
-				e = ((x & 0x80) != 0);
-				*(pD++) = m_ColorTable[e + 2]; *(pD++) = m_ColorTable[e + 1]; *(pD++) = m_ColorTable[e + 0];
-			}
-
-			cursor += pitch;
-		}
-	}
-
-	LUX_FREE_ARRAY(lineData);
-	LUX_FREE_ARRAY(m_ColorTable);
-
-	return true;
-}
 }
 }

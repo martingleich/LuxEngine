@@ -10,6 +10,8 @@ namespace lux
 namespace video
 {
 
+namespace
+{
 struct Context
 {
 	jmp_buf jmpbuf;
@@ -22,11 +24,17 @@ struct Context
 	math::dimension2du size;
 	ColorFormat format;
 
+	Context() :
+		png(nullptr),
+		pngInfo(nullptr)
+	{}
+	
 	~Context()
 	{
 		png_destroy_read_struct(&png, &pngInfo, NULL);
 	}
 };
+}
 
 static void png_read_function(png_structp png_ptr, png_bytep data, png_size_t count)
 {
