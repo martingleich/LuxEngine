@@ -2,6 +2,9 @@
 #include "video/SubMesh.h"
 #include "video/Material.h"
 #include "core/lxAlgorithm.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::StaticMesh)
 
 namespace lux
 {

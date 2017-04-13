@@ -55,7 +55,7 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 
 	struct SCharInfo
 	{
-		wchar_t character;
+		u16 character;
 		u16 Left;
 		u16 Top;
 		u8 B;

@@ -19,8 +19,6 @@ MeshSystemImpl::MeshSystemImpl(core::ResourceSystem* resourceSystem, video::Vide
 	m_GeoCreatorLib = LUX_NEW(GeometryCreatorLibImpl)(m_VideoDriver, this, m_ResourceSystem);
 
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(m_VideoDriver, m_MatLib, m_ResourceSystem));
-
-	m_ResourceSystem->GetReferableFactory()->RegisterType(LUX_NEW(StaticMesh));
 }
 
 

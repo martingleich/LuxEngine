@@ -162,7 +162,7 @@ bool WindowWin32::Init(HWND Window)
 	if(!isZoomed && !isIconic)
 		this->OnStateChange(EStateChange::Normal);
 
-	wchar_t text[200];
+	u16 text[200];
 	size_t length;
 	DWORD_PTR result;
 	text[0] = 0;

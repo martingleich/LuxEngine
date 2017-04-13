@@ -1,6 +1,9 @@
 #include "FontImpl.h"
 #include "video/VideoDriver.h"
 #include "video/Texture.h"
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS(lux::gui::FontImpl);
 
 namespace lux
 {
@@ -23,7 +26,7 @@ FontImpl::FontImpl() :
 
 FontImpl::~FontImpl()
 {
-	delete[] m_Image;
+	LUX_FREE_ARRAY(m_Image);
 }
 
 bool FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
@@ -38,19 +41,19 @@ bool FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 	m_BaseLine = data.baseLine;
 	m_CharMap = data.charMap;
 
-	const wchar_t errorChars[] = L"? ";
+	string errorChars = "? ";
 
-	for(const wchar_t* c = errorChars; *c; ++c) {
-		auto it = m_CharMap.Find(*c);
-		if(it != m_CharMap.End()) {
-			m_ErrorChar = *it;
+	for(auto it = errorChars.First(); it != errorChars.End(); ++it) {
+		auto jt = m_CharMap.Find(*it);
+		if(jt != m_CharMap.End()) {
+			m_ErrorChar = *jt;
 			break;
 		}
 	}
 
-	delete[] m_Image;
+	LUX_FREE_ARRAY(m_Image);
 	if(data.image) {
-		m_Image = new FontPixel[data.imageWidth * data.imageHeight];
+		m_Image = LUX_NEW_ARRAY(FontPixel, data.imageWidth * data.imageHeight);
 		m_ImageWidth = data.imageWidth;
 		m_ImageHeight = data.imageHeight;
 
