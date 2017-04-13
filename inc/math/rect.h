@@ -85,7 +85,7 @@ public:
 	/**
 	\return The width of the rect
 	*/
-	T GetWidht() const
+	T GetWidth() const
 	{
 		return Right - Left;
 	}
@@ -105,7 +105,7 @@ public:
 	*/
 	T GetArea() const
 	{
-		return GetWidht() * GetHeight();
+		return GetWidth() * GetHeight();
 	}
 
 	//! Is the rect empty
@@ -123,7 +123,7 @@ public:
 	*/
 	dimension2d<T> GetDimension() const
 	{
-		return dimension2d<T>(GetWidht(), GetHeight());
+		return dimension2d<T>(GetWidth(), GetHeight());
 	}
 
 	//! Repair rect if invalid

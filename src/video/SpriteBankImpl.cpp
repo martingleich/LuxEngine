@@ -127,7 +127,7 @@ bool SpriteBankImpl::DrawSprite(SpriteBank::Sprite index, const math::vector2i& 
 	if(GetSprite(index.id, time, looped, r, t) == false)
 		return false;
 
-	math::vector2f dia = math::vector2f(r->GetWidht()*t->GetDimension().width, r->GetHeight()*t->GetDimension().height);
+	math::vector2f dia = math::vector2f(r->GetWidth()*t->GetDimension().width, r->GetHeight()*t->GetDimension().height);
 	math::recti loc;
 	if(centered)
 		loc = math::recti(pos.x - (int)dia.x / 2, pos.y - (int)dia.y / 2, pos.x + (int)dia.x / 2, pos.y + (int)dia.y / 2);

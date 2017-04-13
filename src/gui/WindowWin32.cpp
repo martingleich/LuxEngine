@@ -303,20 +303,20 @@ bool WindowWin32::Present(video::Image* image, const math::recti& SourceRect, co
 	if(image->GetBitsPerPixel() == 8) {
 		// Immer nach ARGB
 		data = LUX_NEW_ARRAY(u8, 4 * image->GetBytesPerPixel()*SrcRect.GetArea());
-		video::ColorConverter::ConvertByFormat(mem, image->GetColorFormat(), data, video::ColorFormat::A8R8G8B8, SrcRect.GetWidht(), SrcRect.GetHeight(),
-			image->GetPitch(), SrcRect.GetWidht() * 4);
+		video::ColorConverter::ConvertByFormat(mem, image->GetColorFormat(), data, video::ColorFormat::A8R8G8B8, SrcRect.GetWidth(), SrcRect.GetHeight(),
+			image->GetPitch(), SrcRect.GetWidth() * 4);
 		mem = data;
 		Format = video::ColorFormat::A8R8G8B8;
-		ImageDim.width = SrcRect.GetWidht();
+		ImageDim.width = SrcRect.GetWidth();
 		ImageDim.height = SrcRect.GetHeight();
 	} else if(image->GetBitsPerPixel() == 24) {
 		// Immer nach ARGB
 		data = LUX_NEW_ARRAY(u8, 4 * image->GetBytesPerPixel()*SrcRect.GetArea());
-		video::ColorConverter::ConvertByFormat(mem, image->GetColorFormat(), data, video::ColorFormat::A8R8G8B8, SrcRect.GetWidht(), SrcRect.GetHeight(),
-			image->GetPitch(), SrcRect.GetWidht() * 4);
+		video::ColorConverter::ConvertByFormat(mem, image->GetColorFormat(), data, video::ColorFormat::A8R8G8B8, SrcRect.GetWidth(), SrcRect.GetHeight(),
+			image->GetPitch(), SrcRect.GetWidth() * 4);
 		mem = data;
 		Format = video::ColorFormat::A8R8G8B8;
-		ImageDim.width = SrcRect.GetWidht();
+		ImageDim.width = SrcRect.GetWidth();
 		ImageDim.height = SrcRect.GetHeight();
 	} else if(image->GetBitsPerPixel() == 16 || image->GetBitsPerPixel() == 32) {
 		/*
@@ -341,8 +341,8 @@ bool WindowWin32::Present(video::Image* image, const math::recti& SourceRect, co
 	bi.bV4BlueMask = Format.GetBlueMask();
 
 	StretchDIBits(DC,
-		DstRect.Left, DstRect.Top, DstRect.GetWidht(), DstRect.GetHeight(),
-		SrcRect.Left, SrcRect.Top, SrcRect.GetWidht(), SrcRect.GetHeight(),
+		DstRect.Left, DstRect.Top, DstRect.GetWidth(), DstRect.GetHeight(),
+		SrcRect.Left, SrcRect.Top, SrcRect.GetWidth(), SrcRect.GetHeight(),
 		mem,
 		(const BITMAPINFO*)&bi, DIB_RGB_COLORS, SRCCOPY);
 

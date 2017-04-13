@@ -115,20 +115,20 @@ static void CalculateImageSize(impl::Context* ctx)
 
 	u32 elems_per_line = count;
 	u32 width = elems_per_line * (avg_length + 2);
-	u32 heigth = ctx->fontHeight + 2;
+	u32 height = ctx->fontHeight + 2;
 
 	u32 p2width;
 	u32 p2height;
 	do {
 		p2width = NextPower2(width);
-		p2height = NextPower2(heigth);
+		p2height = NextPower2(height);
 
 		if(elems_per_line % 2 == 1)
 			elems_per_line = elems_per_line / 2 + 1;
 		else
 			elems_per_line /= 2;
 		width = elems_per_line * (avg_length + 2);
-		heigth *= 2;
+		height *= 2;
 	} while(!(p2width == p2height || p2height * 2 == p2width));
 
 	ctx->imageSize.width = p2width;
