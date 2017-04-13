@@ -177,9 +177,6 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 
 void* BufferManagerD3D9::UpdateInternalBuffer(HardwareBuffer* buffer, void* handle)
 {
-	if(!handle)
-		return nullptr;
-
 	switch(buffer->GetBufferType()) {
 	case EHardwareBufferType::Index:
 		return UpdateIndexBuffer(

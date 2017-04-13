@@ -39,7 +39,7 @@ LUX_API path MakeAbsolutePath(const path& base, const path& rel);
 class FileSystem;
 class Archive;
 
-class LUX_API FileDescription
+class FileDescription
 {
 public:
 	enum class EType
@@ -152,9 +152,7 @@ public:
 	}
 
 private:
-#pragma warning(suppress: 4251)
 	path m_Path;
-#pragma warning(suppress: 4251)
 	string m_Name;
 	Archive* m_Archive;
 
@@ -164,7 +162,20 @@ private:
 	bool m_IsVirtual;
 };
 
-LUX_API FileDescription ConcatFileDesc(const FileDescription& base, const io::path& relative);
+inline FileDescription ConcatFileDesc(const FileDescription& base, const io::path& relative)
+{
+	path absPath = MakeAbsolutePath(base.GetPath(), GetFileDir(relative));
+	string fileName = GetFilenameOnly(relative);
+
+	FileDescription out(absPath,
+		fileName,
+		0,
+		FileDescription::EType::Other,
+		core::DateAndTime(),
+		false);
+
+	return out;
+}
 
 } // io
 } // lux

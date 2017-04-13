@@ -3,12 +3,13 @@
 #include "video/Texture.h"
 #include "core/Logger.h"
 #include "io/FileSystem.h"
-#include "io/file.h"
+#include "io/File.h"
 #include "scene/SceneManager.h"
 #include "video/MaterialLibrary.h"
 #include "video/images/ImageSystem.h"
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
+#include "video/HardwareBufferManager.h"
 
 namespace lux
 {

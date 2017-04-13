@@ -1,7 +1,6 @@
 #include "HardwareBufferManagerNull.h"
-#include "video/HardwareBuffer.h"
-#include "video/IndexBuffer.h"
-#include "video/VertexBuffer.h"
+#include "video/IndexBufferImpl.h"
+#include "video/VertexBufferImpl.h"
 
 namespace lux
 {
@@ -19,16 +18,16 @@ BufferManagerNull::UpdateEntry::UpdateEntry(UpdateEntry&& old)
 {
 	group = old.group;
 	buffer = old.buffer;
-	if(buffer->m_Handle == &old)
-		buffer->m_Handle = this;
+	if(buffer->GetHandle() == &old)
+		buffer->SetHandle(this);
 }
 
 BufferManagerNull::UpdateEntry& BufferManagerNull::UpdateEntry::operator=(const UpdateEntry&& old)
 {
 	group = old.group;
 	buffer = old.buffer;
-	if(buffer->m_Handle == &old)
-		buffer->m_Handle = this;
+	if(buffer->GetHandle() == &old)
+		buffer->SetHandle(this);
 
 	return *this;
 }
@@ -66,7 +65,7 @@ void BufferManagerNull::Update(u32 updateGroup)
 
 void BufferManagerNull::AddBuffer(HardwareBuffer* buffer)
 {
-	LUX_UNUSED(buffer);
+	buffer->SetHandle(nullptr);
 }
 
 void BufferManagerNull::RemoveBuffer(HardwareBuffer* buffer)
@@ -78,15 +77,15 @@ void BufferManagerNull::RemoveBuffer(HardwareBuffer* buffer)
 			++it;
 	}
 
-	RemoveInternalBuffer(buffer, buffer->m_Handle);
-	buffer->m_Handle = nullptr;
+	RemoveInternalBuffer(buffer, buffer->GetHandle());
+	buffer->SetHandle(nullptr);
 }
 
 bool BufferManagerNull::UpdateBuffer(HardwareBuffer* buffer, u32 group)
 {
 	if(group != 0) {
 		m_Updates.Push_Back(UpdateEntry(group, buffer));
-		buffer->m_Handle = m_Updates.Data() + m_Updates.Size() - 1;
+		buffer->SetHandle(m_Updates.Data() + m_Updates.Size() - 1);
 		return true;
 	} else {
 		return ForceBufferUpdate(buffer);
@@ -107,11 +106,13 @@ bool BufferManagerNull::ForceBufferUpdate(HardwareBuffer* buffer)
 	if(!ShouldCreateHardwareBuffer(buffer))
 		return true;
 
-	void*& handle = buffer->m_Handle;
+	void* handle = buffer->GetHandle();
 	if(!handle && handle > m_Updates.Data() && handle < m_Updates.Data() + m_Updates.Size() - 1)
 		handle = nullptr;
 
 	handle = UpdateInternalBuffer(buffer, handle);
+
+	buffer->SetHandle(handle);
 
 	if(handle == nullptr)
 		return false;
@@ -131,10 +132,11 @@ VertexBuffer* BufferManagerNull::CreateVertexBuffer()
 
 bool BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer, u32 streamID)
 {
-	if(m_Updates.Size() > 0 && buffer->m_Handle > m_Updates.Data() && buffer->m_Handle < m_Updates.Data() + m_Updates.Size() - 1)
+	void* handle = buffer->GetHandle();
+	if(m_Updates.Size() > 0 && handle > m_Updates.Data() && handle < m_Updates.Data() + m_Updates.Size() - 1)
 		return EnableHardwareBuffer(streamID, buffer, nullptr);
 	else
-		return EnableHardwareBuffer(streamID, buffer, buffer->m_Handle);
+		return EnableHardwareBuffer(streamID, buffer, handle);
 }
 
 }

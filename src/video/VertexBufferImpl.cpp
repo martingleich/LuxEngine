@@ -1,15 +1,23 @@
-#include "video/VertexBuffer.h"
+#include "video/VertexBufferImpl.h"
 
 namespace lux
 {
 namespace video
 {
 
-VertexBufferImpl::VertexBufferImpl(BufferManager* mgr) : VertexBuffer(mgr)
+VertexBufferImpl::VertexBufferImpl(BufferManager* mgr) :
+	m_Manager(mgr),
+	m_Format(VertexFormat::STANDARD),
+	m_Stream(0)
 {
-	m_Format = VertexFormat::STANDARD;
-	m_Stream = 0;
 	m_Stride = m_Format.GetStride(m_Stream);
+
+	m_Manager->AddBuffer(this);
+}
+
+VertexBufferImpl::~VertexBufferImpl()
+{
+	m_Manager->RemoveBuffer(this);
 }
 
 const VertexFormat& VertexBufferImpl::GetFormat() const

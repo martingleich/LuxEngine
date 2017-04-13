@@ -14,7 +14,7 @@ struct is_flag_enum
 #define DEFINE_FLAG_ENUM_CLASS(name) \
 enum class name; \
 template <>\
-struct is_flag_enum<name>\
+struct ::lux::is_flag_enum<name>\
 {\
 static const bool value = true;\
 };\
@@ -22,7 +22,7 @@ enum class name
 
 #define DECLARE_FLAG_CLASS(name)\
 template <>\
-struct is_flag_enum<name>\
+struct ::lux::is_flag_enum<name>\
 {\
 static const bool value = true;\
 };\

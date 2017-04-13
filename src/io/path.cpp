@@ -119,20 +119,5 @@ io::path MakeAbsolutePath(const io::path& base, const io::path& rel)
 	return out;
 }
 
-FileDescription ConcatFileDesc(const FileDescription& base, const io::path& relative)
-{
-	path absPath = MakeAbsolutePath(base.GetPath(), GetFileDir(relative));
-	string fileName = GetFilenameOnly(relative);
-
-	FileDescription out(absPath,
-		fileName,
-		0,
-		FileDescription::EType::Other,
-		core::DateAndTime(),
-		false);
-
-	return out;
-}
-
 }
 }

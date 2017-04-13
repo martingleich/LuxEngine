@@ -1,4 +1,4 @@
-#include "video/IndexBuffer.h"
+#include "video/IndexBufferImpl.h"
 
 namespace lux
 {
@@ -15,10 +15,18 @@ u32 IndexBufferImpl::CalcStride(EIndexFormat type)
 	return 0;
 }
 
-IndexBufferImpl::IndexBufferImpl(BufferManager* mgr) : IndexBuffer(mgr)
+IndexBufferImpl::IndexBufferImpl(BufferManager* mgr) :
+	m_Manager(mgr),
+	m_Type(EIndexFormat::Bit16)
 {
-	m_Type = EIndexFormat::Bit16;
 	m_Stride = CalcStride(m_Type);
+
+	m_Manager->AddBuffer(this);
+}
+
+IndexBufferImpl::~IndexBufferImpl()
+{
+	m_Manager->RemoveBuffer(this);
 }
 
 EIndexFormat IndexBufferImpl::GetType() const

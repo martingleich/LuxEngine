@@ -11,25 +11,6 @@ namespace io
 {
 class File;
 class Archive;
-/*
-class LUX_API FileEnumerator
-{
-public:
-	FileEnumerator(Archive* a, const path& path, void* ctx);
-	~FileEnumerator();
-	bool Valid() const;
-	void operator=(const FileEnumerator&) = delete;
-	bool Advance();
-	const FileDescription& operator*() const;
-	const FileDescription* operator->() const;
-
-private:
-	Archive* m_Archive;
-	void* m_Context;
-	bool m_IsValid;
-	FileDescription m_CurFile;
-};
-*/
 
 class FileEnumerator : public ReferenceCounted
 {

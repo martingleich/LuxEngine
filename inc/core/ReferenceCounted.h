@@ -10,7 +10,7 @@ template <typename T>
 class WeakRef;
 
 //! A object implementing reference counting
-class LUX_API ReferenceCounted
+class ReferenceCounted
 {
 	template <typename T>
 	friend class WeakRef;

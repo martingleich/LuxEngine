@@ -61,9 +61,9 @@ struct FontCreationData
 class FontImpl : public Font
 {
 public:
-	LUX_API FontImpl();
+	FontImpl();
 	~FontImpl();
-	LUX_API bool Init(video::VideoDriver* driver, const FontCreationData& data);
+	bool Init(video::VideoDriver* driver, const FontCreationData& data);
 
 	bool SetMaterial(const video::Material& material);
 	const video::Material& GetMaterial() const;

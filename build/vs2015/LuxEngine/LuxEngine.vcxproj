@@ -483,6 +483,7 @@
     <ClInclude Include="..\..\..\src\video\images\ImageSystemImpl.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageWriterBMP.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageWriterTGA.h" />
+    <ClInclude Include="..\..\..\src\video\IndexBufferImpl.h" />
     <ClInclude Include="..\..\..\src\video\MaterialLibraryImpl.h" />
     <ClInclude Include="..\..\..\src\video\MaterialRendererD3D9.h" />
     <ClInclude Include="..\..\..\src\video\SceneValuesImpl.h" />
@@ -490,6 +491,7 @@
     <ClInclude Include="..\..\..\src\video\SpriteBankImpl.h" />
     <ClInclude Include="..\..\..\src\video\SubMeshImpl.h" />
     <ClInclude Include="..\..\..\src\video\TextureD3D9.h" />
+    <ClInclude Include="..\..\..\src\video\VertexBufferImpl.h" />
     <ClInclude Include="..\..\..\src\video\VideoDriverD3D9.h" />
   </ItemGroup>
   <ItemGroup>
@@ -568,7 +570,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\video\HardwareBuffer.cpp" />
     <ClCompile Include="..\..\..\src\video\HardwareBufferManagerD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">true</ExcludedFromBuild>
@@ -588,7 +589,7 @@
     <ClCompile Include="..\..\..\src\video\images\ImageSystemImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\images\ImageWriterBMP.cpp" />
     <ClCompile Include="..\..\..\src\video\images\ImageWriterTGA.cpp" />
-    <ClCompile Include="..\..\..\src\video\IndexBuffer.cpp" />
+    <ClCompile Include="..\..\..\src\video\IndexBufferImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\MaterialLibraryImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\RenderType.cpp" />
     <ClCompile Include="..\..\..\src\video\SceneValuesImpl.cpp" />
@@ -610,7 +611,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\video\VertexBuffer.cpp" />
+    <ClCompile Include="..\..\..\src\video\VertexBufferImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\VertexFormats.cpp" />
     <ClCompile Include="..\..\..\src\video\VideoDriverD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
