@@ -5,6 +5,10 @@
 
 namespace lux
 {
+namespace io
+{
+class FileSystem;
+}
 namespace core
 {
 
@@ -184,7 +188,8 @@ public:
 	*/
 	virtual bool AddType(Name name) = 0;
 
-	virtual StrongRef<ReferableFactory> GetReferableFactor() = 0;
+	virtual StrongRef<ReferableFactory> GetReferableFactory() = 0;
+	virtual StrongRef<io::FileSystem> GetFileSystem() = 0;
 };
 
 }

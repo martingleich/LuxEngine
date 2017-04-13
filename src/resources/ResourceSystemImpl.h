@@ -39,7 +39,8 @@ public:
 	Name GetType(u32 id) const;
 	bool AddType(Name name);
 
-	StrongRef<ReferableFactory> GetReferableFactor();
+	StrongRef<ReferableFactory> GetReferableFactory();
+	StrongRef<io::FileSystem> GetFileSystem();
 private:
 	u32 GetTypeID(Name type) const;
 

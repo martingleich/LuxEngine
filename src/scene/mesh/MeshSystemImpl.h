@@ -1,6 +1,6 @@
 #ifndef INCLUDED_CMESHCACHE_H
 #define INCLUDED_CMESHCACHE_H
-#include "scene/mesh/MeshCache.h"
+#include "scene/mesh/MeshSystem.h"
 
 namespace lux
 {
@@ -11,14 +11,15 @@ class ResourceSystem;
 namespace video
 {
 class VideoDriver;
+class MaterialLibrary;
 }
 namespace scene
 {
 
-class MeshCacheImpl : public MeshCache
+class MeshSystemImpl : public MeshSystem
 {
 public:
-	MeshCacheImpl(core::ResourceSystem* resourceSystem, video::VideoDriver* driver);
+	MeshSystemImpl(core::ResourceSystem* resourceSystem, video::VideoDriver* driver, video::MaterialLibrary* matLib);
 	bool AddMesh(const io::path& name, Mesh* mesh);
 	StrongRef<Mesh> GetMesh(const io::path& filename);
 	StrongRef<Mesh> GetMesh(io::File* file);
@@ -30,6 +31,7 @@ private:
 	StrongRef<core::ResourceSystem> m_ResourceSystem;
 	StrongRef<video::VideoDriver> m_VideoDriver;
 	StrongRef<GeometryCreatorLib> m_GeoCreatorLib;
+	StrongRef<video::MaterialLibrary> m_MatLib;
 };
 
 }    

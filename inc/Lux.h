@@ -126,7 +126,7 @@ namespace input
 #include "scene/nodes/LightSceneNode.h"
 
 #include "scene/mesh/Mesh.h"
-#include "scene/mesh/MeshCache.h"
+#include "scene/mesh/MeshSystem.h"
 #include "scene/mesh/GeometryCreatorLib.h"
 
 #include "gui/GUIEnvironment.h"

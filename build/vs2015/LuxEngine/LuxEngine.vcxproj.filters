@@ -432,12 +432,6 @@
     <ClInclude Include="..\..\..\inc\scene\mesh\Mesh.h">
       <Filter>mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\inc\scene\mesh\MeshCache.h">
-      <Filter>mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\scene\mesh\MeshCacheImpl.h">
-      <Filter>mesh</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\scene\mesh\StaticMesh.h">
       <Filter>mesh</Filter>
     </ClInclude>
@@ -666,6 +660,12 @@
     <ClInclude Include="..\..\..\inc\scene\components\LinearMoveAnimator.h">
       <Filter>scene\components</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\mesh\MeshSystem.h">
+      <Filter>mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\scene\mesh\MeshSystemImpl.h">
+      <Filter>mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp">
@@ -830,9 +830,6 @@
     <ClCompile Include="..\..\..\src\scene\mesh\Mesh.cpp">
       <Filter>mesh</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\scene\mesh\MeshCacheImpl.cpp">
-      <Filter>mesh</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\scene\mesh\StaticMesh.cpp">
       <Filter>mesh</Filter>
     </ClCompile>
@@ -943,6 +940,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\video\images\ImageListImpl.cpp">
       <Filter>images</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\mesh\MeshSystemImpl.cpp">
+      <Filter>mesh</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

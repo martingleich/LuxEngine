@@ -14,10 +14,10 @@ namespace lux
 namespace scene
 {
 
-GeometryCreatorLibImpl::GeometryCreatorLibImpl(video::VideoDriver* driver, scene::MeshCache* meshCache, core::ResourceSystem* resSys) :
+GeometryCreatorLibImpl::GeometryCreatorLibImpl(video::VideoDriver* driver, scene::MeshSystem* meshCache, core::ResourceSystem* resSys) :
 	m_Driver(driver),
 	m_ResourceSystem(resSys),
-	m_MeshCache(meshCache)
+	m_MeshSystem(meshCache)
 {
 	m_PlaneCreator = LUX_NEW(GeometryCreatorPlane);
 	AddCreator(m_PlaneCreator);
@@ -98,7 +98,7 @@ StrongRef<scene::Mesh> GeometryCreatorLibImpl::CreateMesh(const string& name, co
 	StrongRef<video::SubMesh> sub = it->creator->CreateSubMesh(m_Driver, params);
 	StrongRef<scene::Mesh> out;
 	if(sub) {
-		out = m_MeshCache->CreateMesh();
+		out = m_MeshSystem->CreateMesh();
 		out->AddSubMesh(sub);
 		out->RecalculateBoundingBox();
 	}
@@ -118,7 +118,7 @@ StrongRef<scene::Mesh> GeometryCreatorLibImpl::CreatePlaneMesh(
 	StrongRef<video::SubMesh> sub = creator->CreateSubMesh(m_Driver, sizeX, sizeY, tesX, tesY, texX, texY, function, context);
 	StrongRef<scene::Mesh> out;
 	if(sub) {
-		out = m_MeshCache->CreateMesh();
+		out = m_MeshSystem->CreateMesh();
 		out->AddSubMesh(sub);
 		out->RecalculateBoundingBox();
 	}
@@ -136,7 +136,7 @@ StrongRef<scene::Mesh> GeometryCreatorLibImpl::CreateSphereMesh(
 	StrongRef<video::SubMesh> sub = creator->CreateSubMesh(m_Driver, radius, rings, segments, texX, texY, inside);
 	StrongRef<scene::Mesh> out;
 	if(sub) {
-		out = m_MeshCache->CreateMesh();
+		out = m_MeshSystem->CreateMesh();
 		out->AddSubMesh(sub);
 		out->RecalculateBoundingBox();
 	}
@@ -159,7 +159,7 @@ StrongRef<scene::Mesh> GeometryCreatorLibImpl::CreateCubeMesh(
 		inside);
 	StrongRef<scene::Mesh> out;
 	if(sub) {
-		out = m_MeshCache->CreateMesh();
+		out = m_MeshSystem->CreateMesh();
 		out->AddSubMesh(sub);
 		out->RecalculateBoundingBox();
 	}
@@ -180,7 +180,7 @@ StrongRef<scene::Mesh> GeometryCreatorLibImpl::CreateArrowMesh(
 		sectors);
 	StrongRef<scene::Mesh> out;
 	if(sub) {
-		out = m_MeshCache->CreateMesh();
+		out = m_MeshSystem->CreateMesh();
 		out->AddSubMesh(sub);
 		out->RecalculateBoundingBox();
 	}

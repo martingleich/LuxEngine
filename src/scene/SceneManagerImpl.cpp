@@ -1,9 +1,10 @@
 #include "SceneManagerImpl.h"
-#include "io/FileSystem.h"
-
 #include "video/VideoDriver.h"
-#include "video/images/ImageSystem.h"
+
 #include "video/MaterialLibrary.h"
+#include "video/images/ImageSystem.h"
+#include "scene/mesh/MeshSystem.h"
+#include "io/FileSystem.h"
 
 #include "core/ReferableFactory.h"
 
@@ -15,11 +16,6 @@
 #include "scene/components/RotationAnimatorImpl.h"
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/CameraFPSAnimatorImpl.h"
-
-#include "scene/mesh/MeshCacheImpl.h"
-
-//#include "scene/mesh/MeshLoader3DS.h"
-#include "scene/mesh/MeshLoaderOBJ.h"
 
 #include "core/ReferableRegister.h"
 
@@ -96,12 +92,12 @@ SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	video::ImageSystem* imagSys,
 	io::FileSystem* fileSystem,
 	core::ReferableFactory* refFactory,
-	MeshCache* meshCache,
+	MeshSystem* meshCache,
 	core::ResourceSystem* resourceSystem,
 	video::MaterialLibrary* matLib)
 	: m_Driver(driver),
 	m_Filesystem(fileSystem),
-	m_MeshCache(meshCache),
+	m_MeshSystem(meshCache),
 	m_ImagSys(imagSys),
 	m_RefFactory(refFactory),
 	m_MatLib(matLib),
@@ -109,11 +105,6 @@ SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	m_CurrentRenderPass(ESNRP_NONE),
 	m_AmbientColor(0)
 {
-	if(m_MeshCache == nullptr) {
-		m_MeshCache = LUX_NEW(MeshCacheImpl)(resourceSystem, driver);
-		m_ResourceSystem->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(this));
-	}
-
 	m_RootSceneNode = LUX_NEW(RootSceneNode)(this);
 
 	m_Overwrites.Resize(ESNRP_COUNT);
@@ -125,8 +116,6 @@ SceneManagerImpl::~SceneManagerImpl()
 
 	m_RootSceneNode->RemoveAllChildren();
 	m_RootSceneNode = nullptr;
-
-	m_MeshCache = nullptr;
 }
 
 StrongRef<SceneNode> SceneManagerImpl::AddSceneNode(core::Name type, SceneNode* parent)
@@ -280,9 +269,9 @@ io::FileSystem* SceneManagerImpl::GetFileSystem()
 	return m_Filesystem;
 }
 
-MeshCache* SceneManagerImpl::GetMeshCache()
+MeshSystem* SceneManagerImpl::GetMeshSystem()
 {
-	return m_MeshCache;
+	return m_MeshSystem;
 }
 
 video::ImageSystem* SceneManagerImpl::GetImageSystem() const

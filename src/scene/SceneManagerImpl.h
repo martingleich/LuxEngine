@@ -15,7 +15,7 @@ class ReferableFactory;
 }
 namespace scene
 {
-class MeshCache;
+class MeshSystem;
 
 // Der Scenemanager kontrolliert, die Beleuchtung, Kameras, Renderreihenfolge, das Laden vom Modellen für eine Szene
 class SceneManagerImpl : public SceneManager
@@ -26,7 +26,7 @@ public:
 		video::ImageSystem* imageSystem,
 		io::FileSystem* fileSystem,
 		core::ReferableFactory* refFactory,
-		MeshCache* meshCache,
+		MeshSystem* meshCache,
 		core::ResourceSystem* resourceSystem,
 		video::MaterialLibrary* matLib);
 
@@ -81,7 +81,7 @@ public:
 	io::FileSystem* GetFileSystem();
 	video::MaterialLibrary* GetMaterialLibrary();
 	video::ImageSystem* GetImageSystem() const;
-	virtual MeshCache* GetMeshCache();
+	virtual MeshSystem* GetMeshSystem();
 	virtual core::ReferableFactory* GetReferableFactory() const;
 	virtual core::ResourceSystem* GetResourceSystem() const;
 	virtual SceneNode* GetRootSceneNode();
@@ -147,7 +147,7 @@ private:
 private:
 	StrongRef<video::VideoDriver> m_Driver;
 	StrongRef<io::FileSystem> m_Filesystem;
-	StrongRef<MeshCache> m_MeshCache;
+	StrongRef<MeshSystem> m_MeshSystem;
 	StrongRef<core::ReferableFactory> m_RefFactory;
 	StrongRef<video::ImageSystem> m_ImagSys;
 	StrongRef<core::ResourceSystem> m_ResourceSystem;

@@ -371,7 +371,7 @@
     <ClInclude Include="..\..\..\inc\scene\components\CameraFPSAnimator.h" />
     <ClInclude Include="..\..\..\inc\scene\mesh\GeometryCreatorLib.h" />
     <ClInclude Include="..\..\..\inc\scene\mesh\Mesh.h" />
-    <ClInclude Include="..\..\..\inc\scene\mesh\MeshCache.h" />
+    <ClInclude Include="..\..\..\inc\scene\mesh\MeshSystem.h" />
     <ClInclude Include="..\..\..\inc\scene\nodes\CameraSceneNode.h" />
     <ClInclude Include="..\..\..\inc\scene\nodes\LightSceneNode.h" />
     <ClInclude Include="..\..\..\inc\scene\nodes\MeshSceneNode.h" />
@@ -452,7 +452,7 @@
     <ClInclude Include="..\..\..\src\scene\mesh\GeometryCreatorLibImpl.h" />
     <ClInclude Include="..\..\..\src\scene\mesh\GeometryCreatorPlane.h" />
     <ClInclude Include="..\..\..\src\scene\mesh\GeometryCreatorSphereUV.h" />
-    <ClInclude Include="..\..\..\src\scene\mesh\MeshCacheImpl.h" />
+    <ClInclude Include="..\..\..\src\scene\mesh\MeshSystemImpl.h" />
     <ClInclude Include="..\..\..\src\scene\mesh\MeshLoaderOBJ.h" />
     <ClInclude Include="..\..\..\src\scene\mesh\StaticMesh.h" />
     <ClInclude Include="..\..\..\src\scene\nodes\CameraSceneNodeImpl.h" />
@@ -547,7 +547,7 @@
     <ClCompile Include="..\..\..\src\scene\mesh\GeometryCreatorPlane.cpp" />
     <ClCompile Include="..\..\..\src\scene\mesh\GeometryCreatorSphereUV.cpp" />
     <ClCompile Include="..\..\..\src\scene\mesh\Mesh.cpp" />
-    <ClCompile Include="..\..\..\src\scene\mesh\MeshCacheImpl.cpp" />
+    <ClCompile Include="..\..\..\src\scene\mesh\MeshSystemImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\mesh\MeshLoaderOBJ.cpp" />
     <ClCompile Include="..\..\..\src\scene\mesh\StaticMesh.cpp" />
     <ClCompile Include="..\..\..\src\scene\nodes\CameraSceneNodeImpl.cpp" />

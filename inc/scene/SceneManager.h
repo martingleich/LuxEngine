@@ -34,7 +34,7 @@ class File;
 namespace scene
 {
 
-class MeshCache;
+class MeshSystem;
 class Mesh;
 
 class SceneNode;
@@ -124,7 +124,7 @@ public:
 	virtual core::ResourceSystem* GetResourceSystem() const = 0;
 
 	// Liefert den Modell-Cache
-	virtual MeshCache* GetMeshCache() = 0;
+	virtual MeshSystem* GetMeshSystem() = 0;
 
 	// Liefert den Wurzelknoten
 	virtual SceneNode* GetRootSceneNode() = 0;

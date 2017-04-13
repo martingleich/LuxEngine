@@ -41,7 +41,7 @@ GUIEnvironmentImpl::GUIEnvironmentImpl(
 	ps.FogEnabled = false;
 
 	// Register font resource
-	m_ResSys->GetReferableFactor()->RegisterType(LUX_NEW(FontImpl));
+	m_ResSys->GetReferableFactory()->RegisterType(LUX_NEW(FontImpl));
 
 	// Register font loader
 	m_ResSys->AddResourceLoader(LUX_NEW(FontLoader)(

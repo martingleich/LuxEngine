@@ -15,10 +15,10 @@ class Mesh;
 class GeometryCreatorLib;
 
 //! Loads and caches meshes by name, to prevent unnecessary reloads
-class MeshCache : public ReferenceCounted
+class MeshSystem : public ReferenceCounted
 {
 public:
-	virtual ~MeshCache()
+	virtual ~MeshSystem()
 	{
 	}
 

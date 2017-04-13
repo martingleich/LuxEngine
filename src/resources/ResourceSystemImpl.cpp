@@ -489,9 +489,14 @@ StrongRef<ResourceLoader> ResourceSystemImpl::GetResourceLoader(core::Name& type
 }
 
 
-StrongRef<ReferableFactory> ResourceSystemImpl::GetReferableFactor()
+StrongRef<ReferableFactory> ResourceSystemImpl::GetReferableFactory()
 {
 	return self->refFactory;
+}
+
+StrongRef<io::FileSystem> ResourceSystemImpl::GetFileSystem()
+{
+	return self->fileSystem;
 }
 
 }

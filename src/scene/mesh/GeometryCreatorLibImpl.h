@@ -19,7 +19,7 @@ namespace scene
 class GeometryCreatorLibImpl : public GeometryCreatorLib
 {
 public:
-	GeometryCreatorLibImpl(video::VideoDriver* driver, scene::MeshCache* meshCache, core::ResourceSystem* resSystem);
+	GeometryCreatorLibImpl(video::VideoDriver* driver, scene::MeshSystem* meshCache, core::ResourceSystem* resSystem);
 	StrongRef<GeometryCreator> GetByName(const string& name) const;
 	void AddCreator(GeometryCreator* creator);
 	void RemoveCreator(GeometryCreator* creator);
@@ -52,7 +52,7 @@ private:
 private:
 	core::HashMap<string, Entry> m_Creators;
 	WeakRef<video::VideoDriver> m_Driver;
-	WeakRef<scene::MeshCache> m_MeshCache;
+	WeakRef<scene::MeshSystem> m_MeshSystem;
 	WeakRef<core::ResourceSystem> m_ResourceSystem;
 
 	StrongRef<GeometryCreator> m_PlaneCreator;

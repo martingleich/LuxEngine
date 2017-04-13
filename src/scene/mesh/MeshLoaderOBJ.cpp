@@ -40,14 +40,13 @@ const string& MeshLoaderOBJ::GetName() const
 
 static const u32 WORD_BUFFER_LENGTH = 512;
 
-MeshLoaderOBJ::MeshLoaderOBJ(SceneManager* pSmgr) :
-	m_SceneManager(pSmgr),
-	m_Filesystem(pSmgr->GetFileSystem())
+MeshLoaderOBJ::MeshLoaderOBJ(video::VideoDriver* driver, video::MaterialLibrary* matLib,
+		core::ResourceSystem* resSys) :
+	m_Driver(driver),
+	m_MatLib(matLib),
+	m_ResSys(resSys)
 {
-}
-
-MeshLoaderOBJ::~MeshLoaderOBJ()
-{
+	m_Filesystem = m_ResSys->GetFileSystem().GetWeak();
 }
 
 void MeshLoaderOBJ::CleanUp()
@@ -226,8 +225,8 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 				} else {
 					if(!pVB) {
 						// Vertexbuffer erstellen
-						pVB = m_SceneManager->GetDriver()->GetBufferManager()->CreateVertexBuffer();
-						pIB = m_SceneManager->GetDriver()->GetBufferManager()->CreateIndexBuffer();
+						pVB = m_Driver->GetBufferManager()->CreateVertexBuffer();
+						pIB = m_Driver->GetBufferManager()->CreateIndexBuffer();
 
 						pVB->SetFormat(video::VertexFormat::STANDARD);
 						pVB->SetHWMapping(video::EHardwareBufferMapping::Static);
@@ -393,13 +392,13 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 	StrongRef<video::Texture> texture;
 	if(!texname.IsEmpty()) {
 		if(m_Filesystem->ExistFile(texname)) {
-			texture = m_SceneManager->GetResourceSystem()->GetResource(
+			texture = m_ResSys->GetResource(
 				core::ResourceType::Texture, texname);
 		} else {
 			// Über einen relativen Pfad laden
 			io::FileDescription texFile = io::ConcatFileDesc(fileDesc, texname);
 
-			texture = m_SceneManager->GetResourceSystem()->GetResource(
+			texture = m_ResSys->GetResource(
 				core::ResourceType::Texture, 
 				m_Filesystem->OpenFile(texFile));
 		}
@@ -408,7 +407,7 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 	if(texture) {
 		// Standardtexture
 		if(type == 0) {
-			pCurrMaterial->Meshbuffer->GetMaterial().SetRenderer(m_SceneManager->GetMaterialLibrary()->GetMaterialRenderer("solid"));
+			pCurrMaterial->Meshbuffer->GetMaterial().SetRenderer(m_MatLib->GetMaterialRenderer("solid"));
 			pCurrMaterial->Meshbuffer->GetMaterial().Layer(0) = (video::BaseTexture*)texture;
 		}
 
@@ -593,7 +592,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 	// Ende der Datei wenn ein material erstellt wurde speichern
 	if(currMaterial) {
 		if(currMaterial->Meshbuffer->GetMaterial().GetRenderer() == nullptr)
-			currMaterial->Meshbuffer->GetMaterial().SetRenderer(m_SceneManager->GetMaterialLibrary()->GetMaterialRenderer("solid"));
+			currMaterial->Meshbuffer->GetMaterial().SetRenderer(m_MatLib->GetMaterialRenderer("solid"));
 
 		m_Materials.Push_Back(currMaterial);
 	}

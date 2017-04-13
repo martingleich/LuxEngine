@@ -4,7 +4,7 @@
 #include "video/VertexTypes.h"
 #include "video/SubMeshImpl.h"
 #include "io/path.h"
-#include <map>
+#include "video/MaterialLibrary.h"
 
 namespace lux
 {
@@ -15,15 +15,14 @@ class SceneManager;
 class MeshLoaderOBJ : public core::ResourceLoader
 {
 public:
-	MeshLoaderOBJ(SceneManager* pSmgr);
-	virtual ~MeshLoaderOBJ();
+	MeshLoaderOBJ(video::VideoDriver* driver, video::MaterialLibrary* matLib,
+		core::ResourceSystem* resSys);
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
 	bool LoadResource(io::File* file, core::Resource* dst);
 	const string& GetName() const;
 
 private:
-
 	// Eine subMesh der OBJ-Datei
 	struct SObjMtl
 	{
@@ -81,30 +80,27 @@ private:
 	// Findet und liefert das material mit dem Namen
 	SObjMtl* FindMaterial(const string& mtlName, const string& grpName);
 
-	// Liest eine RGB-Farbe
 	const char*  ReadColor(const char* pFrom, const char* pTo, video::Colorf& out);
-	// Liest einen 3D-Vektor
 	const char*  Read3DVec(const char* pFrom, const char* pTo, math::vector3f& out);
-	// Liest einen 2D-Vektor
 	const char*  Read2DVec(const char* pFrom, const char* pTo, math::vector2f& out);
-	// Liest eine Wahrheitswert
 	const char*  ReadBool(const char* pFrom, const char* pTo, bool& out);
 
-	// Verknüpft die Vertizes und Indizes in der Datei miteinander
 	bool RetrieveVertexIndices(const char* pFrom, const char* pTo, s32* indices, u32 vbsize, u32 vtsize, u32 vnsize);
 
-	// Räumt alles aus
 	void CleanUp();
 
-	WeakRef<scene::SceneManager> m_SceneManager;
-	StrongRef<io::FileSystem> m_Filesystem;
+private:
+	WeakRef<video::MaterialLibrary> m_MatLib;
+	WeakRef<video::VideoDriver> m_Driver;
+	WeakRef<core::ResourceSystem> m_ResSys;
+	WeakRef<io::FileSystem> m_Filesystem;
 
 	core::array<SObjMtl*> m_Materials;
 };
 
-}    
+}
 
-}    
+}
 
 
 #endif

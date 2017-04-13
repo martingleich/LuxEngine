@@ -7,6 +7,7 @@
 
 #include "input/InputSystemImpl.h"
 #include "scene/SceneManagerImpl.h"
+#include "scene/mesh/MeshSystemImpl.h"
 #include "io/FileSystemImpl.h"
 #include "resources/ResourceSystemImpl.h"
 #include "video/MaterialLibraryImpl.h"
@@ -370,6 +371,8 @@ bool LuxDeviceWin32::BuildSceneManager()
 	if(!m_Filesystem)
 		return false;
 
+	m_MeshSystem = LUX_NEW(scene::MeshSystemImpl)(m_ResourceSystem, m_Driver, m_MaterialLibrary);
+
 	// Scene-Manager erstellen
 	log::Info("Build Scene Manager.");
 	m_SceneManager = LUX_NEW(scene::SceneManagerImpl)(
@@ -377,7 +380,7 @@ bool LuxDeviceWin32::BuildSceneManager()
 		m_ImageSystem,
 		m_Filesystem,
 		m_ReferableFactory,
-		nullptr,
+		m_MeshSystem,
 		m_ResourceSystem,
 		m_MaterialLibrary);
 
@@ -649,6 +652,11 @@ StrongRef<core::ReferableFactory> LuxDeviceWin32::GetReferableFactory() const
 StrongRef<core::ResourceSystem> LuxDeviceWin32::GetResourceSystem() const
 {
 	return m_ResourceSystem;
+}
+
+StrongRef<scene::MeshSystem> LuxDeviceWin32::GetMeshSystem() const
+{
+	return m_MeshSystem;
 }
 
 }    //Namespace Lux

@@ -81,6 +81,7 @@ public:
 	StrongRef<core::Timer> GetTimer() const;
 	StrongRef<core::ReferableFactory> GetReferableFactory() const;
 	StrongRef<core::ResourceSystem> GetResourceSystem() const;
+	StrongRef<scene::MeshSystem> GetMeshSystem() const;
 
 	LRESULT WinProc(HWND window,
 		UINT uiMessage,
@@ -154,6 +155,7 @@ private:
 	StrongRef<core::ResourceSystem> m_ResourceSystem;
 	StrongRef<input::RawInputReceiver> m_RawInputReceiver;
 	StrongRef<video::MaterialLibrary> m_MaterialLibrary;
+	StrongRef<scene::MeshSystem> m_MeshSystem;
 
 	const wchar_t* const m_LuxWindowClassName;
 };
