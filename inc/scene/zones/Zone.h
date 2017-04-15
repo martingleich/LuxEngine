@@ -16,9 +16,9 @@ public:
 	{
 		return math::vector3f::ZERO;
 	}
-	virtual math::vector3f GetNormal(const core::Randomizer& rand, const math::vector3f& point) const
+	virtual math::vector3f GetNormal(const math::vector3f& point) const
 	{
-		return rand.GetVector3Sphere();
+		return math::vector3f::ZERO;
 	}
 
 	core::Name GetReferableType() const

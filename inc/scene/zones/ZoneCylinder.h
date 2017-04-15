@@ -41,7 +41,7 @@ public:
 		return math::vector3f(base.x, y, base.y);
 	}
 
-	math::vector3f GetNormal(const core::Randomizer& rand, const math::vector3f& point) const
+	math::vector3f GetNormal(const math::vector3f& point) const
 	{
 		if(point.y >= m_HalfHeight)
 			return math::vector3f::UNIT_Y;
@@ -51,7 +51,7 @@ public:
 		float z = point.z;
 		float len = sqrt(x*x + z*z);
 		if(math::IsZero(len))
-			return rand.GetVector3();
+			return math::vector3f::ZERO;
 		else
 			return math::vector3f(x, 0.0f, z) / len;
 	}

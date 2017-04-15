@@ -947,5 +947,8 @@
     <ClCompile Include="..\..\..\src\video\VertexBufferImpl.cpp">
       <Filter>video\hardware_buffer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\inc\scene\zones\ZoneRing.h">
+      <Filter>scene\zones</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

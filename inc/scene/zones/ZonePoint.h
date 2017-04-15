@@ -27,9 +27,9 @@ public:
 		return m_Point;
 	}
 
-	math::vector3f GetNormal(const core::Randomizer& rand, const math::vector3f& point) const
+	math::vector3f GetNormal(const math::vector3f& point) const
 	{
-		return rand.GetVector3().Normal();
+		return math::vector3f::ZERO;
 	}
 
 	core::Name GetReferableSubType() const

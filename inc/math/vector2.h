@@ -221,6 +221,16 @@ public:
 		return vector2<T>(x - v.x, y - v.y).GetLengthSq();
 	}
 
+	vector2<T> Normal()
+	{
+		vector2<T> out(*this);
+		return out.Normalize();
+	}
+	vector2<T> Normal_s()
+	{
+		vector2<T> out(*this);
+		return out.Normalize_s();
+	}
 	//! Normalize this vector
 	/**
 	\return A reference to this vector
