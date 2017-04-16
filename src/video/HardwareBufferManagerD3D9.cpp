@@ -89,6 +89,10 @@ void* BufferManagerD3D9::UpdateVertexBuffer(VertexBuffer* buffer, void* handle)
 			return nullptr;
 		}
 
+		// Rewrite whole buffer
+		beginDirty = 0;
+		endDirty = size-1;
+
 		if(d3dBuffer)
 			d3dBuffer->Release();
 		d3dBuffer = newD3DBuffer;
@@ -153,8 +157,12 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 			return nullptr;
 		}
 
-		// Den alten Puffer freigeben und den neuen Einsetzten
-		if(d3dBuffer) d3dBuffer->Release();
+		// Rewrite whole buffer
+		beginDirty = 0;
+		endDirty = size-1;
+
+		if(d3dBuffer)
+			d3dBuffer->Release();
 		d3dBuffer = newD3DBuffer;
 	}
 
