@@ -279,7 +279,7 @@ void LuxDeviceWin32::SetOwnWindow(void* hOwnWindow)
 	}
 }
 
-bool LuxDeviceWin32::BuildInputSystem()
+bool LuxDeviceWin32::BuildInputSystem(bool isForeground)
 {
 	// If system already build -> no op
 	if(m_InputSystem) {
@@ -293,7 +293,7 @@ bool LuxDeviceWin32::BuildInputSystem()
 	}
 
 	// Create inputHandler
-	m_InputSystem = LUX_NEW(input::InputSystemImpl);
+	m_InputSystem = LUX_NEW(input::InputSystemImpl)(isForeground);
 	m_InputSystem->SetInputReceiver(&m_InputEventProxy);
 
 	m_RawInputReceiver = LUX_NEW(input::RawInputReceiver)(m_InputSystem, (HWND)m_Window->GetDeviceWindow());

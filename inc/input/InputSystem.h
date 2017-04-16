@@ -33,23 +33,25 @@ public:
 	//! Get the current input receiver.
 	virtual EventReceiver* GetInputReceiver() const = 0;
 
-	//! Aquire the given device.
-	/**
-	The device is allowed to sent event data
-	*/
-	virtual EResult AquireDevice(InputDevice* device) = 0;
-
-	//! Unaquire the given device.
-	/**
-	The device is forbidden to sent event data
-	*/
-	virtual EResult UnAquireDevice(InputDevice* device) = 0;
-
 	//! Set the current foreground state of the active window
 	/**
 	This method is called automaically by the engine.
 	*/
 	virtual void SetForegroundState(bool isForeground) = 0;
+
+	//! Get the current foreground state of the input system.
+	virtual bool IsForeground() const = 0;
+
+	//! Set the default foreground handling for devices.
+	/**
+	Newly created devices will have the default foreground handling.
+	All currenltly created devices which are in default state are changed to the new handling.
+	\param isForeground The new foreground handling state.
+	*/
+	virtual void SetDefaultForegroundHandling(bool isForeground) = 0;
+
+	//! Get the current default foreground handling state.
+	virtual bool GetDefaultForegroundHandling() const = 0;
 
 	//! Sent a input event.
 	/**

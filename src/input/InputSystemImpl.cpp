@@ -8,8 +8,9 @@ namespace lux
 namespace input
 {
 
-InputSystemImpl::InputSystemImpl() :
-	m_IsForeground(false)
+InputSystemImpl::InputSystemImpl(bool defaultForeground) :
+	m_IsForeground(false),
+	m_DefaultForegroundHandling(defaultForeground)
 {
 }
 
@@ -39,18 +40,17 @@ StrongRef<InputDevice> InputSystemImpl::CreateDevice(const DeviceCreationDesc* d
 		return nullptr;
 	}
 
-	m_GUIDMap.Set(desc->GetGUID(), device);
+	device->Configure(m_DefaultForegroundHandling);
 
-	device->Aquire();
+	m_GUIDMap.Set(desc->GetGUID(), device);
 
 	return device;
 }
 
 void InputSystemImpl::SendUserEvent(const Event& event)
 {
-	if(m_Receiver) {
+	if(m_Receiver)
 		m_Receiver->OnEvent(event);
-	}
 }
 
 void InputSystemImpl::Update(Event& event)
@@ -61,7 +61,7 @@ void InputSystemImpl::Update(Event& event)
 			m_KeyboardDevice = event.device;
 		}
 
-		if(event.device->Update(event) && m_Receiver)
+		if(event.device->Update(event) && event.device->IsAquired() && m_Receiver)
 			m_Receiver->OnEvent(event);
 	}
 }
@@ -76,20 +76,6 @@ EventReceiver* InputSystemImpl::GetInputReceiver() const
 	return m_Receiver;
 }
 
-EResult InputSystemImpl::AquireDevice(InputDevice* device)
-{
-	if(device->IsForeground())
-		return m_IsForeground ? EResult::Succeeded : EResult::Failed;
-
-	return EResult::Succeeded;
-}
-
-EResult InputSystemImpl::UnAquireDevice(InputDevice* device)
-{
-	LUX_UNUSED(device);
-	return EResult::Succeeded;
-}
-
 void InputSystemImpl::SetForegroundState(bool isForeground)
 {
 	m_IsForeground = isForeground;
@@ -101,6 +87,29 @@ void InputSystemImpl::SetForegroundState(bool isForeground)
 		else if(dev->IsForeground())
 			dev->UnAquire();
 	}
+}
+
+bool InputSystemImpl::IsForeground() const
+{
+	return m_IsForeground;
+}
+
+void InputSystemImpl::SetDefaultForegroundHandling(bool isForeground)
+{
+	if(isForeground == m_DefaultForegroundHandling)
+		return;
+
+	for(auto it = m_GUIDMap.First(); it != m_GUIDMap.End(); ++it) {
+		if((*it)->IsForeground() == m_DefaultForegroundHandling)
+			(*it)->Configure(isForeground);
+	}
+
+	m_DefaultForegroundHandling = isForeground;
+}
+
+bool InputSystemImpl::GetDefaultForegroundHandling() const
+{
+	return m_DefaultForegroundHandling;
 }
 
 StrongRef<InputDevice> InputSystemImpl::GetKeyboard()

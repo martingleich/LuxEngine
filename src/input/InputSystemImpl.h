@@ -13,7 +13,7 @@ namespace input
 class InputSystemImpl : public InputSystem
 {
 public:
-	InputSystemImpl();
+	InputSystemImpl(bool defaultForeground);
 
 	void Update(Event& event);
 	void SendUserEvent(const Event& event);
@@ -22,9 +22,11 @@ public:
 
 	StrongRef<InputDevice> CreateDevice(const DeviceCreationDesc* desc);
 
-	EResult AquireDevice(InputDevice* device);
-	EResult UnAquireDevice(InputDevice* device);
 	void SetForegroundState(bool isForeground);
+	bool IsForeground() const;
+
+	void SetDefaultForegroundHandling(bool isForeground);
+	bool GetDefaultForegroundHandling() const;
 
 	StrongRef<InputDevice> GetKeyboard();
 
@@ -35,6 +37,7 @@ private:
 	EventReceiver* m_Receiver;
 
 	bool m_IsForeground;
+	bool m_DefaultForegroundHandling;
 };
 
 }

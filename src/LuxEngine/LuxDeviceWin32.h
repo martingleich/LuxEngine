@@ -51,7 +51,7 @@ public:
 	bool BuildWindow(u32 Width, u32 height, const string& stitle);
 	void SetOwnWindow(void* hOwnWindow);
 
-	bool BuildInputSystem();
+	bool BuildInputSystem(bool isForeground = true);
 
 	bool BuildVideoDriver(const video::DriverConfig& config);
 	bool BuildImageSystem();

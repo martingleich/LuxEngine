@@ -74,8 +74,9 @@ public:
 	/**
 	Requires associated window.
 	Initialized the input system of the engine.
+	\param isForeground Are input events only sent when the window is in the foreground.
 	*/
-	virtual bool BuildInputSystem() = 0;
+	virtual bool BuildInputSystem(bool isForeground=true) = 0;
 
 	//! Creates the video driver component of the engine.
 	/**
