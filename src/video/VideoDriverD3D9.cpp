@@ -816,12 +816,15 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 
 	// Indexformat speichern
 	D3DFORMAT IndexFormat = D3DFMT_UNKNOWN;
+	u32 indexSize;
 	switch(indexType) {
 	case EIndexFormat::Bit16:
 		IndexFormat = D3DFMT_INDEX16;
+		indexSize = 2;
 		break;
 	case EIndexFormat::Bit32:
 		IndexFormat = D3DFMT_INDEX32;
+		indexSize = 4;
 		break;
 	default:
 		// Abbrechen
@@ -848,7 +851,6 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 	BufferManagerD3D9::VertexStream vs;
 	BufferManagerD3D9::IndexStream is;
 
-	// TODO: Implement offsets
 	u32 vertexOffset = 0;
 	u32 indexOffset = 0;
 	if(d3d9Manager->GetVertexStream(0, vs))
@@ -882,10 +884,10 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 
 			if(!vertices) {
 				// Aus Hardware zeichnen
-				hr = m_D3DDevice->DrawPrimitive(D3DPT_POINTLIST, 0, primitveCount);
+				hr = m_D3DDevice->DrawPrimitive(D3DPT_POINTLIST, vertexOffset, primitveCount);
 			} else {
 				// Aus Software zeichnen
-				hr = m_D3DDevice->DrawPrimitiveUP(D3DPT_POINTLIST, primitveCount, vertices, stride);
+				hr = m_D3DDevice->DrawPrimitiveUP(D3DPT_POINTLIST, primitveCount, (const u8*)vertices + vertexOffset*stride, stride);
 			}
 
 			// Renderstates löschen
@@ -906,14 +908,14 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 
 			if(!vertices) {
 				// Aus Hardware zeichnen
-				hr = m_D3DDevice->DrawIndexedPrimitive(Types[primitiveType - 1], 0, 0, vertexCount, 0, primitveCount);
+				hr = m_D3DDevice->DrawIndexedPrimitive(Types[primitiveType - 1], 0, 0, vertexCount, indexOffset, primitveCount);
 			} else if(indices) {
 				// Aus Software zeichnen
 				hr = m_D3DDevice->DrawIndexedPrimitiveUP(Types[primitiveType - 1], 0, vertexCount, primitveCount,
-					indices, IndexFormat, vertices, stride);
+					(const u8*)indices + indexSize*indexOffset, IndexFormat, (const u8*)vertices+vertexOffset*stride, stride);
 			} else {
 				// Aus Software zeichnen
-				hr = m_D3DDevice->DrawPrimitiveUP(Types[primitiveType - 1], primitveCount, vertices, stride);
+				hr = m_D3DDevice->DrawPrimitiveUP(Types[primitiveType - 1], primitveCount, (const u8*)vertices+vertexOffset*stride, stride);
 			}
 		}
 		break;
@@ -2063,7 +2065,7 @@ D3DCOLORVALUE VideoDriverD3D9::SColorToD3DColor(const Colorf& color)
 	return out;
 }
 
-}    
+}
 
-}    
+}
 

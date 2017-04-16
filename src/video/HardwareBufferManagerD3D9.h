@@ -15,18 +15,26 @@ public:
 	{
 		const void* data;
 		u32 offset;
+
+		VertexStream() :
+			data(nullptr),
+			offset(0)
+		{}
 	};
 
 	struct IndexStream
 	{
 		const void* data;
 		u32 offset;
+
+		IndexStream() :
+			data(nullptr),
+			offset(0)
+		{}
 	};
 
 private:
 	IDirect3DDevice9* m_D3DDevice;
-	IDirect3DVertexBuffer9* m_VertexBuffer;
-	IDirect3DIndexBuffer9* m_IndexBuffer;
 
 	core::array<VertexStream> m_VStreams;
 	u32 m_UsedStreams;

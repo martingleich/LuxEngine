@@ -10,9 +10,8 @@ namespace lux
 namespace video
 {
 // TODO: Handle lost resources
-BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) : BufferManagerNull(driver),
-m_VertexBuffer(nullptr),
-m_IndexBuffer(nullptr)
+BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
+	BufferManagerNull(driver)
 {
 	m_D3DDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetDevice());
 
@@ -24,7 +23,7 @@ m_IndexBuffer(nullptr)
 	else
 		m_AllowStreamOffset = false;
 
-	m_VStreams.Reserve(m_MaxStreamCount);
+	m_VStreams.Resize(m_MaxStreamCount);
 }
 
 BufferManagerD3D9::~BufferManagerD3D9()

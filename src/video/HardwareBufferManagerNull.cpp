@@ -32,20 +32,9 @@ BufferManagerNull::UpdateEntry& BufferManagerNull::UpdateEntry::operator=(const 
 	return *this;
 }
 
-BufferManagerNull::BufferManagerNull(VideoDriver* driver)
+BufferManagerNull::BufferManagerNull(VideoDriver* driver) :
+	m_Driver(driver)
 {
-	m_Driver = driver;
-	m_MinHardwareBufferBytes = 0;
-}
-
-void BufferManagerNull::SetMinHardwareBufferBytes(u32 bytes)
-{
-	m_MinHardwareBufferBytes = bytes;
-}
-
-u32 BufferManagerNull::GetMinHardwareBufferBytes() const
-{
-	return m_MinHardwareBufferBytes;
 }
 
 VideoDriver* BufferManagerNull::GetDriver()
@@ -92,20 +81,8 @@ bool BufferManagerNull::UpdateBuffer(HardwareBuffer* buffer, u32 group)
 	}
 }
 
-bool BufferManagerNull::ShouldCreateHardwareBuffer(HardwareBuffer* buffer)
-{
-	if(buffer->GetHWMapping() == EHardwareBufferMapping::Never)
-		return false;
-	if(buffer->GetSize() * buffer->GetStride() < GetMinHardwareBufferBytes())
-		return false;
-
-	return true;
-}
 bool BufferManagerNull::ForceBufferUpdate(HardwareBuffer* buffer)
 {
-	if(!ShouldCreateHardwareBuffer(buffer))
-		return true;
-
 	void* handle = buffer->GetHandle();
 	if(!handle && handle > m_Updates.Data() && handle < m_Updates.Data() + m_Updates.Size() - 1)
 		handle = nullptr;

@@ -10,6 +10,22 @@ namespace video
 
 class BufferManagerNull : public BufferManager
 {
+public:
+	BufferManagerNull(VideoDriver* driver);
+
+	VideoDriver* GetDriver();
+	void Update(u32 updateGroup);
+	virtual void AddBuffer(HardwareBuffer* buffer);
+	virtual void RemoveBuffer(HardwareBuffer* buffer);
+	bool UpdateBuffer(HardwareBuffer* buffer, u32 group = 0);
+	bool ForceBufferUpdate(HardwareBuffer* buffer);
+	IndexBuffer* CreateIndexBuffer();
+	VertexBuffer* CreateVertexBuffer();
+	bool EnableBuffer(const HardwareBuffer* buffer, u32 streamID);
+	virtual void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
+	virtual void RemoveInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
+	virtual bool EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle) = 0;
+
 private:
 	struct UpdateEntry
 	{
@@ -23,38 +39,9 @@ private:
 	};
 
 	core::array<UpdateEntry> m_Updates;
-	u32 m_MinHardwareBufferBytes;
 
 protected:
 	VideoDriver* m_Driver;
-
-public:
-	BufferManagerNull(VideoDriver* driver);
-
-	void SetMinHardwareBufferBytes(u32 bytes);
-
-	u32 GetMinHardwareBufferBytes() const;
-
-	VideoDriver* GetDriver();
-	void Update(u32 updateGroup);
-
-	virtual void AddBuffer(HardwareBuffer* buffer);
-
-	virtual void RemoveBuffer(HardwareBuffer* buffer);
-
-	bool UpdateBuffer(HardwareBuffer* buffer, u32 group = 0);
-
-	bool ShouldCreateHardwareBuffer(HardwareBuffer* buffer);
-	bool ForceBufferUpdate(HardwareBuffer* buffer);
-
-	IndexBuffer* CreateIndexBuffer();
-	VertexBuffer* CreateVertexBuffer();
-
-	bool EnableBuffer(const HardwareBuffer* buffer, u32 streamID);
-
-	virtual void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
-	virtual void RemoveInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
-	virtual bool EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle) = 0;
 };
 
 }
