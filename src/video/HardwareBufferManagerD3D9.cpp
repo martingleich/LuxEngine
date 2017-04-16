@@ -99,16 +99,17 @@ void* BufferManagerD3D9::UpdateVertexBuffer(VertexBuffer* buffer, void* handle)
 	if(FAILED(d3dBuffer->Lock(beginDirty * stride,
 		(endDirty - beginDirty + 1) * stride,
 		&data,
-		(HWMapping == EHardwareBufferMapping::Dynamic) ? D3DLOCK_DISCARD : 0))) {
-		log::Error("Failed to lock the indexbuffer.");
-		return false;
+		0))) {
+		log::Error("Failed to lock the vertexbuffer.");
+		return nullptr;
 	}
 
 	// Use const version, to not update the dirty region
 	const void* target = buffer->Pointer_c(beginDirty, endDirty - beginDirty + 1);
 	memcpy(data, target, (endDirty - beginDirty + 1)*stride);
 
-	d3dBuffer->Unlock();
+	if(FAILED(d3dBuffer->Unlock()))
+		return nullptr;
 
 	return d3dBuffer;
 }
@@ -162,7 +163,7 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 	if(FAILED(d3dBuffer->Lock(beginDirty * stride,
 		(endDirty - beginDirty + 1) * stride,
 		&data,
-		(HWMapping == EHardwareBufferMapping::Dynamic) ? D3DLOCK_DISCARD : 0))) {
+		0))) {
 		log::Error("Der Indexpuffer konnte nicht gesperrt werden!");
 		return nullptr;
 	}
@@ -171,7 +172,9 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 	const void* target = buffer->Pointer_c(beginDirty, endDirty - beginDirty + 1);
 	memcpy(data, target, (endDirty - beginDirty + 1)*stride);
 
-	d3dBuffer->Unlock();
+	if(FAILED(d3dBuffer->Unlock()))
+		return nullptr;
+
 	return d3dBuffer;
 }
 

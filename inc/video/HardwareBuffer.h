@@ -180,6 +180,7 @@ inline void HardwareBuffer::Reserve(u32 size, bool moveOld, void* init)
 
 	u8* old = m_Data;
 	m_Data = LUX_NEW_ARRAY(u8, size*m_Stride);
+	m_BeginDirty = 0;
 
 	if(moveOld && old) {
 		memcpy(m_Data, old, m_Size*m_Stride);
