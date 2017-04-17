@@ -146,6 +146,10 @@ public:
 	virtual Texture* AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic = false) = 0;
 	virtual Texture* AddTexture(const string& name, Image* image, bool isDynamic = false) = 0;
 
+	virtual StrongRef<video::Texture> AddChromaKeyedTexture(video::Image* image, video::Color key) = 0;
+	virtual StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, video::Color key) = 0;
+	virtual StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, const math::vector2i& pos) = 0;
+
 	virtual CubeTexture* AddCubeTexture(const string& name, StrongRef<Image> images[6]) = 0;
 	virtual CubeTexture* AddCubeTexture(const string& name, ColorFormat format, u32 size) = 0;
 

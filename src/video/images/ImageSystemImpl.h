@@ -31,6 +31,10 @@ public:
 	Texture* AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic = false);
 	Texture* AddTexture(const string& name, Image* image, bool isDynamic = false);
 
+	StrongRef<video::Texture> AddChromaKeyedTexture(video::Image* image, video::Color key);
+	StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, video::Color key);
+	StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, const math::vector2i& pos);
+
 	CubeTexture* AddCubeTexture(const string& name, StrongRef<Image> images[6]);
 	CubeTexture* AddCubeTexture(const string& name, ColorFormat format, u32 size);
 

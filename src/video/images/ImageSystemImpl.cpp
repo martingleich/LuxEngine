@@ -626,6 +626,54 @@ Texture* ImageSystemImpl::AddTexture(const string& name, Image* image, bool isDy
 
 	return texture;
 }
+StrongRef<video::Texture> ImageSystemImpl::AddChromaKeyedTexture(video::Image* image, video::Color key)
+{
+	if(!image)
+		return nullptr;
+	auto texture = AddTexture(image->GetOrigin().str, image->GetDimension(), video::ColorFormat::A8R8G8B8);
+	if(!texture)
+		return nullptr;
+	video::BaseTexture::SLockedRect locked;
+	texture->Lock(video::BaseTexture::ETLM_OVERWRITE, &locked);
+	u32 real_key = ((u32)key & 0x00FFFFFF);
+	if(locked.bits) {
+		const u8* imgData = (const u8*)image->Lock();
+		if(!imgData) {
+			texture->Unlock();
+			return nullptr;
+		}
+		u32* dst = (u32*)locked.bits;
+
+		video::ColorFormat format = image->GetColorFormat();
+		for(size_t i = 0; i < image->GetSizeInBytes(); i += image->GetBytesPerPixel()) {
+			*dst = format.FormatToA8R8G8B8(imgData + i);
+			if((*dst & 0x00FFFFFF) == real_key)
+				*dst = 0;
+			++dst;
+		}
+		image->Unlock();
+		texture->Unlock();
+		texture->RegenerateMIPMaps();
+	}
+
+	return texture;
+}
+
+StrongRef<Texture> ImageSystemImpl::GetChromaKeyedTexture(const io::path& p, video::Color key)
+{
+	StrongRef<Image> image = m_ResourceSystem->GetResource(core::ResourceType::Image, p);
+	if(!image)
+		return nullptr;
+	return AddChromaKeyedTexture(image, key);
+}
+
+StrongRef<Texture> ImageSystemImpl::GetChromaKeyedTexture(const io::path& p, const math::vector2i& pos)
+{
+	StrongRef<Image> image = m_ResourceSystem->GetResource(core::ResourceType::Image, p);
+	if(!image)
+		return nullptr;
+	return AddChromaKeyedTexture(image, image->GetPixel(pos.x, pos.y));
+}
 
 CubeTexture* ImageSystemImpl::AddCubeTexture(const string& name, StrongRef<Image> images[6])
 {
