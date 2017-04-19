@@ -353,7 +353,9 @@
     <ClInclude Include="..\..\..\inc\io\INIFile.h" />
     <ClInclude Include="..\..\..\inc\io\ioConstants.h" />
     <ClInclude Include="..\..\..\inc\io\path.h" />
+    <ClInclude Include="..\..\..\inc\Lux.h" />
     <ClInclude Include="..\..\..\inc\LuxBase.h" />
+    <ClInclude Include="..\..\..\inc\LuxConfig.h" />
     <ClInclude Include="..\..\..\inc\LuxEngine\LuxDevice.h" />
     <ClInclude Include="..\..\..\inc\math\aabbox3d.h" />
     <ClInclude Include="..\..\..\inc\math\angle.h" />
@@ -388,11 +390,14 @@
     <ClInclude Include="..\..\..\inc\scene\SceneNodeComponent.h" />
     <ClInclude Include="..\..\..\inc\scene\Transformable.h" />
     <ClInclude Include="..\..\..\inc\scene\zones\Zone.h" />
+    <ClInclude Include="..\..\..\inc\scene\zones\ZoneBox.h" />
     <ClInclude Include="..\..\..\inc\scene\zones\ZoneCylinder.h" />
     <ClInclude Include="..\..\..\inc\scene\zones\ZonePoint.h" />
+    <ClInclude Include="..\..\..\inc\scene\zones\ZoneSphere.h" />
     <ClInclude Include="..\..\..\inc\video\BaseTexture.h" />
     <ClInclude Include="..\..\..\inc\video\Color.h" />
     <ClInclude Include="..\..\..\inc\video\ColorConverter.h" />
+    <ClInclude Include="..\..\..\inc\video\ColorSpaces.h" />
     <ClInclude Include="..\..\..\inc\video\CubeTexture.h" />
     <ClInclude Include="..\..\..\inc\video\DrawingCanvas.h" />
     <ClInclude Include="..\..\..\inc\video\EPrimitiveType.h" />

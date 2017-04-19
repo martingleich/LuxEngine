@@ -14,10 +14,12 @@ public:
 	virtual bool IsInside(const math::vector3f& point) const = 0;
 	virtual math::vector3f GetPointInside(const core::Randomizer& rand) const
 	{
+		LUX_UNUSED(rand);
 		return math::vector3f::ZERO;
 	}
 	virtual math::vector3f GetNormal(const math::vector3f& point) const
 	{
+		LUX_UNUSED(point);
 		return math::vector3f::ZERO;
 	}
 

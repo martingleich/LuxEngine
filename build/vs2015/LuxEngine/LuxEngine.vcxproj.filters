@@ -672,6 +672,17 @@
     <ClInclude Include="..\..\..\src\video\VertexBufferImpl.h">
       <Filter>video\hardware_buffer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\zones\ZoneBox.h">
+      <Filter>scene\zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\zones\ZoneSphere.h">
+      <Filter>scene\zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\video\ColorSpaces.h">
+      <Filter>video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\Lux.h" />
+    <ClInclude Include="..\..\..\inc\LuxConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp">

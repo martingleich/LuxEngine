@@ -212,6 +212,7 @@
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\Tests\AlgorithmTest.cpp" />
     <ClCompile Include="..\..\src\Tests\ArrayTest.cpp" />
+    <ClCompile Include="..\..\src\Tests\ColorTest.cpp" />
     <ClCompile Include="..\..\src\Tests\FileSystemTest.cpp" />
     <ClCompile Include="..\..\src\Tests\FormatTest.cpp" />
     <ClCompile Include="..\..\src\Tests\HashMapTest.cpp" />

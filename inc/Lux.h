@@ -90,6 +90,10 @@ namespace input
 #include "input/EventReceiver.h"
 #include "input/Keycodes.h"
 
+#include "video/Color.h"
+#include "video/ColorSpaces.h"
+#include "video/ColorConverter.h"
+
 #include "video/VertexTypes.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
@@ -99,12 +103,10 @@ namespace input
 #include "video/VideoDriver.h"
 #include "video/MaterialRenderer.h"
 #include "video/MaterialLibrary.h"
-#include "video/ColorConverter.h"
 #include "video/SubMesh.h"
 #include "video/SpriteBank.h"
 #include "video/RenderStatistics.h"
 #include "video/SceneValues.h"
-#include "video/SpriteBank.h"
 
 #include "video/images/Image.h"
 #include "video/images/ImageSystem.h"
