@@ -1,6 +1,6 @@
 #ifndef INCLUDED_COLOR_SPACES_H
 #define INCLUDED_COLOR_SPACES_H
-#include "Color.h"
+#include "math/lxMath.h"
 
 namespace lux
 {
@@ -55,19 +55,6 @@ inline void HSVToRGB(float h, float s, float v, float& r, float& g, float& b)
 	r += m;
 	g += m;
 	b += m;
-}
-
-inline void ColorfToHSV(const Colorf& f, float& h, float& s, float& v)
-{
-	RGBToHSV(f.r, f.g, f.b, h, s, v);
-}
-
-inline Colorf HSVToColorf(float h, float s, float v, float alpha = 1.0f)
-{
-	Colorf out;
-	HSVToRGB(h, s, v, out.r, out.g, out.b);
-	out.a = alpha;
-	return out;
 }
 
 }

@@ -2,6 +2,7 @@
 #define INCLUDED_COLOR_H
 #include "math/lxMath.h"
 #include "core/lxFormat.h"
+#include "video/ColorSpaces.h"
 
 namespace lux
 {
@@ -673,13 +674,35 @@ public:
 		*this = Colorf(rc);
 	}
 
-	//! Cast to A8R8G8B8 color
-	explicit operator u32() const
+	static Colorf FromHex(u32 c)
+	{
+		return Colorf(c);
+	}
+
+	static Colorf FromRGB(float r, float g, float b, float a = 1.0f)
+	{
+		return Colorf(r, g, b, a);
+	}
+
+	static Colorf FromHSV(float h, float s, float v, float a = 1.0f)
+	{
+		Colorf out;
+		HSVToRGB(h, s, v, out.r, out.g, out.b);
+		out.a = a;
+		return out;
+	}
+
+	u32 ToHex() const
 	{
 		return ((a >= 1.0f ? 255 : a <= 0.0f ? 0 : (u32)(a * 255.0f)) << 24) |
 			((r >= 1.0f ? 255 : r <= 0.0f ? 0 : (u32)(r * 255.0f)) << 16) |
 			((g >= 1.0f ? 255 : g <= 0.0f ? 0 : (u32)(g * 255.0f)) << 8) |
 			((b >= 1.0f ? 255 : b <= 0.0f ? 0 : (u32)(b * 255.0f)) << 0);
+	}
+
+	void ToHSV(float& h, float& s, float& v) const
+	{
+		RGBToHSV(r, g, b, h, s, v);
 	}
 
 	//! Assign other color
@@ -849,9 +872,9 @@ inline Color operator*(const float f, Color a)
 inline Color::Color(const Colorf& _c)
 {
 	SetRed((u32)(_c.r * 255));
-	SetBlue((u32)(_c.b*255));
-	SetGreen((u32)(_c.g*255));
-	SetAlpha((u32)(_c.a*255));
+	SetBlue((u32)(_c.b * 255));
+	SetGreen((u32)(_c.g * 255));
+	SetAlpha((u32)(_c.a * 255));
 }
 
 inline void conv_data(format::Context& ctx, ColorFormat format, format::Placeholder& placeholder)
@@ -860,6 +883,15 @@ inline void conv_data(format::Context& ctx, ColorFormat format, format::Placehol
 	format::ConvertAddString(ctx, format::StringType::Ascii, format.AsString(), strlen(format.AsString()));
 }
 
+inline void ColorfToHSV(const Colorf& f, float& h, float& s, float& v)
+{
+	RGBToHSV(f.r, f.g, f.b, h, s, v);
+}
+
+inline Colorf HSVToColorf(float h, float s, float v, float alpha = 1.0f)
+{
+	return Colorf::FromHSV(h, s, v, alpha);
+}
 
 }    // video
 
