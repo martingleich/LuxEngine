@@ -18,7 +18,7 @@ class VolumeQueryCallback;
 
 class Mesh;
 
-class MeshCollider : public Collider
+class MeshCollider : public TriangleCollider
 {
 public:
 	MeshCollider()

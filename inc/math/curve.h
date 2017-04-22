@@ -317,6 +317,10 @@ private:
 				da = m_Samples[idx].x - m_Samples[idx - 1].x;
 				db = m_Samples[idx + 1].x - m_Samples[idx].x;
 			}
+		} else {
+			assertNeverReach("Invalid edge handling type.");
+			a = b = m_Samples[idx].value;
+			da = db = 1.0f;
 		}
 
 		T p = m_Samples[idx].value;

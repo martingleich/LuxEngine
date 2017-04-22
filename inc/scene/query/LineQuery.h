@@ -51,7 +51,7 @@ public:
 	virtual bool OnCollision(SceneNode* node, const LineQueryResult& result)
 	{
 		LUX_UNUSED(result);
-		return OnObject(node);
+		return OnObject(node, result);
 	}
 };
 

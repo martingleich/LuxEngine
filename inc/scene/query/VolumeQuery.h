@@ -54,7 +54,7 @@ public:
 	virtual bool OnCollision(SceneNode* node, const VolumeQueryResult& result)
 	{
 		LUX_UNUSED(result);
-		return QueryCallback::OnObject(node);
+		return QueryCallback::OnObject(node, result);
 	}
 };
 

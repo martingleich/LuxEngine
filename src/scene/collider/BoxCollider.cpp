@@ -50,7 +50,7 @@ EResult BoxCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQu
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
 		if(math::LineTestBox(line, m_HalfSize, fullTransform))
-			procceed = result->OnObject(owner);
+			procceed = result->OnObject(owner, QueryResult(this, 0));
 		break;
 	case Query::EQueryLevel::Collision:
 	{
@@ -91,7 +91,7 @@ EResult BoxCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, Sp
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
 		if(math::SphereHitBox(center, radius, halfSize, trans))
-			procceed = result->OnObject(owner);
+			procceed = result->OnObject(owner, QueryResult(this, 0));
 		break;
 	case Query::EQueryLevel::Collision:
 	{
@@ -132,7 +132,7 @@ EResult BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZo
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
 		if(math::BoxTestBox(halfSizeA, transA, halfSizeB, transB))
-			procceed = result->OnObject(owner);
+			procceed = result->OnObject(owner, QueryResult(this, 0));
 		break;
 	default:
 		return EResult::NotImplemented;

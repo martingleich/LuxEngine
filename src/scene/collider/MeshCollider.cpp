@@ -89,7 +89,7 @@ EResult MeshCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQ
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
 		if(found)
-			procceed = result->OnObject(owner);
+			procceed = result->OnObject(owner, QueryResult(this, id));
 		break;
 	case Query::EQueryLevel::Collision:
 	{
@@ -133,7 +133,8 @@ EResult MeshCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, S
 				center, radius,
 				*it);
 			if(hit) {
-				procceed = result->OnObject(owner);
+				QueryResult r(this, core::IteratorDistance(m_Triangles.First(), it));
+				procceed = result->OnObject(owner, r);
 				break;
 			}
 		}

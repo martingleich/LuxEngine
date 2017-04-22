@@ -53,7 +53,7 @@ EResult SphereCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, Lin
 		bool procceed = true;
 		switch(query->GetLevel()) {
 		case Query::EQueryLevel::Object:
-			procceed = result->OnObject(owner);
+			procceed = result->OnObject(owner, QueryResult(this, 0));
 			break;
 		case Query::EQueryLevel::Collision:
 		{
@@ -92,7 +92,7 @@ EResult SphereCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query,
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
 		if(math::SphereHitSphere(centerA, radiusA, centerB, radiusB))
-			procceed = result->OnObject(owner);
+			procceed = result->OnObject(owner, QueryResult(this, 0));
 		break;
 	case Query::EQueryLevel::Collision:
 	{
@@ -133,7 +133,7 @@ EResult SphereCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, Bo
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
 		if(math::SphereHitBox(center, radius, halfSize, trans))
-			procceed = result->OnObject(owner);
+			procceed = result->OnObject(owner, QueryResult(this, 0));
 		break;
 	case Query::EQueryLevel::Collision:
 	{

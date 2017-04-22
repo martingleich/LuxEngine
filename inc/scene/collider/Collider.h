@@ -3,6 +3,7 @@
 #include "core/Referable.h"
 #include "core/Result.h"
 #include "math/aabbox3d.h"
+#include "math/triangle3d.h"
 
 namespace lux
 {
@@ -21,6 +22,12 @@ public:
 	{
 		return ReferableType::Collider;
 	}
+};
+
+class TriangleCollider : public Collider
+{
+public:
+	virtual const math::triangle3df& GetTriangle(u32 id) const = 0;
 };
 
 }

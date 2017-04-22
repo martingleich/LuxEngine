@@ -10,15 +10,6 @@ namespace scene
 class SceneNode;
 class Collider;
 
-//! The base result of a query.
-struct QueryResult
-{
-	//! The collider which trigged the query.
-	Collider* sceneCollider;
-	//! Additional query data, interpretation depends on the type of the collider.
-	s32 colliderData;
-};
-
 class Query : public ReferenceCounted
 {
 public:
