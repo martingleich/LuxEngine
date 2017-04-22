@@ -10,6 +10,12 @@ namespace scene
 class SceneNode;
 class Collider;
 
+//! A collision query.
+/**
+A collision query finds all scene-nodes colliding with some kind of object.
+The type of objects depends on the query.
+All queries are posed in global coordinates.
+*/
 class Query : public ReferenceCounted
 {
 public:
@@ -42,11 +48,13 @@ public:
 
 	virtual core::Name GetType() const = 0;
 
+	//! Get the precision level of the query.
 	EQueryLevel GetLevel() const
 	{
 		return m_Level;
 	}
 
+	//! Set the precision level of the query.
 	void SetLevel(EQueryLevel level)
 	{
 		m_Level = level;

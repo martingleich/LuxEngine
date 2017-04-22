@@ -8,6 +8,11 @@ namespace lux
 namespace scene
 {
 
+//! A volume collision query.
+/**
+Performs a collision query with a given Zone.
+WARNING: Not all zones are supported, watch out for NotImplemented results.
+*/
 class VolumeQuery : public Query
 {
 public:
@@ -48,9 +53,15 @@ struct VolumeQueryResult : QueryResult
 	float penetration;
 };
 
+//! A volume query result callback
 class VolumeQueryCallback : public QueryCallback
 {
 public:
+	//! Called for each "real" collision.
+	/**
+	Will be called for each object in a EQueryLevel::Collision query.
+	Defaults to all call to the OnObject method.
+	*/
 	virtual bool OnCollision(SceneNode* node, const VolumeQueryResult& result)
 	{
 		LUX_UNUSED(result);

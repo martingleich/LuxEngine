@@ -28,9 +28,17 @@ struct QueryResult
 	{}
 };
 
+//! The query result callback interface.
 class QueryCallback : public ReferenceCounted
 {
 public:
+	//! This method is called for each colliding object in the query.
+	/**
+	Will be called for all result objects in the query.
+	\param node The scene node of the collided object.
+	\param result More information about the collision.
+	\return Return true to resume the query, return false to abort it.
+	*/
 	virtual bool OnObject(SceneNode* node, const QueryResult& result)
 	{
 		LUX_UNUSED(node);

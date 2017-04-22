@@ -8,6 +8,10 @@ namespace lux
 namespace scene
 {
 
+//! A line query
+/**
+Returns all objects intersecting a given line.
+*/
 class LineQuery : public Query
 {
 public:
@@ -45,9 +49,15 @@ struct LineQueryResult : QueryResult
 	float distance; //! Line parameter where the collision occured
 };
 
+//! The result callback for a line query.
 class LineQueryCallback : public QueryCallback
 {
 public:
+	//! Called for each "real" collision.
+	/**
+	Will be called for each object in a EQueryLevel::Collision query.
+	Defaults to all call to the OnObject method.
+	*/
 	virtual bool OnCollision(SceneNode* node, const LineQueryResult& result)
 	{
 		LUX_UNUSED(result);
