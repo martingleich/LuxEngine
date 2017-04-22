@@ -36,7 +36,7 @@ public:
 		return m_Transformation.TransformPoint(rand.GetVector3(-m_HalfSize, m_HalfSize));
 	}
 
-	math::vector3f GetNormal(const core::Randomizer& rand, const math::vector3f& point) const
+	math::vector3f GetNormal(const math::vector3f& point) const
 	{
 		math::vector3f p = m_Transformation.TransformInvPoint(point);
 		p.x /= m_HalfSize.x;

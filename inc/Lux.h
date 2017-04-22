@@ -117,9 +117,9 @@ namespace input
 #include "scene/SceneManager.h"
 #include "scene/SceneNode.h"
 #include "scene/Transformable.h"
-#include "scene/Collider.h"
-#include "scene/QueryCallback.h"
-#include "scene/Query.h"
+#include "scene/collider/Collider.h"
+#include "scene/query/QueryCallback.h"
+#include "scene/query/Query.h"
 
 #include "scene/components/CameraFPSAnimator.h"
 

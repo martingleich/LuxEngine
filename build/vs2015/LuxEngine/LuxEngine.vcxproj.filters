@@ -91,6 +91,12 @@
     <Filter Include="scene\zones">
       <UniqueIdentifier>{967037f3-6214-4f3f-a2f7-9f2df51e2f54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="scene\query">
+      <UniqueIdentifier>{0732fdb8-6b45-4f64-9da9-30df0b9327b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scene\collider">
+      <UniqueIdentifier>{8612650a-2bd1-48bb-b108-4a5c16304ff6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\inc\math\aabbox3d.h">
@@ -585,15 +591,6 @@
     <ClInclude Include="..\..\..\inc\video\Shader.h">
       <Filter>video\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\inc\scene\Collider.h">
-      <Filter>scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\inc\scene\Query.h">
-      <Filter>scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\inc\scene\QueryCallback.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\inc\scene\SceneManager.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -683,6 +680,33 @@
     </ClInclude>
     <ClInclude Include="..\..\..\inc\Lux.h" />
     <ClInclude Include="..\..\..\inc\LuxConfig.h" />
+    <ClInclude Include="..\..\..\inc\scene\query\LineQuery.h">
+      <Filter>scene\query</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\query\Query.h">
+      <Filter>scene\query</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\query\QueryCallback.h">
+      <Filter>scene\query</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\query\VolumeQuery.h">
+      <Filter>scene\query</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\scene\collider\SphereCollider.h">
+      <Filter>scene\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\collider\Collider.h">
+      <Filter>scene\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\math\CollisionHelper.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\scene\collider\BoxCollider.h">
+      <Filter>scene\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\scene\collider\MeshCollider.h">
+      <Filter>scene\collider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp">
@@ -910,9 +934,6 @@
     <ClCompile Include="..\..\..\src\video\MaterialLibraryImpl.cpp">
       <Filter>video\material</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\scene\Query.cpp">
-      <Filter>scene</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\scene\SceneManagerImpl.cpp">
       <Filter>scene</Filter>
     </ClCompile>
@@ -959,6 +980,21 @@
       <Filter>video\hardware_buffer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\inc\scene\zones\ZoneRing.h">
+      <Filter>scene\zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\query\Query.cpp">
+      <Filter>scene\query</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\collider\SphereCollider.cpp">
+      <Filter>scene\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\collider\BoxCollider.cpp">
+      <Filter>scene\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\collider\MeshCollider.cpp">
+      <Filter>scene\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene\zones\ReferableRegisterZones.cpp">
       <Filter>scene\zones</Filter>
     </ClCompile>
   </ItemGroup>

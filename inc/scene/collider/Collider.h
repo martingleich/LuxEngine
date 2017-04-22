@@ -1,6 +1,6 @@
 #ifndef INCLUDED_SCENE_COLLIDER_H
 #define INCLUDED_SCENE_COLLIDER_H
-#include "core/ReferenceCounted.h"
+#include "core/Referable.h"
 #include "core/Result.h"
 #include "math/aabbox3d.h"
 
@@ -16,7 +16,6 @@ class Collider : public Referable
 {
 public:
 	virtual EResult ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result) = 0;
-	virtual const math::aabbox3df& GetBoundingBox() const = 0;
 
 	core::Name GetReferableType() const
 	{

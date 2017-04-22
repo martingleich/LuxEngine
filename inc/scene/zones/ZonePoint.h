@@ -24,11 +24,13 @@ public:
 
 	math::vector3f GetPointInside(const core::Randomizer& rand) const
 	{
+		LUX_UNUSED(rand);
 		return m_Point;
 	}
 
 	math::vector3f GetNormal(const math::vector3f& point) const
 	{
+		LUX_UNUSED(point);
 		return math::vector3f::ZERO;
 	}
 

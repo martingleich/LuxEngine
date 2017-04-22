@@ -3,6 +3,7 @@
 #include "math/vector3.h"
 #include "math/quaternion.h"
 #include "math/line3d.h"
+#include "math/Transformation.h"
 
 #include "core/lxName.h"
 #include "core/lxArray.h"
@@ -44,6 +45,10 @@ class LightSceneNode;
 
 class SceneNodeComponent;
 class CameraFPSAnimator;
+
+class Collider;
+class VolumeQuery;
+class LineQuery;
 
 enum ESceneNodeRenderPass
 {
@@ -109,6 +114,12 @@ public:
 		math::anglef maxVerticalAngle = math::anglef::Degree(89.0f)) = 0;
 
 	//--------------------------------------------------------------------------
+
+	virtual StrongRef<Collider> CreateMeshCollider(Mesh* mesh) = 0;
+	virtual StrongRef<Collider> CreateBoundingBoxCollider() = 0;
+	virtual StrongRef<Collider> CreateBoundingSphereCollider() = 0;
+	virtual StrongRef<Collider> CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans) = 0;
+	virtual StrongRef<Collider> CreateSphereCollider(const math::vector3f& center, float radius) = 0;
 
 	// Liefert die Video-Schnittstelle
 	virtual video::VideoDriver* GetDriver() = 0;

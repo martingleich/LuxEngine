@@ -1,4 +1,4 @@
-#include "scene/Query.h"
+#include "scene/query/Query.h"
 #include "scene/SceneNode.h"
 
 namespace lux

@@ -31,7 +31,7 @@ public:
 		return rand.GetVector3Sphere(m_Radius) + m_Center;
 	}
 
-	math::vector3f GetNormal(const core::Randomizer& rand, const math::vector3f& point) const
+	math::vector3f GetNormal(const math::vector3f& point) const
 	{
 		return (point - m_Center).Normal_s();
 	}

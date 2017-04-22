@@ -76,6 +76,11 @@ public:
 		u32 count = std::numeric_limits<u32>::max());
 
 	//--------------------------------------------------------------------------
+	virtual StrongRef<Collider> CreateMeshCollider(Mesh* mesh);
+	virtual StrongRef<Collider> CreateBoundingBoxCollider();
+	virtual StrongRef<Collider> CreateBoundingSphereCollider();
+	virtual StrongRef<Collider> CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans);
+	virtual StrongRef<Collider> CreateSphereCollider(const math::vector3f& center, float radius);
 
 	video::VideoDriver* GetDriver();
 	io::FileSystem* GetFileSystem();

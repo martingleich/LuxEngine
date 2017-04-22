@@ -17,6 +17,13 @@
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/CameraFPSAnimatorImpl.h"
 
+#include "scene/query/LineQuery.h"
+#include "scene/query/VolumeQuery.h"
+
+#include "scene/collider/SphereCollider.h"
+#include "scene/collider/BoxCollider.h"
+#include "scene/collider/MeshCollider.h"
+
 #include "core/ReferableRegister.h"
 
 #include "core/Logger.h"
@@ -252,6 +259,31 @@ StrongRef<SceneNodeComponent> SceneManagerImpl::AddLinearMoveAnimator(SceneNode*
 	animator->Init(line, duration, jumpBack, count);
 
 	return animator;
+}
+
+StrongRef<Collider> SceneManagerImpl::CreateMeshCollider(Mesh* mesh)
+{
+	return LUX_NEW(MeshCollider)(mesh);
+}
+
+StrongRef<Collider> SceneManagerImpl::CreateBoundingBoxCollider()
+{
+	return LUX_NEW(BoundingBoxCollider)();
+}
+
+StrongRef<Collider> SceneManagerImpl::CreateBoundingSphereCollider()
+{
+	return LUX_NEW(BoundingSphereCollider)();
+}
+
+StrongRef<Collider> SceneManagerImpl::CreateSphereCollider(const math::vector3f& center, float radius)
+{
+	return LUX_NEW(SphereCollider)(center, radius);
+}
+
+StrongRef<Collider> SceneManagerImpl::CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans)
+{
+	return LUX_NEW(BoxCollider)(halfSize, trans);
 }
 
 video::VideoDriver* SceneManagerImpl::GetDriver()

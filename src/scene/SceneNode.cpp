@@ -1,7 +1,7 @@
 #include "scene/SceneManager.h"
 #include "scene/SceneNode.h"
-#include "scene/Query.h"
-#include "scene/QueryCallback.h"
+#include "scene/query/Query.h"
+#include "scene/query/QueryCallback.h"
 
 namespace lux
 {

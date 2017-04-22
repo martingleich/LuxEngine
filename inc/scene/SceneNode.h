@@ -9,7 +9,7 @@
 #include "video/Material.h"
 #include "core/lxList.h"
 #include "core/Referable.h"
-#include "scene/Collider.h"
+#include "scene/collider/Collider.h"
 
 namespace lux
 {

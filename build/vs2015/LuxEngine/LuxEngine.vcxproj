@@ -359,6 +359,7 @@
     <ClInclude Include="..\..\..\inc\LuxEngine\LuxDevice.h" />
     <ClInclude Include="..\..\..\inc\math\aabbox3d.h" />
     <ClInclude Include="..\..\..\inc\math\angle.h" />
+    <ClInclude Include="..\..\..\inc\math\CollisionHelper.h" />
     <ClInclude Include="..\..\..\inc\math\Curve.h" />
     <ClInclude Include="..\..\..\inc\math\dimension2d.h" />
     <ClInclude Include="..\..\..\inc\math\line3d.h" />
@@ -375,7 +376,7 @@
     <ClInclude Include="..\..\..\inc\resources\Resource.h" />
     <ClInclude Include="..\..\..\inc\resources\ResourceLoader.h" />
     <ClInclude Include="..\..\..\inc\resources\ResourceSystem.h" />
-    <ClInclude Include="..\..\..\inc\scene\Collider.h" />
+    <ClInclude Include="..\..\..\inc\scene\collider\Collider.h" />
     <ClInclude Include="..\..\..\inc\scene\components\CameraFPSAnimator.h" />
     <ClInclude Include="..\..\..\inc\scene\mesh\GeometryCreatorLib.h" />
     <ClInclude Include="..\..\..\inc\scene\mesh\Mesh.h" />
@@ -383,8 +384,9 @@
     <ClInclude Include="..\..\..\inc\scene\nodes\CameraSceneNode.h" />
     <ClInclude Include="..\..\..\inc\scene\nodes\LightSceneNode.h" />
     <ClInclude Include="..\..\..\inc\scene\nodes\MeshSceneNode.h" />
-    <ClInclude Include="..\..\..\inc\scene\Query.h" />
-    <ClInclude Include="..\..\..\inc\scene\QueryCallback.h" />
+    <ClInclude Include="..\..\..\inc\scene\query\Query.h" />
+    <ClInclude Include="..\..\..\inc\scene\query\QueryCallback.h" />
+    <ClInclude Include="..\..\..\inc\scene\query\LineQuery.h" />
     <ClInclude Include="..\..\..\inc\scene\SceneManager.h" />
     <ClInclude Include="..\..\..\inc\scene\SceneNode.h" />
     <ClInclude Include="..\..\..\inc\scene\SceneNodeComponent.h" />
@@ -455,6 +457,8 @@
     <ClInclude Include="..\..\..\src\io\StreamFile.h" />
     <ClInclude Include="..\..\..\src\LuxEngine\LuxDeviceWin32.h" />
     <ClInclude Include="..\..\..\src\resources\ResourceSystemImpl.h" />
+    <ClInclude Include="..\..\..\src\scene\collider\BoxCollider.h" />
+    <ClInclude Include="..\..\..\src\scene\collider\MeshCollider.h" />
     <ClInclude Include="..\..\..\src\scene\components\CameraFPSAnimatorImpl.h" />
     <ClInclude Include="..\..\..\inc\scene\components\LinearMoveAnimator.h" />
     <ClInclude Include="..\..\..\src\scene\components\RotationAnimatorImpl.h" />
@@ -472,6 +476,7 @@
     <ClInclude Include="..\..\..\src\scene\nodes\MeshSceneNodeImpl.h" />
     <ClInclude Include="..\..\..\src\scene\nodes\SkyBoxSceneNodeImpl.h" />
     <ClInclude Include="..\..\..\src\scene\SceneManagerImpl.h" />
+    <ClInclude Include="..\..\..\src\scene\collider\SphereCollider.h" />
     <ClInclude Include="..\..\..\src\video\CubeTextureD3D9.h" />
     <ClInclude Include="..\..\..\src\video\D3DHelper.h">
       <FileType>CppCode</FileType>
@@ -552,6 +557,9 @@
     <ClCompile Include="..\..\..\src\math\matrix4.cpp" />
     <ClCompile Include="..\..\..\src\math\Transformation.cpp" />
     <ClCompile Include="..\..\..\src\resources\ResourceSystemImpl.cpp" />
+    <ClCompile Include="..\..\..\src\scene\collider\BoxCollider.cpp" />
+    <ClCompile Include="..\..\..\src\scene\collider\MeshCollider.cpp" />
+    <ClCompile Include="..\..\..\src\scene\collider\SphereCollider.cpp" />
     <ClCompile Include="..\..\..\src\scene\components\CameraFPSAnimatorImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\components\LinearMoveAnimator.cpp" />
     <ClCompile Include="..\..\..\src\scene\components\RotationAnimatorImpl.cpp" />
@@ -569,10 +577,11 @@
     <ClCompile Include="..\..\..\src\scene\nodes\LightSceneNodeImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\nodes\MeshSceneNodeImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\nodes\SkyBoxSceneNodeImpl.cpp" />
-    <ClCompile Include="..\..\..\src\scene\Query.cpp" />
+    <ClCompile Include="..\..\..\src\scene\query\Query.cpp" />
     <ClCompile Include="..\..\..\src\scene\SceneManagerImpl.cpp" />
     <ClCompile Include="..\..\..\src\scene\SceneNode.cpp" />
     <ClCompile Include="..\..\..\src\scene\SceneNodeComponent.cpp" />
+    <ClCompile Include="..\..\..\src\scene\zones\ReferableRegisterZones.cpp" />
     <ClCompile Include="..\..\..\src\video\ColorConverter.cpp" />
     <ClCompile Include="..\..\..\src\video\CubeTextureD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
