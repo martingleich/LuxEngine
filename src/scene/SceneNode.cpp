@@ -49,7 +49,7 @@ SceneNode* SceneNode::GetRoot()
 EResult SceneNode::ExecuteQuery(Query* query, QueryCallback* callback)
 {
 	auto result = EResult::Succeeded;
-	if(HasTag(query->GetTags()))
+	if(HasTag(query->GetTags()) && m_Collider)
 		result = m_Collider->ExecuteQuery(this, query, callback);
 	for(auto it = GetChildrenFirst(); result != EResult::Aborted && it != GetChildrenEnd(); ++it) {
 		result = it->ExecuteQuery(query, callback);

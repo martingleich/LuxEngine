@@ -368,6 +368,72 @@ bool BoxTestBox(
 	return BoxTestBox(a, b);
 }
 
+
+template <typename T>
+bool TriangleTestSphere(
+	const math::vector3<T>& center,
+	T radius,
+	const math::triangle3d<T>& tri)
+{
+	// Translate world, so sphere is centered in origin.
+	auto A = tri.A - center;
+	auto B = tri.B - center;
+	auto C = tri.C - center;
+
+	auto rr = radius*radius;
+
+	auto AB = B - A;
+	auto BC = C - B;
+	auto CA = A - C;
+
+	auto normal = (AB).Cross(-CA);
+	auto d = A.Dot(normal);
+	auto e = normal.GetLengthSq();
+	// d*d/e is the distance of the sphere center to the triangle plane.
+	if(d*d > rr*e)
+		return false;
+
+	// Seperating-Axis-Test
+	auto aa = A.Dot(A);
+	auto ab = A.Dot(B);
+	auto ac = A.Dot(C);
+	auto bb = B.Dot(B);
+	auto bc = B.Dot(C);
+	auto cc = C.Dot(C);
+
+	if(aa > rr && ab > aa && ac > aa)
+		return false;
+	if(bb > rr && ab > bb && bc > bb)
+		return false;
+	if(cc > rr && ac > cc && bc > cc)
+		return false;
+
+	auto d1 = ab - aa;
+	auto d2 = bc - bb;
+	auto d3 = ac - cc;
+
+	auto e1 = AB.GetLengthSq();
+	auto e2 = BC.GetLengthSq();
+	auto e3 = CA.GetLengthSq();
+
+	auto Q1 = A * e1 - d1 * AB;
+	auto Q2 = B * e2 - d2 * BC;
+	auto Q3 = C * e3 - d3 * CA;
+	auto QC = C * e1 - Q1;
+	auto QA = A * e2 - Q2;
+	auto QB = B * e3 - Q3;
+
+	if(Q1.GetLengthSq() > rr * e1 * e1 && Q1.Dot(QC) > 0)
+		return false;
+	if(Q2.GetLengthSq() > rr * e2 * e2 && Q2.Dot(QA) > 0)
+		return false;
+	if(Q3.GetLengthSq() > rr * e3 * e3 && Q3.Dot(QB) > 0)
+		return false;
+
+	return true;
+}
+
+
 }
 }
 

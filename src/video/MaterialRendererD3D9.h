@@ -75,9 +75,15 @@ public:
 		if(material.GetRenderer() != lastMaterial.GetRenderer() || resetAll) {
 			// Nur eine Texturschicht
 			// Texturfarbe und Vertexfarbe durch Multiplikation verknüpfen
-			m_D3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-			m_D3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			m_D3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+			if((BaseTexture*)material.Layer(0) == nullptr) {
+				m_D3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+				m_D3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+
+			} else {
+				m_D3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+				m_D3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+				m_D3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+			}
 
 			m_D3DDevice->SetRenderState(D3DRS_COLORVERTEX, FALSE);
 		}
@@ -254,7 +260,7 @@ public:
 			m_D3DDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
 			m_D3DDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEXTURE);
 
-			m_D3DDevice->SetTextureStageState(2, D3DTSS_COLOROP,  D3DTOP_MODULATE);
+			m_D3DDevice->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			m_D3DDevice->SetTextureStageState(2, D3DTSS_COLORARG1, D3DTA_CURRENT);
 			m_D3DDevice->SetTextureStageState(2, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
@@ -269,7 +275,7 @@ public:
 	virtual void OnUnsetMaterial()
 	{
 		m_D3DDevice->SetRenderState(D3DRS_COLORVERTEX, FALSE);
-		m_D3DDevice->SetTextureStageState(2, D3DTSS_COLOROP,  D3DTOP_DISABLE);
+		m_D3DDevice->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	}
 
 	bool IsTransparent() const
@@ -286,9 +292,9 @@ public:
 	}
 };
 
-}    
+}
 
-}    
+}
 
 
 #endif

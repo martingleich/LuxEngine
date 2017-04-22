@@ -131,7 +131,6 @@ EResult BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZo
 	bool procceed = true;
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
-	case Query::EQueryLevel::Collision:
 		if(math::BoxTestBox(halfSizeA, transA, halfSizeB, transB))
 			procceed = result->OnObject(owner);
 		break;

@@ -62,7 +62,8 @@ EResult MeshCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback
 		return ExecuteLineQuery(owner, dynamic_cast<LineQuery*>(query), dynamic_cast<LineQueryCallback*>(result));
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);
 
-	if(query->GetType() == "sphere")
+	core::Name zoneType = vquery->GetZone()->GetReferableSubType();
+	if(zoneType == "sphere")
 		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
 	else
 		return EResult::NotImplemented;
@@ -115,16 +116,27 @@ EResult MeshCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQ
 
 EResult MeshCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
 {
-	return EResult::NotImplemented;
-	/*
 	if(!owner || !query || !zone || !result)
 		return EResult::Failed;
+
+	auto& absTrans = owner->GetAbsoluteTransform();
+
+	auto center = absTrans.TransformInvPoint(zone->GetCenter());
+	auto radius = zone->GetRadius() / absTrans.scale;
+
 
 	bool procceed = true;
 	switch(query->GetLevel()) {
 	case Query::EQueryLevel::Object:
-		break;
-	case Query::EQueryLevel::Collision:
+		for(auto it = m_Triangles.First(); it != m_Triangles.End(); ++it) {
+			bool hit = math::TriangleTestSphere(
+				center, radius,
+				*it);
+			if(hit) {
+				procceed = result->OnObject(owner);
+				break;
+			}
+		}
 		break;
 	default:
 		return EResult::NotImplemented;
@@ -134,7 +146,6 @@ EResult MeshCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, S
 		return EResult::Aborted;
 
 	return EResult::Succeeded;
-	*/
 }
 
 bool MeshCollider::SelectFirstTriangle(const math::line3df& line, math::vector3f& out_pos, size_t& triId, float& distance, bool testOnly)
@@ -167,5 +178,6 @@ bool MeshCollider::SelectFirstTriangle(const math::line3df& line, math::vector3f
 
 	return false;
 }
+
 }
 }
