@@ -123,7 +123,7 @@ EResult BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZo
 		return EResult::Failed;
 
 	const math::vector3f halfSizeA = zone->GetHalfSize();
-	const math::Transformation transA = owner->GetAbsoluteTransform().CombineRight(m_Transform);
+	const math::Transformation transA = zone->GetTransformation();
 
 	const math::vector3f halfSizeB = m_HalfSize;
 	const math::Transformation transB = owner->GetAbsoluteTransform().CombineRight(m_Transform);

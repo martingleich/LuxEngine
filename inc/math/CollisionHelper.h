@@ -287,9 +287,9 @@ struct CollisionBox
 	CollisionBox(const math::vector3<T>& halfSize, const math::Transformation& trans)
 	{
 		center = trans.TransformPoint(math::vector3<T>::ZERO);
-		axes[0] = trans.TransformDir(math::vector3<T>(halfSize.x, 0, 0));
-		axes[1] = trans.TransformDir(math::vector3<T>(0, halfSize.y, 0));
-		axes[2] = trans.TransformDir(math::vector3<T>(0, 0, halfSize.z));
+		axes[0] = halfSize.x * trans.TransformDir(math::vector3<T>::UNIT_X);
+		axes[1] = halfSize.y * trans.TransformDir(math::vector3<T>::UNIT_Y);
+		axes[2] = halfSize.z * trans.TransformDir(math::vector3<T>::UNIT_Z);
 	}
 };
 
@@ -308,20 +308,20 @@ T TransformToAxis(
 /**
 \param one The first box
 \param two The second box
-\param toCentre The distance vector between the boxes.
+\param toCenter The distance vector between the boxes.
 \param axis The axis to test
 */
 template <typename T>
 bool OverlapOnAxis(
 	const CollisionBox<T>& one,
 	const CollisionBox<T>& two,
-	const math::vector3<T>& toCentre,
-	const math::vector3<T>& axis)
+	const math::vector3<T>& axis,
+	const math::vector3<T>& toCenter)
 {
 	T oneProject = TransformToAxis(one, axis);
 	T twoProject = TransformToAxis(two, axis);
 
-	T distance = math::Abs(toCentre.Dot(axis));
+	T distance = math::Abs(toCenter.Dot(axis));
 
 	return (distance < oneProject + twoProject);
 }
@@ -331,29 +331,28 @@ bool BoxTestBox(
 	const CollisionBox<T>& one,
 	const CollisionBox<T>& two)
 {
-	math::vector3<T> toCentre = two.center - one.center;
+	math::vector3<T> toCenter = two.center - one.center;
 
 	return
-		OverlapOnAxis(one, two, one.axes[0], toCentre) &&
-		OverlapOnAxis(one, two, one.axes[1], toCentre) &&
-		OverlapOnAxis(one, two, one.axes[2], toCentre) &&
+		OverlapOnAxis(one, two, one.axes[0], toCenter) &&
+		OverlapOnAxis(one, two, one.axes[1], toCenter) &&
+		OverlapOnAxis(one, two, one.axes[2], toCenter) &&
 
-		OverlapOnAxis(one, two, two.axes[0], toCentre) &&
-		OverlapOnAxis(one, two, two.axes[1], toCentre) &&
-		OverlapOnAxis(one, two, two.axes[2], toCentre) &&
+		OverlapOnAxis(one, two, two.axes[0], toCenter) &&
+		OverlapOnAxis(one, two, two.axes[1], toCenter) &&
+		OverlapOnAxis(one, two, two.axes[2], toCenter) &&
 
-		OverlapOnAxis(one, two, one.axes[0].Cross(two.axes[0]), toCentre) &&
-		OverlapOnAxis(one, two, one.axes[0].Cross(two.axes[1]), toCentre) &&
-		OverlapOnAxis(one, two, one.axes[0].Cross(two.axes[2]), toCentre) &&
+		OverlapOnAxis(one, two, one.axes[0].Cross(two.axes[0]), toCenter) &&
+		OverlapOnAxis(one, two, one.axes[0].Cross(two.axes[1]), toCenter) &&
+		OverlapOnAxis(one, two, one.axes[0].Cross(two.axes[2]), toCenter) &&
 
+		OverlapOnAxis(one, two, one.axes[1].Cross(two.axes[0]), toCenter) &&
+		OverlapOnAxis(one, two, one.axes[1].Cross(two.axes[1]), toCenter) &&
+		OverlapOnAxis(one, two, one.axes[1].Cross(two.axes[2]), toCenter) &&
 
-		OverlapOnAxis(one, two, one.axes[1].Cross(two.axes[0]), toCentre) &&
-		OverlapOnAxis(one, two, one.axes[1].Cross(two.axes[1]), toCentre) &&
-		OverlapOnAxis(one, two, one.axes[1].Cross(two.axes[2]), toCentre) &&
-
-		OverlapOnAxis(one, two, one.axes[2].Cross(two.axes[0]), toCentre) &&
-		OverlapOnAxis(one, two, one.axes[2].Cross(two.axes[1]), toCentre) &&
-		OverlapOnAxis(one, two, one.axes[2].Cross(two.axes[2]), toCentre);
+		OverlapOnAxis(one, two, one.axes[2].Cross(two.axes[0]), toCenter) &&
+		OverlapOnAxis(one, two, one.axes[2].Cross(two.axes[1]), toCenter) &&
+		OverlapOnAxis(one, two, one.axes[2].Cross(two.axes[2]), toCenter);
 }
 }
 

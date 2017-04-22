@@ -387,6 +387,7 @@
     <ClInclude Include="..\..\..\inc\scene\query\Query.h" />
     <ClInclude Include="..\..\..\inc\scene\query\QueryCallback.h" />
     <ClInclude Include="..\..\..\inc\scene\query\LineQuery.h" />
+    <ClInclude Include="..\..\..\inc\scene\query\VolumeQuery.h" />
     <ClInclude Include="..\..\..\inc\scene\SceneManager.h" />
     <ClInclude Include="..\..\..\inc\scene\SceneNode.h" />
     <ClInclude Include="..\..\..\inc\scene\SceneNodeComponent.h" />

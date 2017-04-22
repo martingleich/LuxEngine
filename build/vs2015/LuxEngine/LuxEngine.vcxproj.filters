@@ -689,9 +689,6 @@
     <ClInclude Include="..\..\..\inc\scene\query\QueryCallback.h">
       <Filter>scene\query</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\inc\scene\query\VolumeQuery.h">
-      <Filter>scene\query</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\scene\collider\SphereCollider.h">
       <Filter>scene\collider</Filter>
     </ClInclude>
@@ -706,6 +703,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\scene\collider\MeshCollider.h">
       <Filter>scene\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\scene\query\VolumeQuery.h">
+      <Filter>scene\query</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
