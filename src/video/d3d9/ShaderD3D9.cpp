@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "core/Logger.h"
 #include "video/VideoDriver.h"
 
@@ -748,7 +749,9 @@ ShaderParam ShaderImpl::ElemParam(const ShaderParam* Param, const char* pcName)
 */
 
 #endif
-		}
+}
 
-	}
+}
 
+
+#endif // LUX_COMPILE_WITH_D3D9

@@ -1,7 +1,10 @@
 #ifndef INCLUDED_D3DHELPER_H
 #define INCLUDED_D3DHELPER_H
-#include "StrippedD3D9.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
+
 #include "video/Color.h"
+#include "StrippedD3D9.h"
 
 namespace lux
 {
@@ -46,5 +49,7 @@ inline D3DFORMAT GetD3DFormat(ColorFormat Format, bool Alpha)
 
 }
 }
+
+#endif // LUX_COMPILE_WITH_D3D9
 
 #endif // #ifndef INCLUDED_D3DHELPER_H

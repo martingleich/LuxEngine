@@ -133,7 +133,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;LUXENGINE_EXPORTS;%(PreprocessorDefinitions); LUX_EXPORT</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\inc\;$(ProjectDir)..\..\..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h;LuxConfig.h</ForcedIncludeFiles>
       <ShowIncludes>false</ShowIncludes>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
@@ -163,7 +163,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;_USRDLL;LUXENGINE_EXPORTS;%(PreprocessorDefinitions); LUX_EXPORT</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\inc\;$(ProjectDir)..\..\..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h;LuxConfig.h</ForcedIncludeFiles>
       <ShowIncludes>false</ShowIncludes>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
@@ -193,7 +193,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;_USRDLL;LUXENGINE_EXPORTS;%(PreprocessorDefinitions); LUX_EXPORT</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\inc\;$(ProjectDir)..\..\..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h;LuxConfig.h</ForcedIncludeFiles>
       <ShowIncludes>false</ShowIncludes>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
@@ -221,7 +221,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;_USRDLL;LUXENGINE_EXPORTS;%(PreprocessorDefinitions); LUX_EXPORT</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\inc\;$(ProjectDir)..\..\..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h;LuxConfig.h</ForcedIncludeFiles>
       <ShowIncludes>false</ShowIncludes>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
@@ -251,7 +251,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;LUXENGINE_EXPORTS;%(PreprocessorDefinitions); LUX_EXPORT</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\inc\;$(ProjectDir)..\..\..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h;LuxConfig.h</ForcedIncludeFiles>
       <ShowIncludes>false</ShowIncludes>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
@@ -283,7 +283,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;_USRDLL;LUXENGINE_EXPORTS;%(PreprocessorDefinitions); LUX_EXPORT</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\inc\;$(ProjectDir)..\..\..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)enable_default_off_warnings.h;LuxConfig.h</ForcedIncludeFiles>
       <ShowIncludes>false</ShowIncludes>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
@@ -484,8 +484,8 @@
     <ClInclude Include="..\..\..\src\scene\nodes\SkyBoxSceneNodeImpl.h" />
     <ClInclude Include="..\..\..\src\scene\SceneManagerImpl.h" />
     <ClInclude Include="..\..\..\src\scene\collider\SphereCollider.h" />
-    <ClInclude Include="..\..\..\src\video\CubeTextureD3D9.h" />
-    <ClInclude Include="..\..\..\src\video\D3DHelper.h">
+    <ClInclude Include="..\..\..\src\video\d3d9\CubeTextureD3D9.h" />
+    <ClInclude Include="..\..\..\src\video\d3d9\D3DHelper.h">
       <FileType>CppCode</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">true</ExcludedFromBuild>
@@ -494,7 +494,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\video\HardwareBufferManagerD3D9.h" />
+    <ClInclude Include="..\..\..\src\video\d3d9\HardwareBufferManagerD3D9.h" />
     <ClInclude Include="..\..\..\src\video\HardwareBufferManagerNull.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageImpl.h" />
     <ClInclude Include="..\..\..\src\video\images\ImageListImpl.h" />
@@ -508,14 +508,14 @@
     <ClInclude Include="..\..\..\src\video\images\ImageWriterTGA.h" />
     <ClInclude Include="..\..\..\src\video\IndexBufferImpl.h" />
     <ClInclude Include="..\..\..\src\video\MaterialLibraryImpl.h" />
-    <ClInclude Include="..\..\..\src\video\MaterialRendererD3D9.h" />
+    <ClInclude Include="..\..\..\src\video\d3d9\MaterialRendererD3D9.h" />
     <ClInclude Include="..\..\..\src\video\SceneValuesImpl.h" />
-    <ClInclude Include="..\..\..\src\video\ShaderD3D9.h" />
+    <ClInclude Include="..\..\..\src\video\d3d9\ShaderD3D9.h" />
     <ClInclude Include="..\..\..\src\video\SpriteBankImpl.h" />
     <ClInclude Include="..\..\..\src\video\SubMeshImpl.h" />
-    <ClInclude Include="..\..\..\src\video\TextureD3D9.h" />
+    <ClInclude Include="..\..\..\src\video\d3d9\TextureD3D9.h" />
     <ClInclude Include="..\..\..\src\video\VertexBufferImpl.h" />
-    <ClInclude Include="..\..\..\src\video\VideoDriverD3D9.h" />
+    <ClInclude Include="..\..\..\src\video\d3d9\VideoDriverD3D9.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\inc\scene\zones\ZoneRing.h" />
@@ -590,7 +590,7 @@
     <ClCompile Include="..\..\..\src\scene\SceneNodeComponent.cpp" />
     <ClCompile Include="..\..\..\src\scene\zones\ReferableRegisterZones.cpp" />
     <ClCompile Include="..\..\..\src\video\ColorConverter.cpp" />
-    <ClCompile Include="..\..\..\src\video\CubeTextureD3D9.cpp">
+    <ClCompile Include="..\..\..\src\video\d3d9\CubeTextureD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -598,7 +598,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\video\HardwareBufferManagerD3D9.cpp">
+    <ClCompile Include="..\..\..\src\video\d3d9\HardwareBufferManagerD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -621,7 +621,7 @@
     <ClCompile Include="..\..\..\src\video\MaterialLibraryImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\RenderType.cpp" />
     <ClCompile Include="..\..\..\src\video\SceneValuesImpl.cpp" />
-    <ClCompile Include="..\..\..\src\video\ShaderD3D9.cpp">
+    <ClCompile Include="..\..\..\src\video\d3d9\ShaderD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -631,7 +631,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\video\SpriteBankImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\SubMeshImpl.cpp" />
-    <ClCompile Include="..\..\..\src\video\TextureD3D9.cpp">
+    <ClCompile Include="..\..\..\src\video\d3d9\TextureD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -641,7 +641,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\video\VertexBufferImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\VertexFormats.cpp" />
-    <ClCompile Include="..\..\..\src\video\VideoDriverD3D9.cpp">
+    <ClCompile Include="..\..\..\src\video\d3d9\VideoDriverD3D9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='NoUnitTest|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>

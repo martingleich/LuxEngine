@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "HardwareBufferManagerD3D9.h"
 #include "core/Logger.h"
 #include "video/VertexBuffer.h"
@@ -91,7 +92,7 @@ void* BufferManagerD3D9::UpdateVertexBuffer(VertexBuffer* buffer, void* handle)
 
 		// Rewrite whole buffer
 		beginDirty = 0;
-		endDirty = size-1;
+		endDirty = size - 1;
 
 		if(d3dBuffer)
 			d3dBuffer->Release();
@@ -159,7 +160,7 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 
 		// Rewrite whole buffer
 		beginDirty = 0;
-		endDirty = size-1;
+		endDirty = size - 1;
 
 		if(d3dBuffer)
 			d3dBuffer->Release();
@@ -287,3 +288,4 @@ void BufferManagerD3D9::ResetStreams()
 }
 }
 }
+#endif // LUX_COMPILE_WITH_D3D9

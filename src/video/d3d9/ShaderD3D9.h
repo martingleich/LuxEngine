@@ -1,8 +1,11 @@
-#ifndef INCLUDED_CSHADER_H
-#define INCLUDED_CSHADER_H
+#ifndef INCLUDED_SHADER_D3D9_H
+#define INCLUDED_SHADER_D3D9_H
 #include "video/Shader.h"
 #include "core/lxHashMap.h"
 #include "video/SceneValues.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
+
 #include "StrippedD3D9.h"
 #include "StrippedD3D9X.h"
 
@@ -114,9 +117,11 @@ public:
 	}
 };
 
-}    
+}
 
-}    
+}
+
+#endif // LUX_COMPILE_WITH_D3D9
 
 
 #endif

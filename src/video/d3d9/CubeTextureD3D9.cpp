@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "CubeTextureD3D9.h"
 #include "StrippedD3D9X.h"
 #include "D3DHelper.h"
@@ -125,3 +126,4 @@ StrongRef<Referable> CubeTextureD3D9::Clone() const
 
 }    
 
+#endif // LUX_COMPILE_WITH_D3D9

@@ -1,6 +1,8 @@
-#ifndef INCLUDED_HARDWAREBUFFERMANAGERD3D9_H
-#define INCLUDED_HARDWAREBUFFERMANAGERD3D9_H
-#include "HardwareBufferManagerNull.h"
+#ifndef INCLUDED_HARDWAREBUFFERMANAGER_D3D9_H
+#define INCLUDED_HARDWAREBUFFERMANAGER_D3D9_H
+#include "video/HardwareBufferManagerNull.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "StrippedD3D9.h"
 
 namespace lux
@@ -19,7 +21,8 @@ public:
 		VertexStream() :
 			data(nullptr),
 			offset(0)
-		{}
+		{
+		}
 	};
 
 	struct IndexStream
@@ -30,7 +33,8 @@ public:
 		IndexStream() :
 			data(nullptr),
 			offset(0)
-		{}
+		{
+		}
 	};
 
 private:
@@ -57,5 +61,7 @@ public:
 
 }
 }
+
+#endif // LUX_COMPILE_WITH_D3D9
 
 #endif // !INCLUDED_HARDWAREBUFFERMANAGERD3D9_H

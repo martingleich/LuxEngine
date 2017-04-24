@@ -1,9 +1,11 @@
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "core/Logger.h"
 
-#include "video/TextureD3D9.h"
-#include "video/CubeTextureD3D9.h"
-#include "video/ShaderD3D9.h"
-#include "video/HardwareBufferManagerD3D9.h"
+#include "video/d3d9/TextureD3D9.h"
+#include "video/d3d9/CubeTextureD3D9.h"
+#include "video/d3d9/ShaderD3D9.h"
+#include "video/d3d9/HardwareBufferManagerD3D9.h"
+#include "video/d3d9/VideoDriverD3D9.h"
 
 #include "video/SceneValuesImpl.h"
 #include "video/RenderStatistics.h"
@@ -14,8 +16,6 @@
 #include "video/VertexBuffer.h"
 
 #include "gui/Window.h"
-
-#include "video/VideoDriverD3D9.h"
 
 namespace lux
 {
@@ -912,10 +912,10 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 			} else if(indices) {
 				// Aus Software zeichnen
 				hr = m_D3DDevice->DrawIndexedPrimitiveUP(Types[primitiveType - 1], 0, vertexCount, primitveCount,
-					(const u8*)indices + indexSize*indexOffset, IndexFormat, (const u8*)vertices+vertexOffset*stride, stride);
+					(const u8*)indices + indexSize*indexOffset, IndexFormat, (const u8*)vertices + vertexOffset*stride, stride);
 			} else {
 				// Aus Software zeichnen
-				hr = m_D3DDevice->DrawPrimitiveUP(Types[primitiveType - 1], primitveCount, (const u8*)vertices+vertexOffset*stride, stride);
+				hr = m_D3DDevice->DrawPrimitiveUP(Types[primitiveType - 1], primitveCount, (const u8*)vertices + vertexOffset*stride, stride);
 			}
 		}
 		break;
@@ -2069,3 +2069,5 @@ D3DCOLORVALUE VideoDriverD3D9::SColorToD3DColor(const Colorf& color)
 
 }
 
+
+#endif // LUX_COMPILE_WITH_D3D9

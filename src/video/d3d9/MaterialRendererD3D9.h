@@ -1,8 +1,11 @@
-#ifndef INCLUDED_CMATERIALRENDERER_H
-#define INCLUDED_CMATERIALRENDERER_H
+#ifndef INCLUDED_MATERIALRENDERER_D3D9_H
+#define INCLUDED_MATERIALRENDERER_D3D9_H
 #include "video/MaterialRenderer.h"
 #include "video/Material.h"
 #include "video/VideoDriver.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
+
 #include "StrippedD3D9.h"
 
 namespace lux
@@ -296,5 +299,7 @@ public:
 
 }
 
+
+#endif // LUX_COMPILE_WITH_D3D9
 
 #endif

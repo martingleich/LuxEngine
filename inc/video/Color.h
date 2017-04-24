@@ -208,7 +208,7 @@ public:
 			break;
 		case A1R5G5B5:
 			in16 = *((u16*)in);
-			out = (((u32)in16 & 0x8000) >> 31) & 0xFF00 |
+			out = ((((u32)in16 & 0x8000) >> 31) & 0xFF00) |
 				((in16 & 0x7C00) << 9) | ((in16 & 0x7000) << 4) |
 				((in16 & 0x03E0) << 6) | ((in16 & 0x0380) << 1) |
 				((in16 & 0x001F) << 3) | ((in16 & 0x001C) >> 2);
@@ -644,7 +644,7 @@ public:
 	}
 
 	//! Copyconstructor
-	Colorf(const Colorf& c) : a(c.a), r(c.r), g(c.g), b(c.b)
+	Colorf(const Colorf& c) : r(c.r), g(c.g), b(c.b), a(c.a)
 	{
 	}
 
@@ -652,12 +652,12 @@ public:
 	/**
 		Alpha is set to 1.
 	*/
-	Colorf(const float _r, const float _g, const float _b) : a(1.0f), r(_r), g(_g), b(_b)
+	Colorf(const float _r, const float _g, const float _b) : r(_r), g(_g), b(_b), a(1.0f)
 	{
 	}
 
 	//! Construct from single values.
-	Colorf(const float _r, const float _g, const float _b, const float _a) : a(_a), r(_r), g(_g), b(_b)
+	Colorf(const float _r, const float _g, const float _b, const float _a) : r(_r), g(_g), b(_b), a(_a)
 	{
 	}
 

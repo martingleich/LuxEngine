@@ -2,6 +2,8 @@
 #define INCLUDED_IMAGELOADERD3DX_H
 #include "resources/ResourceLoader.h"
 
+#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
+
 struct IDirect3DDevice9;
 
 namespace lux
@@ -25,5 +27,7 @@ private:
 
 }
 }
+
+#endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 
 #endif // !INCLUDED_CIMAGELOADERD3DX_H

@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "TextureD3D9.h"
 #include "StrippedD3D9X.h"
 #include "D3DHelper.h"
@@ -108,7 +109,7 @@ void* TextureD3D9::Lock(ETextureLockMode Mode, SLockedRect* locked, u32 MipLevel
 		if(Mode == ETLM_OVERWRITE && m_Desc.Usage == 0) {
 			m_TempSurface = GetTempSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface)
-				hr= m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_DISCARD);
+				hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_DISCARD);
 			if(FAILED(hr)) {
 				FreeTempSurface(m_TempSurface);
 				return nullptr;
@@ -248,7 +249,9 @@ StrongRef<Referable> TextureD3D9::Clone() const
 	return new TextureD3D9(m_Device);
 }
 
-}    
+}
 
-}    
+}
 
+
+#endif // LUX_COMPILE_WITH_D3D9

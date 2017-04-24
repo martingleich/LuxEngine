@@ -20,12 +20,17 @@
 #include "input/RawInputReceiver.h"
 
 #include "video/images/ImageSystemImpl.h"
-#include "video/VideoDriverD3D9.h"
-#include "video/MaterialRendererD3D9.h"
 
 #include "core/lxUnicodeConversion.h"
 
 #include "core/ReferableRegister.h"
+
+#include "video/VideoDriver.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
+#include "video/d3d9/VideoDriverD3D9.h"
+#include "video/d3d9/MaterialRendererD3D9.h"
+#endif
 
 #include <WinUser.h>
 
@@ -319,6 +324,7 @@ bool LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 	}
 
 	log::Info("Building Video Driver.");
+#ifdef LUX_COMPILE_WITH_D3D9
 	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9)(m_Timer, m_ReferableFactory);
 	m_Driver = driver;
 	if(!m_Driver->Init(config, m_Window)) {
@@ -330,6 +336,9 @@ bool LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 		return false;
 
 	driver->SetDefaultRenderer(m_MaterialLibrary->GetMaterialRenderer("solid"));
+#else
+	return false;
+#endif
 
 	if(!BuildImageSystem())
 		return false;
@@ -340,11 +349,17 @@ bool LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 bool LuxDeviceWin32::BuildMaterials()
 {
 	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver, m_Filesystem);
+
+#ifdef LUX_COMPILE_WITH_D3D9
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_d3d9)(m_Driver), "solid");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix_d3d9)(m_Driver), "solid_mix");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)(m_Driver), "transparent");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(m_Driver), "transparent_alpha");
-
+#else
+	m_MaterialLibrary = nullptr;
+	return false;
+#endif
+	
 	video::MaterialRenderer* renderer = m_MaterialLibrary->GetMaterialRenderer("solid");
 	video::IdentityMaterial.SetRenderer(renderer);
 	video::WorkMaterial.SetRenderer(renderer);

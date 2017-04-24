@@ -8,7 +8,8 @@ namespace scene
 
 Query::Query(SceneNode* rootNode) :
 	m_QueryRootNode(rootNode),
-	m_Level(EQueryLevel::Object)
+	m_Level(EQueryLevel::Object),
+	m_Tags(0)
 {
 }
 

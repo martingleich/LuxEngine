@@ -1,3 +1,5 @@
+#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
+
 #include "ImageLoaderD3DX.h"
 #include "io/File.h"
 #include "video/ColorConverter.h"
@@ -281,3 +283,4 @@ bool ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 
 }
 
+#endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER

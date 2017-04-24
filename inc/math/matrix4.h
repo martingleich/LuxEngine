@@ -460,7 +460,7 @@ public:
 };
 
 ///\cond INTERNAL
-inline matrix4 operator* (float f, const matrix4& m)
+inline matrix4 operator*(float f, const matrix4& m)
 {
 	return m*f;
 }

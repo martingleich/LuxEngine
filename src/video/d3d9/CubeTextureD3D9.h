@@ -1,7 +1,9 @@
-#ifndef INCLUDED_CCUBETEXTURE_H
-#define INCLUDED_CCUBETEXTURE_H
+#ifndef INCLUDED_CUBETEXTURE_D3D9_H
+#define INCLUDED_CUBETEXTURE_D3D9_H
 
 #include "video/CubeTexture.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "StrippedD3D9.h"
 
 namespace lux
@@ -41,9 +43,10 @@ public:
 	StrongRef<Referable> Clone() const;
 };
 
-}    
+}
 
-}    
+}
 
+#endif // LUX_COMPILE_WITH_D3D9
 
 #endif

@@ -217,7 +217,7 @@ public:
 
 	pool(pool<T>&& old)
 	{
-		*this = other;
+		*this = std::move(old);
 	}
 
 	pool& operator=(const pool<T>& other)

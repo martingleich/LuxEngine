@@ -18,10 +18,13 @@
 #include "ImageImpl.h"
 
 #include "ImageLoaderBMP.h"
-#include "ImageLoaderD3DX.h"
 #include "ImageLoaderPNM.h"
 #include "ImageLoaderTGA.h"
 #include "ImageLoaderPNG.h"
+
+#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
+#include "ImageLoaderD3DX.h"
+#endif
 
 #include "ImageWriterBMP.h"
 #include "ImageWriterTGA.h"
@@ -276,10 +279,12 @@ ImageSystemImpl::ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver*
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageToTextureLoader)(m_ResourceSystem, this));
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(MultiImageToCubeTextureLoader)(m_ResourceSystem, this));
 
+#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 	if(m_Driver && m_Driver->GetVideoDriverType() == EVD_DIRECT9) {
 		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetDevice());
 		m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderD3DX)(d3dDevice));
 	}
+#endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderBMP));
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderPNM));

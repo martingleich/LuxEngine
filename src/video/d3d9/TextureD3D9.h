@@ -1,7 +1,10 @@
-#ifndef INCLUDED_TEXTURED3D9_H
-#define INCLUDED_TEXTURED3D9_H
+#ifndef INCLUDED_TEXTURE_D3D9_H
+#define INCLUDED_TEXTURE_D3D9_H
 #include "video/Texture.h"
 #include "core/lxArray.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
+
 #include "StrippedD3D9.h"
 
 namespace lux
@@ -54,9 +57,11 @@ public:
 	StrongRef<Referable> Clone() const;
 };
 
-}    
+}
 
-}    
+}
 
+
+#endif // LUX_COMPILE_WITH_D3D9
 
 #endif

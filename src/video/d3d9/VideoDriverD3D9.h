@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VIDEODRIVERD3D9_H
-#define INCLUDED_VIDEODRIVERD3D9_H
+#ifndef INCLUDED_VIDEODRIVER_D3D9_H
+#define INCLUDED_VIDEODRIVER_D3D9_H
 #include "core/ReferableFactory.h"
 #include "video/VideoDriver.h"
 #include "video/Material.h"
@@ -8,6 +8,8 @@
 #include "video/PipelineSettings.h"
 
 #include "core/lxHashMap.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
 
 #include "StrippedD3D9.h"
 
@@ -363,9 +365,11 @@ private:
 	core::ReferableFactory* m_RefFactory;
 };
 
-}    
+}
 
-}    
+}
 
+
+#endif // LUX_COMPILE_WITH_D3D9
 
 #endif

@@ -41,7 +41,7 @@ public:
 
 		_Iterator<T>  operator+ (unsigned int num) const
 		{
-			Iterator temp = *this; return temp += num;
+			_Iterator temp = *this; return temp += num;
 		}
 
 		bool operator==(const _Iterator<T>&        other) const
@@ -99,11 +99,11 @@ public:
 
 		_ConstIterator<T>& operator++()
 		{
-			m_Current = m_Current->next; return *this;
+			m_Current = m_Current->m_Sibling; return *this;
 		}
 		_ConstIterator<T>  operator++(int)
 		{
-			_ConstIterator<T> Temp = *this; m_Current = m_Current->next; return Temp;
+			_ConstIterator<T> Temp = *this; m_Current = m_Current->m_Sibling; return Temp;
 		}
 
 		_ConstIterator<T>& operator+=(unsigned int num)
