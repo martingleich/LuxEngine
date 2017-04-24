@@ -130,12 +130,6 @@ public:
 		return out;
 	}
 
-	template <>
-	string Read()
-	{
-		return ReadString(0);
-	}
-
 	// Liest einen str ein, hört auf wenn eine '\0' gelesen wird, oder die maximale Zeichenanzahl gelesen wurde
 	//! Read a string from the file
 	/**

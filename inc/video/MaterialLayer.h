@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SMATERIALLAYER_H
 #define INCLUDED_SMATERIALLAYER_H
 
-#include "lxTypes.h"
+#include "core/lxTypes.h"
 
 namespace lux
 {

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_LX_NAME_H
 #define INCLUDED_LX_NAME_H
-#include "stringconverter.h"
+#include "StringConverter.h"
 #include "core/lxStringTable.h"
 #include "lxUtil.h"
 #include "lxFormat.h"

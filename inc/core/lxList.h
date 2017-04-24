@@ -57,13 +57,13 @@ public:
 		{
 			Iterator tmp(*this);
 			m_Current = m_Current->Next;
-			return Temp;
+			return tmp;
 		}
 		Iterator  operator--(int)
 		{
 			Iterator tmp(*this);
 			m_Current = m_Current->Prev;
-			return Temp;
+			return tmp;
 		}
 
 		Iterator& operator+=(int num)
