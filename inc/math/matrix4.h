@@ -1,7 +1,7 @@
 #ifndef INCLUDED_MATRIX4_H
 #define INCLUDED_MATRIX4_H
 #include "math/vector2.h"
-#include "plane3D.h"
+#include "plane3d.h"
 #include "math/quaternion.h"
 
 namespace lux

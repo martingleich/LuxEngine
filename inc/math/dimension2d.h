@@ -147,7 +147,7 @@ public:
 	*/
 	bool IsEmpty() const
 	{
-		return math::Equal(width, 0) && math::Equal(height, 0);
+		return math::IsEqual(width, 0) && math::IsEqual(height, 0);
 	}
 
 	//! The Aspect of the dimension

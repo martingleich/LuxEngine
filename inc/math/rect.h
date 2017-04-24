@@ -132,7 +132,7 @@ public:
 	*/
 	void Repair()
 	{
-		type t;
+		T t;
 
 		if(Left > Right) {
 			t = Left;

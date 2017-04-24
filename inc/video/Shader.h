@@ -15,6 +15,8 @@ class File;
 namespace video
 {
 
+class LUX_API ShaderParam;
+
 class Shader : public ReferenceCounted
 {
 	friend class ShaderParam;

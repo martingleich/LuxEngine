@@ -2,7 +2,7 @@
 #define INCLUDED_CFONT_H
 #include "gui/Font.h"
 #include "video/Material.h"
-#include "core/lxhashmap.h"
+#include "core/lxHashMap.h"
 #include "video/images/Image.h"
 
 namespace lux

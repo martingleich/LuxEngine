@@ -386,11 +386,11 @@ public:
 	};
 
 public:
-	typename K KeyType;
-	typename V ValueType;
-	typename Alloc AllocatorType;
-	typename Hash HasherType;
-	typename KeyCompare CompareType;
+	typedef K KeyType;
+	typedef V ValueType;
+	typedef Alloc AllocatorType;
+	typedef Hash HasherType;
+	typedef KeyCompare CompareType;
 
 public:
 	HashMap(size_t bucketCount = 7, size_t reserve = 0, double maxLoad = 1.0) :
