@@ -4,6 +4,19 @@ project(LuxEngine)
 # These values will appear in the source code
 set(LuxEngine_VERSION_MAJOR 0)
 set(LuxEngine_VERSION_MINOR 1)
+
+# TODO It would be better if the user could specify 
+# LuxEngine_COMPILE_WITH_D3D9 directly
+if(WIN32)
+	set(LuxEngine_OS_WINDOWS true)
+	set(LuxEngine_OS_LINUX false)
+	set(LuxEngine_COMPILE_WITH_D3D9 true)
+elseif(UNIX AND NOT APPLE)
+	set(LuxEngine_OS_WINDOWS false)
+	set(LuxEngine_OS_LINUX true)
+	set(LuxEngine_COMPILE_WITH_D3D9 false)
+endif()
+
 configure_file(
 	"${PROJECT_SOURCE_DIR}/inc/LuxConfig.h.in"
 	"${PROJECT_SOURCE_DIR}/inc/LuxConfig.h"

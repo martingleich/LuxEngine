@@ -1,6 +1,8 @@
 #ifndef INCLUDED_LUXBASE_H
 #define INCLUDED_LUXBASE_H
 
+#include "LuxConfig.h"
+
 //---------------------------------------------
 // LUX_EXPORT
 #ifdef LUX_WINDOWS
