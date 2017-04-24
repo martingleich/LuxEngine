@@ -9,14 +9,16 @@ configure_file(
 	"${PROJECT_SOURCE_DIR}/inc/LuxConfig.h"
 	)
 
-# Always include inc!
-include_directories("${PROJECT_SOURCE_DIR}/inc")
-include_directories("${PROJECT_SOURCE_DIR}/src")
-
 add_subdirectory(external/format)
 add_subdirectory(external/libpng)
 add_subdirectory(external/libtga)
 add_subdirectory(external/zlib)
+
+add_subdirectory(testing/UnitTest)
+
+# Always include inc!
+include_directories("${PROJECT_SOURCE_DIR}/inc")
+include_directories("${PROJECT_SOURCE_DIR}/src")
 
 # I'm not going to list all cpp files manually ...
 file(GLOB_RECURSE SRCS_CPP "src/*.cpp")
@@ -42,18 +44,41 @@ endfunction(assign_source_group)
 assign_source_group(${SRCS})
 assign_source_group(${INCS})
 
-link_directories("external/d3d9/x86")
+# TODO cmake should already know these libs (we are calling add_dependencies)
+# for them later ...
 set(USED_LIBS ${USED_LIBS} format zlib libtga libpng)
 
-# Build the executable (with the corresponding libraries)
+# Add plattform dependend libs and compiler-flags
 if(MSVC)
 	add_definitions(-std=c++11 -DLUX_EXPORT -DUNICODE -D_UNICODE)
 	set(USED_LIBS ${USED_LIBS} d3d9 d3dx9 Hid)
-	link_directories("$(PROJECT_SOURCE_DIR}/external/d3d9/x86")
+	link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 else()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE)
+	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive)
 endif()
-add_library(LuxEngine SHARED ${SRCS} ${INCS})
-target_link_libraries(LuxEngine ${USED_LIBS})
-add_dependencies(LuxEngine format zlib libpng libtga)
 
+add_library(LuxEngine SHARED ${SRCS} ${INCS} "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def")
+add_dependencies(LuxEngine format zlib libpng libtga)
+target_link_libraries(LuxEngine ${USED_LIBS})
+
+# Add tests
+enable_testing()
+add_test(NAME BasicTest COMMAND UnitTest)
+
+# TODO Ugly hacks to create the def file ...
+add_custom_command(
+	TARGET LuxEngine
+	PRE_BUILD
+	COMMAND "${PROJECT_SOURCE_DIR}/scripts/ValidateDependencies.bat"
+	COMMENT "Validate dependencies"
+)
+set_source_files_properties(
+	"${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
+	PROPERTIES GENERATED TRUE
+)
+add_custom_command(
+	TARGET LuxEngine
+	PRE_LINK
+	COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" "${PROJECT_SOURCE_DIR}/lib/$(Platform)/$(Configuration)" "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
+	COMMENT "Build .def file"
+)
