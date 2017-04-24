@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputDeviceKeyboard.h"
 
 namespace lux
@@ -291,7 +292,7 @@ void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 		if(maxSize - 1 >= (u32)conversionResult) {
 			for(int i = 0; i < conversionResult; ++i)
 				character[i] = translatedKey[i];
-			character[maxSize-1] = 0;
+			character[maxSize - 1] = 0;
 		}
 	}
 
@@ -323,3 +324,4 @@ void RawKeyboardDevice::TranslateCharacter(wchar_t c1, wchar_t c2, wchar_t* out,
 
 }
 }
+#endif // LUX_COMPILE_WITH_RAW_INPUT

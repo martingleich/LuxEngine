@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputReceiver.h"
 
 #include "RawInputDeviceKeyboard.h"
@@ -248,3 +249,4 @@ u32 RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 
 }
 }
+#endif // LUX_COMPILE_WITH_RAW_INPUT

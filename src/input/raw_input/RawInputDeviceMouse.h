@@ -1,5 +1,7 @@
 #ifndef INCLUDED_RAW_MOUSE_DEVICE_H
 #define INCLUDED_RAW_MOUSE_DEVICE_H
+
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputDevice.h"
 
 namespace lux
@@ -35,5 +37,8 @@ private:
 
 }
 }
+
+
+#endif // LUX_COMPILE_WITH_RAW_INPUT
 
 #endif // !INCLUDED_RAW_MOUSE_DEVICE_H

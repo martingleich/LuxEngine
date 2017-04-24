@@ -1,11 +1,13 @@
 #ifndef INCLUDED_RAW_INPUT_RECEIVER_H
 #define INCLUDED_RAW_INPUT_RECEIVER_H
 #include "input/InputSystem.h"
-#include "RawInputDevice.h"
-#include "StrippedWindows.h"
 #include "core/lxHashMap.h"
 #include "core/lxArray.h"
 #include "core/lxMemory.h"
+
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
+#include "RawInputDevice.h"
+#include "StrippedWindows.h"
 
 namespace lux
 {
@@ -77,5 +79,7 @@ private:
 
 }
 }
+
+#endif // LUX_COMPILE_WITH_RAW_INPUT
 
 #endif // !INCLUDED_RAW_INPUT_RECEIVER_H

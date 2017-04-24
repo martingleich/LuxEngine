@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputDeviceJoystick.h"
 
 #include "core/lxAlgorithm.h"
@@ -51,10 +52,10 @@ EResult RawJoystickDevice::GetDeviceHandle(HANDLE& ntHandle)
 		return EResult::Failed;
 
 	ntHandle = CreateFileW(core::StringToUTF16W(path), 0,
-			FILE_SHARE_READ | FILE_SHARE_WRITE,
-			NULL,
-			OPEN_EXISTING,
-			0, NULL);
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,
+		0, NULL);
 
 	if(ntHandle == INVALID_HANDLE_VALUE)
 		return EResult::Failed;
@@ -65,16 +66,16 @@ EResult RawJoystickDevice::GetDeviceHandle(HANDLE& ntHandle)
 EResult RawJoystickDevice::GetDeviceName(string& name)
 {
 	const size_t max_size = 127;
-		
+
 	wchar_t nameBuffer[max_size];
 
 	size_t len = 0;
-	if(HidD_GetManufacturerString(m_NtHandle, nameBuffer, max_size*2)) {
+	if(HidD_GetManufacturerString(m_NtHandle, nameBuffer, max_size * 2)) {
 		len = wcslen(nameBuffer);
 		nameBuffer[len++] = ' ';
 	}
 
-	if(HidD_GetProductString(m_NtHandle, nameBuffer + len, ULONG(max_size - len)*2)) {
+	if(HidD_GetProductString(m_NtHandle, nameBuffer + len, ULONG(max_size - len) * 2)) {
 		len = wcslen(nameBuffer);
 	}
 
@@ -165,10 +166,10 @@ void RawJoystickDevice::LoadDirectInputMapping(bool isAxis, Mapping* mappings, s
 
 	wchar_t path[128];
 	wsprintfW(path, L"System\\CurrentControlSet\\Control\\MediaProperties\\PrivateProperties\\Joystick\\OEM\\VID_%04X&PID_%04X\\%s\\", attribs.VendorID, attribs.ProductID, subType);
-	
+
 	size_t numberBegin = wcslen(path);
 	for(size_t i = 0; i < mappingCount; ++i) {
-		wsprintfW(path+numberBegin, L"%d", i);
+		wsprintfW(path + numberBegin, L"%d", i);
 
 		HKEY key = NULL;
 		if(0 != RegOpenKeyExW(HKEY_CURRENT_USER, path, 0, KEY_READ, &key))
@@ -208,7 +209,7 @@ void RawJoystickDevice::LoadDirectInputAxisCalibration(MappingAndCalibration* ca
 
 	size_t numberBegin = wcslen(path);
 	for(size_t i = 0; i < mappingCount; ++i) {
-		wsprintfW(path+numberBegin, L"%d", i);
+		wsprintfW(path + numberBegin, L"%d", i);
 
 		HKEY key = NULL;
 		if(0 == RegOpenKeyExW(HKEY_CURRENT_USER, path, 0u, KEY_READ, &key)) {
@@ -258,12 +259,12 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 		core::array<HIDP_BUTTON_CAPS> buttonCaps;
 		size_t buttonCount = 0;
 		BREAK_ON_FAIL(result,
-				Succeeded(GetButtonCaps(caps, buttonCaps, buttonCount)));
+			Succeeded(GetButtonCaps(caps, buttonCaps, buttonCount)));
 
 		core::array<HIDP_VALUE_CAPS> axesCaps;
 		size_t axesCount = 0;
 		BREAK_ON_FAIL(result,
-				Succeeded(GetAxesCaps(caps, axesCaps, axesCount)));
+			Succeeded(GetAxesCaps(caps, axesCaps, axesCount)));
 
 		MappingAndCalibration directInputAxisMapping[7] = {};
 		Mapping directInputButtonMapping[128] = {};
@@ -296,8 +297,8 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 				USAGE firstUsage = it->Range.UsageMin;
 				USAGE lastUsage = it->Range.UsageMax;
 				for(USAGE currentUsage = firstUsage; currentUsage <= lastUsage; ++currentUsage) {
-					directInputButtonMapping[currentUsage-1].usagePage = HID_USAGE_PAGE_BUTTON;
-					directInputButtonMapping[currentUsage-1].usage = currentUsage;
+					directInputButtonMapping[currentUsage - 1].usagePage = HID_USAGE_PAGE_BUTTON;
+					directInputButtonMapping[currentUsage - 1].usage = currentUsage;
 				}
 			}
 		}
@@ -440,7 +441,7 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 		int code = 0;
 		for(auto it = temp.First(); it != temp.End(); ++it) {
 			it->obj->code = code;
-				
+
 			m_CodeHIDMapping[code] = it->id;
 			++code;
 		}
@@ -461,7 +462,7 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 		code = 0;
 		for(auto it = temp.First(); it != temp.End(); ++it) {
 			it->obj->code = code;
-				
+
 			m_CodeHIDMapping[m_Buttons.Size() + code] = it->id;
 			++code;
 		}
@@ -489,9 +490,9 @@ EResult RawJoystickDevice::HandleInput(RAWINPUT* input)
 	HIDP_DATA data[64];
 	ULONG dataCount = 64;
 	if(HIDP_STATUS_SUCCESS != HidP_GetData(HidP_Input,
-			data, &dataCount,
-			m_InputReportProtocol,
-			(PCHAR)input->data.hid.bRawData, input->data.hid.dwSizeHid))
+		data, &dataCount,
+		m_InputReportProtocol,
+		(PCHAR)input->data.hid.bRawData, input->data.hid.dwSizeHid))
 		return EResult::Failed;
 
 	size_t axisCur = 0;
@@ -508,7 +509,7 @@ EResult RawJoystickDevice::HandleInput(RAWINPUT* input)
 				++buttonCur;
 				matched = true;
 			}
-				
+
 			if(axisCur < m_Axes.Size() && m_Axes[axisCur].index == dataIndex) {
 				Event event;
 				event.source = EEventSource::Joystick;
@@ -529,15 +530,15 @@ EResult RawJoystickDevice::HandleInput(RAWINPUT* input)
 					if((int32_t)data[i].RawValue > max)
 						data[i].RawValue = max;
 					if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x39)
-						event.axis.abs = (data[i].RawValue-m_Axes[axisCur].logicalMin) * (1024/(m_Axes[axisCur].logicalMax-m_Axes[axisCur].logicalMin+1));
+						event.axis.abs = (data[i].RawValue - m_Axes[axisCur].logicalMin) * (1024 / (m_Axes[axisCur].logicalMax - m_Axes[axisCur].logicalMin + 1));
 					else if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x36)
-						event.axis.abs = ((data[i].RawValue - min) * 1024)/(max-min);
+						event.axis.abs = ((data[i].RawValue - min) * 1024) / (max - min);
 					else
-						event.axis.abs = ((data[i].RawValue - min) * 2048)/(max-min) - 1024;
+						event.axis.abs = ((data[i].RawValue - min) * 2048) / (max - min) - 1024;
 
 					SendInputEvent(event);
 				}
-					
+
 				++axisCur;
 				matched = true;
 			}
@@ -555,8 +556,8 @@ EResult RawJoystickDevice::HandleInput(RAWINPUT* input)
 		}
 	}
 
-	for(size_t i = 0; i < m_Buttons.Size(); ++i){
-		if(m_NewButtonStates[i] != m_ButtonStates[i]){
+	for(size_t i = 0; i < m_Buttons.Size(); ++i) {
+		if(m_NewButtonStates[i] != m_ButtonStates[i]) {
 			Event event;
 			event.source = EEventSource::Joystick;
 			event.type = EEventType::Button;
@@ -608,3 +609,4 @@ RawJoystickDevice::ElemDesc RawJoystickDevice::GetElementDesc(EEventType type, u
 
 }
 }
+#endif // LUX_COMPILE_WITH_RAW_INPUT

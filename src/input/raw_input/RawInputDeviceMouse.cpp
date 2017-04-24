@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputDeviceMouse.h"
 
 #ifndef RI_MOUSE_HWHEEL
@@ -196,3 +197,4 @@ u32 RawMouseDevice::GetKeyCodeFromVKey(u32 vkey)
 
 }
 }
+#endif // LUX_COMPILE_WITH_RAW_INPUT

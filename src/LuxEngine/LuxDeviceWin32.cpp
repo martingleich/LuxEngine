@@ -17,7 +17,6 @@
 #include "gui/CursorControlWin32.h"
 #include "gui/GUIEnvironmentImpl.h"
 
-#include "input/RawInputReceiver.h"
 
 #include "video/images/ImageSystemImpl.h"
 
@@ -30,6 +29,10 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "video/d3d9/MaterialRendererD3D9.h"
+#endif
+
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
+#include "input/raw_input/RawInputReceiver.h"
 #endif
 
 #include <WinUser.h>
@@ -130,8 +133,10 @@ LRESULT LuxDeviceWin32::WinProc(HWND windowHandle,
 
 	LRESULT result;
 
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 	if(m_RawInputReceiver && m_RawInputReceiver->HandleMessage(uiMessage, WParam, LParam, result))
 		return result;
+#endif
 
 	if(window && window->HandleMessages(uiMessage, WParam, LParam, result))
 		return result;
@@ -176,17 +181,7 @@ MaterialRenderer* SOLID_RENDERER;
 
 LuxDeviceWin32::LuxDeviceWin32() :
 	m_Time(0.0),
-	m_InputSystem(nullptr),
-	m_Filesystem(nullptr),
-	m_Timer(nullptr),
-	m_Driver(nullptr),
-	m_SceneManager(nullptr),
 	m_Quit(false),
-	m_UserEventReceiver(nullptr),
-	m_ImageSystem(nullptr),
-	m_GUIEnv(nullptr),
-	m_ReferableFactory(nullptr),
-	m_Window(nullptr),
 	m_InputEventProxy(this),
 	m_LuxWindowClassName(WIN32_CLASS_NAME),
 	m_WindowCallback(this)
@@ -297,7 +292,7 @@ bool LuxDeviceWin32::BuildInputSystem(bool isForeground)
 		return false;
 	}
 
-	// Create inputHandler
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 	m_InputSystem = LUX_NEW(input::InputSystemImpl)(isForeground);
 	m_InputSystem->SetInputReceiver(&m_InputEventProxy);
 
@@ -309,6 +304,10 @@ bool LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	}
 
 	m_InputSystem->SetForegroundState(m_Window->IsFocused());
+#else
+	log::Error("No input system was compiled.");
+	return false;
+#endif
 
 	log::Info("Built Input System.");
 
@@ -525,7 +524,9 @@ LuxDeviceWin32::~LuxDeviceWin32()
 
 	m_ReferableFactory = nullptr;
 
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 	m_RawInputReceiver = nullptr;
+#endif
 	m_InputSystem = nullptr;
 
 	m_Timer = nullptr;

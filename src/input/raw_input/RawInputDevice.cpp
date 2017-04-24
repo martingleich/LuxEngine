@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputDevice.h"
 #include "core/lxUnicodeConversion.h"
 
@@ -34,8 +35,8 @@ void RawInputDevice::SendInputEvent(Event& event)
 	event.device = m_Device;
 	event.source = m_Device->GetType();
 
-	event.shift = ((GetKeyState(VK_SHIFT)&0x8000) != 0);
-	event.control = ((GetKeyState(VK_CONTROL)&0x8000) != 0);
+	event.shift = ((GetKeyState(VK_SHIFT) & 0x8000) != 0);
+	event.control = ((GetKeyState(VK_CONTROL) & 0x8000) != 0);
 
 	m_System->Update(event);
 }
@@ -54,7 +55,7 @@ EResult RawInputDevice::GetDevicePath(HANDLE raw_handle, string& path)
 		return EResult::Failed;
 
 	path = core::UTF16ToString(str.Data_c());
-	path.ReplaceRange("\\", path.First()+1, 1); // Old windows bug, sometimes the second character is not a backslash.
+	path.ReplaceRange("\\", path.First() + 1, 1); // Old windows bug, sometimes the second character is not a backslash.
 
 	return EResult::Succeeded;
 }
@@ -89,3 +90,4 @@ EResult RawInputDevice::GetDeviceInfo(HANDLE raw_handle, RID_DEVICE_INFO& info)
 
 }
 }
+#endif // LUX_COMPILE_WITH_RAW_INPUT

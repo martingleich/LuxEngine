@@ -37,7 +37,9 @@ class ResourceSystem;
 
 namespace input
 {
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
 class RawInputReceiver;
+#endif
 }
 
 class LuxDeviceWin32 : public LuxDevice
@@ -153,11 +155,14 @@ private:
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;
 	StrongRef<core::ReferableFactory> m_ReferableFactory;
 	StrongRef<core::ResourceSystem> m_ResourceSystem;
-	StrongRef<input::RawInputReceiver> m_RawInputReceiver;
 	StrongRef<video::MaterialLibrary> m_MaterialLibrary;
 	StrongRef<scene::MeshSystem> m_MeshSystem;
 
 	const wchar_t* const m_LuxWindowClassName;
+
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
+	StrongRef<input::RawInputReceiver> m_RawInputReceiver;
+#endif
 };
 
 }    //namespace lux

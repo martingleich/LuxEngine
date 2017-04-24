@@ -339,21 +339,6 @@
     <ClInclude Include="..\..\..\src\input\InputDeviceNull.h">
       <Filter>input\devices</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\input\RawInputDevice.h">
-      <Filter>input\raw_input</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\input\RawInputDeviceJoystick.h">
-      <Filter>input\raw_input</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\input\RawInputDeviceKeyboard.h">
-      <Filter>input\raw_input</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\input\RawInputDeviceMouse.h">
-      <Filter>input\raw_input</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\input\RawInputReceiver.h">
-      <Filter>input\raw_input</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\inc\io\ioConstants.h">
       <Filter>io</Filter>
     </ClInclude>
@@ -707,6 +692,21 @@
     <ClInclude Include="..\..\..\src\video\d3d9\VideoDriverD3D9.h">
       <Filter>video\d3d9</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\input\raw_input\RawInputDevice.h">
+      <Filter>input\raw_input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\input\raw_input\RawInputDeviceJoystick.h">
+      <Filter>input\raw_input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\input\raw_input\RawInputDeviceKeyboard.h">
+      <Filter>input\raw_input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\input\raw_input\RawInputDeviceMouse.h">
+      <Filter>input\raw_input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\input\raw_input\RawInputReceiver.h">
+      <Filter>input\raw_input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp">
@@ -801,21 +801,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\input\InputDeviceNull.cpp">
       <Filter>input\devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\input\RawInputDevice.cpp">
-      <Filter>input\raw_input</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\input\RawInputDeviceJoystick.cpp">
-      <Filter>input\raw_input</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\input\RawInputDeviceKeyboard.cpp">
-      <Filter>input\raw_input</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\input\RawInputDeviceMouse.cpp">
-      <Filter>input\raw_input</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\input\RawInputReceiver.cpp">
-      <Filter>input\raw_input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\io\FileSystemImpl.cpp">
       <Filter>io</Filter>
@@ -996,6 +981,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\video\d3d9\VideoDriverD3D9.cpp">
       <Filter>video\d3d9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\input\raw_input\RawInputDevice.cpp">
+      <Filter>input\raw_input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\input\raw_input\RawInputDeviceJoystick.cpp">
+      <Filter>input\raw_input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\input\raw_input\RawInputDeviceKeyboard.cpp">
+      <Filter>input\raw_input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\input\raw_input\RawInputDeviceMouse.cpp">
+      <Filter>input\raw_input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\input\raw_input\RawInputReceiver.cpp">
+      <Filter>input\raw_input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
