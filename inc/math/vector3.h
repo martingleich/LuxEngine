@@ -447,7 +447,7 @@ public:
 			}
 			// x == 0
 			else if(z < 0) {
-				vOut.x = LX_HALF_PI;
+				vOut.x = Constants<T>::half_pi();
 			}
 			//else
 			// vOut.x = 0;    // vOut.x ist mittels Standardkonstruktor bereits 0
@@ -589,12 +589,12 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 	ConvertAddString(ctx, StringType::Ascii, "]", 1);
 }
 
-}    
+}
 
 template<> inline core::Type core::GetTypeInfo<math::vector3<float>>() { return core::Type::Vector3; };
 template<> inline core::Type core::GetTypeInfo<math::vector3<int>>() { return core::Type::Vector3Int; };
 
-}    
+}
 
 
 #endif

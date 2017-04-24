@@ -5,7 +5,6 @@
 // PLATFORM
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
 #define LUX_WINDOWS
-#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #if !defined(LUX_WINDOWS)

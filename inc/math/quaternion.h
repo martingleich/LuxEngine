@@ -336,7 +336,7 @@ public:
 		const T cpsy = cp * sy;
 		const T spsy = sp * sy;
 
-		quaterion out(
+		quaternion<T> out(
 			sr*cpcy - cr*spsy,
 			cr*spcy + sr*cpsy,
 			cr*cpsy - sr*spcy,
@@ -357,14 +357,14 @@ public:
 		const T test = 2 * (y*w - x*z);
 		vector3<T> Euler;
 
-		if(Equal(test, (T)1)) {
+		if(IsEqual(test, (T)1)) {
 			Euler.z = -2 * atan2(x, w);
 			Euler.x = 0;
-			Euler.y = (T)LX_HALF_PI64;
-		} else if(Equal(text, (T)-1)) {
+			Euler.y = math::Constants<T>::half_pi();
+		} else if(IsEqual(test, (T)-1)) {
 			Euler.z = 2 * atan2(x, w);
 			Euler.x = 0;
-			Euler.y = (T)-LX_HALF_PI64;
+			Euler.y = -math::Constants<T>::half_pi();
 		} else {
 			const T sqW = w*w;
 			const T sqX = x*x;
@@ -460,8 +460,7 @@ public:
 	\param to_dir The direction in the to system
 	\param to_up The up in the to system
 	*/
-	template <typename T>
-	static quaternion<T> FromTo(
+	static quaternion FromTo(
 		const math::vector3<T>& from_dir, const math::vector3<T>& from_up,
 		const math::vector3<T>& to_dir, const math::vector3<T>& to_up)
 	{

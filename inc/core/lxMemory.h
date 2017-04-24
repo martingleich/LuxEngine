@@ -33,7 +33,7 @@ public:
 	}
 
 	RawMemory(void* ptr, size_t size) :
-		m_Data(ptr),
+		m_Data((u8*)ptr),
 		m_Size(size)
 	{
 	}
@@ -101,7 +101,7 @@ public:
 			return;
 		}
 
-		void* data = LUX_NEW_ARRAY(u8, newSize);
+		u8* data = LUX_NEW_ARRAY(u8, newSize);
 		if(action == ZERO) {
 			memset(data, 0, newSize);
 		} else if(action & COPY) {
@@ -110,7 +110,7 @@ public:
 				memcpy(data, m_Data, toCopy);
 			}
 			if(action & ZERO) {
-				memset((char*)data + m_Size, 0, newSize - m_Size);
+				memset(data + m_Size, 0, newSize - m_Size);
 			}
 		} else {
 			(void)0;
@@ -164,7 +164,7 @@ public:
 	}
 
 private:
-	void* m_Data;
+	u8* m_Data;
 	size_t m_Size;
 };
 

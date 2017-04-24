@@ -14,7 +14,7 @@ struct is_flag_enum
 #define DEFINE_FLAG_ENUM_CLASS(name) \
 enum class name; \
 template <>\
-struct ::lux::is_flag_enum<name>\
+struct is_flag_enum<name>\
 {\
 static const bool value = true;\
 };\
@@ -22,10 +22,10 @@ enum class name
 
 #define DECLARE_FLAG_CLASS(name)\
 template <>\
-struct ::lux::is_flag_enum<name>\
+struct is_flag_enum<name>\
 {\
 static const bool value = true;\
-};\
+};
 
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type operator~ (T a)
 {

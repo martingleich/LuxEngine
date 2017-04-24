@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include "core/lxSTDIO.h"
 #include "core/lxUnicodeConversion.h"
 

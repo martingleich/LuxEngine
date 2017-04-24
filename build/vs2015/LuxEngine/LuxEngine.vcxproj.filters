@@ -237,9 +237,6 @@
     <ClInclude Include="..\..\..\inc\core\Result.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\inc\core\stringconverter.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\inc\core\Timer.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -706,6 +703,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\inc\scene\query\VolumeQuery.h">
       <Filter>scene\query</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\core\StringConverter.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

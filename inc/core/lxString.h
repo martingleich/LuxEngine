@@ -45,8 +45,8 @@ struct string_type
 	\param s The number of bytes in the string, wihtout the NUL-Byte.
 	*/
 	string_type(const char* str, size_t s) :
-		data(str),
-		size(s)
+		size(s),
+		data(str)
 	{}
 
 	//! Ensures that the size of string is available

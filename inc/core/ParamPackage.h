@@ -63,10 +63,10 @@ public:
 	}
 
 	template <typename T>
-	T Default(const T& default)
+	T Default(const T& defaultValue)
 	{
 		if(core::GetTypeInfo<T>() != m_Type || !IsValid())
-			return default;
+			return defaultValue;
 		else
 			return (T)(*this);
 	}
@@ -160,7 +160,7 @@ public:
 		u8 size; //!< The size of the parameter in bytes
 		core::Type type; //!< The type of the parameter
 		u16 reserved; //!< System reserved value
-		const void* default; //!< The default value of the parameter
+		const void* defaultValue; //!< The default value of the parameter
 	};
 
 private:
@@ -189,7 +189,7 @@ private:
 #pragma warning(suppress: 4251)
 	core::mem::RawMemory m_DefaultPackage;
 
-	void AddEntry(Entry& entry, const void* default);
+	void AddEntry(Entry& entry, const void* defaultValue);
 
 public:
 
@@ -218,11 +218,11 @@ public:
 	/**
 	\param T: The type of the param
 	\param name The name of the new Param(should be unique for package)
-	\param default The default value for this Param, when a new material is created this is the used Value
+	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	\param reserved Reserved for internal use, dont use this param
 	*/
 	template <typename T>
-	void AddParam(const char* name, const T& default, u16 reserved = -1)
+	void AddParam(const char* name, const T& defaultValue, u16 reserved = -1)
 	{
 		core::Type type = core::GetTypeInfo<T>();
 		if(type == core::Type::Unknown) {
@@ -230,17 +230,17 @@ public:
 			return;
 		}
 
-		AddParam(type, name, &default, reserved);
+		AddParam(type, name, &defaultValue, reserved);
 	}
 
 	//! Creates a new Param
 	/**
 	\param type: The type of the param
 	\param name The name of the new Param(should be unique for package)
-	\param default The default value for this Param, when a new material is created this is the used Value
+	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	\param reserved Reserved for internal use, dont use this param
 	*/
-	void AddParam(core::Type type, const char* name, const void* default, u16 reserved = -1);
+	void AddParam(core::Type type, const char* name, const void* defaultValue, u16 reserved = -1);
 
 	//! Creates a new Param
 	/**
@@ -304,9 +304,9 @@ public:
 	//! Set a new default value for a param
 	/**
 	\param param The id of the Param, which default value should be changed
-	\param default A pointer to the new default value
+	\param defaultValue A pointer to the new default value
 	*/
-	void SetDefaultValue(u32 param, const void* default);
+	void SetDefaultValue(u32 param, const void* defaultValue);
 
 	//! The number of existing params in this package
 	u32 GetParamCount() const;

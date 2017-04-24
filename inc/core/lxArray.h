@@ -14,6 +14,7 @@ template <typename T>
 class array
 {
 public:
+	class ConstIterator;
 	class Iterator : public BaseIterator<RandomAccessIteratorTag, T>
 	{
 		friend class array<T>;
@@ -22,9 +23,6 @@ public:
 		T* m_Current;
 	private:
 		explicit Iterator(T* First) : m_Current(First)
-		{
-		}
-		Iterator(const ConstIterator& iter) : m_Current(iter.m_Current)
 		{
 		}
 	public:
@@ -84,14 +82,8 @@ public:
 		{
 			return m_Current != other.m_Current;
 		}
-		bool operator==(const ConstIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ConstIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
+		bool operator==(const ConstIterator& other) const;
+		bool operator!=(const ConstIterator& other) const;
 
 		T& operator*()
 		{
@@ -790,6 +782,16 @@ private:
 	bool m_Sorted;
 };
 
+template <typename T>
+bool array<T>::Iterator::operator==(const typename ConstIterator& other) const
+{
+	return m_Current == other.m_Current;
+}
+template <typename T>
+bool array<T>::Iterator::operator!=(const typename ConstIterator& other) const
+{
+	return m_Current != other.m_Current;
+}
 
 template <typename T>
 struct HashType<array<T>>

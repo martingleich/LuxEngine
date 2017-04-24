@@ -177,8 +177,8 @@ public:
 	*/
 	bool Equal(const vector2<T>& other, T tolerance = math::Constants<T>::rounding_error) const
 	{
-		return math::Equal(x, other.x, tolerance) &&
-			math::Equal(y, other.y, tolerance);
+		return math::IsEqual(x, other.x, tolerance) &&
+			math::IsEqual(y, other.y, tolerance);
 	}
 
 	//! The length of the vector

@@ -694,11 +694,11 @@ public:
 		return it.m_Entry->value;
 	}
 
-	V& At(const K& key, const V& default)
+	V& At(const K& key, const V& defaultValue)
 	{
 		Iterator it;
 		if(FindOrAddEntry(key, it))
-			new ((void*)&it.m_Entry->value) V(default);
+			new ((void*)&it.m_Entry->value) V(defaultValue);
 		return it.m_Entry->value;
 	}
 

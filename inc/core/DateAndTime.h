@@ -43,7 +43,7 @@ inline void conv_data(format::Context& ctx, const DateAndTime& date, format::Pla
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 	char temp[25];
-	sprintf_s(temp, 25, "%.3s %.3s %d %.2d:%.2d:%.2d %d",
+	sprintf(temp, "%.3s %.3s %d %.2d:%.2d:%.2d %d",
 		wday_name[(int)date.weekDay],
 		mon_name[date.month - 1],
 		date.dayOfMonth, date.hours,

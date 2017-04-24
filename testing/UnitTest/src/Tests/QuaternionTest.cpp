@@ -33,6 +33,14 @@ UNIT_SUITE(QuaternionTest)
 		UNIT_ASSERT(math::IsEqual(Angle.Degree(), 45.0f, 0.005f) && Axis.Equal(math::vector3f(1.0f, 0.0f, 1.0f).Normalize()));
 	}
 
+	UNIT_TEST(ToEuler)
+	{
+		// TODO: Do the real test
+		auto q = math::quaternionf::FromEuler(math::vector3f(1.0f, 2.0f, 3.0f));
+
+		auto v = q.ToEuler();
+	}
+
 	UNIT_TEST(Transform)
 	{
 		math::vector3f Point = math::vector3f(1.0f, 0.0f, 0.0f);

@@ -351,7 +351,7 @@ void ParamPackage::AddParam(const ParamDesc& desc)
 		return;
 	}
 
-	AddEntry(entry, desc.default);
+	AddEntry(entry, desc.defaultValue);
 }
 
 void* ParamPackage::CreatePackage() const
@@ -375,7 +375,7 @@ bool ParamPackage::GetParamDesc(u32 param, ParamDesc& desc) const
 	desc.size = m_Params[param].size;
 	desc.type = m_Params[param].type;
 	desc.reserved = m_Params[param].reserved;
-	desc.default = (const u8*)m_DefaultPackage + m_Params[param].offset;
+	desc.defaultValue = (const u8*)m_DefaultPackage + m_Params[param].offset;
 	return true;
 }
 

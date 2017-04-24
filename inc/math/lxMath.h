@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <float.h>
+#include <limits.h>
 
 namespace lux
 {
@@ -24,15 +25,15 @@ struct BaseConstants
 	}
 	static T two_pi()
 	{
-		return (T)(2 * Constants<T>::pi());
+		return (T)(2 * pi());
 	}
 	static T reciprocal_pi()
 	{
-		return (T)(1 / Constants<T>::pi());
+		return (T)(1 / pi());
 	}
 	static T half_pi()
 	{
-		return (T)(Constants<T>::pi() / 2);
+		return (T)(pi() / 2);
 	}
 	static T e()
 	{
@@ -44,15 +45,15 @@ struct BaseConstants
 	}
 	static T reciprocal_sqrt2()
 	{
-		return (T)(1 / Constants<T>::sqrt2());
+		return (T)(1 / sqrt2());
 	}
 	static T deg_to_rad()
 	{
-		return (T)(Constants<T>::pi() / 180);
+		return (T)(pi() / 180);
 	}
 	static T rad_to_deg()
 	{
-		return (T)(180 / Constants<T>::pi());
+		return (T)(180 / pi());
 	}
 	static T rounding_error()
 	{

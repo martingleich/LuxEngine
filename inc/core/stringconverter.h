@@ -67,7 +67,7 @@ public:
 		if(precision < 0)
 			precision = 0;
 
-		int i = sprintf_s(buffer, 256, "%.*f", precision, value);
+		int i = sprintf(buffer, "%.*f", precision, value);
 		return string(buffer, i);
 	}
 
@@ -79,7 +79,7 @@ public:
 			"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 		char temp[25];
-		sprintf_s(temp, 25, "%.3s %.3s %d %.2d:%.2d:%.2d %d",
+		sprintf(temp, "%.3s %.3s %d %.2d:%.2d:%.2d %d",
 			wday_name[(int)value.weekDay],
 			mon_name[value.month - 1],
 			value.dayOfMonth, value.hours,
@@ -102,30 +102,30 @@ public:
 	//! Create a float from a string
 	/**
 	\param str The string to convert
-	\param default The value which is returned if an error occurs
+	\param errorValue The value which is returned if an error occurs
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed float
 	*/
-	static float ParseFloat(const string& str, float default = 0.0f, const char** nextChar = nullptr)
+	static float ParseFloat(const string& str, float errorValue = 0.0f, const char** nextChar = nullptr)
 	{
-		return ParseFloat(str.Data(), default, nextChar);
+		return ParseFloat(str.Data(), errorValue, nextChar);
 	}
 
 	//! Create a float from a string
 	/**
 	\param str The string to convert
-	\param default The value which is returned if an error occurs
+	\param errorValue The value which is returned if an error occurs
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed float
 	*/
-	static float ParseFloat(const char* str, float default = 0.0f, const char** nextChar = nullptr)
+	static float ParseFloat(const char* str, float errorValue = 0.0f, const char** nextChar = nullptr)
 	{
 		int sign = 1;
 
 		if(!*str) {
 			if(nextChar)
 				*nextChar = str;
-			return default;
+			return errorValue;
 		}
 
 		if(*str == '-') {
@@ -185,23 +185,23 @@ public:
 	//! Create a integer from a string
 	/**
 	\param str The string to convert
-	\param default The value which is returned if an error occurs
+	\param errorValue The value which is returned if an error occurs
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed integer
 	*/
-	static int ParseInt(const string& str, int default = 0, const char** nextChar = nullptr)
+	static int ParseInt(const string& str, int errorValue = 0, const char** nextChar = nullptr)
 	{
-		return ParseInt(str.Data(), default, nextChar);
+		return ParseInt(str.Data(), errorValue, nextChar);
 	}
 
 	//! Create a integer from a string
 	/**
 	\param str The string to convert
-	\param default The value which is returned if an error occurs
+	\param errorValue The value which is returned if an error occurs
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed integer
 	*/
-	static int ParseInt(const char* str, int default = 0, const char** nextChar = nullptr)
+	static int ParseInt(const char* str, int errorValue = 0, const char** nextChar = nullptr)
 	{
 		unsigned int value = 0;
 		int numDigits = 0;
@@ -210,7 +210,7 @@ public:
 		if(!*str) {
 			if(nextChar)
 				*nextChar = str;
-			return default;
+			return errorValue;
 		}
 
 		if(*str == '-') {
@@ -230,7 +230,7 @@ public:
 					|| (sign == -1 && value > (unsigned int)std::numeric_limits<int>::max())) {
 					if(nextChar)
 						*nextChar = str;
-					return default;
+					return errorValue;
 				}
 				++str;
 			} else {
@@ -244,7 +244,7 @@ public:
 		if(numDigits > 0)
 			return (int)value*sign;
 		else
-			return default;
+			return errorValue;
 	}
 };
 
