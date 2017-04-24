@@ -100,7 +100,7 @@ EResult SphereCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query,
 		if(math::SphereHitSphere(centerA, radiusA, centerB, radiusB, &info)) {
 			VolumeQueryResult r;
 			r.colliderData = 0;
-			r.seperation = -info.seperation;
+			r.seperation = info.seperation;
 			r.penetration = info.penetration;
 			r.position = info.position;
 			r.sceneCollider = this;

@@ -80,7 +80,7 @@ public:
 	void TranslateGlobal(const math::vector3f& p)
 	{
 		math::Transformation t = GetRelativeTransform();
-		t.translation += ToRelativeDir(p);
+		t.translation += t.TransformDir(GetAbsoluteTransform().TransformInvDir(p));
 		SetRelativeTransform(t);
 	}
 

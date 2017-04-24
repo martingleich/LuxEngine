@@ -97,7 +97,7 @@ bool LineHitSphere(
 		if(out) {
 			out->distance = s;
 			const vector3<T> pos = line.start + s*dir;
-			out->normal = (pos-center).Normal_s();
+			out->normal = (pos - center).Normal_s();
 		}
 
 		return true;
@@ -128,14 +128,14 @@ bool SphereHitSphere(
 {
 	const T r = radiusA + radiusB;
 
-	const math::vector3<T> delta = centerB - centerA;
+	const math::vector3<T> delta = centerA - centerB;
 	const T distanceSq = delta.GetLengthSq();
 	if(distanceSq <= r*r) {
 		if(out) {
 			T distance = sqrt(distanceSq);
 			out->seperation = delta / distance;
 			out->penetration = r - distance;
-			out->position = 0.5f*out->seperation + centerA;
+			out->position = 0.5f*out->seperation + centerB;
 		}
 		return true;
 	} else
@@ -164,9 +164,23 @@ bool SphereHitBox(
 	if(distanceSq <= relRadius*relRadius) {
 		if(out) {
 			T f = sqrt(distanceSq);
-			out->seperation = trans.TransformDir((relCenter - nearest) / f);
-			out->penetration = (radius - f) * trans.scale;
-			out->position = trans.TransformPoint(nearest) - 0.5f * out->seperation;
+			if(nearest == relCenter) {
+				out->seperation = relCenter.GetUnitCubeVector();
+				if(out->seperation == math::vector3<T>::ZERO)
+					out->seperation = math::vector3<T>::UNIT_X;
+				else
+					out->seperation.Normalize();
+				const math::vector3<T> nearestOnWall(
+					relCenter.x < 0 ? -halfSize.x : halfSize.x,
+					relCenter.y < 0 ? -halfSize.y : halfSize.y,
+					relCenter.z < 0 ? -halfSize.z : halfSize.z);
+				out->penetration = nearestOnWall.GetDistanceTo(relCenter) * trans.scale;
+			} else {
+				out->seperation = trans.TransformDir((relCenter - nearest) / f) / trans.scale;
+				out->penetration = (relRadius - f) * trans.scale;
+			}
+
+			out->position = trans.TransformPoint(nearest) - 0.5f * out->seperation*out->penetration;
 		}
 		return true;
 	}
@@ -268,7 +282,7 @@ bool LineHitBox(
 				transPos.x /= halfSize.x;
 				transPos.y /= halfSize.y;
 				transPos.z /= halfSize.z;
-				out->normal = trans.TransformDir(transPos.GetUnitCubeVector());
+				out->normal = trans.TransformDir(transPos.GetUnitCubeVector()) / trans.scale;
 				return true;
 			}
 		}
