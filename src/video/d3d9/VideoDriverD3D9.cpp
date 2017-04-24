@@ -134,7 +134,7 @@ VideoDriverD3D9::Rendertarget_d3d9::Rendertarget_d3d9(Texture* texture) :
 	m_Surface(nullptr)
 {
 	if(m_Texture) {
-		assert(m_Texture->IsRendertarget());
+		lxAssert(m_Texture->IsRendertarget());
 		m_Size = m_Texture->GetDimension();
 		IDirect3DTexture9* d3dTexture = (IDirect3DTexture9*)texture->GetRealTexture();
 		if(FAILED(d3dTexture->GetSurfaceLevel(0, &m_Surface))) {
@@ -152,7 +152,7 @@ VideoDriverD3D9::Rendertarget_d3d9::Rendertarget_d3d9(IDirect3DSurface9* surface
 	if(m_Surface) {
 		D3DSURFACE_DESC desc;
 		if(SUCCEEDED(m_Surface->GetDesc(&desc))) {
-			assert(desc.Usage == D3DUSAGE_RENDERTARGET);
+			lxAssert(desc.Usage == D3DUSAGE_RENDERTARGET);
 			m_Size.width = desc.Width;
 			m_Size.height = desc.Height;
 		}

@@ -171,7 +171,7 @@ public:
 		case ENameScheme::Axes:
 			return basePath + name + GetAxis(id) + "." + ext;
 		default:
-			assertNeverReach("Unsupported cube texture naming scheme.");
+			lxAssertNeverReach("Unsupported cube texture naming scheme.");
 			return "";
 		}
 	}

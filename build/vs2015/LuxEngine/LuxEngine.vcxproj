@@ -311,6 +311,7 @@
     <ClInclude Include="..\..\..\inc\core\lxAlgorithm.h" />
     <ClInclude Include="..\..\..\inc\core\lxAllocator.h" />
     <ClInclude Include="..\..\..\inc\core\lxArray.h" />
+    <ClInclude Include="..\..\..\inc\core\lxAssert.h" />
     <ClInclude Include="..\..\..\inc\core\lxBinary.h" />
     <ClInclude Include="..\..\..\inc\core\lxCharacter.h" />
     <ClInclude Include="..\..\..\inc\core\lxFormat.h" />
@@ -360,7 +361,7 @@
     <ClInclude Include="..\..\..\inc\io\ioConstants.h" />
     <ClInclude Include="..\..\..\inc\io\path.h" />
     <ClInclude Include="..\..\..\inc\Lux.h" />
-    <ClInclude Include="..\..\..\inc\LuxBase.h" />
+    <ClInclude Include="..\..\..\inc\core\LuxBase.h" />
     <ClInclude Include="..\..\..\inc\LuxConfig.h" />
     <ClInclude Include="..\..\..\inc\LuxEngine\LuxDevice.h" />
     <ClInclude Include="..\..\..\inc\math\aabbox3d.h" />
@@ -521,6 +522,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\inc\scene\zones\ZoneRing.h" />
     <ClCompile Include="..\..\..\src\core\Logger.cpp" />
+    <ClCompile Include="..\..\..\src\core\lxAssert.cpp" />
     <ClCompile Include="..\..\..\src\core\lxMemoryAlloc.cpp" />
     <ClCompile Include="..\..\..\src\core\lxName.cpp" />
     <ClCompile Include="..\..\..\src\core\lxSTDIO.cpp" />

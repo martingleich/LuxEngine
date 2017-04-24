@@ -370,7 +370,7 @@ If the value is outside the range [0;1] the result is undefined.
 template <typename type>
 inline type Lerp(const type& A, const type& B, float t)
 {
-	assert(t >= 0.0f && t <= 1.0f);
+	lxAssert(t >= 0.0f && t <= 1.0f);
 
 	return (type)(A*(1.0f - t) + B*t);
 }
@@ -388,7 +388,7 @@ If the value is outside the range [0;1] the result is undefined.
 template <typename T>
 inline T CubicInterpolation(const T& n0, const T& n1, const T& n2, const T& n3, float t)
 {
-	assert(t >= 0.0f && t <= 1.0f);
+	lxAssert(t >= 0.0f && t <= 1.0f);
 
 	T p = (n3 - n2) - (n0 - n1);
 	T q = (n0 - n1) - p;

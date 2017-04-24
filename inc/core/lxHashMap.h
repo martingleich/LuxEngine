@@ -36,7 +36,7 @@ public:
 
 		Iterator& operator++()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			if(!m_Entry->next) {
 				while((void*)*m_Bucket != (void*)m_Bucket) {
 					++m_Bucket;
@@ -76,24 +76,24 @@ public:
 
 		V& operator*()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->value;
 		}
 		V* operator->()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return &(m_Entry->value);
 		}
 
 		V& value()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->value;
 		}
 
 		const K& key()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->key;
 		}
 
@@ -129,7 +129,7 @@ public:
 
 		ConstIterator& operator++()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			if(!m_Entry->next) {
 				while((void*)*m_Bucket != (void*)m_Bucket) {
 					++m_Bucket;
@@ -169,24 +169,24 @@ public:
 
 		const V& operator*()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->value;
 		}
 		const V* operator->()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return &(m_Entry->value);
 		}
 
 		const V& value()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->value;
 		}
 
 		const K& key()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->key;
 		}
 
@@ -228,7 +228,7 @@ public:
 
 		KeyIterator& operator++()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			if(!m_Entry->next) {
 				while((void*)*m_Bucket != (void*)m_Bucket) {
 					++m_Bucket;
@@ -268,12 +268,12 @@ public:
 
 		K& operator*()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->key;
 		}
 		K* operator->()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return &(m_Entry->key);
 		}
 
@@ -309,7 +309,7 @@ public:
 
 		ConstKeyIterator& operator++()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			if(!m_Entry->next) {
 				while((void*)*m_Bucket != (void*)m_Bucket) {
 					++m_Bucket;
@@ -349,12 +349,12 @@ public:
 
 		const K& operator*()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return m_Entry->key;
 		}
 		const K* operator->()
 		{
-			assert(IsValidIterator());
+			lxAssert(IsValidIterator());
 			return &(m_Entry->key);
 		}
 
@@ -829,7 +829,7 @@ private:
 
 		if(newSize > m_Allocated) {
 			HashValue<K, V>* newNodes = m_Allocator.Allocate(newSize);
-			assert((size_t)newNodes % 2 == 0);
+			lxAssert((size_t)newNodes % 2 == 0);
 			if(m_Allocated) {
 				for(size_t i = 0; i < m_BucketCount; ++i) {
 					if(m_Buckets[i])

@@ -34,7 +34,7 @@ public:
 			GetIndex(&data, n);
 			return data;
 		}
-		assertNeverReach("Unknown index format.");
+		lxAssertNeverReach("Unknown index format.");
 		return 0;
 	}
 

@@ -338,7 +338,7 @@ void string::Resize(size_t newLength, const string_type& filler)
 	} else {
 		filler.EnsureSize();
 		if(filler.size == 0) {
-			assertNeverReach("Resize with empty filler");
+			lxAssertNeverReach("Resize with empty filler");
 			return;
 		}
 		size_t fillerLength = filler.size == 1 ? 1 : core::StringLengthUTF8(filler.data);
@@ -429,7 +429,7 @@ void string::PushByte(u8 byte)
 		Reserve(GetAllocated() * 2 + 1);
 
 	if(byte == 0) {
-		assertNeverReach("Can't write zero byte into string.");
+		lxAssertNeverReach("Can't write zero byte into string.");
 		byte = ' ';
 	}
 
@@ -781,7 +781,7 @@ void string::PushCharacter(const char* ptr)
 		Reserve(GetAllocated() * 2 + 6);
 
 	if(*ptr == 0) {
-		assertNeverReach("Can't write zero byte into string.");
+		lxAssertNeverReach("Can't write zero byte into string.");
 		Data()[m_Size++] = ' ';
 	} else {
 		Data()[m_Size++] = *ptr;

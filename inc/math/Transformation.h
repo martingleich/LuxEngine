@@ -344,7 +344,7 @@ public:
 	template <typename T>
 	T& TransformObject(const T& in, T& out) const
 	{
-		assertNeverReach("TransformObject for this type not implemented.");
+		lxAssertNeverReach("TransformObject for this type not implemented.");
 		return out;
 	}
 

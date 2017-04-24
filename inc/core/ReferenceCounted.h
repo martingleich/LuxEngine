@@ -46,7 +46,7 @@ public:
 	*/
 	bool Drop() const
 	{
-		assert(m_ReferenceCounter > 0);
+		lxAssert(m_ReferenceCounter > 0);
 
 		if(m_ReferenceCounter == 1) {
 			LUX_FREE(this);
@@ -163,7 +163,7 @@ public:
 		if(!m_Object)
 			return nullptr;
 		T* casted_out =dynamic_cast<T*>(m_Object);
-		assert(casted_out);
+		lxAssert(casted_out);
 		return casted_out;
 	}
 
@@ -172,7 +172,7 @@ public:
 		if(!m_Object)
 			return nullptr;
 		T* casted_out =dynamic_cast<T*>(m_Object);
-		assert(casted_out);
+		lxAssert(casted_out);
 		return casted_out;
 	}
 
@@ -181,7 +181,7 @@ public:
 		if(!m_Object)
 			return nullptr;
 		T* casted_out =dynamic_cast<T*>(m_Object);
-		assert(casted_out);
+		lxAssert(casted_out);
 		return casted_out;
 	}
 
@@ -233,7 +233,7 @@ public:
 	operator StrongRef<T2>() const
 	{
 		T2* cast_out = dynamic_cast<T2*>(m_Object);
-		assert(cast_out);
+		lxAssert(cast_out);
 		return StrongRef<T2>(cast_out);
 	}
 

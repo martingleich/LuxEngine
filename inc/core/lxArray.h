@@ -232,7 +232,7 @@ public:
 	//! Move assignment 
 	array<T>& operator=(array<T>&& old)
 	{
-		assert(this != &old);
+		lxAssert(this != &old);
 
 		for(u32 i = 0; i < old.m_Used; ++i)
 			m_Entries[i].~T();
@@ -275,7 +275,7 @@ public:
 		m_Alloc = other.m_Alloc;
 		m_Sorted = other.m_Sorted;
 
-		assert(m_Used <= m_Alloc);
+		lxAssert(m_Used <= m_Alloc);
 
 		if(m_Entries) {
 			for(size_t i = 0; i < m_Used; ++i)
@@ -292,7 +292,7 @@ public:
 	*/
 	void Insert(const T& entry, Iterator before)
 	{
-		assert(before.m_Current - m_Entries <= (int)m_Used);
+		lxAssert(before.m_Current - m_Entries <= (int)m_Used);
 
 		T element(entry); // Safe the elements, if it's part of the old list
 		const size_t pos = before.m_Current - m_Entries;
@@ -327,7 +327,7 @@ public:
 	*/
 	void Insert(T&& entry, Iterator before)
 	{
-		assert(before.m_Current - m_Entries <= (int)m_Used);
+		lxAssert(before.m_Current - m_Entries <= (int)m_Used);
 
 		T element(std::move(entry)); // Safe the elements, if it's part of the old list
 		const size_t pos = before.m_Current - m_Entries;
@@ -480,7 +480,7 @@ public:
 	Iterator Erase(Iterator it, bool holdOrder = false)
 	{
 		size_t cur = it.m_Current - m_Entries;
-		assert(it.m_Current - m_Entries <= (int)m_Used);
+		lxAssert(it.m_Current - m_Entries <= (int)m_Used);
 
 		if(holdOrder) {
 			for(T* i = it.m_Current; i < m_Entries + m_Used - 1; ++i)
@@ -508,7 +508,7 @@ public:
 	Iterator Erase(Iterator from, size_t count, bool holdOrder)
 	{
 		size_t cur = from.m_Current - m_Entries;
-		assert((from.m_Current - m_Entries) + count - 1 <= m_Used);
+		lxAssert((from.m_Current - m_Entries) + count - 1 <= m_Used);
 
 		if(holdOrder) {
 			for(T* i = from.m_Current; i < m_Entries + m_Used - count; ++i)
@@ -753,14 +753,14 @@ public:
 	//! Access a single element
 	const T& operator[](size_t entry) const
 	{
-		assert(entry <= m_Used);
+		lxAssert(entry <= m_Used);
 		return m_Entries[entry];
 	}
 
 	//! Access a single element
 	T& operator[](size_t entry)
 	{
-		assert(entry <= m_Used);
+		lxAssert(entry <= m_Used);
 		return m_Entries[entry];
 	}
 

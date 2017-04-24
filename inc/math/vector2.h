@@ -141,7 +141,7 @@ public:
 	//! Access by index.
 	T& operator[](int i)
 	{
-		assert(i < 2);
+		lxAssert(i < 2);
 		switch(i) {
 		case 0: return x;
 		case 1: return y;
@@ -152,7 +152,7 @@ public:
 	//! Access by index.
 	T operator[](int i) const
 	{
-		assert(i < 2);
+		lxAssert(i < 2);
 		switch(i) {
 		case 0: return x;
 		case 1: return y;

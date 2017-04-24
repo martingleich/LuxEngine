@@ -434,7 +434,7 @@ public:
 		if(m_Declaration == nullptr || other.m_Declaration == nullptr)
 			return false;
 
-		assert(m_Declaration->IsNormalized());
+		lxAssert(m_Declaration->IsNormalized());
 		if(GetStreamCount() != other.GetStreamCount())
 			return false;
 		if(GetElemCount() != other.GetElemCount())

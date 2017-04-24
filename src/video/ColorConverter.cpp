@@ -69,7 +69,7 @@ static void Convert_Trivial(const void* src, void* dst, u32 width, u32 height, u
 	u8* dB = (u8*)dst;
 
 	// Assert on overlap
-	assert(!(sB < (dB + height*dstPitch) && dB < (sB + height*srcPitch)));
+	lxAssert(!(sB < (dB + height*dstPitch) && dB < (sB + height*srcPitch)));
 
 	u32 sizeS = srcFormat.GetBytePerPixel();
 	u32 sizeD = dstFormat.GetBytePerPixel();

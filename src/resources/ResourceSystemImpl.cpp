@@ -124,7 +124,7 @@ struct ResourceBlock
 
 	bool AddResource(const string& name, Resource* resource)
 	{
-		assert(resource);
+		lxAssert(resource);
 		if(!resource)
 			return false;
 
@@ -214,7 +214,7 @@ u32 ResourceSystemImpl::GetResourceId(Resource* resource) const
 		return ResourceSystem::INVALID_ID;
 
 	const u32 typeId = GetTypeID(resource->GetReferableSubType());
-	assert(typeId < GetTypeCount());
+	lxAssert(typeId < GetTypeCount());
 
 	const u32 resId = self->resources[typeId].GetResourceId(resource);
 	if(resId == ResourceSystem::INVALID_ID)

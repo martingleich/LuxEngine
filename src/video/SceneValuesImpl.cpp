@@ -72,7 +72,7 @@ void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix)
 		}
 	}
 #else
-	assert(type <= MAT_VIEW_INV);
+	lxAssert(type <= MAT_VIEW_INV);
 	if(type <= MAT_VIEW_INV) {
 		m_Matrizes[type] = Matrix;
 		switch(type) {
@@ -96,7 +96,7 @@ void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix)
 			m_UpdateMatrizes |= 2 | 32 | 128 | 256 | 512 | 2048 | 8192 | 16384 | 32768;
 			m_UpdateMatrizes &= ~16;
 		default:
-			assertNeverReach("There's something fishy.");
+			lxAssertNeverReach("There's something fishy.");
 		}
 	}
 #endif
@@ -104,7 +104,7 @@ void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix)
 
 void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix, const math::matrix4& InvMatrix)
 {
-	assert(type <= MAT_VIEW);
+	lxAssert(type <= MAT_VIEW);
 	if(type <= MAT_VIEW) {
 		m_Matrizes[type] = Matrix;
 		m_Matrizes[type + 3] = InvMatrix;
@@ -119,7 +119,7 @@ void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix, con
 			m_UpdateMatrizes &= ~(2 | 16);
 			break;
 		default:
-			assertNeverReach("There's something fishy.");
+			lxAssertNeverReach("There's something fishy.");
 		}
 	}
 }
@@ -131,19 +131,19 @@ const math::matrix4& SceneValuesImpl::GetMatrix(EMatrizes type) const
 	} else {
 		switch(type) {
 		case MAT_WORLD:
-			assert(IsUpToDate(MAT_WORLD_INV));
+			lxAssert(IsUpToDate(MAT_WORLD_INV));
 			m_Matrizes[MAT_WORLD_INV].GetInverted(m_Matrizes[MAT_WORLD]);
 			break;
 		case MAT_VIEW:
-			assert(IsUpToDate(MAT_VIEW_INV));
+			lxAssert(IsUpToDate(MAT_VIEW_INV));
 			m_Matrizes[MAT_VIEW_INV].GetInverted(m_Matrizes[MAT_VIEW]);
 			break;
 		case MAT_WORLD_INV:
-			assert(IsUpToDate(MAT_WORLD));
+			lxAssert(IsUpToDate(MAT_WORLD));
 			m_Matrizes[MAT_WORLD].GetInverted(m_Matrizes[MAT_WORLD_INV]);
 			break;
 		case MAT_VIEW_INV:
-			assert(IsUpToDate(MAT_VIEW));
+			lxAssert(IsUpToDate(MAT_VIEW));
 			m_Matrizes[MAT_VIEW].GetInverted(m_Matrizes[MAT_VIEW_INV]);
 			break;
 		case MAT_WORLD_VIEW:
@@ -198,7 +198,7 @@ const math::matrix4& SceneValuesImpl::GetMatrix(EMatrizes type) const
 			m_UpdateMatrizes ^= 1 << MAT_WORLD_VIEW_INV_TRANS;
 			break;
 		default:
-			assertNeverReach("Can't generate matrix");
+			lxAssertNeverReach("Can't generate matrix");
 		}
 
 		m_UpdateMatrizes ^= (1 << type);
@@ -210,11 +210,11 @@ u32 SceneValuesImpl::AddParam(const string& name, core::Type type)
 {
 	int id = GetParamID(name.Data());
 	if(id != -1) {
-		assertEx(id != -1, "Param already used");
+		lxAssertEx(id != -1, "Param already used");
 		return 0xFFFFFFFF;
 	}
 
-	assertEx(type.GetSize() != 0, "Invalid type");
+	lxAssertEx(type.GetSize() != 0, "Invalid type");
 	SParam Param(name, m_CurrentOffset, type, type.GetSize());
 	m_aParams.Push_Back(Param);
 

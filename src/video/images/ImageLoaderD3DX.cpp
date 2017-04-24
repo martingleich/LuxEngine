@@ -208,7 +208,7 @@ static void CopyTextureData(
 	}
 	break;
 	default:
-		assertNeverReach("Unsupported texture type.");
+		lxAssertNeverReach("Unsupported texture type.");
 	}
 }
 

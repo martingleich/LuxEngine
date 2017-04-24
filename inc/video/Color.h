@@ -227,7 +227,7 @@ public:
 			out = 0xFF000000 | (in[1] << 16) | (in[1] << 8) << (in[1] << 0);
 			break;
 		default:
-			assertNeverReach("Colorformat not implemented.");
+			lxAssertNeverReach("Colorformat not implemented.");
 			out = 0;
 		}
 
@@ -270,7 +270,7 @@ public:
 				((in & 0x000000F8) >> 3));
 			break;
 		default:
-			assertNeverReach("Colorformat not implemented.");
+			lxAssertNeverReach("Colorformat not implemented.");
 			memset(out, 0, GetBytePerPixel());
 		}
 	}
@@ -903,7 +903,7 @@ namespace math
 template <>
 inline video::Color Lerp(const video::Color& a, const video::Color& b, float t)
 {
-	assert(t >= 0.0f && t <= 1.0f);
+	lxAssert(t >= 0.0f && t <= 1.0f);
 
 	s32 aRed = a.GetRed();
 	s32 bRed = b.GetRed();

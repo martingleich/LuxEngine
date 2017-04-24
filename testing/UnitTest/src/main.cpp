@@ -120,18 +120,18 @@ int main(int argc, const char* argv[])
 		}
 	}
 
-	size_t succeded=0,failed=0;
+	size_t succeded = 0, failed = 0;
 	if(isProject)
 		UnitTesting::Environment::Instance().SetControl(new ProjectPrinter(succeded, failed));
 
-//	NameFilter nameFilter = NameFilter::Include({"string", "unicode", "path"});
-//	UnitTesting::Environment::Instance().AddFilter(&nameFilter);
+	//	NameFilter nameFilter = NameFilter::Include({"string", "unicode", "path"});
+	//	UnitTesting::Environment::Instance().AddFilter(&nameFilter);
 
 #ifdef _DEBUG
 	// This is pure evil.
 	// We can maybe catch the first exception, after that the stack is most likly fucked up.
 	// But one message is better than nothing.
-	typedef void (*SignalHandlerPtr)(int);
+	typedef void(*SignalHandlerPtr)(int);
 	SignalHandlerPtr previous = signal(SIGSEGV, SignalHandler);
 #endif
 
@@ -139,5 +139,5 @@ int main(int argc, const char* argv[])
 
 	std::cin.get();
 
-	return failed?-1:0;
+	return failed ? -1 : 0;
 }

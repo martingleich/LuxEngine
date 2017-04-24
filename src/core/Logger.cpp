@@ -204,7 +204,7 @@ public:
 
 	const string& EscapeString(const string& str)
 	{
-		assert(false);
+		lxAssert(false);
 		/*
 		m_ConversionBuffer.Clear();
 		for(size_t i = 0; i < str.Length(); ++i)

@@ -49,7 +49,7 @@ void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handl
 	}
 	break;
 	default:
-		assertNeverReach("Unsupported hardwarebuffer type.");
+		lxAssertNeverReach("Unsupported hardwarebuffer type.");
 	}
 }
 
@@ -200,7 +200,7 @@ void* BufferManagerD3D9::UpdateInternalBuffer(HardwareBuffer* buffer, void* hand
 			handle);
 
 	default:
-		assertNeverReach("Unsupported hardware buffer type.");
+		lxAssertNeverReach("Unsupported hardware buffer type.");
 		return nullptr;
 	}
 }
