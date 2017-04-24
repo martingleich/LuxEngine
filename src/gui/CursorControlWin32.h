@@ -1,7 +1,9 @@
-#ifndef INCLUDED_CURSORCONTROLWIN32_H
-#define INCLUDED_CURSORCONTROLWIN32_H
+#ifndef INCLUDED_CURSORCONTROL_WIN32_H
+#define INCLUDED_CURSORCONTROL_WIN32_H
 #include "gui/CursorControl.h"
 #include "gui/Window.h"
+
+#ifdef LUX_WINDOWS
 
 namespace lux
 {
@@ -45,5 +47,7 @@ private:
 
 }
 }
+
+#endif // LUX_WINDOWS
 
 #endif // !INCLUDED_CURSORCONTROLWIN32_H

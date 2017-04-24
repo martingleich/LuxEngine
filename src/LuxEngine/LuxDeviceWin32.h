@@ -1,7 +1,5 @@
-#ifndef INCLUDED_CLUXDEVICEWIN32_H
-#define INCLUDED_CLUXDEVICEWIN32_H
-#include "StrippedWindows.h"
-
+#ifndef INCLUDED_LUXDEVICE_WIN32_H
+#define INCLUDED_LUXDEVICE_WIN32_H
 #include "LuxEngine/LuxDevice.h"
 
 #include "math/dimension2d.h"
@@ -9,7 +7,11 @@
 #include "core/lxAlgorithm.h"
 #include "core/lxArray.h"
 #include "core/lxMemory.h"
+
 #include "gui/Window.h"
+
+#ifdef LUX_WINDOWS
+#include "StrippedWindows.h"
 
 namespace lux
 {
@@ -103,7 +105,8 @@ private:
 	{
 		InputEventProxy(LuxDeviceWin32* d) :
 			device(d)
-		{}
+		{
+		}
 
 		bool OnEvent(const input::Event& event)
 		{
@@ -119,7 +122,8 @@ private:
 	public:
 		WindowCallback(LuxDeviceWin32* dev) :
 			device(dev)
-		{}
+		{
+		}
 
 		void OnClose(gui::Window& window)
 		{
@@ -167,4 +171,6 @@ private:
 
 }    //namespace lux
 
+
+#endif // LUX_WINDOWS
 #endif

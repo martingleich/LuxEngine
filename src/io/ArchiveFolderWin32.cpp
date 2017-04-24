@@ -1,4 +1,5 @@
-#include "ArchiveFolder.h"
+#ifdef LUX_WINDOWS
+#include "ArchiveFolderWin32.h"
 #include "io/FileSystem.h"
 #include "io/File.h"
 #include "core/lxUnicodeConversion.h"
@@ -50,6 +51,8 @@ static bool IsFilenameValid(const wchar_t* filename)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace
+{
 class ArchiveFolderEnumerator : public FileEnumerator
 {
 public:
@@ -138,28 +141,29 @@ const FileDescription& ArchiveFolderEnumerator::GetCurrent() const
 {
 	return m_Current;
 }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ArchiveLoaderFolder::SelfData
+struct ArchiveLoaderFolderWin32::SelfData
 {
 	WeakRef<FileSystem> fileSys;
 };
 
-ArchiveLoaderFolder::ArchiveLoaderFolder(FileSystem* fileSystem) :
+ArchiveLoaderFolderWin32::ArchiveLoaderFolderWin32(FileSystem* fileSystem) :
 	self(LUX_NEW(SelfData))
 {
 	self->fileSys = fileSystem;
 }
 
-ArchiveLoaderFolder::~ArchiveLoaderFolder()
+ArchiveLoaderFolderWin32::~ArchiveLoaderFolderWin32()
 {
 	LUX_FREE(self);
 }
 
-StrongRef<Archive> ArchiveLoaderFolder::LoadArchive(const path& p)
+StrongRef<Archive> ArchiveLoaderFolderWin32::LoadArchive(const path& p)
 {
-	StrongRef<Archive> a = LUX_NEW(ArchiveFolder)(self->fileSys, p);
+	StrongRef<Archive> a = LUX_NEW(ArchiveFolderWin32)(self->fileSys, p);
 	if(a->IsValid())
 		return a;
 	else
@@ -168,7 +172,7 @@ StrongRef<Archive> ArchiveLoaderFolder::LoadArchive(const path& p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ArchiveFolder::SelfData
+struct ArchiveFolderWin32::SelfData
 {
 	string name;
 	path path;
@@ -180,19 +184,19 @@ struct ArchiveFolder::SelfData
 	WeakRef<io::FileSystem> fileSystem;
 };
 
-ArchiveFolder::ArchiveFolder(io::FileSystem* fileSystem, const path& dir) :
+ArchiveFolderWin32::ArchiveFolderWin32(io::FileSystem* fileSystem, const path& dir) :
 	self(LUX_NEW(SelfData))
 {
 	self->fileSystem = fileSystem;
 	SetPath(dir);
 }
 
-ArchiveFolder::~ArchiveFolder()
+ArchiveFolderWin32::~ArchiveFolderWin32()
 {
 	LUX_FREE(self);
 }
 
-StrongRef<File> ArchiveFolder::OpenFile(const path& p, EFileMode mode, bool createIfNotExist)
+StrongRef<File> ArchiveFolderWin32::OpenFile(const path& p, EFileMode mode, bool createIfNotExist)
 {
 	if(self->fileSystem) {
 		return self->fileSystem->OpenFile(self->path + p, mode, createIfNotExist);
@@ -201,7 +205,7 @@ StrongRef<File> ArchiveFolder::OpenFile(const path& p, EFileMode mode, bool crea
 	}
 }
 
-StrongRef<File> ArchiveFolder::OpenFile(const FileDescription& file, EFileMode mode, bool createIfNotExist)
+StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileMode mode, bool createIfNotExist)
 {
 	if(file.GetArchive() == this) {
 		return OpenFile(file.GetPath() + file.GetName(), mode, createIfNotExist);
@@ -210,7 +214,7 @@ StrongRef<File> ArchiveFolder::OpenFile(const FileDescription& file, EFileMode m
 	}
 }
 
-bool ArchiveFolder::ExistFile(const path& p)
+bool ArchiveFolderWin32::ExistFile(const path& p)
 {
 #ifdef LUX_WINDOWS
 	DWORD fatt = GetWin32FileAttributes(p);
@@ -223,7 +227,7 @@ bool ArchiveFolder::ExistFile(const path& p)
 #endif
 }
 
-StrongRef<FileEnumerator> ArchiveFolder::EnumerateFiles(const path& subDir)
+StrongRef<FileEnumerator> ArchiveFolderWin32::EnumerateFiles(const path& subDir)
 {
 	path correctedSubDir = NormalizePath(subDir, true);
 	path fullPath = self->path + correctedSubDir;
@@ -232,22 +236,22 @@ StrongRef<FileEnumerator> ArchiveFolder::EnumerateFiles(const path& subDir)
 	return LUX_NEW(ArchiveFolderEnumerator)(this, correctedSubDir, win32Path);
 }
 
-EArchiveCapabilities ArchiveFolder::GetCaps() const
+EArchiveCapabilities ArchiveFolderWin32::GetCaps() const
 {
 	return EArchiveCapabilities::Read | EArchiveCapabilities::Add | EArchiveCapabilities::Delete | EArchiveCapabilities::Change;
 }
 
-bool ArchiveFolder::IsValid() const
+bool ArchiveFolderWin32::IsValid() const
 {
 	return self->isValid;
 }
 
-path ArchiveFolder::GetAbsolutePath(const path& p)
+path ArchiveFolderWin32::GetAbsolutePath(const path& p)
 {
 	return (self->path + p);
 }
 
-void ArchiveFolder::SetPath(const path& dir)
+void ArchiveFolderWin32::SetPath(const path& dir)
 {
 	if(dir.IsEmpty() || self->fileSystem->ExistDirectory(dir)) {
 		self->path = NormalizePath(dir, true);
@@ -258,7 +262,7 @@ void ArchiveFolder::SetPath(const path& dir)
 	}
 }
 
-core::array<u16> ArchiveFolder::ConvertPathToWin32WidePath(const path& p) const
+core::array<u16> ArchiveFolderWin32::ConvertPathToWin32WidePath(const path& p) const
 {
 	core::array<u16> p2 = core::UTF8ToUTF16(p.Data());
 
@@ -275,7 +279,7 @@ core::array<u16> ArchiveFolder::ConvertPathToWin32WidePath(const path& p) const
 	return out;
 }
 
-u32 ArchiveFolder::GetWin32FileAttributes(const path& p) const
+u32 ArchiveFolderWin32::GetWin32FileAttributes(const path& p) const
 {
 	Win32Path win32Path = ConvertPathToWin32WidePath(p);
 	return (u32)GetFileAttributesW((wchar_t*)win32Path.Data_c());
@@ -283,3 +287,5 @@ u32 ArchiveFolder::GetWin32FileAttributes(const path& p) const
 
 }
 }
+
+#endif // LUX_WINDOWS

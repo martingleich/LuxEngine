@@ -1,5 +1,5 @@
+#ifdef LUX_WINDOWS
 #include "CursorControlWin32.h"
-
 #include "StrippedWindows.h"
 
 namespace lux
@@ -122,3 +122,4 @@ void CursorControlWin32::OnResize(Window& Window, const math::dimension2du& newS
 
 }
 }
+#endif // LUX_WINDOWS

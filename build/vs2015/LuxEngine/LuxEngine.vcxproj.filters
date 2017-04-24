@@ -345,9 +345,6 @@
     <ClInclude Include="..\..\..\inc\io\path.h">
       <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\io\FileSystemImpl.h">
-      <Filter>io</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\io\INIFileImpl.h">
       <Filter>io</Filter>
     </ClInclude>
@@ -370,9 +367,6 @@
       <Filter>io\file_types</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\inc\io\Archive.h">
-      <Filter>io\archive</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\io\ArchiveFolder.h">
       <Filter>io\archive</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\inc\io\ArchiveLoader.h">
@@ -707,6 +701,15 @@
     <ClInclude Include="..\..\..\src\input\raw_input\RawInputReceiver.h">
       <Filter>input\raw_input</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\io\ArchiveFolderWin32.h">
+      <Filter>io\archive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\io\FileSystemWin32.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\LuxEngine\LuxDeviceLinux.h">
+      <Filter>LuxDevice</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp">
@@ -802,9 +805,6 @@
     <ClCompile Include="..\..\..\src\input\InputDeviceNull.cpp">
       <Filter>input\devices</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\io\FileSystemImpl.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\io\INIFileImpl.cpp">
       <Filter>io</Filter>
     </ClCompile>
@@ -821,9 +821,6 @@
       <Filter>io\file_types</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\io\Archive.cpp">
-      <Filter>io\archive</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\io\ArchiveFolder.cpp">
       <Filter>io\archive</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\video\images\ImageImpl.cpp">
@@ -996,6 +993,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\input\raw_input\RawInputReceiver.cpp">
       <Filter>input\raw_input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\io\ArchiveFolderWin32.cpp">
+      <Filter>io\archive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\io\FileSystemWin32.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\LuxEngine\LuxDeviceLinux.cpp">
+      <Filter>LuxDevice</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

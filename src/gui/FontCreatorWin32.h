@@ -2,6 +2,7 @@
 #define INCLUDED_FONT_CREATOR_WIN32_H
 #include "FontCreatorNull.h"
 
+#ifdef LUX_WINDOWS
 namespace lux
 {
 namespace gui
@@ -36,4 +37,7 @@ public:
 
 }
 }
+
+#endif // LUX_WINDOWS
+
 #endif 

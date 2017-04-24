@@ -1,6 +1,8 @@
-#ifndef INCLUDED_TIMERWIN32_H
-#define INCLUDED_TIMERWIN32_H
+#ifndef INCLUDED_TIMER_WIN32_H
+#define INCLUDED_TIMER_WIN32_H
 #include "core/Timer.h"
+
+#ifdef LUX_WINDOWS
 
 namespace lux
 {
@@ -38,9 +40,11 @@ private:
 
 };
 
-}    
+}
 
-}    
+}
+
+#endif // LUX_WINDOWS
 
 
 #endif

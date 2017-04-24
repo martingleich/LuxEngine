@@ -1,22 +1,23 @@
-#ifndef INCLUDED_CFILESYSTEM_H
-#define INCLUDED_CFILESYSTEM_H
+#ifndef INCLUDED_FILESYSTEM_WIN32_H
+#define INCLUDED_FILESYSTEM_WIN32_H
 #include "io/FileSystem.h"
 #include "core/lxArray.h"
-#include "ArchiveFolder.h"
+
+#ifdef LUX_WINDOWS
+
+#include "ArchiveFolderWin32.h"
 
 namespace lux
 {
 namespace io
 {
-class ArchiveFolder;
-
-class FileSystemImpl : public FileSystem
+class FileSystemWin32 : public FileSystem
 {
 public:
-	FileSystemImpl();
-	~FileSystemImpl()
+	FileSystemWin32();
+	~FileSystemWin32()
 	{
-	};
+	}
 	StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const string& name, bool deleteOnDrop);
@@ -44,7 +45,7 @@ public:
 	StrongRef<Archive> CreateArchive(const path& path);
 
 	void AddMountPoint(const path& point, Archive* archive);
-	void RemoveMountPoint(const path& point, Archive* archive=nullptr);
+	void RemoveMountPoint(const path& point, Archive* archive = nullptr);
 
 private:
 	string GetFileOpenString(EFileMode mode) const;
@@ -64,15 +65,17 @@ private:
 private:
 	path m_WorkingDirectory;
 
-	StrongRef<ArchiveFolder> m_RootArchive;
+	StrongRef<ArchiveFolderWin32> m_RootArchive;
 	core::array<MountEntry> m_Mounts;
 };
 
 
 
-}    
+}
 
-}    
+}
 
+
+#endif // LUX_WINDOWS
 
 #endif

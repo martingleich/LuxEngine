@@ -1,6 +1,8 @@
-#ifndef INCLUDED_WINDOWWIN32_H
-#define INCLUDED_WINDOWWIN32_H
+#ifndef INCLUDED_WINDOW_WIN32_H
+#define INCLUDED_WINDOW_WIN32_H
 #include "WindowBase.h"
+
+#ifdef LUX_WINDOWS
 #include "StrippedWindows.h"
 
 namespace lux
@@ -54,9 +56,11 @@ public:
 		LRESULT& result);
 };
 
-} 
+}
 
-} 
+}
+
+#endif // LUX_WINDOWS
 
 
 #endif // !INCLUDED_WINDOWWIN32_H

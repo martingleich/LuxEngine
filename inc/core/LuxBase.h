@@ -2,16 +2,6 @@
 #define INCLUDED_LUXBASE_H
 
 //---------------------------------------------
-// PLATFORM
-#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
-#define LUX_WINDOWS
-#endif
-
-#if !defined(LUX_WINDOWS)
-#define LUX_LINUX
-#endif
-
-//---------------------------------------------
 // LUX_EXPORT
 #ifdef LUX_WINDOWS
 #ifdef LUX_EXPORT

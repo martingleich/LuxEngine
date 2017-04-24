@@ -1,3 +1,4 @@
+#ifdef LUX_WINDOWS
 #include "WindowWin32.h"
 #include "video/images/Image.h"
 #include "video/ColorConverter.h"
@@ -455,7 +456,9 @@ bool WindowWin32::HandleMessages(UINT Message,
 	return false;
 }
 
-} 
+}
 
-} 
+}
 
+
+#endif // LUX_WINDOWS

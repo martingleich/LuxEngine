@@ -1,6 +1,7 @@
+#ifdef LUX_WINDOWS
 #include "TimerWin32.h"
-#include "StrippedWindows.h"
 #include <time.h>
+#include "StrippedWindows.h"
 
 namespace lux
 {
@@ -123,7 +124,9 @@ DateAndTime::EWeekDay TimerWin32::TimeStructToWeekDay(int tm) const
 	}
 }
 
-}    
+}
 
-}    
+}
 
+
+#endif // LUX_WINDOWS

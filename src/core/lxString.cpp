@@ -5,7 +5,6 @@ namespace lux
 {
 
 const string string::EMPTY = string();
-const string::ConstIterator string::ConstIterator::INVALID = string::ConstIterator(nullptr, nullptr);
 
 string::string() :
 	m_Data(nullptr),
@@ -467,7 +466,7 @@ string::ConstIterator string::End() const
 
 bool string::StartsWith(const string_type& data, ConstIterator first) const
 {
-	if(first == ConstIterator::INVALID)
+	if(first == ConstIterator::Invalid())
 		first = First();
 	if(data.data[0] == 0)
 		return true;
@@ -483,7 +482,7 @@ bool string::StartsWith(const string_type& data, ConstIterator first) const
 
 bool string::EndsWith(const string_type& data, ConstIterator end) const
 {
-	if(end == ConstIterator::INVALID)
+	if(end == ConstIterator::Invalid())
 		end = End();
 
 	if(data.data[0] == 0)
@@ -503,7 +502,7 @@ bool string::EndsWith(const string_type& data, ConstIterator end) const
 
 size_t string::Replace(const string_type& replace, const string_type& search, ConstIterator first, ConstIterator end)
 {
-	if(end == ConstIterator::INVALID)
+	if(end == ConstIterator::Invalid())
 		end = End();
 
 	size_t count = 0;
@@ -523,7 +522,7 @@ size_t string::Replace(const string_type& replace, const string_type& search, Co
 
 string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIterator rangeFirst, ConstIterator rangeEnd)
 {
-	if(rangeEnd == ConstIterator::INVALID)
+	if(rangeEnd == ConstIterator::Invalid())
 		rangeEnd = End();
 
 	return ReplaceRange(replace, rangeFirst, core::IteratorDistance(rangeFirst, rangeEnd));
@@ -551,9 +550,9 @@ string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIter
 
 string::ConstIterator string::Find(const string_type& search, ConstIterator first, ConstIterator end) const
 {
-	if(first == ConstIterator::INVALID)
+	if(first == ConstIterator::Invalid())
 		first = First();
-	if(end == ConstIterator::INVALID)
+	if(end == ConstIterator::Invalid())
 		end = End();
 
 	search.EnsureSize();
@@ -572,9 +571,9 @@ string::ConstIterator string::Find(const string_type& search, ConstIterator firs
 
 string::ConstIterator string::FindReverse(const string_type& search, ConstIterator first, ConstIterator end) const
 {
-	if(first == ConstIterator::INVALID)
+	if(first == ConstIterator::Invalid())
 		first = First();
-	if(end == ConstIterator::INVALID)
+	if(end == ConstIterator::Invalid())
 		end = End();
 
 	if(first == end)
@@ -661,7 +660,7 @@ string::ConstIterator string::Remove(ConstIterator from, ConstIterator to)
 
 string& string::RStrip(ConstIterator end)
 {
-	if(end == ConstIterator::INVALID)
+	if(end == ConstIterator::Invalid())
 		end = End();
 
 	if(end == First())
@@ -690,7 +689,7 @@ string& string::RStrip(ConstIterator end)
 
 string& string::LStrip(ConstIterator first)
 {
-	if(first == ConstIterator::INVALID)
+	if(first == ConstIterator::Invalid())
 		first = First();
 
 	size_t offset = first.Pointer() - Data_c();

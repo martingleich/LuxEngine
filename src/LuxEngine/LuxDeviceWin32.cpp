@@ -1,3 +1,4 @@
+#ifdef LUX_WINDOWS
 #include "LuxDeviceWin32.h"
 
 #include "core/TimerWin32.h"
@@ -8,11 +9,11 @@
 #include "input/InputSystemImpl.h"
 #include "scene/SceneManagerImpl.h"
 #include "scene/mesh/MeshSystemImpl.h"
-#include "io/FileSystemImpl.h"
 #include "resources/ResourceSystemImpl.h"
 #include "video/MaterialLibraryImpl.h"
 #include "core/ReferableFactoryImpl.h"
 
+#include "io/FileSystemWin32.h"
 #include "gui/WindowWin32.h"
 #include "gui/CursorControlWin32.h"
 #include "gui/GUIEnvironmentImpl.h"
@@ -204,7 +205,7 @@ bool LuxDeviceWin32::BuildCoreDevice()
 		log::EngineLog.SetNewPrinter(log::FilePrinter, true);
 
 	m_Timer = LUX_NEW(core::TimerWin32);
-	m_Filesystem = LUX_NEW(io::FileSystemImpl);
+	m_Filesystem = LUX_NEW(io::FileSystemWin32);
 	m_ReferableFactory = core::ReferableFactoryImpl::Instance();
 	m_Window = LUX_NEW(gui::WindowWin32);
 	m_ResourceSystem = LUX_NEW(core::ResourceSystemImpl)(m_Filesystem, m_ReferableFactory);
@@ -360,7 +361,7 @@ bool LuxDeviceWin32::BuildMaterials()
 	m_MaterialLibrary = nullptr;
 	return false;
 #endif
-	
+
 	video::MaterialRenderer* renderer = m_MaterialLibrary->GetMaterialRenderer("solid");
 	video::IdentityMaterial.SetRenderer(renderer);
 	video::WorkMaterial.SetRenderer(renderer);
@@ -677,4 +678,5 @@ StrongRef<scene::MeshSystem> LuxDeviceWin32::GetMeshSystem() const
 	return m_MeshSystem;
 }
 
-}    //Namespace Lux
+}    //Namespace Lux  
+#endif // LUX_WINDOWS

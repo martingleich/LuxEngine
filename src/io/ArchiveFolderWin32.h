@@ -1,8 +1,9 @@
-#ifndef INCLUDED_ARCHIVEFOLDER_H
-#define INCLUDED_ARCHIVEFOLDER_H
+#ifndef INCLUDED_ARCHIVEFOLDER_WIN32_H
+#define INCLUDED_ARCHIVEFOLDER_WIN32_H
 #include "io/ArchiveLoader.h"
 #include "core/lxArray.h"
 
+#ifdef LUX_WINDOWS
 namespace lux
 {
 namespace io
@@ -11,11 +12,11 @@ namespace io
 class FileSystem;
 using Win32Path = core::array<u16>;
 
-class ArchiveFolder : public Archive
+class ArchiveFolderWin32 : public Archive
 {
 public:
-	ArchiveFolder(io::FileSystem* fileSystem, const path& dir);
-	~ArchiveFolder();
+	ArchiveFolderWin32(io::FileSystem* fileSystem, const path& dir);
+	~ArchiveFolderWin32();
 	StrongRef<File> OpenFile(const path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	bool ExistFile(const path& p);
@@ -34,11 +35,11 @@ private:
 	SelfData* self;
 };
 
-class ArchiveLoaderFolder : public ArchiveLoader
+class ArchiveLoaderFolderWin32 : public ArchiveLoader
 {
 public:
-	ArchiveLoaderFolder(FileSystem* fileSystem);
-	~ArchiveLoaderFolder();
+	ArchiveLoaderFolderWin32(FileSystem* fileSystem);
+	~ArchiveLoaderFolderWin32();
 
 	bool CanLoadFile(const path& p)
 	{
@@ -64,8 +65,9 @@ public:
 	SelfData* self;
 };
 
+}
+}
 
-}
-}
+#endif // LUX_WINDOWS
 
 #endif // #ifndef INCLUDED_ARCHIVEFOLDER_H

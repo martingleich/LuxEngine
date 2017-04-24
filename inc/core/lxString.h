@@ -87,12 +87,10 @@ public:
 		{
 		}
 
-	public:
-		//! The invalid iterator.
-		/**
-		This iterator is always invalid.
-		*/
-		LUX_API static const ConstIterator INVALID;
+		static ConstIterator Invalid()
+		{
+			return ConstIterator();
+		}
 
 		ConstIterator& operator++()
 		{
@@ -436,7 +434,7 @@ public:
 	\param first The position from where the test is performed, if invalid the First() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool StartsWith(const string_type& data, ConstIterator first = ConstIterator::INVALID) const;
+	bool StartsWith(const string_type& data, ConstIterator first = ConstIterator::Invalid()) const;
 
 	//! Test if the string ends with a given string.
 	/**
@@ -444,7 +442,7 @@ public:
 	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool EndsWith(const string_type& data, ConstIterator end = ConstIterator::INVALID) const;
+	bool EndsWith(const string_type& data, ConstIterator end = ConstIterator::Invalid()) const;
 
 	//! Replace all occurences of a substring in this string.
 	/**
@@ -455,7 +453,7 @@ public:
 	\param end The iterator where the search is stopped, if invalid End() is used.
 	\return The number of occurences found and replaced.
 	*/
-	size_t Replace(const string_type& replace, const string_type& search, ConstIterator first = ConstIterator::INVALID, ConstIterator end = ConstIterator::INVALID);
+	size_t Replace(const string_type& replace, const string_type& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid());
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -464,7 +462,7 @@ public:
 	\param rangeEnd the end of the replace range
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	ConstIterator ReplaceRange(const string_type& replace, ConstIterator rangeFirst, ConstIterator rangeEnd = ConstIterator::INVALID);
+	ConstIterator ReplaceRange(const string_type& replace, ConstIterator rangeFirst, ConstIterator rangeEnd = ConstIterator::Invalid());
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -482,7 +480,7 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	ConstIterator Find(const string_type& search, ConstIterator first = ConstIterator::INVALID, ConstIterator end = ConstIterator::INVALID) const;
+	ConstIterator Find(const string_type& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
 
 	//! Find the last occurence of a substring in this string.
 	/**
@@ -491,7 +489,7 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	ConstIterator FindReverse(const string_type& search, ConstIterator first = ConstIterator::INVALID, ConstIterator end = ConstIterator::INVALID) const;
+	ConstIterator FindReverse(const string_type& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
 
 	//! Extract a substring from this string.
 	/**
@@ -539,7 +537,7 @@ public:
 	\param end Where should the removing of characters start, if invalid End() is used.
 	\return selfreference
 	*/
-	string& RStrip(ConstIterator end = ConstIterator::INVALID);
+	string& RStrip(ConstIterator end = ConstIterator::Invalid());
 
 	//! Removes all whitespace from the left side of the string.
 	/**
@@ -548,7 +546,7 @@ public:
 	\param first Where should the removing of characters start, if invalid First() is used.
 	\return selfreference
 	*/
-	string& LStrip(ConstIterator first = ConstIterator::INVALID);
+	string& LStrip(ConstIterator first = ConstIterator::Invalid());
 
 	//! Classify the content of the string
 	/**

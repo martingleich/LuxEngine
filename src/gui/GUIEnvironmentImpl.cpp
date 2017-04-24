@@ -8,6 +8,8 @@
 #include "FontLoader.h"
 #include "gui/FontImpl.h"
 
+#include "gui/FontCreator.h"
+
 #ifdef LUX_WINDOWS
 #include "gui/FontCreatorWin32.h"
 #endif

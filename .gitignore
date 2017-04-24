@@ -16,3 +16,4 @@ NoUnitTest
 *.ipch
 /todo
 /tmp
+/inc/LuxConfig.h

@@ -1,6 +1,7 @@
+#ifdef LUX_WINDOWS
 #include "FontCreatorWin32.h"
-#include "core/lxhashmap.h"
-#include "io/file.h"
+#include "core/lxHashMap.h"
+#include "io/File.h"
 #include "TTFParser.h"
 #include "core/lxMemory.h"
 #include "core/Logger.h"
@@ -279,7 +280,7 @@ static bool DoesFontFamilyExist(impl::Context* ctx, const string& name)
 	auto utf16Buffer = core::UTF8ToUTF16(name.Data());
 	size_t charCount = math::Min<size_t>(LF_FACESIZE, utf16Buffer.Size());
 
-	memcpy(logFont.lfFaceName, utf16Buffer.Data(), charCount*2);
+	memcpy(logFont.lfFaceName, utf16Buffer.Data(), charCount * 2);
 	logFont.lfFaceName[charCount] = 0;
 	logFont.lfCharSet = ANSI_CHARSET;
 	logFont.lfPitchAndFamily = 0;
@@ -331,7 +332,7 @@ static void UnRegisterFileFont(HANDLE handle)
 }
 
 void* FontCreatorWin32::BeginFontCreation(io::File* file,
-		const FontDescription& desc,
+	const FontDescription& desc,
 	const core::array<u32>& charSet)
 {
 	HANDLE fontResource;
@@ -347,7 +348,7 @@ void* FontCreatorWin32::BeginFontCreation(io::File* file,
 }
 
 void* FontCreatorWin32::BeginFontCreation(const string& name,
-		const FontDescription& desc,
+	const FontDescription& desc,
 	const core::array<u32>& charSet)
 {
 	return BeginFontCreation(false, name, desc, charSet);
@@ -467,3 +468,5 @@ void FontCreatorWin32::EndFontCreation(void* void_ctx)
 
 }
 }
+
+#endif // LUX_WINDOWS

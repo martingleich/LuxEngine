@@ -364,7 +364,7 @@ public:
 	}
 };
 
-#endif
+#endif // LUX_WINDOWS
 
 }
 
