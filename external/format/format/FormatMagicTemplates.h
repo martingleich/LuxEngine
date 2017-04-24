@@ -1,4 +1,6 @@
 #pragma once
+#include <limits>
+
 namespace format
 {
 namespace internal

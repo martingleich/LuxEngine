@@ -64,9 +64,9 @@ struct tga_info_t
 
 #define TGA_HEADER_SIZE 18
 
-static char* tga_error_str(int error)
+static const char* tga_error_str(int error)
 {
-	static char* error_string[TGA_ERROR_COUNT] = {"Success", "Error", "Out of memory", "IO Error", "Unknown format", "Invalid argument"};
+	static const char* error_string[TGA_ERROR_COUNT] = {"Success", "Error", "Out of memory", "IO Error", "Unknown format", "Invalid argument"};
 
 	if(error >= TGA_ERROR_COUNT)
 		return error_string[TGA_ERROR];
@@ -502,7 +502,10 @@ static void tga_remove_alpha(uint8_t* data, uint32_t count, uint32_t source_has_
 	uint8_t* dst = data;
 	uint8_t r, g, b;
 
-	uint8_t back[3] = {background & 0xFF, (background >> 8) & 0xFF, (background >> 16) & 0xFF};
+	uint8_t back[3] = {
+		(uint8_t)(background & 0xFF),
+		(uint8_t)((background >> 8) & 0xFF),
+		(uint8_t)((background >> 16) & 0xFF)};
 
 	if(result_has_alpha) {
 		for(; data < end; data += 4, dst += 4) {

@@ -1,4 +1,4 @@
-#include "SinkOstream.h"
+#include "SinkOStream.h"
 #include <ostream>
 
 namespace format

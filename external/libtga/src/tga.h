@@ -3,6 +3,7 @@
 #include "tgaconfig.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 enum {
 	TGA_OK = 0,
@@ -29,7 +30,7 @@ enum {
 typedef struct tga_struct_t tga_struct;
 typedef struct tga_info_t tga_info;
 
-typedef void (*tga_error_proc)(tga_struct*, int, char*);
+typedef void (*tga_error_proc)(tga_struct*, int, const char*);
 
 // Seeks to the position offset, return 0 in the case of success othwise not zero
 typedef uint32_t (*tga_seek_proc)(tga_struct*, uint32_t offset);

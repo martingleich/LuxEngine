@@ -1,5 +1,6 @@
 #include "Format.h"
 #include "Context.h"
+#include <limits>
 
 namespace format
 {

@@ -188,7 +188,7 @@ inline void vformat(Context& ctx, StringType fmtStringType, const char* str, con
 template <typename SinkT, typename... Types>
 inline size_t formatEx(SinkT&& sink, StringType dstStringType, const locale::Locale* locale, int sinkFlags, StringType fmtStringType, const char* str, const Types&... args)
 {
-	typedef std::remove_const<typename std::remove_cv<typename std::remove_reference<SinkT>::type>::type>::type CleanSinkT;
+	typedef typename std::remove_const<typename std::remove_cv<typename std::remove_reference<SinkT>::type>::type>::type CleanSinkT;
 	if(!str)
 		return (size_t)-1;
 

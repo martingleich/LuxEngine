@@ -1,5 +1,6 @@
 #include "ConvInternal.h"
 #include "StringBasics.h"
+#include <cmath>
 
 namespace format
 {
@@ -84,9 +85,9 @@ namespace internal
 		char BUFFER[32];
 		char* s = BUFFER;
 
-		if(isnan(n)) {
+		if(std::isnan(n)) {
 			ConvertAddString(ctx, StringType::Ascii, locale.NaN, strlen(locale.NaN));
-		} else if(isinf(n)) {
+		} else if(std::isinf(n)) {
 			if(n < 0)
 				ConvertAddString(ctx, StringType::Unicode, locale.Minus, strlen(locale.Minus));
 
@@ -99,7 +100,7 @@ namespace internal
 			int sign = (n < 0);
 			if(sign)
 				n = -n;
-			m = (int)log10(n);
+			m = (int)std::log10(n);
 			int useExp = (m >= 14 || (sign && m >= 9) || m <= -9);
 			if(useExp) {
 				if(m < 0)
@@ -192,9 +193,9 @@ namespace internal
 
 	void hftoa(Context& ctx, double n, const locale::Facet_NumericalFormat& locale)
 	{
-		if(isnan(n)) {
+		if(std::isnan(n)) {
 			ConvertAddString(ctx, StringType::Ascii, locale.NaN, strlen(locale.NaN));
-		} else if(isinf(n)) {
+		} else if(std::isinf(n)) {
 			if(n < 0)
 				ConvertAddString(ctx, StringType::Unicode, locale.Minus, strlen(locale.Minus));
 

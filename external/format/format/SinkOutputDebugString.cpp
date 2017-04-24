@@ -1,3 +1,4 @@
+#ifdef FORMAT_WINDOWS
 #include "SinkOutputDebugString.h"
 #include <Windows.h>
 
@@ -43,3 +44,4 @@ size_t OutputDebugString_sink::Write(Context& ctx, const slice* firstSlice, int 
 	return (size-1);
 }
 }
+#endif

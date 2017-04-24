@@ -2,6 +2,7 @@
 #include "Sink.h"
 #include "FormatConfig.h"
 
+#ifdef FORMAT_WINDOWS
 namespace format
 {
 
@@ -66,3 +67,5 @@ inline MsgBox_sink MsgBox(EIcon icon = EIcon::None, const char* Utf8Caption = nu
 }
 
 }
+
+#endif // FORMAT_WINDOWS

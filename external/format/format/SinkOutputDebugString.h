@@ -1,6 +1,7 @@
 #pragma once
 #include "Sink.h"
 
+#ifdef FORMAT_WINDOWS
 namespace format
 {
 
@@ -19,3 +20,5 @@ inline OutputDebugString_sink OutputDebugString(size_t collumn=0)
 }
 
 }
+
+#endif // FORMAT_WINDOWS

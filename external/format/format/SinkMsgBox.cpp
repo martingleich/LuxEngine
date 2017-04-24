@@ -1,3 +1,4 @@
+#ifdef FORMAT_WINDOWS
 #include "SinkMsgBox.h"
 #include <string>
 #include <codecvt>
@@ -144,3 +145,5 @@ EButton MsgBox_sink::GetPressedButton() const
 }
 
 }
+
+#endif
