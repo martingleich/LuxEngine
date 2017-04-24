@@ -60,7 +60,7 @@ struct CheckEntry
 	{
 		size_t operator()(const CheckEntry& entry) const
 		{
-			return std::_Hash_seq(reinterpret_cast<const unsigned char*>(entry.m_Handle) + sizeof(size_t),
+			return core::HashSequence(reinterpret_cast<const u8*>(entry.m_Handle) + sizeof(size_t),
 				*reinterpret_cast<const size_t*>(entry.m_Handle));
 		}
 	};

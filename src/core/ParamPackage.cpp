@@ -258,7 +258,7 @@ void ParamPackage::Clear()
 	m_Params.Clear();
 }
 
-void ParamPackage::AddEntry(Entry& entry, const void* default)
+void ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 {
 	if(m_Params.Size() > 0)
 		entry.offset = m_Params.Last()->offset + m_Params.Last()->size;
@@ -270,7 +270,7 @@ void ParamPackage::AddEntry(Entry& entry, const void* default)
 		m_TextureCount++;
 
 	m_DefaultPackage.SetMinSize(entry.offset + entry.size, core::mem::RawMemory::COPY);
-	memcpy((u8*)m_DefaultPackage + entry.offset, default, entry.size);
+	memcpy((u8*)m_DefaultPackage + entry.offset, defaultValue, entry.size);
 
 	m_Params.Push_Back(entry);
 }
@@ -322,7 +322,7 @@ ParamPackage& ParamPackage::operator=(ParamPackage&& old)
 	return *this;
 }
 
-void ParamPackage::AddParam(core::Type type, const char* name, const void* default, u16 reserved)
+void ParamPackage::AddParam(core::Type type, const char* name, const void* defaultValue, u16 reserved)
 {
 	Entry entry;
 	entry.name = name;
@@ -336,7 +336,7 @@ void ParamPackage::AddParam(core::Type type, const char* name, const void* defau
 		return;
 	}
 
-	AddEntry(entry, default);
+	AddEntry(entry, defaultValue);
 }
 
 void ParamPackage::AddParam(const ParamDesc& desc)
@@ -421,13 +421,13 @@ PackageParam ParamPackage::GetParamFromType(core::Type type, int index, void* ba
 	return PackageParam::INVALID;
 }
 
-void ParamPackage::SetDefaultValue(u32 param, const void* default)
+void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue)
 {
-	if(param >= m_Params.Size() || !default)
+	if(param >= m_Params.Size() || !defaultValue)
 		return;
 
 	const Entry& e = m_Params[param];
-	memcpy((u8*)m_DefaultPackage + e.offset, default, e.size);
+	memcpy((u8*)m_DefaultPackage + e.offset, defaultValue, e.size);
 }
 
 u32 ParamPackage::GetParamCount() const

@@ -16,10 +16,10 @@ public:
 
 	static ReferableFactoryImpl* Instance();
 
-	bool RegisterType(Referable* default);
+	bool RegisterType(Referable* prototype);
 	void UnregisterType(Name type, Name subType);
 
-	bool SetPrototype(Referable* default);
+	bool SetPrototype(Referable* prototype);
 	StrongRef<Referable> GetPrototype(Name type, Name subType) const;
 	StrongRef<Referable> GetPrototype(size_t id) const;
 

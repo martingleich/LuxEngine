@@ -1,8 +1,9 @@
 #ifndef INCLUDED_LXARRAY_H
 #define INCLUDED_LXARRAY_H
-#include "lxSort.h"
-#include "lxMemory.h"
-#include "lxIterator.h"
+#include "math/lxMath.h"
+#include "core/lxSort.h"
+#include "core/lxMemory.h"
+#include "core/lxIterator.h"
 
 namespace lux
 {
@@ -584,7 +585,7 @@ public:
 	Only used elements can be accessed via [] operator
 	\param Used The new size of the list
 	*/
-	void Resize(size_t used, const T& default = T())
+	void Resize(size_t used, const T& defaultValue = T())
 	{
 		if(m_Alloc < used) {
 			Reserve(used);
@@ -596,7 +597,7 @@ public:
 		}
 
 		for(size_t i = m_Used; i < used; ++i)
-			new ((void*)&m_Entries[i]) T(default);
+			new ((void*)&m_Entries[i]) T(defaultValue);
 
 		m_Used = used;
 	}
@@ -783,12 +784,12 @@ private:
 };
 
 template <typename T>
-bool array<T>::Iterator::operator==(const typename ConstIterator& other) const
+bool array<T>::Iterator::operator==(const ConstIterator& other) const
 {
 	return m_Current == other.m_Current;
 }
 template <typename T>
-bool array<T>::Iterator::operator!=(const typename ConstIterator& other) const
+bool array<T>::Iterator::operator!=(const ConstIterator& other) const
 {
 	return m_Current != other.m_Current;
 }

@@ -6,6 +6,8 @@
 #include "lxUtil.h"
 #include "lxIterator.h"
 
+#include <limits>
+
 namespace lux
 {
 

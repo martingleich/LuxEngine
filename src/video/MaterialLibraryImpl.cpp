@@ -1,8 +1,8 @@
 #include "MaterialLibraryImpl.h"
 #include "core/lxAlgorithm.h"
 #include "video/VideoDriver.h"
-#include "io/filesystem.h"
-#include "io/file.h"
+#include "io/FileSystem.h"
+#include "io/File.h"
 #include "core/Logger.h"
 
 namespace lux

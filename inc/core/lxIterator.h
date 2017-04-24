@@ -1,6 +1,8 @@
 #ifndef INCLUDED_LXITERATOR_H
 #define INCLUDED_LXITERATOR_H 
 #include <stdint.h>
+#include <stdlib.h>
+#include <utility>
 
 namespace lux
 {
