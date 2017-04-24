@@ -42,7 +42,7 @@ Name& Name::operator=(const Name& other)
 
 void Name::Set(const char* str, int action, StringTable* table)
 {
-	assert("Assign null to name string." && str);
+	lxAssert("Assign null to name string." && str);
 
 	if(!table)
 		table = &StringTable::GlobalInstance();
@@ -88,7 +88,7 @@ bool Name::operator==(const Name& other) const
 
 bool Name::operator==(const char* str) const
 {
-	assert("Compare null to name string." && str);
+	lxAssert("Compare null to name string." && str);
 	if(!str)
 		return false;
 

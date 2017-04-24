@@ -36,7 +36,7 @@ StrongRef<InputDevice> InputSystemImpl::CreateDevice(const DeviceCreationDesc* d
 		device = LUX_NEW(JoystickDevice)(desc, this);
 		break;
 	default:
-		assertNeverReach("Event source isn't a input device.");
+		lxAssertNeverReach("Event source isn't a input device.");
 		return nullptr;
 	}
 

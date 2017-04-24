@@ -55,7 +55,7 @@ public:
 	template <typename T>
 	operator T()
 	{
-		assert(core::GetTypeInfo<T>() == m_Type);
+		lxAssert(core::GetTypeInfo<T>() == m_Type);
 
 		if(IsValid())
 			return *((T*)m_Data);
@@ -90,7 +90,7 @@ public:
 	template <typename T>
 	PackageParam& operator= (const T& varVal)
 	{
-		assert(core::GetTypeInfo<T>() == m_Type);
+		lxAssert(core::GetTypeInfo<T>() == m_Type);
 		if(IsValid())
 			*((T*)m_Data) = varVal;
 
@@ -226,7 +226,7 @@ public:
 	{
 		core::Type type = core::GetTypeInfo<T>();
 		if(type == core::Type::Unknown) {
-			assertNeverReach("Unsupported type");
+			lxAssertNeverReach("Unsupported type");
 			return;
 		}
 

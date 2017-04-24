@@ -131,7 +131,7 @@ public:
 		if (type < (sizeof(TYPE_SIZES) / sizeof(*TYPE_SIZES)))
 			return TYPE_SIZES[type];
 		else
-			assertNeverReach("Unknown type used");
+			lxAssertNeverReach("Unknown type used");
 		return 0;
 	}
 

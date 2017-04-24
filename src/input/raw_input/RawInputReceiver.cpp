@@ -113,7 +113,7 @@ EResult RawInputReceiver::CreateDevice(HANDLE rawHandle, StrongRef<RawInputDevic
 		device = LUX_NEW(RawJoystickDevice)(m_InputSystem);
 		break;
 	default:
-		assertNeverReach("Unknown raw device type.");
+		lxAssertNeverReach("Unknown raw device type.");
 		return EResult::Failed;
 	}
 

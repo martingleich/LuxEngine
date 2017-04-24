@@ -1,6 +1,5 @@
 #include "core/lxStringTable.h"
 #include <unordered_map>
-#include <cassert>
 #include <cctype>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -204,7 +203,7 @@ StringTable::MemBlock* StringTable::GetMatchingPosition(size_t length)
 StringTable::MemBlock* StringTable::AddNewMemBlock()
 {
 	MemBlock* newBlock = new(std::nothrow) MemBlock;
-	assert("Can't allocate memory." && newBlock);
+	lxAssert("Can't allocate memory." && newBlock);
 	if(!newBlock)
 		return nullptr;
 

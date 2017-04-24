@@ -255,7 +255,7 @@ private:
 			}
 		}
 
-		assert(newX >= lowerRange && newX <= upperRange);
+		lxAssert(newX >= lowerRange && newX <= upperRange);
 		return newX;
 	}
 
@@ -318,7 +318,7 @@ private:
 				db = m_Samples[idx + 1].x - m_Samples[idx].x;
 			}
 		} else {
-			assertNeverReach("Invalid edge handling type.");
+			lxAssertNeverReach("Invalid edge handling type.");
 			a = b = m_Samples[idx].value;
 			da = db = 1.0f;
 		}

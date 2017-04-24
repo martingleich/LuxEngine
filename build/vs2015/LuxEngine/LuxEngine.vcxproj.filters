@@ -186,9 +186,6 @@
     <ClInclude Include="..\..\..\inc\EnumClassFlags.h">
       <Filter>core\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\inc\LuxBase.h">
-      <Filter>core\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\inc\core\DateAndTime.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -710,6 +707,12 @@
     <ClInclude Include="..\..\..\src\LuxEngine\LuxDeviceLinux.h">
       <Filter>LuxDevice</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\inc\core\lxAssert.h">
+      <Filter>core\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\inc\core\LuxBase.h">
+      <Filter>core\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp">
@@ -1002,6 +1005,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\LuxEngine\LuxDeviceLinux.cpp">
       <Filter>LuxDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\lxAssert.cpp">
+      <Filter>core\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

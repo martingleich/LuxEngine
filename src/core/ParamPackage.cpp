@@ -35,7 +35,7 @@ PackageParam::PackageParam(const PackageParam& other) :
 
 PackageParam::operator video::MaterialLayer()
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid())
 		return *(video::MaterialLayer*)m_Data;
 
@@ -44,7 +44,7 @@ PackageParam::operator video::MaterialLayer()
 
 PackageParam::operator video::BaseTexture*()
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 
 	if(IsValid())
 		return ((video::MaterialLayer*)m_Data)->texture;
@@ -53,7 +53,7 @@ PackageParam::operator video::BaseTexture*()
 
 PackageParam::operator video::Texture*()
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 
 	if(IsValid())
 		return (video::Texture*)((video::MaterialLayer*)m_Data)->texture;
@@ -62,7 +62,7 @@ PackageParam::operator video::Texture*()
 
 PackageParam::operator video::CubeTexture*()
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 
 	if(IsValid())
 		return (video::CubeTexture*)((video::MaterialLayer*)m_Data)->texture;
@@ -71,7 +71,7 @@ PackageParam::operator video::CubeTexture*()
 
 PackageParam::operator StrongRef<video::BaseTexture>()
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 
 	if(IsValid())
 		return ((video::MaterialLayer*)m_Data)->texture;
@@ -80,7 +80,7 @@ PackageParam::operator StrongRef<video::BaseTexture>()
 
 PackageParam::operator StrongRef<video::Texture>()
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 
 	if(IsValid())
 		return (video::Texture*)((video::MaterialLayer*)m_Data)->texture;
@@ -89,7 +89,7 @@ PackageParam::operator StrongRef<video::Texture>()
 
 PackageParam::operator StrongRef<video::CubeTexture>()
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 
 	if(IsValid())
 		return (video::CubeTexture*)((video::MaterialLayer*)m_Data)->texture;
@@ -98,7 +98,7 @@ PackageParam::operator StrongRef<video::CubeTexture>()
 
 PackageParam& PackageParam::operator=(video::BaseTexture* texture)
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid()) {
 		if(texture)
 			texture->Grab();
@@ -112,7 +112,7 @@ PackageParam& PackageParam::operator=(video::BaseTexture* texture)
 
 PackageParam& PackageParam::operator=(video::Texture* texture)
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid()) {
 		if(texture)
 			texture->Grab();
@@ -126,7 +126,7 @@ PackageParam& PackageParam::operator=(video::Texture* texture)
 
 PackageParam& PackageParam::operator=(video::CubeTexture* texture)
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid()) {
 		if(texture)
 			texture->Grab();
@@ -140,7 +140,7 @@ PackageParam& PackageParam::operator=(video::CubeTexture* texture)
 
 PackageParam& PackageParam::operator=(StrongRef<video::BaseTexture> texture)
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid()) {
 		if(texture)
 			texture->Grab();
@@ -154,7 +154,7 @@ PackageParam& PackageParam::operator=(StrongRef<video::BaseTexture> texture)
 
 PackageParam& PackageParam::operator=(StrongRef<video::Texture> texture)
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid()) {
 		if(texture)
 			texture->Grab();
@@ -168,7 +168,7 @@ PackageParam& PackageParam::operator=(StrongRef<video::Texture> texture)
 
 PackageParam& PackageParam::operator=(StrongRef<video::CubeTexture> texture)
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid()) {
 		if(texture)
 			texture->Grab();
@@ -182,7 +182,7 @@ PackageParam& PackageParam::operator=(StrongRef<video::CubeTexture> texture)
 
 PackageParam& PackageParam::operator=(video::MaterialLayer& Layer)
 {
-	assert(m_Type == core::Type::Texture);
+	lxAssert(m_Type == core::Type::Texture);
 	if(IsValid()) {
 		if(Layer.texture)
 			Layer.texture->Grab();
@@ -196,7 +196,7 @@ PackageParam& PackageParam::operator=(video::MaterialLayer& Layer)
 
 PackageParam& PackageParam::operator=(const PackageParam& varVal)
 {
-	assert(varVal.m_Type == m_Type);
+	lxAssert(varVal.m_Type == m_Type);
 	if(IsValid()) {
 		if(m_Type == core::Type::Texture) {
 			if(((video::MaterialLayer*)varVal.m_Data)->texture)
@@ -327,12 +327,12 @@ void ParamPackage::AddParam(core::Type type, const char* name, const void* defau
 	Entry entry;
 	entry.name = name;
 	const u32 size = type.GetSize();
-	assert(size <= 255);
+	lxAssert(size <= 255);
 	entry.size = (u8)size;
 	entry.type = type;
 	entry.reserved = reserved;
 	if(entry.type == core::Type::Unknown) {
-		assertNeverReach("Unsupported type");
+		lxAssertNeverReach("Unsupported type");
 		return;
 	}
 
@@ -347,7 +347,7 @@ void ParamPackage::AddParam(const ParamDesc& desc)
 	entry.type = desc.type;
 	entry.reserved = desc.reserved;
 	if(entry.type == core::Type::Unknown) {
-		assertNeverReach("Unsupported type");
+		lxAssertNeverReach("Unsupported type");
 		return;
 	}
 

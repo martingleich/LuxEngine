@@ -114,7 +114,7 @@ void CursorControlWin32::Tick()
 void CursorControlWin32::OnResize(Window& Window, const math::dimension2du& newSize)
 {
 	// Should never happen, but isn't a problem
-	assert(m_Window == &Window);
+	lxAssert(m_Window == &Window);
 
 	LUX_UNUSED(newSize); // The size is read directly from the window.
 	UpdateSize();

@@ -66,7 +66,7 @@ public:
 	*/
 	virtual u32 WriteString(const string& str)
 	{
-		assert(str.Size() < std::numeric_limits<u32>::max());
+		lxAssert(str.Size() < std::numeric_limits<u32>::max());
 		return WriteBinary(str.Data(), (u32)str.Size());
 	}
 

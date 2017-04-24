@@ -3,6 +3,14 @@
 
 #include "LuxConfig.h"
 
+#if !defined(LUX_WINDOWS) && !defined(LUX_LINUX)
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64)
+#define LUX_WINDOWS
+#else
+#define LUX_LINUX
+#endif
+#endif
+
 //---------------------------------------------
 // LUX_EXPORT
 #ifdef LUX_WINDOWS
@@ -23,27 +31,11 @@
 #endif
 #endif
 
-// Löst einen Haltepunkt aus
-#include <assert.h>
-#undef assert
-
-#ifdef NDEBUG
-#define assert(_Expression)         ((void)0)
-#define assertEx(_Expression, _Msg) ((void)0)
-#define assertMsg(_Msg)             ((void)0)
-#define assertNeverReach(_Msg)      ((void)0)
-#else  /* NDEBUG */
-#ifdef WIN32
-#define LUX_DEBUG_BREAK (__debugbreak(),0)
-#else
-#define LUX_DEBUG_BREAK 0
+#ifndef NDEBUG
+#define LUX_ENABLE_ASSERTS
 #endif
 
-#define assert(_Expression)            (void)( (!!(_Expression)) || (_wassert(_CRT_WIDE(#_Expression), _CRT_WIDE(__FILE__), __LINE__), LUX_DEBUG_BREAK) )
-#define assertEx(_Expression, _Msg)    (void)( (!!(_Expression)) || (_wassert(_CRT_WIDE(_Msg),         _CRT_WIDE(__FILE__), __LINE__), LUX_DEBUG_BREAK) )
-#define assertMsg(_Msg)                (void)(                      (_wassert(_CRT_WIDE(_Msg),         _CRT_WIDE(__FILE__), __LINE__), LUX_DEBUG_BREAK)
-#define assertNeverReach(_Msg)                                      (_wassert(_CRT_WIDE(_Msg),         _CRT_WIDE(__FILE__), __LINE__), LUX_DEBUG_BREAK)
-#endif
+#include "lxAssert.h"
 
 #include <utility>
 #include <cstdint>

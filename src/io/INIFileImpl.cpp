@@ -831,7 +831,7 @@ const string& INIFileImpl::GetCommentChars() const
 
 void INIFileImpl::SetCommentChars(const string& chars)
 {
-	assert(!chars.IsEmpty());
+	lxAssert(!chars.IsEmpty());
 
 	m_CommentChars = chars;
 }

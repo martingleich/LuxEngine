@@ -84,7 +84,7 @@ bool ShaderImpl::Init(const char* pcVSCode, const char* pcVSEntryPoint, size_t V
 	m_Params.Reserve(Helper.Size());
 	u32 count = (u32)Helper.Size();
 	if(count > 0xFFFF) {
-		assertNeverReach("Helper array overflow");
+		lxAssertNeverReach("Helper array overflow");
 		count = 0xFFFF;
 	}
 	for(u32 i = 0; i < count; ++i) {
@@ -445,7 +445,7 @@ void ShaderImpl::CastTypeToShader(core::Type type, const void* in, void* out)
 	}
 	break;
 	default:
-		assertNeverReach("Unsupported shader variable type.");
+		lxAssertNeverReach("Unsupported shader variable type.");
 	}
 }
 
@@ -482,7 +482,7 @@ void ShaderImpl::CastShaderToType(core::Type type, const void* in, void* out)
 	}
 	break;
 	default:
-		assertNeverReach("Unsupported shader variable type.");
+		lxAssertNeverReach("Unsupported shader variable type.");
 	}
 }
 
@@ -543,7 +543,7 @@ void ShaderImpl::GetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 			}
 			break;
 		default:
-			assertNeverReach("Unsupported shader variable type.");
+			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	} else {
 		Register = RegisterPS;
@@ -592,7 +592,7 @@ void ShaderImpl::GetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 			break;
 
 		default:
-			assertNeverReach("Unsupported shader variable type.");
+			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	}
 }
@@ -632,7 +632,7 @@ void ShaderImpl::SetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 			break;
 
 		default:
-			assertNeverReach("Unsupported shader variable type.");
+			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	}
 	if(RegisterPS != -1) {
@@ -658,7 +658,7 @@ void ShaderImpl::SetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type,
 			break;
 
 		default:
-			assertNeverReach("Unsupported shader variable type.");
+			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	}
 }

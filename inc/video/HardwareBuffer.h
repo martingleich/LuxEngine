@@ -96,7 +96,7 @@ inline void HardwareBuffer::ResetDirty()
 
 inline void* HardwareBuffer::Pointer(u32 n, u32 count)
 {
-	assert(n + count <= m_Size);
+	lxAssert(n + count <= m_Size);
 	m_BeginDirty = math::Min(m_BeginDirty, n);
 	m_EndDirty = math::Max(m_EndDirty, n + count - 1);
 	return m_Data + n*m_Stride;
@@ -104,7 +104,7 @@ inline void* HardwareBuffer::Pointer(u32 n, u32 count)
 
 inline const void* HardwareBuffer::Pointer(u32 n, u32 count) const
 {
-	assert(n + count <= m_Size);
+	lxAssert(n + count <= m_Size);
 	return m_Data + n*m_Stride;
 }
 
@@ -139,7 +139,7 @@ inline bool HardwareBuffer::Update(u32 group)
 
 inline void HardwareBuffer::SetCursor(u32 c)
 {
-	assert(c < m_Size);
+	lxAssert(c < m_Size);
 	m_Cursor = c;
 }
 
