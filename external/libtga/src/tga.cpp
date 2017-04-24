@@ -1,5 +1,5 @@
 #include "tga.h"
-#include <string>
+#include <string.h>
 #include <assert.h>
 
 typedef struct tga_header_t tga_header;

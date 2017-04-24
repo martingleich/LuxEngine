@@ -1,6 +1,7 @@
 #ifndef INCLUDED_LX_MEMORY_ALLOC_H
 #define INCLUDED_LX_MEMORY_ALLOC_H
-#include "core\LuxBase.h"
+#include "core/LuxBase.h"
+#include <stdlib.h>
 
 //#define LUX_MEMORY_ALLOC_DEBUG
 
