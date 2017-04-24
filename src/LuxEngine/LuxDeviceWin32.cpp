@@ -337,6 +337,7 @@ bool LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 
 	driver->SetDefaultRenderer(m_MaterialLibrary->GetMaterialRenderer("solid"));
 #else
+	log::Error("No video driver was compiled.");
 	return false;
 #endif
 
@@ -356,6 +357,7 @@ bool LuxDeviceWin32::BuildMaterials()
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)(m_Driver), "transparent");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(m_Driver), "transparent_alpha");
 #else
+	log::Error("No material library was compiled.");
 	m_MaterialLibrary = nullptr;
 	return false;
 #endif
