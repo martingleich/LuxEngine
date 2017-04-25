@@ -6,7 +6,7 @@ include_directories("${PROJECT_SOURCE_DIR}/inc")
 include_directories("${PROJECT_SOURCE_DIR}/testing/UnitTest/src")
 link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 
-add_definitions(-std=c++11 -fpermissive)
+add_definitions(-std=c++11)
 add_executable(UnitTest ${UNITTEST_SRCS} ${UNITTEST_INCS})
 add_dependencies(UnitTest LuxEngine)
 target_link_libraries(UnitTest LuxEngine)

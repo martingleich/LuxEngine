@@ -109,8 +109,10 @@ public:
 
 } // !namespace video
 
-
-template<> inline core::Type core::GetTypeInfo<video::MaterialLayer>() { return core::Type::Texture; }
+namespace core
+{
+template<> inline Type GetTypeInfo<video::MaterialLayer>() { return Type::Texture; }
+} // namespace core
 
 } // !namespace lux
 

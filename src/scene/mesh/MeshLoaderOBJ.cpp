@@ -60,7 +60,7 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 {
 	const long filesize = file->GetSize();
 	if(!filesize)
-		return nullptr;
+		return false;
 
 	core::array<math::vector3f> vertexBuffer;
 	core::array<math::vector3f> NormalBuffer;

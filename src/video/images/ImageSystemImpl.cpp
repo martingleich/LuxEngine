@@ -252,7 +252,7 @@ public:
 				images[i] = m_ResSys->GetResource(core::ResourceType::Image, image_path[i]);
 		} else {
 			log::Error("Can't open file: ~s.", filename);
-			return nullptr;
+			return false;
 		}
 
 		return m_ImageSystem->InitCubeTexture(images, (CubeTexture*)dst);

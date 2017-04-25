@@ -35,17 +35,17 @@ public:
 	/**
 	\param Constructor How should the new matrix created, only M4C_NOTHING and M4C_IDENT
 	*/
-	matrix4::matrix4(EMatrix4Constructor Constructor = M4C_IDENT);
+	matrix4(EMatrix4Constructor Constructor = M4C_IDENT);
 
 	//! Copyconstructor
 	/**
 	\param m The other matrix
 	\param Constructor How should the new matrix created
 	*/
-	matrix4::matrix4(const matrix4& m, EMatrix4Constructor Constructor = M4C_COPY);
+	matrix4(const matrix4& m, EMatrix4Constructor Constructor = M4C_COPY);
 
 	//! Full constructor
-	matrix4::matrix4(float c11, float c12, float c13, float c14,
+	matrix4(float c11, float c12, float c13, float c14,
 		float c21, float c22, float c23, float c24,
 		float c31, float c32, float c33, float c34,
 		float c41, float c42, float c43, float c44)
@@ -465,12 +465,14 @@ inline matrix4 operator*(float f, const matrix4& m)
 	return m*f;
 }
 ///\endcond
-}
+} // namespace math
 
-template<> inline core::Type core::GetTypeInfo<math::matrix4>() { return core::Type::Matrix; };
+namespace core
+{
+template<> inline Type GetTypeInfo<math::matrix4>() { return Type::Matrix; };
+} // namespace core
 
-}    
-
+} // namespace lux
 
 #endif
 
