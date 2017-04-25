@@ -2,6 +2,7 @@
 #define INCLUDED_CURVE_H
 #include "lxMath.h"
 #include "core/lxArray.h"
+#include "core/lxAlgorithm.h"
 
 namespace lux
 {
@@ -79,7 +80,7 @@ public:
 			else
 				m_Samples.Push_Back(Sample(x, value));
 		} else {
-			core::array<Sample>::Iterator n, i;
+			typename core::array<Sample>::Iterator n, i;
 			Sample dummy;
 			dummy.x = x;
 			n = core::Binary_Search(dummy, m_Samples.First(), m_Samples.End(), &i);
@@ -332,7 +333,7 @@ private:
 	//! The index of the next element >= x, to the right.
 	u32 GetUpperBound(float x) const
 	{
-		core::array<Sample>::ConstIterator n, i;
+		typename core::array<Sample>::ConstIterator n, i;
 		Sample dummy;
 		dummy.x = x;
 		n = core::Binary_Search(dummy, m_Samples.First(), m_Samples.End(), &i);

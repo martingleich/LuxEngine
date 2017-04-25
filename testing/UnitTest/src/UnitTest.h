@@ -485,9 +485,9 @@ void SuiteFixtureLeave()
 
 // TODO: Improved reporting for this asserts
 #define UNIT_ASSERT_TRUE(cond) UNIT_ASSERT_EX(cond, #cond)
-#define UNIT_ASSERT_FALSE(cond) UNIT_ASSERT_EX(!(cond), "not " ## #cond)
-#define UNIT_ASSERT_EQUAL(a, b) UNIT_ASSERT_EX((a) == (b), #a ## " = " ## #b)
-#define UNIT_ASSERT_UNEQUAL(a, b) UNIT_ASSERT_EX((a) != (b), #a ## " != " ## #b)
-#define UNIT_ASSERT_NULL(a) UNIT_ASSERT_EX((a) == nullptr, #a ## " is null")
+#define UNIT_ASSERT_FALSE(cond) UNIT_ASSERT_EX(!(cond), "not " #cond)
+#define UNIT_ASSERT_EQUAL(a, b) UNIT_ASSERT_EX((a) == (b), #a " = " #b)
+#define UNIT_ASSERT_UNEQUAL(a, b) UNIT_ASSERT_EX((a) != (b), #a " != " #b)
+#define UNIT_ASSERT_NULL(a) UNIT_ASSERT_EX((a) == nullptr, #a " is null")
 
 #endif
