@@ -33,6 +33,8 @@ add_subdirectory(external/zlib)
 
 add_subdirectory(testing/UnitTest)
 
+add_subdirectory(external/FilterExportFiles)
+
 # Always include inc!
 include_directories("${PROJECT_SOURCE_DIR}/inc")
 include_directories("${PROJECT_SOURCE_DIR}/src")
@@ -76,7 +78,7 @@ else()
 endif()
 
 add_library(LuxEngine SHARED ${SRCS} ${INCS})
-add_dependencies(LuxEngine format zlib libpng libtga)
+add_dependencies(LuxEngine format zlib libpng libtga FilterExportFiles)
 target_link_libraries(LuxEngine ${USED_LIBS})
 
 # Add tests
@@ -90,6 +92,7 @@ if(WIN32)
 		PRE_BUILD
 		COMMAND "${PROJECT_SOURCE_DIR}/scripts/ValidateDependencies.bat"
 		COMMENT "Validate dependencies"
+		VERBATIM
 	)
 	set_source_files_properties(
 		"${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
@@ -98,7 +101,8 @@ if(WIN32)
 	add_custom_command(
 		TARGET LuxEngine
 		PRE_LINK
-		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" "${PROJECT_SOURCE_DIR}/lib/$(Platform)/$(Configuration)" "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
+		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" $<TARGET_FILE:FilterExportFiles> "${PROJECT_SOURCE_DIR}/lib/$(Platform)/$(Configuration)" "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
 		COMMENT "Build .def file"
+		VERBATIM
 	)
 endif()

@@ -1,10 +1,10 @@
 #pragma once
 
-#if true
+#if @Format_OS_WINDOWS@
 #define FORMAT_WINDOWS
 #endif
 
-#if false
+#if @Format_OS_LINUX@
 #define FORMAT_LINUX
 #endif
 
