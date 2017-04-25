@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ISHADER_H
-#define INCLUDED_ISHADER_H
+#ifndef INCLUDED_SHADER_H
+#define INCLUDED_SHADER_H
 #include "core/lxString.h"
 #include "math/matrix4.h"
 #include "video/Color.h"
@@ -15,47 +15,42 @@ class File;
 namespace video
 {
 
-class LUX_API ShaderParam;
+class ShaderParam;
 
 class Shader : public ReferenceCounted
 {
 	friend class ShaderParam;
-private:
-	virtual void GetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type, u32 Size, void* out) = 0;
-	virtual void SetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type, u32 Size, const void* data) = 0;
-
 public:
-	virtual ~Shader()
-	{
-	}
+	virtual ~Shader() {}
 
-	virtual const ShaderParam& GetParam(const char* pcName) = 0;
+	virtual const ShaderParam& GetParam(const char* name) = 0;
 	virtual const ShaderParam& GetParam(u32 index) = 0;
 	virtual u32 GetParamCount() const = 0;
 	virtual void Enable() = 0;
-	virtual void LoadParams(const core::PackagePuffer& Puffer) = 0;
+	virtual void LoadParams(const core::PackagePuffer& puffer, const RenderData* renderData) = 0;
+	virtual void LoadSceneValues() = 0;
 	virtual void Disable() = 0;
 
-	virtual bool Init(const char* pcVSCode, const char* pcVSEntryPoint, size_t VSLength, const char* pcVSProfile,
-		const char* pcPSCode, const char* pcPSEntryPoint, size_t PSLength, const char* pcPSProfile) = 0;
+	virtual bool Init(
+		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
+		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile) = 0;
 
 	virtual const core::ParamPackage& GetParamPackage() = 0;
+
+private:
+	virtual void GetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, void* out) = 0;
+	virtual void SetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, const void* data) = 0;
 };
 
-class LUX_API ShaderParam
+class ShaderParam
 {
 	friend class ShaderValueAccess;
 private:
 	class ShaderValueAccess
 	{
 		friend class ShaderParam;
-	private:
-		const ShaderParam* Param;
-		ShaderValueAccess(const ShaderParam* p) : Param(p)
-		{
-		}
 	public:
-		float Matrix(int iRow, int iCol);            // Matrix only
+		float Matrix(int row, int col);
 
 		// Getter
 		operator bool();
@@ -68,56 +63,63 @@ private:
 
 		// Setter
 		ShaderValueAccess& operator= (const ShaderValueAccess& varVal);
-		ShaderValueAccess& operator= (bool bVal);
-		ShaderValueAccess& operator= (int iVal);
-		ShaderValueAccess& operator= (float fVal);
-		ShaderValueAccess& operator= (const math::vector2f& vVal);
-		ShaderValueAccess& operator= (const math::vector3f& vVal);
-		ShaderValueAccess& operator= (const video::Colorf& Val);
-		ShaderValueAccess& operator= (const math::matrix4& mVal);
+		ShaderValueAccess& operator= (bool value);
+		ShaderValueAccess& operator= (int value);
+		ShaderValueAccess& operator= (float value);
+		ShaderValueAccess& operator= (const math::vector2f& value);
+		ShaderValueAccess& operator= (const math::vector3f& value);
+		ShaderValueAccess& operator= (const video::Colorf& value);
+		ShaderValueAccess& operator= (const math::matrix4& value);
+
+	private:
+		const ShaderParam* m_Param;
+		ShaderValueAccess(const ShaderParam* p) : m_Param(p)
+		{
+		}
 	};
 
 private:
-	u32            m_Register_VS;    // Das Register im Vertexshader
-	u32            m_Register_PS;    // Das Register im Pixelshader
+	u32 m_RegisterVS;
+	u32 m_RegisterPS;
 
-// The type core::Type is independet of the client or dll.
-#pragma warning(suppress: 4251)
-	core::Type    m_Type;            // Der Datentyp
-	u8            m_TypeSize;        // Die größe des Datentyps
-	const char* m_pName;        // Der name dieses Members
+	core::Type m_Type;
+	u8 m_TypeSize;
+	const char* m_Name;
 
-	Shader*    m_pOwner;        // Der zugehörige Shader
+	Shader* m_Owner;
 
 public:
-	// Konstruktor/Destruktor
-	ShaderParam(Shader *pOwnerEffect,
-		core::Type type, u8 TypeSize,
-		const char* const pName,
-		u32 RegisterVS, u32 RegisterPS) : m_pOwner(pOwnerEffect),
-		m_Type(type), m_TypeSize(TypeSize),
-		m_Register_VS(RegisterVS), m_Register_PS(RegisterPS),
-		m_pName(pName)
+	ShaderParam(Shader *owner,
+		core::Type type, u8 typeSize,
+		const char* name,
+		u32 registerVS, u32 registerPS) :
+		m_RegisterVS(registerVS), m_RegisterPS(registerPS),
+		m_Type(type), m_TypeSize(typeSize),
+		m_Name(name),
+		m_Owner(owner)
 	{
 	}
 
-	ShaderParam() : m_pOwner(nullptr),
+	ShaderParam() : 
+		m_RegisterVS(0xFFFFFFFF), m_RegisterPS(0xFFFFFFFF),
 		m_Type(core::Type::Unknown), m_TypeSize(0),
-		m_Register_VS(0xFFFFFFFF), m_Register_PS(0xFFFFFFFF),
-		m_pName(nullptr)
+		m_Name(nullptr),
+		m_Owner(nullptr)
 	{
 	}
 
-	ShaderParam(const ShaderParam& other) : m_Register_PS(other.m_Register_PS),
-		m_Register_VS(other.m_Register_VS),
+	ShaderParam(const ShaderParam& other) : 
+		m_RegisterVS(other.m_RegisterVS),
+		m_RegisterPS(other.m_RegisterPS),
 		m_Type(other.m_Type), m_TypeSize(other.m_TypeSize),
-		m_pName(other.m_pName), m_pOwner(other.m_pOwner)
+		m_Name(other.m_Name),
+		m_Owner(other.m_Owner)
 	{
 	}
 
 	bool IsValid() const
 	{
-		return (m_Register_PS != -1) || (m_Register_VS != -1);
+		return (m_RegisterPS != 0xFFFFFFFF) || (m_RegisterVS != 0xFFFFFFFF);
 	}
 
 	core::Type GetType() const
@@ -125,9 +127,9 @@ public:
 		return m_Type;
 	}
 
-	const char* const GetName() const
+	const char* GetName() const
 	{
-		return m_pName;
+		return m_Name;
 	}
 
 	ShaderValueAccess operator*() const
@@ -135,150 +137,154 @@ public:
 		return ShaderValueAccess(this);
 	}
 
-	ShaderParam& operator= (const ShaderParam& varVal);
+	ShaderParam& operator=(const ShaderParam& other)
+	{
+		m_Owner = other.m_Owner;
+		m_Name = other.m_Name;
+		m_RegisterPS = other.m_RegisterPS;
+		m_RegisterVS = other.m_RegisterVS;
+		m_Type = other.m_Type;
+		m_TypeSize = other.m_TypeSize;
+
+		return *this;
+	}
 
 	void GetShaderValue(void* out) const
 	{
-		m_pOwner->GetShaderValue(m_Register_VS, m_Register_PS, m_Type, m_TypeSize, out);
+		m_Owner->GetShaderValue(m_RegisterVS, m_RegisterPS, m_Type, m_TypeSize, out);
 	}
+
 	void SetShaderValue(const void* data) const
 	{
-		m_pOwner->SetShaderValue(m_Register_VS, m_Register_PS, m_Type, m_TypeSize, data);
+		m_Owner->SetShaderValue(m_RegisterVS, m_RegisterPS, m_Type, m_TypeSize, data);
 	}
 };
 
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const ShaderParam::ShaderValueAccess& Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const ShaderParam::ShaderValueAccess& value)
 {
-	if(Param->IsValid() && Value.Param->IsValid() &&
-		Param->m_pOwner == Value.Param->m_pOwner &&
-		Param->m_Type == Value.Param->m_Type &&
-		Param->m_Type != core::Type::Unknown) {
+	if(m_Param->IsValid() && value.m_Param->IsValid() &&
+		m_Param->m_Owner == value.m_Param->m_Owner &&
+		m_Param->m_Type == value.m_Param->m_Type &&
+		m_Param->m_Type != core::Type::Unknown) {
 		static u8 data[64];
 
-		Value.Param->GetShaderValue(data);
-		Param->SetShaderValue(data);
+		value.m_Param->GetShaderValue(data);
+		m_Param->SetShaderValue(data);
 	}
 
 	return *this;
 }
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (bool Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (bool value)
 {
-	Param->SetShaderValue(&Value);
+	m_Param->SetShaderValue(&value);
 	return *this;
 }
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (int Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (int value)
 {
-	Param->SetShaderValue(&Value);
+	m_Param->SetShaderValue(&value);
 	return *this;
 }
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (float Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (float value)
 {
-	Param->SetShaderValue(&Value);
+	m_Param->SetShaderValue(&value);
 	return *this;
 }
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const math::vector2f& Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const math::vector2f& value)
 {
-	float a[2] = {Value.x, Value.y};
-	Param->SetShaderValue(a);
+	float a[2] = {value.x, value.y};
+	m_Param->SetShaderValue(a);
 	return *this;
 }
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const math::vector3f& Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const math::vector3f& value)
 {
-	float a[3] = {Value.x, Value.y, Value.z};
-	Param->SetShaderValue(a);
+	float a[3] = {value.x, value.y, value.z};
+	m_Param->SetShaderValue(a);
 	return *this;
 }
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const video::Colorf& Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const video::Colorf& value)
 {
-	float a[4] = {Value.r, Value.g, Value.b, Value.a};
-	Param->SetShaderValue(a);
+	float a[4] = {value.r, value.g, value.b, value.a};
+	m_Param->SetShaderValue(a);
 	return *this;
 }
 
-inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const math::matrix4& Value)
+inline ShaderParam::ShaderValueAccess& ShaderParam::ShaderValueAccess::operator= (const math::matrix4& value)
 {
-	Param->SetShaderValue(Value.DataRowMajor());
+	m_Param->SetShaderValue(value.DataRowMajor());
 	return *this;
 }
 
-//Liefert einen Wert aus dem Effekt
 inline ShaderParam::ShaderValueAccess::operator bool()
 {
 	bool out;
-	Param->GetShaderValue(&out);
+	m_Param->GetShaderValue(&out);
 
 	return out;
 }
 
-//Liefert einen Wert aus dem Effekt
 inline ShaderParam::ShaderValueAccess::operator int()
 {
 	int out;
-	Param->GetShaderValue(&out);
+	m_Param->GetShaderValue(&out);
 
 	return out;
 }
 
-//Liefert einen Wert aus dem Effekt
 inline ShaderParam::ShaderValueAccess::operator float()
 {
 	float out;
-	Param->GetShaderValue(&out);
+	m_Param->GetShaderValue(&out);
 
 	return out;
 }
 
-//Liefert einen Wert aus dem Effekt
 inline ShaderParam::ShaderValueAccess::operator math::vector2f()
 {
 	float a[2];
-	Param->GetShaderValue(a);
+	m_Param->GetShaderValue(a);
 
 	return math::vector2f(a[0], a[1]);
 }
 
-//Liefert einen Wert aus dem Effekt
 inline ShaderParam::ShaderValueAccess::operator math::vector3f()
 {
 	float a[3];
-	Param->GetShaderValue(a);
+	m_Param->GetShaderValue(a);
 
 	return math::vector3f(a[0], a[1], a[2]);
 }
 
-//Liefert einen Wert aus dem Effekt
 inline ShaderParam::ShaderValueAccess::operator video::Colorf()
 {
 	video::Colorf out;
 	float a[4];
-	Param->GetShaderValue(a);
+	m_Param->GetShaderValue(a);
 
 	return video::Colorf(a[0], a[1], a[2], a[3]);
 }
 
-//Liefert einen Wert aus dem Effekt
 inline ShaderParam::ShaderValueAccess::operator math::matrix4()
 {
 	math::matrix4 out;
-	Param->GetShaderValue(out.DataRowMajor());
+	m_Param->GetShaderValue(out.DataRowMajor());
 
 	return out;
 }
 
-inline float ShaderParam::ShaderValueAccess::Matrix(int iRow, int iCol)
+inline float ShaderParam::ShaderValueAccess::Matrix(int row, int col)
 {
-	return this->operator lux::math::matrix4()(iRow, iCol);
+	return ((math::matrix4)(*this))(row, col);
 }
 
-}    
+}
 
-}    
+}
 
 #endif

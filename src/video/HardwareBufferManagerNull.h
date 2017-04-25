@@ -19,8 +19,8 @@ public:
 	virtual void RemoveBuffer(HardwareBuffer* buffer);
 	bool UpdateBuffer(HardwareBuffer* buffer, u32 group = 0);
 	bool ForceBufferUpdate(HardwareBuffer* buffer);
-	IndexBuffer* CreateIndexBuffer();
-	VertexBuffer* CreateVertexBuffer();
+	StrongRef<IndexBuffer> CreateIndexBuffer();
+	StrongRef<VertexBuffer> CreateVertexBuffer();
 	bool EnableBuffer(const HardwareBuffer* buffer, u32 streamID);
 	virtual void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
 	virtual void RemoveInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;

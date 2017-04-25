@@ -70,7 +70,7 @@ public:
 	void OnSetMaterial(const Material& material, const Material& lastMaterial, bool resetAll = false)
 	{
 		m_Pipeline.Blending.Operator = EBO_NONE;
-		Enable(material.GetPuffer(), resetAll);
+		Enable(material.GetPuffer(), resetAll, &material);
 
 		// Textur setzen
 		m_Driver->SetTextureLayer(material.Layer(0), 0, resetAll);
@@ -136,7 +136,7 @@ public:
 		m_Pipeline.Blending.Operator = Operator;
 		m_Pipeline.Blending.DstBlend = DstFact;
 		m_Pipeline.Blending.SrcBlend = SrcFact;
-		Enable(material.GetPuffer(), resetAll);
+		Enable(material.GetPuffer(), resetAll, &material);
 
 		m_Driver->SetTextureLayer(material.Layer(0), 0, resetAll);
 
@@ -194,7 +194,7 @@ public:
 	{
 		// Basis-Renderstates einsetzen
 		//m_pDriver->SetBasicRenderstates(material, lastMaterial, bResetAll);
-		Enable(material.GetPuffer(), resetAll);
+		Enable(material.GetPuffer(), resetAll, &material);
 
 		m_Driver->SetTextureLayer(material.Layer(0), 0, resetAll);
 
@@ -248,7 +248,7 @@ public:
 	void OnSetMaterial(const Material& material, const Material& lastMaterial, bool resetAll = false)
 	{
 		m_Pipeline.Blending.Operator = EBO_NONE;
-		Enable(material.GetPuffer(), resetAll);
+		Enable(material.GetPuffer(), resetAll, &material);
 
 		m_Driver->SetTextureLayer(material.Layer(0), 0, resetAll);
 		m_Driver->SetTextureLayer(material.Layer(1), 1, resetAll);

@@ -219,8 +219,8 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 				s32 VertexLocation;
 				std::map<video::Vertex3D, s32>::iterator it = pCurrMtl->VertMap.find(v);
 
-				video::VertexBuffer* pVB = pCurrMtl->Meshbuffer->GetVertices();
-				video::IndexBuffer* pIB = pCurrMtl->Meshbuffer->GetIndices();
+				StrongRef<video::VertexBuffer> pVB = pCurrMtl->Meshbuffer->GetVertices();
+				StrongRef<video::IndexBuffer> pIB = pCurrMtl->Meshbuffer->GetIndices();
 				if(it != pCurrMtl->VertMap.end()) {
 					VertexLocation = it->second;
 				} else {

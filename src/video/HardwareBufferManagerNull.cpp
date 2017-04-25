@@ -97,12 +97,12 @@ bool BufferManagerNull::ForceBufferUpdate(HardwareBuffer* buffer)
 		return true;
 }
 
-IndexBuffer* BufferManagerNull::CreateIndexBuffer()
+StrongRef<IndexBuffer> BufferManagerNull::CreateIndexBuffer()
 {
 	return LUX_NEW(IndexBufferImpl)(this);
 }
 
-VertexBuffer* BufferManagerNull::CreateVertexBuffer()
+StrongRef<VertexBuffer> BufferManagerNull::CreateVertexBuffer()
 {
 	return LUX_NEW(VertexBufferImpl)(this);
 }

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CIMAGESYSTEM_H
-#define INCLUDED_CIMAGESYSTEM_H
+#ifndef INCLUDED_IMAGESYSTEM_IMPL_H
+#define INCLUDED_IMAGESYSTEM_IMPL_H
 #include "video/images/ImageSystem.h"
 #include "core/lxArray.h"
 
@@ -25,20 +25,20 @@ public:
 
 	void AddExternalImageWriter(ImageWriter* writer);
 	size_t GetImageWriterCount() const;
-	ImageWriter* GetImageWriter(size_t index);
-	ImageWriter* GetImageWriter(const io::path& name);
+	StrongRef<ImageWriter> GetImageWriter(size_t index);
+	StrongRef<ImageWriter> GetImageWriter(const io::path& name);
 
-	Texture* AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic = false);
-	Texture* AddTexture(const string& name, Image* image, bool isDynamic = false);
+	StrongRef<Texture> AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic = false);
+	StrongRef<Texture> AddTexture(const string& name, Image* image, bool isDynamic = false);
 
 	StrongRef<video::Texture> AddChromaKeyedTexture(video::Image* image, video::Color key);
 	StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, video::Color key);
 	StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, const math::vector2i& pos);
 
-	CubeTexture* AddCubeTexture(const string& name, StrongRef<Image> images[6]);
-	CubeTexture* AddCubeTexture(const string& name, ColorFormat format, u32 size);
+	StrongRef<CubeTexture> AddCubeTexture(const string& name, StrongRef<Image> images[6]);
+	StrongRef<CubeTexture> AddCubeTexture(const string& name, ColorFormat format, u32 size);
 
-	Texture* AddRendertargetTexture(const string& name, const math::dimension2du& size, ColorFormat format);
+	StrongRef<Texture> AddRendertargetTexture(const string& name, const math::dimension2du& size, ColorFormat format);
 
 	StrongRef<SpriteBank> CreateSpriteBank();
 

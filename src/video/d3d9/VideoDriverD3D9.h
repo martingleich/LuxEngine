@@ -73,12 +73,12 @@ public:
 	void DeleteAllLights();
 	size_t GetMaximalLightCount() const;
 
-	virtual SubMesh* CreateSubMesh(
+	virtual StrongRef<SubMesh> CreateSubMesh(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
 		EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, u32 IndexCount,
 		EPrimitiveType primitiveType);
 
-	virtual SubMesh* CreateSubMesh(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
+	virtual StrongRef<SubMesh> CreateSubMesh(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		bool Dynamic = false,
 		EPrimitiveType primitiveType = EPT_TRIANGLES,
 		u32 primitiveCount = 0);
@@ -86,15 +86,15 @@ public:
 	//------------------------------------------------------------------
 	// Textur-Methoden
 	bool CheckTextureFormat(ColorFormat format, bool alpha, bool cube);
-	Texture* CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool Alpha, bool isDynamic);
-	Texture* CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha);
-	CubeTexture* CreateCubeTexture(u32 Size, ColorFormat Format, bool Alpha, bool isDynamic);
+	StrongRef<Texture> CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool Alpha, bool isDynamic);
+	StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha);
+	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool Alpha, bool isDynamic);
 
 	// Cache for auxalarity textures
 	/*
 	i.e. Dynamic texture for temporary use
 	*/
-	Shader* CreateShader(
+	StrongRef<Shader> CreateShader(
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, EVertexShaderType VSType,
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, EPixelShaderType PSType);
 

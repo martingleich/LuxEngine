@@ -62,10 +62,10 @@ public:
 	virtual VideoDriver* GetDriver() = 0;
 
 	//! Create a new index buffer
-	virtual IndexBuffer* CreateIndexBuffer() = 0;
+	virtual StrongRef<IndexBuffer> CreateIndexBuffer() = 0;
 
 	//! Create a new vertex buffer
-	virtual VertexBuffer* CreateVertexBuffer() = 0;
+	virtual StrongRef<VertexBuffer> CreateVertexBuffer() = 0;
 };
 
 }

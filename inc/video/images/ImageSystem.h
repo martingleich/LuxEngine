@@ -131,29 +131,29 @@ public:
 	\param index The index of the image writer.
 	\return The specified image writer or NULL if no such loader exists
 	*/
-	virtual ImageWriter* GetImageWriter(size_t index) = 0;
+	virtual StrongRef<ImageWriter> GetImageWriter(size_t index) = 0;
 
 	//! Retrieve a image writer based on the file extension of the given file
 	/**
 	\param name The name of a file you would like to write
 	\return The image writer which can write this file
 	*/
-	virtual ImageWriter* GetImageWriter(const io::path& name) = 0;
+	virtual StrongRef<ImageWriter> GetImageWriter(const io::path& name) = 0;
 
 	virtual bool SetTextureCreationFlag(ETextureCreationFlag flag, bool set) = 0;
 	virtual bool GetTextureCreationFlag(ETextureCreationFlag flag) const = 0;
 
-	virtual Texture* AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic = false) = 0;
-	virtual Texture* AddTexture(const string& name, Image* image, bool isDynamic = false) = 0;
+	virtual StrongRef<Texture> AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic = false) = 0;
+	virtual StrongRef<Texture> AddTexture(const string& name, Image* image, bool isDynamic = false) = 0;
 
-	virtual StrongRef<video::Texture> AddChromaKeyedTexture(video::Image* image, video::Color key) = 0;
-	virtual StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, video::Color key) = 0;
-	virtual StrongRef<video::Texture> GetChromaKeyedTexture(const io::path& p, const math::vector2i& pos) = 0;
+	virtual StrongRef<Texture> AddChromaKeyedTexture(video::Image* image, video::Color key) = 0;
+	virtual StrongRef<Texture> GetChromaKeyedTexture(const io::path& p, video::Color key) = 0;
+	virtual StrongRef<Texture> GetChromaKeyedTexture(const io::path& p, const math::vector2i& pos) = 0;
 
-	virtual CubeTexture* AddCubeTexture(const string& name, StrongRef<Image> images[6]) = 0;
-	virtual CubeTexture* AddCubeTexture(const string& name, ColorFormat format, u32 size) = 0;
+	virtual StrongRef<CubeTexture> AddCubeTexture(const string& name, StrongRef<Image> images[6]) = 0;
+	virtual StrongRef<CubeTexture> AddCubeTexture(const string& name, ColorFormat format, u32 size) = 0;
 
-	virtual Texture* AddRendertargetTexture(const string& name, const math::dimension2du& size, ColorFormat format) = 0;
+	virtual StrongRef<Texture> AddRendertargetTexture(const string& name, const math::dimension2du& size, ColorFormat format) = 0;
 
 	virtual StrongRef<SpriteBank> CreateSpriteBank() = 0;
 

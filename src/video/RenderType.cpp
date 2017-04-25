@@ -7,12 +7,11 @@ namespace lux
 namespace video
 {
 
-void RenderType::Enable(const core::PackagePuffer& puffer, bool fullReset)
+void RenderType::Enable(const core::PackagePuffer& puffer, bool fullReset, const RenderData* renderData)
 {
-	// Shader setzen, Package nach Shader laden, Pipeline setzen
 	if(m_Shader) {
 		m_Shader->Enable();
-		m_Shader->LoadParams(puffer);
+		m_Shader->LoadParams(puffer, renderData);
 	}
 
 	m_Driver->EnablePipeline(m_Pipeline, fullReset);

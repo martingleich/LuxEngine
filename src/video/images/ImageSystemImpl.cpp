@@ -588,14 +588,14 @@ size_t ImageSystemImpl::GetImageWriterCount() const
 	return m_WriterList.Size();
 }
 
-ImageWriter* ImageSystemImpl::GetImageWriter(size_t index)
+StrongRef<ImageWriter> ImageSystemImpl::GetImageWriter(size_t index)
 {
 	if(index >= m_WriterList.Size())
 		return nullptr;
 	return m_WriterList[index];
 }
 
-ImageWriter* ImageSystemImpl::GetImageWriter(const io::path& name)
+StrongRef<ImageWriter> ImageSystemImpl::GetImageWriter(const io::path& name)
 {
 	if(m_WriterList.IsEmpty())
 		return nullptr;
@@ -608,7 +608,7 @@ ImageWriter* ImageSystemImpl::GetImageWriter(const io::path& name)
 	return nullptr;
 }
 
-Texture* ImageSystemImpl::AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic)
+StrongRef<Texture> ImageSystemImpl::AddTexture(const string& name, const math::dimension2du& size, ColorFormat format, bool isDynamic)
 {
 	StrongRef<Texture> texture = CreateTexture(format, size, isDynamic, nullptr);
 
@@ -620,7 +620,7 @@ Texture* ImageSystemImpl::AddTexture(const string& name, const math::dimension2d
 	return texture;
 }
 
-Texture* ImageSystemImpl::AddTexture(const string& name, Image* image, bool isDynamic)
+StrongRef<Texture> ImageSystemImpl::AddTexture(const string& name, Image* image, bool isDynamic)
 {
 	StrongRef<Texture> texture = CreateTexture(image, isDynamic);
 
@@ -680,7 +680,7 @@ StrongRef<Texture> ImageSystemImpl::GetChromaKeyedTexture(const io::path& p, con
 	return AddChromaKeyedTexture(image, image->GetPixel(pos.x, pos.y));
 }
 
-CubeTexture* ImageSystemImpl::AddCubeTexture(const string& name, StrongRef<Image> images[6])
+StrongRef<CubeTexture> ImageSystemImpl::AddCubeTexture(const string& name, StrongRef<Image> images[6])
 {
 	StrongRef<video::CubeTexture> texture = CreateCubeTexture(images);
 
@@ -693,7 +693,7 @@ CubeTexture* ImageSystemImpl::AddCubeTexture(const string& name, StrongRef<Image
 }
 
 
-CubeTexture* ImageSystemImpl::AddCubeTexture(const string& name, ColorFormat format, u32 size)
+StrongRef<CubeTexture> ImageSystemImpl::AddCubeTexture(const string& name, ColorFormat format, u32 size)
 {
 	StrongRef<video::CubeTexture> texture = CreateCubeTexture(format, size);
 
@@ -705,7 +705,7 @@ CubeTexture* ImageSystemImpl::AddCubeTexture(const string& name, ColorFormat for
 	return texture;
 }
 
-Texture* ImageSystemImpl::AddRendertargetTexture(const string& name, const math::dimension2du& size, ColorFormat format)
+StrongRef<Texture> ImageSystemImpl::AddRendertargetTexture(const string& name, const math::dimension2du& size, ColorFormat format)
 {
 	if(!m_Driver)
 		return nullptr;

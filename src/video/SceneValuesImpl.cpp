@@ -223,7 +223,7 @@ u32 SceneValuesImpl::AddParam(const string& name, core::Type type)
 
 	m_CurrentOffset += Param.Size;
 
-	return (u32)(m_aParams.Size() + MATRIX_COUNT);
+	return (u32)(m_aParams.Size() + MATRIX_COUNT - 1);
 }
 
 /*

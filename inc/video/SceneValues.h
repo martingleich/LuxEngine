@@ -1,11 +1,10 @@
-#ifndef INCLUDED_ISCENEVALUES_H
-#define INCLUDED_ISCENEVALUES_H
-#include "../core/ReferenceCounted.h"
-#include "../core/lxString.h"
-#include "../core/lxTypes.h"
+#ifndef INCLUDED_SCENEVALUES_H
+#define INCLUDED_SCENEVALUES_H
+#include "core/ReferenceCounted.h"
+#include "core/lxString.h"
+#include "core/lxTypes.h"
 
-
-#include "../math/matrix4.h"
+#include "math/matrix4.h"
 
 namespace lux
 {
@@ -41,9 +40,7 @@ public:
 	};
 
 public:
-	virtual ~SceneValues()
-	{
-	}
+	virtual ~SceneValues() {}
 	virtual void SetMatrix(EMatrizes type, const math::matrix4& matrix) = 0;
 
 	virtual void SetMatrix(EMatrizes type, const math::matrix4& matrix, const math::matrix4& InvMatrix) = 0;
@@ -59,7 +56,7 @@ public:
 	*/
 	virtual u32 GetParamCount() const = 0;
 
-	virtual u32 GetParamID(const char* pName) const = 0;
+	virtual u32 GetParamID(const char* name) const = 0;
 
 	virtual const string& GetParamName(u32 id) const = 0;
 

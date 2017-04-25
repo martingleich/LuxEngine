@@ -9,6 +9,7 @@ namespace video
 
 class VideoDriver;
 class Shader;
+class RenderData;
 
 class RenderType
 {
@@ -18,7 +19,7 @@ public:
 
 	virtual ~RenderType();
 
-	void Enable(const core::PackagePuffer& puffer, bool fullReset);
+	void Enable(const core::PackagePuffer& puffer, bool fullReset, const RenderData* renderData=nullptr);
 	void Disable();
 
 	core::ParamPackage& GetPackage()

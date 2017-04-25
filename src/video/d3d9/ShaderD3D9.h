@@ -15,106 +15,121 @@ namespace video
 {
 
 class VideoDriver;
-class ShaderImpl : public Shader
+class ShaderD3D9 : public Shader
 {
-	friend class ShaderParam;
-
-private:
-	struct SParamEntry
-	{
-		ShaderParam Param;
-		u32 index;    // The sceneindex
-
-		SParamEntry(u32 _Index, const ShaderParam& p) : Param(p), index(_Index)
-		{
-		}
-
-		SParamEntry()
-		{
-		}
-
-		bool IsSceneValue() const
-		{
-			return (index != -1);
-		}
-	};
-
-	struct SHelperEntry
-	{
-		u32            Register_VS;    // Das Register im Vertexshader
-		u32            Register_PS;    // Das Register im Pixelshader
-		core::Type    type;            // Der Datentyp
-		u8            TypeSize;        // Die größe des Datentyps
-		const char* pName;
-		u32 NameLength;
-		const void* default;
-
-		SHelperEntry() : Register_VS(0xFFFFFFFF), Register_PS(0xFFFFFFFF), type(core::Type::Unknown), TypeSize(0), pName(nullptr), NameLength(0), default(nullptr)
-		{
-		}
-	};
-
-private:
-	IDirect3DDevice9* m_D3DDevice;
-	scene::SceneValues* m_SceneValues;
-	IDirect3DVertexShader9* m_pVertexShader;
-	IDirect3DPixelShader9* m_pPixelShader;
-
-	ID3DXConstantTable* m_pVertexShaderConstants;
-	ID3DXConstantTable* m_pPixelShaderConstants;
-
-	ShaderParam m_paramInvalid;        // Fehlercode
-
-	size_t m_MaterialParamCount;
-	core::array<SParamEntry> m_Params;
-	char* m_pNames;
-	core::ParamPackage m_ParamPackage;
-
-	/*
-	Verlinken von Shader und Engine bzw. material
-	material:
-		Das ParamPackage speichert den zugehörigen ShaderParam-index zum verwenden ab
-	Engine:
-		Verknüfen mit ShaderManager
-		Der Shader speichert für jeden ParamEntry den zugehörigen SceneParam ab(IDEA: Test existence of right value before usage)
-
-	// Diese Parameter werden automatisch verknüpft
-	float ambient;
-	float shininess;
-	Color diffuse;
-	Color emissive;
-	Color specular;
-	*/
-
-private:
-	void GetStructureElemType(D3DXHANDLE StructHandle, u32 index, ID3DXConstantTable* Table, core::Type& outType, u32& outSize, u32& registerID, const char*& Nameconst, const void*& default);
-	u32 LoadParams(ID3DXConstantTable* from, bool IsParam, core::array<SHelperEntry>& target, u32& StringSize, u32 ParamCount, u32 SceneCount);
-	bool CreatePixelShader(const char* Code, const char* EntryPoint, size_t length, const char* Profile);
-	bool CreateVertexShader(const char* Code, const char* EntryPoint, size_t length, const char* Profile);
-	void GetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type, u32 Size, void* out);
-	void SetShaderValue(u32 RegisterVS, u32 RegisterPS, core::Type type, u32 Size, const void* data);
-	void CastTypeToShader(core::Type type, const void* in, void* out);
-	void CastShaderToType(core::Type type, const void* in, void* out);
-
 public:
-	ShaderImpl(VideoDriver* Driver);
-	~ShaderImpl();
+	ShaderD3D9(VideoDriver* driver);
+	~ShaderD3D9();
 
-	bool Init(const char* VSCode, const char* VSEntryPoint, size_t VSLength, const char* VSProfile,
-		const char* PSCode, const char* PSEntryPoint, size_t PSLength, const char* PSProfile);
+	bool Init(
+		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
+		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile);
 
-	const ShaderParam& GetParam(const char* pcName);
+	const ShaderParam& GetParam(const char* name);
 	const ShaderParam& GetParam(u32 index);
 	u32 GetParamCount() const;
 
 	void Enable();
-	void LoadParams(const core::PackagePuffer& Puffer);
+	void LoadParams(const core::PackagePuffer& puffer, const RenderData* renderData);
+	void LoadSceneValues();
 	void Disable();
 
-	const core::ParamPackage& GetParamPackage()
+	const core::ParamPackage& GetParamPackage();
+
+private:
+	enum EParamType
 	{
-		return m_ParamPackage;
-	}
+		ParamType_DefaultMaterial,
+		ParamType_ParamMaterial,
+		ParamType_Scene,
+	};
+
+	enum EDefaultParam
+	{
+		DefaultParam_Shininess = 0,
+		DefaultParam_Diffuse = 1,
+		DefaultParam_Emissive = 2,
+		DefaultParam_Specular = 3,
+	};
+
+	struct ParamEntry
+	{
+		ShaderParam param;
+		EParamType paramType;
+		u32 index;
+
+		ParamEntry()
+		{
+		}
+
+		ParamEntry(EParamType t, const ShaderParam& p, u32 id = 0) :
+			param(p),
+			paramType(t),
+			index(id)
+		{
+		}
+	};
+
+	struct HelperEntry
+	{
+		u32 registerVS;
+		u32 registerPS;
+		core::Type type;
+		u8 typeSize;
+		const char* name;
+		u32 nameLength;
+		const void* defaultValue;
+
+		EParamType paramType;
+
+		HelperEntry() :
+			registerVS(0xFFFFFFFF),
+			registerPS(0xFFFFFFFF),
+			type(core::Type::Unknown),
+			typeSize(0),
+			name(nullptr),
+			nameLength(0),
+			defaultValue(nullptr),
+			paramType(ParamType_ParamMaterial)
+		{
+		}
+	};
+
+private:
+	bool GetStructureElemType(D3DXHANDLE structHandle, u32 index, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, const char*& name, const void*& defaultValue);
+
+	bool LoadParamsFromStructure(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, bool isParam);
+	bool LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize);
+
+	bool CreatePixelShader(const char* code, const char* entryPoint, size_t length, const char* profile);
+	bool CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile);
+
+	void GetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, void* out);
+	void SetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, const void* data);
+
+	void CastTypeToShader(core::Type type, const void* in, void* out);
+	void CastShaderToType(core::Type type, const void* in, void* out);
+
+	static int GetDefaultId(const char* name);
+	static core::Type GetDefaultType(u32 id);
+
+	static bool IsTypeCompatible(core::Type a, core::Type b);
+
+private:
+	IDirect3DDevice9* m_D3DDevice;
+	scene::SceneValues* m_SceneValues;
+	IDirect3DVertexShader9* m_VertexShader;
+	IDirect3DPixelShader9* m_PixelShader;
+
+	ID3DXConstantTable* m_VertexShaderConstants;
+	ID3DXConstantTable* m_PixelShaderConstants;
+
+	core::array<ParamEntry> m_Params;
+
+	char* m_Names;
+	core::ParamPackage m_ParamPackage;
+
+	ShaderParam m_InvalidParam;
 };
 
 }

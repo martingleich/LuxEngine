@@ -707,19 +707,22 @@ size_t VideoDriverD3D9::GetMaximalLightCount() const
 	return m_Caps.MaxActiveLights;
 }
 
-SubMesh* VideoDriverD3D9::CreateSubMesh(
+StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(
 	const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
 	EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, u32 IndexCount,
 	EPrimitiveType primitiveType)
 {
-	SubMesh* out = LUX_NEW(SubMeshImpl);
-	IndexBuffer* ib = m_BufferManager->CreateIndexBuffer();
+	StrongRef<SubMesh> out = LUX_NEW(SubMeshImpl);
+	StrongRef<IndexBuffer> ib = m_BufferManager->CreateIndexBuffer();
+	if(!ib)
+		return nullptr;
 	ib->SetType(indexType);
 	ib->SetHWMapping(IndexHWMapping);
 	ib->SetSize(IndexCount);
 
-
-	VertexBuffer* vb = m_BufferManager->CreateVertexBuffer();
+	StrongRef<VertexBuffer> vb = m_BufferManager->CreateVertexBuffer();
+	if(!vb)
+		return nullptr;
 	vb->SetFormat(vertexFormat);
 	vb->SetHWMapping(VertexHWMapping);
 	vb->SetSize(vertexCount);
@@ -731,7 +734,7 @@ SubMesh* VideoDriverD3D9::CreateSubMesh(
 	return out;
 }
 
-SubMesh* VideoDriverD3D9::CreateSubMesh(const VertexFormat& vertexFormat,
+StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(const VertexFormat& vertexFormat,
 	bool Dynamic,
 	EPrimitiveType primitiveType,
 	u32 primitiveCount)
@@ -1249,40 +1252,34 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool alpha, bool cu
 	return SUCCEEDED(hr);
 }
 
-Texture* VideoDriverD3D9::CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool Alpha, bool isDynamic)
+StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool Alpha, bool isDynamic)
 {
-	TextureD3D9* out = LUX_NEW(TextureD3D9)(m_D3DDevice);
-	if(!out->Init(Size, Format, MipCount, false, isDynamic)) {
-		out->Drop();
+	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
+	if(!out->Init(Size, Format, MipCount, false, isDynamic))
 		out = nullptr;
-	}
 
 	return out;
 }
 
-Texture* VideoDriverD3D9::CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha)
+StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha)
 {
-	TextureD3D9* out = LUX_NEW(TextureD3D9)(m_D3DDevice);
-	if(!out->Init(size, format, 1, true, false)) {
-		out->Drop();
+	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
+	if(!out->Init(size, format, 1, true, false))
 		out = nullptr;
-	}
 
 	return out;
 }
 
-CubeTexture* VideoDriverD3D9::CreateCubeTexture(u32 Size, ColorFormat Format, bool Alpha, bool isDynamic)
+StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 Size, ColorFormat Format, bool Alpha, bool isDynamic)
 {
-	CubeTextureD3D9* out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
-	if(!out->Init(Size, Format, isDynamic)) {
-		out->Drop();
+	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
+	if(!out->Init(Size, Format, isDynamic))
 		out = nullptr;
-	}
 
 	return out;
 }
 
-Shader* VideoDriverD3D9::CreateShader(
+StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	const char* VSCode, const char* VSEntryPoint, u32 VSLength, EVertexShaderType VSType,
 	const char* PSCode, const char* PSEntryPoint, u32 PSLength, EPixelShaderType PSType)
 {
@@ -1309,12 +1306,11 @@ Shader* VideoDriverD3D9::CreateShader(
 		"ps_5_0"
 	};
 
-	ShaderImpl* out = LUX_NEW(ShaderImpl)(this);
-	if(out->Init(VSCode, VSEntryPoint, VSLength, VSProfileNames[VSType], PSCode, PSEntryPoint, PSLength, PSProfileNames[PSType]))
-		return out;
+	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this);
+	if(!out->Init(VSCode, VSEntryPoint, VSLength, VSProfileNames[VSType], PSCode, PSEntryPoint, PSLength, PSProfileNames[PSType]))
+		out = nullptr;
 
-	out->Drop();
-	return nullptr;
+	return out;
 }
 
 void VideoDriverD3D9::SetActiveTexture(u32 stage,
@@ -1687,6 +1683,8 @@ void VideoDriverD3D9::SetRenderstates3DMode(bool useMaterial)
 		m_CurrentMaterial = m_3DMaterial;
 	}
 
+	if(m_CurrentMaterial.GetRenderer()->GetShader())
+		m_CurrentMaterial.GetRenderer()->GetShader()->LoadSceneValues();
 
 	m_CurrentRendermode = ERM_3D;
 	m_ResetRenderstates = false;
@@ -1735,6 +1733,9 @@ void VideoDriverD3D9::SetRenderstates2DMode(bool useMaterial, bool Alpha, bool A
 			m_2DMaterial.GetRenderer()->OnSetMaterial(m_2DMaterial, m_CurrentMaterial);
 
 		m_CurrentMaterial = m_2DMaterial;
+
+		if(m_CurrentMaterial.GetRenderer()->GetShader())
+			m_CurrentMaterial.GetRenderer()->GetShader()->LoadSceneValues();
 	} else {
 		m_D3DDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 		m_D3DDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
