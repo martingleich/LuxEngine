@@ -15,10 +15,10 @@ struct Placeholder
 
 	public:
 		Option() :
+			value(0),
 			enabled(false),
 			hasDefaultValue(false),
-			placeholder(false),
-			value(0)
+			placeholder(false)
 		{
 		}
 

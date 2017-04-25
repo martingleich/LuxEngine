@@ -163,8 +163,8 @@ public:
 	}
 
 	Locale(const Locale& other) :
-		m_Facets(other.m_Facets),
-		m_Numerical(other.m_Numerical->Clone())
+		m_Numerical(other.m_Numerical->Clone()),
+		m_Facets(other.m_Facets)
 	{
 		for(auto it = m_Facets.begin(); it != m_Facets.end(); ++it)
 			it->second = it->second->Clone();

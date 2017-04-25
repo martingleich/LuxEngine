@@ -20,7 +20,7 @@ namespace internal
 	// sign pre.postEexp
 	// MAX_INT_LEN + 1 + digits + 1 + MAX_INT_LEN
 	// 11 + 1 + 11 + 1= 24
-	static size_t MAX_DOUBLE_LEN = 24;
+	//static size_t MAX_DOUBLE_LEN = 24;
 
 	template <typename T>
 	size_t uitoa(T n, char* s, int base)

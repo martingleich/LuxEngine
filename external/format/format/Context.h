@@ -45,19 +45,21 @@ public:
 
 public:
 	Context() :
-		m_LastSlice(nullptr),
+		stringType(Ascii),
+                fstrType(Ascii),
+                dstSink(nullptr),
+                fstrPos(0),
+                fstrLastArgPos(0),
+                argId(0),
+                fstr(nullptr),
 		m_FirstSlice(nullptr),
+		m_LastSlice(nullptr),
+		m_ForceSlice(true),
 		m_Line(0),
 		m_Collumn(0),
 		m_CharacterCount(0),
-		fstrPos(0),
-		fstrLastArgPos(0),
-		argId(0),
-		fstr(nullptr),
 		m_SinkCollumn((size_t)-1),
-		dstSink(nullptr),
-		m_Locale(nullptr),
-		m_ForceSlice(true)
+		m_Locale(nullptr)
 	{
 	}
 
