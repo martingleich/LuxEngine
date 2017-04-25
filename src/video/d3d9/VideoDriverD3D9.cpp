@@ -953,6 +953,8 @@ bool VideoDriverD3D9::Draw3DLine(const math::vector3f& start,
 	if(disableZ)
 		m_D3DDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
 	if(colorStart.HasAlpha() || colorEnd.HasAlpha()) {
+		m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+		m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
 		m_D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		m_D3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		m_D3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
