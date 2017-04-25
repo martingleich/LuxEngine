@@ -186,20 +186,20 @@ public:
 	\param Trans The new used translation
 	\return Selfreference
 	*/
-	inline matrix4& SetTranslation(const vector3f& Trans);
+	matrix4& SetTranslation(const vector3f& Trans);
 
 	//! Creates a Translationmatrix and combine it with this matrix
 	/**
 	\param Trans The Translation to add
 	\return Selfreference
 	*/
-	inline matrix4& AddTranslation(const vector3f& Trans);
+	matrix4& AddTranslation(const vector3f& Trans);
 
 	//! The current translation done by this matrix
 	/**
 	\return The Translation done by this matrix
 	*/
-	inline vector3f GetTranslation() const;
+	vector3f GetTranslation() const;
 
 	//! Set the scaling done by this matrix
 	/**
@@ -207,20 +207,20 @@ public:
 	\param scale The new used scale
 	\return Selfreference
 	*/
-	inline matrix4& SetScale(const vector3f& scale);
+	matrix4& SetScale(const vector3f& scale);
 
 	//! Creates a scalematrix and combine it with this matrix
 	/**
 	\param scale The new used scale
 	\return Selfreference
 	*/
-	inline matrix4& AddScale(const vector3f& scale);
+	matrix4& AddScale(const vector3f& scale);
 
 	//! The current scale done by this matrix
 	/**
 	\return The scale done by this matrix
 	*/
-	inline vector3f GetScale() const;
+	vector3f GetScale() const;
 
 	//! Set the rotation done by this matrix
 	/**
@@ -230,7 +230,7 @@ public:
 	\param z The z angle.
 	\return Selfreference
 	*/
-	inline matrix4& SetRotationEuler(anglef x, anglef y, anglef z);
+	matrix4& SetRotationEuler(anglef x, anglef y, anglef z);
 
 	//! Set the rotation done by this matrix
 	/**
@@ -238,7 +238,7 @@ public:
 	\param f The rotation about the x axis.
 	\return Selfreference
 	*/
-	inline matrix4& SetRotationX(anglef f);
+	matrix4& SetRotationX(anglef f);
 
 	//! Set the rotation done by this matrix
 	/**
@@ -246,7 +246,7 @@ public:
 	\param f The rotation about the y axis
 	\return Selfreference
 	*/
-	inline matrix4& SetRotationY(anglef f);
+	matrix4& SetRotationY(anglef f);
 
 	//! Set the rotation done by this matrix
 	/**
@@ -254,42 +254,42 @@ public:
 	\param f The rotation about the z axis.
 	\return Selfreference
 	*/
-	inline matrix4& SetRotationZ(anglef f);
+	matrix4& SetRotationZ(anglef f);
 
 	//! Add a rotation about the x axis
 	/**
 	\param f The rotation about the x axis.
 	\return Selfreference
 	*/
-	inline matrix4& AddRotationX(anglef f);
+	matrix4& AddRotationX(anglef f);
 
 	//! Add a rotation about the y axis
 	/**
 	\param f The rotation about the y axis.
 	\return Selfreference
 	*/
-	inline matrix4& AddRotationY(anglef f);
+	matrix4& AddRotationY(anglef f);
 
 	//! Add a rotation about the z axis
 	/**
 	\param f The rotation about the z axis.
 	\return Selfreference
 	*/
-	inline matrix4& AddRotationZ(anglef f);
+	matrix4& AddRotationZ(anglef f);
 
 	//! Add a euler rotation to this matrix
 	/**
 	\param Rot The rotation vector in Eulerangle(XYZ) and Rad
 	\return Selfreference
 	*/
-	inline matrix4& AddRotation(anglef x, anglef y, anglef z);
+	matrix4& AddRotation(anglef x, anglef y, anglef z);
 
 	//! The rotation done by this matrix
 	/**
 	Calculates the rotation in Eulerangle(XYZ) and Degree
 	\return The rotation done by this matrix
 	*/
-	inline vector3f GetRotationDeg() const;
+	vector3f GetRotationDeg() const;
 
 	//! Set this matrix to the product of two other matrices
 	/**
@@ -431,29 +431,29 @@ public:
 	}
 
 	//! Addition
-	inline matrix4  operator+ (const matrix4& other) const;
+	matrix4  operator+ (const matrix4& other) const;
 	//! Short addition
-	inline matrix4& operator+=(const matrix4& other);
+	matrix4& operator+=(const matrix4& other);
 	//! Subtraction
-	inline matrix4  operator- (const matrix4& other) const;
+	matrix4  operator- (const matrix4& other) const;
 	//! Short subtraction
-	inline matrix4& operator-=(const matrix4& other);
+	matrix4& operator-=(const matrix4& other);
 	//! Scalar multiplication
-	inline matrix4  operator* (float f) const;
+	matrix4  operator* (float f) const;
 	//! Short scalar multiplication
-	inline matrix4& operator*=(float f);
+	matrix4& operator*=(float f);
 	//! Multiplication
 	matrix4  operator* (const matrix4& other) const;
 	//! Shortmuliplication
 	matrix4& operator*=(const matrix4& other);
 
 	//! Assignment
-	inline matrix4& operator= (const matrix4& other);
+	matrix4& operator= (const matrix4& other);
 
 	//! Equality
-	inline bool operator==(const matrix4& other) const;
+	bool operator==(const matrix4& other) const;
 	//! Unequality
-	inline bool operator!=(const matrix4& other) const;
+	bool operator!=(const matrix4& other) const;
 
 	//! Equality with tolerance
 	bool Equal(const matrix4& other, float tolerance = math::Constants<float>::rounding_error()) const;
