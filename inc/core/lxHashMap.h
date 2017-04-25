@@ -401,7 +401,9 @@ public:
 		m_FirstUnusedNode(nullptr),
 		m_Allocated(0),
 		m_Entries(0),
-		m_MaxLoad(1.0)
+		m_MaxLoad(1.0),
+		m_Hasher(),
+		m_Equal()
 	{
 		if(maxLoad < 0.0)
 			m_MaxLoad = 1.0;
@@ -418,7 +420,9 @@ public:
 		m_FirstUnusedNode(nullptr),
 		m_Allocated(0),
 		m_Entries(0),
-		m_MaxLoad(1.0f)
+		m_MaxLoad(1.0f),
+		m_Hasher(),
+		m_Equal()
 	{
 		*this = other;
 	}
@@ -431,7 +435,9 @@ public:
 		m_FirstUnusedNode(nullptr),
 		m_Allocated(0),
 		m_Entries(0),
-		m_MaxLoad(1.0f)
+		m_MaxLoad(1.0f),
+		m_Hasher(),
+		m_Equal()
 	{
 		*this = std::move(old);
 	}

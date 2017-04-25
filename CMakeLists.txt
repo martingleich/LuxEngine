@@ -74,7 +74,7 @@ if(MSVC)
 	link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 	set(SRCS ${SRCS} "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def")
 else()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC -include "LuxConfig.h")
+	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
 endif()
 
 add_library(LuxEngine SHARED ${SRCS} ${INCS})

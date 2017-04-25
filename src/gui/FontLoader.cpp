@@ -82,7 +82,7 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	file->ReadBinary(sizeof(u32), &Magic);
 	file->ReadBinary(sizeof(u32), &VersionStr);
 	if(Magic != LX_MAKE_FOURCC('F', 'O', 'N', 'T')) {
-		return nullptr;
+		return false;
 	}
 
 	u32 Version = 0;
@@ -92,7 +92,7 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	}
 
 	if(Version != 1)
-		return nullptr;
+		return false;
 
 	core::HashMap<u32, gui::CharInfo> charMap;
 	video::Texture* fontTexture;
@@ -143,7 +143,7 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 					u8* pixel = rowData;
 					for(u32 x = 0; x < image.TextureWidth; ++x) {
 						if(file->ReadBinary(1, &value) == 0) {
-							return nullptr;
+							return false;
 						}
 
 						*pixel = value;        // Alpha

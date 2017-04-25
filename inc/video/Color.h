@@ -895,8 +895,11 @@ inline Colorf HSVToColorf(float h, float s, float v, float alpha = 1.0f)
 
 }    // video
 
-template<> inline core::Type core::GetTypeInfo<video::Colorf>() { return core::Type::ColorF; }
-template<> inline core::Type core::GetTypeInfo<video::Color>() { return core::Type::Color; }
+namespace core
+{
+template<> inline Type GetTypeInfo<video::Colorf>() { return Type::ColorF; }
+template<> inline Type GetTypeInfo<video::Color>() { return Type::Color; }
+} // namespace core
 
 namespace math
 {

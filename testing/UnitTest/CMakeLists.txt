@@ -10,7 +10,7 @@ link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 if(MSVC)
 	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS)
 else()
-	add_definitions(-std=c++11 -Wall -DUNICODE -D_UNICODE -DNDEBUG -fpermissive)
+	add_definitions(-std=c++11 -Wall -DUNICODE -D_UNICODE -DNDEBUG)
 endif()
 
 add_executable(UnitTest ${UNITTEST_SRCS} ${UNITTEST_INCS})

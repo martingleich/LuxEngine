@@ -589,13 +589,15 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 	ConvertAddString(ctx, StringType::Ascii, "]", 1);
 }
 
-}
+} // namespace math
 
-template<> inline core::Type core::GetTypeInfo<math::vector3<float>>() { return core::Type::Vector3; };
-template<> inline core::Type core::GetTypeInfo<math::vector3<int>>() { return core::Type::Vector3Int; };
+namespace core
+{
+template<> inline Type GetTypeInfo<math::vector3<float>>() { return Type::Vector3; };
+template<> inline Type GetTypeInfo<math::vector3<int>>() { return Type::Vector3Int; };
+} // namespace core
 
-}
-
+} // namespace lux
 
 #endif
 
