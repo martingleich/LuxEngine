@@ -173,13 +173,6 @@ LRESULT LuxDeviceWin32::WinProc(HWND windowHandle,
 	return DefWindowProcW(windowHandle, uiMessage, WParam, LParam);
 }
 
-namespace video
-{
-Material IdentityMaterial;
-Material WorkMaterial;
-MaterialRenderer* SOLID_RENDERER;
-}
-
 LuxDeviceWin32::LuxDeviceWin32() :
 	m_Time(0.0),
 	m_Quit(false),

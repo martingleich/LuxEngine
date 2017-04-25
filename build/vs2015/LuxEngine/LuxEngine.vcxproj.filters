@@ -713,6 +713,7 @@
     <ClInclude Include="..\..\..\inc\core\LuxBase.h">
       <Filter>core\util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\inc\core\LuxBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\math\lxMath.cpp">
@@ -1008,6 +1009,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\lxAssert.cpp">
       <Filter>core\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\video\Material.cpp">
+      <Filter>video\material</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

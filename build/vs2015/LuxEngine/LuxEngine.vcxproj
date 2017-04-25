@@ -622,6 +622,7 @@
     <ClCompile Include="..\..\..\src\video\images\ImageWriterBMP.cpp" />
     <ClCompile Include="..\..\..\src\video\images\ImageWriterTGA.cpp" />
     <ClCompile Include="..\..\..\src\video\IndexBufferImpl.cpp" />
+    <ClCompile Include="..\..\..\src\video\Material.cpp" />
     <ClCompile Include="..\..\..\src\video\MaterialLibraryImpl.cpp" />
     <ClCompile Include="..\..\..\src\video\RenderType.cpp" />
     <ClCompile Include="..\..\..\src\video\SceneValuesImpl.cpp" />
