@@ -6,7 +6,13 @@ include_directories("${PROJECT_SOURCE_DIR}/inc")
 include_directories("${PROJECT_SOURCE_DIR}/testing/UnitTest/src")
 link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 
-add_definitions(-std=c++11)
+# Add plattform dependend libs and compiler-flags
+if(MSVC)
+	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS)
+else()
+	add_definitions(-std=c++11 -Wall -DUNICODE -D_UNICODE -DNDEBUG)
+endif()
+
 add_executable(UnitTest ${UNITTEST_SRCS} ${UNITTEST_INCS})
 add_dependencies(UnitTest LuxEngine)
 target_link_libraries(UnitTest LuxEngine)
