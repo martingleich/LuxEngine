@@ -600,9 +600,9 @@ ImageWriter* ImageSystemImpl::GetImageWriter(const io::path& name)
 	if(m_WriterList.IsEmpty())
 		return nullptr;
 
-	for(size_t i = m_WriterList.Size() - 1; i >= 0; --i) {
-		if(m_WriterList[i]->CanWriteFile(name))
-			return m_WriterList[i];
+	for(size_t i = m_WriterList.Size(); i > 0; --i) {
+		if(m_WriterList[i-1]->CanWriteFile(name))
+			return m_WriterList[i-1];
 	}
 
 	return nullptr;

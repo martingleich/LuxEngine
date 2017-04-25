@@ -2,8 +2,14 @@
 file(GLOB_RECURSE LIBTGA_INCS "src/*.h")
 file(GLOB_RECURSE LIBTGA_SRCS "src/*.cpp")
 
-add_definitions(-std=c++11 -DUNICODE -D_UNICODE -fPIC)
 add_library(libtga ${LIBTGA_SRCS} ${LIBTGA_INCS})
+
+# Add plattform dependend libs and compiler-flags
+if(MSVC)
+	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS)
+else()
+	add_definitions(-std=c++11 -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC)
+endif()
 
 # http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)

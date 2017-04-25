@@ -2,9 +2,15 @@
 file(GLOB_RECURSE LIBPNG_INCS "src/*.h")
 file(GLOB_RECURSE LIBPNG_SRCS "src/*.c")
 
-add_definitions(-DUNICODE -D_UNICODE -fPIC)
 add_library(libpng ${LIBPNG_SRCS} ${LIBPNG_INCS})
 add_dependencies(libpng zlib)
+
+# Add plattform dependend libs and compiler-flags
+if(MSVC)
+	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS)
+else()
+	add_definitions(-DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC)
+endif()
 
 include_directories("${PROJECT_SOURCE_DIR}/external/zlib/src")
 

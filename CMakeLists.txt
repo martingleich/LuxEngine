@@ -69,10 +69,16 @@ set(USED_LIBS ${USED_LIBS} format zlib libtga libpng)
 
 # Add plattform dependend libs and compiler-flags
 if(MSVC)
-	add_definitions(-std=c++11 -DLUX_EXPORT -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"LuxConfig.h")
+	add_definitions(-std=c++11 -DLUX_EXPORT -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"LuxConfig.h" -W4)
 	set(USED_LIBS ${USED_LIBS} d3d9 d3dx9 Hid)
 	link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 	set(SRCS ${SRCS} "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def")
+
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34296 ") #'operator': expression is always false
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34062 ") # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34264 ") # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34265 ") # 'class': class has virtual functions, but destructor is not virtual
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34928 ") # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
 else()
 	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
 endif()
