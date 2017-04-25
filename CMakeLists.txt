@@ -33,7 +33,10 @@ add_subdirectory(external/zlib)
 
 add_subdirectory(testing/UnitTest)
 
-add_subdirectory(external/FilterExportFiles)
+if(WIN32)
+	# TODO Ugly hacks to create the def file ...
+	add_subdirectory(external/FilterExportFiles)
+endif()
 
 # Always include inc!
 include_directories("${PROJECT_SOURCE_DIR}/inc")
@@ -84,7 +87,7 @@ else()
 endif()
 
 add_library(LuxEngine SHARED ${SRCS} ${INCS})
-add_dependencies(LuxEngine format zlib libpng libtga FilterExportFiles)
+add_dependencies(LuxEngine format zlib libpng libtga)
 target_link_libraries(LuxEngine ${USED_LIBS})
 
 # Add tests
@@ -93,6 +96,7 @@ add_test(NAME BasicTest COMMAND UnitTest)
 
 if(WIN32)
 	# TODO Ugly hacks to create the def file ...
+	add_dependencies(LuxEngine FilterExportFiles)
 	add_custom_command(
 		TARGET LuxEngine
 		PRE_BUILD
