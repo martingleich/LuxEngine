@@ -1,7 +1,7 @@
 #ifndef INCLUDED_GEOMETRY_CREATOR_LIB_IMPL_H
 #define INCLUDED_GEOMETRY_CREATOR_LIB_IMPL_H
 #include "scene/mesh/GeometryCreatorLib.h"
-#include "core/lxhashmap.h"
+#include "core/lxHashMap.h"
 
 namespace lux
 {

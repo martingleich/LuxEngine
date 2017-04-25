@@ -38,7 +38,7 @@ enum EDebugData : u32
 };
 
 // Eine Szenenknoten ist ein element des Szenengraphs
-class SceneNode : public Referable, public scene::Transformable, private core::TreeNode, public input::EventReceiver
+class SceneNode : public Referable, public scene::Transformable, public core::TreeNode, public input::EventReceiver
 {
 	friend struct RenderTransform;
 public:
@@ -351,11 +351,12 @@ public:
 	// Rückgabe: True wenn er entfernt werden konnte ansonsten false
 	virtual bool RemoveChild(SceneNode* child)
 	{
-		ChildIterator it = TreeNode::_GetChildrenFirst<SceneNode>();
-		for(; it != TreeNode::_GetChildrenEnd<SceneNode>(); ++it) {
+		auto it = TreeNode::_GetChildrenFirst<TreeNode>();
+		for(; it != TreeNode::_GetChildrenEnd<TreeNode>(); ++it) {
 			if(it.Pointer() == (TreeNode*)child) {
-				it->_RemoveFromParent();
-				it->Drop();
+				SceneNode *node = dynamic_cast<SceneNode*>(it.Pointer());
+				node->_RemoveFromParent();
+				node->Drop();
 				return true;
 			}
 		}

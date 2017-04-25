@@ -35,7 +35,7 @@ public:
 		return m_BoundingBox;
 	}
 
-	const math::triangle3df& GetTriangle(size_t id) const
+	const math::triangle3df& GetTriangle(u32 id) const
 	{
 		return m_Triangles[id];
 	}

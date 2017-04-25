@@ -65,7 +65,7 @@ namespace input
 #include "math/triangle3d.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
-#include "math/Curve.h"
+#include "math/curve.h"
 
 #include "core/ReferenceCounted.h"
 #include "core/Logger.h"
