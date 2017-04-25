@@ -20,11 +20,11 @@ struct MemoryDebugInfo
 	size_t line;
 
 	MemoryDebugInfo(const char* _file, size_t _line, const char* _type, bool _array) :
+		ptr(nullptr),
 		type(_type),
-		file(_file),
-		line(_line),
 		array(_array),
-		ptr(nullptr)
+		file(_file),
+		line(_line)
 	{
 	}
 };
