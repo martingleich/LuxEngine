@@ -43,7 +43,7 @@ void FilterObject(const std::string& object)
 	std::string undec(g_Buffer, result);
 
 	for(auto it = g_ExportNames.begin(); it != g_ExportNames.end(); ++it) {
-		if(StringStartsWith(undec, *it)) {
+		if(!it->empty() && StringStartsWith(undec, *it)) {
 			if(it->back() != ':') { // Must be the full object name.
 				if(undec.length() != it->length())
 					continue;
@@ -73,6 +73,9 @@ int main(int argc, const char* argv[])
 	g_ExportNames.clear();
 	while(std::fgets(g_Buffer, sizeof(g_Buffer), export_file)) {
 		if(g_Buffer[0] == '\0' || g_Buffer[0] == '#')
+			continue;
+		size_t len = strlen(g_Buffer)-1;
+		if(len == 0)
 			continue;
 
 		g_ExportNames.push_back(std::string(g_Buffer, strlen(g_Buffer) - 1));

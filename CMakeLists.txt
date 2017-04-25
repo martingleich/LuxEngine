@@ -101,7 +101,7 @@ if(WIN32)
 	add_custom_command(
 		TARGET LuxEngine
 		PRE_LINK
-		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" $<TARGET_FILE:FilterExportFiles> "${PROJECT_SOURCE_DIR}/lib/$(Platform)/$(Configuration)" "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
+		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" $<TARGET_FILE:FilterExportFiles> $<TARGET_FILE_DIR:format> "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
 		COMMENT "Build .def file"
 		VERBATIM
 	)
