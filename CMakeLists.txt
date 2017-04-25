@@ -66,11 +66,12 @@ if(MSVC)
 	add_definitions(-std=c++11 -DLUX_EXPORT -DUNICODE -D_UNICODE)
 	set(USED_LIBS ${USED_LIBS} d3d9 d3dx9 Hid)
 	link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
+	set(SRCS ${SRCS} "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def")
 else()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive)
+	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC)
 endif()
 
-add_library(LuxEngine SHARED ${SRCS} ${INCS} "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def")
+add_library(LuxEngine SHARED ${SRCS} ${INCS})
 add_dependencies(LuxEngine format zlib libpng libtga)
 target_link_libraries(LuxEngine ${USED_LIBS})
 
@@ -78,20 +79,22 @@ target_link_libraries(LuxEngine ${USED_LIBS})
 enable_testing()
 add_test(NAME BasicTest COMMAND UnitTest)
 
-# TODO Ugly hacks to create the def file ...
-add_custom_command(
-	TARGET LuxEngine
-	PRE_BUILD
-	COMMAND "${PROJECT_SOURCE_DIR}/scripts/ValidateDependencies.bat"
-	COMMENT "Validate dependencies"
-)
-set_source_files_properties(
-	"${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
-	PROPERTIES GENERATED TRUE
-)
-add_custom_command(
-	TARGET LuxEngine
-	PRE_LINK
-	COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" "${PROJECT_SOURCE_DIR}/lib/$(Platform)/$(Configuration)" "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
-	COMMENT "Build .def file"
-)
+if(WIN32)
+	# TODO Ugly hacks to create the def file ...
+	add_custom_command(
+		TARGET LuxEngine
+		PRE_BUILD
+		COMMAND "${PROJECT_SOURCE_DIR}/scripts/ValidateDependencies.bat"
+		COMMENT "Validate dependencies"
+	)
+	set_source_files_properties(
+		"${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
+		PROPERTIES GENERATED TRUE
+	)
+	add_custom_command(
+		TARGET LuxEngine
+		PRE_LINK
+		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" "${PROJECT_SOURCE_DIR}/lib/$(Platform)/$(Configuration)" "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
+		COMMENT "Build .def file"
+	)
+endif()

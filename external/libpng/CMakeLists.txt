@@ -2,7 +2,7 @@
 file(GLOB_RECURSE LIBPNG_INCS "src/*.h")
 file(GLOB_RECURSE LIBPNG_SRCS "src/*.c")
 
-add_definitions(-DUNICODE -D_UNICODE)
+add_definitions(-DUNICODE -D_UNICODE -fPIC)
 add_library(libpng ${LIBPNG_SRCS} ${LIBPNG_INCS})
 add_dependencies(libpng zlib)
 

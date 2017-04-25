@@ -2,7 +2,7 @@
 file(GLOB_RECURSE ZLIB_INCS "src/*.h")
 file(GLOB_RECURSE ZLIB_SRCS "src/*.c")
 
-add_definitions(-DUNICODE -D_UNICODE)
+add_definitions(-DUNICODE -D_UNICODE -fPIC)
 add_library(zlib ${ZLIB_SRCS} ${ZLIB_INCS})
 
 # http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
