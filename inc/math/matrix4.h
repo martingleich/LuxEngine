@@ -297,7 +297,7 @@ public:
 	\param b The second factor
 	\return Selfreference
 	*/
-	inline matrix4& SetByProduct(const matrix4& a, const matrix4& b);
+	matrix4& SetByProduct(const matrix4& a, const matrix4& b);
 
 	//! Make a worldmatrix
 	/**
@@ -443,9 +443,9 @@ public:
 	//! Short scalar multiplication
 	inline matrix4& operator*=(float f);
 	//! Multiplication
-	inline matrix4  operator* (const matrix4& other) const;
+	matrix4  operator* (const matrix4& other) const;
 	//! Shortmuliplication
-	inline matrix4& operator*=(const matrix4& other);
+	matrix4& operator*=(const matrix4& other);
 
 	//! Assignment
 	inline matrix4& operator= (const matrix4& other);

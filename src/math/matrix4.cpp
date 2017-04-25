@@ -712,7 +712,7 @@ inline matrix4& matrix4::operator*=(float f)
 }
 
 // Multiplikation mit einer anderen Matrix
-inline matrix4 matrix4::operator* (const matrix4& other) const
+matrix4 matrix4::operator* (const matrix4& other) const
 {
 	// Multiplikationen sind sehr langsam
 	if(this->IsIdent()) return other;
@@ -739,7 +739,7 @@ inline matrix4 matrix4::operator* (const matrix4& other) const
 		m[3][0]*other.m[0][3] + m[3][1]*other.m[1][3] + m[3][2]*other.m[2][3] + m[3][3]*other.m[3][3]);
 }
 
-inline matrix4& matrix4::SetByProduct(const matrix4& a, const matrix4& b)
+matrix4& matrix4::SetByProduct(const matrix4& a, const matrix4& b)
 {
 	m[0][0] = a.m[0][0]*b.m[0][0] + a.m[0][1]*b.m[1][0] + a.m[0][2]*b.m[2][0] + a.m[0][3]*b.m[3][0],
 		m[0][1] = a.m[0][0]*b.m[0][1] + a.m[0][1]*b.m[1][1] + a.m[0][2]*b.m[2][1] + a.m[0][3]*b.m[3][1],
@@ -764,7 +764,7 @@ inline matrix4& matrix4::SetByProduct(const matrix4& a, const matrix4& b)
 	return *this;
 }
 
-inline matrix4& matrix4::operator*=(const matrix4& other)
+matrix4& matrix4::operator*=(const matrix4& other)
 {
 	if(this->IsIdent()) return ((*this) = other);
 	if(other.IsIdent()) return *this;
