@@ -39,12 +39,14 @@ public:
 	//! Default constructor, creates invalid type.
 	Type() :
 		m_Type(Unknown)
-	{}
+	{
+	}
 
 	//! Construct from type.
 	Type(EType t) :
 		m_Type(t)
-	{}
+	{
+	}
 
 	Type(const Type& t) = default;
 
@@ -112,7 +114,7 @@ public:
 	u32 GetSize() const
 	{
 		u32 type = GetBaseType().m_Type;
-		static const u32 TYPE_SIZES[] = { sizeof(void*) + 1,
+		static const u32 TYPE_SIZES[] = {sizeof(void*) + 1,
 			4,
 			4,
 			4,
@@ -126,9 +128,9 @@ public:
 			4 * 4,
 			0,
 			4 * 4 * 4,
-			0 };
+			0};
 
-		if (type < (sizeof(TYPE_SIZES) / sizeof(*TYPE_SIZES)))
+		if(type < (sizeof(TYPE_SIZES) / sizeof(*TYPE_SIZES)))
 			return TYPE_SIZES[type];
 		else
 			lxAssertNeverReach("Unknown type used");
@@ -147,6 +149,140 @@ template <> inline Type GetTypeInfo<int>() { return Type::Integer; }
 template <> inline Type GetTypeInfo<u32>() { return Type::U32; }
 template <> inline Type GetTypeInfo<float>() { return Type::Float; }
 template <> inline Type GetTypeInfo<bool>() { return Type::Bool; }
+
+//! Converts between base types.
+/**
+The base types are int, u32, float and bool.
+*/
+inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, void* toData)
+{
+	if(fromType == toType) {
+		memcpy(toData, fromData, fromType.GetSize());
+		return true;
+	}
+
+	if(fromType == Type::Integer) {
+		if(toType == Type::U32) {
+			*((u32*)toData) = *((int*)fromData);
+			return true;
+		}
+		if(toType == Type::Float) {
+			*((float*)toData) = (float)*((int*)fromData);
+			return true;
+		}
+		if(toType == Type::Bool) {
+			*((bool*)toData) = *((int*)fromData) ? true : false;
+			return true;
+		}
+		return false;
+	}
+
+	if(fromType == Type::U32) {
+		if(toType == Type::Integer) {
+			*((int*)toData) = *((u32*)fromData);
+			return true;
+		}
+		if(toType == Type::Float) {
+			*((float*)toData) = (float)*((u32*)fromData);
+			return true;
+		}
+
+		if(toType == Type::Bool) {
+			*((bool*)toData) = *((u32*)fromData) ? true : false;
+			return true;
+		}
+		return false;
+	}
+
+	if(fromType == Type::Float) {
+		if(toType == Type::Integer) {
+			*((int*)toData) = (int)*((float*)fromData);
+			return true;
+		}
+		if(toType == Type::U32) {
+			*((u32*)toData) = (u32)*((float*)fromData);
+			return true;
+		}
+		return false;
+	}
+
+	if(fromType == Type::Bool) {
+		if(toType == Type::Integer) {
+			*((int*)toData) = *((bool*)fromData) ? 1 : 0;
+			return true;
+		}
+		if(toType == Type::U32) {
+			*((u32*)toData) = *((bool*)fromData) ? 1 : 0;
+			return true;
+		}
+		if(toType == Type::Float) {
+			*((float*)toData) = *((bool*)fromData) ? 1.0f : 0.0f;
+			return true;
+		}
+		return false;
+	}
+
+	return false;
+}
+
+inline bool IsConvertible(Type fromType, Type toType)
+{
+	if(fromType == toType) {
+		return true;
+	}
+
+	if(fromType == Type::Integer) {
+		if(toType == Type::U32) {
+			return true;
+		}
+		if(toType == Type::Float) {
+			return true;
+		}
+		if(toType == Type::Bool) {
+			return true;
+		}
+		return false;
+	}
+
+	if(fromType == Type::U32) {
+		if(toType == Type::Integer) {
+			return true;
+		}
+		if(toType == Type::Float) {
+			return true;
+		}
+
+		if(toType == Type::Bool) {
+			return true;
+		}
+		return false;
+	}
+
+	if(fromType == Type::Float) {
+		if(toType == Type::Integer) {
+			return true;
+		}
+		if(toType == Type::U32) {
+			return true;
+		}
+		return false;
+	}
+
+	if(fromType == Type::Bool) {
+		if(toType == Type::Integer) {
+			return true;
+		}
+		if(toType == Type::U32) {
+			return true;
+		}
+		if(toType == Type::Float) {
+			return true;
+		}
+		return false;
+	}
+
+	return false;
+}
 
 } // !namespace core
 } // !namespace lux

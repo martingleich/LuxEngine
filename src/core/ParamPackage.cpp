@@ -196,16 +196,17 @@ PackageParam& PackageParam::operator=(video::MaterialLayer& Layer)
 
 PackageParam& PackageParam::operator=(const PackageParam& varVal)
 {
-	lxAssert(varVal.m_Type == m_Type);
+	lxAssert(IsConvertible(m_Type, varVal.m_Type));
+
 	if(IsValid()) {
-		if(m_Type == core::Type::Texture) {
+		if(m_Type == core::Type::Texture && varVal.m_Type == core::Type::Texture) {
 			if(((video::MaterialLayer*)varVal.m_Data)->texture)
 				((video::MaterialLayer*)varVal.m_Data)->texture->Grab();
 			if(((video::MaterialLayer*)m_Data)->texture)
 				((video::MaterialLayer*)m_Data)->texture->Drop();
 		}
 
-		memcpy(m_Data, varVal.m_Data, m_Size);
+		ConvertBaseType(varVal.m_Type, varVal.m_Data, m_Type, m_Data);
 	}
 
 	return *this;
@@ -399,21 +400,16 @@ PackageParam ParamPackage::GetParam(u32 param, void* baseData, bool isConst) con
 
 PackageParam ParamPackage::GetParamFromName(const string& name, void* baseData, bool isConst) const
 {
-	for(u32 i = 0; i < m_Params.Size(); ++i) {
-		if(m_Params[i].name == name)
-			return GetParam(i, baseData, isConst);
-	}
-
-	return PackageParam::INVALID;
+	return GetParam(GetParamId(name), baseData, isConst);
 }
 
 PackageParam ParamPackage::GetParamFromType(core::Type type, int index, void* baseData, bool isConst) const
 {
-	int CurrLayer = -1;
+	int id = -1;
 	for(u32 i = 0; i < m_Params.Size(); ++i) {
 		if(m_Params[i].type == type) {
-			CurrLayer++;
-			if(CurrLayer == index)
+			id++;
+			if(id == index)
 				return GetParam(i, baseData, isConst);
 		}
 	}
@@ -421,13 +417,37 @@ PackageParam ParamPackage::GetParamFromType(core::Type type, int index, void* ba
 	return PackageParam::INVALID;
 }
 
-void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue)
+void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue, core::Type type)
 {
 	if(param >= m_Params.Size() || !defaultValue)
 		return;
 
 	const Entry& e = m_Params[param];
-	memcpy((u8*)m_DefaultPackage + e.offset, defaultValue, e.size);
+	if(type == core::Type::Unknown || type == e.type)
+		memcpy((u8*)m_DefaultPackage + e.offset, defaultValue, e.size);
+	else {
+		lxAssert(IsConvertible(type, e.type));
+		ConvertBaseType(type, defaultValue, e.type, (u8*)m_DefaultPackage + e.offset);
+	}
+}
+
+void ParamPackage::SetDefaultValue(const string& param, const void* defaultValue, core::Type type)
+{
+	SetDefaultValue(GetParamId(param), defaultValue, type);
+}
+
+u32 ParamPackage::GetParamId(const string& name, core::Type type) const
+{
+	for(u32 i = 0; i < m_Params.Size(); ++i) {
+		if(m_Params[i].name == name) {
+			if(type == core::Type::Unknown || m_Params[i].type == type)
+				return i;
+			else
+				return 0xFFFFFFFF;
+		}
+	}
+
+	return 0xFFFFFFFF;
 }
 
 u32 ParamPackage::GetParamCount() const

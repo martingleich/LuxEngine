@@ -110,6 +110,8 @@ bool ShaderD3D9::Init(
 				u8 tempMemory[sizeof(float) * 16]; // Matrix is the biggest type.
 				if(h.defaultValue)
 					CastShaderToType(h.type, h.defaultValue, tempMemory);
+				else
+					memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
 				m_ParamPackage.AddParam(h.type, h.name, tempMemory, (u16)i);
 
 				entry.index = 0;

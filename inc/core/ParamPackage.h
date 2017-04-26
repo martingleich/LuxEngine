@@ -55,17 +55,21 @@ public:
 	template <typename T>
 	operator T()
 	{
-		lxAssert(core::GetTypeInfo<T>() == m_Type);
+		if(IsValid()) {
+			lxAssert(IsConvertible(m_Type, core::GetTypeInfo<T>()));
 
-		if(IsValid())
-			return *((T*)m_Data);
+			T out;
+			ConvertBaseType(m_Type, m_Data, core::GetTypeInfo<T>(), &out);
+			return out;
+		}
+
 		return T();
 	}
 
 	template <typename T>
 	T Default(const T& defaultValue)
 	{
-		if(core::GetTypeInfo<T>() != m_Type || !IsValid())
+		if(!IsConvertible(m_Type, core::GetTypeInfo<T>()) || !IsValid())
 			return defaultValue;
 		else
 			return (T)(*this);
@@ -306,7 +310,36 @@ public:
 	\param param The id of the Param, which default value should be changed
 	\param defaultValue A pointer to the new default value
 	*/
-	void SetDefaultValue(u32 param, const void* defaultValue);
+	void SetDefaultValue(u32 param, const void* defaultValue, core::Type type = core::Type::Unknown);
+
+	//! Set a new default value for a param
+	/**
+	\param param The name of the Param, which default value should be changed
+	\param defaultValue A pointer to the new default value
+	*/
+	void SetDefaultValue(const string& param, const void* defaultValue, core::Type type = core::Type::Unknown);
+
+	//! Convienice function for SetDefaultValue.
+	template <typename T>
+	void SetDefaultValue(const char* name, const T& defaultValue)
+	{
+		SetDefaultValue(name, &defaultValue, core::GetTypeInfo<T>());
+	}
+
+	//! Convienice function for SetDefaultValue.
+	template <typename T>
+	void SetDefaultValue(u32 param, const T& defaultValue)
+	{
+		SetDefaultValue(param, &defaultValue, core::GetTypeInfo<T>());
+	}
+
+	//! Get the id of a parameter by it's name.
+	/**
+	\param name The name of the param.
+	\param type The type of the parameter, core::Type::Unknown if any type is ok.
+	\return The id of the parameter, of 0xFFFFFFFF if param doesn't exist.
+	*/
+	u32 GetParamId(const string& name, core::Type type = core::Type::Unknown) const;
 
 	//! The number of existing params in this package
 	u32 GetParamCount() const;
@@ -415,9 +448,9 @@ public:
 	}
 };
 
-}    
+}
 
-}    
+}
 
 
 #endif
