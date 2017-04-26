@@ -686,7 +686,7 @@ void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS, core::Type type,
 	}
 }
 
-const core::ParamPackage& ShaderD3D9::GetParamPackage()
+core::ParamPackage& ShaderD3D9::GetParamPackage()
 {
 	return m_ParamPackage;
 }

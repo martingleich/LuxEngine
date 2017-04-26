@@ -56,7 +56,7 @@ public:
 	*/
 	virtual u32 GetParamCount() const = 0;
 
-	virtual u32 GetParamID(const char* name) const = 0;
+	virtual u32 GetParamID(const string& name) const = 0;
 
 	virtual const string& GetParamName(u32 id) const = 0;
 

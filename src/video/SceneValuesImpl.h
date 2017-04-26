@@ -43,7 +43,7 @@ private:
 	static_assert(MATRIX_COUNT <= sizeof(u32)*8, "Too many matrizes.");
 
 private:
-	core::array<SParam> m_aParams;
+	core::array<SParam> m_Params;
 	void* m_ParamData;
 	u32 m_CurrentOffset;
 	u32 m_MaxSize;
@@ -107,7 +107,7 @@ public:
 	*/
 	u32 GetParamCount() const;
 
-	u32 GetParamID(const char* pName) const;
+	u32 GetParamID(const string& name) const;
 
 	const string& GetParamName(u32 id) const;
 

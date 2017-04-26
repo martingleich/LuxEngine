@@ -77,6 +77,7 @@ namespace input
 #include "core/lxString.h"
 #include "core/lxPool.h"
 #include "core/StringConverter.h"
+#include "core/StringBuffer.h"
 #include "core/lxRandom.h"
 
 #include "io/FileSystem.h"

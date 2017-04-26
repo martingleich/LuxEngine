@@ -208,7 +208,7 @@ const math::matrix4& SceneValuesImpl::GetMatrix(EMatrizes type) const
 
 u32 SceneValuesImpl::AddParam(const string& name, core::Type type)
 {
-	int id = GetParamID(name.Data());
+	int id = GetParamID(name);
 	if(id != -1) {
 		lxAssertEx(id != -1, "Param already used");
 		return 0xFFFFFFFF;
@@ -216,57 +216,58 @@ u32 SceneValuesImpl::AddParam(const string& name, core::Type type)
 
 	lxAssertEx(type.GetSize() != 0, "Invalid type");
 	SParam Param(name, m_CurrentOffset, type, type.GetSize());
-	m_aParams.Push_Back(Param);
+	m_Params.Push_Back(Param);
 
 	if(m_CurrentOffset + Param.Size > m_MaxSize)
 		Realloc((m_CurrentOffset + Param.Size) * 2);
 
 	m_CurrentOffset += Param.Size;
 
-	return (u32)(m_aParams.Size() + MATRIX_COUNT - 1);
+	return (u32)(m_Params.Size() + MATRIX_COUNT - 1);
 }
 
 /*
 void SceneValuesImpl::RemoveParam(u32 id)
 {
-	if(id >= m_aParams.Size() || id < 10)
+	if(id >= m_Params.Size() || id < 10)
 		return;
 
-	const SParam& p = m_aParams[id-10];
+	const SParam& p = m_Params[id-10];
 
 	u32 After = m_CurrentOffset - p.offset - p.Size;
 	if(After != 0)
 		memmove((u8*)m_ParamData+p.offset, (u8*)m_ParamData+p.offset+p.Size, After);
 
-	for(u32 i = id-10; i < m_aParams.Size(); ++i)
-		m_aParams[i].offset -= p.Size;
+	for(u32 i = id-10; i < m_Params.Size(); ++i)
+		m_Params[i].offset -= p.Size;
 
 	m_CurrentOffset -= p.Size;
-	m_aParams.DeleteEntry(m_aParams.First()+id-10, true);
+	m_Params.DeleteEntry(m_Params.First()+id-10, true);
 }
 
 void SceneValuesImpl::RemoveAllParams()
 {
 	m_CurrentOffset = 0;
-	m_aParams.Clear();
+	m_Params.Clear();
 }
 */
 u32 SceneValuesImpl::GetParamCount() const
 {
-	return (u32)(m_aParams.Size() + MATRIX_COUNT);
+	return (u32)(m_Params.Size() + MATRIX_COUNT);
 }
 
-u32 SceneValuesImpl::GetParamID(const char* pName) const
+u32 SceneValuesImpl::GetParamID(const string& name) const
 {
 	// Check matrizes
-	if(*pName == 'w' || *pName == 'v' || *pName == 'p') {
+	u32 first = *name.First();
+	if(first == 'w' || first == 'v' || first == 'p') {
 		for(u32 i = 0; i < 16; ++i)
-			if(MATRIX_NAMES[i] == pName)
+			if(MATRIX_NAMES[i] == name)
 				return i;
 	}
 
-	for(u32 i = 0; i < m_aParams.Size(); ++i)
-		if(m_aParams[i].name == pName)
+	for(u32 i = 0; i < m_Params.Size(); ++i)
+		if(m_Params[i].name == name)
 			return i + MATRIX_COUNT;
 
 	return 0xFFFFFFFF;
@@ -277,7 +278,7 @@ const string& SceneValuesImpl::GetParamName(u32 id) const
 	if(id < MATRIX_COUNT) {
 		return MATRIX_NAMES[id];
 	} else {
-		return m_aParams[id - MATRIX_COUNT].name;
+		return m_Params[id - MATRIX_COUNT].name;
 	}
 }
 
@@ -286,7 +287,7 @@ core::Type SceneValuesImpl::GetParamType(u32 id) const
 	if(id < MATRIX_COUNT)
 		return core::Type::Matrix;
 	else
-		return m_aParams[id - MATRIX_COUNT].type;
+		return m_Params[id - MATRIX_COUNT].type;
 }
 
 const void* SceneValuesImpl::GetParamValue(u32 id) const
@@ -294,7 +295,7 @@ const void* SceneValuesImpl::GetParamValue(u32 id) const
 	if(id < MATRIX_COUNT) {
 		return &GetMatrix((EMatrizes)id);
 	} else {
-		return (u8*)m_ParamData + m_aParams[id - MATRIX_COUNT].offset;
+		return (u8*)m_ParamData + m_Params[id - MATRIX_COUNT].offset;
 	}
 }
 
@@ -303,7 +304,7 @@ void SceneValuesImpl::SetParamValue(u32 id, const void* p)
 	if(id < MATRIX_COUNT) {
 		SetMatrix((EMatrizes)id, *(const math::matrix4*)p);
 	} else {
-		memcpy((u8*)m_ParamData + m_aParams[id - MATRIX_COUNT].offset, p, m_aParams[id - MATRIX_COUNT].Size);
+		memcpy((u8*)m_ParamData + m_Params[id - MATRIX_COUNT].offset, p, m_Params[id - MATRIX_COUNT].Size);
 	}
 }
 

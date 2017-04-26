@@ -34,7 +34,7 @@ public:
 	void LoadSceneValues();
 	void Disable();
 
-	const core::ParamPackage& GetParamPackage();
+	core::ParamPackage& GetParamPackage();
 
 private:
 	enum EParamType

@@ -35,7 +35,7 @@ public:
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile) = 0;
 
-	virtual const core::ParamPackage& GetParamPackage() = 0;
+	virtual core::ParamPackage& GetParamPackage() = 0;
 
 private:
 	virtual void GetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, void* out) = 0;

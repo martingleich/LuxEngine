@@ -35,7 +35,7 @@ public:
 		if((flags & format::ESinkFlags::Newline) != 0)
 			++size;
 
-		m_Str.Reserve(size);
+		m_Str.Reserve(m_Str.Size() + size);
 		for(auto slice = firstSlice; slice; slice = slice->GetNext())
 			m_Str.AppendRaw(slice->data, slice->size);
 

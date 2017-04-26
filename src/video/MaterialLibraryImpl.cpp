@@ -56,8 +56,28 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::CloneMaterialRenderer(const str
 		return nullptr;
 }
 
+StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
+	Shader* shader,
+	const MaterialRenderer* baseMaterial, const string& name)
+{
+	if(!baseMaterial)
+		return nullptr;
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(const io::path& VSPath, const string& VSEntryPoint, video::EVertexShaderType VSType,
+	if(baseMaterial->GetShader() != nullptr)
+		return nullptr;
+
+	StrongRef<video::MaterialRenderer> renderer;
+	if(shader)
+		renderer = baseMaterial->Clone(shader, &shader->GetParamPackage());
+
+	if(AddMaterialRenderer(renderer, name) > 0)
+		return renderer;
+	else
+		return nullptr;
+}
+
+StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
+	const io::path& VSPath, const string& VSEntryPoint, video::EVertexShaderType VSType,
 	const io::path& PSPath, const string& PSEntryPoint, video::EPixelShaderType PSType,
 	const MaterialRenderer* baseMaterial, const string& name)
 {
@@ -89,7 +109,6 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(const
 		}
 	}
 
-
 	void* vsCode = VSFile->GetBuffer();
 	if(!vsCode) {
 		vsCode = LUX_NEW_ARRAY(u8, VSFile->GetSize() + 1);
@@ -107,7 +126,8 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(const
 			((char*)psCode)[PSFile->GetSize()] = 0;
 		}
 	}
-	StrongRef<video::Shader> shader = m_VideoDriver->CreateShader((const char*)vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSType,
+	StrongRef<video::Shader> shader = m_VideoDriver->CreateShader(
+		(const char*)vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSType,
 		(const char*)psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSType);
 
 	if(!VSFile->GetBuffer())
@@ -117,14 +137,7 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(const
 			LUX_FREE_ARRAY(psCode);
 	}
 
-	StrongRef<video::MaterialRenderer> renderer;
-	if(shader)
-		renderer = baseMaterial->Clone(shader, &shader->GetParamPackage());
-
-	if(AddMaterialRenderer(renderer, name) > 0)
-		return renderer;
-	else
-		return nullptr;
+	return AddShaderMaterialRenderer(shader, baseMaterial, name);
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(size_t index) const

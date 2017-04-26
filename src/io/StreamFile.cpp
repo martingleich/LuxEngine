@@ -25,10 +25,10 @@ StreamFile::~StreamFile()
 
 u32 StreamFile::ReadBinary(u32 numBytes, void* out)
 {
-	if(numBytes == 0 || !out || numBytes > m_FileSize)
+	if(numBytes == 0 || !out)
 		return 0;
 
-	if((u32)ftell(m_File) > m_FileSize - numBytes)
+	if((u32)ftell(m_File) + numBytes > m_FileSize)
 		numBytes = m_FileSize - ftell(m_File);
 
 	u32 read = (u32)fread(out, numBytes, 1, m_File)*numBytes;
@@ -112,7 +112,7 @@ u32 StreamFile::GetCursor() const
 	return ftell(m_File);
 }
 
-}    
+}
 
-}    
+}
 

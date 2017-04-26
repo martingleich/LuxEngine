@@ -30,10 +30,10 @@ MemoryFile::~MemoryFile()
 
 u32 MemoryFile::ReadBinary(u32 numBytes, void* out)
 {
-	if(numBytes == 0 || !out || numBytes > m_Size)
+	if(numBytes == 0 || !out)
 		return 0;
 
-	if(m_Cursor > m_Size - numBytes) {
+	if(m_Cursor + numBytes > m_Size) {
 		numBytes = m_Size - m_Cursor;
 		m_IsEOF = true;
 	}

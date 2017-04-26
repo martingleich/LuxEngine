@@ -64,6 +64,17 @@ public:
 		const io::path& PSPath, const string& PSEntryPoint, video::EPixelShaderType PSType,
 		const MaterialRenderer* baseMaterial, const string& name) = 0;
 
+	//! Add a shader material renderer
+	/**
+	\param shader The shader to use for the material renderer.
+	\param baseMaterial The base rendersetting used for the shader
+	\param name The name of the new material renderer
+	\return The new material renderer
+	*/
+	virtual StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
+		Shader* shader,
+		const MaterialRenderer* baseMaterial, const string& name) = 0;
+
 	//! Returns a material renderer by its index
 	virtual StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const = 0;
 

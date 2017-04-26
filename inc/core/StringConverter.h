@@ -14,7 +14,7 @@ namespace core
 class StringConverter
 {
 public:
-	//! Convert an integer to a string
+	//! Convert a integer to a string
 	static string ToString(size_t num)
 	{
 		char buffer[16] = {0};
@@ -31,7 +31,7 @@ public:
 		return string(buffer+end, 15-end);
 	}
 
-	//! Convert an integer to a string
+	//! Convert a integer to a string
 	static string ToString(int num)
 	{
 		bool isNegative = false;
@@ -59,7 +59,7 @@ public:
 		return string(buffer+end, 15-end);
 	}
 
-	//! Convert an float to a string
+	//! Convert a float to a string
 	static string ToString(float value)
 	{
 		char buffer[256];
@@ -71,7 +71,7 @@ public:
 		return string(buffer, i);
 	}
 
-	//! Convert an date to a string
+	//! Convert a date to a string
 	static string ToString(const core::DateAndTime& value)
 	{
 		static const char wday_name[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -89,16 +89,34 @@ public:
 		return string(temp, 24);
 	}
 
+	//! Convert a string to a string.
+	static const string& ToString(const string& value)
+	{
+		return value;
+	}
+
+	//! Convert a string to a string.
+	static string ToString(const char* str)
+	{
+		return str;
+	}
+
 	template <typename... T>
-	static string Format(string_type str, T... args)
+	static string Format(string_type format, T... args)
 	{
 		string out;
-		core::string_sink sink(out);
-		format::format(sink, str.data, args...);
+		AppendFormat(out, format, args...);
 
-		return out;
+		return std::move(out);
 	}
 	
+	template <typename... T>
+	static void AppendFormat(string str, string_type format, T... args)
+	{
+		core::string_sink sink(str);
+		format::format(sink, format.data, args...);
+	}
+
 	//! Create a float from a string
 	/**
 	\param str The string to convert

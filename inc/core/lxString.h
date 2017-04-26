@@ -604,7 +604,7 @@ private:
 
 inline string operator+(const char* str, const string& string)
 {
-	return string + str;
+	return lux::string(str) + string;
 }
 
 inline bool operator==(const char* other, const string& string)
