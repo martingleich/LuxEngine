@@ -11,7 +11,7 @@ namespace assert_namespace
 static bool DefaultHandler(const char* file, size_t line, const char* assert_str, const char* msg)
 {
 	if(file)
-		std::printf("%s (%d)", file, line);
+		std::printf("%s (%zu)", file, line);
 
 	if(assert_str) {
 		if(file)
@@ -22,7 +22,7 @@ static bool DefaultHandler(const char* file, size_t line, const char* assert_str
 	if(msg) {
 		if(file || assert_str)
 			std::printf(": ");
-		std::printf(msg);
+		std::fputs(msg, stdout);
 	}
 
 	std::printf("\n");

@@ -94,11 +94,12 @@ bool SpriteBankImpl::GetSprite(SpriteBank::Sprite sprite, u32 Time, bool Looped,
 		AnimatedSprite& a = m_AnimatedSprites[sprite.id];
 
 		u32 f = Time / a.frameTime;
-		if(f > a.lastSprite - a.firstSprite)
+		if(f > a.lastSprite - a.firstSprite) {
 			if(Looped)
 				f = f % (a.lastSprite - a.firstSprite);
 			else
 				f = a.lastSprite;
+		}
 
 		Sprite& s = m_Sprites[a.firstSprite + f];
 		outCoords = &s.rect;

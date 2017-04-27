@@ -172,7 +172,6 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	FontCreationData data;
 	data.charMap = charMap;
 	data.charHeight = info.height;
-	CharInfo spaceInfo = data.charMap[' '];
 	data.material = video::Material(m_MaterialLibrary->GetMaterialRenderer("font"));
 	data.material.Layer(0) = fontTexture;
 	data.material.Param("BlendFunc") = (u32)video::Pack_TextureBlendFunc(video::EBF_SRC_ALPHA, video::EBF_ONE_MINUS_SRC_ALPHA);

@@ -21,7 +21,7 @@ static path::ConstIterator FindLastSlash(const path& filename)
 		if(*it == '/' || *it == '\\')
 			return it;
 	}
-	if(*it == '/' || *it == '//')
+	if(*it == '/' || *it == '\\')
 		return it;
 	return filename.End();
 }

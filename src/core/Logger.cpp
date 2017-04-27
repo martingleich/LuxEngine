@@ -67,12 +67,12 @@ void WriteWideCharAsUTF8ToFile(FILE* file, const wchar_t* str)
 		fwrite(buffer, bc - buffer, 1, file);
 }
 
-extern LogSystem EngineLog(ELogLevel::Info);
-extern Logger Debug(EngineLog, ELogLevel::Debug, FilePrinter);
-extern Logger Info(EngineLog, ELogLevel::Info, FilePrinter);
-extern Logger Warning(EngineLog, ELogLevel::Warning, FilePrinter);
-extern Logger Error(EngineLog, ELogLevel::Error, FilePrinter);
-extern Logger Log(EngineLog, ELogLevel::None, FilePrinter);
+LogSystem EngineLog(ELogLevel::Info);
+Logger Debug(EngineLog, ELogLevel::Debug, FilePrinter);
+Logger Info(EngineLog, ELogLevel::Info, FilePrinter);
+Logger Warning(EngineLog, ELogLevel::Warning, FilePrinter);
+Logger Error(EngineLog, ELogLevel::Error, FilePrinter);
+Logger Log(EngineLog, ELogLevel::None, FilePrinter);
 
 bool LogSystem::HasUnsetLogs() const
 {
@@ -205,6 +205,7 @@ public:
 	const string& EscapeString(const string& str)
 	{
 		lxAssert(false);
+		return string::EMPTY;
 		/*
 		m_ConversionBuffer.Clear();
 		for(size_t i = 0; i < str.Length(); ++i)
@@ -369,15 +370,15 @@ public:
 }
 
 static Impl::HTMLPrinter realHTMLPrinter;
-extern Printer* HTMLPrinter = &realHTMLPrinter;
+Printer* HTMLPrinter = &realHTMLPrinter;
 static Impl::FilePrinter realFilePrinter;
-extern Printer* FilePrinter = &realFilePrinter;
+Printer* FilePrinter = &realFilePrinter;
 static Impl::ConsolePrinter realConsolePrinter;
-extern Printer* ConsolePrinter = &realConsolePrinter;
+Printer* ConsolePrinter = &realConsolePrinter;
 
 #ifdef LUX_HAS_WIN32_DEBUG_PRINTER
 static Impl::Win32DebugPrinter realWin32DebugPrinter;
-extern Printer* Win32DebugPrinter = &realWin32DebugPrinter;
+Printer* Win32DebugPrinter = &realWin32DebugPrinter;
 #endif
 
 }
