@@ -184,9 +184,6 @@ bool ShaderD3D9::LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntr
 		if(strncmp(name, "param_", 6) == 0) {
 			name += 6;
 			isParam = true;
-		} else if(strncmp(name, "tex_", 4) == 0) {
-			name += 4;
-			isParam = true;
 		} else if(strncmp(name, "scene_", 6) == 0) {
 			name += 6;
 			isScene = true;
@@ -430,7 +427,7 @@ bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* tab
 		if(desc.Type == D3DXPT_FLOAT)
 			outType = core::Type::Internal_MatrixCol;
 	} else if(desc.Class == D3DXPC_OBJECT) {
-		if(desc.Type == D3DXPT_SAMPLER)
+		if(desc.Type == D3DXPT_SAMPLER || desc.Type == D3DXPT_SAMPLER2D || desc.Type == D3DXPT_SAMPLER3D  || desc.Type == D3DXPT_SAMPLERCUBE)
 			outType = core::Type::Texture;
 	}
 

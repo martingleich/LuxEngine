@@ -115,7 +115,8 @@ public:
 	u32 GetSize() const
 	{
 		u32 type = GetBaseType().m_Type;
-		static const u32 TYPE_SIZES[] = {sizeof(void*) + 1,
+		static const u32 TYPE_SIZES[] = {
+			sizeof(void*),
 			4,
 			4,
 			4,
