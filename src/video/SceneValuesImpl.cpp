@@ -26,7 +26,7 @@ const string SceneValuesImpl::MATRIX_NAMES[16] = {
 
 void SceneValuesImpl::Realloc(u32 newSize)
 {
-	void* New = LUX_NEW_ARRAY(u8, newSize);
+	u8* New = LUX_NEW_ARRAY(u8, newSize);
 	if(m_ParamData) {
 		memcpy(New, m_ParamData, m_CurrentOffset);
 		LUX_FREE_ARRAY(m_ParamData);
@@ -295,7 +295,7 @@ const void* SceneValuesImpl::GetParamValue(u32 id) const
 	if(id < MATRIX_COUNT) {
 		return &GetMatrix((EMatrizes)id);
 	} else {
-		return (u8*)m_ParamData + m_Params[id - MATRIX_COUNT].offset;
+		return m_ParamData + m_Params[id - MATRIX_COUNT].offset;
 	}
 }
 
@@ -304,7 +304,7 @@ void SceneValuesImpl::SetParamValue(u32 id, const void* p)
 	if(id < MATRIX_COUNT) {
 		SetMatrix((EMatrizes)id, *(const math::matrix4*)p);
 	} else {
-		memcpy((u8*)m_ParamData + m_Params[id - MATRIX_COUNT].offset, p, m_Params[id - MATRIX_COUNT].Size);
+		memcpy(m_ParamData + m_Params[id - MATRIX_COUNT].offset, p, m_Params[id - MATRIX_COUNT].Size);
 	}
 }
 

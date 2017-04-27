@@ -110,27 +110,27 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 		}
 	}
 
-	void* vsCode = VSFile->GetBuffer();
+	char* vsCode = (char*)VSFile->GetBuffer();
 	if(!vsCode) {
-		vsCode = LUX_NEW_ARRAY(u8, VSFile->GetSize() + 1);
+		vsCode = LUX_NEW_ARRAY(char, VSFile->GetSize() + 1);
 		VSFile->ReadBinary(VSFile->GetSize(), vsCode);
-		((char*)vsCode)[VSFile->GetSize()] = 0;
+		vsCode[VSFile->GetSize()] = 0;
 	}
 
-	void* psCode = PSFile->GetBuffer();
+	char* psCode = (char*)PSFile->GetBuffer();
 	if(!psCode) {
 		if(PSFile == VSFile) {
 			psCode = vsCode;
 		} else {
-			psCode = LUX_NEW_ARRAY(u8, PSFile->GetSize() + 1);
+			psCode = LUX_NEW_ARRAY(char, PSFile->GetSize() + 1);
 			PSFile->ReadBinary(PSFile->GetSize(), psCode);
-			((char*)psCode)[PSFile->GetSize()] = 0;
+			psCode[PSFile->GetSize()] = 0;
 		}
 	}
 	StrongRef<video::Shader> shader = m_VideoDriver->CreateShader(
 		language,
-		(const char*)vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSMajor, VSMinor,
-		(const char*)psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSMajor, PSMinor);
+		vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSMajor, VSMinor,
+		psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSMajor, PSMinor);
 
 	if(!VSFile->GetBuffer())
 		LUX_FREE_ARRAY(vsCode);

@@ -145,10 +145,12 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 #ifdef LUX_DEBUG_OBJ_LOADER
 			log::Debug << "Setting smoothing group " << Smooth << ".";
 #endif
-			if(strcmp(Smooth, "off"))
-				SmoothingGroup = 0;
-			else
-				SmoothingGroup = atol(Smooth);
+
+// TODO Use the smooth option?!
+//			if(strcmp(Smooth, "off"))
+//				SmoothingGroup = 0;
+//			else
+//				SmoothingGroup = atol(Smooth);
 		}
 		break;
 
