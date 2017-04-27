@@ -1279,35 +1279,90 @@ StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 Size, ColorFormat 
 	return out;
 }
 
-StrongRef<Shader> VideoDriverD3D9::CreateShader(
-	const char* VSCode, const char* VSEntryPoint, u32 VSLength, EVertexShaderType VSType,
-	const char* PSCode, const char* PSEntryPoint, u32 PSLength, EPixelShaderType PSType)
+static const char* GetShaderProfile(
+	bool isPixel,
+	int major, int minor)
 {
-	static const char* VSProfileNames[EVST_COUNT] = {
-		"vs_1_1",
-		"vs_2_0",
-		"vs_2_a",
-		"vs_3_0",
-		"vs_4_0",
-		"vs_4_1",
-		"vs_5_0"
-	};
-	static const char* PSProfileNames[EPST_COUNT] = {
-		"ps_1_1",
-		"ps_1_2",
-		"ps_1_3",
-		"ps_1_4",
-		"ps_2_0",
-		"ps_2_a",
-		"ps_2_b",
-		"ps_3_0",
-		"ps_4_0",
-		"ps_4_1",
-		"ps_5_0"
-	};
+	if(isPixel) {
+		if(major == 1) {
+			if(minor == 1)
+				return "ps_1_1";
+			if(minor == 2)
+				return "ps_1_2";
+			if(minor == 3)
+				return "ps_1_3";
+			if(minor == 4)
+				return "ps_1_4";
+		} else if(major == 2) {
+			if(minor == 0)
+				return "ps_2_0";
+			if(minor == 1)
+				return "ps_2_a";
+			if(minor == 2)
+				return "ps_2_b";
+		} else if(major == 3) {
+			if(minor == 0)
+				return "ps_3_0";
+		} else if(major == 4) {
+			if(minor == 0)
+				return "ps_4_0";
+			if(minor == 1)
+				return "ps_4_1";
+		} else if(major == 5) {
+			if(minor == 0)
+				return "ps_5_0";
+		}
+	} else {
+		if(major == 1) {
+			if(minor == 1)
+				return "vs_1_1";
+		} else if(major == 2) {
+			if(minor == 0)
+				return "vs_2_0";
+			if(minor == 1)
+				return "vs_2_a";
+		} else if(major == 3) {
+			if(minor == 0)
+				return "ps_3_0";
+		} else if(major == 4) {
+			if(minor == 0)
+				return "ps_4_0";
+			if(minor == 1)
+				return "ps_4_1";
+		} else if(major == 5) {
+			if(minor == 0)
+				return "ps_5_0";
+		}
+	}
+
+	return nullptr;
+}
+
+StrongRef<Shader> VideoDriverD3D9::CreateShader(
+	EShaderLanguage language,
+	const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
+	const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion)
+{
+	if(language != EShaderLanguage::HLSL) {
+		log::Error("Direct3D9 video driver only supports HLSL shaders.");
+		return nullptr;
+	}
+
+	const char* vsProfile = GetShaderProfile(false, VSmajorVersion, VSminorVersion);
+	const char* psProfile = GetShaderProfile(true, PSmajorVersion, PSminorVersion);
+
+	if(!vsProfile) {
+		log::Error("Invalid vertex shader profile(~d.~d).", VSmajorVersion, VSminorVersion);
+		return nullptr;
+	}
+
+	if(!psProfile) {
+		log::Error("Invalid pixel shader profile(~d.~d).", PSmajorVersion, PSminorVersion);
+		return nullptr;
+	}
 
 	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this);
-	if(!out->Init(VSCode, VSEntryPoint, VSLength, VSProfileNames[VSType], PSCode, PSEntryPoint, PSLength, PSProfileNames[PSType]))
+	if(!out->Init(VSCode, VSEntryPoint, VSLength, vsProfile, PSCode, PSEntryPoint, PSLength, psProfile))
 		out = nullptr;
 
 	return out;

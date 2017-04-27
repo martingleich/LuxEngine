@@ -77,8 +77,9 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
-	const io::path& VSPath, const string& VSEntryPoint, video::EVertexShaderType VSType,
-	const io::path& PSPath, const string& PSEntryPoint, video::EPixelShaderType PSType,
+	video::EShaderLanguage language,
+	const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
+	const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
 	const MaterialRenderer* baseMaterial, const string& name)
 {
 	if(!baseMaterial)
@@ -121,14 +122,15 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 		if(PSFile == VSFile) {
 			psCode = vsCode;
 		} else {
-			psCode = LUX_NEW_ARRAY(u8, PSFile->GetSize()+1);
+			psCode = LUX_NEW_ARRAY(u8, PSFile->GetSize() + 1);
 			PSFile->ReadBinary(PSFile->GetSize(), psCode);
 			((char*)psCode)[PSFile->GetSize()] = 0;
 		}
 	}
 	StrongRef<video::Shader> shader = m_VideoDriver->CreateShader(
-		(const char*)vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSType,
-		(const char*)psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSType);
+		language,
+		(const char*)vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSMajor, VSMinor,
+		(const char*)psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSMajor, PSMinor);
 
 	if(!VSFile->GetBuffer())
 		LUX_FREE_ARRAY(vsCode);

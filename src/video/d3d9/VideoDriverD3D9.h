@@ -94,9 +94,11 @@ public:
 	/*
 	i.e. Dynamic texture for temporary use
 	*/
+
 	StrongRef<Shader> CreateShader(
-		const char* VSCode, const char* VSEntryPoint, u32 VSLength, EVertexShaderType VSType,
-		const char* PSCode, const char* PSEntryPoint, u32 PSLength, EPixelShaderType PSType);
+		EShaderLanguage language,
+		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
+		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion);
 
 	//------------------------------------------------------------------
 	// Renderfunktionen

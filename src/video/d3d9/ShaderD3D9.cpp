@@ -138,12 +138,12 @@ bool ShaderD3D9::Init(
 		}
 
 		// Put name into namelist.
-		memcpy(m_Names + nameCursor, helper[i].name, helper[i].nameLength);
+		memcpy(m_Names + nameCursor, helper[i].name, helper[i].nameLength+1);
 
 		entry.param = ShaderParam(this, h.type, h.typeSize, m_Names + nameCursor, h.registerVS, h.registerPS);
 		m_Params.Push_Back(std::move(entry));
 
-		nameCursor += h.nameLength;
+		nameCursor += h.nameLength+1;
 	}
 
 	// Free constant data.
@@ -162,35 +162,42 @@ bool ShaderD3D9::Init(
 
 bool ShaderD3D9::LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize)
 {
-	return LoadParamsFromStructure(table, outParams, outStringSize, true) && LoadParamsFromStructure(table, outParams, outStringSize, false);
-}
+	D3DXCONSTANTTABLE_DESC tableDesc;
+	if(FAILED(table->GetDesc(&tableDesc)))
+		return false;
 
-bool ShaderD3D9::LoadParamsFromStructure(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, bool isParam)
-{
-	const char* structName = isParam ? "param" : "scene";
+	for(UINT i = 0; i < tableDesc.Constants; ++i) {
+		D3DXHANDLE handle = table->GetConstant(NULL, i);
+		if(handle == NULL)
+			continue;
 
-	D3DXHANDLE structHandle = table->GetConstantByName(NULL, structName);
-	if(structHandle == NULL)
-		return true;
-
-	UINT count = 1;
-	D3DXCONSTANT_DESC structDesc;
-	HRESULT hr = table->GetConstantDesc(structHandle, &structDesc, &count);
-	if(FAILED(hr))
-		return true;
-
-	for(u32 i = 0; i < structDesc.StructMembers; ++i) {
 		u32 size, regId;
 		core::Type type;
 		const char* name;
 		const void* defaultValue;
-		if(!GetStructureElemType(structHandle, i, table, type, size, regId, name, defaultValue)) {
+		bool isValidType;
+		if(!GetStructureElemType(handle, table, type, size, regId, name, defaultValue, isValidType))
+			continue;
+
+		bool isParam = false;
+		bool isScene = false;
+		if(strncmp(name, "param_", 6) == 0) {
+			name += 6;
+			isParam = true;
+		} else if(strncmp(name, "tex_", 4) == 0) {
+			name += 4;
+			isParam = true;
+		} else if(strncmp(name, "scene_", 6) == 0) {
+			name += 6;
+			isScene = true;
+		}
+
+		if((isParam || isScene) && !isValidType) {
 			log::Error("Shader has unsupported parameter type. (param: ~s).", name);
 			return false;
 		}
 
-		// Ignore params starting with underline.
-		if(name[0] == '_')
+		if(!isParam && !isScene)
 			continue;
 
 		HelperEntry* foundEntry = nullptr;
@@ -219,7 +226,7 @@ bool ShaderD3D9::LoadParamsFromStructure(ID3DXConstantTable* table, core::array<
 		} else {
 			// Otherwise, create a new entry.
 			HelperEntry HEntry;
-			HEntry.nameLength = (u32)strlen(name) + 1;
+			HEntry.nameLength = (u32)strlen(name);
 			HEntry.name = name;
 			HEntry.type = type;
 			HEntry.typeSize = (u8)size;
@@ -230,7 +237,7 @@ bool ShaderD3D9::LoadParamsFromStructure(ID3DXConstantTable* table, core::array<
 				HEntry.registerPS = regId;
 			HEntry.paramType = isParam ? ParamType_ParamMaterial : ParamType_Scene;
 			outParams.Push_Back(HEntry);
-			outStringSize += HEntry.nameLength;
+			outStringSize += HEntry.nameLength + 1;
 		}
 	}
 
@@ -390,14 +397,10 @@ void ShaderD3D9::Disable()
 	m_D3DDevice->SetPixelShader(NULL);
 }
 
-bool ShaderD3D9::GetStructureElemType(D3DXHANDLE structHandle, u32 index, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, const char*& name, const void*& defaultValue)
+bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, const char*& name, const void*& defaultValue, bool& isValid)
 {
 	D3DXCONSTANT_DESC desc;
 	UINT count = 1;
-	D3DXHANDLE handle = table->GetConstant(structHandle, index);
-	if(handle == NULL)
-		return false;
-
 	if(FAILED(table->GetConstantDesc(handle, &desc, &count)))
 		return false;
 
@@ -436,7 +439,8 @@ bool ShaderD3D9::GetStructureElemType(D3DXHANDLE structHandle, u32 index, ID3DXC
 	name = desc.Name;
 	defaultValue = desc.DefaultValue;
 
-	return (outType != core::Type::Unknown);
+	isValid = (outType != core::Type::Unknown);
+	return true;
 }
 
 void ShaderD3D9::CastTypeToShader(core::Type type, const void* in, void* out)

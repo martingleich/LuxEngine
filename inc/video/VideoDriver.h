@@ -209,8 +209,9 @@ public:
 	virtual StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha) = 0;
 
 	virtual StrongRef<Shader> CreateShader(
-		const char* VSCode, const char* VSEntryPoint, u32 VSLength, EVertexShaderType VSType,
-		const char* PSCode, const char* PSEntryPoint, u32 PSLength, EPixelShaderType PSType) = 0;
+		EShaderLanguage language,
+		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
+		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion) = 0;
 
 	virtual bool Draw3DPrimitiveList(EPrimitiveType primitiveType,
 		u32 primitiveCount,

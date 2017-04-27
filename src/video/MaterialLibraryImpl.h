@@ -23,8 +23,9 @@ public:
 	StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const string& oldName);
 	StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const MaterialRenderer* pOld);
 	StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
-		const string& VSPath, const string& VSEntryPoint, video::EVertexShaderType VSType,
-		const string& PSPath, const string& PSEntryPoint, video::EPixelShaderType PSType,
+		video::EShaderLanguage language,
+		const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
+		const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
 		const MaterialRenderer* baseMaterial, const string& name);
 
 	StrongRef<MaterialRenderer> AddShaderMaterialRenderer(

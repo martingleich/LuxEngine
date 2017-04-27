@@ -96,7 +96,7 @@ private:
 	};
 
 private:
-	bool GetStructureElemType(D3DXHANDLE structHandle, u32 index, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, const char*& name, const void*& defaultValue);
+	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, const char*& name, const void*& defaultValue, bool& isValid);
 
 	bool LoadParamsFromStructure(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, bool isParam);
 	bool LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize);

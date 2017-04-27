@@ -60,8 +60,9 @@ public:
 	\return The new material renderer
 	*/
 	virtual StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
-		const io::path& VSPath, const string& VSEntryPoint, video::EVertexShaderType VSType,
-		const io::path& PSPath, const string& PSEntryPoint, video::EPixelShaderType PSType,
+		video::EShaderLanguage language,
+		const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
+		const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
 		const MaterialRenderer* baseMaterial, const string& name) = 0;
 
 	//! Add a shader material renderer
