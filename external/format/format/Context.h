@@ -3,6 +3,7 @@
 #include "Memory.h"
 #include "StringType.h"
 #include "StringBasics.h"
+#include <limits>
 
 namespace format
 {
@@ -58,7 +59,7 @@ public:
 		m_Line(0),
 		m_Collumn(0),
 		m_CharacterCount(0),
-		m_SinkCollumn((size_t)-1),
+		m_SinkCollumn(std::numeric_limits<size_t>::max()),
 		m_Locale(nullptr)
 	{
 	}
