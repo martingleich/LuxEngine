@@ -22,7 +22,7 @@ configure_file(
 if(MSVC)
 	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"FormatConfig.h")
 else()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC -include "FormatConfig.h")
+	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC -include "format/FormatConfig.h")
 endif()
 
 add_library(format ${FORMAT_SRCS} ${FORMAT_INCS})

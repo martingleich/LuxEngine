@@ -9,7 +9,7 @@ add_dependencies(libpng zlib)
 if(MSVC)
 	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS)
 else()
-	add_definitions(-DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC)
+	add_definitions(-DUNICODE -D_UNICODE -DNDEBUG -fPIC)
 endif()
 
 include_directories("${PROJECT_SOURCE_DIR}/external/zlib/src")

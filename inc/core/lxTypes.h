@@ -1,6 +1,7 @@
 #ifndef INCLUDED_LXTYPES_H
 #define INCLUDED_LXTYPES_H
 #include "LuxBase.h"
+#include <string.h>
 
 namespace lux
 {
