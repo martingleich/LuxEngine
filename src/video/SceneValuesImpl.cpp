@@ -1,4 +1,5 @@
 #include "SceneValuesImpl.h"
+#include "core/StringConverter.h"
 
 namespace lux
 {
@@ -47,6 +48,9 @@ SceneValuesImpl::SceneValuesImpl(bool AllMatrizesToIdent) : m_ParamData(nullptr)
 		m_UpdateMatrizes = 0xFFFFFFFF;
 	else
 		m_UpdateMatrizes = 0;
+
+	// The invalid light, is a disabled light.
+	m_InvalidLight(0, 0) = 0.0f;
 }
 
 SceneValuesImpl::~SceneValuesImpl()
@@ -206,6 +210,52 @@ const math::matrix4& SceneValuesImpl::GetMatrix(EMatrizes type) const
 	}
 }
 
+bool SceneValuesImpl::SetLight(u32 id, const video::LightData& light)
+{
+	math::matrix4 m;
+	if(light.type == video::LightData::EType::Directional)
+		m(0, 3) = 1.0f;
+	else if(light.type == video::LightData::EType::Point)
+		m(0, 3) = 2.0f;
+	else if(light.type == video::LightData::EType::Spot)
+		m(0, 3) = 3.0f;
+	else
+		return false;
+
+	m(0, 0) = light.color.r;
+	m(0, 1) = light.color.g;
+	m(0, 2) = light.color.b;
+
+	m(1, 0) = light.position.x;
+	m(1, 1) = light.position.y;
+	m(1, 2) = light.position.z;
+
+	m(2, 0) = light.direction.x;
+	m(2, 1) = light.direction.y;
+	m(2, 2) = light.direction.z;
+
+	m(3, 0) = light.range;
+	m(3, 1) = light.falloff;
+	m(3, 2) = light.innerCone;
+	m(3, 3) = light.outerCone;
+
+	m(1, 3) = 0.0f;
+	m(2, 3) = 0.0f;
+
+	m_Lights.Resize(id + 1);
+	m_Lights[id].name = "lightData" + core::StringConverter::ToString(id);
+	m_Lights[id].matrix = m;
+
+	return true;
+}
+
+void SceneValuesImpl::ClearLights()
+{
+	for(auto it = m_Lights.First(); it != m_Lights.End(); ++it) {
+		it->matrix(0, 3) = 0.0f;
+	}
+}
+
 u32 SceneValuesImpl::AddParam(const string& name, core::Type type)
 {
 	int id = GetParamID(name);
@@ -251,6 +301,7 @@ void SceneValuesImpl::RemoveAllParams()
 	m_Params.Clear();
 }
 */
+
 u32 SceneValuesImpl::GetParamCount() const
 {
 	return (u32)(m_Params.Size() + MATRIX_COUNT);
@@ -261,9 +312,17 @@ u32 SceneValuesImpl::GetParamID(const string& name) const
 	// Check matrizes
 	u32 first = *name.First();
 	if(first == 'w' || first == 'v' || first == 'p') {
-		for(u32 i = 0; i < 16; ++i)
+		for(u32 i = 0; i < MATRIX_COUNT; ++i)
 			if(MATRIX_NAMES[i] == name)
 				return i;
+	}
+
+	if(name.StartsWith("lightData")) {
+		const char* next;
+		int id = core::StringConverter::ParseInt((name.First() + 9).Pointer(), -1, &next);
+		if(id >= 0 && next == name.End().Pointer()) {
+			return FIRST_LIGHT_ID + (u32)id;
+		}
 	}
 
 	for(u32 i = 0; i < m_Params.Size(); ++i)
@@ -277,6 +336,8 @@ const string& SceneValuesImpl::GetParamName(u32 id) const
 {
 	if(id < MATRIX_COUNT) {
 		return MATRIX_NAMES[id];
+	} else if(id >= FIRST_LIGHT_ID) {
+		return m_Lights[id - FIRST_LIGHT_ID].name;
 	} else {
 		return m_Params[id - MATRIX_COUNT].name;
 	}
@@ -286,6 +347,8 @@ core::Type SceneValuesImpl::GetParamType(u32 id) const
 {
 	if(id < MATRIX_COUNT)
 		return core::Type::Matrix;
+	else if(id >= FIRST_LIGHT_ID)
+		return core::Type::Matrix;
 	else
 		return m_Params[id - MATRIX_COUNT].type;
 }
@@ -294,6 +357,11 @@ const void* SceneValuesImpl::GetParamValue(u32 id) const
 {
 	if(id < MATRIX_COUNT) {
 		return &GetMatrix((EMatrizes)id);
+	} else if(id >= FIRST_LIGHT_ID) {
+		id -= FIRST_LIGHT_ID;
+		if(id < m_Lights.Size())
+			return m_Lights[id].matrix.DataRowMajor();
+		return m_InvalidLight.DataRowMajor();
 	} else {
 		return (u8*)m_ParamData + m_Params[id - MATRIX_COUNT].offset;
 	}
@@ -303,6 +371,10 @@ void SceneValuesImpl::SetParamValue(u32 id, const void* p)
 {
 	if(id < MATRIX_COUNT) {
 		SetMatrix((EMatrizes)id, *(const math::matrix4*)p);
+	} else if(id >= FIRST_LIGHT_ID) {
+		id -= FIRST_LIGHT_ID;
+		if(id < m_Lights.Size())
+			m_Lights[id].matrix = *(const math::matrix4*)p;
 	} else {
 		memcpy((u8*)m_ParamData + m_Params[id - MATRIX_COUNT].offset, p, m_Params[id - MATRIX_COUNT].Size);
 	}

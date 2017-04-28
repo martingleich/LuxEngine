@@ -42,7 +42,23 @@ private:
 	static const u32 MATRIX_COUNT = 16;
 	static_assert(MATRIX_COUNT <= sizeof(u32)*8, "Too many matrizes.");
 
+	static const u32 FIRST_LIGHT_ID = 10000;
+
+	struct LightMatrix
+	{
+		math::matrix4 matrix;
+		string name;
+
+		LightMatrix()
+		{
+			matrix(0, 3) = 0.0f;
+		}
+	};
+
 private:
+	core::array<LightMatrix> m_Lights;
+	math::matrix4 m_InvalidLight;
+
 	core::array<SParam> m_Params;
 	void* m_ParamData;
 	u32 m_CurrentOffset;
@@ -95,12 +111,15 @@ public:
 	~SceneValuesImpl();
 
 	void SetMatrix(EMatrizes type, const math::matrix4& Matrix);
-
 	void SetMatrix(EMatrizes type, const math::matrix4& Matrix, const math::matrix4& InvMatrix);
 
 	const math::matrix4& GetMatrix(EMatrizes type) const;
 
 	u32 AddParam(const string& name, core::Type type);
+
+	bool SetLight(u32 id, const video::LightData& light);
+	void ClearLights();
+
 	/*
 	void RemoveParam(u32 id);
 	void RemoveAllParams();

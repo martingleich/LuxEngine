@@ -31,37 +31,26 @@ public:
 		Spot,
 	};
 
-	LightData() : type(EType::Point), ambient(0.0f, 0.0f, 0.0f), diffuse(1.0f, 1.0f, 1.0f),
-		outerCone(45.0f), innerCone(10.0f), falloff(2.0f),
-		position(0.0f, 0.0f, 0.0f), direction(0.0f, 0.0f, 1.0f),
-		range(100.0f), att0(1.0f), att1(0.0f), att2(0.0f)
+	LightData() : 
+		type(EType::Point),
+		color(1.0f, 1.0f, 1.0f),
+		position(0.0f, 0.0f, 0.0f),
+		range(100.0f),
+		direction(0.0f, 0.0f, 1.0f),
+		innerCone(math::DegToRad(10.0f)),
+		outerCone(math::DegToRad(45.0f)),
+		falloff(2.0f)
 	{
 	}
 
 	//! The light type
 	EType type;
 
-	//! The ambient color of the light
-	/**
-	Default: Black
-	*/
-	Colorf ambient;
-
-	//! The diffuse color of the light
+	//! The color of the light
 	/**
 	Default: White
 	*/
-	Colorf diffuse;
-
-	//! The attentuation the light 
-	/**
-	relative light illumination = 1 / (Att0 + d*Att1 + d²*Att2)
-	d is the distance to the light
-	Normal values are Att0 = Att2 = 0.0f und Att1 = 1 / LightRange
-	*/
-	float att0;
-	float att1;
-	float att2;
+	Colorf color;
 
 	//! The lightposition in world coordinates
 	math::vector3f position;
@@ -75,7 +64,6 @@ public:
 
 	//! The lightdirection in world coordinates
 	math::vector3f direction;
-
 
 	//! The inner lightcone of a spotlight
 	/**
@@ -101,9 +89,7 @@ public:
 	float falloff;
 };
 
-}    
-
-}    
-
+}
+}
 
 #endif

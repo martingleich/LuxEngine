@@ -280,7 +280,7 @@ ImageSystemImpl::ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver*
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(MultiImageToCubeTextureLoader)(m_ResourceSystem, this));
 
 #ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
-	if(m_Driver && m_Driver->GetVideoDriverType() == EVD_DIRECT9) {
+	if(m_Driver && m_Driver->GetVideoDriverType() == EVideoDriver::Direct3D9) {
 		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetDevice());
 		m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderD3DX)(d3dDevice));
 	}

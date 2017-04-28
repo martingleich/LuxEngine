@@ -451,9 +451,9 @@ void SceneManagerImpl::DrawAll()
 	// Das Hintergrundlicht neu setzten
 	m_Driver->SetAmbient(m_AmbientColor);
 
-	m_Driver->DeleteAllLights();
+	m_Driver->ClearLights();
 
-	size_t maxLightCount = m_Driver->GetMaximalLightCount();
+	size_t maxLightCount = m_Driver->GetDeviceCapability(video::EDriverCaps::MaxLights);
 	maxLightCount = math::Min(maxLightCount, m_LightList.Size());
 
 	// TODO: Lichter nach Kameradistanz sortieren, und am besten passedne Lichter auswählen
@@ -579,12 +579,12 @@ bool SceneManagerImpl::GetSceneNodeArrayByType(core::Name type, core::array<Scen
 	return !array.IsEmpty();
 }
 
-void SceneManagerImpl::SetAmbient(video::Color ambient)
+void SceneManagerImpl::SetAmbient(video::Colorf ambient)
 {
 	m_AmbientColor = ambient;
 }
 
-video::Color SceneManagerImpl::GetAmbient()
+video::Colorf SceneManagerImpl::GetAmbient()
 {
 	return m_AmbientColor;
 }

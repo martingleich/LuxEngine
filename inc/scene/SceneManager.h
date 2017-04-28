@@ -171,10 +171,10 @@ public:
 	virtual void Clear() = 0;
 
 	// Setzt die Hintergrund-Beleuchtung
-	virtual void SetAmbient(video::Color ambient) = 0;
+	virtual void SetAmbient(video::Colorf ambient) = 0;
 
 	// Fragt die Hintergrund-Beleuchtung ab
-	virtual video::Color GetAmbient() = 0;
+	virtual video::Colorf GetAmbient() = 0;
 
 	// Der aktuelle Renderingpass
 	virtual ESceneNodeRenderPass GetActRenderPass() const = 0;

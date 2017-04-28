@@ -100,8 +100,8 @@ public:
 	virtual bool RegisterNodeForRendering(SceneNode* node, ESceneNodeRenderPass renderPass);
 	virtual void AddToDeletionQueue(SceneNode* node);
 	virtual void Clear();
-	virtual void SetAmbient(video::Color ambient);
-	virtual video::Color GetAmbient();
+	virtual void SetAmbient(video::Colorf ambient);
+	virtual video::Colorf GetAmbient();
 	virtual ESceneNodeRenderPass GetActRenderPass() const;
 	void RegisterEventReceiver(SceneNode* receiver);
 	void UnregisterEventReceiver(SceneNode* receiver);
@@ -178,7 +178,7 @@ private:
 	ESceneNodeRenderPass m_CurrentRenderPass;
 
 	// Das Hintergrundlicht
-	video::Color m_AmbientColor;
+	video::Colorf m_AmbientColor;
 
 	// Die DeletionList, alle zu löschenden Knoten sollten ihr hinzugefügt werden, sie werden dann zu einen Zeitpunkt
 	// gelöscht an dem es zu keinen Komplikationen kommen kann

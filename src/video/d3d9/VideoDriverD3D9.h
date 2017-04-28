@@ -1,7 +1,6 @@
 #ifndef INCLUDED_VIDEODRIVER_D3D9_H
 #define INCLUDED_VIDEODRIVER_D3D9_H
-#include "core/ReferableFactory.h"
-#include "video/VideoDriver.h"
+#include "video/VideoDriverNull.h"
 #include "video/Material.h"
 #include "video/LightData.h"
 #include "math/matrix4.h"
@@ -24,23 +23,17 @@ class Timer;
 namespace video
 {
 
-class VideoDriverD3D9 : public VideoDriver
+class VideoDriverD3D9 : public VideoDriverNull
 {
 public:
 	VideoDriverD3D9(core::Timer* timer, core::ReferableFactory* refFactory);
-	~VideoDriverD3D9()
-	{
-		Exit();
-	}
+	~VideoDriverD3D9();
 
 	bool Init(const DriverConfig& config, gui::Window* Window);
-	void Exit();
 
 	bool BeginScene(bool color, bool zbuffer);
 	bool EndScene();
 	bool Present();
-
-	void SetClearValues(Color color, float depth);
 
 	bool SetRendertarget(Texture* texture);
 	Texture* GetRendertarget();
@@ -65,14 +58,6 @@ public:
 	void SetTextureLayer(const MaterialLayer& layer, u32 textureLayer, bool resetAll = false);
 
 	//------------------------------------------------------------------
-	// Lichter
-	size_t AddLight(const LightData& light);
-	const LightData& GetLight(size_t index);
-	void EnableLight(size_t index, bool bTurnOn);
-	size_t GetLightCount() const;
-	void DeleteAllLights();
-	size_t GetMaximalLightCount() const;
-
 	virtual StrongRef<SubMesh> CreateSubMesh(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
 		EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, u32 IndexCount,
@@ -169,25 +154,16 @@ public:
 		float* density = nullptr,
 		bool* pixelFog = nullptr,
 		bool* rangeFog = nullptr) const;
-	virtual void        SetAmbient(Color ambient);
-	virtual Color        GetAmbient() const;
 
-	u32 GetDeviceCapability(EDriverCaps Capability) const
-	{
-		return m_DriverCaps[(u32)Capability];
-	}
+	bool AddLight(const LightData& light);
+	void ClearLights();
 
 	//------------------------------------------------------------------
-	// Inline-Methoden
-	const DriverConfig& GetConfig() const
-	{
-		return m_Config;
-	}
-
 	EVideoDriver GetVideoDriverType() const
 	{
-		return EVD_DIRECT9;
+		return EVideoDriver::Direct3D9;
 	}
+
 	void* GetDevice() const
 	{
 		return m_D3DDevice;
@@ -209,33 +185,14 @@ public:
 		return m_PresentResult;
 	}
 
-	StrongRef<RenderStatistics> GetRenderStatistics() const
-	{
-		return m_RenderStatistics;
-	}
-	StrongRef<scene::SceneValues> GetSceneValues() const
-	{
-		return m_SceneValues;
-	}
 	StrongRef<BufferManager> GetBufferManager() const
 	{
 		return m_BufferManager;
 	}
-
 	void SetDefaultRenderer(MaterialRenderer* r)
 	{
 		m_SolidRenderer = r;
 	}
-
-	static BYTE GetD3DUsage(VertexElement::EUsage usage);
-	static D3DFORMAT GetD3DFormat(ColorFormat Format, bool Alpha);
-	static ColorFormat GetLuxFormat(D3DFORMAT Format);
-	static u32 GetBitsPerPixel(D3DFORMAT Format);
-	static u32 GetD3DBlend(EBlendFactor factor);
-	static u32 GetD3DBlendFunc(EBlendOperator Op);
-	static u32 GetD3DRepeatMode(ETextureRepeat repeat);
-	static u32 GetD3DDeclType(VertexElement::EType type);
-	static D3DCOLORVALUE SColorToD3DColor(const Colorf& color);
 
 private:
 	class VertexFormat_d3d9
@@ -326,18 +283,8 @@ private:
 
 	ERenderMode m_CurrentRendermode;
 
-	StrongRef<core::Timer> m_Timer;
-	StrongRef<RenderStatistics> m_RenderStatistics;
-	StrongRef<scene::SceneValues> m_SceneValues;
 	StrongRef<BufferManager> m_BufferManager;
-
 	FogInformation_d3d9 m_Fog;
-
-	Color m_ClearColor;
-	float m_ClearDepth;
-
-	size_t m_LastSetLight;
-	core::array<LightData> m_LightList;
 
 	IDirect3D9* m_D3D;
 	IDirect3DDevice9* m_D3DDevice;
@@ -348,29 +295,21 @@ private:
 	math::matrix4 m_Transforms[ETS_COUNT];
 	math::matrix4 m_2DTranform;
 
-	Color m_AmbientColor;
-
 	VertexFormat m_CurrentVertexFormat;
 	core::HashMap<VertexFormat, VertexFormat_d3d9> m_VertexFormats;
 
 	core::array<PipelineOverwrite> m_PipelineOverwrites;
 
-	DriverConfig m_Config;
-	u32 m_DriverCaps[(u32)EDriverCaps::EDriverCaps_Count];
 	bool m_HasStencilBuffer;
 	D3DCAPS9 m_Caps;
 	int m_Adapter;
 	D3DPRESENT_PARAMETERS m_PresentParams;
 
 	video::MaterialRenderer* m_SolidRenderer;
-
-	core::ReferableFactory* m_RefFactory;
 };
 
 }
-
 }
-
 
 #endif // LUX_COMPILE_WITH_D3D9
 

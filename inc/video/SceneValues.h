@@ -4,6 +4,8 @@
 #include "core/lxString.h"
 #include "core/lxTypes.h"
 
+#include "video/LightData.h"
+
 #include "math/matrix4.h"
 
 namespace lux
@@ -42,13 +44,13 @@ public:
 public:
 	virtual ~SceneValues() {}
 	virtual void SetMatrix(EMatrizes type, const math::matrix4& matrix) = 0;
-
 	virtual void SetMatrix(EMatrizes type, const math::matrix4& matrix, const math::matrix4& InvMatrix) = 0;
-
 	virtual const math::matrix4& GetMatrix(EMatrizes type) const = 0;
 
 	virtual u32 AddParam(const string& name, core::Type type) = 0;
 
+	virtual bool SetLight(u32 id, const video::LightData& light) = 0;
+	virtual void ClearLights() = 0;
 	/*
 	to dangerous when there are still shaders referencing this
 	virtual void RemoveParam(u32 id) = 0;

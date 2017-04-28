@@ -7,6 +7,7 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 
 #include "StrippedD3D9.h"
+#include "video/d3d9/D3DHelper.h"
 
 namespace lux
 {
@@ -16,44 +17,14 @@ namespace video
 class MaterialRendererD3D9 : public MaterialRenderer
 {
 public:
-	MaterialRendererD3D9(VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRenderer(p, pShader, BasePackage), m_D3DDevice((IDirect3DDevice9*)p->GetDevice())
+	MaterialRendererD3D9(VideoDriver* p,
+		Shader* pShader = nullptr,
+		const core::ParamPackage* BasePackage = nullptr) :
+		MaterialRenderer(p, pShader, BasePackage),
+		m_D3DDevice((IDirect3DDevice9*)p->GetDevice())
 	{
 	}
 
-	virtual ~MaterialRendererD3D9()
-	{
-	}
-
-protected:
-	D3DCOLORVALUE SColorToD3DColor(const Colorf& color)
-	{
-		D3DCOLORVALUE out = {color.r,
-			color.g,
-			color.b,
-			color.a};
-
-		return out;
-	}
-
-	u32 GetD3DBlend(EBlendFactor factor)
-	{
-		switch(factor) {
-		case EBF_ZERO:
-			return D3DBLEND_ZERO;
-		case EBF_ONE:
-			return D3DBLEND_ONE;
-		case EBF_SRC_ALPHA:
-			return D3DBLEND_SRCALPHA;
-		case EBF_ONE_MINUS_SRC_ALPHA:
-			return D3DBLEND_INVSRCALPHA;
-		case EBF_DST_ALPHA:
-			return D3DBLEND_DESTALPHA;
-		case EBF_ONE_MINUS_DST_ALPHA:
-			return D3DBLEND_INVDESTALPHA;
-		default:
-			return 0;
-		}
-	}
 protected:
 	IDirect3DDevice9* m_D3DDevice;
 };

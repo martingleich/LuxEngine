@@ -38,8 +38,14 @@ public:
 	virtual core::ParamPackage& GetParamPackage() = 0;
 
 private:
-	virtual void GetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, void* out) = 0;
-	virtual void SetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, const void* data) = 0;
+	virtual void GetShaderValue(
+		u32 registerVS, u32 registerPS,
+		u32 registerVSCount, u32 registerPSCount,
+		core::Type type, u32 size, void* out) = 0;
+	virtual void SetShaderValue(
+		u32 registerVS, u32 registerPS,
+		u32 registerVSCount, u32 registerPSCount,
+		core::Type type, u32 size, const void* data) = 0;
 };
 
 class ShaderParam
@@ -82,6 +88,9 @@ private:
 	u32 m_RegisterVS;
 	u32 m_RegisterPS;
 
+	u32 m_RegisterPSCount;
+	u32 m_RegisterVSCount;
+
 	core::Type m_Type;
 	u8 m_TypeSize;
 	const char* m_Name;
@@ -92,8 +101,10 @@ public:
 	ShaderParam(Shader *owner,
 		core::Type type, u8 typeSize,
 		const char* name,
-		u32 registerVS, u32 registerPS) :
+		u32 registerVS, u32 registerPS,
+		u32 registerVSCount, u32 registerPSCount) :
 		m_RegisterVS(registerVS), m_RegisterPS(registerPS),
+		m_RegisterVSCount(registerVSCount), m_RegisterPSCount(registerPSCount),
 		m_Type(type), m_TypeSize(typeSize),
 		m_Name(name),
 		m_Owner(owner)
@@ -102,6 +113,7 @@ public:
 
 	ShaderParam() : 
 		m_RegisterVS(0xFFFFFFFF), m_RegisterPS(0xFFFFFFFF),
+		m_RegisterVSCount(0), m_RegisterPSCount(0),
 		m_Type(core::Type::Unknown), m_TypeSize(0),
 		m_Name(nullptr),
 		m_Owner(nullptr)
@@ -111,6 +123,8 @@ public:
 	ShaderParam(const ShaderParam& other) : 
 		m_RegisterVS(other.m_RegisterVS),
 		m_RegisterPS(other.m_RegisterPS),
+		m_RegisterVSCount(other.m_RegisterVSCount),
+		m_RegisterPSCount(other.m_RegisterPSCount),
 		m_Type(other.m_Type), m_TypeSize(other.m_TypeSize),
 		m_Name(other.m_Name),
 		m_Owner(other.m_Owner)
@@ -143,6 +157,10 @@ public:
 		m_Name = other.m_Name;
 		m_RegisterPS = other.m_RegisterPS;
 		m_RegisterVS = other.m_RegisterVS;
+
+		m_RegisterPSCount = other.m_RegisterPSCount;
+		m_RegisterVSCount = other.m_RegisterVSCount;
+
 		m_Type = other.m_Type;
 		m_TypeSize = other.m_TypeSize;
 
@@ -151,12 +169,18 @@ public:
 
 	void GetShaderValue(void* out) const
 	{
-		m_Owner->GetShaderValue(m_RegisterVS, m_RegisterPS, m_Type, m_TypeSize, out);
+		m_Owner->GetShaderValue(
+			m_RegisterVS, m_RegisterPS, 
+			m_RegisterVSCount, m_RegisterPSCount,
+			m_Type, m_TypeSize, out);
 	}
 
 	void SetShaderValue(const void* data) const
 	{
-		m_Owner->SetShaderValue(m_RegisterVS, m_RegisterPS, m_Type, m_TypeSize, data);
+		m_Owner->SetShaderValue(
+			m_RegisterVS, m_RegisterPS,
+			m_RegisterVSCount, m_RegisterPSCount,
+			m_Type, m_TypeSize, data);
 	}
 };
 

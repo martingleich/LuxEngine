@@ -32,9 +32,6 @@ video::LightData& LightSceneNodeImpl::GetLightData()
 void LightSceneNodeImpl::SetRange(float range)
 {
 	m_LightData.range = range;
-	m_LightData.att0 = 0.0f;
-	m_LightData.att1 = 1.0f / range;
-	m_LightData.att2 = 0.0f;
 }
 
 float LightSceneNodeImpl::GetRange() const
@@ -44,12 +41,12 @@ float LightSceneNodeImpl::GetRange() const
 
 void LightSceneNodeImpl::SetColor(const video::Colorf& color)
 {
-	m_LightData.diffuse = color;
+	m_LightData.color = color;
 }
 
 const video::Colorf& LightSceneNodeImpl::GetColor() const
 {
-	return m_LightData.diffuse;
+	return m_LightData.color;
 }
 
 void LightSceneNodeImpl::SetLightType(video::LightData::EType type)
@@ -88,9 +85,7 @@ void LightSceneNodeImpl::OnRegisterSceneNode()
 void LightSceneNodeImpl::Render()
 {
 	video::VideoDriver* driver = GetSceneManager()->GetDriver();
-
-	size_t index = driver->AddLight(m_LightData);
-	driver->EnableLight(index, true);
+	driver->AddLight(m_LightData);
 }
 
 core::Name LightSceneNodeImpl::GetReferableSubType() const

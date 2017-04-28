@@ -52,13 +52,13 @@ namespace video
 {
 
 //! Diffrent types of usable video drivers
-enum EVideoDriver
+enum class EVideoDriver
 {
 	//! The direct3D 9 video driver
-	EVD_DIRECT9 = 0,
+	Direct3D9 = 0,
 
 	//! The null driver
-	EVD_NULL,
+	Null,
 };
 
 struct DriverConfig
@@ -80,7 +80,7 @@ struct DriverConfig
 	bool pureSoftware;
 
 	DriverConfig() :
-		driverType(EVD_DIRECT9),
+		driverType(EVideoDriver::Null),
 		width(800),
 		height(600),
 		zBits(16),
@@ -101,7 +101,7 @@ struct DriverConfig
 		config.width = _width;
 		config.height = _height;
 		config.vSync = vSync;
-		config.driverType = EVD_DIRECT9;
+		config.driverType = EVideoDriver::Direct3D9;
 		config.windowed = true;
 
 		return config;
@@ -149,6 +149,8 @@ enum class EDriverCaps
 	TextureSquareOnly,
 	//! Maximum number of parallel texture
 	MaxSimultaneousTextures,
+	//! The maximum number of lights.
+	MaxLights,
 
 	EDriverCaps_Count
 };
@@ -161,19 +163,15 @@ public:
 	}
 
 	virtual bool Init(const DriverConfig& config, gui::Window* window) = 0;
-	virtual void Exit() = 0;
 	virtual bool Present() = 0;
 	virtual bool BeginScene(bool ClearColor, bool ClearZBuffer) = 0;
 	virtual bool EndScene() = 0;
 
 	virtual void SetClearValues(Color color, float depth) = 0;
 
-	virtual size_t AddLight(const LightData& light) = 0;
-	virtual const LightData& GetLight(size_t index) = 0;
-	virtual void EnableLight(size_t index, bool turnOn) = 0;
-	virtual size_t  GetLightCount() const = 0;
-	virtual void DeleteAllLights() = 0;
-	virtual size_t GetMaximalLightCount() const = 0;
+	virtual bool AddLight(const LightData& light) = 0;
+	virtual size_t GetLightCount() const = 0;
+	virtual void ClearLights() = 0;
 
 	virtual bool SetRendertarget(Texture* texture) = 0;
 	virtual Texture* GetRendertarget() = 0;
@@ -256,7 +254,6 @@ public:
 	virtual void Set2DTransform(const math::matrix4& matrix) = 0;
 	virtual void Use2DTransform(bool Use) = 0;
 
-	//virtual void SetVertexFormat(const VertexFormat& vertexFormat, bool reset = false) = 0;
 	virtual void SetVertexFormat(const VertexFormat& format, bool reset = false) = 0;
 
 	virtual void SetFog(Color color = Color(0),
@@ -275,8 +272,8 @@ public:
 		bool* pixelFog = nullptr,
 		bool* rangeFog = nullptr) const = 0;
 
-	virtual void SetAmbient(Color ambient) = 0;
-	virtual Color GetAmbient() const = 0;
+	virtual void SetAmbient(Colorf ambient) = 0;
+	virtual Colorf GetAmbient() const = 0;
 
 	virtual void* GetDevice() const = 0;
 	virtual EVideoDriver GetVideoDriverType() const = 0;

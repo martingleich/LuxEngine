@@ -17,7 +17,7 @@ ShaderD3D9::ShaderD3D9(VideoDriver* driver) :
 	m_VertexShader(nullptr), m_PixelShader(nullptr),
 	m_VertexShaderConstants(nullptr), m_PixelShaderConstants(nullptr),
 	m_Names(nullptr),
-	m_InvalidParam(this, core::Type::Unknown, 0, nullptr, 0xFFFFFFFF, 0xFFFFFFFF)
+	m_InvalidParam(this, core::Type::Unknown, 0, nullptr, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0)
 {
 }
 
@@ -140,7 +140,7 @@ bool ShaderD3D9::Init(
 		// Put name into namelist.
 		memcpy(m_Names + nameCursor, helper[i].name, helper[i].nameLength+1);
 
-		entry.param = ShaderParam(this, h.type, h.typeSize, m_Names + nameCursor, h.registerVS, h.registerPS);
+		entry.param = ShaderParam(this, h.type, h.typeSize, m_Names + nameCursor, h.registerVS, h.registerPS, h.registerVSCount, h.registerPSCount);
 		m_Params.Push_Back(std::move(entry));
 
 		nameCursor += h.nameLength+1;
@@ -171,12 +171,12 @@ bool ShaderD3D9::LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntr
 		if(handle == NULL)
 			continue;
 
-		u32 size, regId;
+		u32 size, regId, regCount;
 		core::Type type;
 		const char* name;
 		const void* defaultValue;
 		bool isValidType;
-		if(!GetStructureElemType(handle, table, type, size, regId, name, defaultValue, isValidType))
+		if(!GetStructureElemType(handle, table, type, size, regId, regCount, name, defaultValue, isValidType))
 			continue;
 
 		bool isParam = false;
@@ -212,10 +212,13 @@ bool ShaderD3D9::LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntr
 
 		if(foundEntry) {
 			// If entry already available just update it's data
-			if(table == m_VertexShaderConstants)
+			if(table == m_VertexShaderConstants) {
 				foundEntry->registerVS = regId;
-			else
+				foundEntry->registerVSCount = regCount;
+			} else {
 				foundEntry->registerPS = regId;
+				foundEntry->registerPSCount = regCount;
+			}
 			if(foundEntry->type != type) {
 				log::Error("Shader param in pixelshader and vertex shader has diffrent types. (param: ~s).", name);
 				return false;
@@ -228,10 +231,13 @@ bool ShaderD3D9::LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntr
 			HEntry.type = type;
 			HEntry.typeSize = (u8)size;
 			HEntry.defaultValue = defaultValue;
-			if(table == m_VertexShaderConstants)
+			if(table == m_VertexShaderConstants) {
 				HEntry.registerVS = regId;
-			else
+				HEntry.registerVSCount = regCount;
+			} else {
 				HEntry.registerPS = regId;
+				HEntry.registerPSCount = regCount;
+			}
 			HEntry.paramType = isParam ? ParamType_ParamMaterial : ParamType_Scene;
 			outParams.Push_Back(HEntry);
 			outStringSize += HEntry.nameLength + 1;
@@ -394,7 +400,7 @@ void ShaderD3D9::Disable()
 	m_D3DDevice->SetPixelShader(NULL);
 }
 
-bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, const char*& name, const void*& defaultValue, bool& isValid)
+bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid)
 {
 	D3DXCONSTANT_DESC desc;
 	UINT count = 1;
@@ -433,6 +439,7 @@ bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* tab
 
 	outSize = desc.Bytes;
 	registerID = desc.RegisterIndex;
+	regCount = desc.RegisterCount;
 	name = desc.Name;
 	defaultValue = desc.DefaultValue;
 
@@ -510,7 +517,9 @@ void ShaderD3D9::CastShaderToType(core::Type type, const void* in, void* out)
 	}
 }
 
-void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, void* out)
+void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
+	u32 registerVSCount, u32 registerPSCount,
+	core::Type type, u32 size, void* out)
 {
 	LUX_UNUSED(size);
 
@@ -554,10 +563,14 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS, core::Type type,
 			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, 1);
 			break;
 		case core::Type::Matrix:
-			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, 4);
+			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, registerVSCount);
+			for(u32 i = registerVSCount; i < 4; ++i)
+				((float*)out)[i*4] = 0;
 			break;
 		case core::Type::Internal_MatrixCol:
-			m_D3DDevice->GetVertexShaderConstantF(regId, f, 4);
+			m_D3DDevice->GetVertexShaderConstantF(regId, f, registerVSCount);
+			for(u32 i = registerVSCount; i < 4; ++i)
+				((float*)f)[i*4] = 0;
 			{
 				float* pf = (float*)out;
 				pf[1] = f[4];   pf[2] = f[8];   pf[3] = f[12];
@@ -602,10 +615,14 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS, core::Type type,
 			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, 1);
 			break;
 		case core::Type::Matrix:
-			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, 4);
+			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, registerPSCount);
+			for(u32 i = registerVSCount; i < 4; ++i)
+				((float*)out)[i*4] = 0;
 			break;
 		case core::Type::Internal_MatrixCol:
-			m_D3DDevice->GetPixelShaderConstantF(regId, f, 4);
+			m_D3DDevice->GetPixelShaderConstantF(regId, f, registerPSCount);
+			for(u32 i = registerVSCount; i < 4; ++i)
+				((float*)f)[i*4] = 0;
 			{
 				float* pf = (float*)out;
 				pf[1] = f[4];   pf[2] = f[8];   pf[3] = f[12];
@@ -621,7 +638,9 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS, core::Type type,
 	}
 }
 
-void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, const void* data)
+void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS,
+	u32 registerVSCount, u32 registerPSCount,
+	core::Type type, u32 size, const void* data)
 {
 	LUX_UNUSED(size);
 
@@ -652,7 +671,7 @@ void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS, core::Type type,
 			break;
 		case core::Type::Matrix:
 		case core::Type::Internal_MatrixCol:
-			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, 4);
+			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, registerVSCount);
 			break;
 
 		default:
@@ -678,7 +697,7 @@ void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS, core::Type type,
 
 		case core::Type::Matrix:
 		case core::Type::Internal_MatrixCol:
-			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, 4);
+			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, registerPSCount);
 			break;
 
 		default:

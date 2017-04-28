@@ -74,6 +74,10 @@ private:
 	{
 		u32 registerVS;
 		u32 registerPS;
+
+		u32 registerVSCount;
+		u32 registerPSCount;
+
 		core::Type type;
 		u8 typeSize;
 		const char* name;
@@ -85,6 +89,8 @@ private:
 		HelperEntry() :
 			registerVS(0xFFFFFFFF),
 			registerPS(0xFFFFFFFF),
+			registerVSCount(0),
+			registerPSCount(0),
 			type(core::Type::Unknown),
 			typeSize(0),
 			name(nullptr),
@@ -96,7 +102,7 @@ private:
 	};
 
 private:
-	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, const char*& name, const void*& defaultValue, bool& isValid);
+	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
 
 	bool LoadParamsFromStructure(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, bool isParam);
 	bool LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize);
@@ -104,8 +110,14 @@ private:
 	bool CreatePixelShader(const char* code, const char* entryPoint, size_t length, const char* profile);
 	bool CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile);
 
-	void GetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, void* out);
-	void SetShaderValue(u32 registerVS, u32 registerPS, core::Type type, u32 size, const void* data);
+	void GetShaderValue(
+		u32 registerVS, u32 registerPS,
+		u32 registerVSCount, u32 registerPSCount,
+		core::Type type, u32 size, void* out);
+	void SetShaderValue(
+		u32 registerVS, u32 registerPS,
+		u32 registerVSCount, u32 registerPSCount,
+		core::Type type, u32 size, const void* data);
 
 	void CastTypeToShader(core::Type type, const void* in, void* out);
 	void CastShaderToType(core::Type type, const void* in, void* out);

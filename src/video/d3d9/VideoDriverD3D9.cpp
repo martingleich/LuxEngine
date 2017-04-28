@@ -1,14 +1,13 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "core/Logger.h"
 
+#include "video/d3d9/D3DHelper.h"
 #include "video/d3d9/TextureD3D9.h"
 #include "video/d3d9/CubeTextureD3D9.h"
 #include "video/d3d9/ShaderD3D9.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
 #include "video/d3d9/VideoDriverD3D9.h"
 
-#include "video/SceneValuesImpl.h"
-#include "video/RenderStatistics.h"
 #include "video/LightData.h"
 #include "video/SubMeshImpl.h"
 
@@ -176,13 +175,9 @@ IDirect3DSurface9* VideoDriverD3D9::Rendertarget_d3d9::GetSurface()
 
 //////////////////////////////////////////////////////////////////////
 
-VideoDriverD3D9::VideoDriverD3D9(core::Timer* timer, core::ReferableFactory* f) :
-	m_Timer(timer),
-	m_RefFactory(f),
+VideoDriverD3D9::VideoDriverD3D9(core::Timer* timer, core::ReferableFactory* refFactory) :
+	VideoDriverNull(timer, refFactory),
 	m_HasStencilBuffer(false),
-	m_LastSetLight(0xFFFFFFFF),
-	m_ClearColor(0x00000000),
-	m_ClearDepth(1.0f),
 	m_3DTransformsChanged(false),
 	m_2DTransformChanged(false),
 	m_PresentResult(true),
@@ -190,15 +185,14 @@ VideoDriverD3D9::VideoDriverD3D9(core::Timer* timer, core::ReferableFactory* f) 
 {
 }
 
-bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
+bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 {
-	if(!Window)
+	if(!VideoDriverNull::Init(config, window))
 		return false;
 
 	D3DPRESENT_PARAMETERS PresentParams;
 
 	m_Adapter = 0;
-	m_Config = config;
 
 	m_D3D = Direct3DCreate9(D3D_SDK_VERSION);
 	if(!m_D3D) {
@@ -206,7 +200,7 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 		return false;
 	}
 
-	HWND window = (HWND)Window->GetDeviceWindow();
+	HWND windowHandle = (HWND)window->GetDeviceWindow();
 	// Präsentationsstruktur ausfüllen
 	D3DDISPLAYMODE CurrentVideoMode;
 	m_D3D->GetAdapterDisplayMode(m_Adapter, &CurrentVideoMode);
@@ -220,7 +214,7 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 	}
 	PresentParams.BackBufferCount = 1;
 	PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	PresentParams.hDeviceWindow = window;
+	PresentParams.hDeviceWindow = windowHandle;
 	PresentParams.Windowed = m_Config.windowed;
 	PresentParams.EnableAutoDepthStencil = TRUE;
 	PresentParams.Flags = 0;
@@ -338,7 +332,7 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 	if(m_Config.pureSoftware) {
 		if(FAILED(m_D3D->CreateDevice(m_Adapter,
 			D3DDEVTYPE_HAL,
-			(HWND)(window),
+			windowHandle,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 			&PresentParams,
 			&m_D3DDevice))) {
@@ -350,14 +344,14 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 
 		hr = m_D3D->CreateDevice(m_Adapter,
 			D3DDEVTYPE_HAL,
-			(HWND)(window),
+			windowHandle,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING,
 			&PresentParams,
 			&m_D3DDevice);
 		if(FAILED(hr))
 			hr = m_D3D->CreateDevice(m_Adapter,
 				D3DDEVTYPE_HAL,
-				(HWND)(window),
+				windowHandle,
 				D3DCREATE_MIXED_VERTEXPROCESSING,
 				&PresentParams,
 				&m_D3DDevice);
@@ -365,7 +359,7 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 		if(FAILED(hr))
 			hr = m_D3D->CreateDevice(m_Adapter,
 				D3DDEVTYPE_HAL,
-				(HWND)(window),
+				windowHandle,
 				D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 				&PresentParams,
 				&m_D3DDevice);
@@ -379,7 +373,7 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 	// Print Information
 	D3DADAPTER_IDENTIFIER9 AdapterIdent;
 	m_D3D->GetAdapterIdentifier(m_Adapter, 0, &AdapterIdent);
-	log::Info("Using Direct3D ~d.~d.~d.~d on ~s.",
+	log::Info("Using Direct3D-Driver ~d.~d.~d.~d on ~s.",
 		HIWORD(AdapterIdent.DriverVersion.HighPart),
 		LOWORD(AdapterIdent.DriverVersion.HighPart),
 		HIWORD(AdapterIdent.DriverVersion.LowPart),
@@ -410,8 +404,6 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 	m_CurrentRendermode = ERM_NONE;
 
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
-	m_SceneValues = LUX_NEW(scene::SceneValuesImpl);
-	m_RenderStatistics = LUX_NEW(RenderStatistics)(m_Timer);
 
 	m_RefFactory->RegisterType(LUX_NEW(TextureD3D9)(m_D3DDevice));
 	m_RefFactory->RegisterType(LUX_NEW(CubeTextureD3D9)(m_D3DDevice));
@@ -419,16 +411,13 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* Window)
 	return true;
 }
 
-void VideoDriverD3D9::Exit()
+VideoDriverD3D9::~VideoDriverD3D9()
 {
 	if(m_D3DDevice) {
-		DeleteAllLights();
-
 		IdentityMaterial.SetRenderer(nullptr);
 		WorkMaterial.SetRenderer(nullptr);
 
 		m_BufferManager = nullptr;
-		m_SceneValues = nullptr;
 
 		m_VertexFormats.Clear();
 		m_DepthBuffers.Clear();
@@ -438,9 +427,8 @@ void VideoDriverD3D9::Exit()
 		m_D3DDevice->Release();
 	}
 
-	if(m_D3D) {
+	if(m_D3D)
 		m_D3D->Release();
-	}
 }
 
 void VideoDriverD3D9::FillCaps()
@@ -452,6 +440,7 @@ void VideoDriverD3D9::FillCaps()
 	m_DriverCaps[(u32)EDriverCaps::TexturesPowerOfTwoOnly] = (m_Caps.TextureCaps & D3DPTEXTURECAPS_POW2) != 0 ? 1 : 0;
 	m_DriverCaps[(u32)EDriverCaps::TextureSquareOnly] = (m_Caps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY) != 0 ? 1 : 0;
 	m_DriverCaps[(u32)EDriverCaps::MaxSimultaneousTextures] = m_Caps.MaxSimultaneousTextures;
+	m_DriverCaps[(u32)EDriverCaps::MaxLights] = m_Caps.MaxActiveLights;
 }
 
 bool VideoDriverD3D9::InitRendertargetData()
@@ -603,12 +592,6 @@ bool VideoDriverD3D9::BeginScene(bool clearColor, bool clearZBuffer)
 	return SUCCEEDED(hr);
 }
 
-void VideoDriverD3D9::SetClearValues(Color color, float depth)
-{
-	m_ClearColor = color;
-	m_ClearDepth = depth;
-}
-
 bool VideoDriverD3D9::EndScene()
 {
 	if(FAILED(m_D3DDevice->EndScene())) {
@@ -621,9 +604,12 @@ bool VideoDriverD3D9::EndScene()
 	return true;
 }
 
-size_t VideoDriverD3D9::AddLight(const LightData& light)
+bool VideoDriverD3D9::AddLight(const LightData& light)
 {
-	m_LightList.Push_Back(light);
+	if(!VideoDriverNull::AddLight(light))
+		return false;
+
+	DWORD lightId = (DWORD)GetLightCount() - 1;
 
 	D3DLIGHT9 D3DLight;
 
@@ -646,65 +632,34 @@ size_t VideoDriverD3D9::AddLight(const LightData& light)
 	D3DLight.Falloff = light.falloff;
 
 	D3DCOLORVALUE Specular = {1.0f, 1.0f, 1.0f, 1.0f};
-	D3DLight.Diffuse = *((D3DCOLORVALUE*)(&light.diffuse));
+	D3DCOLORVALUE Ambient = {0.0f, 0.0f, 0.0f, 0.0f};
+	D3DLight.Diffuse = SColorToD3DColor(light.color);
 	D3DLight.Specular = Specular;
-	D3DLight.Ambient = *((D3DCOLORVALUE*)(&light.ambient));
+	D3DLight.Ambient = Ambient;
 
-	D3DLight.Attenuation0 = light.att0;
-	D3DLight.Attenuation1 = light.att1;
-	D3DLight.Attenuation2 = light.att2;
-	if(math::IsZero(light.att0 + light.att1 + light.att2)
-		&& light.type != LightData::EType::Directional) {
-		D3DLight.Attenuation1 = 1.0f / light.range;
-	}
+	D3DLight.Attenuation0 = 0.0f;
+	D3DLight.Attenuation1 = 0.0f;
+	D3DLight.Attenuation2 = 1.0f / light.range;
 
 	D3DLight.Theta = light.innerCone * 2.0f;
 	D3DLight.Phi = light.outerCone * 2.0f;
 
-	if(m_LastSetLight != 0xFFFFFFFF)
-		++m_LastSetLight;
-	else
-		m_LastSetLight = 0;
-
-	if(SUCCEEDED(m_D3DDevice->SetLight((DWORD)m_LastSetLight, &D3DLight))) {
-		// Klappt jetzt sicher
-		m_D3DDevice->LightEnable((DWORD)m_LastSetLight, true);
+	if(SUCCEEDED(m_D3DDevice->SetLight(lightId, &D3DLight))) {
+		if(FAILED(m_D3DDevice->LightEnable(lightId, TRUE)))
+			return false;
+		else
+			return true;
 	}
 
-	return m_LastSetLight;
+	return false;
 }
 
-const LightData& VideoDriverD3D9::GetLight(size_t index)
+void VideoDriverD3D9::ClearLights()
 {
-	return m_LightList[index];
-}
+	for(size_t i = 0; i < GetLightCount(); ++i)
+		m_D3DDevice->LightEnable((DWORD)i, FALSE);
 
-void VideoDriverD3D9::EnableLight(size_t index, bool turnOn)
-{
-	if(index < m_LastSetLight)
-		m_D3DDevice->LightEnable((DWORD)index, turnOn);
-}
-
-size_t VideoDriverD3D9::GetLightCount() const
-{
-	return m_LightList.Size();
-}
-
-void VideoDriverD3D9::DeleteAllLights()
-{
-	if(m_LastSetLight == 0xFFFFFFFF)
-		return;
-
-	for(size_t i = 0; i < m_LastSetLight; ++i)
-		m_D3DDevice->LightEnable((DWORD)i, false);
-
-	m_LastSetLight = 0xFFFFFFFF;
-	m_LightList.Resize(0);
-}
-
-size_t VideoDriverD3D9::GetMaximalLightCount() const
-{
-	return m_Caps.MaxActiveLights;
+	VideoDriverNull::ClearLights();
 }
 
 StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(
@@ -1279,65 +1234,6 @@ StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 Size, ColorFormat 
 	return out;
 }
 
-static const char* GetShaderProfile(
-	bool isPixel,
-	int major, int minor)
-{
-	if(isPixel) {
-		if(major == 1) {
-			if(minor == 1)
-				return "ps_1_1";
-			if(minor == 2)
-				return "ps_1_2";
-			if(minor == 3)
-				return "ps_1_3";
-			if(minor == 4)
-				return "ps_1_4";
-		} else if(major == 2) {
-			if(minor == 0)
-				return "ps_2_0";
-			if(minor == 1)
-				return "ps_2_a";
-			if(minor == 2)
-				return "ps_2_b";
-		} else if(major == 3) {
-			if(minor == 0)
-				return "ps_3_0";
-		} else if(major == 4) {
-			if(minor == 0)
-				return "ps_4_0";
-			if(minor == 1)
-				return "ps_4_1";
-		} else if(major == 5) {
-			if(minor == 0)
-				return "ps_5_0";
-		}
-	} else {
-		if(major == 1) {
-			if(minor == 1)
-				return "vs_1_1";
-		} else if(major == 2) {
-			if(minor == 0)
-				return "vs_2_0";
-			if(minor == 1)
-				return "vs_2_a";
-		} else if(major == 3) {
-			if(minor == 0)
-				return "ps_3_0";
-		} else if(major == 4) {
-			if(minor == 0)
-				return "ps_4_0";
-			if(minor == 1)
-				return "ps_4_1";
-		} else if(major == 5) {
-			if(minor == 0)
-				return "ps_5_0";
-		}
-	}
-
-	return nullptr;
-}
-
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
 	const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
@@ -1348,8 +1244,8 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 		return nullptr;
 	}
 
-	const char* vsProfile = GetShaderProfile(false, VSmajorVersion, VSminorVersion);
-	const char* psProfile = GetShaderProfile(true, PSmajorVersion, PSminorVersion);
+	const char* vsProfile = GetD3DXShaderProfile(false, VSmajorVersion, VSminorVersion);
+	const char* psProfile = GetD3DXShaderProfile(true, PSmajorVersion, PSminorVersion);
 
 	if(!vsProfile) {
 		log::Error("Invalid vertex shader profile(~d.~d).", VSmajorVersion, VSminorVersion);
@@ -1514,17 +1410,6 @@ void VideoDriverD3D9::GetFog(Color* color,
 		*rangeFog = m_Fog.range;
 }
 
-static u32 MakeFilter(ETextureFilter filter)
-{
-	if(filter == ETF_LINEAR)
-		return D3DTEXF_LINEAR;
-	if(filter == ETF_POINT)
-		return D3DTEXF_POINT;
-	if(filter == ETF_ANISOTROPIC)
-		return D3DTEXF_ANISOTROPIC;
-	return D3DTEXF_POINT;
-}
-
 void VideoDriverD3D9::SetTextureLayer(const MaterialLayer& layer, u32 textureLayer, bool resetAll)
 {
 	SetActiveTexture(textureLayer, layer.texture);
@@ -1535,8 +1420,8 @@ void VideoDriverD3D9::SetTextureLayer(const MaterialLayer& layer, u32 textureLay
 		m_D3DDevice->SetSamplerState(textureLayer, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
 		m_D3DDevice->SetSamplerState(textureLayer, D3DSAMP_ADDRESSV, GetD3DRepeatMode(layer.repeat.v));
 
-		u32 filterMag = MakeFilter(m_CurrentPipeline.MagFilter);
-		u32 filterMin = MakeFilter(m_CurrentPipeline.MinFilter);
+		u32 filterMag = GetD3DTextureFilter(m_CurrentPipeline.MagFilter);
+		u32 filterMin = GetD3DTextureFilter(m_CurrentPipeline.MinFilter);
 		u32 filterMip = m_CurrentPipeline.TrilinearFilter ? D3DTEXF_LINEAR : D3DTEXF_POINT;
 
 		m_D3DDevice->SetSamplerState(textureLayer, D3DSAMP_MIPFILTER, filterMip);
@@ -1831,16 +1716,6 @@ void VideoDriverD3D9::ResetAllRenderstates()
 	m_ResetRenderstates = true;
 }
 
-void VideoDriverD3D9::SetAmbient(Color ambient)
-{
-	m_AmbientColor = ambient;
-}
-
-Color VideoDriverD3D9::GetAmbient() const
-{
-	return m_AmbientColor;
-}
-
 IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFormat& format)
 {
 	if(!format.IsValid()) {
@@ -1916,215 +1791,7 @@ IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFor
 	return d3dDecl;
 }
 
-BYTE VideoDriverD3D9::GetD3DUsage(VertexElement::EUsage usage)
-{
-	switch(usage) {
-	case VertexElement::EUsage::Position:      return D3DDECLUSAGE_POSITION;
-	case VertexElement::EUsage::PositionNT:    return D3DDECLUSAGE_POSITIONT;
-	case VertexElement::EUsage::Normal:        return D3DDECLUSAGE_NORMAL;
-	case VertexElement::EUsage::Tangent:       return D3DDECLUSAGE_TANGENT;
-	case VertexElement::EUsage::Binormal:      return D3DDECLUSAGE_BINORMAL;
-	case VertexElement::EUsage::Texcoord0:
-	case VertexElement::EUsage::Texcoord1:
-	case VertexElement::EUsage::Texcoord2:
-	case VertexElement::EUsage::Texcoord3:
-		return D3DDECLUSAGE_TEXCOORD;
-	case VertexElement::EUsage::Diffuse:
-	case VertexElement::EUsage::Specular:
-		return D3DDECLUSAGE_COLOR;
-	case VertexElement::EUsage::BlendWeight:  return D3DDECLUSAGE_BLENDWEIGHT;
-	case VertexElement::EUsage::BlendIndices: return D3DDECLUSAGE_BLENDINDICES;
-	case VertexElement::EUsage::Sample:       return D3DDECLUSAGE_SAMPLE;
-	default:
-		return 0xFF;
-	}
 }
-
-D3DFORMAT VideoDriverD3D9::GetD3DFormat(ColorFormat Format, bool Alpha)
-{
-	switch((u32)Format) {
-	case ColorFormat::R8G8B8:
-		return D3DFMT_R8G8B8;
-	case ColorFormat::A8R8G8B8:
-		return Alpha ? D3DFMT_A8R8G8B8 : D3DFMT_X8B8G8R8;
-	case ColorFormat::A1R5G5B5:
-		return Alpha ? D3DFMT_A1R5G5B5 : D3DFMT_X1R5G5B5;
-	case ColorFormat::R5G6B5:
-		return D3DFMT_R5G6B5;
-
-	case ColorFormat::X8:
-		return D3DFMT_L8;
-	case ColorFormat::X16:
-		return D3DFMT_L16;
-
-		// Floating Point Formats
-	case ColorFormat::R16F:
-		return D3DFMT_R16F;
-	case ColorFormat::G16R16F:
-		return D3DFMT_G16R16F;
-	case ColorFormat::A16B16G16R16F:
-		return D3DFMT_A16B16G16R16F;
-	case ColorFormat::R32F:
-		return D3DFMT_R32F;
-	case ColorFormat::G32R32F:
-		return D3DFMT_G32R32F;
-	case ColorFormat::A32B32G32R32F:
-		return D3DFMT_A32B32G32R32F;
-
-	case ColorFormat::UNKNOWN:
-	default:
-		return D3DFMT_UNKNOWN;
-	};
-}
-
-u32 VideoDriverD3D9::GetD3DBlend(EBlendFactor factor)
-{
-	switch(factor) {
-	case EBF_ZERO:                    return D3DBLEND_ZERO;
-	case EBF_ONE:                    return D3DBLEND_ONE;
-		//case EBF_SRC_COLOR:                return D3DBLEND_SRCCOLOR; 
-		//case EBF_ONE_MINUS_SRC_COLOR:    return D3DBLEND_INVSRCCOLOR; 
-		//case EBF_DST_COLOR:                return D3DBLEND_DESTCOLOR; 
-		//case EBF_ONE_MINUS_DST_COLOR:    return D3DBLEND_INVDESTCOLOR; 
-	case EBF_SRC_ALPHA:                return D3DBLEND_SRCALPHA;
-	case EBF_ONE_MINUS_SRC_ALPHA:    return D3DBLEND_INVSRCALPHA;
-	case EBF_DST_ALPHA:                return D3DBLEND_DESTALPHA;
-	case EBF_ONE_MINUS_DST_ALPHA:    return D3DBLEND_INVDESTALPHA;
-	default:                        return 0;
-	}
-}
-
-u32 VideoDriverD3D9::GetD3DBlendFunc(EBlendOperator Op)
-{
-	switch(Op) {
-	case EBO_ADD: return D3DBLENDOP_ADD;
-	case EBO_MAX: return D3DBLENDOP_MAX;
-	case EBO_MIN: return D3DBLENDOP_MIN;
-	case EBO_REVSUBTRACT: return D3DBLENDOP_REVSUBTRACT;
-	case EBO_SUBTRACT: return D3DBLENDOP_SUBTRACT;
-	default: return 0;
-	}
-}
-
-ColorFormat VideoDriverD3D9::GetLuxFormat(D3DFORMAT Format)
-{
-	switch(Format) {
-	case D3DFMT_R8G8B8:
-		return ColorFormat::R8G8B8;
-	case D3DFMT_A8R8G8B8:
-		return ColorFormat::A8R8G8B8;
-	case D3DFMT_A1R5G5B5:
-		return ColorFormat::A1R5G5B5;
-	case D3DFMT_R5G6B5:
-		return ColorFormat::R5G6B5;
-	case D3DFMT_L8:
-		return ColorFormat::X8;
-	case D3DFMT_L16:
-		return ColorFormat::X16;
-	case D3DFMT_R16F:
-		return ColorFormat::R16F;
-	case D3DFMT_G16R16F:
-		return ColorFormat::G16R16F;
-	case D3DFMT_A16B16G16R16F:
-		return ColorFormat::A16B16G16R16F;
-	case D3DFMT_R32F:
-		return ColorFormat::R32F;
-	case D3DFMT_G32R32F:
-		return ColorFormat::G32R32F;
-	case D3DFMT_A32B32G32R32F:
-		return ColorFormat::A32B32G32R32F;
-	default:
-		return ColorFormat::UNKNOWN;
-	}
-}
-
-u32 VideoDriverD3D9::GetBitsPerPixel(D3DFORMAT Format)
-{
-	// Format suchen
-	switch(Format) {
-	case D3DFMT_R8G8B8: return 24;
-	case D3DFMT_A8R8G8B8: return 32;
-	case D3DFMT_X8R8G8B8: return 32;
-	case D3DFMT_R5G6B5: return 16;
-	case D3DFMT_X1R5G5B5: return 16;
-	case D3DFMT_A1R5G5B5: return 16;
-	case D3DFMT_A4R4G4B4: return 16;
-	case D3DFMT_A2B10G10R10: return 32;
-	case D3DFMT_A16B16G16R16: return 64;
-	case D3DFMT_G16R16: return 32;
-	case D3DFMT_A8P8: return 16;
-	case D3DFMT_P8: return 8;
-	case D3DFMT_L8: return 8;
-	case D3DFMT_A8L8: return 16;
-	case D3DFMT_A4L4: return 8;
-
-	case D3DFMT_V8U8: return 16;
-	case D3DFMT_Q8W8V8U8: return 32;
-	case D3DFMT_V16U16: return 32;
-	case D3DFMT_Q16W16V16U16: return 64;
-
-	case D3DFMT_L6V5U5: return 16;
-	case D3DFMT_X8L8V8U8: return 32;
-	case D3DFMT_A2W10V10U10: return 32;
-	case D3DFMT_L16: return 16;
-
-	case D3DFMT_D16_LOCKABLE: return 16;
-	case D3DFMT_D32: return 32;
-	case D3DFMT_D32F_LOCKABLE: return 32;
-	case D3DFMT_D24FS8: return 32;
-	case D3DFMT_D15S1: return 16;
-	case D3DFMT_D24S8: return 32;
-	case D3DFMT_D16: return 16;
-	case D3DFMT_D24X8: return 32;
-	case D3DFMT_D24X4S4: return 32;
-	default: return 0;
-	}
-}
-
-u32 VideoDriverD3D9::GetD3DRepeatMode(ETextureRepeat repeat)
-{
-	switch(repeat) {
-	case ETR_WRAP:
-		return D3DTADDRESS_WRAP;
-	case ETR_MIRROR:
-		return D3DTADDRESS_MIRROR;
-	case ETR_CLAMP:
-		return D3DTADDRESS_CLAMP;
-	case ETR_MIRRORONCE:
-		return D3DTADDRESS_MIRRORONCE;
-	default:
-		return D3DTADDRESS_FORCE_DWORD;
-	}
-}
-
-u32 VideoDriverD3D9::GetD3DDeclType(VertexElement::EType type)
-{
-	switch(type) {
-	case VertexElement::EType::Float1: return D3DDECLTYPE_FLOAT1;
-	case VertexElement::EType::Float2: return D3DDECLTYPE_FLOAT2;
-	case VertexElement::EType::Float3: return D3DDECLTYPE_FLOAT3;
-	case VertexElement::EType::Float4: return D3DDECLTYPE_FLOAT4;
-	case VertexElement::EType::Color: return D3DDECLTYPE_D3DCOLOR;
-	case VertexElement::EType::Byte4: return D3DDECLTYPE_UBYTE4;
-	case VertexElement::EType::Short2: return D3DDECLTYPE_SHORT2;
-	case VertexElement::EType::Short4: return D3DDECLTYPE_SHORT4;
-	default: return D3DDECLTYPE_UNUSED;
-	}
-}
-
-
-D3DCOLORVALUE VideoDriverD3D9::SColorToD3DColor(const Colorf& color)
-{
-	D3DCOLORVALUE out = {color.r,
-		color.g,
-		color.b,
-		color.a};
-
-	return out;
-}
-
-}
-
 }
 
 

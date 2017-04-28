@@ -116,7 +116,7 @@ public:
 	{
 		u32 type = GetBaseType().m_Type;
 		static const u32 TYPE_SIZES[] = {
-			sizeof(void*),
+			sizeof(void*) + 1, // The texture pointer and the repeat mode
 			4,
 			4,
 			4,
