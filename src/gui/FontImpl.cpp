@@ -59,7 +59,7 @@ bool FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 
 		memcpy(m_Image, data.image, m_ImageWidth*m_ImageHeight * sizeof(FontPixel));
 
-		m_Texture = m_Driver->CreateTexture(math::dimension2du(m_ImageWidth, m_ImageHeight), video::ColorFormat::A8R8G8B8, 0, true, false);
+		m_Texture = m_Driver->CreateTexture(math::dimension2du(m_ImageWidth, m_ImageHeight), video::ColorFormat::A8R8G8B8, 0, false);
 		if(!m_Texture) {
 			return false;
 		}

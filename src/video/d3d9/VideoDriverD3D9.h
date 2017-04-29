@@ -70,10 +70,10 @@ public:
 
 	//------------------------------------------------------------------
 	// Textur-Methoden
-	bool CheckTextureFormat(ColorFormat format, bool alpha, bool cube);
-	StrongRef<Texture> CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool Alpha, bool isDynamic);
-	StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha);
-	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool Alpha, bool isDynamic);
+	bool CheckTextureFormat(ColorFormat format, bool cube);
+	StrongRef<Texture> CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
+	StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format);
+	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool isDynamic);
 
 	// Cache for auxalarity textures
 	/*

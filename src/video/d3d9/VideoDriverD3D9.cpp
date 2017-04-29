@@ -1187,9 +1187,9 @@ bool VideoDriverD3D9::Draw2DLine(const math::vector2i& start, const math::vector
 	return true;
 }
 
-bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool alpha, bool cube)
+bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube)
 {
-	D3DFORMAT d3dFormat = GetD3DFormat(format, alpha);
+	D3DFORMAT d3dFormat = GetD3DFormat(format, format.HasAlpha());
 
 	D3DRESOURCETYPE rType;
 	DWORD usage;
@@ -1210,16 +1210,16 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool alpha, bool cu
 	return SUCCEEDED(hr);
 }
 
-StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool Alpha, bool isDynamic)
+StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::dimension2du& size, ColorFormat format, u32 mipCount, bool isDynamic)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
-	if(!out->Init(Size, Format, MipCount, false, isDynamic))
+	if(!out->Init(size, format, mipCount, false, isDynamic))
 		out = nullptr;
 
 	return out;
 }
 
-StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha)
+StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
 	if(!out->Init(size, format, 1, true, false))
@@ -1228,10 +1228,10 @@ StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::dimens
 	return out;
 }
 
-StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 Size, ColorFormat Format, bool Alpha, bool isDynamic)
+StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic)
 {
 	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
-	if(!out->Init(Size, Format, isDynamic))
+	if(!out->Init(size, format, isDynamic))
 		out = nullptr;
 
 	return out;

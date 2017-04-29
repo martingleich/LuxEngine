@@ -201,10 +201,10 @@ public:
 		EPrimitiveType primitiveType = EPT_TRIANGLES,
 		u32 primitiveCount = 0) = 0;
 
-	virtual bool CheckTextureFormat(ColorFormat format, bool alpha, bool cube) = 0;
-	virtual StrongRef<Texture> CreateTexture(const math::dimension2du& size, ColorFormat format, u32 mipCount, bool alpha, bool isDynamic) = 0;
-	virtual StrongRef<CubeTexture> CreateCubeTexture(u32 size, ColorFormat format, bool alpha, bool isDynamic) = 0;
-	virtual StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format, bool alpha) = 0;
+	virtual bool CheckTextureFormat(ColorFormat format, bool cube) = 0;
+	virtual StrongRef<Texture> CreateTexture(const math::dimension2du& size, ColorFormat format, u32 mipCount, bool isDynamic) = 0;
+	virtual StrongRef<CubeTexture> CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic) = 0;
+	virtual StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format) = 0;
 
 	virtual StrongRef<Shader> CreateShader(
 		EShaderLanguage language,

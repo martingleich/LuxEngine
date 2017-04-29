@@ -318,8 +318,7 @@ StrongRef<Texture> ImageSystemImpl::CreateTexture(ColorFormat format, math::dime
 	}
 
 	StrongRef<Texture> texture = m_Driver->CreateTexture(size, format,
-		GetTextureCreationFlag(ETCF_CREATE_MIP_MAPS) ? 0 : 1,
-		GetTextureCreationFlag(ETCF_ALPHA_CHANNEL), isDynamic);
+		GetTextureCreationFlag(ETCF_CREATE_MIP_MAPS) ? 0 : 1, isDynamic);
 	if(!texture)
 		return nullptr;
 
@@ -360,7 +359,7 @@ StrongRef<CubeTexture> ImageSystemImpl::CreateCubeTexture(ColorFormat format, u3
 		return nullptr;
 	}
 
-	return m_Driver->CreateCubeTexture(tmp.width, format, GetTextureCreationFlag(ETCF_ALPHA_CHANNEL), false);
+	return m_Driver->CreateCubeTexture(tmp.width, format, false);
 }
 
 StrongRef<CubeTexture> ImageSystemImpl::CreateCubeTexture(StrongRef<Image> images[6])
@@ -480,12 +479,12 @@ bool ImageSystemImpl::GetFittingTextureFormat(ColorFormat& format, math::dimensi
 		else if(GetTextureCreationFlag(ETCF_ALWAYS_16_BIT))
 			format = ColorFormat::A1R5G5B5;
 		else {
-			bool alpha = GetTextureCreationFlag(ETCF_ALPHA_CHANNEL);
-			if(m_Driver->CheckTextureFormat(format, alpha, cube))
+			//bool alpha = GetTextureCreationFlag(ETCF_ALPHA_CHANNEL);
+			if(m_Driver->CheckTextureFormat(format, cube))
 				format = format;
-			else if(m_Driver->CheckTextureFormat(ColorFormat::A8R8G8B8, alpha, cube))
+			else if(m_Driver->CheckTextureFormat(ColorFormat::A8R8G8B8, cube))
 				format = ColorFormat::A8R8G8B8;
-			else if(m_Driver->CheckTextureFormat(ColorFormat::A1R5G5B5, alpha, cube))
+			else if(m_Driver->CheckTextureFormat(ColorFormat::A1R5G5B5, cube))
 				format = ColorFormat::A1R5G5B5;
 			else
 				return false;
@@ -496,12 +495,12 @@ bool ImageSystemImpl::GetFittingTextureFormat(ColorFormat& format, math::dimensi
 		else if(GetTextureCreationFlag(ETCF_ALWAYS_16_BIT))
 			format = ColorFormat::R5G6B5;
 		else {
-			bool alpha = GetTextureCreationFlag(ETCF_ALPHA_CHANNEL);
-			if(m_Driver->CheckTextureFormat(format, alpha, cube))
+			//bool alpha = GetTextureCreationFlag(ETCF_ALPHA_CHANNEL);
+			if(m_Driver->CheckTextureFormat(format, cube))
 				format = format;
-			else if(m_Driver->CheckTextureFormat(ColorFormat::A8R8G8B8, alpha, cube))
+			else if(m_Driver->CheckTextureFormat(ColorFormat::A8R8G8B8, cube))
 				format = ColorFormat::A8R8G8B8;
-			else if(m_Driver->CheckTextureFormat(ColorFormat::R5G6B5, alpha, cube))
+			else if(m_Driver->CheckTextureFormat(ColorFormat::R5G6B5, cube))
 				format = ColorFormat::A1R5G5B5;
 			else
 				return false;
@@ -710,7 +709,7 @@ StrongRef<Texture> ImageSystemImpl::AddRendertargetTexture(const string& name, c
 	if(!m_Driver)
 		return nullptr;
 
-	StrongRef<Texture> texture = m_Driver->CreateRendertargetTexture(size, format, true);
+	StrongRef<Texture> texture = m_Driver->CreateRendertargetTexture(size, format);
 
 	if(texture) {
 		if(!m_ResourceSystem->AddResource(name, texture))
