@@ -179,6 +179,9 @@ public:
 		if(!node)
 			return;
 
+		if(node->m_Parent)
+			node->m_Parent->_RemoveChild(node);
+
 		if(m_Child) {
 			TreeNode* tmp = m_Child;
 			m_Child = node;
@@ -186,9 +189,6 @@ public:
 		} else {
 			m_Child = node;
 		}
-
-		if(node->m_Parent)
-			node->m_Parent->_RemoveChild(node);
 
 		node->m_Parent = this;
 	}

@@ -564,13 +564,13 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
 			break;
 		case core::Type::Matrix:
 			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, registerVSCount);
-			for(u32 i = registerVSCount; i < 4; ++i)
-				((float*)out)[i*4] = 0;
+			for(u32 j = registerVSCount; j < 4; ++j)
+				((float*)out)[j*4] = 0;
 			break;
 		case core::Type::Internal_MatrixCol:
 			m_D3DDevice->GetVertexShaderConstantF(regId, f, registerVSCount);
-			for(u32 i = registerVSCount; i < 4; ++i)
-				((float*)f)[i*4] = 0;
+			for(u32 j = registerVSCount; j < 4; ++j)
+				((float*)f)[j*4] = 0;
 			{
 				float* pf = (float*)out;
 				pf[1] = f[4];   pf[2] = f[8];   pf[3] = f[12];
@@ -616,13 +616,13 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
 			break;
 		case core::Type::Matrix:
 			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, registerPSCount);
-			for(u32 i = registerVSCount; i < 4; ++i)
-				((float*)out)[i*4] = 0;
+			for(u32 j = registerVSCount; j < 4; ++j)
+				((float*)out)[j*4] = 0;
 			break;
 		case core::Type::Internal_MatrixCol:
 			m_D3DDevice->GetPixelShaderConstantF(regId, f, registerPSCount);
-			for(u32 i = registerVSCount; i < 4; ++i)
-				((float*)f)[i*4] = 0;
+			for(u32 j = registerVSCount; j < 4; ++j)
+				((float*)f)[j*4] = 0;
 			{
 				float* pf = (float*)out;
 				pf[1] = f[4];   pf[2] = f[8];   pf[3] = f[12];
