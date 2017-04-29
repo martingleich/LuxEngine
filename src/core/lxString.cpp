@@ -261,7 +261,7 @@ string::ConstIterator string::Insert(ConstIterator pos, ConstIterator first, Con
 	size_t count = core::IteratorDistance(first, end);
 
 	size_t newSize = m_Size + size;
-	size_t pos_off = m_Data - pos.Pointer();
+	size_t pos_off = Data() - pos.Pointer();
 	Reserve(newSize);
 
 	// Move last part of string back, including NUL.
@@ -669,6 +669,7 @@ string& string::RStrip(ConstIterator end)
 	char* data = Data();
 
 	ConstIterator last = end - 1;
+	size_t lastSize = strlen(last.Pointer());
 	ConstIterator begin = Begin();
 	size_t removed = 0;
 	while(last != begin && core::IsSpace(*last)) {
@@ -679,7 +680,7 @@ string& string::RStrip(ConstIterator end)
 	if(last == begin)
 		m_Size = 0;
 	else
-		m_Size = last.Pointer() - data + 1;
+		m_Size = last.Pointer() - data + lastSize;
 
 	m_Length -= removed;
 	data[m_Size] = 0;
