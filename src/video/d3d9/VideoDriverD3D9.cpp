@@ -498,10 +498,13 @@ IDirect3DSurface9* VideoDriverD3D9::GetMatchingDepthBuffer(IDirect3DSurface9* ta
 
 bool VideoDriverD3D9::SetRendertarget(Texture* texture)
 {
-	if(!texture || !texture->IsRendertarget()) {
+	if(texture && !texture->IsRendertarget()) {
 		log::Error("Tried to set a non rendertarget texture as rendertarget.");
 		return false;
 	}
+
+	if(m_CurrentRendertarget.GetTexture() == texture)
+		return true;
 
 	Rendertarget_d3d9 newRendertarget;
 	bool result = true;

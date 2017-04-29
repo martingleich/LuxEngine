@@ -41,7 +41,7 @@ public:
 	//------------------------------------------------------------------
 	// Materialien
 	void Set3DMaterial(const Material& material);
-	const Material&   Get3DMaterial() const;
+	const Material& Get3DMaterial() const;
 
 	void Set2DMaterial(const Material& material);
 	const Material& Get2DMaterial() const;
