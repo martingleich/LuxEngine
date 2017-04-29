@@ -143,6 +143,7 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 
 	rowbytes = png_get_rowbytes(ctx.png, ctx.pngInfo);
 	channels = (int)png_get_channels(ctx.png, ctx.pngInfo);
+	LUX_UNUSED(channels);
 
 	u32 pitchLux = ctx.format.GetBytePerPixel() * ctx.size.width;
 	if(rowbytes != pitchLux) {

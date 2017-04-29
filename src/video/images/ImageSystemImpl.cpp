@@ -406,7 +406,7 @@ StrongRef<CubeTexture> ImageSystemImpl::CreateCubeTexture(StrongRef<Image> image
 			if(!errorLog)
 				log::Error("Cant lock cube texture, for loading.");
 			errorLog = true;
-			return false;
+			return nullptr;
 		}
 	}
 

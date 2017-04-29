@@ -60,7 +60,7 @@ private:
 	math::matrix4 m_InvalidLight;
 
 	core::array<SParam> m_Params;
-	void* m_ParamData;
+	u8* m_ParamData;
 	u32 m_CurrentOffset;
 	u32 m_MaxSize;
 

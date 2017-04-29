@@ -91,7 +91,6 @@ StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver
 		return nullptr;
 
 	const float shaft_circum = 2.0f*shaft_radius*math::Constants<float>::pi();
-	const float head_circum = 2.0f*head_radius*math::Constants<float>::pi();
 
 	struct SinCos
 	{
@@ -114,8 +113,6 @@ StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver
 	u32 baseIndex = 0;
 
 	for(s32 i = 0; i <= sectors; ++i) {
-		math::anglef a = i * (math::anglef::FULL / sectors);
-
 		video::Vertex3D v;
 
 		v.position.x = shaft_radius * sinCos[i].s;
@@ -224,7 +221,6 @@ StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver
 	const float head_s = sqrt(head_radius*head_radius + head_height*head_height);
 	const math::anglef unroll_sector_angle = (head_radius / head_s) * math::anglef::FULL;
 	for(s32 i = 0; i <= sectors; ++i) {
-		math::anglef a = i * math::anglef::FULL / sectors;
 		video::Vertex3D v;
 
 		const float s = sinCos[i].s;

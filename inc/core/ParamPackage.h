@@ -356,7 +356,7 @@ class LUX_API PackagePuffer
 {
 private:
 	const ParamPackage* m_Pack;
-	void* m_Data;
+	u8* m_Data;
 	u32 m_MaxSize;
 
 public:

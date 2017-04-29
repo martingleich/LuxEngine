@@ -392,7 +392,7 @@ private:
 					x = r.Left;
 				}
 
-				if(out = out0) {
+				if(out == out0) {
 					x0 = x;
 					y0 = y;
 					out0 = ComputeOutCode(x0, y0, r);

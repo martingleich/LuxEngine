@@ -68,7 +68,6 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 
 	SObjMtl* pCurrMtl = LUX_NEW(SObjMtl);
 	m_Materials.Push_Back(pCurrMtl);
-	u32 SmoothingGroup = 0;
 
 	const io::FileDescription fileDesc = file->GetDescription();
 
@@ -89,7 +88,7 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			char name[WORD_BUFFER_LENGTH];
 			pcBuffPtr = CopyNextWord(pcBuffPtr, pcBufferEnd, name, WORD_BUFFER_LENGTH);
 #ifdef LUX_DEBUG_OBJ_LOADER
-			log::Debug << "Loading material file.;
+			log::Debug("Loading material file.");
 #endif
 				ReadMaterial(name, fileDesc);
 		}
@@ -146,10 +145,12 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 #ifdef LUX_DEBUG_OBJ_LOADER
 			log::Debug << "Setting smoothing group " << Smooth << ".";
 #endif
-			if(strcmp(Smooth, "off"))
-				SmoothingGroup = 0;
-			else
-				SmoothingGroup = atol(Smooth);
+
+// TODO Use the smooth option?!
+//			if(strcmp(Smooth, "off"))
+//				SmoothingGroup = 0;
+//			else
+//				SmoothingGroup = atol(Smooth);
 		}
 		break;
 

@@ -26,7 +26,7 @@ public:
 	u32 GetCursor() const;
 
 private:
-	void* m_Buffer;
+	u8* m_Buffer;
 	u32 m_Size;
 	u32 m_Cursor;
 	bool m_IsEOF;

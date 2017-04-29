@@ -116,9 +116,6 @@ StrongRef<video::SubMesh> GeometryCreatorCube::CreateSubMesh(video::VideoDriver*
 		const float sb = size[b];
 		const float sc = size[c];
 
-		const float txa = tex[a];
-		const float txb = tex[b];
-
 		const u32 firstIndex = vertexBuffer->GetCursor();
 
 		for(u32 j = 0; j < tb; ++j) {

@@ -39,6 +39,8 @@ UNIT_SUITE(QuaternionTest)
 		auto q = math::quaternionf::FromEuler(math::vector3f(1.0f, 2.0f, 3.0f));
 
 		auto v = q.ToEuler();
+
+		LUX_UNUSED(v);
 	}
 
 	UNIT_TEST(Transform)

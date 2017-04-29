@@ -13,7 +13,7 @@ MemoryFile::MemoryFile(void* Buffer,
 	bool DeleteBufferOnDrop,
 	bool Expandable) :
 	File(name, desc),
-	m_Buffer(Buffer),
+	m_Buffer((u8*)Buffer),
 	m_Size(desc.GetSize()),
 	m_Cursor(0),
 	m_IsEOF(false),
@@ -38,7 +38,7 @@ u32 MemoryFile::ReadBinary(u32 numBytes, void* out)
 		m_IsEOF = true;
 	}
 
-	memcpy(out, (u8*)(m_Buffer)+m_Cursor, numBytes);
+	memcpy(out, m_Buffer+m_Cursor, numBytes);
 	m_Cursor += numBytes;
 
 	return numBytes;
@@ -54,7 +54,7 @@ u32 MemoryFile::WriteBinary(const void* data, u32 numBytes)
 			numBytes = m_Size - m_Cursor;
 			m_IsEOF = true;
 		} else {
-			void* pNewData = LUX_NEW_ARRAY(u8, ((m_Cursor + numBytes) * 3) / 2);
+			u8* pNewData = LUX_NEW_ARRAY(u8, ((m_Cursor + numBytes) * 3) / 2);
 
 			if(m_Buffer) {
 				memcpy(pNewData, m_Buffer, m_Size);
@@ -66,7 +66,7 @@ u32 MemoryFile::WriteBinary(const void* data, u32 numBytes)
 		}
 	}
 
-	memcpy((u8*)(m_Buffer)+m_Cursor, data, numBytes);
+	memcpy(m_Buffer+m_Cursor, data, numBytes);
 	m_Cursor += numBytes;
 
 	return numBytes;
