@@ -5,6 +5,8 @@
 
 #include "core/Logger.h"
 #include "core/lxAlgorithm.h"
+#include "core/lxUnicodeConversion.h"
+
 #include <algorithm>
 
 #ifdef _WIN32
@@ -276,15 +278,15 @@ bool INIFileImpl::ReadLine(string& out)
 		return false;
 
 	char c;
-	int readBytes;
+	u32 readBytes;
 
 	while(!m_IsEOF) {
-		u32 SpaceCount = 0;
-		u32 count;
+		size_t spaceCount = 0;
+		size_t count;
 		do {
 			out.Clear();
 			count = 0;
-			SpaceCount = 0;
+			spaceCount = 0;
 			while(!m_IsEOF) {
 				do {
 					readBytes = m_File->ReadBinary(1, &c);
@@ -295,16 +297,16 @@ bool INIFileImpl::ReadLine(string& out)
 					break;
 				} else {
 					if(core::IsSpace(c))
-						++SpaceCount;
+						++spaceCount;
 					if(c == '\n' || c == '\r') {
-						--SpaceCount;
+						--spaceCount;
 						break;
 					}
 					out.PushByte(c);
 					++count;
 				}
 			}
-		} while(SpaceCount == count && !m_IsEOF);
+		} while(spaceCount == count && !m_IsEOF);
 
 		// Strip whitespaces at lineend
 		out.RStrip();
@@ -346,7 +348,7 @@ INIFileImpl::SectionID INIFileImpl::GetSectionID(const char* section)
 		}
 	}
 
-	for(u32 i = 0; i < m_CurrentSection; ++i) {
+	for(size_t i = 0; i < m_CurrentSection; ++i) {
 		if(m_Sections[i].name == section) {
 			m_CurrentSection = i;
 			m_CurrentElement = 0;
@@ -412,23 +414,35 @@ void INIFileImpl::WriteComment(const string& comment, size_t identDepth, INIFile
 	if(comment.IsEmpty())
 		return;
 
-	char commentChar = GetCommentChar();
+	u8 utf8Buffer[6];
+	size_t utf8Size;
+	u32 commentChar = GetCommentChar();
 
 	for(size_t i = 0; i < identDepth; ++i)
 		m_File->WriteBinary("\t", 1);
-	m_File->WriteBinary(&commentChar, 1);
+
+	utf8Size = core::CodePointToUTF8(commentChar, utf8Buffer) - utf8Buffer;
+
+	m_File->WriteBinary(utf8Buffer, utf8Size);
 	m_File->WriteBinary(" ", 1);
 
 	for(auto it = comment.First(); it != comment.End(); ++it) {
-		char c = *it;
-		m_File->WriteBinary(&c, 1);
-		if(*it == '\n' && it != comment.Last()) {
-			for(size_t j = 0; j < identDepth; ++j)
-				m_File->WriteBinary("\t", 1);
-			m_File->WriteBinary(&commentChar, 1);
-			m_File->WriteBinary(" ", 1);
+		u32 c = *it;
+		if(c == '\n') {
+			if(it != comment.Last()) {
+				for(size_t j = 0; j < identDepth; ++j)
+					m_File->WriteBinary("\t", 1);
+			}
+			m_File->WriteBinary(NEWLINE, sizeof(NEWLINE) - 1);
+			if(it != comment.Last()) {
+				m_File->WriteBinary(" ", 1);
+			}
+		} else {
+			utf8Size = core::CodePointToUTF8(c, utf8Buffer) - utf8Buffer;
+			m_File->WriteBinary(utf8Buffer, utf8Size);
 		}
 	}
+
 	if(pos == ECommentPos::Before)
 		m_File->WriteBinary(NEWLINE, sizeof(NEWLINE) - 1);
 }
@@ -789,7 +803,7 @@ const string& INIFileImpl::GetElementName(const char* section, INIFileImpl::Elem
 	if(sectionID == InvalidID)
 		return string::EMPTY;
 
-	if((int)id >= (int)m_Sections[sectionID].elemCount)
+	if(id >= m_Sections[sectionID].elemCount)
 		return string::EMPTY;
 
 	m_CurrentSection = sectionID;
@@ -836,7 +850,7 @@ void INIFileImpl::SetCommentChars(const string& chars)
 	m_CommentChars = chars;
 }
 
-char INIFileImpl::GetCommentChar() const
+u32 INIFileImpl::GetCommentChar() const
 {
 	return *m_CommentChars.First();
 }

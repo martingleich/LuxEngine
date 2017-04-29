@@ -42,8 +42,8 @@ public:
 	bool Commit();
 
 	const string& GetCommentChars() const;
-	void SetCommentChars(const string& Chars);
-	char GetCommentChar() const;
+	void SetCommentChars(const string& chars);
+	u32 GetCommentChar() const;
 
 	size_t GetSectionCount();
 	bool SortSections(ESorting sorting, bool recursive = false);

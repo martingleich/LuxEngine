@@ -33,18 +33,18 @@ public:
 	{
 	}
 
-	// Close this ini file
+	// Close this ini file, all uncommited changes are lost.
 	virtual void Close() = 0;
 
 	// Reload the data from the file
 	virtual void Reload() = 0;
 
-	// Commit all changes to the file, automatic called on Close
+	// Commit all changes to the file, automatic called when the file is destroyed.
 	virtual bool Commit() = 0;
 
 	virtual const string& GetCommentChars() const = 0;
-	virtual void SetCommentChars(const string& Chars) = 0;
-	virtual char GetCommentChar() const = 0;
+	virtual void SetCommentChars(const string& chars) = 0;
+	virtual u32 GetCommentChar() const = 0;
 
 	virtual size_t GetSectionCount() = 0;
 	virtual bool SortSections(ESorting sorting, bool recursive = false) = 0;
