@@ -3,6 +3,8 @@
 //#include <iostream>
 #include "core/lxSTDIO.h"
 #include "core/lxUnicodeConversion.h"
+#include "core/Clock.h"
+#include "core/StringConverter.h"
 #ifdef LUX_WINDOWS
 #include "StrippedWindows.h"
 #endif
@@ -132,6 +134,7 @@ static const char* GetLogLevelName(ELogLevel ll)
 	}
 }
 
+#if 0
 class HTMLPrinter : public Printer
 {
 public:
@@ -213,33 +216,33 @@ public:
 		return m_ConversionBuffer.GetString();
 		*/
 	}
-/*
-	void ConvertChar(wchar_t c, core::WStringBuffer& e)
-	{
-		switch((char)c) {
-		case '\n':
-			e << "<br/>";
-			break;
-		case '\"':
-			e << "&quot;";
-			break;
-		case '&':
-			e << "&amp;";
-			break;
-		case '<':
-			e << "&lt;";
-			break;
-		case '>':
-			e << "&gt;";
-			break;
-		case '\'':
-			e << "&apos;";
-			break;
-		default:
-			e << c;
+	/*
+		void ConvertChar(wchar_t c, core::WStringBuffer& e)
+		{
+			switch((char)c) {
+			case '\n':
+				e << "<br/>";
+				break;
+			case '\"':
+				e << "&quot;";
+				break;
+			case '&':
+				e << "&amp;";
+				break;
+			case '<':
+				e << "&lt;";
+				break;
+			case '>':
+				e << "&gt;";
+				break;
+			case '\'':
+				e << "&apos;";
+				break;
+			default:
+				e << c;
+			}
 		}
-	}
-*/
+	*/
 	void Exit()
 	{
 		if(IsInit() == false)
@@ -257,6 +260,7 @@ private:
 	HTMLPrinterSettings m_Settings;
 	FILE* m_File;
 };
+#endif // Disable HTML Printer
 
 class FilePrinter : public Printer
 {
@@ -276,7 +280,7 @@ public:
 	{
 		Exit();
 
-		m_File = core::FOpenUTF8(m_Settings.m_Path.Data(), "wb");
+		m_File = core::FOpenUTF8(m_Settings.FilePath.Data(), "wb");
 		if(!m_File)
 			return false;
 
@@ -287,6 +291,10 @@ public:
 	{
 		if(ll != ELogLevel::None) {
 			fputs(m_File, GetLogLevelName(ll));
+			if(m_Settings.ShowTime) {
+				auto time = core::Clock::GetDateAndTime();
+				fprintf(m_File, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
+			}
 			fputs(m_File, ": ");
 		}
 
@@ -318,15 +326,30 @@ public:
 		return Printer::Init();
 	}
 
+	virtual void SetSettings(const Printer::Settings& settings)
+	{
+		const ConsolePrinterSettings* data = dynamic_cast<const ConsolePrinterSettings*>(&settings);
+		if(data)
+			m_Settings = *data;
+	}
+
 	void Print(const string& s, ELogLevel ll)
 	{
 		if(ll != ELogLevel::None) {
 			fputs(stdout, GetLogLevelName(ll));
+			if(m_Settings.ShowTime) {
+				auto time = core::Clock::GetDateAndTime();
+				fprintf(stdout, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
+			}
+
 			fputs(stdout, ": ");
 		}
 
 		puts(s.Data());
 	}
+
+private:
+	ConsolePrinterSettings m_Settings;
 };
 
 #ifdef LUX_WINDOWS
@@ -346,19 +369,25 @@ public:
 #endif
 
 		return Printer::Init();
-	}
+}
 
 	void Print(const string& s, ELogLevel ll)
 	{
+		static char BUFFER[100];
+
 		string out;
 		if(ll != ELogLevel::None) {
 			out += GetLogLevelName(ll);
+
+			auto time = core::Clock::GetDateAndTime();
+			sprintf(BUFFER, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
+			out += BUFFER;
+
 			out += ": ";
 		}
 
 		out += s;
 		out += "\n";
-
 		auto utf16 = core::UTF8ToUTF16(out.Data_c());
 
 		OutputDebugStringW((const wchar_t*)utf16.Data_c());
@@ -369,8 +398,7 @@ public:
 
 }
 
-static Impl::HTMLPrinter realHTMLPrinter;
-Printer* HTMLPrinter = &realHTMLPrinter;
+Printer* HTMLPrinter = nullptr;
 static Impl::FilePrinter realFilePrinter;
 Printer* FilePrinter = &realFilePrinter;
 static Impl::ConsolePrinter realConsolePrinter;

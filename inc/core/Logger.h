@@ -25,43 +25,6 @@ enum class ELogLevel
 	None, //!< A message without any type
 };
 
-//! Information about the current position in the programm for logging
-/**
-/ref LOG_CONTEXT
-*/
-struct LogContext
-{
-	const char* function; //!< The current function name
-	const char* file; //!< The current file name
-	int line; //!< The current line number
-
-	LogContext() :
-		function(nullptr),
-		file(nullptr),
-		line(-1)
-	{
-	}
-	LogContext(const char* _function, const char* _file, int _line) :
-		function(_function),
-		file(_file),
-		line(_line)
-	{
-	}
-
-	bool IsValid() const
-	{
-		return !(function == nullptr && file == nullptr && line < 0);
-	}
-};
-
-/*!
-\def LOG_CONTEXT
-\brief Log current function context.
-Push this macro into any log stream, at any position in the stream to remark the current code position
-in the log file.
-*/
-#define LOG_CONTEXT lux::log::LogContext(__FUNCTION__, __FILE__, __LINE__)
-
 //! A log printer
 /**
 A printer describes how log messages are shown to the user.
@@ -72,12 +35,15 @@ A printer describes how log messages are shown to the user.
 class Printer
 {
 public:
-	class Settings
+	struct Settings
 	{
-	public:
-		virtual ~Settings()
-		{
-		}
+		Settings() :
+			ShowTime(true)
+		{}
+
+		virtual ~Settings() {}
+
+		bool ShowTime;
 	};
 
 public:
@@ -252,26 +218,28 @@ public:
 	}
 };
 
-class HTMLPrinterSettings : public Printer::Settings
+struct HTMLPrinterSettings : public Printer::Settings
 {
-public:
 	HTMLPrinterSettings(const io::path& p) :
-		m_Path(p)
+		FilePath(p)
 	{
 	}
 
-	io::path m_Path;
+	io::path FilePath;
 };
 
-class FilePrinterSettings : public Printer::Settings
+struct FilePrinterSettings : public Printer::Settings
 {
-public:
 	FilePrinterSettings(const io::path& p) :
-		m_Path(p)
+		FilePath(p)
 	{
 	}
 
-	io::path m_Path;
+	io::path FilePath;
+};
+
+struct ConsolePrinterSettings : public Printer::Settings
+{
 };
 
 extern LUX_API Printer* HTMLPrinter; //!< Prints the whole log into a html file
