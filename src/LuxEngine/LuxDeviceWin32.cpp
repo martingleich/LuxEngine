@@ -1,7 +1,7 @@
 #ifdef LUX_WINDOWS
 #include "LuxDeviceWin32.h"
 
-#include "core/TimerWin32.h"
+#include "core/Clock.h"
 #include "core/Logger.h"
 #include "core/lxRandom.h"
 #include "core/StringConverter.h"
@@ -197,13 +197,12 @@ bool LuxDeviceWin32::BuildCoreDevice()
 	if(log::EngineLog.HasUnsetLogs())
 		log::EngineLog.SetNewPrinter(log::FilePrinter, true);
 
-	m_Timer = LUX_NEW(core::TimerWin32);
 	m_Filesystem = LUX_NEW(io::FileSystemWin32);
 	m_ReferableFactory = core::ReferableFactoryImpl::Instance();
 	m_Window = LUX_NEW(gui::WindowWin32);
 	m_ResourceSystem = LUX_NEW(core::ResourceSystemImpl)(m_Filesystem, m_ReferableFactory);
 
-	log::Log("Running on: ~a", m_Timer->GetDateAndTime());
+	log::Log("Starting time ~a", core::Clock::GetDateAndTime());
 
 	m_ResourceSystem->AddType(core::ResourceType::Mesh);
 	m_ResourceSystem->AddType(core::ResourceType::Image);
@@ -318,7 +317,7 @@ bool LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 
 	log::Info("Building Video Driver.");
 #ifdef LUX_COMPILE_WITH_D3D9
-	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9)(m_Timer, m_ReferableFactory);
+	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9)(m_ReferableFactory);
 	m_Driver = driver;
 	if(!m_Driver->Init(config, m_Window)) {
 		log::Error("Failed to create the video driver.");
@@ -523,7 +522,6 @@ LuxDeviceWin32::~LuxDeviceWin32()
 #endif
 	m_InputSystem = nullptr;
 
-	m_Timer = nullptr;
 	m_Window = nullptr;
 
 	// Fenster schlieﬂen
@@ -575,11 +573,10 @@ StrongRef<input::UserEventReceiver> LuxDeviceWin32::GetUserEventReceiver() const
 
 bool LuxDeviceWin32::Run(float& fNumSecsPassed)
 {
-	static u32 StartTime = m_Timer->GetTime();
+	static auto StartTime = core::Clock::GetTicks();
 	double Time;
 
-	m_Timer->Tick();
-	u32 endTime = m_Timer->GetTime();
+	auto endTime = core::Clock::GetTicks();
 	if(endTime == StartTime)
 		Time = 0.000001;
 	else
@@ -644,11 +641,6 @@ StrongRef<gui::GUIEnvironment> LuxDeviceWin32::GetGUIEnvironment() const
 StrongRef<video::MaterialLibrary> LuxDeviceWin32::GetMaterialLibrary() const
 {
 	return m_MaterialLibrary;
-}
-
-StrongRef<core::Timer> LuxDeviceWin32::GetTimer() const
-{
-	return m_Timer;
 }
 
 StrongRef<gui::Window> LuxDeviceWin32::GetWindow() const

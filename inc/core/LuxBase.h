@@ -42,12 +42,15 @@
 
 namespace lux
 {
-typedef std::uint8_t  u8;    //!< A type for unsigned 8 bit integers
+typedef std::uint8_t u8;    //!< A type for unsigned 8 bit integers
 typedef std::uint16_t u16;   //!< A type for unsigned 16 bit integers
 typedef std::uint32_t u32;   //!< A type for unsigned 32 bit integers
-typedef std::int8_t   s8;    //!< A type for signed 8 bit integers
-typedef std::int16_t  s16;   //!< A type for signed 16 bit integers
-typedef std::int32_t  s32;   //!< A type for signed 32 bit integers
+typedef std::uint64_t u64;   //!< A type for unsigned 64 bit integers
+
+typedef std::int8_t s8;    //!< A type for signed 8 bit integers
+typedef std::int16_t s16;   //!< A type for signed 16 bit integers
+typedef std::int32_t s32;   //!< A type for signed 32 bit integers
+typedef std::int64_t s64;   //!< A type for unsigned 64 bit integers
 }
 
 // Define-Funktionen

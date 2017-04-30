@@ -125,8 +125,8 @@ IDirect3DSurface9* VideoDriverD3D9::DepthBuffer_d3d9::GetSurface() const
 
 //////////////////////////////////////////////////////////////////////
 
-VideoDriverD3D9::VideoDriverD3D9(core::Timer* timer, core::ReferableFactory* refFactory) :
-	VideoDriverNull(timer, refFactory),
+VideoDriverD3D9::VideoDriverD3D9(core::ReferableFactory* refFactory) :
+	VideoDriverNull(refFactory),
 	m_HasStencilBuffer(false),
 	m_3DTransformsChanged(false),
 	m_2DTransformChanged(false),

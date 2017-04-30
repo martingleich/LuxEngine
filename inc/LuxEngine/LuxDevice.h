@@ -10,7 +10,6 @@ namespace core
 {
 class ReferableFactory;
 class ResourceSystem;
-class Timer;
 }
 
 namespace io
@@ -118,7 +117,6 @@ public:
 
 	//! Runs all engine internal actions.
 	/**
-	i.e. Timer, window message handling, etc.
 	\param [out] numSecsPassed The time in seconds since the last call to Run.
 	\return Returns true if the device is still running, returns false once when the device was closed.
 	*/
@@ -134,7 +132,6 @@ public:
 	virtual StrongRef<video::ImageSystem> GetImageSystem() const = 0;
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;
 	virtual StrongRef<core::ReferableFactory> GetReferableFactory() const = 0;
-	virtual StrongRef<core::Timer> GetTimer() const = 0;
 	virtual StrongRef<gui::Window> GetWindow() const = 0;
 	virtual StrongRef<core::ResourceSystem> GetResourceSystem() const = 0;
 	virtual StrongRef<scene::MeshSystem> GetMeshSystem() const = 0;

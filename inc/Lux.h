@@ -72,7 +72,7 @@ namespace input
 #include "core/lxList.h"
 #include "core/lxArray.h"
 #include "core/lxHashMap.h"
-#include "core/Timer.h"
+#include "core/Clock.h"
 #include "core/lxName.h"
 #include "core/lxString.h"
 #include "core/lxPool.h"

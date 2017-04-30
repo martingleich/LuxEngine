@@ -1,6 +1,7 @@
 #ifndef INCLUDED_RENDERSTATISTICS_H
 #define INCLUDED_RENDERSTATISTICS_H
-#include "core/Timer.h"
+#include "core/ReferenceCounted.h"
+#include "core/Clock.h"
 
 namespace lux
 {
@@ -10,8 +11,7 @@ namespace video
 class RenderStatistics : public ReferenceCounted
 {
 public:
-	RenderStatistics(core::Timer* timer) :
-		m_Timer(timer),
+	RenderStatistics() :
 		m_FPS(60),
 		m_PrimitiveAverage(0),
 		m_PrimitivesDrawn(0),
@@ -41,8 +41,8 @@ public:
 
 	void RegisterFrame()
 	{
-		const u32 ActualTime = m_Timer->GetTime();
-		const u32 Milliseconds = ActualTime - m_StartTime;
+		const auto ActualTime = core::Clock::GetTicks();
+		const auto Milliseconds = ActualTime - m_StartTime;
 
 		++m_FramesCounted;
 
@@ -68,12 +68,9 @@ private:
 	u32 m_PrimitivesDrawn;
 
 	u32 m_FramesCounted;
-	u32 m_StartTime;
+	u64 m_StartTime;
 
 	u32 m_PrimitivesCounted;
-
-	StrongRef<core::Timer> m_Timer;
-
 };
 
 }

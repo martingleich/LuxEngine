@@ -12,7 +12,7 @@ namespace core
 struct DateAndTime
 {
 	//! The days of week
-	enum class EWeekDay : u8
+	enum class EWeekDay
 	{
 		Sunday = 0,
 		Monday,

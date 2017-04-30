@@ -16,18 +16,13 @@
 namespace lux
 {
 
-namespace core
-{
-class Timer;
-}
-
 namespace video
 {
 
 class VideoDriverD3D9 : public VideoDriverNull
 {
 public:
-	VideoDriverD3D9(core::Timer* timer, core::ReferableFactory* refFactory);
+	VideoDriverD3D9(core::ReferableFactory* refFactory);
 	~VideoDriverD3D9();
 
 	bool Init(const DriverConfig& config, gui::Window* Window);

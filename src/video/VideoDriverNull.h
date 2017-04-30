@@ -2,7 +2,6 @@
 #define INCLUDED_VIDEO_DRIVER_NULL_H
 #include "video/VideoDriver.h"
 #include "core/ReferableFactory.h"
-#include "core/Timer.h"
 #include "video/RenderStatistics.h"
 
 namespace lux
@@ -13,7 +12,7 @@ namespace video
 class VideoDriverNull : public VideoDriver
 {
 public:
-	VideoDriverNull(core::Timer* timer, core::ReferableFactory* refFactory);
+	VideoDriverNull(core::ReferableFactory* refFactory);
 	~VideoDriverNull();
 
 	virtual bool Init(const DriverConfig& config, gui::Window* Window);
@@ -40,7 +39,6 @@ protected:
 
 	u32 m_SceneValueAmbient;
 
-	StrongRef<core::Timer> m_Timer;
 	StrongRef<core::ReferableFactory> m_RefFactory;
 	StrongRef<RenderStatistics> m_RenderStatistics;
 	StrongRef<scene::SceneValues> m_SceneValues;

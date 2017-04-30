@@ -32,7 +32,6 @@ class ImageSystem;
 
 namespace core
 {
-class Timer;
 class ReferableFactory;
 class ResourceSystem;
 }
@@ -82,7 +81,6 @@ public:
 	StrongRef<io::FileSystem> GetFileSystem() const;
 	StrongRef<video::ImageSystem> GetImageSystem() const;
 	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const;
-	StrongRef<core::Timer> GetTimer() const;
 	StrongRef<core::ReferableFactory> GetReferableFactory() const;
 	StrongRef<core::ResourceSystem> GetResourceSystem() const;
 	StrongRef<scene::MeshSystem> GetMeshSystem() const;
@@ -155,7 +153,6 @@ private:
 	StrongRef<video::ImageSystem> m_ImageSystem;
 	StrongRef<scene::SceneManager> m_SceneManager;
 	StrongRef<io::FileSystem> m_Filesystem;
-	StrongRef<core::Timer> m_Timer;
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;
 	StrongRef<core::ReferableFactory> m_ReferableFactory;
 	StrongRef<core::ResourceSystem> m_ResourceSystem;

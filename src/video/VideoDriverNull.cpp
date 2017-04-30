@@ -7,13 +7,12 @@ namespace lux
 namespace video
 {
 
-VideoDriverNull::VideoDriverNull(core::Timer* timer, core::ReferableFactory* refFactory) :
+VideoDriverNull::VideoDriverNull(core::ReferableFactory* refFactory) :
 	m_AmbientColor(video::Color::Black)
 {
 	m_RefFactory = refFactory;
-	m_Timer = timer;
 
-	m_RenderStatistics = LUX_NEW(RenderStatistics)(m_Timer);
+	m_RenderStatistics = LUX_NEW(RenderStatistics);
 
 	m_SceneValues = LUX_NEW(scene::SceneValuesImpl);
 	m_SceneValueAmbient = m_SceneValues->AddParam("ambient", core::Type::ColorF);
