@@ -87,7 +87,7 @@ StrongRef<video::SubMesh> GeometryCreatorPlane::CreateSubMesh(
 			if(function)
 				vertex.position.y = function(context, vertex.position.x, vertex.position.z);
 
-			vertex.texture = math::vector2f((float)(x) / tesX * texX, (float)(y) / tesY * texY);
+			vertex.texture = math::vector2f((float)(x) / (tesX-1) * texX, (float)(y) / (tesY-1) * texY);
 			vertexBuffer->SetVertex(&vertex, GetVertexIndex(x, y));
 
 			boundingBox.AddPoint(vertex.position);
