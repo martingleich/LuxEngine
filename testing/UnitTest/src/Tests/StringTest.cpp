@@ -269,4 +269,16 @@ UNIT_SUITE(string)
 		UNIT_ASSERT_EQUAL(str.Pop(100), 3);
 		UNIT_ASSERT_EQUAL(str, "");
 	}
+
+	UNIT_TEST(split)
+	{
+		string str = "ab,b,,c";
+		string out[5];
+		size_t count = str.Split(',', out, 5);
+		UNIT_ASSERT_EQUAL(count, 4);
+		UNIT_ASSERT_EQUAL(out[0], "ab");
+		UNIT_ASSERT_EQUAL(out[1], "b");
+		UNIT_ASSERT_EQUAL(out[2], "");
+		UNIT_ASSERT_EQUAL(out[3], "c");
+	}
 }

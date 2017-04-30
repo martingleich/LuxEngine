@@ -49,7 +49,8 @@ struct string_type
 	string_type(const char* str, size_t s) :
 		size(s),
 		data(str)
-	{}
+	{
+	}
 
 	//! Ensures that the size of string is available
 	/**
@@ -548,6 +549,37 @@ public:
 	*/
 	string& LStrip(ConstIterator first = ConstIterator::Invalid());
 
+	//! Split the string on a character.
+	/**
+	If the character isn't contained in the string, the original string is returned.
+	\param ch The character were to split the string.
+	\param outArray Where to write the substrings.
+	\param maxCount The amount of strings available in the output array.
+	\return The number of written output strings.
+	*/
+	size_t Split(u32 ch, string* outArray, size_t maxCount)
+	{
+		if(maxCount == 0)
+			return 0;
+
+		string* cur = outArray;
+		size_t count = 1;
+		cur->Clear();
+		for(auto it = First(); it != End(); ++it) {
+			if(*it == ch) {
+				if(count == maxCount)
+					return maxCount;
+				++cur;
+				++count;
+				cur->Clear();
+			} else {
+				cur->Append(*it);
+			}
+		}
+
+		return count;
+	}
+
 	//! Classify the content of the string
 	/**
 	See \ref{EStringType} for more information about string classification.
@@ -574,7 +606,7 @@ private:
 
 	//! Push a single character to string, it's data is read from ptr.
 	void PushCharacter(const char* ptr);
-	
+
 private:
 	//! Contains the raw data of the string.
 	/**
@@ -656,7 +688,7 @@ struct HashType<string>
 };
 }
 
-}    
+}
 
 
 #endif
