@@ -17,7 +17,6 @@ public:
 	~VideoDriverNull();
 
 	virtual bool Init(const DriverConfig& config, gui::Window* Window);
-	virtual void SetClearValues(Color color, float depth);
 
 	virtual void SetAmbient(Colorf ambient);
 	virtual Colorf GetAmbient() const;
@@ -35,9 +34,6 @@ public:
 	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
 
 protected:
-	Color m_ClearColor;
-	float m_ClearDepth;
-
 	core::array<LightData> m_LightList;
 
 	Colorf m_AmbientColor;

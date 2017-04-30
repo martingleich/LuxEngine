@@ -29,7 +29,7 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::rect<
 	if(it == m_Textures.End())
 		it = m_Textures.Push_Back(texture);
 
-	math::dimension2du dim = texture->GetDimension();
+	math::dimension2du dim = texture->GetSize();
 	Sprite sprite;
 	sprite.textureID = (u16)core::IteratorDistance(m_Textures.First(), it);
 	sprite.rect.Top = rect.Top / (float)dim.height;
@@ -128,7 +128,7 @@ bool SpriteBankImpl::DrawSprite(SpriteBank::Sprite index, const math::vector2i& 
 	if(GetSprite(index.id, time, looped, r, t) == false)
 		return false;
 
-	math::vector2f dia = math::vector2f(r->GetWidth()*t->GetDimension().width, r->GetHeight()*t->GetDimension().height);
+	math::vector2f dia = math::vector2f(r->GetWidth()*t->GetSize().width, r->GetHeight()*t->GetSize().height);
 	math::recti loc;
 	if(centered)
 		loc = math::recti(pos.x - (int)dia.x / 2, pos.y - (int)dia.y / 2, pos.x + (int)dia.x / 2, pos.y + (int)dia.y / 2);

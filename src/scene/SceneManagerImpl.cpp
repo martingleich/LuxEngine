@@ -95,6 +95,16 @@ bool SceneManagerImpl::STransparentNodeEntry::operator==(const STransparentNodeE
 	return (distance == other.distance);
 }
 
+bool SceneManagerImpl::CameraEntry::operator<(const CameraEntry& other) const
+{
+	return camera->GetRenderPriority() > other.camera->GetRenderPriority();
+}
+
+bool SceneManagerImpl::CameraEntry::operator==(const CameraEntry& other) const
+{
+	return camera->GetRenderPriority() == other.camera->GetRenderPriority();
+}
+
 SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	video::ImageSystem* imagSys,
 	io::FileSystem* fileSystem,
@@ -330,28 +340,24 @@ void SceneManagerImpl::Render()
 {
 }
 
+void SceneManagerImpl::RegisterCamera(CameraSceneNode* camera)
+{
+	m_CameraList.Push_Back(camera);
+}
+
+void SceneManagerImpl::UnRegisterCamera(CameraSceneNode* camera)
+{
+	auto it = core::Linear_Search(camera, m_CameraList.First(), m_CameraList.End());
+	if(it != m_CameraList.End())
+		m_CameraList.Erase(it);
+}
+
 bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRenderPass renderPass)
 {
 	bool wasTaken = false;
 
 	// Wann soll der Scene-node gezeichnet werden
 	switch(renderPass) {
-	case ESNRP_CAMERA:
-
-		wasTaken = true;
-
-		// Kameras dürfen nur einmal angenommen werden
-		for(u32 dwNode = 0; dwNode < m_CameraList.Size(); ++dwNode) {
-			if(m_CameraList[dwNode] == node) {
-				wasTaken = false;
-				break;
-			}
-		}
-
-		// Knoten hinzufügen
-		if(wasTaken)    m_CameraList.Push_Back((CameraSceneNode*&)(node));
-		break;
-
 	case ESNRP_SKY_BOX:
 		m_SkyBoxList.Push_Back(node);
 		wasTaken = true;
@@ -413,34 +419,76 @@ void SceneManagerImpl::AnimateAll(float secsPassed)
 
 
 // Zeichnet alles
-void SceneManagerImpl::DrawAll()
+bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 {
-	if(!m_Driver) return;
+	ClearDeletionQueue();
 
-	// Alle Knoten registrieren
-	GetRootSceneNode()->OnRegisterSceneNode();
+	m_RenderRoot = nullptr;
 
-	if(m_CameraList.Size() == 0)
-		return;
+	auto camList = m_CameraList;
+	if(camList.Size() == 0)
+		return false;
 
-	if(!m_ActiveCamera)
-		m_ActiveCamera = m_CameraList[0];
+	auto newEnd = core::RemoveIf(camList.First(), camList.End(),
+		[](const CameraEntry& e) -> bool {
+		return !e.camera->IsTrulyVisible();
+	});
+	camList.Resize(core::IteratorDistance(camList.First(), newEnd));
 
-	m_AbsoluteCamPos = m_ActiveCamera->GetAbsoluteTransform().translation;
+	camList.Sort();
 
-	//-------------------------------------------------------------------------
-	// Die Kameras zeichnen
-	m_CurrentRenderPass = ESNRP_CAMERA;
+	if(!beginScene) {
+		if(m_Driver->GetRenderTarget() != camList[0].camera->GetRenderTarget()) {
+			log::Error("Scenemanager.DrawAll: Already started scene uses diffrent rendertarget than first camera.");
+			return false;
+		}
+	}
 
-	EnableOverwrite();
+	for(auto it = camList.First(); it != camList.End(); ++it) {
+		m_ActiveCamera = it->camera;
+		m_AbsoluteCamPos = m_ActiveCamera->GetAbsoluteTransform().translation;
 
-	for(auto it = m_CameraList.First(); it != m_CameraList.End(); ++it)
-		(*it)->Render();
+		m_CurrentRenderPass = ESNRP_CAMERA;
 
-	// Kameraliste zurücksetzten
-	m_CameraList.Resize(0);
+		if(it != camList.First() || beginScene) {
+			m_Driver->SetRenderTarget(m_ActiveCamera->GetRenderTarget());
+			auto backgroundColor = m_ActiveCamera->GetBackgroundColor();
+			bool clearColor = true;
+			if(backgroundColor.GetAlpha() == 0)
+				clearColor = false;
+			m_Driver->BeginScene(clearColor, true, backgroundColor, 1.0f);
+		}
 
-	DisableOverwrite();
+		m_ActiveCamera->Render();
+
+		DrawScene(m_ActiveCamera->GetVirtualRoot());
+
+		if(it != camList.Last() || endScene)
+			m_Driver->EndScene();
+	}
+
+	m_SkyBoxList.Clear();
+	m_SolidNodeList.Clear();
+	m_TransparentNodeList.Clear();
+	m_LightList.Clear();
+
+	return true;
+}
+
+void SceneManagerImpl::DrawScene(SceneNode* root)
+{
+	if(!root)
+		root = m_RootSceneNode;
+
+	if(root != m_RenderRoot) {
+		m_SkyBoxList.Clear();
+		m_SolidNodeList.Clear();
+		m_TransparentNodeList.Clear();
+		m_LightList.Clear();
+
+		root->OnRegisterSceneNode();
+		m_RenderRoot = root;
+	}
 
 	//-------------------------------------------------------------------------
 	// Die Lichter aktivieren
@@ -461,8 +509,6 @@ void SceneManagerImpl::DrawAll()
 		m_LightList[i]->Render();
 	}
 
-	m_LightList.Resize(0);
-
 	DisableOverwrite();
 
 	//-------------------------------------------------------------------------
@@ -473,8 +519,6 @@ void SceneManagerImpl::DrawAll()
 
 	for(auto it = m_SkyBoxList.First(); it != m_SkyBoxList.End(); ++it)
 		(*it)->Render();
-
-	m_SkyBoxList.Resize(0);
 
 	DisableOverwrite();
 
@@ -489,8 +533,6 @@ void SceneManagerImpl::DrawAll()
 
 	for(auto it = m_SolidNodeList.First(); it != m_SolidNodeList.End(); ++it)
 		it->node->Render();
-
-	m_SolidNodeList.Resize(0);
 
 	DisableOverwrite();
 
@@ -507,15 +549,11 @@ void SceneManagerImpl::DrawAll()
 	for(auto it = m_TransparentNodeList.First(); it != m_TransparentNodeList.End(); ++it)
 		it->node->Render();
 
-	m_TransparentNodeList.Resize(0);
-
 	DisableOverwrite();
 
 	//-------------------------------------------------------------------------
 
 	m_CurrentRenderPass = ESNRP_NONE;
-
-	ClearDeletionQueue();
 }
 
 void SceneManagerImpl::AddToDeletionQueue(SceneNode* node)

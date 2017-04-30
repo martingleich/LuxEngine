@@ -507,7 +507,7 @@ inline DrawingCanvas BeginDrawTexture(Texture* texture, bool overwrite = true)
 {
 	video::Texture::SLockedRect locked;
 	if(texture && texture->Lock(!overwrite ? Texture::ETLM_READ_WRITE : Texture::ETLM_OVERWRITE, &locked))
-		return DrawingCanvas(locked.bits, texture->GetColorFormat(), texture->GetDimension(), locked.pitch);
+		return DrawingCanvas(locked.bits, texture->GetColorFormat(), texture->GetSize(), locked.pitch);
 	else
 		return DrawingCanvas();
 }

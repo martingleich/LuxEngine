@@ -97,7 +97,7 @@ void CubeTextureD3D9::Unlock()
 	m_LockedLevel = 0xFFFFFFFF;
 }
 
-const math::dimension2du& CubeTextureD3D9::GetDimension() const
+const math::dimension2du& CubeTextureD3D9::GetSize() const
 {
 	return m_Dimension;
 }

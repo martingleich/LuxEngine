@@ -54,7 +54,7 @@ public:
 	virtual ColorFormat GetColorFormat() const = 0;
 
 	//! Returns the resolution of a texture surface in pixel
-	virtual const math::dimension2du& GetDimension() const = 0;
+	virtual const math::dimension2du& GetSize() const = 0;
 
 	//! Unlock a locked texture
 	/**

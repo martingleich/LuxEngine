@@ -190,7 +190,7 @@ u32 TextureD3D9::GetLevelCount() const
 	return m_Texture->GetLevelCount();
 }
 
-const math::dimension2du& TextureD3D9::GetDimension() const
+const math::dimension2du& TextureD3D9::GetSize() const
 {
 	return m_Dimension;
 }

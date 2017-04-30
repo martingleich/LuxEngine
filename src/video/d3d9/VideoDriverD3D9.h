@@ -11,6 +11,7 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 
 #include "StrippedD3D9.h"
+#include "video/d3d9/RenderTargetD3D9.h"
 
 namespace lux
 {
@@ -31,12 +32,13 @@ public:
 
 	bool Init(const DriverConfig& config, gui::Window* Window);
 
-	bool BeginScene(bool color, bool zbuffer);
+	bool BeginScene(bool cleaColor, bool clearZ,
+		video::Color color, float z);
 	bool EndScene();
 	bool Present();
 
-	bool SetRendertarget(Texture* texture);
-	Texture* GetRendertarget();
+	bool SetRenderTarget(const RenderTarget& target);
+	const RenderTarget& GetRenderTarget();
 
 	//------------------------------------------------------------------
 	// Materialien
@@ -178,8 +180,9 @@ public:
 	}
 	const math::dimension2du& GetScreenSize() const
 	{
-		return m_CurrentRendertarget.GetSize();
+		return m_CurrentRenderTarget.GetSize();
 	}
+
 	bool GetPresentResult() const
 	{
 		return m_PresentResult;
@@ -226,22 +229,6 @@ private:
 		IDirect3DSurface9* m_Surface;
 	};
 
-	class Rendertarget_d3d9
-	{
-	public:
-		Rendertarget_d3d9();
-		Rendertarget_d3d9(Texture* texture);
-		Rendertarget_d3d9(IDirect3DSurface9* surface);
-		const math::dimension2du& GetSize() const;
-		StrongRef<Texture> GetTexture();
-		IDirect3DSurface9* GetSurface();
-
-	private:
-		StrongRef<Texture> m_Texture;
-		math::dimension2du m_Size;
-		IDirect3DSurface9* m_Surface;
-	};
-
 	struct FogInformation_d3d9
 	{
 		Color color;
@@ -263,10 +250,8 @@ private:
 	IDirect3DVertexDeclaration9* CreateVertexFormat(const VertexFormat& format);
 
 private:
-	Rendertarget_d3d9 m_CurrentRendertarget;
-
-	WeakRef<Texture> m_PreviousRendertarget;
-	IDirect3DSurface9* m_PreviousRendertargetSurface;
+	Rendertarget_d3d9 m_CurrentRenderTarget;
+	Rendertarget_d3d9 m_BackBufferTarget;
 
 	core::array<DepthBuffer_d3d9> m_DepthBuffers;
 

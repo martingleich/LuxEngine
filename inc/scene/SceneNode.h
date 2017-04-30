@@ -96,10 +96,15 @@ private:
 	StrongRef<Collider> m_Collider;
 
 public:
-	SceneNode()
-		: m_HasRelTransChanged(true), m_HasAbsTransChanged(true), m_IsVisible(true), m_ShouldRegister(true),
+	SceneNode() : 
+		m_Tags(0),
+		m_DebugFlags(EDD_NONE),
+		m_IsVisible(true),
+		m_ShouldRegister(true),
+		m_IsEventReceiver(false),
 		m_SceneManager(nullptr),
-		m_DebugFlags(EDD_NONE), m_IsEventReceiver(false), m_Tags(0)
+		m_HasRelTransChanged(true),
+		m_HasAbsTransChanged(true)
 	{
 		UpdateAbsTransform();
 	}
@@ -542,21 +547,17 @@ public:
 	LUX_API void SetEventReceiver(bool receiver);
 
 protected:
-	SceneNode(const SceneNode& other)
+	SceneNode(const SceneNode& other) :
+		m_Tags(other.m_Tags),
+		m_DebugFlags(other.m_DebugFlags),
+		m_IsVisible(other.m_IsVisible),
+		m_ShouldRegister(other.m_ShouldRegister),
+		m_IsEventReceiver(other.m_IsEventReceiver),
+		m_SceneManager(nullptr), // Will be set later on, when the node is added to a scenemanager.
+		m_RelativeTrans(other.m_RelativeTrans),
+		m_HasRelTransChanged(true),
+		m_HasAbsTransChanged(true)
 	{
-		m_Tags = other.m_Tags;
-		m_RelativeTrans = other.m_RelativeTrans;
-		m_AbsoluteTrans = other.m_AbsoluteTrans;
-		m_HasRelTransChanged = true;
-		m_HasAbsTransChanged = true;
-
-		m_Collider = other.m_Collider;
-
-		m_DebugFlags = other.m_DebugFlags;
-
-		m_IsVisible = other.m_IsVisible;
-		m_IsEventReceiver = other.m_IsEventReceiver;
-
 		// Kinder kopieren
 		ChildIterator entry = TreeNode::_GetChildrenFirst<SceneNode>();
 		for(; entry != TreeNode::_GetChildrenEnd<SceneNode>(); ++entry) {

@@ -1,6 +1,5 @@
-#ifndef INCLUDED_CCAMERASCENENODE_H
-#define INCLUDED_CCAMERASCENENODE_H
-
+#ifndef INCLUDED_CAMERASCENENODE_IMPL_H
+#define INCLUDED_CAMERASCENENODE_IMPL_H
 #include "scene/nodes/CameraSceneNode.h"
 
 namespace lux
@@ -12,50 +11,52 @@ class CameraSceneNodeImpl : public CameraSceneNode
 {
 public:
 	CameraSceneNodeImpl();
-	CameraSceneNodeImpl(const CameraSceneNodeImpl& other) = default;
 
-	// Setzt die Projektionsmatrix neu
-	virtual void SetProjection(const math::matrix4& projection);
-	// Fragt die Projektionsmatrix ab
-	virtual const math::matrix4& GetProjection() const;
+	void SetCustomProjection(const math::matrix4& proj);
+	void ClearCustomProjection();
 
-	// Fragt die Sichtmatrix ab
-	virtual const math::matrix4& GetView() const;
+	const math::matrix4& GetProjection() const;
+	const math::matrix4& GetView() const;
 
-	// Setzt einen Kameramodifizierer(damit kann die Sichtmatrix nach allen Berechnungen noch verändert werden
-	// für z.B. Spiegelungen)
-	virtual void SetViewModificator(const math::matrix4 modification);
-	// Fragt den Kameramodifikator ab(damit kann die Sichtmatrix nach allen Berechnungen noch verändert werden
-	// für z.B. Spiegelungen)
-	virtual const math::matrix4& GetViewModificator() const;
+	void SetViewModification(const math::matrix4& mod);
+	const math::matrix4& GetViewModification();
 
-	// Setzt das Bildseitenverhältnis(Breite/Höhe) neu
-	virtual void SetAspect(float aspect);
-	// Fragt das Bildseitenverhältnis(Breite/Höhe) ab
-	virtual float GetAspect() const;
+	void SetAspect(float aspect);
+	float GetAspect() const;
 
-	// Setzt den vertikalen Sichtwinkel in rad neu
-	virtual void SetFOV(float fieldOfVison);
-	// Fragt den vertikalen Sichtwinkel in rad ab
-	virtual float GetFOV() const;
+	void SetFOV(float fov);
+	float GetFOV() const;
 
-	// Setzt die nahe Clippingebene neu
-	virtual void SetNearPlane(float near);
-	// Fragt die nahe Clippingebene ab
-	virtual float GetNearPlane() const;
+	void SetXMax(float xmax);
+	float GetXMax() const;
 
-	// Setzt die ferne Clippingebene neu
-	virtual void SetFarPlane(float far);
-	// Fragt die ferne Clippingebene ab
-	virtual float GetFarPlane() const;
+	void SetNearPlane(float near);
+	float GetNearPlane() const;
 
-	// Setzt den Up-Vektor neu
-	virtual void SetUpVector(const math::vector3f& upVector);
-	// Fragt den Up-Vektor ab
-	virtual const math::vector3f& GetUpVector() const;
-	bool SetSceneManager(SceneManager* mngr);
-	virtual void OnRegisterSceneNode();
-	virtual void Render();
+	void SetFarPlane(float far);
+	float GetFarPlane() const;
+
+	void SetOrtho(bool ortho);
+	bool IsOrtho() const;
+
+	void SetAutoAspect(bool automatic);
+	bool GetAutoAspect();
+
+	void SetRenderTarget(const video::RenderTarget& target);
+	const video::RenderTarget& GetRenderTarget() const;
+
+	void SetRenderPriority(s32 p);
+	s32 GetRenderPriority() const;
+
+	void SetBackgroundColor(video::Color color);
+	video::Color GetBackgroundColor();
+
+	void SetVirtualRoot(SceneNode* node);
+	SceneNode* GetVirtualRoot() const;
+
+	void Render();
+
+	bool SetSceneManager(SceneManager* smgr);
 
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;
@@ -64,21 +65,33 @@ private:
 	void RecalculateProjectionMatrix();
 	void RecalculateViewMatrix();
 
-	math::vector3f m_vUpVector;
+private:
+	math::matrix4 m_Projection;
+	bool m_HasCustomProjection;
 
-	math::matrix4 m_mProjectionMatrix;
-	math::matrix4 m_mViewMatrix;
-	math::matrix4 m_mViewModificator;
+	math::matrix4 m_View;
+	math::matrix4 m_ViewModification;
 
-	float m_fFOV;
-	float m_fAspect;
-	float m_fNearPlane;
-	float m_fFarPlane;
+	float m_FOV;
+	float m_XMax;
+	float m_Aspect;
+
+	float m_NearPlane;
+	float m_FarPlane;
+
+	bool m_IsOrtho;
+
+	video::RenderTarget m_RenderTarget;
+	u32 m_RenderPriority;
+	video::Color m_BackgroundColor;
+
+	WeakRef<SceneNode> m_VirtualRoot;
+
+	bool m_AutoAspect;
 };
 
-}    
+} // namespace scene
 
-}    
-
+} // namespace lux
 
 #endif

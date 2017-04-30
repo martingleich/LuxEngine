@@ -122,56 +122,6 @@ IDirect3DSurface9* VideoDriverD3D9::DepthBuffer_d3d9::GetSurface() const
 	return m_Surface;
 }
 
-VideoDriverD3D9::Rendertarget_d3d9::Rendertarget_d3d9() :
-	m_Texture(nullptr),
-	m_Surface(nullptr)
-{
-}
-
-VideoDriverD3D9::Rendertarget_d3d9::Rendertarget_d3d9(Texture* texture) :
-	m_Texture(texture),
-	m_Surface(nullptr)
-{
-	if(m_Texture) {
-		lxAssert(m_Texture->IsRendertarget());
-		m_Size = m_Texture->GetDimension();
-		IDirect3DTexture9* d3dTexture = (IDirect3DTexture9*)texture->GetRealTexture();
-		if(FAILED(d3dTexture->GetSurfaceLevel(0, &m_Surface))) {
-			m_Texture = nullptr;
-			m_Surface = nullptr;
-			m_Size.Set(0, 0);
-		}
-	}
-}
-
-VideoDriverD3D9::Rendertarget_d3d9::Rendertarget_d3d9(IDirect3DSurface9* surface) :
-	m_Texture(nullptr),
-	m_Surface(surface)
-{
-	if(m_Surface) {
-		D3DSURFACE_DESC desc;
-		if(SUCCEEDED(m_Surface->GetDesc(&desc))) {
-			lxAssert(desc.Usage == D3DUSAGE_RENDERTARGET);
-			m_Size.width = desc.Width;
-			m_Size.height = desc.Height;
-		}
-	}
-}
-
-const math::dimension2du& VideoDriverD3D9::Rendertarget_d3d9::GetSize() const
-{
-	return m_Size;
-}
-
-StrongRef<Texture> VideoDriverD3D9::Rendertarget_d3d9::GetTexture()
-{
-	return m_Texture;
-}
-
-IDirect3DSurface9* VideoDriverD3D9::Rendertarget_d3d9::GetSurface()
-{
-	return m_Surface;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -422,8 +372,6 @@ VideoDriverD3D9::~VideoDriverD3D9()
 		m_VertexFormats.Clear();
 		m_DepthBuffers.Clear();
 
-		m_CurrentRendertarget = Rendertarget_d3d9();
-
 		m_D3DDevice->Release();
 	}
 
@@ -448,7 +396,8 @@ bool VideoDriverD3D9::InitRendertargetData()
 	IDirect3DSurface9* backbuffer = nullptr;
 	if(FAILED(m_D3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backbuffer)))
 		return false;
-	m_CurrentRendertarget = Rendertarget_d3d9(backbuffer);
+	m_BackBufferTarget = backbuffer;
+	m_CurrentRenderTarget = Rendertarget_d3d9(backbuffer);
 
 	IDirect3DSurface9* depthStencilBuffer = nullptr;
 	if(FAILED(m_D3DDevice->GetDepthStencilSurface(&depthStencilBuffer)))
@@ -496,27 +445,30 @@ IDirect3DSurface9* VideoDriverD3D9::GetMatchingDepthBuffer(IDirect3DSurface9* ta
 	return nullptr;
 }
 
-bool VideoDriverD3D9::SetRendertarget(Texture* texture)
+bool VideoDriverD3D9::SetRenderTarget(const RenderTarget& target)
 {
-	if(texture && !texture->IsRendertarget()) {
-		log::Error("Tried to set a non rendertarget texture as rendertarget.");
-		return false;
-	}
+	if(target.HasTexture()) {
+		if(!target.IsValid()) {
+			log::Error("Tried to set a non rendertarget texture as rendertarget.");
+			return false;
+		}
 
-	if(m_CurrentRendertarget.GetTexture() == texture)
-		return true;
+		// Same texture as current target -> Abort
+		if(target.GetTexture() == m_CurrentRenderTarget.GetTexture())
+			return true;
+	} else {
+		// Tries to set to back buffer backbuffer already loaded -> Abort
+		if(m_CurrentRenderTarget == m_BackBufferTarget)
+			return true;
+	}
 
 	Rendertarget_d3d9 newRendertarget;
-	bool result = true;
-	if(texture == nullptr) {
-		if(m_PreviousRendertarget)
-			newRendertarget = Rendertarget_d3d9(m_PreviousRendertarget);
-		else
-			newRendertarget = Rendertarget_d3d9(m_PreviousRendertargetSurface);
-	} else {
-		newRendertarget = Rendertarget_d3d9(texture);
-	}
+	if(!target)
+		newRendertarget = m_BackBufferTarget;
+	else
+		newRendertarget = target;
 
+	bool result = true;
 	if(FAILED(m_D3DDevice->SetRenderTarget(0, newRendertarget.GetSurface()))) {
 		result = false;
 		log::Error("Can't set new rendertarget texture.");
@@ -533,16 +485,14 @@ bool VideoDriverD3D9::SetRendertarget(Texture* texture)
 
 	if(result) {
 		if(FAILED(m_D3DDevice->SetDepthStencilSurface(depthStencil))) {
-			m_D3DDevice->SetRenderTarget(0, m_CurrentRendertarget.GetSurface());
+			m_D3DDevice->SetRenderTarget(0, m_CurrentRenderTarget.GetSurface());
 			result = false;
 			log::Error("Can't enable new depth-stencil buffer.");
 		}
 	}
 
 	if(result) {
-		m_PreviousRendertarget = m_CurrentRendertarget.GetTexture().GetWeak();
-		m_PreviousRendertargetSurface = m_CurrentRendertarget.GetSurface();
-		m_CurrentRendertarget = newRendertarget;
+		m_CurrentRenderTarget = newRendertarget;
 
 		m_3DTransformsChanged = true;
 		m_2DTransformChanged = true;
@@ -551,9 +501,9 @@ bool VideoDriverD3D9::SetRendertarget(Texture* texture)
 	return result;
 }
 
-Texture* VideoDriverD3D9::GetRendertarget()
+const RenderTarget& VideoDriverD3D9::GetRenderTarget()
 {
-	return m_CurrentRendertarget.GetTexture();
+	return m_CurrentRenderTarget;
 }
 
 bool VideoDriverD3D9::Present()
@@ -567,12 +517,18 @@ bool VideoDriverD3D9::Present()
 	return m_PresentResult;
 }
 
-bool VideoDriverD3D9::BeginScene(bool clearColor, bool clearZBuffer)
+bool VideoDriverD3D9::BeginScene(bool clearColor, bool clearZ,
+	video::Color color, float z)
 {
+	if(!m_CurrentRenderTarget.HasTexture() && m_CurrentRenderTarget != m_BackBufferTarget) {
+		log::Warning("The current rendertarget texture was destroyed, using normal backbuffer.");
+		SetRenderTarget(nullptr);
+	}
+
 	u32 flags = 0;
 	if(clearColor)
 		flags = D3DCLEAR_TARGET;
-	if(clearZBuffer)
+	if(clearZ)
 		flags |= D3DCLEAR_ZBUFFER;
 	if(m_HasStencilBuffer)
 		flags |= D3DCLEAR_STENCIL;
@@ -580,17 +536,17 @@ bool VideoDriverD3D9::BeginScene(bool clearColor, bool clearZBuffer)
 	HRESULT hr = S_OK;
 
 	if(flags) {
-		const D3DCOLOR d3dClear = (u32)m_ClearColor;
+		const D3DCOLOR d3dClear = (u32)color;
 		if(FAILED(hr = m_D3DDevice->Clear(
 			0, nullptr,
 			flags,
-			d3dClear, m_ClearDepth, 0))) {
-			log::Error("Couldn't clean the backbuffer before beginning a scene.");
+			d3dClear, z, 0))) {
+			log::Error("Driver: Couldn't clear the rendertarget before beginning a scene.");
 		}
 	}
 
 	if(FAILED(hr) || FAILED(hr = m_D3DDevice->BeginScene()))
-		log::Error("Couldn't begin a new scene.");
+		log::Error("Driver: Couldn't begin a new scene.");
 
 	return SUCCEEDED(hr);
 }
@@ -993,8 +949,13 @@ bool VideoDriverD3D9::Draw3DBox(const math::aabbox3df& box, Color color)
 
 bool VideoDriverD3D9::Draw2DImage(Texture* texture, const math::vector2i& position, const math::recti* clip, const video::Material* material)
 {
-	return Draw2DImage(texture, math::recti(position.x, position.y, position.x + texture->GetDimension().width, position.y + texture->GetDimension().height),
-		math::rectf(0.0f, 0.0f, 1.0f, 1.0f), Color::White, false, clip, material);
+	u32 w = texture->GetSize().width;
+	u32 h = texture->GetSize().height;
+	math::recti posR(position.x, position.y, position.x + w, position.y + h);
+	math::rectf texR(0.0f, 0.0f, 1.0f, 1.0f);
+	return Draw2DImage(texture,
+		posR,
+		texR, Color::White, false, clip, material);
 }
 
 bool VideoDriverD3D9::Draw2DImage(Texture* texture,
@@ -1277,6 +1238,14 @@ void VideoDriverD3D9::SetActiveTexture(u32 stage,
 
 	if(m_Textures[stage] != texture) {
 		if(texture) {
+			// The current rendertarget can't be used as texture -> set texture channel to black
+			// But tell all people asking that the correct texture was set.
+			if(texture == m_CurrentRenderTarget.GetTexture()) {
+				m_D3DDevice->SetTexture(stage, nullptr);
+				m_Textures[stage] = texture;
+				return;
+			}
+
 			if(SUCCEEDED(m_D3DDevice->SetTexture(stage, (IDirect3DBaseTexture9*)(texture->GetRealTexture()))))
 				m_Textures[stage] = texture;
 		} else {
@@ -1650,15 +1619,16 @@ void VideoDriverD3D9::SetRenderstates2DMode(bool useMaterial, bool Alpha, bool A
 					0.0f, 0.0f, 0.0f, 0.0f,
 					-1.0f, 1.0f, 0.0f, 1.0f);
 					*/
+		auto ssize = GetScreenSize();
 		m = math::matrix4(
 			1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, -1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			-(s32)m_CurrentRendertarget.GetSize().width / 2 - 0.5f, (s32)m_CurrentRendertarget.GetSize().height / 2 - 0.5f, 0.0f, 1.0f);
+			-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 - 0.5f, 0.0f, 1.0f);
 		m_D3DDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)(m.DataRowMajor()));
 		m = math::matrix4(
-			2.0f / m_CurrentRendertarget.GetSize().width, 0.0f, 0.0f, 0.0f,
-			0.0f, 2.0f / m_CurrentRendertarget.GetSize().height, 0.0f, 0.0f,
+			2.0f / ssize.width, 0.0f, 0.0f, 0.0f,
+			0.0f, 2.0f / ssize.height, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
 			0.0f, 0.0f, 0.0f, 1.0f);
 

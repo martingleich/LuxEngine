@@ -153,13 +153,16 @@ public:
 	virtual void SetActiveCamera(CameraSceneNode* camera) = 0;
 
 	// Zeichnet alles
-	virtual void DrawAll() = 0;
+	virtual bool DrawAll(bool beginScene=true, bool endScene=true) = 0;
 
 	// Animiert alles
 	virtual void AnimateAll(float secsPassed) = 0;
 
 	// Registriet einen Scenenode zum Zeichnen
 	virtual bool RegisterNodeForRendering(SceneNode* node, ESceneNodeRenderPass renderPass = ESNRP_AUTOMATIC) = 0;
+
+	virtual void RegisterCamera(CameraSceneNode* camera) = 0;
+	virtual void UnRegisterCamera(CameraSceneNode* camera) = 0;
 
 	// Fügt den Knoten zur DeletionQueue hinzu
 	virtual void AddToDeletionQueue(SceneNode* node) = 0;

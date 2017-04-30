@@ -90,14 +90,20 @@ public:
 	virtual core::ReferableFactory* GetReferableFactory() const;
 	virtual core::ResourceSystem* GetResourceSystem() const;
 	virtual SceneNode* GetRootSceneNode();
-	virtual SceneNode* GetSceneNodeByType(core::Name type, SceneNode* start = nullptr, u32 tags=0);
-	virtual bool GetSceneNodeArrayByType(core::Name type, core::array<SceneNode*>& array, SceneNode* start = nullptr, u32 tags=0);
+	virtual SceneNode* GetSceneNodeByType(core::Name type, SceneNode* start = nullptr, u32 tags = 0);
+	virtual bool GetSceneNodeArrayByType(core::Name type, core::array<SceneNode*>& array, SceneNode* start = nullptr, u32 tags = 0);
 	virtual StrongRef<CameraSceneNode> GetActiveCamera();
 	virtual void SetActiveCamera(CameraSceneNode* camera);
 	virtual void Render();
-	virtual void DrawAll();
+
+	virtual bool DrawAll(bool beginScene = true, bool endScene = true);
+
 	virtual void AnimateAll(float secsPassed);
 	virtual bool RegisterNodeForRendering(SceneNode* node, ESceneNodeRenderPass renderPass);
+
+	void RegisterCamera(CameraSceneNode* camera);
+	void UnRegisterCamera(CameraSceneNode* camera);
+
 	virtual void AddToDeletionQueue(SceneNode* node);
 	virtual void Clear();
 	virtual void SetAmbient(video::Colorf ambient);
@@ -117,6 +123,8 @@ public:
 	void DisableOverwrite();
 
 private:
+	void DrawScene(SceneNode* root);
+
 	// Leert die Deletionqueue
 	virtual void ClearDeletionQueue();
 
@@ -149,6 +157,22 @@ private:
 		bool operator==(const STransparentNodeEntry& other) const;
 	};
 
+	struct CameraEntry
+	{
+		CameraSceneNode* camera;
+
+		CameraEntry() :
+			camera(nullptr)
+		{}
+
+		CameraEntry(CameraSceneNode* node) :
+			camera(node)
+		{
+		}
+
+		bool operator<(const CameraEntry& other) const;
+		bool operator==(const CameraEntry& other) const;
+	};
 private:
 	StrongRef<video::VideoDriver> m_Driver;
 	StrongRef<io::FileSystem> m_Filesystem;
@@ -161,7 +185,7 @@ private:
 	//-------------------------------------------------------------
 
 	// Die verschieden Gruppen von Scene-Nodes
-	core::array<CameraSceneNode*> m_CameraList;
+	core::array<CameraEntry> m_CameraList;
 	core::array<LightSceneNode*> m_LightList;
 	core::array<SceneNode*> m_SkyBoxList;
 	core::array<SSolidNodeEntry> m_SolidNodeList;
@@ -186,11 +210,12 @@ private:
 
 	StrongRef<SceneNode> m_RootSceneNode;
 
+	StrongRef<SceneNode> m_RenderRoot;
 };
 
-}    
+}
 
-}    
+}
 
 
 #endif

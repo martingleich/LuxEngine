@@ -8,8 +8,6 @@ namespace video
 {
 
 VideoDriverNull::VideoDriverNull(core::Timer* timer, core::ReferableFactory* refFactory) :
-	m_ClearColor(video::Color::Black),
-	m_ClearDepth(1.0f),
 	m_AmbientColor(video::Color::Black)
 {
 	m_RefFactory = refFactory;
@@ -31,12 +29,6 @@ bool VideoDriverNull::Init(const DriverConfig& config, gui::Window* window)
 	m_Config = config;
 
 	return true;
-}
-
-void VideoDriverNull::SetClearValues(Color color, float depth)
-{
-	m_ClearColor = color;
-	m_ClearDepth = depth;
 }
 
 void VideoDriverNull::SetAmbient(Colorf ambient)

@@ -7,10 +7,11 @@
 
 #include "video/Color.h"
 #include "video/VertexFormats.h"
-#include "EPrimitiveType.h"
-#include "EShaderTypes.h"
+#include "video/EPrimitiveType.h"
+#include "video/EShaderTypes.h"
 
-#include "HardwareBufferConstants.h"
+#include "video/HardwareBufferConstants.h"
+#include "video/RenderTarget.h"
 
 namespace lux
 {
@@ -164,17 +165,16 @@ public:
 
 	virtual bool Init(const DriverConfig& config, gui::Window* window) = 0;
 	virtual bool Present() = 0;
-	virtual bool BeginScene(bool ClearColor, bool ClearZBuffer) = 0;
+	virtual bool BeginScene(bool clearColor, bool clearZBuffer,
+		video::Color color=video::Color::Black, float z=1.0f) = 0;
 	virtual bool EndScene() = 0;
-
-	virtual void SetClearValues(Color color, float depth) = 0;
 
 	virtual bool AddLight(const LightData& light) = 0;
 	virtual size_t GetLightCount() const = 0;
 	virtual void ClearLights() = 0;
 
-	virtual bool SetRendertarget(Texture* texture) = 0;
-	virtual Texture* GetRendertarget() = 0;
+	virtual bool SetRenderTarget(const RenderTarget& target) = 0;
+	virtual const RenderTarget& GetRenderTarget() = 0;
 
 	virtual void Set3DMaterial(const Material& material) = 0;
 	virtual const Material& Get3DMaterial() const = 0;

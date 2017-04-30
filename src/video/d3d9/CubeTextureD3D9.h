@@ -38,7 +38,7 @@ public:
 	ColorFormat GetColorFormat() const;
 	void* GetRealTexture();
 	u32 GetLevelCount() const;
-	const math::dimension2du& GetDimension() const;
+	const math::dimension2du& GetSize() const;
 
 	StrongRef<Referable> Clone() const;
 };

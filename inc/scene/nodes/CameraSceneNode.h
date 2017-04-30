@@ -1,7 +1,7 @@
-#ifndef INCLUDED_ICAMERASCENENODE_H
-#define INCLUDED_ICAMERASCENENODE_H
-
+#ifndef INCLUDED_CAMERASCENENODE_H
+#define INCLUDED_CAMERASCENENODE_H
 #include "scene/SceneNode.h"
+#include "video/RenderTarget.h"
 
 namespace lux
 {
@@ -12,52 +12,75 @@ namespace scene
 class CameraSceneNode : public SceneNode
 {
 public:
-	// Setzt die Projektionsmatrix neu
-	virtual void SetProjection(const math::matrix4& projection) = 0;
-	// Fragt die Projektionsmatrix ab
+	//! Get the current projection matrix.
+	/**
+	This may not reflect the currently set values.
+	*/
 	virtual const math::matrix4& GetProjection() const = 0;
 
-	// Fragt die Sichtmatrix ab
+	virtual void SetCustomProjection(const math::matrix4& proj) = 0;
+	virtual void ClearCustomProjection() = 0;
+
+	//! Get the current view matrix.
+	/**
+	This may not reflect the currently set values.
+	*/
 	virtual const math::matrix4& GetView() const = 0;
 
-	// Setzt einen Kameramodifizierer(damit kann die Sichtmatrix nach allen Berechnungen noch verändert werden
-	// für z.B. Spiegelungen)
-	virtual void SetViewModificator(const math::matrix4 modification) = 0;
-	// Fragt den Kameramodifikator ab(damit kann die Sichtmatrix nach allen Berechnungen noch verändert werden
-	// für z.B. Spiegelungen)
-	virtual const math::matrix4& GetViewModificator() const = 0;
+	virtual void SetViewModification(const math::matrix4& mod) = 0;
+	virtual const math::matrix4& GetViewModification() = 0;
 
-	// Setzt das Bildseitenverhältnis(Breite/Höhe) neu
 	virtual void SetAspect(float aspect) = 0;
-	// Fragt das Bildseitenverhältnis(Breite/Höhe) ab
 	virtual float GetAspect() const = 0;
 
-	// Setzt den vertikalen Sichtwinkel in rad neu
-	virtual void SetFOV(float fieldOfVison) = 0;
-	// Fragt den vertikalen Sichtwinkel in rad ab
+	virtual void SetXMax(float xmax) = 0;
+	virtual float GetXMax() const = 0;
+
+	virtual void SetFOV(float fov) = 0;
 	virtual float GetFOV() const = 0;
 
-	// Setzt die nahe Clippingebene neu
 	virtual void SetNearPlane(float near) = 0;
-	// Fragt die nahe Clippingebene ab
 	virtual float GetNearPlane() const = 0;
 
-	// Setzt die ferne Clippingebene neu
 	virtual void SetFarPlane(float far) = 0;
-	// Fragt die ferne Clippingebene ab
 	virtual float GetFarPlane() const = 0;
 
-	// Setzt den Up-Vektor neu
-	virtual void SetUpVector(const math::vector3f& upVector) = 0;
-	// Fragt den Up-Vektor ab
-	virtual const math::vector3f& GetUpVector() const = 0;
+	//! Set if the camera is a orthgonal camera.
+	/**
+	Default value is false.
+	*/
+	virtual void SetOrtho(bool ortho) = 0;
+	//! Is the camera orthogonal
+	virtual bool IsOrtho() const = 0;
 
-	virtual StrongRef<Referable> Clone() const = 0;
+	//! The aspect ratio is automatic calculated from the rendertarget.
+	/**
+	Default value is true.
+	*/
+	virtual void SetAutoAspect(bool automatic) = 0;
+	//! Is the aspect ratio automatic calculated.
+	virtual bool GetAutoAspect() = 0;
+
+	//! Set the virtual root of the camera.
+	/**
+	This camera displays all nodes below and inclusive the virtual root.
+	If set to null the whole scene is rendered.
+	Default value is null.
+	*/
+	virtual void SetVirtualRoot(SceneNode* node) = 0;
+	virtual SceneNode* GetVirtualRoot() const = 0;
+
+	virtual void SetRenderTarget(const video::RenderTarget& target) = 0;
+	virtual const video::RenderTarget& GetRenderTarget() const = 0;
+
+	virtual void SetRenderPriority(s32 p) = 0;
+	virtual s32 GetRenderPriority() const = 0;
+
+	virtual void SetBackgroundColor(video::Color color) = 0;
+	virtual video::Color GetBackgroundColor() = 0;
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

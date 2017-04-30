@@ -1,6 +1,7 @@
 #include "CameraFPSAnimatorImpl.h"
 #include "scene/nodes/CameraSceneNode.h"
 #include "core/ReferableRegister.h"
+#include "core/Logger.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraFPSAnimatorImpl)
 
@@ -11,7 +12,8 @@ namespace scene
 
 CameraFPSAnimatorImpl::CameraFPSAnimatorImpl() :
 	CameraFPSAnimatorImpl(1.0f, math::anglef::Radian(1.0f), math::anglef::Degree(89.0f), false)
-{}
+{
+}
 
 CameraFPSAnimatorImpl::CameraFPSAnimatorImpl(float fMoveSpeed, math::anglef fRotSpeed,
 	math::anglef fMaxVerticalAngle, bool bNoVerticalMovement)
@@ -32,7 +34,8 @@ CameraFPSAnimatorImpl::CameraFPSAnimatorImpl(float fMoveSpeed, math::anglef fRot
 }
 
 CameraFPSAnimatorImpl::~CameraFPSAnimatorImpl()
-{}
+{
+}
 
 void CameraFPSAnimatorImpl::Animate(float time)
 {
@@ -46,64 +49,62 @@ void CameraFPSAnimatorImpl::Animate(float time)
 	if(!camNode)
 		return;
 
-	// Werte zwischenspeichern
 	math::vector3f pos = camNode->GetAbsoluteTransform().translation;
-	math::vector3f lookDir = camNode->FromRelativeDir(math::vector3f::UNIT_Z);
+	math::vector3f flank = camNode->FromRelativeDir(math::vector3f::UNIT_X);
+	math::vector3f up = camNode->FromRelativeDir(math::vector3f::UNIT_Y);
+	math::vector3f look = camNode->FromRelativeDir(math::vector3f::UNIT_Z);
 
-	math::vector2f MouseMove = m_MouseMove;
-	math::vector3f vRelRot = lookDir.GetRotAngles();
-	vRelRot.y += MouseMove.x * m_RotSpeed.Radian() * 0.001f;
-	vRelRot.x += MouseMove.y * m_RotSpeed.Radian() * 0.001f;
-
-	// Drehung begrenzen
-	if(vRelRot.x > m_MaxVerticalAngle.Radian() * 2 &&
-		vRelRot.x < math::Constants<float>::two_pi() - m_MaxVerticalAngle.Radian()) {
-		vRelRot.x = math::Constants<float>::two_pi() - m_MaxVerticalAngle.Radian();
-	} else if(vRelRot.x > m_MaxVerticalAngle.Radian() &&
-		vRelRot.x < math::Constants<float>::two_pi() - m_MaxVerticalAngle.Radian()) {
-		vRelRot.x = m_MaxVerticalAngle.Radian();
+	math::vector3f move = look;
+	if(m_NoVerticalMovement) {
+		move.y = 0.0f;
+		move.Normalize();
 	}
 
-	lookDir = math::vector3f(vRelRot.x, vRelRot.y, 0.0f).RotToDir();
-	math::vector3f moveDir = lookDir;
-	if(m_NoVerticalMovement)
-		moveDir.y = 0.0f;
+	auto deltaRotY = m_MouseMove.x * m_RotSpeed * 0.001f;
+	auto deltaRotX = -m_MouseMove.y * m_RotSpeed * 0.001f;
 
-	// Bewegung verarbeiten
-	math::vector3f vFlank = moveDir.Cross(camNode->GetUpVector()).Normalize_s();
-	moveDir.Normalize();
+	auto curAngleX = math::ArcCos(up.y);
+	if(look.y < 0)
+		curAngleX = -curAngleX;
 
-	float tempSpeed = m_MoveSpeed;
-	if(IsKeyDown(EA_FAST)) {
-		tempSpeed *= 2.0f;
-	}
+	if(curAngleX + deltaRotX > m_MaxVerticalAngle)
+		deltaRotX = m_MaxVerticalAngle - curAngleX;
+	else if(curAngleX + deltaRotX < -m_MaxVerticalAngle)
+		deltaRotX = -m_MaxVerticalAngle - curAngleX;
 
-	if(IsKeyDown(EA_SLOW)) {
-		tempSpeed *= 0.5f;
-	}
+	auto rot =
+		math::quaternionf(flank, -deltaRotX) *
+		math::quaternionf(math::vector3f::UNIT_Y, deltaRotY);
+
+	node->SetOrientation(node->GetOrientation() * rot);
+
+	float realSpeed = m_MoveSpeed;
+	if(IsKeyDown(EA_FAST))
+		realSpeed *= 2.0f;
+
+	if(IsKeyDown(EA_SLOW))
+		realSpeed *= 0.5f;
 
 	if(IsKeyDown(EA_FORWARD))
-		pos += moveDir * tempSpeed * time;
+		pos += move * realSpeed * time;
 
 	if(IsKeyDown(EA_BACKWARD))
-		pos -= moveDir * tempSpeed * time;
+		pos -= move * realSpeed * time;
 
 	if(IsKeyDown(EA_LEFT))
-		pos += vFlank * tempSpeed * time;
+		pos -= flank * realSpeed * time;
 
 	if(IsKeyDown(EA_RIGHT))
-		pos -= vFlank * tempSpeed * time;
+		pos += flank * realSpeed * time;
 
 	if(m_NoVerticalMovement == false) {
 		if(IsKeyDown(EA_UP))
-			pos.y += tempSpeed * time;
+			pos.y += realSpeed * time;
 
 		if(IsKeyDown(EA_DOWN))
-			pos.y -= tempSpeed * time;
+			pos.y -= realSpeed * time;
 	}
 
-	// Werte aktualisieren
-	camNode->SetDirection(lookDir);
 	camNode->SetPosition(pos);
 
 	m_MouseMove.Set(0.0f, 0.0f);
@@ -196,7 +197,7 @@ core::Name CameraFPSAnimatorImpl::GetReferableSubType() const
 	return SceneNodeComponentType::CameraFPS;
 }
 
-}    
+}
 
-}    
+}
 

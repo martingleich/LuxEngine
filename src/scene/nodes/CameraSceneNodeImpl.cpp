@@ -11,175 +11,226 @@ namespace lux
 namespace scene
 {
 
-//****************************************************************
-// Konstruktor
 CameraSceneNodeImpl::CameraSceneNodeImpl() :
-	m_vUpVector(math::vector3f::UNIT_Y),
-	m_fNearPlane(1.0f),
-	m_fFarPlane(500.0f),
-	m_fFOV(math::DegToRad(60.0f)),
-	m_mViewModificator(math::matrix4::IDENTITY),
-	m_fAspect(1.0f)
+	m_HasCustomProjection(false),
+	m_FOV(math::DegToRad(60.0f)),
+	m_XMax(1.0f),
+	m_Aspect(1.0f),
+	m_NearPlane(0.1f),
+	m_FarPlane(500.0f),
+	m_IsOrtho(false),
+	m_RenderPriority(0),
+	m_BackgroundColor(video::Color::Black),
+	m_AutoAspect(true)
 {
-	SetPosition(math::vector3f::ZERO);
-	SetDirection(math::vector3f::UNIT_Z);
+}
 
+void CameraSceneNodeImpl::SetCustomProjection(const math::matrix4& proj)
+{
+	m_Projection = proj;
+	m_HasCustomProjection = true;
+}
+
+void CameraSceneNodeImpl::ClearCustomProjection()
+{
+	m_HasCustomProjection = false;
 	RecalculateProjectionMatrix();
-	RecalculateViewMatrix();
 }
 
-bool CameraSceneNodeImpl::SetSceneManager(SceneManager* mngr)
-{
-	SetAspect(mngr->GetDriver()->GetScreenSize().GetAspect());
-	return CameraSceneNode::SetSceneManager(mngr);
-}
-
-// Setzt die Projektionsmatrix neu
-void CameraSceneNodeImpl::SetProjection(const math::matrix4& projection)
-{
-	m_mProjectionMatrix = projection;
-}
-
-// Fragt die Projektionsmatrix ab
 const math::matrix4& CameraSceneNodeImpl::GetProjection() const
 {
-	return m_mProjectionMatrix;
+	return m_Projection;
 }
 
-// Fragt die Sichtmatrix ab
 const math::matrix4& CameraSceneNodeImpl::GetView() const
 {
-	return m_mViewMatrix;
+	return m_View;
 }
 
-// Setzt einen Kameramodifizierer(damit kann die Sichtmatrix nach allen Berechnungen noch verändert werden
-// für z.B. Spiegelungen)
-void CameraSceneNodeImpl::SetViewModificator(const math::matrix4 modification)
+void CameraSceneNodeImpl::SetViewModification(const math::matrix4& mod)
 {
-	m_mViewModificator = modification;
+	m_ViewModification = mod;
 }
 
-// Fragt den Kameramodifikator ab(damit kann die Sichtmatrix nach allen Berechnungen noch verändert werden
-// für z.B. Spiegelungen)
-const math::matrix4& CameraSceneNodeImpl::GetViewModificator() const
+const math::matrix4& CameraSceneNodeImpl::GetViewModification()
 {
-	return m_mViewModificator;
+	return m_ViewModification;
 }
 
-// Setzt das Bildseitenverhältnis(Breite/Höhe) neu
 void CameraSceneNodeImpl::SetAspect(float aspect)
 {
-	m_fAspect = aspect;
+	m_Aspect = aspect;
 	RecalculateProjectionMatrix();
 }
 
-// Fragt das Bildseitenverhältnis(Breite/Höhe) ab
 float CameraSceneNodeImpl::GetAspect() const
 {
-	return m_fAspect;
+	return m_Aspect;
 }
 
-// Setzt den vertikalen Sichtwinkel in rad neu
-void CameraSceneNodeImpl::SetFOV(float fieldOfVison)
+void CameraSceneNodeImpl::SetFOV(float fov)
 {
-	m_fFOV = fieldOfVison;
+	m_FOV = fov;
 	RecalculateProjectionMatrix();
 }
 
-// Fragt den vertikalen Sichtwinkel in rad ab
 float CameraSceneNodeImpl::GetFOV() const
 {
-	return m_fFOV;
+	return m_FOV;
 }
 
-// Setzt die nahe Clippingebene neu
+void CameraSceneNodeImpl::SetXMax(float xmax)
+{
+	m_XMax = xmax;
+	RecalculateProjectionMatrix();
+}
+
+float CameraSceneNodeImpl::GetXMax() const
+{
+	return m_XMax;
+}
+
 void CameraSceneNodeImpl::SetNearPlane(float near)
 {
-	m_fNearPlane = near;
+	m_NearPlane = near;
 	RecalculateProjectionMatrix();
 }
 
-// Fragt die nahe Clippingebene ab
 float CameraSceneNodeImpl::GetNearPlane() const
 {
-	return m_fNearPlane;
+	return m_NearPlane;
 }
 
-// Setzt die ferne Clippingebene neu
 void CameraSceneNodeImpl::SetFarPlane(float far)
 {
-	m_fFarPlane = far;
+	m_FarPlane = far;
 	RecalculateProjectionMatrix();
 }
 
-// Fragt die ferne Clippingebene ab
 float CameraSceneNodeImpl::GetFarPlane() const
 {
-	return m_fFarPlane;
+	return m_FarPlane;
 }
 
-// Setzt den Up-Vektor neu
-void CameraSceneNodeImpl::SetUpVector(const math::vector3f& upVector)
+void CameraSceneNodeImpl::SetOrtho(bool ortho)
 {
-	m_vUpVector = upVector;
+	m_IsOrtho = ortho;
+	RecalculateProjectionMatrix();
 }
 
-// Fragt den Up-Vektor ab
-const math::vector3f& CameraSceneNodeImpl::GetUpVector() const
+void CameraSceneNodeImpl::SetAutoAspect(bool automatic)
 {
-	return m_vUpVector;
+	m_AutoAspect = automatic;
 }
 
-// Registiert den Scenenode zum Zeichnen
-void CameraSceneNodeImpl::OnRegisterSceneNode()
+bool CameraSceneNodeImpl::GetAutoAspect()
 {
-	// Nur die aktive Kamera zeichnen
-	if(GetSceneManager()->GetActiveCamera() == this)
-		GetSceneManager()->RegisterNodeForRendering(this, ESNRP_CAMERA);
-
-	// An Kinder weitergeben
-	SceneNode::OnRegisterSceneNode();
+	return m_AutoAspect;
 }
 
-// Zeichnet die Kamera
+bool CameraSceneNodeImpl::IsOrtho() const
+{
+	return m_IsOrtho;
+}
+
+void CameraSceneNodeImpl::SetVirtualRoot(SceneNode* node)
+{
+	m_VirtualRoot = node;
+}
+
+SceneNode* CameraSceneNodeImpl::GetVirtualRoot() const
+{
+	return m_VirtualRoot;
+}
+
+void CameraSceneNodeImpl::SetRenderTarget(const video::RenderTarget& target)
+{
+	m_RenderTarget = target;
+	RecalculateProjectionMatrix();
+}
+
+const video::RenderTarget& CameraSceneNodeImpl::GetRenderTarget() const
+{
+	return m_RenderTarget;
+}
+
+void CameraSceneNodeImpl::SetRenderPriority(s32 p)
+{
+	m_RenderPriority = p;
+}
+
+s32 CameraSceneNodeImpl::GetRenderPriority() const
+{
+	return m_RenderPriority;
+}
+
+void CameraSceneNodeImpl::SetBackgroundColor(video::Color color)
+{
+	m_BackgroundColor = color;
+}
+
+video::Color CameraSceneNodeImpl::GetBackgroundColor()
+{
+	return m_BackgroundColor;
+}
+
 void CameraSceneNodeImpl::Render()
 {
-	// Die Sichtmatrix neu berechnen
 	RecalculateViewMatrix();
+	RecalculateProjectionMatrix();
 
 	video::VideoDriver* driver = GetSceneManager()->GetDriver();
-	driver->SetTransform(video::ETS_PROJECTION, m_mProjectionMatrix);
-	driver->SetTransform(video::ETS_VIEW, m_mViewMatrix);
+	driver->SetTransform(video::ETS_PROJECTION, m_Projection);
+	driver->SetTransform(video::ETS_VIEW, m_View);
 }
 
-// Berechnet die Projektionsmatrix neu
 void CameraSceneNodeImpl::RecalculateProjectionMatrix()
 {
-	m_mProjectionMatrix.BuildProjection_Persp(m_fFOV, m_fAspect, m_fNearPlane, m_fFarPlane);
-}
-
-// Berechnet die Kameramatrix neu
-void CameraSceneNodeImpl::RecalculateViewMatrix()
-{
-	math::vector3f Position = GetAbsolutePosition();
-	math::vector3f Direction = this->FromRelativeDir(math::vector3f::UNIT_Z);
-
-	// Wenn der Nach-oben-Vektor und der Blickpunkt das Gleiche sind gibt es ein Problem
-	math::vector3f upVector = m_vUpVector;
-	upVector.Normalize();
-
-	float fDot = Direction.Dot(upVector);
-
-	if(math::IsEqual(fabsf(fDot), 1.0f)) {
-		// Die Richtung ist egal
-		upVector.x += 0.5f;
+	if(m_AutoAspect) {
+		if(m_RenderTarget)
+			m_Aspect = m_RenderTarget.GetSize().GetAspect();
+		else
+			m_Aspect = GetSceneManager()->GetDriver()->GetRenderTarget().GetSize().GetAspect();
 	}
 
-	// Kameramatrix bilden
-	m_mViewMatrix.BuildCameraLookAt(Position, Position + Direction, m_vUpVector);
+	if(m_HasCustomProjection)
+		return;
 
-	// Affektor hinzufügen
-	m_mViewMatrix *= m_mViewModificator;
+	if(m_IsOrtho) {
+		m_Projection.BuildProjection_Ortho(
+			m_XMax,
+			m_Aspect,
+			m_NearPlane,
+			m_FarPlane);
+	} else {
+		m_Projection.BuildProjection_Persp(
+			m_FOV,
+			m_Aspect,
+			m_NearPlane,
+			m_FarPlane);
+	}
+}
+
+void CameraSceneNodeImpl::RecalculateViewMatrix()
+{
+	math::vector3f position = GetAbsolutePosition();
+	math::vector3f direction = this->FromRelativeDir(math::vector3f::UNIT_Z);
+	math::vector3f up = this->FromRelativeDir(math::vector3f::UNIT_Y);
+
+	m_View.BuildCameraLookAt(position, position + direction, up);
+
+	m_View *= m_ViewModification;
+}
+
+bool CameraSceneNodeImpl::SetSceneManager(SceneManager* smgr)
+{
+	auto oldSmgr = GetSceneManager();
+	if(oldSmgr)
+		oldSmgr->UnRegisterCamera(this);
+	if(smgr)
+		smgr->RegisterCamera(this);
+
+	return SceneNode::SetSceneManager(smgr);
 }
 
 core::Name CameraSceneNodeImpl::GetReferableSubType() const
@@ -189,12 +240,7 @@ core::Name CameraSceneNodeImpl::GetReferableSubType() const
 
 StrongRef<Referable> CameraSceneNodeImpl::Clone() const
 {
-	StrongRef<CameraSceneNodeImpl> out = LUX_NEW(CameraSceneNodeImpl)(*this);
-
-	out->RecalculateProjectionMatrix();
-	out->RecalculateViewMatrix();
-
-	return out;
+	return LUX_NEW(CameraSceneNodeImpl)(*this);
 }
 
 }
