@@ -557,7 +557,7 @@ public:
 	\param maxCount The amount of strings available in the output array.
 	\return The number of written output strings.
 	*/
-	size_t Split(u32 ch, string* outArray, size_t maxCount)
+	size_t Split(u32 ch, string* outArray, size_t maxCount) const
 	{
 		if(maxCount == 0)
 			return 0;
