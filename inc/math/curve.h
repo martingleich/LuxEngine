@@ -78,12 +78,12 @@ public:
 			if(!m_Samples.IsEmpty() && m_Samples.Last()->x == x)
 				m_Samples.Last()->value = value;
 			else
-				m_Samples.Push_Back(Sample(x, value));
+				m_Samples.PushBack(Sample(x, value));
 		} else {
 			typename core::array<Sample>::Iterator n, i;
 			Sample dummy;
 			dummy.x = x;
-			n = core::Binary_Search(dummy, m_Samples.First(), m_Samples.End(), &i);
+			n = core::BinarySearch(dummy, m_Samples.First(), m_Samples.End(), &i);
 			if(n == m_Samples.End())
 				m_Samples.Insert(Sample(x, value), i);
 			else
@@ -336,7 +336,7 @@ private:
 		typename core::array<Sample>::ConstIterator n, i;
 		Sample dummy;
 		dummy.x = x;
-		n = core::Binary_Search(dummy, m_Samples.First(), m_Samples.End(), &i);
+		n = core::BinarySearch(dummy, m_Samples.First(), m_Samples.End(), &i);
 		if(n == m_Samples.End())
 			return core::IteratorDistance(m_Samples.First(), i);
 		else

@@ -35,7 +35,7 @@ void RawInputReceiver::RegisterDevices(HIDUsagePage usagePage, s32 usageID, bool
 	device.usUsagePage = (USHORT)usagePage;
 	device.dwFlags = RIDEV_INPUTSINK | RIDEV_DEVNOTIFY;
 	if(RegisterRawInputDevices(&device, 1, sizeof(device)))
-		m_Subscribed.Push_Back(device);
+		m_Subscribed.PushBack(device);
 }
 
 void RawInputReceiver::UnregisterDevice(HIDUsagePage usagePage, s32 usageID)

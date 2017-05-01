@@ -73,7 +73,7 @@ void BufferManagerNull::RemoveBuffer(HardwareBuffer* buffer)
 bool BufferManagerNull::UpdateBuffer(HardwareBuffer* buffer, u32 group)
 {
 	if(group != 0) {
-		m_Updates.Push_Back(UpdateEntry(group, buffer));
+		m_Updates.PushBack(UpdateEntry(group, buffer));
 		buffer->SetHandle(m_Updates.Data() + m_Updates.Size() - 1);
 		return true;
 	} else {

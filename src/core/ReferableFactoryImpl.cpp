@@ -40,7 +40,7 @@ core::array<ReferableFactoryImpl::ReferableType>::Iterator ReferableFactoryImpl:
 	dummy.type = type;
 	dummy.subType = subType;
 
-	return core::Binary_Search(dummy, m_Referables.First(), m_Referables.End());
+	return core::BinarySearch(dummy, m_Referables.First(), m_Referables.End());
 }
 
 ReferableFactoryImpl::ReferableFactoryImpl() :
@@ -61,7 +61,7 @@ bool ReferableFactoryImpl::RegisterType(Referable* prototype)
 	}
 
 	core::array<ReferableType>::Iterator i, n;
-	i = core::Binary_Search(entry, m_Referables.First(), m_Referables.End(), &n);
+	i = core::BinarySearch(entry, m_Referables.First(), m_Referables.End(), &n);
 
 	if(i == m_Referables.End()) {
 		m_Referables.Insert(entry, n);

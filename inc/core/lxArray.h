@@ -360,7 +360,7 @@ public:
 	\param entry The entry to add
 	\return An iterator to the newly created entry
 	*/
-	Iterator Push_Back(const T& entry)
+	Iterator PushBack(const T& entry)
 	{
 		Insert(entry, End());
 		return Last();
@@ -371,7 +371,7 @@ public:
 	\param entry The entry to add
 	\return An iterator to the newly created entry
 	*/
-	Iterator Push_Back(T&& entry)
+	Iterator PushBack(T&& entry)
 	{
 		Insert((T&&)entry, End());
 		return Last();
@@ -382,7 +382,7 @@ public:
 	Very slow operation, the whole array have to be moved
 	\param entry The entry to insert
 	*/
-	void Push_Front(const T& entry)
+	void PushFront(const T& entry)
 	{
 		Insert(entry, First());
 	}
@@ -392,23 +392,23 @@ public:
 	Very slow operation, the whole array have to be moved
 	\param entry The entry to insert
 	*/
-	void Push_Front(T&& entry)
+	void PushFront(T&& entry)
 	{
 		Insert(entry, First());
 	}
 
-	void Push_Back(const core::array<T>& entries)
+	void PushBack(const core::array<T>& entries)
 	{
-		Push_Back(entries.Data_c(), entries.Size());
+		PushBack(entries.Data_c(), entries.Size());
 	}
 
 	//! Add multiple entries to the end of the array
 	/**
-	More efficent than multiple call to Push_Back
+	More efficent than multiple call to PushBack
 	\param entries A pointer to then entries to add
 	\param numEntries The number of entries to add
 	*/
-	void Push_Back(const T* entries, size_t numEntries)
+	void PushBack(const T* entries, size_t numEntries)
 	{
 		if(m_Used + numEntries > m_Alloc)
 			Reserve(m_Alloc + numEntries);
@@ -423,11 +423,11 @@ public:
 
 	//! Add multiple entries to the end of the array(move version)
 	/**
-	More efficent than multiple call to Push_Back
+	More efficent than multiple call to PushBack
 	\param entries A pointer to then entries to add
 	\param numEntries The number of entries to add
 	*/
-	void Push_Backm(const T* entries, size_t numEntries)
+	void PushBackm(const T* entries, size_t numEntries)
 	{
 		// Wenn kein Platz mehr ist welchen machen
 		if(m_Used + numEntries > m_Alloc) {
@@ -449,13 +449,13 @@ public:
 	}
 
 	//! Remove the last element in the array
-	void Pop_Back()
+	void PopBack()
 	{
 		Erase(Last(), true);
 	}
 
 	//! Remove the last element in the array
-	void Pop_Front()
+	void PopFront()
 	{
 		Erase(First(), true);
 	}
@@ -467,7 +467,16 @@ public:
 	void Sort()
 	{
 		if(!m_Sorted && m_Used > 1)
-			Heapsort(m_Entries, m_Used, core::CompareType<T>());
+			core::Sort(First(), End(), core::CompareType<T>());
+
+		m_Sorted = true;
+	}
+
+	template <typename CompareT>
+	void Sort(const CompareT& compare)
+	{
+		if(!m_Sorted && m_Used > 1)
+			core::Sort(First(), End(), compare);
 
 		m_Sorted = true;
 	}

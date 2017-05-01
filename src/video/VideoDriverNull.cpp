@@ -46,7 +46,7 @@ bool VideoDriverNull::AddLight(const LightData& light)
 	if(m_LightList.Size() == GetDeviceCapability(EDriverCaps::MaxLights))
 		return false;
 
-	m_LightList.Push_Back(light);
+	m_LightList.PushBack(light);
 
 	if(!m_SceneValues->SetLight(m_LightList.Size()-1, light))
 		return false;

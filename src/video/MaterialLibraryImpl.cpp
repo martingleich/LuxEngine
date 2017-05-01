@@ -26,14 +26,14 @@ size_t MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer, cons
 		return INVALID_ID;
 
 	if(name.IsEmpty()) {
-		m_AnonRenderers.Push_Back(renderer);
+		m_AnonRenderers.PushBack(renderer);
 		return ANON_BASE_ID + (m_AnonRenderers.Size() - 1);
 	} else {
 		size_t i = m_MaterialRenderers.Size();
 		if(i >= ANON_BASE_ID)
 			return INVALID_ID;
 
-		m_MaterialRenderers.Push_Back(Entry(renderer, name));
+		m_MaterialRenderers.PushBack(Entry(renderer, name));
 		return m_MaterialRenderers.Size() - 1;
 	}
 }
@@ -161,7 +161,7 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(size_t inde
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(const string& name) const
 {
-	auto it = core::Linear_Search(
+	auto it = core::LinearSearch(
 		name,
 		m_MaterialRenderers.First(), m_MaterialRenderers.End(),
 		[](const Entry& other, const string& name) {

@@ -52,9 +52,9 @@ UNIT_SUITE(array)
 		int refCount3 = 0;
 
 		core::array<Type> arr;
-		arr.Push_Back(Type(refCount1, 111));
-		arr.Push_Back(Type(refCount2, 222));
-		arr.Push_Back(Type(refCount3, 333));
+		arr.PushBack(Type(refCount1, 111));
+		arr.PushBack(Type(refCount2, 222));
+		arr.PushBack(Type(refCount3, 333));
 
 		UNIT_ASSERT(arr.Size() == 3);
 		UNIT_ASSERT(arr[0].value == 111);
@@ -73,9 +73,9 @@ UNIT_SUITE(array)
 		int refCount3 = 0;
 
 		core::array<Type> arr;
-		arr.Push_Front(Type(refCount1, 111));
-		arr.Push_Front(Type(refCount2, 222));
-		arr.Push_Front(Type(refCount3, 333));
+		arr.PushFront(Type(refCount1, 111));
+		arr.PushFront(Type(refCount2, 222));
+		arr.PushFront(Type(refCount3, 333));
 
 		UNIT_ASSERT(arr.Size() == 3);
 		UNIT_ASSERT(arr[2].value == 111);
@@ -94,8 +94,8 @@ UNIT_SUITE(array)
 		int refCount3 = 0;
 
 		core::array<Type> arr;
-		arr.Push_Back(Type(refCount1, 111));
-		arr.Push_Back(Type(refCount2, 222));
+		arr.PushBack(Type(refCount1, 111));
+		arr.PushBack(Type(refCount2, 222));
 		arr.Insert(Type(refCount3, 333), arr.First()+1);
 
 		UNIT_ASSERT(arr.Size() == 3);
@@ -115,9 +115,9 @@ UNIT_SUITE(array)
 		int refCount3 = 0;
 
 		core::array<Type> arr;
-		arr.Push_Back(Type(refCount1, 111));
-		arr.Push_Back(Type(refCount2, 222));
-		arr.Push_Back(Type(refCount3, 333));
+		arr.PushBack(Type(refCount1, 111));
+		arr.PushBack(Type(refCount2, 222));
+		arr.PushBack(Type(refCount3, 333));
 
 		arr.Erase(core::AdvanceIterator(arr.First(), 1), true);
 		UNIT_ASSERT(arr.Size() == 2);

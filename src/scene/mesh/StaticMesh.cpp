@@ -61,7 +61,7 @@ void StaticMesh::RecalculateBoundingBox()
 void StaticMesh::AddSubMesh(video::SubMesh* subMesh)
 {
 	if(subMesh)
-		m_MeshBuffers.Push_Back(subMesh);
+		m_MeshBuffers.PushBack(subMesh);
 }
 
 void StaticMesh::RemoveSubMesh(size_t index)
@@ -71,7 +71,7 @@ void StaticMesh::RemoveSubMesh(size_t index)
 
 void StaticMesh::RemoveSubMesh(video::SubMesh* subMesh)
 {
-	auto it = core::Linear_Search(subMesh, m_MeshBuffers.First(), m_MeshBuffers.End());
+	auto it = core::LinearSearch(subMesh, m_MeshBuffers.First(), m_MeshBuffers.End());
 	if(it != m_MeshBuffers.End())
 		m_MeshBuffers.Erase(it);
 }

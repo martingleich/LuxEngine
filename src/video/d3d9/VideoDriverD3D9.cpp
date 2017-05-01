@@ -403,7 +403,7 @@ bool VideoDriverD3D9::InitRendertargetData()
 	if(FAILED(m_D3DDevice->GetDepthStencilSurface(&depthStencilBuffer)))
 		return false;
 	DepthBuffer_d3d9 depthBuffer(depthStencilBuffer);
-	m_DepthBuffers.Push_Back(depthBuffer);
+	m_DepthBuffers.PushBack(depthBuffer);
 
 	return true;
 }
@@ -438,7 +438,7 @@ IDirect3DSurface9* VideoDriverD3D9::GetMatchingDepthBuffer(IDirect3DSurface9* ta
 		TRUE,
 		&depthStencil, nullptr))) {
 		DepthBuffer_d3d9 buffer(depthStencil);
-		m_DepthBuffers.Push_Back(buffer);
+		m_DepthBuffers.PushBack(buffer);
 		return depthStencil;
 	}
 
@@ -1412,12 +1412,12 @@ void VideoDriverD3D9::SetTextureLayer(const MaterialLayer& layer, u32 textureLay
 
 void VideoDriverD3D9::PushPipelineOverwrite(const PipelineOverwrite& over)
 {
-	m_PipelineOverwrites.Push_Back(over);
+	m_PipelineOverwrites.PushBack(over);
 }
 
 void VideoDriverD3D9::PopPipelineOverwrite()
 {
-	m_PipelineOverwrites.Pop_Back();
+	m_PipelineOverwrites.PopBack();
 }
 
 void VideoDriverD3D9::EnablePipeline(const PipelineSettings& settings, bool resetAll)

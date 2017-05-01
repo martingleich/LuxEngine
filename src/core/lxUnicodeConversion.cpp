@@ -31,10 +31,10 @@ array<u8> UTF16ToUTF8(const void* _data)
 		u8* cur = buffer;
 		u8* end = CodePointToUTF8(c, cur);
 		while(cur < end)
-			out.Push_Back(*cur++);
+			out.PushBack(*cur++);
 	}
 
-	out.Push_Back(0);
+	out.PushBack(0);
 
 	return out;
 }
@@ -63,10 +63,10 @@ array<u16> UTF8ToUTF16(const void* _data)
 		u16* cur = buffer;
 		u16* end = CodePointToUTF16(c, cur);
 		while(cur < end)
-			out.Push_Back(*cur++);
+			out.PushBack(*cur++);
 	}
 
-	out.Push_Back(0);
+	out.PushBack(0);
 
 	return out;
 }

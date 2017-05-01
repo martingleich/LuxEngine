@@ -105,7 +105,7 @@ StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver
 		SinCos sc;
 		sc.c = math::Cos(a);
 		sc.s = math::Sin(a);
-		sinCos.Push_Back(sc);
+		sinCos.PushBack(sc);
 	}
 
 	////////////////////////////////////////////////////////////////////

@@ -48,7 +48,7 @@ MeshCollider::MeshCollider(scene::Mesh* mesh)
 				*(const math::vector3f*)(data + stride*i1 + offset),
 				*(const math::vector3f*)(data + stride*i2 + offset));
 
-			m_Triangles.Push_Back(tri);
+			m_Triangles.PushBack(tri);
 		}
 	}
 }
@@ -160,7 +160,7 @@ bool MeshCollider::SelectFirstTriangle(const math::line3df& line, math::vector3f
 		if(it->IntersectWithLineBary(line, &pos)) {
 			if(testOnly)
 				return true;
-			m_Temp.Push_Back(FindEntry(
+			m_Temp.PushBack(FindEntry(
 				i,
 				line.start.GetDistanceToSq(pos),
 				pos));

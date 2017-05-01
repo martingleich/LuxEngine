@@ -171,7 +171,7 @@ void MeshSceneNodeImpl::CopyMaterials()
 			if(i < OldCount)
 				m_Materials[i] = *material;
 			else
-				m_Materials.Push_Back(*material);
+				m_Materials.PushBack(*material);
 		}
 	} else {
 		m_Materials.Clear();

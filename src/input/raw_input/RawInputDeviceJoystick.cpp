@@ -357,7 +357,7 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 
 				axis.name = core::UTF16ToString(toName);
 
-				m_Axes.Push_Back(axis);
+				m_Axes.PushBack(axis);
 			}
 		}
 
@@ -386,7 +386,7 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 				button.name = core::UTF16ToString(toName);
 				button.isAbsolute = (it->IsAbsolute == TRUE);
 
-				m_Buttons.Push_Back(button);
+				m_Buttons.PushBack(button);
 			}
 		}
 
@@ -419,9 +419,7 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 			}
 		};
 
-		core::Heapsort(m_Buttons.Data(),
-			m_Buttons.Size(),
-			SortByIndex());
+		m_Buttons.Sort(SortByIndex());
 
 		m_CodeHIDMapping.Resize(m_Buttons.Size() + m_Axes.Size());
 
@@ -431,13 +429,11 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 			HIDObjectWrapper wrapper;
 			wrapper.obj = &*it;
 			wrapper.id = index;
-			temp.Push_Back(wrapper);
+			temp.PushBack(wrapper);
 			++index;
 		}
 
-		core::Heapsort(temp.Data(),
-			temp.Size(),
-			SortByUsage());
+		temp.Sort(SortByUsage());
 		int code = 0;
 		for(auto it = temp.First(); it != temp.End(); ++it) {
 			it->obj->code = code;
@@ -452,13 +448,11 @@ EResult RawJoystickDevice::Init(HANDLE rawHandle)
 			HIDObjectWrapper wrapper;
 			wrapper.obj = &*it;
 			wrapper.id = index;
-			temp.Push_Back(wrapper);
+			temp.PushBack(wrapper);
 			++index;
 		}
 
-		core::Heapsort(temp.Data(),
-			temp.Size(),
-			SortByUsage());
+		temp.Sort(SortByUsage());
 		code = 0;
 		for(auto it = temp.First(); it != temp.End(); ++it) {
 			it->obj->code = code;

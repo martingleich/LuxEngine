@@ -141,7 +141,7 @@ bool ShaderD3D9::Init(
 		memcpy(m_Names + nameCursor, helper[i].name, helper[i].nameLength+1);
 
 		entry.param = ShaderParam(this, h.type, h.typeSize, m_Names + nameCursor, h.registerVS, h.registerPS, h.registerVSCount, h.registerPSCount);
-		m_Params.Push_Back(std::move(entry));
+		m_Params.PushBack(std::move(entry));
 
 		nameCursor += h.nameLength+1;
 	}
@@ -239,7 +239,7 @@ bool ShaderD3D9::LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntr
 				HEntry.registerPSCount = regCount;
 			}
 			HEntry.paramType = isParam ? ParamType_ParamMaterial : ParamType_Scene;
-			outParams.Push_Back(HEntry);
+			outParams.PushBack(HEntry);
 			outStringSize += HEntry.nameLength + 1;
 		}
 	}

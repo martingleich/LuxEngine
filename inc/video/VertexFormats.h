@@ -137,7 +137,7 @@ public:
 	void AddStream()
 	{
 		u32 firstElem = m_Data.IsEmpty() ? 0 : ((u32)m_Data.Size() - 1);
-		m_Streams.Push_Back(Stream(firstElem));
+		m_Streams.PushBack(Stream(firstElem));
 
 		m_CurrentStream = &m_Streams[m_Streams.Size() - 1];
 		m_IsNormalized = false;
@@ -154,7 +154,7 @@ public:
 		else
 			offset = m_CurrentStream->stride;
 
-		m_Data.Push_Back(Element(offset, usage, type));
+		m_Data.PushBack(Element(offset, usage, type));
 		m_CurrentStream->stride = math::Max(m_CurrentStream->stride, offset) + GetTypeSize(type);
 		m_CurrentStream->elemCount += 1;
 
@@ -167,7 +167,7 @@ public:
 		if(type == VertexElement::EType::Unknown)
 			type = GetSematicDefaultType(usage);
 
-		m_Data.Push_Back(Element(offset, usage, type));
+		m_Data.PushBack(Element(offset, usage, type));
 		m_CurrentStream->stride = math::Max(m_CurrentStream->stride, offset) + GetTypeSize(type);
 		m_CurrentStream->elemCount += 1;
 
@@ -265,8 +265,9 @@ public:
 		for(size_t streamId = m_Streams.Size(); streamId < m_Streams.Size(); ++streamId) {
 			const auto& stream = m_Streams[streamId];
 
-			core::Heapsort(m_Data.Data() + stream.firstElement,
-				stream.elemCount,
+			core::Sort(
+				m_Data.First() + stream.firstElement,
+				m_Data.First() + stream.firstElement + stream.elemCount,
 				SortByOffset());
 		}
 

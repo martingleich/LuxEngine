@@ -5,17 +5,17 @@ UNIT_SUITE(algorithm)
 	UNIT_TEST(sort)
 	{
 		core::array<int> arr;
-		arr.Push_Back(3);
-		arr.Push_Back(2);
-		arr.Push_Back(1);
-		arr.Push_Back(7);
-		arr.Push_Back(5);
-		arr.Push_Back(9);
-		arr.Push_Back(6);
-		arr.Push_Back(6);
-		arr.Push_Back(4);
-		arr.Push_Back(8);
-		arr.Push_Back(0);
+		arr.PushBack(3);
+		arr.PushBack(2);
+		arr.PushBack(1);
+		arr.PushBack(7);
+		arr.PushBack(5);
+		arr.PushBack(9);
+		arr.PushBack(6);
+		arr.PushBack(6);
+		arr.PushBack(4);
+		arr.PushBack(8);
+		arr.PushBack(0);
 
 		arr.Sort();
 
@@ -34,7 +34,7 @@ UNIT_SUITE(algorithm)
 	{
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
-		int* it = core::Binary_Search(4, array, array+10);
+		int* it = core::BinarySearch(4, array, array+10);
 
 		UNIT_ASSERT(*it == 4);
 	}
@@ -43,7 +43,7 @@ UNIT_SUITE(algorithm)
 	{
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
-		int* it = core::Linear_Search(4, array, array+10);
+		int* it = core::LinearSearch(4, array, array+10);
 
 		UNIT_ASSERT(*it == 4);
 	}
@@ -53,7 +53,7 @@ UNIT_SUITE(algorithm)
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
 		int* jt;
-		int* it = core::Binary_Search(17, array, array+10, &jt);
+		int* it = core::BinarySearch(17, array, array+10, &jt);
 
 		UNIT_ASSERT(it == array+10);
 		UNIT_ASSERT(jt == array+5);
@@ -64,7 +64,7 @@ UNIT_SUITE(algorithm)
 		int array[11] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543, 600};
 
 		int* jt;
-		int* it = core::Binary_Search(17, array, array+11, &jt);
+		int* it = core::BinarySearch(17, array, array+11, &jt);
 
 		UNIT_ASSERT(it == array+11);
 		UNIT_ASSERT(jt == array+5);
@@ -74,7 +74,7 @@ UNIT_SUITE(algorithm)
 	{
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
-		int* it = core::Linear_Search(17, array, array+10);
+		int* it = core::LinearSearch(17, array, array+10);
 
 		UNIT_ASSERT(it == array+10);
 	}

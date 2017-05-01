@@ -342,12 +342,12 @@ void SceneManagerImpl::Render()
 
 void SceneManagerImpl::RegisterCamera(CameraSceneNode* camera)
 {
-	m_CameraList.Push_Back(camera);
+	m_CameraList.PushBack(camera);
 }
 
 void SceneManagerImpl::UnRegisterCamera(CameraSceneNode* camera)
 {
-	auto it = core::Linear_Search(camera, m_CameraList.First(), m_CameraList.End());
+	auto it = core::LinearSearch(camera, m_CameraList.First(), m_CameraList.End());
 	if(it != m_CameraList.End())
 		m_CameraList.Erase(it);
 }
@@ -359,18 +359,18 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 	// Wann soll der Scene-node gezeichnet werden
 	switch(renderPass) {
 	case ESNRP_SKY_BOX:
-		m_SkyBoxList.Push_Back(node);
+		m_SkyBoxList.PushBack(node);
 		wasTaken = true;
 		break;
 	case ESNRP_SOLID:
 		// TODO Culling
-		m_SolidNodeList.Push_Back(SSolidNodeEntry(node));
+		m_SolidNodeList.PushBack(SSolidNodeEntry(node));
 		wasTaken = true;
 		break;
 
 	case ESNRP_TRANSPARENT:
 		// TODO Culling
-		m_TransparentNodeList.Push_Back(STransparentNodeEntry(node, m_AbsoluteCamPos));
+		m_TransparentNodeList.PushBack(STransparentNodeEntry(node, m_AbsoluteCamPos));
 		wasTaken = true;
 		break;
 
@@ -383,7 +383,7 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 			// Ist ein material transparent, dann gilt der ganze Knoten als transparent
 			video::MaterialRenderer* renderer = node->GetMaterial(i).GetRenderer();
 			if(renderer && renderer->IsTransparent()) {
-				m_TransparentNodeList.Push_Back(STransparentNodeEntry(node, m_AbsoluteCamPos));
+				m_TransparentNodeList.PushBack(STransparentNodeEntry(node, m_AbsoluteCamPos));
 				wasTaken = true;
 				break;
 			}
@@ -391,14 +391,14 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 
 		// Kein transparentes material -> Knoten solid
 		if(!wasTaken) {
-			m_SolidNodeList.Push_Back(SSolidNodeEntry(node));
+			m_SolidNodeList.PushBack(SSolidNodeEntry(node));
 			wasTaken = true;
 		}
 	}
 	break;
 
 	case ESNRP_LIGHT:
-		m_LightList.Push_Back((LightSceneNode*)node);
+		m_LightList.PushBack((LightSceneNode*)node);
 		wasTaken = true;
 		break;
 	default:
@@ -559,7 +559,7 @@ void SceneManagerImpl::DrawScene(SceneNode* root)
 void SceneManagerImpl::AddToDeletionQueue(SceneNode* node)
 {
 	if(node)
-		m_DeletionList.Push_Back(node);
+		m_DeletionList.PushBack(node);
 }
 
 void SceneManagerImpl::ClearDeletionQueue()
@@ -609,7 +609,7 @@ bool SceneManagerImpl::GetSceneNodeArrayByType(core::Name type, core::array<Scen
 		start = GetRootSceneNode();
 
 	if(start->GetReferableSubType() == type && start->HasTag(tags))
-		array.Push_Back(start);
+		array.PushBack(start);
 
 	for(auto it = start->GetChildrenFirst(); it != start->GetChildrenEnd(); ++it)
 		GetSceneNodeArrayByType(type, array, it.Pointer());
@@ -649,7 +649,7 @@ bool SceneManagerImpl::OnEvent(const input::Event& event)
 
 void SceneManagerImpl::RegisterEventReceiver(SceneNode* receiver)
 {
-	m_EventReceivers.Push_Back(receiver);
+	m_EventReceivers.PushBack(receiver);
 }
 
 void SceneManagerImpl::UnregisterEventReceiver(SceneNode* receiver)
@@ -663,7 +663,7 @@ void SceneManagerImpl::UnregisterEventReceiver(SceneNode* receiver)
 
 void SceneManagerImpl::AddPipelineOverwrite(ESceneNodeRenderPass pass, const video::PipelineOverwrite& over)
 {
-	m_Overwrites[pass].Push_Back(over);
+	m_Overwrites[pass].PushBack(over);
 }
 
 void SceneManagerImpl::RemovePipelineOverwrite(ESceneNodeRenderPass pass, const video::PipelineOverwrite& over)

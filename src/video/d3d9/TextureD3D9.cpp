@@ -232,7 +232,7 @@ IDirect3DSurface9* TextureD3D9::GetTempSurface(u32 width, u32 height, D3DFORMAT 
 		return nullptr;
 
 	surface->AddRef();
-	s_TempSurfaces.Push_Back(surface);
+	s_TempSurfaces.PushBack(surface);
 
 	return surface;
 }

@@ -85,7 +85,7 @@ bool INIFileImpl::ReadSections()
 					m_Sections[sectionID].comment.Append(m_LastComment);
 					section = &m_Sections[sectionID];
 				} else {
-					section = &*m_Sections.Push_Back(SINISection());
+					section = &*m_Sections.PushBack(SINISection());
 					section->name = sectionName;
 					section->sorted = false;
 					section->elemCount = 0;
@@ -112,7 +112,7 @@ bool INIFileImpl::ReadSections()
 					m_Elements[elemID].value = element.value;
 				} else {
 					element.comment = m_LastComment;
-					elemID = core::IteratorDistance(m_Elements.First(), m_Elements.Push_Back(element));
+					elemID = core::IteratorDistance(m_Elements.First(), m_Elements.PushBack(element));
 				}
 
 				m_LastComment.Clear();
@@ -514,7 +514,7 @@ bool INIFileImpl::AddSection(const char* name, const char* comment)
 	section.firstElem = InvalidID;
 	section.comment = comment;
 	section.sorted = true;
-	m_Sections.Push_Back(section);
+	m_Sections.PushBack(section);
 
 	m_SectionSorted = false;
 

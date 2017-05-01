@@ -266,7 +266,7 @@ u32 SceneValuesImpl::AddParam(const string& name, core::Type type)
 
 	lxAssertEx(type.GetSize() != 0, "Invalid type");
 	SParam Param(name, m_CurrentOffset, type, type.GetSize());
-	m_Params.Push_Back(Param);
+	m_Params.PushBack(Param);
 
 	if(m_CurrentOffset + Param.Size > m_MaxSize)
 		Realloc((m_CurrentOffset + Param.Size) * 2);

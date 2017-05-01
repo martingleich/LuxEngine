@@ -69,7 +69,7 @@ public:
 		if(it != m_Queue.End())
 			m_Queue.Erase(it, true);
 
-		m_Queue.Push_Back(a);
+		m_Queue.PushBack(a);
 
 		UpdateCaps();
 	}

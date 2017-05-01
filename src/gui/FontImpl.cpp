@@ -307,7 +307,7 @@ void FontImpl::GetTextCarets(const string& text, core::array<float>& carets, siz
 	auto it = text.First();
 	while(counter < charCount && it != text.Last()) {
 		++counter;
-		carets.Push_Back(width*m_Scale);
+		carets.PushBack(width*m_Scale);
 		const u32 c = *it;
 		const CharInfo& info = GetCharInfo(c);
 		if(c == ' ')
@@ -321,7 +321,7 @@ void FontImpl::GetTextCarets(const string& text, core::array<float>& carets, siz
 		++counter;
 	}
 
-	carets.Push_Back(width);
+	carets.PushBack(width);
 }
 
 float FontImpl::GetCharDistance() const

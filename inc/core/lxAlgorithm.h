@@ -1,5 +1,6 @@
 #ifndef INCLUDED_LXALGORITHM_H
 #define INCLUDED_LXALGORITHM_H 
+#include "lxSort.h"
 
 namespace lux
 {
@@ -16,7 +17,7 @@ returns true if the entry matches otherwise false
 \return An iterator to the searched entry if found, otherwise from
 */
 template <typename Iterator, typename type, typename Condition>
-Iterator Linear_Search(const type& entry, Iterator from, Iterator to, Condition con)
+Iterator LinearSearch(const type& entry, Iterator from, Iterator to, Condition con)
 {
 	// Lineare Suche
 	for(; from != to; ++from) {
@@ -37,7 +38,7 @@ The operation
 \return An iterator to the searched entry if found, otherwise from
 */
 template <typename Iterator, typename type>
-Iterator Linear_Search(const type& entry, Iterator from, Iterator to)
+Iterator LinearSearch(const type& entry, Iterator from, Iterator to)
 {
 	// Lineare Suche
 	for(; from != to; ++from) {
@@ -58,7 +59,7 @@ The operation (*Iterator == type), must be defined
 \return An iterator to the searched entry if found, otherwise from
 */
 template <typename Iterator, typename type>
-Iterator Reverse_Linear_Search(const type& entry, Iterator from, Iterator to)
+Iterator ReverseLinearSearch(const type& entry, Iterator from, Iterator to)
 {
 	// Lineare Suche
 	for(; to != from; --to) {
@@ -79,7 +80,7 @@ returns true if the entry matches otherwise false
 \return An iterator to the searched entry if found, otherwise from
 */
 template <typename Iterator, typename type, typename Condition>
-Iterator Reverse_Linear_Search(const type& entry, Iterator from, Iterator to, Condition con)
+Iterator ReverseLinearSearch(const type& entry, Iterator from, Iterator to, Condition con)
 {
 	// Lineare Suche
 	for(; to != from; --to) {
@@ -113,7 +114,7 @@ void Foreach(Iterator from, Iterator to, Action act)
 \return The iterator to the search interator or end if it couldn't be found.
 */
 template <typename Iterator, typename T>
-Iterator Binary_Search(const T& entry, Iterator begin, Iterator end, Iterator* outNextEntry = nullptr)
+Iterator BinarySearch(const T& entry, Iterator begin, Iterator end, Iterator* outNextEntry = nullptr)
 {
 	if(begin == end) {
 		if(outNextEntry)

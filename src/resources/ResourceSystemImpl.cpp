@@ -115,7 +115,7 @@ struct ResourceBlock
 			return ResourceSystem::INVALID_ID;
 
 		Entry entry(name, nullptr);
-		auto it = core::Binary_Search(entry, resources.First(), resources.End());
+		auto it = core::BinarySearch(entry, resources.First(), resources.End());
 		if(it == resources.End())
 			return ResourceSystem::INVALID_ID;
 
@@ -134,7 +134,7 @@ struct ResourceBlock
 		bool result = false;
 		Entry entry(name, resource);
 		core::array<Entry>::Iterator n;
-		auto it = core::Binary_Search(entry, resources.First(), resources.End(), &n);
+		auto it = core::BinarySearch(entry, resources.First(), resources.End(), &n);
 		if(it == resources.End()) {
 			resources.Insert(entry, n);
 			result = true;
@@ -419,7 +419,7 @@ bool ResourceSystemImpl::AddResourceLoader(ResourceLoader* loader)
 		return false;
 
 	log::Debug("Registered resource loader: ~s.", loader->GetName());
-	self->loaders.Push_Back(loader);
+	self->loaders.PushBack(loader);
 
 	return true;
 }
@@ -440,10 +440,10 @@ Name ResourceSystemImpl::GetType(u32 id) const
 bool ResourceSystemImpl::AddType(Name name)
 {
 	TypeEntry entry(name);
-	auto it = core::Linear_Search(entry, self->types.First(), self->types.End());
+	auto it = core::LinearSearch(entry, self->types.First(), self->types.End());
 	if(it == self->types.End()) {
-		self->types.Push_Back(entry);
-		self->resources.Push_Back(ResourceBlock());
+		self->types.PushBack(entry);
+		self->resources.PushBack(ResourceBlock());
 		log::Debug("New resource type \"~s\".", name);
 		return true;
 	} else {
@@ -455,7 +455,7 @@ bool ResourceSystemImpl::AddType(Name name)
 u32 ResourceSystemImpl::GetTypeID(Name type) const
 {
 	TypeEntry entry(type);
-	auto it = core::Linear_Search(entry, self->types.First(), self->types.End());
+	auto it = core::LinearSearch(entry, self->types.First(), self->types.End());
 	if(it != self->types.End())
 		return (u32)core::IteratorDistance(self->types.First(), it);
 	else

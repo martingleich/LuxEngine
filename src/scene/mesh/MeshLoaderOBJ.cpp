@@ -67,7 +67,7 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 	core::array<math::vector2f> TCoordBuffer;
 
 	SObjMtl* pCurrMtl = LUX_NEW(SObjMtl);
-	m_Materials.Push_Back(pCurrMtl);
+	m_Materials.PushBack(pCurrMtl);
 
 	const io::FileDescription fileDesc = file->GetDescription();
 
@@ -100,7 +100,7 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			{
 				math::vector3f vPos;
 				pcBuffPtr = Read3DVec(pcBuffPtr, pcBufferEnd, vPos);
-				vertexBuffer.Push_Back(vPos);
+				vertexBuffer.PushBack(vPos);
 			}
 			break;
 
@@ -108,7 +108,7 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			{
 				math::vector3f vNor;
 				pcBuffPtr = Read3DVec(pcBuffPtr, pcBufferEnd, vNor);
-				NormalBuffer.Push_Back(vNor);
+				NormalBuffer.PushBack(vNor);
 			}
 			break;
 
@@ -116,7 +116,7 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			{
 				math::vector2f vTex;
 				pcBuffPtr = Read2DVec(pcBuffPtr, pcBufferEnd, vTex);
-				TCoordBuffer.Push_Back(vTex);
+				TCoordBuffer.PushBack(vTex);
 			}
 			break;
 			}
@@ -241,7 +241,7 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 					pCurrMtl->VertMap[v] = VertexLocation;
 				}
 
-				FaceCorners.Push_Back(VertexLocation);
+				FaceCorners.PushBack(VertexLocation);
 
 				// Nächster Vertex
 				pcLinePtr = MoveToNextWord(pcLinePtr, pcEndPtr);
@@ -474,7 +474,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 		{
 			// Letztes material speichern
 			if(currMaterial)
-				m_Materials.Push_Back(currMaterial);
+				m_Materials.PushBack(currMaterial);
 
 			// Neuen Materialname einlesen
 			char mtlNameBuf[WORD_BUFFER_LENGTH];
@@ -596,7 +596,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 		if(currMaterial->Meshbuffer->GetMaterial().GetRenderer() == nullptr)
 			currMaterial->Meshbuffer->GetMaterial().SetRenderer(m_MatLib->GetMaterialRenderer("solid"));
 
-		m_Materials.Push_Back(currMaterial);
+		m_Materials.PushBack(currMaterial);
 	}
 
 	LUX_FREE_ARRAY(pBuffer);
@@ -617,12 +617,12 @@ MeshLoaderOBJ::SObjMtl* MeshLoaderOBJ::FindMaterial(const string& mtlName, const
 	}
 
 	if(pTmp) {
-		m_Materials.Push_Back(LUX_NEW(MeshLoaderOBJ::SObjMtl)(*pTmp));
+		m_Materials.PushBack(LUX_NEW(MeshLoaderOBJ::SObjMtl)(*pTmp));
 		MeshLoaderOBJ::SObjMtl* out = m_Materials[m_Materials.Size() - 1];
 		out->Group = grpName;
 		return out;
 	} else if(!grpName.IsEmpty()) {
-		m_Materials.Push_Back(LUX_NEW(SObjMtl)(*m_Materials[0]));
+		m_Materials.PushBack(LUX_NEW(SObjMtl)(*m_Materials[0]));
 		MeshLoaderOBJ::SObjMtl* out = m_Materials[m_Materials.Size() - 1];
 		out->Group = grpName;
 		return out;

@@ -273,7 +273,7 @@ void ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	m_DefaultPackage.SetMinSize(entry.offset + entry.size, core::mem::RawMemory::COPY);
 	memcpy((u8*)m_DefaultPackage + entry.offset, defaultValue, entry.size);
 
-	m_Params.Push_Back(entry);
+	m_Params.PushBack(entry);
 }
 
 ParamPackage::ParamPackage() :

@@ -121,7 +121,7 @@ public:
 	}
 	void AddLogger(Logger* l)
 	{
-		m_Loggers.Push_Back(l);
+		m_Loggers.PushBack(l);
 	}
 
 	void RemoveLogger(Logger* l)

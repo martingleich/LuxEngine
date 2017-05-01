@@ -81,9 +81,9 @@ ArchiveFolderEnumerator::ArchiveFolderEnumerator(
 {
 	Win32Path win32searchPath;
 	win32searchPath.Reserve(win32Path.Size() + 2);
-	win32searchPath.Push_Back(win32Path);
-	win32searchPath.Push_Back(L'*');
-	win32searchPath.Push_Back(0);
+	win32searchPath.PushBack(win32Path);
+	win32searchPath.PushBack(L'*');
+	win32searchPath.PushBack(0);
 
 	m_FindHandle = FindFirstFileW((const wchar_t*)win32searchPath.Data_c(), &m_FindData);
 	m_IsValid = (m_FindHandle != nullptr);
@@ -273,8 +273,8 @@ core::array<u16> ArchiveFolderWin32::ConvertPathToWin32WidePath(const path& p) c
 	core::array<u16> out;
 	out.Reserve(4 + self->win32AbsPath.Size() + p2.Size() + 1);
 	if(!self->win32AbsPath.IsEmpty())
-		out.Push_Back(self->win32AbsPath.Data(), self->win32AbsPath.Size() - 1);
-	out.Push_Back(p2.Data(), p2.Size());
+		out.PushBack(self->win32AbsPath.Data(), self->win32AbsPath.Size() - 1);
+	out.PushBack(p2.Data(), p2.Size());
 
 	return out;
 }

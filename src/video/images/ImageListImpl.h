@@ -20,7 +20,7 @@ public:
 	void AddImage(Image* img)
 	{
 		if(img)
-			m_Images.Push_Back(img);
+			m_Images.PushBack(img);
 	}
 
 	StrongRef<Image> GetImage(size_t i) const

@@ -579,7 +579,7 @@ bool ImageSystemImpl::WriteImageDataToFile(const math::dimension2du& size, Color
 void ImageSystemImpl::AddExternalImageWriter(ImageWriter* writer)
 {
 	if(writer)
-		m_WriterList.Push_Back(writer);
+		m_WriterList.PushBack(writer);
 }
 
 size_t ImageSystemImpl::GetImageWriterCount() const
@@ -714,7 +714,7 @@ StrongRef<Texture> ImageSystemImpl::AddRendertargetTexture(const string& name, c
 	if(texture) {
 		if(!m_ResourceSystem->AddResource(name, texture))
 			return nullptr;
-		m_Rendertargets.Push_Back(texture);
+		m_Rendertargets.PushBack(texture);
 	}
 
 	return texture;

@@ -331,7 +331,7 @@ void FileSystemWin32::AddMountPoint(const path& point, Archive* archive)
 	MountEntry e;
 	e.mountpoint = io::NormalizePath(point, true);
 	e.archive = archive;
-	m_Mounts.Push_Back(e);
+	m_Mounts.PushBack(e);
 }
 
 void FileSystemWin32::RemoveMountPoint(const path& point, Archive* archive)
@@ -365,12 +365,12 @@ Win32Path FileSystemWin32::ConvertPathToWin32WidePath(const path& p) const
 	core::array<u16> p2 = core::UTF8ToUTF16(GetAbsoluteFilename(p).Data());
 	out.Reserve(4 + p2.Size() + 1);
 
-	out.Push_Back((const u16*)L"\\\\?\\", 4);
+	out.PushBack((const u16*)L"\\\\?\\", 4);
 	for(auto it = p2.First(); it != p2.End(); ++it) {
 		if(*it == L'/')
-			out.Push_Back(L'\\');
+			out.PushBack(L'\\');
 		else
-			out.Push_Back(*it);
+			out.PushBack(*it);
 	}
 
 	return out;
@@ -386,7 +386,7 @@ bool FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
 {
 	Win32Path subPath = path;
 	while(*subPath.Last() != '/')
-		subPath.Pop_Back();
+		subPath.PopBack();
 
 	DWORD attrb = GetFileAttributesW((const wchar_t*)subPath.Data_c());
 	bool subPathExists = false;
@@ -419,7 +419,7 @@ bool FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 	wchar_t* path_ptr = path + _path.Size();
 
 	core::array<wchar_t*> subDirs;
-	subDirs.Push_Back(path_ptr);
+	subDirs.PushBack(path_ptr);
 	do {
 		**subDirs.Last() = L'\0';
 		BOOL result = CreateDirectoryW(path, nullptr);
@@ -433,7 +433,7 @@ bool FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 					--path_ptr;
 
 				if(path_ptr - path > 4)
-					subDirs.Push_Back(path_ptr);
+					subDirs.PushBack(path_ptr);
 				else
 					break;
 			} else
@@ -442,7 +442,7 @@ bool FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 
 		if(result) {
 			**subDirs.Last() = L'\\';
-			subDirs.Pop_Back();
+			subDirs.PopBack();
 		}
 	} while(!subDirs.IsEmpty() && path_ptr - path > 4 && !recursive);
 

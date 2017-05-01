@@ -25,9 +25,9 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::rect<
 	if(!texture)
 		return 0;
 
-	auto it = core::Linear_Search(texture, m_Textures.First(), m_Textures.End());
+	auto it = core::LinearSearch(texture, m_Textures.First(), m_Textures.End());
 	if(it == m_Textures.End())
-		it = m_Textures.Push_Back(texture);
+		it = m_Textures.PushBack(texture);
 
 	math::dimension2du dim = texture->GetSize();
 	Sprite sprite;
@@ -37,7 +37,7 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::rect<
 	sprite.rect.Left = rect.Left / (float)dim.width;
 	sprite.rect.Right = rect.Right / (float)dim.width;
 
-	return SpriteBank::Sprite((s32)core::IteratorDistance(m_Sprites.First(), m_Sprites.Push_Back(sprite)) + 1);
+	return SpriteBank::Sprite((s32)core::IteratorDistance(m_Sprites.First(), m_Sprites.PushBack(sprite)) + 1);
 }
 
 SpriteBank::Sprite SpriteBankImpl::AddTextureAsSprite(Texture* texture)
@@ -45,15 +45,15 @@ SpriteBank::Sprite SpriteBankImpl::AddTextureAsSprite(Texture* texture)
 	if(!texture)
 		return 0;
 
-	auto it = core::Linear_Search(texture, m_Textures.First(), m_Textures.End());
+	auto it = core::LinearSearch(texture, m_Textures.First(), m_Textures.End());
 	if(it == m_Textures.End())
-		it = m_Textures.Push_Back(texture);
+		it = m_Textures.PushBack(texture);
 
 	Sprite sprite;
 	sprite.textureID = (u16)core::IteratorDistance(m_Textures.First(), it);
 	sprite.rect = math::rectf(0.0f, 0.0f, 1.0f, 1.0f);
 
-	return SpriteBank::Sprite((u16)core::IteratorDistance(m_Sprites.First(), m_Sprites.Push_Back(sprite)) + 1);
+	return SpriteBank::Sprite((u16)core::IteratorDistance(m_Sprites.First(), m_Sprites.PushBack(sprite)) + 1);
 }
 
 SpriteBank::Sprite SpriteBankImpl::AddAnimatedSprite(SpriteBank::Sprite first, SpriteBank::Sprite last, u32 frameTime)
@@ -74,7 +74,7 @@ SpriteBank::Sprite SpriteBankImpl::AddAnimatedSprite(SpriteBank::Sprite first, S
 	sprite.lastSprite = last.id;
 	sprite.frameTime = frameTime;
 
-	return SpriteBank::Sprite(-1 * ((s32)core::IteratorDistance(m_AnimatedSprites.First(), m_AnimatedSprites.Push_Back(sprite)) + 1));
+	return SpriteBank::Sprite(-1 * ((s32)core::IteratorDistance(m_AnimatedSprites.First(), m_AnimatedSprites.PushBack(sprite)) + 1));
 }
 
 void SpriteBankImpl::Clear()

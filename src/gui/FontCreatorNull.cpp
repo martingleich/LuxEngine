@@ -44,7 +44,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromFile(const io::path& path,
 core::array<u32> FontCreatorNull::CorrectCharSet(const core::array<u32>& set)
 {
 	core::array<u32> out = set;
-	out.Push_Back(' ');
+	out.PushBack(' ');
 
 	out.Sort();
 
@@ -141,7 +141,7 @@ void FontCreatorNull::AddDefaultCharSet(const string& name, const string& data)
 {
 	core::array<u32> a;
 	for(auto it = data.First(); it != data.End(); ++it)
-		a.Push_Back(*it);
+		a.PushBack(*it);
 
 	m_DefaultCharSets[name] = a;
 }
