@@ -122,7 +122,6 @@ IDirect3DSurface9* VideoDriverD3D9::DepthBuffer_d3d9::GetSurface() const
 	return m_Surface;
 }
 
-
 //////////////////////////////////////////////////////////////////////
 
 VideoDriverD3D9::VideoDriverD3D9(core::ReferableFactory* refFactory) :
@@ -727,11 +726,9 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 	EIndexFormat indexType,
 	bool is3D)
 {
-	// Vertextyp setzen und Größe speichern
 	SetVertexFormat(vertexFormat);
 	const u32 stride = vertexFormat.GetStride(0);
 
-	// Indexformat speichern
 	D3DFORMAT IndexFormat = D3DFMT_UNKNOWN;
 	u32 indexSize;
 	switch(indexType) {
@@ -744,18 +741,14 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 		indexSize = 4;
 		break;
 	default:
-		// Abbrechen
 		return false;
 	}
 
-	// material aktivieren
-	if(is3D) {
+	if(is3D)
 		SetRenderstates3DMode();
-	} else {
+	else
 		SetRenderstates2DMode();
-	}
 
-	// Materialrenderer beginnt zu Zeichnen
 	if(m_CurrentRendermode == ERM_3D) {
 		if(m_CurrentMaterial.GetRenderer()) {
 			if(!m_CurrentMaterial.GetRenderer()->OnRender(0))
@@ -778,17 +771,14 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 
 	u32 pass = 1;
 	do {
-		// Je nach Primitive zeichnen
 		HRESULT hr = S_OK;
 		float fTemp;
 		switch(primitiveType) {
 		case EPT_POINT_SPRITES:
 		case EPT_POINTS:
-
-			// Renderstates setzen
-			if(primitiveType == EPT_POINT_SPRITES) {
+			if(primitiveType == EPT_POINT_SPRITES)
 				m_D3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
-			}
+			
 			m_D3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE, TRUE);
 			fTemp = m_CurrentPipeline.Thickness / GetScreenSize().width;
 			m_D3DDevice->SetRenderState(D3DRS_POINTSIZE, *reinterpret_cast<u32*>(&fTemp));
@@ -799,20 +789,14 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 			fTemp = 0.0f;
 			m_D3DDevice->SetRenderState(D3DRS_POINTSCALE_C, *reinterpret_cast<u32*>(&fTemp));
 
-			if(!vertices) {
-				// Aus Hardware zeichnen
+			if(!vertices)
 				hr = m_D3DDevice->DrawPrimitive(D3DPT_POINTLIST, vertexOffset, primitveCount);
-			} else {
-				// Aus Software zeichnen
+			else
 				hr = m_D3DDevice->DrawPrimitiveUP(D3DPT_POINTLIST, primitveCount, (const u8*)vertices + vertexOffset*stride, stride);
-			}
 
-			// Renderstates löschen
 			m_D3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE, FALSE);
-			if(primitiveType == EPT_POINT_SPRITES) {
+			if(primitiveType == EPT_POINT_SPRITES)
 				m_D3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, FALSE);
-			}
-
 			break;
 
 		case EPT_LINE_STRIP:
@@ -824,14 +808,11 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 			static D3DPRIMITIVETYPE Types[] = {D3DPT_LINESTRIP, D3DPT_LINELIST, D3DPT_TRIANGLESTRIP, D3DPT_TRIANGLEFAN, D3DPT_TRIANGLELIST};
 
 			if(!vertices) {
-				// Aus Hardware zeichnen
 				hr = m_D3DDevice->DrawIndexedPrimitive(Types[primitiveType - 1], 0, 0, vertexCount, indexOffset, primitveCount);
 			} else if(indices) {
-				// Aus Software zeichnen
 				hr = m_D3DDevice->DrawIndexedPrimitiveUP(Types[primitiveType - 1], 0, vertexCount, primitveCount,
 					(const u8*)indices + indexSize*indexOffset, IndexFormat, (const u8*)vertices + vertexOffset*stride, stride);
 			} else {
-				// Aus Software zeichnen
 				hr = m_D3DDevice->DrawPrimitiveUP(Types[primitiveType - 1], primitveCount, (const u8*)vertices + vertexOffset*stride, stride);
 			}
 		}
@@ -1267,11 +1248,8 @@ BaseTexture* VideoDriverD3D9::GetActiveTexture(u32 stage) const
 
 void VideoDriverD3D9::Set2DTransform(const math::matrix4& m)
 {
-	if(m_Use2DTransform) {
-		m_D3DDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)(m.DataRowMajor()));
-		m_SceneValues->SetMatrix(scene::SceneValues::MAT_WORLD, m);
+	if(m_Use2DTransform)
 		m_2DTransformChanged = true;
-	}
 
 	m_2DTranform = m;
 }
@@ -1282,27 +1260,48 @@ void VideoDriverD3D9::Use2DTransform(bool Use)
 	m_2DTransformChanged = true;
 }
 
-void VideoDriverD3D9::SetTransform(ETransformState transform, const math::matrix4& m)
+void VideoDriverD3D9::EnableTransforms(
+	const math::matrix4& world,
+	const math::matrix4& view,
+	const math::matrix4& proj)
 {
-	switch(transform) {
-	case ETS_VIEW:
-		m_D3DDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)(m.DataRowMajor()));
-		m_SceneValues->SetMatrix(scene::SceneValues::MAT_VIEW, m);
-		break;
-	case ETS_PROJECTION:
-		m_D3DDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)(m.DataRowMajor()));
-		m_SceneValues->SetMatrix(scene::SceneValues::MAT_PROJ, m);
-		break;
-	case ETS_WORLD:
-		m_D3DDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)(m.DataRowMajor()));
-		m_SceneValues->SetMatrix(scene::SceneValues::MAT_WORLD, m);
-		break;
-	default:
-		return;
+	if(m_CurrentRendermode == ERM_3D) {
+		if(m_3DTransformsChanged)
+			m_3DTransformsChanged = false;
+		else
+			return;
 	}
 
+	if(m_CurrentRendermode == ERM_2D) {
+		if(m_2DTransformChanged)
+			m_2DTransformChanged = false;
+		else
+			return;
+	}
+
+	m_D3DDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)(view.DataRowMajor()));
+	m_SceneValues->SetMatrix(scene::SceneValues::MAT_VIEW, view);
+
+	math::matrix4 projCopy = proj;
+	if(m_CurrentPipeline.PolygonOffset) {
+		const u32 zBits = m_Config.zBits;
+		const u32 values = 1 << zBits;
+		const float min = 1.0f / values;
+		projCopy.AddTranslation(math::vector3f(0.0f, 0.0f, -min *m_CurrentPipeline.PolygonOffset));
+	}
+	m_D3DDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)(projCopy.DataRowMajor()));
+	m_SceneValues->SetMatrix(scene::SceneValues::MAT_PROJ, projCopy);
+
+	m_D3DDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)(world.DataRowMajor()));
+	m_SceneValues->SetMatrix(scene::SceneValues::MAT_WORLD, world);
+}
+
+void VideoDriverD3D9::SetTransform(ETransformState transform, const math::matrix4& m)
+{
 	m_Transforms[transform] = m;
 	m_3DTransformsChanged = true;
+	if(m_Use2DTransform)
+		m_2DTransformChanged = true;
 }
 
 const math::matrix4& VideoDriverD3D9::GetTransform(ETransformState transform) const
@@ -1413,11 +1412,13 @@ void VideoDriverD3D9::SetTextureLayer(const MaterialLayer& layer, u32 textureLay
 void VideoDriverD3D9::PushPipelineOverwrite(const PipelineOverwrite& over)
 {
 	m_PipelineOverwrites.PushBack(over);
+	ResetAllRenderstates();
 }
 
 void VideoDriverD3D9::PopPipelineOverwrite()
 {
 	m_PipelineOverwrites.PopBack();
+	ResetAllRenderstates();
 }
 
 void VideoDriverD3D9::EnablePipeline(const PipelineSettings& settings, bool resetAll)
@@ -1520,6 +1521,10 @@ void VideoDriverD3D9::EnablePipeline(const PipelineSettings& settings, bool rese
 		m_D3DDevice->SetRenderState(D3DRS_FOGDENSITY, *reinterpret_cast<u32*>(&m_Fog.density));
 	}
 
+	if(m_Pipeline.PolygonOffset != pipeline.PolygonOffset) {
+		m_3DTransformsChanged = true;
+	}
+
 	m_CurrentPipeline = pipeline;
 }
 
@@ -1550,18 +1555,9 @@ const Material& VideoDriverD3D9::Get2DMaterial() const
 
 void VideoDriverD3D9::SetRenderstates3DMode(bool useMaterial)
 {
-	if(m_CurrentRendermode != ERM_3D || (m_2DTransformChanged && m_Use2DTransform)) {
-		// Matrizen wiederherstellen
-		m_D3DDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)(&m_Transforms[ETS_WORLD]));
-		m_D3DDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)(&m_Transforms[ETS_VIEW]));
-		m_D3DDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)(&m_Transforms[ETS_PROJECTION]));
-
+	if(m_CurrentRendermode != ERM_3D)
 		ResetAllRenderstates();
-	}
 
-	/*
-	TODO: Hat hier eigentlich nichts zu suchen hab aber keine anderer Wahl
-	*/
 	const Colorf LastAmbient = m_CurrentMaterial.ambient * m_AmbientColor;
 	const Colorf NewAmbient = m_3DMaterial.ambient * m_AmbientColor;
 	if(m_CurrentMaterial.diffuse != m_3DMaterial.diffuse ||
@@ -1586,58 +1582,29 @@ void VideoDriverD3D9::SetRenderstates3DMode(bool useMaterial)
 	}
 
 	if((m_ResetRenderstates || useMaterial) || m_CurrentMaterial != m_3DMaterial) {
-		// Altes material deaktivieren
 		if(m_CurrentMaterial.GetRenderer())
 			m_CurrentMaterial.GetRenderer()->OnUnsetMaterial();
 
-		// Neues material aktivieren
 		m_3DMaterial.GetRenderer()->OnSetMaterial(m_3DMaterial, m_CurrentMaterial, m_ResetRenderstates);
 		m_CurrentMaterial = m_3DMaterial;
 	}
 
-	if(m_CurrentMaterial.GetRenderer()->GetShader())
-		m_CurrentMaterial.GetRenderer()->GetShader()->LoadSceneValues();
-
 	m_CurrentRendermode = ERM_3D;
 	m_ResetRenderstates = false;
+
+	EnableTransforms(
+		m_Transforms[ETS_WORLD],
+		m_Transforms[ETS_VIEW],
+		m_Transforms[ETS_PROJECTION]
+	);
+
+	// Must be loaded after loading the transforms
+	if(m_CurrentMaterial.GetRenderer()->GetShader())
+		m_CurrentMaterial.GetRenderer()->GetShader()->LoadSceneValues();
 }
 
 void VideoDriverD3D9::SetRenderstates2DMode(bool useMaterial, bool Alpha, bool AlphaChannel)
 {
-	if(m_CurrentRendermode != ERM_2D || m_3DTransformsChanged || m_2DTransformChanged) {
-		// Matrizen setzen
-		math::matrix4 m;
-		if(m_Use2DTransform)
-			m_D3DDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)(m_2DTranform.DataRowMajor()));
-		else
-			m_D3DDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)(m.DataRowMajor()));
-		/*
-				m.SetTranslation(math::vector3f(-0.5f, -0.5f, 0.0f));
-				m_D3DDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)(m.DataRowMajor()));
-				m = math::matrix4(2.0f / m_CurrentRendertarget.GetSize().width, 0.0f, 0.0f, 0.0f,
-					0.0f, -2.0f / m_CurrentRendertarget.GetSize().height, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.0f, 0.0f,
-					-1.0f, 1.0f, 0.0f, 1.0f);
-					*/
-		auto ssize = GetScreenSize();
-		m = math::matrix4(
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, -1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 - 0.5f, 0.0f, 1.0f);
-		m_D3DDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)(m.DataRowMajor()));
-		m = math::matrix4(
-			2.0f / ssize.width, 0.0f, 0.0f, 0.0f,
-			0.0f, 2.0f / ssize.height, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f);
-
-		m_D3DDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)(m.DataRowMajor()));
-
-		m_3DTransformsChanged = false;
-		m_2DTransformChanged = false;
-	}
-
 	if(m_CurrentMaterial.GetRenderer())
 		m_CurrentMaterial.GetRenderer()->OnUnsetMaterial();
 
@@ -1660,7 +1627,6 @@ void VideoDriverD3D9::SetRenderstates2DMode(bool useMaterial, bool Alpha, bool A
 			m_D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 		}
 
-
 		m_D3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
 		m_D3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
 
@@ -1682,6 +1648,25 @@ void VideoDriverD3D9::SetRenderstates2DMode(bool useMaterial, bool Alpha, bool A
 
 	m_CurrentRendermode = ERM_2D;
 	m_ResetRenderstates = false;
+
+	const math::matrix4& world =
+		m_Use2DTransform ? m_2DTranform : math::matrix4::IDENTITY;
+
+	auto ssize = GetScreenSize();
+	math::matrix4 view = math::matrix4(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 - 0.5f, 0.0f, 1.0f);
+
+	math::matrix4 proj = math::matrix4(
+		2.0f / ssize.width, 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f / ssize.height, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f);
+
+	m_2DTransformChanged = true;
+	EnableTransforms(world, view, proj);
 }
 
 void VideoDriverD3D9::ResetAllRenderstates()

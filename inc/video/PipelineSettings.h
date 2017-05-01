@@ -59,7 +59,7 @@ enum EPipelineFlag
 
 
 // Die Vergleichsfunktion für den Z-Buffer
-enum EZComparisonFunc : u32
+enum EZComparisonFunc
 {
 	// Der Z-Test wird nie bestanden
 	EZCF_NEVER = 1,
@@ -79,7 +79,7 @@ enum EZComparisonFunc : u32
 	EZCF_ALWAYS = 8,
 };
 
-enum EColorPlane : u32
+enum EColorPlane
 {
 	ECP_NONE = 0x0,
 	ECP_ALPHA = 0x1,
@@ -91,14 +91,14 @@ enum EColorPlane : u32
 	ECP_ALL = ECP_RGB | ECP_ALPHA
 };
 
-enum EPolygonOffset : u32
+enum EPolygonOffset
 {
 	EPO_FRONT = 0,
 	EPO_BACK = 1
 };
 
 // Blendfaktor für Alphablending
-enum EBlendFactor : u32
+enum EBlendFactor
 {
 	// Alpha ist immer 0
 	EBF_ZERO = 0,
@@ -117,7 +117,7 @@ enum EBlendFactor : u32
 // Wie werden die alte und neue Farbe nach Multiplikation mit
 // dem Blendfaktor verknüpft.
 // Alle Operationen erfolgen Komponentenweise
-enum EBlendOperator : u32
+enum EBlendOperator
 {
 	// Es findet kein Alphablending stat
 	EBO_NONE = 0,
@@ -133,7 +133,7 @@ enum EBlendOperator : u32
 	EBO_MAX
 };
 
-enum ETextureFilter : u32
+enum ETextureFilter
 {
 	ETF_POINT,
 	ETF_LINEAR,
@@ -205,25 +205,35 @@ public:
 	// Sollen MIP-Maps benutzt werden
 	bool UseMIPMaps : 1;
 
+	float PolygonOffset;
+
 	// Die geschriebenen Farbebenen
 	EColorPlane ColorPlane : 4;
-
-	// Polygon offset von 0-7
-	u8 PolygonOffsetFactor : 3;
-
-	// Polygon offset Richtung
-	EPolygonOffset PolygonOffsetDirection : 1;
 
 	ETextureFilter MinFilter;
 	ETextureFilter MagFilter;
 	bool TrilinearFilter : 1;
 	u16 Anisotropic : 16;
 
-	PipelineSettings() : Thickness(1.0f), ZBufferFunc(EZCF_LESS_EQUAL), Wireframe(false), Pointcloud(false),
-		GouraudShading(true), ZWriteEnabled(true), BackfaceCulling(true), FrontfaceCulling(false),
-		FogEnabled(true), UseMIPMaps(true), Lighting(true), NormalizeNormals(true),
-		ColorPlane(ECP_ALL), PolygonOffsetFactor(0), PolygonOffsetDirection(EPO_FRONT),
-		MinFilter(ETF_LINEAR), MagFilter(ETF_LINEAR), TrilinearFilter(false), Anisotropic(0)
+	PipelineSettings() : 
+		FogEnabled(false),
+		Lighting(true),
+		Thickness(1.0f),
+		ZBufferFunc(EZCF_LESS_EQUAL),
+		ZWriteEnabled(true),
+		Wireframe(false),
+		NormalizeNormals(true),
+		Pointcloud(false),
+		GouraudShading(true),
+		BackfaceCulling(true),
+		FrontfaceCulling(false),
+		UseMIPMaps(true),
+		ColorPlane(ECP_ALL),
+		PolygonOffset(0.0f),
+		MinFilter(ETF_LINEAR),
+		MagFilter(ETF_LINEAR),
+		TrilinearFilter(false),
+		Anisotropic(0)
 	{
 	}
 
@@ -242,8 +252,7 @@ public:
 			NormalizeNormals != other.NormalizeNormals ||
 			UseMIPMaps != other.UseMIPMaps ||
 			ColorPlane != other.ColorPlane ||
-			PolygonOffsetFactor != other.PolygonOffsetFactor ||
-			PolygonOffsetDirection != other.PolygonOffsetDirection ||
+			PolygonOffset != other.PolygonOffset ||
 			MagFilter != other.MagFilter ||
 			MinFilter != other.MinFilter ||
 			TrilinearFilter != other.TrilinearFilter ||
@@ -292,7 +301,7 @@ public:
 		case EPF_NORMALIZE_NORMALS:
 			NormalizeNormals = Set; break;
 		case EPF_POLYGON_OFFSET:
-			PolygonOffsetFactor = Set ? 1 : 0; break;
+			PolygonOffset = Set ? 1.0f : 0.0f; break;
 		case EPF_COLOR_PLANE:
 			ColorPlane = Set ? ECP_ALL : ECP_NONE; break;
 		}
@@ -357,8 +366,7 @@ public:
 			if((Flags&EPF_COLOR_PLANE) != 0)
 				settings.ColorPlane = Override.ColorPlane;
 			if((Flags&EPF_POLYGON_OFFSET) != 0) {
-				settings.PolygonOffsetDirection = Override.PolygonOffsetDirection;
-				settings.PolygonOffsetFactor = Override.PolygonOffsetFactor;
+				settings.PolygonOffset = Override.PolygonOffset;
 			}
 		}
 	}

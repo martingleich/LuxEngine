@@ -240,6 +240,7 @@ private:
 private:
 	void FillCaps();
 	bool InitRendertargetData();
+	void EnableTransforms(const math::matrix4& world, const math::matrix4& view, const math::matrix4& proj);
 
 	IDirect3DSurface9* GetMatchingDepthBuffer(IDirect3DSurface9* target);
 	IDirect3DVertexDeclaration9* CreateVertexFormat(const VertexFormat& format);
