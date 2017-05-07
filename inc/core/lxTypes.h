@@ -142,10 +142,14 @@ private:
 	EType m_Type;
 };
 
-struct TypeException : Exception
+//! Exception thrown when a type mismatch occures.
+/**
+Some type is not valid in this place, or two types are not compatible.
+*/
+struct TypeException : ErrorException
 {
 	explicit TypeException(const char* _msg, Type _typeA = Type::Unknown, Type _typeB = Type::Unknown) :
-		Exception("type error"),
+		ErrorException("type error"),
 		msg(_msg),
 		typeA(_typeA),
 		typeB(_typeB)
@@ -153,7 +157,11 @@ struct TypeException : Exception
 	}
 
 	ExceptionSafeString msg;
+
+	//! First type which was part of the problem
 	Type typeA;
+
+	//! Second type which was part of the porblem
 	Type typeB;
 };
 

@@ -38,6 +38,10 @@ public:
 	virtual void LoadSceneValues() = 0;
 	virtual void Disable() = 0;
 
+	//! Initializes the shader from code
+	/**
+	\throws ShaderCompileException The shader couldn't be compiled, error lies in content of code.
+	*/
 	virtual void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,

@@ -247,7 +247,7 @@ void LuxDeviceWin32::SetOwnWindow(void* hOwnWindow)
 	// Globalen Zeiger für Dlg-Funktion speichern
 	if(!GetWindowLongPtrW(WinWindow, GWLP_USERDATA)) {
 		SetWindowLongPtrW(WinWindow, GWLP_USERDATA, (LONG_PTR)this);
-		throw core::GenericException();
+		throw core::RuntimeException("Window userdata already used.");
 	}
 }
 

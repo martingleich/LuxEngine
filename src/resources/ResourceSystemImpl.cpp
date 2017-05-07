@@ -20,6 +20,8 @@ const Name Font = "font";
 const Name Sound = "sound";
 }
 
+static u32 INVALID_ID = 0xFFFFFFFF;
+
 struct Entry
 {
 	string name;
@@ -102,18 +104,18 @@ struct ResourceBlock
 				return (u32)core::IteratorDistance(resources.First(), it);
 		}
 
-		return ResourceSystem::INVALID_ID;
+		return INVALID_ID;
 	}
 
 	u32 GetResourceId(const string& name) const
 	{
 		if(name.IsEmpty())
-			return ResourceSystem::INVALID_ID;
+			return INVALID_ID;
 
 		Entry entry(name, nullptr);
 		auto it = core::BinarySearch(entry, resources.First(), resources.End());
 		if(it == resources.End())
-			return ResourceSystem::INVALID_ID;
+			return INVALID_ID;
 
 		return (u32)core::IteratorDistance(resources.First(), it);
 	}
@@ -183,7 +185,7 @@ ResourceSystemImpl::~ResourceSystemImpl()
 u32 ResourceSystemImpl::GetResourceCount(Name type) const
 {
 	const u32 typeID = GetTypeID(type);
-	if(typeID == ResourceSystem::INVALID_ID)
+	if(typeID == INVALID_ID)
 		throw core::InvalidArgumentException("type", "type does not exist");
 
 	return (u32)self->resources[typeID].Size();
@@ -206,7 +208,7 @@ u32 ResourceSystemImpl::GetResourceId(Resource* resource) const
 	const u32 typeId = GetTypeID(resource->GetReferableSubType());
 
 	const u32 resId = self->resources[typeId].GetResourceId(resource);
-	if(resId == ResourceSystem::INVALID_ID)
+	if(resId == INVALID_ID)
 		throw core::Exception("Resource does not exist");
 
 	return resId;
@@ -215,7 +217,7 @@ u32 ResourceSystemImpl::GetResourceId(Resource* resource) const
 u32 ResourceSystemImpl::GetResourceId(Name type, const string& name) const
 {
 	u32 id = GetResourceIdUnsafe(type, name);
-	if(id == ResourceSystem::INVALID_ID)
+	if(id == INVALID_ID)
 		throw core::ObjectNotFoundException(name.Data());
 
 	return id;
@@ -229,7 +231,7 @@ u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const string& name) const
 	const u32 typeId = GetTypeID(type);
 
 	if(self->types[typeId].isCached == false)
-		return ResourceSystem::INVALID_ID; 
+		return INVALID_ID; 
 
 	if(self->fileSystem->ExistFile(name)) {
 		const string abs_path = self->fileSystem->GetAbsoluteFilename(name);
@@ -286,7 +288,7 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const string& nam
 		return nullptr;
 
 	const u32 id = GetResourceIdUnsafe(type, name);
-	if(id != ResourceSystem::INVALID_ID)
+	if(id != INVALID_ID)
 		return GetResource(type, id);
 
 	StrongRef<io::File> file = self->fileSystem->OpenFile(name);
@@ -323,12 +325,10 @@ StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, const string& 
 		return nullptr;
 
 	const u32 id = GetResourceIdUnsafe(type, name);
-	if(id != ResourceSystem::INVALID_ID)
+	if(id != INVALID_ID)
 		return GetResource(type, id);
 
 	StrongRef<io::File> file = self->fileSystem->OpenFile(name);
-	if(!file)
-		log::Error("Can't open file: ~s.", name);
 	return CreateResource(type, file);
 }
 
@@ -337,7 +337,7 @@ StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, io::File* file
 	// Get loader and correct resource type from file
 	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file);
 	if(!loader)
-		throw core::LoaderException("Resource format not supported");
+		throw core::FileFormatException("File format not supported", type.c_str());
 
 	// TODO: Use origin and originloader to load data
 	StrongRef<Resource> resource = self->refFactory->Create(ReferableType::Resource, type);
@@ -409,7 +409,6 @@ void ResourceSystemImpl::AddType(Name name)
 	auto it = core::LinearSearch(entry, self->types.First(), self->types.End());
 	if(it != self->types.End())
 		throw core::Exception("Resource type already exists");
-
 
 	self->types.PushBack(entry);
 	self->resources.PushBack(ResourceBlock());

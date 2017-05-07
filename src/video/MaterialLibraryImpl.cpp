@@ -30,7 +30,7 @@ size_t MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer, cons
 	} else {
 		size_t i = m_MaterialRenderers.Size();
 		if(i >= ANON_BASE_ID)
-			throw core::GenericException();
+			throw core::RuntimeException("Too many material renderers.");
 
 		m_MaterialRenderers.PushBack(Entry(renderer, name));
 		return m_MaterialRenderers.Size() - 1;
@@ -122,14 +122,10 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(size_t index) const
 {
-	if(index >= ANON_BASE_ID) {
-		index -= ANON_BASE_ID;
-		if(index < m_AnonRenderers.Size())
-			return m_AnonRenderers.At(index);
-	} else {
-		if(index < m_MaterialRenderers.Size())
-			return m_MaterialRenderers.At(index).renderer;
-	}
+	if(index >= ANON_BASE_ID)
+		return m_AnonRenderers.At(index - ANON_BASE_ID);
+	else
+		return m_MaterialRenderers.At(index).renderer;
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(const string& name) const

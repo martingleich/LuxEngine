@@ -241,7 +241,7 @@ void ArchiveFolderWin32::SetPath(const path& dir)
 		self->path = NormalizePath(dir, true);
 		self->win32AbsPath = ConvertPathToWin32WidePath(self->path);
 	} else {
-		throw core::InvalidArgumentException("dir", "Directory is not a valid path");
+		throw core::FileNotFoundException(dir.Data());
 	}
 }
 

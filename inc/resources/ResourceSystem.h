@@ -21,10 +21,6 @@ The resource system saves data as a map from names to resources.
 class ResourceSystem : public ReferenceCounted
 {
 public:
-	//! Returned by the resource system, if asked for an invalid id.
-	static const u32 INVALID_ID = 0xFFFFFFFF;
-
-public:
 	virtual ~ResourceSystem() {}
 
 	//! Query the number of loaded resources of a given type.
@@ -101,6 +97,8 @@ public:
 	\param type The type of the resource, can be empty to indicate any resourcetype matching name.
 	\param name The name of the resource.
 	\return The resource.
+	\throws FileNotFoundException
+	\throws FileFormatException
 	*/
 	virtual StrongRef<Resource> GetResource(Name type, const string& name) = 0;
 
@@ -130,6 +128,8 @@ public:
 	\param type The type of the resource, can be empty to indicate any resourcetype matching name.
 	\param name The name of the resource.
 	\return The resource.
+	\throws FileNotFoundException
+	\throws FileFormatException
 	*/
 	virtual StrongRef<Resource> CreateResource(Name type, const string& name) = 0;
 

@@ -236,7 +236,7 @@ void ImageLoaderPNM::LoadResource(io::File* file, core::Resource* dst)
 	Context ctx;
 	result = LoadImageFormat(ctx, file);
 	if(!result)
-		throw core::LoaderException();
+		throw core::FileFormatException("Corrupted or unsupported", "pnm");
 
 	img->Init(
 		math::dimension2du(ctx.m_Width, ctx.m_Height),
@@ -245,7 +245,7 @@ void ImageLoaderPNM::LoadResource(io::File* file, core::Resource* dst)
 	video::ImageLock lock(img);
 	result = LoadImageToMemory(ctx, lock.data);
 	if(!result)
-		throw core::LoaderException();
+		throw core::FileFormatException("Corrupted or unsupported", "pnm");
 }
 
 

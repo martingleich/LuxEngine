@@ -43,7 +43,7 @@ void INIFileImpl::Init(File* File)
 	bool result = LoadData();
 	if(!result) {
 		Close();
-		throw core::LoaderException("Invalid ini file");
+		throw core::FileFormatException("Invalid file", "ini");
 	}
 }
 

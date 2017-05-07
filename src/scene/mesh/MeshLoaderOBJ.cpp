@@ -60,7 +60,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 {
 	const long filesize = file->GetSize();
 	if(!filesize)
-		throw core::LoaderException("Can't load streaming file");
+		throw core::FileFormatException("Can't load streaming file", "obj");
 
 	core::array<math::vector3f> vertexBuffer;
 	core::array<math::vector3f> NormalBuffer;

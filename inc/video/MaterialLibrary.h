@@ -56,6 +56,8 @@ public:
 	\param name The name of the new material renderer
 	\param [out] errorList If not null, here a list of all errors/warning while creating the shader is written.
 	\return The new material renderer
+	\throws ShaderCompileException
+	\throws FileNotFoundException
 	*/
 	virtual StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
 		video::EShaderLanguage language,

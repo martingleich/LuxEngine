@@ -10,7 +10,7 @@ namespace lux
 namespace core
 {
 
-struct D3D9Exception : Exception
+struct D3D9Exception : RuntimeException
 {
 	static char* MakeErrorString(HRESULT hr)
 	{
@@ -26,7 +26,7 @@ struct D3D9Exception : Exception
 	}
 
 	explicit D3D9Exception(HRESULT hr) :
-		Exception(MakeErrorString(hr)),
+		RuntimeException(MakeErrorString(hr)),
 		result(hr)
 	{
 	}

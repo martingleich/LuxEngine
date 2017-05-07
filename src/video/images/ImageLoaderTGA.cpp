@@ -92,7 +92,7 @@ static void LoadImageFormat(Context& ctx)
 		result = false;
 
 	if(!result)
-		throw core::LoaderException();
+		throw core::FileFormatException("Corrupted or unsupported", "tga");
 
 	if(flags & TGA_FLAG_ALPHA)
 		ctx.format = video::ColorFormat::A8R8G8B8;
@@ -108,7 +108,7 @@ static void LoadImageToMemory(Context& ctx, void* dest)
 	uint32_t result = tga_read_image(ctx.tga, ctx.info, dest);
 
 	if(result != TGA_OK)
-		throw core::LoaderException();
+		throw core::FileFormatException("Corrupted or unsupported", "tga");
 }
 
 const string& ImageLoaderTGA::GetName() const
@@ -137,7 +137,7 @@ void ImageLoaderTGA::LoadResource(io::File* file, core::Resource* dst)
 
 	Context ctx;
 	if(!LoadTgaInfo(ctx, file, false))
-		throw core::LoaderException();
+		throw core::FileFormatException("Corrupted or unsupported", "tga");
 
 	LoadImageFormat(ctx);
 

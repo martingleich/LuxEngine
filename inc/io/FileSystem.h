@@ -37,7 +37,7 @@ public:
 	\param mode The mode to open the file in
 	\param createIfNotExist If the file doesnt exist create it
 	\return The newly created file
-	\exception FileNotFoundException If the file can't be opend
+	\throws FileNotFoundException
 	*/
 	virtual StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
@@ -47,7 +47,7 @@ public:
 	\param mode The mode to open the file in
 	\param createIfNotExist If the file doesnt exist create it
 	\return The newly created file
-	\exception FileNotFoundException If the file can't be opend
+	\throws FileNotFoundException
 	*/
 	virtual StrongRef<File> OpenFile(const path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
@@ -57,7 +57,8 @@ public:
 	\param size The size of the memory used by the file in bytes
 	\param name The name of the newly created file, can be empty
 	\param deleteOnDrop Should the used memory be deleted, if the file is not longer referenced
-	\return The newly created file, NULL if the file couldnt be created
+	\return The newly created file.
+	\throws FileNotFoundException
 	*/
 	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const string& name, bool deleteOnDrop) = 0;
 
@@ -69,6 +70,7 @@ public:
 	\param size The size of the limited file in bytes.
 	\param name The name of the new file
 	\return The new file
+	\throws FileNotFoundException
 	*/
 	virtual StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const string& name) = 0;
 
@@ -104,7 +106,8 @@ public:
 	/**
 	A temporary file, will be removed from disc after its no longer referenzed
 	\param size The roundabout size of the new file, didnt have to be exakt
-	\return The newly created file, or NULL if no file could be created
+	\return The newly created file.
+	\throws FileNotFoundException
 	*/
 	virtual File* CreateTemporaryFile(u32 size) = 0;
 
@@ -112,6 +115,7 @@ public:
 	/**
 	\param path The path of the file or directory
 	\return The information about the file is written here
+	\throws FileNotFoundException
 	*/
 	virtual FileDescription GetFileDescription(const path& path) = 0;
 
@@ -119,6 +123,7 @@ public:
 	/**
 	\param filename The path of the ini file
 	\return The new INI File
+	\throws FileNotFoundException
 	*/
 	virtual StrongRef<INIFile> CreateINIFile(const path& filename) = 0;
 

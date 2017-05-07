@@ -209,10 +209,10 @@ void ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
 	// Context is destroyed at end of scope.
 	Context ctx;
 	if(!Init(ctx, file))
-		throw core::LoaderException();
+		throw core::FileFormatException("Corrupted or unsupported", "png");
 
 	if(!LoadImageFormat(ctx))
-		throw core::LoaderException();
+		throw core::FileFormatException("Corrupted or unsupported", "png");
 
 	img->Init(ctx.size, ctx.format);
 

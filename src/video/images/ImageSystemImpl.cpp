@@ -80,36 +80,26 @@ public:
 
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
-		StrongRef<core::Resource> r = m_ResourceSystem->GetResource(core::Name::INVALID, file);
-		bool result;
-		if(r) {
-			if(r->GetReferableSubType() == core::ResourceType::Image) {
+		StrongRef<core::Resource> r = m_ResourceSystem->GetResource(core::ResourceType::Image, file);
+		StrongRef<Image> img = r;
+		Texture* texture = dynamic_cast<Texture*>(dst);
+		ColorFormat format = img->GetColorFormat();
+		math::dimension2du size = img->GetSize();
 
-				StrongRef<Image> img = r;
-				Texture* texture = dynamic_cast<Texture*>(dst);
-				ColorFormat format = img->GetColorFormat();
-				math::dimension2du size = img->GetSize();
+		bool result = m_ImageSystem->GetFittingTextureFormat(format, size, false);
+		if(!result)
+			throw core::FileFormatException("No matching texture format", "texture_loader_proxy");
+		texture->Init(size, format, 0, false, false);
 
-				result = m_ImageSystem->GetFittingTextureFormat(format, size, false);
-				if(!result)
-					throw core::LoaderException();
-				texture->Init(size, format, 0, false, false);
+		video::ImageLock lock(img);
+		video::TextureLock texLock(texture, BaseTexture::ETLM_OVERWRITE);
 
-				video::ImageLock lock(img);
-				video::TextureLock texLock(texture, BaseTexture::ETLM_OVERWRITE);
-
-				ColorConverter::ConvertByFormat(
-					lock.data, img->GetColorFormat(),
-					texLock.data, texture->GetColorFormat(),
-					img->GetSize().width,
-					img->GetSize().height,
-					0, texLock.pitch);
-
-				return;
-			}
-		}
-
-		throw core::LoaderException();
+		ColorConverter::ConvertByFormat(
+			lock.data, img->GetColorFormat(),
+			texLock.data, texture->GetColorFormat(),
+			img->GetSize().width,
+			img->GetSize().height,
+			0, texLock.pitch);
 	}
 
 	const string& GetName() const

@@ -206,6 +206,10 @@ public:
 	virtual StrongRef<CubeTexture> CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic) = 0;
 	virtual StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format) = 0;
 
+	//! Creates a new shader from code
+	/**
+	\throws ShaderCompileException
+	*/
 	virtual StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,

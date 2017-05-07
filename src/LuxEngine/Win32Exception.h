@@ -40,10 +40,10 @@ inline lux::string GetWin32ErrorString(DWORD error)
 
 namespace core
 {
-struct Win32Exception : Exception
+struct Win32Exception : RuntimeException
 {
 	explicit Win32Exception(DWORD _error) :
-		Exception(GetWin32ErrorString(_error).Data()),
+		RuntimeException(GetWin32ErrorString(_error).Data()),
 		error(_error)
 	{}
 

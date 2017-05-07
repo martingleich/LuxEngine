@@ -82,7 +82,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	file->ReadBinary(sizeof(u32), &Magic);
 	file->ReadBinary(sizeof(u32), &VersionStr);
 	if(Magic != LX_MAKE_FOURCC('F', 'O', 'N', 'T'))
-		throw core::LoaderException("Invalid magic number");
+		throw core::FileFormatException("Invalid magic number", "font");
 
 	u32 Version = 0;
 	for(int i = 0; i < 4; ++i) {
@@ -91,7 +91,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	}
 
 	if(Version != 1)
-		throw core::LoaderException("Unsupported version");
+		throw core::FileFormatException("Unsupported version", "font");
 
 	core::HashMap<u32, gui::CharInfo> charMap;
 	video::Texture* fontTexture;
@@ -143,7 +143,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 						u8* pixel = rowData;
 						for(u32 x = 0; x < image.TextureWidth; ++x) {
 							if(file->ReadBinary(1, &value) == 0)
-								throw core::LoaderException("Unexpected end of file");
+								throw core::FileFormatException("Unexpected end of file", "font");
 
 							*pixel = value;        // Alpha
 							++pixel;

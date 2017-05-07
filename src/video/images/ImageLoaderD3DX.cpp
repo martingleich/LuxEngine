@@ -236,19 +236,19 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 		buffer.drop = true;
 		size_t read = file->ReadBinary((u32)buffer.size, tmp);
 		if(read != buffer.size)
-			throw core::LoaderException("Unexpected end of file");
+			throw core::FileFormatException("Unexpected end of file");
 	} else {
 		buffer.ptr = file->GetBuffer();
 		buffer.drop = false;
 	}
 
 	if(!buffer.ptr)
-		throw core::LoaderException("Can't loader data from file");
+		throw core::FileFormatException("Can't loader data from file");
 
 	D3DXIMAGE_INFO info;
 	hr = D3DXGetImageInfoFromFileInMemory(buffer.ptr, (UINT)buffer.size, &info);
 	if(FAILED(hr))
-		throw core::LoaderException("Texture corrupted or not supported");
+		throw core::FileFormatException("Corrupted or not supported", io::GetFileExtension(file->GetName()).Data());
 
 	D3DSURFACE_DESC desc;
 	auto texture = LoadTexture(
@@ -258,11 +258,11 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 		desc);
 
 	if(!texture)
-		throw core::LoaderException("Texture corrupted or not supported");
+		throw core::FileFormatException("Corrupted or not supported", io::GetFileExtension(file->GetName()).Data());
 
 	video::ColorFormat lxFormat = ConvertD3DToLuxFormat(desc.Format);
 	if(lxFormat == video::ColorFormat::UNKNOWN)
-		throw core::LoaderException("Texture has unsupported color format");
+		throw core::FileFormatException("Unsupported color format", io::GetFileExtension(file->GetName()).Data());
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	img->Init(math::dimension2du(desc.Width, desc.Height), lxFormat);

@@ -355,7 +355,7 @@ void ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
 	Context ctx;
 	result = LoadImageFormat(ctx, file);
 	if(!result)
-		throw core::LoaderException("Failed to load bitmap");
+		throw core::FileFormatException("Failed to load", "bmp");
 
 	img->Init(ctx.size, ctx.format);
 
