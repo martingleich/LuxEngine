@@ -293,13 +293,13 @@ bool WindowWin32::Present(video::Image* image, const math::recti& SourceRect, co
 		DstRect.FitInto(WinRect);
 
 	math::recti SrcRect = SourceRect;
-	math::recti ImageRect = math::recti(0, 0, image->GetDimension().width, image->GetDimension().height);
+	math::recti ImageRect = math::recti(0, 0, image->GetSize().width, image->GetSize().height);
 	if(SrcRect.IsEmpty())
 		SrcRect = ImageRect;
 	else
 		SrcRect.FitInto(ImageRect);
 
-	math::dimension2d<int> ImageDim = ImageRect.GetDimension();
+	math::dimension2d<int> ImageDim = ImageRect.GetSize();
 	void* data = nullptr;
 	if(image->GetBitsPerPixel() == 8) {
 		// Immer nach ARGB

@@ -12,6 +12,7 @@
 
 #include "StrippedD3D9.h"
 #include "video/d3d9/RenderTargetD3D9.h"
+#include "video/d3d9/UnknownRefCounted.h"
 
 namespace lux
 {
@@ -27,12 +28,12 @@ public:
 
 	bool Init(const DriverConfig& config, gui::Window* Window);
 
-	bool BeginScene(bool cleaColor, bool clearZ,
+	void BeginScene(bool clearColor, bool clearZ,
 		video::Color color, float z);
-	bool EndScene();
+	void EndScene();
 	bool Present();
 
-	bool SetRenderTarget(const RenderTarget& target);
+	void SetRenderTarget(const RenderTarget& target);
 	const RenderTarget& GetRenderTarget();
 
 	//------------------------------------------------------------------
@@ -80,7 +81,8 @@ public:
 	StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
-		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion);
+		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
+		core::array<string>* errorList);
 
 	//------------------------------------------------------------------
 	// Renderfunktionen
@@ -196,32 +198,28 @@ private:
 	class VertexFormat_d3d9
 	{
 	public:
-		VertexFormat_d3d9();
-		VertexFormat_d3d9(IDirect3DVertexDeclaration9* d3dDecl);
-		VertexFormat_d3d9(const VertexFormat_d3d9& other);
-		VertexFormat_d3d9& operator=(const VertexFormat_d3d9& other);
-		VertexFormat_d3d9(VertexFormat_d3d9&& old);
-		VertexFormat_d3d9& operator=(VertexFormat_d3d9&& old);
-		~VertexFormat_d3d9();
-		IDirect3DVertexDeclaration9* GetD3D() const;
+		VertexFormat_d3d9() {}
+		VertexFormat_d3d9(IDirect3DVertexDeclaration9* d3dDecl) :
+			m_D3DDeclaration(d3dDecl)
+		{}
+
+		IDirect3DVertexDeclaration9* GetD3D() const { return m_D3DDeclaration; }
 
 	private:
-		IDirect3DVertexDeclaration9* m_D3DDeclaration;
+		UnknownRefCounted<IDirect3DVertexDeclaration9> m_D3DDeclaration;
 	};
 
 	class DepthBuffer_d3d9
 	{
 	public:
-		DepthBuffer_d3d9();
+		DepthBuffer_d3d9() {}
 		DepthBuffer_d3d9(IDirect3DSurface9* surface);
-		DepthBuffer_d3d9& operator=(const DepthBuffer_d3d9& other);
-		~DepthBuffer_d3d9();
-		const math::dimension2du& GetSize() const;
-		IDirect3DSurface9* GetSurface() const;
+		const math::dimension2du& GetSize() const { return m_Size; }
+		IDirect3DSurface9* GetSurface() const { return m_Surface; }
 
 	private:
 		math::dimension2du m_Size;
-		IDirect3DSurface9* m_Surface;
+		UnknownRefCounted<IDirect3DSurface9> m_Surface;
 	};
 
 	struct FogInformation_d3d9
@@ -267,8 +265,8 @@ private:
 	StrongRef<BufferManager> m_BufferManager;
 	FogInformation_d3d9 m_Fog;
 
-	IDirect3D9* m_D3D;
-	IDirect3DDevice9* m_D3DDevice;
+	UnknownRefCounted<IDirect3D9> m_D3D;
+	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
 	bool m_PresentResult;
 
 	core::array<StrongRef<BaseTexture>> m_Textures;

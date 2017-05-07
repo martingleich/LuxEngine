@@ -24,13 +24,25 @@ public:
 	{
 	}
 
+	INIFileImpl(FileSystem* FileSys, File* f) :
+		INIFileImpl(FileSys)
+	{
+		Init(f);
+	}
+
+	INIFileImpl(FileSystem* FileSys, const io::path& p) :
+		INIFileImpl(FileSys)
+	{
+		Init(p);
+	}
+
 	~INIFileImpl()
 	{
 		Close();
 	}
 
-	bool Init(File* file);
-	bool Init(const io::path& path);
+	void Init(File* file);
+	void Init(const io::path& path);
 
 	// Close this ini file
 	void Close();

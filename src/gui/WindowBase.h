@@ -154,10 +154,10 @@ public:
 		call->m_Window = this;
 	}
 
-	bool UnregisterCallback(WindowEventCallback* call)
+	void UnregisterCallback(WindowEventCallback* call)
 	{
 		if(call->m_Window != this)
-			return false;
+			return;
 
 		if(call->m_Next)
 			call->m_Next->m_Prev = call->m_Prev;
@@ -170,8 +170,6 @@ public:
 		call->m_Next = nullptr;
 		call->m_Prev = nullptr;
 		call->m_Window = nullptr;
-
-		return true;
 	}
 
 	const string& GetTitle() const

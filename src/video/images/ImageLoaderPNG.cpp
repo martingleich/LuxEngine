@@ -198,34 +198,26 @@ core::Name ImageLoaderPNG::GetResourceType(io::File* file, core::Name requestedT
 	return core::ResourceType::Image;
 }
 
-bool ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
 {
 	bool result;
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)
-		return false;
+		throw core::Exception("Passed wrong resource type to loader");
 
 	// Context is destroyed at end of scope.
 	Context ctx;
 	if(!Init(ctx, file))
-		return false;
+		throw core::LoaderException();
 
 	if(!LoadImageFormat(ctx))
-		return false;
+		throw core::LoaderException();
 
 	img->Init(ctx.size, ctx.format);
 
-	void* data = img->Lock();
-	if(!data)
-		return false;
-
-	result = LoadImageToMemory(ctx, data);
-	img->Unlock();
-	if(!result)
-		return false;
-
-	return true;
+	video::ImageLock lock(img);
+	result = LoadImageToMemory(ctx, lock.data);
 }
 
 }

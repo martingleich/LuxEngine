@@ -15,6 +15,13 @@ class File;
 namespace video
 {
 
+struct ShaderCompileException : public core::Exception
+{
+	explicit ShaderCompileException(const char* msg = "shader compile error") :
+		Exception(msg)
+	{}
+};
+
 class ShaderParam;
 
 class Shader : public ReferenceCounted
@@ -31,9 +38,10 @@ public:
 	virtual void LoadSceneValues() = 0;
 	virtual void Disable() = 0;
 
-	virtual bool Init(
+	virtual void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
-		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile) = 0;
+		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
+		core::array<string>* errorList) = 0;
 
 	virtual core::ParamPackage& GetParamPackage() = 0;
 

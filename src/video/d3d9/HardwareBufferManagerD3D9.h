@@ -48,12 +48,11 @@ private:
 
 public:
 	BufferManagerD3D9(VideoDriver* driver);
-	~BufferManagerD3D9();
 	void RemoveInternalBuffer(HardwareBuffer* buffer, void* handle);
 	void* UpdateVertexBuffer(VertexBuffer* buffer, void* handle);
 	void* UpdateIndexBuffer(IndexBuffer* buffer, void* handle);
 	void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle);
-	bool EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle);
+	void EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle);
 	bool GetVertexStream(u32 streamID, VertexStream& vs) const;
 	bool GetIndexStream(IndexStream& is) const;
 	void ResetStreams();

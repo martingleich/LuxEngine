@@ -6,6 +6,7 @@
 #include "video/images/Image.h"
 #include "core/lxMemory.h"
 #include "StrippedD3D9X.h"
+#include "video/d3d9/UnknownRefCounted.h"
 
 namespace lux
 {
@@ -57,12 +58,11 @@ static ColorFormat ConvertD3DToLuxFormat(D3DFORMAT Format)
 	}
 }
 
-static bool LoadTexture(
+static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	IDirect3DDevice9* device,
 	void* buffer, size_t bufferSize,
 	D3DFORMAT format,
 	const D3DXIMAGE_INFO& imageInfo,
-	IDirect3DBaseTexture9*& outTexture,
 	D3DSURFACE_DESC& outDesc)
 {
 	HRESULT hr = E_FAIL;
@@ -77,11 +77,11 @@ static bool LoadTexture(
 			D3DX_DEFAULT, D3DX_DEFAULT, 0,
 			nullptr, nullptr, &Tex);
 		if(FAILED(hr))
-			return false;
+			return nullptr;
 
 		Tex->GetLevelDesc(0, &outDesc);
 
-		outTexture = Tex;
+		return Tex;
 	}
 	break;
 	case D3DRTYPE_CUBETEXTURE:
@@ -94,9 +94,9 @@ static bool LoadTexture(
 			D3DX_DEFAULT, D3DX_DEFAULT,
 			0, nullptr, nullptr, &Tex);
 		if(FAILED(hr))
-			return false;
+			return nullptr;
 		Tex->GetLevelDesc(0, &outDesc);
-		outTexture = Tex;
+		return Tex;
 	}
 	break;
 	case D3DRTYPE_VOLUMETEXTURE:
@@ -110,7 +110,7 @@ static bool LoadTexture(
 			0, nullptr, nullptr, &tex);
 
 		if(FAILED(hr))
-			return false;
+			return nullptr;
 		D3DVOLUME_DESC desc;
 		tex->GetLevelDesc(0, &desc);
 		outDesc.Format = desc.Format;
@@ -119,14 +119,12 @@ static bool LoadTexture(
 		outDesc.Type = desc.Type;
 		outDesc.Usage = desc.Usage;
 		outDesc.Width = desc.Width;
-		outTexture = tex;
+		return tex;
 	}
 	break;
 	default:
-		return false;
+		return nullptr;
 	}
-
-	return true;
 }
 
 static void ConvertLine(void* Src, void* Dst, D3DFORMAT SrcFormat, ColorFormat DstFormat, u32 Width)
@@ -225,7 +223,7 @@ struct TempMemory
 	}
 };
 
-bool ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 {
 	HRESULT hr;
 
@@ -234,48 +232,43 @@ bool ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 	buffer.size = file->GetSize() - file->GetCursor();
 	if(file->GetBuffer() == nullptr) {
 		void* tmp = LUX_NEW_ARRAY(u8, buffer.size);
-		size_t read = file->ReadBinary((u32)buffer.size, tmp);
-		if(read != buffer.size)
-			return false;
 		buffer.ptr = tmp;
 		buffer.drop = true;
+		size_t read = file->ReadBinary((u32)buffer.size, tmp);
+		if(read != buffer.size)
+			throw core::LoaderException("Unexpected end of file");
 	} else {
 		buffer.ptr = file->GetBuffer();
 		buffer.drop = false;
 	}
 
 	if(!buffer.ptr)
-		return false;
+		throw core::LoaderException("Can't loader data from file");
 
 	D3DXIMAGE_INFO info;
 	hr = D3DXGetImageInfoFromFileInMemory(buffer.ptr, (UINT)buffer.size, &info);
 	if(FAILED(hr))
-		return false;
+		throw core::LoaderException("Texture corrupted or not supported");
 
-	IDirect3DBaseTexture9* texture;
 	D3DSURFACE_DESC desc;
-	bool result = LoadTexture(
+	auto texture = LoadTexture(
 		m_Device,
 		buffer.ptr, buffer.size,
 		info.Format, info,
-		texture, desc);
+		desc);
 
-	if(!result)
-		return false;
+	if(!texture)
+		throw core::LoaderException("Texture corrupted or not supported");
 
 	video::ColorFormat lxFormat = ConvertD3DToLuxFormat(desc.Format);
 	if(lxFormat == video::ColorFormat::UNKNOWN)
-		return false;
+		throw core::LoaderException("Texture has unsupported color format");
+
 	video::Image* img = dynamic_cast<video::Image*>(dst);
-	img->Init(
-		math::dimension2du(desc.Width, desc.Height), lxFormat);
-	void* imgData = img->Lock();
-	CopyTextureData(0, imgData, texture, info, desc, lxFormat);
-	img->Unlock();
+	img->Init(math::dimension2du(desc.Width, desc.Height), lxFormat);
 
-	texture->Release();
-
-	return true;
+	video::ImageLock imgLock(img);
+	CopyTextureData(0, imgLock.data, texture, info, desc, lxFormat);
 }
 
 

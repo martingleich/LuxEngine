@@ -20,7 +20,7 @@ class MeshSystemImpl : public MeshSystem
 {
 public:
 	MeshSystemImpl(core::ResourceSystem* resourceSystem, video::VideoDriver* driver, video::MaterialLibrary* matLib);
-	bool AddMesh(const io::path& name, Mesh* mesh);
+	void AddMesh(const io::path& name, Mesh* mesh);
 	StrongRef<Mesh> GetMesh(const io::path& filename);
 	StrongRef<Mesh> GetMesh(io::File* file);
 	StrongRef<Mesh> CreateMesh();

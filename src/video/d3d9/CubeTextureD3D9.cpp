@@ -21,10 +21,10 @@ CubeTextureD3D9::~CubeTextureD3D9()
 		m_Texture->Release();
 }
 
-bool CubeTextureD3D9::Init(u32 Size, ColorFormat lxFormat, bool isDynamic)
+void CubeTextureD3D9::Init(u32 Size, ColorFormat lxFormat, bool isDynamic)
 {
 	if(!m_D3DDevice)
-		return false;
+		throw core::Exception("No driver available");
 
 	if(m_Texture) {
 		m_Texture->Release();
@@ -41,7 +41,7 @@ bool CubeTextureD3D9::Init(u32 Size, ColorFormat lxFormat, bool isDynamic)
 	HRESULT hr = m_D3DDevice->CreateCubeTexture(Size, 1, usage, format, pool, &m_Texture, nullptr);
 
 	if(FAILED(hr))
-		return false;
+		throw core::D3D9Exception(hr);
 
 	m_LockedLevel = 0xFFFFFFFF;
 
@@ -50,19 +50,19 @@ bool CubeTextureD3D9::Init(u32 Size, ColorFormat lxFormat, bool isDynamic)
 	m_Dimension.Set(m_Desc.Width, m_Desc.Height);
 
 	m_Format = lxFormat;
-
-	return true;
 }
 
 void CubeTextureD3D9::RegenerateMIPMaps()
 {
-	D3DXFilterCubeTexture(m_Texture, nullptr, 0, 0);
+	HRESULT hr = D3DXFilterTexture(m_Texture, nullptr, 0, 0);
+	if(FAILED(hr))
+		throw core::D3D9Exception(hr);
 }
 
-void* CubeTextureD3D9::Lock(ETextureLockMode Mode, EFace Face, SLockedRect* locked, u32 MipLevel)
+BaseTexture::LockedRect CubeTextureD3D9::Lock(ETextureLockMode Mode, EFace Face, u32 MipLevel)
 {
 	if(m_LockedLevel != 0xFFFFFFFF)
-		return nullptr;
+		throw core::Exception("Texture is already locked");
 
 	static const D3DCUBEMAP_FACES Conv[6] = {D3DCUBEMAP_FACE_POSITIVE_X, D3DCUBEMAP_FACE_NEGATIVE_X,
 		D3DCUBEMAP_FACE_POSITIVE_Y, D3DCUBEMAP_FACE_NEGATIVE_Y,
@@ -77,16 +77,15 @@ void* CubeTextureD3D9::Lock(ETextureLockMode Mode, EFace Face, SLockedRect* lock
 	else if(Mode == ETLM_READ_ONLY)
 		Flags = D3DLOCK_READONLY;
 
-	HRESULT h = m_Texture->LockRect(m_LockedFace, MipLevel, &Locked, nullptr, Flags);
-	if(locked) {
-		locked->bits = Locked.pBits;
-		locked->pitch = Locked.Pitch;
-	}
+	HRESULT hr = m_Texture->LockRect(m_LockedFace, MipLevel, &Locked, nullptr, Flags);
+	if(FAILED(hr))
+		throw core::D3D9Exception(hr);
 
-	if(FAILED(h))
-		return nullptr;
-	else
-		return Locked.pBits;
+	LockedRect locked;
+	locked.bits = (u8*)Locked.pBits;
+	locked.pitch = Locked.Pitch;
+
+	return locked;
 }
 
 void CubeTextureD3D9::Unlock()
@@ -122,8 +121,8 @@ StrongRef<Referable> CubeTextureD3D9::Clone() const
 	return new CubeTextureD3D9(m_D3DDevice);
 }
 
-}    
+}
 
-}    
+}
 
 #endif // LUX_COMPILE_WITH_D3D9

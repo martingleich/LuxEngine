@@ -33,17 +33,21 @@ void INIFileImpl::InitValues()
 	m_CurrentElement = 0;
 }
 
-bool INIFileImpl::Init(File* File)
+void INIFileImpl::Init(File* File)
 {
 	m_File = File;
 	m_AutoCommit = false;
 	m_AutoReload = false;
 	InitValues();
 
-	return LoadData();
+	bool result = LoadData();
+	if(!result) {
+		Close();
+		throw core::LoaderException("Invalid ini file");
+	}
 }
 
-bool INIFileImpl::Init(const io::path& File)
+void INIFileImpl::Init(const io::path& File)
 {
 	m_FilePath = File;
 	m_File = nullptr;
@@ -51,9 +55,7 @@ bool INIFileImpl::Init(const io::path& File)
 	m_AutoReload = true;
 	InitValues();
 
-	bool result = LoadData();
-	LUX_UNUSED(result); // if file couldn't be loaded, handle as new empty file.
-	return true;
+	LoadData(); // if file couldn't be loaded, handle as new empty file.
 }
 
 bool INIFileImpl::ReadSections()

@@ -276,15 +276,15 @@ public:
 			m_Settings = *data;
 	}
 
-	virtual bool Init()
+	virtual void Init()
 	{
 		Exit();
 
 		m_File = core::FOpenUTF8(m_Settings.FilePath.Data(), "wb");
 		if(!m_File)
-			return false;
+			throw core::FileNotFoundException(m_Settings.FilePath.Data_c());
 
-		return Printer::Init();
+		Printer::Init();
 	}
 
 	void Print(const string& s, ELogLevel ll)
@@ -320,10 +320,10 @@ private:
 class ConsolePrinter : public Printer
 {
 public:
-	bool Init()
+	void Init()
 	{
 		Exit();
-		return Printer::Init();
+		Printer::Init();
 	}
 
 	virtual void SetSettings(const Printer::Settings& settings)
@@ -357,7 +357,7 @@ private:
 class Win32DebugPrinter : public Printer
 {
 public:
-	bool Init()
+	void Init()
 	{
 		Exit();
 #if WINVER >= 0x0A00
@@ -368,8 +368,8 @@ public:
 		// No unicode support available
 #endif
 
-		return Printer::Init();
-}
+		Printer::Init();
+	}
 
 	void Print(const string& s, ELogLevel ll)
 	{

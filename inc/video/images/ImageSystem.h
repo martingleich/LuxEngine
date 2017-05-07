@@ -57,7 +57,7 @@ public:
 	/**
 	\param size The size of the new image in pixel
 	\param format The colorformat of the new image
-	\return The newly created image or NULL if an error occured
+	\return The newly created image
 	*/
 	virtual StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format) = 0;
 
@@ -68,7 +68,7 @@ public:
 	\param data The imagedata of the image, the size and the format must be euqal to the previouse params
 	\param copyMem Should the data from the original location be copied or only referenced
 	\param deleteOnDrop Only if copyMem=true. Should the referenced memory be deleted if the image is destructed.
-	\return The newly created image or NULL if an error occured
+	\return The newly created image
 	*/
 	virtual StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format, void* data, bool copyMem, bool deleteOnDrop) = 0;
 
@@ -77,18 +77,16 @@ public:
 	The filetype is determined by the ending of the name of file
 	\param image The image to write to memory
 	\param file The file where the image is written must be a writable file
-	\return True if the image was written otherwise false
 	*/
-	virtual bool WriteImageToFile(Image* image, io::File* file) = 0;
+	virtual void WriteImageToFile(Image* image, io::File* file) = 0;
 
 	//! Write a image from memory to file
 	/**
 	The filetype is determined by the ending of the path
 	\param image The image to write to memory
 	\param path The path were the image is written
-	\return True if the image was written otherwise false
 	*/
-	virtual bool WriteImageToFile(Image* image, const io::path& path) = 0;
+	virtual void WriteImageToFile(Image* image, const io::path& path) = 0;
 
 	//! Write a image from memory to file
 	/**
@@ -97,9 +95,8 @@ public:
 	\param format The colorformat of the image
 	\param data A pointer to the image data
 	\param file The file where the image is written must be a writable file
-	\return True if the image was written otherwise false
 	*/
-	virtual bool WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, io::File* file) = 0;
+	virtual void WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, io::File* file) = 0;
 
 	//! Write a image from memory to file
 	/**
@@ -108,9 +105,8 @@ public:
 	\param format The colorformat of the image
 	\param data A pointer to the image data
 	\param path The path where the image is written
-	\return True if the image was written otherwise false
 	*/
-	virtual bool WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, const io::path& path) = 0;
+	virtual void WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, const io::path& path) = 0;
 
 	//! Add a new image writer
 	/**

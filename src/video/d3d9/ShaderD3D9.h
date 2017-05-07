@@ -3,11 +3,13 @@
 #include "video/Shader.h"
 #include "core/lxHashMap.h"
 #include "video/SceneValues.h"
+#include "core/lxMemory.h"
 
 #ifdef LUX_COMPILE_WITH_D3D9
 
 #include "StrippedD3D9.h"
 #include "StrippedD3D9X.h"
+#include "video/d3d9/UnknownRefCounted.h"
 
 namespace lux
 {
@@ -19,11 +21,11 @@ class ShaderD3D9 : public Shader
 {
 public:
 	ShaderD3D9(VideoDriver* driver);
-	~ShaderD3D9();
 
-	bool Init(
+	void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
-		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile);
+		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
+		core::array<string>* errorList);
 
 	const ShaderParam& GetParam(const char* name);
 	const ShaderParam& GetParam(u32 index);
@@ -104,11 +106,12 @@ private:
 private:
 	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
 
-	bool LoadParamsFromStructure(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, bool isParam);
-	bool LoadAllParams(ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize);
+	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, core::array<string>* errorList);
 
-	bool CreatePixelShader(const char* code, const char* entryPoint, size_t length, const char* profile);
-	bool CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile);
+	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(const char* code, const char* entryPoint, size_t length, const char* profile,
+		core::array<string>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
+	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile,
+		core::array<string>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 
 	void GetShaderValue(
 		u32 registerVS, u32 registerPS,
@@ -130,15 +133,13 @@ private:
 private:
 	IDirect3DDevice9* m_D3DDevice;
 	scene::SceneValues* m_SceneValues;
-	IDirect3DVertexShader9* m_VertexShader;
-	IDirect3DPixelShader9* m_PixelShader;
 
-	ID3DXConstantTable* m_VertexShaderConstants;
-	ID3DXConstantTable* m_PixelShaderConstants;
+	UnknownRefCounted<IDirect3DVertexShader9> m_VertexShader;
+	UnknownRefCounted<IDirect3DPixelShader9> m_PixelShader;
 
 	core::array<ParamEntry> m_Params;
 
-	char* m_Names;
+	core::mem::RawMemory m_Names;
 	core::ParamPackage m_ParamPackage;
 
 	ShaderParam m_InvalidParam;

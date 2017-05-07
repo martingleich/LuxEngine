@@ -25,9 +25,8 @@ public:
 	/**
 	The type name, resource type, type id are automatic read from the object.
 	\param prototype The new prototype object for this type, every new object is cloned from this one
-	\return True if the type was registed otherwise false.
 	*/
-	virtual bool RegisterType(Referable* prototype) = 0;
+	virtual void RegisterType(Referable* prototype) = 0;
 
 	//! Unregister a type
 	/**
@@ -39,15 +38,15 @@ public:
 	//! Set the passed referable as prototype for its own type.
 	/**
 	\param prototype The new prototype type.
-	\return Was the new prototype set
 	*/
-	virtual bool SetPrototype(Referable* prototype) = 0;
+	virtual void SetPrototype(Referable* prototype) = 0;
 
 	//! Gets the prototype object
 	/**
 	\param type The type
 	\param subType The sub type
 	\return The prototype object
+	\throws ObjectNotFoundException No Prototye with passed name exist.
 	*/
 	virtual StrongRef<Referable> GetPrototype(Name type, Name subType) const = 0;
 
@@ -55,6 +54,7 @@ public:
 	/**
 	\param id The internal id of the object.
 	\return The prototype object
+	\throws OutOfRange id is out of range
 	*/
 	virtual StrongRef<Referable> GetPrototype(size_t id) const = 0;
 

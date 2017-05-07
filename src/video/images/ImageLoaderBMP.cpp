@@ -344,30 +344,25 @@ const string& ImageLoaderBMP::GetName() const
 	return name;
 }
 
-bool ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
 {
 	bool result;
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)
-		return false;
+		throw core::Exception("Passed wrong resource type to loader");
 
 	Context ctx;
 	result = LoadImageFormat(ctx, file);
 	if(!result)
-		return false;
+		throw core::LoaderException("Failed to load bitmap");
 
 	img->Init(ctx.size, ctx.format);
 
-	void* data = img->Lock();
-	if(!data)
-		return false;
-	result = LoadImageToMemory(ctx, file, data);
-	img->Unlock();
-	if(!result)
-		return false;
-
-	return true;
+	{
+		video::ImageLock lock(img);
+		result = LoadImageToMemory(ctx, file, lock.data);
+	}
 }
 
 }

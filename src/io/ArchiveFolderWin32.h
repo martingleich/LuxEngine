@@ -22,7 +22,6 @@ public:
 	bool ExistFile(const path& p);
 	StrongRef<FileEnumerator> EnumerateFiles(const path& subDir = string::EMPTY);
 	EArchiveCapabilities GetCaps() const;
-	bool IsValid() const;
 	path GetAbsolutePath(const path& p);
 
 private:

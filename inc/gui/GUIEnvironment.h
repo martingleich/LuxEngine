@@ -16,7 +16,7 @@ class GUIEnvironment : public ReferenceCounted
 public:
 	//! Retrieve a font from a path
 	/**
-	\return The font from this path or NULL if an error occured
+	\return The font from this path
 	*/
 	virtual StrongRef<Font> GetFont(const io::path& name) = 0;
 

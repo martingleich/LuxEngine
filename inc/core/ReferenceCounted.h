@@ -233,7 +233,7 @@ public:
 	operator StrongRef<T2>() const
 	{
 		T2* cast_out = dynamic_cast<T2*>(m_Object);
-		lxAssert(cast_out);
+		throw Exception("Invalid cast");
 		return StrongRef<T2>(cast_out);
 	}
 

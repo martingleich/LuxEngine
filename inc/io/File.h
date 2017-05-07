@@ -56,14 +56,10 @@ public:
 	/**
 	\param data The data to write to the file
 	\param Length The number of bytes to write
-	\return The number of bytes which were written, 0 in the case of an error
 	*/
 	virtual u32 WriteBinary(const void* data, u32 length) = 0;
 
 	//! Write a string to the file
-	/**
-	\return The number of bytes which were written, at max str.Size()+1
-	*/
 	virtual u32 WriteString(const string& str)
 	{
 		lxAssert(str.Size() < std::numeric_limits<u32>::max());
@@ -74,7 +70,7 @@ public:
 	/**
 	\param file The file to copy
 	\param bytes the number of bytes to copy, or 0 to copy bytes until end of file
-	\return The number of bytes written, in the case of an error 0
+	\return The number of bytes written.
 	*/
 	u32 WriteToFile(File* file, u32 bytes = 0)
 	{
@@ -82,14 +78,15 @@ public:
 		u32 written = 0;
 		if(bytes > 0) {
 			if(file->GetBuffer() != nullptr) {
-				written = this->WriteBinary(file->GetBuffer(), file->GetSize());
+				this->WriteBinary(file->GetBuffer(), file->GetSize());
+				written = file->GetSize();
 			} else {
 				while(written < bytes) {
 					u32 toMove = math::Min((u32)sizeof(byteBuffer), (u32)bytes);
 					u32 readBytes = file->ReadBinary(toMove, byteBuffer);
-					u32 writtenBytes = this->WriteBinary(byteBuffer, readBytes);
-					written += writtenBytes;
-					if(writtenBytes != toMove)
+					this->WriteBinary(byteBuffer, readBytes);
+					written += readBytes;
+					if(readBytes != toMove)
 						break;
 				}
 			}
@@ -97,9 +94,9 @@ public:
 			while(!file->IsEOF()) {
 				u32 toMove = sizeof(byteBuffer);
 				u32 readBytes = file->ReadBinary(toMove, byteBuffer);
-				u32 writtenBytes = this->WriteBinary(byteBuffer, readBytes);
-				written += writtenBytes;
-				if(writtenBytes != toMove)
+				this->WriteBinary(byteBuffer, readBytes);
+				written += readBytes;
+				if(readBytes != toMove)
 					break;
 			}
 		}

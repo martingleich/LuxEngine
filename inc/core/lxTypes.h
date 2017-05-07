@@ -1,11 +1,11 @@
 #ifndef INCLUDED_LXTYPES_H
 #define INCLUDED_LXTYPES_H
 #include "LuxBase.h"
+#include "lxException.h"
 #include <string.h>
 
 namespace lux
 {
-
 namespace core
 {
 
@@ -132,15 +132,29 @@ public:
 			4 * 4 * 4,
 			0};
 
-		if(type < (sizeof(TYPE_SIZES) / sizeof(*TYPE_SIZES)))
-			return TYPE_SIZES[type];
-		else
-			lxAssertNeverReach("Unknown type used");
-		return 0;
+		if(type >= (sizeof(TYPE_SIZES) / sizeof(*TYPE_SIZES)))
+			throw Exception("Unknown type used");
+
+		return TYPE_SIZES[type];
 	}
 
 private:
 	EType m_Type;
+};
+
+struct TypeException : Exception
+{
+	explicit TypeException(const char* _msg, Type _typeA = Type::Unknown, Type _typeB = Type::Unknown) :
+		Exception("type error"),
+		msg(_msg),
+		typeA(_typeA),
+		typeB(_typeB)
+	{
+	}
+
+	ExceptionSafeString msg;
+	Type typeA;
+	Type typeB;
 };
 
 //! Available Types for params
@@ -288,4 +302,5 @@ inline bool IsConvertible(Type fromType, Type toType)
 
 } // !namespace core
 } // !namespace lux
+
 #endif // !INCLUDED_LXTYPES_H

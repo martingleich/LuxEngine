@@ -63,9 +63,9 @@ class FontImpl : public Font
 public:
 	FontImpl();
 	~FontImpl();
-	bool Init(video::VideoDriver* driver, const FontCreationData& data);
+	void Init(video::VideoDriver* driver, const FontCreationData& data);
 
-	bool SetMaterial(const video::Material& material);
+	void SetMaterial(const video::Material& material);
 	const video::Material& GetMaterial() const;
 	float GetBaseLine() const;
 	void SetBaseLine(float base);

@@ -65,7 +65,7 @@ void ImageImpl::Init(const math::dimension2du& size, ColorFormat format, void* d
 	}
 }
 
-const math::dimension2du& ImageImpl::GetDimension() const
+const math::dimension2du& ImageImpl::GetSize() const
 {
 	return m_Dimension;
 }
@@ -113,12 +113,11 @@ u32 ImageImpl::GetPitch() const
 
 void* ImageImpl::Lock()
 {
-	if(m_Locked == false) {
-		m_Locked = true;
-		return m_Data;
-	}
+	if(m_Locked)
+		throw core::Exception("Image is already locked");
 
-	return nullptr;
+	m_Locked = true;
+	return m_Data;
 }
 
 void ImageImpl::Unlock()
@@ -132,7 +131,7 @@ StrongRef<Referable> ImageImpl::Clone() const
 }
 
 
-} 
+}
 
-} 
+}
 

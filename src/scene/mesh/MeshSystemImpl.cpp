@@ -22,9 +22,9 @@ MeshSystemImpl::MeshSystemImpl(core::ResourceSystem* resourceSystem, video::Vide
 }
 
 
-bool MeshSystemImpl::AddMesh(const io::path& name, Mesh* mesh)
+void MeshSystemImpl::AddMesh(const io::path& name, Mesh* mesh)
 {
-	return m_ResourceSystem->AddResource(name, mesh);
+	m_ResourceSystem->AddResource(name, mesh);
 }
 
 StrongRef<Mesh> MeshSystemImpl::CreateMesh()

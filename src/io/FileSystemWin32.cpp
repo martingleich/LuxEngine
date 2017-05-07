@@ -91,7 +91,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const FileDescription& desc, EFileMode
 		if(desc.GetName().IsEmpty() == false)
 			return OpenFile(desc.GetPath() + desc.GetName(), mode, createIfNotExist);
 		else
-			return nullptr;
+			throw core::FileNotFoundException("[Unnamed file]");
 	}
 
 	return OpenFile(desc.GetPath() + desc.GetName(), mode, createIfNotExist);
@@ -120,32 +120,40 @@ StrongRef<File> FileSystemWin32::OpenFile(const path& filename, EFileMode mode, 
 
 	if(!ExistFile(absPath)) {
 		if(!createIfNotExist) {
-			return nullptr;
+			throw core::FileNotFoundException(absPath.Data());
 		} else {
 			log::Info("The file \"~s\" was created.", absPath);
 			file = core::FOpenUTF8(absPath.Data(), GetFileOpenString(mode).Data());
 			if(!file)
-				return nullptr;
-			GetFileDescription(absPath, desc);
-			return LUX_NEW(StreamFile)(file, desc, absPath);
+				throw core::FileNotFoundException(absPath.Data());
+			try {
+				desc = GetFileDescription(absPath);
+				return LUX_NEW(StreamFile)(file, desc, absPath);
+			} catch(...) {
+				fclose(file);
+				throw;
+			}
 		}
 	}
 
 	file = core::FOpenUTF8(absPath.Data(), GetFileOpenString(mode).Data());
 	if(!file)
-		return nullptr;
+		throw core::FileNotFoundException(absPath.Data());
 
-	u32 fileSize = 0;
-	if(GetFileDescription(absPath, desc))
-		fileSize = desc.GetSize();
 
-	return LUX_NEW(StreamFile)(file, desc, absPath);
+	try {
+		desc = GetFileDescription(absPath);
+		return LUX_NEW(StreamFile)(file, desc, absPath);
+	} catch(...) {
+		fclose(file);
+		throw;
+	}
 }
 
 StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const string& name, bool deleteOnDrop)
 {
 	if(!memory || size == 0)
-		return nullptr;
+		throw core::FileNotFoundException("[Empty Memory file]");
 
 	FileDescription desc(
 		path::EMPTY,
@@ -196,7 +204,7 @@ bool FileSystemWin32::ExistFile(const path& filename) const
 #else
 #error Not implemented
 #endif
-}
+	}
 
 bool FileSystemWin32::ExistDirectory(const path& filename) const
 {
@@ -219,17 +227,18 @@ File* FileSystemWin32::CreateTemporaryFile(u32 Size)
 }
 
 
-bool FileSystemWin32::GetFileDescription(const path& name, FileDescription& outDesc)
+FileDescription FileSystemWin32::GetFileDescription(const path& name)
 {
 	WIN32_FIND_DATAW FindData;
 	HANDLE FindHandle = FindFirstFileW((const wchar_t*)ConvertPathToWin32WidePath(name).Data_c(), &FindData);
 
 	if(FindHandle == INVALID_HANDLE_VALUE)
-		return false;
+		throw core::FileNotFoundException(name.Data());
 
 	core::DateAndTime creatinoDate;
-	bool success = ConvertWin32FileTimeToLuxTime(FindData.ftCreationTime, creatinoDate);
+	ConvertWin32FileTimeToLuxTime(FindData.ftCreationTime, creatinoDate);
 
+	FileDescription outDesc;
 	outDesc.SetCreationDate(creatinoDate);
 	outDesc.SetIsVirtual(false);
 	outDesc.SetName(io::GetFilenameOnly(name));
@@ -237,34 +246,26 @@ bool FileSystemWin32::GetFileDescription(const path& name, FileDescription& outD
 	outDesc.SetSize(FindData.nFileSizeLow);
 	outDesc.SetType(GetFileTypeFromAttributes(FindData.dwFileAttributes));
 
-	return success;
+	return outDesc;
 }
 
 StrongRef<INIFile> FileSystemWin32::CreateINIFile(const path& filename)
 {
-	StrongRef<INIFileImpl> out = LUX_NEW(INIFileImpl)(this);
-	if(out->Init(filename))
-		return out;
-
-	return nullptr;
+	return LUX_NEW(INIFileImpl)(this, filename);
 }
 
 StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 {
-	StrongRef<INIFileImpl> out = LUX_NEW(INIFileImpl)(this);
-	if(out->Init(file))
-		return out;
-
-	return nullptr;
+	return LUX_NEW(INIFileImpl)(this, file);
 }
 
 StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const string& name)
 {
 	if(!file)
-		return nullptr;
+		throw core::FileNotFoundException("[Empty file]");
 
 	if(start + size > file->GetSize())
-		return nullptr;
+		throw core::Exception("Limited file size is to big");
 
 	FileDescription desc(
 		string::EMPTY,
@@ -313,19 +314,12 @@ StrongRef<Archive> FileSystemWin32::GetRootArchive()
 
 StrongRef<Archive> FileSystemWin32::CreateArchive(const path& path)
 {
-	StrongRef<Archive> a = LUX_NEW(ArchiveFolderWin32)(this, GetAbsoluteFilename(path));
-	if(a->IsValid())
-		return a;
-	else
-		return nullptr;
+	return LUX_NEW(ArchiveFolderWin32)(this, GetAbsoluteFilename(path));
 }
 
 void FileSystemWin32::AddMountPoint(const path& point, Archive* archive)
 {
 	if(!archive || point.IsEmpty())
-		return;
-
-	if(!archive->IsValid())
 		return;
 
 	MountEntry e;

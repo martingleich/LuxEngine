@@ -5,6 +5,7 @@
 #include "video/IndexBuffer.h"
 
 #include "VideoDriverD3D9.h"
+#include "video/d3d9/D3DHelper.h"
 
 namespace lux
 {
@@ -27,10 +28,6 @@ BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 	m_VStreams.Resize(m_MaxStreamCount);
 }
 
-BufferManagerD3D9::~BufferManagerD3D9()
-{
-}
-
 void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handle)
 {
 	switch(buffer->GetBufferType()) {
@@ -49,7 +46,7 @@ void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handl
 	}
 	break;
 	default:
-		lxAssertNeverReach("Unsupported hardwarebuffer type.");
+		throw core::Exception("Unsupported hardwarebuffer type.");
 	}
 }
 
@@ -76,18 +73,18 @@ void* BufferManagerD3D9::UpdateVertexBuffer(VertexBuffer* buffer, void* handle)
 		oldMapping = desc.Usage;
 	}
 
+	HRESULT hr;
 	if(size*stride > oldSize ||
 		mapping != oldMapping) {
 		IDirect3DVertexBuffer9* newD3DBuffer;
 
-		if(FAILED(m_D3DDevice->CreateVertexBuffer(size*stride,
+		if(FAILED(hr = m_D3DDevice->CreateVertexBuffer(size*stride,
 			mapping,
 			0,
 			D3DPOOL_DEFAULT,
 			&newD3DBuffer,
 			nullptr))) {
-			log::Error("Failed to create the vertexbuffer.");
-			return nullptr;
+			throw core::D3D9Exception(hr);
 		}
 
 		// Rewrite whole buffer
@@ -100,20 +97,19 @@ void* BufferManagerD3D9::UpdateVertexBuffer(VertexBuffer* buffer, void* handle)
 	}
 
 	void* data;
-	if(FAILED(d3dBuffer->Lock(beginDirty * stride,
+	if(FAILED(hr = d3dBuffer->Lock(beginDirty * stride,
 		(endDirty - beginDirty + 1) * stride,
 		&data,
 		0))) {
-		log::Error("Failed to lock the vertexbuffer.");
-		return nullptr;
+		throw core::D3D9Exception(hr);
 	}
 
 	// Use const version, to not update the dirty region
 	const void* target = buffer->Pointer_c(beginDirty, endDirty - beginDirty + 1);
 	memcpy(data, target, (endDirty - beginDirty + 1)*stride);
 
-	if(FAILED(d3dBuffer->Unlock()))
-		return nullptr;
+	if(FAILED(hr = d3dBuffer->Unlock()))
+		throw core::D3D9Exception(hr);
 
 	return d3dBuffer;
 }
@@ -144,18 +140,18 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 		oldMapping = desc.Usage;
 	}
 
+	HRESULT hr;
 	if(size*stride > oldSize ||
 		format != oldFormat ||
 		mapping != oldMapping) {
 		IDirect3DIndexBuffer9* newD3DBuffer;
-		if(FAILED(m_D3DDevice->CreateIndexBuffer(size*stride,
+		if(FAILED(hr = m_D3DDevice->CreateIndexBuffer(size*stride,
 			mapping,
 			format,
 			D3DPOOL_DEFAULT,
 			&newD3DBuffer,
 			nullptr))) {
-			log::Error("Failed to create the indexbuffer.");
-			return nullptr;
+			throw core::D3D9Exception(hr);
 		}
 
 		// Rewrite whole buffer
@@ -168,20 +164,19 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 	}
 
 	void* data;
-	if(FAILED(d3dBuffer->Lock(beginDirty * stride,
+	if(FAILED(hr = d3dBuffer->Lock(beginDirty * stride,
 		(endDirty - beginDirty + 1) * stride,
 		&data,
 		0))) {
-		log::Error("Der Indexpuffer konnte nicht gesperrt werden!");
-		return nullptr;
+		throw core::D3D9Exception(hr);
 	}
 
 	// Use const version, to not update the dirty region
 	const void* target = buffer->Pointer_c(beginDirty, endDirty - beginDirty + 1);
 	memcpy(data, target, (endDirty - beginDirty + 1)*stride);
 
-	if(FAILED(d3dBuffer->Unlock()))
-		return nullptr;
+	if(FAILED(hr = d3dBuffer->Unlock()))
+		throw core::D3D9Exception(hr);
 
 	return d3dBuffer;
 }
@@ -200,17 +195,15 @@ void* BufferManagerD3D9::UpdateInternalBuffer(HardwareBuffer* buffer, void* hand
 			handle);
 
 	default:
-		lxAssertNeverReach("Unsupported hardware buffer type.");
-		return nullptr;
+		throw core::Exception("Unsupported hardwarebuffer type.");
 	}
 }
 
-bool BufferManagerD3D9::EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle)
+void BufferManagerD3D9::EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle)
 {
 	if(streamID > m_MaxStreamCount)
-		return false;
+		throw core::InvalidArgumentException("streamID");
 
-	bool out = true;
 	switch(buffer->GetBufferType()) {
 	case EHardwareBufferType::Index:
 	{
@@ -220,7 +213,7 @@ bool BufferManagerD3D9::EnableHardwareBuffer(u32 streamID, const HardwareBuffer*
 			m_IStream.offset = 0;
 			HRESULT hr = m_D3DDevice->SetIndices(d3dBuffer);
 			if(FAILED(hr))
-				out = false;
+				throw core::D3D9Exception(hr);
 		} else {
 			m_IStream.data = buffer->Pointer_c(0, buffer->GetSize());
 			m_IStream.offset = 0;
@@ -244,19 +237,16 @@ bool BufferManagerD3D9::EnableHardwareBuffer(u32 streamID, const HardwareBuffer*
 			}
 
 			if(FAILED(hr))
-				out = false;
+				throw core::D3D9Exception(hr);
 		} else {
 			vs.data = buffer->Pointer_c(0, buffer->GetSize());
 			vs.offset = 0;
 		}
 
-		if(out)
-			m_UsedStreams |= (1 << streamID);
+		m_UsedStreams |= (1 << streamID);
 	}
 	break;
 	}
-
-	return out;
 }
 
 bool BufferManagerD3D9::GetVertexStream(u32 streamID, VertexStream& vs) const

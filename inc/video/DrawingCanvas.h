@@ -489,34 +489,18 @@ private:
 	u32 m_Pitch;
 };
 
-inline DrawingCanvas BeginDrawImage(Image* image)
+template <typename LockType>
+struct DrawingCanvasScope
 {
-	if(image)
-		return DrawingCanvas(image->Lock(), image->GetColorFormat(), image->GetDimension(), image->GetPitch());
-	else
-		return DrawingCanvas();
-}
+	DrawingCanvasScope(LockType&& _lock) :
+		lock(std::move(_lock)),
+		canvas(lock.data, lock.base->GetColorFormat(), lock.base->GetSize(), lock.pitch)
+	{
+	}
 
-inline void EndDrawImage(Image* image)
-{
-	if(image)
-		image->Unlock();
-}
-
-inline DrawingCanvas BeginDrawTexture(Texture* texture, bool overwrite = true)
-{
-	video::Texture::SLockedRect locked;
-	if(texture && texture->Lock(!overwrite ? Texture::ETLM_READ_WRITE : Texture::ETLM_OVERWRITE, &locked))
-		return DrawingCanvas(locked.bits, texture->GetColorFormat(), texture->GetSize(), locked.pitch);
-	else
-		return DrawingCanvas();
-}
-
-inline void EndDrawTexture(Texture* texture)
-{
-	if(texture)
-		texture->Unlock();
-}
+	LockType lock;
+	DrawingCanvas canvas;
+};
 
 }
 }

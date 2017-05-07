@@ -146,14 +146,12 @@ StringTableHandle StringTable::AddString(const string& str)
 StringTableHandle StringTable::AddFindString(const char* str, bool find)
 {
 	if(!str)
-		return StringTableHandle::INVALID;
+		throw InvalidArgumentException("str", "Entry in stringtable may not be empty.");
 
 	size_t strSize = strlen(str);
 	size_t size = strSize + 1 + sizeof(size_t);
 
 	MemBlock* block = GetMatchingPosition(size);
-	if(!block)
-		return StringTableHandle::INVALID;
 
 	void* handle = block->data + block->used;
 
@@ -187,7 +185,7 @@ StringTableHandle StringTable::AddFindString(const char* str, bool find)
 StringTable::MemBlock* StringTable::GetMatchingPosition(size_t length)
 {
 	if(length > MemBlock::DATA_SIZE)
-		return nullptr;
+		throw Exception("String is to long for string table");
 
 	MemBlock* cur = self->first;
 	while(cur) {
@@ -202,10 +200,7 @@ StringTable::MemBlock* StringTable::GetMatchingPosition(size_t length)
 
 StringTable::MemBlock* StringTable::AddNewMemBlock()
 {
-	MemBlock* newBlock = new(std::nothrow) MemBlock;
-	lxAssert("Can't allocate memory." && newBlock);
-	if(!newBlock)
-		return nullptr;
+	MemBlock* newBlock = new MemBlock;
 
 	newBlock->next = nullptr;
 	newBlock->used = 0;

@@ -14,14 +14,14 @@ class ImageSystemImpl : public ImageSystem
 	friend class MultiImageToCubeTextureLoader;
 public:
 	ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver* driver, core::ResourceSystem* resSys);
-	~ImageSystemImpl();
+
 	StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format);
 	StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMem = true, bool deleteOnDrop = true);
 
-	bool WriteImageToFile(Image* image, io::File* file);
-	bool WriteImageToFile(Image* image, const io::path& file);
-	bool WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, io::File* file);
-	bool WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, const io::path& file);
+	void WriteImageToFile(Image* image, io::File* file);
+	void WriteImageToFile(Image* image, const io::path& file);
+	void WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, io::File* file);
+	void WriteImageDataToFile(const math::dimension2du& size, ColorFormat format, void* data, const io::path& file);
 
 	void AddExternalImageWriter(ImageWriter* writer);
 	size_t GetImageWriterCount() const;
@@ -51,7 +51,7 @@ private:
 	StrongRef<CubeTexture> CreateCubeTexture(ColorFormat format, u32 size);
 	StrongRef<CubeTexture> CreateCubeTexture(StrongRef<Image> images[6]);
 
-	bool InitCubeTexture(StrongRef<Image> images[6], CubeTexture* tex);
+	void InitCubeTexture(StrongRef<Image> images[6], CubeTexture* tex);
 	bool GetFittingTextureFormat(ColorFormat& format, math::dimension2du& size, bool cube);
 
 private:

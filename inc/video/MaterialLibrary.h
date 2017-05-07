@@ -16,9 +16,6 @@ Caches materialsrenders and is used to created new ones.
 class MaterialLibrary : public ReferenceCounted
 {
 public:
-	static const size_t INVALID_ID = 0xFFFFFFFF;
-
-public:
 	virtual ~MaterialLibrary()
 	{
 	}
@@ -27,7 +24,7 @@ public:
 	/**
 	\param renderer The material renderer
 	\param name The name of the material renderer
-	\return The index of the new renderer, or INVALID_ID if an error occured
+	\return The index of the new renderer.
 	*/
 	virtual size_t AddMaterialRenderer(MaterialRenderer* renderer, const string& name) = 0;
 
@@ -57,13 +54,15 @@ public:
 	\param PSType The type of the pixel shader
 	\param baseMaterial The base rendersetting used for the shader
 	\param name The name of the new material renderer
+	\param [out] errorList If not null, here a list of all errors/warning while creating the shader is written.
 	\return The new material renderer
 	*/
 	virtual StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
 		video::EShaderLanguage language,
 		const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
 		const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
-		const MaterialRenderer* baseMaterial, const string& name) = 0;
+		const MaterialRenderer* baseMaterial, const string& name,
+		core::array<string>* errorList=nullptr) = 0;
 
 	//! Add a shader material renderer
 	/**

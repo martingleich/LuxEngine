@@ -163,11 +163,7 @@ ArchiveLoaderFolderWin32::~ArchiveLoaderFolderWin32()
 
 StrongRef<Archive> ArchiveLoaderFolderWin32::LoadArchive(const path& p)
 {
-	StrongRef<Archive> a = LUX_NEW(ArchiveFolderWin32)(self->fileSys, p);
-	if(a->IsValid())
-		return a;
-	else
-		return nullptr;
+	return LUX_NEW(ArchiveFolderWin32)(self->fileSys, p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,8 +174,6 @@ struct ArchiveFolderWin32::SelfData
 	path path;
 
 	Win32Path win32AbsPath;
-
-	bool isValid;
 
 	WeakRef<io::FileSystem> fileSystem;
 };
@@ -198,20 +192,15 @@ ArchiveFolderWin32::~ArchiveFolderWin32()
 
 StrongRef<File> ArchiveFolderWin32::OpenFile(const path& p, EFileMode mode, bool createIfNotExist)
 {
-	if(self->fileSystem) {
-		return self->fileSystem->OpenFile(self->path + p, mode, createIfNotExist);
-	} else {
-		return nullptr;
-	}
+	return self->fileSystem->OpenFile(self->path + p, mode, createIfNotExist);
 }
 
 StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileMode mode, bool createIfNotExist)
 {
-	if(file.GetArchive() == this) {
-		return OpenFile(file.GetPath() + file.GetName(), mode, createIfNotExist);
-	} else {
-		return nullptr;
-	}
+	if(file.GetArchive() != this)
+		throw core::FileNotFoundException("");
+
+	return OpenFile(file.GetPath() + file.GetName(), mode, createIfNotExist);
 }
 
 bool ArchiveFolderWin32::ExistFile(const path& p)
@@ -241,11 +230,6 @@ EArchiveCapabilities ArchiveFolderWin32::GetCaps() const
 	return EArchiveCapabilities::Read | EArchiveCapabilities::Add | EArchiveCapabilities::Delete | EArchiveCapabilities::Change;
 }
 
-bool ArchiveFolderWin32::IsValid() const
-{
-	return self->isValid;
-}
-
 path ArchiveFolderWin32::GetAbsolutePath(const path& p)
 {
 	return (self->path + p);
@@ -256,9 +240,8 @@ void ArchiveFolderWin32::SetPath(const path& dir)
 	if(dir.IsEmpty() || self->fileSystem->ExistDirectory(dir)) {
 		self->path = NormalizePath(dir, true);
 		self->win32AbsPath = ConvertPathToWin32WidePath(self->path);
-		self->isValid = true;
 	} else {
-		self->isValid = false;
+		throw core::InvalidArgumentException("dir", "Directory is not a valid path");
 	}
 }
 

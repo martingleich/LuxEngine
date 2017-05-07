@@ -1,5 +1,6 @@
 #include "core/lxUnicode.h"
 #include "core/lxCharacter.h"
+#include "core/lxException.h"
 
 namespace lux
 {
@@ -59,8 +60,7 @@ u32 AdvanceCursorUTF8(const char*& ptr)
 		return (u0&~0xFE) << 30 | (u1&~0xC0) << 24 | (u2&~0xC0) << 18 | (u3 &~0xC) << 12 | (u4 &~0xC) << 6 | (u5 &~0xC) << 0;
 	}
 
-	lxAssertNeverReach("Invalid UTF-8 String.");
-	return 0xFFFFFFFF;
+	throw UnicodeException("Invalid utf8 codepoint");
 }
 
 u32 GetCharacterUTF8(const char* ptr)
@@ -84,8 +84,7 @@ u32 GetCharacterUTF8(const char* ptr)
 	if((u0 & 0xFE) == 0xFD) // 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 		return (u0&~0xFE) << 30 | (u1&~0xC0) << 24 | (u2&~0xC0) << 18 | (u3 &~0xC) << 12 | (u4 &~0xC) << 6 | (u5 &~0xC) << 0;
 
-	lxAssertNeverReach("Invalid UTF-8 String.");
-	return 0xFFFFFFFF;
+	throw UnicodeException("Invalid utf8 codepoint");
 }
 
 size_t StringLengthUTF16(const char* str)

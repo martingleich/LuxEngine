@@ -44,9 +44,8 @@ public:
 	Update the data in a single buffer and resets its dirty area.
 	\param buffer The buffer which should be updated
 	\param group The group which should be updated use 0 to update immeditly
-	\return Was the buffer successfully updated
 	*/
-	virtual bool UpdateBuffer(HardwareBuffer* buffer, u32 group = 0) = 0;
+	virtual void UpdateBuffer(HardwareBuffer* buffer, u32 group = 0) = 0;
 
 	//! Enable a single hardwarebuffer for rendering
 	/**
@@ -54,9 +53,8 @@ public:
 	for rendering.
 	\param buffer The buffer to set
 	\param streamID The stream where the buffer is set
-	\return Was the buffer successfully enabled
 	*/
-	virtual bool EnableBuffer(const HardwareBuffer* buffer, u32 streamID = 0) = 0;
+	virtual void EnableBuffer(const HardwareBuffer* buffer, u32 streamID = 0) = 0;
 
 	//! The driver which uses this buffermanager
 	virtual VideoDriver* GetDriver() = 0;

@@ -18,7 +18,7 @@ public:
 	~ImageLoaderD3DX();
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
-	bool LoadResource(io::File* file, core::Resource* dst);
+	void LoadResource(io::File* file, core::Resource* dst);
 	const string& GetName() const;
 
 private:

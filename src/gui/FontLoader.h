@@ -26,11 +26,11 @@ public:
 	{}
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
-	bool LoadResource(io::File* file, core::Resource* dst);
+	void LoadResource(io::File* file, core::Resource* dst);
 	const string& GetName() const;
 
 private:
-	bool LoadFontFromFile(io::File* file, core::Resource* dst);
+	void LoadFontFromFile(io::File* file, core::Resource* dst);
 
 private:
 	WeakRef<video::MaterialLibrary> m_MaterialLibrary;

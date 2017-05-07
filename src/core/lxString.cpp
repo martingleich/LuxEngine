@@ -1,5 +1,6 @@
 #include "core/lxString.h"
 #include "core/lxUnicodeConversion.h"
+#include "core/lxArray.h"
 
 namespace lux
 {
@@ -221,6 +222,8 @@ bool string::EqualCaseInsensitive(const string_type& other) const
 
 string::ConstIterator string::Insert(ConstIterator pos, const string_type& other, size_t count)
 {
+	lxAssert(pos.m_First == Data());
+
 	other.EnsureSize();
 	size_t size;
 	if(count == std::numeric_limits<size_t>::max()) {
@@ -337,10 +340,9 @@ void string::Resize(size_t newLength, const string_type& filler)
 		m_Size -= (data + m_Size) - ptr;
 	} else {
 		filler.EnsureSize();
-		if(filler.size == 0) {
-			lxAssertNeverReach("Resize with empty filler");
-			return;
-		}
+		if(filler.size == 0)
+			throw core::InvalidArgumentException("filler", "length(filler) > 0");
+
 		size_t fillerLength = filler.size == 1 ? 1 : core::StringLengthUTF8(filler.data);
 		size_t addLength = newLength - m_Length;
 
@@ -428,10 +430,8 @@ void string::PushByte(u8 byte)
 	if(m_Size + 1 >= GetAllocated())
 		Reserve(GetAllocated() * 2 + 1);
 
-	if(byte == 0) {
-		lxAssertNeverReach("Can't write zero byte into string.");
-		byte = ' ';
-	}
+	if(byte == 0)
+		throw core::InvalidArgumentException("byte", "byte must not be null");
 
 	Data()[m_Size] = byte;
 	Data()[m_Size + 1] = 0;
@@ -468,6 +468,9 @@ bool string::StartsWith(const string_type& data, ConstIterator first) const
 {
 	if(first == ConstIterator::Invalid())
 		first = First();
+
+	lxAssert(first.m_First == Data());
+
 	if(data.data[0] == 0)
 		return true;
 
@@ -484,6 +487,8 @@ bool string::EndsWith(const string_type& data, ConstIterator end) const
 {
 	if(end == ConstIterator::Invalid())
 		end = End();
+
+	lxAssert(end.m_First == Data());
 
 	if(data.data[0] == 0)
 		return true;
@@ -530,8 +535,13 @@ string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIter
 
 string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIterator rangeFirst, size_t count)
 {
+	lxAssert(rangeFirst.m_First == Data());
+
 	replace.EnsureSize();
 	size_t replacedSize = (rangeFirst + count).Pointer() - rangeFirst.Pointer();
+
+	if(m_Size + replace.size < replacedSize)
+		throw core::InvalidArgumentException("count", "count must not be to large.");
 
 	size_t newSize = m_Size - replacedSize + replace.size;
 	size_t replaceOffset = rangeFirst.Pointer() - Data_c();
@@ -555,6 +565,9 @@ string::ConstIterator string::Find(const string_type& search, ConstIterator firs
 	if(end == ConstIterator::Invalid())
 		end = End();
 
+	lxAssert(first.m_First == Data());
+	lxAssert(end.m_First == Data());
+
 	search.EnsureSize();
 	if(search.size == 0)
 		return end;
@@ -575,6 +588,9 @@ string::ConstIterator string::FindReverse(const string_type& search, ConstIterat
 		first = First();
 	if(end == ConstIterator::Invalid())
 		end = End();
+
+	lxAssert(first.m_First == Data());
+	lxAssert(end.m_First == Data());
 
 	if(first == end)
 		return end;
@@ -597,11 +613,16 @@ string::ConstIterator string::FindReverse(const string_type& search, ConstIterat
 
 string string::SubString(ConstIterator first, size_t count) const
 {
+	lxAssert(first.m_First == Data());
+
 	return string(first.Pointer(), count);
 }
 
 string string::SubString(ConstIterator first, ConstIterator end) const
 {
+	lxAssert(first.m_First == Data());
+	lxAssert(end.m_First == Data());
+
 	string out;
 	ConstIterator it = first;
 	while(it != end) {
@@ -621,7 +642,7 @@ size_t string::Pop(size_t count)
 		--count;
 	}
 
-	const char* last = (it+1).Pointer();
+	const char* last = (it + 1).Pointer();
 	size_t newSize = last - Data();
 	if(it == First() && count > 0) {
 		newSize = 0;
@@ -638,7 +659,12 @@ size_t string::Pop(size_t count)
 
 string::ConstIterator string::Remove(ConstIterator pos, size_t count)
 {
+	lxAssert(pos.m_First == Data());
+
 	size_t removeSize = (pos + count).Pointer() - pos.Pointer();
+
+	if(removeSize > m_Size)
+		throw core::InvalidArgumentException("count", "count must not be to large.");
 
 	size_t newSize = m_Size - removeSize;
 
@@ -665,6 +691,8 @@ string& string::RStrip(ConstIterator end)
 
 	if(end == First())
 		return *this;
+
+	lxAssert(end.m_First == Data());
 
 	char* data = Data();
 
@@ -693,6 +721,8 @@ string& string::LStrip(ConstIterator first)
 	if(first == ConstIterator::Invalid())
 		first = First();
 
+	lxAssert(first.m_First == Data());
+
 	size_t offset = first.Pointer() - Data_c();
 	auto end = End();
 	size_t count = 0;
@@ -708,6 +738,45 @@ string& string::LStrip(ConstIterator first)
 	m_Length -= count;
 
 	return *this;
+}
+
+size_t string::Split(u32 ch, string* outArray, size_t maxCount) const
+{
+	if(maxCount == 0)
+		return 0;
+
+	string* cur = outArray;
+	size_t count = 1;
+	cur->Clear();
+	for(auto it = First(); it != End(); ++it) {
+		if(*it == ch) {
+			if(count == maxCount)
+				return maxCount;
+			++cur;
+			++count;
+			cur->Clear();
+		} else {
+			cur->Append(*it);
+		}
+	}
+
+	return count;
+}
+
+core::array<string> string::Split(u32 ch) const
+{
+	core::array<string> out;
+	string buffer;
+	for(auto it = First(); it != End(); ++it) {
+		if(*it == ch) {
+			out.PushBack(std::move(buffer));
+			buffer.Clear();
+		} else {
+			buffer.Append(*it);
+		}
+	}
+
+	return out;
 }
 
 EStringType string::Classify() const
@@ -781,16 +850,14 @@ void string::PushCharacter(const char* ptr)
 	if(m_Size + 6 >= GetAllocated()) // Maximal 6 utf-8 bytes
 		Reserve(GetAllocated() * 2 + 6);
 
-	if(*ptr == 0) {
-		lxAssertNeverReach("Can't write zero byte into string.");
-		Data()[m_Size++] = ' ';
-	} else {
-		Data()[m_Size++] = *ptr;
-		if((*ptr & 0x80) != 0) {
-			ptr++;
-			while((*ptr & 0xC0) == 0x80)
-				Data()[m_Size++] = *ptr++;
-		}
+	if(*ptr == 0)
+		throw core::InvalidArgumentException("byte", "byte must not be null");
+
+	Data()[m_Size++] = *ptr;
+	if((*ptr & 0x80) != 0) {
+		ptr++;
+		while((*ptr & 0xC0) == 0x80)
+			Data()[m_Size++] = *ptr++;
 	}
 
 	Data()[m_Size] = 0;

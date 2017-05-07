@@ -27,7 +27,7 @@ public:
 	const path& GetWorkingDirectory() const;
 
 	File* CreateTemporaryFile(u32 Size);
-	bool GetFileDescription(const path& name, FileDescription& outDesc);
+	FileDescription GetFileDescription(const path& name);
 
 	StrongRef<INIFile> CreateINIFile(const path& filename);
 	StrongRef<INIFile> CreateINIFile(File* file);

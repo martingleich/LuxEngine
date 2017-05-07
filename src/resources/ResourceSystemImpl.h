@@ -22,8 +22,8 @@ public:
 	const string& GetResourceName(Name type, u32 id) const;
 	u32 GetResourceId(Resource* resource) const;
 	u32 GetResourceId(Name type, const string& name) const;
-	bool AddResource(const string& name, Resource* resource);
-	bool RemoveResource(Name type, u32 id);
+	void AddResource(const string& name, Resource* resource);
+	void RemoveResource(Name type, u32 id);
 	u32 FreeUnusedResources(Name type);
 	StrongRef<Resource> GetResource(Name type, u32 id);
 	StrongRef<Resource> GetResource(Name type, const string& name);
@@ -34,10 +34,10 @@ public:
 	u32 GetResourceLoaderCount() const;
 	StrongRef<ResourceLoader> GetResourceLoader(u32 id) const;
 	core::Name GetFileType(io::File* file) const;
-	bool AddResourceLoader(ResourceLoader* loader);
+	void AddResourceLoader(ResourceLoader* loader);
 	u32 GetTypeCount() const;
 	Name GetType(u32 id) const;
-	bool AddType(Name name);
+	void AddType(Name name);
 
 	StrongRef<ReferableFactory> GetReferableFactory();
 	StrongRef<io::FileSystem> GetFileSystem();
@@ -46,6 +46,7 @@ private:
 
 	StrongRef<ResourceLoader> GetResourceLoader(core::Name& type, io::File* file) const;
 
+	u32 GetResourceIdUnsafe(Name type, const string& name) const;
 private:
 	struct SelfType;
 	SelfType* self;

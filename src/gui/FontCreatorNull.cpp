@@ -33,11 +33,6 @@ StrongRef<Font> FontCreatorNull::CreateFontFromFile(const io::path& path,
 	const core::array<u32>& charSet)
 {
 	StrongRef<io::File> file = m_FileSystem->OpenFile(path);
-	if(!file) {
-		log::Error("Can't open file \"~s\".", path);
-		return nullptr;
-	}
-
 	return CreateFontFromFile(file, desc, charSet);
 }
 
@@ -71,11 +66,18 @@ StrongRef<Font> FontCreatorNull::CreateFontFromFile(io::File* file,
 	const core::array<u32>& charSet)
 {
 	if(!file)
-		return nullptr;
+		throw core::InvalidArgumentException("file", "File must not be null");
 
 	core::array<u32> realCharSet = CorrectCharSet(charSet);
 	void* creationContext = this->BeginFontCreation(file, desc, realCharSet);
-	return CreateFontFromContext(creationContext, realCharSet);
+	try {
+		auto out = CreateFontFromContext(creationContext, realCharSet);
+		this->EndFontCreation(creationContext);
+		return out;
+	} catch(...) {
+		this->EndFontCreation(creationContext);
+		throw;
+	}
 }
 
 StrongRef<Font> FontCreatorNull::CreateFont(const string& name,
@@ -84,13 +86,20 @@ StrongRef<Font> FontCreatorNull::CreateFont(const string& name,
 {
 	core::array<u32> realCharSet = CorrectCharSet(charSet);
 	void* creationContext = this->BeginFontCreation(name, desc, realCharSet);
-	return CreateFontFromContext(creationContext, realCharSet);
+	try {
+		auto out = CreateFontFromContext(creationContext, realCharSet);
+		this->EndFontCreation(creationContext);
+		return out;
+	} catch(...) {
+		this->EndFontCreation(creationContext);
+		throw;
+	}
 }
 
 StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::array<u32>& charSet)
 {
 	if(!ctx)
-		return nullptr;
+		throw core::Exception("Font creation failed");
 
 	CharInfo info;
 	FontPixel* image;
@@ -120,13 +129,9 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::ar
 	data.baseLine = 0.0f;
 
 	StrongRef<FontImpl> font = LUX_NEW(FontImpl);
-	bool result = font->Init(m_Driver, data);
-	this->EndFontCreation(ctx);
+	font->Init(m_Driver, data);
 
-	if(!result)
-		return nullptr;
-	else
-		return font;
+	return font;
 }
 
 const core::array<u32>& FontCreatorNull::GetDefaultCharset(const string& name) const

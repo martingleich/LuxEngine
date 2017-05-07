@@ -1,11 +1,10 @@
 #ifndef INCLUDED_LOGGER_H
 #define INCLUDED_LOGGER_H
-#include "StringConverter.h"
-#include "lxAlgorithm.h"
-#include "core/lxArray.h"
+#include "core/StringConverter.h"
+#include "core/lxAlgorithm.h"
 #include "core/lxName.h"
 #include "math/lxMathPrinter.h"
-#include "core/lxFormat.h"
+#include "core/lxArray.h"
 
 #include <mutex>
 #include <condition_variable>
@@ -64,10 +63,9 @@ public:
 	}
 
 	virtual void SetSettings(const Settings& data) { LUX_UNUSED(data); }
-	virtual bool Init()
+	virtual void Init()
 	{
 		m_IsInit = true;
-		return true;
 	}
 
 	virtual void Exit()

@@ -14,9 +14,9 @@ class BaseTexture : public core::Resource
 {
 public:
 	//! Describes a locked texture
-	struct SLockedRect
+	struct LockedRect
 	{
-		void* bits; //! Pointer to the texture data
+		u8* bits; //! Pointer to the texture data
 		u32 pitch; //! Number of bytes from one image-line to the next
 	};
 

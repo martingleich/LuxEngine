@@ -30,9 +30,9 @@ u32 LimitedFile::ReadBinary(u32 numBytes, void* out)
 
 u32 LimitedFile::WriteBinary(const void* data, u32 length)
 {
-	u32 written = m_MasterFile->WriteBinary(data, length);
-	m_Cursor += written;
-	return written;
+	m_MasterFile->WriteBinary(data, length);
+	m_Cursor += length;
+	return length;
 }
 
 bool LimitedFile::Seek(s32 offset, ESeekOrigin orgin)

@@ -121,7 +121,7 @@ public:
 	/**
 	\return The dimension of the rect
 	*/
-	dimension2d<T> GetDimension() const
+	dimension2d<T> GetSize() const
 	{
 		return dimension2d<T>(GetWidth(), GetHeight());
 	}

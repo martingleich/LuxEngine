@@ -57,7 +57,10 @@ u32 StreamFile::WriteBinary(const void* data, u32 numBytes)
 	if((u32)ftell(m_File) > m_FileSize - numBytes)
 		m_FileSize = ftell(m_File) + numBytes;
 
-	return (u32)fwrite(data, numBytes, 1, m_File)*numBytes;
+	if(fwrite(data, numBytes, 1, m_File) != 1)
+		throw core::FileException(core::FileException::WriteError);
+
+	return numBytes;
 }
 
 bool StreamFile::Seek(s32 offset, ESeekOrigin orgin)

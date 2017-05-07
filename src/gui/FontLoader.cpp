@@ -26,12 +26,12 @@ core::Name FontLoader::GetResourceType(io::File* file, core::Name requestedType)
 		return core::ResourceType::Font;
 }
 
-bool FontLoader::LoadResource(io::File* file, core::Resource* dst)
+void FontLoader::LoadResource(io::File* file, core::Resource* dst)
 {
 	if(!m_Driver || !m_ImageSystem || !m_MaterialLibrary)
-		return false;
+		throw core::Exception("Font loader is missing driver, imageSystem or materialLibrary");
 
-	return LoadFontFromFile(file, dst);
+	LoadFontFromFile(file, dst);
 }
 
 const string& FontLoader::GetName() const
@@ -40,7 +40,7 @@ const string& FontLoader::GetName() const
 	return name;
 }
 
-bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
+void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 {
 #pragma pack(push, 1)
 	struct SFontInfo
@@ -81,9 +81,8 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	char VersionStr[4];
 	file->ReadBinary(sizeof(u32), &Magic);
 	file->ReadBinary(sizeof(u32), &VersionStr);
-	if(Magic != LX_MAKE_FOURCC('F', 'O', 'N', 'T')) {
-		return false;
-	}
+	if(Magic != LX_MAKE_FOURCC('F', 'O', 'N', 'T'))
+		throw core::LoaderException("Invalid magic number");
 
 	u32 Version = 0;
 	for(int i = 0; i < 4; ++i) {
@@ -92,7 +91,7 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	}
 
 	if(Version != 1)
-		return false;
+		throw core::LoaderException("Unsupported version");
 
 	core::HashMap<u32, gui::CharInfo> charMap;
 	video::Texture* fontTexture;
@@ -134,34 +133,32 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 
 			fontTexture = m_ImageSystem->AddTexture(file->GetName(), math::dimension2du(image.TextureWidth, image.TextureHeight), video::ColorFormat::A8R8G8B8, false);
 
-			video::BaseTexture::SLockedRect rect;
-			u8* rowData = (u8*)(fontTexture->Lock(video::BaseTexture::ETLM_OVERWRITE, &rect));
+			{
+				video::TextureLock texLock(fontTexture, video::BaseTexture::ETLM_OVERWRITE);
 
-			if(image.Compression == 0) {
-				u8 value;
-				for(u32 y = 0; y < image.TextureHeight; ++y) {
-					u8* pixel = rowData;
-					for(u32 x = 0; x < image.TextureWidth; ++x) {
-						if(file->ReadBinary(1, &value) == 0) {
-							return false;
+				u8* rowData = texLock.data;
+				if(image.Compression == 0) {
+					u8 value;
+					for(u32 y = 0; y < image.TextureHeight; ++y) {
+						u8* pixel = rowData;
+						for(u32 x = 0; x < image.TextureWidth; ++x) {
+							if(file->ReadBinary(1, &value) == 0)
+								throw core::LoaderException("Unexpected end of file");
+
+							*pixel = value;        // Alpha
+							++pixel;
+							*pixel = value;        // Red
+							++pixel;
+							*pixel = value;        // Green
+							++pixel;
+							*pixel = value;        // Blue
+							++pixel;
 						}
 
-						*pixel = value;        // Alpha
-						++pixel;
-						*pixel = value;        // Red
-						++pixel;
-						*pixel = value;        // Green
-						++pixel;
-						*pixel = value;        // Blue
-						++pixel;
+						rowData += texLock.pitch;
 					}
-
-					rowData += rect.pitch;
 				}
 			}
-
-			fontTexture->Unlock();
-			fontTexture->RegenerateMIPMaps();
 		}
 		break;
 		default:
@@ -183,9 +180,8 @@ bool FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 
 	gui::FontImpl* real_dst = dynamic_cast<gui::FontImpl*>(dst);
 	if(!real_dst)
-		return false;
+		throw core::Exception("Passed wrong resource type to loader");
 	real_dst->Init(m_Driver, data);
-	return true;
 }
 
 }

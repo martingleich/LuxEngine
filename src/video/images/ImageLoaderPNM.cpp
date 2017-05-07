@@ -225,32 +225,27 @@ const string& ImageLoaderPNM::GetName() const
 	return name;
 }
 
-bool ImageLoaderPNM::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderPNM::LoadResource(io::File* file, core::Resource* dst)
 {
 	bool result;
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)
-		return false;
+		throw core::Exception("Passed wrong resource type to loader");
 
 	Context ctx;
 	result = LoadImageFormat(ctx, file);
 	if(!result)
-		return false;
+		throw core::LoaderException();
 
 	img->Init(
 		math::dimension2du(ctx.m_Width, ctx.m_Height),
 		ctx.m_OutputFormat);
 
-	void* data = img->Lock();
-	if(!data)
-		return false;
-	result = LoadImageToMemory(ctx, data);
-	img->Unlock();
+	video::ImageLock lock(img);
+	result = LoadImageToMemory(ctx, lock.data);
 	if(!result)
-		return false;
-
-	return true;
+		throw core::LoaderException();
 }
 
 

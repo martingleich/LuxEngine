@@ -26,7 +26,8 @@ public:
 		video::EShaderLanguage language,
 		const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
 		const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
-		const MaterialRenderer* baseMaterial, const string& name);
+		const MaterialRenderer* baseMaterial, const string& name,
+		core::array<string>* errorList);
 
 	StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
 		Shader* shader,
@@ -74,9 +75,9 @@ private:
 
 };
 
-} 
+}
 
-} 
+}
 
 
 #endif // INCLUDED_CMATERIALLIBRARY_H

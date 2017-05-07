@@ -51,11 +51,10 @@ public:
 	/**
 	You are no longer informed when window parameters are changing
 	\param call The Callback object
-	\return Was the callback removed.
 
 	\ref RegisterCallback
 	*/
-	virtual bool UnregisterCallback(WindowEventCallback* call) = 0;
+	virtual void UnregisterCallback(WindowEventCallback* call) = 0;
 
 	//! Set the title shown by the window
 	/**

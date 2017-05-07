@@ -39,7 +39,7 @@ public:
 
 	//! Check if a string exist in the string table
 	/**
-	Returns invalid handle if a error occured.
+	Returns invalid handle if the string does not exist.
 	\param str The string to check
 	\return The handle of the entry
 	*/
@@ -47,7 +47,7 @@ public:
 
 	//! Check if a string exist in the string table
 	/**
-	Returns invalid handle if a error occured.
+	Returns invalid handle if the string does not exist.
 	\param str The string to check
 	\return The handle of the entry
 	*/
@@ -56,7 +56,6 @@ public:
 	//! Add a string to the string table
 	/**
 	If the string is already in the table, don't add it again.
-	Returns invalid handle if a error occured.
 	\param str The string to add
 	\return The handle to the entry
 	*/
@@ -65,7 +64,6 @@ public:
 	//! Add a string to the string table
 	/**
 	If the string is already in the table, don't add it again.
-	Returns invalid handle if a error occured.
 	\param str The string to add
 	\return The handle to the entry
 	*/

@@ -74,7 +74,8 @@ static bool LoadTgaInfo(Context& ctx, io::File* file, bool silent)
 	return true;
 }
 
-static bool LoadImageFormat(Context& ctx)
+// Must have silent fail, for resource type test.
+static void LoadImageFormat(Context& ctx)
 {
 	uint32_t flags = tga_info_get_flags(ctx.info);
 	flags &= ~TGA_FLAG_COLOR_BGR;
@@ -91,7 +92,7 @@ static bool LoadImageFormat(Context& ctx)
 		result = false;
 
 	if(!result)
-		return false;
+		throw core::LoaderException();
 
 	if(flags & TGA_FLAG_ALPHA)
 		ctx.format = video::ColorFormat::A8R8G8B8;
@@ -100,15 +101,14 @@ static bool LoadImageFormat(Context& ctx)
 
 	ctx.size.width = tga_info_get_width(ctx.info);
 	ctx.size.height = tga_info_get_height(ctx.info);
-
-	return true;
 }
 
-static bool LoadImageToMemory(Context& ctx, void* dest)
+static void LoadImageToMemory(Context& ctx, void* dest)
 {
 	uint32_t result = tga_read_image(ctx.tga, ctx.info, dest);
 
-	return (result == TGA_OK);
+	if(result != TGA_OK)
+		throw core::LoaderException();
 }
 
 const string& ImageLoaderTGA::GetName() const
@@ -129,32 +129,22 @@ core::Name ImageLoaderTGA::GetResourceType(io::File* file, core::Name requestedT
 		return core::Name::INVALID;
 }
 
-bool ImageLoaderTGA::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderTGA::LoadResource(io::File* file, core::Resource* dst)
 {
-	bool result;
-
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)
-		return false;
+		throw core::Exception("Passed wrong resource type to loader");
 
 	Context ctx;
 	if(!LoadTgaInfo(ctx, file, false))
-		return false;
+		throw core::LoaderException();
 
-	if(!LoadImageFormat(ctx))
-		return false;
+	LoadImageFormat(ctx);
 
 	img->Init(ctx.size, ctx.format);
 
-	void* data = img->Lock();
-	if(!data)
-		return false;
-	result = LoadImageToMemory(ctx, data);
-	img->Unlock();
-	if(!result)
-		return false;
-
-	return true;
+	video::ImageLock lock(img);
+	LoadImageToMemory(ctx, lock.data);
 }
 
 

@@ -27,7 +27,7 @@ public:
 	\param name The name of the new mesh, if the name is empty the mesh is not cached
 	\param mesh The mesh to add to the list
 	*/
-	virtual bool AddMesh(const io::path& name, Mesh* mesh) = 0;
+	virtual void AddMesh(const io::path& name, Mesh* mesh) = 0;
 
 	//! Retrieves a model from cache or loads it if necessary
 	/**

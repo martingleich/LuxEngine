@@ -19,7 +19,7 @@ public:
 	void Init(const math::dimension2du& size, ColorFormat format);
 	void Init(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop);
 
-	const math::dimension2du& GetDimension() const;
+	const math::dimension2du& GetSize() const;
 	ColorFormat GetColorFormat() const;
 	u32 GetBitsPerPixel() const;
 	u32 GetBytesPerPixel() const;

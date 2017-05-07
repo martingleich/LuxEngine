@@ -70,18 +70,17 @@ void BufferManagerNull::RemoveBuffer(HardwareBuffer* buffer)
 	buffer->SetHandle(nullptr);
 }
 
-bool BufferManagerNull::UpdateBuffer(HardwareBuffer* buffer, u32 group)
+void BufferManagerNull::UpdateBuffer(HardwareBuffer* buffer, u32 group)
 {
 	if(group != 0) {
 		m_Updates.PushBack(UpdateEntry(group, buffer));
 		buffer->SetHandle(m_Updates.Data() + m_Updates.Size() - 1);
-		return true;
 	} else {
-		return ForceBufferUpdate(buffer);
+		ForceBufferUpdate(buffer);
 	}
 }
 
-bool BufferManagerNull::ForceBufferUpdate(HardwareBuffer* buffer)
+void BufferManagerNull::ForceBufferUpdate(HardwareBuffer* buffer)
 {
 	void* handle = buffer->GetHandle();
 	if(!handle && handle > m_Updates.Data() && handle < m_Updates.Data() + m_Updates.Size() - 1)
@@ -90,11 +89,6 @@ bool BufferManagerNull::ForceBufferUpdate(HardwareBuffer* buffer)
 	handle = UpdateInternalBuffer(buffer, handle);
 
 	buffer->SetHandle(handle);
-
-	if(handle == nullptr)
-		return false;
-	else
-		return true;
 }
 
 StrongRef<IndexBuffer> BufferManagerNull::CreateIndexBuffer()
@@ -107,13 +101,13 @@ StrongRef<VertexBuffer> BufferManagerNull::CreateVertexBuffer()
 	return LUX_NEW(VertexBufferImpl)(this);
 }
 
-bool BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer, u32 streamID)
+void BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer, u32 streamID)
 {
 	void* handle = buffer->GetHandle();
 	if(m_Updates.Size() > 0 && handle > m_Updates.Data() && handle < m_Updates.Data() + m_Updates.Size() - 1)
-		return EnableHardwareBuffer(streamID, buffer, nullptr);
+		EnableHardwareBuffer(streamID, buffer, nullptr);
 	else
-		return EnableHardwareBuffer(streamID, buffer, handle);
+		EnableHardwareBuffer(streamID, buffer, handle);
 }
 
 }

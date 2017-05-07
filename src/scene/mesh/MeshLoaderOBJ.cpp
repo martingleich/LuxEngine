@@ -56,11 +56,11 @@ void MeshLoaderOBJ::CleanUp()
 }
 
 
-bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
+void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 {
 	const long filesize = file->GetSize();
 	if(!filesize)
-		return false;
+		throw core::LoaderException("Can't load streaming file");
 
 	core::array<math::vector3f> vertexBuffer;
 	core::array<math::vector3f> NormalBuffer;
@@ -287,8 +287,6 @@ bool MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 	// Alles aufräumen
 	LUX_FREE_ARRAY(pcBuffer);
 	CleanUp();
-
-	return true;
 }
 
 const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo,

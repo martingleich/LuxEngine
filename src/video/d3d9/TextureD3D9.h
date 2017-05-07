@@ -14,6 +14,35 @@ namespace video
 
 class TextureD3D9 : public Texture
 {
+public:
+	TextureD3D9(IDirect3DDevice9* device);
+	~TextureD3D9();
+
+	void Init(
+		const math::dimension2du& Size,
+		ColorFormat format,
+		u32 MipCount, bool isRendertarget, bool isDynamic);
+
+	LockedRect Lock(ETextureLockMode Mode, u32 MipLevel);
+	void Unlock();
+	void RegenerateMIPMaps();
+
+	bool IsRendertarget() const;
+
+	ColorFormat GetColorFormat() const;
+	void* GetRealTexture();
+	u32 GetLevelCount() const;
+	const math::dimension2du& GetSize() const;
+
+	StrongRef<Referable> Clone() const;
+
+private:
+	static u32 s_TextureCount;
+	static core::array<IDirect3DSurface9*> s_TempSurfaces;
+
+	IDirect3DSurface9* GetTempSurface(u32 width, u32 height, D3DFORMAT format);
+	void FreeTempSurface(IDirect3DSurface9* surface);
+
 protected:
 	IDirect3DDevice9* m_Device;
 	IDirect3DTexture9* m_Texture;
@@ -26,35 +55,6 @@ protected:
 	u32 m_LockedLevel;
 	ETextureLockMode m_LockedMode;
 	IDirect3DSurface9* m_TempSurface;
-
-private:
-	static u32 s_TextureCount;
-	static core::array<IDirect3DSurface9*> s_TempSurfaces;
-
-	IDirect3DSurface9* GetTempSurface(u32 width, u32 height, D3DFORMAT format);
-	void FreeTempSurface(IDirect3DSurface9* surface);
-
-public:
-	TextureD3D9(IDirect3DDevice9* device);
-	~TextureD3D9();
-
-	bool Init(
-		const math::dimension2du& Size,
-		ColorFormat format,
-		u32 MipCount, bool isRendertarget, bool isDynamic);
-
-	void* Lock(ETextureLockMode Mode, SLockedRect* locked, u32 MipLevel);
-	void Unlock();
-	void RegenerateMIPMaps();
-
-	bool IsRendertarget() const;
-
-	ColorFormat GetColorFormat() const;
-	void* GetRealTexture();
-	u32 GetLevelCount() const;
-	const math::dimension2du& GetSize() const;
-
-	StrongRef<Referable> Clone() const;
 };
 
 }

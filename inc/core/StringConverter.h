@@ -1,6 +1,5 @@
 #ifndef INCLUDED_STRINGCONVERTER_H
 #define INCLUDED_STRINGCONVERTER_H
-#include "lxString.h"
 #include "DateAndTime.h"
 #include "lxFormat.h"
 

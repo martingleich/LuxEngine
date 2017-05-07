@@ -49,7 +49,7 @@ public:
 	Remark: The id is only valid until resources are added or removed from the system.
 	It's best to use an id immeditly after getting it.
 	\param resource The resource to query the name from.
-	\return The index of the resource, or INVALID_ID if an error occured.
+	\return The index of the resource.
 	*/
 	virtual u32 GetResourceId(Resource* resource) const = 0;
 
@@ -57,7 +57,7 @@ public:
 	/**
 	\param type The type of the resource to query.
 	\param name The name of the resource to query.
-	\return The index of the resource, or INVALID_ID if an error occured.
+	\return The index of the resource.
 	*/
 	virtual u32 GetResourceId(Name type, const string& name) const = 0;
 
@@ -66,17 +66,15 @@ public:
 	The name of resource must be unique for each type.
 	\param name The name of the resource.
 	\param resource The resource to add to the system.
-	\return True, if the resource was added to the system, otherwise false.
 	*/
-	virtual bool AddResource(const string& name, Resource* resource) = 0;
+	virtual void AddResource(const string& name, Resource* resource) = 0;
 
 	//! Remove a resource from the cache
 	/**
 	\param type The type of the resource to remove.
 	\param id The id of the resource to remove.
-	\return True, if the resource was removed, otherwise false.
 	*/
-	virtual bool RemoveResource(Name type, u32 id) = 0;
+	virtual void RemoveResource(Name type, u32 id) = 0;
 
 	//! Remove unused resources from the system
 	/**
@@ -92,7 +90,7 @@ public:
 	/**
 	\param type The type of the resource.
 	\param id The index of the resource.
-	\return A resource or null in case of an error.
+	\return A resource.
 	*/
 	virtual StrongRef<Resource> GetResource(Name type, u32 id) = 0;
 
@@ -102,7 +100,7 @@ public:
 	the given name. <br>
 	\param type The type of the resource, can be empty to indicate any resourcetype matching name.
 	\param name The name of the resource.
-	\return The resource of null in case of an error.
+	\return The resource.
 	*/
 	virtual StrongRef<Resource> GetResource(Name type, const string& name) = 0;
 
@@ -113,7 +111,7 @@ public:
 	and added to the system under the name of the file.
 	\param type The type of the resource.
 	\param file The file from which to load the resource.
-	\return The resource of null in case of an error.
+	\return The resource.
 	*/
 	virtual StrongRef<Resource> GetResource(Name type, io::File* file) = 0;
 
@@ -121,7 +119,7 @@ public:
 	/**
 	\param type The type of the resource.
 	\param file The file from which to load the resource.
-	\return The resource of null in case of an error.
+	\return The resource.
 	*/
 	virtual StrongRef<Resource> CreateResource(Name type, io::File* file) = 0;
 
@@ -131,7 +129,7 @@ public:
 	the given name. <br>
 	\param type The type of the resource, can be empty to indicate any resourcetype matching name.
 	\param name The name of the resource.
-	\return The resource of null in case of an error.
+	\return The resource.
 	*/
 	virtual StrongRef<Resource> CreateResource(Name type, const string& name) = 0;
 
@@ -151,10 +149,15 @@ public:
 	//! Query a resource loader
 	/**
 	\param id The id of the resource loader must be between 0 and the number of resource loaders.
-	\return A resource loader, or null in case of an error.
+	\return A resource loader.
 	*/
 	virtual StrongRef<ResourceLoader> GetResourceLoader(u32 id) const = 0;
 
+	//! Get the type of resource contained in a file.
+	/**
+	\param file The file to check.
+	\return The invalid name if there is not matching resource type.
+	*/
 	virtual core::Name GetFileType(io::File* file) const = 0;
 
 	//! Add a new resource loader to the system.
@@ -163,9 +166,8 @@ public:
 	Resource loader which were added later in the programm, are used before
 	older ones, so you can overwritte internal loaders with your own.
 	\param loader The new resource loader.
-	\return True if the loaders was added otherwise false.
 	*/
-	virtual bool AddResourceLoader(ResourceLoader* loader) = 0;
+	virtual void AddResourceLoader(ResourceLoader* loader) = 0;
 
 	//! Get the total number of diffrent resource types.
 	/**
@@ -184,9 +186,8 @@ public:
 	/**
 	Type names must be unique and not empty.
 	\param name The new type.
-	\return True, if the type was added, otherwise false.
 	*/
-	virtual bool AddType(Name name) = 0;
+	virtual void AddType(Name name) = 0;
 
 	virtual StrongRef<ReferableFactory> GetReferableFactory() = 0;
 	virtual StrongRef<io::FileSystem> GetFileSystem() = 0;

@@ -30,7 +30,6 @@ public:
 	virtual bool ExistFile(const path& p) = 0;
 	virtual StrongRef<FileEnumerator> EnumerateFiles(const path& subDir = string::EMPTY) = 0;
 	virtual EArchiveCapabilities GetCaps() const = 0;
-	virtual bool IsValid() const = 0;
 	virtual path GetAbsolutePath(const path& p) = 0;
 };
 

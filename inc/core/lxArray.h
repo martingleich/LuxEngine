@@ -774,6 +774,21 @@ public:
 	}
 
 
+	const T& At(size_t entry) const
+	{
+		if(entry >= m_Used)
+			throw core::OutOfRangeException();
+
+		return m_Entries[entry];
+	}
+
+	T& At(size_t entry)
+	{
+		if(entry >= m_Used)
+			throw core::OutOfRangeException();
+
+		return m_Entries[entry];
+	}
 private:
 	T* Allocate(size_t count)
 	{

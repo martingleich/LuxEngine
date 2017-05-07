@@ -3,6 +3,7 @@
 #include "math/lxMath.h"
 #include "core/lxFormat.h"
 #include "video/ColorSpaces.h"
+#include "core/lxException.h"
 
 namespace lux
 {
@@ -279,6 +280,29 @@ private:
 	EColorFormat m_Format;
 };
 
+}
+
+namespace core
+{
+struct ColorFormatException : Exception
+{
+	explicit ColorFormatException(video::ColorFormat _format) :
+		Exception("Invalid or unsupported color format"),
+		format(_format)
+	{}
+
+	ColorFormatException(const char* msg, video::ColorFormat _format) :
+		Exception(msg),
+		format(_format)
+	{}
+
+	video::ColorFormat format;
+};
+
+}
+
+namespace video
+{
 class Colorf;
 
 //! Real 32-Bit color

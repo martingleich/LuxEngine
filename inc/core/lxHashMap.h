@@ -2,8 +2,8 @@
 #define INCLUDED_LX_HASH_MAP_H
 #include "lxAllocator.h"
 #include "lxIterator.h"
-#include "math/lxMath.h"
 #include "lxUtil.h"
+#include "math/lxMath.h"
 
 namespace lux
 {

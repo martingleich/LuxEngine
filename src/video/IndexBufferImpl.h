@@ -41,7 +41,7 @@ public:
 	void SetHandle(void* handle) { m_Handle = handle; }
 	void* GetHandle() const { return m_Handle; }
 	BufferManager* GetManager() { return m_Manager; }
-	bool UpdateByManager(u32 group) { return m_Manager->UpdateBuffer(this, group); }
+	void UpdateByManager(u32 group) { m_Manager->UpdateBuffer(this, group); }
 
 private:
 	static u32 CalcStride(EIndexFormat type);

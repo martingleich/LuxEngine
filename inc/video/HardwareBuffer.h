@@ -24,7 +24,7 @@ public:
 	inline const void* Pointer_c(u32 n, u32 count) const;
 	inline u32 GetSize() const;
 	inline u32 GetAlloc() const;
-	inline bool Update(u32 group = 0);
+	inline void Update(u32 group = 0);
 	inline void SetCursor(u32 c);
 	inline u32 GetCursor() const;
 	inline u32 GetStride() const;
@@ -37,7 +37,7 @@ public:
 	virtual void SetHandle(void* handle) = 0;
 	virtual void* GetHandle() const = 0;
 	virtual BufferManager* GetManager() = 0;
-	virtual bool UpdateByManager(u32 group) = 0;
+	virtual void UpdateByManager(u32 group) = 0;
 
 protected:
 	u8* m_Data;
@@ -123,18 +123,15 @@ inline u32 HardwareBuffer::GetAlloc() const
 	return m_Allocated;
 }
 
-inline bool HardwareBuffer::Update(u32 group)
+inline void HardwareBuffer::Update(u32 group)
 {
 	if(m_EndDirty < m_BeginDirty)
-		return true;
+		return;
 
-	if(!UpdateByManager(group))
-		return false;
+	UpdateByManager(group);
 
 	m_EndDirty = 0;
 	m_BeginDirty = 0xFFFFFFFF;
-
-	return true;
 }
 
 inline void HardwareBuffer::SetCursor(u32 c)

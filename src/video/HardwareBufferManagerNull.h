@@ -17,14 +17,14 @@ public:
 	void Update(u32 updateGroup);
 	virtual void AddBuffer(HardwareBuffer* buffer);
 	virtual void RemoveBuffer(HardwareBuffer* buffer);
-	bool UpdateBuffer(HardwareBuffer* buffer, u32 group = 0);
-	bool ForceBufferUpdate(HardwareBuffer* buffer);
+	void UpdateBuffer(HardwareBuffer* buffer, u32 group = 0);
+	void ForceBufferUpdate(HardwareBuffer* buffer);
 	StrongRef<IndexBuffer> CreateIndexBuffer();
 	StrongRef<VertexBuffer> CreateVertexBuffer();
-	bool EnableBuffer(const HardwareBuffer* buffer, u32 streamID);
+	void EnableBuffer(const HardwareBuffer* buffer, u32 streamID);
 	virtual void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
 	virtual void RemoveInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
-	virtual bool EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle) = 0;
+	virtual void EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle) = 0;
 
 private:
 	struct UpdateEntry

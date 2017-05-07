@@ -12,7 +12,7 @@ class ImageLoaderPNG : public core::ResourceLoader
 public:
 	const string& GetName() const;
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
-	bool LoadResource(io::File* file, core::Resource* dst);
+	void LoadResource(io::File* file, core::Resource* dst);
 };
 
 }

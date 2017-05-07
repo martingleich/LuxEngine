@@ -21,7 +21,7 @@ public:
 	virtual void Init(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop) = 0;
 
 	//! Get the size of the image in pixel
-	virtual const math::dimension2du& GetDimension() const = 0;
+	virtual const math::dimension2du& GetSize() const = 0;
 
 	//! Get the colorformat of the image
 	virtual ColorFormat GetColorFormat() const = 0;
@@ -89,6 +89,55 @@ public:
 	*/
 };
 
+struct ImageLock
+{
+	ImageLock(Image* i) :
+		base(i),
+		data((u8*)base->Lock()),
+		pitch(base->GetPitch())
+	{
+	}
+
+	ImageLock(const ImageLock& old) = delete;
+
+	ImageLock(ImageLock&& old)
+	{
+		base = old.base;
+		data = old.data;
+		pitch = old.pitch;
+		old.base = nullptr;
+	}
+
+	ImageLock& operator=(const ImageLock& other) = delete;
+	ImageLock& operator=(ImageLock&& old)
+	{
+		Unlock();
+		base = old.base;
+		data = old.data;
+		pitch = old.pitch;
+		old.base = nullptr;
+		return *this;
+	}
+
+	~ImageLock()
+	{
+		Unlock();
+	}
+
+	void Unlock()
+	{
+		if(base)
+			base->Unlock();
+		base = nullptr;
+		data = nullptr;
+		pitch = 0;
+	}
+
+	Image* base;
+	u8* data;
+	u32 pitch;
+};
+
 
 class ImageList : public core::Resource
 {
@@ -100,9 +149,9 @@ public:
 	virtual void Clear() = 0;
 };
 
-} 
+}
 
-} 
+}
 
 
 #endif // INCLUDED_IMAGE_H

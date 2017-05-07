@@ -35,179 +35,209 @@ PackageParam::PackageParam(const PackageParam& other) :
 
 PackageParam::operator video::MaterialLayer()
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid())
-		return *(video::MaterialLayer*)m_Data;
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	return video::MaterialLayer();
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	return *(video::MaterialLayer*)m_Data;
 }
 
 PackageParam::operator video::BaseTexture*()
 {
-	lxAssert(m_Type == core::Type::Texture);
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	if(IsValid())
-		return ((video::MaterialLayer*)m_Data)->texture;
-	return nullptr;
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	return ((video::MaterialLayer*)m_Data)->texture;
 }
 
 PackageParam::operator video::Texture*()
 {
-	lxAssert(m_Type == core::Type::Texture);
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	if(IsValid())
-		return (video::Texture*)((video::MaterialLayer*)m_Data)->texture;
-	return nullptr;
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	return (video::Texture*)((video::MaterialLayer*)m_Data)->texture;
 }
 
 PackageParam::operator video::CubeTexture*()
 {
-	lxAssert(m_Type == core::Type::Texture);
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	if(IsValid())
-		return (video::CubeTexture*)((video::MaterialLayer*)m_Data)->texture;
-	return nullptr;
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	return (video::CubeTexture*)((video::MaterialLayer*)m_Data)->texture;
 }
 
 PackageParam::operator StrongRef<video::BaseTexture>()
 {
-	lxAssert(m_Type == core::Type::Texture);
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	if(IsValid())
-		return ((video::MaterialLayer*)m_Data)->texture;
-	return nullptr;
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	return ((video::MaterialLayer*)m_Data)->texture;
 }
 
 PackageParam::operator StrongRef<video::Texture>()
 {
-	lxAssert(m_Type == core::Type::Texture);
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	if(IsValid())
-		return (video::Texture*)((video::MaterialLayer*)m_Data)->texture;
-	return nullptr;
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+	return (video::Texture*)((video::MaterialLayer*)m_Data)->texture;
 }
 
 PackageParam::operator StrongRef<video::CubeTexture>()
 {
-	lxAssert(m_Type == core::Type::Texture);
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	if(IsValid())
-		return (video::CubeTexture*)((video::MaterialLayer*)m_Data)->texture;
-	return nullptr;
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	return (video::CubeTexture*)((video::MaterialLayer*)m_Data)->texture;
 }
 
 PackageParam& PackageParam::operator=(video::BaseTexture* texture)
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid()) {
-		if(texture)
-			texture->Grab();
-		if(((video::MaterialLayer*)m_Data)->texture)
-			((video::MaterialLayer*)m_Data)->texture->Drop();
-		((video::MaterialLayer*)m_Data)->texture = texture;
-	}
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	if(texture)
+		texture->Grab();
+	if(((video::MaterialLayer*)m_Data)->texture)
+		((video::MaterialLayer*)m_Data)->texture->Drop();
+	((video::MaterialLayer*)m_Data)->texture = texture;
 
 	return *this;
 }
 
 PackageParam& PackageParam::operator=(video::Texture* texture)
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid()) {
-		if(texture)
-			texture->Grab();
-		if(((video::MaterialLayer*)m_Data)->texture)
-			((video::MaterialLayer*)m_Data)->texture->Drop();
-		((video::MaterialLayer*)m_Data)->texture = (video::BaseTexture*)texture;
-	}
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	if(texture)
+		texture->Grab();
+	if(((video::MaterialLayer*)m_Data)->texture)
+		((video::MaterialLayer*)m_Data)->texture->Drop();
+	((video::MaterialLayer*)m_Data)->texture = (video::BaseTexture*)texture;
 
 	return *this;
 }
 
 PackageParam& PackageParam::operator=(video::CubeTexture* texture)
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid()) {
-		if(texture)
-			texture->Grab();
-		if(((video::MaterialLayer*)m_Data)->texture)
-			((video::MaterialLayer*)m_Data)->texture->Drop();
-		((video::MaterialLayer*)m_Data)->texture = (video::BaseTexture*)texture;
-	}
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	if(texture)
+		texture->Grab();
+	if(((video::MaterialLayer*)m_Data)->texture)
+		((video::MaterialLayer*)m_Data)->texture->Drop();
+	((video::MaterialLayer*)m_Data)->texture = (video::BaseTexture*)texture;
 
 	return *this;
 }
 
 PackageParam& PackageParam::operator=(StrongRef<video::BaseTexture> texture)
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid()) {
-		if(texture)
-			texture->Grab();
-		if(((video::MaterialLayer*)m_Data)->texture)
-			((video::MaterialLayer*)m_Data)->texture->Drop();
-		((video::MaterialLayer*)m_Data)->texture = (video::BaseTexture*)texture;
-	}
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	if(texture)
+		texture->Grab();
+	if(((video::MaterialLayer*)m_Data)->texture)
+		((video::MaterialLayer*)m_Data)->texture->Drop();
+	((video::MaterialLayer*)m_Data)->texture = (video::BaseTexture*)texture;
 
 	return *this;
 }
 
 PackageParam& PackageParam::operator=(StrongRef<video::Texture> texture)
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid()) {
-		if(texture)
-			texture->Grab();
-		if(((video::MaterialLayer*)m_Data)->texture)
-			((video::MaterialLayer*)m_Data)->texture->Drop();
-		((video::MaterialLayer*)m_Data)->texture = (StrongRef<video::BaseTexture>)texture;
-	}
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	if(texture)
+		texture->Grab();
+	if(((video::MaterialLayer*)m_Data)->texture)
+		((video::MaterialLayer*)m_Data)->texture->Drop();
+	((video::MaterialLayer*)m_Data)->texture = (StrongRef<video::BaseTexture>)texture;
 
 	return *this;
 }
 
 PackageParam& PackageParam::operator=(StrongRef<video::CubeTexture> texture)
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid()) {
-		if(texture)
-			texture->Grab();
-		if(((video::MaterialLayer*)m_Data)->texture)
-			((video::MaterialLayer*)m_Data)->texture->Drop();
-		((video::MaterialLayer*)m_Data)->texture = (StrongRef<video::BaseTexture>)texture;
-	}
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	if(texture)
+		texture->Grab();
+	if(((video::MaterialLayer*)m_Data)->texture)
+		((video::MaterialLayer*)m_Data)->texture->Drop();
+	((video::MaterialLayer*)m_Data)->texture = (StrongRef<video::BaseTexture>)texture;
 
 	return *this;
 }
 
 PackageParam& PackageParam::operator=(video::MaterialLayer& Layer)
 {
-	lxAssert(m_Type == core::Type::Texture);
-	if(IsValid()) {
-		if(Layer.texture)
-			Layer.texture->Grab();
-		if(((video::MaterialLayer*)m_Data)->texture)
-			((video::MaterialLayer*)m_Data)->texture->Drop();
-		*(video::MaterialLayer*)m_Data = Layer;
-	}
+	if(m_Type != core::Type::Texture)
+		throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
+
+	if(Layer.texture)
+		Layer.texture->Grab();
+	if(((video::MaterialLayer*)m_Data)->texture)
+		((video::MaterialLayer*)m_Data)->texture->Drop();
+	*(video::MaterialLayer*)m_Data = Layer;
 
 	return *this;
 }
 
 PackageParam& PackageParam::operator=(const PackageParam& varVal)
 {
-	lxAssert(IsConvertible(m_Type, varVal.m_Type));
+	if(IsConvertible(m_Type, varVal.m_Type))
+		throw TypeException("Incompatible types used", m_Type, varVal.m_Type);
 
-	if(IsValid()) {
-		if(m_Type == core::Type::Texture && varVal.m_Type == core::Type::Texture) {
-			if(((video::MaterialLayer*)varVal.m_Data)->texture)
-				((video::MaterialLayer*)varVal.m_Data)->texture->Grab();
-			if(((video::MaterialLayer*)m_Data)->texture)
-				((video::MaterialLayer*)m_Data)->texture->Drop();
-		}
+	if(!IsValid())
+		throw Exception("Accessed invalid package parameter");
 
-		ConvertBaseType(varVal.m_Type, varVal.m_Data, m_Type, m_Data);
+	if(m_Type == core::Type::Texture && varVal.m_Type == core::Type::Texture) {
+		if(((video::MaterialLayer*)varVal.m_Data)->texture)
+			((video::MaterialLayer*)varVal.m_Data)->texture->Grab();
+		if(((video::MaterialLayer*)m_Data)->texture)
+			((video::MaterialLayer*)m_Data)->texture->Drop();
 	}
+
+	ConvertBaseType(varVal.m_Type, varVal.m_Data, m_Type, m_Data);
 
 	return *this;
 }
@@ -328,14 +358,16 @@ void ParamPackage::AddParam(core::Type type, const char* name, const void* defau
 	Entry entry;
 	entry.name = name;
 	const u32 size = type.GetSize();
-	lxAssert(size <= 255);
+
+	// There are currently no types triggering this, just to be shure
+	if(size > 255)
+		throw Exception("Type is too big for param package");
+
 	entry.size = (u8)size;
 	entry.type = type;
 	entry.reserved = reserved;
-	if(entry.type == core::Type::Unknown) {
-		lxAssertNeverReach("Unsupported type");
-		return;
-	}
+	if(entry.type == core::Type::Unknown)
+		throw Exception("Type is not supported in param package");
 
 	AddEntry(entry, defaultValue);
 }
@@ -347,10 +379,8 @@ void ParamPackage::AddParam(const ParamDesc& desc)
 	entry.size = desc.size;
 	entry.type = desc.type;
 	entry.reserved = desc.reserved;
-	if(entry.type == core::Type::Unknown) {
-		lxAssertNeverReach("Unsupported type");
-		return;
-	}
+	if(entry.type == core::Type::Unknown)
+		throw Exception("Type is not supported in param package");
 
 	AddEntry(entry, desc.defaultValue);
 }
@@ -367,35 +397,34 @@ const void* ParamPackage::GetDefault() const
 	return m_DefaultPackage;
 }
 
-bool ParamPackage::GetParamDesc(u32 param, ParamDesc& desc) const
+ParamPackage::ParamDesc ParamPackage::GetParamDesc(u32 param) const
 {
 	if(param >= m_Params.Size())
-		return false;
+		throw OutOfRangeException();
 
-	desc.name = m_Params[param].name.Data();
-	desc.size = m_Params[param].size;
-	desc.type = m_Params[param].type;
-	desc.reserved = m_Params[param].reserved;
-	desc.defaultValue = (const u8*)m_DefaultPackage + m_Params[param].offset;
-	return true;
+	auto& p = m_Params.At(param);
+	ParamDesc desc;
+	desc.name = p.name.Data();
+	desc.size = p.size;
+	desc.type = p.type;
+	desc.reserved = p.reserved;
+	desc.defaultValue = (const u8*)m_DefaultPackage + p.offset;
+
+	return desc;
 }
 
 const string& ParamPackage::GetParamName(u32 param) const
 {
-	if(param >= m_Params.Size())
-		return string::EMPTY;
-
-	return m_Params[param].name;
+	return m_Params.At(param).name;
 }
 
 PackageParam ParamPackage::GetParam(u32 param, void* baseData, bool isConst) const
 {
-	if(param >= m_Params.Size())
-		return PackageParam::INVALID;
+	auto& p = m_Params.At(param);
 
-	core::Type type = isConst ? m_Params[param].type.GetConstantType() : m_Params[param].type;
+	core::Type type = isConst ? p.type.GetConstantType() : p.type;
 
-	return PackageParam(m_Params[param].size, type, (u8*)baseData + m_Params[param].offset, m_Params[param].name.Data());
+	return PackageParam(p.size, type, (u8*)baseData + p.offset, p.name.Data());
 }
 
 PackageParam ParamPackage::GetParamFromName(const string& name, void* baseData, bool isConst) const
@@ -403,14 +432,14 @@ PackageParam ParamPackage::GetParamFromName(const string& name, void* baseData, 
 	return GetParam(GetParamId(name), baseData, isConst);
 }
 
-PackageParam ParamPackage::GetParamFromType(core::Type type, int index, void* baseData, bool isConst) const
+PackageParam ParamPackage::GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const
 {
-	int id = -1;
+	u32 id = 0;
 	for(u32 i = 0; i < m_Params.Size(); ++i) {
 		if(m_Params[i].type == type) {
-			id++;
 			if(id == index)
 				return GetParam(i, baseData, isConst);
+			id++;
 		}
 	}
 
@@ -419,14 +448,15 @@ PackageParam ParamPackage::GetParamFromType(core::Type type, int index, void* ba
 
 void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue, core::Type type)
 {
-	if(param >= m_Params.Size() || !defaultValue)
+	if(!defaultValue)
 		return;
 
-	const Entry& e = m_Params[param];
+	const Entry& e = m_Params.At(param);
 	if(type == core::Type::Unknown || type == e.type)
 		memcpy((u8*)m_DefaultPackage + e.offset, defaultValue, e.size);
 	else {
-		lxAssert(IsConvertible(type, e.type));
+		if(!IsConvertible(type, e.type))
+			throw TypeException("Incompatible types used", type, e.type);
 		ConvertBaseType(type, defaultValue, e.type, (u8*)m_DefaultPackage + e.offset);
 	}
 }
@@ -442,12 +472,10 @@ u32 ParamPackage::GetParamId(const string& name, core::Type type) const
 		if(m_Params[i].name == name) {
 			if(type == core::Type::Unknown || m_Params[i].type == type)
 				return i;
-			else
-				return 0xFFFFFFFF;
 		}
 	}
 
-	return 0xFFFFFFFF;
+	throw ObjectNotFoundException(name.Data());
 }
 
 u32 ParamPackage::GetParamCount() const
@@ -571,18 +599,18 @@ void PackagePuffer::Reset()
 
 PackageParam PackagePuffer::FromName(const string& name, bool isConst) const
 {
-	if(m_Pack)
-		return m_Pack->GetParamFromName(name, m_Data, isConst);
-	else
-		return PackageParam::INVALID;
+	if(!m_Pack)
+		throw Exception("No param pack set");
+
+	return m_Pack->GetParamFromName(name, m_Data, isConst);
 }
 
 PackageParam PackagePuffer::FromType(core::Type type, u32 index, bool isConst) const
 {
-	if(m_Pack)
-		return m_Pack->GetParamFromType(type, index, m_Data, isConst);
-	else
-		return PackageParam::INVALID;
+	if(!m_Pack)
+		throw Exception("No param pack set");
+
+	return m_Pack->GetParamFromType(type, index, m_Data, isConst);
 }
 
 PackageParam PackagePuffer::FromID(u32 id, bool isConst) const

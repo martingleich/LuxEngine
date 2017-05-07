@@ -161,12 +161,11 @@ public:
 
 	//! Set the material used for rendering the font
 	/**
-	The material must support at least one texture, or the material set is ignored
+	The material must support at least one texture,
 	for more see "font Rendering in Lux"
 	\param material The new material to use
-	\return Is the material used
 	*/
-	virtual bool SetMaterial(const video::Material& material) = 0;
+	virtual void SetMaterial(const video::Material& material) = 0;
 
 	//! Retrieve the material used for rendering the font
 	/**

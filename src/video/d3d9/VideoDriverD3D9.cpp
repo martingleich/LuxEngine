@@ -1,7 +1,6 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "core/Logger.h"
 
-#include "video/d3d9/D3DHelper.h"
 #include "video/d3d9/TextureD3D9.h"
 #include "video/d3d9/CubeTextureD3D9.h"
 #include "video/d3d9/ShaderD3D9.h"
@@ -16,70 +15,12 @@
 
 #include "gui/Window.h"
 
+#include "D3DHelper.h"
+
 namespace lux
 {
 namespace video
 {
-
-VideoDriverD3D9::VertexFormat_d3d9::VertexFormat_d3d9() : m_D3DDeclaration(nullptr)
-{
-}
-
-VideoDriverD3D9::VertexFormat_d3d9::VertexFormat_d3d9(IDirect3DVertexDeclaration9* d3dDecl) :
-	m_D3DDeclaration(d3dDecl)
-{
-}
-
-VideoDriverD3D9::VertexFormat_d3d9::VertexFormat_d3d9(const VertexFormat_d3d9& other) :
-	m_D3DDeclaration(other.m_D3DDeclaration)
-{
-	if(m_D3DDeclaration)
-		m_D3DDeclaration->AddRef();
-}
-
-VideoDriverD3D9::VertexFormat_d3d9& VideoDriverD3D9::VertexFormat_d3d9::operator=(const VertexFormat_d3d9& other)
-{
-	if(m_D3DDeclaration)
-		m_D3DDeclaration->Release();
-	if(other.m_D3DDeclaration)
-		other.m_D3DDeclaration->AddRef();
-
-	m_D3DDeclaration = other.m_D3DDeclaration;
-
-	return *this;
-}
-
-VideoDriverD3D9::VertexFormat_d3d9::VertexFormat_d3d9(VertexFormat_d3d9&& old) : m_D3DDeclaration(old.m_D3DDeclaration)
-{
-	old.m_D3DDeclaration = nullptr;
-}
-
-VideoDriverD3D9::VertexFormat_d3d9& VideoDriverD3D9::VertexFormat_d3d9::operator=(VertexFormat_d3d9&& old)
-{
-	if(m_D3DDeclaration)
-		m_D3DDeclaration->Release();
-	m_D3DDeclaration = old.m_D3DDeclaration;
-	old.m_D3DDeclaration = nullptr;
-
-	return *this;
-}
-
-VideoDriverD3D9::VertexFormat_d3d9::~VertexFormat_d3d9()
-{
-	if(m_D3DDeclaration)
-		m_D3DDeclaration->Release();
-	m_D3DDeclaration = nullptr;
-}
-
-IDirect3DVertexDeclaration9* VideoDriverD3D9::VertexFormat_d3d9::GetD3D() const
-{
-	return m_D3DDeclaration;
-}
-
-VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9() :
-	m_Surface(nullptr)
-{
-}
 
 VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(IDirect3DSurface9* surface) :
 	m_Surface(surface)
@@ -89,37 +30,7 @@ VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(IDirect3DSurface9* surface) 
 		m_Surface->GetDesc(&desc);
 		m_Size.width = desc.Width;
 		m_Size.height = desc.Height;
-		m_Surface->AddRef();
 	}
-}
-
-VideoDriverD3D9::DepthBuffer_d3d9& VideoDriverD3D9::DepthBuffer_d3d9::operator=(const DepthBuffer_d3d9& other)
-{
-	if(m_Surface)
-		m_Surface->Release();
-	if(other.m_Surface)
-		other.m_Surface->AddRef();
-
-	m_Surface = other.m_Surface;
-	m_Size = other.m_Size;
-
-	return *this;
-}
-
-VideoDriverD3D9::DepthBuffer_d3d9::~DepthBuffer_d3d9()
-{
-	if(m_Surface)
-		m_Surface->Release();
-}
-
-const math::dimension2du& VideoDriverD3D9::DepthBuffer_d3d9::GetSize() const
-{
-	return m_Size;
-}
-
-IDirect3DSurface9* VideoDriverD3D9::DepthBuffer_d3d9::GetSurface() const
-{
-	return m_Surface;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -278,13 +189,14 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 	}
 
 	// Geräteschnittstelle generieren
+	IDirect3DDevice9* newDevice;
 	if(m_Config.pureSoftware) {
 		if(FAILED(m_D3D->CreateDevice(m_Adapter,
 			D3DDEVTYPE_HAL,
 			windowHandle,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 			&PresentParams,
-			&m_D3DDevice))) {
+			&newDevice))) {
 			log::Error("Failed to create Direct3DDevice.");
 			return false;
 		}
@@ -296,14 +208,14 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 			windowHandle,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING,
 			&PresentParams,
-			&m_D3DDevice);
+			&newDevice);
 		if(FAILED(hr))
 			hr = m_D3D->CreateDevice(m_Adapter,
 				D3DDEVTYPE_HAL,
 				windowHandle,
 				D3DCREATE_MIXED_VERTEXPROCESSING,
 				&PresentParams,
-				&m_D3DDevice);
+				&newDevice);
 
 		if(FAILED(hr))
 			hr = m_D3D->CreateDevice(m_Adapter,
@@ -311,7 +223,7 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 				windowHandle,
 				D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 				&PresentParams,
-				&m_D3DDevice);
+				&newDevice);
 
 		if(FAILED(hr)) {
 			log::Error("Failed to create the direct3dDevice.");
@@ -319,7 +231,8 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 		}
 	}
 
-	// Print Information
+	m_D3DDevice = newDevice;
+
 	D3DADAPTER_IDENTIFIER9 AdapterIdent;
 	m_D3D->GetAdapterIdentifier(m_Adapter, 0, &AdapterIdent);
 	log::Info("Using Direct3D-Driver ~d.~d.~d.~d on ~s.",
@@ -362,20 +275,14 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 
 VideoDriverD3D9::~VideoDriverD3D9()
 {
-	if(m_D3DDevice) {
-		IdentityMaterial.SetRenderer(nullptr);
-		WorkMaterial.SetRenderer(nullptr);
+	IdentityMaterial.SetRenderer(nullptr);
+	WorkMaterial.SetRenderer(nullptr);
 
-		m_BufferManager = nullptr;
+	// Destroy buffer manager before the device is destroyed
+	m_BufferManager.Reset();
 
-		m_VertexFormats.Clear();
-		m_DepthBuffers.Clear();
-
-		m_D3DDevice->Release();
-	}
-
-	if(m_D3D)
-		m_D3D->Release();
+	m_VertexFormats.Clear();
+	m_DepthBuffers.Clear();
 }
 
 void VideoDriverD3D9::FillCaps()
@@ -444,21 +351,19 @@ IDirect3DSurface9* VideoDriverD3D9::GetMatchingDepthBuffer(IDirect3DSurface9* ta
 	return nullptr;
 }
 
-bool VideoDriverD3D9::SetRenderTarget(const RenderTarget& target)
+void VideoDriverD3D9::SetRenderTarget(const RenderTarget& target)
 {
 	if(target.HasTexture()) {
-		if(!target.IsValid()) {
-			log::Error("Tried to set a non rendertarget texture as rendertarget.");
-			return false;
-		}
+		if(!target.IsValid())
+			throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
 
 		// Same texture as current target -> Abort
 		if(target.GetTexture() == m_CurrentRenderTarget.GetTexture())
-			return true;
+			return;
 	} else {
 		// Tries to set to back buffer backbuffer already loaded -> Abort
 		if(m_CurrentRenderTarget == m_BackBufferTarget)
-			return true;
+			return;
 	}
 
 	Rendertarget_d3d9 newRendertarget;
@@ -467,37 +372,23 @@ bool VideoDriverD3D9::SetRenderTarget(const RenderTarget& target)
 	else
 		newRendertarget = target;
 
-	bool result = true;
-	if(FAILED(m_D3DDevice->SetRenderTarget(0, newRendertarget.GetSurface()))) {
-		result = false;
-		log::Error("Can't set new rendertarget texture.");
+	HRESULT  hr;
+	if(FAILED(hr = m_D3DDevice->SetRenderTarget(0, newRendertarget.GetSurface())))
+		throw core::D3D9Exception(hr);
+
+	IDirect3DSurface9* depthStencil = GetMatchingDepthBuffer(newRendertarget.GetSurface());
+	if(depthStencil == nullptr)
+		throw core::Exception("Can't find matching depth buffer for rendertarget.");
+
+	if(FAILED(hr = m_D3DDevice->SetDepthStencilSurface(depthStencil))) {
+		m_D3DDevice->SetRenderTarget(0, m_CurrentRenderTarget.GetSurface());
+		throw core::D3D9Exception(hr);
 	}
 
-	IDirect3DSurface9* depthStencil = nullptr;
-	if(result) {
-		depthStencil = GetMatchingDepthBuffer(newRendertarget.GetSurface());
-		if(depthStencil == nullptr) {
-			result = false;
-			log::Error("Can't find matching depth buffer for rendertarget.");
-		}
-	}
+	m_CurrentRenderTarget = newRendertarget;
 
-	if(result) {
-		if(FAILED(m_D3DDevice->SetDepthStencilSurface(depthStencil))) {
-			m_D3DDevice->SetRenderTarget(0, m_CurrentRenderTarget.GetSurface());
-			result = false;
-			log::Error("Can't enable new depth-stencil buffer.");
-		}
-	}
-
-	if(result) {
-		m_CurrentRenderTarget = newRendertarget;
-
-		m_3DTransformsChanged = true;
-		m_2DTransformChanged = true;
-	}
-
-	return result;
+	m_3DTransformsChanged = true;
+	m_2DTransformChanged = true;
 }
 
 const RenderTarget& VideoDriverD3D9::GetRenderTarget()
@@ -509,14 +400,14 @@ bool VideoDriverD3D9::Present()
 {
 	HRESULT hr = m_D3DDevice->Present(NULL, NULL, NULL, NULL);
 	if(FAILED(hr))
-		log::Error("Present failed.");
+		return false;
 
 	m_PresentResult = SUCCEEDED(hr);
 
 	return m_PresentResult;
 }
 
-bool VideoDriverD3D9::BeginScene(bool clearColor, bool clearZ,
+void VideoDriverD3D9::BeginScene(bool clearColor, bool clearZ,
 	video::Color color, float z)
 {
 	if(!m_CurrentRenderTarget.HasTexture() && m_CurrentRenderTarget != m_BackBufferTarget) {
@@ -544,22 +435,25 @@ bool VideoDriverD3D9::BeginScene(bool clearColor, bool clearZ,
 		}
 	}
 
-	if(FAILED(hr) || FAILED(hr = m_D3DDevice->BeginScene()))
-		log::Error("Driver: Couldn't begin a new scene.");
-
-	return SUCCEEDED(hr);
+	if(FAILED(hr) || FAILED(hr = m_D3DDevice->BeginScene())) {
+		if(hr == D3DERR_INVALIDCALL)
+			throw core::Exception("Scene was already started");
+		else
+			throw core::D3D9Exception(hr);
+	}
 }
 
-bool VideoDriverD3D9::EndScene()
+void VideoDriverD3D9::EndScene()
 {
-	if(FAILED(m_D3DDevice->EndScene())) {
-		log::Error("Couldn't finish scene.");
-		return false;
+	HRESULT hr;
+	if(FAILED(hr = m_D3DDevice->EndScene())) {
+		if(hr == D3DERR_INVALIDCALL)
+			throw core::Exception("Scene was already started");
+		else
+			throw core::D3D9Exception(hr);
 	}
 
 	m_RenderStatistics->RegisterFrame();
-
-	return true;
 }
 
 bool VideoDriverD3D9::AddLight(const LightData& light)
@@ -627,15 +521,11 @@ StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(
 {
 	StrongRef<SubMesh> out = LUX_NEW(SubMeshImpl);
 	StrongRef<IndexBuffer> ib = m_BufferManager->CreateIndexBuffer();
-	if(!ib)
-		return nullptr;
 	ib->SetType(indexType);
 	ib->SetHWMapping(IndexHWMapping);
 	ib->SetSize(IndexCount);
 
 	StrongRef<VertexBuffer> vb = m_BufferManager->CreateVertexBuffer();
-	if(!vb)
-		return nullptr;
 	vb->SetFormat(vertexFormat);
 	vb->SetHWMapping(VertexHWMapping);
 	vb->SetSize(vertexCount);
@@ -778,7 +668,7 @@ bool VideoDriverD3D9::DrawPrimitiveList(EPrimitiveType primitiveType,
 		case EPT_POINTS:
 			if(primitiveType == EPT_POINT_SPRITES)
 				m_D3DDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
-			
+
 			m_D3DDevice->SetRenderState(D3DRS_POINTSCALEENABLE, TRUE);
 			fTemp = m_CurrentPipeline.Thickness / GetScreenSize().width;
 			m_D3DDevice->SetRenderState(D3DRS_POINTSIZE, *reinterpret_cast<u32*>(&fTemp));
@@ -1155,56 +1045,44 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube)
 StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::dimension2du& size, ColorFormat format, u32 mipCount, bool isDynamic)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
-	if(!out->Init(size, format, mipCount, false, isDynamic))
-		out = nullptr;
-
+	out->Init(size, format, mipCount, false, isDynamic);
 	return out;
 }
 
 StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
-	if(!out->Init(size, format, 1, true, false))
-		out = nullptr;
-
+	out->Init(size, format, 1, true, false);
 	return out;
 }
 
 StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic)
 {
 	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
-	if(!out->Init(size, format, isDynamic))
-		out = nullptr;
-
+	out->Init(size, format, isDynamic);
 	return out;
 }
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
 	const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
-	const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion)
+	const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
+	core::array<string>* errorList)
 {
-	if(language != EShaderLanguage::HLSL) {
-		log::Error("Direct3D9 video driver only supports HLSL shaders.");
-		return nullptr;
-	}
+	if(language != EShaderLanguage::HLSL)
+		throw core::InvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");
 
 	const char* vsProfile = GetD3DXShaderProfile(false, VSmajorVersion, VSminorVersion);
 	const char* psProfile = GetD3DXShaderProfile(true, PSmajorVersion, PSminorVersion);
 
-	if(!vsProfile) {
-		log::Error("Invalid vertex shader profile(~d.~d).", VSmajorVersion, VSminorVersion);
-		return nullptr;
-	}
+	if(!vsProfile)
+		throw core::InvalidArgumentException("vertex shader profile", "Invalid vertex shader profile(~d.~d).");
 
-	if(!psProfile) {
-		log::Error("Invalid pixel shader profile(~d.~d).", PSmajorVersion, PSminorVersion);
-		return nullptr;
-	}
+	if(!psProfile)
+		throw core::InvalidArgumentException("pixel shader profile", "Invalid pixel shader profile(~d.~d).");
 
 	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this);
-	if(!out->Init(VSCode, VSEntryPoint, VSLength, vsProfile, PSCode, PSEntryPoint, PSLength, psProfile))
-		out = nullptr;
+	out->Init(VSCode, VSEntryPoint, VSLength, vsProfile, PSCode, PSEntryPoint, PSLength, psProfile, errorList);
 
 	return out;
 }

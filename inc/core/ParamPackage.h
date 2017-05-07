@@ -56,7 +56,8 @@ public:
 	operator T()
 	{
 		if(IsValid()) {
-			lxAssert(IsConvertible(m_Type, core::GetTypeInfo<T>()));
+			if(!IsConvertible(m_Type, core::GetTypeInfo<T>()))
+				throw TypeException("Incompatible types used", m_Type, core::GetTypeInfo<T>());
 
 			T out;
 			ConvertBaseType(m_Type, m_Data, core::GetTypeInfo<T>(), &out);
@@ -94,7 +95,8 @@ public:
 	template <typename T>
 	PackageParam& operator= (const T& varVal)
 	{
-		lxAssert(core::GetTypeInfo<T>() == m_Type);
+		if(m_Type != core::GetTypeInfo<T>())
+			throw TypeException("Incompatible types used", m_Type, core::GetTypeInfo<T>());
 		if(IsValid())
 			*((T*)m_Data) = varVal;
 
@@ -229,10 +231,8 @@ public:
 	void AddParam(const char* name, const T& defaultValue, u16 reserved = -1)
 	{
 		core::Type type = core::GetTypeInfo<T>();
-		if(type == core::Type::Unknown) {
-			lxAssertNeverReach("Unsupported type");
-			return;
-		}
+		if(type == core::Type::Unknown)
+			throw TypeException("Unsupported type used");
 
 		AddParam(type, name, &defaultValue, reserved);
 	}
@@ -265,14 +265,15 @@ public:
 	/**
 	\param param The index of the param from which information is loaded
 	\param [out] desc The description of the parameter
-	\return True if the param could be found, otherwise false
+	\exception OutOfRange param is out of range
 	*/
-	bool GetParamDesc(u32 param, ParamDesc& desc) const;
+	ParamDesc GetParamDesc(u32 param) const;
 
 	//! Retrieve the name of a param
 	/**
 	\param Param index of Param
 	\return The name of the param
+	\exception OutOfRange param is out of range
 	*/
 	const string& GetParamName(u32 param) const;
 
@@ -282,6 +283,7 @@ public:
 	\param baseData The base pointer of the data block which belongs to the param
 	\param isConst Should the package param be constant, i.e. can't be changed
 	\return The found param
+	\exception OutOfRange param is out of range
 	*/
 	PackageParam GetParam(u32 param, void* baseData, bool isConst) const;
 
@@ -290,7 +292,8 @@ public:
 	\param name name of the param to found
 	\param baseData The base pointer of the data block which belongs to the param
 	\param isConst Should the package param be constant, i.e. can't be changed
-	\return The found param, the invalid param if the name couldnt be found
+	\return The found param
+	\exception Exception name does not exist
 	*/
 	PackageParam GetParamFromName(const string& name, void* baseData, bool isConst) const;
 
@@ -301,14 +304,15 @@ public:
 	\param index The number of which layer should be searched
 	\param baseData The base pointer of the data block which belongs to the param
 	\param isConst Should the package param be constant, i.e. can't be changed
-	\return The index of the found param, if no param could be found -1 is returned
+	\return The index of the found param, if no param could be found the invalid param is returned
 	*/
-	PackageParam GetParamFromType(core::Type type, int index, void* baseData, bool isConst) const;
+	PackageParam GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const;
 
 	//! Set a new default value for a param
 	/**
 	\param param The id of the Param, which default value should be changed
 	\param defaultValue A pointer to the new default value
+	\exception OutOfRange param is out of range
 	*/
 	void SetDefaultValue(u32 param, const void* defaultValue, core::Type type = core::Type::Unknown);
 
@@ -316,6 +320,7 @@ public:
 	/**
 	\param param The name of the Param, which default value should be changed
 	\param defaultValue A pointer to the new default value
+	\exception Exception name does not exist
 	*/
 	void SetDefaultValue(const string& param, const void* defaultValue, core::Type type = core::Type::Unknown);
 
@@ -337,7 +342,8 @@ public:
 	/**
 	\param name The name of the param.
 	\param type The type of the parameter, core::Type::Unknown if any type is ok.
-	\return The id of the parameter, of 0xFFFFFFFF if param doesn't exist.
+	\return The id of the parameter.
+	\exception Exception name does not exist
 	*/
 	u32 GetParamId(const string& name, core::Type type = core::Type::Unknown) const;
 

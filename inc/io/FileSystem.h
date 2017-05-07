@@ -36,7 +36,8 @@ public:
 	\param desc The file description to open
 	\param mode The mode to open the file in
 	\param createIfNotExist If the file doesnt exist create it
-	\return The newly created file, NULL if the file couldnt be created
+	\return The newly created file
+	\exception FileNotFoundException If the file can't be opend
 	*/
 	virtual StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
@@ -45,7 +46,8 @@ public:
 	\param filename The name of the file to open
 	\param mode The mode to open the file in
 	\param createIfNotExist If the file doesnt exist create it
-	\return The newly created file, NULL if the file couldnt be created
+	\return The newly created file
+	\exception FileNotFoundException If the file can't be opend
 	*/
 	virtual StrongRef<File> OpenFile(const path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
@@ -109,10 +111,9 @@ public:
 	//! Retrieve important fileinformations
 	/**
 	\param path The path of the file or directory
-	\param [out] outDesc The information about the file is written here
-	\return True if information could be found
+	\return The information about the file is written here
 	*/
-	virtual bool GetFileDescription(const path& path, FileDescription& outDesc) = 0;
+	virtual FileDescription GetFileDescription(const path& path) = 0;
 
 	//! Create a ini file reader
 	/**

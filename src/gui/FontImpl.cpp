@@ -29,7 +29,7 @@ FontImpl::~FontImpl()
 	LUX_FREE_ARRAY(m_Image);
 }
 
-bool FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
+void FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 {
 	m_Driver = driver;
 
@@ -60,18 +60,11 @@ bool FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 		memcpy(m_Image, data.image, m_ImageWidth*m_ImageHeight * sizeof(FontPixel));
 
 		m_Texture = m_Driver->CreateTexture(math::dimension2du(m_ImageWidth, m_ImageHeight), video::ColorFormat::A8R8G8B8, 0, false);
-		if(!m_Texture) {
-			return false;
-		}
 
-		video::BaseTexture::SLockedRect rect;
-		m_Texture->Lock(video::BaseTexture::ETLM_OVERWRITE, &rect);
-		if(!rect.bits) {
-			return false;
-		}
+		video::TextureLock lock(m_Texture, video::BaseTexture::ETLM_OVERWRITE);
 
 		const FontPixel* srcRow = m_Image;
-		u8* dstRow = (u8*)rect.bits;
+		u8* dstRow = lock.data;
 		for(u32 y = 0; y < m_ImageHeight; ++y) {
 			const FontPixel* srcPixel = srcRow;
 			u8* dstPixel = dstRow;
@@ -88,7 +81,6 @@ bool FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 			dstRow += m_ImageWidth * 4;
 			srcRow += m_ImageWidth * sizeof(FontPixel);
 		}
-		m_Texture->Unlock();
 	} else {
 		m_Image = nullptr;
 		m_Texture = nullptr;
@@ -96,24 +88,18 @@ bool FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 		m_ImageHeight = 0;
 	}
 
-	if(!SetMaterial(data.material)) {
-		return false;
-	}
-
-	return true;
+	SetMaterial(data.material);
 }
 
-bool FontImpl::SetMaterial(const video::Material& material)
+void FontImpl::SetMaterial(const video::Material& material)
 {
 	if(material.Layer(0).IsValid() == false)
-		return false;
+		throw core::InvalidArgumentException("material", "Material must have at least one texture layer");
 
 	m_Material = material;
 
 	if(m_Texture)
 		m_Material.Layer(0) = m_Texture;
-
-	return true;
 }
 
 const video::Material& FontImpl::GetMaterial() const

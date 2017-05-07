@@ -5,12 +5,19 @@
 #include "lxUnicode.h"
 #include "lxUtil.h"
 #include "lxIterator.h"
+#include "lxException.h"
 
 #include <limits>
 
 namespace lux
 {
 
+namespace core
+{
+template <typename T>
+class array;
+
+}
 //! The type of characters a string contains.
 DEFINE_FLAG_ENUM_CLASS(EStringType)
 {
@@ -76,7 +83,7 @@ No string can contain the NUL character.
 class LUX_API string
 {
 public:
-	// Iterator over the codepoints of the string.
+	//! Iterator over the codepoints of the string.
 	class ConstIterator : public core::BaseIterator<core::BidirectionalIteratorTag, u32>
 	{
 		friend class string;
@@ -557,28 +564,15 @@ public:
 	\param maxCount The amount of strings available in the output array.
 	\return The number of written output strings.
 	*/
-	size_t Split(u32 ch, string* outArray, size_t maxCount) const
-	{
-		if(maxCount == 0)
-			return 0;
+	size_t Split(u32 ch, string* outArray, size_t maxCount) const;
 
-		string* cur = outArray;
-		size_t count = 1;
-		cur->Clear();
-		for(auto it = First(); it != End(); ++it) {
-			if(*it == ch) {
-				if(count == maxCount)
-					return maxCount;
-				++cur;
-				++count;
-				cur->Clear();
-			} else {
-				cur->Append(*it);
-			}
-		}
-
-		return count;
-	}
+	//! Split the string on a character.
+	/**
+	If the character isn't contained in the string, the original string is returned.
+	\param ch The character were to split the string.
+	\return The array of substrings
+	*/
+	core::array<string> Split(u32 ch) const;
 
 	//! Classify the content of the string
 	/**

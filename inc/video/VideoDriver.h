@@ -165,15 +165,15 @@ public:
 
 	virtual bool Init(const DriverConfig& config, gui::Window* window) = 0;
 	virtual bool Present() = 0;
-	virtual bool BeginScene(bool clearColor, bool clearZBuffer,
+	virtual void BeginScene(bool clearColor, bool clearZBuffer,
 		video::Color color=video::Color::Black, float z=1.0f) = 0;
-	virtual bool EndScene() = 0;
+	virtual void EndScene() = 0;
 
 	virtual bool AddLight(const LightData& light) = 0;
 	virtual size_t GetLightCount() const = 0;
 	virtual void ClearLights() = 0;
 
-	virtual bool SetRenderTarget(const RenderTarget& target) = 0;
+	virtual void SetRenderTarget(const RenderTarget& target) = 0;
 	virtual const RenderTarget& GetRenderTarget() = 0;
 
 	virtual void Set3DMaterial(const Material& material) = 0;
@@ -209,7 +209,8 @@ public:
 	virtual StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
-		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion) = 0;
+		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
+		core::array<string>* errorList) = 0;
 
 	virtual bool Draw3DPrimitiveList(EPrimitiveType primitiveType,
 		u32 primitiveCount,

@@ -36,16 +36,18 @@ TextureD3D9::~TextureD3D9()
 
 void TextureD3D9::RegenerateMIPMaps()
 {
-	D3DXFilterTexture(m_Texture, NULL, D3DX_DEFAULT, D3DX_DEFAULT);
+	HRESULT hr = D3DXFilterTexture(m_Texture, NULL, D3DX_DEFAULT, D3DX_DEFAULT);
+	if(FAILED(hr))
+		throw core::D3D9Exception(hr);
 }
 
-bool TextureD3D9::Init(
+void TextureD3D9::Init(
 	const math::dimension2du& Size,
 	video::ColorFormat lxFormat,
 	u32 MipCount, bool isRendertarget, bool isDynamic)
 {
 	if(!m_Device)
-		return false;
+		throw core::Exception("No driver available");
 
 	if(m_Texture)
 		m_Texture->Release();
@@ -67,12 +69,12 @@ bool TextureD3D9::Init(
 		pool = D3DPOOL_DEFAULT;
 	}
 
-	m_Device->CreateTexture(Size.width, Size.height, Levels,
+	HRESULT hr = m_Device->CreateTexture(Size.width, Size.height, Levels,
 		usage, format,
 		D3DPOOL_DEFAULT, &m_Texture, nullptr);
 
-	if(m_Texture == nullptr)
-		return false;
+	if(FAILED(hr))
+		throw core::D3D9Exception(hr);
 
 	m_IsLocked = false;
 
@@ -80,14 +82,12 @@ bool TextureD3D9::Init(
 
 	m_Dimension.Set(m_Desc.Width, m_Desc.Height);
 	m_Format = lxFormat;
-
-	return true;
 }
 
-void* TextureD3D9::Lock(ETextureLockMode Mode, SLockedRect* locked, u32 MipLevel)
+BaseTexture::LockedRect TextureD3D9::Lock(ETextureLockMode Mode, u32 MipLevel)
 {
 	if(m_IsLocked)
-		return nullptr;
+		throw core::Exception("Texture is already locked");
 
 	m_LockedLevel = MipLevel;
 	if(m_LockedLevel >= m_Texture->GetLevelCount())
@@ -112,12 +112,12 @@ void* TextureD3D9::Lock(ETextureLockMode Mode, SLockedRect* locked, u32 MipLevel
 				hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_DISCARD);
 			if(FAILED(hr)) {
 				FreeTempSurface(m_TempSurface);
-				return nullptr;
+				throw core::D3D9Exception(hr);
 			}
 		} else if(Mode == ETLM_READ_ONLY && m_Desc.Usage == 0) {
-			return nullptr;
+			throw core::Exception("Can't lock static texture in read mode");
 		} else if(Mode == ETLM_READ_WRITE && m_Desc.Usage == 0) {
-			return nullptr;
+			throw core::Exception("Can't lock static texture in read mode");
 		} else if(Mode == ETLM_READ_ONLY && m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
 			m_TempSurface = GetTempSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface) {
@@ -130,18 +130,17 @@ void* TextureD3D9::Lock(ETextureLockMode Mode, SLockedRect* locked, u32 MipLevel
 			}
 			if(FAILED(hr)) {
 				FreeTempSurface(m_TempSurface);
-				return nullptr;
+				throw core::D3D9Exception(hr);
 			}
 		}
 	}
 
-	if(locked) {
-		locked->bits = Locked.pBits;
-		locked->pitch = Locked.Pitch;
-		m_IsLocked = true;
-	}
+	LockedRect locked;
+	locked.bits = (u8*)Locked.pBits;
+	locked.pitch = Locked.Pitch;
+	m_IsLocked = true;
 
-	return Locked.pBits;
+	return locked;
 }
 
 void TextureD3D9::Unlock()
@@ -159,12 +158,14 @@ void TextureD3D9::Unlock()
 			m_Texture->GetSurfaceLevel(m_LockedLevel, &surface);
 
 			hr = device->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
+			if(FAILED(hr))
+				throw core::D3D9Exception(hr);
 		}
 
 		FreeTempSurface(m_TempSurface);
 		m_TempSurface = nullptr;
 	} else {
-		hr = m_Texture->UnlockRect(m_LockedLevel);
+		m_Texture->UnlockRect(m_LockedLevel);
 	}
 
 	m_IsLocked = false;
@@ -250,8 +251,6 @@ StrongRef<Referable> TextureD3D9::Clone() const
 }
 
 }
-
 }
-
 
 #endif // LUX_COMPILE_WITH_D3D9
