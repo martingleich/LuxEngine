@@ -18,7 +18,6 @@
 #include "gui/CursorControlWin32.h"
 #include "gui/GUIEnvironmentImpl.h"
 
-
 #include "video/images/ImageSystemImpl.h"
 
 #include "core/lxUnicodeConversion.h"
@@ -37,7 +36,7 @@
 #endif
 
 #include <WinUser.h>
-
+#include "LuxEngine/Win32Exception.h"
 
 HMODULE g_Instance = NULL;
 static const wchar_t WIN32_CLASS_NAME[] = L"Lux Window Class";
@@ -173,25 +172,18 @@ LRESULT LuxDeviceWin32::WinProc(HWND windowHandle,
 	return DefWindowProcW(windowHandle, uiMessage, WParam, LParam);
 }
 
+LUX_API StrongRef<LuxDevice> CreateDevice()
+{
+	StrongRef<LuxDevice> out = LUX_NEW(LuxDeviceWin32);
+	return out;
+}
+
 LuxDeviceWin32::LuxDeviceWin32() :
 	m_Time(0.0),
 	m_Quit(false),
 	m_InputEventProxy(this),
 	m_LuxWindowClassName(WIN32_CLASS_NAME),
 	m_WindowCallback(this)
-{
-}
-
-LUX_API StrongRef<LuxDevice> CreateDevice()
-{
-	StrongRef<LuxDevice> out = LUX_NEW(LuxDeviceWin32);
-	if(!out->BuildCoreDevice())
-		out = nullptr;
-
-	return out;
-}
-
-bool LuxDeviceWin32::BuildCoreDevice()
 {
 	// If there are logs which aren't written, write them to the default file.
 	if(log::EngineLog.HasUnsetLogs())
@@ -215,35 +207,25 @@ bool LuxDeviceWin32::BuildCoreDevice()
 	m_ResourceSystem->SetCaching(core::ResourceType::ImageList, false);
 	m_ResourceSystem->SetCaching(core::ResourceType::Image, false);
 
-	// Register all referable objects.
 	lux::core::impl::RunAllRegisterReferableFunctions();
 
-	// Datum und Uhrzeit schreiben
 	log::Info("Lux core was build.");
-
-	return true;
 }
 
-bool LuxDeviceWin32::BuildWindow(u32 width, u32 height, const string& title)
+void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const string& title)
 {
-	// Wenn bereits ein Fenster definiert ist no op
 	if(m_Window->GetDeviceWindow()) {
 		log::Warning("Window already built.");
-		return true;
+		return;
 	}
 
 	log::Info("Create new Lux window \"~s\".", title);
 
-	if(!CreateNewWindow(width, height, title)) {
-		log::Error("The creation of the window failed.");
-		return false;
-	}
+	CreateNewWindow(width, height, title);
 
 	m_OwnWindow = true;
 
 	m_Window->RegisterCallback(&m_WindowCallback);
-
-	return true;
 }
 
 void LuxDeviceWin32::SetOwnWindow(void* hOwnWindow)
@@ -255,10 +237,8 @@ void LuxDeviceWin32::SetOwnWindow(void* hOwnWindow)
 	}
 
 	HWND WinWindow = *((HWND*)hOwnWindow);
-	if(WinWindow == nullptr || *((HWND*)WinWindow) == nullptr) {
-		log::Error("Undefined window passed.");
-		return;
-	}
+	if(WinWindow == nullptr || *((HWND*)WinWindow) == nullptr)
+		throw core::InvalidArgumentException("hOwnWindow");
 
 	StrongRef<gui::WindowWin32> windowWin32 = m_Window;
 	windowWin32->Init(WinWindow);
@@ -267,91 +247,72 @@ void LuxDeviceWin32::SetOwnWindow(void* hOwnWindow)
 	// Globalen Zeiger für Dlg-Funktion speichern
 	if(!GetWindowLongPtrW(WinWindow, GWLP_USERDATA)) {
 		SetWindowLongPtrW(WinWindow, GWLP_USERDATA, (LONG_PTR)this);
-	} else {
-		log::Error("The creation of the window failed.");
+		throw core::GenericException();
 	}
 }
 
-bool LuxDeviceWin32::BuildInputSystem(bool isForeground)
+void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 {
 	// If system already build -> no op
 	if(m_InputSystem) {
 		log::Warning("Input system alread built.");
-		return true;
+		return;
 	}
 
-	if(!m_Window->GetDeviceWindow()) {
-		log::Error("Can't build input system, window is missing.");
-		return false;
-	}
+	if(!m_Window->GetDeviceWindow())
+		throw core::Exception("Missing window");
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 	m_InputSystem = LUX_NEW(input::InputSystemImpl)(isForeground);
 	m_InputSystem->SetInputReceiver(&m_InputEventProxy);
+	m_InputSystem->SetForegroundState(m_Window->IsFocused());
 
 	m_RawInputReceiver = LUX_NEW(input::RawInputReceiver)(m_InputSystem, (HWND)m_Window->GetDeviceWindow());
 	u32 keyboardCount = m_RawInputReceiver->DiscoverDevices(input::EEventSource::Keyboard);
-	if(keyboardCount == 0) {
-		log::Error("No keyboard found on system.");
-		return false;
-	}
-
-	m_InputSystem->SetForegroundState(m_Window->IsFocused());
+	if(keyboardCount == 0)
+		throw core::Exception("No keyboard found on system.");
 #else
-	log::Error("No input system was compiled.");
-	return false;
+	throw core::NotImplementedException();
 #endif
 
 	log::Info("Built Input System.");
-
-	return true;
 }
 
-bool LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
+void LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 {
 	// If system already build -> no op
 	if(m_Driver) {
 		log::Warning("Videodriver already build.");
-		return true;
+		return;
 	}
 
 	log::Info("Building Video Driver.");
 #ifdef LUX_COMPILE_WITH_D3D9
 	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9)(m_ReferableFactory);
 	m_Driver = driver;
-	if(!m_Driver->Init(config, m_Window)) {
-		log::Error("Failed to create the video driver.");
-		return false;
-	}
+	m_Driver->Init(config, m_Window);
 
-	if(!BuildMaterials())
-		return false;
+	BuildMaterials();
 
 	driver->SetDefaultRenderer(m_MaterialLibrary->GetMaterialRenderer("solid"));
 #else
-	log::Error("No video driver was compiled.");
-	return false;
+	throw core::NotImplementedException();
 #endif
 
-	if(!BuildImageSystem())
-		return false;
-
-	return true;
+	BuildImageSystem();
 }
 
-bool LuxDeviceWin32::BuildMaterials()
+void LuxDeviceWin32::BuildMaterials()
 {
-	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver, m_Filesystem);
 
 #ifdef LUX_COMPILE_WITH_D3D9
+	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver, m_Filesystem);
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_d3d9)(m_Driver), "solid");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix_d3d9)(m_Driver), "solid_mix");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)(m_Driver), "transparent");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(m_Driver), "transparent_alpha");
 #else
-	log::Error("No material library was compiled.");
-	m_MaterialLibrary = nullptr;
-	return false;
+	throw core::NotImplementedException();
 #endif
 
 	video::MaterialRenderer* renderer = m_MaterialLibrary->GetMaterialRenderer("solid");
@@ -360,25 +321,21 @@ bool LuxDeviceWin32::BuildMaterials()
 
 	m_Driver->Set3DMaterial(video::IdentityMaterial);
 	m_Driver->Set2DMaterial(video::IdentityMaterial);
-
-	return true;
 }
 
-bool LuxDeviceWin32::BuildSceneManager()
+void LuxDeviceWin32::BuildSceneManager()
 {
 	// If system already build -> no op
 	if(m_SceneManager) {
 		log::Warning("Scene Manager already built.");
-		return true;
+		return;
 	}
 
-	if(!m_Driver) {
-		log::Error("Can't build scenemanager, driver missing.");
-		return false;
-	}
+	if(!m_Driver)
+		throw core::Exception("Missing video driver");
 
 	if(!m_Filesystem)
-		return false;
+		throw core::Exception("Missing file system");
 
 	m_MeshSystem = LUX_NEW(scene::MeshSystemImpl)(m_ResourceSystem, m_Driver, m_MaterialLibrary);
 
@@ -392,84 +349,57 @@ bool LuxDeviceWin32::BuildSceneManager()
 		m_MeshSystem,
 		m_ResourceSystem,
 		m_MaterialLibrary);
-
-
-	return true;
 }
 
-bool LuxDeviceWin32::BuildImageSystem()
+void LuxDeviceWin32::BuildImageSystem()
 {
 	if(m_ImageSystem != nullptr) {
 		log::Warning("Image system already built.");
-		return true;
+		return;
 	}
 
 	log::Info("Build Image System.");
 	m_ImageSystem = LUX_NEW(video::ImageSystemImpl)(m_Filesystem, m_Driver, m_ResourceSystem);
-
-	return true;
 }
 
-bool LuxDeviceWin32::BuildGUIEnvironment()
+void LuxDeviceWin32::BuildGUIEnvironment()
 {
 	if(m_GUIEnv != nullptr) {
 		log::Warning("Gui environment already built.");
-		return true;
-	}
-
-	if(!m_ImageSystem) {
-		log::Error("Can't build gui environment, image system missing.");
-		return false;
+		return;
 	}
 
 	if(!m_Driver) {
-		log::Error("Can't build gui environment, video driver missing.");
-		return false;
+		throw core::Exception("Missing video driver");
+		return;
 	}
+
 	log::Info("Build GUI Environment.");
 	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl)(m_ResourceSystem, m_ImageSystem, m_Driver, m_MaterialLibrary, m_Filesystem);
-
-	return true;
 }
 
-bool LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
+void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
 {
-	bool result = true;
-
-	if(result)
-		result = BuildWindow(config.width, config.height, "Window");
-
-	if(result)
-		result = BuildInputSystem();
-	if(result)
-		result = BuildVideoDriver(config);
-	if(result)
-		result = BuildSceneManager();
-	if(result)
-		result = BuildGUIEnvironment();
-
-	if(!result)
-		log::Error("Couldn't initialize the lux engine.");
-
-	return result;
+	BuildWindow(config.width, config.height, "Window");
+	BuildInputSystem();
+	BuildVideoDriver(config);
+	BuildSceneManager();
+	BuildGUIEnvironment();
 }
 
 // Erstellt ein neues Fenster
 HWND LuxDeviceWin32::CreateNewWindow(u32 width, u32 height, const string& title)
 {
 	if(width > (u32)GetSystemMetrics(SM_CXSCREEN) || height > (u32)GetSystemMetrics(SM_CYSCREEN)) {
-		log::Error("The window is bigger than the screen and can't be created.");
-		return nullptr;
+		throw core::Exception("The window is bigger than the screen and can't be created.");
 	}
 
 	WNDCLASSEXW wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WindowProc, 0, 0,
 		g_Instance, nullptr, LoadCursorW(NULL, IDC_ARROW), nullptr, nullptr,
 		m_LuxWindowClassName, nullptr};
 
-	if(!RegisterClassExW(&wc)) {
-		log::Error("Can't register window class for lux. (~a)", LogWin32Error(GetLastError()));
-		return nullptr;
-	}
+	if(!RegisterClassExW(&wc))
+		throw core::Win32Exception(GetLastError());
 
 	RECT rect;
 	SetRect(&rect, 0, 0, width, height);
@@ -490,11 +420,8 @@ HWND LuxDeviceWin32::CreateNewWindow(u32 width, u32 height, const string& title)
 		wc.hInstance,
 		this);
 
-	RECT r2;
-	GetClientRect(out, &r2);
-
 	if(!out)
-		log::Error("Can't create new window. (~a)", LogWin32Error(GetLastError()));
+		throw core::Win32Exception(GetLastError());
 
 	return out;
 }

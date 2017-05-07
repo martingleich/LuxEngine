@@ -51,14 +51,6 @@ public:
 	{
 	}
 
-	//! Initialize the core engine functionality
-	/**
-	Must not be called by the user.
-	Automatically called when creating a new device.
-	After this call the fileSystem, logging, referable, and timing modules are usable
-	*/
-	virtual bool BuildCoreDevice() = 0;
-
 	//! Create the window associated with the engine.
 	/**
 	Requires core device.
@@ -66,7 +58,7 @@ public:
 	\param height The height of the window.
 	\param title The title of the window.
 	*/
-	virtual bool BuildWindow(u32 Width, u32 height, const string& title) = 0;
+	virtual void BuildWindow(u32 Width, u32 height, const string& title) = 0;
 	virtual void SetOwnWindow(void* OwnWindow) = 0;
 
 	//! Create the input system of the engine.
@@ -75,7 +67,7 @@ public:
 	Initialized the input system of the engine.
 	\param isForeground Are input events only sent when the window is in the foreground.
 	*/
-	virtual bool BuildInputSystem(bool isForeground=true) = 0;
+	virtual void BuildInputSystem(bool isForeground=true) = 0;
 
 	//! Creates the video driver component of the engine.
 	/**
@@ -83,15 +75,15 @@ public:
 	After this call all video modules are fully usable.
 	The image module is fully usable.
 	*/
-	virtual bool BuildVideoDriver(const video::DriverConfig& config) = 0;
+	virtual void BuildVideoDriver(const video::DriverConfig& config) = 0;
 
 	//! Creates the scene manager component of the engine
 	/**
 	Requires video driver and the input system.
 	After this call all scene modules are fully usable
 	*/
-	virtual bool BuildSceneManager() = 0;
-	virtual bool BuildGUIEnvironment() = 0;
+	virtual void BuildSceneManager() = 0;
+	virtual void BuildGUIEnvironment() = 0;
 
 	//! Build the image system of the engine.
 	/**
@@ -99,13 +91,13 @@ public:
 	Is automatic called by BuildVideoDriver, but can also
 	be called on it's own.
 	*/
-	virtual bool BuildImageSystem() = 0;
+	virtual void BuildImageSystem() = 0;
 
 	//! Build all components.
 	/**
 	The created window has the same resolution as the backbuffer.
 	*/
-	virtual bool BuildAll(const video::DriverConfig& config) = 0;
+	virtual void BuildAll(const video::DriverConfig& config) = 0;
 
 	//! Closes the associated window.
 	virtual void CloseDevice() = 0;

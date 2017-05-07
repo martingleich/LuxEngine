@@ -20,7 +20,7 @@ public:
 	virtual void SetAmbient(Colorf ambient);
 	virtual Colorf GetAmbient() const;
 
-	virtual bool AddLight(const LightData& light);
+	virtual void AddLight(const LightData& light);
 	virtual size_t GetLightCount() const;
 	virtual void ClearLights();
 

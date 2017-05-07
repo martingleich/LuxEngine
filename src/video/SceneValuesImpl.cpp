@@ -27,14 +27,7 @@ const string SceneValuesImpl::MATRIX_NAMES[16] = {
 
 void SceneValuesImpl::Realloc(u32 newSize)
 {
-	u8* New = LUX_NEW_ARRAY(u8, newSize);
-	if(m_ParamData) {
-		memcpy(New, m_ParamData, m_CurrentOffset);
-		LUX_FREE_ARRAY(m_ParamData);
-	}
-
-	m_ParamData = New;
-	m_MaxSize = newSize;
+	m_ParamData.SetSize(newSize, core::mem::RawMemory::COPY);
 }
 
 bool SceneValuesImpl::IsUpToDate(EMatrizes type) const
@@ -42,7 +35,8 @@ bool SceneValuesImpl::IsUpToDate(EMatrizes type) const
 	return ((m_UpdateMatrizes & (1 << type)) == 0);
 }
 
-SceneValuesImpl::SceneValuesImpl(bool AllMatrizesToIdent) : m_ParamData(nullptr), m_CurrentOffset(0), m_MaxSize(0)
+SceneValuesImpl::SceneValuesImpl(bool AllMatrizesToIdent) : 
+	m_CurrentOffset(0)
 {
 	if(AllMatrizesToIdent)
 		m_UpdateMatrizes = 0xFFFFFFFF;
@@ -51,11 +45,6 @@ SceneValuesImpl::SceneValuesImpl(bool AllMatrizesToIdent) : m_ParamData(nullptr)
 
 	// The invalid light, is a disabled light.
 	m_InvalidLight(0, 0) = 0.0f;
-}
-
-SceneValuesImpl::~SceneValuesImpl()
-{
-	LUX_FREE_ARRAY(m_ParamData);
 }
 
 void SceneValuesImpl::SetMatrix(EMatrizes type, const math::matrix4& Matrix)
@@ -210,7 +199,7 @@ const math::matrix4& SceneValuesImpl::GetMatrix(EMatrizes type) const
 	}
 }
 
-bool SceneValuesImpl::SetLight(u32 id, const video::LightData& light)
+void SceneValuesImpl::SetLight(u32 id, const video::LightData& light)
 {
 	math::matrix4 m;
 	if(light.type == video::LightData::EType::Directional)
@@ -220,7 +209,7 @@ bool SceneValuesImpl::SetLight(u32 id, const video::LightData& light)
 	else if(light.type == video::LightData::EType::Spot)
 		m(0, 3) = 3.0f;
 	else
-		return false;
+		throw core::Exception("Unknown light type");
 
 	m(0, 0) = light.color.r;
 	m(0, 1) = light.color.g;
@@ -245,62 +234,33 @@ bool SceneValuesImpl::SetLight(u32 id, const video::LightData& light)
 	m_Lights.Resize(id + 1);
 	m_Lights[id].name = "lightData" + core::StringConverter::ToString(id);
 	m_Lights[id].matrix = m;
-
-	return true;
 }
 
 void SceneValuesImpl::ClearLights()
 {
-	for(auto it = m_Lights.First(); it != m_Lights.End(); ++it) {
+	for(auto it = m_Lights.First(); it != m_Lights.End(); ++it)
 		it->matrix(0, 3) = 0.0f;
-	}
 }
 
 u32 SceneValuesImpl::AddParam(const string& name, core::Type type)
 {
-	int id = GetParamID(name);
-	if(id != -1) {
-		lxAssertEx(id != -1, "Param already used");
-		return 0xFFFFFFFF;
-	}
+	if(type == core::Type::Unknown)
+		throw core::InvalidArgumentException("type");
 
-	lxAssertEx(type.GetSize() != 0, "Invalid type");
-	SParam Param(name, m_CurrentOffset, type, type.GetSize());
-	m_Params.PushBack(Param);
+	u32 id = GetParamIdUnsafe(name);
+	if(id != 0xFFFFFFFF)
+		throw core::InvalidArgumentException("name", "Param name already used");
 
-	if(m_CurrentOffset + Param.Size > m_MaxSize)
-		Realloc((m_CurrentOffset + Param.Size) * 2);
+	Param param(name, m_CurrentOffset, type, type.GetSize());
+	m_Params.PushBack(param);
 
-	m_CurrentOffset += Param.Size;
+	if(m_CurrentOffset + param.size > m_ParamData.GetSize())
+		Realloc((m_CurrentOffset + param.size) * 2);
+
+	m_CurrentOffset += param.size;
 
 	return (u32)(m_Params.Size() + MATRIX_COUNT - 1);
 }
-
-/*
-void SceneValuesImpl::RemoveParam(u32 id)
-{
-	if(id >= m_Params.Size() || id < 10)
-		return;
-
-	const SParam& p = m_Params[id-10];
-
-	u32 After = m_CurrentOffset - p.offset - p.Size;
-	if(After != 0)
-		memmove((u8*)m_ParamData+p.offset, (u8*)m_ParamData+p.offset+p.Size, After);
-
-	for(u32 i = id-10; i < m_Params.Size(); ++i)
-		m_Params[i].offset -= p.Size;
-
-	m_CurrentOffset -= p.Size;
-	m_Params.DeleteEntry(m_Params.First()+id-10, true);
-}
-
-void SceneValuesImpl::RemoveAllParams()
-{
-	m_CurrentOffset = 0;
-	m_Params.Clear();
-}
-*/
 
 u32 SceneValuesImpl::GetParamCount() const
 {
@@ -308,6 +268,66 @@ u32 SceneValuesImpl::GetParamCount() const
 }
 
 u32 SceneValuesImpl::GetParamID(const string& name) const
+{
+	u32 id = GetParamIdUnsafe(name);
+	if(id == 0xFFFFFFFF)
+		throw core::ObjectNotFoundException(name.Data());
+	return id;
+}
+
+const string& SceneValuesImpl::GetParamName(u32 id) const
+{
+	if(id < MATRIX_COUNT)
+		return MATRIX_NAMES[id];
+	else if(id >= FIRST_LIGHT_ID)
+		return m_Lights.At(id - FIRST_LIGHT_ID).name;
+	else
+		return m_Params.At(id - MATRIX_COUNT).name;
+}
+
+core::Type SceneValuesImpl::GetParamType(u32 id) const
+{
+	if(id < MATRIX_COUNT)
+		return core::Type::Matrix;
+	else if(id >= FIRST_LIGHT_ID)
+		return core::Type::Matrix;
+	else
+		return m_Params.At(id - MATRIX_COUNT).type;
+}
+
+const void* SceneValuesImpl::GetParamValue(u32 id) const
+{
+	if(id < MATRIX_COUNT) {
+		return &GetMatrix((EMatrizes)id);
+	} else if(id >= FIRST_LIGHT_ID) {
+		id -= FIRST_LIGHT_ID;
+		if(id < m_Lights.Size())
+			return m_Lights.At(id).matrix.DataRowMajor();
+		return m_InvalidLight.DataRowMajor();
+	} else {
+		return (const u8*)m_ParamData + m_Params.At(id - MATRIX_COUNT).offset;
+	}
+}
+
+void SceneValuesImpl::SetParamValue(u32 id, const void* p)
+{
+	if(id < MATRIX_COUNT) {
+		SetMatrix((EMatrizes)id, *(const math::matrix4*)p);
+	} else if(id >= FIRST_LIGHT_ID) {
+		id -= FIRST_LIGHT_ID;
+		if(id < m_Lights.Size())
+			m_Lights.At(id).matrix = *(const math::matrix4*)p;
+	} else {
+		memcpy((u8*)m_ParamData + m_Params.At(id - MATRIX_COUNT).offset, p, m_Params.At(id - MATRIX_COUNT).size);
+	}
+}
+
+u32 SceneValuesImpl::GetSysMatrixCount() const
+{
+	return 16;
+}
+
+u32 SceneValuesImpl::GetParamIdUnsafe(const string& name) const
 {
 	// Check matrizes
 	u32 first = *name.First();
@@ -330,59 +350,6 @@ u32 SceneValuesImpl::GetParamID(const string& name) const
 			return i + MATRIX_COUNT;
 
 	return 0xFFFFFFFF;
-}
-
-const string& SceneValuesImpl::GetParamName(u32 id) const
-{
-	if(id < MATRIX_COUNT) {
-		return MATRIX_NAMES[id];
-	} else if(id >= FIRST_LIGHT_ID) {
-		return m_Lights[id - FIRST_LIGHT_ID].name;
-	} else {
-		return m_Params[id - MATRIX_COUNT].name;
-	}
-}
-
-core::Type SceneValuesImpl::GetParamType(u32 id) const
-{
-	if(id < MATRIX_COUNT)
-		return core::Type::Matrix;
-	else if(id >= FIRST_LIGHT_ID)
-		return core::Type::Matrix;
-	else
-		return m_Params[id - MATRIX_COUNT].type;
-}
-
-const void* SceneValuesImpl::GetParamValue(u32 id) const
-{
-	if(id < MATRIX_COUNT) {
-		return &GetMatrix((EMatrizes)id);
-	} else if(id >= FIRST_LIGHT_ID) {
-		id -= FIRST_LIGHT_ID;
-		if(id < m_Lights.Size())
-			return m_Lights[id].matrix.DataRowMajor();
-		return m_InvalidLight.DataRowMajor();
-	} else {
-		return m_ParamData + m_Params[id - MATRIX_COUNT].offset;
-	}
-}
-
-void SceneValuesImpl::SetParamValue(u32 id, const void* p)
-{
-	if(id < MATRIX_COUNT) {
-		SetMatrix((EMatrizes)id, *(const math::matrix4*)p);
-	} else if(id >= FIRST_LIGHT_ID) {
-		id -= FIRST_LIGHT_ID;
-		if(id < m_Lights.Size())
-			m_Lights[id].matrix = *(const math::matrix4*)p;
-	} else {
-		memcpy(m_ParamData + m_Params[id - MATRIX_COUNT].offset, p, m_Params[id - MATRIX_COUNT].Size);
-	}
-}
-
-u32 SceneValuesImpl::GetSysMatrixCount() const
-{
-	return 16;
 }
 
 }

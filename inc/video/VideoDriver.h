@@ -169,7 +169,7 @@ public:
 		video::Color color=video::Color::Black, float z=1.0f) = 0;
 	virtual void EndScene() = 0;
 
-	virtual bool AddLight(const LightData& light) = 0;
+	virtual void AddLight(const LightData& light) = 0;
 	virtual size_t GetLightCount() const = 0;
 	virtual void ClearLights() = 0;
 

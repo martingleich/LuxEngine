@@ -88,6 +88,13 @@ private:
 	ExceptionSafeString m_What;
 };
 
+struct NotImplementedException : Exception
+{
+	NotImplementedException() :
+		Exception("not implemented")
+	{}
+};
+
 struct GenericException : Exception
 {
 	GenericException() :

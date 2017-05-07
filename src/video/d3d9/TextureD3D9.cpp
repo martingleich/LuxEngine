@@ -1,7 +1,9 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "TextureD3D9.h"
+
 #include "StrippedD3D9X.h"
 #include "D3DHelper.h"
+#include "D3D9Exception.h"
 
 namespace lux
 {
@@ -53,6 +55,8 @@ void TextureD3D9::Init(
 		m_Texture->Release();
 
 	D3DFORMAT format = GetD3DFormat(lxFormat, lxFormat.HasAlpha());
+	if(format == D3DFMT_UNKNOWN)
+		throw core::ColorFormatException(lxFormat);
 
 	UINT Levels = MipCount;
 	if(MipCount == 0)

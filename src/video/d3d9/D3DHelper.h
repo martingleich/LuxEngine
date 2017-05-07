@@ -6,26 +6,10 @@
 #include "video/Color.h"
 #include "video/VertexFormats.h"
 #include "video/Material.h"
-#include "core/lxException.h"
 #include "StrippedD3D9.h"
 
 namespace lux
 {
-namespace core
-{
-
-struct D3D9Exception : Exception
-{
-	explicit D3D9Exception(HRESULT hr) : 
-		Exception("d3d9 error"),
-		result(hr)
-	{}
-
-	HRESULT result;
-};
-
-}
-
 namespace video
 {
 

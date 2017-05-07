@@ -16,6 +16,7 @@
 #include "gui/Window.h"
 
 #include "D3DHelper.h"
+#include "D3D9Exception.h"
 
 namespace lux
 {
@@ -456,10 +457,9 @@ void VideoDriverD3D9::EndScene()
 	m_RenderStatistics->RegisterFrame();
 }
 
-bool VideoDriverD3D9::AddLight(const LightData& light)
+void VideoDriverD3D9::AddLight(const LightData& light)
 {
-	if(!VideoDriverNull::AddLight(light))
-		return false;
+	VideoDriverNull::AddLight(light);
 
 	DWORD lightId = (DWORD)GetLightCount() - 1;
 
@@ -496,14 +496,12 @@ bool VideoDriverD3D9::AddLight(const LightData& light)
 	D3DLight.Theta = light.innerCone * 2.0f;
 	D3DLight.Phi = light.outerCone * 2.0f;
 
-	if(SUCCEEDED(m_D3DDevice->SetLight(lightId, &D3DLight))) {
-		if(FAILED(m_D3DDevice->LightEnable(lightId, TRUE)))
-			return false;
-		else
-			return true;
-	}
+	HRESULT hr;
+	if(FAILED(hr = m_D3DDevice->SetLight(lightId, &D3DLight)))
+		throw core::D3D9Exception(hr);
 
-	return false;
+	if(FAILED(hr = m_D3DDevice->LightEnable(lightId, TRUE)))
+		throw core::D3D9Exception(hr);
 }
 
 void VideoDriverD3D9::ClearLights()
@@ -1202,10 +1200,9 @@ void VideoDriverD3D9::SetVertexFormat(const VertexFormat& vertexFormat, bool res
 
 		IDirect3DVertexDeclaration9* D3DDecl = vf.GetD3D();
 
-		if(!D3DDecl || FAILED(m_D3DDevice->SetVertexDeclaration(D3DDecl))) {
-			log::Error("Can't set vertex format.");
-			return;
-		}
+		HRESULT hr;
+		if(FAILED(hr = m_D3DDevice->SetVertexDeclaration(D3DDecl)))
+			throw core::D3D9Exception(hr);
 
 		m_CurrentVertexFormat = vertexFormat;
 	}
@@ -1554,18 +1551,15 @@ void VideoDriverD3D9::ResetAllRenderstates()
 
 IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFormat& format)
 {
-	if(!format.IsValid()) {
-		log::Error("Vertexformat \"~s\" is invalid.", format.GetName());
-		return nullptr;
-	}
+	if(!format.IsValid())
+		throw core::InvalidArgumentException("format");
 
 	if(format.GetElement(0, VertexElement::EUsage::Position).sematic != VertexElement::EUsage::Position &&
-		format.GetElement(0, VertexElement::EUsage::PositionNT).sematic != VertexElement::EUsage::PositionNT) {
-		log::Error("Vertexformat \"~s\" is missing position usage.", format.GetName());
-		return nullptr;
-	}
+		format.GetElement(0, VertexElement::EUsage::PositionNT).sematic != VertexElement::EUsage::PositionNT)
+		throw core::InvalidArgumentException("format", "Missing position usage");
 
-	D3DVERTEXELEMENT9* d3dElements = LUX_NEW_ARRAY(D3DVERTEXELEMENT9, format.GetElemCount() + 1);
+	core::array<D3DVERTEXELEMENT9> d3dElements;
+	d3dElements.Resize(format.GetElemCount() + 1);
 
 	for(u32 stream = 0; stream < format.GetStreamCount(); ++stream) {
 		for(u32 elem = 0; elem < format.GetElemCount(stream); ++elem) {
@@ -1597,12 +1591,8 @@ IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFor
 			if(d3dElements[elem].Usage == 0xFF)
 				error = true;
 
-			if(error) {
-				LUX_FREE_ARRAY(d3dElements);
-
-				log::Error("Vertexformat \"~s\" has unknown vertex element in declaration.", format.GetName());
-				return nullptr;
-			}
+			if(error)
+				throw core::Exception("Unknown vertex element type");
 		}
 	}
 
@@ -1614,15 +1604,10 @@ IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFor
 	d3dElements[size].Usage = 0;
 	d3dElements[size].UsageIndex = 0;
 
-	// Deklaration erstellen
-	IDirect3DVertexDeclaration9* d3dDecl = NULL;
-	m_D3DDevice->CreateVertexDeclaration(d3dElements, &d3dDecl);
-	LUX_FREE_ARRAY(d3dElements);
-
-	if(!d3dDecl) {
-		log::Error("Vertexformat \"~s\" can't be created.", format.GetName());
-		return nullptr;
-	}
+	IDirect3DVertexDeclaration9* d3dDecl;
+	HRESULT hr;
+	if(FAILED(hr = m_D3DDevice->CreateVertexDeclaration(d3dElements.Data(), &d3dDecl)))
+		throw core::D3D9Exception(hr);
 
 	return d3dDecl;
 }

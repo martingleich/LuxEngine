@@ -49,18 +49,16 @@ public:
 	LuxDeviceWin32();
 	~LuxDeviceWin32();
 
-	bool BuildCoreDevice();
-
-	bool BuildWindow(u32 Width, u32 height, const string& stitle);
+	void BuildWindow(u32 Width, u32 height, const string& stitle);
 	void SetOwnWindow(void* hOwnWindow);
 
-	bool BuildInputSystem(bool isForeground = true);
+	void BuildInputSystem(bool isForeground = true);
 
-	bool BuildVideoDriver(const video::DriverConfig& config);
-	bool BuildImageSystem();
-	bool BuildSceneManager();
-	bool BuildGUIEnvironment();
-	bool BuildAll(const video::DriverConfig& config);
+	void BuildVideoDriver(const video::DriverConfig& config);
+	void BuildImageSystem();
+	void BuildSceneManager();
+	void BuildGUIEnvironment();
+	void BuildAll(const video::DriverConfig& config);
 
 	HWND CreateNewWindow(u32 width, u32 height, const string& title);
 	void CloseDevice();
@@ -96,7 +94,7 @@ private:
 		WPARAM WParam,
 		LPARAM LParam);
 
-	bool BuildMaterials();
+	void BuildMaterials();
 
 private:
 	struct InputEventProxy : public input::EventReceiver

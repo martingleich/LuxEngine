@@ -41,17 +41,14 @@ Colorf VideoDriverNull::GetAmbient() const
 	return m_AmbientColor;
 }
 
-bool VideoDriverNull::AddLight(const LightData& light)
+void VideoDriverNull::AddLight(const LightData& light)
 {
 	if(m_LightList.Size() == GetDeviceCapability(EDriverCaps::MaxLights))
-		return false;
+		throw core::Exception("Too many lights");
 
 	m_LightList.PushBack(light);
 
-	if(!m_SceneValues->SetLight(m_LightList.Size()-1, light))
-		return false;
-
-	return true;
+	m_SceneValues->SetLight(m_LightList.Size()-1, light);
 }
 
 size_t VideoDriverNull::GetLightCount() const

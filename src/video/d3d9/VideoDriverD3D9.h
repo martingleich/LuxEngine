@@ -154,7 +154,7 @@ public:
 		bool* pixelFog = nullptr,
 		bool* rangeFog = nullptr) const;
 
-	bool AddLight(const LightData& light);
+	void AddLight(const LightData& light);
 	void ClearLights();
 
 	//------------------------------------------------------------------

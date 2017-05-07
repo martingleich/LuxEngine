@@ -1,6 +1,7 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "CubeTextureD3D9.h"
 #include "StrippedD3D9X.h"
+#include "D3D9Exception.h"
 #include "D3DHelper.h"
 
 namespace lux
@@ -32,6 +33,9 @@ void CubeTextureD3D9::Init(u32 Size, ColorFormat lxFormat, bool isDynamic)
 	}
 
 	D3DFORMAT format = GetD3DFormat(lxFormat, lxFormat.HasAlpha());
+	if(format == D3DFMT_UNKNOWN)
+		throw core::ColorFormatException(lxFormat);
+
 	DWORD usage = 0;
 	D3DPOOL pool = D3DPOOL_MANAGED;
 	if(isDynamic) {

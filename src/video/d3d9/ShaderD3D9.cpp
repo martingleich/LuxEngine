@@ -1,10 +1,12 @@
 #ifdef LUX_COMPILE_WITH_D3D9
+#include "ShaderD3D9.h"
+
 #include "core/Logger.h"
 #include "video/VideoDriver.h"
 #include "video/Material.h"
 
-#include "ShaderD3D9.h"
-#include "D3DHelper.h"
+#include "video/d3d9/D3DHelper.h"
+#include "video/d3d9/D3D9Exception.h"
 
 namespace lux
 {

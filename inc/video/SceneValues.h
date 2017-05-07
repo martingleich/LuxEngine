@@ -49,7 +49,7 @@ public:
 
 	virtual u32 AddParam(const string& name, core::Type type) = 0;
 
-	virtual bool SetLight(u32 id, const video::LightData& light) = 0;
+	virtual void SetLight(u32 id, const video::LightData& light) = 0;
 	virtual void ClearLights() = 0;
 	/*
 	to dangerous when there are still shaders referencing this
