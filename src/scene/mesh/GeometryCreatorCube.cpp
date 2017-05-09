@@ -38,8 +38,7 @@ const core::ParamPackage& GeometryCreatorCube::GetParams() const
 
 StrongRef<video::SubMesh> GeometryCreatorCube::CreateSubMesh(video::VideoDriver* driver, const core::PackagePuffer& params)
 {
-	if(!driver)
-		return nullptr;
+	LX_CHECK_NULL_ARG(driver);
 
 	const math::vector3f size = params.FromID(0, true);
 	const math::vector3i tes = params.FromID(1, true);
@@ -59,18 +58,17 @@ StrongRef<video::SubMesh> GeometryCreatorCube::CreateSubMesh(video::VideoDriver*
 	float texX, float texY, float texZ,
 	bool inside)
 {
-	if(!driver)
-		return nullptr;
+	LX_CHECK_NULL_ARG(driver);
 
 	if(sizeX <= 0.0f || sizeY <= 0.0f || sizeZ <= 0.0f)
-		return nullptr;
+		throw core::InvalidArgumentException("sizeX, sizeY, sizeZ", "Must be bigger than zero");
 
 	if(tesX < 2 || tesY < 2 || tesZ < 2)
-		return nullptr;
+		throw core::InvalidArgumentException("tesX, tesY, tesZ", "Must be bigger than 1");
 
 	const u32 vertexCount = tesX*tesY * 2 + tesX*tesZ * 2 + tesZ*tesY * 2;
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
-		return nullptr;
+		throw core::InvalidArgumentException("Too many indices");
 
 	const u32 indexCount =
 		6 * ((tesX - 1)*(tesY - 1) * 2 +
@@ -86,16 +84,9 @@ StrongRef<video::SubMesh> GeometryCreatorCube::CreateSubMesh(video::VideoDriver*
 		video::EIndexFormat::Bit16, video::EHardwareBufferMapping::Static, indexCount,
 		video::EPT_TRIANGLES);
 
-	if(!subMesh)
-		return nullptr;
-
 	StrongRef<video::VertexBuffer> vertexBuffer = subMesh->GetVertices();
-	if(!vertexBuffer)
-		return nullptr;
 
 	StrongRef<video::IndexBuffer> indexBuffer = subMesh->GetIndices();
-	if(!indexBuffer)
-		return nullptr;
 
 	static const struct
 	{

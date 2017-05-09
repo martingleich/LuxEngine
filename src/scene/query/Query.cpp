@@ -15,8 +15,7 @@ Query::Query(SceneNode* rootNode) :
 
 bool Query::Execute(QueryCallback* callback)
 {
-	auto result = m_QueryRootNode->ExecuteQuery(this, callback);
-	return Succeeded(result);
+	return m_QueryRootNode->ExecuteQuery(this, callback);
 }
 
 }

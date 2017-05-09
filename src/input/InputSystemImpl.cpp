@@ -36,8 +36,7 @@ StrongRef<InputDevice> InputSystemImpl::CreateDevice(const DeviceCreationDesc* d
 		device = LUX_NEW(JoystickDevice)(desc, this);
 		break;
 	default:
-		lxAssertNeverReach("Event source isn't a input device.");
-		return nullptr;
+		throw core::InvalidArgumentException("desc", "Isn't a valid input device");
 	}
 
 	device->Configure(m_DefaultForegroundHandling);

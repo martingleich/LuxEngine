@@ -48,36 +48,16 @@ SceneNode* SceneNode::GetRoot()
 	return this;
 }
 
-EResult SceneNode::ExecuteQuery(Query* query, QueryCallback* callback)
+bool SceneNode::ExecuteQuery(Query* query, QueryCallback* callback)
 {
-	auto result = EResult::Succeeded;
-	if(HasTag(query->GetTags()) && m_Collider) {
-		result = m_Collider->ExecuteQuery(this, query, callback);
-		if(result == EResult::NotImplemented) {
-			bool isVolume = (query->GetType() == "volume");
-			const char* levelString;
-			if(query->GetLevel() == Query::EQueryLevel::Collision)
-				levelString = "collision";
-			else if(query->GetLevel() == Query::EQueryLevel::Object)
-				levelString = "object";
-			else
-				levelString = "unknown";
-			if(!isVolume)
-				log::Warning("Performed not implemented query(level: ~a, query: ~a, collider: ~a).", levelString, query->GetType(), m_Collider->GetReferableSubType());
-			else {
-				VolumeQuery* vq = (VolumeQuery*)query;
-				log::Warning("Performed not implemented query(level: ~a, query: ~a, zone: ~a, collider: ~a).", levelString, query->GetType(), vq->GetZone()->GetReferableSubType() , m_Collider->GetReferableSubType());
-			}
-		}
-	}
+	bool wasNotAborted = true;
+	if(HasTag(query->GetTags()) && m_Collider)
+		wasNotAborted = m_Collider->ExecuteQuery(this, query, callback);
 
-	for(auto it = GetChildrenFirst(); result != EResult::Aborted && it != GetChildrenEnd(); ++it) {
-		result = it->ExecuteQuery(query, callback);
-	}
+	for(auto it = GetChildrenFirst(); wasNotAborted && it != GetChildrenEnd(); ++it)
+		wasNotAborted = it->ExecuteQuery(query, callback);
 
-	if(result == EResult::Aborted)
-		return EResult::Aborted;
-	return EResult::Succeeded;
+	return wasNotAborted;
 }
 
 }

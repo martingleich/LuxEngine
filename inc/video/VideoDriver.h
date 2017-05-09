@@ -163,7 +163,7 @@ public:
 	{
 	}
 
-	virtual bool Init(const DriverConfig& config, gui::Window* window) = 0;
+	virtual void Init(const DriverConfig& config, gui::Window* window) = 0;
 	virtual bool Present() = 0;
 	virtual void BeginScene(bool clearColor, bool clearZBuffer,
 		video::Color color=video::Color::Black, float z=1.0f) = 0;

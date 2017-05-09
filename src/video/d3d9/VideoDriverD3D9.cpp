@@ -46,20 +46,17 @@ VideoDriverD3D9::VideoDriverD3D9(core::ReferableFactory* refFactory) :
 {
 }
 
-bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
+void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 {
-	if(!VideoDriverNull::Init(config, window))
-		return false;
+	VideoDriverNull::Init(config, window);
 
 	D3DPRESENT_PARAMETERS PresentParams;
 
 	m_Adapter = 0;
 
 	m_D3D = Direct3DCreate9(D3D_SDK_VERSION);
-	if(!m_D3D) {
-		log::Error("Couldn't create the direct3D9 interface.");
-		return false;
-	}
+	if(!m_D3D)
+		throw core::RuntimeException("Couldn't create the direct3D9 interface.");
 
 	HWND windowHandle = (HWND)window->GetDeviceWindow();
 	// Präsentationsstruktur ausfüllen
@@ -191,19 +188,17 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 
 	// Geräteschnittstelle generieren
 	IDirect3DDevice9* newDevice;
+	HRESULT hr;
 	if(m_Config.pureSoftware) {
-		if(FAILED(m_D3D->CreateDevice(m_Adapter,
+		if(FAILED(hr = m_D3D->CreateDevice(m_Adapter,
 			D3DDEVTYPE_HAL,
 			windowHandle,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 			&PresentParams,
 			&newDevice))) {
-			log::Error("Failed to create Direct3DDevice.");
-			return false;
+			throw core::D3D9Exception(hr);
 		}
 	} else {
-		HRESULT hr;
-
 		hr = m_D3D->CreateDevice(m_Adapter,
 			D3DDEVTYPE_HAL,
 			windowHandle,
@@ -226,10 +221,8 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 				&PresentParams,
 				&newDevice);
 
-		if(FAILED(hr)) {
-			log::Error("Failed to create the direct3dDevice.");
-			return false;
-		}
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
 	}
 
 	m_D3DDevice = newDevice;
@@ -270,8 +263,6 @@ bool VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 
 	m_RefFactory->RegisterType(LUX_NEW(TextureD3D9)(m_D3DDevice));
 	m_RefFactory->RegisterType(LUX_NEW(CubeTextureD3D9)(m_D3DDevice));
-
-	return true;
 }
 
 VideoDriverD3D9::~VideoDriverD3D9()
@@ -298,21 +289,22 @@ void VideoDriverD3D9::FillCaps()
 	m_DriverCaps[(u32)EDriverCaps::MaxLights] = m_Caps.MaxActiveLights;
 }
 
-bool VideoDriverD3D9::InitRendertargetData()
+void VideoDriverD3D9::InitRendertargetData()
 {
+	HRESULT hr;
 	IDirect3DSurface9* backbuffer = nullptr;
-	if(FAILED(m_D3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backbuffer)))
-		return false;
+	if(FAILED(hr = m_D3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backbuffer)))
+		throw core::D3D9Exception(hr);
+
 	m_BackBufferTarget = backbuffer;
 	m_CurrentRenderTarget = Rendertarget_d3d9(backbuffer);
 
 	IDirect3DSurface9* depthStencilBuffer = nullptr;
-	if(FAILED(m_D3DDevice->GetDepthStencilSurface(&depthStencilBuffer)))
-		return false;
+	if(FAILED(hr = m_D3DDevice->GetDepthStencilSurface(&depthStencilBuffer)))
+		throw core::D3D9Exception(hr);
+
 	DepthBuffer_d3d9 depthBuffer(depthStencilBuffer);
 	m_DepthBuffers.PushBack(depthBuffer);
-
-	return true;
 }
 
 IDirect3DSurface9* VideoDriverD3D9::GetMatchingDepthBuffer(IDirect3DSurface9* target)

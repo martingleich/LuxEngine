@@ -95,10 +95,10 @@ public:
 	template <typename T>
 	PackageParam& operator= (const T& varVal)
 	{
-		if(m_Type != core::GetTypeInfo<T>())
-			throw TypeException("Incompatible types used", m_Type, core::GetTypeInfo<T>());
+		if(!core::IsConvertible(core::GetTypeInfo<T>(), m_Type))
+			throw TypeException("Incompatible types used", core::GetTypeInfo<T>(), m_Type);
 		if(IsValid())
-			*((T*)m_Data) = varVal;
+			core::ConvertBaseType(core::GetTypeInfo<T>(), &varVal, m_Type, m_Data);
 
 		return *this;
 	}

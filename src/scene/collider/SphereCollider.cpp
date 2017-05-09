@@ -17,10 +17,11 @@ namespace lux
 namespace scene
 {
 
-EResult SphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool SphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	if(query->GetType() == "line")
 		return ExecuteLineQuery(owner, dynamic_cast<LineQuery*>(query), dynamic_cast<LineQueryCallback*>(result));
@@ -33,14 +34,11 @@ EResult SphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallba
 	else if(zoneType == "box")
 		return ExecuteBoxQuery(owner, vquery, vquery->GetZone().As<BoxZone>(), dynamic_cast<VolumeQueryCallback*>(result));
 	else
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 }
 
-EResult SphereCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
+bool SphereCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
-
 	math::line3df line = query->GetLine();
 
 	math::vector3f center = owner->GetAbsoluteTransform().TransformPoint(m_Center);
@@ -67,20 +65,19 @@ EResult SphereCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, Lin
 			break;
 		}
 		default:
-			return EResult::NotImplemented;
+			throw core::NotImplementedException();
 		}
 
 		if(!procceed)
-			return EResult::Aborted;
+			return false;
 	}
 
-	return EResult::Succeeded;
+	return true;
 }
 
-EResult SphereCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
+bool SphereCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(zone);
 
 	const math::vector3f centerA = owner->GetAbsoluteTransform().TransformPoint(m_Center);
 	const float radiusA = owner->GetAbsoluteTransform().scale * m_Radius;
@@ -109,19 +106,18 @@ EResult SphereCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query,
 		break;
 	}
 	default:
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 	}
 
 	if(!procceed)
-		return EResult::Aborted;
+		return false;
 
-	return EResult::Succeeded;
+	return true;
 }
 
-EResult SphereCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
+bool SphereCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(zone);
 
 	const math::vector3f center = owner->GetAbsoluteTransform().TransformPoint(m_Center);
 	const float radius = owner->GetAbsoluteTransform().scale * m_Radius;
@@ -150,16 +146,13 @@ EResult SphereCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, Bo
 		break;
 	}
 	default:
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 	}
 
-	if(!procceed)
-		return EResult::Aborted;
-
-	return EResult::Succeeded;
+	return procceed;
 }
 
-EResult BoundingSphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool BoundingSphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
 {
 	SetRadius(owner->GetBoundingBox().GetExtent().Average() / 2);
 	return SphereCollider::ExecuteQuery(owner, query, result);

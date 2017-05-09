@@ -25,9 +25,9 @@ public:
 	\param owner The collision query to which these collider belongs.
 	\param query The query to perform
 	\param result The callback where to send the query results, type must match the query type.
-	\return The result of the query, i.e. was the query executed with success, says nothing about the collisions.
+	\return True if the run trough, false if it was aborted
 	*/
-	virtual EResult ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result) = 0;
+	virtual bool ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result) = 0;
 
 	core::Name GetReferableType() const
 	{

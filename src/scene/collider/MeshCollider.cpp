@@ -53,10 +53,11 @@ MeshCollider::MeshCollider(scene::Mesh* mesh)
 	}
 }
 
-EResult MeshCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool MeshCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	if(query->GetType() == "line")
 		return ExecuteLineQuery(owner, dynamic_cast<LineQuery*>(query), dynamic_cast<LineQueryCallback*>(result));
@@ -66,13 +67,14 @@ EResult MeshCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback
 	if(zoneType == "sphere")
 		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
 	else
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 }
 
-EResult MeshCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
+bool MeshCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	math::line3df line = query->GetLine();
 	const auto& trans = owner->GetAbsoluteTransform();
@@ -105,25 +107,22 @@ EResult MeshCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQ
 	}
 	break;
 	default:
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 	}
 
-	if(!procceed)
-		return EResult::Aborted;
-
-	return EResult::Succeeded;
+	return procceed;
 }
 
-EResult MeshCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
+bool MeshCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
 {
-	if(!owner || !query || !zone || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	auto& absTrans = owner->GetAbsoluteTransform();
 
 	auto center = absTrans.TransformInvPoint(zone->GetCenter());
 	auto radius = zone->GetRadius() / absTrans.scale;
-
 
 	bool procceed = true;
 	switch(query->GetLevel()) {
@@ -140,13 +139,10 @@ EResult MeshCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, S
 		}
 		break;
 	default:
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 	}
 
-	if(!procceed)
-		return EResult::Aborted;
-
-	return EResult::Succeeded;
+	return procceed;
 }
 
 bool MeshCollider::SelectFirstTriangle(const math::line3df& line, math::vector3f& out_pos, size_t& triId, float& distance, bool testOnly)

@@ -22,12 +22,10 @@ VideoDriverNull::~VideoDriverNull()
 {
 }
 
-bool VideoDriverNull::Init(const DriverConfig& config, gui::Window* window)
+void VideoDriverNull::Init(const DriverConfig& config, gui::Window* window)
 {
 	LUX_UNUSED(window);
 	m_Config = config;
-
-	return true;
 }
 
 void VideoDriverNull::SetAmbient(Colorf ambient)

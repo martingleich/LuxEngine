@@ -26,7 +26,7 @@ public:
 	VideoDriverD3D9(core::ReferableFactory* refFactory);
 	~VideoDriverD3D9();
 
-	bool Init(const DriverConfig& config, gui::Window* Window);
+	void Init(const DriverConfig& config, gui::Window* Window);
 
 	void BeginScene(bool clearColor, bool clearZ,
 		video::Color color, float z);
@@ -237,7 +237,7 @@ private:
 
 private:
 	void FillCaps();
-	bool InitRendertargetData();
+	void InitRendertargetData();
 	void EnableTransforms(const math::matrix4& world, const math::matrix4& view, const math::matrix4& proj);
 
 	IDirect3DSurface9* GetMatchingDepthBuffer(IDirect3DSurface9* target);

@@ -516,7 +516,7 @@ public:
 		return m_Collider;
 	}
 
-	LUX_API EResult ExecuteQuery(Query* query, QueryCallback* queryCallback);
+	LUX_API bool ExecuteQuery(Query* query, QueryCallback* queryCallback);
 
 	virtual StrongRef<Referable> Clone() const
 	{

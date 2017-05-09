@@ -17,10 +17,11 @@ namespace lux
 namespace scene
 {
 
-EResult BoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool BoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	if(query->GetType() == "line")
 		return ExecuteLineQuery(owner, dynamic_cast<LineQuery*>(query), dynamic_cast<LineQueryCallback*>(result));
@@ -34,13 +35,14 @@ EResult BoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback*
 	else if(zoneType == "box")
 		return ExecuteBoxQuery(owner, vquery, vquery->GetZone().As<BoxZone>(), vcallback);
 	else
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 }
 
-EResult BoxCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
+bool BoxCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	math::line3df line = query->GetLine();
 
@@ -67,19 +69,17 @@ EResult BoxCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQu
 	}
 	break;
 	default:
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 	}
 
-	if(!procceed)
-		return EResult::Aborted;
-
-	return EResult::Succeeded;
+	return procceed;
 }
 
-EResult BoxCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
+bool BoxCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	const math::vector3f center = zone->GetCenter();
 	const float radius = zone->GetRadius();
@@ -108,19 +108,17 @@ EResult BoxCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, Sp
 		break;
 	}
 	default:
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 	}
 
-	if(!procceed)
-		return EResult::Aborted;
-
-	return EResult::Succeeded;
+	return procceed;
 }
 
-EResult BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
+bool BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
 {
-	if(!owner || !query || !result)
-		return EResult::Failed;
+	LX_CHECK_NULL_ARG(owner);
+	LX_CHECK_NULL_ARG(query);
+	LX_CHECK_NULL_ARG(result);
 
 	const math::vector3f halfSizeA = zone->GetHalfSize();
 	const math::Transformation transA = zone->GetTransformation();
@@ -135,16 +133,13 @@ EResult BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZo
 			procceed = result->OnObject(owner, QueryResult(this, 0));
 		break;
 	default:
-		return EResult::NotImplemented;
+		throw core::NotImplementedException();
 	}
 
-	if(!procceed)
-		return EResult::Aborted;
-
-	return EResult::Succeeded;
+	return procceed;
 }
 
-EResult BoundingBoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool BoundingBoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
 {
 	SetHalfSize(owner->GetBoundingBox().GetExtent() / 2);
 	return BoxCollider::ExecuteQuery(owner, query, result);

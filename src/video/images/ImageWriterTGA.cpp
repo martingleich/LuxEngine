@@ -118,7 +118,7 @@ void ImageWriterTGA::WriteFile(io::File* file, void* data, video::ColorFormat fo
 	} while(false);
 
 	if(!result)
-		throw core::FileFormatException("Can' write file", "tga");
+		throw core::FileFormatException("Can't write file", "tga");
 }
 
 }

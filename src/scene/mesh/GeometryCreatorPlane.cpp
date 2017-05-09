@@ -45,17 +45,19 @@ StrongRef<video::SubMesh> GeometryCreatorPlane::CreateSubMesh(
 	float texX, float texY,
 	float(*function)(void* ctx, float x, float y), void* context)
 {
-	if(sizeX < 0.0f || sizeY < 0.0f)
-		return nullptr;
+	LX_CHECK_NULL_ARG(driver);
+
+	if(sizeX <= 0.0f || sizeY <= 0.0f)
+		throw core::InvalidArgumentException("sizeX, sizeY", "Must be bigger than zero");
 
 	if(tesX <= 1 || tesY <= 1)
-		return nullptr;
+		throw core::InvalidArgumentException("tesX, tesY", "Must be bigger than 1");
 
 	const u32 vertexCount = tesX * tesY;
 	const u32 indexCount = (tesX - 1)*(tesY - 1) * 6;
 
 	if(vertexCount > 0xFFFF)
-		return nullptr;
+		throw core::InvalidArgumentException("Too many arguments");
 
 	auto GetVertexIndex = [=](s32 x, s32 y) -> u16 { return (u16)(y * tesX + x); };
 
@@ -63,16 +65,9 @@ StrongRef<video::SubMesh> GeometryCreatorPlane::CreateSubMesh(
 		video::VertexFormat::STANDARD, video::EHardwareBufferMapping::Static, vertexCount,
 		video::EIndexFormat::Bit16, video::EHardwareBufferMapping::Static, indexCount,
 		video::EPT_TRIANGLES);
-	if(!subMesh)
-		return nullptr;
 
 	StrongRef<video::VertexBuffer> vertexBuffer = subMesh->GetVertices();
-	if(!vertexBuffer)
-		return nullptr;
-
 	StrongRef<video::IndexBuffer> indexBuffer = subMesh->GetIndices();
-	if(!indexBuffer)
-		return nullptr;
 
 	math::aabbox3df boundingBox;
 	video::Vertex3D vertex;

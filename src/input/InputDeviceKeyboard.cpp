@@ -11,9 +11,8 @@ KeyboardDevice::KeyboardDevice(const DeviceCreationDesc* desc, InputSystem* syst
 {
 	m_Buttons.Resize(143);
 
-	for(auto it = m_Buttons.First(); it != m_Buttons.End(); ++it) {
+	for(auto it = m_Buttons.First(); it != m_Buttons.End(); ++it)
 		it->type = EElementType::Input | EElementType::Button | EElementType::PushButton;
-	}
 
 	Reset();
 }
@@ -49,28 +48,25 @@ EEventSource KeyboardDevice::GetType() const
 
 bool KeyboardDevice::GetButtonState(u32 buttonCode) const
 {
-	if(buttonCode >= m_Buttons.Size())
-		return false;
-
-	return m_Buttons[buttonCode].state;
+	return m_Buttons.At(buttonCode).state;
 }
 
 int KeyboardDevice::GetAxisState(u32 axisCode) const
 {
 	LUX_UNUSED(axisCode);
-	return 0;
+	throw core::OutOfRangeException();
 }
 
 math::vector2i KeyboardDevice::GetAreaState(u32 areaCode) const
 {
 	LUX_UNUSED(areaCode);
-	return math::vector2i::ZERO;
+	throw core::OutOfRangeException();
 }
 
 bool KeyboardDevice::Update(Event& event)
 {
 	if(event.type != EEventType::Button || (size_t)event.button.code >= m_Buttons.Size())
-		return false;
+		throw core::OutOfRangeException();
 
 	if(m_Buttons[event.button.code].state != event.button.state) {
 		m_Buttons[event.button.code].state = event.button.state;

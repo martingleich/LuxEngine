@@ -88,24 +88,18 @@ EEventSource MouseDevice::GetType() const
 
 bool MouseDevice::GetButtonState(u32 buttonCode) const
 {
-	if(buttonCode >= m_Buttons.Size())
-		return false;
-
-	return m_Buttons[buttonCode].state;
+	return m_Buttons.At(buttonCode).state;
 }
 
 int MouseDevice::GetAxisState(u32 axisCode) const
 {
-	if(axisCode >= m_Axes.Size())
-		return false;
-
-	return m_Axes[axisCode].state;
+	return m_Axes.At(axisCode).state;
 }
 
 math::vector2i MouseDevice::GetAreaState(u32 areaCode) const
 {
 	if(areaCode != 0)
-		return math::vector2i::ZERO;
+		throw core::OutOfRangeException();
 
 	return m_Pos.state;
 }
@@ -114,7 +108,7 @@ bool MouseDevice::Update(Event& event)
 {
 	if(event.type == EEventType::Button) {
 		if((size_t)event.button.code >= m_Buttons.Size())
-			return false;
+			throw core::OutOfRangeException();
 
 		if(m_Buttons[event.button.code].state != event.button.state) {
 			m_Buttons[event.button.code].state = event.button.state;
@@ -125,7 +119,7 @@ bool MouseDevice::Update(Event& event)
 
 	if(event.type == EEventType::Axis) {
 		if((size_t)event.axis.code >= m_Axes.Size())
-			return false;
+			throw core::OutOfRangeException();
 
 		if(event.internal_abs_only)
 			event.axis.rel = m_Axes[event.axis.code].state - event.axis.abs;
@@ -142,7 +136,7 @@ bool MouseDevice::Update(Event& event)
 
 	if(event.type == EEventType::Area) {
 		if(event.area.code != 0)
-			return false;
+			throw core::OutOfRangeException();
 
 		if(event.internal_abs_only) {
 			event.area.relX = m_Pos.state.x - event.area.absX;
@@ -182,17 +176,17 @@ const string& MouseDevice::GetElementName(EEventType type, u32 code) const
 EElementType MouseDevice::GetElementType(EEventType type, u32 id) const
 {
 	if(type == EEventType::Button) {
-		if(id < m_Buttons.Size())
-			return m_Buttons[id].type;
+		return m_Buttons.At(id).type;
 	} else if(type == EEventType::Axis) {
 		if(id < m_Axes.Size())
-			return m_Axes[id].type;
+			m_Axes.At(id).type;
 	} else if(type == EEventType::Area) {
-		if(id == 0)
-			return m_Pos.type;
+		if(id != 0)
+			throw core::OutOfRangeException();
+		return m_Pos.type;
+	} else {
+		return EElementType::Other;
 	}
-
-	return EElementType::Other;
 }
 
 size_t MouseDevice::GetElementCount(EEventType type) const
@@ -203,8 +197,8 @@ size_t MouseDevice::GetElementCount(EEventType type) const
 		return m_Axes.Size();
 	else if(type == EEventType::Area)
 		return 1;
-
-	return 0;
+	else
+		return 0;
 }
 
 }

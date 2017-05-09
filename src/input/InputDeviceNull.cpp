@@ -20,13 +20,15 @@ const string& InputDeviceNull::GetName() const
 	return m_Name;
 }
 
-EResult InputDeviceNull::Connect()
+bool InputDeviceNull::Connect()
 {
-	if(m_Connected == false)
-		Aquire();
+	if(m_Connected == false) {
+		if(!Aquire())
+			return false;
+	}
 
 	m_Connected = true;
-	return EResult::Succeeded;
+	return true;
 }
 
 void InputDeviceNull::Disconnect()
@@ -41,13 +43,13 @@ bool InputDeviceNull::IsConnected() const
 	return m_Connected;
 }
 
-EResult InputDeviceNull::Aquire()
+bool InputDeviceNull::Aquire()
 {
 	if(m_System->IsForeground() == false && m_Foreground == true)
-		return EResult::Failed;
+		return false;
 
 	m_Aquired = true;
-	return EResult::Succeeded;
+	return true;
 }
 
 void InputDeviceNull::UnAquire()

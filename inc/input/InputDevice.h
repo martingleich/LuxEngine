@@ -131,7 +131,7 @@ public:
 	virtual const string& GetName() const = 0;
 
 	//! Connect the device.
-	virtual EResult Connect() = 0;
+	virtual bool Connect() = 0;
 	//! Disconnect the device
 	/**
 	The device will reconnect if it generates a event.
@@ -148,7 +148,7 @@ public:
 	/**
 	Only aquired device can sent data.
 	*/
-	virtual EResult Aquire() = 0;
+	virtual bool Aquire() = 0;
 
 	//! Disable event handling for the device.
 	/**

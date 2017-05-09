@@ -15,10 +15,10 @@ public:
 
 	virtual const string& GetName() const;
 
-	virtual EResult Connect();
+	virtual bool Connect();
 	virtual void Disconnect();
 	virtual bool IsConnected() const;
-	virtual EResult Aquire();
+	virtual bool Aquire();
 	virtual void UnAquire();
 	virtual bool IsAquired() const;
 	virtual bool IsForeground() const;

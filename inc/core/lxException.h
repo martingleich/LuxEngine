@@ -80,7 +80,7 @@ struct Exception : public std::exception
 	{
 	}
 
-	const char* what() const
+	const char* what() const noexcept
 	{
 		return m_What.Data();
 	}
@@ -89,7 +89,7 @@ private:
 	ExceptionSafeString m_What;
 };
 
-//! Exception which occured beyond the programmers control and can't be handles by him
+//! Exception which occured beyond the programmers control and most of the time can't be handled by him
 /**
 Examples are OutOfMemory, Errors when creating hardware resources, errors from os calls, etc.
 These errors can't be handles by the programmer, except "this function call does not work."
@@ -185,7 +185,7 @@ struct UnicodeException : Exception
 	u32 codepoint;
 };
 
-//! An array was accesse out of its valid range.
+//! An array was accessed out of its valid range.
 struct OutOfRangeException : ErrorException
 {
 	OutOfRangeException() :
@@ -194,7 +194,7 @@ struct OutOfRangeException : ErrorException
 	}
 };
 
-//! An non existing object was queried.
+//! A non existing object was queried.
 /**
 For example a parameter in a ParamPackage
 */
@@ -213,7 +213,7 @@ struct ObjectNotFoundException : ErrorException
 
 //! Exception dealing with a file format
 /**
-Thrown when a fileformat is not available or the conted is corrupted.
+Thrown when a fileformat is not available or the contet is corrupted.
 */
 struct FileFormatException : Exception
 {

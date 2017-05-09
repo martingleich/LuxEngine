@@ -53,34 +53,30 @@ StrongRef<video::SubMesh> GeometryCreatorSphereUV::CreateSubMesh(video::VideoDri
 	s32 rings, s32 segments, float texX, float texY,
 	bool inside)
 {
+	LX_CHECK_NULL_ARG(driver);
+
 	if(radius <= 0.0f)
-		return nullptr;
+		throw core::InvalidArgumentException("radius", "Must be bigger than zero");
+
 	if(rings < 2)
-		return nullptr;
+		throw core::InvalidArgumentException("rings", "Must be bigger than 1");
+
 	if(segments < 3)
-		return nullptr;
+		throw core::InvalidArgumentException("segments", "Must be bigger than 2");
 
 	const u32 vertexCount = (rings - 1) * (segments + 1) + 2;
 	const u32 indexCount = 6 * segments * (rings - 1);
 
 	if(vertexCount > 0xFFFF)
-		return nullptr;
+		throw core::InvalidArgumentException("Too many arguments");
 
 	StrongRef<video::SubMesh> subMesh = driver->CreateSubMesh(
 		video::VertexFormat::STANDARD, video::EHardwareBufferMapping::Static, vertexCount,
 		video::EIndexFormat::Bit16, video::EHardwareBufferMapping::Static, indexCount,
 		video::EPT_TRIANGLES);
 
-	if(!subMesh)
-		return nullptr;
-
 	StrongRef<video::VertexBuffer> vertexBuffer = subMesh->GetVertices();
-	if(!vertexBuffer)
-		return nullptr;
-
 	StrongRef<video::IndexBuffer> indexBuffer = subMesh->GetIndices();
-	if(!indexBuffer)
-		return nullptr;
 
 	const s32 temp = rings-1;
 	video::Vertex3D Vertex;

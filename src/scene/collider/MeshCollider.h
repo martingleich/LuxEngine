@@ -26,9 +26,9 @@ public:
 	}
 
 	MeshCollider(Mesh* mesh);
-	virtual EResult ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result);
-	virtual EResult ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result);
-	virtual EResult ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result);
+	virtual bool ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result);
+	virtual bool ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result);
+	virtual bool ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result);
 
 	const math::aabbox3df& GetBoundingBox() const
 	{

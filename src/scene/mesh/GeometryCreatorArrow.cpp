@@ -34,8 +34,7 @@ const core::ParamPackage& GeometryCreatorArrow::GetParams() const
 
 StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver* driver, const core::PackagePuffer& params)
 {
-	if(!driver)
-		return nullptr;
+	LX_CHECK_NULL_ARG(driver);
 
 	const float shaft_height = params.Param(0).Default(2.0f);
 	const float head_height = params.Param(1).Default(1.0f);
@@ -54,22 +53,21 @@ StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver
 	float shaft_radius, float head_radius,
 	s32 sectors)
 {
-	if(!driver)
-		return nullptr;
+	LX_CHECK_NULL_ARG(driver);
 
 	if(shaft_height <= 0.0f || head_height <= 0.0f || shaft_radius <= 0.0f || head_radius <= 0.0f)
-		return nullptr;
+		throw core::InvalidArgumentException("shaft_height, head_height, shaft_radius, head_radius", "Must be bigger than zero");
 
 	if(head_radius < shaft_radius)
-		return nullptr;
+		throw core::InvalidArgumentException("head_radius, shaft_radius", "Head radius must be bigger than shaft_radius");
 
 	if(sectors < 3)
-		return nullptr;
+		throw core::InvalidArgumentException("sectors", "Number of sectors must be bigger than 2");
 
 	// 6 Rings + 1 Arrowpoint
 	const u32 vertexCount = sectors * 6 + 1;
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
-		return nullptr;
+		throw core::InvalidArgumentException("sectors", "Too many sectors");
 
 	// Circle + Pipe  + Ring  + Head
 	// sec-2  + sec*2 + sec*2 + sec Triangles
@@ -79,16 +77,8 @@ StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver
 		video::EIndexFormat::Bit16, video::EHardwareBufferMapping::Static, indexCount,
 		video::EPT_TRIANGLES);
 
-	if(!subMesh)
-		return nullptr;
-
 	StrongRef<video::VertexBuffer> vertexBuffer = subMesh->GetVertices();
-	if(!vertexBuffer)
-		return nullptr;
-
 	StrongRef<video::IndexBuffer> indexBuffer = subMesh->GetIndices();
-	if(!indexBuffer)
-		return nullptr;
 
 	const float shaft_circum = 2.0f*shaft_radius*math::Constants<float>::pi();
 

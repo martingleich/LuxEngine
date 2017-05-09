@@ -14,7 +14,6 @@ class DeviceCreationDesc;
 
 // TODO:
 /*
-Renaming of aquire connect naming and conventions.
 Establish control from InputSystem to RawInputReceiver(just a little bit)
 */
 

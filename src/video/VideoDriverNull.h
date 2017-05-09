@@ -15,7 +15,7 @@ public:
 	VideoDriverNull(core::ReferableFactory* refFactory);
 	~VideoDriverNull();
 
-	virtual bool Init(const DriverConfig& config, gui::Window* Window);
+	virtual void Init(const DriverConfig& config, gui::Window* Window);
 
 	virtual void SetAmbient(Colorf ambient);
 	virtual Colorf GetAmbient() const;
