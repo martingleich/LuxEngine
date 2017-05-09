@@ -180,7 +180,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			}
 
 			if(pCurrMtl)
-				v.color = pCurrMtl->Meshbuffer->GetMaterial().diffuse;
+				v.color = ColorFToColor(pCurrMtl->Meshbuffer->GetMaterial().diffuse);
 
 			//v.color = video::Color::White;
 
