@@ -192,14 +192,15 @@ public:
 	virtual void EnablePipeline(const PipelineSettings& settings, bool resetAll = false) = 0;
 	virtual void SetTextureLayer(const MaterialLayer& Layer, u32 textureLayer, bool resetAll = false) = 0;
 
-	virtual StrongRef<SubMesh> CreateSubMesh(const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
+	virtual StrongRef<SubMesh> CreateSubMesh(
+		const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
 		EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
 		EPrimitiveType primitiveType) = 0;
 
 	virtual StrongRef<SubMesh> CreateSubMesh(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
-		bool dynamic = false,
 		EPrimitiveType primitiveType = EPT_TRIANGLES,
-		u32 primitiveCount = 0) = 0;
+		u32 primitiveCount = 0,
+		bool dynamic = false) = 0;
 
 	virtual bool CheckTextureFormat(ColorFormat format, bool cube) = 0;
 	virtual StrongRef<Texture> CreateTexture(const math::dimension2du& size, ColorFormat format, u32 mipCount, bool isDynamic) = 0;

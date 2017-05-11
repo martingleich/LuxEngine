@@ -528,9 +528,9 @@ StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(
 }
 
 StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(const VertexFormat& vertexFormat,
-	bool Dynamic,
 	EPrimitiveType primitiveType,
-	u32 primitiveCount)
+	u32 primitiveCount,
+	bool Dynamic)
 {
 	LUX_UNUSED(primitiveCount);
 	return CreateSubMesh(vertexFormat, Dynamic ? EHardwareBufferMapping::Dynamic : EHardwareBufferMapping::Static, 0,

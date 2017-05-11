@@ -1,6 +1,9 @@
 #ifndef INCLUDED_MESH_H
 #define INCLUDED_MESH_H
 #include "math/aabbox3d.h"
+#include "video/VertexFormats.h"
+#include "video/HardwareBufferConstants.h"
+#include "video/EPrimitiveType.h"
 #include "resources/ResourceSystem.h"
 
 namespace lux
@@ -9,6 +12,7 @@ namespace video
 {
 class SubMesh;
 class Material;
+class VideoDriver;
 }
 namespace scene
 {
@@ -49,7 +53,16 @@ public:
 	The bounding box isn´t recalculated automaticly
 	\param subMesh The submesh to add
 	*/
-	virtual void AddSubMesh(video::SubMesh* subMesh) = 0;
+	virtual StrongRef<video::SubMesh> AddSubMesh(video::SubMesh* subMesh) = 0;
+
+	virtual StrongRef<video::SubMesh> AddSubMesh(const video::VertexFormat& vertexFormat, video::EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
+		video::EIndexFormat indexType, video::EHardwareBufferMapping indexHWMapping, u32 indexCount,
+		video::EPrimitiveType primitiveType) = 0;
+
+	virtual StrongRef<video::SubMesh> AddSubMesh(const video::VertexFormat& vertexFormat = video::VertexFormat::STANDARD,
+		video::EPrimitiveType primitiveType = video::EPT_TRIANGLES,
+		u32 primitiveCount = 0,
+		bool dynamic = false) = 0;
 
 	//! Removes a Submesh by index
 	virtual void RemoveSubMesh(size_t index) = 0;
@@ -71,6 +84,8 @@ public:
 
 	//! Get a submesh material by index.
 	virtual const video::Material& GetMaterial(size_t index) const = 0;
+
+	virtual video::VideoDriver* GetDriver() const = 0;
 
 	virtual core::Name GetResourceType() const
 	{

@@ -24,24 +24,9 @@ public:
 
 	//! Add new mesh to the list
 	/**
-	\param name The name of the new mesh, if the name is empty the mesh is not cached
-	\param mesh The mesh to add to the list
+	\param name The name of the new mesh
 	*/
-	virtual void AddMesh(const io::path& name, Mesh* mesh) = 0;
-
-	//! Retrieves a model from cache or loads it if necessary
-	/**
-	\param filename The filename of the mesh
-	\return The loaded mesh
-	*/
-	virtual StrongRef<Mesh> GetMesh(const io::path& filename) = 0;
-
-	//! Retrieves a model from cache or loads it if necessary
-	/**
-	\param filename The file which contains the mesh
-	\return The loaded mesh
-	*/
-	virtual StrongRef<Mesh> GetMesh(io::File* file) = 0;
+	virtual StrongRef<Mesh> AddMesh(const io::path& name) = 0;
 
 	//! Create a new unmanaged mesh
 	/**

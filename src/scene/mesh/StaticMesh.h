@@ -11,10 +11,12 @@ namespace scene
 class StaticMesh : public Mesh
 {
 public:
-	StaticMesh();
-	~StaticMesh()
+	StaticMesh() :
+		m_Driver(nullptr)
 	{
 	}
+
+	StaticMesh(video::VideoDriver* driver);
 	void Clear();
 	size_t GetSubMeshCount() const;
 	const video::SubMesh* GetSubMesh(size_t i) const;
@@ -22,11 +24,19 @@ public:
 	const math::aabbox3df& GetBoundingBox() const;
 	void SetBoundingBox(const math::aabbox3df& box);
 	void RecalculateBoundingBox();
-	void AddSubMesh(video::SubMesh* subMesh);
+	StrongRef<video::SubMesh> AddSubMesh(video::SubMesh* subMesh);
+	StrongRef<video::SubMesh> AddSubMesh(const video::VertexFormat& vertexFormat, video::EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
+		video::EIndexFormat indexType, video::EHardwareBufferMapping indexHWMapping, u32 indexCount,
+		video::EPrimitiveType primitiveType);
+	StrongRef<video::SubMesh> AddSubMesh(const video::VertexFormat& vertexFormat = video::VertexFormat::STANDARD,
+		video::EPrimitiveType primitiveType = video::EPT_TRIANGLES,
+		u32 primitiveCount = 0,
+		bool dynamic = false);
 	void RemoveSubMesh(size_t index);
 	void RemoveSubMesh(video::SubMesh* subMesh);
 	video::Material& GetMaterial(size_t index);
 	const video::Material& GetMaterial(size_t index) const;
+	video::VideoDriver* GetDriver() const;
 
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;
@@ -34,6 +44,7 @@ public:
 private:
 	math::aabbox3df m_BoundingBox;
 	core::array<StrongRef<video::SubMesh>> m_MeshBuffers;
+	video::VideoDriver* m_Driver;
 };
 
 

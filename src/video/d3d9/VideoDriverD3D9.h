@@ -62,9 +62,9 @@ public:
 		EPrimitiveType primitiveType);
 
 	virtual StrongRef<SubMesh> CreateSubMesh(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
-		bool Dynamic = false,
 		EPrimitiveType primitiveType = EPT_TRIANGLES,
-		u32 primitiveCount = 0);
+		u32 primitiveCount = 0,
+		bool dynamic = false);
 
 	//------------------------------------------------------------------
 	// Textur-Methoden
@@ -201,7 +201,8 @@ private:
 		VertexFormat_d3d9() {}
 		VertexFormat_d3d9(IDirect3DVertexDeclaration9* d3dDecl) :
 			m_D3DDeclaration(d3dDecl)
-		{}
+		{
+		}
 
 		IDirect3DVertexDeclaration9* GetD3D() const { return m_D3DDeclaration; }
 

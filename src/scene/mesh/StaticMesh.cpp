@@ -3,16 +3,16 @@
 #include "video/Material.h"
 #include "core/lxAlgorithm.h"
 #include "core/ReferableRegister.h"
-
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::StaticMesh)
+#include "video/VideoDriver.h"
 
 namespace lux
 {
 namespace scene
 {
 
-StaticMesh::StaticMesh() :
-	m_BoundingBox(math::vector3f::ZERO)
+StaticMesh::StaticMesh(video::VideoDriver* driver) :
+	m_BoundingBox(math::vector3f::ZERO),
+	m_Driver(driver)
 {
 }
 
@@ -58,10 +58,31 @@ void StaticMesh::RecalculateBoundingBox()
 	}
 }
 
-void StaticMesh::AddSubMesh(video::SubMesh* subMesh)
+StrongRef<video::SubMesh> StaticMesh::AddSubMesh(video::SubMesh* subMesh)
 {
 	if(subMesh)
 		m_MeshBuffers.PushBack(subMesh);
+
+	return subMesh;
+}
+
+StrongRef<video::SubMesh> StaticMesh::AddSubMesh(
+	const video::VertexFormat& vertexFormat, video::EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
+	video::EIndexFormat indexType, video::EHardwareBufferMapping indexHWMapping, u32 indexCount,
+	video::EPrimitiveType primitiveType)
+{
+	return AddSubMesh(m_Driver->CreateSubMesh(
+		vertexFormat, vertexHWMapping, vertexCount,
+		indexType, indexHWMapping, indexCount,
+		primitiveType));
+}
+
+StrongRef<video::SubMesh> StaticMesh::AddSubMesh(const video::VertexFormat& vertexFormat,
+	video::EPrimitiveType primitiveType,
+	u32 primitiveCount,
+	bool dynamic)
+{
+	return AddSubMesh(m_Driver->CreateSubMesh(vertexFormat, primitiveType, primitiveCount, dynamic));
 }
 
 void StaticMesh::RemoveSubMesh(size_t index)
@@ -92,6 +113,11 @@ const video::Material& StaticMesh::GetMaterial(size_t index) const
 		return video::IdentityMaterial;
 }
 
+video::VideoDriver* StaticMesh::GetDriver() const
+{
+	return m_Driver;
+}
+
 core::Name StaticMesh::GetReferableSubType() const
 {
 	return core::ResourceType::Mesh;
@@ -99,7 +125,7 @@ core::Name StaticMesh::GetReferableSubType() const
 
 StrongRef<Referable> StaticMesh::Clone() const
 {
-	return LUX_NEW(StaticMesh);
+	return LUX_NEW(StaticMesh)(m_Driver);
 }
 
 }
