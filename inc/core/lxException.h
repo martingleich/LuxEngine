@@ -19,17 +19,18 @@ class ExceptionSafeString
 {
 public:
 	ExceptionSafeString() :
-		data("\001")
+		ExceptionSafeString("")
 	{
 	}
 
 	ExceptionSafeString(const char* s)
 	{
+		if(!s)
+			s = "";
+
 		size_t len = strlen(s);
 		data = (char*)std::malloc(len + 1 + 1);
-		if(!data)
-			data = "\001string_alloc_error";
-		else {
+		if(data) {
 			data[0] = 1;
 			memcpy(data + 1, s, len + 1);
 		}
@@ -38,28 +39,35 @@ public:
 	ExceptionSafeString(const ExceptionSafeString& other) :
 		data(other.data)
 	{
-		++data[0];
+		if(data)
+			++data[0];
 	}
 
 	ExceptionSafeString& operator=(const ExceptionSafeString& other)
 	{
 		this->~ExceptionSafeString();
 		data = other.data;
-		++data[0];
+		if(data)
+			++data[0];
 
 		return *this;
 	}
 
 	~ExceptionSafeString()
 	{
-		--data[0];
-		if(!data[0])
-			std::free(data);
+		if(data) {
+			--data[0];
+			if(!data[0])
+				std::free(data);
+		}
 	}
 
 	const char* Data() const
 	{
-		return data + 1;
+		if(data)
+			return data + 1;
+		else
+			return "string_alloc_error";
 	}
 
 	operator const char*() const
@@ -98,7 +106,8 @@ struct RuntimeException : Exception
 {
 	explicit RuntimeException(const char* msg) :
 		Exception(msg)
-	{}
+	{
+	}
 };
 
 //! Exception created by using a interface wrong
@@ -109,7 +118,8 @@ struct ErrorException : Exception
 {
 	explicit ErrorException(const char* msg) :
 		Exception(msg)
-	{}
+	{
+	}
 };
 
 //! The requested thing is not implemented.
