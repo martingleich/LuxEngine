@@ -163,7 +163,7 @@ public:
 	{
 		if(!m_Object)
 			return nullptr;
-		T* casted_out =dynamic_cast<T*>(m_Object);
+		T* casted_out = dynamic_cast<T*>(m_Object);
 		lxAssert(casted_out);
 		return casted_out;
 	}
@@ -172,7 +172,7 @@ public:
 	{
 		if(!m_Object)
 			return nullptr;
-		T* casted_out =dynamic_cast<T*>(m_Object);
+		T* casted_out = dynamic_cast<T*>(m_Object);
 		lxAssert(casted_out);
 		return casted_out;
 	}
@@ -181,7 +181,7 @@ public:
 	{
 		if(!m_Object)
 			return nullptr;
-		T* casted_out =dynamic_cast<T*>(m_Object);
+		T* casted_out = dynamic_cast<T*>(m_Object);
 		lxAssert(casted_out);
 		return casted_out;
 	}
@@ -234,7 +234,8 @@ public:
 	operator StrongRef<T2>() const
 	{
 		T2* cast_out = dynamic_cast<T2*>(m_Object);
-		throw core::Exception("Invalid cast");
+		if(!cast_out)
+			throw core::Exception("Invalid cast");
 		return StrongRef<T2>(cast_out);
 	}
 
@@ -404,7 +405,10 @@ public:
 	template <typename T2>
 	WeakRef<T>& operator=(const WeakRef<T2>& other)
 	{
-		return this->operator=(dynamic_cast<T*>(other.m_Object));
+		auto cast_out = dynamic_cast<T*>(other.m_Object);
+		if(!cast_out)
+			throw core::Exception("Invalid cast");
+		return this->operator=(cast_out);
 	}
 
 	~WeakRef()
@@ -543,7 +547,7 @@ StrongRef<T>::StrongRef(const WeakRef<T>& other) : StrongRef(*other)
 
 }
 
-}    
+}
 
 
 #endif
