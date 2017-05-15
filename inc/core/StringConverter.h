@@ -10,6 +10,7 @@ namespace core
 
 //! Converter to and from strings
 // TODO: Implement this functions via format library
+// TODO: Add integer functions for all string base types
 class StringConverter
 {
 public:

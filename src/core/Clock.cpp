@@ -24,17 +24,16 @@ DateAndTime Clock::GetDateAndTime()
 {
 	time_t secondsSince1970;
 	time(&secondsSince1970);
-	tm timeStruct;
-	localtime_s(&timeStruct, &secondsSince1970);
+	tm* timeStruct = localtime(&secondsSince1970);
 	DateAndTime out;
-	out.dayOfMonth = timeStruct.tm_mday;
-	out.hours = timeStruct.tm_hour;
-	out.isDayLightSaving = (timeStruct.tm_isdst != 0);
-	out.minutes = timeStruct.tm_min;
-	out.month = timeStruct.tm_mon + 1;
-	out.seconds = timeStruct.tm_sec;
-	out.weekDay = TimeStructToWeekDay(timeStruct.tm_wday);
-	out.year = timeStruct.tm_year + 1900;
+	out.dayOfMonth = timeStruct->tm_mday;
+	out.hours = timeStruct->tm_hour;
+	out.isDayLightSaving = (timeStruct->tm_isdst != 0);
+	out.minutes = timeStruct->tm_min;
+	out.month = timeStruct->tm_mon + 1;
+	out.seconds = timeStruct->tm_sec;
+	out.weekDay = TimeStructToWeekDay(timeStruct->tm_wday);
+	out.year = timeStruct->tm_year + 1900;
 
 	return out;
 }
