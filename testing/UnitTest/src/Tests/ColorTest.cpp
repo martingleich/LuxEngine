@@ -1,5 +1,9 @@
 #include "UnitTestEx.h"
+
+// TODO gcc -Wunknown-pragmas
+#ifndef LUX_LINUX
 #pragma warning(disable: 4244)
+#endif
 
 UNIT_SUITE(Color)
 {

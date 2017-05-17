@@ -32,7 +32,10 @@ private:
 	u8 m_Size;
 
 	// The type core::Type is independet of the client or dll.
+// TODO gcc -Wunknown-pragmas
+#ifndef LUX_LINUX
 #pragma warning(suppress: 4251)
+#endif
 	core::Type m_Type;
 	u8* m_Data;
 	const char* m_Name;
@@ -186,13 +189,19 @@ private:
 
 	//class "lux::core::array<lux::core::ParamPackage::Entry>" erfordert eine DLL-Schnittstelle, die von Clients von class "lux::core::ParamPackage" verwendet wird
 	// BUT: The user can not access m_Params so its alright
+// TODO gcc -Wunknown-pragmas
+#ifndef LUX_LINUX
 #pragma warning(suppress: 4251)
+#endif
 	core::array<Entry> m_Params;
 
 	u32 m_TotalSize;
 	u32 m_TextureCount;
 
+// TODO gcc -Wunknown-pragmas
+#ifndef LUX_LINUX
 #pragma warning(suppress: 4251)
+#endif
 	core::mem::RawMemory m_DefaultPackage;
 
 	void AddEntry(Entry& entry, const void* defaultValue);

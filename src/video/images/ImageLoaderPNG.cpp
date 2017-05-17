@@ -63,7 +63,10 @@ static bool LoadImageFormat(Context& ctx)
 {
 	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
 	// scope of setjmp.
+// TODO gcc -Wunknown-pragmas
+#ifndef LUX_LINUX
 #pragma warning(suppress: 4611)
+#endif
 	if(setjmp(ctx.jmpbuf)) {
 		return false;
 	}
@@ -111,7 +114,10 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 
 	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
 	// scope of setjmp.
+// TODO gcc -Wunknown-pragmas
+#ifndef LUX_LINUX
 #pragma warning(suppress: 4611)
+#endif
 	if(setjmp(ctx.jmpbuf)) {
 		return false;
 	}
