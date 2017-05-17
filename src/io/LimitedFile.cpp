@@ -11,10 +11,10 @@ LimitedFile::LimitedFile(StrongRef<File> Master,
 	const FileDescription& desc,
 	string name) :
 	File(name, desc),
-	m_MasterFile(Master),
 	m_StartOffset(offset),
 	m_FileSize(desc.GetSize()),
-	m_Cursor(0)
+	m_Cursor(0),
+	m_MasterFile(Master)
 {
 }
 

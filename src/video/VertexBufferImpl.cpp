@@ -6,9 +6,9 @@ namespace video
 {
 
 VertexBufferImpl::VertexBufferImpl(BufferManager* mgr) :
-	m_Manager(mgr),
+	m_Stream(0),
 	m_Format(VertexFormat::STANDARD),
-	m_Stream(0)
+	m_Manager(mgr)
 {
 	m_Stride = m_Format.GetStride(m_Stream);
 

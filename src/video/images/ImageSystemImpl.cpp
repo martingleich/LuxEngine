@@ -38,8 +38,8 @@ class ImageToTextureLoader : public core::ResourceLoader
 {
 public:
 	ImageToTextureLoader(core::ResourceSystem* resSys, ImageSystemImpl* imagSys) :
-		m_ResourceSystem(resSys),
-		m_ImageSystem(imagSys)
+		m_ImageSystem(imagSys),
+		m_ResourceSystem(resSys)
 	{
 	}
 
@@ -251,9 +251,9 @@ private:
 };
 
 ImageSystemImpl::ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver* driver, core::ResourceSystem* resSys) :
+	m_ResourceSystem(resSys),
 	m_Filesystem(fileSystem),
 	m_Driver(driver),
-	m_ResourceSystem(resSys),
 	m_TextureCreationFlags(ETCF_ALPHA_CHANNEL | ETCF_CREATE_MIP_MAPS)
 {
 	// Register before image loaders, to make default load type images, instead of textures.
@@ -617,5 +617,5 @@ bool ImageSystemImpl::GetTextureCreationFlag(ETextureCreationFlag Flag) const
 	return ((m_TextureCreationFlags & Flag) != 0);
 }
 
-}
-}
+} // namespace video
+} // namespace lux

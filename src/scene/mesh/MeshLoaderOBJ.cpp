@@ -43,8 +43,8 @@ static const u32 WORD_BUFFER_LENGTH = 512;
 
 MeshLoaderOBJ::MeshLoaderOBJ(video::VideoDriver* driver, video::MaterialLibrary* matLib,
 		core::ResourceSystem* resSys) :
-	m_Driver(driver),
 	m_MatLib(matLib),
+	m_Driver(driver),
 	m_ResSys(resSys)
 {
 	m_Filesystem = m_ResSys->GetFileSystem().GetWeak();

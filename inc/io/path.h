@@ -63,11 +63,11 @@ public:
 		bool isVirtual) :
 		m_Path(path),
 		m_Name(name),
+		m_Archive(nullptr),
 		m_Size(size),
 		m_Type(type),
 		m_Creation(creationDate),
-		m_IsVirtual(isVirtual),
-		m_Archive(nullptr)
+		m_IsVirtual(isVirtual)
 	{
 	}
 

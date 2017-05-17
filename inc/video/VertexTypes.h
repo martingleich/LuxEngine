@@ -18,8 +18,8 @@ class Vertex3D
 public:
 	math::vector3f position; //!< The vertex position
 	math::vector3f normal; //!< The vertex normal
-	video::Color color; //!< The vertex color
 	math::vector2f texture; //!< The vertex texturecoords
+	video::Color color; //!< The vertex color
 
 	//! Default constructor
 	Vertex3D()
@@ -70,8 +70,8 @@ class Vertex2D
 {
 public:
 	math::vector2f position; //!< The vertex position
-	video::Color color; //!< The vertex color
 	math::vector2f texture; //! The vertex texturecoords
+	video::Color color; //!< The vertex color
 
 	//! Default constructor
 	Vertex2D()
@@ -253,7 +253,7 @@ public:
 	//! Construct from single values
 	VertexTangents(float Px, float Py, float Pz, Color _Color, float Nx, float Ny, float Nz, float Tx, float Ty,
 		float Tax, float Tay, float Taz, float Bx, float By, float Bz) :
-		Vertex3D(Px, Py, Pz, _Color, Nx, Ny, Nz, Tx, Ty), tangent(Tax, Tay, Taz), binormal(Bx, By, Bz)
+		Vertex3D(Px, Py, Pz, _Color, Nx, Ny, Nz, Tx, Ty), binormal(Bx, By, Bz), tangent(Tax, Tay, Taz)
 	{
 	}
 

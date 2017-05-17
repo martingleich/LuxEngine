@@ -145,10 +145,10 @@ public:
 class Logger
 {
 private:
-	Printer* m_Printer;
-
 	const ELogLevel m_MyLogLevel;
 	LogSystem& m_LogSystem;
+
+	Printer* m_Printer;
 
 public:
 	Logger(LogSystem& LogSystem, ELogLevel ll, Printer* printer = nullptr) :

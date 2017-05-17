@@ -205,10 +205,10 @@ public:
 	// Sollen MIP-Maps benutzt werden
 	bool UseMIPMaps : 1;
 
-	float PolygonOffset;
-
 	// Die geschriebenen Farbebenen
 	EColorPlane ColorPlane : 4;
+
+	float PolygonOffset;
 
 	ETextureFilter MinFilter;
 	ETextureFilter MagFilter;

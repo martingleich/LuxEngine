@@ -18,8 +18,8 @@ FontCreatorNull::FontCreatorNull(video::MaterialLibrary* matLib,
 	io::FileSystem* fileSys,
 	video::VideoDriver* driver,
 	video::MaterialRenderer* defaultFontMaterial) :
-	m_Driver(driver),
 	m_FileSystem(fileSys),
+	m_Driver(driver),
 	m_DefaultFontMaterial(defaultFontMaterial)
 {
 	if(!m_DefaultFontMaterial)

@@ -16,10 +16,10 @@ public:
 	INIFileImpl(FileSystem* FileSys) :
 		m_FileSys(FileSys),
 		m_File(nullptr),
-		m_AutoCommit(true),
 		m_AutoReload(true),
-		m_CurrentElement(0),
+		m_AutoCommit(true),
 		m_CurrentSection(0),
+		m_CurrentElement(0),
 		m_CommentChars(";#")
 	{
 	}

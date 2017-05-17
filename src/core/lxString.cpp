@@ -10,15 +10,15 @@ const string string::EMPTY = string();
 string::string() :
 	m_Data(nullptr),
 	m_Size(0),
-	m_Length(0),
-	m_Allocated(0)
+	m_Allocated(0),
+	m_Length(0)
 {
 }
 
 string::string(const char* data, size_t length) :
 	m_Data(nullptr),
-	m_Allocated(0),
 	m_Size(0),
+	m_Allocated(0),
 	m_Length(0)
 {
 	if(!data || !length) {
@@ -51,8 +51,8 @@ string::string(const char* data, size_t length) :
 
 string::string(const string& other) :
 	m_Data(nullptr),
-	m_Allocated(0),
 	m_Size(0),
+	m_Allocated(0),
 	m_Length(0)
 {
 	Reserve(other.m_Size);

@@ -100,8 +100,8 @@ private:
 	u32 m_RegisterVS;
 	u32 m_RegisterPS;
 
-	u32 m_RegisterPSCount;
 	u32 m_RegisterVSCount;
+	u32 m_RegisterPSCount;
 
 	core::Type m_Type;
 	u8 m_TypeSize;

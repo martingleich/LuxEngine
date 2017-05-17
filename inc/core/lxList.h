@@ -436,9 +436,9 @@ public:
 	}
 
 private:
-	u32           m_Size;
 	ListEntry*    m_First;
 	ListEntry*    m_Last;
+	u32           m_Size;
 };
 
 

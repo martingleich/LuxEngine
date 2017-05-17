@@ -24,8 +24,8 @@ void RenderType::Disable()
 }
 
 RenderType::RenderType(VideoDriver* driver, Shader* shader, const core::ParamPackage* basePackage) :
-	m_Driver(driver),
-	m_Shader(shader)
+	m_Shader(shader),
+	m_Driver(driver)
 {
 	if(basePackage)
 		m_Package = *basePackage;

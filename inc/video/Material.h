@@ -122,11 +122,6 @@ public:
 	// default: 1.0
 	float ambient;
 
-	// Glanzkraft
-	// 0 = Kein Glanz; Ansonten desto größer der Wert, desto schärferer Glanzpunkt
-	// default: 0.0
-	float shininess;
-
 	// Streufarbe
 	// default: LightGray
 	Colorf diffuse;
@@ -140,6 +135,11 @@ public:
 	// Wie glänzt das Material
 	// default: White
 	Colorf specular;
+
+	// Glanzkraft
+	// 0 = Kein Glanz; Ansonten desto größer der Wert, desto schärferer Glanzpunkt
+	// default: 0.0
+	float shininess;
 
 	// Konstuktor
 	Material() :

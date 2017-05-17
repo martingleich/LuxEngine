@@ -23,6 +23,8 @@ struct DateAndTime
 		Saturday,
 	};
 
+// TODO Find a way to remove the size-related warnings
+#if 0
 	u32 seconds : 6;      //!< Seconds - [0,59] 
 	u32 minutes : 6;      //!< Minutes - [0,59] 
 	u32 hours : 5;        //!< Hours - [0,23] 
@@ -32,6 +34,17 @@ struct DateAndTime
 	EWeekDay weekDay : 3; //!< Day of week 
 
 	bool isDayLightSaving : 1; //!< Is daylightsaving
+#else
+	u32 seconds;           //!< Seconds - [0,59] 
+	u32 minutes;           //!< Minutes - [0,59] 
+	u32 hours;             //!< Hours - [0,23] 
+	u32 dayOfMonth;        //!< Day of month - [1,31] 
+	u32 month;             //!< month - [1,12] 
+	u32 year;              //!< Year
+	EWeekDay weekDay;      //!< Day of week 
+	bool isDayLightSaving; //!< Is daylightsaving
+#endif
+
 };
 
 inline void conv_data(format::Context& ctx, const DateAndTime& date, format::Placeholder& placeholder)

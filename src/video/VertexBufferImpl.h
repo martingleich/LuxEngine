@@ -33,8 +33,8 @@ private:
 	u32 m_Stream;
 	VertexFormat m_Format;
 
-	void* m_Handle;
 	BufferManager* m_Manager;
+	void* m_Handle;
 };
 
 }

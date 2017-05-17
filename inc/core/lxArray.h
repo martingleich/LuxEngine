@@ -221,10 +221,10 @@ public:
 
 	//! Move constructor
 	array(array<T>&& old) :
+		m_Entries(old.m_Entries),
 		m_Used(old.m_Used),
 		m_Alloc(old.m_Alloc),
-		m_Sorted(old.m_Sorted),
-		m_Entries(old.m_Entries)
+		m_Sorted(old.m_Sorted)
 	{
 		old.m_Entries = nullptr;
 	}

@@ -31,7 +31,7 @@ public:
 	}
 
 	//! Construct from two corners
-	rect(T left, T top, T right, T bottom) : Left(left), Top(top), Right(right), Bottom(bottom)
+	rect(T left, T top, T right, T bottom) : Left(left), Bottom(bottom), Right(right), Top(top)
 	{
 	}
 
@@ -43,9 +43,9 @@ public:
 	//! Copyconstruct
 	rect(const rect& other) :
 		Left(other.Left),
-		Top(other.Top),
 		Bottom(other.Bottom),
-		Right(other.Right)
+		Right(other.Right),
+		Top(other.Top)
 	{
 	}
 
@@ -53,9 +53,9 @@ public:
 	rect& operator=(const rect& other)
 	{
 		Left = other.Left;
-		Top = other.Top;
-		Right = other.Right;
 		Bottom = other.Bottom;
+		Right = other.Right;
+		Top = other.Top;
 
 		return *this;
 	}
@@ -76,9 +76,9 @@ public:
 	void Set(T left, T top, T right, T bottom)
 	{
 		Left = left;
-		Top = top;
-		Right = right;
 		Bottom = bottom;
+		Right = right;
+		Top = top;
 	}
 
 	//! Return width of rect
@@ -177,12 +177,12 @@ public:
 	{
 		if(Left < other.Left)
 			Left = other.Left;
+		if(Bottom > other.Bottom)
+			Bottom = other.Bottom;
 		if(Right > other.Right)
 			Right = other.Right;
 		if(Top < other.Top)
 			Top = other.Top;
-		if(Bottom > other.Bottom)
-			Bottom = other.Bottom;
 		return *this;
 	}
 };

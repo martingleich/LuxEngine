@@ -58,10 +58,10 @@ public:
 
 LUX_REGISTER_REFERABLE_CLASS(RootSceneNode)
 
-SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry() : node(nullptr), texture(nullptr)
+SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry() : texture(nullptr), node(nullptr)
 {
 }
-SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry(SceneNode* node) : node(node), texture(nullptr)
+SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry(SceneNode* node) : texture(nullptr), node(node)
 {
 	if(node->GetMaterialCount()) {
 		if(node->GetMaterial(0).GetTextureCount())
@@ -78,7 +78,7 @@ bool SceneManagerImpl::SSolidNodeEntry::operator==(const SSolidNodeEntry& other)
 	return (texture == other.texture);
 }
 
-SceneManagerImpl::STransparentNodeEntry::STransparentNodeEntry() : node(nullptr), distance(-1.0f)
+SceneManagerImpl::STransparentNodeEntry::STransparentNodeEntry() : distance(-1.0f), node(nullptr)
 {
 }
 SceneManagerImpl::STransparentNodeEntry::STransparentNodeEntry(SceneNode* node, math::vector3f vCameraPos) : node(node)
@@ -115,10 +115,10 @@ SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	: m_Driver(driver),
 	m_Filesystem(fileSystem),
 	m_MeshSystem(meshCache),
-	m_ImagSys(imagSys),
 	m_RefFactory(refFactory),
-	m_MatLib(matLib),
+	m_ImagSys(imagSys),
 	m_ResourceSystem(resourceSystem),
+	m_MatLib(matLib),
 	m_CurrentRenderPass(ESNRP_NONE),
 	m_AmbientColor(0)
 {

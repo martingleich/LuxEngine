@@ -8,18 +8,18 @@ namespace video
 {
 
 SubMeshImpl::SubMeshImpl() :
+	m_Material(video::IdentityMaterial),
 	m_Vertices(nullptr),
 	m_Indices(nullptr),
-	m_PrimitveType(EPT_TRIANGLES),
-	m_Material(video::IdentityMaterial)
+	m_PrimitveType(EPT_TRIANGLES)
 {
 }
 
 SubMeshImpl::SubMeshImpl(VertexBuffer* vertices, IndexBuffer* indices) :
+	m_Material(video::IdentityMaterial),
 	m_Vertices(vertices),
 	m_Indices(indices),
-	m_PrimitveType(EPT_TRIANGLES),
-	m_Material(video::IdentityMaterial)
+	m_PrimitveType(EPT_TRIANGLES)
 {
 }
 

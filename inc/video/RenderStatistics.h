@@ -15,8 +15,8 @@ public:
 		m_FPS(60),
 		m_PrimitiveAverage(0),
 		m_PrimitivesDrawn(0),
-		m_StartTime(0),
 		m_FramesCounted(0),
+		m_StartTime(0),
 		m_PrimitivesCounted(0)
 	{
 	}

@@ -53,8 +53,8 @@ protected:
 class RenderData
 {
 protected:
-	core::PackagePuffer m_Puffer;
 	RenderType*  m_Type;
+	core::PackagePuffer m_Puffer;
 
 public:
 	RenderData() : m_Type(nullptr), m_Puffer(nullptr)

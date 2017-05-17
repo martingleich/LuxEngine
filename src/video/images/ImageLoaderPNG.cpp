@@ -200,8 +200,6 @@ core::Name ImageLoaderPNG::GetResourceType(io::File* file, core::Name requestedT
 
 void ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
 {
-	bool result;
-
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)
 		throw core::Exception("Passed wrong resource type to loader");
@@ -217,7 +215,7 @@ void ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
 	img->Init(ctx.size, ctx.format);
 
 	video::ImageLock lock(img);
-	result = LoadImageToMemory(ctx, lock.data);
+	LoadImageToMemory(ctx, lock.data);
 }
 
 }

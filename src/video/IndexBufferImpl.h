@@ -47,9 +47,9 @@ private:
 	static u32 CalcStride(EIndexFormat type);
 
 private:
+	BufferManager* m_Manager;
 	EIndexFormat m_Type;
 	void* m_Handle;
-	BufferManager* m_Manager;
 };
 
 }

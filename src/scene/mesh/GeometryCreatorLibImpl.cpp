@@ -16,8 +16,8 @@ namespace scene
 
 GeometryCreatorLibImpl::GeometryCreatorLibImpl(video::VideoDriver* driver, scene::MeshSystem* meshCache, core::ResourceSystem* resSys) :
 	m_Driver(driver),
-	m_ResourceSystem(resSys),
-	m_MeshSystem(meshCache)
+	m_MeshSystem(meshCache),
+	m_ResourceSystem(resSys)
 {
 	m_PlaneCreator = LUX_NEW(GeometryCreatorPlane);
 	AddCreator(m_PlaneCreator);

@@ -178,8 +178,7 @@ EElementType MouseDevice::GetElementType(EEventType type, u32 id) const
 	if(type == EEventType::Button) {
 		return m_Buttons.At(id).type;
 	} else if(type == EEventType::Axis) {
-		if(id < m_Axes.Size())
-			m_Axes.At(id).type;
+		return m_Axes.At(id).type;
 	} else if(type == EEventType::Area) {
 		if(id != 0)
 			throw core::OutOfRangeException();

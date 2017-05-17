@@ -767,7 +767,7 @@ bool INIFileImpl::SetElementName(const char* section, const char* element, const
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
-	if(elementID == -1)
+	if(elementID == InvalidID)
 		return false;
 
 	m_Elements[elementID].name = name;

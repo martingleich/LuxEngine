@@ -326,8 +326,8 @@ ParamPackage::ParamPackage(const ParamPackage& other) :
 ParamPackage::ParamPackage(ParamPackage&& old) :
 	m_Params(std::move(old.m_Params)),
 	m_TotalSize(old.m_TotalSize),
-	m_DefaultPackage(std::move(old.m_DefaultPackage)),
-	m_TextureCount(old.m_TextureCount)
+	m_TextureCount(old.m_TextureCount),
+	m_DefaultPackage(std::move(old.m_DefaultPackage))
 {
 }
 

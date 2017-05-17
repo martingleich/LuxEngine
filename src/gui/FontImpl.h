@@ -37,22 +37,22 @@ struct FontCreationData
 	core::HashMap<u32, CharInfo> charMap;
 	float charHeight;
 
+	float scale;
 	float charDistance;
 	float wordDistance;
 	float lineDistance;
-	float scale;
 	float baseLine;
 
 	FontCreationData() :
 		image(nullptr),
 		imageWidth(0),
 		imageHeight(0),
+		charHeight(0.0f),
 		scale(1.0f),
 		charDistance(0.0f),
 		wordDistance(1.0f),
 		lineDistance(1.0f),
-		baseLine(0.0f),
-		charHeight(0.0f)
+		baseLine(0.0f)
 	{
 		
 	}
