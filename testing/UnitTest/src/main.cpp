@@ -7,8 +7,8 @@ class NameFilter : public UnitTesting::Filter
 {
 public:
 	NameFilter(std::vector<std::string> v, bool including) :
-		m_Including(including),
-		m_Names(v)
+		m_Names(v),
+		m_Including(including)
 	{
 	}
 
