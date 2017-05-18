@@ -60,7 +60,14 @@ void write_integer(Context& ctx, int base, bool sign, uintmax_t value, Placehold
 		}
 	}
 
-	len += internal::uitoa(value, cur, base);
+	int numLen = internal::uitoa(value, cur, base);
+	len += numLen;
+
+	int precision = placeholder.dot.GetValue(0);
+	if(numLen < precision) {
+		static const char ZEROS[32+1] = "00000000000000000000000000000000";
+		internal::PutCount(ctx, precision-numLen, StringType::Ascii, ZEROS, 32);
+	}
 
 	CopyConvertAddString(ctx, StringType::Ascii, buffer, len);
 }

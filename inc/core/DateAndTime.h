@@ -54,15 +54,13 @@ inline void conv_data(format::Context& ctx, const DateAndTime& date, format::Pla
 	if(!date.IsValid()) {
 		format::CopyConvertAddString(ctx, format::StringType::Ascii, "[invalid date]", 14);
 	} else {
-		char temp[25];
-		sprintf(temp, "%.3s %.3s %d %.2d:%.2d:%.2d %d",
+		format::vformat(ctx, format::StringType::Ascii,
+			"~s ~s ~d ~.2d:~.2d:~.2d ~d",
 			wday_name[(int)date.weekDay],
 			mon_name[date.month - 1],
 			date.dayOfMonth, date.hours,
 			date.minutes, date.seconds,
 			date.year);
-
-		format::CopyConvertAddString(ctx, format::StringType::Ascii, temp, 24);
 	}
 }
 

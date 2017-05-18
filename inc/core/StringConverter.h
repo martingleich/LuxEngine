@@ -74,19 +74,7 @@ public:
 	//! Convert a date to a string
 	static string ToString(const core::DateAndTime& value)
 	{
-		static const char wday_name[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-		static const char mon_name[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-			"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
-		char temp[25];
-		sprintf(temp, "%.3s %.3s %d %.2d:%.2d:%.2d %d",
-			wday_name[(int)value.weekDay],
-			mon_name[value.month - 1],
-			value.dayOfMonth, value.hours,
-			value.minutes, value.seconds,
-			value.year);
-
-		return string(temp, 24);
+		return Format("~a", value);
 	}
 
 	//! Convert a string to a string.
