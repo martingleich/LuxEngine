@@ -33,10 +33,10 @@ GUIEnvironmentImpl::GUIEnvironmentImpl(
 	// Register font material renderer
 	video::MaterialRenderer* FontRenderer = m_MatLibrary->CloneMaterialRenderer("font", "transparent");
 	video::PipelineSettings& ps = FontRenderer->GetPipeline();
-	ps.MagFilter = video::ETF_POINT;
-	ps.MinFilter = video::ETF_LINEAR;
+	ps.MagFilter = video::ETextureFilter::Point;
+	ps.MinFilter = video::ETextureFilter::Linear;
 	ps.ZWriteEnabled = false;
-	ps.ZBufferFunc = video::EZCF_ALWAYS;
+	ps.ZBufferFunc = video::EZComparisonFunc::Always;
 	ps.BackfaceCulling = false;
 	ps.UseMIPMaps = false;
 	ps.Lighting = false;

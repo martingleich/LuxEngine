@@ -27,8 +27,9 @@ struct Context
 	Context() :
 		png(nullptr),
 		pngInfo(nullptr)
-	{}
-	
+	{
+	}
+
 	~Context()
 	{
 		png_destroy_read_struct(&png, &pngInfo, NULL);
@@ -63,13 +64,16 @@ static bool LoadImageFormat(Context& ctx)
 {
 	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
 	// scope of setjmp.
-// TODO gcc -Wunknown-pragmas
-#ifndef LUX_LINUX
-#pragma warning(suppress: 4611)
+	// Exceptions are not allowed in this scope
+#ifndef __MSC_VER
+#pragma warning( push )
+#pragma warning( disable: 4611 )
 #endif
-	if(setjmp(ctx.jmpbuf)) {
+	if(setjmp(ctx.jmpbuf))
 		return false;
-	}
+#ifndef __MSC_VER
+#pragma warning( pop )
+#endif
 
 	png_read_info(ctx.png, ctx.pngInfo);
 
@@ -114,13 +118,16 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 
 	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
 	// scope of setjmp.
-// TODO gcc -Wunknown-pragmas
-#ifndef LUX_LINUX
-#pragma warning(suppress: 4611)
+	// Exceptions are not allowed in this scope
+#ifndef __MSC_VER
+#pragma warning( push )
+#pragma warning( disable: 4611 )
 #endif
-	if(setjmp(ctx.jmpbuf)) {
+	if(setjmp(ctx.jmpbuf))
 		return false;
-	}
+#ifndef __MSC_VER
+#pragma warning( pop )
+#endif
 
 	if(ctx.colorType == PNG_COLOR_TYPE_PALETTE)
 		png_set_palette_to_rgb(ctx.png);
@@ -135,9 +142,8 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 		ctx.colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb(ctx.png);
 
-	if(ctx.format.HasAlpha()) {
+	if(ctx.format.HasAlpha())
 		png_set_bgr(ctx.png);
-	}
 
 	if(!ctx.format.HasAlpha())
 		png_set_strip_alpha(ctx.png);
@@ -152,9 +158,8 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 	LUX_UNUSED(channels);
 
 	u32 pitchLux = ctx.format.GetBytePerPixel() * ctx.size.width;
-	if(rowbytes != pitchLux) {
+	if(rowbytes != pitchLux)
 		return false;
-	}
 
 	png_bytepp row_pointers = (png_bytepp)alloca(ctx.size.height * sizeof(png_bytep));
 	for(u32 i = 0; i < ctx.size.height; ++i)

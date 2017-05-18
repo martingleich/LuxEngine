@@ -35,12 +35,12 @@ class MaterialRenderer_Solid_d3d9 : public MaterialRendererD3D9
 public:
 	MaterialRenderer_Solid_d3d9(VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererD3D9(p, pShader, BasePackage)
 	{
-		m_Package.AddParam("DiffMap", MaterialLayer());
+		m_Package.AddParam("DiffMap", TextureLayer());
 	}
 
 	void OnSetMaterial(const Material& material, const Material& lastMaterial, bool resetAll = false)
 	{
-		m_Pipeline.Blending.Operator = EBO_NONE;
+		m_Pipeline.Blending.Operator = EBlendOperator::None;
 		Enable(material.GetPuffer(), resetAll, &material);
 
 		// Textur setzen
@@ -80,8 +80,8 @@ class MaterialRenderer_OneTextureBlend_d3d9 : public MaterialRendererD3D9
 public:
 	MaterialRenderer_OneTextureBlend_d3d9(VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererD3D9(p, pShader, BasePackage)
 	{
-		m_Package.AddParam<u32>("BlendFunc", Pack_TextureBlendFunc(video::EBF_SRC_ALPHA, video::EBF_ONE_MINUS_SRC_ALPHA));
-		m_Package.AddParam("DiffMap", MaterialLayer());
+		m_Package.AddParam<u32>("BlendFunc", PackTextureBlendFunc(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha));
+		m_Package.AddParam("DiffMap", TextureLayer());
 
 		m_Pipeline.ZWriteEnabled = false;
 	}
@@ -102,7 +102,7 @@ public:
 			LastParam = lastMaterial.Param(0);
 		}
 
-		Unpack_TextureBlendFunc(SrcFact, DstFact, Operator, AlphaSource, Value, NewParam);
+		UnpackTextureBlendFunc(SrcFact, DstFact, Operator, AlphaSource, Value, NewParam);
 
 		m_Pipeline.Blending.Operator = Operator;
 		m_Pipeline.Blending.DstBlend = DstFact;
@@ -118,15 +118,15 @@ public:
 			m_D3DDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			m_D3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-			if(TextureBlendFunc_HasAlpha(SrcFact) || TextureBlendFunc_HasAlpha(DstFact)) {
-				if(AlphaSource == EAS_VERTEX_COLOR) {
+			if(HasTextureBlendAlpha(SrcFact) || HasTextureBlendAlpha(DstFact)) {
+				if(AlphaSource == EAlphaSource::VertexColor) {
 					m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 					m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-				} else if(AlphaSource == EAS_VERTEX_AND_TEXTURE || (AlphaSource == EAS_TEXTURE && material.diffuse.HasAlpha())) {
+				} else if(AlphaSource == EAlphaSource::VertexAndTexture || (AlphaSource == EAlphaSource::Texture && material.diffuse.HasAlpha())) {
 					m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 					m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 					m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-				} else if(AlphaSource == EAS_TEXTURE) {
+				} else if(AlphaSource == EAlphaSource::Texture) {
 					m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 					m_D3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 				}
@@ -157,7 +157,7 @@ public:
 	CMaterialRenderer_VertexAlpha_d3d9(VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererD3D9(p, pShader, BasePackage)
 	{
 		m_Package.AddParam<float>("AlphaFactor", 1.0f);
-		m_Package.AddParam("DiffMap", MaterialLayer());
+		m_Package.AddParam("DiffMap", TextureLayer());
 		m_Pipeline.ZWriteEnabled = false;
 	}
 
@@ -212,13 +212,13 @@ class MaterialRenderer_Solid_Mix_d3d9 : public MaterialRendererD3D9
 public:
 	MaterialRenderer_Solid_Mix_d3d9(VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererD3D9(p, pShader, BasePackage)
 	{
-		m_Package.AddParam("DiffMap1", MaterialLayer());
-		m_Package.AddParam("DiffMap2", MaterialLayer());
+		m_Package.AddParam("DiffMap1", TextureLayer());
+		m_Package.AddParam("DiffMap2", TextureLayer());
 	}
 
 	void OnSetMaterial(const Material& material, const Material& lastMaterial, bool resetAll = false)
 	{
-		m_Pipeline.Blending.Operator = EBO_NONE;
+		m_Pipeline.Blending.Operator = EBlendOperator::None;
 		Enable(material.GetPuffer(), resetAll, &material);
 
 		m_Driver->SetTextureLayer(material.Layer(0), 0, resetAll);

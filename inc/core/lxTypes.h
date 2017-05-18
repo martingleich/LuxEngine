@@ -19,7 +19,7 @@ public:
 	//! The diffrent available types.
 	enum EType
 	{
-		Texture = 0,   //!< A single texturelayer    class: lux::video::MaterialLayer
+		Texture = 0,   //!< A single texturelayer    class: lux::video::TextureLayer
 		Integer,           //!< A integer    type: int
 		Float,         //!< A floating point decimal    type: float
 		Color,         //!< A 32-bit color with A8R8G8B8, class lux::video::Color
@@ -108,6 +108,8 @@ public:
 		return Type((EType)(m_Type & 0x7F));
 	}
 
+	static const u32 TEXTURE_LAYER_SIZE = (sizeof(void*) + 8);
+
 	//! The size of this type.
 	/**
 	\return The size of type in bytes or 0 if an error occured
@@ -116,7 +118,7 @@ public:
 	{
 		u32 type = GetBaseType().m_Type;
 		static const u32 TYPE_SIZES[] = {
-			sizeof(void*) + 1, // The texture pointer and the repeat mode
+			TEXTURE_LAYER_SIZE,
 			4,
 			4,
 			4,

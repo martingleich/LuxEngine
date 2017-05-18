@@ -158,6 +158,12 @@ public:
 		return (const T*)Pointer();
 	}
 
+	template <typename T=void>
+	T* GetChangable() const
+	{
+		return (T*)m_Data;
+	}
+
 	size_t GetSize() const
 	{
 		return m_Size;
@@ -167,7 +173,6 @@ private:
 	u8* m_Data;
 	size_t m_Size;
 };
-
 
 } 
 } 

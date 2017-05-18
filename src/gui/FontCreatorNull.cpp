@@ -118,7 +118,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::ar
 
 	data.charHeight = (float)fontHeight;
 	data.material = video::Material(m_DefaultFontMaterial);
-	data.material.Param("BlendFunc") = (u32)video::Pack_TextureBlendFunc(video::EBF_SRC_ALPHA, video::EBF_ONE_MINUS_SRC_ALPHA);
+	data.material.Param("BlendFunc") = (u32)video::PackTextureBlendFunc(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha);
 	data.image = image;
 	data.imageWidth = imageSize.width;
 	data.imageHeight = imageSize.height;

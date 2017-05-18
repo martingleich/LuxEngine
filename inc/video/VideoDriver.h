@@ -42,7 +42,7 @@ class SubMesh;
 class RenderStatistics;
 class BufferManager;
 class Material;
-class MaterialLayer;
+class TextureLayer;
 class LightData;
 class PipelineSettings;
 class PipelineOverwrite;
@@ -91,12 +91,13 @@ struct DriverConfig
 		vSync(true),
 		stencil(false),
 		pureSoftware(false)
-	{}
+	{
+	}
 
 	inline static DriverConfig WindowDirect3D(
 		u32 _width,
 		u32 _height,
-		bool vSync=true)
+		bool vSync = true)
 	{
 		DriverConfig config;
 		config.width = _width;
@@ -109,14 +110,12 @@ struct DriverConfig
 	}
 };
 
-enum EFogType
+//! The way fog is calculated
+enum class EFogType
 {
-	// Expontenieller Nebel
-	EFT_EXP = 1,
-	// Quadratisch expontenieller Nebel
-	EFT_EXP2,
-	// Linearer Nebel
-	EFT_LINEAR
+	Exp, //!< Exponential fog
+	Exp2, //!< Squared exponential fog
+	Linear, //!< Linear fog
 };
 
 enum ETransformState
@@ -166,7 +165,7 @@ public:
 	virtual void Init(const DriverConfig& config, gui::Window* window) = 0;
 	virtual bool Present() = 0;
 	virtual void BeginScene(bool clearColor, bool clearZBuffer,
-		video::Color color=video::Color::Black, float z=1.0f) = 0;
+		video::Color color = video::Color::Black, float z = 1.0f) = 0;
 	virtual void EndScene() = 0;
 
 	virtual void AddLight(const LightData& light) = 0;
@@ -190,7 +189,7 @@ public:
 	virtual void PopPipelineOverwrite() = 0;
 
 	virtual void EnablePipeline(const PipelineSettings& settings, bool resetAll = false) = 0;
-	virtual void SetTextureLayer(const MaterialLayer& Layer, u32 textureLayer, bool resetAll = false) = 0;
+	virtual void SetTextureLayer(const TextureLayer& Layer, u32 textureLayer, bool resetAll = false) = 0;
 
 	virtual StrongRef<SubMesh> CreateSubMesh(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
@@ -242,7 +241,7 @@ public:
 		EIndexFormat indexType,
 		bool is3D) = 0;
 
-	virtual bool Draw3DLine(const math::vector3f& start, const math::vector3f& end, Color colorStart, Color colorEnd, bool disableZ=false) = 0;
+	virtual bool Draw3DLine(const math::vector3f& start, const math::vector3f& end, Color colorStart, Color colorEnd, bool disableZ = false) = 0;
 	virtual bool Draw3DBox(const math::aabbox3df& box, Color color) = 0;
 	virtual bool Draw2DImage(Texture* texture, const math::vector2i& position, const math::recti* clip = nullptr, const video::Material* material = nullptr) = 0;
 	virtual bool Draw2DImage(Texture* texture, const math::recti& DstRect, const math::rectf& SrcRect, Color color = Color::White, bool UseAlpha = false, const math::recti* clip = nullptr, const video::Material* material = nullptr) = 0;
@@ -263,7 +262,7 @@ public:
 	virtual void SetVertexFormat(const VertexFormat& format, bool reset = false) = 0;
 
 	virtual void SetFog(Color color = Color(0),
-		EFogType FogType = EFT_LINEAR,
+		EFogType FogType = EFogType::Linear,
 		float start = 50.0f,
 		float end = 100.0f,
 		float density = 0.01f,

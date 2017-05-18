@@ -1248,7 +1248,7 @@ void VideoDriverD3D9::GetFog(Color* color,
 		*rangeFog = m_Fog.range;
 }
 
-void VideoDriverD3D9::SetTextureLayer(const MaterialLayer& layer, u32 textureLayer, bool resetAll)
+void VideoDriverD3D9::SetTextureLayer(const TextureLayer& layer, u32 textureLayer, bool resetAll)
 {
 	SetActiveTexture(textureLayer, layer.texture);
 
@@ -1294,23 +1294,19 @@ void VideoDriverD3D9::EnablePipeline(const PipelineSettings& settings, bool rese
 	for(auto it = m_PipelineOverwrites.First(); it != m_PipelineOverwrites.End(); ++it)
 		it->ApplyTo(pipeline);
 
-	// Beleuchtung
 	if(m_CurrentPipeline.Lighting != pipeline.Lighting ||
 		resetAll)
 		m_D3DDevice->SetRenderState(D3DRS_LIGHTING, pipeline.Lighting);
 
-	// Nebel
 	if(m_CurrentPipeline.FogEnabled != pipeline.FogEnabled ||
 		resetAll)
 		m_D3DDevice->SetRenderState(D3DRS_FOGENABLE, pipeline.FogEnabled);
 
-	// Z-Buffer verlgeich
 	if(m_CurrentPipeline.ZBufferFunc != pipeline.ZBufferFunc ||
 		resetAll) {
-		m_D3DDevice->SetRenderState(D3DRS_ZFUNC, pipeline.ZBufferFunc);
+		m_D3DDevice->SetRenderState(D3DRS_ZFUNC, GetD3DZBufferFunc(pipeline.ZBufferFunc));
 	}
 
-	// Z-Schreiberlaubnis
 	if(m_CurrentPipeline.ZWriteEnabled != pipeline.ZWriteEnabled ||
 		resetAll)
 		m_D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, pipeline.ZWriteEnabled ? TRUE : FALSE);
@@ -1362,7 +1358,7 @@ void VideoDriverD3D9::EnablePipeline(const PipelineSettings& settings, bool rese
 	}
 
 	// Alpha-Blending
-	if(pipeline.Blending.Operator == EBO_NONE) {
+	if(pipeline.Blending.Operator == EBlendOperator::None) {
 		m_D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 	} else {
 		m_D3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -1374,11 +1370,17 @@ void VideoDriverD3D9::EnablePipeline(const PipelineSettings& settings, bool rese
 	// TODO: Own Rendersystem for fog
 	if(m_Fog.isDirty) {
 		m_Fog.isDirty = false;
+		DWORD type = D3DFOG_NONE;
+		switch(m_Fog.type) {
+		case EFogType::Exp: type = D3DFOG_EXP; break;
+		case EFogType::Exp2: type = D3DFOG_EXP2; break;
+		case EFogType::Linear: type = D3DFOG_LINEAR; break;
+		}
+
 		if(m_Fog.pixel) {
-			// TODO: Use real type conversion, instead using the enum directly
-			m_D3DDevice->SetRenderState(D3DRS_FOGTABLEMODE, m_Fog.type);
+			m_D3DDevice->SetRenderState(D3DRS_FOGTABLEMODE, type);
 		} else {
-			m_D3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE, m_Fog.type);
+			m_D3DDevice->SetRenderState(D3DRS_FOGVERTEXMODE, type);
 			m_D3DDevice->SetRenderState(D3DRS_RANGEFOGENABLE, m_Fog.range);
 		}
 

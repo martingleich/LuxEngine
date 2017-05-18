@@ -1,6 +1,7 @@
 #ifndef INCLUDED_RENDERTYPE_H
 #define INCLUDED_RENDERTYPE_H
 #include "core/ParamPackage.h"
+#include "video/PipelineSettings.h"
 
 namespace lux
 {

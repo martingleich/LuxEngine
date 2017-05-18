@@ -4,55 +4,39 @@
 #include "core/lxArray.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
-#include "video/PipelineSettings.h"
-#include "video/MaterialLayer.h"
-#include "lxTypes.h"
-#include "core/ReferenceCounted.h"
 
-// TODO: Remove more headers
+#include "video/TextureLayer.h"
+#include "video/Texture.h"
+#include "video/CubeTexture.h"
 
 namespace lux
 {
-namespace video
-{
-class BaseTexture;
-class Texture;
-class CubeTexture;
-}
-
 namespace core
 {
 
 //! Represents a single parameter in a parameter package
-class LUX_API PackageParam
+class PackageParam
 {
 	friend class ParamPackage;
 	friend class PackagePuffer;
 private:
-	u8 m_Size;
-
-	// The type core::Type is independet of the client or dll.
-// TODO gcc -Wunknown-pragmas
-#ifndef LUX_LINUX
-#pragma warning(suppress: 4251)
-#endif
-	core::Type m_Type;
-	u8* m_Data;
-	const char* m_Name;
-
-public:
-	static const PackageParam INVALID; //!< The invalid parameter package
-
-private:
-	PackageParam(u8 size, core::Type type, u8* data, const char* name);
-
+	PackageParam(u8 size, core::Type type, u8* data, const char* name) :
+		m_Size(size),
+		m_Type(type),
+		m_Data(data),
+		m_Name(name)
+	{
+	}
 
 public:
 	//! Construct an empty invalid parameter package
-	PackageParam();
-
-	//! Make a swallow copy of another parameter package
-	PackageParam(const PackageParam& other);
+	PackageParam() :
+		m_Size(0),
+		m_Type(core::Type::Unknown),
+		m_Data(nullptr),
+		m_Name(nullptr)
+	{
+	}
 
 	//! Access as any type
 	template <typename T>
@@ -79,24 +63,48 @@ public:
 			return (T)(*this);
 	}
 
-	//! Access as MaterialLayer
-	operator video::MaterialLayer();
-	//! Acess as texture
-	operator video::BaseTexture*();
-	//! Acess as texture
-	operator video::Texture*();
-	//! Acess as texture
-	operator video::CubeTexture*();
-	//! Acess as texture
-	operator StrongRef<video::BaseTexture>();
-	//! Acess as texture
-	operator StrongRef<video::Texture>();
-	//! Acess as texture
-	operator StrongRef<video::CubeTexture>();
+	//! Access as TextureLayer
+	operator video::TextureLayer()
+	{
+		if(m_Type != core::Type::Texture)
+			throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+
+		if(!IsValid())
+			throw Exception("Accessed invalid package parameter");
+
+		return *(video::TextureLayer*)m_Data;
+	}
+
+	//! Access as texture
+	operator video::BaseTexture*()
+	{
+		return ((video::TextureLayer)*this).texture;
+	}
+	//! Access as texture
+	operator video::Texture*()
+	{
+		auto base = (video::BaseTexture*)*this;
+		auto out = dynamic_cast<video::Texture*>(base);
+		if(!out)
+			throw core::Exception("Invalid cast");
+
+		return out;
+	}
+
+	//! Access as texture
+	operator video::CubeTexture*()
+	{
+		auto base = (video::BaseTexture*)*this;
+		auto out = dynamic_cast<video::CubeTexture*>(base);
+		if(!out)
+			throw core::Exception("Invalid cast");
+
+		return out;
+	}
 
 	//! Access as any type
 	template <typename T>
-	PackageParam& operator= (const T& varVal)
+	PackageParam& operator=(const T& varVal)
 	{
 		if(!core::IsConvertible(core::GetTypeInfo<T>(), m_Type))
 			throw TypeException("Incompatible types used", core::GetTypeInfo<T>(), m_Type);
@@ -106,57 +114,150 @@ public:
 		return *this;
 	}
 
-	//! Acess as texture
-	PackageParam& operator=(video::BaseTexture* texture);
+	//! Access as Materiallayer
+	PackageParam& operator=(video::TextureLayer& layer)
+	{
+		if(m_Type != core::Type::Texture)
+			throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+		if(!IsValid())
+			throw Exception("Accessed invalid package parameter");
 
-	//! Acess as texture
-	PackageParam& operator=(video::Texture* texture);
+		if(layer.texture)
+			layer.texture->Grab();
+		if(((video::TextureLayer*)m_Data)->texture)
+			((video::TextureLayer*)m_Data)->texture->Drop();
+		*(video::TextureLayer*)m_Data = layer;
 
-	//! Acess as texture
-	PackageParam& operator=(video::CubeTexture* texture);
+		return *this;
+	}
 
-	//! Acess as texture
-	PackageParam& operator=(StrongRef<video::BaseTexture> texture);
+	//! Access as texture
+	PackageParam& operator=(video::BaseTexture* texture)
+	{
+		if(m_Type != core::Type::Texture)
+			throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
 
-	//! Acess as texture
-	PackageParam& operator=(StrongRef<video::Texture> texture);
+		if(!IsValid())
+			throw Exception("Accessed invalid package parameter");
 
-	//! Acess as texture
-	PackageParam& operator=(StrongRef<video::CubeTexture> texture);
+		if(texture)
+			texture->Grab();
+		if(((video::TextureLayer*)m_Data)->texture)
+			((video::TextureLayer*)m_Data)->texture->Drop();
+		((video::TextureLayer*)m_Data)->texture = texture;
 
-	//! Acess as Materiallayer
-	PackageParam& operator=(video::MaterialLayer& Layer);
+		return *this;
+	}
+	//! Access as texture
+	PackageParam& operator=(video::Texture* texture)
+	{
+		return (*this = (video::BaseTexture*)texture);
+	}
+
+	//! Access as texture
+	PackageParam& operator=(video::CubeTexture* texture)
+	{
+		return (*this = (video::BaseTexture*)texture);
+	}
+
+	//! Access as texture
+	PackageParam& operator=(StrongRef<video::BaseTexture> texture)
+	{
+		return (*this = (video::BaseTexture*)texture);
+	}
+
+	//! Access as texture
+	PackageParam& operator=(StrongRef<video::Texture> texture)
+	{
+		return (*this = (video::BaseTexture*)texture);
+	}
+
+	//! Access as texture
+	PackageParam& operator=(StrongRef<video::CubeTexture> texture)
+	{
+		return (*this = (video::BaseTexture*)texture);
+	}
 
 	//! Copy data from other packge param
 	/**
 	Deep Copy
 	\param varVal The other packge param
 	*/
-	PackageParam& operator=(const PackageParam& varVal);
+	PackageParam& operator=(const PackageParam& varVal)
+	{
+		if(IsConvertible(m_Type, varVal.m_Type))
+			throw TypeException("Incompatible types used", m_Type, varVal.m_Type);
+
+		if(!IsValid())
+			throw Exception("Accessed invalid package parameter");
+
+		if(m_Type == core::Type::Texture && varVal.m_Type == core::Type::Texture) {
+			if(((video::TextureLayer*)varVal.m_Data)->texture)
+				((video::TextureLayer*)varVal.m_Data)->texture->Grab();
+			if(((video::TextureLayer*)m_Data)->texture)
+				((video::TextureLayer*)m_Data)->texture->Drop();
+		}
+
+		ConvertBaseType(varVal.m_Type, varVal.m_Data, m_Type, m_Data);
+
+		return *this;
+	}
 
 	//! Clone from other param package
 	/**
 	Swallow copy
 	\param otherParam The other package param
 	*/
-	PackageParam& Set(const PackageParam& otherParam);
+	PackageParam& Set(const PackageParam& otherParam)
+	{
+		m_Size = otherParam.m_Size;
+		m_Type = otherParam.m_Type;
+		m_Data = otherParam.m_Data;
+		m_Name = otherParam.m_Name;
+
+		return *this;
+	}
 
 	//! Is it safe to access the param data
-	bool IsValid() const;
+	bool IsValid() const
+	{
+		return (m_Data != nullptr);
+	}
 
 	//! The name of the param
-	const char* GetName() const;
+	const char* GetName() const
+	{
+		if(IsValid())
+			return m_Name;
+		else
+			return "";
+	}
 
 	//! The size of the param in bytes
-	u32 GetSize() const;
+	u32 GetSize() const
+	{
+		return m_Size;
+	}
 
 	//! The type of the param
-	core::Type GetType() const;
+	core::Type GetType() const
+	{
+		return m_Type.GetBaseType();
+	}
 
 	//! A pointer to the raw param data
-	void* Pointer();
-};
+	void* Pointer()
+	{
+		return m_Data;
+	}
 
+private:
+	u8 m_Size;
+
+	core::Type m_Type;
+	u8* m_Data;
+	const char* m_Name;
+};
 
 //! Presents a description of the parameters of a MaterialType
 class LUX_API ParamPackage
@@ -187,47 +288,14 @@ private:
 		}
 	};
 
-	//class "lux::core::array<lux::core::ParamPackage::Entry>" erfordert eine DLL-Schnittstelle, die von Clients von class "lux::core::ParamPackage" verwendet wird
-	// BUT: The user can not access m_Params so its alright
-// TODO gcc -Wunknown-pragmas
-#ifndef LUX_LINUX
-#pragma warning(suppress: 4251)
-#endif
-	core::array<Entry> m_Params;
-
-	u32 m_TotalSize;
-	u32 m_TextureCount;
-
-// TODO gcc -Wunknown-pragmas
-#ifndef LUX_LINUX
-#pragma warning(suppress: 4251)
-#endif
-	core::mem::RawMemory m_DefaultPackage;
-
-	void AddEntry(Entry& entry, const void* defaultValue);
-
 public:
+	ParamPackage();
+	~ParamPackage();
+	ParamPackage(const ParamPackage& other);
+	ParamPackage& operator=(const ParamPackage& other);
 
 	//! Clears the param package
 	void Clear();
-
-	//! Default constuctor, creates a package without params
-	ParamPackage();
-
-	//! Destructor
-	~ParamPackage();
-
-	//! Copies another param package
-	ParamPackage(const ParamPackage& other);
-
-	//! Moves from another param package
-	ParamPackage(ParamPackage&& old);
-
-	//! Copies another param package
-	ParamPackage& operator=(const ParamPackage& other);
-
-	//! Moves from another param package
-	ParamPackage& operator=(ParamPackage&& old);
 
 	//! Creates a new Param
 	/**
@@ -364,62 +432,87 @@ public:
 
 	//! The size of the allocated data, in bytes
 	u32 GetTotalSize() const;
+
+private:
+	void AddEntry(Entry& entry, const void* defaultValue);
+
+private:
+	struct SelfData;
+	SelfData* self; // PIMPL: To make the dll-interface independent
 };
 
 //! Contains the values for a parameter Package
-class LUX_API PackagePuffer
+class PackagePuffer
 {
-private:
-	const ParamPackage* m_Pack;
-	u8* m_Data;
-	u32 m_MaxSize;
-
 public:
 	//! Create data for given parameter packaged
 	/**
 	\param pack The parameter package on which the data builds up
 	*/
-	PackagePuffer(const ParamPackage* pack);
-
-	//! Copy package puffer
-	PackagePuffer(const PackagePuffer& other);
-
-	//! Move package puffer
-	PackagePuffer(PackagePuffer&& old);
-
-	//! Destructor
-	~PackagePuffer();
+	PackagePuffer(const ParamPackage* pack) :
+		m_Pack(nullptr)
+	{
+		SetType(pack);
+	}
 
 	//! Equality
-	bool operator==(const PackagePuffer& other) const;
+	bool operator==(const PackagePuffer& other) const
+	{
+		if(m_Pack != other.m_Pack)
+			return false;
+
+		return (memcmp(m_Data, other.m_Data, m_Pack->GetTotalSize()) == 0);
+	}
 
 	//! Unequality
-	bool operator!=(const PackagePuffer& other) const;
-
-	//! Copy from another package puffer
-	PackagePuffer& operator=(const PackagePuffer& other);
-
-	//! Move from another package puffer
-	PackagePuffer& operator=(PackagePuffer&& old);
+	bool operator!=(const PackagePuffer& other) const
+	{
+		return !(*this == other);
+	}
 
 	//! Set the type of the package puffer
 	/**
 	\param pack The new type of the package
 	*/
-	void SetType(const ParamPackage* pack);
+	void SetType(const ParamPackage* pack)
+	{
+		if(!pack) {
+			m_Pack = pack;
+			return;
+		}
+
+		if(m_Pack != pack) {
+			m_Data.SetMinSize(pack->GetTotalSize());
+			memcpy(m_Data, pack->GetDefault(), pack->GetTotalSize());
+			m_Pack = pack;
+		}
+	}
 
 	//! Get the type of the puffer
-	const ParamPackage* GetType() const;
+	const ParamPackage* GetType() const
+	{
+		return m_Pack;
+	}
 
 	//! Reset the puffer to its default state
-	void Reset();
+	void Reset()
+	{
+		if(m_Pack)
+			memcpy(m_Data, m_Pack->GetDefault(), m_Pack->GetTotalSize());
+	}
 
 	//! Get a param from its name
 	/**
 	\param name The name of the param
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromName(const string& name, bool isConst) const;
+	PackageParam FromName(const string& name, bool isConst) const
+	{
+		if(!m_Pack)
+			throw Exception("No param pack set");
+
+		return m_Pack->GetParamFromName(name, m_Data.GetChangable(), isConst);
+	}
 
 	//! Get a param from its type
 	/**
@@ -427,20 +520,44 @@ public:
 	\param index Which param of this type
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromType(core::Type type, u32 index, bool isConst) const;
+	PackageParam FromType(core::Type type, u32 index, bool isConst) const
+	{
+		if(!m_Pack)
+			throw Exception("No param pack set");
+
+		return m_Pack->GetParamFromType(type, index, m_Data.GetChangable(), isConst);
+	}
 
 	//! Get a param from its id
 	/**
 	\param id The index of the param
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromID(u32 id, bool isConst) const;
+	PackageParam FromID(u32 id, bool isConst) const
+	{
+		if(m_Pack)
+			return m_Pack->GetParam(id, m_Data.GetChangable(), isConst);
+		else
+			return PackageParam();
+	}
 
 	//! The total number of parameters in the package
-	u32 GetParamCount() const;
+	u32 GetParamCount() const
+	{
+		if(m_Pack)
+			return m_Pack->GetParamCount();
+		else
+			return 0;
+	}
 
 	//! The total number of textures in the package
-	u32 GetTextureCount() const;
+	u32 GetTextureCount() const
+	{
+		if(m_Pack)
+			return m_Pack->GetTextureCount();
+		else
+			return 0;
+	}
 
 	core::PackageParam Param(const string& name)
 	{
@@ -461,11 +578,13 @@ public:
 	{
 		return FromID(id, true);
 	}
+
+private:
+	const ParamPackage* m_Pack;
+	core::mem::RawMemory m_Data;
 };
 
-}
-
-}
-
+} // namespace core
+} // namespace video
 
 #endif

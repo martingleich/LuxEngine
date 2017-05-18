@@ -53,7 +53,7 @@ public:
 	void PopPipelineOverwrite();
 
 	void EnablePipeline(const PipelineSettings& settings, bool resetAll = false);
-	void SetTextureLayer(const MaterialLayer& layer, u32 textureLayer, bool resetAll = false);
+	void SetTextureLayer(const TextureLayer& layer, u32 textureLayer, bool resetAll = false);
 
 	//------------------------------------------------------------------
 	virtual StrongRef<SubMesh> CreateSubMesh(
@@ -139,7 +139,7 @@ public:
 	virtual const VertexFormat& GetVertexFormat() const;
 
 	void SetFog(Color color = Color(0),
-		EFogType FogType = EFT_LINEAR,
+		EFogType FogType = EFogType::Linear,
 		float start = 50.0f,
 		float end = 100.0f,
 		float density = 0.01f,

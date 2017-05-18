@@ -1,52 +1,33 @@
 #ifndef INCLUDED_MATERIAL_H
 #define INCLUDED_MATERIAL_H
 #include "video/Color.h"
-#include "MaterialRenderer.h"
-#include "MaterialLayer.h"
+#include "video/MaterialRenderer.h"
+#include "video/TextureLayer.h"
 
 namespace lux
 {
 namespace video
 {
 
-// Woher kommen die Alphawerte
-enum EAlphaSource
+//! The source of alpha values
+enum class EAlphaSource
 {
-	// Aus der Vertexfarbe
-	EAS_VERTEX_COLOR = 1,
-	// Aus der gesetzten Textur
-	EAS_TEXTURE = 2,
-	// Aus vertex und textur
-	EAS_VERTEX_AND_TEXTURE = 3,
+	VertexColor, //!< From each vertex color
+	Texture, //!< From the current texture
+	VertexAndTexture //! From the vertex color and the texture combined
 };
 
-// Benutzt ein Blendingfaktor Alphawerte
-inline bool TextureBlendFunc_HasAlpha(const EBlendFactor factor)
-{
-	switch(factor) {
-	case EBF_SRC_ALPHA:
-	case EBF_ONE_MINUS_SRC_ALPHA:
-	case EBF_DST_ALPHA:
-	case EBF_ONE_MINUS_DST_ALPHA:
-		return true;
-	default:
-		return false;
-	}
-}
-
-// Packt SrcFactor, DstFactor, Modulate und Alphaquelle in einen float für "fUnknown1"
-inline u32 Pack_TextureBlendFunc(EBlendFactor SrcFactor,
+inline u32 PackTextureBlendFunc(EBlendFactor SrcFactor,
 	EBlendFactor DstFactor,
-	EBlendOperator Operator = EBO_ADD,
-	EAlphaSource AlphaSrc = EAS_TEXTURE,
+	EBlendOperator Operator = EBlendOperator::Add,
+	EAlphaSource AlphaSrc = EAlphaSource::Texture,
 	u32 Value = 0)
 {
 	// 0000000000000000aaaaoooossssdddd
-	return (Value << 16) | ((AlphaSrc << 12) & 0xF000) | ((Operator << 8) & 0xF00) | ((SrcFactor << 4) & 0xF0) | (DstFactor & 0xF);
+	return (Value << 16) | (((u32)AlphaSrc << 12) & 0xF000) | (((u32)Operator << 8) & 0xF00) | (((u32)SrcFactor << 4) & 0xF0) | ((u32)DstFactor & 0xF);
 }
 
-// Entpackt SrcFactor, DstFactor, Modulate und Alphaquelle auf "fUnknwon1"
-inline void Unpack_TextureBlendFunc(EBlendFactor& SrcFactor,
+inline void UnpackTextureBlendFunc(EBlendFactor& SrcFactor,
 	EBlendFactor& DstFactor,
 	EBlendOperator& Operator,
 	EAlphaSource& AlphaSrc,
@@ -222,9 +203,9 @@ public:
 LUX_API extern Material IdentityMaterial;
 LUX_API extern Material WorkMaterial;
 
-}    
+}
 
-}    
+}
 
 
 #endif

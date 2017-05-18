@@ -65,7 +65,7 @@ SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry(SceneNode* node) : texture(nu
 {
 	if(node->GetMaterialCount()) {
 		if(node->GetMaterial(0).GetTextureCount())
-			texture = ((video::MaterialLayer)node->GetMaterial(0).Layer(0)).texture;
+			texture = ((video::TextureLayer)node->GetMaterial(0).Layer(0)).texture;
 	}
 }
 

@@ -52,6 +52,8 @@ inline D3DFORMAT GetD3DFormat(ColorFormat Format, bool Alpha)
 
 inline BYTE GetD3DUsage(VertexElement::EUsage usage)
 {
+	lxAssert(usage != VertexElement::EUsage::Unknown);
+
 	switch(usage) {
 	case VertexElement::EUsage::Position:      return D3DDECLUSAGE_POSITION;
 	case VertexElement::EUsage::PositionNT:    return D3DDECLUSAGE_POSITIONT;
@@ -69,19 +71,20 @@ inline BYTE GetD3DUsage(VertexElement::EUsage usage)
 	case VertexElement::EUsage::BlendWeight:  return D3DDECLUSAGE_BLENDWEIGHT;
 	case VertexElement::EUsage::BlendIndices: return D3DDECLUSAGE_BLENDINDICES;
 	case VertexElement::EUsage::Sample:       return D3DDECLUSAGE_SAMPLE;
-	default:
-		return 0xFF;
+	default: return 0;
 	}
 }
 
-inline DWORD GetD3DBlendFunc(EBlendOperator Op)
+inline DWORD GetD3DBlendFunc(EBlendOperator op)
 {
-	switch(Op) {
-	case EBO_ADD: return D3DBLENDOP_ADD;
-	case EBO_MAX: return D3DBLENDOP_MAX;
-	case EBO_MIN: return D3DBLENDOP_MIN;
-	case EBO_REVSUBTRACT: return D3DBLENDOP_REVSUBTRACT;
-	case EBO_SUBTRACT: return D3DBLENDOP_SUBTRACT;
+	lxAssert(op != EBlendOperator::None);
+
+	switch(op) {
+	case EBlendOperator::Add: return D3DBLENDOP_ADD;
+	case EBlendOperator::Max: return D3DBLENDOP_MAX;
+	case EBlendOperator::Min: return D3DBLENDOP_MIN;
+	case EBlendOperator::Subtract: return D3DBLENDOP_SUBTRACT;
+	case EBlendOperator::RevSubtract: return D3DBLENDOP_REVSUBTRACT;
 	default: return 0;
 	}
 }
@@ -164,17 +167,17 @@ inline u32 GetBitsPerPixel(D3DFORMAT Format)
 inline DWORD GetD3DRepeatMode(ETextureRepeat repeat)
 {
 	switch(repeat) {
-	case ETR_WRAP:
+	case ETextureRepeat::Wrap:
 		return D3DTADDRESS_WRAP;
-	case ETR_MIRROR:
+	case ETextureRepeat::Mirror:
 		return D3DTADDRESS_MIRROR;
-	case ETR_CLAMP:
+	case ETextureRepeat::Clamp:
 		return D3DTADDRESS_CLAMP;
-	case ETR_MIRRORONCE:
+	case ETextureRepeat::MirrorOnce:
 		return D3DTADDRESS_MIRRORONCE;
-	default:
-		return D3DTADDRESS_FORCE_DWORD;
 	}
+
+	return 0;
 }
 
 inline DWORD GetD3DDeclType(VertexElement::EType type)
@@ -205,13 +208,16 @@ inline D3DCOLORVALUE SColorToD3DColor(const Colorf& color)
 
 inline DWORD GetD3DTextureFilter(ETextureFilter filter)
 {
-	if(filter == ETF_LINEAR)
+	switch(filter) {
+	case ETextureFilter::Linear:
 		return D3DTEXF_LINEAR;
-	if(filter == ETF_POINT)
+	case ETextureFilter::Point:
 		return D3DTEXF_POINT;
-	if(filter == ETF_ANISOTROPIC)
+	case ETextureFilter::Anisotropic:
 		return D3DTEXF_ANISOTROPIC;
-	return D3DTEXF_POINT;
+	};
+
+	return 0;
 }
 
 inline const char* GetD3DXShaderProfile(
@@ -276,21 +282,45 @@ inline const char* GetD3DXShaderProfile(
 inline DWORD GetD3DBlend(EBlendFactor factor)
 {
 	switch(factor) {
-	case EBF_ZERO:
+	case EBlendFactor::Zero:
 		return D3DBLEND_ZERO;
-	case EBF_ONE:
+	case EBlendFactor::One:
 		return D3DBLEND_ONE;
-	case EBF_SRC_ALPHA:
+	case EBlendFactor::SrcAlpha:
 		return D3DBLEND_SRCALPHA;
-	case EBF_ONE_MINUS_SRC_ALPHA:
+	case EBlendFactor::OneMinusSrcAlpha:
 		return D3DBLEND_INVSRCALPHA;
-	case EBF_DST_ALPHA:
+	case EBlendFactor::DstAlpha:
 		return D3DBLEND_DESTALPHA;
-	case EBF_ONE_MINUS_DST_ALPHA:
+	case EBlendFactor::OneMinusDstAlpha:
 		return D3DBLEND_INVDESTALPHA;
-	default:
-		return 0;
 	}
+
+	return 0;
+}
+
+inline DWORD GetD3DZBufferFunc(EZComparisonFunc func)
+{
+	switch(func) {
+	case EZComparisonFunc::Always:
+		return D3DCMP_ALWAYS;
+	case EZComparisonFunc::Equal:
+		return D3DCMP_EQUAL;
+	case EZComparisonFunc::Greater:
+		return D3DCMP_GREATER;
+	case EZComparisonFunc::GreaterEqual:
+		return D3DCMP_GREATEREQUAL;
+	case EZComparisonFunc::Less:
+		return D3DCMP_LESS;
+	case EZComparisonFunc::LessEqual:
+		return D3DCMP_LESSEQUAL;
+	case EZComparisonFunc::Never:
+		return D3DCMP_NEVER;
+	case EZComparisonFunc::NotEqual:
+		return D3DCMP_NOTEQUAL;
+	}
+
+	return 0;
 }
 
 }

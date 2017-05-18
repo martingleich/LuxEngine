@@ -50,10 +50,10 @@ void SkyBoxSceneNodeImpl::Render()
 	over.Override.FogEnabled = false;
 	over.Override.Lighting = false;
 	over.Override.ZWriteEnabled = false;
-	over.Override.ZBufferFunc = video::EZCF_ALWAYS;
+	over.Override.ZBufferFunc = video::EZComparisonFunc::Always;
 	over.Override.UseMIPMaps = false;
 	driver->PushPipelineOverwrite(over);
-
+	
 	// Die Vertizes
 	static const video::Vertex3DTCoord Vertices[8] =
 	{

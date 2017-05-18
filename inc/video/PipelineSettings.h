@@ -57,102 +57,119 @@ enum EPipelineFlag
 	EPF_MIN_FILTER = 0x20000,
 };
 
-
 // Die Vergleichsfunktion für den Z-Buffer
-enum EZComparisonFunc
+enum class EZComparisonFunc
 {
-	// Der Z-Test wird nie bestanden
-	EZCF_NEVER = 1,
-	// zWert(Neu) < zWert(Alt)
-	EZCF_LESS = 2,
-	// zWert(Neu) = zWert(Alt)
-	EZCF_EQUAL = 3,
-	// zWert(Neu) <= zWert(Alt)
-	EZCF_LESS_EQUAL = 4,
-	// zWert(Neu) > zWert(Alt)
-	EZCF_GREATER = 5,
-	// zWert(Neu) != zWert(Alt)
-	EZCF_NOT_EQUAL = 6,
-	// zWert(Neu) >= zWert(Alt)
-	EZCF_GREATER_EQUAL = 7,
-	// Der Z-Test wird immer bestanden
-	EZCF_ALWAYS = 8,
+	Never,
+	Less,
+	Equal,
+	LessEqual,
+	Greater,
+	NotEqual,
+	GreaterEqual,
+	Always,
 };
 
-enum EColorPlane
+enum class EColorPlane // enum class flag at end of file
 {
-	ECP_NONE = 0x0,
-	ECP_ALPHA = 0x1,
-	ECP_RED = 0x2,
-	ECP_GREEN = 0x4,
-	ECP_BLUE = 0x8,
-
-	ECP_RGB = ECP_RED | ECP_GREEN | ECP_BLUE,
-	ECP_ALL = ECP_RGB | ECP_ALPHA
-};
-
-enum EPolygonOffset
-{
-	EPO_FRONT = 0,
-	EPO_BACK = 1
+	None = 0,
+	Alpha = 1,
+	Red = 2,
+	Green = 4,
+	Blue = 8,
+	RGB = Red | Green | Blue,
+	All = RGB | Alpha,
 };
 
 // Blendfaktor für Alphablending
-enum EBlendFactor
+enum class EBlendFactor
 {
 	// Alpha ist immer 0
-	EBF_ZERO = 0,
+	Zero,
 	// Alpha ist immer 1
-	EBF_ONE,
+	One,
 	// Alpha ist gleich Quellalpha
-	EBF_SRC_ALPHA,
+	SrcAlpha,
 	// Alpha ist gleich 1-Quellalpha
-	EBF_ONE_MINUS_SRC_ALPHA,
+	OneMinusSrcAlpha,
 	// Alpha ist gleich Zielalpha
-	EBF_DST_ALPHA,
+	DstAlpha,
 	// Alpha ist gleich 1-Zielalpha
-	EBF_ONE_MINUS_DST_ALPHA,
+	OneMinusDstAlpha,
 };
+
+//! Uses a texture blending factor alpha values.
+inline bool HasTextureBlendAlpha(const EBlendFactor factor)
+{
+	switch(factor) {
+	case EBlendFactor::SrcAlpha:
+	case EBlendFactor::OneMinusSrcAlpha:
+	case EBlendFactor::DstAlpha:
+	case EBlendFactor::OneMinusDstAlpha:
+		return true;
+	default:
+		return false;
+	}
+}
 
 // Wie werden die alte und neue Farbe nach Multiplikation mit
 // dem Blendfaktor verknüpft.
 // Alle Operationen erfolgen Komponentenweise
-enum EBlendOperator
+enum class EBlendOperator
 {
 	// Es findet kein Alphablending stat
-	EBO_NONE = 0,
+	None,
 	// Alte Farbe + Neue Farbe = Ergebnis
-	EBO_ADD,
+	Add,
 	// Neue Farbe - Alte Farbe = Ergebnis
-	EBO_SUBTRACT,
+	Subtract,
 	// Alte Farbe - Neue Farbe = Ergebnis
-	EBO_REVSUBTRACT,
+	RevSubtract,
 	// Min(Alte Farbe, Neue Farbe) = Ergebnis
-	EBO_MIN,
+	Min,
 	// Max(Alte Farbe, Neue Farbe) = Ergebnis
-	EBO_MAX
+	Max,
 };
 
-enum ETextureFilter
+enum class ETextureFilter
 {
-	ETF_POINT,
-	ETF_LINEAR,
-	ETF_ANISOTROPIC,
+	Point,
+	Linear,
+	Anisotropic,
 };
 
 class PipelineSettings
 {
 public:
-	struct SAlphaBlend
+	struct AlphaBlend
 	{
-		EBlendFactor SrcBlend : 3;
-		EBlendFactor DstBlend : 3;
-		EBlendOperator Operator : 3;
+		EBlendFactor SrcBlend;
+		EBlendFactor DstBlend;
+		EBlendOperator Operator;
 
-		SAlphaBlend() : SrcBlend(EBF_ONE), DstBlend(EBF_ZERO), Operator(EBO_NONE)
+		AlphaBlend() : SrcBlend(EBlendFactor::One), DstBlend(EBlendFactor::Zero), Operator(EBlendOperator::None)
 		{
 		}
 	};
+
+	AlphaBlend Blending;
+
+	// Die Größe von Punkten
+	// default: 1.0
+	float Thickness;
+
+	// Vergleichsfunktion des ZBuffers
+	EZComparisonFunc ZBufferFunc;
+
+	EColorPlane ColorPlane;
+
+	float PolygonOffset;
+
+	ETextureFilter MinFilter;
+	ETextureFilter MagFilter;
+	u16 Anisotropic;
+
+	bool TrilinearFilter : 1;
 
 	// Reagiert das material auf Nebel
 	// default: false
@@ -161,15 +178,6 @@ public:
 	// Beleuchung an oder aus
 	// default: true;
 	bool Lighting : 1;
-
-	SAlphaBlend Blending;
-
-	// Die Größe von Punkten
-	// default: 1.0
-	float Thickness;
-
-	// Vergleichsfunktion des ZBuffers
-	EZComparisonFunc ZBufferFunc : 4;
 
 	// Wird in den ZBuffer geschrieben
 	// Achtung bei Transparenten Materialien
@@ -205,21 +213,18 @@ public:
 	// Sollen MIP-Maps benutzt werden
 	bool UseMIPMaps : 1;
 
-	// Die geschriebenen Farbebenen
-	EColorPlane ColorPlane : 4;
 
-	float PolygonOffset;
-
-	ETextureFilter MinFilter;
-	ETextureFilter MagFilter;
-	bool TrilinearFilter : 1;
-	u16 Anisotropic : 16;
-
-	PipelineSettings() : 
+	PipelineSettings() :
+		Thickness(1.0f),
+		ZBufferFunc(EZComparisonFunc::LessEqual),
+		ColorPlane(EColorPlane::All),
+		PolygonOffset(0.0f),
+		MinFilter(ETextureFilter::Linear),
+		MagFilter(ETextureFilter::Linear),
+		Anisotropic(0),
+		TrilinearFilter(false),
 		FogEnabled(false),
 		Lighting(true),
-		Thickness(1.0f),
-		ZBufferFunc(EZCF_LESS_EQUAL),
 		ZWriteEnabled(true),
 		Wireframe(false),
 		NormalizeNormals(true),
@@ -227,13 +232,7 @@ public:
 		GouraudShading(true),
 		BackfaceCulling(true),
 		FrontfaceCulling(false),
-		UseMIPMaps(true),
-		ColorPlane(ECP_ALL),
-		PolygonOffset(0.0f),
-		MinFilter(ETF_LINEAR),
-		MagFilter(ETF_LINEAR),
-		TrilinearFilter(false),
-		Anisotropic(0)
+		UseMIPMaps(true)
 	{
 	}
 
@@ -276,7 +275,7 @@ public:
 		case EPF_LIGHTING:
 			Lighting = Set; break;
 		case EPF_ZBUFFER:
-			ZBufferFunc = Set ? EZCF_LESS_EQUAL : EZCF_ALWAYS; break;
+			ZBufferFunc = Set ? EZComparisonFunc::LessEqual : EZComparisonFunc::Always; break;
 		case EPF_ZWRITE_ENABLED:
 			ZWriteEnabled = Set; break;
 		case EPF_BACK_FACE_CULLING:
@@ -284,12 +283,12 @@ public:
 		case EPF_FRONT_FACE_CULLING:
 			FrontfaceCulling = Set; break;
 		case EPF_FILTER:
-			MagFilter = Set ? ETF_LINEAR : ETF_POINT;
-			MinFilter = Set ? ETF_LINEAR : ETF_POINT; break;
+			MagFilter = Set ? ETextureFilter::Linear : ETextureFilter::Point;
+			MinFilter = Set ? ETextureFilter::Linear : ETextureFilter::Point; break;
 		case EPF_MAG_FILTER:
-			MagFilter = Set ? ETF_LINEAR : ETF_POINT; break;
+			MagFilter = Set ? ETextureFilter::Linear : ETextureFilter::Point; break;
 		case EPF_MIN_FILTER:
-			MinFilter = Set ? ETF_LINEAR : ETF_POINT; break;
+			MinFilter = Set ? ETextureFilter::Linear : ETextureFilter::Point; break;
 		case EPF_TRILINEAR_FILTER:
 			TrilinearFilter = Set; break;
 		case EPF_ANISOTROPIC:
@@ -303,7 +302,7 @@ public:
 		case EPF_POLYGON_OFFSET:
 			PolygonOffset = Set ? 1.0f : 0.0f; break;
 		case EPF_COLOR_PLANE:
-			ColorPlane = Set ? ECP_ALL : ECP_NONE; break;
+			ColorPlane = Set ? EColorPlane::All : EColorPlane::None; break;
 		}
 	}
 };
@@ -393,9 +392,10 @@ public:
 };
 
 
-} 
+} // namespace video
 
-} 
+DECLARE_FLAG_CLASS(lux::video::EColorPlane);
 
+} // namespace lux
 
 #endif // INCLUDED_PIPELINESETTINGS_H
