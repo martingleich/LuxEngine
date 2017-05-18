@@ -9,66 +9,49 @@ namespace core
 {
 
 //! Converter to and from strings
-// TODO: Implement this functions via format library
-// TODO: Add integer functions for all string base types
 class StringConverter
 {
+private:
+	static string IntToString(intmax_t num)
+	{
+		char buffer[22]; // See format::IntToString for size reasoning
+		format::IntToString(num, buffer);
+		return buffer;
+	}
+
+	static string UIntToString(uintmax_t num)
+	{
+		char buffer[22]; // See format::UIntToString for size reasoning
+		format::UIntToString(num, buffer);
+		return buffer;
+	}
 public:
-	//! Convert a integer to a string
-	static string ToString(size_t num)
-	{
-		char buffer[16] = {0};
-		u32 end = 15;
-		if(!num)
-			return "0";
+	static string ToString(unsigned long long num) { return UIntToString(num); }
+	static string ToString(unsigned long num) { return UIntToString(num); }
+	static string ToString(unsigned int num) { return UIntToString(num); }
+	static string ToString(unsigned short num) { return UIntToString(num); }
+	static string ToString(unsigned char num) { return UIntToString(num); }
 
-		do {
-			--end;
-			buffer[end] = (char)('0' + num % 10);
-			num /= 10;
-		} while(num && end);
-
-		return string(buffer+end, 15-end);
-	}
-
-	//! Convert a integer to a string
-	static string ToString(int num)
-	{
-		bool isNegative = false;
-		if(num < 0) {
-			num *= -1;
-			isNegative = true;
-		}
-
-		char buffer[16] = {0};
-		u32 end = 15;
-		if(!num)
-			return "0";
-
-		do {
-			--end;
-			buffer[end] = (char)('0' + num % 10);
-			num /= 10;
-		} while(num && end);
-
-		if(isNegative) {
-			--end;
-			buffer[end] = '-';
-		}
-
-		return string(buffer+end, 15-end);
-	}
+	static string ToString(long long num) { return IntToString(num); }
+	static string ToString(long num) { return IntToString(num); }
+	static string ToString(int num) { return IntToString(num); }
+	static string ToString(short num) { return IntToString(num); }
+	static string ToString(char num) { return IntToString(num); }
 
 	//! Convert a float to a string
 	static string ToString(float value)
 	{
-		char buffer[256];
-		int precision = 2;
-		if(precision < 0)
-			precision = 0;
+		char buffer[43]; // See format::FloatToString for size reasoning
+		format::FloatToString(value, buffer);
+		return buffer;
+	}
 
-		int i = sprintf(buffer, "%.*f", precision, value);
-		return string(buffer, i);
+	//! Convert a float to a string
+	static string ToString(double value)
+	{
+		char buffer[43]; // See format::FloatToString for size reasoning
+		format::FloatToString(value, buffer);
+		return buffer;
 	}
 
 	//! Convert a date to a string
@@ -141,6 +124,9 @@ public:
 			sign = 1;
 			++str;
 		}
+
+		if(strcmp(str, "inf") == 0)
+			return sign * std::numeric_limits<float>::infinity();
 
 		unsigned int pre = 0;
 		unsigned int post = std::numeric_limits<unsigned int>::max();

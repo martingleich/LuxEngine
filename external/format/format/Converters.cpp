@@ -65,8 +65,8 @@ void write_integer(Context& ctx, int base, bool sign, uintmax_t value, Placehold
 
 	int precision = placeholder.dot.GetValue(0);
 	if(numLen < precision) {
-		static const char ZEROS[32+1] = "00000000000000000000000000000000";
-		internal::PutCount(ctx, precision-numLen, StringType::Ascii, ZEROS, 32);
+		static const char ZEROS[32 + 1] = "00000000000000000000000000000000";
+		internal::PutCount(ctx, precision - numLen, StringType::Ascii, ZEROS, 32);
 	}
 
 	CopyConvertAddString(ctx, StringType::Ascii, buffer, len);
@@ -152,7 +152,7 @@ void conv_data(Context& ctx, double data, Placeholder& placeholder)
 			ConvertAddString(ctx, StringType::Unicode, str, strlen(str));
 		}
 		internal::hftoa(ctx, sign ? -data : data, facet);
-	} else{
+	} else {
 		throw invalid_placeholder_type("Invalid placeholder for floating-point type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
 	}
 }
@@ -183,6 +183,37 @@ void conv_data(Context& ctx, Cursor* ptr, Placeholder& placeholder)
 	} else {
 		throw invalid_placeholder_type("Invalid placeholder for crusor pointer type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
 	}
+}
+
+size_t IntToString(intmax_t data, char* str, int base)
+{
+	int sign = (data < 0);
+	if(sign) {
+		*str++ = '-';
+		data = -data;
+	}
+	size_t len = internal::uitoa(data, str, base) + sign;
+	str[len] = 0;
+	return len;
+}
+
+size_t UIntToString(uintmax_t data, char* str, int base)
+{
+	size_t len = internal::uitoa(data, str, base);
+	str[len] = 0;
+	return len;
+}
+
+size_t FloatToString(double data, char* str, int precision)
+{
+	if(precision < 1)
+		precision = 3;
+	if(precision > 10)
+		precision = 10;
+
+	size_t len = internal::ftoaSimple(data, precision, str);
+	str[len] = 0;
+	return len;
 }
 
 }

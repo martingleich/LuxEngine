@@ -31,5 +31,8 @@ UNIT_SUITE(ParseTest)
 
 		value = lux::core::StringConverter::ParseFloat("1234.5678");
 		UNIT_ASSERT(math::IsEqual(value, 1234.5678f));
+
+		value = lux::core::StringConverter::ParseFloat("-inf");
+		UNIT_ASSERT(math::IsEqual(value, -std::numeric_limits<float>::infinity()));
 	}
 }

@@ -23,6 +23,9 @@ format::locale::BooleanFormat_Digit
 
 format::Context::GetCollumn
 format::conv_data
+format::IntToString
+format::UIntToString
+format::FloatToString
 
 format::internal::ParseUntilPlaceholder
 format::internal::ReplaceSubPlaceholder

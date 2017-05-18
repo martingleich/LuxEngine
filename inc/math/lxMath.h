@@ -295,6 +295,8 @@ bool IsInRange(T x, T lower, T upper)
 template <typename T>
 bool IsEqual(T a, T b, T roundingError = Constants<T>::rounding_error())
 {
+	if(a == b)
+		return true;
 	return (Abs(a - b) <= roundingError);
 }
 

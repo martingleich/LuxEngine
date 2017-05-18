@@ -67,6 +67,79 @@ namespace internal
 			return pow(10, i);
 	}
 
+	size_t ftoaSimple(double n, int digits, char* str)
+	{
+		if(digits < 0 || digits >= 10)
+			return 0;
+
+		char* old = str;
+
+		if(std::isnan(n)) {
+			*str++ = 'n';
+			*str++ = 'a';
+			*str++ = 'n';
+		} else if(std::isinf(n)) {
+			if(n < 0)
+				*str++ = '-';
+			*str++ = 'i';
+			*str++ = 'n';
+			*str++ = 'f';
+		} else if(n == 0) {
+			*str++ = '0';
+		} else {
+			int m;
+			int sign = (n < 0);
+			if(sign)
+				n = -n;
+			m = (int)std::log10(n);
+
+			if(sign)
+				*str++ = '-';
+
+			// 64-Bit since we need enough room for at least 13 digits.
+			// otherwise we use exponential notation.
+			uint64_t pre = (uint64_t)n;
+			uint64_t post = (uint64_t)((n - floor(n)) * getPow10(digits + 1));
+
+			size_t len = 0;
+			do {
+				*str++ = '0' + pre % 10;
+				++len;
+			} while((pre /= 10) > 0);
+
+			reverse(str - len, len);
+
+			bool hasPost = (post > 0);
+			len = 0;
+			if(hasPost) {
+				size_t post_digits = digits;
+				if(post % 10 >= 5)
+					post += 5;
+				post /= 10;
+				while(post % 10 == 0 && post) {
+					post /= 10;
+					--post_digits;
+				}
+				*str++ = '.';
+
+				while(post > 0) {
+					*str++ = '0' + post % 10;
+					post /= 10;
+					++len;
+				}
+
+				while(len < post_digits) {
+					*str++ = '0';
+					++len;
+				}
+
+				reverse(str - len, len);
+			}
+		}
+
+		return str - old;
+	}
+
 	//! Convert a floating point number to a string.
 	/**
 	for Not a number nan is written
@@ -386,13 +459,13 @@ slice ConvertString(Context& dst, StringType srcType, const char* srcData, size_
 				++s;
 			}
 
-			size_t size = data-base;
+			size_t size = data - base;
 			if(size == srcSize) {
 				dst.UnallocByte(base);
 				return slice(size, srcData);
 			}
 
-			return slice(data-base, base);
+			return slice(data - base, base);
 		}
 	}
 

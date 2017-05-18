@@ -41,6 +41,12 @@ namespace internal
 		return c - s;
 	}
 
+	// The maximum number of characters used by this function
+	// are 42 byte
+	// sign + pre + comma + post
+	// 1 + ceil(log10(2^64)) + 1 + ceil(log10(2^64))
+	size_t ftoaSimple(double n, int digits, char* str);
+
 	//! Convert a floating point number to a string.
 	/**
 	for Not a number nan is written

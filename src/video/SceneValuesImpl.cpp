@@ -232,7 +232,7 @@ void SceneValuesImpl::SetLight(u32 id, const video::LightData& light)
 	m(2, 3) = 0.0f;
 
 	m_Lights.Resize(id + 1);
-	m_Lights[id].name = "lightData" + core::StringConverter::ToString((size_t)id); // TODO: Remove this cast
+	m_Lights[id].name = "lightData" + core::StringConverter::ToString(id);
 	m_Lights[id].matrix = m;
 }
 
