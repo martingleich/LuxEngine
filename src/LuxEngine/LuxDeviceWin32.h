@@ -68,7 +68,6 @@ public:
 	StrongRef<input::UserEventReceiver> GetUserEventReceiver() const;
 	bool Run(float& fNumSecsPassed);
 
-
 	double GetTime() const;
 	StrongRef<gui::Window> GetWindow() const;
 

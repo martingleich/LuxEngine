@@ -4,6 +4,17 @@
 #include "math/vector3.h"
 #include "video/Color.h"
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+// REMARK
+// The types in this file are directly used to access memory, meaning
+// their data layout _must_ never change.
+// Furthermore they must be trivial types.
+// Meaning they must not have a destructur, or any virtual methods.
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 namespace lux
 {
 namespace video
@@ -13,13 +24,12 @@ namespace video
 /**
 \ref VertexFormat::STANDARD
 */
-class Vertex3D
+struct Vertex3D
 {
-public:
 	math::vector3f position; //!< The vertex position
 	math::vector3f normal; //!< The vertex normal
-	math::vector2f texture; //!< The vertex texturecoords
 	video::Color color; //!< The vertex color
+	math::vector2f texture; //!< The vertex texturecoords
 
 	//! Default constructor
 	Vertex3D()
@@ -28,13 +38,13 @@ public:
 
 	//! Construct from single values
 	Vertex3D(float Px, float Py, float Pz, Color _Color, float Nx, float Ny, float Nz, float Tx, float Ty) :
-		position(Px, Py, Pz), normal(Nx, Ny, Nz), texture(Tx, Ty), color(_Color)
+		position(Px, Py, Pz), normal(Nx, Ny, Nz), color(_Color), texture(Tx, Ty)
 	{
 	}
 
 	//! Construct from combined values
 	Vertex3D(const math::vector3f& _Pos, Color _Color, const math::vector3f& _Normal, const math::vector2f& _TCoords)
-		: position(_Pos), normal(_Normal), texture(_TCoords), color(_Color)
+		: position(_Pos), normal(_Normal), color(_Color), texture(_TCoords)
 	{
 	}
 
@@ -66,12 +76,11 @@ public:
 /**
 \ref EVT_2DVERTEX
 */
-class Vertex2D
+struct Vertex2D
 {
-public:
 	math::vector2f position; //!< The vertex position
-	math::vector2f texture; //! The vertex texturecoords
 	video::Color color; //!< The vertex color
+	math::vector2f texture; //! The vertex texturecoords
 
 	//! Default constructor
 	Vertex2D()
@@ -80,19 +89,19 @@ public:
 
 	//! Construct from single values
 	Vertex2D(float Px, float Py, Color _Color, float Tx, float Ty) :
-		position(Px, Py), texture(Tx, Ty), color(_Color)
+		position(Px, Py), color(_Color), texture(Tx, Ty)
 	{
 	}
 
 	//! Construct from combined values
 	Vertex2D(float Px, float Py, Color _Color) :
-		position(Px, Py), texture(0.0f, 0.0f), color(_Color)
+		position(Px, Py), color(_Color), texture(0.0f, 0.0f)
 	{
 	}
 
 	//! Full constructor
 	Vertex2D(const math::vector2f& _Pos, Color _Color, const math::vector2f& _TCoords)
-		: position(_Pos), texture(_TCoords), color(_Color)
+		: position(_Pos), color(_Color), texture(_TCoords)
 	{
 	}
 
@@ -122,9 +131,8 @@ public:
 /**
 \ref EVT_TRANSFORMED
 */
-class VertexTransformed
+struct VertexTransformed
 {
-public:
 	math::vector3f position; //!< The vertex position
 	float RHW; //!< Reciproc W
 	video::Color color; //! The vertex color
@@ -179,9 +187,8 @@ public:
 /**
 \ref EVT_2TCOORDS
 */
-class Vertex2TCoords : public Vertex3D
+struct Vertex2TCoords : public Vertex3D
 {
-public:
 	math::vector2f texture2; //!<< The second vertex texture coordinates
 
 	//! Default constructor
@@ -239,9 +246,8 @@ public:
 /**
 \ref EVT_TANGENTS
 */
-class VertexTangents : public Vertex3D
+struct VertexTangents : public Vertex3D
 {
-public:
 	math::vector3f binormal; //!< The binormal vector
 	math::vector3f tangent; //!< The tangent vector
 
@@ -297,9 +303,8 @@ public:
 /**
 \ref EVT_3DTEXCOORD
 */
-class Vertex3DTCoord
+struct Vertex3DTCoord
 {
-public:
 	math::vector3f position; //!< The vertex position
 	math::vector3f texture; //!< The 3d texture coordinate
 
@@ -333,9 +338,9 @@ public:
 	}
 };
 
-}    
+}
 
-}    
+}
 
 
 #endif

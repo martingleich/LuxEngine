@@ -38,6 +38,37 @@
 #include <WinUser.h>
 #include "LuxEngine/Win32Exception.h"
 
+namespace lux
+{
+// Validate sizes and offsets of data layout types.
+// TODO: Move this to a more platform indepented place
+static_assert(offsetof(math::vector2f, x) == 0, "Bad offset");
+static_assert(offsetof(math::vector2f, y) == 4, "Bad offset");
+static_assert(sizeof(math::vector2f) == 8, "Bad size");
+
+static_assert(offsetof(math::vector3f, x) == 0, "Bad offset");
+static_assert(offsetof(math::vector3f, y) == 4, "Bad offset");
+static_assert(offsetof(math::vector3f, z) == 8, "Bad offset");
+static_assert(sizeof(math::vector3f) == 12, "Bad size");
+
+static_assert(offsetof(math::quaternionf, x) == 0, "Bad offset");
+static_assert(offsetof(math::quaternionf, y) == 4, "Bad offset");
+static_assert(offsetof(math::quaternionf, z) == 8, "Bad offset");
+static_assert(offsetof(math::quaternionf, w) == 12, "Bad offset");
+static_assert(sizeof(math::quaternionf) == 16, "Bad size");
+
+static_assert(offsetof(video::Colorf, r) == 0, "Bad offset");
+static_assert(offsetof(video::Colorf, g) == 4, "Bad offset");
+static_assert(offsetof(video::Colorf, b) == 8, "Bad offset");
+static_assert(offsetof(video::Colorf, a) == 12, "Bad offset");
+static_assert(sizeof(video::Colorf) == 16, "Bad size");
+
+static_assert(sizeof(math::matrix4) == 4 * 4 * 4, "Bad size");
+static_assert(sizeof(video::Color) == 4, "Bad size");
+static_assert(sizeof(math::vector2i) == 8, "Bad size");
+static_assert(sizeof(math::vector3i) == 12, "Bad size");
+}
+
 HMODULE g_Instance = NULL;
 static const wchar_t WIN32_CLASS_NAME[] = L"Lux Window Class";
 
@@ -589,6 +620,7 @@ StrongRef<scene::MeshSystem> LuxDeviceWin32::GetMeshSystem() const
 {
 	return m_MeshSystem;
 }
+
 
 }    //Namespace Lux  
 #endif // LUX_WINDOWS
