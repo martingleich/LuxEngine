@@ -12,28 +12,24 @@ class BaseTexture;
 class Texture;
 class CubeTexture;
 
-// Wie sollen Texturenkoordinaten außerhalb von [0; 1] behandelt werden
-enum ETextureRepeat
+//! How are texturecoordinates outside of [0,1] handeled
+enum class ETextureRepeat
 {
-	// Texturkoordinaten, die auf der einen Seite rausgehen kommen auf der anderen wieder rein
-	ETR_WRAP = 0,
-	// Ähnlich ETR_WRAP nur wird die Textur abwechselnd Orginalegetreu und gespiegelt angezeigt
-	ETR_MIRROR,
-	// Texturkoordinaten > 1 werden zu 1, Texturkoordinaten < 0 werden zu 0
-	ETR_CLAMP,
-	// Es wird der Betrag der Texturkoordinaten benutzt, danach wie ETR_CLAMP
-	ETR_MIRRORONCE,
+	Wrap = 0,
+	Mirror,
+	Clamp,
+	MirrorOnce,
 };
 
-//Die Klasse für eine Texturebene des Materials
-class MaterialLayer
+//! A single texture layer in a material
+class TextureLayer
 {
 public:
 	BaseTexture*  texture;
 	struct RepeatMode
 	{
-		ETextureRepeat u : 3;
-		ETextureRepeat v : 3;
+		ETextureRepeat u;
+		ETextureRepeat v;
 		RepeatMode& operator=(ETextureRepeat r)
 		{
 			u = v = r;
@@ -50,7 +46,7 @@ public:
 			return !(*this == other);
 		}
 
-		RepeatMode() : u(ETR_WRAP), v(ETR_WRAP)
+		RepeatMode() : u(ETextureRepeat::Wrap), v(ETextureRepeat::Wrap)
 		{
 		}
 		RepeatMode(ETextureRepeat r) : u(r), v(r)
@@ -64,25 +60,24 @@ public:
 	RepeatMode repeat;
 
 	//Konstruktor
-	MaterialLayer() :
-		texture(nullptr),
-		repeat(ETR_WRAP, ETR_WRAP)
+	TextureLayer() :
+		texture(nullptr)
 	{
 	}
 
 	//Kopierkonstuktor
-	MaterialLayer(const MaterialLayer& other)
+	TextureLayer(const TextureLayer& other)
 	{
 		*this = other;
 	}
 
 	//Destuktor
-	~MaterialLayer()
+	~TextureLayer()
 	{
 	}
 
 	//Zuweisungsoperator
-	MaterialLayer& operator=(const MaterialLayer& other)
+	TextureLayer& operator=(const TextureLayer& other)
 	{
 		if(this == &other)
 			return *this;
@@ -94,13 +89,13 @@ public:
 	}
 
 	//Ungleichheitsopeartor
-	inline bool operator!=(const MaterialLayer& other) const
+	inline bool operator!=(const TextureLayer& other) const
 	{
 		return texture != other.texture || repeat != other.repeat;
 	}
 
 	//Gleichheitoperator
-	inline bool operator==(const MaterialLayer& other) const
+	inline bool operator==(const TextureLayer& other) const
 	{
 		return !(other != *this);
 	}
@@ -111,7 +106,7 @@ public:
 
 namespace core
 {
-template<> inline Type GetTypeInfo<video::MaterialLayer>() { return Type::Texture; }
+template<> inline Type GetTypeInfo<video::TextureLayer>() { return Type::Texture; }
 } // namespace core
 
 } // !namespace lux

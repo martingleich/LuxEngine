@@ -1,7 +1,6 @@
 #include "UnitTestEx.h"
 
-// TODO gcc -Wunknown-pragmas
-#ifndef LUX_LINUX
+#ifdef _MSC_VER
 #pragma warning(disable: 4244)
 #endif
 

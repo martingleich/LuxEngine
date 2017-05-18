@@ -65,13 +65,13 @@ static bool LoadImageFormat(Context& ctx)
 	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
 	// scope of setjmp.
 	// Exceptions are not allowed in this scope
-#ifndef __MSC_VER
+#ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable: 4611 )
 #endif
 	if(setjmp(ctx.jmpbuf))
 		return false;
-#ifndef __MSC_VER
+#ifdef _MSC_VER
 #pragma warning( pop )
 #endif
 
@@ -119,13 +119,13 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 	// Supress warning about setjmp C++/Objectdeletion, since only trivial object are used in the
 	// scope of setjmp.
 	// Exceptions are not allowed in this scope
-#ifndef __MSC_VER
+#ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable: 4611 )
 #endif
 	if(setjmp(ctx.jmpbuf))
 		return false;
-#ifndef __MSC_VER
+#ifdef _MSC_VER
 #pragma warning( pop )
 #endif
 
