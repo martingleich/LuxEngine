@@ -17,9 +17,6 @@
 #define NEWLINE "\n"
 #endif
 
-
-// TODO: Only use lxAlgorithm
-
 namespace lux
 {
 namespace io
@@ -402,7 +399,7 @@ INIFileImpl::ElementID INIFileImpl::GetElemID(INIFileImpl::SectionID sectionID, 
 		}
 	}
 
-	// TODO: If sorted use this to own advantage
+	// IDEA: If sorted use this to own advantage
 	return InvalidID;
 }
 

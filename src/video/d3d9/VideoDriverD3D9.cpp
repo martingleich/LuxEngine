@@ -1367,7 +1367,6 @@ void VideoDriverD3D9::EnablePipeline(const PipelineSettings& settings, bool rese
 		m_D3DDevice->SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(pipeline.Blending.Operator));
 	}
 
-	// TODO: Own Rendersystem for fog
 	if(m_Fog.isDirty) {
 		m_Fog.isDirty = false;
 		DWORD type = D3DFOG_NONE;

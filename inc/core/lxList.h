@@ -10,13 +10,6 @@ namespace lux
 namespace core
 {
 
-//TODO:
-/*
-Add push_front
-Add insert
-Optimize
-*/
-
 //! A double-linked list
 template <typename T>
 class list

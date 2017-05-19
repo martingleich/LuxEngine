@@ -195,28 +195,20 @@ bool FileSystemWin32::ExistFile(const path& filename) const
 	}
 
 	// Scan filesystem
-#ifdef LUX_WINDOWS
 	DWORD fatt = GetWin32FileAttributes(filename);
 	if(fatt == INVALID_FILE_ATTRIBUTES)
 		return false;
 	else
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) == 0;
-#else
-#error Not implemented
-#endif
 	}
 
 bool FileSystemWin32::ExistDirectory(const path& filename) const
 {
-#ifdef LUX_WINDOWS
 	DWORD fatt = GetWin32FileAttributes(filename);
 	if(fatt == INVALID_FILE_ATTRIBUTES)
 		return false;
 	else
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) != 0;
-#else
-#error Not implemented.
-#endif
 }
 
 File* FileSystemWin32::CreateTemporaryFile(u32 Size)
@@ -225,7 +217,6 @@ File* FileSystemWin32::CreateTemporaryFile(u32 Size)
 
 	return OpenVirtualFile(ptr, Size, string::EMPTY, true);
 }
-
 
 FileDescription FileSystemWin32::GetFileDescription(const path& name)
 {

@@ -103,8 +103,6 @@ static u32 NextPower2(u32 x)
 
 static void CalculateImageSize(impl::Context* ctx)
 {
-	// TODO: Improve function
-
 	u32 count = 0;
 	float sum_length = 0;
 	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {

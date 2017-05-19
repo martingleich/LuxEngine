@@ -10,11 +10,6 @@ namespace lux
 namespace gui
 {
 
-
-// TODO: Make font a shader material
-// Use color with shaderParam
-// Implement clipping
-// Add text borders
 FontImpl::FontImpl() :
 	m_Driver(nullptr),
 	m_Image(nullptr),
@@ -22,7 +17,6 @@ FontImpl::FontImpl() :
 	m_ImageHeight(0)
 {
 }
-
 
 FontImpl::~FontImpl()
 {
@@ -119,7 +113,6 @@ void FontImpl::SetBaseLine(float base)
 
 void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign align, video::Color color, const math::rectf* clip)
 {
-	// TODO: Implement clipping
 	LUX_UNUSED(clip);
 
 	m_Driver->Set2DMaterial(m_Material);

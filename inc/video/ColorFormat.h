@@ -187,7 +187,6 @@ public:
 			return false;
 	}
 
-	// TODO: Add floating-point conversions.
 	//! Convert a color in this format to A8R8G8B8
 	/**
 	\param in A pointer to a pixel in this format

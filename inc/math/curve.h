@@ -102,7 +102,7 @@ public:
 	void AddSampleBatch(const float* x, const T* values, size_t count)
 	{
 		m_Samples.Reserve(m_Samples.Size() + count);
-		// TODO: Optimize this.
+		// IDEA: Optimize this.
 		for(size_t i = 0; i < count; ++i)
 			AddSample(x[i], values[i]);
 	}

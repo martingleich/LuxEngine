@@ -511,7 +511,7 @@ public:
 	{
 		if(this->Size() != other->Size())
 			return false;
-		// TODO: If the maps have the same bucket count,
+		// IDEA: If the maps have the same bucket count,
 		// compare the individual buckets.
 
 		for(auto it = this->cBegin(); this->cEnd(); ++it) {
@@ -778,7 +778,7 @@ private:
 		m_Allocator.Deallocate(m_Nodes);
 	}
 
-	// TODO: Improve this function, by keeping the old node list if possible
+	// IDEA: Improve this function, by keeping the old node list if possible
 	void ResizeAndRehash(size_t newBucketCount, size_t newSize)
 	{
 		if(!m_Buckets) {

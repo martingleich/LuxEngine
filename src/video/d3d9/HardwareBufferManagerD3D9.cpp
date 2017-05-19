@@ -12,7 +12,7 @@ namespace lux
 {
 namespace video
 {
-// TODO: Handle lost resources
+
 BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 	BufferManagerNull(driver)
 {

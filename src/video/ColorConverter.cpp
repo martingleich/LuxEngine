@@ -64,7 +64,6 @@ static void Convert_R8G8B8toA1R5G5B5(const void* src, void* dst, u32 width, u32 
 
 static void Convert_Trivial(const void* src, void* dst, u32 width, u32 height, u32 srcPitch, u32 dstPitch, ColorFormat srcFormat, ColorFormat dstFormat)
 {
-	// TODO: Overlapping 
 	u8* sB = (u8*)src;
 	u8* dB = (u8*)dst;
 

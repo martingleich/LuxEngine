@@ -1,6 +1,4 @@
 #include "core/Logger.h"
-//#include <fstream>
-//#include <iostream>
 #include "core/lxSTDIO.h"
 #include "core/lxUnicodeConversion.h"
 #include "core/Clock.h"
@@ -17,57 +15,6 @@ namespace lux
 {
 namespace log
 {
-
-// TODO: Use the current locale to convert the charcter correctly
-void fputs(FILE* file, const char* str)
-{
-	char buffer[64];
-	char* bc = buffer;
-	for(const char* cur = str; *cur; ++cur) {
-		char c = *cur;
-		if(c <= 0x7F) {
-			*bc++ = (u8)(c & 0x7F);
-		} else {
-			*bc++ = (c >> 6) | 0xC0;
-			*bc++ = (c & 0x3F) | 0x80;
-		}
-
-		if(buffer + sizeof(buffer) - bc < 2) {
-			fwrite(buffer, bc - buffer, 1, file);
-			bc = buffer;
-		}
-	}
-
-	if(bc - buffer)
-		fwrite(buffer, bc - buffer, 1, file);
-}
-
-void WriteWideCharAsUTF8ToFile(FILE* file, const wchar_t* str)
-{
-	char buffer[64];
-	char* bc = buffer;
-	for(const wchar_t* cur = str; *cur; ++cur) {
-		wchar_t c = *cur;
-		if(c <= 0x7F) {
-			*bc++ = (u8)(c & 0x7F);
-		} else if(c <= 0x7FF) {
-			*bc++ = ((c >> 6) | 0xC0) & 0xFF;
-			*bc++ = (c & 0x3F) | 0x80;
-		} else {
-			*bc++ = (c >> 12) | 0xE0;
-			*bc++ = ((c >> 6) & 0x3F) | 0x80;
-			*bc++ = (c & 0x3F) | 0x80;
-		}
-
-		if(buffer + sizeof(buffer) - bc < 3) {
-			fwrite(buffer, bc - buffer, 1, file);
-			bc = buffer;
-		}
-	}
-
-	if(bc - buffer)
-		fwrite(buffer, bc - buffer, 1, file);
-}
 
 LogSystem EngineLog(ELogLevel::Info);
 Logger Debug(EngineLog, ELogLevel::Debug, FilePrinter);
@@ -290,16 +237,16 @@ public:
 	void Print(const string& s, ELogLevel ll)
 	{
 		if(ll != ELogLevel::None) {
-			fputs(m_File, GetLogLevelName(ll));
+			fputs(GetLogLevelName(ll), m_File);
 			if(m_Settings.ShowTime) {
 				auto time = core::Clock::GetDateAndTime();
 				fprintf(m_File, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
 			}
-			fputs(m_File, ": ");
+			fputs(": ", m_File);
 		}
 
-		fputs(m_File, s.Data());
-		fputs(m_File, "\n");
+		fputs(s.Data(), m_File);
+		fputs("\n", m_File);
 
 		fflush(m_File);
 	}
@@ -336,13 +283,13 @@ public:
 	void Print(const string& s, ELogLevel ll)
 	{
 		if(ll != ELogLevel::None) {
-			fputs(stdout, GetLogLevelName(ll));
+			fputs(GetLogLevelName(ll), stdout);
 			if(m_Settings.ShowTime) {
 				auto time = core::Clock::GetDateAndTime();
 				fprintf(stdout, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
 			}
 
-			fputs(stdout, ": ");
+			fputs(": ", stdout);
 		}
 
 		puts(s.Data());

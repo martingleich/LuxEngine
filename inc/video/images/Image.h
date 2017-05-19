@@ -79,14 +79,6 @@ public:
 	If the image isn't locked nothing happens
 	*/
 	virtual void Unlock() = 0;
-
-	/*
-	TODO: Add create empty image method to image system.
-	TODO: Allow null image, as empty image
-	TODO: SetFormat(newFormat)
-	TODO: SetSize(newSize, copyRect)
-	TODO: Fill-Methode, füllt das Bild mit einer beliebigen Farbe
-	*/
 };
 
 struct ImageLock

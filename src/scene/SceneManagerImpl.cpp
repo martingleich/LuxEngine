@@ -363,21 +363,17 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 		wasTaken = true;
 		break;
 	case ESNRP_SOLID:
-		// TODO Culling
 		m_SolidNodeList.PushBack(SSolidNodeEntry(node));
 		wasTaken = true;
 		break;
 
 	case ESNRP_TRANSPARENT:
-		// TODO Culling
 		m_TransparentNodeList.PushBack(STransparentNodeEntry(node, m_AbsoluteCamPos));
 		wasTaken = true;
 		break;
 
 	case ESNRP_AUTOMATIC:
 	{
-		// TODO Culling
-
 		const size_t count = node->GetMaterialCount();
 		for(size_t i = 0; i < count; ++i) {
 			// Ist ein material transparent, dann gilt der ganze Knoten als transparent
@@ -504,10 +500,8 @@ void SceneManagerImpl::DrawScene(SceneNode* root)
 	size_t maxLightCount = m_Driver->GetDeviceCapability(video::EDriverCaps::MaxLights);
 	maxLightCount = math::Min(maxLightCount, m_LightList.Size());
 
-	// TODO: Lichter nach Kameradistanz sortieren, und am besten passedne Lichter auswählen
-	for(size_t i = 0; i < maxLightCount; ++i) {
+	for(size_t i = 0; i < maxLightCount; ++i)
 		m_LightList[i]->Render();
-	}
 
 	DisableOverwrite();
 

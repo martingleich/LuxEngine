@@ -12,11 +12,6 @@ class EventReceiver;
 class Event;
 class DeviceCreationDesc;
 
-// TODO:
-/*
-Establish control from InputSystem to RawInputReceiver(just a little bit)
-*/
-
 //! The input system of the lux engine.
 class InputSystem : public ReferenceCounted
 {
