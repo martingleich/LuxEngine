@@ -4,6 +4,7 @@
 /**/Release/
 /*.opensdf
 bin
+build
 lib
 *.db
 /**/*~
