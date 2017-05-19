@@ -15,7 +15,7 @@ struct HashValue
 {
 	K key;
 	V value;
-	HashValue* next;
+	HashValue* next; // If the last bit in this pointer is set, the value doesn't have to be destructed
 };
 
 template <typename K, typename V,
