@@ -8,7 +8,7 @@ add_library(zlib ${ZLIB_SRCS} ${ZLIB_INCS})
 if(MSVC)
 	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -wd4996)
 else()
-	add_definitions(-DUNICODE -D_UNICODE -DNDEBUG -fPIC)
+	add_definitions(-DUNICODE -D_UNICODE -DNDEBUG -fPIC -Wno-implicit-function-declaration)
 endif()
 
 # http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
