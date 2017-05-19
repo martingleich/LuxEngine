@@ -87,11 +87,9 @@ namespace internal
 		} else if(n == 0) {
 			*str++ = '0';
 		} else {
-			int m;
 			int sign = (n < 0);
 			if(sign)
 				n = -n;
-			m = (int)std::log10(n);
 
 			if(sign)
 				*str++ = '-';

@@ -187,58 +187,84 @@ struct VertexTransformed
 /**
 \ref EVT_2TCOORDS
 */
-struct Vertex2TCoords : public Vertex3D
+struct Vertex2TCoords
 {
+	math::vector3f position; //!< The vertex position
+	math::vector3f normal; //!< The vertex normal
+	video::Color color; //!< The vertex color
+	math::vector2f texture; //!< The vertex texturecoords
 	math::vector2f texture2; //!<< The second vertex texture coordinates
 
 	//! Default constructor
-	Vertex2TCoords() : Vertex3D()
-	{
-	}
-
-	//! Construct from single values
-	Vertex2TCoords(float Px, float Py, float Pz, Color _Color, float Nx, float Ny, float Nz, float Tx, float Ty, float T2x, float T2y) :
-		Vertex3D(Px, Py, Pz, _Color, Nx, Ny, Nz, Tx, Ty), texture2(T2x, T2y)
+	Vertex2TCoords()
 	{
 	}
 
 	//! Construct from combines values
-	Vertex2TCoords(const math::vector3f& _Pos, Color _Color, const math::vector3f& _Normal,
-		const math::vector2f& _TCoords, const math::vector2f& _TCoords2) :
-		Vertex3D(_Pos, _Color, _Normal, _TCoords), texture2(_TCoords2)
+	Vertex2TCoords(
+			const math::vector3f& _Pos,
+			Color _Color,
+			const math::vector3f& _Normal,
+			const math::vector2f& _TCoords,
+			const math::vector2f& _TCoords2) :
+		position(_Pos),
+		normal(_Normal),
+		color(_Color),
+		texture(_TCoords),
+		texture2(_TCoords2)
 	{
 	}
+
+	//! Construct from single values
+	Vertex2TCoords(
+			float Px, float Py, float Pz, 
+			Color _Color,
+			float Nx, float Ny, float Nz,
+			float Tx, float Ty,
+			float T2x, float T2y) :
+		position(Px, Py, Pz),
+		normal(Nx, Ny, Nz),
+		color(_Color),
+		texture(Tx, Ty),
+		texture2(T2x, T2y)
+	{
+	}
+
 	//! Construct without normal
 	Vertex2TCoords(const math::vector3f& _Pos, Color _Color,
 		const math::vector2f& _TCoords, const math::vector2f& _TCoords2) :
-		Vertex3D(_Pos, _Color, math::vector3f(), _TCoords), texture2(_TCoords2)
+		position(_Pos),
+		color(_Color),
+		texture(_TCoords),
+		texture2(_TCoords2)
 	{
 	}
 
 	//! Construct with identical texture coordinates
 	Vertex2TCoords(const math::vector3f& _Pos, Color _Color,
 		const math::vector3f& _Normal, const math::vector2f& _TCoords) :
-		Vertex3D(_Pos, _Color, _Normal, _TCoords), texture2(_TCoords)
-	{
-	}
-
-	//! Construct from Vertex3d
-	Vertex2TCoords(const Vertex3D& a) : Vertex3D(a)
+		position(_Pos),
+		color(_Color),
+		texture(_TCoords),
+		texture2(_TCoords)
 	{
 	}
 
 	//! Equality
 	bool operator==(const Vertex2TCoords& other) const
 	{
-		return ((static_cast<Vertex3D>(*this) == other) &&
-			(texture2 == other.texture2));
+		return 
+			position == other.position &&
+			normal == other.normal &&
+			color == other.color &&
+			texture == other.texture &&
+			texture2 == other.texture2;
 	}
 
 	//! Unequality
 	bool operator!=(const Vertex2TCoords& other) const
 	{
-		return ((static_cast<Vertex3D>(*this) != other) ||
-			(texture2 != other.texture2));
+		return !(*this == other);
 	}
 };
 
@@ -246,56 +272,67 @@ struct Vertex2TCoords : public Vertex3D
 /**
 \ref EVT_TANGENTS
 */
-struct VertexTangents : public Vertex3D
+struct VertexTangents
 {
-	math::vector3f binormal; //!< The binormal vector
+	math::vector3f position; //!< The vertex position
+	math::vector3f normal; //!< The vertex normal
+	video::Color color; //!< The vertex color
+	math::vector2f texture; //!< The vertex texturecoords
 	math::vector3f tangent; //!< The tangent vector
+	math::vector3f binormal; //!< The binormal vector
 
 	//! Default constructor
-	VertexTangents() : Vertex3D()
+	VertexTangents()
 	{
 	}
 
 	//! Construct from single values
-	VertexTangents(float Px, float Py, float Pz, Color _Color, float Nx, float Ny, float Nz, float Tx, float Ty,
-		float Tax, float Tay, float Taz, float Bx, float By, float Bz) :
-		Vertex3D(Px, Py, Pz, _Color, Nx, Ny, Nz, Tx, Ty), binormal(Bx, By, Bz), tangent(Tax, Tay, Taz)
+	VertexTangents(
+			float Px, float Py, float Pz,
+			Color _Color,
+			float Nx, float Ny, float Nz,
+			float Tx, float Ty,
+			float Tax, float Tay, float Taz,
+			float Bx, float By, float Bz) :
+		position(Px, Py, Pz),
+		normal(Nx, Ny, Nz),
+		color(_Color),
+		texture(Tx, Ty),
+		tangent(Tax, Tay, Taz),
+		binormal(Bx, By, Bz)
 	{
 	}
 
 	//! Construct from combined values
 	VertexTangents(const math::vector3f& _Pos, const math::vector3f& _Normal, Color _Color,
 		const math::vector2f& _TCoords, const math::vector3f& _Tangent, const math::vector3f& _Binormal) :
-		Vertex3D(_Pos, _Color, _Normal, _TCoords), binormal(_Binormal), tangent(_Tangent)
+		position(_Pos), normal(_Normal), color(_Color), texture(_TCoords), tangent(_Tangent), binormal(_Binormal)
 	{
 	}
 
 	//! Construct without tangents
 	VertexTangents(const math::vector3f& _Pos, const math::vector3f& _Normal, Color _Color,
 		const math::vector2f& _TCoords) :
-		Vertex3D(_Pos, _Color, _Normal, _TCoords), binormal(math::vector3f()), tangent(math::vector3f())
-	{
-	}
-
-	//! Construct from Vector3D
-	VertexTangents(const Vertex3D& a) : Vertex3D(a)
+		position(_Pos), normal(_Normal), color(_Color), texture(_TCoords)
 	{
 	}
 
 	//! Equality
 	bool operator==(const VertexTangents& other) const
 	{
-		return ((static_cast<Vertex3D>(*this) == other) &&
-			(tangent == other.tangent)) &&
-			(binormal == other.binormal);
+		return
+			position == other.position &&
+			normal == other.normal &&
+			color == other.color &&
+			texture == other.texture &&
+			tangent == other.tangent &&
+			binormal == other.binormal;
 	}
 
 	//! Unequality
 	bool operator!=(const VertexTangents& other) const
 	{
-		return ((static_cast<Vertex3D>(*this) != other) ||
-			(tangent != other.tangent)) ||
-			(binormal != other.binormal);
+		return !(*this == other);
 	}
 };
 

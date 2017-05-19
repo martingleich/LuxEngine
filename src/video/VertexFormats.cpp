@@ -56,15 +56,15 @@ struct VertexDeclInitType
 		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Normal, VertexElement::EType::Float3);
 		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
 		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
-		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Binormal, VertexElement::EType::Float3);
 		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Tangent, VertexElement::EType::Float3);
+		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Binormal, VertexElement::EType::Float3);
 		lxAssert(VertexDeclaration_TANGENTS.IsValid());
 		static_assert(offsetof(video::VertexTangents, position) == 0, "Bad offset");
 		static_assert(offsetof(video::VertexTangents, normal) == 12, "Bad offset");
 		static_assert(offsetof(video::VertexTangents, color) == 24, "Bad offset");
 		static_assert(offsetof(video::VertexTangents, texture) == 28, "Bad offset");
-		static_assert(offsetof(video::VertexTangents, binormal) == 36, "Bad offset");
-		static_assert(offsetof(video::VertexTangents, tangent) == 48, "Bad offset");
+		static_assert(offsetof(video::VertexTangents, tangent) == 36, "Bad offset");
+		static_assert(offsetof(video::VertexTangents, binormal) == 48, "Bad offset");
 		static_assert(sizeof(video::VertexTangents) == 60, "Bad size");
 
 		VertexDeclaration_TEXTURE_3D.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
