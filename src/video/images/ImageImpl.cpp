@@ -1,6 +1,7 @@
 #include "ImageImpl.h"
 #include "core/lxMemory.h"
 #include "core/ReferableRegister.h"
+#include "video/DrawingCanvas.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::video::ImageImpl);
 
@@ -104,6 +105,12 @@ void ImageImpl::SetPixel(u32 x, u32 y, Color Col)
 {
 	void* dst = (m_Data + (y * m_Pitch + x*m_BytePerPixel));
 	m_Format.A8R8G8B8ToFormat((u32)Col, (u8*)dst);
+}
+
+void ImageImpl::Fill(Color color)
+{
+	DrawingCanvas c(m_Data, m_Format, m_Dimension, m_Pitch);
+	c.Clear(color);
 }
 
 u32 ImageImpl::GetPitch() const

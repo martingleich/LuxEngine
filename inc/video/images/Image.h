@@ -56,6 +56,12 @@ public:
 	*/
 	virtual void SetPixel(u32 x, u32 y, Color color) = 0;
 
+	//! Fill the image with a single color
+	/**
+	\param color The color to fill the image with
+	*/
+	virtual void Fill(Color color=video::Color::Black) = 0;
+
 	//! Get the pitch of the image
 	/**
 	The pitch is the number of bytes between the begin of one line and the start of the next.

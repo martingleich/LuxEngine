@@ -27,6 +27,7 @@ public:
 	u32 GetSizeInPixels() const;
 	Color GetPixel(u32 x, u32 y);
 	void SetPixel(u32 x, u32 y, Color Col);
+	void Fill(Color color=video::Color::Black);
 	u32 GetPitch() const;
 	void* Lock();
 	void Unlock();
