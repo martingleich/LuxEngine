@@ -270,7 +270,7 @@ inline bool AddInsideBounds(u32 value, s32 offset, u32 upper_limit, u32& new_val
 
 //! Absolute value
 template <typename T>
-T Abs(T x)
+typename std::enable_if<std::is_arithmetic<T>::value, T>::type Abs(T x)
 {
 	if(x > (T)0)
 		return x;
@@ -279,21 +279,21 @@ T Abs(T x)
 
 //! Is the value zero within tolerance
 template <typename T>
-bool IsZero(T x, T roundingError = Constants<T>::rounding_error())
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type IsZero(T x, T roundingError = Constants<T>::rounding_error())
 {
 	return (Abs(x) <= roundingError);
 }
 
 //! Is the value between two values.
 template <typename T>
-bool IsInRange(T x, T lower, T upper)
+typename std::enable_if<std::is_arithmetic<T>::value, T>::type IsInRange(T x, T lower, T upper)
 {
 	return (x >= lower && x <= upper);
 }
 
 //! Are two values equal within tolerance
 template <typename T>
-bool IsEqual(T a, T b, T roundingError = Constants<T>::rounding_error())
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type IsEqual(T a, T b, T roundingError = Constants<T>::rounding_error())
 {
 	if(a == b)
 		return true;

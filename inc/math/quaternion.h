@@ -54,15 +54,6 @@ public:
 		return x != other.x || y != other.y || z != other.z || x != other.w;
 	}
 
-	//! Equality with tolerance
-	bool Equal(const quaternion<T>& other, const T tolerance = math::Constants<T>::rounding_error()) const
-	{
-		return math::IsEqual(x, other.x, tolerance) &&
-			math::IsEqual(y, other.y, tolerance) &&
-			math::IsEqual(z, other.z, tolerance) &&
-			math::IsEqual(w, other.w, tolerance);
-	}
-
 	//! Assignment
 	quaternion<T>& operator=(const quaternion<T>& other)
 	{
@@ -577,6 +568,25 @@ quaternion<T> operator*(T s, const quaternion<T>& q)
 //! Typedef for quaternion with float precision
 typedef quaternion<float> quaternionf;
 
+template <typename T>
+bool IsEqual(const quaternion<T>& a, const quaternion<T>& b, const T tolerance = math::Constants<T>::rounding_error())
+{
+	return 
+		math::IsEqual(a.x, b.x, tolerance) &&
+		math::IsEqual(a.y, b.y, tolerance) &&
+		math::IsEqual(a.z, b.z, tolerance) &&
+		math::IsEqual(a.w, b.w, tolerance);
+}
+
+template <typename T>
+bool IsZero(const quaternion<T>& v, const T tolerance = math::Constants<T>::rounding_error())
+{
+	return 
+		math::IsZero(v.x, tolerance) &&
+		math::IsZero(v.y, tolerance) &&
+		math::IsZero(v.z, tolerance) &&
+		math::IsZero(v.w, tolerance);
+}
 } // !namespace math
 } // !namespace lux
 

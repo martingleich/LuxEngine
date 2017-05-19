@@ -169,18 +169,6 @@ public:
 		return *this;
 	}
 
-	//! Equality with tolerance
-	/**
-	\param other The other vector
-	\param tolerance The tolerance to compare
-	\return True if the vectors are equal in the tolerance, otherwise false
-	*/
-	bool Equal(const vector2<T>& other, T tolerance = math::Constants<T>::rounding_error) const
-	{
-		return math::IsEqual(x, other.x, tolerance) &&
-			math::IsEqual(y, other.y, tolerance);
-	}
-
 	//! The length of the vector
 	/**
 	\return The length of the vector
@@ -393,10 +381,26 @@ template <typename T>
 const vector2<T>  vector2<T>::UNIT_scale = math::vector2<T>(1, 1);
 
 template <typename T>
+bool IsEqual(const vector2<T>& a, const vector2<T>& b, T tolerance = math::Constants<T>::rounding_error())
+{
+	return 
+		math::IsEqual(a.x, b.x, tolerance) &&
+		math::IsEqual(a.y, b.y, tolerance);
+}
+
+template <typename T>
+bool IsZero(const vector2<T>& v, T tolerance = math::Constants<T>::rounding_error())
+{
+	return 
+		math::IsZero(v.x, tolerance) &&
+		math::IsZero(v.y, tolerance);
+}
+
+template <typename T>
 void conv_data(format::Context& ctx, const vector2<T>& v, format::Placeholder& placeholder)
 {
 	using namespace format;
-	
+
 	placeholder.type = 'a';
 	bool printLength = placeholder.hash.IsEnabled();
 	placeholder.hash.Disable();
@@ -412,6 +416,8 @@ void conv_data(format::Context& ctx, const vector2<T>& v, format::Placeholder& p
 
 	ConvertAddString(ctx, StringType::Ascii, "]", 1);
 }
+
+
 } // namespace math
 
 namespace core

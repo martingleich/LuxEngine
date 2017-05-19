@@ -30,7 +30,7 @@ UNIT_SUITE(TransformationTest)
 		m1.BuildWorld(math::vector3f(t1.scale), t1.orientation, t1.translation);
 		t1.ToMatrix(m2);
 
-		UNIT_ASSERT(m1.Equal(m2));
+		UNIT_ASSERT_APPROX(m1, m2);
 	}
 
 	UNIT_TEST(ToInvMatrix)
@@ -39,7 +39,7 @@ UNIT_SUITE(TransformationTest)
 		m1.BuildWorld(math::vector3f(t1.scale), t1.orientation, t1.translation).Invert();
 		t1.ToMatrixInv(m2);
 
-		UNIT_ASSERT(m1.Equal(m2));
+		UNIT_ASSERT_APPROX(m1, m2);
 	}
 
 	UNIT_TEST(TransformPoint)
@@ -51,7 +51,7 @@ UNIT_SUITE(TransformationTest)
 		math::vector3f b = math::vector3f(2.585786462f, 3.828427076f, 8.41421366f);
 		math::vector3f x = t1.TransformPoint(a);
 
-		UNIT_ASSERT(x.Equal(b));
+		UNIT_ASSERT_APPROX(x, b);
 	}
 
 	UNIT_TEST(TransformInvPoint)
@@ -60,7 +60,7 @@ UNIT_SUITE(TransformationTest)
 		math::vector3f b = math::vector3f(1.0f, 2.0f, 3.0f);
 		math::vector3f x = t1.TransformInvPoint(a);
 
-		UNIT_ASSERT(x.Equal(b));
+		UNIT_ASSERT_APPROX(x, b);
 	}
 
 	UNIT_TEST(Invert)
@@ -72,7 +72,7 @@ UNIT_SUITE(TransformationTest)
 		a = tinv.TransformPoint(a);
 		math::vector3f b = math::vector3f(1.0f, 2.0f, 3.0f);
 
-		UNIT_ASSERT(a.Equal(b));
+		UNIT_ASSERT_APPROX(a, b);
 	}
 
 	UNIT_TEST(CombineRight)
@@ -84,7 +84,7 @@ UNIT_SUITE(TransformationTest)
 		math::vector3f b = t1.CombineRight(t2).TransformPoint(a);
 
 		// Relativ viele Rechungen darum höhere Abweichung möglich
-		UNIT_ASSERT(x.Equal(b, 0.0001f));
+		UNIT_ASSERT(math::IsEqual(x, b, 0.0001f));
 	}
 
 	UNIT_TEST(CombineLeft)
@@ -96,6 +96,6 @@ UNIT_SUITE(TransformationTest)
 		math::vector3f b = t1.CombineLeft(t2).TransformPoint(a);
 
 		// Relativ viele Rechungen darum höhere Abweichung möglich
-		UNIT_ASSERT(x.Equal(b, 0.0001f));
+		UNIT_ASSERT(math::IsEqual(x, b, 0.0001f));
 	}
 }

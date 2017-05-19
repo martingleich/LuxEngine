@@ -238,21 +238,6 @@ public:
 			(orientation == other.orientation));
 	}
 
-	//! Complex Equality
-	/**
-	Transforms another transform points to the same points a this one
-	\param tolerance: A tolerance parameter for compares
-	*/
-	bool Equal(const Transformation& other, float tolerance = math::Constants<float>::rounding_error()) const
-	{
-		if(math::IsZero(scale, tolerance) && math::IsZero(other.scale, tolerance))
-			return true;
-
-		return (math::IsEqual(scale, other.scale, tolerance) &&
-			(translation.Equal(other.translation)) &&
-			((orientation.Equal(other.orientation, tolerance) || orientation.Equal(-other.orientation, tolerance))));
-	}
-
 	//! Inequality operator
 	bool operator!=(const Transformation& other) const
 	{
@@ -357,6 +342,17 @@ public:
 		return out;
 	}
 };
+
+inline bool IsEqual(const Transformation& a, const Transformation& b, float tolerance = math::Constants<float>::rounding_error())
+{
+	if(math::IsZero(a.scale, tolerance) && math::IsZero(b.scale, tolerance))
+		return true;
+
+	return 
+		math::IsEqual(a.scale, b.scale, tolerance) &&
+		math::IsEqual(a.translation, b.translation, tolerance) &&
+		(math::IsEqual(a.orientation, b.orientation, tolerance) || math::IsEqual(a.orientation, -b.orientation, tolerance));
+}
 
 template <>
 inline math::line3df& Transformation::TransformObject(const math::line3df& in, math::line3df& out) const

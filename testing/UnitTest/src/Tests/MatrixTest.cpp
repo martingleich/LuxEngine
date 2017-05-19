@@ -45,6 +45,6 @@ UNIT_SUITE(MatrixTest)
 			986, 1028, 1070, 1112, 
 			1354, 1412, 1470, 1528);
 
-		UNIT_ASSERT((a*b).Equal(result));
+		UNIT_ASSERT_APPROX(a*b, result);
 	}
 }

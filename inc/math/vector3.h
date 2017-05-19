@@ -220,19 +220,6 @@ public:
 		return *this;
 	}
 
-	//! Equality with tolerance
-	/**
-	\param other The vector to compare
-	\param tolerance to comparison tolerance
-	\return Are this vector and the other equal
-	*/
-	bool Equal(const vector3<T>& other, const T tolerance = math::Constants<T>::rounding_error()) const
-	{
-		return math::IsEqual(x, other.x, tolerance) &&
-			math::IsEqual(y, other.y, tolerance) &&
-			math::IsEqual(z, other.z, tolerance);
-	}
-
 	//! The length of the vector
 	/**
 	\return The length of the vector
@@ -587,6 +574,24 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 	}
 
 	ConvertAddString(ctx, StringType::Ascii, "]", 1);
+}
+
+template <typename T>
+bool IsEqual(const vector3<T>& a, const vector3<T>& b, const T tolerance = math::Constants<T>::rounding_error())
+{
+	return 
+		math::IsEqual(a.x, b.x, tolerance) &&
+		math::IsEqual(a.y, b.y, tolerance) &&
+		math::IsEqual(a.z, b.z, tolerance);
+}
+
+template <typename T>
+bool IsZero(const vector3<T>& v, const T tolerance = math::Constants<T>::rounding_error())
+{
+	return 
+		math::IsZero(v.x, tolerance) &&
+		math::IsZero(v.y, tolerance) &&
+		math::IsZero(v.z, tolerance);
 }
 
 } // namespace math

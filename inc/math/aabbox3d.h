@@ -138,7 +138,7 @@ public:
 	*/
 	bool IsEmpty() const
 	{
-		return maxCorner.Equal(minCorner);
+		return math::IsEqual(maxCorner, minCorner);
 	}
 
 	//! Returns the Volume of the box

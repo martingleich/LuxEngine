@@ -19,7 +19,7 @@ public:
 
 	bool IsInside(const math::vector3f& point) const
 	{
-		return m_Point.Equal(point);
+		return math::IsEqual(point, m_Point);
 	}
 
 	math::vector3f GetPointInside(const core::Randomizer& rand) const

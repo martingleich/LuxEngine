@@ -794,16 +794,6 @@ bool matrix4::operator==(const matrix4& other) const
 	return true;
 }
 
-bool matrix4::Equal(const matrix4& other, float tolerance) const
-{
-	for(int i = 0; i < 16; ++i) {
-		if(math::IsEqual((*this)[i], other[i], tolerance) == false)
-			return false;
-	}
-
-	return true;
-}
-
 // Ungleichheitsoperator
 bool matrix4::operator!=(const matrix4& other) const
 {

@@ -454,9 +454,6 @@ public:
 	bool operator==(const matrix4& other) const;
 	//! Unequality
 	bool operator!=(const matrix4& other) const;
-
-	//! Equality with tolerance
-	bool Equal(const matrix4& other, float tolerance = math::Constants<float>::rounding_error()) const;
 };
 
 ///\cond INTERNAL
@@ -465,6 +462,18 @@ inline matrix4 operator*(float f, const matrix4& m)
 	return m*f;
 }
 ///\endcond
+
+
+inline bool IsEqual(const matrix4& a, const matrix4& b, float tolerance = math::Constants<float>::rounding_error())
+{
+	for(int i = 0; i < 16; ++i) {
+		if(!math::IsEqual(a[i], b[i], tolerance))
+			return false;
+	}
+
+	return true;
+}
+
 } // namespace math
 
 namespace core
