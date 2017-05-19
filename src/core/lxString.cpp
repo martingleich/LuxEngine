@@ -510,6 +510,9 @@ size_t string::Replace(const string_type& replace, const string_type& search, Co
 	if(end == ConstIterator::Invalid())
 		end = End();
 
+	if(first == ConstIterator::Invalid())
+		first = First();
+
 	size_t count = 0;
 	size_t length = core::StringLengthUTF8(search.data);
 	ConstIterator it = Find(search, first, end);

@@ -463,22 +463,22 @@ void TestFunc_##name(UnitTesting::TestContext& ctx)
 #define UNIT_SUITE_INIT \
 void SuiteInitFunc(); \
 static UnitTesting::RegisterInit RegisterSuiteInit(Suite, &SuiteInitFunc, UnitTesting::Info("suite.init", UnitTesting::USE_PARENT_FILE, __LINE__)); \
-void SuiteInitFunc()
+void SuiteInitFunc
 
 #define UNIT_SUITE_EXIT \
 void SuiteExit(); \
 static UnitTesting::RegisterExit RegisterSuiteExit(Suite, &SuiteExit, UnitTesting::Info("suite.exit", UnitTesting::USE_PARENT_FILE, __LINE__)); \
-void SuiteExit()
+void SuiteExit
 
 #define UNIT_SUITE_FIXTURE_ENTER \
 void SuiteFixtureEnter(); \
 static UnitTesting::RegisterFixtureEnter RegisterFixtureEnter(Suite, &SuiteFixtureEnter, UnitTesting::Info("suite.fixture_enter", UnitTesting::USE_PARENT_FILE, __LINE__)); \
-void SuiteFixtureEnter()
+void SuiteFixtureEnter
 
 #define UNIT_SUITE_FIXTURE_LEAVE \
 void SuiteFixtureLeave(); \
 static UnitTesting::RegisterFixtureLeave RegisterFixtureLeave(Suite, &SuiteFixtureLeave, UnitTesting::Info("suite.fixture_leave", UnitTesting::USE_PARENT_FILE, __LINE__)); \
-void SuiteFixtureLeave()
+void SuiteFixtureLeave
 
 #define UNIT_ASSERT(cond) do{ ctx.AddResult(UnitTesting::Info("", UnitTesting::USE_PARENT_FILE, __LINE__), (cond), (#cond)); }while(false)
 #define UNIT_ASSERT_EX(cond, msg) do{ ctx.AddResult(UnitTesting::Info("", UnitTesting::USE_PARENT_FILE, __LINE__), (cond), (msg)); }while(false)

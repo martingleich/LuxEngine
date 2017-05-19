@@ -9,7 +9,7 @@ UNIT_SUITE(TransformationTest)
 	math::Transformation t1;
 	math::Transformation t2;
 
-	UNIT_SUITE_FIXTURE_ENTER
+	UNIT_SUITE_FIXTURE_ENTER()
 	{
 		t1.translation = math::vector3f(2.0f, 3.0, 1.0f);
 		t1.scale = 2.0f;

@@ -190,7 +190,7 @@ public:
 		if(!m_Printer)
 			return;
 
-		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel) {
+		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel && m_LogSystem.GetLogLevel() != ELogLevel::None) {
 			ifconst(sizeof...(data)) {
 				string out;
 				core::string_sink sink(out);

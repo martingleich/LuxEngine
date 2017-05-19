@@ -4,7 +4,7 @@ UNIT_SUITE(QuaternionTest)
 {
 	math::quaternionf q1;
 
-	UNIT_SUITE_FIXTURE_ENTER
+	UNIT_SUITE_FIXTURE_ENTER()
 	{
 		q1.x = 0.2705980500730984921998616026832f;
 		q1.y = 0.0f;

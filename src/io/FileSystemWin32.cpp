@@ -200,7 +200,7 @@ bool FileSystemWin32::ExistFile(const path& filename) const
 		return false;
 	else
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) == 0;
-	}
+}
 
 bool FileSystemWin32::ExistDirectory(const path& filename) const
 {
@@ -370,8 +370,9 @@ u32 FileSystemWin32::GetWin32FileAttributes(const path& p) const
 bool FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
 {
 	Win32Path subPath = path;
-	while(*subPath.Last() != '/')
+	while(*subPath.Last() != '\\')
 		subPath.PopBack();
+	subPath.PushBack(0);
 
 	DWORD attrb = GetFileAttributesW((const wchar_t*)subPath.Data_c());
 	bool subPathExists = false;
@@ -380,10 +381,14 @@ bool FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
 			subPathExists = true;
 	}
 
-	if(!subPathExists && recursive)
-		CreateWin32Directory(subPath, true);
-	else
-		return false;
+	if(!subPathExists) {
+		if(recursive) {
+			if(!CreateWin32Directory(subPath, true))
+				return false;
+		} else {
+			return false;
+		}
+	}
 
 	HANDLE file = CreateFileW((const wchar_t*)path.Data_c(),
 		0, 0, nullptr,
