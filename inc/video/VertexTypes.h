@@ -244,6 +244,7 @@ struct Vertex2TCoords
 	Vertex2TCoords(const math::vector3f& _Pos, Color _Color,
 		const math::vector3f& _Normal, const math::vector2f& _TCoords) :
 		position(_Pos),
+		normal(_Normal),
 		color(_Color),
 		texture(_TCoords),
 		texture2(_TCoords)
