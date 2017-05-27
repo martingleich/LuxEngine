@@ -19,7 +19,7 @@ public:
 		ColorFormat format,
 		u32 MipCount, bool isRendertarget, bool isDynamic) = 0;
 
-	virtual LockedRect Lock(ETextureLockMode mode, u32 mipLevel = 0) = 0;
+	virtual LockedRect Lock(ELockMode mode, u32 mipLevel = 0) = 0;
 	virtual void Unlock() = 0;
 	virtual bool IsRendertarget() const = 0;
 
@@ -31,7 +31,7 @@ public:
 
 struct TextureLock
 {
-	TextureLock(Texture* t, BaseTexture::ETextureLockMode mode, bool regMips = true, u32 mipLevel = 0) :
+	TextureLock(Texture* t, BaseTexture::ELockMode mode, bool regMips = true, u32 mipLevel = 0) :
 		base(t),
 		regenerateMips(regMips)
 	{

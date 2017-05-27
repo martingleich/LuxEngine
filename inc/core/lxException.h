@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LX_EXCEPTION_H
 #define INCLUDED_LX_EXCEPTION_H
 #include "LuxBase.h"
-#include <stdexcept>
 #include <cstring>
 #include <cstdlib>
 
@@ -81,14 +80,14 @@ private:
 };
 
 //! The exception baseclass
-struct Exception : public std::exception
+struct Exception
 {
 	explicit Exception(const char* what) :
 		m_What(what)
 	{
 	}
 
-	const char* what() const noexcept
+	const char* What() const noexcept
 	{
 		return m_What.Data();
 	}

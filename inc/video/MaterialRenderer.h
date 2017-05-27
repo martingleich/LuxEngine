@@ -1,33 +1,37 @@
 #ifndef INCLUDED_MATERIALRENDERER_H
 #define INCLUDED_MATERIALRENDERER_H
 #include "core/ReferenceCounted.h"
-#include "video/VertexTypes.h"
-#include "video/PipelineSettings.h"
-#include "video/RenderType.h"
 
 namespace lux
 {
+namespace core
+{
+class ParamPackage;
+}
 namespace video
 {
-
 class VideoDriver;
 class Material;
+class RenderSettings;
+class Shader;
+class PipelineSettings;
+class DeviceState;
 
 //! A Materialrenderer
 /**
 Material rendered communicate the data inside a material to the driver.
 */
-class MaterialRenderer : public ReferenceCounted, public RenderType
+class MaterialRenderer : public ReferenceCounted
 {
 public:
-	MaterialRenderer(video::VideoDriver* driver, Shader* shader, const core::ParamPackage* basePackage) : RenderType(driver, shader, basePackage)
+	//! Requierments of a material renderer(flag class)
+	enum class ERequirement
 	{
-	}
+		None = 0,
+		Transparent = 1,
+	};
 
-	MaterialRenderer(const MaterialRenderer& other) : RenderType(other)
-	{
-	}
-
+public:
 	virtual ~MaterialRenderer() {}
 
 	// Wird von der Video-Schnittstelle aufgerufen und lässt den renderer seine Renderstates setzen
@@ -35,23 +39,8 @@ public:
 	//! Enable a material
 	/**
 	\param material The material to enable
-	\param lastMaterial The material which is currently active
-	\param resetAll Should all pipeline changes be done, regardless if the lastMaterial has already set them
 	*/
-	virtual void OnSetMaterial(const Material& material, const Material& lastMaterial, bool resetAll = false) = 0;
-
-	//! Will be called each time after geometry is rendered
-	/**
-	\param pass The next renderpass
-	\return Return false to abort the rendering
-	*/
-	virtual bool OnRender(u32 pass)
-	{
-		if(pass == 0)
-			return true;
-		else
-			return false;
-	}
+	virtual void Begin(const RenderSettings& settings, DeviceState& state) = 0;
 
 	// Wird aufgerufen, wenn das material nicht mehr gebraucht wird
 	// Wird in VideoDriver::SetMaterial aufgerufen wenn ein material ersetzt wird
@@ -60,29 +49,25 @@ public:
 	You only should reset renderstates which no other MaterialRenders uses.
 	The other will be set in OnSetMaterial
 	*/
-	virtual void OnUnsetMaterial()
-	{
-		this->Disable();
-	}
+	virtual void End(DeviceState& state) = 0;
 
-	//! Are objects rendered with this method transparent
-	virtual bool IsTransparent() const
-	{
-		return false;
-	}
+	//! Get the requirements of this renderer
+	virtual ERequirement GetRequirements() const = 0;
 
 	//! Clones the material renderer
-	virtual MaterialRenderer* Clone(Shader* shader = nullptr, const core::ParamPackage* basePackage = nullptr) const
-	{
-		LUX_UNUSED(shader);
-		LUX_UNUSED(basePackage);
-		return nullptr;
-	}
+	virtual StrongRef<MaterialRenderer> Clone(Shader* shader = nullptr, const core::ParamPackage* basePackage = nullptr) const = 0;
+
+	virtual const PipelineSettings& GetPipeline() const = 0;
+	virtual void SetPipeline(const PipelineSettings& set) = 0;
+
+	virtual const core::ParamPackage& GetPackage() const = 0;
+	virtual StrongRef<Shader> GetShader() const = 0;
 };
 
-}    
+} // namespace video
 
-}    
+DECLARE_FLAG_CLASS(video::MaterialRenderer::ERequirement);
 
+} // namespace lux
 
 #endif

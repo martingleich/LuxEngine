@@ -88,7 +88,7 @@ void TextureD3D9::Init(
 	m_Format = lxFormat;
 }
 
-BaseTexture::LockedRect TextureD3D9::Lock(ETextureLockMode Mode, u32 MipLevel)
+BaseTexture::LockedRect TextureD3D9::Lock(ELockMode Mode, u32 MipLevel)
 {
 	if(m_IsLocked)
 		throw core::Exception("Texture is already locked");
@@ -100,9 +100,9 @@ BaseTexture::LockedRect TextureD3D9::Lock(ETextureLockMode Mode, u32 MipLevel)
 	D3DLOCKED_RECT Locked;
 	DWORD Flags;
 	HRESULT hr;
-	if(Mode == ETLM_OVERWRITE && m_Desc.Usage == D3DUSAGE_DYNAMIC)
+	if(Mode == ELockMode::Overwrite && m_Desc.Usage == D3DUSAGE_DYNAMIC)
 		Flags = D3DLOCK_DISCARD;
-	else if(Mode == ETLM_READ_ONLY)
+	else if(Mode == ELockMode::ReadOnly)
 		Flags = D3DLOCK_READONLY;
 	else
 		Flags = 0;
@@ -110,7 +110,7 @@ BaseTexture::LockedRect TextureD3D9::Lock(ETextureLockMode Mode, u32 MipLevel)
 	hr = m_Texture->LockRect(MipLevel, &Locked, nullptr, Flags);
 
 	if(FAILED(hr)) {
-		if(Mode == ETLM_OVERWRITE && m_Desc.Usage == 0) {
+		if(Mode == ELockMode::Overwrite && m_Desc.Usage == 0) {
 			m_TempSurface = GetTempSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface)
 				hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_DISCARD);
@@ -118,11 +118,11 @@ BaseTexture::LockedRect TextureD3D9::Lock(ETextureLockMode Mode, u32 MipLevel)
 				FreeTempSurface(m_TempSurface);
 				throw core::D3D9Exception(hr);
 			}
-		} else if(Mode == ETLM_READ_ONLY && m_Desc.Usage == 0) {
+		} else if(Mode == ELockMode::ReadOnly && m_Desc.Usage == 0) {
 			throw core::Exception("Can't lock static texture in read mode");
-		} else if(Mode == ETLM_READ_WRITE && m_Desc.Usage == 0) {
+		} else if(Mode == ELockMode::ReadWrite && m_Desc.Usage == 0) {
 			throw core::Exception("Can't lock static texture in read mode");
-		} else if(Mode == ETLM_READ_ONLY && m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
+		} else if(Mode == ELockMode::ReadOnly && m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
 			m_TempSurface = GetTempSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface) {
 				IDirect3DDevice9* device;
@@ -200,6 +200,14 @@ const math::dimension2du& TextureD3D9::GetSize() const
 	return m_Dimension;
 }
 
+const BaseTexture::Filter& TextureD3D9::GetFiltering() const
+{
+	return m_Filtering;
+}
+void TextureD3D9::SetFiltering(const Filter& f)
+{
+	m_Filtering = f;
+}
 
 IDirect3DSurface9* TextureD3D9::GetTempSurface(u32 width, u32 height, D3DFORMAT format)
 {

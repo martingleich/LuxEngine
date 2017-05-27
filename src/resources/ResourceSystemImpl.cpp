@@ -3,6 +3,8 @@
 #include "io/File.h"
 #include "core/lxAlgorithm.h"
 #include "core/Logger.h"
+#include "resources/ResourceLoader.h"
+#include "core/ReferableFactory.h"
 
 namespace lux
 {

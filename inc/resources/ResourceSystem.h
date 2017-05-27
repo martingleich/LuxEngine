@@ -1,16 +1,20 @@
 #ifndef INCLUDED_RESOURCESYSTEM
 #define INCLUDED_RESOURCESYSTEM
-#include "core/ReferableFactory.h"
-#include "ResourceLoader.h"
+#include "core/ReferenceCounted.h"
+#include "core/lxName.h"
 
 namespace lux
 {
 namespace io
 {
 class FileSystem;
+class File;
 }
 namespace core
 {
+class ResourceLoader;
+class ReferableFactory;
+class Resource;
 
 //! Caching and loading for engine resources
 /**

@@ -1,7 +1,6 @@
 #ifndef INCLUDED_INPUT_SYSTEM_H
 #define INCLUDED_INPUT_SYSTEM_H
 #include "core/ReferenceCounted.h"
-#include "core/Result.h"
 
 namespace lux
 {
@@ -73,7 +72,7 @@ public:
 	virtual StrongRef<InputDevice> GetKeyboard() = 0;
 };
 
-}
-}
+} // namespace input
+} // namespace lux
 
 #endif // #ifndef INCLUDED_INPUT_SYSTE_H

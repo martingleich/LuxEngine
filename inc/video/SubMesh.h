@@ -2,8 +2,9 @@
 #define INCLUDED_SUBMESH_H
 #include "core/ReferenceCounted.h"
 #include "math/aabbox3d.h"
-#include "EPrimitiveType.h"
-#include "HardwareBufferConstants.h"
+
+#include "video/EPrimitiveType.h"
+#include "video/HardwareBufferConstants.h"
 
 namespace lux
 {
@@ -28,7 +29,7 @@ public:
 	\param indices The new indexbuffer, can be null
 	\param primitveType The primitve type in which way the data is interpreted
 	*/
-	virtual void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = video::EPT_TRIANGLES) = 0;
+	virtual void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
 
 	//! Get the primitve type used by this mesh
 	/**

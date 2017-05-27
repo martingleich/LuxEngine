@@ -427,7 +427,7 @@ public:
 	\param entries A pointer to then entries to add
 	\param numEntries The number of entries to add
 	*/
-	void PushBackm(const T* entries, size_t numEntries)
+	void PushBackm(T* entries, size_t numEntries)
 	{
 		// Wenn kein Platz mehr ist welchen machen
 		if(m_Used + numEntries > m_Alloc) {
@@ -438,7 +438,6 @@ public:
 		for(size_t entry = 0; entry < numEntries; ++entry) {
 			// Listeneintrag erzeugen
 			new ((void*)(&m_Entries[m_Used + entry]))T(std::move(entries[entry]));
-			entries[entry].~T();
 		}
 
 		// Vieleicht soll das Feld, nie sortiert werden und definiert keinen Vergleichsoperator,

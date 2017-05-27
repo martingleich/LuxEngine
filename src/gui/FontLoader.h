@@ -1,6 +1,7 @@
 #ifndef INCLUDED_FONT_LOADER_H
 #define INCLUDED_FONT_LOADER_H
 #include "resources/ResourceSystem.h"
+#include "resources/ResourceLoader.h"
 
 namespace lux
 {

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ILIGHTSCENENODE_H
-#define INCLUDED_ILIGHTSCENENODE_H
+#ifndef INCLUDED_LIGHTSCENENODE_H
+#define INCLUDED_LIGHTSCENENODE_H
 #include "scene/SceneNode.h"
 #include "video/LightData.h"
 
@@ -81,9 +81,7 @@ public:
 	virtual const math::vector3f& GetDirection() = 0;
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

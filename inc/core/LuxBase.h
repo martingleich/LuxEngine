@@ -36,8 +36,6 @@
 #endif
 
 #include "lxAssert.h"
-
-#include <utility>
 #include <cstdint>
 
 namespace lux
@@ -68,7 +66,6 @@ if(cond)
 #endif
 
 #include "core/EnumClassFlags.h"
-
 #include "core/lxMemoryAlloc.h"
 
 #endif

@@ -29,7 +29,7 @@ public:
 		video::EIndexFormat indexType, video::EHardwareBufferMapping indexHWMapping, u32 indexCount,
 		video::EPrimitiveType primitiveType);
 	StrongRef<video::SubMesh> AddSubMesh(const video::VertexFormat& vertexFormat = video::VertexFormat::STANDARD,
-		video::EPrimitiveType primitiveType = video::EPT_TRIANGLES,
+		video::EPrimitiveType primitiveType = video::EPrimitiveType::Triangles,
 		u32 primitiveCount = 0,
 		bool dynamic = false);
 	void RemoveSubMesh(size_t index);

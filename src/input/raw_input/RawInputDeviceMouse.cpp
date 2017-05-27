@@ -10,33 +10,26 @@ namespace lux
 namespace input
 {
 
-RawMouseDevice::RawMouseDevice(InputSystem* system) :
+RawMouseDevice::RawMouseDevice(InputSystem* system, HANDLE rawHandle) :
 	RawInputDevice(system),
 	m_ButtonCount(8),
 	m_HasHWheel(false)
 {
-}
-
-EResult RawMouseDevice::Init(HANDLE rawHandle)
-{
 	m_Name = "GenericMouse";
-	GetDeviceGUID(rawHandle, m_GUID);
+	m_GUID = GetDeviceGUID(rawHandle);
 
-	RID_DEVICE_INFO info;
-	if(Succeeded(GetDeviceInfo(rawHandle, info))) {
-		if(info.dwType != RIM_TYPEMOUSE)
-			return EResult::Failed;
-		m_ButtonCount = info.mouse.dwNumberOfButtons;
-		m_HasHWheel = (info.mouse.fHasHorizontalWheel == TRUE);
-	}
+	RID_DEVICE_INFO info = GetDeviceInfo(rawHandle);
+	if(info.dwType != RIM_TYPEMOUSE)
+		throw core::InvalidArgumentException("rawHandle", "Is not a mouse");
+
+	m_ButtonCount = info.mouse.dwNumberOfButtons;
+	m_HasHWheel = (info.mouse.fHasHorizontalWheel == TRUE);
 
 	for(int i = 0; i < ARRAYSIZE(m_ButtonState); ++i)
 		m_ButtonState[i] = false;
-
-	return EResult::Succeeded;
 }
 
-EResult RawMouseDevice::HandleInput(RAWINPUT* input)
+void RawMouseDevice::HandleInput(RAWINPUT* input)
 {
 	RAWMOUSE& mouse = input->data.mouse;
 
@@ -61,8 +54,6 @@ EResult RawMouseDevice::HandleInput(RAWINPUT* input)
 
 	if(mouse.usButtonFlags & RI_MOUSE_HWHEEL)
 		SendHWheelEvent((short)mouse.usButtonData);
-
-	return EResult::Succeeded;
 }
 
 EEventSource RawMouseDevice::GetType() const

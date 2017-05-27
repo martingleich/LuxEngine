@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ISCENENODE_H
-#define INCLUDED_ISCENENODE_H
+#ifndef INCLUDED_SCENENODE_H
+#define INCLUDED_SCENENODE_H
 #include "scene/SceneNodeComponent.h"
 #include "math/aabbox3d.h"
 #include "scene/Transformable.h"
@@ -580,9 +580,7 @@ protected:
 	}
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

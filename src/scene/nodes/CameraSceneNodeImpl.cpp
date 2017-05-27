@@ -1,6 +1,6 @@
 #include "CameraSceneNodeImpl.h"
 #include "scene/SceneManager.h"
-#include "video/VideoDriver.h"
+#include "video/Renderer.h"
 #include "core/Logger.h"
 #include "core/ReferableRegister.h"
 
@@ -179,9 +179,9 @@ void CameraSceneNodeImpl::Render()
 	RecalculateViewMatrix();
 	RecalculateProjectionMatrix();
 
-	video::VideoDriver* driver = GetSceneManager()->GetDriver();
-	driver->SetTransform(video::ETS_PROJECTION, m_Projection);
-	driver->SetTransform(video::ETS_VIEW, m_View);
+	video::Renderer* renderer = GetSceneManager()->GetRenderer();
+	renderer->SetTransform(video::ETransform::Projection, m_Projection);
+	renderer->SetTransform(video::ETransform::View, m_View);
 }
 
 void CameraSceneNodeImpl::RecalculateProjectionMatrix()
@@ -190,7 +190,7 @@ void CameraSceneNodeImpl::RecalculateProjectionMatrix()
 		if(m_RenderTarget)
 			m_Aspect = m_RenderTarget.GetSize().GetAspect();
 		else
-			m_Aspect = GetSceneManager()->GetDriver()->GetRenderTarget().GetSize().GetAspect();
+			m_Aspect = GetSceneManager()->GetRenderer()->GetRenderTarget().GetSize().GetAspect();
 	}
 
 	if(m_HasCustomProjection)

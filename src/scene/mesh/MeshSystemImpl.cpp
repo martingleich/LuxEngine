@@ -5,6 +5,7 @@
 #include "video/VideoDriver.h"
 
 #include "scene/mesh/MeshLoaderOBJ.h"
+#include "core/ReferableFactory.h"
 
 namespace lux
 {

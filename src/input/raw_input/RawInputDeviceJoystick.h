@@ -76,16 +76,15 @@ private:
 	};
 
 public:
-	RawJoystickDevice(InputSystem* system);
+	RawJoystickDevice(InputSystem* system, HANDLE rawHandle);
 	~RawJoystickDevice();
-	EResult GetDeviceHandle(HANDLE& ntHandle);
-	EResult GetDeviceName(string& name);
-	EResult GetButtonCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount);
-	EResult GetAxesCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount);
+	HANDLE GetDeviceHandle();
+	string GetDeviceName();
+	void GetButtonCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount);
+	void GetAxesCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount);
 	void LoadDirectInputMapping(bool isAxis, Mapping* mappings, size_t mappingCount, size_t offset, const HIDD_ATTRIBUTES& attribs);
 	void LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, size_t mappingCount, const HIDD_ATTRIBUTES& attribs);
-	EResult Init(HANDLE rawHandle);
-	EResult HandleInput(RAWINPUT* input);
+	void HandleInput(RAWINPUT* input);
 	EEventSource GetType() const;
 	size_t GetElementCount(EEventType type) const;
 	ElemDesc GetElementDesc(EEventType type, u32 code) const;

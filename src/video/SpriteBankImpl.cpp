@@ -32,10 +32,10 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::rect<
 	math::dimension2du dim = texture->GetSize();
 	Sprite sprite;
 	sprite.textureID = (u16)core::IteratorDistance(m_Textures.First(), it);
-	sprite.rect.Top = rect.Top / (float)dim.height;
-	sprite.rect.Bottom = rect.Bottom / (float)dim.height;
-	sprite.rect.Left = rect.Left / (float)dim.width;
-	sprite.rect.Right = rect.Right / (float)dim.width;
+	sprite.rect.top = rect.top / (float)dim.height;
+	sprite.rect.bottom = rect.bottom / (float)dim.height;
+	sprite.rect.left = rect.left / (float)dim.width;
+	sprite.rect.right = rect.right / (float)dim.width;
 
 	return SpriteBank::Sprite((s32)core::IteratorDistance(m_Sprites.First(), m_Sprites.PushBack(sprite)) + 1);
 }
@@ -123,6 +123,14 @@ bool SpriteBankImpl::GetSprite(SpriteBank::Sprite sprite, u32 Time, bool Looped,
 
 bool SpriteBankImpl::DrawSprite(SpriteBank::Sprite index, const math::vector2i& pos, u32 time, bool looped, bool centered)
 {
+	LUX_UNUSED(index);
+	LUX_UNUSED(pos);
+	LUX_UNUSED(time);
+	LUX_UNUSED(looped);
+	LUX_UNUSED(centered);
+	throw core::NotImplementedException();
+
+	/*
 	math::rectf* r;
 	Texture* t;
 	if(GetSprite(index.id, time, looped, r, t) == false)
@@ -136,6 +144,7 @@ bool SpriteBankImpl::DrawSprite(SpriteBank::Sprite index, const math::vector2i& 
 		loc = math::recti(pos.x, pos.y, pos.x + (int)dia.x, pos.y + (int)dia.y);
 	return m_Driver->Draw2DImage(t, loc, *r,
 		video::Color::White, true);
+		*/
 }
 
 } // !namespace video

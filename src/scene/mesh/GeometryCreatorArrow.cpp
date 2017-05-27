@@ -75,7 +75,7 @@ StrongRef<video::SubMesh> GeometryCreatorArrow::CreateSubMesh(video::VideoDriver
 	StrongRef<video::SubMesh> subMesh = driver->CreateSubMesh(
 		video::VertexFormat::STANDARD, video::EHardwareBufferMapping::Static, vertexCount,
 		video::EIndexFormat::Bit16, video::EHardwareBufferMapping::Static, indexCount,
-		video::EPT_TRIANGLES);
+		video::EPrimitiveType::Triangles);
 
 	StrongRef<video::VertexBuffer> vertexBuffer = subMesh->GetVertices();
 	StrongRef<video::IndexBuffer> indexBuffer = subMesh->GetIndices();

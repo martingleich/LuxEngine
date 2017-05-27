@@ -6,28 +6,21 @@ namespace lux
 namespace input
 {
 
-RawKeyboardDevice::RawKeyboardDevice(InputSystem* system) :
+RawKeyboardDevice::RawKeyboardDevice(InputSystem* system, HANDLE rawHandle) :
 	RawInputDevice(system),
 	m_DeadKey(0)
 {
 	memset(m_Win32KeyStates, 0, sizeof(m_Win32KeyStates));
-}
 
-EResult RawKeyboardDevice::Init(HANDLE rawHandle)
-{
 	m_Name = "GenericKeyboard";
-	GetDeviceGUID(rawHandle, m_GUID);
+	m_GUID = GetDeviceGUID(rawHandle);
 
-	RID_DEVICE_INFO info;
-	if(Succeeded(GetDeviceInfo(rawHandle, info))) {
-		if(info.dwType != RIM_TYPEKEYBOARD)
-			return EResult::Failed;
-	}
-
-	return EResult::Succeeded;
+	RID_DEVICE_INFO info = GetDeviceInfo(rawHandle);
+	if(info.dwType != RIM_TYPEKEYBOARD)
+		throw core::InvalidArgumentException("rawHandle", "Is not a keyboard");
 }
 
-EResult RawKeyboardDevice::HandleInput(RAWINPUT* input)
+void RawKeyboardDevice::HandleInput(RAWINPUT* input)
 {
 	Event event;
 	event.type = EEventType::Button;
@@ -39,7 +32,7 @@ EResult RawKeyboardDevice::HandleInput(RAWINPUT* input)
 	event.internal_rel_only = false;
 
 	if(event.button.code == -1)
-		return EResult::Failed;
+		throw core::RuntimeException("Unknown key code");
 
 	if(event.button.code == 143) {
 		if(input->data.keyboard.MakeCode == 0x2a)
@@ -61,8 +54,6 @@ EResult RawKeyboardDevice::HandleInput(RAWINPUT* input)
 	GetKeyCharacter(input->data.keyboard, event.keyInput.character, 4);
 
 	SendInputEvent(event);
-
-	return EResult::Succeeded;
 }
 
 EEventSource RawKeyboardDevice::GetType() const

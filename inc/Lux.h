@@ -107,7 +107,11 @@ namespace input
 #include "video/SubMesh.h"
 #include "video/SpriteBank.h"
 #include "video/RenderStatistics.h"
-#include "video/SceneValues.h"
+#include "video/Renderer.h"
+#include "video/LightData.h"
+#include "video/FogData.h"
+#include "video/AlphaSettings.h"
+#include "video/PipelineSettings.h"
 
 #include "video/images/Image.h"
 #include "video/images/ImageSystem.h"

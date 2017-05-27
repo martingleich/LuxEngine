@@ -55,10 +55,10 @@ void ParamPackage::Clear()
 	self->Params.Clear();
 }
 
-void ParamPackage::AddParam(core::Type type, const char* name, const void* defaultValue, u16 reserved)
+void ParamPackage::AddParam(core::Type type, const string_type& name, const void* defaultValue, u16 reserved)
 {
 	Entry entry;
-	entry.name = name;
+	entry.name = name.data;
 	const u32 size = type.GetSize();
 
 	// There are currently no types triggering this, just to be shure
@@ -74,32 +74,67 @@ void ParamPackage::AddParam(core::Type type, const char* name, const void* defau
 	AddEntry(entry, defaultValue);
 }
 
-void ParamPackage::AddParam(const ParamDesc& desc)
-{
-	Entry entry;
-	entry.name = desc.name;
-	entry.size = desc.size;
-	entry.type = desc.type;
-	entry.reserved = desc.reserved;
-	if(entry.type == core::Type::Unknown)
-		throw Exception("Type is not supported in param package");
-
-	AddEntry(entry, desc.defaultValue);
-}
-
 void* ParamPackage::CreatePackage() const
 {
 	u8* out = LUX_NEW_ARRAY(u8, self->TotalSize);
-	memcpy(out, self->DefaultPackage, self->TotalSize);
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
+		if(it->type == core::Type::Texture) {
+			new ((u8*)out + it->offset) video::TextureLayer(*(video::TextureLayer*)((u8*)self->DefaultPackage + it->offset));
+		} else {
+			lxAssert(it->type.IsTrivial());
+			memcpy((u8*)out + it->offset, (u8*)self->DefaultPackage + it->offset, it->size);
+		}
+	}
+
 	return out;
 }
 
-const void* ParamPackage::GetDefault() const
+void ParamPackage::DestroyPackage(void* p) const
 {
-	return self->DefaultPackage;
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
+		if(it->type == core::Type::Texture) {
+			((video::TextureLayer*)((u8*)p + it->offset))->~TextureLayer();
+		} else {
+			lxAssert(it->type.IsTrivial());
+		}
+	}
+
+	LUX_FREE_ARRAY((u8*)p);
 }
 
-ParamPackage::ParamDesc ParamPackage::GetParamDesc(u32 param) const
+bool ParamPackage::ComparePackage(const void* a, const void* b) const
+{
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
+		if(it->type == core::Type::Texture) {
+			bool r = (*((video::TextureLayer*)((u8*)a + it->offset)) == *((video::TextureLayer*)((u8*)b + it->offset)));
+			if(!r)
+				return false;
+		} else {
+			lxAssert(it->type.IsTrivial());
+			if(memcmp((u8*)a + it->offset, (u8*)b + it->offset, it->size) != 0)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+void* ParamPackage::CopyPackage(const void* b) const
+{
+	u8* out = LUX_NEW_ARRAY(u8, self->TotalSize);
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
+		if(it->type == core::Type::Texture) {
+			new ((u8*)out + it->offset) video::TextureLayer(*(video::TextureLayer*)((u8*)b + it->offset));
+		} else {
+			lxAssert(it->type.IsTrivial());
+			memcpy((u8*)out + it->offset, (u8*)b + it->offset, it->size);
+		}
+	}
+
+	return out;
+}
+
+ParamDesc ParamPackage::GetParamDesc(u32 param) const
 {
 	if(param >= self->Params.Size())
 		throw OutOfRangeException();
@@ -109,8 +144,8 @@ ParamPackage::ParamDesc ParamPackage::GetParamDesc(u32 param) const
 	desc.name = p.name.Data();
 	desc.size = p.size;
 	desc.type = p.type;
+	desc.id = param;
 	desc.reserved = p.reserved;
-	desc.defaultValue = (const u8*)self->DefaultPackage + p.offset;
 
 	return desc;
 }
@@ -126,10 +161,15 @@ PackageParam ParamPackage::GetParam(u32 param, void* baseData, bool isConst) con
 
 	core::Type type = isConst ? p.type.GetConstantType() : p.type;
 
-	return PackageParam(p.size, type, (u8*)baseData + p.offset, p.name.Data());
+	ParamDesc desc;
+	desc.name = p.name.Data();
+	desc.size = p.size;
+	desc.type = p.type;
+	desc.id = param;
+	return PackageParam(desc, (u8*)baseData + p.offset);
 }
 
-PackageParam ParamPackage::GetParamFromName(const string& name, void* baseData, bool isConst) const
+PackageParam ParamPackage::GetParamFromName(const string_type& name, void* baseData, bool isConst) const
 {
 	return GetParam(GetParamId(name), baseData, isConst);
 }
@@ -154,30 +194,37 @@ void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue, core::Ty
 		return;
 
 	const Entry& e = self->Params.At(param);
-	if(type == core::Type::Unknown || type == e.type)
-		memcpy((u8*)self->DefaultPackage + e.offset, defaultValue, e.size);
-	else {
+	if(type == core::Type::Unknown || type == e.type) {
+		if(e.type == core::Type::Texture) {
+			*(video::TextureLayer*)((u8*)self->DefaultPackage + e.offset) = *(video::TextureLayer*)((u8*)self->DefaultPackage + e.offset);
+		} else {
+			lxAssert(e.type.IsTrivial());
+			memcpy((u8*)self->DefaultPackage + e.offset, defaultValue, e.size);
+		}
+	} else {
 		if(!IsConvertible(type, e.type))
 			throw TypeException("Incompatible types used", type, e.type);
 		ConvertBaseType(type, defaultValue, e.type, (u8*)self->DefaultPackage + e.offset);
 	}
 }
 
-void ParamPackage::SetDefaultValue(const string& param, const void* defaultValue, core::Type type)
+void ParamPackage::SetDefaultValue(const string_type& param, const void* defaultValue, core::Type type)
 {
 	SetDefaultValue(GetParamId(param), defaultValue, type);
 }
 
-u32 ParamPackage::GetParamId(const string& name, core::Type type) const
+u32 ParamPackage::GetParamId(const string_type& name, core::Type type) const
 {
+	string_type cname = name;
+	cname.EnsureSize();
 	for(u32 i = 0; i < self->Params.Size(); ++i) {
-		if(self->Params[i].name == name) {
+		if(self->Params[i].name == cname) {
 			if(type == core::Type::Unknown || self->Params[i].type == type)
 				return i;
 		}
 	}
 
-	throw ObjectNotFoundException(name.Data());
+	throw ObjectNotFoundException(name.data);
 }
 
 u32 ParamPackage::GetParamCount() const
@@ -206,10 +253,25 @@ void ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	if(entry.type == core::Type::Texture)
 		self->TextureCount++;
 
-	self->DefaultPackage.SetMinSize(entry.offset + entry.size, core::mem::RawMemory::COPY);
-	memcpy((u8*)self->DefaultPackage + entry.offset, defaultValue, entry.size);
+	core::mem::RawMemory newBlock(entry.offset + entry.size);
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
+		if(it->type == core::Type::Texture) {
+			new ((u8*)newBlock + it->offset) video::TextureLayer(*(video::TextureLayer*)((u8*)self->DefaultPackage + it->offset));
+		} else {
+			lxAssert(it->type.IsTrivial());
+			memcpy((u8*)newBlock + it->offset, (u8*)self->DefaultPackage + it->offset, it->size);
+		}
+	}
 
 	self->Params.PushBack(entry);
+	if(entry.type == core::Type::Texture) {
+		new ((u8*)newBlock + entry.offset) video::TextureLayer(*(video::TextureLayer*)((u8*)defaultValue));
+	} else {
+		lxAssert(entry.type.IsTrivial());
+		memcpy((u8*)newBlock + entry.offset, (u8*)defaultValue, entry.size);
+	}
+
+	self->DefaultPackage = std::move(newBlock);
 }
 
 

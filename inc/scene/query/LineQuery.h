@@ -1,6 +1,7 @@
 #ifndef INCLUDED_LINE_QUERY_H
 #define INCLUDED_LINE_QUERY_H
 #include "scene/query/Query.h"
+#include "scene/query/QueryCallback.h"
 #include "math/line3d.h"
 
 namespace lux
@@ -65,7 +66,7 @@ public:
 	}
 };
 
-}
-}
+} // namespace scene
+} // namespace lux
 
 #endif // #ifndef INCLUDED_LINE_QUERY_H

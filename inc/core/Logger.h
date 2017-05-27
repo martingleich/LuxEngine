@@ -3,11 +3,9 @@
 #include "core/StringConverter.h"
 #include "core/lxAlgorithm.h"
 #include "core/lxName.h"
-#include "math/lxMathPrinter.h"
 #include "core/lxArray.h"
 
 #include <mutex>
-#include <condition_variable>
 
 namespace lux
 {

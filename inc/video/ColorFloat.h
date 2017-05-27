@@ -29,11 +29,6 @@ public:
 	{
 	}
 
-	//! Copyconstructor
-	Colorf(const Colorf& c) : r(c.r), g(c.g), b(c.b), a(c.a)
-	{
-	}
-
 	//! Construct from single values.
 	/**
 		Alpha is set to 1.
@@ -89,16 +84,6 @@ public:
 	void ToHSV(float& h, float& s, float& v) const
 	{
 		RGBToHSV(r, g, b, h, s, v);
-	}
-
-	//! Assign other color
-	Colorf& operator=(const Colorf& c)
-	{
-		r = c.r;
-		g = c.g;
-		b = c.b;
-		a = c.a;
-		return *this;
 	}
 
 	//! Mix with other color

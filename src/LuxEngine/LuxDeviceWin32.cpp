@@ -291,7 +291,7 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	}
 
 	if(!m_Window->GetDeviceWindow())
-		throw core::Exception("Missing window");
+		throw core::ErrorException("Missing window");
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 	m_InputSystem = LUX_NEW(input::InputSystemImpl)(isForeground);
@@ -301,7 +301,7 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	m_RawInputReceiver = LUX_NEW(input::RawInputReceiver)(m_InputSystem, (HWND)m_Window->GetDeviceWindow());
 	u32 keyboardCount = m_RawInputReceiver->DiscoverDevices(input::EEventSource::Keyboard);
 	if(keyboardCount == 0)
-		throw core::Exception("No keyboard found on system.");
+		throw core::RuntimeException("No keyboard found on system.");
 #else
 	throw core::NotImplementedException();
 #endif
@@ -320,8 +320,8 @@ void LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 	log::Info("Building Video Driver.");
 #ifdef LUX_COMPILE_WITH_D3D9
 	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9)(m_ReferableFactory);
+	driver->Init(config, m_Window);
 	m_Driver = driver;
-	m_Driver->Init(config, m_Window);
 
 	BuildMaterials();
 
@@ -338,10 +338,10 @@ void LuxDeviceWin32::BuildMaterials()
 
 #ifdef LUX_COMPILE_WITH_D3D9
 	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver, m_Filesystem);
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_d3d9)(m_Driver), "solid");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix_d3d9)(m_Driver), "solid_mix");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)(m_Driver), "transparent");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(m_Driver), "transparent_alpha");
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_d3d9)(nullptr, nullptr), "solid");
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix_d3d9)(nullptr, nullptr), "solid_mix");
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)(nullptr, nullptr), "transparent");
+	//m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(nullptr, nullptr), "transparent_alpha");
 #else
 	throw core::NotImplementedException();
 #endif
@@ -349,9 +349,6 @@ void LuxDeviceWin32::BuildMaterials()
 	video::MaterialRenderer* renderer = m_MaterialLibrary->GetMaterialRenderer("solid");
 	video::IdentityMaterial.SetRenderer(renderer);
 	video::WorkMaterial.SetRenderer(renderer);
-
-	m_Driver->Set3DMaterial(video::IdentityMaterial);
-	m_Driver->Set2DMaterial(video::IdentityMaterial);
 }
 
 void LuxDeviceWin32::BuildSceneManager()

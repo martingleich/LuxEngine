@@ -198,10 +198,10 @@ static void GenerateFont(impl::Context* ctx)
 		out.B = info.b;
 		out.C = info.c;
 
-		out.Left = (float)(cur_x) / width;
-		out.Top = (float)(cur_y) / height;
-		out.Right = (float)(cur_x + info.b) / width;
-		out.Bottom = (float)(cur_y + ctx->fontHeight) / height;
+		out.left = (float)(cur_x) / width;
+		out.top = (float)(cur_y) / height;
+		out.right = (float)(cur_x + info.b) / width;
+		out.bottom = (float)(cur_y + ctx->fontHeight) / height;
 
 		ctx->outCharInfo.Set(c, out);
 

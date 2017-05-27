@@ -1,5 +1,5 @@
 #include "MeshSceneNodeImpl.h"
-#include "video/VideoDriver.h"
+#include "video/Renderer.h"
 #include "scene/SceneManager.h"
 #include "video/SubMesh.h"
 #include "core/ReferableRegister.h"
@@ -33,7 +33,7 @@ void MeshSceneNodeImpl::OnRegisterSceneNode()
 			video::Material& Mat = subMesh->GetMaterial();
 
 			video::MaterialRenderer* renderer = subMesh ? Mat.GetRenderer() : nullptr;
-			if(renderer && renderer->IsTransparent())
+			if(renderer && TestFlag(renderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent))
 				bTransparent = true;
 			else
 				bSolid = true;
@@ -44,7 +44,7 @@ void MeshSceneNodeImpl::OnRegisterSceneNode()
 	} else {
 		for(u32 dwMat = 0; dwMat < m_Materials.Size(); ++dwMat) {
 			video::MaterialRenderer* renderer = m_Materials[dwMat].GetRenderer();
-			if(renderer && renderer->IsTransparent())
+			if(renderer && TestFlag(renderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent))
 				bTransparent = true;
 			else
 				bSolid = true;
@@ -66,16 +66,17 @@ void MeshSceneNodeImpl::OnRegisterSceneNode()
 
 void MeshSceneNodeImpl::Render()
 {
-	video::VideoDriver* driver = GetSceneManager()->GetDriver();
+	video::Renderer* renderer = GetSceneManager()->GetRenderer();
 
-	if(!m_Mesh || !driver) return;
+	if(!m_Mesh || !renderer)
+		return;
 
 	// Wir müssen aufpassen in welchem Renderpass wir sind
 	bool bIsTransparentPass = (GetSceneManager()->GetActRenderPass() == ESNRP_TRANSPARENT);
 
 	m_RenderTransform.Set(this);
 
-	driver->SetTransform(video::ETS_WORLD, m_RenderTransform.world);
+	renderer->SetTransform(video::ETransform::World, m_RenderTransform.world);
 
 	// Alles Zeichnen
 	for(u32 dwSub = 0; dwSub < m_Mesh->GetSubMeshCount(); ++dwSub) {
@@ -84,31 +85,39 @@ void MeshSceneNodeImpl::Render()
 			const video::Material& Mat = m_OnlyReadMaterials ? pSub->GetMaterial() : m_Materials[dwSub];
 
 			// renderer abfragen, wenn es denn gewünschten nicht gibt abbrechen
-			video::MaterialRenderer* renderer = Mat.GetRenderer();
-			if(!renderer) break;
+			video::MaterialRenderer* matRenderer = Mat.GetRenderer();
+			if(!matRenderer)
+				break;
 
 			// Im soliden Pass -> Solides Zeichnen
 			// Im transparenten Pass -> Transparentes Zeichnen
-			if(bIsTransparentPass == renderer->IsTransparent()) {
-				driver->Set3DMaterial(Mat);
-				driver->DrawSubMesh(pSub);
+
+			bool isTransparent =  TestFlag(matRenderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent);
+			if(bIsTransparentPass == isTransparent) {
+				renderer->SetMaterial(Mat);
+				renderer->DrawSubMesh(pSub);
 			}
 		}
 	}
 
 	// Debugdaten zeichnen
 	if(this->GetDebugData(EDD_SUB_BBOX)) {
-		// Alles Zeichnen
+		/*
+		TODO:
 		for(u32 dwSub = 0; dwSub < m_Mesh->GetSubMeshCount(); ++dwSub) {
 			video::SubMesh* pSub = m_Mesh->GetSubMesh(dwSub);
 			if(pSub)
 				driver->Draw3DBox(pSub->GetBoundingBox(), video::Color::Orange);
 		}
+		*/
 	}
 
 	// Debugdaten zeichnen
 	if(this->GetDebugData(EDD_MAIN_BBOX)) {
+		/*
+		TODO:
 		driver->Draw3DBox(m_Mesh->GetBoundingBox(), video::Color::Yellow);
+		*/
 	}
 
 }

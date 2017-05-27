@@ -342,8 +342,8 @@ bool WindowWin32::Present(video::Image* image, const math::recti& SourceRect, co
 	bi.bV4BlueMask = Format.GetBlueMask();
 
 	StretchDIBits(DC,
-		DstRect.Left, DstRect.Top, DstRect.GetWidth(), DstRect.GetHeight(),
-		SrcRect.Left, SrcRect.Top, SrcRect.GetWidth(), SrcRect.GetHeight(),
+		DstRect.left, DstRect.top, DstRect.GetWidth(), DstRect.GetHeight(),
+		SrcRect.left, SrcRect.top, SrcRect.GetWidth(), SrcRect.GetHeight(),
 		mem,
 		(const BITMAPINFO*)&bi, DIB_RGB_COLORS, SRCCOPY);
 

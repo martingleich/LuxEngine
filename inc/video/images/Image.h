@@ -1,6 +1,6 @@
 #ifndef INCLUDED_IMAGE_H
 #define INCLUDED_IMAGE_H
-#include "resources/ResourceSystem.h"
+#include "resources/Resource.h"
 #include "math/dimension2d.h"
 #include "video/Color.h"
 

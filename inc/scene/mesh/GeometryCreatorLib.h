@@ -1,6 +1,7 @@
 #ifndef INCLUDED_GEOMETRY_CREATOR_LIB_H
 #define INCLUDED_GEOMETRY_CREATOR_LIB_H
-#include "scene/mesh/MeshSystem.h"
+#include "core/ReferenceCounted.h"
+#include "core/lxString.h"
 
 namespace lux
 {

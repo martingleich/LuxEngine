@@ -242,7 +242,7 @@ public:
 	}
 };
 
-}
-}
+} // namespace scene
+} // namespace lux
 
 #endif // !INCLUDED_ITRANSFORMABLE_H

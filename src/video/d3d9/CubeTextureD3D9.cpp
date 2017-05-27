@@ -63,7 +63,7 @@ void CubeTextureD3D9::RegenerateMIPMaps()
 		throw core::D3D9Exception(hr);
 }
 
-BaseTexture::LockedRect CubeTextureD3D9::Lock(ETextureLockMode Mode, EFace Face, u32 MipLevel)
+BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode Mode, EFace Face, u32 MipLevel)
 {
 	if(m_LockedLevel != 0xFFFFFFFF)
 		throw core::Exception("Texture is already locked");
@@ -76,9 +76,9 @@ BaseTexture::LockedRect CubeTextureD3D9::Lock(ETextureLockMode Mode, EFace Face,
 
 	D3DLOCKED_RECT Locked;
 	DWORD Flags = 0;
-	if(Mode == ETLM_OVERWRITE && m_Desc.Usage == D3DUSAGE_DYNAMIC)
+	if(Mode == ELockMode::Overwrite && m_Desc.Usage == D3DUSAGE_DYNAMIC)
 		Flags = D3DLOCK_DISCARD;
-	else if(Mode == ETLM_READ_ONLY)
+	else if(Mode == ELockMode::ReadOnly)
 		Flags = D3DLOCK_READONLY;
 
 	HRESULT hr = m_Texture->LockRect(m_LockedFace, MipLevel, &Locked, nullptr, Flags);
@@ -108,6 +108,16 @@ const math::dimension2du& CubeTextureD3D9::GetSize() const
 u32 CubeTextureD3D9::GetLevelCount() const
 {
 	return m_Texture->GetLevelCount();
+}
+
+const BaseTexture::Filter& CubeTextureD3D9::GetFiltering() const
+{
+	return m_Filtering;
+}
+
+void CubeTextureD3D9::SetFiltering(const Filter& f)
+{
+	m_Filtering = f;
 }
 
 void* CubeTextureD3D9::GetRealTexture()

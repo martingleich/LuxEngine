@@ -1,12 +1,13 @@
 #ifndef INCLUDED_QUERY_H
 #define INCLUDED_QUERY_H
-#include "scene/query/QueryCallback.h"
+#include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 
 namespace lux
 {
 namespace scene
 {
+class QueryCallback;
 class SceneNode;
 class Collider;
 

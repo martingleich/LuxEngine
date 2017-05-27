@@ -16,7 +16,7 @@ namespace video
 BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 	BufferManagerNull(driver)
 {
-	m_D3DDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetDevice());
+	m_D3DDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetLowLevelDevice());
 
 	m_UsedStreams = 0;
 	m_MaxStreamCount = m_Driver->GetDeviceCapability(EDriverCaps::MaxStreams);

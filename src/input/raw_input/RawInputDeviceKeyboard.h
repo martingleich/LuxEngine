@@ -12,9 +12,8 @@ namespace input
 class RawKeyboardDevice : public RawInputDevice
 {
 public:
-	RawKeyboardDevice(InputSystem* system);
-	EResult Init(HANDLE rawHandle);
-	EResult HandleInput(RAWINPUT* input);
+	RawKeyboardDevice(InputSystem* system, HANDLE rawHandle);
+	void HandleInput(RAWINPUT* input);
 	EEventSource GetType() const;
 	size_t GetElementCount(EEventType type) const;
 	ElemDesc GetElementDesc(EEventType type, u32 code) const;

@@ -1,10 +1,14 @@
 #ifndef INCLUDED_ZONE_H
 #define INCLUDED_ZONE_H
 #include "core/Referable.h"
-#include "core/lxRandom.h"
+#include "math/vector3.h"
 
 namespace lux
 {
+namespace core
+{
+class Randomizer;
+}
 namespace scene
 {
 
@@ -28,10 +32,9 @@ public:
 		static const core::Name name = "zone";
 		return name;
 	}
-
 };
 
-}
-}
+} // namespace scene
+} // namespace lux
 
 #endif // #ifndef INCLUDED_ZONE_H

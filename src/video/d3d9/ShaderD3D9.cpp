@@ -3,7 +3,9 @@
 
 #include "core/Logger.h"
 #include "video/VideoDriver.h"
+#include "video/Renderer.h"
 #include "video/Material.h"
+#include "video/RenderSettings.h"
 
 #include "video/d3d9/D3DHelper.h"
 #include "video/d3d9/D3D9Exception.h"
@@ -13,11 +15,9 @@ namespace lux
 namespace video
 {
 
-
 ShaderD3D9::ShaderD3D9(VideoDriver* driver) :
-	m_D3DDevice((IDirect3DDevice9*)driver->GetDevice()),
-	m_SceneValues(driver->GetSceneValues()),
-	m_InvalidParam(this, core::Type::Unknown, 0, nullptr, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0)
+	m_D3DDevice((IDirect3DDevice9*)driver->GetLowLevelDevice()),
+	m_Renderer(driver->GetRenderer())
 {
 }
 
@@ -57,16 +57,13 @@ void ShaderD3D9::Init(
 
 	u32 materialParamCount = (u32)helper.Size();
 	// Param ids are saved as 16-Bit integer
-	if(materialParamCount > 0xFFFF) {
-		lxAssertNeverReach("Helper array overflow");
-		materialParamCount = 0xFFFF;
-	}
+	lxAssert(materialParamCount <= 0xFFFF);
 
 	u32 nameCursor = 0;
 	m_Params.Reserve(helper.Size());
 	m_Names.SetMinSize(nameMemoryNeeded);
 	for(u32 i = 0; i < materialParamCount; ++i) {
-		ParamEntry entry;
+		Param entry;
 		const HelperEntry& h = helper[i];
 		switch(h.paramType) {
 		case ParamType_DefaultMaterial:
@@ -96,30 +93,44 @@ void ShaderD3D9::Init(
 		}
 		break;
 		case ParamType_Scene:
-			u32 idx = m_SceneValues->GetParamID(h.name);
-			if(idx == 0xFFFFFFFF) {
+		{
+			core::PackageParam param;
+			bool jumpToNext = false;
+			try {
+				param.Set(m_Renderer->GetParam(h.name));
+			} catch(core::ObjectNotFoundException&) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Warning: Unknown scene value in shader: ~s.", h.name));
-				continue;
+				jumpToNext = true;
 			}
 
-			if(!IsTypeCompatible(h.type, m_SceneValues->GetParamType(idx))) {
+			if(jumpToNext)
+				continue;
+
+			if(!IsTypeCompatible(h.type, param.GetType())) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Warning: Incompatible scene value type in shader: ~s.", h.name));
 				continue;
 			}
 
-			entry.index = idx;
+			entry.index = param.GetDesc().id;
 			entry.paramType = ParamType_Scene;
-
-			break;
+		}
+		break;
 		}
 
 		// Put name into namelist.
 		memcpy((char*)m_Names + nameCursor, helper[i].name, helper[i].nameLength + 1);
 
-		entry.param = ShaderParam(this, h.type, h.typeSize, (char*)m_Names + nameCursor, h.registerVS, h.registerPS, h.registerVSCount, h.registerPSCount);
-		m_Params.PushBack(std::move(entry));
+		entry.registerPS = h.registerPS;
+		entry.registerPSCount = h.registerPSCount;
+		entry.registerVS = h.registerVS;
+		entry.registerVSCount = h.registerVSCount;
+		entry.type = h.type;
+		if(entry.paramType == ParamType_Scene)
+			m_SceneValues.PushBack(std::move(entry));
+		else
+			m_Params.PushBack(std::move(entry));
 
 		nameCursor += h.nameLength + 1;
 	}
@@ -302,7 +313,8 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 		errors->Release();
 	}
 
-	hr = m_D3DDevice->CreatePixelShader((DWORD*)output->GetBufferPointer(), &shader);
+	DWORD* data = (DWORD*)output->GetBufferPointer();
+	hr = m_D3DDevice->CreatePixelShader(data, &shader);
 	if(FAILED(hr)) {
 		output->Release();
 		throw core::D3D9Exception(hr);
@@ -313,74 +325,54 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	return shader;
 }
 
-const ShaderParam& ShaderD3D9::GetParam(const char* name)
+size_t ShaderD3D9::GetSceneParamCount() const
 {
-	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
-		if(strcmp(it->param.GetName(), name) == 0)
-			return it->param;
-	}
-
-	return m_InvalidParam;
+	return m_SceneValues.Size();
 }
 
-const ShaderParam& ShaderD3D9::GetParam(u32 index)
+u32 ShaderD3D9::GetSceneParam(size_t id) const
 {
-	if(index < m_Params.Size())
-		return m_Params[index].param;
-
-	return m_InvalidParam;
-}
-
-u32 ShaderD3D9::GetParamCount() const
-{
-	return (u32)m_Params.Size();
+	return m_SceneValues.At(id).index;
 }
 
 void ShaderD3D9::Enable()
 {
-	HRESULT hr = m_D3DDevice->SetVertexShader(m_VertexShader);
-	hr = m_D3DDevice->SetPixelShader(m_PixelShader);
+	HRESULT hr;
+
+	if(FAILED(hr = m_D3DDevice->SetVertexShader(m_VertexShader)))
+		throw core::D3D9Exception(hr);
+
+	if(FAILED(hr = m_D3DDevice->SetPixelShader(m_PixelShader)))
+		throw core::D3D9Exception(hr);
 }
 
-void ShaderD3D9::LoadParams(const core::PackagePuffer& Puffer, const RenderData* renderData)
+void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 {
-	const core::ParamPackage* pack = Puffer.GetType();
-	if(pack != nullptr) {
-		for(u32 i = 0; i < pack->GetParamCount(); ++i) {
-			auto desc = pack->GetParamDesc(i);
-			if(desc.reserved != 0xFFFF) {
-				// Its a shader param
-				ShaderParam& param = m_Params[desc.reserved].param;
-				param.SetShaderValue(Puffer.FromID(i, true).Pointer());
-			}
+	auto& material = settings.material;
+	for(u32 i = 0; i < material.GetParamCount(); ++i) {
+		auto desc = material.GetPuffer().GetType()->GetParamDesc(i);
+		if(desc.reserved != 0xFFFF) {
+			// It's a shader param
+			Param& param = m_Params[desc.reserved];
+			SetShaderValue(param, material.Param(i).Pointer());
 		}
 	}
 
-	const Material* mat = dynamic_cast<const Material*>(renderData);
-
-	if(mat) {
-		for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
-			if(it->paramType == ParamType_DefaultMaterial) {
-				ShaderParam& param = it->param;
-				switch(it->index) {
-				case DefaultParam_Shininess: param.SetShaderValue(&mat->shininess); break;
-				case DefaultParam_Diffuse: param.SetShaderValue(&mat->diffuse); break;
-				case DefaultParam_Emissive: param.SetShaderValue(&mat->emissive); break;
-				case DefaultParam_Specular: param.SetShaderValue(&mat->specular); break;
-				default: continue;
-				}
-			}
-		}
-	}
-
-}
-
-void ShaderD3D9::LoadSceneValues()
-{
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
-		if(it->paramType == ParamType_Scene) {
-			it->param.SetShaderValue(m_SceneValues->GetParamValue(it->index));
+		if(it->paramType == ParamType_DefaultMaterial) {
+			switch(it->index) {
+			case DefaultParam_Shininess: SetShaderValue(*it, &material.shininess); break;
+			case DefaultParam_Diffuse: SetShaderValue(*it, &material.diffuse); break;
+			case DefaultParam_Emissive: SetShaderValue(*it, &material.emissive); break;
+			case DefaultParam_Specular: SetShaderValue(*it, &material.specular); break;
+			default: continue;
+			}
 		}
+	}
+
+	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
+		if(it->paramType == ParamType_Scene)
+			SetShaderValue(*it, m_Renderer->GetParam(it->index).Pointer());
 	}
 }
 
@@ -507,22 +499,18 @@ void ShaderD3D9::CastShaderToType(core::Type type, const void* in, void* out)
 	}
 }
 
-void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
-	u32 registerVSCount, u32 registerPSCount,
-	core::Type type, u32 size, void* out)
+void ShaderD3D9::GetShaderValue(const Param& param, void* out)
 {
-	LUX_UNUSED(size);
-
-	if((registerVS == 0xFFFFFFFF && registerPS == 0xFFFFFFFF) || type == core::Type::Unknown)
+	if((param.registerVS == 0xFFFFFFFF && param.registerPS == 0xFFFFFFFF) || param.type == core::Type::Unknown)
 		return;
 
 	int i[4];
 	float f[16];
 	BOOL b[4];
 	u32 regId;
-	if(registerVS != -1) {
-		regId = registerVS;
-		switch((core::Type::EType)type) {
+	if(param.registerVS != 0xFFFFFFFF) {
+		regId = param.registerVS;
+		switch((core::Type::EType)param.type) {
 		case core::Type::Bool:
 		{
 			m_D3DDevice->GetVertexShaderConstantB(regId, b, 1);
@@ -553,13 +541,13 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
 			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, 1);
 			break;
 		case core::Type::Matrix:
-			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, registerVSCount);
-			for(u32 j = registerVSCount; j < 4; ++j)
+			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, param.registerVSCount);
+			for(u32 j = param.registerVSCount; j < 4; ++j)
 				((float*)out)[j * 4] = 0;
 			break;
 		case core::Type::Internal_MatrixCol:
-			m_D3DDevice->GetVertexShaderConstantF(regId, f, registerVSCount);
-			for(u32 j = registerVSCount; j < 4; ++j)
+			m_D3DDevice->GetVertexShaderConstantF(regId, f, param.registerVSCount);
+			for(u32 j = param.registerVSCount; j < 4; ++j)
 				((float*)f)[j * 4] = 0;
 			{
 				float* pf = (float*)out;
@@ -573,8 +561,8 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
 			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	} else {
-		regId = registerPS;
-		switch((core::Type::EType)type) {
+		regId = param.registerPS;
+		switch((core::Type::EType)param.type) {
 		case core::Type::Bool:
 		{
 			m_D3DDevice->GetPixelShaderConstantB(regId, b, 1);
@@ -605,13 +593,13 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
 			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, 1);
 			break;
 		case core::Type::Matrix:
-			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, registerPSCount);
-			for(u32 j = registerVSCount; j < 4; ++j)
+			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, param.registerPSCount);
+			for(u32 j = param.registerVSCount; j < 4; ++j)
 				((float*)out)[j * 4] = 0;
 			break;
 		case core::Type::Internal_MatrixCol:
-			m_D3DDevice->GetPixelShaderConstantF(regId, f, registerPSCount);
-			for(u32 j = registerVSCount; j < 4; ++j)
+			m_D3DDevice->GetPixelShaderConstantF(regId, f, param.registerPSCount);
+			for(u32 j = param.registerVSCount; j < 4; ++j)
 				((float*)f)[j * 4] = 0;
 			{
 				float* pf = (float*)out;
@@ -628,24 +616,20 @@ void ShaderD3D9::GetShaderValue(u32 registerVS, u32 registerPS,
 	}
 }
 
-void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS,
-	u32 registerVSCount, u32 registerPSCount,
-	core::Type type, u32 size, const void* data)
+void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 {
-	LUX_UNUSED(size);
-
-	if((registerVS == -1 && registerPS == -1) || type == core::Type::Unknown)
+	if((param.registerVS == 0xFFFFFFFF && param.registerPS == 0xFFFFFFFF) || param.type == core::Type::Unknown)
 		return;
 
 	static u32 v[16];
 
-	CastTypeToShader(type, data, v);
+	CastTypeToShader(param.type, data, v);
 
 	u32 regId;
 	HRESULT hr;
-	if(registerVS != -1) {
-		regId = registerVS;
-		switch((core::Type::EType)type) {
+	if(param.registerVS != 0xFFFFFFFF) {
+		regId = param.registerVS;
+		switch((core::Type::EType)param.type) {
 		case core::Type::Bool:
 			hr = m_D3DDevice->SetVertexShaderConstantB(regId, (BOOL*)v, 1);
 			break;
@@ -661,16 +645,16 @@ void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS,
 			break;
 		case core::Type::Matrix:
 		case core::Type::Internal_MatrixCol:
-			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, registerVSCount);
+			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, param.registerVSCount);
 			break;
 
 		default:
 			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	}
-	if(registerPS != -1) {
-		regId = registerPS;
-		switch((core::Type::EType)type) {
+	if(param.registerPS != 0xFFFFFFFF) {
+		regId = param.registerPS;
+		switch((core::Type::EType)param.type) {
 		case core::Type::Bool:
 			hr = m_D3DDevice->SetPixelShaderConstantB(regId, (BOOL*)v, 1);
 			break;
@@ -687,7 +671,7 @@ void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS,
 
 		case core::Type::Matrix:
 		case core::Type::Internal_MatrixCol:
-			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, registerPSCount);
+			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, param.registerPSCount);
 			break;
 
 		default:
@@ -696,7 +680,7 @@ void ShaderD3D9::SetShaderValue(u32 registerVS, u32 registerPS,
 	}
 }
 
-core::ParamPackage& ShaderD3D9::GetParamPackage()
+const core::ParamPackage& ShaderD3D9::GetParamPackage() const
 {
 	return m_ParamPackage;
 }

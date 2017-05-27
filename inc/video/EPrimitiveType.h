@@ -7,32 +7,29 @@ namespace video
 {
 
 //! Different Primitive Types
-enum EPrimitiveType
+enum class EPrimitiveType
 {
 	//! One point per vertex
-	EPT_POINTS = 0,
+	Points,
 
 	//! One line through all vertices
-	EPT_LINE_STRIP,
+	LineStrip,
 
 	//! Two following vertices, make a line
-	EPT_LINES,
+	Lines,
 
 	//! After the first two vertices, every one creates a new triangle,
 	//! the two older ones and the the create a triangle
-	EPT_TRIANGLE_STRIP,
+	TriangleStrip,
 
 	//! A triangle fan, first point in center
-	EPT_TRIANGLE_FAN,
+	TriangleFan,
 
 	//! Three vertices create a triangle
-	EPT_TRIANGLES,
-
-	//! Single vertices become small quads
-	EPT_POINT_SPRITES
+	Triangles,
 };
 
-}
-}
+} // namespace video
+} // namespace lux
 
 #endif // #ifndef INCLUDED_EPRIMITIVE_TYPE_H

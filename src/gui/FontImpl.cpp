@@ -1,7 +1,9 @@
 #include "FontImpl.h"
 #include "video/VideoDriver.h"
+#include "video/Renderer.h"
 #include "video/Texture.h"
 #include "core/ReferableRegister.h"
+#include "video/VertexTypes.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::gui::FontImpl);
 
@@ -55,7 +57,7 @@ void FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 
 		m_Texture = m_Driver->CreateTexture(math::dimension2du(m_ImageWidth, m_ImageHeight), video::ColorFormat::A8R8G8B8, 0, false);
 
-		video::TextureLock lock(m_Texture, video::BaseTexture::ETLM_OVERWRITE);
+		video::TextureLock lock(m_Texture, video::BaseTexture::ELockMode::Overwrite);
 
 		const FontPixel* srcRow = m_Image;
 		u8* dstRow = lock.data;
@@ -115,7 +117,8 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 {
 	LUX_UNUSED(clip);
 
-	m_Driver->Set2DMaterial(m_Material);
+	auto renderer = m_Driver->GetRenderer();
+	renderer->SetMaterial(m_Material);
 
 	const float italic = 0.0f * m_Scale;
 	const float charHeight = m_CharHeight * m_Scale;
@@ -159,22 +162,22 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 		vertices[vertexCursor].position.x = floorf(cursor.x + italic);
 		vertices[vertexCursor].position.y = floorf(cursor.y);
 		vertices[vertexCursor].color = color;
-		vertices[vertexCursor].texture.x = info.Left;
-		vertices[vertexCursor].texture.y = info.Top;
+		vertices[vertexCursor].texture.x = info.left;
+		vertices[vertexCursor].texture.y = info.top;
 
 		// Top-Right
 		vertices[vertexCursor + 1].position.x = floorf(cursor.x + CharWidth + italic);
 		vertices[vertexCursor + 1].position.y = floorf(cursor.y);
 		vertices[vertexCursor + 1].color = color;
-		vertices[vertexCursor + 1].texture.x = info.Right;
-		vertices[vertexCursor + 1].texture.y = info.Top;
+		vertices[vertexCursor + 1].texture.x = info.right;
+		vertices[vertexCursor + 1].texture.y = info.top;
 
 		// Lower-Right
 		vertices[vertexCursor + 2].position.x = floorf(cursor.x + CharWidth);
 		vertices[vertexCursor + 2].position.y = floorf(cursor.y + charHeight);
 		vertices[vertexCursor + 2].color = color;
-		vertices[vertexCursor + 2].texture.x = info.Right;
-		vertices[vertexCursor + 2].texture.y = info.Bottom;
+		vertices[vertexCursor + 2].texture.x = info.right;
+		vertices[vertexCursor + 2].texture.y = info.bottom;
 
 		vertices[vertexCursor + 3] = vertices[vertexCursor];
 		vertices[vertexCursor + 4] = vertices[vertexCursor + 2];
@@ -183,8 +186,8 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 		vertices[vertexCursor + 5].position.x = floorf(cursor.x);
 		vertices[vertexCursor + 5].position.y = floorf(cursor.y + charHeight);
 		vertices[vertexCursor + 5].color = color;
-		vertices[vertexCursor + 5].texture.x = info.Left;
-		vertices[vertexCursor + 5].texture.y = info.Bottom;
+		vertices[vertexCursor + 5].texture.x = info.left;
+		vertices[vertexCursor + 5].texture.y = info.bottom;
 
 		vertexCursor += 6;
 
@@ -194,20 +197,20 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 			cursor.x += charSpace;
 
 		if(vertexCursor >= 600) {
-			m_Driver->Draw2DPrimitiveList(video::EPT_TRIANGLES,
+			renderer->DrawPrimitiveList(video::EPrimitiveType::Triangles,
 				vertexCursor / 3, vertices,
 				vertexCursor, video::VertexFormat::STANDARD_2D,
-				nullptr, video::EIndexFormat::Bit16);
+				false);
 
 			vertexCursor = 0;
 		}
 	}
 
 	if(vertexCursor > 0) {
-		m_Driver->Draw2DPrimitiveList(video::EPT_TRIANGLES,
+		renderer->DrawPrimitiveList(video::EPrimitiveType::Triangles,
 			vertexCursor / 3, vertices,
 			vertexCursor, video::VertexFormat::STANDARD_2D,
-			nullptr, video::EIndexFormat::Bit16);
+			false);
 	}
 }
 

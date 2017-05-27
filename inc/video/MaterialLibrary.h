@@ -1,13 +1,16 @@
 #ifndef INCLUDED_MATERIALLIBRARY_H
 #define INCLUDED_MATERIALLIBRARY_H
-#include "video/Material.h"
+#include "core/ReferenceCounted.h"
+#include "core/lxString.h"
 #include "EShaderTypes.h"
-#include "video/Shader.h"
 
 namespace lux
 {
 namespace video
 {
+class Shader;
+class Material;
+class MaterialRenderer;
 
 //! The material library
 /**

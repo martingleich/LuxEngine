@@ -1,6 +1,6 @@
 #include "LightSceneNodeImpl.h"
 #include "scene/SceneManager.h"
-#include "video/VideoDriver.h"
+#include "video/Renderer.h"
 #include "core/ReferableRegister.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::scene::LightSceneNodeImpl)
@@ -84,8 +84,8 @@ void LightSceneNodeImpl::OnRegisterSceneNode()
 
 void LightSceneNodeImpl::Render()
 {
-	video::VideoDriver* driver = GetSceneManager()->GetDriver();
-	driver->AddLight(m_LightData);
+	video::Renderer* renderer = GetSceneManager()->GetRenderer();
+	renderer->AddLight(m_LightData);
 }
 
 core::Name LightSceneNodeImpl::GetReferableSubType() const

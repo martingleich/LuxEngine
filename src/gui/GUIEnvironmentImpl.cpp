@@ -4,6 +4,7 @@
 #include "video/VideoDriver.h"
 #include "video/images/ImageSystem.h"
 #include "video/MaterialLibrary.h"
+#include "video/PipelineSettings.h"
 
 #include "FontLoader.h"
 #include "gui/FontImpl.h"
@@ -32,15 +33,13 @@ GUIEnvironmentImpl::GUIEnvironmentImpl(
 {
 	// Register font material renderer
 	video::MaterialRenderer* FontRenderer = m_MatLibrary->CloneMaterialRenderer("font", "transparent");
-	video::PipelineSettings& ps = FontRenderer->GetPipeline();
-	ps.MagFilter = video::ETextureFilter::Point;
-	ps.MinFilter = video::ETextureFilter::Linear;
-	ps.ZWriteEnabled = false;
-	ps.ZBufferFunc = video::EZComparisonFunc::Always;
-	ps.BackfaceCulling = false;
-	ps.UseMIPMaps = false;
-	ps.Lighting = false;
-	ps.FogEnabled = false;
+	video::PipelineSettings ps = FontRenderer->GetPipeline();
+	ps.zWriteEnabled = false;
+	ps.zBufferFunc = video::EZComparisonFunc::Always;
+	ps.backfaceCulling = false;
+	ps.lighting = false;
+	ps.fogEnabled = false;
+	FontRenderer->SetPipeline(ps);
 
 	// Register font loader
 	m_ResSys->AddResourceLoader(LUX_NEW(FontLoader)(

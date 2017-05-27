@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMESHCACHE_H
-#define INCLUDED_IMESHCACHE_H
+#ifndef INCLUDED_MESHCACHE_H
+#define INCLUDED_MESHCACHE_H
 #include "io/path.h"
 #include "core/ReferenceCounted.h"
 
@@ -18,9 +18,7 @@ class GeometryCreatorLib;
 class MeshSystem : public ReferenceCounted
 {
 public:
-	virtual ~MeshSystem()
-	{
-	}
+	virtual ~MeshSystem() {}
 
 	//! Add new mesh to the list
 	/**
@@ -38,9 +36,7 @@ public:
 	virtual StrongRef<GeometryCreatorLib> GetGeometryCreatorLib() = 0;
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

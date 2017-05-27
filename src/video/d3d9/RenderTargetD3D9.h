@@ -10,15 +10,15 @@ namespace lux
 namespace video
 {
 
-class Rendertarget_d3d9 : public RenderTarget
+class RendertargetD3D9 : public RenderTarget
 {
 public:
-	Rendertarget_d3d9() :
+	RendertargetD3D9() :
 		m_Surface(nullptr)
 	{
 	}
 
-	Rendertarget_d3d9(Texture* texture) :
+	RendertargetD3D9(Texture* texture) :
 		RenderTarget(texture),
 		m_Surface(nullptr)
 	{
@@ -33,12 +33,12 @@ public:
 		}
 	}
 
-	Rendertarget_d3d9(const RenderTarget& target) :
-		Rendertarget_d3d9(target.GetTexture())
+	RendertargetD3D9(const RenderTarget& target) :
+		RendertargetD3D9(target.GetTexture())
 	{
 	}
 
-	Rendertarget_d3d9(IDirect3DSurface9* surface) :
+	RendertargetD3D9(IDirect3DSurface9* surface) :
 		m_Surface(surface)
 	{
 		if(m_Surface) {
@@ -56,7 +56,7 @@ public:
 		return m_Surface;
 	}
 
-	bool operator==(const Rendertarget_d3d9& other)
+	bool operator==(const RendertargetD3D9& other)
 	{
 		return m_Surface == other.m_Surface;
 	}

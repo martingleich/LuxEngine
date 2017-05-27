@@ -1,6 +1,6 @@
 #ifndef INCLUDED_LX_ASSERT_H
 #define INCLUDED_LX_ASSERT_H
-#include <cstdlib>
+#include <cstddef>
 
 namespace lux
 {

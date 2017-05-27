@@ -3,6 +3,9 @@
 #include "video/VideoDriver.h"
 #include "video/SubMesh.h"
 #include "scene/mesh/Mesh.h"
+#include "scene/mesh/MeshSystem.h"
+
+#include "resources/ResourceSystem.h"
 
 #include "scene/mesh/GeometryCreatorPlane.h"
 #include "scene/mesh/GeometryCreatorSphereUV.h"

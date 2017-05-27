@@ -1,5 +1,7 @@
 #include "ImageSystemImpl.h"
 
+#include "resources/ResourceSystem.h"
+
 #include "io/FileSystem.h"
 #include "io/File.h"
 
@@ -92,7 +94,7 @@ public:
 		texture->Init(size, format, 0, false, false);
 
 		video::ImageLock lock(img);
-		video::TextureLock texLock(texture, BaseTexture::ETLM_OVERWRITE);
+		video::TextureLock texLock(texture, BaseTexture::ELockMode::Overwrite);
 
 		ColorConverter::ConvertByFormat(
 			lock.data, img->GetColorFormat(),
@@ -261,8 +263,8 @@ ImageSystemImpl::ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver*
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(MultiImageToCubeTextureLoader)(m_ResourceSystem, this));
 
 #ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
-	if(m_Driver && m_Driver->GetVideoDriverType() == EVideoDriver::Direct3D9) {
-		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetDevice());
+	if(m_Driver && m_Driver->GetVideoDriverType() == EDriverType::Direct3D9) {
+		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetLowLevelDevice());
 		m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderD3DX)(d3dDevice));
 	}
 #endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
@@ -294,7 +296,7 @@ StrongRef<Texture> ImageSystemImpl::CreateTexture(ColorFormat format, math::dime
 		GetTextureCreationFlag(ETCF_CREATE_MIP_MAPS) ? 0 : 1, isDynamic);
 
 	if(imageBits) {
-		video::TextureLock lock(texture, BaseTexture::ETLM_OVERWRITE);
+		video::TextureLock lock(texture, BaseTexture::ELockMode::Overwrite);
 		ColorConverter::ConvertByFormat(imageBits, srcFormat,
 			lock.data, format,
 			size.width, size.height, 0, lock.pitch);
@@ -343,7 +345,7 @@ StrongRef<CubeTexture> ImageSystemImpl::CreateCubeTexture(StrongRef<Image> image
 	StrongRef<CubeTexture> texture = CreateCubeTexture(format, size);
 
 	for(u32 i = 0; i < 6; ++i) {
-		video::CubeTextureLock lock(texture, BaseTexture::ETLM_OVERWRITE, (CubeTexture::EFace)i);
+		video::CubeTextureLock lock(texture, BaseTexture::ELockMode::Overwrite, (CubeTexture::EFace)i);
 		video::ImageLock imgLock(images[i]);
 
 		ColorConverter::ConvertByFormat(
@@ -381,7 +383,7 @@ void ImageSystemImpl::InitCubeTexture(StrongRef<Image> images[6], CubeTexture* t
 
 	tex->Init(size, format, false);
 	for(u32 i = 0; i < 6; ++i) {
-		video::CubeTextureLock lock(tex, BaseTexture::ETLM_OVERWRITE, (CubeTexture::EFace)i);
+		video::CubeTextureLock lock(tex, BaseTexture::ELockMode::Overwrite, (CubeTexture::EFace)i);
 		video::ImageLock imgLock(images[i]);
 
 		ColorConverter::ConvertByFormat(
@@ -539,7 +541,7 @@ StrongRef<video::Texture> ImageSystemImpl::AddChromaKeyedTexture(video::Image* i
 
 	auto texture = AddTexture(image->GetOrigin().str, image->GetSize(), video::ColorFormat::A8R8G8B8);
 	{
-		video::TextureLock texLock(texture, video::BaseTexture::ETLM_OVERWRITE);
+		video::TextureLock texLock(texture, video::BaseTexture::ELockMode::Overwrite);
 		u32 real_key = ((u32)key & 0x00FFFFFF);
 
 		video::ImageLock imgLock(image);

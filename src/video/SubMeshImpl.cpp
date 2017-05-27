@@ -1,6 +1,7 @@
 #include "SubMeshImpl.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
+#include "video/VertexFormats.h"
 
 namespace lux
 {
@@ -11,7 +12,7 @@ SubMeshImpl::SubMeshImpl() :
 	m_Material(video::IdentityMaterial),
 	m_Vertices(nullptr),
 	m_Indices(nullptr),
-	m_PrimitveType(EPT_TRIANGLES)
+	m_PrimitveType(EPrimitiveType::Triangles)
 {
 }
 
@@ -19,7 +20,7 @@ SubMeshImpl::SubMeshImpl(VertexBuffer* vertices, IndexBuffer* indices) :
 	m_Material(video::IdentityMaterial),
 	m_Vertices(vertices),
 	m_Indices(indices),
-	m_PrimitveType(EPT_TRIANGLES)
+	m_PrimitveType(EPrimitiveType::Triangles)
 {
 }
 
@@ -44,17 +45,16 @@ u32 SubMeshImpl::GetPrimitveCount() const
 		pointCount = m_Vertices->GetSize();
 
 	switch(m_PrimitveType) {
-	case video::EPT_LINES:
+	case video::EPrimitiveType::Lines:
 		return pointCount / 2;
-	case video::EPT_LINE_STRIP:
+	case video::EPrimitiveType::LineStrip:
 		return pointCount > 0 ? pointCount - 1 : 0;
-	case video::EPT_POINTS:
-	case video::EPT_POINT_SPRITES:
+	case video::EPrimitiveType::Points:
 		return pointCount;
-	case video::EPT_TRIANGLES:
+	case video::EPrimitiveType::Triangles:
 		return pointCount / 3;
-	case video::EPT_TRIANGLE_FAN:
-	case video::EPT_TRIANGLE_STRIP:
+	case video::EPrimitiveType::TriangleFan:
+	case video::EPrimitiveType::TriangleStrip:
 		return pointCount > 2 ? pointCount - 2 : 0;
 	};
 

@@ -1,6 +1,7 @@
 #ifndef INCLUDED_CAMERASCENENODE_IMPL_H
 #define INCLUDED_CAMERASCENENODE_IMPL_H
 #include "scene/nodes/CameraSceneNode.h"
+#include "video/RenderTarget.h"
 
 namespace lux
 {

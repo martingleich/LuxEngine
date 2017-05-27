@@ -1,10 +1,15 @@
 #include "SceneManagerImpl.h"
 #include "video/VideoDriver.h"
-
+#include "video/Renderer.h"
+#include "video/RenderTarget.h"
 #include "video/MaterialLibrary.h"
 #include "video/images/ImageSystem.h"
+#include "video/PipelineSettings.h"
+
 #include "scene/mesh/MeshSystem.h"
 #include "io/FileSystem.h"
+
+#include "resources/ResourceSystem.h"
 
 #include "core/ReferableFactory.h"
 
@@ -123,8 +128,11 @@ SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	m_AmbientColor(0)
 {
 	m_RootSceneNode = LUX_NEW(RootSceneNode)(this);
+	m_Renderer = m_Driver->GetRenderer();
 
 	m_Overwrites.Resize(ESNRP_COUNT);
+
+	m_Fog.isActive = false;
 }
 
 SceneManagerImpl::~SceneManagerImpl()
@@ -301,6 +309,11 @@ video::VideoDriver* SceneManagerImpl::GetDriver()
 	return m_Driver;
 }
 
+video::Renderer* SceneManagerImpl::GetRenderer()
+{
+	return m_Renderer;
+}
+
 video::MaterialLibrary* SceneManagerImpl::GetMaterialLibrary()
 {
 	return m_MatLib;
@@ -378,7 +391,7 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 		for(size_t i = 0; i < count; ++i) {
 			// Ist ein material transparent, dann gilt der ganze Knoten als transparent
 			video::MaterialRenderer* renderer = node->GetMaterial(i).GetRenderer();
-			if(renderer && renderer->IsTransparent()) {
+			if(renderer && renderer->GetRequirements() == video::MaterialRenderer::ERequirement::Transparent) {
 				m_TransparentNodeList.PushBack(STransparentNodeEntry(node, m_AbsoluteCamPos));
 				wasTaken = true;
 				break;
@@ -434,7 +447,7 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 	camList.Sort();
 
 	if(!beginScene) {
-		if(m_Driver->GetRenderTarget() != camList[0].camera->GetRenderTarget()) {
+		if(m_Renderer->GetRenderTarget() != camList[0].camera->GetRenderTarget()) {
 			log::Error("Scenemanager.DrawAll: Already started scene uses diffrent rendertarget than first camera.");
 			return false;
 		}
@@ -447,12 +460,12 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 		m_CurrentRenderPass = ESNRP_CAMERA;
 
 		if(it != camList.First() || beginScene) {
-			m_Driver->SetRenderTarget(m_ActiveCamera->GetRenderTarget());
+			m_Renderer->SetRenderTarget(m_ActiveCamera->GetRenderTarget());
 			auto backgroundColor = m_ActiveCamera->GetBackgroundColor();
 			bool clearColor = true;
 			if(backgroundColor.GetAlpha() == 0)
 				clearColor = false;
-			m_Driver->BeginScene(clearColor, true, backgroundColor, 1.0f);
+			m_Renderer->BeginScene(clearColor, true, backgroundColor, 1.0f);
 		}
 
 		m_ActiveCamera->Render();
@@ -460,7 +473,7 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 		DrawScene(m_ActiveCamera->GetVirtualRoot());
 
 		if(it != camList.Last() || endScene)
-			m_Driver->EndScene();
+			m_Renderer->EndScene();
 	}
 
 	m_SkyBoxList.Clear();
@@ -486,18 +499,19 @@ void SceneManagerImpl::DrawScene(SceneNode* root)
 		m_RenderRoot = root;
 	}
 
+	m_Renderer->SetFog(m_Fog);
+
 	//-------------------------------------------------------------------------
 	// Die Lichter aktivieren
 	m_CurrentRenderPass = ESNRP_LIGHT;
 
 	EnableOverwrite();
 
-	// Das Hintergrundlicht neu setzten
-	m_Driver->SetAmbient(m_AmbientColor);
+	m_Renderer->GetParam("ambient") = m_AmbientColor;
 
-	m_Driver->ClearLights();
+	m_Renderer->ClearLights();
 
-	size_t maxLightCount = m_Driver->GetDeviceCapability(video::EDriverCaps::MaxLights);
+	size_t maxLightCount = m_Renderer->GetMaxLightCount();
 	maxLightCount = math::Min(maxLightCount, m_LightList.Size());
 
 	for(size_t i = 0; i < maxLightCount; ++i)
@@ -568,9 +582,6 @@ void SceneManagerImpl::ClearDeletionQueue()
 void SceneManagerImpl::Clear()
 {
 	GetRootSceneNode()->RemoveAllChildren();
-
-	if(m_Driver)
-		m_Driver->Set3DMaterial(video::IdentityMaterial);
 }
 
 ESceneNodeRenderPass SceneManagerImpl::GetActRenderPass() const
@@ -596,7 +607,6 @@ SceneNode* SceneManagerImpl::GetSceneNodeByType(core::Name type, SceneNode* star
 	return nullptr;
 }
 
-
 bool SceneManagerImpl::GetSceneNodeArrayByType(core::Name type, core::array<SceneNode*>& array, SceneNode* start, u32 tags)
 {
 	if(!start)
@@ -619,6 +629,16 @@ void SceneManagerImpl::SetAmbient(video::Colorf ambient)
 video::Colorf SceneManagerImpl::GetAmbient()
 {
 	return m_AmbientColor;
+}
+
+void SceneManagerImpl::SetFog(const video::FogData& fog)
+{
+	m_Fog = fog;
+}
+
+const video::FogData& SceneManagerImpl::GetFog() const
+{
+	return m_Fog;
 }
 
 bool SceneManagerImpl::OnEvent(const input::Event& event)
@@ -663,7 +683,7 @@ void SceneManagerImpl::AddPipelineOverwrite(ESceneNodeRenderPass pass, const vid
 void SceneManagerImpl::RemovePipelineOverwrite(ESceneNodeRenderPass pass, const video::PipelineOverwrite& over)
 {
 	for(auto it = m_Overwrites[pass].First(); it != m_Overwrites[pass].End(); ++it) {
-		if(it->Flags == over.Flags) {
+		if(*it == over) {
 			m_Overwrites[pass].Erase(it);
 			return;
 		}
@@ -672,16 +692,14 @@ void SceneManagerImpl::RemovePipelineOverwrite(ESceneNodeRenderPass pass, const 
 
 void SceneManagerImpl::EnableOverwrite()
 {
-	for(auto it = m_Overwrites[m_CurrentRenderPass].First(); it != m_Overwrites[m_CurrentRenderPass].End(); ++it) {
-		m_Driver->PushPipelineOverwrite(*it);
-	}
+	for(auto it = m_Overwrites[m_CurrentRenderPass].First(); it != m_Overwrites[m_CurrentRenderPass].End(); ++it)
+		m_Renderer->PushPipelineOverwrite(*it);
 }
 
 void SceneManagerImpl::DisableOverwrite()
 {
-	for(auto it = m_Overwrites[m_CurrentRenderPass].First(); it != m_Overwrites[m_CurrentRenderPass].End(); ++it) {
-		m_Driver->PopPipelineOverwrite();
-	}
+	for(auto it = m_Overwrites[m_CurrentRenderPass].First(); it != m_Overwrites[m_CurrentRenderPass].End(); ++it)
+		m_Renderer->PopPipelineOverwrite();
 }
 
 core::ReferableFactory* SceneManagerImpl::GetReferableFactory() const

@@ -2,6 +2,7 @@
 #define INCLUDED_ZONE_BOX_H
 #include "Zone.h"
 #include "math/Transformation.h"
+#include "core/lxRandom.h"
 
 namespace lux
 {

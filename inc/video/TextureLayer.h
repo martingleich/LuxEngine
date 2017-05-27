@@ -1,16 +1,12 @@
 #ifndef INCLUDED_SMATERIALLAYER_H
 #define INCLUDED_SMATERIALLAYER_H
-
 #include "core/lxTypes.h"
+#include "video/BaseTexture.h"
 
 namespace lux
 {
 namespace video
 {
-
-class BaseTexture;
-class Texture;
-class CubeTexture;
 
 //! How are texturecoordinates outside of [0,1] handeled
 enum class ETextureRepeat
@@ -25,7 +21,6 @@ enum class ETextureRepeat
 class TextureLayer
 {
 public:
-	BaseTexture*  texture;
 	struct RepeatMode
 	{
 		ETextureRepeat u;
@@ -57,44 +52,15 @@ public:
 		}
 	};
 
+public:
+	StrongRef<BaseTexture>  texture;
 	RepeatMode repeat;
 
-	//Konstruktor
-	TextureLayer() :
-		texture(nullptr)
-	{
-	}
-
-	//Kopierkonstuktor
-	TextureLayer(const TextureLayer& other)
-	{
-		*this = other;
-	}
-
-	//Destuktor
-	~TextureLayer()
-	{
-	}
-
-	//Zuweisungsoperator
-	TextureLayer& operator=(const TextureLayer& other)
-	{
-		if(this == &other)
-			return *this;
-
-		texture = other.texture;
-		repeat = other.repeat;
-
-		return *this;
-	}
-
-	//Ungleichheitsopeartor
 	inline bool operator!=(const TextureLayer& other) const
 	{
 		return texture != other.texture || repeat != other.repeat;
 	}
 
-	//Gleichheitoperator
 	inline bool operator==(const TextureLayer& other) const
 	{
 		return !(other != *this);

@@ -14,19 +14,19 @@ public:
 	DrawingCanvas() :
 		m_Data(nullptr), m_Width(0), m_Height(0), m_Pitch(0)
 	{
-		m_Rect.Top = 0;
-		m_Rect.Left = 0;
-		m_Rect.Bottom = m_Height - 1;
-		m_Rect.Right = m_Width - 1;
+		m_Rect.top = 0;
+		m_Rect.left = 0;
+		m_Rect.bottom = m_Height - 1;
+		m_Rect.right = m_Width - 1;
 	}
 
 	DrawingCanvas(void* d, ColorFormat f, const math::dimension2du& dim, u32 p) :
 		m_Data((u8*)d), m_Format(f), m_Width(dim.width), m_Height(dim.height), m_Pitch(p)
 	{
-		m_Rect.Top = 0;
-		m_Rect.Left = 0;
-		m_Rect.Bottom = m_Height - 1;
-		m_Rect.Right = m_Width - 1;
+		m_Rect.top = 0;
+		m_Rect.left = 0;
+		m_Rect.bottom = m_Height - 1;
+		m_Rect.right = m_Width - 1;
 	}
 
 	bool IsValid()
@@ -353,13 +353,13 @@ private:
 	{
 		u8 code = 0;
 
-		if(x < r.Left)
+		if(x < r.left)
 			code |= 1;
-		if(x > r.Right)
+		if(x > r.right)
 			code |= 2;
-		if(y < r.Top)
+		if(y < r.top)
 			code |= 4;
-		if(y > r.Bottom)
+		if(y > r.bottom)
 			code |= 8;
 
 		return code;
@@ -379,17 +379,17 @@ private:
 				int x, y;
 				u8 out = out0 ? out0 : out1;
 				if(out & 8) {
-					x = x0 + ((x1 - x0) * (r.Bottom - y0)) / (y1 - y0);
-					y = r.Bottom;
+					x = x0 + ((x1 - x0) * (r.bottom - y0)) / (y1 - y0);
+					y = r.bottom;
 				} else if(out & 4) {
-					x = x0 + ((x1 - x0) * (r.Top - y0)) / (y1 - y0);
-					y = r.Top;
+					x = x0 + ((x1 - x0) * (r.top - y0)) / (y1 - y0);
+					y = r.top;
 				} else if(out & 2) {
-					y = y0 + ((y1 - y0) * (r.Right - x0)) / (x1 - x0);
-					x = r.Right;
+					y = y0 + ((y1 - y0) * (r.right - x0)) / (x1 - x0);
+					x = r.right;
 				} else if(out & 1) {
-					y = y0 + ((y1 - y0) * (r.Left - x0)) / (x1 - x0);
-					x = r.Left;
+					y = y0 + ((y1 - y0) * (r.left - x0)) / (x1 - x0);
+					x = r.left;
 				}
 
 				if(out == out0) {
@@ -407,14 +407,14 @@ private:
 
 	bool ClipRectangle(s32& left, s32& top, s32& right, s32& bottom, const math::recti&r)
 	{
-		if(left < r.Left)
-			left = r.Left;
-		if(top < r.Top)
-			top = r.Top;
-		if(right > r.Right)
-			right = r.Right;
-		if(bottom > r.Bottom)
-			bottom = r.Bottom;
+		if(left < r.left)
+			left = r.left;
+		if(top < r.top)
+			top = r.top;
+		if(right > r.right)
+			right = r.right;
+		if(bottom > r.bottom)
+			bottom = r.bottom;
 
 		if(right < left)
 			return false;

@@ -1,12 +1,14 @@
 #ifndef INCLUDED_SCENEMANAGER_IMPL_H
 #define INCLUDED_SCENEMANAGER_IMPL_H
 #include "scene/SceneManager.h"
+#include "video/FogData.h"
 
 namespace lux
 {
 namespace video
 {
 class VideoDriver;
+class Renderer;
 }
 namespace core
 {
@@ -82,6 +84,7 @@ public:
 	virtual StrongRef<Collider> CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans);
 	virtual StrongRef<Collider> CreateSphereCollider(const math::vector3f& center, float radius);
 
+	video::Renderer* GetRenderer();
 	video::VideoDriver* GetDriver();
 	io::FileSystem* GetFileSystem();
 	video::MaterialLibrary* GetMaterialLibrary();
@@ -108,6 +111,8 @@ public:
 	virtual void Clear();
 	virtual void SetAmbient(video::Colorf ambient);
 	virtual video::Colorf GetAmbient();
+	virtual void SetFog(const video::FogData& fog);
+	virtual const video::FogData& GetFog() const;
 	virtual ESceneNodeRenderPass GetActRenderPass() const;
 	void RegisterEventReceiver(SceneNode* receiver);
 	void UnregisterEventReceiver(SceneNode* receiver);
@@ -175,6 +180,8 @@ private:
 	};
 private:
 	StrongRef<video::VideoDriver> m_Driver;
+	video::Renderer* m_Renderer;
+
 	StrongRef<io::FileSystem> m_Filesystem;
 	StrongRef<MeshSystem> m_MeshSystem;
 	StrongRef<core::ReferableFactory> m_RefFactory;
@@ -203,6 +210,7 @@ private:
 
 	// Das Hintergrundlicht
 	video::Colorf m_AmbientColor;
+	video::FogData m_Fog;
 
 	// Die DeletionList, alle zu löschenden Knoten sollten ihr hinzugefügt werden, sie werden dann zu einen Zeitpunkt
 	// gelöscht an dem es zu keinen Komplikationen kommen kann
@@ -214,8 +222,6 @@ private:
 };
 
 }
-
 }
-
 
 #endif

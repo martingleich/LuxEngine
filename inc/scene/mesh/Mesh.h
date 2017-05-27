@@ -4,7 +4,7 @@
 #include "video/VertexFormats.h"
 #include "video/HardwareBufferConstants.h"
 #include "video/EPrimitiveType.h"
-#include "resources/ResourceSystem.h"
+#include "resources/Resource.h"
 
 namespace lux
 {
@@ -21,9 +21,7 @@ namespace scene
 class Mesh : public core::Resource
 {
 public:
-	virtual ~Mesh()
-	{
-	}
+	virtual ~Mesh() {}
 
 	//! Removes all Submeshes
 	virtual void Clear() = 0;
@@ -55,12 +53,14 @@ public:
 	*/
 	virtual StrongRef<video::SubMesh> AddSubMesh(video::SubMesh* subMesh) = 0;
 
+	//! Create a new submesh and add it to the mesh
 	virtual StrongRef<video::SubMesh> AddSubMesh(const video::VertexFormat& vertexFormat, video::EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
 		video::EIndexFormat indexType, video::EHardwareBufferMapping indexHWMapping, u32 indexCount,
 		video::EPrimitiveType primitiveType) = 0;
 
+	//! Create a new submesh and add it to the mesh
 	virtual StrongRef<video::SubMesh> AddSubMesh(const video::VertexFormat& vertexFormat = video::VertexFormat::STANDARD,
-		video::EPrimitiveType primitiveType = video::EPT_TRIANGLES,
+		video::EPrimitiveType primitiveType = video::EPrimitiveType::Triangles,
 		u32 primitiveCount = 0,
 		bool dynamic = false) = 0;
 
@@ -85,6 +85,7 @@ public:
 	//! Get a submesh material by index.
 	virtual const video::Material& GetMaterial(size_t index) const = 0;
 
+	//! Get the video driver used by this mesh
 	virtual video::VideoDriver* GetDriver() const = 0;
 
 	virtual core::Name GetResourceType() const
@@ -93,9 +94,7 @@ public:
 	}
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

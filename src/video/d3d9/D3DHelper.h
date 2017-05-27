@@ -2,11 +2,16 @@
 #define INCLUDED_D3DHELPER_H
 
 #ifdef LUX_COMPILE_WITH_D3D9
+#include "StrippedD3D9.h"
 
 #include "video/Color.h"
 #include "video/VertexFormats.h"
-#include "video/Material.h"
-#include "StrippedD3D9.h"
+#include "video/PipelineSettings.h"
+#include "video/AlphaSettings.h"
+#include "video/TextureLayer.h"
+#include "video/FogData.h"
+#include "video/HardwareBufferConstants.h"
+#include "video/EPrimitiveType.h"
 
 namespace lux
 {
@@ -206,18 +211,17 @@ inline D3DCOLORVALUE SColorToD3DColor(const Colorf& color)
 	return out;
 }
 
-inline DWORD GetD3DTextureFilter(ETextureFilter filter)
+inline DWORD GetD3DTextureFilter(BaseTexture::Filter::EFilter filter)
 {
 	switch(filter) {
-	case ETextureFilter::Linear:
+	case BaseTexture::Filter::Linear:
 		return D3DTEXF_LINEAR;
-	case ETextureFilter::Point:
+	case BaseTexture::Filter::Point:
 		return D3DTEXF_POINT;
-	case ETextureFilter::Anisotropic:
+	case BaseTexture::Filter::Anisotropic:
 		return D3DTEXF_ANISOTROPIC;
+	default: throw core::InvalidArgumentException("filter");
 	};
-
-	return 0;
 }
 
 inline const char* GetD3DXShaderProfile(
@@ -294,9 +298,8 @@ inline DWORD GetD3DBlend(EBlendFactor factor)
 		return D3DBLEND_DESTALPHA;
 	case EBlendFactor::OneMinusDstAlpha:
 		return D3DBLEND_INVDESTALPHA;
+	default: throw core::InvalidArgumentException("factor");
 	}
-
-	return 0;
 }
 
 inline DWORD GetD3DZBufferFunc(EZComparisonFunc func)
@@ -318,13 +321,50 @@ inline DWORD GetD3DZBufferFunc(EZComparisonFunc func)
 		return D3DCMP_NEVER;
 	case EZComparisonFunc::NotEqual:
 		return D3DCMP_NOTEQUAL;
+	default: throw core::InvalidArgumentException("func");
 	}
-
-	return 0;
 }
 
+inline D3DFORMAT GetD3DIndexFormat(EIndexFormat indexFormat)
+{
+	switch(indexFormat) {
+	case EIndexFormat::Bit16: return D3DFMT_INDEX16;
+	case EIndexFormat::Bit32: return D3DFMT_INDEX32;
+	default: throw core::InvalidArgumentException("indexFormat");
+	}
 }
+
+inline D3DPRIMITIVETYPE GetD3DPrimitiveType(EPrimitiveType type)
+{
+	switch(type) {
+	case EPrimitiveType::Lines:
+		return D3DPT_LINELIST;
+	case EPrimitiveType::LineStrip:
+		return D3DPT_LINESTRIP;
+	case EPrimitiveType::Points:
+		return D3DPT_POINTLIST;
+	case EPrimitiveType::TriangleFan:
+		return D3DPT_TRIANGLEFAN;
+	case EPrimitiveType::Triangles:
+		return D3DPT_TRIANGLELIST;
+	case EPrimitiveType::TriangleStrip:
+		return D3DPT_TRIANGLESTRIP;
+	default: throw core::InvalidArgumentException("type");
+	}
 }
+
+inline DWORD GetD3DFogType(FogData::EType type)
+{
+	switch(type) {
+	case FogData::EType::Exp: return D3DFOG_EXP;
+	case FogData::EType::ExpSq: return D3DFOG_EXP2;
+	case FogData::EType::Linear: return D3DFOG_LINEAR;
+	default: throw core::InvalidArgumentException("type");
+	}
+}
+
+} // namespace video
+} // namesapce lux
 
 #endif // LUX_COMPILE_WITH_D3D9
 

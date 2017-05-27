@@ -1,6 +1,5 @@
 #ifndef INCLUDED_CUBETEXTURE_D3D9_H
 #define INCLUDED_CUBETEXTURE_D3D9_H
-
 #include "video/CubeTexture.h"
 
 #ifdef LUX_COMPILE_WITH_D3D9
@@ -21,13 +20,16 @@ public:
 
 	void RegenerateMIPMaps();
 
-	LockedRect Lock(ETextureLockMode Mode, EFace Face, u32 MipLevel = 0);
+	LockedRect Lock(ELockMode Mode, EFace Face, u32 MipLevel = 0);
 	void Unlock();
 
 	ColorFormat GetColorFormat() const;
 	void* GetRealTexture();
 	u32 GetLevelCount() const;
 	const math::dimension2du& GetSize() const;
+
+	const Filter& GetFiltering() const;
+	void SetFiltering(const Filter& f);
 
 	StrongRef<Referable> Clone() const;
 
@@ -37,6 +39,7 @@ private:
 	D3DCUBEMAP_FACES m_LockedFace;
 	D3DSURFACE_DESC m_Desc;
 	ColorFormat m_Format;
+	Filter m_Filtering;
 
 	math::dimension2du m_Dimension;
 

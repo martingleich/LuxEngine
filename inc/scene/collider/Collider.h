@@ -1,7 +1,6 @@
 #ifndef INCLUDED_SCENE_COLLIDER_H
 #define INCLUDED_SCENE_COLLIDER_H
 #include "core/Referable.h"
-#include "core/Result.h"
 #include "math/aabbox3d.h"
 #include "math/triangle3d.h"
 

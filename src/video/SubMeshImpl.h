@@ -13,7 +13,7 @@ class SubMeshImpl : public SubMesh
 public:
 	SubMeshImpl();
 	SubMeshImpl(VertexBuffer* vertices, IndexBuffer* indices);
-	void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = video::EPT_TRIANGLES);
+	void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = video::EPrimitiveType::Triangles);
 	video::EPrimitiveType GetPrimitiveType() const;
 	u32 GetPrimitveCount() const;
 	void SetPrimitiveType(video::EPrimitiveType type);

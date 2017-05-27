@@ -1,12 +1,12 @@
 #ifndef INCLUDED_MESHSCENENODE_H
 #define INCLUDED_MESHSCENENODE_H
 #include "scene/SceneNode.h"
-#include "scene/mesh/Mesh.h"
 
 namespace lux
 {
 namespace scene
 {
+class Mesh;
 
 //! Represent a single mesh in the scenegraph
 class MeshSceneNode : public SceneNode
@@ -49,9 +49,7 @@ public:
 	virtual bool GetReadMaterialsOnly() const = 0;
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

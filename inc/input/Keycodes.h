@@ -8,7 +8,6 @@ namespace input
 //! Predefinend key codes
 enum EKeyCode
 {
-	KEY_FORCE_32_BIT = 0xFFFFFFFF,
 	KEY_NONE = 0xFFFFFFFF,  //!< Not defined
 
 	KEY_LBUTTON = 0,  //!< Left mousebutton

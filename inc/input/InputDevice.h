@@ -3,13 +3,11 @@
 #include "input/EventReceiver.h"
 #include "core/lxString.h"
 #include "math/vector2.h"
-#include "core/Result.h"
 
 namespace lux
 {
 namespace input
 {
-
 class InputSystem;
 
 //! Internal class used for creating new input devices.
@@ -175,7 +173,7 @@ public:
 	virtual void Configure(bool isForeground) = 0;
 };
 
-}
-}
+} // namespace input
+} // namespace lux
 
 #endif // #ifndef INCLUDED_INPUT_DEVICE_H

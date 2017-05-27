@@ -1,7 +1,7 @@
 #ifndef INCLUDED_ENUMCLASSFLAGS_H
 #define INCLUDED_ENUMCLASSFLAGS_H
 #include <type_traits>
-#include <stdlib.h>
+#include <cstddef>
 
 namespace lux
 {

@@ -13,38 +13,17 @@ class VideoDriverNull : public VideoDriver
 {
 public:
 	VideoDriverNull(core::ReferableFactory* refFactory);
-	~VideoDriverNull();
 
 	virtual void Init(const DriverConfig& config, gui::Window* Window);
 
-	virtual void SetAmbient(Colorf ambient);
-	virtual Colorf GetAmbient() const;
-
-	virtual void AddLight(const LightData& light);
-	virtual size_t GetLightCount() const;
-	virtual void ClearLights();
-
-	virtual StrongRef<RenderStatistics> GetRenderStatistics() const;
-	virtual StrongRef<scene::SceneValues> GetSceneValues() const;
-
-	virtual EVideoDriver GetVideoDriverType() const;
+	virtual EDriverType GetVideoDriverType() const;
 	virtual const DriverConfig& GetConfig() const;
 	
 	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
 
 protected:
-	core::array<LightData> m_LightList;
-
-	Colorf m_AmbientColor;
-
-	u32 m_SceneValueAmbient;
-
 	StrongRef<core::ReferableFactory> m_RefFactory;
-	StrongRef<RenderStatistics> m_RenderStatistics;
-	StrongRef<scene::SceneValues> m_SceneValues;
-
 	DriverConfig m_Config;
-
 	u32 m_DriverCaps[(u32)EDriverCaps::EDriverCaps_Count];
 };
 

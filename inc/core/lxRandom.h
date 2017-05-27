@@ -199,8 +199,8 @@ public:
 	inline math::vector2f GetVector2(const math::rectf& rect) const
 	{
 		return math::vector2f(
-			GetFloat(rect.Left, rect.Right),
-			GetFloat(rect.Bottom, rect.Top));
+			GetFloat(rect.left, rect.right),
+			GetFloat(rect.bottom, rect.top));
 	}
 
 	//! Generate a random vector inside the unit circle

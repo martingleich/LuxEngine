@@ -37,7 +37,7 @@ public:
 	\param mipLevel Which mipmap level should be locked
 	\return The locked rectangle
 	*/
-	virtual LockedRect Lock(ETextureLockMode mode, EFace face, u32 mipLevel = 0) = 0;
+	virtual LockedRect Lock(ELockMode mode, EFace face, u32 mipLevel = 0) = 0;
 
 	virtual void Unlock() = 0;
 
@@ -49,7 +49,7 @@ public:
 
 struct CubeTextureLock
 {
-	CubeTextureLock(CubeTexture* t, BaseTexture::ETextureLockMode mode, CubeTexture::EFace face, u32 mipLevel = 0) :
+	CubeTextureLock(CubeTexture* t, BaseTexture::ELockMode mode, CubeTexture::EFace face, u32 mipLevel = 0) :
 		base(t)
 	{
 		auto rect = base->Lock(mode, face, mipLevel);

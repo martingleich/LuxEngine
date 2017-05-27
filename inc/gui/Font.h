@@ -1,11 +1,10 @@
 #ifndef INCLUDED_FONT_H
 #define INCLUDED_FONT_H
-#include "core/ReferenceCounted.h"
+#include "resources/Resource.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
 #include "math/rect.h"
 #include "video/Color.h"
-#include "resources/ResourceSystem.h"
 
 namespace lux
 {

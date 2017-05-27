@@ -1,8 +1,13 @@
 #include "SkyBoxSceneNodeImpl.h"
+
 #include "scene/SceneManager.h"
-#include "video/MaterialLibrary.h"
-#include "video/VideoDriver.h"
 #include "scene/nodes/CameraSceneNode.h"
+
+#include "video/MaterialLibrary.h"
+#include "video/Renderer.h"
+#include "video/VertexFormats.h"
+#include "video/PipelineSettings.h"
+
 #include "core/ReferableRegister.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::scene::SkyBoxSceneNodeImpl)
@@ -27,10 +32,10 @@ bool SkyBoxSceneNodeImpl::SetSceneManager(SceneManager* mgr)
 
 void SkyBoxSceneNodeImpl::Render()
 {
-	video::VideoDriver* driver = GetSceneManager()->GetDriver();
+	video::Renderer* renderer = GetSceneManager()->GetRenderer();
 	const CameraSceneNode* camera = GetSceneManager()->GetActiveCamera();
 
-	if(!driver || !camera)
+	if(!renderer || !camera)
 		return;
 
 	math::Transformation t = this->GetAbsoluteTransform();
@@ -42,17 +47,14 @@ void SkyBoxSceneNodeImpl::Render()
 
 	math::matrix4 m;
 	t.ToMatrix(m);
-	driver->SetTransform(video::ETS_WORLD, m);
+	renderer->SetTransform(video::ETransform::World, m);
 
 	// Adjust Pipeline for Skyboxes
 	video::PipelineOverwrite over;
-	over.SetFlags(video::EPF_FOG_ENABLED | video::EPF_LIGHTING | video::EPF_ZWRITE_ENABLED | video::EPF_ZBUFFER);
-	over.Override.FogEnabled = false;
-	over.Override.Lighting = false;
-	over.Override.ZWriteEnabled = false;
-	over.Override.ZBufferFunc = video::EZComparisonFunc::Always;
-	over.Override.UseMIPMaps = false;
-	driver->PushPipelineOverwrite(over);
+	over.disableFog = true;
+	over.disableLighting = true;
+	over.disableZWrite = true;
+	renderer->PushPipelineOverwrite(over);
 	
 	// Die Vertizes
 	static const video::Vertex3DTCoord Vertices[8] =
@@ -67,28 +69,29 @@ void SkyBoxSceneNodeImpl::Render()
 		video::Vertex3DTCoord(-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f)
 	};
 
-	// Die Indizes
 	static const u16 ausIndex[36] =
 	{
-		7, 3, 0, 4, 7, 0,    // Vorderseite
-		5, 1, 2, 6, 5, 2,    // Hinterseite
-		4, 0, 1, 5, 4, 1,    // Linke Seite
-		6, 2, 3, 7, 6, 3,    // Rechte Seite
-		2, 1, 0, 3, 2, 0,    // Oberseite
-		4, 5, 6, 7, 4, 6};// Unterseite
+		7, 3, 0, 4, 7, 0,    // Front
+		5, 1, 2, 6, 5, 2,    // Back
+		4, 0, 1, 5, 4, 1,    // Left
+		6, 2, 3, 7, 6, 3,    // Right
+		2, 1, 0, 3, 2, 0,    // Top
+		4, 5, 6, 7, 4, 6     // Down
+	};
 
 		
 	m_Material.Layer(0) = m_SkyTexture;
-	driver->Set3DMaterial(m_Material);
-	driver->Draw3DPrimitiveList(video::EPT_TRIANGLES,
+	renderer->SetMaterial(m_Material);
+	renderer->DrawIndexedPrimitiveList(video::EPrimitiveType::Triangles,
 		12,
 		Vertices,
 		8,
 		video::VertexFormat::TEXTURE_3D,
 		ausIndex,
-		video::EIndexFormat::Bit16);
+		video::EIndexFormat::Bit16,
+		true);
 
-	driver->PopPipelineOverwrite();
+	renderer->PopPipelineOverwrite();
 }
 
 void SkyBoxSceneNodeImpl::SetSkyTexture(video::CubeTexture* pSkyTexture)

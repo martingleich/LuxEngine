@@ -1,4 +1,4 @@
-#ifndef INCLUDED_ARCHIVE_LOADER_H_H
+#ifndef INCLUDED_ARCHIVE_LOADER_H
 #define INCLUDED_ARCHIVE_LOADER_H
 #include "io/Archive.h"
 

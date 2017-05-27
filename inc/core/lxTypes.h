@@ -140,6 +140,32 @@ public:
 		return TYPE_SIZES[type];
 	}
 
+	bool IsTrivial() const
+	{
+		u32 type = GetBaseType().m_Type;
+		static const bool TRIVIAL_TABLE[] = {
+			false,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			false,
+			false};
+
+		if(type >= (sizeof(TRIVIAL_TABLE) / sizeof(*TRIVIAL_TABLE)))
+			throw Exception("Unknown type used");
+
+		return TRIVIAL_TABLE[type];
+	}
+
 private:
 	EType m_Type;
 };
@@ -182,6 +208,9 @@ The base types are int, u32, float and bool.
 */
 inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, void* toData)
 {
+	if(!fromType.IsTrivial() || !toType.IsTrivial())
+		return false;
+
 	if(fromType == toType) {
 		memcpy(toData, fromData, fromType.GetSize());
 		return true;
@@ -253,9 +282,11 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 
 inline bool IsConvertible(Type fromType, Type toType)
 {
-	if(fromType == toType) {
+	if(!fromType.IsTrivial() || !toType.IsTrivial())
+		return false;
+
+	if(fromType == toType)
 		return true;
-	}
 
 	if(fromType == Type::Integer) {
 		if(toType == Type::U32) {

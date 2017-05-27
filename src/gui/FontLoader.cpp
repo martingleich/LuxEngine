@@ -7,6 +7,7 @@
 #include "gui/FontImpl.h"
 #include "video/Texture.h"
 #include "video/MaterialLibrary.h"
+#include "video/AlphaSettings.h"
 
 namespace lux
 {
@@ -56,8 +57,8 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	struct SCharInfo
 	{
 		u16 character;
-		u16 Left;
-		u16 Top;
+		u16 left;
+		u16 top;
 		u8 B;
 		signed char C;
 		signed char A;
@@ -116,11 +117,11 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 				Internal.B = (float)(CharInfo.B);
 				Internal.C = (float)(CharInfo.C);
 
-				Internal.Left = (float)(CharInfo.Left) * InvWidth;
-				Internal.Top = (float)(CharInfo.Top) * InvHeight;
+				Internal.left = (float)(CharInfo.left) * InvWidth;
+				Internal.top = (float)(CharInfo.top) * InvHeight;
 
-				Internal.Right = (float)(CharInfo.Left + CharInfo.B) * InvWidth;
-				Internal.Bottom = (float)(CharInfo.Top + info.height) * InvHeight;
+				Internal.right = (float)(CharInfo.left + CharInfo.B) * InvWidth;
+				Internal.bottom = (float)(CharInfo.top + info.height) * InvHeight;
 
 				charMap.Set(CharInfo.character, Internal);
 			}
@@ -134,7 +135,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 			fontTexture = m_ImageSystem->AddTexture(file->GetName(), math::dimension2du(image.TextureWidth, image.TextureHeight), video::ColorFormat::A8R8G8B8, false);
 
 			{
-				video::TextureLock texLock(fontTexture, video::BaseTexture::ETLM_OVERWRITE);
+				video::TextureLock texLock(fontTexture, video::BaseTexture::ELockMode::Overwrite);
 
 				u8* rowData = texLock.data;
 				if(image.Compression == 0) {
@@ -171,7 +172,9 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	data.charHeight = info.height;
 	data.material = video::Material(m_MaterialLibrary->GetMaterialRenderer("font"));
 	data.material.Layer(0) = fontTexture;
-	data.material.Param("BlendFunc") = (u32)video::PackTextureBlendFunc(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha);
+	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha,
+		video::EBlendOperator::Add, video::EAlphaSource::Texture);
+	data.material.Param("blendFunc") = alpha.Pack();
 	data.charDistance = 0.0f;
 	data.wordDistance = 1.0f;
 	data.lineDistance = 1.0f;

@@ -12,10 +12,9 @@ namespace input
 class RawMouseDevice : public RawInputDevice
 {
 public:
-	RawMouseDevice(InputSystem* system);
+	RawMouseDevice(InputSystem* system, HANDLE rawHandle);
 
-	EResult Init(HANDLE rawHandle);
-	EResult HandleInput(RAWINPUT* input);
+	void HandleInput(RAWINPUT* input);
 	EEventSource GetType() const;
 	size_t GetElementCount(EEventType type) const;
 	ElemDesc GetElementDesc(EEventType type, u32 code) const;

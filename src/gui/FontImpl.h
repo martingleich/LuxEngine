@@ -12,10 +12,10 @@ namespace gui
 
 struct CharInfo
 {
-	float Left;
-	float Top;
-	float Right;
-	float Bottom;
+	float left;
+	float top;
+	float right;
+	float bottom;
 
 	float A;
 	float B;

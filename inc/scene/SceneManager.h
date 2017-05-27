@@ -3,27 +3,35 @@
 #include "math/vector3.h"
 #include "math/quaternion.h"
 #include "math/line3d.h"
-#include "math/Transformation.h"
 
 #include "core/lxName.h"
 #include "core/lxArray.h"
-#include "core/ReferableFactory.h"
 
 #include "video/Color.h"
-#include "video/PipelineSettings.h"
 
 #include "input/EventReceiver.h"
 
-#include "resources/ResourceSystem.h"
-
 namespace lux
 {
+namespace core
+{
+class ResourceSystem;
+class ReferableFactory;
+}
+namespace math
+{
+class Transformation;
+}
 namespace video
 {
 class VideoDriver;
 class MaterialLibrary;
 class ImageSystem;
 class CubeTexture;
+class Renderer;
+class PipelineSettings;
+class PipelineOverwrite;
+class FogData;
 }
 
 namespace io
@@ -124,6 +132,8 @@ public:
 	// Liefert die Video-Schnittstelle
 	virtual video::VideoDriver* GetDriver() = 0;
 
+	virtual video::Renderer* GetRenderer() = 0;
+
 	// Liefert das Datei-System
 	virtual io::FileSystem* GetFileSystem() = 0;
 
@@ -179,6 +189,9 @@ public:
 	// Fragt die Hintergrund-Beleuchtung ab
 	virtual video::Colorf GetAmbient() = 0;
 
+	virtual void SetFog(const video::FogData& fog) = 0;
+	virtual const video::FogData& GetFog() const = 0;
+
 	// Der aktuelle Renderingpass
 	virtual ESceneNodeRenderPass GetActRenderPass() const = 0;
 
@@ -189,9 +202,7 @@ public:
 	virtual void RemovePipelineOverwrite(ESceneNodeRenderPass pass, const video::PipelineOverwrite& over) = 0;
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

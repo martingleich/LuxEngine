@@ -14,27 +14,37 @@ namespace lux
 namespace core
 {
 
+//! The description of a single parameter
+struct ParamDesc
+{
+	const char* name; //!< The name of the parameter
+	u8 size; //!< The size of the parameter in bytes
+	core::Type type; //!< The type of the parameter
+	u32 id;
+
+	u32 reserved;
+};
+
 //! Represents a single parameter in a parameter package
 class PackageParam
 {
-	friend class ParamPackage;
-	friend class PackagePuffer;
-private:
-	PackageParam(u8 size, core::Type type, u8* data, const char* name) :
-		m_Size(size),
-		m_Type(type),
+public:
+	//! Construct a package param to some data
+	/**
+	\param size The size of parameter in byte
+	\param type The type of the parameter
+	\param data A pointer to the data of the param, must be valid for the lifetime of this object
+	\param name The name of parameter, must be valid for the lifetime of this object(i.e. Is not copied)
+	*/
+	PackageParam(const ParamDesc& desc, u8* data) :
 		m_Data(data),
-		m_Name(name)
+		m_Desc(desc)
 	{
 	}
 
-public:
 	//! Construct an empty invalid parameter package
 	PackageParam() :
-		m_Size(0),
-		m_Type(core::Type::Unknown),
-		m_Data(nullptr),
-		m_Name(nullptr)
+		m_Data(nullptr)
 	{
 	}
 
@@ -43,11 +53,11 @@ public:
 	operator T()
 	{
 		if(IsValid()) {
-			if(!IsConvertible(m_Type, core::GetTypeInfo<T>()))
-				throw TypeException("Incompatible types used", m_Type, core::GetTypeInfo<T>());
+			if(!IsConvertible(m_Desc.type, core::GetTypeInfo<T>()))
+				throw TypeException("Incompatible types used", m_Desc.type, core::GetTypeInfo<T>());
 
 			T out;
-			ConvertBaseType(m_Type, m_Data, core::GetTypeInfo<T>(), &out);
+			ConvertBaseType(m_Desc.type, m_Data, core::GetTypeInfo<T>(), &out);
 			return out;
 		}
 
@@ -57,7 +67,7 @@ public:
 	template <typename T>
 	T Default(const T& defaultValue)
 	{
-		if(!IsConvertible(m_Type, core::GetTypeInfo<T>()) || !IsValid())
+		if(!IsConvertible(m_Desc.type, core::GetTypeInfo<T>()) || !IsValid())
 			return defaultValue;
 		else
 			return (T)(*this);
@@ -66,8 +76,8 @@ public:
 	//! Access as TextureLayer
 	operator video::TextureLayer()
 	{
-		if(m_Type != core::Type::Texture)
-			throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+		if(m_Desc.type != core::Type::Texture)
+			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Texture);
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
@@ -106,10 +116,10 @@ public:
 	template <typename T>
 	PackageParam& operator=(const T& varVal)
 	{
-		if(!core::IsConvertible(core::GetTypeInfo<T>(), m_Type))
-			throw TypeException("Incompatible types used", core::GetTypeInfo<T>(), m_Type);
+		if(!core::IsConvertible(core::GetTypeInfo<T>(), m_Desc.type))
+			throw TypeException("Incompatible types used", core::GetTypeInfo<T>(), m_Desc.type);
 		if(IsValid())
-			core::ConvertBaseType(core::GetTypeInfo<T>(), &varVal, m_Type, m_Data);
+			core::ConvertBaseType(core::GetTypeInfo<T>(), &varVal, m_Desc.type, m_Data);
 
 		return *this;
 	}
@@ -117,15 +127,11 @@ public:
 	//! Access as Materiallayer
 	PackageParam& operator=(video::TextureLayer& layer)
 	{
-		if(m_Type != core::Type::Texture)
-			throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+		if(m_Desc.type != core::Type::Texture)
+			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Texture);
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		if(layer.texture)
-			layer.texture->Grab();
-		if(((video::TextureLayer*)m_Data)->texture)
-			((video::TextureLayer*)m_Data)->texture->Drop();
 		*(video::TextureLayer*)m_Data = layer;
 
 		return *this;
@@ -134,20 +140,17 @@ public:
 	//! Access as texture
 	PackageParam& operator=(video::BaseTexture* texture)
 	{
-		if(m_Type != core::Type::Texture)
-			throw TypeException("Incompatible types used", m_Type, core::Type::Texture);
+		if(m_Desc.type != core::Type::Texture)
+			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Texture);
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		if(texture)
-			texture->Grab();
-		if(((video::TextureLayer*)m_Data)->texture)
-			((video::TextureLayer*)m_Data)->texture->Drop();
 		((video::TextureLayer*)m_Data)->texture = texture;
 
 		return *this;
 	}
+
 	//! Access as texture
 	PackageParam& operator=(video::Texture* texture)
 	{
@@ -185,20 +188,16 @@ public:
 	*/
 	PackageParam& operator=(const PackageParam& varVal)
 	{
-		if(IsConvertible(m_Type, varVal.m_Type))
-			throw TypeException("Incompatible types used", m_Type, varVal.m_Type);
+		if(IsConvertible(m_Desc.type, varVal.m_Desc.type))
+			throw TypeException("Incompatible types used", m_Desc.type, varVal.m_Desc.type);
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		if(m_Type == core::Type::Texture && varVal.m_Type == core::Type::Texture) {
-			if(((video::TextureLayer*)varVal.m_Data)->texture)
-				((video::TextureLayer*)varVal.m_Data)->texture->Grab();
-			if(((video::TextureLayer*)m_Data)->texture)
-				((video::TextureLayer*)m_Data)->texture->Drop();
-		}
-
-		ConvertBaseType(varVal.m_Type, varVal.m_Data, m_Type, m_Data);
+		if(m_Desc.type == core::Type::Texture)
+			*(video::TextureLayer*)m_Data = *(const video::TextureLayer*)varVal.m_Data;
+		else
+			ConvertBaseType(varVal.m_Desc.type, varVal.m_Data, m_Desc.type, m_Data);
 
 		return *this;
 	}
@@ -210,10 +209,8 @@ public:
 	*/
 	PackageParam& Set(const PackageParam& otherParam)
 	{
-		m_Size = otherParam.m_Size;
-		m_Type = otherParam.m_Type;
 		m_Data = otherParam.m_Data;
-		m_Name = otherParam.m_Name;
+		m_Desc = otherParam.m_Desc;
 
 		return *this;
 	}
@@ -228,7 +225,7 @@ public:
 	const char* GetName() const
 	{
 		if(IsValid())
-			return m_Name;
+			return m_Desc.name;
 		else
 			return "";
 	}
@@ -236,13 +233,18 @@ public:
 	//! The size of the param in bytes
 	u32 GetSize() const
 	{
-		return m_Size;
+		return m_Desc.size;
+	}
+
+	const ParamDesc& GetDesc() const
+	{
+		return m_Desc;
 	}
 
 	//! The type of the param
 	core::Type GetType() const
 	{
-		return m_Type.GetBaseType();
+		return m_Desc.type.GetBaseType();
 	}
 
 	//! A pointer to the raw param data
@@ -252,27 +254,16 @@ public:
 	}
 
 private:
-	u8 m_Size;
-
-	core::Type m_Type;
-	u8* m_Data;
-	const char* m_Name;
+	void* m_Data;
+	ParamDesc m_Desc;
 };
 
-//! Presents a description of the parameters of a MaterialType
+//! A collection of named variable.
+/**
+Can be compared with a class, this class contains members and types, but no values.
+*/
 class LUX_API ParamPackage
 {
-public:
-	//! The description of a single parameter
-	struct ParamDesc
-	{
-		const char* name; //!< The name of the parameter
-		u8 size; //!< The size of the parameter in bytes
-		core::Type type; //!< The type of the parameter
-		u16 reserved; //!< System reserved value
-		const void* defaultValue; //!< The default value of the parameter
-	};
-
 private:
 	struct Entry
 	{
@@ -305,7 +296,7 @@ public:
 	\param reserved Reserved for internal use, dont use this param
 	*/
 	template <typename T>
-	void AddParam(const char* name, const T& defaultValue, u16 reserved = -1)
+	void AddParam(const string_type& name, const T& defaultValue, u16 reserved = -1)
 	{
 		core::Type type = core::GetTypeInfo<T>();
 		if(type == core::Type::Unknown)
@@ -321,13 +312,7 @@ public:
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	\param reserved Reserved for internal use, dont use this param
 	*/
-	void AddParam(core::Type type, const char* name, const void* defaultValue, u16 reserved = -1);
-
-	//! Creates a new Param
-	/**
-	\param desc The description of the parameter
-	*/
-	void AddParam(const ParamDesc& desc);
+	void AddParam(core::Type type, const string_type& name, const void* defaultValue, u16 reserved = -1);
 
 	//! Creates a new ParamPackage
 	/**
@@ -335,8 +320,14 @@ public:
 	*/
 	void* CreatePackage() const;
 
-	//! A pointer to the default data of this package
-	const void* GetDefault() const;
+	//! Destroys a with CreatePackage created ParamBlock
+	void DestroyPackage(void* p) const;
+
+	//! Compare the data of two packages
+	bool ComparePackage(const void* a, const void* b) const;
+
+	//! Create a new package with the same content as an other one
+	void* CopyPackage(const void* b) const;
 
 	//! Retrieves Information about the Param from a index
 	/**
@@ -372,7 +363,7 @@ public:
 	\return The found param
 	\exception Exception name does not exist
 	*/
-	PackageParam GetParamFromName(const string& name, void* baseData, bool isConst) const;
+	PackageParam GetParamFromName(const string_type& name, void* baseData, bool isConst) const;
 
 	//! Get the n-th Param of a specific type
 	/**
@@ -399,7 +390,7 @@ public:
 	\param defaultValue A pointer to the new default value
 	\exception Exception name does not exist
 	*/
-	void SetDefaultValue(const string& param, const void* defaultValue, core::Type type = core::Type::Unknown);
+	void SetDefaultValue(const string_type& param, const void* defaultValue, core::Type type = core::Type::Unknown);
 
 	//! Convienice function for SetDefaultValue.
 	template <typename T>
@@ -422,7 +413,7 @@ public:
 	\return The id of the parameter.
 	\exception Exception name does not exist
 	*/
-	u32 GetParamId(const string& name, core::Type type = core::Type::Unknown) const;
+	u32 GetParamId(const string_type& name, core::Type type = core::Type::Unknown) const;
 
 	//! The number of existing params in this package
 	u32 GetParamCount() const;
@@ -455,13 +446,41 @@ public:
 		SetType(pack);
 	}
 
+	PackagePuffer(const PackagePuffer& other) :
+		m_Pack(other.m_Pack)
+	{
+		if(m_Pack)
+			m_Data = m_Pack->CopyPackage(other.m_Data);
+	}
+
+	~PackagePuffer()
+	{
+		if(m_Pack)
+			m_Pack->DestroyPackage(m_Data);
+	}
+
+	PackagePuffer& operator=(const PackagePuffer& other)
+	{
+		if(m_Pack)
+			m_Pack->DestroyPackage(m_Data);
+
+		m_Pack = other.m_Pack;
+
+		if(m_Pack)
+			m_Data = m_Pack->CopyPackage(other.m_Data);
+
+		return *this;
+	}
+
 	//! Equality
 	bool operator==(const PackagePuffer& other) const
 	{
 		if(m_Pack != other.m_Pack)
 			return false;
+		if(m_Pack == nullptr)
+			return true;
 
-		return (memcmp(m_Data, other.m_Data, m_Pack->GetTotalSize()) == 0);
+		return m_Pack->ComparePackage(m_Data, other.m_Data);
 	}
 
 	//! Unequality
@@ -482,8 +501,9 @@ public:
 		}
 
 		if(m_Pack != pack) {
-			m_Data.SetMinSize(pack->GetTotalSize());
-			memcpy(m_Data, pack->GetDefault(), pack->GetTotalSize());
+			if(m_Pack)
+				m_Pack->DestroyPackage(m_Data);
+			m_Data = pack->CreatePackage();
 			m_Pack = pack;
 		}
 	}
@@ -497,8 +517,10 @@ public:
 	//! Reset the puffer to its default state
 	void Reset()
 	{
-		if(m_Pack)
-			memcpy(m_Data, m_Pack->GetDefault(), m_Pack->GetTotalSize());
+		if(m_Pack) {
+			m_Pack->DestroyPackage(m_Data);
+			m_Data = m_Pack->CreatePackage();
+		}
 	}
 
 	//! Get a param from its name
@@ -506,12 +528,12 @@ public:
 	\param name The name of the param
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromName(const string& name, bool isConst) const
+	PackageParam FromName(const string_type& name, bool isConst) const
 	{
 		if(!m_Pack)
 			throw Exception("No param pack set");
 
-		return m_Pack->GetParamFromName(name, m_Data.GetChangable(), isConst);
+		return m_Pack->GetParamFromName(name, m_Data, isConst);
 	}
 
 	//! Get a param from its type
@@ -525,7 +547,7 @@ public:
 		if(!m_Pack)
 			throw Exception("No param pack set");
 
-		return m_Pack->GetParamFromType(type, index, m_Data.GetChangable(), isConst);
+		return m_Pack->GetParamFromType(type, index, m_Data, isConst);
 	}
 
 	//! Get a param from its id
@@ -536,7 +558,7 @@ public:
 	PackageParam FromID(u32 id, bool isConst) const
 	{
 		if(m_Pack)
-			return m_Pack->GetParam(id, m_Data.GetChangable(), isConst);
+			return m_Pack->GetParam(id, m_Data, isConst);
 		else
 			return PackageParam();
 	}
@@ -559,12 +581,12 @@ public:
 			return 0;
 	}
 
-	core::PackageParam Param(const string& name)
+	core::PackageParam Param(const string_type& name)
 	{
 		return FromName(name, false);
 	}
 
-	core::PackageParam Param(const string& name) const
+	core::PackageParam Param(const string_type& name) const
 	{
 		return FromName(name, true);
 	}
@@ -581,7 +603,143 @@ public:
 
 private:
 	const ParamPackage* m_Pack;
-	core::mem::RawMemory m_Data;
+	void* m_Data;
+};
+
+class ParamList
+{
+public:
+	struct Param
+	{
+		string name;
+		u8* data;
+		core::Type type;
+
+		Param() :
+			data(nullptr)
+		{
+		}
+
+		Param(const Param& other) :
+			name(other.name),
+			type(other.type)
+		{
+			data = LUX_NEW_ARRAY(u8, type.GetSize());
+			if(type == core::Type::Texture)
+				new (data) video::TextureLayer(*(const video::TextureLayer*)other.data);
+			else {
+				lxAssert(type.IsTrivial());
+				memcpy(data, other.data, type.GetSize());
+			}
+		}
+
+		Param(Param&& old) :
+			name(std::move(old.name)),
+			type(std::move(old.type)),
+			data(old.data)
+		{
+			old.data = nullptr;
+		}
+
+		Param& operator=(const Param& other)
+		{
+			this->~Param();
+			data = LUX_NEW_ARRAY(u8, type.GetSize());
+			if(type == core::Type::Texture)
+				new (data) video::TextureLayer(*(const video::TextureLayer*)other.data);
+			else {
+				lxAssert(type.IsTrivial());
+				memcpy(data, other.data, type.GetSize());
+			}
+
+			return *this;
+		}
+
+		Param& operator=(Param&& old)
+		{
+			this->~Param();
+			name = std::move(old.name);
+			type = std::move(old.type);
+			data = old.data;
+
+			old.data = nullptr;
+
+			return *this;
+		}
+
+		Param(const string_type& n, core::Type t) :
+			name(n.data),
+			type(t)
+		{
+			data = LUX_NEW_ARRAY(u8, type.GetSize());
+			if(type == core::Type::Texture)
+				new (data) video::TextureLayer();
+			else
+				lxAssert(type.IsTrivial());
+		}
+
+		~Param()
+		{
+			if(type == core::Type::Texture)
+				((video::TextureLayer*)data)->~TextureLayer();
+			else
+				lxAssert(type.IsTrivial());
+
+			LUX_FREE_ARRAY(data);
+		}
+	};
+
+public:
+	u32 AddParam(const string_type& name, core::Type type)
+	{
+		u32 id;
+		if(GetId(name, id))
+			throw core::InvalidArgumentException("name", "Name already used");
+
+		m_Params.PushBack(std::move(Param(name, type)));
+		return (m_Params.Size() - 1);
+	}
+
+	u32 GetId(const string_type& name) const
+	{
+		u32 id;
+		if(!GetId(name, id))
+			throw core::ObjectNotFoundException(name.data);
+		return id;
+	}
+
+	core::PackageParam operator[](u32 id) const
+	{
+		const auto& p = m_Params.At(id);
+
+		core::ParamDesc desc;
+		desc.id = id;
+		desc.name = p.name.Data();
+		desc.type = p.type;
+		desc.size = (u8)p.type.GetSize();
+
+		return core::PackageParam(desc, p.data);
+	}
+
+	u32 Size() const
+	{
+		return m_Params.Size();
+	}
+
+private:
+	bool GetId(const string_type& name, u32& outId) const
+	{
+		for(size_t i = 0; i < m_Params.Size(); ++i) {
+			if(m_Params[i].name == name) {
+				outId = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
+private:
+	core::array<Param> m_Params;
 };
 
 } // namespace core

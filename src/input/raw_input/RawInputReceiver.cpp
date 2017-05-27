@@ -5,6 +5,10 @@
 #include "RawInputDeviceMouse.h"
 #include "RawInputDeviceJoystick.h"
 
+#include "LuxEngine/Win32Exception.h"
+
+#include "core/Logger.h"
+
 namespace lux
 {
 namespace input
@@ -75,54 +79,41 @@ StrongRef<InputSystem> RawInputReceiver::GetSystem() const
 	return m_InputSystem;
 }
 
-EResult RawInputReceiver::GetRawInputData(HRAWINPUT raw, RAWINPUT*& data)
+RAWINPUT* RawInputReceiver::GetRawInputData(HRAWINPUT raw)
 {
-	data = nullptr;
 	UINT Size = 0;
 	::GetRawInputData(raw, RID_INPUT, NULL, &Size, sizeof(RAWINPUTHEADER));
 	m_RawData.SetMinSize(Size);
 
 	UINT Return = ::GetRawInputData(raw, RID_INPUT, m_RawData, &Size, sizeof(RAWINPUTHEADER));
 	if(Return != Size)
-		return EResult::Failed;
+		throw core::Win32Exception(GetLastError());
 
-	data = (RAWINPUT*)m_RawData;
-
-	return EResult::Succeeded;
+	return (RAWINPUT*)m_RawData;
 }
 
-EResult RawInputReceiver::CreateDevice(HANDLE rawHandle, StrongRef<RawInputDevice>& device)
+StrongRef<RawInputDevice> RawInputReceiver::CreateDevice(HANDLE rawHandle)
 {
-	device = nullptr;
-
 	RID_DEVICE_INFO info;
 	UINT buffer_size;
 	info.cbSize = sizeof(info);
 	buffer_size = sizeof(info);
 	if(GetRawInputDeviceInfoW(rawHandle, RIDI_DEVICEINFO, &info, &buffer_size) == -1)
-		return EResult::Failed;
+		throw core::Win32Exception(GetLastError());
 
 	switch(info.dwType) {
 	case RIM_TYPEKEYBOARD:
-		device = LUX_NEW(RawKeyboardDevice)(m_InputSystem);
+		return LUX_NEW(RawKeyboardDevice)(m_InputSystem, rawHandle);
 		break;
 	case RIM_TYPEMOUSE:
-		device = LUX_NEW(RawMouseDevice)(m_InputSystem);
+		return LUX_NEW(RawMouseDevice)(m_InputSystem, rawHandle);
 		break;
 	case RIM_TYPEHID:
-		device = LUX_NEW(RawJoystickDevice)(m_InputSystem);
+		return LUX_NEW(RawJoystickDevice)(m_InputSystem, rawHandle);
 		break;
 	default:
-		lxAssertNeverReach("Unknown raw device type.");
-		return EResult::Failed;
+		throw core::RuntimeException("Unsupported device type");
 	}
-
-	if(Failed(device->Init(rawHandle))) {
-		device = nullptr;
-		return EResult::Failed;
-	}
-
-	return EResult::Succeeded;
 }
 
 void RawInputReceiver::DestroyDevice(RawInputDevice* device)
@@ -135,21 +126,18 @@ void RawInputReceiver::DestroyDevice(RawInputDevice* device)
 	}
 }
 
-EResult RawInputReceiver::GetDevice(HANDLE rawHandle, StrongRef<RawInputDevice>& device)
+StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle)
 {
-	device = nullptr;
-
 	auto it = m_DeviceMap.Find(rawHandle);
+	StrongRef<RawInputDevice> out;
 	if(it == m_DeviceMap.End()) {
-		if(Failed(CreateDevice(rawHandle, device)))
-			return EResult::Failed;
-
-		m_DeviceMap.Set(rawHandle, device);
+		out = CreateDevice(rawHandle);
+		m_DeviceMap.Set(rawHandle, out);
 	} else {
-		device = *it;
+		out = *it;
 	}
 
-	return EResult::Succeeded;
+	return out;
 }
 
 bool RawInputReceiver::HandleMessage(UINT msg,
@@ -161,14 +149,16 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 	switch(msg) {
 	case WM_INPUT:
 	{
-		RAWINPUT* raw_data;
-		GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), raw_data);
-		if(raw_data) {
-			StrongRef<RawInputDevice> device;
-			GetDevice(raw_data->header.hDevice, device);
+		try {
+			RAWINPUT* raw_data = GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam));
+			if(raw_data) {
+				StrongRef<RawInputDevice> device = GetDevice(raw_data->header.hDevice);
 
-			if(device)
-				device->HandleInput(raw_data);
+				if(device)
+					device->HandleInput(raw_data);
+			}
+		} catch(core::RuntimeException&) {
+			// Can't receive input -> just ignore the input
 		}
 		result = S_OK;
 		ret = true;
@@ -176,19 +166,23 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 	}
 	case WM_INPUT_DEVICE_CHANGE:
 	{
-		StrongRef<RawInputDevice> device;
-		GetDevice(reinterpret_cast<HANDLE>(lParam), device);
-		if(device) {
-			if(wParam == GIDC_ARRIVAL)
-				(void)0; /* We only connect with devices, which have sent input at least one time*/
-			if(wParam == GIDC_REMOVAL) {
-				InputDevice* userDevice = device->GetDevice();
+		HANDLE hDevice = reinterpret_cast<HANDLE>(lParam);
+		try {
+			StrongRef<RawInputDevice> device = GetDevice(hDevice);
+			if(device) {
+				if(wParam == GIDC_ARRIVAL)
+					(void)0; /* We only connect with devices, which have sent input at least one time*/
+				if(wParam == GIDC_REMOVAL) {
+					InputDevice* userDevice = device->GetDevice();
 
-				if(userDevice)
-					userDevice->Disconnect();
+					if(userDevice)
+						userDevice->Disconnect();
 
-				DestroyDevice(device);
+					DestroyDevice(device);
+				}
 			}
+		} catch(core::RuntimeException& e) {
+			log::Debug("Detected unsupported device(~a): ~s", hDevice, e.What());
 		}
 		result = S_OK;
 		ret = true;
@@ -234,12 +228,14 @@ u32 RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 	for(size_t i = 0; i < device_list.Size(); ++i) {
 		RAWINPUTDEVICELIST& device_info = device_list[i];
 		if(device_info.dwType == win32DeviceType) {
-			StrongRef<RawInputDevice> device;
-			EResult r = GetDevice(device_info.hDevice, device);
-			if(Succeeded(r)) {
+			try {
+				StrongRef<RawInputDevice> device = GetDevice(device_info.hDevice);
 				StrongRef<InputDevice> real_device = m_InputSystem->CreateDevice(device);
 				real_device->Disconnect();
 				++count;
+			} catch(core::RuntimeException& e) {
+				log::Debug("Detected unsupported device(~a): ~s", device_info.hDevice, e.What());
+				break;
 			}
 		}
 	}
@@ -249,4 +245,5 @@ u32 RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 
 }
 }
+
 #endif // LUX_COMPILE_WITH_RAW_INPUT

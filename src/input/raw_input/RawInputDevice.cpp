@@ -1,6 +1,7 @@
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputDevice.h"
 #include "core/lxUnicodeConversion.h"
+#include "LuxEngine/Win32Exception.h"
 
 namespace lux
 {
@@ -41,53 +42,49 @@ void RawInputDevice::SendInputEvent(Event& event)
 	m_System->Update(event);
 }
 
-EResult RawInputDevice::GetDevicePath(HANDLE raw_handle, string& path)
+string RawInputDevice::GetDevicePath(HANDLE raw_handle)
 {
 	// Get Buffer Size
 	UINT bufferSize = 0;
 	if(GetRawInputDeviceInfoW(raw_handle, RIDI_DEVICENAME, NULL, &bufferSize) != 0)
-		return EResult::Failed;
+		throw core::Win32Exception(GetLastError());
 
 	// Get Buffer Data
 	core::array<u16> str;
 	str.Resize(bufferSize);
 	if(GetRawInputDeviceInfoW(raw_handle, RIDI_DEVICENAME, str.Data(), &bufferSize) == -1)
-		return EResult::Failed;
+		throw core::Win32Exception(GetLastError());
 
-	path = core::UTF16ToString(str.Data_c());
+	string path = core::UTF16ToString(str.Data_c());
 	path.ReplaceRange("\\", path.First() + 1, 1); // Old windows bug, sometimes the second character is not a backslash.
 
-	return EResult::Succeeded;
+	return path;
 }
 
-EResult RawInputDevice::GetDeviceGUID(HANDLE raw_handle, string& guid)
+string RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
 {
-	guid.Clear();
-
-	string path;
-	if(Failed(GetDevicePath(raw_handle, path)))
-		return EResult::Failed;
+	string path = GetDevicePath(raw_handle);
 
 	// A guid is build like: random_characters{<guid>}
 	for(auto it = path.First(); it != path.End(); ++it) {
-		if(*it == '{') {
-			guid = path.SubString(it.Next(), path.Last());
-			break;
-		}
+		if(*it == '{')
+			return path.SubString(it.Next(), path.Last());
 	}
 
-	return EResult::Succeeded;
+	throw core::RuntimeException("Invalid device guid");
 }
 
-EResult RawInputDevice::GetDeviceInfo(HANDLE raw_handle, RID_DEVICE_INFO& info)
+RID_DEVICE_INFO RawInputDevice::GetDeviceInfo(HANDLE raw_handle)
 {
-	UINT bufferSize = sizeof(info);
-	if(GetRawInputDeviceInfoW(raw_handle, RIDI_DEVICEINFO, &info, &bufferSize))
-		return EResult::Failed;
+	RID_DEVICE_INFO out;
+	UINT bufferSize = sizeof(out);
+	if(GetRawInputDeviceInfoW(raw_handle, RIDI_DEVICEINFO, &out, &bufferSize) == 0)
+		throw core::Win32Exception(GetLastError());
 
-	return EResult::Succeeded;
+	return out;
 }
 
-}
-}
+} // namespace input
+} // namespace lux
+
 #endif // LUX_COMPILE_WITH_RAW_INPUT

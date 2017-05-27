@@ -16,46 +16,46 @@ template <typename T>
 class rect
 {
 public:
-	T Left;    //!< The left edge of the rect
-	T Bottom; //!< The bottom edge of the rect
+	T left;    //!< The left edge of the rect
+	T bottom; //!< The bottom edge of the rect
 
-	T Right; //!< The right edge of the rect            
-	T Top; //!< The top edge of the rect
+	T right; //!< The right edge of the rect            
+	T top; //!< The top edge of the rect
 
 	//! The empty rect located at 0, 0
 	static const rect<T> EMPTY;
 
 	//! default Constructor empty rect at 0,0
-	rect() : Left(0), Bottom(0), Right(0), Top(0)
+	rect() : left(0), bottom(0), right(0), top(0)
 	{
 	}
 
 	//! Construct from two corners
-	rect(T left, T top, T right, T bottom) : Left(left), Bottom(bottom), Right(right), Top(top)
+	rect(T left, T top, T right, T bottom) : left(left), bottom(bottom), right(right), top(top)
 	{
 	}
 
 	//! Construct from two corners
-	rect(const vector2<T>& min, const vector2<T>& max) : Left(min.x), Bottom(min.y), Right(max.x), Top(Max.y)
+	rect(const vector2<T>& min, const vector2<T>& max) : left(min.x), bottom(min.y), right(max.x), top(Max.y)
 	{
 	}
 
 	//! Copyconstruct
 	rect(const rect& other) :
-		Left(other.Left),
-		Bottom(other.Bottom),
-		Right(other.Right),
-		Top(other.Top)
+		left(other.left),
+		bottom(other.bottom),
+		right(other.right),
+		top(other.top)
 	{
 	}
 
 	//! Assignment
 	rect& operator=(const rect& other)
 	{
-		Left = other.Left;
-		Bottom = other.Bottom;
-		Right = other.Right;
-		Top = other.Top;
+		left = other.left;
+		bottom = other.bottom;
+		right = other.right;
+		top = other.top;
 
 		return *this;
 	}
@@ -64,7 +64,7 @@ public:
 	//! Equality
 	bool operator==(const rect<T>& other) const
 	{
-		return (Left == other.Left && Bottom == other.Bottom && Top == other.Top && Right == other.Right);
+		return (left == other.left && bottom == other.bottom && top == other.top && right == other.right);
 	}
 
 	//! Unequality
@@ -75,10 +75,10 @@ public:
 
 	void Set(T left, T top, T right, T bottom)
 	{
-		Left = left;
-		Bottom = bottom;
-		Right = right;
-		Top = top;
+		left = left;
+		bottom = bottom;
+		right = right;
+		top = top;
 	}
 
 	//! Return width of rect
@@ -87,7 +87,7 @@ public:
 	*/
 	T GetWidth() const
 	{
-		return Right - Left;
+		return right - left;
 	}
 
 	//! Return height of rect
@@ -96,7 +96,7 @@ public:
 	*/
 	T GetHeight() const
 	{
-		return Bottom - Top;
+		return bottom - top;
 	}
 
 	//! Return area of rect
@@ -114,7 +114,7 @@ public:
 	*/
 	bool IsEmpty() const
 	{
-		return (Right == Left) || (Top == Bottom);
+		return (right == left) || (top == bottom);
 	}
 
 	//! Get the dimension of rect
@@ -134,28 +134,28 @@ public:
 	{
 		T t;
 
-		if(Left > Right) {
-			t = Left;
-			Left = Right;
-			Right = t;
+		if(left > right) {
+			t = left;
+			left = right;
+			right = t;
 		}
-		if(Bottom > Top) {
-			t = Bottom;
-			Bottom = Top;
-			Top = t;
+		if(bottom > top) {
+			t = bottom;
+			bottom = top;
+			top = t;
 		}
 	}
 
 	//! The lower left corner.
 	vector2<T> Min() const
 	{
-		return vector2<T>(Left, Bottom);
+		return vector2<T>(left, bottom);
 	}
 
 	//! The upper right corner
 	vector2<T> Max() const
 	{
-		return vector2<T>(Right, Top);
+		return vector2<T>(right, top);
 	}
 
 	//! Get center point of rect
@@ -175,14 +175,14 @@ public:
 	*/
 	rect<T>& FitInto(const rect<T>& other)
 	{
-		if(Left < other.Left)
-			Left = other.Left;
-		if(Bottom > other.Bottom)
-			Bottom = other.Bottom;
-		if(Right > other.Right)
-			Right = other.Right;
-		if(Top < other.Top)
-			Top = other.Top;
+		if(left < other.left)
+			left = other.left;
+		if(bottom > other.bottom)
+			bottom = other.bottom;
+		if(right > other.right)
+			right = other.right;
+		if(top < other.top)
+			top = other.top;
 		return *this;
 	}
 };

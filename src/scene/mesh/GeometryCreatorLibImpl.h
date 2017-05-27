@@ -15,6 +15,7 @@ class VideoDriver;
 }
 namespace scene
 {
+class MeshSystem;
 
 class GeometryCreatorLibImpl : public GeometryCreatorLib
 {

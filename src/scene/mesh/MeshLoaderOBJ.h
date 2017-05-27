@@ -5,6 +5,8 @@
 #include "video/SubMeshImpl.h"
 #include "io/path.h"
 #include "video/MaterialLibrary.h"
+#include "resources/ResourceLoader.h"
+#include "resources/ResourceSystem.h"
 
 namespace lux
 {

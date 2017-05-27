@@ -1,13 +1,12 @@
 #ifndef INCLUDED_VERTEXBUFFER_H
 #define INCLUDED_VERTEXBUFFER_H
 #include "video/HardwareBuffer.h"
-#include "video/VertexFormats.h"
 
 namespace lux
 {
-
 namespace video
 {
+class VertexFormat;
 
 class VertexBuffer : public HardwareBuffer
 {
@@ -26,7 +25,7 @@ public:
 	virtual void GetVertices(void* ptr, u32 count, u32 n) const = 0;
 };
 
-}    //namespace scene
-}    //namespace lux
+} //namespace video
+} //namespace lux
 
 #endif

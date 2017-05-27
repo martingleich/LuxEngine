@@ -23,7 +23,7 @@ public:
 		ColorFormat format,
 		u32 MipCount, bool isRendertarget, bool isDynamic);
 
-	LockedRect Lock(ETextureLockMode Mode, u32 MipLevel);
+	LockedRect Lock(ELockMode Mode, u32 MipLevel);
 	void Unlock();
 	void RegenerateMIPMaps();
 
@@ -33,6 +33,9 @@ public:
 	void* GetRealTexture();
 	u32 GetLevelCount() const;
 	const math::dimension2du& GetSize() const;
+
+	const Filter& GetFiltering() const;
+	void SetFiltering(const Filter& f);
 
 	StrongRef<Referable> Clone() const;
 
@@ -48,12 +51,13 @@ protected:
 	IDirect3DTexture9* m_Texture;
 	D3DSURFACE_DESC m_Desc;
 	ColorFormat m_Format;
+	Filter m_Filtering;
 
 	math::dimension2du m_Dimension;
 
 	bool m_IsLocked;
 	u32 m_LockedLevel;
-	ETextureLockMode m_LockedMode;
+	ELockMode m_LockedMode;
 	IDirect3DSurface9* m_TempSurface;
 };
 

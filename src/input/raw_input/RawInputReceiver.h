@@ -57,10 +57,10 @@ public:
 	void UnregisterDevice(HIDUsagePage usagePage, s32 usageID);
 	void UnregisterAll();
 	StrongRef<InputSystem> GetSystem() const;
-	EResult GetRawInputData(HRAWINPUT raw, RAWINPUT*& data);
-	EResult CreateDevice(HANDLE rawHandle, StrongRef<RawInputDevice>& device);
+	RAWINPUT* GetRawInputData(HRAWINPUT raw);
+	StrongRef<RawInputDevice> CreateDevice(HANDLE rawHandle);
 	void DestroyDevice(RawInputDevice* device);
-	EResult GetDevice(HANDLE rawHandle, StrongRef<RawInputDevice>& device);
+	StrongRef<RawInputDevice> GetDevice(HANDLE rawHandle);
 	bool HandleMessage(UINT msg,
 		WPARAM wParam,
 		LPARAM lParam,

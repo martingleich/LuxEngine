@@ -1,11 +1,16 @@
-#ifndef INCLUDED_IIMAGESYSTEM_H
-#define INCLUDED_IIMAGESYSTEM_H
-#include "resources/ResourceSystem.h"
+#ifndef INCLUDED_IMAGESYSTEM_H
+#define INCLUDED_IMAGESYSTEM_H
+#include "core/ReferenceCounted.h"
 #include "math/dimension2d.h"
 #include "video/Color.h"
 
 namespace lux
 {
+
+namespace core
+{
+class ResourceSystem;
+}
 
 namespace io
 {
