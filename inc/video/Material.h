@@ -35,6 +35,9 @@ public:
 	virtual void SetDiffuse(const Colorf& diffuse) = 0;
 	virtual const Colorf& GetDiffuse() const = 0;
 
+	virtual void SetAlpha(float alpha) = 0;
+	virtual float GetAlpha() const = 0;
+
 	virtual void SetEmissive(const Colorf& emissive) = 0;
 	virtual const Colorf& GetEmissive() const = 0;
 

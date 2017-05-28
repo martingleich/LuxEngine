@@ -29,6 +29,8 @@ public:
 	float GetAmbient() const;
 	void SetDiffuse(const Colorf& diffuse);
 	const Colorf& GetDiffuse() const;
+	void SetAlpha(float alpha);
+	float GetAlpha() const;
 	void SetEmissive(const Colorf& emissive);
 	const Colorf& GetEmissive() const;
 	void SetSpecular(const Colorf& specular);

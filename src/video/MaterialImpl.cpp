@@ -87,10 +87,21 @@ const Colorf& MaterialImpl::GetDiffuse() const
 	return m_Diffuse;
 }
 
+void MaterialImpl::SetAlpha(float alpha)
+{
+	m_Diffuse.SetAlpha(alpha);
+}
+
+float MaterialImpl::GetAlpha() const
+{
+	return m_Diffuse.GetAlpha();
+}
+
 void MaterialImpl::SetEmissive(const Colorf& emissive)
 {
 	m_Emissive = emissive;
 }
+
 const Colorf& MaterialImpl::GetEmissive() const
 {
 	return m_Emissive;
