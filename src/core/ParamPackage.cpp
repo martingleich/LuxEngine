@@ -57,6 +57,10 @@ void ParamPackage::Clear()
 
 void ParamPackage::AddParam(core::Type type, const string_type& name, const void* defaultValue, u16 reserved)
 {
+	u32 id;
+	if(GetId(name, core::Type::Unknown, id))
+		throw InvalidArgumentException("name", "Name is already used");
+
 	Entry entry;
 	entry.name = name.data;
 	const u32 size = type.GetSize();
@@ -72,6 +76,37 @@ void ParamPackage::AddParam(core::Type type, const string_type& name, const void
 		throw Exception("Type is not supported in param package");
 
 	AddEntry(entry, defaultValue);
+}
+
+void ParamPackage::MergePackage(const ParamPackage& other)
+{
+	for(u32 i = 0; i < other.GetParamCount(); ++i) {
+		auto desc = other.GetParamDesc(i);
+
+		u32 id;
+		if(GetId(desc.name, core::Type::Unknown, id)) {
+			if(self->Params[id].type != desc.type)
+				throw Exception("Same name with diffrent types in package merge");
+			u16 reserved = 0xFFFF;
+			if(self->Params[id].reserved != 0xFFFF)
+				reserved = self->Params[id].reserved;
+			if(desc.reserved != 0xFFFFF) {
+				if(reserved != 0xFFFF)
+					throw Exception("Same name with diffrent reserved values in package merge");
+				else
+					reserved = (u16)desc.reserved;
+			}
+			self->Params[id].reserved = reserved;
+			continue;
+		}
+
+		Entry entry;
+		entry.name = desc.name;
+		entry.reserved = (u16)desc.reserved;
+		entry.type = desc.type;
+		entry.size = (u8)entry.type.GetSize();
+		AddEntry(entry, desc.defaultValue);
+	}
 }
 
 void* ParamPackage::CreatePackage() const
@@ -146,6 +181,7 @@ ParamDesc ParamPackage::GetParamDesc(u32 param) const
 	desc.type = p.type;
 	desc.id = param;
 	desc.reserved = p.reserved;
+	desc.defaultValue = (u8*)self->DefaultPackage + p.offset;
 
 	return desc;
 }
@@ -215,16 +251,11 @@ void ParamPackage::SetDefaultValue(const string_type& param, const void* default
 
 u32 ParamPackage::GetParamId(const string_type& name, core::Type type) const
 {
-	string_type cname = name;
-	cname.EnsureSize();
-	for(u32 i = 0; i < self->Params.Size(); ++i) {
-		if(self->Params[i].name == cname) {
-			if(type == core::Type::Unknown || self->Params[i].type == type)
-				return i;
-		}
-	}
+	u32 out;
+	if(!GetId(name, type, out))
+		throw ObjectNotFoundException(name.data);
 
-	throw ObjectNotFoundException(name.data);
+	return out;
 }
 
 u32 ParamPackage::GetParamCount() const
@@ -274,6 +305,19 @@ void ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	self->DefaultPackage = std::move(newBlock);
 }
 
+bool ParamPackage::GetId(string_type name, core::Type t, u32& outId) const
+{
+	string_type cname = name;
+	cname.EnsureSize();
+	for(outId = 0; outId < self->Params.Size(); ++outId) {
+		if(self->Params[outId].name == cname) {
+			if(t == core::Type::Unknown || self->Params[outId].type == t)
+				return true;
+		}
+	}
+
+	return false;
+}
 
 } // namespace core
 } // namespace lux

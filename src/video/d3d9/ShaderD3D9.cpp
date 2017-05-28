@@ -63,6 +63,7 @@ void ShaderD3D9::Init(
 	u32 nameCursor = 0;
 	m_Params.Reserve(helper.Size());
 	m_Names.SetMinSize(nameMemoryNeeded);
+	u32 paramId = 0;
 	for(u32 i = 0; i < materialParamCount; ++i) {
 		Param entry;
 		const HelperEntry& h = helper[i];
@@ -86,11 +87,13 @@ void ShaderD3D9::Init(
 					CastShaderToType(h.type, h.defaultValue, tempMemory);
 				else
 					memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
-				m_ParamPackage.AddParam(h.type, h.name, tempMemory, (u16)i);
+				m_ParamPackage.AddParam(h.type, h.name, tempMemory, (u16)paramId);
 
 				entry.index = 0;
 				entry.paramType = ParamType_ParamMaterial;
 			}
+
+			++paramId;
 		}
 		break;
 		case ParamType_Scene:
@@ -349,14 +352,21 @@ void ShaderD3D9::Enable()
 
 void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 {
+	int layerId = 0;
 	auto& material = settings.material;
 	for(u32 i = 0; i < material->GetParamCount(); ++i) {
 		auto desc = material->GetRenderer()->GetPackage().GetParamDesc(i);
 		if(desc.reserved != 0xFFFF) {
 			// It's a shader param
 			Param& param = m_Params[desc.reserved];
-			SetShaderValue(param, material->Param(i).Pointer());
+			if(param.type == core::Type::Texture)
+				SetShaderValue(param, &layerId);
+			else
+				SetShaderValue(param, material->Param(i).Pointer());
 		}
+
+		if(desc.type == core::Type::Texture)
+			layerId++;
 	}
 
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
@@ -364,13 +374,13 @@ void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 			float f;
 			video::Colorf c;
 			switch(it->index) {
-			case DefaultParam_Shininess: 
+			case DefaultParam_Shininess:
 				f = material->GetShininess();
 				SetShaderValue(*it, &f); break;
 			case DefaultParam_Diffuse:
 				c = material->GetDiffuse();
 				SetShaderValue(*it, &c); break;
-			case DefaultParam_Emissive: 
+			case DefaultParam_Emissive:
 				c = material->GetEmissive();
 				SetShaderValue(*it, &c); break;
 			case DefaultParam_Specular:
@@ -382,8 +392,15 @@ void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 	}
 
 	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
-		if(it->paramType == ParamType_Scene)
-			SetShaderValue(*it, m_Renderer->GetParam(it->index).Pointer());
+		if(it->paramType == ParamType_Scene) {
+			if(it->type == core::Type::Texture)
+				SetShaderValue(*it, &layerId);
+			else
+				SetShaderValue(*it, m_Renderer->GetParam(it->index).Pointer());
+
+			if(it->type == core::Type::Texture)
+				layerId++;
+		}
 	}
 }
 

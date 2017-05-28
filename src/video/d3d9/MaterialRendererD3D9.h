@@ -22,11 +22,9 @@ namespace video
 class MaterialRendererD3D9 : public MaterialRenderer
 {
 public:
-	MaterialRendererD3D9(Shader* shader, const core::ParamPackage* basePackage) :
+	MaterialRendererD3D9(Shader* shader) :
 		m_Shader(shader)
 	{
-		if(basePackage)
-			m_Package = core::ParamPackage(*basePackage);
 	}
 
 	virtual void Begin(const RenderSettings& settings, DeviceState& state)
@@ -103,10 +101,13 @@ class MaterialRenderer_DebugOverlay_d3d9 : public MaterialRendererD3D9
 {
 public:
 	MaterialRenderer_DebugOverlay_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader, basePackage)
+		MaterialRendererD3D9(shader)
 	{
 		m_Pipeline.fogEnabled = false;
 		m_Pipeline.lighting = false;
+
+		if(basePackage)
+			m_Package.MergePackage(*basePackage);
 	}
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
@@ -132,14 +133,93 @@ public:
 	}
 };
 
+class MaterialRenderer_BaseSolid_d3d9 : public MaterialRendererD3D9
+{
+public:
+	MaterialRenderer_BaseSolid_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(shader)
+	{
+		if(basePackage)
+			m_Package = *basePackage;
+	}
+
+	void Begin(const RenderSettings& settings, DeviceState& state)
+	{
+		MaterialRendererD3D9::Begin(settings, state);
+	}
+
+	ERequirement GetRequirements() const
+	{
+		return ERequirement::None;
+	}
+
+	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	{
+		StrongRef<MaterialRenderer_BaseSolid_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseSolid_d3d9)(shader, basePackage);
+		renderer->m_Pipeline = m_Pipeline;
+		return renderer;
+	}
+};
+
+class MaterialRenderer_BaseTransparent_d3d9 : public MaterialRendererD3D9
+{
+public:
+	MaterialRenderer_BaseTransparent_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(shader)
+	{
+		AlphaBlendSettings defaultSettings;
+		defaultSettings.SrcBlend = video::EBlendFactor::SrcAlpha;
+		defaultSettings.DstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+		defaultSettings.Operator = video::EBlendOperator::Add;
+		defaultSettings.AlphaSrc = video::EAlphaSource::Texture;
+		m_Package.AddParam<u32>("blendFunc", defaultSettings.Pack());
+
+		if(basePackage)
+			m_Package.MergePackage(*basePackage);
+
+		m_Pipeline.zWriteEnabled = false;
+		m_Pipeline.fogEnabled = false;
+	}
+
+	void Begin(const RenderSettings& settings, DeviceState& state)
+	{
+		MaterialRendererD3D9::Begin(settings, state);
+
+		AlphaBlendSettings blend;
+		blend.Unpack(settings.material->Param(0));
+
+		state.EnableAlpha(blend);
+	}
+
+	void End(DeviceState& state)
+	{
+		state.EnableAlpha(video::AlphaBlendSettings::Disabled());
+		MaterialRendererD3D9::End(state);
+	}
+
+	ERequirement GetRequirements() const
+	{
+		return ERequirement::Transparent;
+	}
+
+	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	{
+		StrongRef<MaterialRenderer_BaseTransparent_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseTransparent_d3d9)(shader, basePackage);
+		renderer->m_Pipeline = m_Pipeline;
+		return renderer;
+	}
+};
+
 //! Render a solid/opak material
 class MaterialRenderer_Solid_d3d9 : public MaterialRendererD3D9
 {
 public:
 	MaterialRenderer_Solid_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader, basePackage)
+		MaterialRendererD3D9(shader)
 	{
 		m_Package.AddParam("diffMap", TextureLayer());
+		if(basePackage)
+			m_Package.MergePackage(*basePackage);
 	}
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
@@ -183,7 +263,7 @@ class MaterialRenderer_OneTextureBlend_d3d9 : public MaterialRendererD3D9
 {
 public:
 	MaterialRenderer_OneTextureBlend_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader, basePackage)
+		MaterialRendererD3D9(shader)
 	{
 		AlphaBlendSettings defaultSettings;
 		defaultSettings.SrcBlend = video::EBlendFactor::SrcAlpha;
@@ -192,6 +272,9 @@ public:
 		defaultSettings.AlphaSrc = video::EAlphaSource::Texture;
 		m_Package.AddParam<u32>("blendFunc", defaultSettings.Pack());
 		m_Package.AddParam("diffMap", TextureLayer());
+
+		if(basePackage)
+			m_Package.MergePackage(*basePackage);
 
 		m_Pipeline.zWriteEnabled = false;
 		m_Pipeline.fogEnabled = false;
@@ -312,10 +395,13 @@ class MaterialRenderer_Solid_Mix_d3d9 : public MaterialRendererD3D9
 {
 public:
 	MaterialRenderer_Solid_Mix_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader, basePackage)
+		MaterialRendererD3D9(shader)
 	{
 		m_Package.AddParam("diffMap1", TextureLayer());
 		m_Package.AddParam("diffMap2", TextureLayer());
+
+		if(basePackage)
+			m_Package.MergePackage(*basePackage);
 	}
 
 	void Begin(const RenderSettings& settings, DeviceState& state)

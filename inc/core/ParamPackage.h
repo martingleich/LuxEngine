@@ -22,6 +22,8 @@ struct ParamDesc
 	core::Type type; //!< The type of the parameter
 	u32 id;
 
+	const void* defaultValue;
+
 	u32 reserved;
 };
 
@@ -314,6 +316,13 @@ public:
 	*/
 	void AddParam(core::Type type, const string_type& name, const void* defaultValue, u16 reserved = -1);
 
+	//! Merges two packages
+	/**
+	Objects with the same name and type will be combined into one parameters.
+	Combination of objects with the same name and diffrent types will fail.
+	*/
+	void MergePackage(const ParamPackage& other);
+
 	//! Creates a new ParamPackage
 	/**
 	\return A pointer to the newly created paramblock
@@ -426,6 +435,7 @@ public:
 
 private:
 	void AddEntry(Entry& entry, const void* defaultValue);
+	bool GetId(string_type name, core::Type t, u32& outId) const;
 
 private:
 	struct SelfData;
@@ -501,6 +511,7 @@ public:
 		}
 
 		if(m_Pack != pack) {
+			// TÓDO: Move data from the old package to the new one
 			if(m_Pack)
 				m_Pack->DestroyPackage(m_Data);
 			m_Data = pack->CreatePackage();
