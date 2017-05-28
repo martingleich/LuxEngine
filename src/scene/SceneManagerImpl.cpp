@@ -3,6 +3,7 @@
 #include "video/Renderer.h"
 #include "video/RenderTarget.h"
 #include "video/MaterialLibrary.h"
+#include "video/MaterialRenderer.h"
 #include "video/images/ImageSystem.h"
 #include "video/PipelineSettings.h"
 
@@ -69,8 +70,8 @@ SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry() : texture(nullptr), node(nu
 SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry(SceneNode* node) : texture(nullptr), node(node)
 {
 	if(node->GetMaterialCount()) {
-		if(node->GetMaterial(0).GetTextureCount())
-			texture = ((video::TextureLayer)node->GetMaterial(0).Layer(0)).texture;
+		if(node->GetMaterial(0)->GetTextureCount())
+			texture = ((video::TextureLayer)node->GetMaterial(0)->Layer(0)).texture;
 	}
 }
 
@@ -390,7 +391,7 @@ bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRende
 		const size_t count = node->GetMaterialCount();
 		for(size_t i = 0; i < count; ++i) {
 			// Ist ein material transparent, dann gilt der ganze Knoten als transparent
-			video::MaterialRenderer* renderer = node->GetMaterial(i).GetRenderer();
+			video::MaterialRenderer* renderer = node->GetMaterial(i)->GetRenderer();
 			if(renderer && renderer->GetRequirements() == video::MaterialRenderer::ERequirement::Transparent) {
 				m_TransparentNodeList.PushBack(STransparentNodeEntry(node, m_AbsoluteCamPos));
 				wasTaken = true;

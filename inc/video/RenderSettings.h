@@ -11,6 +11,7 @@ class PackageParam;
 namespace video
 {
 class Material;
+class MaterialRenderer;
 class PipelineSettings;
 class RenderTarget;
 
@@ -23,14 +24,16 @@ public:
 		virtual core::PackageParam operator[](u32 id) const = 0;
 	};
 
-	RenderSettings(const Material& m, const PipelineSettings& ps, const ParamListAccess& pa) :
+	RenderSettings(MaterialRenderer* r, const Material* m, const PipelineSettings& ps, const ParamListAccess& pa) :
+		renderer(r),
 		material(m),
 		pipeline(ps),
 		params(pa)
 	{
 	}
 
-	const Material& material;
+	MaterialRenderer* renderer;
+	const Material* material;
 	const PipelineSettings& pipeline;
 	const ParamListAccess& params;
 };

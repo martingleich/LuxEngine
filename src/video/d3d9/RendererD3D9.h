@@ -22,6 +22,8 @@ class RendererD3D9 : public RendererNull
 public:
 	RendererD3D9(VideoDriverD3D9* driver);
 
+	void CleanUp();
+
 	void BeginScene(
 		bool clearColor, bool clearZBuffer,
 		video::Color color = video::Color::Black, float z = 1.0f);

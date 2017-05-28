@@ -46,6 +46,12 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver) :
 	m_CurrentRendertarget = m_BackbufferTarget;
 }
 
+void RendererD3D9::CleanUp()
+{
+	m_InvalidMaterial.Reset();
+	m_Material.Reset();
+}
+
 void RendererD3D9::BeginScene(bool clearColor, bool clearZ,
 	video::Color color, float z)
 {
@@ -103,7 +109,7 @@ bool RendererD3D9::Present()
 void RendererD3D9::SetRenderTarget(const RenderTarget& target)
 {
 	if(!target.IsBackbuffer()) {
-		if(target.GetTexture()->IsRendertarget())
+		if(!target.GetTexture()->IsRendertarget())
 			throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
 
 		// Same texture as current target -> Abort
@@ -257,7 +263,7 @@ void RendererD3D9::SetupRendering(ERenderMode mode)
 		bool oldFogging = m_Pipeline.fogEnabled;
 		float oldPolyOffset = m_Pipeline.polygonOffset;
 
-		m_Pipeline = m_Material.GetRenderer()->GetPipeline();
+		m_Pipeline = m_Material->GetRenderer()->GetPipeline();
 
 		// Apply overwrites
 		for(auto it = m_PipelineOverwrites.First(); it != m_PipelineOverwrites.End(); ++it)
@@ -327,6 +333,7 @@ void RendererD3D9::LoadSettings()
 	// Collect rendersettings
 	ParamListAccessNull listAccess(this);
 	RenderSettings settings(
+		m_Material->GetRenderer(),
 		m_Material,
 		m_Pipeline,
 		listAccess);
@@ -338,7 +345,7 @@ void RendererD3D9::LoadSettings()
 	LoadLightSettings(settings);
 
 	// Begin the new renderer
-	auto newRenderer = settings.material.GetRenderer();
+	auto newRenderer = settings.renderer;
 	if(IsDirty(Dirty_MaterialRenderer) || IsDirty(Dirty_Material)) {
 		if(m_MaterialRenderer)
 			m_MaterialRenderer->End(m_State);
@@ -403,7 +410,7 @@ void RendererD3D9::LoadTransforms(const RenderSettings& settings)
 	}
 
 	if(IsDirty(Dirty_Transform)) {
-		if(settings.material.GetRenderer()->GetShader() == nullptr) {
+		if(settings.renderer->GetShader() == nullptr) {
 			m_State.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
 			m_State.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
 			m_State.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
@@ -421,7 +428,7 @@ void RendererD3D9::LoadFogSettings(const RenderSettings& settings)
 			useFog = false;
 
 		bool useFixedFog = useFog;
-		if(settings.material.GetRenderer()->GetShader() == nullptr)
+		if(settings.renderer->GetShader() != nullptr)
 			useFixedFog = false;
 
 		math::vector3f fogInfo;
@@ -455,14 +462,14 @@ void RendererD3D9::LoadLightSettings(const RenderSettings& settings)
 			useLights = false;
 
 		bool useFixedLights = useLights;
-		if(settings.material.GetRenderer()->GetShader() == nullptr)
+		if(settings.renderer->GetShader() != nullptr)
 			useFixedLights = false;
 
 		m_State.ClearLights(useFixedLights);
 		GetParam(m_ParamId.lighting) = settings.pipeline.lighting ? 1.0f : 0.0f;
 		if(useLights) {
 			// Only use the fixed pipeline if there is no shader
-			if(!settings.material.GetRenderer()->GetShader()) {
+			if(!settings.renderer->GetShader()) {
 				// Enable fixed pipeline lights
 				for(auto it = m_Lights.First(); it != m_Lights.End(); ++it)
 					m_State.EnableLight(*it);

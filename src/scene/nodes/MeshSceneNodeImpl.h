@@ -16,7 +16,7 @@ private:
 	bool m_OnlyReadMaterials;    // Benutzt der Scene-Node nur die Materialien der Sub-Meshes
 									// d.h. Wenn man das material der Sub-Meshes ändert, ändert es sich in allen
 									// Scene-Nodes mit.
-	core::array<video::Material> m_Materials;    // Die Materialien des Knotens falls nicht m_OnlyReadMaterials
+	core::array<StrongRef<video::Material>> m_Materials;    // Die Materialien des Knotens falls nicht m_OnlyReadMaterials
 
 	math::aabbox3df m_BoundingBox;    // Damit wenn keine mesh geladen auch eine Bounding-box vorhanden ist
 
@@ -48,7 +48,8 @@ public:
 	}
 
 	// Liefert ein material des Knotens
-	virtual video::Material& GetMaterial(size_t index);
+	virtual video::Material* GetMaterial(size_t index);
+	virtual void SetMaterial(size_t index, video::Material* m);
 
 	// Liefert die Anzahl der Materialien
 	virtual size_t GetMaterialCount() const;

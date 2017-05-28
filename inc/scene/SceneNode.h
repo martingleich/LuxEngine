@@ -292,10 +292,17 @@ public:
 	}
 
 	// Liefert ein material des Knotens
-	virtual video::Material& GetMaterial(size_t mat)
+	virtual video::Material* GetMaterial(size_t mat)
 	{
 		LUX_UNUSED(mat);
-		return video::WorkMaterial;
+		throw core::OutOfRangeException();
+	}
+
+	virtual void SetMaterial(size_t i, video::Material* m)
+	{
+		LUX_UNUSED(i);
+		LUX_UNUSED(m);
+		throw core::OutOfRangeException();
 	}
 
 	// Ist der Knoten selbst sichtbar

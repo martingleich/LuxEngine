@@ -325,7 +325,10 @@ void LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 
 	BuildMaterials();
 
-	driver->SetDefaultRenderer(m_MaterialLibrary->GetMaterialRenderer("solid"));
+	auto invalidMaterial = m_MaterialLibrary->CreateMaterial(m_MaterialLibrary->GetMaterialRenderer("debug_overlay"));
+	invalidMaterial->SetDiffuse(video::Color(255, 0, 255));
+	driver->GetRenderer()->SetInvalidMaterial(invalidMaterial);
+
 #else
 	throw core::NotImplementedException();
 #endif
@@ -341,14 +344,11 @@ void LuxDeviceWin32::BuildMaterials()
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_d3d9)(nullptr, nullptr), "solid");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix_d3d9)(nullptr, nullptr), "solid_mix");
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)(nullptr, nullptr), "transparent");
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_DebugOverlay_d3d9)(nullptr, nullptr), "debug_overlay");
 	//m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(nullptr, nullptr), "transparent_alpha");
 #else
 	throw core::NotImplementedException();
 #endif
-
-	video::MaterialRenderer* renderer = m_MaterialLibrary->GetMaterialRenderer("solid");
-	video::IdentityMaterial.SetRenderer(renderer);
-	video::WorkMaterial.SetRenderer(renderer);
 }
 
 void LuxDeviceWin32::BuildSceneManager()
@@ -462,6 +462,13 @@ LuxDeviceWin32::~LuxDeviceWin32()
 	m_SceneManager = nullptr;
 
 	m_ImageSystem = nullptr;
+
+	video::VideoDriverD3D9* driver = m_Driver.As<video::VideoDriverD3D9>();
+
+	// Free all shared resources, default materials, invalid materials and so on
+	if(driver)
+		driver->CleanUp();
+	
 	m_MaterialLibrary = nullptr;
 
 	m_Driver = nullptr;

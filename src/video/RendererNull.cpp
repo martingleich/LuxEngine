@@ -1,5 +1,6 @@
 #include "RendererNull.h"
 #include "core/Logger.h"
+#include "video/MaterialImpl.h"
 
 namespace lux
 {
@@ -26,22 +27,38 @@ RendererNull::RendererNull(VideoDriver* driver) :
 	m_ParamId.fogInfo = AddInternalParam("fogInfo", core::Type::Vector3);
 
 	m_RenderStatistics = LUX_NEW(RenderStatistics);
+
+	m_Material = LUX_NEW(MaterialImpl)(nullptr);
+	m_InvalidMaterial = LUX_NEW(MaterialImpl)(nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::SetMaterial(const Material& material)
+void RendererNull::SetMaterial(const Material* material)
 {
 	SetDirty(Dirty_Material);
-	if(m_Material.GetRenderer() != material.GetRenderer())
+	if(m_Material->GetRenderer() != material->GetRenderer())
 		SetDirty(Dirty_MaterialRenderer);
 
-	m_Material = material;
+	if(material->GetRenderer())
+		m_Material->CopyFrom(material);
+	else
+		m_Material->CopyFrom(m_InvalidMaterial);
 }
 
-const Material& RendererNull::GetMaterial() const
+const Material* RendererNull::GetMaterial() const
 {
 	return m_Material;
+}
+
+void RendererNull::SetInvalidMaterial(const Material* material)
+{
+	m_InvalidMaterial->CopyFrom(material);
+}
+
+const Material* RendererNull::GetInvalidMaterial()
+{
+	return m_InvalidMaterial;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -66,7 +83,7 @@ void RendererNull::AddLight(const LightData& light)
 		throw core::ErrorException("Too many lights");
 
 	// Fill remaining light objects
-	for(size_t i = m_ParamId.lights.Size(); i < m_Lights.Size()+1; ++i) {
+	for(size_t i = m_ParamId.lights.Size(); i < m_Lights.Size() + 1; ++i) {
 		m_ParamId.lights.PushBack(
 			AddInternalParam("light" + core::StringConverter::ToString(i), core::Type::Matrix));
 	}
@@ -262,7 +279,7 @@ bool RendererNull::GetLightId(const string_type& string, u32& outId)
 		return false;
 
 	// Fill remaining light objects
-	for(size_t i = m_ParamId.lights.Size(); i < (size_t)id+1; ++i) {
+	for(size_t i = m_ParamId.lights.Size(); i < (size_t)id + 1; ++i) {
 		m_ParamId.lights.PushBack(
 			AddInternalParam("light" + core::StringConverter::ToString(i), core::Type::Matrix));
 	}

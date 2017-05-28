@@ -33,9 +33,7 @@ private:
 	StrongRef<video::MaterialLibrary> m_MatLib;
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

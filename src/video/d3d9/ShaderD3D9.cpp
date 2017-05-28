@@ -6,6 +6,7 @@
 #include "video/Renderer.h"
 #include "video/Material.h"
 #include "video/RenderSettings.h"
+#include "video/MaterialRenderer.h"
 
 #include "video/d3d9/D3DHelper.h"
 #include "video/d3d9/D3D9Exception.h"
@@ -349,22 +350,32 @@ void ShaderD3D9::Enable()
 void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 {
 	auto& material = settings.material;
-	for(u32 i = 0; i < material.GetParamCount(); ++i) {
-		auto desc = material.GetPuffer().GetType()->GetParamDesc(i);
+	for(u32 i = 0; i < material->GetParamCount(); ++i) {
+		auto desc = material->GetRenderer()->GetPackage().GetParamDesc(i);
 		if(desc.reserved != 0xFFFF) {
 			// It's a shader param
 			Param& param = m_Params[desc.reserved];
-			SetShaderValue(param, material.Param(i).Pointer());
+			SetShaderValue(param, material->Param(i).Pointer());
 		}
 	}
 
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
 		if(it->paramType == ParamType_DefaultMaterial) {
+			float f;
+			video::Colorf c;
 			switch(it->index) {
-			case DefaultParam_Shininess: SetShaderValue(*it, &material.shininess); break;
-			case DefaultParam_Diffuse: SetShaderValue(*it, &material.diffuse); break;
-			case DefaultParam_Emissive: SetShaderValue(*it, &material.emissive); break;
-			case DefaultParam_Specular: SetShaderValue(*it, &material.specular); break;
+			case DefaultParam_Shininess: 
+				f = material->GetShininess();
+				SetShaderValue(*it, &f); break;
+			case DefaultParam_Diffuse:
+				c = material->GetDiffuse();
+				SetShaderValue(*it, &c); break;
+			case DefaultParam_Emissive: 
+				c = material->GetEmissive();
+				SetShaderValue(*it, &c); break;
+			case DefaultParam_Specular:
+				c = material->GetSpecular();
+				SetShaderValue(*it, &c); break;
 			default: continue;
 			}
 		}

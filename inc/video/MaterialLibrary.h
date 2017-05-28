@@ -23,6 +23,18 @@ public:
 	{
 	}
 
+	//! Create a new material
+	/**
+	\param renderer The material renderer of the new material, if null is passed the solid renderer is used
+	*/
+	virtual StrongRef<Material> CreateMaterial(MaterialRenderer* renderer = nullptr) = 0;
+
+	//! Create a new material
+	/**
+	\param name The name of the material renderer
+	*/
+	virtual StrongRef<Material> CreateMaterial(const string& name) = 0;
+
 	//! Add a new material renderer
 	/**
 	\param renderer The material renderer

@@ -42,6 +42,11 @@ VideoDriverD3D9::VideoDriverD3D9(core::ReferableFactory* refFactory) :
 {
 }
 
+void VideoDriverD3D9::CleanUp()
+{
+	m_Renderer->CleanUp();
+}
+
 void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 {
 	VideoDriverNull::Init(config, window);
@@ -254,9 +259,6 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 
 VideoDriverD3D9::~VideoDriverD3D9()
 {
-	IdentityMaterial.SetRenderer(nullptr);
-	WorkMaterial.SetRenderer(nullptr);
-
 	// Destroy buffer manager before the device is destroyed
 	m_BufferManager.Reset();
 

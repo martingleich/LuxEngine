@@ -17,7 +17,9 @@ class MaterialLibraryImpl : public MaterialLibrary
 {
 public:
 	MaterialLibraryImpl(VideoDriver* driver, io::FileSystem* fileSys);
-	~MaterialLibraryImpl();
+
+	StrongRef<Material> CreateMaterial(const string& name);
+	StrongRef<Material> CreateMaterial(MaterialRenderer* renderer = nullptr);
 
 	size_t AddMaterialRenderer(MaterialRenderer* renderer, const string& name);
 	StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const string& oldName);

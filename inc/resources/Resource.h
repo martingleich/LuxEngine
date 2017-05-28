@@ -23,6 +23,7 @@ LUX_API extern const Name CubeTexture; //!< Resources of type \ref lux::video::C
 LUX_API extern const Name Mesh; //!< Resources of type \ref lux::scene::Mesh
 LUX_API extern const Name Font; //!< Resources of type \ref lux::gui::Font
 LUX_API extern const Name Sound; //!< Resources of type \ref lux::sound::SoundSource
+LUX_API extern const Name Material; //!< Resources of type \ref lux::sound::SoundSource
 }
 
 class Resource;

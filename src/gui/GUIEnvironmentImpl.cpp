@@ -5,6 +5,7 @@
 #include "video/images/ImageSystem.h"
 #include "video/MaterialLibrary.h"
 #include "video/PipelineSettings.h"
+#include "video/MaterialRenderer.h"
 
 #include "FontLoader.h"
 #include "gui/FontImpl.h"

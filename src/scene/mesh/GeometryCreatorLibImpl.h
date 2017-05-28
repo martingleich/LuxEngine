@@ -12,6 +12,7 @@ class ResourceSystem;
 namespace video
 {
 class VideoDriver;
+class MaterialLibrary;
 }
 namespace scene
 {
@@ -20,7 +21,7 @@ class MeshSystem;
 class GeometryCreatorLibImpl : public GeometryCreatorLib
 {
 public:
-	GeometryCreatorLibImpl(video::VideoDriver* driver, scene::MeshSystem* meshCache, core::ResourceSystem* resSystem);
+	GeometryCreatorLibImpl(video::MaterialLibrary* matLib, video::VideoDriver* driver, scene::MeshSystem* meshCache, core::ResourceSystem* resSystem);
 	StrongRef<GeometryCreator> GetByName(const string& name) const;
 	void AddCreator(GeometryCreator* creator);
 	void RemoveCreator(GeometryCreator* creator);
@@ -55,6 +56,7 @@ private:
 	WeakRef<video::VideoDriver> m_Driver;
 	WeakRef<scene::MeshSystem> m_MeshSystem;
 	WeakRef<core::ResourceSystem> m_ResourceSystem;
+	WeakRef<video::MaterialLibrary> m_MatLib;
 
 	StrongRef<GeometryCreator> m_PlaneCreator;
 	StrongRef<GeometryCreator> m_SphereUVCreator;

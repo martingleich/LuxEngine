@@ -21,8 +21,17 @@ MaterialLibraryImpl::MaterialLibraryImpl(VideoDriver* driver, io::FileSystem* fi
 {
 }
 
-MaterialLibraryImpl::~MaterialLibraryImpl()
+StrongRef<Material> MaterialLibraryImpl::CreateMaterial(const string& name)
 {
+	return CreateMaterial(GetMaterialRenderer(name));
+}
+
+StrongRef<Material> MaterialLibraryImpl::CreateMaterial(MaterialRenderer* renderer)
+{
+	if(renderer == nullptr)
+		renderer = m_MaterialRenderers[0].renderer;
+
+	return renderer->CreateMaterial();
 }
 
 size_t MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer, const string& name)

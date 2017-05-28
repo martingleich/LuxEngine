@@ -9,15 +9,11 @@ namespace video
 {
 
 SubMeshImpl::SubMeshImpl() :
-	m_Material(video::IdentityMaterial),
-	m_Vertices(nullptr),
-	m_Indices(nullptr),
 	m_PrimitveType(EPrimitiveType::Triangles)
 {
 }
 
 SubMeshImpl::SubMeshImpl(VertexBuffer* vertices, IndexBuffer* indices) :
-	m_Material(video::IdentityMaterial),
 	m_Vertices(vertices),
 	m_Indices(indices),
 	m_PrimitveType(EPrimitiveType::Triangles)
@@ -66,17 +62,17 @@ void SubMeshImpl::SetPrimitiveType(video::EPrimitiveType type)
 	m_PrimitveType = type;
 }
 
-const video::Material& SubMeshImpl::GetMaterial() const
+const video::Material* SubMeshImpl::GetMaterial() const
 {
 	return m_Material;
 }
 
-video::Material& SubMeshImpl::GetMaterial()
+video::Material* SubMeshImpl::GetMaterial()
 {
 	return m_Material;
 }
 
-void SubMeshImpl::SetMaterial(const video::Material& material)
+void SubMeshImpl::SetMaterial(video::Material* material)
 {
 	m_Material = material;
 }

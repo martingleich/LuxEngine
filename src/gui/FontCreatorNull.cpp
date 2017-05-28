@@ -9,6 +9,7 @@
 #include "core/lxAlgorithm.h"
 #include "core/lxSort.h"
 #include "video/AlphaSettings.h"
+#include "video/MaterialRenderer.h"
 
 namespace lux
 {
@@ -118,10 +119,10 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::ar
 	this->GetFontInfo(ctx, fontHeight);
 
 	data.charHeight = (float)fontHeight;
-	data.material = video::Material(m_DefaultFontMaterial);
+	data.material = m_DefaultFontMaterial->CreateMaterial();
 	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha,
 		video::EBlendOperator::Add, video::EAlphaSource::Texture);
-	data.material.Param("blendFunc") = alpha.Pack();
+	data.material->Param("blendFunc") = alpha.Pack();
 	data.image = image;
 	data.imageWidth = imageSize.width;
 	data.imageHeight = imageSize.height;

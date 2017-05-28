@@ -87,18 +87,18 @@ void FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 	SetMaterial(data.material);
 }
 
-void FontImpl::SetMaterial(const video::Material& material)
+void FontImpl::SetMaterial(const video::Material* material)
 {
-	if(material.Layer(0).IsValid() == false)
+	if(material->Layer(0).IsValid() == false)
 		throw core::InvalidArgumentException("material", "Material must have at least one texture layer");
 
-	m_Material = material;
+	m_Material = material->Clone();
 
 	if(m_Texture)
-		m_Material.Layer(0) = m_Texture;
+		m_Material->Layer(0) = m_Texture;
 }
 
-const video::Material& FontImpl::GetMaterial() const
+const video::Material* FontImpl::GetMaterial() const
 {
 	return m_Material;
 }

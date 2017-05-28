@@ -26,7 +26,7 @@ void SkyBoxSceneNodeImpl::OnRegisterSceneNode()
 
 bool SkyBoxSceneNodeImpl::SetSceneManager(SceneManager* mgr)
 {
-	m_Material.SetRenderer(mgr->GetMaterialLibrary()->GetMaterialRenderer("solid"));
+	m_Material = mgr->GetMaterialLibrary()->CreateMaterial();
 	return SceneNode::SetSceneManager(mgr);
 }
 
@@ -80,7 +80,7 @@ void SkyBoxSceneNodeImpl::Render()
 	};
 
 		
-	m_Material.Layer(0) = m_SkyTexture;
+	m_Material->Layer(0) = m_SkyTexture;
 	renderer->SetMaterial(m_Material);
 	renderer->DrawIndexedPrimitiveList(video::EPrimitiveType::Triangles,
 		12,
@@ -99,12 +99,20 @@ void SkyBoxSceneNodeImpl::SetSkyTexture(video::CubeTexture* pSkyTexture)
 	m_SkyTexture = pSkyTexture;
 }
 
-video::Material& SkyBoxSceneNodeImpl::GetMaterial(size_t id)
+video::Material* SkyBoxSceneNodeImpl::GetMaterial(size_t id)
 {
 	if(id == 0)
 		return m_Material;
 	else
-		return video::IdentityMaterial;
+		return SceneNode::GetMaterial(id);
+}
+
+void SkyBoxSceneNodeImpl::SetMaterial(size_t i, video::Material* m)
+{
+	if(i == 0)
+		m_Material = m;
+	else
+		return SceneNode::SetMaterial(i, m);
 }
 
 size_t SkyBoxSceneNodeImpl::GetMaterialCount() const

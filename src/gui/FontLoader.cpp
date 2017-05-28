@@ -170,11 +170,11 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	FontCreationData data;
 	data.charMap = charMap;
 	data.charHeight = info.height;
-	data.material = video::Material(m_MaterialLibrary->GetMaterialRenderer("font"));
-	data.material.Layer(0) = fontTexture;
+	data.material = m_MaterialLibrary->CreateMaterial("font");
+	data.material->Layer(0) = fontTexture;
 	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha,
 		video::EBlendOperator::Add, video::EAlphaSource::Texture);
-	data.material.Param("blendFunc") = alpha.Pack();
+	data.material->Param("blendFunc") = alpha.Pack();
 	data.charDistance = 0.0f;
 	data.wordDistance = 1.0f;
 	data.lineDistance = 1.0f;

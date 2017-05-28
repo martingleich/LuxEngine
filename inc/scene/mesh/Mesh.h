@@ -80,10 +80,12 @@ public:
 	virtual void SetBoundingBox(const math::aabbox3df& box) = 0;
 
 	//! Get a submesh material by index.
-	virtual video::Material& GetMaterial(size_t index) = 0;
+	virtual video::Material* GetMaterial(size_t index) = 0;
 
 	//! Get a submesh material by index.
-	virtual const video::Material& GetMaterial(size_t index) const = 0;
+	virtual const video::Material* GetMaterial(size_t index) const = 0;
+
+	virtual void SetMaterial(size_t index, video::Material* m) = 0;
 
 	//! Get the video driver used by this mesh
 	virtual video::VideoDriver* GetDriver() const = 0;

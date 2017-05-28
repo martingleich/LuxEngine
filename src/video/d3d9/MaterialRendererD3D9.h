@@ -2,7 +2,7 @@
 #define INCLUDED_MATERIALRENDERER_D3D9_H
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/MaterialRenderer.h"
-#include "video/Material.h"
+#include "video/MaterialImpl.h"
 #include "video/RenderSettings.h"
 #include "video/Renderer.h"
 #include "video/DeviceState.h"
@@ -65,12 +65,17 @@ public:
 		return m_Shader;
 	}
 
+	virtual StrongRef<Material> CreateMaterial()
+	{
+		return LUX_NEW(MaterialImpl)(this);
+	}
+
 private:
 	u32 EnableTextures(const RenderSettings& settings, DeviceState& state)
 	{
 		u32 curStage = 0;
-		for(size_t i = 0; i < settings.material.GetTextureCount(); ++i) {
-			state.EnableTextureLayer(curStage, settings.material.Layer(i));
+		for(size_t i = 0; i < settings.material->GetTextureCount(); ++i) {
+			state.EnableTextureLayer(curStage, settings.material->Layer(i));
 			++curStage;
 		}
 
@@ -94,6 +99,39 @@ protected:
 	PipelineSettings m_Pipeline;
 };
 
+class MaterialRenderer_DebugOverlay_d3d9 : public MaterialRendererD3D9
+{
+public:
+	MaterialRenderer_DebugOverlay_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(shader, basePackage)
+	{
+		m_Pipeline.fogEnabled = false;
+		m_Pipeline.lighting = false;
+	}
+
+	void Begin(const RenderSettings& settings, DeviceState& state)
+	{
+		MaterialRendererD3D9::Begin(settings, state);
+		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
+
+		device->SetRenderState(D3DRS_TEXTUREFACTOR, settings.material->GetDiffuse().ToHex());
+		device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+		device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
+	}
+
+	ERequirement GetRequirements() const
+	{
+		return ERequirement::None;
+	}
+
+	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	{
+		StrongRef<MaterialRenderer_DebugOverlay_d3d9> renderer = LUX_NEW(MaterialRenderer_DebugOverlay_d3d9)(shader, basePackage);
+		renderer->m_Pipeline = m_Pipeline;
+		return renderer;
+	}
+};
+
 //! Render a solid/opak material
 class MaterialRenderer_Solid_d3d9 : public MaterialRendererD3D9
 {
@@ -109,15 +147,21 @@ public:
 		MaterialRendererD3D9::Begin(settings, state);
 		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
 
-		BaseTexture* firstLayer = settings.material.Layer(0);
+		BaseTexture* firstLayer = settings.material->Layer(0);
+
+		if(!settings.pipeline.lighting) {
+			device->SetRenderState(D3DRS_TEXTUREFACTOR, settings.material->GetDiffuse().ToHex());
+			device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+		} else {
+			device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		}
+
 		if(firstLayer) {
 			device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 		} else {
 			// Use only the diffuse color
-			device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-			device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+			device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
 		}
 	}
 
@@ -159,7 +203,7 @@ public:
 		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
 
 		AlphaBlendSettings blend;
-		blend.Unpack(settings.material.Param(0));
+		blend.Unpack(settings.material->Param(0));
 
 		state.EnableAlpha(blend);
 
@@ -171,7 +215,7 @@ public:
 			if(blend.AlphaSrc == EAlphaSource::VertexColor) {
 				device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 				device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-			} else if(blend.AlphaSrc == EAlphaSource::VertexAndTexture || (blend.AlphaSrc == EAlphaSource::Texture && settings.material.diffuse.HasAlpha())) {
+			} else if(blend.AlphaSrc == EAlphaSource::VertexAndTexture || (blend.AlphaSrc == EAlphaSource::Texture && settings.material->GetDiffuse().HasAlpha())) {
 				device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
 				device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 				device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
@@ -306,6 +350,7 @@ public:
 
 		device->SetRenderState(D3DRS_COLORVERTEX, FALSE);
 		device->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
+		device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	}
 
 	ERequirement GetRequirements() const

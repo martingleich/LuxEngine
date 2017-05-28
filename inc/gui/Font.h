@@ -164,13 +164,13 @@ public:
 	for more see "font Rendering in Lux"
 	\param material The new material to use
 	*/
-	virtual void SetMaterial(const video::Material& material) = 0;
+	virtual void SetMaterial(const video::Material* material) = 0;
 
 	//! Retrieve the material used for rendering the font
 	/**
 	\return The new material used for rendering the font
 	*/
-	virtual const video::Material& GetMaterial() const = 0;
+	virtual const video::Material* GetMaterial() const = 0;
 
 	core::Name GetResourceType() const
 	{

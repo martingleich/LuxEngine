@@ -6,6 +6,7 @@
 
 #include "video/RenderSettings.h"
 #include "video/Material.h"
+#include "video/MaterialRenderer.h"
 #include "video/LightData.h"
 #include "video/FogData.h"
 #include "video/RenderStatistics.h"
@@ -60,8 +61,11 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void SetMaterial(const Material& material);
-	const Material& GetMaterial() const;
+	void SetMaterial(const Material* material);
+	const Material* GetMaterial() const;
+
+	void SetInvalidMaterial(const Material* material);
+	const Material* GetInvalidMaterial();
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -129,7 +133,8 @@ protected:
 	ERenderMode m_RenderMode; //!< Active rendermode
 
 	// The userset parameters are only rememberd they don't have to be activated immediatly
-	Material m_Material; //!< User set material
+	StrongRef<Material> m_Material; //!< User set material
+	StrongRef<Material> m_InvalidMaterial; //!< The material used to render invalid materials
 
 	core::array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
 

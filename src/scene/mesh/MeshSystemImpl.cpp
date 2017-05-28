@@ -17,7 +17,7 @@ MeshSystemImpl::MeshSystemImpl(core::ResourceSystem* resourceSystem,video::Video
 	m_VideoDriver(driver),
 	m_MatLib(matLib)
 {
-	m_GeoCreatorLib = LUX_NEW(GeometryCreatorLibImpl)(m_VideoDriver, this, m_ResourceSystem);
+	m_GeoCreatorLib = LUX_NEW(GeometryCreatorLibImpl)(m_MatLib, m_VideoDriver, this, m_ResourceSystem);
 
 	m_ResourceSystem->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(m_VideoDriver, m_MatLib, m_ResourceSystem));
 
@@ -41,7 +41,5 @@ StrongRef<GeometryCreatorLib> MeshSystemImpl::GetGeometryCreatorLib()
 	return m_GeoCreatorLib;
 }
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux

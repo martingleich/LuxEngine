@@ -32,10 +32,6 @@ private:
 			RecalculateNormals(false)
 		{
 			Meshbuffer = LUX_NEW(video::SubMeshImpl);
-			Meshbuffer->GetMaterial().shininess = 0.0f;
-			Meshbuffer->GetMaterial().ambient = 0.2f;
-			Meshbuffer->GetMaterial().diffuse = video::Color(204, 204, 204, 255);
-			Meshbuffer->GetMaterial().specular = video::Color(255, 255, 255, 255);
 		}
 
 		SObjMtl(const SObjMtl& other)

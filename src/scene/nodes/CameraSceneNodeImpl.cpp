@@ -187,7 +187,7 @@ void CameraSceneNodeImpl::Render()
 void CameraSceneNodeImpl::RecalculateProjectionMatrix()
 {
 	if(m_AutoAspect) {
-		if(m_RenderTarget)
+		if(m_RenderTarget.GetTexture())
 			m_Aspect = m_RenderTarget.GetSize().GetAspect();
 		else
 			m_Aspect = GetSceneManager()->GetRenderer()->GetRenderTarget().GetSize().GetAspect();

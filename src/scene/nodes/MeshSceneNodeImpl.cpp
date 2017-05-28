@@ -3,6 +3,7 @@
 #include "scene/SceneManager.h"
 #include "video/SubMesh.h"
 #include "core/ReferableRegister.h"
+#include "video/MaterialRenderer.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::scene::MeshSceneNodeImpl)
 
@@ -30,9 +31,9 @@ void MeshSceneNodeImpl::OnRegisterSceneNode()
 	if(m_OnlyReadMaterials && m_Mesh != nullptr) {
 		for(u32 dwSub = 0; dwSub < m_Mesh->GetSubMeshCount(); ++dwSub) {
 			video::SubMesh* subMesh = m_Mesh->GetSubMesh(dwSub);
-			video::Material& Mat = subMesh->GetMaterial();
+			video::Material* Mat = subMesh->GetMaterial();
 
-			video::MaterialRenderer* renderer = subMesh ? Mat.GetRenderer() : nullptr;
+			video::MaterialRenderer* renderer = Mat ? Mat->GetRenderer() : nullptr;
 			if(renderer && TestFlag(renderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent))
 				bTransparent = true;
 			else
@@ -43,7 +44,8 @@ void MeshSceneNodeImpl::OnRegisterSceneNode()
 		}
 	} else {
 		for(u32 dwMat = 0; dwMat < m_Materials.Size(); ++dwMat) {
-			video::MaterialRenderer* renderer = m_Materials[dwMat].GetRenderer();
+			video::Material* mat = m_Materials[dwMat];
+			video::MaterialRenderer* renderer = mat ? mat->GetRenderer() : nullptr;
 			if(renderer && TestFlag(renderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent))
 				bTransparent = true;
 			else
@@ -82,17 +84,16 @@ void MeshSceneNodeImpl::Render()
 	for(u32 dwSub = 0; dwSub < m_Mesh->GetSubMeshCount(); ++dwSub) {
 		video::SubMesh* pSub = m_Mesh->GetSubMesh(dwSub);
 		if(pSub) {
-			const video::Material& Mat = m_OnlyReadMaterials ? pSub->GetMaterial() : m_Materials[dwSub];
+			const video::Material* Mat = m_OnlyReadMaterials ? pSub->GetMaterial() : m_Materials[dwSub];
 
 			// renderer abfragen, wenn es denn gewünschten nicht gibt abbrechen
-			video::MaterialRenderer* matRenderer = Mat.GetRenderer();
-			if(!matRenderer)
-				break;
+			video::MaterialRenderer* matRenderer = nullptr;
+			if(Mat)
+				matRenderer = Mat->GetRenderer();
+			bool isTransparent = false;
+			if(matRenderer)
+				isTransparent = TestFlag(matRenderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent);
 
-			// Im soliden Pass -> Solides Zeichnen
-			// Im transparenten Pass -> Transparentes Zeichnen
-
-			bool isTransparent =  TestFlag(matRenderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent);
 			if(bIsTransparentPass == isTransparent) {
 				renderer->SetMaterial(Mat);
 				renderer->DrawSubMesh(pSub);
@@ -122,7 +123,7 @@ void MeshSceneNodeImpl::Render()
 
 }
 
-video::Material& MeshSceneNodeImpl::GetMaterial(size_t index)
+video::Material* MeshSceneNodeImpl::GetMaterial(size_t index)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
 		return m_Mesh->GetSubMesh(index)->GetMaterial();
@@ -131,7 +132,19 @@ video::Material& MeshSceneNodeImpl::GetMaterial(size_t index)
 	if(index >= m_Materials.Size())
 		return SceneNode::GetMaterial(index);
 
-	return  m_Materials[index];
+	return m_Materials[index];
+}
+
+void MeshSceneNodeImpl::SetMaterial(size_t index, video::Material* m)
+{
+	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
+		m_Mesh->GetSubMesh(index)->SetMaterial(m);
+
+	// Wenn der index zu groß ist, hat vieleicht der Knoten selbst noch Materialien
+	if(index >= m_Materials.Size())
+		SceneNode::SetMaterial(index, m);
+
+	m_Materials[index] = m;
 }
 
 size_t MeshSceneNodeImpl::GetMaterialCount() const
@@ -171,16 +184,14 @@ void MeshSceneNodeImpl::CopyMaterials()
 		// Wenn mit der Submesh ein Fehler auftritt wird das Standartmaterial benutzt
 		for(size_t i = 0; i < MaterialCount; ++i) {
 			video::SubMesh* subMesh = m_Mesh->GetSubMesh(i);
-			video::Material* material;
+			StrongRef<video::Material> material;
 			if(subMesh)
-				material = &subMesh->GetMaterial();
-			else
-				material = &video::IdentityMaterial;
+				material = subMesh->GetMaterial()->Clone();
 
 			if(i < OldCount)
-				m_Materials[i] = *material;
+				m_Materials[i] = material;
 			else
-				m_Materials.PushBack(*material);
+				m_Materials.PushBack(material);
 		}
 	} else {
 		m_Materials.Clear();
@@ -200,7 +211,6 @@ StrongRef<Referable> MeshSceneNodeImpl::Clone() const
 	return out;
 }
 
-} 
-
-} 
+}
+}
 

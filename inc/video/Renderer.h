@@ -112,10 +112,21 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	//! Set the active material
-	virtual void SetMaterial(const Material& material) = 0;
+	virtual void SetMaterial(const Material* material) = 0;
 
 	//! Get the active matrial
-	virtual const Material& GetMaterial() const = 0;
+	virtual const Material* GetMaterial() const = 0;
+
+	//! Set the invalid material
+	/**
+	The invalid material is used to render invalid materials, for example materials with
+	missing renderers.
+	The invalid is automatically set by the engine.
+	*/
+	virtual void SetInvalidMaterial(const Material* material) = 0;
+
+	//! Get the invalid material
+	virtual const Material* GetInvalidMaterial() = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

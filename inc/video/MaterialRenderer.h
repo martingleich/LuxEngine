@@ -57,6 +57,8 @@ public:
 	//! Clones the material renderer
 	virtual StrongRef<MaterialRenderer> Clone(Shader* shader = nullptr, const core::ParamPackage* basePackage = nullptr) const = 0;
 
+	virtual StrongRef<Material> CreateMaterial() = 0;
+
 	virtual const PipelineSettings& GetPipeline() const = 0;
 	virtual void SetPipeline(const PipelineSettings& set) = 0;
 

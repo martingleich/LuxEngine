@@ -7,6 +7,10 @@
 
 namespace lux
 {
+namespace video
+{
+class VideoDriver;
+}
 namespace gui
 {
 
@@ -29,7 +33,7 @@ struct FontPixel
 
 struct FontCreationData
 {
-	video::Material material;
+	StrongRef<video::Material> material;
 	FontPixel* image;
 	u32 imageWidth;
 	u32 imageHeight;
@@ -65,8 +69,8 @@ public:
 	~FontImpl();
 	void Init(video::VideoDriver* driver, const FontCreationData& data);
 
-	void SetMaterial(const video::Material& material);
-	const video::Material& GetMaterial() const;
+	void SetMaterial(const video::Material* material);
+	const video::Material* GetMaterial() const;
 	float GetBaseLine() const;
 	void SetBaseLine(float base);
 	void Draw(const string& Text, const math::vector2f& Position, EAlign Align, video::Color color, const math::rectf* clip);
@@ -104,7 +108,7 @@ private:
 	float m_Scale;
 	float m_BaseLine;
 
-	video::Material m_Material;
+	StrongRef<video::Material> m_Material;
 	FontPixel* m_Image;
 	u32 m_ImageWidth;
 	u32 m_ImageHeight;
@@ -114,9 +118,7 @@ private:
 	CharInfo m_ErrorChar;
 };
 
-}    
-
-}    
-
+} // namespace gui
+} // namespace lux
 
 #endif

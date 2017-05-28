@@ -34,8 +34,9 @@ public:
 		bool dynamic = false);
 	void RemoveSubMesh(size_t index);
 	void RemoveSubMesh(video::SubMesh* subMesh);
-	video::Material& GetMaterial(size_t index);
-	const video::Material& GetMaterial(size_t index) const;
+	video::Material* GetMaterial(size_t index);
+	const video::Material* GetMaterial(size_t index) const;
+	void SetMaterial(size_t index, video::Material* m);
 	video::VideoDriver* GetDriver() const;
 
 	core::Name GetReferableSubType() const;

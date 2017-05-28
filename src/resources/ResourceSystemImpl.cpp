@@ -20,6 +20,7 @@ const Name CubeTexture = "cubetexture";
 const Name Mesh = "mesh";
 const Name Font = "font";
 const Name Sound = "sound";
+const Name Material = "material";
 }
 
 static u32 INVALID_ID = 0xFFFFFFFF;

@@ -120,18 +120,18 @@ void DeviceStateD3D9::SetRenderStateF(D3DRENDERSTATETYPE state, float value)
 	SetRenderState(state, v);
 }
 
-void DeviceStateD3D9::SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material& mat)
+void DeviceStateD3D9::SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material* mat)
 {
 	D3DMATERIAL9 D3DMaterial = {
-		SColorToD3DColor(mat.diffuse),
+		SColorToD3DColor(mat->GetDiffuse()),
 		SColorToD3DColor(ambient),
-		SColorToD3DColor(mat.specular),
-		SColorToD3DColor(mat.emissive),
-		mat.shininess
+		SColorToD3DColor(mat->GetSpecular()),
+		SColorToD3DColor(mat->GetEmissive()),
+		mat->GetShininess()
 	};
 	m_Device->SetMaterial(&D3DMaterial);
 
-	if(pipeline.lighting && !math::IsZero(mat.shininess))
+	if(pipeline.lighting && !math::IsZero(D3DMaterial.Power))
 		SetRenderState(D3DRS_SPECULARENABLE, 1);
 	else
 		SetRenderState(D3DRS_SPECULARENABLE, 0);

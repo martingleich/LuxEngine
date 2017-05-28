@@ -19,7 +19,8 @@ public:
 	void OnRegisterSceneNode();
 	void Render();
 	void SetSkyTexture(video::CubeTexture* skyTexture);
-	video::Material& GetMaterial(size_t id);
+	video::Material* GetMaterial(size_t id);
+	void SetMaterial(size_t i, video::Material* m);
 	size_t GetMaterialCount() const;
 
 	core::Name GetReferableSubType() const;
@@ -27,12 +28,10 @@ public:
 
 private:
 	StrongRef<video::CubeTexture> m_SkyTexture;
-	video::Material m_Material;
+	StrongRef<video::Material> m_Material;
 };
 
-}    
-
-}    
-
+} // namespace scene
+} // namespace lux
 
 #endif

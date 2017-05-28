@@ -54,16 +54,16 @@ public:
 	/**
 	\return The constant material of the submesh
 	*/
-	virtual const Material& GetMaterial() const = 0;
+	virtual const Material* GetMaterial() const = 0;
 
 	//! Ask the material of this submesh
 	/**
 	\return The changeable material of the submesh
 	*/
-	virtual Material& GetMaterial() = 0;
+	virtual Material* GetMaterial() = 0;
 
 	//! Set a new material for the submesh
-	virtual void SetMaterial(const Material& material) = 0;
+	virtual void SetMaterial(Material* material) = 0;
 
 	//! Set new vertices for the submesh
 	/**

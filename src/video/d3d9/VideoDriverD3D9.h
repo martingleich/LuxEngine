@@ -18,12 +18,15 @@ namespace lux
 
 namespace video
 {
+class RendererD3D9;
 
 class VideoDriverD3D9 : public VideoDriverNull
 {
 public:
 	VideoDriverD3D9(core::ReferableFactory* refFactory);
 	~VideoDriverD3D9();
+
+	void CleanUp();
 
 	void Init(const DriverConfig& config, gui::Window* Window);
 
@@ -82,10 +85,6 @@ public:
 	{
 		return m_BufferManager;
 	}
-	void SetDefaultRenderer(MaterialRenderer* r)
-	{
-		m_SolidRenderer = r;
-	}
 
 	StrongRef<Renderer> GetRenderer() const
 	{
@@ -135,7 +134,7 @@ private:
 	core::array<DepthBuffer_d3d9> m_DepthBuffers;
 
 	StrongRef<BufferManager> m_BufferManager;
-	StrongRef<Renderer> m_Renderer;
+	StrongRef<RendererD3D9> m_Renderer;
 
 	UnknownRefCounted<IDirect3D9> m_D3D;
 	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
@@ -146,8 +145,6 @@ private:
 	D3DCAPS9 m_Caps;
 	int m_Adapter;
 	D3DPRESENT_PARAMETERS m_PresentParams;
-
-	video::MaterialRenderer* m_SolidRenderer;
 };
 
 }

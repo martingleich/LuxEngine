@@ -1,204 +1,75 @@
 #ifndef INCLUDED_MATERIAL_H
 #define INCLUDED_MATERIAL_H
+#include "resources/Resource.h"
 #include "core/ParamPackage.h"
 
 #include "video/Color.h"
-#include "video/MaterialRenderer.h"
-#include "video/TextureLayer.h"
 
 namespace lux
 {
 namespace video
 {
+class TextureLayer;
+class MaterialRenderer;
 
-class Material
+class Material : public core::Resource
 {
 public:
-	//-------------------------------------------------------------
-	// Echte Materialdaten
-	// Diese Daten enthält jedes Material per definition, alle anderen Parameter sind mittels Param-Methode erreichbar
+	virtual ~Material() {}
 
-	// Hintergrundfaktor
-	// Wie stark reagiert das Material auf die globale Hintergrundfarbe
-	// default: 1.0
-	float ambient;
+	////////////////////////////////////////////////////////////////////
 
-	// Streufarbe
-	// default: LightGray
-	Colorf diffuse;
+	virtual void SetRenderer(MaterialRenderer* renderer) = 0;
+	virtual MaterialRenderer* GetRenderer() const = 0;
 
-	// Eigenfarbe
-	// Wie stark erhellt sich das Material selbst
-	// default: Black
-	Colorf emissive;
+	////////////////////////////////////////////////////////////////////
 
-	// Glanzfarbe
-	// Wie glänzt das Material
-	// default: White
-	Colorf specular;
+	virtual void CopyFrom(const Material* other) = 0;
+	virtual bool Equal(const Material* other) const = 0;
 
-	// Glanzkraft
-	// 0 = Kein Glanz; Ansonten desto größer der Wert, desto schärferer Glanzpunkt
-	// default: 0.0
-	float shininess;
+	////////////////////////////////////////////////////////////////////
 
-public:
-	Material() :
-		ambient(1.0f),
-		diffuse(Color::LightGray),
-		emissive(Color::Black),
-		specular(Color::White),
-		shininess(0.0f),
-		m_Type(nullptr),
-		m_Puffer(nullptr)
+	virtual void SetAmbient(float ambient) = 0;
+	virtual float GetAmbient() const = 0;
+
+	virtual void SetDiffuse(const Colorf& diffuse) = 0;
+	virtual const Colorf& GetDiffuse() const = 0;
+
+	virtual void SetEmissive(const Colorf& emissive) = 0;
+	virtual const Colorf& GetEmissive() const = 0;
+
+	virtual void SetSpecular(const Colorf& specular) = 0;
+	virtual const Colorf& GetSpecular() const = 0;
+
+	virtual void SetShininess(float shininess) = 0;
+	virtual float GetShininess() const = 0;
+
+	////////////////////////////////////////////////////////////////////
+
+	virtual core::PackageParam Param(const string_type& name) = 0;
+	virtual core::PackageParam Param(const string_type& name) const = 0;
+	virtual core::PackageParam Param(u32 id) = 0;
+	virtual core::PackageParam Param(u32 id) const = 0;
+
+	virtual core::PackageParam Layer(u32 layer) = 0;
+	virtual core::PackageParam Layer(u32 layer) const = 0;
+
+	////////////////////////////////////////////////////////////////////
+
+	virtual u32 GetTextureCount() const = 0;
+	virtual u32 GetParamCount() const = 0;
+
+	////////////////////////////////////////////////////////////////////
+
+	core::Name GetReferableSubType() const
 	{
+		return core::ResourceType::Material;
 	}
 
-	Material(MaterialRenderer* renderer) :
-		ambient(1.0f),
-		diffuse(Color::LightGray),
-		emissive(Color::Black),
-		specular(Color::White),
-		shininess(0.0f),
-		m_Type(renderer),
-		m_Puffer(renderer ? &renderer->GetPackage() : nullptr)
-	{
-	}
-
-	Material(const Material& other) :
-		m_Type(nullptr),
-		m_Puffer(nullptr)
-	{
-		this->Set(other);
-	}
-
-	~Material()
-	{
-		SetRenderer(nullptr);
-	}
-
-	bool operator==(const Material& other) const
-	{
-		return  m_Puffer == other.m_Puffer &&
-			ambient == other.ambient &&
-			diffuse == other.diffuse &&
-			emissive == other.emissive &&
-			specular == other.specular &&
-			shininess == other.shininess;
-	}
-
-	bool operator!=(const Material& other) const
-	{
-		return !(*this == other);
-	}
-
-	Material& operator=(const Material& other)
-	{
-		return this->Set(other);
-	}
-
-	core::PackageParam Param(const string& name)
-	{
-		return m_Puffer.FromName(name, false);
-	}
-
-	core::PackageParam Param(const string& name) const
-	{
-		return m_Puffer.FromName(name, true);
-	}
-
-	core::PackageParam Param(u32 id)
-	{
-		return m_Puffer.FromID(id, false);
-	}
-
-	core::PackageParam Param(u32 id) const
-	{
-		return m_Puffer.FromID(id, true);
-	}
-
-	core::PackageParam Layer(u32 layer)
-	{
-		return m_Puffer.FromType(core::Type::Texture, layer, false);
-	}
-
-	core::PackageParam Layer(u32 layer) const
-	{
-		return m_Puffer.FromType(core::Type::Texture, layer, false);
-	}
-
-	u32 GetTextureCount() const
-	{
-		return m_Puffer.GetTextureCount();
-	}
-
-	u32 GetParamCount() const
-	{
-		return m_Puffer.GetParamCount();
-	}
-
-	MaterialRenderer* GetRenderer() const
-	{
-		return m_Type;
-	}
-
-	void SetRenderer(MaterialRenderer* renderer)
-	{
-		m_Type = renderer;
-		if(m_Type)
-			m_Puffer.SetType(&m_Type->GetPackage());
-		else
-			m_Puffer.SetType(nullptr);
-	}
-
-	void Clear()
-	{
-		m_Puffer.Reset();
-	}
-
-	const core::PackagePuffer& GetPuffer() const
-	{
-		return m_Puffer;
-	}
-
-	Material& Set(const Material& other)
-	{
-		if(this == &other)
-			return *this;
-
-		m_Puffer = other.m_Puffer;
-		m_Type = other.m_Type;
-
-		ambient = other.ambient;
-		diffuse = other.diffuse;
-		emissive = other.emissive;
-		specular = other.specular;
-		shininess = other.shininess;
-
-		return *this;
-	}
-
-private:
-	WeakRef<MaterialRenderer> m_Type;
-	core::PackagePuffer m_Puffer;
+	virtual StrongRef<Referable> Clone() const = 0;
 };
 
-LUX_API extern Material IdentityMaterial;
-LUX_API extern Material WorkMaterial;
-
-}
-
-}
-
+} // namespace video
+} // namespace lux
 
 #endif
-
-
-
-
-
-
-
-
-
-

@@ -31,7 +31,7 @@ public:
 	void* GetLowLevelDevice();
 	void SetRenderState(D3DRENDERSTATETYPE state, DWORD value);
 	void SetRenderStateF(D3DRENDERSTATETYPE state, float value);
-	void SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material& mat);
+	void SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material* mat);
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::matrix4& m);
 	void SetFog(bool active, const FogData& fog);
 	void ClearLights(bool useLights);

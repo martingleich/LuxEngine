@@ -17,9 +17,9 @@ public:
 	video::EPrimitiveType GetPrimitiveType() const;
 	u32 GetPrimitveCount() const;
 	void SetPrimitiveType(video::EPrimitiveType type);
-	const video::Material& GetMaterial() const;
-	video::Material& GetMaterial();
-	void SetMaterial(const video::Material& material);
+	const video::Material* GetMaterial() const;
+	video::Material* GetMaterial();
+	void SetMaterial(video::Material* material);
 	void SetVertices(VertexBuffer* vertices);
 	StrongRef<VertexBuffer> GetVertices();
 	const VertexBuffer* GetVertices() const;
@@ -35,16 +35,14 @@ public:
 	void RecalculateBoundingBox();
 
 private:
-	Material m_Material;
+	StrongRef<Material> m_Material;
 	StrongRef<VertexBuffer> m_Vertices;
 	StrongRef<IndexBuffer> m_Indices;
 	EPrimitiveType m_PrimitveType;
 	math::aabbox3df m_BoundingBox;
 };
 
-}    
-
-}    
-
+} // namespace video
+} // namespace lux
 
 #endif

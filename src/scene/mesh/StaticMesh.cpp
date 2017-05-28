@@ -97,20 +97,19 @@ void StaticMesh::RemoveSubMesh(video::SubMesh* subMesh)
 		m_MeshBuffers.Erase(it);
 }
 
-video::Material& StaticMesh::GetMaterial(size_t index)
+video::Material* StaticMesh::GetMaterial(size_t index)
 {
-	if(index < m_MeshBuffers.Size())
-		return m_MeshBuffers[index]->GetMaterial();
-	else
-		return video::WorkMaterial;
+	return m_MeshBuffers.At(index)->GetMaterial();
 }
 
-const video::Material& StaticMesh::GetMaterial(size_t index) const
+const video::Material* StaticMesh::GetMaterial(size_t index) const
 {
-	if(index < m_MeshBuffers.Size())
-		return m_MeshBuffers[index]->GetMaterial();
-	else
-		return video::IdentityMaterial;
+	return m_MeshBuffers.At(index)->GetMaterial();
+}
+
+void StaticMesh::SetMaterial(size_t index, video::Material* m)
+{
+	m_MeshBuffers.At(index)->SetMaterial(m);
 }
 
 video::VideoDriver* StaticMesh::GetDriver() const
