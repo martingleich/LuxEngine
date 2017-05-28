@@ -29,7 +29,7 @@ StrongRef<Material> MaterialLibraryImpl::CreateMaterial(const string& name)
 StrongRef<Material> MaterialLibraryImpl::CreateMaterial(MaterialRenderer* renderer)
 {
 	if(renderer == nullptr)
-		renderer = m_MaterialRenderers[0].renderer;
+		renderer = GetSolidRenderer();
 
 	return renderer->CreateMaterial();
 }
@@ -186,6 +186,14 @@ const string& MaterialLibraryImpl::GetRendererName(MaterialRenderer* renderer) c
 size_t MaterialLibraryImpl::GetMaterialRendererCount() const
 {
 	return m_MaterialRenderers.Size();
+}
+
+StrongRef<MaterialRenderer> MaterialLibraryImpl::GetSolidRenderer()
+{
+	if(!m_Solid)
+		m_Solid = GetMaterialRenderer("solid");
+
+	return m_Solid;
 }
 
 } // !namespace video

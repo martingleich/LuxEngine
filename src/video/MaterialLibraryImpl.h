@@ -42,6 +42,8 @@ public:
 
 	size_t GetMaterialRendererCount() const;
 
+	StrongRef<MaterialRenderer> GetSolidRenderer();
+
 private:
 	struct Entry
 	{
@@ -70,6 +72,9 @@ private:
 
 	core::array<Entry> m_MaterialRenderers;
 	core::array<StrongRef<MaterialRenderer>> m_AnonRenderers;
+
+	StrongRef<MaterialRenderer> m_Solid;
+
 	StrongRef<VideoDriver> m_VideoDriver;
 	StrongRef<io::FileSystem> m_FileSystem;
 
