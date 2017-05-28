@@ -21,7 +21,7 @@ public:
 	StrongRef<Material> CreateMaterial(const string& name);
 	StrongRef<Material> CreateMaterial(MaterialRenderer* renderer = nullptr);
 
-	size_t AddMaterialRenderer(MaterialRenderer* renderer, const string& name);
+	StrongRef<MaterialRenderer> AddMaterialRenderer(MaterialRenderer* renderer);
 	StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const string& oldName);
 	StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const MaterialRenderer* pOld);
 	StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
@@ -34,57 +34,27 @@ public:
 	StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
 		Shader* shader,
 		const MaterialRenderer* baseMaterial, const string& name);
+	void RemoveMaterialRenderer(MaterialRenderer* renderer);
 	StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const;
 	StrongRef<MaterialRenderer> GetMaterialRenderer(const string& wname) const;
-
-	size_t GetRendererID(MaterialRenderer* renderer) const;
-	const string& GetRendererName(MaterialRenderer* renderer) const;
 
 	size_t GetMaterialRendererCount() const;
 
 	StrongRef<MaterialRenderer> GetSolidRenderer();
 
 private:
-	struct Entry
-	{
-		StrongRef<MaterialRenderer> renderer;
-		string name;
+	bool FindRenderer(const string& name, size_t& id) const;
 
-		Entry()
-		{
-		}
-		Entry(MaterialRenderer* render, const string& name) :
-			renderer(render),
-			name(name)
-		{
-		}
-
-		bool operator<(const Entry& other) const
-		{
-			return name < other.name;
-		}
-
-		bool operator==(const Entry& other) const
-		{
-			return name == other.name;
-		}
-	};
-
-	core::array<Entry> m_MaterialRenderers;
-	core::array<StrongRef<MaterialRenderer>> m_AnonRenderers;
+private:
+	core::array<StrongRef<MaterialRenderer>> m_Renderers;
 
 	StrongRef<MaterialRenderer> m_Solid;
 
 	StrongRef<VideoDriver> m_VideoDriver;
 	StrongRef<io::FileSystem> m_FileSystem;
-
-	static const size_t ANON_BASE_ID = 1048576;
-
 };
 
-}
-
-}
-
+} // namespace video
+} // namespace lux
 
 #endif // INCLUDED_CMATERIALLIBRARY_H

@@ -22,8 +22,9 @@ namespace video
 class MaterialRendererD3D9 : public MaterialRenderer
 {
 public:
-	MaterialRendererD3D9(Shader* shader) :
-		m_Shader(shader)
+	MaterialRendererD3D9(const string& name, Shader* shader) :
+		m_Shader(shader),
+		m_Name(name)
 	{
 	}
 
@@ -68,6 +69,11 @@ public:
 		return LUX_NEW(MaterialImpl)(this);
 	}
 
+	const string& GetName() const
+	{
+		return m_Name;
+	}
+
 private:
 	u32 EnableTextures(const RenderSettings& settings, DeviceState& state)
 	{
@@ -95,13 +101,15 @@ protected:
 
 	core::ParamPackage m_Package;
 	PipelineSettings m_Pipeline;
+
+	string m_Name;
 };
 
 class MaterialRenderer_DebugOverlay_d3d9 : public MaterialRendererD3D9
 {
 public:
-	MaterialRenderer_DebugOverlay_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader)
+	MaterialRenderer_DebugOverlay_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(name, shader)
 	{
 		m_Pipeline.fogEnabled = false;
 		m_Pipeline.lighting = false;
@@ -125,9 +133,9 @@ public:
 		return ERequirement::None;
 	}
 
-	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_DebugOverlay_d3d9> renderer = LUX_NEW(MaterialRenderer_DebugOverlay_d3d9)(shader, basePackage);
+		StrongRef<MaterialRenderer_DebugOverlay_d3d9> renderer = LUX_NEW(MaterialRenderer_DebugOverlay_d3d9)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -136,8 +144,8 @@ public:
 class MaterialRenderer_BaseSolid_d3d9 : public MaterialRendererD3D9
 {
 public:
-	MaterialRenderer_BaseSolid_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader)
+	MaterialRenderer_BaseSolid_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(name, shader)
 	{
 		if(basePackage)
 			m_Package = *basePackage;
@@ -153,9 +161,9 @@ public:
 		return ERequirement::None;
 	}
 
-	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_BaseSolid_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseSolid_d3d9)(shader, basePackage);
+		StrongRef<MaterialRenderer_BaseSolid_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseSolid_d3d9)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -164,8 +172,8 @@ public:
 class MaterialRenderer_BaseTransparent_d3d9 : public MaterialRendererD3D9
 {
 public:
-	MaterialRenderer_BaseTransparent_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader)
+	MaterialRenderer_BaseTransparent_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(name, shader)
 	{
 		AlphaBlendSettings defaultSettings;
 		defaultSettings.SrcBlend = video::EBlendFactor::SrcAlpha;
@@ -202,20 +210,20 @@ public:
 		return ERequirement::Transparent;
 	}
 
-	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_BaseTransparent_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseTransparent_d3d9)(shader, basePackage);
+		StrongRef<MaterialRenderer_BaseTransparent_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseTransparent_d3d9)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
 };
 
-//! Render a solid/opak material
+//! Render a solid/oname, pak material
 class MaterialRenderer_Solid_d3d9 : public MaterialRendererD3D9
 {
 public:
-	MaterialRenderer_Solid_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader)
+	MaterialRenderer_Solid_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(name, shader)
 	{
 		m_Package.AddParam("diffMap", TextureLayer());
 		if(basePackage)
@@ -250,9 +258,9 @@ public:
 		return ERequirement::None;
 	}
 
-	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_Solid_d3d9> renderer = LUX_NEW(MaterialRenderer_Solid_d3d9)(shader, basePackage);
+		StrongRef<MaterialRenderer_Solid_d3d9> renderer = LUX_NEW(MaterialRenderer_Solid_d3d9)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -262,8 +270,8 @@ public:
 class MaterialRenderer_OneTextureBlend_d3d9 : public MaterialRendererD3D9
 {
 public:
-	MaterialRenderer_OneTextureBlend_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader)
+	MaterialRenderer_OneTextureBlend_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(name, shader)
 	{
 		AlphaBlendSettings defaultSettings;
 		defaultSettings.SrcBlend = video::EBlendFactor::SrcAlpha;
@@ -320,9 +328,9 @@ public:
 		return ERequirement::Transparent;
 	}
 
-	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_OneTextureBlend_d3d9> renderer = LUX_NEW(MaterialRenderer_OneTextureBlend_d3d9)(shader, basePackage);
+		StrongRef<MaterialRenderer_OneTextureBlend_d3d9> renderer = LUX_NEW(MaterialRenderer_OneTextureBlend_d3d9)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -333,7 +341,7 @@ public:
 class CMaterialRenderer_VertexAlpha_d3d9 : public MaterialRendererD3D9
 {
 public:
-	CMaterialRenderer_VertexAlpha_d3d9(VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererD3D9(p, pShader, BasePackage)
+	CMaterialRenderer_VertexAlpha_d3d9(const string& name, VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererD3D9(p, pShader, BasePackagename, )
 	{
 		m_Package.AddParam<float>("AlphaFactor", 1.0f);
 		m_Package.AddParam("diffMap", TextureLayer());
@@ -375,12 +383,12 @@ public:
 		return true;
 	}
 
-	MaterialRenderer* Clone(Shader* pShader, const core::ParamPackage* BasePackage) const
+	MaterialRenderer* Clone(const string& name, Shader* pShader, const core::ParamPackage* BasePackage) const
 	{
 		if(!pShader)
 			return nullptr;
 
-		CMaterialRenderer_VertexAlpha_d3d9* renderer = LUX_NEW(CMaterialRenderer_VertexAlpha_d3d9)(m_Driver, pShader, BasePackage);
+		CMname, aterialRenderer_VertexAlpha_d3d9* renderer = LUX_NEW(CMaterialRenderer_VertexAlpha_d3d9)(m_Driver, pShader, BasePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -394,8 +402,8 @@ The alpha color of the vertices determinates the interpolation value
 class MaterialRenderer_Solid_Mix_d3d9 : public MaterialRendererD3D9
 {
 public:
-	MaterialRenderer_Solid_Mix_d3d9(Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(shader)
+	MaterialRenderer_Solid_Mix_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererD3D9(name, shader)
 	{
 		m_Package.AddParam("diffMap1", TextureLayer());
 		m_Package.AddParam("diffMap2", TextureLayer());
@@ -444,9 +452,9 @@ public:
 		return ERequirement::None;
 	}
 
-	StrongRef<MaterialRenderer> Clone(Shader* shader, const core::ParamPackage* basePackage) const
+	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_Solid_Mix_d3d9> renderer = LUX_NEW(MaterialRenderer_Solid_Mix_d3d9)(shader, basePackage);
+		StrongRef<MaterialRenderer_Solid_Mix_d3d9> renderer = LUX_NEW(MaterialRenderer_Solid_Mix_d3d9)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}

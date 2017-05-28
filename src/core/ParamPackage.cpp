@@ -221,7 +221,7 @@ PackageParam ParamPackage::GetParamFromType(core::Type type, u32 index, void* ba
 		}
 	}
 
-	return PackageParam();
+	throw core::ObjectNotFoundException("param_by_type");
 }
 
 void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue, core::Type type)

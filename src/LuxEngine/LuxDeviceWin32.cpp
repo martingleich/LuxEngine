@@ -341,12 +341,12 @@ void LuxDeviceWin32::BuildMaterials()
 
 #ifdef LUX_COMPILE_WITH_D3D9
 	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver, m_Filesystem);
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseSolid_d3d9)(nullptr, nullptr), "solid_base");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseTransparent_d3d9)(nullptr, nullptr), "transparent_base");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_d3d9)(nullptr, nullptr), "solid");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix_d3d9)(nullptr, nullptr), "solid_mix");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)(nullptr, nullptr), "transparent");
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_DebugOverlay_d3d9)(nullptr, nullptr), "debug_overlay");
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseSolid_d3d9)("solid_base", nullptr, nullptr));
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseTransparent_d3d9)("transparent_base", nullptr, nullptr));
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_d3d9)("solid", nullptr, nullptr));
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix_d3d9)("solid_mix", nullptr, nullptr));
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend_d3d9)("transparent", nullptr, nullptr));
+	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_DebugOverlay_d3d9)("debug_overlay", nullptr, nullptr));
 	//m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(nullptr, nullptr), "transparent_alpha");
 #else
 	throw core::NotImplementedException();

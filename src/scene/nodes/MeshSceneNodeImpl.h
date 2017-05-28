@@ -12,17 +12,6 @@ namespace scene
 class MeshSceneNodeImpl : public MeshSceneNode
 {
 private:
-	StrongRef<Mesh> m_Mesh;
-	bool m_OnlyReadMaterials;    // Benutzt der Scene-Node nur die Materialien der Sub-Meshes
-									// d.h. Wenn man das material der Sub-Meshes ändert, ändert es sich in allen
-									// Scene-Nodes mit.
-	core::array<StrongRef<video::Material>> m_Materials;    // Die Materialien des Knotens falls nicht m_OnlyReadMaterials
-
-	math::aabbox3df m_BoundingBox;    // Damit wenn keine mesh geladen auch eine Bounding-box vorhanden ist
-
-	RenderTransform m_RenderTransform;
-
-private:
 	// Kopiert die Materialien der Sub-Meshes in eine interne Liste
 	void CopyMaterials();
 
@@ -83,6 +72,18 @@ public:
 
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;
+
+private:
+	StrongRef<Mesh> m_Mesh;
+	bool m_OnlyReadMaterials;    // Benutzt der Scene-Node nur die Materialien der Sub-Meshes
+									// d.h. Wenn man das material der Sub-Meshes ändert, ändert es sich in allen
+									// Scene-Nodes mit.
+	core::array<StrongRef<video::Material>> m_Materials;    // Die Materialien des Knotens falls nicht m_OnlyReadMaterials
+
+	math::aabbox3df m_BoundingBox;    // Damit wenn keine mesh geladen auch eine Bounding-box vorhanden ist
+
+	RenderTransform m_RenderTransform;
+
 };
 
 }    

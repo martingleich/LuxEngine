@@ -34,21 +34,20 @@ StrongRef<Material> MaterialLibraryImpl::CreateMaterial(MaterialRenderer* render
 	return renderer->CreateMaterial();
 }
 
-size_t MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer, const string& name)
+StrongRef<MaterialRenderer> MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer)
 {
 	LX_CHECK_NULL_ARG(renderer);
 
-	if(name.IsEmpty()) {
-		m_AnonRenderers.PushBack(renderer);
-		return ANON_BASE_ID + (m_AnonRenderers.Size() - 1);
-	} else {
-		size_t i = m_MaterialRenderers.Size();
-		if(i >= ANON_BASE_ID)
-			throw core::RuntimeException("Too many material renderers.");
+	if(renderer->GetName().IsEmpty())
+		throw core::InvalidArgumentException("renderer", "Renderer must have an name");
 
-		m_MaterialRenderers.PushBack(Entry(renderer, name));
-		return m_MaterialRenderers.Size() - 1;
-	}
+	size_t id;
+	if(FindRenderer(renderer->GetName(), id))
+		throw core::InvalidArgumentException("renderer", "Name is already used");
+
+	m_Renderers.PushBack(renderer);
+
+	return renderer;
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::CloneMaterialRenderer(const string& name, const string& oldName)
@@ -60,9 +59,17 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::CloneMaterialRenderer(const str
 {
 	LX_CHECK_NULL_ARG(old);
 
-	StrongRef<MaterialRenderer> renderer = old->Clone();
-	AddMaterialRenderer(renderer, name);
-	return renderer;
+	return AddMaterialRenderer(old->Clone(name));
+}
+
+void MaterialLibraryImpl::RemoveMaterialRenderer(MaterialRenderer* renderer)
+{
+	for(auto it = m_Renderers.First(); it != m_Renderers.End(); ++it) {
+		if(*it == renderer) {
+			m_Renderers.Erase(it);
+			return;
+		}
+	}
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
@@ -77,11 +84,9 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 
 	StrongRef<video::MaterialRenderer> renderer;
 	if(shader)
-		renderer = baseMaterial->Clone(shader, &shader->GetParamPackage());
+		renderer = baseMaterial->Clone(name, shader, &shader->GetParamPackage());
 
-	AddMaterialRenderer(renderer, name);
-
-	return renderer;
+	return AddMaterialRenderer(renderer);
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
@@ -136,56 +141,21 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(size_t index) const
 {
-	if(index >= ANON_BASE_ID)
-		return m_AnonRenderers.At(index - ANON_BASE_ID);
-	else
-		return m_MaterialRenderers.At(index).renderer;
+	return m_Renderers.At(index);
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(const string& name) const
 {
-	auto it = core::LinearSearch(
-		name,
-		m_MaterialRenderers.First(), m_MaterialRenderers.End(),
-		[](const Entry& other, const string& name) {
-		return other.name == name;
-	}
-	);
-
-	if(it == m_MaterialRenderers.End())
+	size_t id;
+	if(!FindRenderer(name, id))
 		throw core::ObjectNotFoundException(name.Data());
 
-	return it->renderer;
-}
-
-size_t MaterialLibraryImpl::GetRendererID(MaterialRenderer* renderer) const
-{
-	for(size_t i = 0; i < m_MaterialRenderers.Size(); ++i) {
-		if(renderer == m_MaterialRenderers[i].renderer)
-			return i;
-	}
-
-	for(size_t i = 0; i < m_AnonRenderers.Size(); ++i) {
-		if(renderer == m_AnonRenderers[i])
-			return ANON_BASE_ID + i;
-	}
-
-	throw core::ObjectNotFoundException("[renderer]");
-}
-
-const string& MaterialLibraryImpl::GetRendererName(MaterialRenderer* renderer) const
-{
-	for(size_t i = 0; i < m_MaterialRenderers.Size(); ++i) {
-		if(renderer == m_MaterialRenderers[i].renderer)
-			return m_MaterialRenderers[i].name;
-	}
-
-	throw core::ObjectNotFoundException("[renderer]");
+	return m_Renderers[id];
 }
 
 size_t MaterialLibraryImpl::GetMaterialRendererCount() const
 {
-	return m_MaterialRenderers.Size();
+	return m_Renderers.Size();
 }
 
 StrongRef<MaterialRenderer> MaterialLibraryImpl::GetSolidRenderer()
@@ -194,6 +164,16 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::GetSolidRenderer()
 		m_Solid = GetMaterialRenderer("solid");
 
 	return m_Solid;
+}
+
+bool MaterialLibraryImpl::FindRenderer(const string& name, size_t& id) const
+{
+	for(id = 0; id < m_Renderers.Size(); ++id) {
+		if(m_Renderers[id]->GetName() == name)
+			return true;
+	}
+
+	return false;
 }
 
 } // !namespace video

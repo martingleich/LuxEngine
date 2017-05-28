@@ -95,6 +95,7 @@ namespace input
 #include "video/ColorSpaces.h"
 #include "video/ColorConverter.h"
 
+#include "video/Shader.h"
 #include "video/VertexTypes.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"

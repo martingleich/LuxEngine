@@ -55,7 +55,7 @@ public:
 	virtual ERequirement GetRequirements() const = 0;
 
 	//! Clones the material renderer
-	virtual StrongRef<MaterialRenderer> Clone(Shader* shader = nullptr, const core::ParamPackage* basePackage = nullptr) const = 0;
+	virtual StrongRef<MaterialRenderer> Clone(const string& newName, Shader* shader = nullptr, const core::ParamPackage* basePackage = nullptr) const = 0;
 
 	virtual StrongRef<Material> CreateMaterial() = 0;
 
@@ -64,6 +64,8 @@ public:
 
 	virtual const core::ParamPackage& GetPackage() const = 0;
 	virtual StrongRef<Shader> GetShader() const = 0;
+
+	virtual const string& GetName() const = 0;
 };
 
 } // namespace video
