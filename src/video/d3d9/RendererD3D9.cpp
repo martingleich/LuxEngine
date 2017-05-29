@@ -56,7 +56,7 @@ void RendererD3D9::BeginScene(bool clearColor, bool clearZ,
 	video::Color color, float z)
 {
 	if((m_CurrentRendertarget.GetTexture() == nullptr) && m_CurrentRendertarget != m_BackbufferTarget) {
-		log::Warning("The current rendertarget texture was destroyed, fallback too normal backbuffer.");
+		log::Warning("The current rendertarget texture was destroyed, fallback to normal backbuffer.");
 		SetRenderTarget(nullptr);
 	}
 
@@ -74,7 +74,7 @@ void RendererD3D9::BeginScene(bool clearColor, bool clearZ,
 			0, nullptr,
 			flags,
 			d3dClear, z, 0))) {
-			log::Error("Driver: Couldn't clear the rendertarget before beginning a scene.");
+			throw core::D3D9Exception(hr);
 		}
 	}
 

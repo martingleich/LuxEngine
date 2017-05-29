@@ -605,7 +605,3 @@ template<> inline Type GetTypeInfo<math::vector3<int>>() { return Type::Vector3I
 } // namespace lux
 
 #endif
-
-
-
-

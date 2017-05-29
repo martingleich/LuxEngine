@@ -44,6 +44,28 @@ private:
 		ParamType_Scene,
 	};
 
+	enum class EType
+	{
+		Unknown,
+
+		Integer,
+		Float,
+		Boolean,
+		U32,
+
+		Texture,
+		Color,
+		Colorf,
+		Vector2,
+		Vector3,
+		Vector2Int,
+		Vector3Int,
+		Matrix,
+
+		Matrix_ColMajor,
+		Structure,
+	};
+
 	enum EDefaultParam
 	{
 		DefaultParam_Shininess = 0,
@@ -60,7 +82,7 @@ private:
 		u32 registerVSCount;
 		u32 registerPSCount;
 
-		core::Type type;
+		EType type;
 		u8 typeSize;
 		const char* name;
 		u32 nameLength;
@@ -73,7 +95,7 @@ private:
 			registerPS(0xFFFFFFFF),
 			registerVSCount(0),
 			registerPSCount(0),
-			type(core::Type::Unknown),
+			type(EType::Unknown),
 			typeSize(0),
 			name(nullptr),
 			nameLength(0),
@@ -85,20 +107,22 @@ private:
 
 	struct Param
 	{
+		Param() {}
+
 		u32 registerVS;
 		u32 registerPS;
 
 		u32 registerVSCount;
 		u32 registerPSCount;
 
-		core::Type type;
+		EType type;
 
 		EParamType paramType;
 		u32 index;
 	};
 
 private:
-	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
+	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
 
 	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, core::array<string>* errorList);
 
@@ -107,16 +131,17 @@ private:
 	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile,
 		core::array<string>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 
-	void GetShaderValue(const Param& p, void* out);
 	void SetShaderValue(const Param& p, const void* data);
 
-	void CastTypeToShader(core::Type type, const void* in, void* out);
-	void CastShaderToType(core::Type type, const void* in, void* out);
+	void CastTypeToShader(EType type, const void* in, void* out);
+	void CastShaderToType(EType type, const void* in, void* out);
 
 	static int GetDefaultId(const char* name);
-	static core::Type GetDefaultType(u32 id);
+	static EType GetDefaultType(u32 id);
 
-	static bool IsTypeCompatible(core::Type a, core::Type b);
+	static bool IsTypeCompatible(EType a, EType b);
+
+	static core::Type GetCoreType(EType type);
 
 private:
 	IDirect3DDevice9* m_D3DDevice;

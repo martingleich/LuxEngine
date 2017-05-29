@@ -16,12 +16,12 @@ RendererNull::RendererNull(VideoDriver* driver) :
 
 	m_ParamId.lighting = AddParam("lighting", core::Type::Float);
 	GetParam(m_ParamId.lighting) = 1.0f;
-	m_ParamId.ambient = AddParam("ambient", core::Type::ColorF);
+	m_ParamId.ambient = AddParam("ambient", core::Type::Colorf);
 	GetParam(m_ParamId.ambient) = video::Colorf(0.0f, 0.0f, 0.0f);
 	m_ParamId.time = AddParam("time", core::Type::Float);
 	GetParam(m_ParamId.time) = 0.0f;
 
-	m_ParamId.fogColor = AddInternalParam("fogColor", core::Type::ColorF);
+	m_ParamId.fogColor = AddInternalParam("fogColor", core::Type::Colorf);
 
 	m_ParamId.fogRange = AddInternalParam("fogRange", core::Type::Vector3);
 	m_ParamId.fogInfo = AddInternalParam("fogInfo", core::Type::Vector3);

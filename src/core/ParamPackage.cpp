@@ -112,27 +112,16 @@ void ParamPackage::MergePackage(const ParamPackage& other)
 void* ParamPackage::CreatePackage() const
 {
 	u8* out = LUX_NEW_ARRAY(u8, self->TotalSize);
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
-		if(it->type == core::Type::Texture) {
-			new ((u8*)out + it->offset) video::TextureLayer(*(video::TextureLayer*)((u8*)self->DefaultPackage + it->offset));
-		} else {
-			lxAssert(it->type.IsTrivial());
-			memcpy((u8*)out + it->offset, (u8*)self->DefaultPackage + it->offset, it->size);
-		}
-	}
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it)
+		it->type.CopyConstruct(out + it->offset, (u8*)self->DefaultPackage + it->offset);
 
 	return out;
 }
 
 void ParamPackage::DestroyPackage(void* p) const
 {
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
-		if(it->type == core::Type::Texture) {
-			((video::TextureLayer*)((u8*)p + it->offset))->~TextureLayer();
-		} else {
-			lxAssert(it->type.IsTrivial());
-		}
-	}
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it)
+		it->type.Destruct((u8*)p + it->offset);
 
 	LUX_FREE_ARRAY((u8*)p);
 }
@@ -140,15 +129,8 @@ void ParamPackage::DestroyPackage(void* p) const
 bool ParamPackage::ComparePackage(const void* a, const void* b) const
 {
 	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
-		if(it->type == core::Type::Texture) {
-			bool r = (*((video::TextureLayer*)((u8*)a + it->offset)) == *((video::TextureLayer*)((u8*)b + it->offset)));
-			if(!r)
-				return false;
-		} else {
-			lxAssert(it->type.IsTrivial());
-			if(memcmp((u8*)a + it->offset, (u8*)b + it->offset, it->size) != 0)
-				return false;
-		}
+		if(!it->type.Compare((const u8*)a + it->offset, (const u8*)b + it->offset))
+			return false;
 	}
 
 	return true;
@@ -157,14 +139,8 @@ bool ParamPackage::ComparePackage(const void* a, const void* b) const
 void* ParamPackage::CopyPackage(const void* b) const
 {
 	u8* out = LUX_NEW_ARRAY(u8, self->TotalSize);
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
-		if(it->type == core::Type::Texture) {
-			new ((u8*)out + it->offset) video::TextureLayer(*(video::TextureLayer*)((u8*)b + it->offset));
-		} else {
-			lxAssert(it->type.IsTrivial());
-			memcpy((u8*)out + it->offset, (u8*)b + it->offset, it->size);
-		}
-	}
+	for(auto it = self->Params.First(); it != self->Params.End(); ++it)
+		it->type.CopyConstruct(out + it->offset, (u8*)b + it->offset);
 
 	return out;
 }
@@ -231,12 +207,7 @@ void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue, core::Ty
 
 	const Entry& e = self->Params.At(param);
 	if(type == core::Type::Unknown || type == e.type) {
-		if(e.type == core::Type::Texture) {
-			*(video::TextureLayer*)((u8*)self->DefaultPackage + e.offset) = *(video::TextureLayer*)((u8*)self->DefaultPackage + e.offset);
-		} else {
-			lxAssert(e.type.IsTrivial());
-			memcpy((u8*)self->DefaultPackage + e.offset, defaultValue, e.size);
-		}
+		e.type.CopyConstruct((u8*)self->DefaultPackage + e.offset, defaultValue);
 	} else {
 		if(!IsConvertible(type, e.type))
 			throw TypeException("Incompatible types used", type, e.type);
@@ -286,22 +257,13 @@ void ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 
 	core::mem::RawMemory newBlock(entry.offset + entry.size);
 	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
-		if(it->type == core::Type::Texture) {
-			new ((u8*)newBlock + it->offset) video::TextureLayer(*(video::TextureLayer*)((u8*)self->DefaultPackage + it->offset));
-		} else {
-			lxAssert(it->type.IsTrivial());
-			memcpy((u8*)newBlock + it->offset, (u8*)self->DefaultPackage + it->offset, it->size);
-		}
+		it->type.CopyConstruct((u8*)newBlock + it->offset, (u8*)self->DefaultPackage + it->offset);
+		it->type.Destruct((u8*)self->DefaultPackage + it->offset);
 	}
+
+	entry.type.CopyConstruct((u8*)newBlock + entry.offset, defaultValue);
 
 	self->Params.PushBack(entry);
-	if(entry.type == core::Type::Texture) {
-		new ((u8*)newBlock + entry.offset) video::TextureLayer(*(video::TextureLayer*)((u8*)defaultValue));
-	} else {
-		lxAssert(entry.type.IsTrivial());
-		memcpy((u8*)newBlock + entry.offset, (u8*)defaultValue, entry.size);
-	}
-
 	self->DefaultPackage = std::move(newBlock);
 }
 

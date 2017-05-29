@@ -3,11 +3,113 @@
 #include "LuxBase.h"
 #include "lxException.h"
 #include <string.h>
+#include <new>
 
 namespace lux
 {
 namespace core
 {
+
+class TypeInfo
+{
+public:
+	TypeInfo(const char* name, size_t size, bool isTrivial) :
+		m_Name(name),
+		m_Size(size),
+		m_IsTrivial(isTrivial)
+	{
+	}
+
+	virtual void Construct(void* ptr) const = 0;
+	virtual void CopyConstruct(void* ptr, const void* other) const = 0;
+	virtual void Destruct(void* ptr) const = 0;
+	virtual void Assign(void* ptr, const void* other) const = 0;
+	virtual bool Compare(const void* a, const void* b) const = 0;
+
+	inline const char* GetName() const
+	{
+		return m_Name;
+	}
+
+	inline size_t GetSize() const
+	{
+		return m_Size;
+	}
+
+	inline bool IsTrivial() const
+	{
+		return m_IsTrivial;
+	}
+
+private:
+	const char* const m_Name;
+	const size_t m_Size;
+	const bool m_IsTrivial;
+};
+
+template <typename T>
+class TypeInfoTemplate : public TypeInfo
+{
+public:
+	TypeInfoTemplate(const char* name, bool isTrivial) :
+		TypeInfo(name, sizeof(T), isTrivial)
+	{
+	}
+
+	void Construct(void* ptr) const
+	{
+		new (ptr) T();
+	}
+
+	void CopyConstruct(void* ptr, const void* other) const
+	{
+		new (ptr) T(*(reinterpret_cast<const T*>(other)));
+	}
+
+	void Destruct(void* ptr) const
+	{
+		if(ptr)
+			reinterpret_cast<const T*>(ptr)->~T();
+	}
+
+	void Assign(void* ptr, const void* other) const
+	{
+		*(reinterpret_cast<T*>(ptr)) = *(reinterpret_cast<const T*>(other));
+	}
+
+	bool Compare(const void* a, const void* b) const
+	{
+		return *(reinterpret_cast<const T*>(a)) == *(reinterpret_cast<const T*>(b));
+	}
+};
+
+class TypeInfoVirtual : public TypeInfo
+{
+public:
+	TypeInfoVirtual(const char* name, size_t size, bool isTrivial) :
+		TypeInfo(name, size, isTrivial)
+	{
+	}
+
+	void Construct(void*) const {}
+
+	void CopyConstruct(void* ptr, const void* other) const
+	{
+		memcpy(ptr, other, GetSize());
+	}
+
+	void Destruct(void*) const {}
+
+	void Assign(void* ptr, const void* other) const
+	{
+		memcpy(ptr, other, GetSize());
+	}
+
+	bool Compare(const void* a, const void* b) const
+	{
+		return (memcmp(a, b, GetSize()) == 0);
+	}
+};
 
 //! Represent a type in the lux-engine
 /**
@@ -16,158 +118,115 @@ This class is used to save type information.
 class Type
 {
 public:
-	//! The diffrent available types.
-	enum EType
-	{
-		Texture = 0,   //!< A single texturelayer    class: lux::video::TextureLayer
-		Integer,           //!< A integer    type: int
-		Float,         //!< A floating point decimal    type: float
-		Color,         //!< A 32-bit color with A8R8G8B8, class lux::video::Color
-		Vector2,          //!< A twodimensional float vector, class lux::math::vector2f
-		Vector3,          //!< A threedimensional float vector, class lux::math::vector3f
-		ColorF,        //!< A floating-point color, class lux::video::Colorf
-		U32,           //!< A unsigned integer    type: lux::u32
-		Bool,          //!< A boolean type: bool
-		Matrix,        //!< A 4x4 float matrix type: lux::math::matrix4
-		Vector2Int,      //!< A twodimensional integer vector, class lux::math::vector2i
-		Vector3Int,      //!< A threedimensional integer vector, class lux::math::vector3i
-		Unknown,       //!< Unknown type
-		Internal_MatrixCol,    //!< A 4x4 float matrix in collum order, do not use
-		Internal_Composed,      //!< A type composed of diffrent types, do not use
-	};
+	LUX_API static const Type Unknown;
+
+	LUX_API static const Type Integer;
+	LUX_API static const Type Float;
+	LUX_API static const Type Boolean;
+	LUX_API static const Type U32;
+
+	LUX_API static const Type Texture;
+	LUX_API static const Type Color;
+	LUX_API static const Type Colorf;
+	LUX_API static const Type Vector2;
+	LUX_API static const Type Vector3;
+	LUX_API static const Type Vector2Int;
+	LUX_API static const Type Vector3Int;
+	LUX_API static const Type Matrix;
 
 public:
-	//! Default constructor, creates invalid type.
 	Type() :
-		m_Type(Unknown)
+		m_Info(Type::Unknown.GetInfo()),
+		m_IsConstant(false)
 	{
 	}
 
-	//! Construct from type.
-	Type(EType t) :
-		m_Type(t)
+	//! Do _not_ call
+	Type(const TypeInfo* info) :
+		m_Info(info),
+		m_IsConstant(false)
 	{
 	}
 
-	Type(const Type& t) = default;
-
-	//! Assing type
-	Type& operator=(EType t)
+	bool operator==(const Type& other) const
 	{
-		m_Type = t;
-		return *this;
+		return m_Info == other.m_Info;
 	}
 
-	Type& operator=(const Type& t) = default;
-
-	//! Access the type enumration
-	explicit operator EType() const
-	{
-		return m_Type;
-	}
-
-	//! Equality
-	bool operator==(EType other) const
-	{
-		return GetBaseType().m_Type == other;
-	}
-
-	//! Equality
-	bool operator==(Type other) const
-	{
-		return GetBaseType().m_Type == other.GetBaseType().m_Type;
-	}
-
-	//! Inequality
-	bool operator!=(EType other) const
+	bool operator!=(const Type& other) const
 	{
 		return !(*this == other);
 	}
 
-	//! Inequality
-	bool operator!=(Type other) const
+	const TypeInfo* GetInfo() const
 	{
-		return !(*this == other);
+		return m_Info;
 	}
 
-	//! The this type marked as constant.
+	const char* GetName() const
+	{
+		return m_Info->GetName();
+	}
+
+	void Construct(void* ptr) const
+	{
+		m_Info->Construct(ptr);
+	}
+
+	void CopyConstruct(void* ptr, const void* other) const
+	{
+		m_Info->CopyConstruct(ptr, other);
+	}
+
+	bool Compare(const void* a, const void* b) const
+	{
+		return m_Info->Compare(a, b);
+	}
+
+	void Destruct(void* ptr)
+	{
+		m_Info->Destruct(ptr);
+	}
+
+	void Assign(void* ptr, const void* other)
+	{
+		m_Info->Assign(ptr, other);
+	}
+
+	size_t GetSize() const
+	{
+		return m_Info->GetSize();
+	}
+
 	bool IsConstant() const
 	{
-		return (m_Type & 0x80) != 0;
-	}
-
-	//! Gives a types based on this one, which is constant.
-	Type GetConstantType() const
-	{
-		return Type((EType)(m_Type | 0x80));
-	}
-
-	//! Gives a type based on this, with all modification i.e. constness removed.
-	Type GetBaseType() const
-	{
-		return Type((EType)(m_Type & 0x7F));
-	}
-
-	static const u32 TEXTURE_LAYER_SIZE = (sizeof(void*) + 8);
-
-	//! The size of this type.
-	/**
-	\return The size of type in bytes or 0 if an error occured
-	*/
-	u32 GetSize() const
-	{
-		u32 type = GetBaseType().m_Type;
-		static const u32 TYPE_SIZES[] = {
-			TEXTURE_LAYER_SIZE,
-			4,
-			4,
-			4,
-			2 * 4,
-			3 * 4,
-			4 * 4,
-			4,
-			1,
-			4 * 4 * 4,
-			4 * 4,
-			4 * 4,
-			0,
-			4 * 4 * 4,
-			0};
-
-		if(type >= (sizeof(TYPE_SIZES) / sizeof(*TYPE_SIZES)))
-			throw Exception("Unknown type used");
-
-		return TYPE_SIZES[type];
+		return m_IsConstant;
 	}
 
 	bool IsTrivial() const
 	{
-		u32 type = GetBaseType().m_Type;
-		static const bool TRIVIAL_TABLE[] = {
-			false,
-			true,
-			true,
-			true,
-			true,
-			true,
-			true,
-			true,
-			true,
-			true,
-			true,
-			true,
-			true,
-			false,
-			false};
+		return m_Info->IsTrivial();
+	}
 
-		if(type >= (sizeof(TRIVIAL_TABLE) / sizeof(*TRIVIAL_TABLE)))
-			throw Exception("Unknown type used");
+	Type GetConstantType() const
+	{
+		Type out = *this;
+		out.m_IsConstant = true;
 
-		return TRIVIAL_TABLE[type];
+		return out;
+	}
+
+	Type GetBaseType() const
+	{
+		Type out = *this;
+		out.m_IsConstant = true;
+
+		return out;
 	}
 
 private:
-	EType m_Type;
+	const TypeInfo* m_Info;
+	bool m_IsConstant;
 };
 
 //! Exception thrown when a type mismatch occures.
@@ -200,7 +259,7 @@ Type GetTypeInfo() { return Type::Unknown; }
 template <> inline Type GetTypeInfo<int>() { return Type::Integer; }
 template <> inline Type GetTypeInfo<u32>() { return Type::U32; }
 template <> inline Type GetTypeInfo<float>() { return Type::Float; }
-template <> inline Type GetTypeInfo<bool>() { return Type::Bool; }
+template <> inline Type GetTypeInfo<bool>() { return Type::Boolean; }
 
 //! Converts between base types.
 /**
@@ -208,13 +267,13 @@ The base types are int, u32, float and bool.
 */
 inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, void* toData)
 {
-	if(!fromType.IsTrivial() || !toType.IsTrivial())
-		return false;
-
 	if(fromType == toType) {
-		memcpy(toData, fromData, fromType.GetSize());
+		fromType.Assign(toData, fromData);
 		return true;
 	}
+
+	if(!fromType.IsTrivial() || !toType.IsTrivial())
+		return false;
 
 	if(fromType == Type::Integer) {
 		if(toType == Type::U32) {
@@ -225,7 +284,7 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 			*((float*)toData) = (float)*((int*)fromData);
 			return true;
 		}
-		if(toType == Type::Bool) {
+		if(toType == Type::Boolean) {
 			*((bool*)toData) = *((int*)fromData) ? true : false;
 			return true;
 		}
@@ -242,7 +301,7 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 			return true;
 		}
 
-		if(toType == Type::Bool) {
+		if(toType == Type::Boolean) {
 			*((bool*)toData) = *((u32*)fromData) ? true : false;
 			return true;
 		}
@@ -261,7 +320,7 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 		return false;
 	}
 
-	if(fromType == Type::Bool) {
+	if(fromType == Type::Boolean) {
 		if(toType == Type::Integer) {
 			*((int*)toData) = *((bool*)fromData) ? 1 : 0;
 			return true;
@@ -282,11 +341,11 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 
 inline bool IsConvertible(Type fromType, Type toType)
 {
-	if(!fromType.IsTrivial() || !toType.IsTrivial())
-		return false;
-
 	if(fromType == toType)
 		return true;
+
+	if(!fromType.IsTrivial() || !toType.IsTrivial())
+		return false;
 
 	if(fromType == Type::Integer) {
 		if(toType == Type::U32) {
@@ -295,7 +354,7 @@ inline bool IsConvertible(Type fromType, Type toType)
 		if(toType == Type::Float) {
 			return true;
 		}
-		if(toType == Type::Bool) {
+		if(toType == Type::Boolean) {
 			return true;
 		}
 		return false;
@@ -309,7 +368,7 @@ inline bool IsConvertible(Type fromType, Type toType)
 			return true;
 		}
 
-		if(toType == Type::Bool) {
+		if(toType == Type::Boolean) {
 			return true;
 		}
 		return false;
@@ -325,7 +384,7 @@ inline bool IsConvertible(Type fromType, Type toType)
 		return false;
 	}
 
-	if(fromType == Type::Bool) {
+	if(fromType == Type::Boolean) {
 		if(toType == Type::Integer) {
 			return true;
 		}

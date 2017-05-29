@@ -2,14 +2,21 @@
 
 namespace lux
 {
+namespace core
+{
+const Type Type::Matrix(new TypeInfoTemplate<math::matrix4>("matrix", true));
+}
+
 namespace math
 {
 
-const matrix4 matrix4::IDENTITY = math::matrix4(1.0f, 0.0f, 0.0f, 0.0f,
+const matrix4 matrix4::IDENTITY = math::matrix4(
+	1.0f, 0.0f, 0.0f, 0.0f,
 	0.0f, 1.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 1.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 1.0f);
-const matrix4 matrix4::ZERO = math::matrix4(0.0f, 0.0f, 0.0f, 0.0f,
+const matrix4 matrix4::ZERO = math::matrix4(
+	0.0f, 0.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 0.0f);
@@ -192,10 +199,10 @@ matrix4& matrix4::SetTranslation(const vector3f& vTrans)
 // Adds a Translation to this Matrix
 matrix4& matrix4::AddTranslation(const vector3f& vTrans)
 {
-	m[0][0] += m[0][3]*vTrans.x;    m[0][1] += m[0][3]*vTrans.y;    m[0][2] += m[0][3]*vTrans.z;
-	m[1][0] += m[1][3]*vTrans.x;    m[1][1] += m[1][3]*vTrans.y;    m[1][2] += m[1][3]*vTrans.z;
-	m[2][0] += m[2][3]*vTrans.x;    m[2][1] += m[2][3]*vTrans.y;    m[2][2] += m[2][3]*vTrans.z;
-	m[3][0] += m[3][3]*vTrans.x;    m[3][1] += m[3][3]*vTrans.y;    m[3][2] += m[3][3]*vTrans.z;
+	m[0][0] += m[0][3] * vTrans.x;    m[0][1] += m[0][3] * vTrans.y;    m[0][2] += m[0][3] * vTrans.z;
+	m[1][0] += m[1][3] * vTrans.x;    m[1][1] += m[1][3] * vTrans.y;    m[1][2] += m[1][3] * vTrans.z;
+	m[2][0] += m[2][3] * vTrans.x;    m[2][1] += m[2][3] * vTrans.y;    m[2][2] += m[2][3] * vTrans.z;
+	m[3][0] += m[3][3] * vTrans.x;    m[3][1] += m[3][3] * vTrans.y;    m[3][2] += m[3][3] * vTrans.z;
 
 	return *this;
 }
@@ -240,10 +247,10 @@ vector3f matrix4::GetScale() const
 		return vector3f(m[0][0], m[1][1], m[2][2]);
 
 	// Volle Berechnung nötig
-	float XScaling = sqrtf(m[0][0]*m[0][0] + m[0][1]*m[0][1] + m[0][2]*m[0][2]);
+	float XScaling = sqrtf(m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2]);
 	return vector3f(GetDet() > 0 ? XScaling : -XScaling,
-		sqrtf(m[1][0]*m[1][0] + m[1][1]*m[1][1] + m[1][2]*m[1][2]),
-		sqrtf(m[2][0]*m[0][0] + m[2][1]*m[2][1] + m[2][2]*m[2][2]));
+		sqrtf(m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2]),
+		sqrtf(m[2][0] * m[0][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2]));
 }
 
 //******************************************************************
@@ -309,20 +316,20 @@ matrix4& matrix4::AddRotationX(anglef f)
 	float tmp;
 
 	tmp = m[0][1];
-	m[0][1] = m[0][1]*c - m[0][2]*s;
-	m[0][2] = tmp*s + m[0][2]*c;
+	m[0][1] = m[0][1] * c - m[0][2] * s;
+	m[0][2] = tmp*s + m[0][2] * c;
 
 	tmp = m[1][1];
-	m[1][1] = m[1][1]*c - m[1][2]*s;
-	m[1][2] = tmp*s + m[1][2]*c;
+	m[1][1] = m[1][1] * c - m[1][2] * s;
+	m[1][2] = tmp*s + m[1][2] * c;
 
 	tmp = m[2][1];
-	m[2][1] = m[2][1]*c - m[2][2]*s;
-	m[2][2] = tmp*s + m[2][2]*c;
+	m[2][1] = m[2][1] * c - m[2][2] * s;
+	m[2][2] = tmp*s + m[2][2] * c;
 
 	tmp = m[3][1];
-	m[3][1] = m[3][1]*c - m[3][2]*s;
-	m[3][2] = tmp*s + m[3][2]*c;
+	m[3][1] = m[3][1] * c - m[3][2] * s;
+	m[3][2] = tmp*s + m[3][2] * c;
 
 	return *this;
 }
@@ -334,20 +341,20 @@ matrix4& matrix4::AddRotationY(anglef f)
 	float tmp;
 
 	tmp = m[0][0];
-	m[0][0] = m[0][0]*c + m[0][2]*s;
-	m[0][2] = m[0][2]*c - tmp*s;
+	m[0][0] = m[0][0] * c + m[0][2] * s;
+	m[0][2] = m[0][2] * c - tmp*s;
 
 	tmp = m[1][0];
-	m[1][0] = m[1][0]*c + m[1][2]*s;
-	m[1][2] = m[1][2]*c - tmp*s;
+	m[1][0] = m[1][0] * c + m[1][2] * s;
+	m[1][2] = m[1][2] * c - tmp*s;
 
 	tmp = m[2][0];
-	m[2][0] = m[2][0]*c + m[2][2]*s;
-	m[2][2] = m[2][2]*c - tmp*s;
+	m[2][0] = m[2][0] * c + m[2][2] * s;
+	m[2][2] = m[2][2] * c - tmp*s;
 
 	tmp = m[3][0];
-	m[3][0] = m[3][0]*c + m[3][2]*s;
-	m[3][2] = m[3][2]*c - tmp*s;
+	m[3][0] = m[3][0] * c + m[3][2] * s;
+	m[3][2] = m[3][2] * c - tmp*s;
 
 	return *this;
 }
@@ -359,20 +366,20 @@ matrix4& matrix4::AddRotationZ(anglef f)
 	float tmp;
 
 	tmp = m[0][0];
-	m[0][0] = m[0][0]*c - m[0][1]*s;
-	m[0][1] = tmp*s + m[0][1]*c;
+	m[0][0] = m[0][0] * c - m[0][1] * s;
+	m[0][1] = tmp*s + m[0][1] * c;
 
 	tmp = m[1][0];
-	m[1][0] = m[1][0]*c - m[1][1]*s;
-	m[1][1] = tmp*s + m[1][1]*c;
+	m[1][0] = m[1][0] * c - m[1][1] * s;
+	m[1][1] = tmp*s + m[1][1] * c;
 
 	tmp = m[2][0];
-	m[2][0] = m[2][0]*c - m[2][1]*s;
-	m[2][1] = tmp*s + m[2][1]*c;
+	m[2][0] = m[2][0] * c - m[2][1] * s;
+	m[2][1] = tmp*s + m[2][1] * c;
 
 	tmp = m[3][0];
-	m[3][0] = m[3][0]*c - m[3][1]*s;
-	m[3][1] = tmp*s + m[3][1]*c;
+	m[3][0] = m[3][0] * c - m[3][1] * s;
+	m[3][1] = tmp*s + m[3][1] * c;
 
 	return *this;
 }
@@ -402,24 +409,24 @@ matrix4& matrix4::AddRotation(anglef x, anglef y, anglef z)
 	float tp1, tp2;
 
 	tp1 = m[0][0]; tp2 = m[0][1];
-	m[0][0] = m[0][0]*a5 + m[0][1]*a1 + m[0][2]*a3;
-	m[0][1] = tp1*a6 + m[0][1]*a2 + m[0][2]*a4;
-	m[0][2] = tp2*a7 + m[0][2]*a8 - sY*tp1;
+	m[0][0] = m[0][0] * a5 + m[0][1] * a1 + m[0][2] * a3;
+	m[0][1] = tp1*a6 + m[0][1] * a2 + m[0][2] * a4;
+	m[0][2] = tp2*a7 + m[0][2] * a8 - sY*tp1;
 
 	tp1 = m[1][0]; tp2 = m[1][1];
-	m[1][0] = m[1][0]*a5 + m[1][1]*a1 + m[1][2]*a3;
-	m[1][1] = tp1*a6 + m[1][1]*a2 + m[1][2]*a4;
-	m[1][2] = tp2*a7 + m[1][2]*a8 - sY*tp1;
+	m[1][0] = m[1][0] * a5 + m[1][1] * a1 + m[1][2] * a3;
+	m[1][1] = tp1*a6 + m[1][1] * a2 + m[1][2] * a4;
+	m[1][2] = tp2*a7 + m[1][2] * a8 - sY*tp1;
 
 	tp1 = m[2][0]; tp2 = m[2][1];
-	m[2][0] = m[2][0]*a5 + m[2][1]*a1 + m[2][2]*a3;
-	m[2][1] = tp1*a6 + m[2][1]*a2 + m[2][2]*a4;
-	m[2][2] = tp2*a7 + m[2][2]*a8 - sY*tp1;
+	m[2][0] = m[2][0] * a5 + m[2][1] * a1 + m[2][2] * a3;
+	m[2][1] = tp1*a6 + m[2][1] * a2 + m[2][2] * a4;
+	m[2][2] = tp2*a7 + m[2][2] * a8 - sY*tp1;
 
 	tp1 = m[3][0]; tp2 = m[3][1];
-	m[3][0] = m[3][0]*a5 + m[3][1]*a1 + m[3][2]*a3;
-	m[3][1] = tp1*a6 + m[3][1]*a2 + m[3][2]*a4;
-	m[3][2] = tp2*a7 + m[3][2]*a8 - sY*tp1;
+	m[3][0] = m[3][0] * a5 + m[3][1] * a1 + m[3][2] * a3;
+	m[3][1] = tp1*a6 + m[3][1] * a2 + m[3][2] * a4;
+	m[3][2] = tp2*a7 + m[3][2] * a8 - sY*tp1;
 
 	return *this;
 }
@@ -432,7 +439,7 @@ vector3f matrix4::GetRotationDeg() const
 	const vector3f scale = GetScale();
 	const vector3f invScale(1.0f / scale.x, 1.0f / scale.y, 1.0f / scale.z);
 
-	float Y = (float)-asin(tmp.m[0][2]*invScale.x);
+	float Y = (float)-asin(tmp.m[0][2] * invScale.x);
 	const float C = cosf(Y);
 	Y *= math::Constants<float>::deg_to_rad();
 
@@ -695,10 +702,10 @@ matrix4& matrix4::operator-=(const matrix4& other)
 // Multiplikation mit Skalar
 matrix4 matrix4::operator*(float f) const
 {
-	return matrix4(m[0][0]*f, m[0][1]*f, m[0][2]*f, m[0][3]*f,
-		m[1][0]*f, m[1][1]*f, m[1][2]*f, m[1][3]*f,
-		m[2][0]*f, m[2][1]*f, m[2][2]*f, m[2][3]*f,
-		m[3][0]*f, m[3][1]*f, m[3][2]*f, m[3][3]*f);
+	return matrix4(m[0][0] * f, m[0][1] * f, m[0][2] * f, m[0][3] * f,
+		m[1][0] * f, m[1][1] * f, m[1][2] * f, m[1][3] * f,
+		m[2][0] * f, m[2][1] * f, m[2][2] * f, m[2][3] * f,
+		m[3][0] * f, m[3][1] * f, m[3][2] * f, m[3][3] * f);
 }
 
 matrix4& matrix4::operator*=(float f)
@@ -718,48 +725,48 @@ matrix4 matrix4::operator* (const matrix4& other) const
 	if(this->IsIdent()) return other;
 	if(other.IsIdent()) return *this;
 
-	return matrix4(m[0][0]*other.m[0][0] + m[0][1]*other.m[1][0] + m[0][2]*other.m[2][0] + m[0][3]*other.m[3][0],
-		m[0][0]*other.m[0][1] + m[0][1]*other.m[1][1] + m[0][2]*other.m[2][1] + m[0][3]*other.m[3][1],
-		m[0][0]*other.m[0][2] + m[0][1]*other.m[1][2] + m[0][2]*other.m[2][2] + m[0][3]*other.m[3][2],
-		m[0][0]*other.m[0][3] + m[0][1]*other.m[1][3] + m[0][2]*other.m[2][3] + m[0][3]*other.m[3][3],
+	return matrix4(m[0][0] * other.m[0][0] + m[0][1] * other.m[1][0] + m[0][2] * other.m[2][0] + m[0][3] * other.m[3][0],
+		m[0][0] * other.m[0][1] + m[0][1] * other.m[1][1] + m[0][2] * other.m[2][1] + m[0][3] * other.m[3][1],
+		m[0][0] * other.m[0][2] + m[0][1] * other.m[1][2] + m[0][2] * other.m[2][2] + m[0][3] * other.m[3][2],
+		m[0][0] * other.m[0][3] + m[0][1] * other.m[1][3] + m[0][2] * other.m[2][3] + m[0][3] * other.m[3][3],
 
-		m[1][0]*other.m[0][0] + m[1][1]*other.m[1][0] + m[1][2]*other.m[2][0] + m[1][3]*other.m[3][0],
-		m[1][0]*other.m[0][1] + m[1][1]*other.m[1][1] + m[1][2]*other.m[2][1] + m[1][3]*other.m[3][1],
-		m[1][0]*other.m[0][2] + m[1][1]*other.m[1][2] + m[1][2]*other.m[2][2] + m[1][3]*other.m[3][2],
-		m[1][0]*other.m[0][3] + m[1][1]*other.m[1][3] + m[1][2]*other.m[2][3] + m[1][3]*other.m[3][3],
+		m[1][0] * other.m[0][0] + m[1][1] * other.m[1][0] + m[1][2] * other.m[2][0] + m[1][3] * other.m[3][0],
+		m[1][0] * other.m[0][1] + m[1][1] * other.m[1][1] + m[1][2] * other.m[2][1] + m[1][3] * other.m[3][1],
+		m[1][0] * other.m[0][2] + m[1][1] * other.m[1][2] + m[1][2] * other.m[2][2] + m[1][3] * other.m[3][2],
+		m[1][0] * other.m[0][3] + m[1][1] * other.m[1][3] + m[1][2] * other.m[2][3] + m[1][3] * other.m[3][3],
 
-		m[2][0]*other.m[0][0] + m[2][1]*other.m[1][0] + m[2][2]*other.m[2][0] + m[2][3]*other.m[3][0],
-		m[2][0]*other.m[0][1] + m[2][1]*other.m[1][1] + m[2][2]*other.m[2][1] + m[2][3]*other.m[3][1],
-		m[2][0]*other.m[0][2] + m[2][1]*other.m[1][2] + m[2][2]*other.m[2][2] + m[2][3]*other.m[3][2],
-		m[2][0]*other.m[0][3] + m[2][1]*other.m[1][3] + m[2][2]*other.m[2][3] + m[2][3]*other.m[3][3],
+		m[2][0] * other.m[0][0] + m[2][1] * other.m[1][0] + m[2][2] * other.m[2][0] + m[2][3] * other.m[3][0],
+		m[2][0] * other.m[0][1] + m[2][1] * other.m[1][1] + m[2][2] * other.m[2][1] + m[2][3] * other.m[3][1],
+		m[2][0] * other.m[0][2] + m[2][1] * other.m[1][2] + m[2][2] * other.m[2][2] + m[2][3] * other.m[3][2],
+		m[2][0] * other.m[0][3] + m[2][1] * other.m[1][3] + m[2][2] * other.m[2][3] + m[2][3] * other.m[3][3],
 
-		m[3][0]*other.m[0][0] + m[3][1]*other.m[1][0] + m[3][2]*other.m[2][0] + m[3][3]*other.m[3][0],
-		m[3][0]*other.m[0][1] + m[3][1]*other.m[1][1] + m[3][2]*other.m[2][1] + m[3][3]*other.m[3][1],
-		m[3][0]*other.m[0][2] + m[3][1]*other.m[1][2] + m[3][2]*other.m[2][2] + m[3][3]*other.m[3][2],
-		m[3][0]*other.m[0][3] + m[3][1]*other.m[1][3] + m[3][2]*other.m[2][3] + m[3][3]*other.m[3][3]);
+		m[3][0] * other.m[0][0] + m[3][1] * other.m[1][0] + m[3][2] * other.m[2][0] + m[3][3] * other.m[3][0],
+		m[3][0] * other.m[0][1] + m[3][1] * other.m[1][1] + m[3][2] * other.m[2][1] + m[3][3] * other.m[3][1],
+		m[3][0] * other.m[0][2] + m[3][1] * other.m[1][2] + m[3][2] * other.m[2][2] + m[3][3] * other.m[3][2],
+		m[3][0] * other.m[0][3] + m[3][1] * other.m[1][3] + m[3][2] * other.m[2][3] + m[3][3] * other.m[3][3]);
 }
 
 matrix4& matrix4::SetByProduct(const matrix4& a, const matrix4& b)
 {
-	m[0][0] = a.m[0][0]*b.m[0][0] + a.m[0][1]*b.m[1][0] + a.m[0][2]*b.m[2][0] + a.m[0][3]*b.m[3][0],
-		m[0][1] = a.m[0][0]*b.m[0][1] + a.m[0][1]*b.m[1][1] + a.m[0][2]*b.m[2][1] + a.m[0][3]*b.m[3][1],
-		m[0][2] = a.m[0][0]*b.m[0][2] + a.m[0][1]*b.m[1][2] + a.m[0][2]*b.m[2][2] + a.m[0][3]*b.m[3][2],
-		m[0][3] = a.m[0][0]*b.m[0][3] + a.m[0][1]*b.m[1][3] + a.m[0][2]*b.m[2][3] + a.m[0][3]*b.m[3][3],
+	m[0][0] = a.m[0][0] * b.m[0][0] + a.m[0][1] * b.m[1][0] + a.m[0][2] * b.m[2][0] + a.m[0][3] * b.m[3][0],
+		m[0][1] = a.m[0][0] * b.m[0][1] + a.m[0][1] * b.m[1][1] + a.m[0][2] * b.m[2][1] + a.m[0][3] * b.m[3][1],
+		m[0][2] = a.m[0][0] * b.m[0][2] + a.m[0][1] * b.m[1][2] + a.m[0][2] * b.m[2][2] + a.m[0][3] * b.m[3][2],
+		m[0][3] = a.m[0][0] * b.m[0][3] + a.m[0][1] * b.m[1][3] + a.m[0][2] * b.m[2][3] + a.m[0][3] * b.m[3][3],
 
-		m[1][0] = a.m[1][0]*b.m[0][0] + a.m[1][1]*b.m[1][0] + a.m[1][2]*b.m[2][0] + a.m[1][3]*b.m[3][0],
-		m[1][1] = a.m[1][0]*b.m[0][1] + a.m[1][1]*b.m[1][1] + a.m[1][2]*b.m[2][1] + a.m[1][3]*b.m[3][1],
-		m[1][2] = a.m[1][0]*b.m[0][2] + a.m[1][1]*b.m[1][2] + a.m[1][2]*b.m[2][2] + a.m[1][3]*b.m[3][2],
-		m[1][3] = a.m[1][0]*b.m[0][3] + a.m[1][1]*b.m[1][3] + a.m[1][2]*b.m[2][3] + a.m[1][3]*b.m[3][3],
+		m[1][0] = a.m[1][0] * b.m[0][0] + a.m[1][1] * b.m[1][0] + a.m[1][2] * b.m[2][0] + a.m[1][3] * b.m[3][0],
+		m[1][1] = a.m[1][0] * b.m[0][1] + a.m[1][1] * b.m[1][1] + a.m[1][2] * b.m[2][1] + a.m[1][3] * b.m[3][1],
+		m[1][2] = a.m[1][0] * b.m[0][2] + a.m[1][1] * b.m[1][2] + a.m[1][2] * b.m[2][2] + a.m[1][3] * b.m[3][2],
+		m[1][3] = a.m[1][0] * b.m[0][3] + a.m[1][1] * b.m[1][3] + a.m[1][2] * b.m[2][3] + a.m[1][3] * b.m[3][3],
 
-		m[2][0] = a.m[2][0]*b.m[0][0] + a.m[2][1]*b.m[1][0] + a.m[2][2]*b.m[2][0] + a.m[2][3]*b.m[3][0],
-		m[2][1] = a.m[2][0]*b.m[0][1] + a.m[2][1]*b.m[1][1] + a.m[2][2]*b.m[2][1] + a.m[2][3]*b.m[3][1],
-		m[2][2] = a.m[2][0]*b.m[0][2] + a.m[2][1]*b.m[1][2] + a.m[2][2]*b.m[2][2] + a.m[2][3]*b.m[3][2],
-		m[2][3] = a.m[2][0]*b.m[0][3] + a.m[2][1]*b.m[1][3] + a.m[2][2]*b.m[2][3] + a.m[2][3]*b.m[3][3],
+		m[2][0] = a.m[2][0] * b.m[0][0] + a.m[2][1] * b.m[1][0] + a.m[2][2] * b.m[2][0] + a.m[2][3] * b.m[3][0],
+		m[2][1] = a.m[2][0] * b.m[0][1] + a.m[2][1] * b.m[1][1] + a.m[2][2] * b.m[2][1] + a.m[2][3] * b.m[3][1],
+		m[2][2] = a.m[2][0] * b.m[0][2] + a.m[2][1] * b.m[1][2] + a.m[2][2] * b.m[2][2] + a.m[2][3] * b.m[3][2],
+		m[2][3] = a.m[2][0] * b.m[0][3] + a.m[2][1] * b.m[1][3] + a.m[2][2] * b.m[2][3] + a.m[2][3] * b.m[3][3],
 
-		m[3][0] = a.m[3][0]*b.m[0][0] + a.m[3][1]*b.m[1][0] + a.m[3][2]*b.m[2][0] + a.m[3][3]*b.m[3][0],
-		m[3][1] = a.m[3][0]*b.m[0][1] + a.m[3][1]*b.m[1][1] + a.m[3][2]*b.m[2][1] + a.m[3][3]*b.m[3][1],
-		m[3][2] = a.m[3][0]*b.m[0][2] + a.m[3][1]*b.m[1][2] + a.m[3][2]*b.m[2][2] + a.m[3][3]*b.m[3][2],
-		m[3][3] = a.m[3][0]*b.m[0][3] + a.m[3][1]*b.m[1][3] + a.m[3][2]*b.m[2][3] + a.m[3][3]*b.m[3][3];
+		m[3][0] = a.m[3][0] * b.m[0][0] + a.m[3][1] * b.m[1][0] + a.m[3][2] * b.m[2][0] + a.m[3][3] * b.m[3][0],
+		m[3][1] = a.m[3][0] * b.m[0][1] + a.m[3][1] * b.m[1][1] + a.m[3][2] * b.m[2][1] + a.m[3][3] * b.m[3][1],
+		m[3][2] = a.m[3][0] * b.m[0][2] + a.m[3][1] * b.m[1][2] + a.m[3][2] * b.m[2][2] + a.m[3][3] * b.m[3][2],
+		m[3][3] = a.m[3][0] * b.m[0][3] + a.m[3][1] * b.m[1][3] + a.m[3][2] * b.m[2][3] + a.m[3][3] * b.m[3][3];
 
 	return *this;
 }
@@ -800,7 +807,6 @@ bool matrix4::operator!=(const matrix4& other) const
 	return !(*this == other);
 }
 
-}        
-
-}        
+}
+}
 

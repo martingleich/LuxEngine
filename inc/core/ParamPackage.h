@@ -126,15 +126,34 @@ public:
 		return *this;
 	}
 
-	//! Access as Materiallayer
-	PackageParam& operator=(video::TextureLayer& layer)
-	{
-		if(m_Desc.type != core::Type::Texture)
-			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Texture);
-		if(!IsValid())
-			throw Exception("Accessed invalid package parameter");
 
-		*(video::TextureLayer*)m_Data = layer;
+	//! Casting from color to colorf
+	template <>
+	PackageParam& operator=(const video::Color& color)
+	{
+		if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
+			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
+
+		if(m_Desc.type == core::Type::Color)
+			*((video::Color*)m_Data) = color;
+
+		if(m_Desc.type == core::Type::Colorf)
+			*((video::Colorf*)m_Data) = video::Colorf(color);
+
+		return *this;
+	}
+
+	template <>
+	PackageParam& operator=(const video::Color::EPredefinedColors& color)
+	{
+		if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
+			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
+
+		if(m_Desc.type == core::Type::Color)
+			*((video::Color*)m_Data) = color;
+
+		if(m_Desc.type == core::Type::Colorf)
+			*((video::Colorf*)m_Data) = video::Colorf(color);
 
 		return *this;
 	}
@@ -196,10 +215,7 @@ public:
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		if(m_Desc.type == core::Type::Texture)
-			*(video::TextureLayer*)m_Data = *(const video::TextureLayer*)varVal.m_Data;
-		else
-			ConvertBaseType(varVal.m_Desc.type, varVal.m_Data, m_Desc.type, m_Data);
+		ConvertBaseType(varVal.m_Desc.type, varVal.m_Data, m_Desc.type, m_Data);
 
 		return *this;
 	}
@@ -571,7 +587,7 @@ public:
 		if(m_Pack)
 			return m_Pack->GetParam(id, m_Data, isConst);
 		else
-			return PackageParam();
+			throw core::Exception("Not param pack set");
 	}
 
 	//! The total number of parameters in the package
@@ -636,12 +652,7 @@ public:
 			type(other.type)
 		{
 			data = LUX_NEW_ARRAY(u8, type.GetSize());
-			if(type == core::Type::Texture)
-				new (data) video::TextureLayer(*(const video::TextureLayer*)other.data);
-			else {
-				lxAssert(type.IsTrivial());
-				memcpy(data, other.data, type.GetSize());
-			}
+			type.CopyConstruct(data, other.data);
 		}
 
 		Param(Param&& old) :
@@ -656,12 +667,7 @@ public:
 		{
 			this->~Param();
 			data = LUX_NEW_ARRAY(u8, type.GetSize());
-			if(type == core::Type::Texture)
-				new (data) video::TextureLayer(*(const video::TextureLayer*)other.data);
-			else {
-				lxAssert(type.IsTrivial());
-				memcpy(data, other.data, type.GetSize());
-			}
+			type.CopyConstruct(data, other.data);
 
 			return *this;
 		}
@@ -683,19 +689,12 @@ public:
 			type(t)
 		{
 			data = LUX_NEW_ARRAY(u8, type.GetSize());
-			if(type == core::Type::Texture)
-				new (data) video::TextureLayer();
-			else
-				lxAssert(type.IsTrivial());
+			type.Construct(data);
 		}
 
 		~Param()
 		{
-			if(type == core::Type::Texture)
-				((video::TextureLayer*)data)->~TextureLayer();
-			else
-				lxAssert(type.IsTrivial());
-
+			type.Destruct(data);
 			LUX_FREE_ARRAY(data);
 		}
 	};

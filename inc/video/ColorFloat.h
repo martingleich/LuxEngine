@@ -257,7 +257,7 @@ inline void conv_data(format::Context& ctx, Colorf format, format::Placeholder& 
 
 namespace core
 {
-template<> inline Type GetTypeInfo<video::Colorf>() { return Type::ColorF; }
+template<> inline Type GetTypeInfo<video::Colorf>() { return Type::Colorf; }
 } // namespace core
 
 }

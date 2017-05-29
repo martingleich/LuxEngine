@@ -87,7 +87,7 @@ void ShaderD3D9::Init(
 					CastShaderToType(h.type, h.defaultValue, tempMemory);
 				else
 					memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
-				m_ParamPackage.AddParam(h.type, h.name, tempMemory, (u16)paramId);
+				m_ParamPackage.AddParam(GetCoreType(h.type), h.name, tempMemory, (u16)paramId);
 
 				entry.index = 0;
 				entry.paramType = ParamType_ParamMaterial;
@@ -111,7 +111,7 @@ void ShaderD3D9::Init(
 			if(jumpToNext)
 				continue;
 
-			if(!IsTypeCompatible(h.type, param.GetType())) {
+			if(GetCoreType(h.type) != param.GetType()) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Warning: Incompatible scene value type in shader: ~s.", h.name));
 				continue;
@@ -154,7 +154,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::a
 			continue;
 
 		u32 size, regId, regCount;
-		core::Type type;
+		EType type;
 		const char* name;
 		const void* defaultValue;
 		bool isValidType;
@@ -359,7 +359,7 @@ void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 		if(desc.reserved != 0xFFFF) {
 			// It's a shader param
 			Param& param = m_Params[desc.reserved];
-			if(param.type == core::Type::Texture)
+			if(param.type == EType::Texture)
 				SetShaderValue(param, &layerId);
 			else
 				SetShaderValue(param, material->Param(i).Pointer());
@@ -393,12 +393,12 @@ void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 
 	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
 		if(it->paramType == ParamType_Scene) {
-			if(it->type == core::Type::Texture)
+			if(it->type == EType::Texture)
 				SetShaderValue(*it, &layerId);
 			else
 				SetShaderValue(*it, m_Renderer->GetParam(it->index).Pointer());
 
-			if(it->type == core::Type::Texture)
+			if(it->type == EType::Texture)
 				layerId++;
 		}
 	}
@@ -410,41 +410,39 @@ void ShaderD3D9::Disable()
 	m_D3DDevice->SetPixelShader(NULL);
 }
 
-bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, core::Type& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid)
+bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid)
 {
 	D3DXCONSTANT_DESC desc;
 	UINT count = 1;
 	if(FAILED(table->GetConstantDesc(handle, &desc, &count)))
 		return false;
 
-	outType = core::Type::Unknown;
-	if(desc.Class == D3DXPC_STRUCT)
-		outType = core::Type::Internal_Composed;
-	else if(desc.Class == D3DXPC_SCALAR) {
+	outType = EType::Unknown;
+	if(desc.Class == D3DXPC_SCALAR) {
 		if(desc.Type == D3DXPT_BOOL)
-			outType = core::Type::Bool;
+			outType = EType::Boolean;
 		else if(desc.Type == D3DXPT_INT)
-			outType = core::Type::Integer;
+			outType = EType::Integer;
 		else if(desc.Type == D3DXPT_FLOAT)
-			outType = core::Type::Float;
+			outType = EType::Float;
 	} else if(desc.Class == D3DXPC_VECTOR) {
 		if(desc.Type == D3DXPT_FLOAT) {
 			if(desc.Columns == 2)
-				outType = core::Type::Vector2;
+				outType = EType::Vector2;
 			else if(desc.Columns == 3)
-				outType = core::Type::Vector3;
+				outType = EType::Vector3;
 			else if(desc.Columns == 4)
-				outType = core::Type::ColorF;
+				outType = EType::Colorf;
 		}
 	} else if(desc.Class == D3DXPC_MATRIX_ROWS && desc.Rows == 4 && desc.Columns == 4) {
 		if(desc.Type == D3DXPT_FLOAT)
-			outType = core::Type::Matrix;
+			outType = EType::Matrix;
 	} else if(desc.Class == D3DXPC_MATRIX_COLUMNS && desc.Rows == 4 && desc.Columns == 4) {
 		if(desc.Type == D3DXPT_FLOAT)
-			outType = core::Type::Internal_MatrixCol;
+			outType = EType::Matrix_ColMajor;
 	} else if(desc.Class == D3DXPC_OBJECT) {
 		if(desc.Type == D3DXPT_SAMPLER || desc.Type == D3DXPT_SAMPLER2D || desc.Type == D3DXPT_SAMPLER3D || desc.Type == D3DXPT_SAMPLERCUBE)
-			outType = core::Type::Texture;
+			outType = EType::Texture;
 	}
 
 	outSize = desc.Bytes;
@@ -453,29 +451,27 @@ bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* tab
 	name = desc.Name;
 	defaultValue = desc.DefaultValue;
 
-	isValid = (outType != core::Type::Unknown);
+	isValid = (outType != EType::Unknown);
 	return true;
 }
 
-void ShaderD3D9::CastTypeToShader(core::Type type, const void* in, void* out)
+void ShaderD3D9::CastTypeToShader(EType type, const void* in, void* out)
 {
-	switch((core::Type::EType)type) {
-	case core::Type::Bool:
-		((BOOL*)out)[0] = (*(bool*)in) ? TRUE : FALSE;
+	switch(type) {
+	case EType::Boolean:
 		break;
-	case core::Type::Texture:
-	case core::Type::Integer:
-		((int*)out)[0] = *(int*)in;
+	case EType::Texture:
+	case EType::Integer:
 		break;
-	case core::Type::ColorF:    ((float*)out)[3] = ((float*)in)[3];
-	case core::Type::Vector3:      ((float*)out)[2] = ((float*)in)[2];
-	case core::Type::Vector2:      ((float*)out)[1] = ((float*)in)[1];
-	case core::Type::Float:     ((float*)out)[0] = ((float*)in)[0];
+	case EType::Colorf:    ((float*)out)[3] = ((float*)in)[3];
+	case EType::Vector3:      ((float*)out)[2] = ((float*)in)[2];
+	case EType::Vector2:      ((float*)out)[1] = ((float*)in)[1];
+	case EType::Float:     ((float*)out)[0] = ((float*)in)[0];
 		break;
-	case core::Type::Matrix:
+	case EType::Matrix:
 		memcpy(out, in, 16 * sizeof(float));
 		break;
-	case core::Type::Internal_MatrixCol:
+	case EType::Matrix_ColMajor:
 	{
 		float* pf = (float*)in;
 		float* f = (float*)out;
@@ -490,29 +486,29 @@ void ShaderD3D9::CastTypeToShader(core::Type type, const void* in, void* out)
 	}
 }
 
-void ShaderD3D9::CastShaderToType(core::Type type, const void* in, void* out)
+void ShaderD3D9::CastShaderToType(EType type, const void* in, void* out)
 {
-	switch((core::Type::EType)type) {
-	case core::Type::Bool:
+	switch(type) {
+	case EType::Boolean:
 		((bool*)out)[0] = ((*(BOOL*)in) == TRUE);
 		break;
-	case core::Type::Texture:
-	case core::Type::Integer:
+	case EType::Texture:
+	case EType::Integer:
 		((int*)out)[0] = *(int*)in;
 		break;
-	case core::Type::ColorF:
+	case EType::Colorf:
 		((float*)out)[3] = ((float*)in)[3];
-	case core::Type::Vector3:
+	case EType::Vector3:
 		((float*)out)[2] = ((float*)in)[2];
-	case core::Type::Vector2:
+	case EType::Vector2:
 		((float*)out)[1] = ((float*)in)[1];
-	case core::Type::Float:
+	case EType::Float:
 		((float*)out)[0] = ((float*)in)[0];
 		break;
-	case core::Type::Matrix:
+	case EType::Matrix:
 		memcpy(out, in, 16 * sizeof(float));
 		break;
-	case core::Type::Internal_MatrixCol:
+	case EType::Matrix_ColMajor:
 	{
 		float* pf = (float*)in;
 		float* f = (float*)out;
@@ -524,129 +520,12 @@ void ShaderD3D9::CastShaderToType(core::Type type, const void* in, void* out)
 	break;
 	default:
 		lxAssertNeverReach("Unsupported shader variable type.");
-	}
-}
-
-void ShaderD3D9::GetShaderValue(const Param& param, void* out)
-{
-	if((param.registerVS == 0xFFFFFFFF && param.registerPS == 0xFFFFFFFF) || param.type == core::Type::Unknown)
-		return;
-
-	int i[4];
-	float f[16];
-	BOOL b[4];
-	u32 regId;
-	if(param.registerVS != 0xFFFFFFFF) {
-		regId = param.registerVS;
-		switch((core::Type::EType)param.type) {
-		case core::Type::Bool:
-		{
-			m_D3DDevice->GetVertexShaderConstantB(regId, b, 1);
-			*(bool*)out = (*b == TRUE);
-		}
-		break;
-		case core::Type::Texture:
-		case core::Type::Integer:
-			m_D3DDevice->GetVertexShaderConstantI(regId, i, 1);
-			*((int*)out) = *i;
-			break;
-		case core::Type::Float:
-			m_D3DDevice->GetVertexShaderConstantF(regId, f, 1);
-			*((float*)out) = *f;
-			break;
-		case core::Type::Vector2:
-			m_D3DDevice->GetVertexShaderConstantF(regId, f, 1);
-			((float*)out)[0] = f[0];
-			((float*)out)[1] = f[1];
-			break;
-		case core::Type::Vector3:
-			m_D3DDevice->GetVertexShaderConstantF(regId, f, 1);
-			((float*)out)[0] = f[0];
-			((float*)out)[1] = f[1];
-			((float*)out)[2] = f[2];
-			break;
-		case core::Type::ColorF:
-			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, 1);
-			break;
-		case core::Type::Matrix:
-			m_D3DDevice->GetVertexShaderConstantF(regId, (float*)out, param.registerVSCount);
-			for(u32 j = param.registerVSCount; j < 4; ++j)
-				((float*)out)[j * 4] = 0;
-			break;
-		case core::Type::Internal_MatrixCol:
-			m_D3DDevice->GetVertexShaderConstantF(regId, f, param.registerVSCount);
-			for(u32 j = param.registerVSCount; j < 4; ++j)
-				((float*)f)[j * 4] = 0;
-			{
-				float* pf = (float*)out;
-				pf[1] = f[4];   pf[2] = f[8];   pf[3] = f[12];
-				pf[4] = f[1];                    pf[6] = f[9];   pf[7] = f[13];
-				pf[8] = f[2];   pf[9] = f[6];                    pf[11] = f[14];
-				pf[12] = f[3];    pf[13] = f[7]; pf[14] = f[11];
-			}
-			break;
-		default:
-			lxAssertNeverReach("Unsupported shader variable type.");
-		}
-	} else {
-		regId = param.registerPS;
-		switch((core::Type::EType)param.type) {
-		case core::Type::Bool:
-		{
-			m_D3DDevice->GetPixelShaderConstantB(regId, b, 1);
-			*(bool*)out = (*b == TRUE);
-		}
-		break;
-		case core::Type::Texture:
-		case core::Type::Integer:
-			m_D3DDevice->GetPixelShaderConstantI(regId, i, 1);
-			*((int*)out) = *i;
-			break;
-		case core::Type::Float:
-			m_D3DDevice->GetPixelShaderConstantF(regId, f, 1);
-			*((float*)out) = *f;
-			break;
-		case core::Type::Vector2:
-			m_D3DDevice->GetPixelShaderConstantF(regId, f, 1);
-			((float*)out)[0] = f[0];
-			((float*)out)[1] = f[1];
-			break;
-		case core::Type::Vector3:
-			m_D3DDevice->GetPixelShaderConstantF(regId, f, 1);
-			((float*)out)[0] = f[0];
-			((float*)out)[1] = f[1];
-			((float*)out)[2] = f[2];
-			break;
-		case core::Type::ColorF:
-			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, 1);
-			break;
-		case core::Type::Matrix:
-			m_D3DDevice->GetPixelShaderConstantF(regId, (float*)out, param.registerPSCount);
-			for(u32 j = param.registerVSCount; j < 4; ++j)
-				((float*)out)[j * 4] = 0;
-			break;
-		case core::Type::Internal_MatrixCol:
-			m_D3DDevice->GetPixelShaderConstantF(regId, f, param.registerPSCount);
-			for(u32 j = param.registerVSCount; j < 4; ++j)
-				((float*)f)[j * 4] = 0;
-			{
-				float* pf = (float*)out;
-				pf[1] = f[4];   pf[2] = f[8];   pf[3] = f[12];
-				pf[4] = f[1];                    pf[6] = f[9];   pf[7] = f[13];
-				pf[8] = f[2];   pf[9] = f[6];                    pf[11] = f[14];
-				pf[12] = f[3];    pf[13] = f[7]; pf[14] = f[11];
-			}
-			break;
-
-		default:
-			lxAssertNeverReach("Unsupported shader variable type.");
-		}
 	}
 }
 
 void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 {
-	if((param.registerVS == 0xFFFFFFFF && param.registerPS == 0xFFFFFFFF) || param.type == core::Type::Unknown)
+	if((param.registerVS == 0xFFFFFFFF && param.registerPS == 0xFFFFFFFF) || param.type == EType::Unknown)
 		return;
 
 	static u32 v[16];
@@ -657,22 +536,22 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 	HRESULT hr;
 	if(param.registerVS != 0xFFFFFFFF) {
 		regId = param.registerVS;
-		switch((core::Type::EType)param.type) {
-		case core::Type::Bool:
+		switch(param.type) {
+		case EType::Boolean:
 			hr = m_D3DDevice->SetVertexShaderConstantB(regId, (BOOL*)v, 1);
 			break;
-		case core::Type::Texture:
-		case core::Type::Integer:
+		case EType::Texture:
+		case EType::Integer:
 			hr = m_D3DDevice->SetVertexShaderConstantI(regId, (int*)v, 1);
 			break;
-		case core::Type::Float:
-		case core::Type::Vector2:
-		case core::Type::Vector3:
-		case core::Type::ColorF:
+		case EType::Float:
+		case EType::Vector2:
+		case EType::Vector3:
+		case EType::Colorf:
 			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, 1);
 			break;
-		case core::Type::Matrix:
-		case core::Type::Internal_MatrixCol:
+		case EType::Matrix:
+		case EType::Matrix_ColMajor:
 			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, param.registerVSCount);
 			break;
 
@@ -682,23 +561,23 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 	}
 	if(param.registerPS != 0xFFFFFFFF) {
 		regId = param.registerPS;
-		switch((core::Type::EType)param.type) {
-		case core::Type::Bool:
+		switch(param.type) {
+		case EType::Boolean:
 			hr = m_D3DDevice->SetPixelShaderConstantB(regId, (BOOL*)v, 1);
 			break;
-		case core::Type::Texture:
-		case core::Type::Integer:
+		case EType::Texture:
+		case EType::Integer:
 			hr = m_D3DDevice->SetPixelShaderConstantI(regId, (int*)v, 1);
 			break;
-		case core::Type::Float:
-		case core::Type::Vector2:
-		case core::Type::Vector3:
-		case core::Type::ColorF:
+		case EType::Float:
+		case EType::Vector2:
+		case EType::Vector3:
+		case EType::Colorf:
 			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, 1);
 			break;
 
-		case core::Type::Matrix:
-		case core::Type::Internal_MatrixCol:
+		case EType::Matrix:
+		case EType::Matrix_ColMajor:
 			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, param.registerPSCount);
 			break;
 
@@ -730,28 +609,50 @@ int ShaderD3D9::GetDefaultId(const char* name)
 	return -1;
 }
 
-core::Type ShaderD3D9::GetDefaultType(u32 id)
+ShaderD3D9::EType ShaderD3D9::GetDefaultType(u32 id)
 {
 	switch(id) {
 	case DefaultParam_Shininess:
-		return core::Type::Float;
+		return EType::Float;
 	case DefaultParam_Diffuse:
 	case DefaultParam_Emissive:
 	case DefaultParam_Specular:
-		return core::Type::ColorF;
+		return EType::Colorf;
 	default:
-		return core::Type::Unknown;
+		return EType::Unknown;
 	}
 }
 
-bool ShaderD3D9::IsTypeCompatible(core::Type a, core::Type b)
+bool ShaderD3D9::IsTypeCompatible(EType a, EType b)
 {
 	if(a == b)
 		return true;
-	if((a == core::Type::Internal_MatrixCol && b == core::Type::Matrix) || (a == core::Type::Matrix && b == core::Type::Internal_MatrixCol))
+	if((a == EType::Matrix_ColMajor && b == EType::Matrix) || (a == EType::Matrix && b == EType::Matrix_ColMajor))
 		return true;
 
 	return false;
+}
+
+core::Type ShaderD3D9::GetCoreType(EType type)
+{
+	switch(type) {
+	case EType::Unknown: return core::Type::Unknown;
+	case EType::Integer: return core::Type::Integer;
+	case EType::Float: return core::Type::Float;
+	case EType::Boolean: return core::Type::Boolean;
+	case EType::U32: return core::Type::U32;
+	case EType::Texture: return core::Type::Texture;
+	case EType::Color: return core::Type::Color;
+	case EType::Colorf: return core::Type::Colorf;
+	case EType::Vector2: return core::Type::Vector2;
+	case EType::Vector3: return core::Type::Vector3;
+	case EType::Vector2Int: return core::Type::Vector2Int;
+	case EType::Vector3Int: return core::Type::Vector3Int;
+	case EType::Matrix: return core::Type::Matrix;
+	case EType::Matrix_ColMajor: return core::Type::Matrix;
+	case EType::Structure: return core::Type::Unknown;
+	default: return core::Type::Unknown;
+	}
 }
 
 } // namespace video

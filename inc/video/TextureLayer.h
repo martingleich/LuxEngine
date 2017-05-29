@@ -67,14 +67,12 @@ public:
 	}
 };
 
-
-} // !namespace video
+} // namespace video
 
 namespace core
 {
 template<> inline Type GetTypeInfo<video::TextureLayer>() { return Type::Texture; }
 } // namespace core
-
-} // !namespace lux
+} // namespace lux
 
 #endif // !INCLUDED_SMATERIALLAYER_H

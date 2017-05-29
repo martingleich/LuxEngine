@@ -219,12 +219,12 @@ inline void conv_data(format::Context& ctx, Color format, format::Placeholder& p
 	format::vformat(ctx, format::StringType::Ascii, "~h", (u32)format);
 }
 
-}
+} // namespace video
 
 namespace core
 {
 template<> inline Type GetTypeInfo<video::Color>() { return Type::Color; }
-}
+} // namespace core
 
 namespace math
 {
@@ -250,8 +250,7 @@ inline video::Color Lerp(const video::Color& a, const video::Color& b, float t)
 	return video::Color(red, green, blue, alpha);
 }
 
-}
-
-}
+} // namespace math
+} // namespace lux
 
 #endif // #ifndef INCLUDED_COLOR_INT_H
