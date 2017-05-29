@@ -5,7 +5,7 @@
 
 #ifdef LUX_WINDOWS
 
-#include "ArchiveFolderWin32.h"
+#include "io/ArchiveFolderWin32.h"
 
 namespace lux
 {
@@ -15,9 +15,6 @@ class FileSystemWin32 : public FileSystem
 {
 public:
 	FileSystemWin32();
-	~FileSystemWin32()
-	{
-	}
 	StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const string& name, bool deleteOnDrop);

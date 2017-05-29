@@ -2,23 +2,19 @@
 #include "scene/SceneNode.h"
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::LinearMoveComponent)
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::LinearMoveAnimator)
 
 namespace lux
 {
 namespace scene
 {
 
-LinearMoveComponent::LinearMoveComponent(
-	const math::line3df& line,
-	float duration,
-	bool jumpBack,
-	u32 count)
+LinearMoveAnimator::LinearMoveAnimator()
 {
-	Init(line, duration, jumpBack, count);
+	SetData(math::line3df(), 1.0f);
 }
 
-void LinearMoveComponent::Init(
+void LinearMoveAnimator::SetData(
 	const math::line3df& line,
 	float duration,
 	bool jumpBack,
@@ -35,7 +31,7 @@ void LinearMoveComponent::Init(
 		m_Count++;
 }
 
-void LinearMoveComponent::Animate(float secsPassed)
+void LinearMoveAnimator::Animate(float secsPassed)
 {
 	if(m_Count == 0) {
 		GetParent()->MarkForDelete(this);
@@ -69,5 +65,14 @@ void LinearMoveComponent::Animate(float secsPassed)
 	node->SetPosition(math::Lerp(m_Line.start, m_Line.end, t));
 }
 
+StrongRef<Referable> LinearMoveAnimator::Clone() const
+{
+	return LUX_NEW(LinearMoveAnimator)(*this);
+}
+
+core::Name LinearMoveAnimator::GetReferableSubType() const
+{
+	return SceneNodeComponentType::LinearMove;
+}
 }
 }

@@ -19,9 +19,9 @@
 #include "scene/nodes/LightSceneNode.h"
 #include "scene/nodes/SkyBoxSceneNodeImpl.h"
 
-#include "scene/components/RotationAnimatorImpl.h"
+#include "scene/components/RotationAnimator.h"
 #include "scene/components/LinearMoveAnimator.h"
-#include "scene/components/CameraFPSAnimatorImpl.h"
+#include "scene/components/CameraFPSAnimator.h"
 
 #include "scene/query/LineQuery.h"
 #include "scene/query/VolumeQuery.h"
@@ -237,12 +237,11 @@ StrongRef<SceneNode> SceneManagerImpl::AddEmptySceneNode(SceneNode* parent)
 	return AddSceneNode(SceneNodeType::Empty, parent);
 }
 
-StrongRef<SceneNodeComponent> SceneManagerImpl::AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis, math::anglef rotSpeed)
+StrongRef<RotationAnimator> SceneManagerImpl::AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis, math::anglef rotSpeed)
 {
-	if(!addTo)
-		return nullptr;
+	LX_CHECK_NULL_ARG(addTo);
 
-	StrongRef<scene::SceneNodeAnimatorRotationImpl> animator = AddComponent(scene::SceneNodeComponentType::Rotation, addTo);
+	StrongRef<RotationAnimator> animator = AddComponent(scene::SceneNodeComponentType::Rotation, addTo);
 	animator->SetAxis(axis);
 	animator->SetRotationSpeed(rotSpeed);
 
@@ -253,10 +252,9 @@ StrongRef<CameraFPSAnimator> SceneManagerImpl::AddCameraFPSAnimator(CameraSceneN
 	bool noVerticalMovement,
 	math::anglef maxVerticalAngle)
 {
-	if(!addTo)
-		return nullptr;
+	LX_CHECK_NULL_ARG(addTo);
 
-	StrongRef<scene::CameraFPSAnimator> animator = AddComponent(scene::SceneNodeComponentType::CameraFPS, addTo);
+	StrongRef<CameraFPSAnimator> animator = AddComponent(scene::SceneNodeComponentType::CameraFPS, addTo);
 	animator->SetMoveSpeed(moveSpeed);
 	animator->SetRotationSpeed(rotSpeed);
 	animator->AllowVerticalMovement(!noVerticalMovement);
@@ -265,17 +263,16 @@ StrongRef<CameraFPSAnimator> SceneManagerImpl::AddCameraFPSAnimator(CameraSceneN
 	return animator;
 }
 
-StrongRef<SceneNodeComponent> SceneManagerImpl::AddLinearMoveAnimator(SceneNode* addTo,
+StrongRef<LinearMoveAnimator> SceneManagerImpl::AddLinearMoveAnimator(SceneNode* addTo,
 	const math::line3df& line,
 	float duration,
 	bool jumpBack,
 	u32 count)
 {
-	if(!addTo)
-		return nullptr;
+	LX_CHECK_NULL_ARG(addTo);
 
-	StrongRef<LinearMoveComponent> animator = AddComponent(scene::SceneNodeComponentType::LinearMove, addTo);
-	animator->Init(line, duration, jumpBack, count);
+	StrongRef<LinearMoveAnimator> animator = AddComponent(scene::SceneNodeComponentType::LinearMove, addTo);
+	animator->SetData(line, duration, jumpBack, count);
 
 	return animator;
 }

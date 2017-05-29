@@ -1,15 +1,15 @@
 #ifdef LUX_WINDOWS
-#include "FileSystemWin32.h"
+#include "io/FileSystemWin32.h"
 
 #include "math/lxMath.h" 
 #include "core/Logger.h"
 #include "core/lxArray.h"
 
-#include "MemoryFile.h"
-#include "StreamFile.h"
-#include "LimitedFile.h"
+#include "io/MemoryFile.h"
+#include "io/StreamFile.h"
+#include "io/LimitedFile.h"
 
-#include "INIFileImpl.h"
+#include "io/INIFile.h"
 #include "core/lxUnicodeConversion.h"
 #include "core/lxSTDIO.h"
 
@@ -242,12 +242,12 @@ FileDescription FileSystemWin32::GetFileDescription(const path& name)
 
 StrongRef<INIFile> FileSystemWin32::CreateINIFile(const path& filename)
 {
-	return LUX_NEW(INIFileImpl)(this, filename);
+	return LUX_NEW(INIFile)(this, filename);
 }
 
 StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 {
-	return LUX_NEW(INIFileImpl)(this, file);
+	return LUX_NEW(INIFile)(this, file);
 }
 
 StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const string& name)

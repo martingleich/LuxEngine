@@ -52,7 +52,10 @@ class MeshSceneNode;
 class LightSceneNode;
 
 class SceneNodeComponent;
+
 class CameraFPSAnimator;
+class RotationAnimator;
+class LinearMoveAnimator;
 
 class Collider;
 class VolumeQuery;
@@ -108,9 +111,9 @@ public:
 
 	// Erstellt einen Rotationsanimator
 	// vRot = Rotationsgeschwindigkeit in Rad/Sekunde
-	virtual StrongRef<SceneNodeComponent> AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis=math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f)) = 0;
+	virtual StrongRef<RotationAnimator> AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis=math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f)) = 0;
 
-	virtual StrongRef<SceneNodeComponent> AddLinearMoveAnimator(SceneNode* addTo,
+	virtual StrongRef<LinearMoveAnimator> AddLinearMoveAnimator(SceneNode* addTo,
 		const math::line3df& line,
 		float duration,
 		bool jumpBack = false,

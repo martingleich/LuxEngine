@@ -1,14 +1,15 @@
-#ifndef INCLUDED_ICAMERAFPSANIMATOR_H
-#define INCLUDED_ICAMERAFPSANIMATOR_H
+#ifndef INCLUDED_CAMERAFPSANIMATOR_H
+#define INCLUDED_CAMERAFPSANIMATOR_H
 #include "scene/SceneNodeComponent.h"
 #include "math/angle.h"
+#include "math/vector2.h"
 
 namespace lux
 {
 namespace scene
 {
 
-class CameraFPSAnimator : public SceneNodeComponent
+class CameraFPSAnimator : public AnimatedSceneNodeComponent
 {
 public:
 	enum EAction
@@ -24,19 +25,51 @@ public:
 
 		EA_COUNT
 	};
+	
 public:
-	virtual ~CameraFPSAnimator()
-	{}
+	LUX_API CameraFPSAnimator();
+	LUX_API CameraFPSAnimator(float moveSpeed, math::anglef rotSpeed, math::anglef maxVerticalAngle, bool noVerticalMovement);
 
-	virtual void SetKeyCode(EAction action, input::EKeyCode key) = 0;
-	virtual input::EKeyCode GetKeyCode(EAction action) const = 0;
-	virtual float GetMoveSpeed() const = 0;
-	virtual void SetMoveSpeed(float speed) = 0;
-	virtual math::anglef GetRotationSpeed() const = 0;
-	virtual void SetRotationSpeed(math::anglef speed) = 0;
-	virtual bool VerticalMovementAllowed() const = 0;
-	virtual void AllowVerticalMovement(bool allow) = 0;
-	virtual void SetMaxVerticalAngle(math::anglef a) = 0;
+	void Animate(float time);
+	void SetActive(bool Active);
+
+	LUX_API void SetKeyCode(EAction Action, input::EKeyCode key);
+	LUX_API input::EKeyCode GetKeyCode(EAction Action) const;
+	LUX_API bool OnEvent(const input::Event& event);
+	LUX_API bool IsKeyDown(EAction Action) const;
+	LUX_API float GetMoveSpeed() const;
+	LUX_API void SetMoveSpeed(float fSpeed);
+	LUX_API void SetMaxVerticalAngle(math::anglef a) { m_MaxVerticalAngle = a; }
+	LUX_API math::anglef GetRotationSpeed() const;
+	LUX_API void SetRotationSpeed(math::anglef fSpeed);
+	LUX_API bool VerticalMovementAllowed() const;
+	LUX_API void AllowVerticalMovement(bool Allow);
+
+	core::Name GetReferableSubType() const;
+	StrongRef<Referable> Clone() const;
+
+private:
+	struct SKey
+	{
+		input::EKeyCode keyCode;
+		bool state;
+
+		SKey() : keyCode(input::KEY_NONE), state(false)
+		{}
+		SKey(input::EKeyCode key) : keyCode(key), state(false)
+		{}
+	};
+
+private:
+	float m_MoveSpeed;
+	math::anglef m_RotSpeed;
+	math::anglef m_MaxVerticalAngle;
+
+	SKey m_KeyMap[EA_COUNT];
+	bool m_NoVerticalMovement;
+	bool m_FirstCall;
+
+	math::vector2f m_MouseMove;
 };
 
 }    

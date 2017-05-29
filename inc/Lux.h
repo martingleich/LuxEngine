@@ -95,6 +95,7 @@ namespace input
 #include "video/ColorSpaces.h"
 #include "video/ColorConverter.h"
 
+#include "video/HardwareBufferManager.h"
 #include "video/Shader.h"
 #include "video/VertexTypes.h"
 #include "video/VertexBuffer.h"
@@ -129,6 +130,8 @@ namespace input
 #include "scene/query/Query.h"
 
 #include "scene/components/CameraFPSAnimator.h"
+#include "scene/components/LinearMoveAnimator.h"
+#include "scene/components/RotationAnimator.h"
 
 #include "scene/nodes/CameraSceneNode.h"
 #include "scene/nodes/MeshSceneNode.h"

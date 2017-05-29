@@ -1,27 +1,26 @@
-#include "CameraFPSAnimatorImpl.h"
+#include "scene/components/CameraFPSAnimator.h"
 #include "scene/nodes/CameraSceneNode.h"
 #include "core/ReferableRegister.h"
 #include "core/Logger.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraFPSAnimatorImpl)
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraFPSAnimator)
 
 namespace lux
 {
 namespace scene
 {
 
-CameraFPSAnimatorImpl::CameraFPSAnimatorImpl() :
-	CameraFPSAnimatorImpl(1.0f, math::anglef::Radian(1.0f), math::anglef::Degree(89.0f), false)
+CameraFPSAnimator::CameraFPSAnimator() :
+	CameraFPSAnimator(1.0f, math::anglef::Radian(1.0f), math::anglef::Degree(89.0f), false)
 {
 }
 
-CameraFPSAnimatorImpl::CameraFPSAnimatorImpl(float fMoveSpeed, math::anglef fRotSpeed,
+CameraFPSAnimator::CameraFPSAnimator(float fMoveSpeed, math::anglef fRotSpeed,
 	math::anglef fMaxVerticalAngle, bool bNoVerticalMovement)
 	: m_MoveSpeed(fMoveSpeed), m_RotSpeed(fRotSpeed), m_MaxVerticalAngle(fMaxVerticalAngle),
 	m_NoVerticalMovement(bNoVerticalMovement), m_FirstCall(true), m_MouseMove(0.0f, 0.0f)
 {
 	this->SetEventReceiver(true);
-	this->SetAnimated(true);
 
 	m_KeyMap[EA_FORWARD] = input::KEY_KEY_W;
 	m_KeyMap[EA_BACKWARD] = input::KEY_KEY_S;
@@ -33,11 +32,7 @@ CameraFPSAnimatorImpl::CameraFPSAnimatorImpl(float fMoveSpeed, math::anglef fRot
 	m_KeyMap[EA_DOWN] = input::KEY_KEY_E;
 }
 
-CameraFPSAnimatorImpl::~CameraFPSAnimatorImpl()
-{
-}
-
-void CameraFPSAnimatorImpl::Animate(float time)
+void CameraFPSAnimator::Animate(float time)
 {
 	SceneNode* node = GetParent();
 	if(!node)
@@ -110,9 +105,9 @@ void CameraFPSAnimatorImpl::Animate(float time)
 	m_MouseMove.Set(0.0f, 0.0f);
 }
 
-StrongRef<Referable> CameraFPSAnimatorImpl::Clone() const
+StrongRef<Referable> CameraFPSAnimator::Clone() const
 {
-	StrongRef<CameraFPSAnimatorImpl> out = LUX_NEW(CameraFPSAnimatorImpl)(m_MoveSpeed, m_RotSpeed,
+	StrongRef<CameraFPSAnimator> out = LUX_NEW(CameraFPSAnimator)(m_MoveSpeed, m_RotSpeed,
 		m_MaxVerticalAngle, m_NoVerticalMovement);
 
 	for(int i = 0; i < EA_COUNT; ++i)
@@ -121,17 +116,17 @@ StrongRef<Referable> CameraFPSAnimatorImpl::Clone() const
 	return out;
 }
 
-void CameraFPSAnimatorImpl::SetKeyCode(EAction Action, input::EKeyCode key)
+void CameraFPSAnimator::SetKeyCode(EAction Action, input::EKeyCode key)
 {
 	m_KeyMap[Action] = SKey(key);
 }
 
-input::EKeyCode CameraFPSAnimatorImpl::GetKeyCode(EAction Action) const
+input::EKeyCode CameraFPSAnimator::GetKeyCode(EAction Action) const
 {
 	return m_KeyMap[Action].keyCode;
 }
 
-void CameraFPSAnimatorImpl::SetActive(bool Active)
+void CameraFPSAnimator::SetActive(bool Active)
 {
 	if(IsActive() == false && Active == true)
 		m_MouseMove.Set(0.0f, 0.0f);
@@ -139,7 +134,7 @@ void CameraFPSAnimatorImpl::SetActive(bool Active)
 	SceneNodeComponent::SetActive(Active);
 }
 
-bool CameraFPSAnimatorImpl::OnEvent(const input::Event& event)
+bool CameraFPSAnimator::OnEvent(const input::Event& event)
 {
 	if(event.type == input::EEventType::Button) {
 		for(int i = 0; i < EA_COUNT; ++i) {
@@ -157,42 +152,42 @@ bool CameraFPSAnimatorImpl::OnEvent(const input::Event& event)
 	return false;
 }
 
-bool CameraFPSAnimatorImpl::IsKeyDown(EAction Action) const
+bool CameraFPSAnimator::IsKeyDown(EAction Action) const
 {
 	return m_KeyMap[Action].state;
 }
 
-float CameraFPSAnimatorImpl::GetMoveSpeed() const
+float CameraFPSAnimator::GetMoveSpeed() const
 {
 	return m_MoveSpeed;
 }
 
-void CameraFPSAnimatorImpl::SetMoveSpeed(float fSpeed)
+void CameraFPSAnimator::SetMoveSpeed(float fSpeed)
 {
 	m_MoveSpeed = fSpeed;
 }
 
-math::anglef CameraFPSAnimatorImpl::GetRotationSpeed() const
+math::anglef CameraFPSAnimator::GetRotationSpeed() const
 {
 	return m_RotSpeed;
 }
 
-void CameraFPSAnimatorImpl::SetRotationSpeed(math::anglef fSpeed)
+void CameraFPSAnimator::SetRotationSpeed(math::anglef fSpeed)
 {
 	m_RotSpeed = fSpeed;
 }
 
-bool CameraFPSAnimatorImpl::VerticalMovementAllowed() const
+bool CameraFPSAnimator::VerticalMovementAllowed() const
 {
 	return !m_NoVerticalMovement;
 }
 
-void CameraFPSAnimatorImpl::AllowVerticalMovement(bool Allow)
+void CameraFPSAnimator::AllowVerticalMovement(bool Allow)
 {
 	m_NoVerticalMovement = !Allow;
 }
 
-core::Name CameraFPSAnimatorImpl::GetReferableSubType() const
+core::Name CameraFPSAnimator::GetReferableSubType() const
 {
 	return SceneNodeComponentType::CameraFPS;
 }

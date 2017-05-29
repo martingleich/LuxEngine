@@ -65,13 +65,13 @@ public:
 
 	//--------------------------------------------------------------------------
 
-	virtual StrongRef<SceneNodeComponent> AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis, math::anglef rotSpeed);
+	virtual StrongRef<RotationAnimator> AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis, math::anglef rotSpeed);
 
 	virtual StrongRef<CameraFPSAnimator> AddCameraFPSAnimator(CameraSceneNode* addTo, float moveSpeed, math::anglef rotSpeed,
 		bool noVerticalMovement = false,
 		math::anglef maxVerticalAngle = math::anglef::Degree(89.0f));
 
-	virtual StrongRef<SceneNodeComponent> AddLinearMoveAnimator(SceneNode* addTo,
+	virtual StrongRef<LinearMoveAnimator> AddLinearMoveAnimator(SceneNode* addTo,
 		const math::line3df& line,
 		float duration,
 		bool jumpBack = false,

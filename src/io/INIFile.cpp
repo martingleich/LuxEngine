@@ -1,4 +1,4 @@
-#include "INIFileImpl.h"
+#include "io/INIFile.h"
 #include "io/FileSystem.h"
 
 #include "io/File.h"
@@ -22,7 +22,35 @@ namespace lux
 namespace io
 {
 
-void INIFileImpl::InitValues()
+INIFile::INIFile(FileSystem* FileSys) :
+	m_FileSys(FileSys),
+	m_File(nullptr),
+	m_AutoReload(true),
+	m_AutoCommit(true),
+	m_CurrentSection(0),
+	m_CurrentElement(0),
+	m_CommentChars(";#")
+{
+}
+
+INIFile::INIFile(FileSystem* FileSys, File* f) :
+	INIFile(FileSys)
+{
+	Init(f);
+}
+
+INIFile::INIFile(FileSystem* FileSys, const io::path& p) :
+	INIFile(FileSys)
+{
+	Init(p);
+}
+
+INIFile::~INIFile()
+{
+	Close();
+}
+
+void INIFile::InitValues()
 {
 	m_SectionSorted = true;
 	m_SectionsAscending = true;
@@ -30,7 +58,7 @@ void INIFileImpl::InitValues()
 	m_CurrentElement = 0;
 }
 
-void INIFileImpl::Init(File* File)
+void INIFile::Init(File* File)
 {
 	m_File = File;
 	m_AutoCommit = false;
@@ -44,7 +72,7 @@ void INIFileImpl::Init(File* File)
 	}
 }
 
-void INIFileImpl::Init(const io::path& File)
+void INIFile::Init(const io::path& File)
 {
 	m_FilePath = File;
 	m_File = nullptr;
@@ -55,7 +83,7 @@ void INIFileImpl::Init(const io::path& File)
 	LoadData(); // if file couldn't be loaded, handle as new empty file.
 }
 
-bool INIFileImpl::ReadSections()
+bool INIFile::ReadSections()
 {
 	SINIElement element;
 	SINISection* section = nullptr;
@@ -132,7 +160,7 @@ bool INIFileImpl::ReadSections()
 	return !m_IsEOF;
 }
 
-bool INIFileImpl::ReadElement(string& work, SINIElement& element)
+bool INIFile::ReadElement(string& work, SINIElement& element)
 {
 	/*
 	element: Ident [Whitespace] = [Whitespace] value
@@ -196,7 +224,7 @@ bool INIFileImpl::ReadElement(string& work, SINIElement& element)
 	return false;
 }
 
-bool INIFileImpl::LoadData()
+bool INIFile::LoadData()
 {
 	if(!m_File) {
 		if(!m_FilePath.IsEmpty()) {
@@ -227,7 +255,7 @@ bool INIFileImpl::LoadData()
 	return (m_Sections.Size() > 0);
 }
 
-bool INIFileImpl::ParseSectionName(string& work, string& out)
+bool INIFile::ParseSectionName(string& work, string& out)
 {
 	out.Clear();
 	auto it = work.First();
@@ -243,7 +271,7 @@ bool INIFileImpl::ParseSectionName(string& work, string& out)
 	return false;
 }
 
-bool INIFileImpl::IsComment(const string& work, string::ConstIterator& commentBegin)
+bool INIFile::IsComment(const string& work, string::ConstIterator& commentBegin)
 {
 	if(work.IsEmpty())
 		return false;
@@ -269,7 +297,7 @@ bool INIFileImpl::IsComment(const string& work, string::ConstIterator& commentBe
 	return false;
 }
 
-bool INIFileImpl::ReadLine(string& out)
+bool INIFile::ReadLine(string& out)
 {
 	out.Clear();
 
@@ -323,7 +351,7 @@ bool INIFileImpl::ReadLine(string& out)
 	return !m_IsEOF;
 }
 
-void INIFileImpl::Close()
+void INIFile::Close()
 {
 	m_File = nullptr;
 
@@ -331,7 +359,7 @@ void INIFileImpl::Close()
 	m_Elements.Clear();
 }
 
-INIFileImpl::SectionID INIFileImpl::GetSectionID(const char* section)
+INIFile::SectionID INIFile::GetSectionID(const char* section)
 {
 	if(m_Sections.Size() == 0)
 		return InvalidID;
@@ -357,7 +385,7 @@ INIFileImpl::SectionID INIFileImpl::GetSectionID(const char* section)
 
 	return InvalidID;
 }
-INIFileImpl::ElementID INIFileImpl::GetElemID(const char* section, const char* element, INIFileImpl::SectionID& outSection)
+INIFile::ElementID INIFile::GetElemID(const char* section, const char* element, INIFile::SectionID& outSection)
 {
 	SectionID sectionID = GetSectionID(section);
 
@@ -369,7 +397,7 @@ INIFileImpl::ElementID INIFileImpl::GetElemID(const char* section, const char* e
 	return GetElemID(sectionID, element);
 }
 
-INIFileImpl::ElementID INIFileImpl::GetElemID(INIFileImpl::SectionID sectionID, const char* element)
+INIFile::ElementID INIFile::GetElemID(INIFile::SectionID sectionID, const char* element)
 {
 	if(sectionID == InvalidID)
 		return InvalidID;
@@ -403,12 +431,12 @@ INIFileImpl::ElementID INIFileImpl::GetElemID(INIFileImpl::SectionID sectionID, 
 	return InvalidID;
 }
 
-void INIFileImpl::Reload()
+void INIFile::Reload()
 {
 	LoadData();
 }
 
-void INIFileImpl::WriteComment(const string& comment, size_t identDepth, INIFileImpl::ECommentPos pos)
+void INIFile::WriteComment(const string& comment, size_t identDepth, INIFile::ECommentPos pos)
 {
 	if(comment.IsEmpty())
 		return;
@@ -446,7 +474,7 @@ void INIFileImpl::WriteComment(const string& comment, size_t identDepth, INIFile
 		m_File->WriteBinary(NEWLINE, sizeof(NEWLINE) - 1);
 }
 
-bool INIFileImpl::Commit()
+bool INIFile::Commit()
 {
 	if(!m_File) {
 		if(!m_FilePath.IsEmpty()) {
@@ -496,12 +524,12 @@ bool INIFileImpl::Commit()
 }
 
 
-size_t INIFileImpl::GetSectionCount()
+size_t INIFile::GetSectionCount()
 {
 	return m_Sections.Size();
 }
 
-bool INIFileImpl::AddSection(const char* name, const char* comment)
+bool INIFile::AddSection(const char* name, const char* comment)
 {
 	SectionID sectionID = GetSectionID(name);
 	if(sectionID != InvalidID)
@@ -520,7 +548,7 @@ bool INIFileImpl::AddSection(const char* name, const char* comment)
 	return true;
 }
 
-bool INIFileImpl::RemoveSection(const char* section)
+bool INIFile::RemoveSection(const char* section)
 {
 	SectionID sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
@@ -546,7 +574,7 @@ bool INIFileImpl::RemoveSection(const char* section)
 	return true;
 }
 
-bool INIFileImpl::SortSections(INIFileImpl::ESorting sorting, bool recursive)
+bool INIFile::SortSections(INIFile::ESorting sorting, bool recursive)
 {
 	if(m_Sections.Size() <= 1) {
 		if(recursive) {
@@ -596,7 +624,7 @@ bool INIFileImpl::SortSections(INIFileImpl::ESorting sorting, bool recursive)
 	return true;
 }
 
-bool INIFileImpl::SetSectionName(const char* section, const char* name)
+bool INIFile::SetSectionName(const char* section, const char* name)
 {
 	SectionID sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
@@ -611,7 +639,7 @@ bool INIFileImpl::SetSectionName(const char* section, const char* name)
 	return true;
 }
 
-bool INIFileImpl::SetSectionComment(const char* section, const char* comment)
+bool INIFile::SetSectionComment(const char* section, const char* comment)
 {
 	SectionID sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
@@ -625,12 +653,12 @@ bool INIFileImpl::SetSectionComment(const char* section, const char* comment)
 	return true;
 }
 
-const string& INIFileImpl::GetSectionName(INIFileImpl::SectionID id)
+const string& INIFile::GetSectionName(INIFile::SectionID id)
 {
 	return m_Sections[id].name;
 }
 
-const string& INIFileImpl::GetSectionComment(const char* section)
+const string& INIFile::GetSectionComment(const char* section)
 {
 	SectionID sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
@@ -638,7 +666,7 @@ const string& INIFileImpl::GetSectionComment(const char* section)
 	return m_Sections[sectionID].name;
 }
 
-size_t INIFileImpl::GetElementCount(const char* section)
+size_t INIFile::GetElementCount(const char* section)
 {
 	ElementID elementID = GetSectionID(section);
 	if(elementID == InvalidID)
@@ -646,7 +674,7 @@ size_t INIFileImpl::GetElementCount(const char* section)
 	return m_Sections[elementID].elemCount;
 }
 
-bool INIFileImpl::AddElement(const char* section, const char* name, const char* value, const char* comment)
+bool INIFile::AddElement(const char* section, const char* name, const char* value, const char* comment)
 {
 	if(!value)
 		return false;
@@ -698,7 +726,7 @@ bool INIFileImpl::AddElement(const char* section, const char* name, const char* 
 	return true;
 }
 
-bool INIFileImpl::RemoveElement(const char* section, const char* element)
+bool INIFile::RemoveElement(const char* section, const char* element)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
@@ -726,7 +754,7 @@ bool INIFileImpl::RemoveElement(const char* section, const char* element)
 	return false;
 }
 
-bool INIFileImpl::SortElements(const char* sectionName, INIFileImpl::ESorting sorting)
+bool INIFile::SortElements(const char* sectionName, INIFile::ESorting sorting)
 {
 	SectionID sectionID = GetSectionID(sectionName);
 	if(sectionID == InvalidID)
@@ -760,7 +788,7 @@ bool INIFileImpl::SortElements(const char* sectionName, INIFileImpl::ESorting so
 	return false;
 }
 
-bool INIFileImpl::SetElementName(const char* section, const char* element, const char* name)
+bool INIFile::SetElementName(const char* section, const char* element, const char* name)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
@@ -774,7 +802,7 @@ bool INIFileImpl::SetElementName(const char* section, const char* element, const
 	return true;
 }
 
-bool INIFileImpl::SetElementComment(const char* section, const char* element, const char* comment)
+bool INIFile::SetElementComment(const char* section, const char* element, const char* comment)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
@@ -785,7 +813,7 @@ bool INIFileImpl::SetElementComment(const char* section, const char* element, co
 	return true;
 }
 
-bool INIFileImpl::SetElementValue(const char* section, const char* element, const char* value)
+bool INIFile::SetElementValue(const char* section, const char* element, const char* value)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
@@ -796,7 +824,7 @@ bool INIFileImpl::SetElementValue(const char* section, const char* element, cons
 	return true;
 }
 
-const string& INIFileImpl::GetElementName(const char* section, INIFileImpl::ElementID id)
+const string& INIFile::GetElementName(const char* section, INIFile::ElementID id)
 {
 	SectionID sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
@@ -811,7 +839,7 @@ const string& INIFileImpl::GetElementName(const char* section, INIFileImpl::Elem
 	return m_Elements[m_Sections[sectionID].firstElem + id].name;
 }
 
-const string& INIFileImpl::GetElementComment(const char* section, const char* element)
+const string& INIFile::GetElementComment(const char* section, const char* element)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
@@ -824,7 +852,7 @@ const string& INIFileImpl::GetElementComment(const char* section, const char* el
 	return m_Elements[elementID].comment;
 }
 
-const string& INIFileImpl::GetElementValue(const char* section, const char* element)
+const string& INIFile::GetElementValue(const char* section, const char* element)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
@@ -837,34 +865,34 @@ const string& INIFileImpl::GetElementValue(const char* section, const char* elem
 	return m_Elements[elementID].value;
 }
 
-const string& INIFileImpl::GetCommentChars() const
+const string& INIFile::GetCommentChars() const
 {
 	return m_CommentChars;
 }
 
-void INIFileImpl::SetCommentChars(const string& chars)
+void INIFile::SetCommentChars(const string& chars)
 {
 	lxAssert(!chars.IsEmpty());
 
 	m_CommentChars = chars;
 }
 
-u32 INIFileImpl::GetCommentChar() const
+u32 INIFile::GetCommentChar() const
 {
 	return *m_CommentChars.First();
 }
 
-void INIFileImpl::SetElementCommentPos(ECommentPos pos)
+void INIFile::SetElementCommentPos(ECommentPos pos)
 {
 	m_ElementCommentPos = pos;
 }
 
-INIFile::ECommentPos INIFileImpl::GetElementCommentPos() const
+INIFile::ECommentPos INIFile::GetElementCommentPos() const
 {
 	return m_ElementCommentPos;
 }
 
-bool INIFileImpl::IsEmpty()
+bool INIFile::IsEmpty()
 {
 	return (m_Sections.Size() == 0);
 }
