@@ -646,8 +646,8 @@ public:
 
 		Param(Param&& old) :
 			name(std::move(old.name)),
-			type(std::move(old.type)),
-			data(old.data)
+			data(old.data),
+			type(std::move(old.type))
 		{
 			old.data = nullptr;
 		}

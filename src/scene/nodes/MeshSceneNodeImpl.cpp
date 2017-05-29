@@ -84,7 +84,7 @@ void MeshSceneNodeImpl::Render()
 	for(u32 dwSub = 0; dwSub < m_Mesh->GetSubMeshCount(); ++dwSub) {
 		video::SubMesh* pSub = m_Mesh->GetSubMesh(dwSub);
 		if(pSub) {
-			const video::Material* Mat = m_OnlyReadMaterials ? pSub->GetMaterial() : m_Materials[dwSub];
+			const video::Material* Mat = m_OnlyReadMaterials ? pSub->GetMaterial() : (const video::Material*)m_Materials[dwSub];
 
 			// renderer abfragen, wenn es denn gewünschten nicht gibt abbrechen
 			video::MaterialRenderer* matRenderer = nullptr;

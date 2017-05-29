@@ -200,7 +200,7 @@ PackageParam ParamPackage::GetParam(u32 param, void* baseData, bool isConst) con
 	ParamDesc desc;
 	desc.name = p.name.Data();
 	desc.size = p.size;
-	desc.type = p.type;
+	desc.type = type;
 	desc.id = param;
 	return PackageParam(desc, (u8*)baseData + p.offset);
 }
