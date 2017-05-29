@@ -236,15 +236,14 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 {
 	ID3DXBuffer* output = 0;
 	ID3DXBuffer* errors = 0;
-	ID3DXConstantTable* table;
-	IDirect3DVertexShader9* shader;
+	ID3DXConstantTable* table = nullptr;
+	IDirect3DVertexShader9* shader = nullptr;
 
 	HRESULT hr = D3DXCompileShader(code, (UINT)length,
 		NULL, NULL, entryPoint,
 		profile,
 		0, &output, &errors,
 		&table);
-	outTable = table;
 	if(FAILED(hr)) {
 		if(errors) {
 			if(errorList) {
@@ -257,6 +256,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 		throw ShaderCompileException();
 	}
 
+	outTable = table;
 	// Warnings.
 	if(errors) {
 		if(errorList) {
@@ -285,8 +285,8 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 {
 	ID3DXBuffer* output = 0;
 	ID3DXBuffer* errors = 0;
-	ID3DXConstantTable* table;
-	IDirect3DPixelShader9* shader;
+	ID3DXConstantTable* table = nullptr;
+	IDirect3DPixelShader9* shader = nullptr;
 
 	HRESULT hr;
 	hr = D3DXCompileShader(code, (UINT)length,
@@ -294,7 +294,6 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 		profile,
 		0, &output, &errors,
 		&table);
-	outTable = table;
 	if(FAILED(hr)) {
 		if(errors) {
 			if(errorList) {
@@ -307,6 +306,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 		throw ShaderCompileException();
 	}
 
+	outTable = table;
 	// Warnings.
 	if(errors) {
 		if(errorList) {
