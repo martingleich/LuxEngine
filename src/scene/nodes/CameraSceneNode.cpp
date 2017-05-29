@@ -1,17 +1,17 @@
-#include "CameraSceneNodeImpl.h"
+#include "scene/nodes/CameraSceneNode.h"
 #include "scene/SceneManager.h"
 #include "video/Renderer.h"
 #include "core/Logger.h"
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraSceneNodeImpl)
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraSceneNode)
 
 namespace lux
 {
 namespace scene
 {
 
-CameraSceneNodeImpl::CameraSceneNodeImpl() :
+CameraSceneNode::CameraSceneNode() :
 	m_HasCustomProjection(false),
 	m_FOV(math::DegToRad(60.0f)),
 	m_XMax(1.0f),
@@ -25,156 +25,156 @@ CameraSceneNodeImpl::CameraSceneNodeImpl() :
 {
 }
 
-void CameraSceneNodeImpl::SetCustomProjection(const math::matrix4& proj)
+void CameraSceneNode::SetCustomProjection(const math::matrix4& proj)
 {
 	m_Projection = proj;
 	m_HasCustomProjection = true;
 }
 
-void CameraSceneNodeImpl::ClearCustomProjection()
+void CameraSceneNode::ClearCustomProjection()
 {
 	m_HasCustomProjection = false;
 	RecalculateProjectionMatrix();
 }
 
-const math::matrix4& CameraSceneNodeImpl::GetProjection() const
+const math::matrix4& CameraSceneNode::GetProjection() const
 {
 	return m_Projection;
 }
 
-const math::matrix4& CameraSceneNodeImpl::GetView() const
+const math::matrix4& CameraSceneNode::GetView() const
 {
 	return m_View;
 }
 
-void CameraSceneNodeImpl::SetViewModification(const math::matrix4& mod)
+void CameraSceneNode::SetViewModification(const math::matrix4& mod)
 {
 	m_ViewModification = mod;
 }
 
-const math::matrix4& CameraSceneNodeImpl::GetViewModification()
+const math::matrix4& CameraSceneNode::GetViewModification()
 {
 	return m_ViewModification;
 }
 
-void CameraSceneNodeImpl::SetAspect(float aspect)
+void CameraSceneNode::SetAspect(float aspect)
 {
 	m_Aspect = aspect;
 	RecalculateProjectionMatrix();
 }
 
-float CameraSceneNodeImpl::GetAspect() const
+float CameraSceneNode::GetAspect() const
 {
 	return m_Aspect;
 }
 
-void CameraSceneNodeImpl::SetFOV(float fov)
+void CameraSceneNode::SetFOV(float fov)
 {
 	m_FOV = fov;
 	RecalculateProjectionMatrix();
 }
 
-float CameraSceneNodeImpl::GetFOV() const
+float CameraSceneNode::GetFOV() const
 {
 	return m_FOV;
 }
 
-void CameraSceneNodeImpl::SetXMax(float xmax)
+void CameraSceneNode::SetXMax(float xmax)
 {
 	m_XMax = xmax;
 	RecalculateProjectionMatrix();
 }
 
-float CameraSceneNodeImpl::GetXMax() const
+float CameraSceneNode::GetXMax() const
 {
 	return m_XMax;
 }
 
-void CameraSceneNodeImpl::SetNearPlane(float near)
+void CameraSceneNode::SetNearPlane(float near)
 {
 	m_NearPlane = near;
 	RecalculateProjectionMatrix();
 }
 
-float CameraSceneNodeImpl::GetNearPlane() const
+float CameraSceneNode::GetNearPlane() const
 {
 	return m_NearPlane;
 }
 
-void CameraSceneNodeImpl::SetFarPlane(float far)
+void CameraSceneNode::SetFarPlane(float far)
 {
 	m_FarPlane = far;
 	RecalculateProjectionMatrix();
 }
 
-float CameraSceneNodeImpl::GetFarPlane() const
+float CameraSceneNode::GetFarPlane() const
 {
 	return m_FarPlane;
 }
 
-void CameraSceneNodeImpl::SetOrtho(bool ortho)
+void CameraSceneNode::SetOrtho(bool ortho)
 {
 	m_IsOrtho = ortho;
 	RecalculateProjectionMatrix();
 }
 
-void CameraSceneNodeImpl::SetAutoAspect(bool automatic)
+void CameraSceneNode::SetAutoAspect(bool automatic)
 {
 	m_AutoAspect = automatic;
 }
 
-bool CameraSceneNodeImpl::GetAutoAspect()
+bool CameraSceneNode::GetAutoAspect()
 {
 	return m_AutoAspect;
 }
 
-bool CameraSceneNodeImpl::IsOrtho() const
+bool CameraSceneNode::IsOrtho() const
 {
 	return m_IsOrtho;
 }
 
-void CameraSceneNodeImpl::SetVirtualRoot(SceneNode* node)
+void CameraSceneNode::SetVirtualRoot(SceneNode* node)
 {
 	m_VirtualRoot = node;
 }
 
-SceneNode* CameraSceneNodeImpl::GetVirtualRoot() const
+SceneNode* CameraSceneNode::GetVirtualRoot() const
 {
 	return m_VirtualRoot;
 }
 
-void CameraSceneNodeImpl::SetRenderTarget(const video::RenderTarget& target)
+void CameraSceneNode::SetRenderTarget(const video::RenderTarget& target)
 {
 	m_RenderTarget = target;
 	RecalculateProjectionMatrix();
 }
 
-const video::RenderTarget& CameraSceneNodeImpl::GetRenderTarget() const
+const video::RenderTarget& CameraSceneNode::GetRenderTarget() const
 {
 	return m_RenderTarget;
 }
 
-void CameraSceneNodeImpl::SetRenderPriority(s32 p)
+void CameraSceneNode::SetRenderPriority(s32 p)
 {
 	m_RenderPriority = p;
 }
 
-s32 CameraSceneNodeImpl::GetRenderPriority() const
+s32 CameraSceneNode::GetRenderPriority() const
 {
 	return m_RenderPriority;
 }
 
-void CameraSceneNodeImpl::SetBackgroundColor(video::Color color)
+void CameraSceneNode::SetBackgroundColor(video::Color color)
 {
 	m_BackgroundColor = color;
 }
 
-video::Color CameraSceneNodeImpl::GetBackgroundColor()
+video::Color CameraSceneNode::GetBackgroundColor()
 {
 	return m_BackgroundColor;
 }
 
-void CameraSceneNodeImpl::Render()
+void CameraSceneNode::Render()
 {
 	RecalculateViewMatrix();
 	RecalculateProjectionMatrix();
@@ -184,7 +184,7 @@ void CameraSceneNodeImpl::Render()
 	renderer->SetTransform(video::ETransform::View, m_View);
 }
 
-void CameraSceneNodeImpl::RecalculateProjectionMatrix()
+void CameraSceneNode::RecalculateProjectionMatrix()
 {
 	if(m_AutoAspect) {
 		if(m_RenderTarget.GetTexture())
@@ -211,7 +211,7 @@ void CameraSceneNodeImpl::RecalculateProjectionMatrix()
 	}
 }
 
-void CameraSceneNodeImpl::RecalculateViewMatrix()
+void CameraSceneNode::RecalculateViewMatrix()
 {
 	math::vector3f position = GetAbsolutePosition();
 	math::vector3f direction = this->FromRelativeDir(math::vector3f::UNIT_Z);
@@ -222,7 +222,7 @@ void CameraSceneNodeImpl::RecalculateViewMatrix()
 	m_View *= m_ViewModification;
 }
 
-bool CameraSceneNodeImpl::SetSceneManager(SceneManager* smgr)
+bool CameraSceneNode::SetSceneManager(SceneManager* smgr)
 {
 	auto oldSmgr = GetSceneManager();
 	if(oldSmgr)
@@ -233,14 +233,14 @@ bool CameraSceneNodeImpl::SetSceneManager(SceneManager* smgr)
 	return SceneNode::SetSceneManager(smgr);
 }
 
-core::Name CameraSceneNodeImpl::GetReferableSubType() const
+core::Name CameraSceneNode::GetReferableSubType() const
 {
 	return SceneNodeType::Camera;
 }
 
-StrongRef<Referable> CameraSceneNodeImpl::Clone() const
+StrongRef<Referable> CameraSceneNode::Clone() const
 {
-	return LUX_NEW(CameraSceneNodeImpl)(*this);
+	return LUX_NEW(CameraSceneNode)(*this);
 }
 
 }

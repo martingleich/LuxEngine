@@ -1,6 +1,5 @@
-#ifndef INCLUDED_CSKYBOXSCENENODE_H
-#define INCLUDED_CSKYBOXSCENENODE_H
-
+#ifndef INCLUDED_SKYBOXSCENENODE_H
+#define INCLUDED_SKYBOXSCENENODE_H
 #include "scene/SceneNode.h"
 #include "video/VertexTypes.h"
 #include "video/CubeTexture.h"
@@ -9,16 +8,14 @@ namespace lux
 {
 namespace scene
 {
-class SkyBoxSceneNodeImpl : public SceneNode
+class SkyBoxSceneNode : public SceneNode
 {
 public:
-	SkyBoxSceneNodeImpl() = default;
-	SkyBoxSceneNodeImpl(const SkyBoxSceneNodeImpl& other) = default;
+	LUX_API void SetSkyTexture(video::CubeTexture* skyTexture);
 
 	bool SetSceneManager(SceneManager* mgr);
 	void OnRegisterSceneNode();
 	void Render();
-	void SetSkyTexture(video::CubeTexture* skyTexture);
 	video::Material* GetMaterial(size_t id);
 	void SetMaterial(size_t i, video::Material* m);
 	size_t GetMaterialCount() const;

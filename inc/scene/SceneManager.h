@@ -50,6 +50,8 @@ class SceneNode;
 class CameraSceneNode;
 class MeshSceneNode;
 class LightSceneNode;
+class EmptySceneNode;
+class SkyBoxSceneNode;
 
 class SceneNodeComponent;
 
@@ -95,13 +97,13 @@ public:
 		float scale = 1.0f) = 0;
 
 	// Fügt eine Sky-box zum Scene-Graph hinzu
-	virtual StrongRef<SceneNode> AddSkyBoxSceneNode(video::CubeTexture* skyTexture) = 0;
+	virtual StrongRef<SkyBoxSceneNode> AddSkyBoxSceneNode(video::CubeTexture* skyTexture) = 0;
 
 	virtual StrongRef<LightSceneNode> AddLightSceneNode(const math::vector3f position = math::vector3f::ZERO,
 		const video::Colorf color = video::Colorf(1.0f, 1.0f, 1.0f),
 		float range = 100.0f) = 0;
 
-	virtual StrongRef<SceneNode> AddEmptySceneNode(SceneNode* parent = nullptr) = 0;
+	virtual StrongRef<EmptySceneNode> AddEmptySceneNode(SceneNode* parent = nullptr) = 0;
 
 	virtual StrongRef<SceneNode> AddSceneNode(core::Name type, SceneNode* parent = nullptr) = 0;
 

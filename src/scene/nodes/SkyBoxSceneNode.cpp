@@ -1,4 +1,4 @@
-#include "SkyBoxSceneNodeImpl.h"
+#include "scene/nodes/SkyBoxSceneNode.h"
 
 #include "scene/SceneManager.h"
 #include "scene/nodes/CameraSceneNode.h"
@@ -10,27 +10,27 @@
 
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::SkyBoxSceneNodeImpl)
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::SkyBoxSceneNode)
 
 namespace lux
 {
 namespace scene
 {
 
-void SkyBoxSceneNodeImpl::OnRegisterSceneNode()
+void SkyBoxSceneNode::OnRegisterSceneNode()
 {
 	GetSceneManager()->RegisterNodeForRendering(this, ESNRP_SKY_BOX);
 
 	SceneNode::OnRegisterSceneNode();
 }
 
-bool SkyBoxSceneNodeImpl::SetSceneManager(SceneManager* mgr)
+bool SkyBoxSceneNode::SetSceneManager(SceneManager* mgr)
 {
 	m_Material = mgr->GetMaterialLibrary()->CreateMaterial();
 	return SceneNode::SetSceneManager(mgr);
 }
 
-void SkyBoxSceneNodeImpl::Render()
+void SkyBoxSceneNode::Render()
 {
 	video::Renderer* renderer = GetSceneManager()->GetRenderer();
 	const CameraSceneNode* camera = GetSceneManager()->GetActiveCamera();
@@ -94,12 +94,12 @@ void SkyBoxSceneNodeImpl::Render()
 	renderer->PopPipelineOverwrite();
 }
 
-void SkyBoxSceneNodeImpl::SetSkyTexture(video::CubeTexture* pSkyTexture)
+void SkyBoxSceneNode::SetSkyTexture(video::CubeTexture* pSkyTexture)
 {
 	m_SkyTexture = pSkyTexture;
 }
 
-video::Material* SkyBoxSceneNodeImpl::GetMaterial(size_t id)
+video::Material* SkyBoxSceneNode::GetMaterial(size_t id)
 {
 	if(id == 0)
 		return m_Material;
@@ -107,7 +107,7 @@ video::Material* SkyBoxSceneNodeImpl::GetMaterial(size_t id)
 		return SceneNode::GetMaterial(id);
 }
 
-void SkyBoxSceneNodeImpl::SetMaterial(size_t i, video::Material* m)
+void SkyBoxSceneNode::SetMaterial(size_t i, video::Material* m)
 {
 	if(i == 0)
 		m_Material = m;
@@ -115,19 +115,19 @@ void SkyBoxSceneNodeImpl::SetMaterial(size_t i, video::Material* m)
 		return SceneNode::SetMaterial(i, m);
 }
 
-size_t SkyBoxSceneNodeImpl::GetMaterialCount() const
+size_t SkyBoxSceneNode::GetMaterialCount() const
 {
 	return 1;
 }
 
-core::Name SkyBoxSceneNodeImpl::GetReferableSubType() const
+core::Name SkyBoxSceneNode::GetReferableSubType() const
 {
 	return SceneNodeType::SkyBox;
 }
 
-StrongRef<Referable> SkyBoxSceneNodeImpl::Clone() const
+StrongRef<Referable> SkyBoxSceneNode::Clone() const
 {
-	StrongRef<SkyBoxSceneNodeImpl> out = LUX_NEW(SkyBoxSceneNodeImpl)(*this);
+	StrongRef<SkyBoxSceneNode> out = LUX_NEW(SkyBoxSceneNode)(*this);
 
 	return out;
 }

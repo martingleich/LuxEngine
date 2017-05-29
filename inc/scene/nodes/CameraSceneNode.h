@@ -1,13 +1,10 @@
 #ifndef INCLUDED_CAMERASCENENODE_H
 #define INCLUDED_CAMERASCENENODE_H
 #include "scene/SceneNode.h"
+#include "video/RenderTarget.h"
 
 namespace lux
 {
-namespace video
-{
-class RenderTarget;
-}
 namespace scene
 {
 
@@ -15,72 +12,108 @@ namespace scene
 class CameraSceneNode : public SceneNode
 {
 public:
+	CameraSceneNode();
+
 	//! Get the current projection matrix.
 	/**
 	This may not reflect the currently set values.
 	*/
-	virtual const math::matrix4& GetProjection() const = 0;
+	LUX_API const math::matrix4& GetProjection() const;
 
-	virtual void SetCustomProjection(const math::matrix4& proj) = 0;
-	virtual void ClearCustomProjection() = 0;
+	LUX_API void SetCustomProjection(const math::matrix4& proj);
+	LUX_API void ClearCustomProjection();
 
 	//! Get the current view matrix.
 	/**
 	This may not reflect the currently set values.
 	*/
-	virtual const math::matrix4& GetView() const = 0;
+	LUX_API const math::matrix4& GetView() const;
 
-	virtual void SetViewModification(const math::matrix4& mod) = 0;
-	virtual const math::matrix4& GetViewModification() = 0;
+	LUX_API void SetViewModification(const math::matrix4& mod);
+	LUX_API const math::matrix4& GetViewModification();
 
-	virtual void SetAspect(float aspect) = 0;
-	virtual float GetAspect() const = 0;
+	LUX_API void SetAspect(float aspect);
+	LUX_API float GetAspect() const;
 
-	virtual void SetXMax(float xmax) = 0;
-	virtual float GetXMax() const = 0;
+	LUX_API void SetXMax(float xmax);
+	LUX_API float GetXMax() const;
 
-	virtual void SetFOV(float fov) = 0;
-	virtual float GetFOV() const = 0;
+	LUX_API void SetFOV(float fov);
+	LUX_API float GetFOV() const;
 
-	virtual void SetNearPlane(float near) = 0;
-	virtual float GetNearPlane() const = 0;
+	LUX_API void SetNearPlane(float near);
+	LUX_API float GetNearPlane() const;
 
-	virtual void SetFarPlane(float far) = 0;
-	virtual float GetFarPlane() const = 0;
+	LUX_API void SetFarPlane(float far);
+	LUX_API float GetFarPlane() const;
 
 	//! Set if the camera is a orthgonal camera.
 	/**
 	Default value is false.
 	*/
-	virtual void SetOrtho(bool ortho) = 0;
+	LUX_API void SetOrtho(bool ortho);
 	//! Is the camera orthogonal
-	virtual bool IsOrtho() const = 0;
+	LUX_API bool IsOrtho() const;
 
 	//! The aspect ratio is automatic calculated from the rendertarget.
 	/**
 	Default value is true.
 	*/
-	virtual void SetAutoAspect(bool automatic) = 0;
+	LUX_API void SetAutoAspect(bool automatic);
 	//! Is the aspect ratio automatic calculated.
-	virtual bool GetAutoAspect() = 0;
+	LUX_API bool GetAutoAspect();
 
-	//! Set the virtual root of the camera.
+	//! Set the LUX_API root of the camera.
 	/**
-	This camera displays all nodes below and inclusive the virtual root.
+	This camera displays all nodes below and inclusive the LUX_API root.
 	If set to null the whole scene is rendered.
 	Default value is null.
 	*/
-	virtual void SetVirtualRoot(SceneNode* node) = 0;
-	virtual SceneNode* GetVirtualRoot() const = 0;
+	LUX_API void SetVirtualRoot(SceneNode* node);
+	LUX_API SceneNode* GetVirtualRoot() const;
 
-	virtual void SetRenderTarget(const video::RenderTarget& target) = 0;
-	virtual const video::RenderTarget& GetRenderTarget() const = 0;
+	LUX_API void SetRenderTarget(const video::RenderTarget& target);
+	LUX_API const video::RenderTarget& GetRenderTarget() const;
 
-	virtual void SetRenderPriority(s32 p) = 0;
-	virtual s32 GetRenderPriority() const = 0;
+	LUX_API void SetRenderPriority(s32 p);
+	LUX_API s32 GetRenderPriority() const;
 
-	virtual void SetBackgroundColor(video::Color color) = 0;
-	virtual video::Color GetBackgroundColor() = 0;
+	LUX_API void SetBackgroundColor(video::Color color);
+	LUX_API video::Color GetBackgroundColor();
+
+	void Render();
+	bool SetSceneManager(SceneManager* smgr);
+
+	core::Name GetReferableSubType() const;
+	StrongRef<Referable> Clone() const;
+
+private:
+	void RecalculateProjectionMatrix();
+	void RecalculateViewMatrix();
+
+private:
+	math::matrix4 m_Projection;
+	bool m_HasCustomProjection;
+
+	math::matrix4 m_View;
+	math::matrix4 m_ViewModification;
+
+	float m_FOV;
+	float m_XMax;
+	float m_Aspect;
+
+	float m_NearPlane;
+	float m_FarPlane;
+
+	bool m_IsOrtho;
+
+	video::RenderTarget m_RenderTarget;
+	u32 m_RenderPriority;
+	video::Color m_BackgroundColor;
+
+	WeakRef<SceneNode> m_VirtualRoot;
+
+	bool m_AutoAspect;
 };
 
 } // namespace scene

@@ -1,28 +1,25 @@
-#include "MeshSceneNodeImpl.h"
+#include "scene/nodes/MeshSceneNode.h"
+#include "scene/mesh/Mesh.h"
 #include "video/Renderer.h"
 #include "scene/SceneManager.h"
 #include "video/SubMesh.h"
 #include "core/ReferableRegister.h"
 #include "video/MaterialRenderer.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::MeshSceneNodeImpl)
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::MeshSceneNode)
 
 namespace lux
 {
 namespace scene
 {
 
-MeshSceneNodeImpl::MeshSceneNodeImpl() :
+MeshSceneNode::MeshSceneNode() :
 	m_Mesh(nullptr),
 	m_OnlyReadMaterials(true)
 {
 }
 
-MeshSceneNodeImpl::~MeshSceneNodeImpl()
-{
-}
-
-void MeshSceneNodeImpl::OnRegisterSceneNode()
+void MeshSceneNode::OnRegisterSceneNode()
 {
 	bool bTransparent = false;
 	bool bSolid = false;
@@ -66,7 +63,7 @@ void MeshSceneNodeImpl::OnRegisterSceneNode()
 	SceneNode::OnRegisterSceneNode();
 }
 
-void MeshSceneNodeImpl::Render()
+void MeshSceneNode::Render()
 {
 	video::Renderer* renderer = GetSceneManager()->GetRenderer();
 
@@ -123,7 +120,12 @@ void MeshSceneNodeImpl::Render()
 
 }
 
-video::Material* MeshSceneNodeImpl::GetMaterial(size_t index)
+const math::aabbox3df& MeshSceneNode::GetBoundingBox() const
+{
+	return m_BoundingBox;
+}
+
+video::Material* MeshSceneNode::GetMaterial(size_t index)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
 		return m_Mesh->GetSubMesh(index)->GetMaterial();
@@ -135,7 +137,7 @@ video::Material* MeshSceneNodeImpl::GetMaterial(size_t index)
 	return m_Materials[index];
 }
 
-void MeshSceneNodeImpl::SetMaterial(size_t index, video::Material* m)
+void MeshSceneNode::SetMaterial(size_t index, video::Material* m)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
 		m_Mesh->GetSubMesh(index)->SetMaterial(m);
@@ -147,7 +149,7 @@ void MeshSceneNodeImpl::SetMaterial(size_t index, video::Material* m)
 	m_Materials[index] = m;
 }
 
-size_t MeshSceneNodeImpl::GetMaterialCount() const
+size_t MeshSceneNode::GetMaterialCount() const
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr)
 		return m_Mesh->GetSubMeshCount();
@@ -155,7 +157,12 @@ size_t MeshSceneNodeImpl::GetMaterialCount() const
 	return m_Materials.Size();
 }
 
-void MeshSceneNodeImpl::SetMesh(Mesh* mesh)
+StrongRef<Mesh> MeshSceneNode::GetMesh()
+{
+	return m_Mesh;
+}
+
+void MeshSceneNode::SetMesh(Mesh* mesh)
 {
 	// Alte mesh löschen, Neue einsetzen
 	// Und die Materialien kopieren
@@ -169,7 +176,19 @@ void MeshSceneNodeImpl::SetMesh(Mesh* mesh)
 	}
 }
 
-void MeshSceneNodeImpl::CopyMaterials()
+void MeshSceneNode::SetReadMaterialsOnly(bool state)
+{
+	m_OnlyReadMaterials = state;
+	if(!m_OnlyReadMaterials)
+		CopyMaterials();
+}
+
+bool MeshSceneNode::GetReadMaterialsOnly() const
+{
+	return m_OnlyReadMaterials;
+}
+
+void MeshSceneNode::CopyMaterials()
 {
 	if(m_Mesh != nullptr) {
 		if(m_OnlyReadMaterials)
@@ -198,14 +217,14 @@ void MeshSceneNodeImpl::CopyMaterials()
 	}
 }
 
-core::Name MeshSceneNodeImpl::GetReferableSubType() const
+core::Name MeshSceneNode::GetReferableSubType() const
 {
 	return SceneNodeType::Mesh;
 }
 
-StrongRef<Referable> MeshSceneNodeImpl::Clone() const
+StrongRef<Referable> MeshSceneNode::Clone() const
 {
-	StrongRef<MeshSceneNodeImpl> out = LUX_NEW(MeshSceneNodeImpl)(*this);
+	StrongRef<MeshSceneNode> out = LUX_NEW(MeshSceneNode)(*this);
 	out->SetMesh(m_Mesh);
 
 	return out;
@@ -213,4 +232,3 @@ StrongRef<Referable> MeshSceneNodeImpl::Clone() const
 
 }
 }
-

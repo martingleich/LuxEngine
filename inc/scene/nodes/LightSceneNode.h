@@ -16,61 +16,61 @@ public:
 	/**
 	\param light The new light settings
 	*/
-	virtual void SetLightData(const video::LightData& light) = 0;
+	LUX_API void SetLightData(const video::LightData& light);
 
 	//! Get the current light parameters
 	/**
 	\return The current light data
 	*/
-	virtual const video::LightData& GetLightData() const = 0;
+	LUX_API const video::LightData& GetLightData() const;
 
 	//! Get the current light parameters
 	/**
 	\return The current light data
 	*/
-	virtual video::LightData& GetLightData() = 0;
+	LUX_API video::LightData& GetLightData();
 
 	//! Set the range of the light
 	/**
 	See \ref video::LightData::range
 	\param range The range of the light
 	*/
-	virtual void SetRange(float range) = 0;
+	LUX_API void SetRange(float range);
 
 	//! Get the range of the light
 	/**
 	See \ref video::LightData::range
 	\return The range of the light
 	*/
-	virtual float GetRange() const = 0;
+	LUX_API float GetRange() const;
 
 	//! Set the diffuse color of the light
 	/**
 	See \ref video::LightData::diffuse
 	\param color The new diffuse color of the light
 	*/
-	virtual void SetColor(const video::Colorf& color) = 0;
+	LUX_API void SetColor(const video::Colorf& color);
 
 	//! Get the diffuse color of the light
 	/**
 	See \ref video::LightData::diffuse
 	\return The diffuse color of the light
 	*/
-	virtual const video::Colorf& GetColor() const = 0;
+	LUX_API const video::Colorf& GetColor() const;
 
 	//! Set the type of the light
 	/**
 	See \ref video::LightData::type
 	\param type The type of the light
 	*/
-	virtual void SetLightType(video::LightData::EType type) = 0;
+	LUX_API void SetLightType(video::LightData::EType type);
 
 	//! Get the type of the light
 	/**
 	See \ref video::LightData::type
 	\return The type of the light
 	*/
-	virtual video::LightData::EType GetLightType() const = 0;
+	LUX_API video::LightData::EType GetLightType() const;
 
 	//! Get the orientation of the light
 	/**
@@ -78,7 +78,16 @@ public:
 	To change the orientation use the scenenode method.
 	\return The orientation of the light
 	*/
-	virtual const math::vector3f& GetDirection() = 0;
+	LUX_API const math::vector3f& GetDirection();
+
+	void OnRegisterSceneNode();
+	void Render();
+
+	core::Name GetReferableSubType() const;
+	StrongRef<Referable> Clone() const;
+
+private:
+	video::LightData m_LightData;
 };
 
 } // namespace scene

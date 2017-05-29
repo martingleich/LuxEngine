@@ -17,7 +17,8 @@
 #include "scene/nodes/CameraSceneNode.h"
 #include "scene/nodes/MeshSceneNode.h"
 #include "scene/nodes/LightSceneNode.h"
-#include "scene/nodes/SkyBoxSceneNodeImpl.h"
+#include "scene/nodes/SkyBoxSceneNode.h"
+#include "scene/nodes/EmptySceneNode.h"
 
 #include "scene/components/RotationAnimator.h"
 #include "scene/components/LinearMoveAnimator.h"
@@ -209,9 +210,9 @@ StrongRef<MeshSceneNode> SceneManagerImpl::AddMeshSceneNode(Mesh* mesh,
 	return out;
 }
 
-StrongRef<SceneNode> SceneManagerImpl::AddSkyBoxSceneNode(video::CubeTexture* skyTexture)
+StrongRef<SkyBoxSceneNode> SceneManagerImpl::AddSkyBoxSceneNode(video::CubeTexture* skyTexture)
 {
-	StrongRef<SkyBoxSceneNodeImpl> out = AddSceneNode(SceneNodeType::SkyBox);
+	StrongRef<SkyBoxSceneNode> out = AddSceneNode(SceneNodeType::SkyBox);
 	if(!out)
 		return nullptr;
 	out->SetSkyTexture(skyTexture);
@@ -232,7 +233,7 @@ StrongRef<LightSceneNode> SceneManagerImpl::AddLightSceneNode(const math::vector
 	return out;
 }
 
-StrongRef<SceneNode> SceneManagerImpl::AddEmptySceneNode(SceneNode* parent)
+StrongRef<EmptySceneNode> SceneManagerImpl::AddEmptySceneNode(SceneNode* parent)
 {
 	return AddSceneNode(SceneNodeType::Empty, parent);
 }
