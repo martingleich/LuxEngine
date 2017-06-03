@@ -1,12 +1,12 @@
 #include "scene/query/Query.h"
-#include "scene/SceneNode.h"
+#include "scene/Node.h"
 
 namespace lux
 {
 namespace scene
 {
 
-Query::Query(SceneNode* rootNode) :
+Query::Query(Node* rootNode) :
 	m_QueryRootNode(rootNode),
 	m_Level(EQueryLevel::Object),
 	m_Tags(0)

@@ -124,13 +124,14 @@ void DeviceStateD3D9::SetD3DMaterial(const video::Colorf& ambient, const Pipelin
 {
 	D3DMATERIAL9 D3DMaterial = {
 		SColorToD3DColor(mat->GetDiffuse()),
-		SColorToD3DColor(ambient),
+		SColorToD3DColor(mat->GetDiffuse()*mat->GetAmbient()),
 		SColorToD3DColor(mat->GetSpecular()),
 		SColorToD3DColor(mat->GetEmissive()),
 		mat->GetShininess()
 	};
 	m_Device->SetMaterial(&D3DMaterial);
 
+	SetRenderState(D3DRS_AMBIENT, ambient.ToHex());
 	if(pipeline.lighting && !math::IsZero(D3DMaterial.Power))
 		SetRenderState(D3DRS_SPECULARENABLE, 1);
 	else
@@ -210,13 +211,13 @@ void DeviceStateD3D9::EnableLight(const LightData& light)
 	D3DLIGHT9 D3DLight;
 
 	switch(light.type) {
-	case LightData::EType::Point:
+	case ELightType::Point:
 		D3DLight.Type = D3DLIGHT_POINT;
 		break;
-	case LightData::EType::Spot:
+	case ELightType::Spot:
 		D3DLight.Type = D3DLIGHT_SPOT;
 		break;
-	case LightData::EType::Directional:
+	case ELightType::Directional:
 		D3DLight.Type = D3DLIGHT_DIRECTIONAL;
 		break;
 	}

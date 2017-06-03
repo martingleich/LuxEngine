@@ -6,7 +6,7 @@
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "video/d3d9/D3D9Exception.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
-#include "video/SubMesh.h"
+#include "video/mesh/SubMesh.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 #include "video/VertexTypes.h"
@@ -201,7 +201,7 @@ void RendererD3D9::DrawPrimitiveList(
 		hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
 			indexData, d3dIndexFormat, vertexData, stride);
 	}
-	if(vertexData) {
+	if(vertexData && !indexData) {
 		// Draw from memory
 		hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
 	}
@@ -338,6 +338,11 @@ void RendererD3D9::LoadSettings()
 		m_Pipeline,
 		listAccess);
 
+	if(IsDirty(Dirty_MaterialRenderer)) {
+		SetDirty(Dirty_Lights);
+		SetDirty(Dirty_Fog);
+	}
+
 	LoadTransforms(settings);
 
 	LoadFogSettings(settings);
@@ -434,9 +439,9 @@ void RendererD3D9::LoadFogSettings(const RenderSettings& settings)
 		math::vector3f fogInfo;
 		fogInfo.x = useFog;
 		fogInfo.y =
-			m_Fog.type == FogData::EType::Linear ? 1.0f :
-			m_Fog.type == FogData::EType::Exp ? 2.0f :
-			m_Fog.type == FogData::EType::ExpSq ? 3.0f : 1.0f;
+			m_Fog.type == EFogType::Linear ? 1.0f :
+			m_Fog.type == EFogType::Exp ? 2.0f :
+			m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
 		fogInfo.z = 0;
 		GetParamInternal(m_ParamId.fogInfo) = fogInfo;
 

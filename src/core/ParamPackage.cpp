@@ -200,24 +200,21 @@ PackageParam ParamPackage::GetParamFromType(core::Type type, u32 index, void* ba
 	throw core::ObjectNotFoundException("param_by_type");
 }
 
-void ParamPackage::SetDefaultValue(u32 param, const void* defaultValue, core::Type type)
+PackageParam ParamPackage::DefaultValue(u32 param)
 {
-	if(!defaultValue)
-		return;
+	auto& p = self->Params.At(param);
 
-	const Entry& e = self->Params.At(param);
-	if(type == core::Type::Unknown || type == e.type) {
-		e.type.CopyConstruct((u8*)self->DefaultPackage + e.offset, defaultValue);
-	} else {
-		if(!IsConvertible(type, e.type))
-			throw TypeException("Incompatible types used", type, e.type);
-		ConvertBaseType(type, defaultValue, e.type, (u8*)self->DefaultPackage + e.offset);
-	}
+	ParamDesc desc;
+	desc.name = p.name.Data();
+	desc.size = p.size;
+	desc.type = p.type;
+	desc.id = param;
+	return PackageParam(desc, (u8*)self->DefaultPackage + p.offset);
 }
 
-void ParamPackage::SetDefaultValue(const string_type& param, const void* defaultValue, core::Type type)
+PackageParam ParamPackage::DefaultValue(const string_type& param)
 {
-	SetDefaultValue(GetParamId(param), defaultValue, type);
+	return DefaultValue(GetParamId(param));
 }
 
 u32 ParamPackage::GetParamId(const string_type& name, core::Type type) const

@@ -80,7 +80,7 @@ public:
 	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const;
 	StrongRef<core::ReferableFactory> GetReferableFactory() const;
 	StrongRef<core::ResourceSystem> GetResourceSystem() const;
-	StrongRef<scene::MeshSystem> GetMeshSystem() const;
+	StrongRef<video::MeshSystem> GetMeshSystem() const;
 
 	LRESULT WinProc(HWND window,
 		UINT uiMessage,
@@ -154,7 +154,7 @@ private:
 	StrongRef<core::ReferableFactory> m_ReferableFactory;
 	StrongRef<core::ResourceSystem> m_ResourceSystem;
 	StrongRef<video::MaterialLibrary> m_MaterialLibrary;
-	StrongRef<scene::MeshSystem> m_MeshSystem;
+	StrongRef<video::MeshSystem> m_MeshSystem;
 
 	const wchar_t* const m_LuxWindowClassName;
 

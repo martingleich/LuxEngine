@@ -28,10 +28,10 @@ public:
 		SetCenter(center);
 	}
 
-	virtual bool ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result);
-	virtual bool ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result);
-	virtual bool ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result);
-	virtual bool ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result);
+	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result);
+	virtual bool ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallback* result);
+	virtual bool ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result);
+	virtual bool ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result);
 
 	virtual const math::aabbox3df& GetBoundingBox() const
 	{
@@ -80,7 +80,7 @@ public:
 	{
 	}
 
-	virtual bool ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result);
+	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result);
 
 	core::Name GetReferableSubType() const
 	{

@@ -10,7 +10,7 @@ namespace scene
 {
 class Query;
 class QueryCallback;
-class SceneNode;
+class Node;
 
 //! A collision object
 /**
@@ -26,7 +26,7 @@ public:
 	\param result The callback where to send the query results, type must match the query type.
 	\return True if the run trough, false if it was aborted
 	*/
-	virtual bool ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result) = 0;
+	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result) = 0;
 
 	core::Name GetReferableType() const
 	{

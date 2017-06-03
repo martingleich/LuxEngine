@@ -99,6 +99,7 @@ public:
 	EDrawMode drawMode;
 
 	bool disableZWrite;
+	bool disableZCmp;
 	bool normalizeNormals;
 
 	bool disableBackfaceCulling;
@@ -110,6 +111,7 @@ public:
 		disableFog(false),
 		drawMode(EDrawMode::Fill),
 		disableZWrite(false),
+		disableZCmp(false),
 		normalizeNormals(false),
 		disableBackfaceCulling(false),
 		enableFrontfaceCulling(false)
@@ -128,6 +130,8 @@ public:
 		if(drawMode == EDrawMode::Point)
 			settings.drawMode = EDrawMode::Point;
 
+		if(disableZCmp)
+			settings.zBufferFunc = video::EZComparisonFunc::Always;
 		if(disableZWrite)
 			settings.zWriteEnabled = false;
 		if(normalizeNormals)

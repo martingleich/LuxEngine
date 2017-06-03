@@ -1,5 +1,5 @@
 #include "scene/components/LinearMoveAnimator.h"
-#include "scene/SceneNode.h"
+#include "scene/Node.h"
 #include "core/ReferableRegister.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::scene::LinearMoveAnimator)
@@ -31,14 +31,12 @@ void LinearMoveAnimator::SetData(
 		m_Count++;
 }
 
-void LinearMoveAnimator::Animate(float secsPassed)
+void LinearMoveAnimator::Animate(Node* node, float secsPassed)
 {
 	if(m_Count == 0) {
-		GetParent()->MarkForDelete(this);
+		node->MarkForDelete(this);
 		return;
 	}
-
-	auto node = GetParent();
 
 	m_Time = fmodf(m_Time + secsPassed, m_Period);
 
@@ -57,7 +55,7 @@ void LinearMoveAnimator::Animate(float secsPassed)
 			--m_Count;
 		m_Direction = dir;
 		if(m_Count == 0) {
-			GetParent()->MarkForDelete(this);
+			node->MarkForDelete(this);
 			return;
 		}
 	}
@@ -72,7 +70,8 @@ StrongRef<Referable> LinearMoveAnimator::Clone() const
 
 core::Name LinearMoveAnimator::GetReferableSubType() const
 {
-	return SceneNodeComponentType::LinearMove;
+	return SceneComponentType::LinearMove;
 }
-}
-}
+
+} // namespace scene
+} // namespace lux

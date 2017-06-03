@@ -222,30 +222,6 @@ public:
 		return false;
 	}
 
-	inline void _RemoveAllChilds(bool recursive = false, Removecallback callback = nullptr)
-	{
-		if(!m_Child)
-			return;
-
-		TreeNode* m_Current = m_Child;
-		TreeNode* next;
-		while(m_Current) {
-			next = m_Current->m_Sibling;
-
-			if(recursive)
-				m_Current->_RemoveAllChilds(recursive, callback);
-
-			m_Current->m_Parent = nullptr;
-			m_Current->m_Sibling = nullptr;
-			if(callback)
-				callback(m_Current);
-
-			m_Current = next;
-		}
-
-		m_Child = nullptr;
-	}
-
 	inline void _RemoveFromParent()
 	{
 		if(m_Parent) {

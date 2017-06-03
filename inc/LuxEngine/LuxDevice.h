@@ -28,12 +28,12 @@ class VideoDriver;
 class MaterialLibrary;
 class ImageSystem;
 struct DriverConfig;
+class MeshSystem;
 }
 
 namespace scene
 {
 class SceneManager;
-class MeshSystem;
 }
 
 namespace gui
@@ -126,7 +126,7 @@ public:
 	virtual StrongRef<core::ReferableFactory> GetReferableFactory() const = 0;
 	virtual StrongRef<gui::Window> GetWindow() const = 0;
 	virtual StrongRef<core::ResourceSystem> GetResourceSystem() const = 0;
-	virtual StrongRef<scene::MeshSystem> GetMeshSystem() const = 0;
+	virtual StrongRef<video::MeshSystem> GetMeshSystem() const = 0;
 };
 
 //! Create a new lux device.

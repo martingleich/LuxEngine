@@ -229,6 +229,11 @@ public:
 	{
 		return a < 1.0f;
 	}
+
+	inline Colorf WeightWith(const Colorf& c) const
+	{
+		return Colorf(r*c.r, g*c.g, b*c.b, a*c.a);
+	}
 };
 
 inline Colorf operator*(const float f, const Colorf& a)

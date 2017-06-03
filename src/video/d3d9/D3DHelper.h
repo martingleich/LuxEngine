@@ -353,12 +353,12 @@ inline D3DPRIMITIVETYPE GetD3DPrimitiveType(EPrimitiveType type)
 	}
 }
 
-inline DWORD GetD3DFogType(FogData::EType type)
+inline DWORD GetD3DFogType(EFogType type)
 {
 	switch(type) {
-	case FogData::EType::Exp: return D3DFOG_EXP;
-	case FogData::EType::ExpSq: return D3DFOG_EXP2;
-	case FogData::EType::Linear: return D3DFOG_LINEAR;
+	case EFogType::Exp: return D3DFOG_EXP;
+	case EFogType::ExpSq: return D3DFOG_EXP2;
+	case EFogType::Linear: return D3DFOG_LINEAR;
 	default: throw core::InvalidArgumentException("type");
 	}
 }

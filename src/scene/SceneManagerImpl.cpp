@@ -1,28 +1,25 @@
-#include "SceneManagerImpl.h"
+#include "scene/SceneManagerImpl.h"
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
 #include "video/RenderTarget.h"
-#include "video/MaterialLibrary.h"
-#include "video/MaterialRenderer.h"
-#include "video/images/ImageSystem.h"
 #include "video/PipelineSettings.h"
 
-#include "scene/mesh/MeshSystem.h"
-#include "io/FileSystem.h"
-
+#include "video/MaterialLibrary.h"
+#include "video/images/ImageSystem.h"
+#include "video/mesh/MeshSystem.h"
+#include "video/mesh/VideoMesh.h"
 #include "resources/ResourceSystem.h"
-
+#include "io/FileSystem.h"
 #include "core/ReferableFactory.h"
 
-#include "scene/nodes/CameraSceneNode.h"
-#include "scene/nodes/MeshSceneNode.h"
-#include "scene/nodes/LightSceneNode.h"
-#include "scene/nodes/SkyBoxSceneNode.h"
-#include "scene/nodes/EmptySceneNode.h"
+#include "scene/components/Camera.h"
+#include "scene/components/SceneMesh.h"
+#include "scene/components/Light.h"
+#include "scene/components/SkyBox.h"
 
 #include "scene/components/RotationAnimator.h"
 #include "scene/components/LinearMoveAnimator.h"
-#include "scene/components/CameraFPSAnimator.h"
+#include "scene/components/CameraControl.h"
 
 #include "scene/query/LineQuery.h"
 #include "scene/query/VolumeQuery.h"
@@ -31,8 +28,6 @@
 #include "scene/collider/BoxCollider.h"
 #include "scene/collider/MeshCollider.h"
 
-#include "core/ReferableRegister.h"
-
 #include "core/Logger.h"
 
 namespace lux
@@ -40,245 +35,129 @@ namespace lux
 namespace scene
 {
 
-class RootSceneNode : public SceneNode
-{
-public:
-	RootSceneNode() {}
-	RootSceneNode(SceneManager* mngr)
-	{
-		SetSceneManager(mngr);
-	}
-
-	void Render()
-	{
-	}
-	core::Name GetReferableSubType() const
-	{
-		return SceneNodeType::Root;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return new RootSceneNode(nullptr);
-	}
-};
-
-LUX_REGISTER_REFERABLE_CLASS(RootSceneNode)
-
-SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry() : texture(nullptr), node(nullptr)
-{
-}
-SceneManagerImpl::SSolidNodeEntry::SSolidNodeEntry(SceneNode* node) : texture(nullptr), node(node)
-{
-	if(node->GetMaterialCount()) {
-		if(node->GetMaterial(0)->GetTextureCount())
-			texture = ((video::TextureLayer)node->GetMaterial(0)->Layer(0)).texture;
-	}
-}
-
-bool SceneManagerImpl::SSolidNodeEntry::operator<(const SSolidNodeEntry& other) const
-{
-	return (texture < other.texture);
-}
-bool SceneManagerImpl::SSolidNodeEntry::operator==(const SSolidNodeEntry& other) const
-{
-	return (texture == other.texture);
-}
-
-SceneManagerImpl::STransparentNodeEntry::STransparentNodeEntry() : distance(-1.0f), node(nullptr)
-{
-}
-SceneManagerImpl::STransparentNodeEntry::STransparentNodeEntry(SceneNode* node, math::vector3f vCameraPos) : node(node)
-{
-	distance = node->GetAbsolutePosition().GetDistanceToSq(vCameraPos);
-}
-
-bool SceneManagerImpl::STransparentNodeEntry::operator<(const STransparentNodeEntry& other) const
-{
-	return (distance < other.distance);
-}
-bool SceneManagerImpl::STransparentNodeEntry::operator==(const STransparentNodeEntry& other) const
-{
-	return (distance == other.distance);
-}
-
-bool SceneManagerImpl::CameraEntry::operator<(const CameraEntry& other) const
-{
-	return camera->GetRenderPriority() > other.camera->GetRenderPriority();
-}
-
-bool SceneManagerImpl::CameraEntry::operator==(const CameraEntry& other) const
-{
-	return camera->GetRenderPriority() == other.camera->GetRenderPriority();
-}
-
 SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	video::ImageSystem* imagSys,
 	io::FileSystem* fileSystem,
 	core::ReferableFactory* refFactory,
-	MeshSystem* meshCache,
+	video::MeshSystem* meshCache,
 	core::ResourceSystem* resourceSystem,
-	video::MaterialLibrary* matLib)
-	: m_Driver(driver),
+	video::MaterialLibrary* matLib) :
+	m_CollectedRoot(nullptr),
+	m_Driver(driver),
 	m_Filesystem(fileSystem),
 	m_MeshSystem(meshCache),
 	m_RefFactory(refFactory),
 	m_ImagSys(imagSys),
 	m_ResourceSystem(resourceSystem),
-	m_MatLib(matLib),
-	m_CurrentRenderPass(ESNRP_NONE),
-	m_AmbientColor(0)
+	m_MatLib(matLib)
 {
-	m_RootSceneNode = LUX_NEW(RootSceneNode)(this);
+	m_RootSceneNode = LUX_NEW(Node)(this, true);
 	m_Renderer = m_Driver->GetRenderer();
 
-	m_Overwrites.Resize(ESNRP_COUNT);
+	m_Overwrites.Resize((size_t)ERenderPass::COUNT);
 
 	m_Fog.isActive = false;
 }
 
 SceneManagerImpl::~SceneManagerImpl()
 {
+	Clear();
+}
+
+void SceneManagerImpl::Clear()
+{
 	ClearDeletionQueue();
 
+	m_CameraList.Clear();
+	m_LightList.Clear();
+	m_EventReceivers.Clear();
+
 	m_RootSceneNode->RemoveAllChildren();
-	m_RootSceneNode = nullptr;
 }
 
-StrongRef<SceneNode> SceneManagerImpl::AddSceneNode(core::Name type, SceneNode* parent)
+////////////////////////////////////////////////////////////////////////////////////
+
+StrongRef<Node> SceneManagerImpl::AddNode(Component* baseComp, Node* parent)
 {
 	if(!parent)
-		parent = GetRootSceneNode();
+		parent = GetRoot();
 
-	StrongRef<SceneNode> out = m_RefFactory->Create(ReferableType::SceneNode, type);
-	if(out) {
-		if(!out->SetParent(parent))
-			return nullptr;
-	} else {
-		log::Error("Can't created scene node type ~s.", type);
-	}
+	auto node = parent->AddChild();
+	if(baseComp)
+		node->AddComponent(baseComp);
 
-	return out;
+	return node;
 }
 
-StrongRef<SceneNodeComponent> SceneManagerImpl::AddComponent(core::Name type, SceneNode* node)
+StrongRef<Camera> SceneManagerImpl::CreateCamera()
 {
-	StrongRef<SceneNodeComponent> out = m_RefFactory->Create(ReferableType::SceneNodeComponent, type);
-	if(out) {
-		node->AddComponent(out);
-	} else {
-		log::Error("Can't created scene node component type ~s.", type);
-	}
-
-	return out;
+	return CreateComponent(SceneComponentType::Camera);
 }
 
-StrongRef<CameraSceneNode> SceneManagerImpl::AddCameraSceneNode(const math::vector3f& position,
-	const math::vector3f& direction,
-	bool makeActive)
+StrongRef<Mesh> SceneManagerImpl::CreateMesh(const io::path& path)
 {
-	StrongRef<CameraSceneNode> out = AddSceneNode(SceneNodeType::Camera);
-	if(!out)
-		return nullptr;
-
-	out->SetPosition(position);
-	out->SetDirection(direction);
-
-	if(makeActive)
-		SetActiveCamera(out);
-
-	return out;
+	return CreateMesh(m_ResourceSystem->GetResource(core::ResourceType::Mesh, path).As<video::Mesh>());
 }
 
-StrongRef<MeshSceneNode> SceneManagerImpl::AddMeshSceneNode(Mesh* mesh,
-	bool addIfMeshIsEmpty,
-	const math::vector3f& position,
-	const math::quaternionf& orientation,
-	float scale)
+StrongRef<Mesh> SceneManagerImpl::CreateMesh(video::Mesh* mesh)
 {
-	if(!addIfMeshIsEmpty && !mesh)
-		return nullptr;
-
-	StrongRef<MeshSceneNode> out = AddSceneNode(SceneNodeType::Mesh);
-	if(!out)
-		return nullptr;
+	StrongRef<Mesh> out = CreateComponent(SceneComponentType::Mesh);
 	out->SetMesh(mesh);
-	out->SetPosition(position);
-	out->SetOrientation(orientation);
-	out->SetScale(scale);
 
 	return out;
 }
 
-StrongRef<SkyBoxSceneNode> SceneManagerImpl::AddSkyBoxSceneNode(video::CubeTexture* skyTexture)
+StrongRef<SkyBox> SceneManagerImpl::CreateSkyBox(video::CubeTexture* skyTexture)
 {
-	StrongRef<SkyBoxSceneNode> out = AddSceneNode(SceneNodeType::SkyBox);
-	if(!out)
-		return nullptr;
+	StrongRef<SkyBox> out = CreateComponent(SceneComponentType::SkyBox);
+
+	// Use a simple solid matrial for the sky box
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->SetSkyTexture(skyTexture);
 
 	return out;
 }
 
-StrongRef<LightSceneNode> SceneManagerImpl::AddLightSceneNode(const math::vector3f position,
-	const video::Colorf color, float range)
+StrongRef<Light> SceneManagerImpl::CreateLight()
 {
-	StrongRef<LightSceneNode> out = AddSceneNode(SceneNodeType::Light);
-	if(!out)
-		return nullptr;
-	out->SetPosition(position);
-	out->SetColor(color);
-	out->SetRange(range);
+	return CreateComponent(SceneComponentType::Light);
+}
+
+StrongRef<RotationAnimator> SceneManagerImpl::CreateRotator(const math::vector3f& axis, math::anglef rotSpeed)
+{
+	StrongRef<RotationAnimator> out = CreateComponent(SceneComponentType::Rotation);
+	out->SetAxis(axis);
+	out->SetRotationSpeed(rotSpeed);
 
 	return out;
 }
 
-StrongRef<EmptySceneNode> SceneManagerImpl::AddEmptySceneNode(SceneNode* parent)
+StrongRef<LinearMoveAnimator> SceneManagerImpl::CreateLinearMover(const math::line3df& line, float duration)
 {
-	return AddSceneNode(SceneNodeType::Empty, parent);
+	StrongRef<LinearMoveAnimator> out = CreateComponent(SceneComponentType::LinearMove);
+	out->SetData(line, duration);
+
+	return out;
 }
 
-StrongRef<RotationAnimator> SceneManagerImpl::AddRotationAnimator(SceneNode* addTo, const math::vector3f& axis, math::anglef rotSpeed)
+StrongRef<CameraControl> SceneManagerImpl::CreateCameraControl(float moveSpeed, math::anglef rotSpeed, bool noVerticalMovement)
 {
-	LX_CHECK_NULL_ARG(addTo);
+	StrongRef<CameraControl> out = CreateComponent(SceneComponentType::CameraControl);
+	out->SetMoveSpeed(moveSpeed);
+	out->SetRotationSpeed(rotSpeed);
+	out->AllowVerticalMovement(!noVerticalMovement);
 
-	StrongRef<RotationAnimator> animator = AddComponent(scene::SceneNodeComponentType::Rotation, addTo);
-	animator->SetAxis(axis);
-	animator->SetRotationSpeed(rotSpeed);
-
-	return animator;
+	return out;
 }
 
-StrongRef<CameraFPSAnimator> SceneManagerImpl::AddCameraFPSAnimator(CameraSceneNode* addTo, float moveSpeed, math::anglef rotSpeed,
-	bool noVerticalMovement,
-	math::anglef maxVerticalAngle)
+StrongRef<Component> SceneManagerImpl::CreateComponent(core::Name type)
 {
-	LX_CHECK_NULL_ARG(addTo);
-
-	StrongRef<CameraFPSAnimator> animator = AddComponent(scene::SceneNodeComponentType::CameraFPS, addTo);
-	animator->SetMoveSpeed(moveSpeed);
-	animator->SetRotationSpeed(rotSpeed);
-	animator->AllowVerticalMovement(!noVerticalMovement);
-	animator->SetMaxVerticalAngle(maxVerticalAngle);
-
-	return animator;
+	return m_RefFactory->Create(ReferableType::SceneNodeComponent, type);
 }
 
-StrongRef<LinearMoveAnimator> SceneManagerImpl::AddLinearMoveAnimator(SceneNode* addTo,
-	const math::line3df& line,
-	float duration,
-	bool jumpBack,
-	u32 count)
-{
-	LX_CHECK_NULL_ARG(addTo);
+////////////////////////////////////////////////////////////////////////////////////
 
-	StrongRef<LinearMoveAnimator> animator = AddComponent(scene::SceneNodeComponentType::LinearMove, addTo);
-	animator->SetData(line, duration, jumpBack, count);
-
-	return animator;
-}
-
-StrongRef<Collider> SceneManagerImpl::CreateMeshCollider(Mesh* mesh)
+StrongRef<Collider> SceneManagerImpl::CreateMeshCollider(video::Mesh* mesh)
 {
 	return LUX_NEW(MeshCollider)(mesh);
 }
@@ -293,183 +172,94 @@ StrongRef<Collider> SceneManagerImpl::CreateBoundingSphereCollider()
 	return LUX_NEW(BoundingSphereCollider)();
 }
 
-StrongRef<Collider> SceneManagerImpl::CreateSphereCollider(const math::vector3f& center, float radius)
-{
-	return LUX_NEW(SphereCollider)(center, radius);
-}
-
 StrongRef<Collider> SceneManagerImpl::CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans)
 {
 	return LUX_NEW(BoxCollider)(halfSize, trans);
 }
 
-video::VideoDriver* SceneManagerImpl::GetDriver()
+StrongRef<Collider> SceneManagerImpl::CreateSphereCollider(const math::vector3f& center, float radius)
 {
-	return m_Driver;
+	return LUX_NEW(SphereCollider)(center, radius);
 }
 
-video::Renderer* SceneManagerImpl::GetRenderer()
-{
-	return m_Renderer;
-}
+////////////////////////////////////////////////////////////////////////////////////
 
-video::MaterialLibrary* SceneManagerImpl::GetMaterialLibrary()
-{
-	return m_MatLib;
-}
-
-io::FileSystem* SceneManagerImpl::GetFileSystem()
-{
-	return m_Filesystem;
-}
-
-MeshSystem* SceneManagerImpl::GetMeshSystem()
-{
-	return m_MeshSystem;
-}
-
-video::ImageSystem* SceneManagerImpl::GetImageSystem() const
-{
-	return m_ImagSys;
-}
-
-SceneNode* SceneManagerImpl::GetRootSceneNode()
+Node* SceneManagerImpl::GetRoot()
 {
 	return m_RootSceneNode;
 }
 
-StrongRef<CameraSceneNode> SceneManagerImpl::GetActiveCamera()
+StrongRef<Node> SceneManagerImpl::GetActiveCameraNode()
+{
+	return m_ActiveCameraNode;
+}
+
+StrongRef<Camera> SceneManagerImpl::GetActiveCamera()
 {
 	return m_ActiveCamera;
 }
 
-void SceneManagerImpl::SetActiveCamera(CameraSceneNode* camera)
-{
-	m_ActiveCamera = camera;
-}
+////////////////////////////////////////////////////////////////////////////////////
 
-void SceneManagerImpl::Render()
-{
-}
-
-void SceneManagerImpl::RegisterCamera(CameraSceneNode* camera)
-{
-	m_CameraList.PushBack(camera);
-}
-
-void SceneManagerImpl::UnRegisterCamera(CameraSceneNode* camera)
-{
-	auto it = core::LinearSearch(camera, m_CameraList.First(), m_CameraList.End());
-	if(it != m_CameraList.End())
-		m_CameraList.Erase(it);
-}
-
-bool SceneManagerImpl::RegisterNodeForRendering(SceneNode* node, ESceneNodeRenderPass renderPass)
-{
-	bool wasTaken = false;
-
-	// Wann soll der Scene-node gezeichnet werden
-	switch(renderPass) {
-	case ESNRP_SKY_BOX:
-		m_SkyBoxList.PushBack(node);
-		wasTaken = true;
-		break;
-	case ESNRP_SOLID:
-		m_SolidNodeList.PushBack(SSolidNodeEntry(node));
-		wasTaken = true;
-		break;
-
-	case ESNRP_TRANSPARENT:
-		m_TransparentNodeList.PushBack(STransparentNodeEntry(node, m_AbsoluteCamPos));
-		wasTaken = true;
-		break;
-
-	case ESNRP_AUTOMATIC:
-	{
-		const size_t count = node->GetMaterialCount();
-		for(size_t i = 0; i < count; ++i) {
-			// Ist ein material transparent, dann gilt der ganze Knoten als transparent
-			video::MaterialRenderer* renderer = node->GetMaterial(i)->GetRenderer();
-			if(renderer && renderer->GetRequirements() == video::MaterialRenderer::ERequirement::Transparent) {
-				m_TransparentNodeList.PushBack(STransparentNodeEntry(node, m_AbsoluteCamPos));
-				wasTaken = true;
-				break;
-			}
-		}
-
-		// Kein transparentes material -> Knoten solid
-		if(!wasTaken) {
-			m_SolidNodeList.PushBack(SSolidNodeEntry(node));
-			wasTaken = true;
-		}
-	}
-	break;
-
-	case ESNRP_LIGHT:
-		m_LightList.PushBack((LightSceneNode*)node);
-		wasTaken = true;
-		break;
-	default:
-		wasTaken = false;
-		break;
-	}
-
-	return wasTaken;
-}
-
-
-// Animiert alles
 void SceneManagerImpl::AnimateAll(float secsPassed)
 {
-	// Es reicht die Animationsfunktion des Wurzelknotens aufzurufen
-	GetRootSceneNode()->Animate(secsPassed);
+	m_RootSceneNode->Animate(secsPassed);
 }
 
-
-// Zeichnet alles
 bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 {
+	auto oldActiveCamNode = m_ActiveCameraNode;
+	auto oldActiveCam = m_ActiveCamera;
+
 	ClearDeletionQueue();
 
-	m_RenderRoot = nullptr;
-
+	// Collect "real" camera nodes
 	auto camList = m_CameraList;
 	if(camList.Size() == 0)
 		return false;
 
 	auto newEnd = core::RemoveIf(camList.First(), camList.End(),
 		[](const CameraEntry& e) -> bool {
-		return !e.camera->IsTrulyVisible();
+		return !e.node->IsTrulyVisible();
 	});
 	camList.Resize(core::IteratorDistance(camList.First(), newEnd));
 
 	camList.Sort();
 
+	if(camList.IsEmpty())
+		throw core::ErrorException("Scene contains no visible camera.");
+
 	if(!beginScene) {
-		if(m_Renderer->GetRenderTarget() != camList[0].camera->GetRenderTarget()) {
-			log::Error("Scenemanager.DrawAll: Already started scene uses diffrent rendertarget than first camera.");
-			return false;
-		}
+		if(m_Renderer->GetRenderTarget() != camList[0].camera->GetRenderTarget())
+			throw core::ErrorException("Already started scene uses diffrent rendertarget than first camera.");
 	}
 
 	for(auto it = camList.First(); it != camList.End(); ++it) {
-		m_ActiveCamera = it->camera;
-		m_AbsoluteCamPos = m_ActiveCamera->GetAbsoluteTransform().translation;
+		CollectRenderables(m_RootSceneNode);
 
-		m_CurrentRenderPass = ESNRP_CAMERA;
+		m_ActiveCamera = it->camera;
+		m_ActiveCameraNode = it->node;
+		m_AbsoluteCamPos = m_ActiveCameraNode->GetAbsolutePosition();
 
 		if(it != camList.First() || beginScene) {
+			// Start a new scene
 			m_Renderer->SetRenderTarget(m_ActiveCamera->GetRenderTarget());
-			auto backgroundColor = m_ActiveCamera->GetBackgroundColor();
 			bool clearColor = true;
-			if(backgroundColor.GetAlpha() == 0)
-				clearColor = false;
-			m_Renderer->BeginScene(clearColor, true, backgroundColor, 1.0f);
+			bool clearZ = true;
+			if(!m_SkyBoxList.IsEmpty()) {
+				clearZ = true;
+				clearColor = true;
+			}
+			m_Renderer->BeginScene(clearColor, clearZ, video::Color::Black, 1.0f);
 		}
 
-		m_ActiveCamera->Render();
+		m_ActiveCamera->PreRender(m_Renderer, m_ActiveCameraNode);
 
-		DrawScene(m_ActiveCamera->GetVirtualRoot());
+		m_ActiveCamera->Render(m_Renderer, m_ActiveCameraNode);
+
+		DrawScene();
+
+		m_ActiveCamera->PostRender(m_Renderer, m_ActiveCameraNode);
 
 		if(it != camList.Last() || endScene)
 			m_Renderer->EndScene();
@@ -478,154 +268,82 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 	m_SkyBoxList.Clear();
 	m_SolidNodeList.Clear();
 	m_TransparentNodeList.Clear();
-	m_LightList.Clear();
+
+	m_CollectedRoot = nullptr;
+
+	m_ActiveCameraNode = oldActiveCamNode;
+	m_ActiveCamera = oldActiveCam;
 
 	return true;
 }
 
-void SceneManagerImpl::DrawScene(SceneNode* root)
+////////////////////////////////////////////////////////////////////////////////////
+
+void SceneManagerImpl::RegisterCamera(Node* node, Camera* camera)
 {
-	if(!root)
-		root = m_RootSceneNode;
-
-	if(root != m_RenderRoot) {
-		m_SkyBoxList.Clear();
-		m_SolidNodeList.Clear();
-		m_TransparentNodeList.Clear();
-		m_LightList.Clear();
-
-		root->OnRegisterSceneNode();
-		m_RenderRoot = root;
-	}
-
-	m_Renderer->SetFog(m_Fog);
-
-	//-------------------------------------------------------------------------
-	// Die Lichter aktivieren
-	m_CurrentRenderPass = ESNRP_LIGHT;
-
-	EnableOverwrite();
-
-	m_Renderer->GetParam("ambient") = m_AmbientColor;
-
-	m_Renderer->ClearLights();
-
-	size_t maxLightCount = m_Renderer->GetMaxLightCount();
-	maxLightCount = math::Min(maxLightCount, m_LightList.Size());
-
-	for(size_t i = 0; i < maxLightCount; ++i)
-		m_LightList[i]->Render();
-
-	DisableOverwrite();
-
-	//-------------------------------------------------------------------------
-	// Die Skyboxes zeichnen
-	m_CurrentRenderPass = ESNRP_SKY_BOX;
-
-	EnableOverwrite();
-
-	for(auto it = m_SkyBoxList.First(); it != m_SkyBoxList.End(); ++it)
-		(*it)->Render();
-
-	DisableOverwrite();
-
-	//-------------------------------------------------------------------------
-	// Die normalen Objekte zeichnen
-	m_CurrentRenderPass = ESNRP_SOLID;
-
-	EnableOverwrite();
-
-	// Die Knoten anhand ihrer Haupttextur sortieren
-	m_SolidNodeList.Sort();
-
-	for(auto it = m_SolidNodeList.First(); it != m_SolidNodeList.End(); ++it)
-		it->node->Render();
-
-	DisableOverwrite();
-
-	//-------------------------------------------------------------------------
-
-	// Die transparenten Objekte zeichnen
-	m_CurrentRenderPass = ESNRP_TRANSPARENT;
-
-	EnableOverwrite();
-
-	// Die Knoten anhand ihrer Entfernung zur Kamera sortieren
-	m_TransparentNodeList.Sort();
-
-	for(auto it = m_TransparentNodeList.First(); it != m_TransparentNodeList.End(); ++it)
-		it->node->Render();
-
-	DisableOverwrite();
-
-	//-------------------------------------------------------------------------
-
-	m_CurrentRenderPass = ESNRP_NONE;
+	m_CameraList.PushBack(CameraEntry(node, camera));
 }
 
-void SceneManagerImpl::AddToDeletionQueue(SceneNode* node)
+void SceneManagerImpl::UnregisterCamera(Node* node, Camera* camera)
+{
+	CameraEntry entry(node, camera);
+	auto it = core::LinearSearch(entry, m_CameraList.First(), m_CameraList.End());
+	if(it != m_CameraList.End())
+		m_CameraList.Erase(it);
+}
+
+void SceneManagerImpl::RegisterLight(Node* node, Light* light)
+{
+	m_LightList.PushBack(LightEntry(node, light));
+}
+
+void SceneManagerImpl::UnregisterLight(Node* node, Light* light)
+{
+	LightEntry entry(node, light);
+	auto it = core::LinearSearch(entry, m_LightList.First(), m_LightList.End());
+	if(it != m_LightList.End())
+		m_LightList.Erase(it);
+}
+
+void SceneManagerImpl::RegisterEventReceiver(input::EventReceiver* receiver)
+{
+	m_EventReceivers.PushBack(receiver);
+}
+
+void SceneManagerImpl::UnregisterEventReceiver(input::EventReceiver* receiver)
+{
+	for(auto it = m_EventReceivers.First(); it != m_EventReceivers.End(); ++it) {
+		if(*it == receiver) {
+			m_EventReceivers.Erase(it);
+			return;
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+void SceneManagerImpl::AddToDeletionQueue(Node* node)
 {
 	if(node)
-		m_DeletionList.PushBack(node);
+		m_DeletionQueue.PushBack(node);
 }
 
 void SceneManagerImpl::ClearDeletionQueue()
 {
-	for(u32 i = 0; i < m_DeletionList.Size(); ++i)
-		m_DeletionList[i]->Remove();
+	for(auto it = m_DeletionQueue.First(); it != m_DeletionQueue.End(); ++it)
+		(*it)->Remove();
 
-	m_DeletionList.Clear();
+	m_DeletionQueue.Clear();
 }
 
+////////////////////////////////////////////////////////////////////////////////////
 
-void SceneManagerImpl::Clear()
-{
-	GetRootSceneNode()->RemoveAllChildren();
-}
-
-ESceneNodeRenderPass SceneManagerImpl::GetActRenderPass() const
-{
-	return m_CurrentRenderPass;
-}
-
-// Fragt einen Scene-node anhand seines Typs ab
-SceneNode* SceneManagerImpl::GetSceneNodeByType(core::Name type, SceneNode* start, u32 tags)
-{
-	if(!start)
-		start = GetRootSceneNode();
-
-	if(type == start->GetReferableSubType() && start->HasTag(tags))
-		return start;
-
-	for(auto it = start->GetChildrenFirst(); it != start->GetChildrenEnd(); ++it) {
-		SceneNode* node = GetSceneNodeByType(type, it.Pointer());
-		if(node)
-			return node;
-	}
-
-	return nullptr;
-}
-
-bool SceneManagerImpl::GetSceneNodeArrayByType(core::Name type, core::array<SceneNode*>& array, SceneNode* start, u32 tags)
-{
-	if(!start)
-		start = GetRootSceneNode();
-
-	if(start->GetReferableSubType() == type && start->HasTag(tags))
-		array.PushBack(start);
-
-	for(auto it = start->GetChildrenFirst(); it != start->GetChildrenEnd(); ++it)
-		GetSceneNodeArrayByType(type, array, it.Pointer());
-
-	return !array.IsEmpty();
-}
-
-void SceneManagerImpl::SetAmbient(video::Colorf ambient)
+void SceneManagerImpl::SetAmbient(const video::Colorf& ambient)
 {
 	m_AmbientColor = ambient;
 }
 
-video::Colorf SceneManagerImpl::GetAmbient()
+const video::Colorf& SceneManagerImpl::GetAmbient() const
 {
 	return m_AmbientColor;
 }
@@ -640,65 +358,50 @@ const video::FogData& SceneManagerImpl::GetFog() const
 	return m_Fog;
 }
 
-bool SceneManagerImpl::OnEvent(const input::Event& event)
-{
-	for(auto it = m_EventReceivers.First(); it != m_EventReceivers.End();) {
-		SceneNode* node = *it;
-		if(node) {
-			if(node->OnEvent(event))
-				return true;
-			++it;
-		} else {
-			auto next = it;
-			++next;
-			m_EventReceivers.Erase(it);
-			it = next;
-		}
-	}
+////////////////////////////////////////////////////////////////////////////////////
 
-	return false;
+void SceneManagerImpl::AddPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over)
+{
+	size_t id = GetPassId(pass);
+	m_Overwrites[id].PushBack(over);
 }
 
-
-void SceneManagerImpl::RegisterEventReceiver(SceneNode* receiver)
+void SceneManagerImpl::RemovePipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over)
 {
-	m_EventReceivers.PushBack(receiver);
-}
-
-void SceneManagerImpl::UnregisterEventReceiver(SceneNode* receiver)
-{
-	for(auto it = m_EventReceivers.First(); it != m_EventReceivers.End(); ++it)
-		if(*it == receiver) {
-			m_EventReceivers.Erase(it);
-			return;
-		}
-}
-
-void SceneManagerImpl::AddPipelineOverwrite(ESceneNodeRenderPass pass, const video::PipelineOverwrite& over)
-{
-	m_Overwrites[pass].PushBack(over);
-}
-
-void SceneManagerImpl::RemovePipelineOverwrite(ESceneNodeRenderPass pass, const video::PipelineOverwrite& over)
-{
-	for(auto it = m_Overwrites[pass].First(); it != m_Overwrites[pass].End(); ++it) {
+	size_t id = GetPassId(pass);
+	for(auto it = m_Overwrites[id].First(); it != m_Overwrites[id].End(); ++it) {
 		if(*it == over) {
-			m_Overwrites[pass].Erase(it);
+			m_Overwrites[id].Erase(it);
 			return;
 		}
 	}
 }
 
-void SceneManagerImpl::EnableOverwrite()
+////////////////////////////////////////////////////////////////////////////////////
+
+video::VideoDriver* SceneManagerImpl::GetDriver() const
 {
-	for(auto it = m_Overwrites[m_CurrentRenderPass].First(); it != m_Overwrites[m_CurrentRenderPass].End(); ++it)
-		m_Renderer->PushPipelineOverwrite(*it);
+	return m_Driver;
 }
 
-void SceneManagerImpl::DisableOverwrite()
+video::Renderer* SceneManagerImpl::GetRenderer() const
 {
-	for(auto it = m_Overwrites[m_CurrentRenderPass].First(); it != m_Overwrites[m_CurrentRenderPass].End(); ++it)
-		m_Renderer->PopPipelineOverwrite();
+	return m_Renderer;
+}
+
+io::FileSystem* SceneManagerImpl::GetFileSystem() const
+{
+	return m_Filesystem;
+}
+
+video::MaterialLibrary* SceneManagerImpl::GetMaterialLibrary() const
+{
+	return m_MatLib;
+}
+
+video::ImageSystem* SceneManagerImpl::GetImageSystem() const
+{
+	return m_ImagSys;
 }
 
 core::ReferableFactory* SceneManagerImpl::GetReferableFactory() const
@@ -711,8 +414,164 @@ core::ResourceSystem* SceneManagerImpl::GetResourceSystem() const
 	return m_ResourceSystem;
 }
 
-
+video::MeshSystem* SceneManagerImpl::GetMeshSystem() const
+{
+	return m_MeshSystem;
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Private functions
+////////////////////////////////////////////////////////////////////////////
+
+bool SceneManagerImpl::OnEvent(const input::Event& event)
+{
+	for(auto it = m_EventReceivers.First(); it != m_EventReceivers.End(); ++it) {
+		if((*it)->OnEvent(event))
+			return true;
+	}
+
+	return false;
 }
 
+void SceneManagerImpl::EnableOverwrite(ERenderPass pass)
+{
+	size_t id = GetPassId(pass);
+	for(auto it = m_Overwrites[id].First(); it != m_Overwrites[id].End(); ++it)
+		m_Renderer->PushPipelineOverwrite(*it);
+}
+
+void SceneManagerImpl::DisableOverwrite(ERenderPass pass)
+{
+	size_t id = GetPassId(pass);
+	for(auto it = m_Overwrites[id].First(); it != m_Overwrites[id].End(); ++it)
+		m_Renderer->PopPipelineOverwrite();
+}
+
+size_t SceneManagerImpl::GetPassId(ERenderPass pass) const
+{
+	return (size_t)pass;
+}
+
+class SceneManagerImpl::RenderableCollector : public RenderableVisitor
+{
+public:
+	void Visit(Renderable* r)
+	{
+		smgr->AddRenderEntry(curNode, r);
+	}
+
+	Node* curNode;
+	SceneManagerImpl* smgr;
+};
+
+void SceneManagerImpl::CollectRenderables(Node* root)
+{
+	if(root == m_CollectedRoot)
+		return;
+
+	m_SkyBoxList.Clear();
+	m_SolidNodeList.Clear();
+	m_TransparentNodeList.Clear();
+
+	RenderableCollector collector;
+	collector.smgr = this;
+	CollectRenderablesRec(root, &collector, true);
+	m_CollectedRoot = root;
+}
+
+void SceneManagerImpl::CollectRenderablesRec(Node* node, RenderableCollector* collector, bool noDebug)
+{
+	collector->curNode = node;
+	node->VisitRenderables(collector, noDebug);
+
+	for(auto it = node->GetChildrenFirst(); it != node->GetChildrenEnd(); ++it)
+		CollectRenderablesRec(*it, collector, noDebug);
+}
+
+void SceneManagerImpl::AddRenderEntry(Node* n, Renderable* r)
+{
+	auto pass = r->GetRenderPass();
+	if(pass == ERenderPass::SkyBox) {
+		m_SkyBoxList.PushBack(RenderEntry(n, r));
+	} else if(pass == ERenderPass::Solid) {
+		m_SolidNodeList.PushBack(RenderEntry(n, r));
+	} else if(pass == ERenderPass::Transparent) {
+		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r));
+	} else if(pass == ERenderPass::SolidAndTransparent) {
+		m_SolidNodeList.PushBack(RenderEntry(n, r));
+		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r));
+	} else if(pass == ERenderPass::None) {
+		(void)0;
+	} else {
+		throw core::Exception("Unknown render pass used");
+	}
+}
+
+void SceneManagerImpl::DrawScene()
+{
+	m_Renderer->SetFog(m_Fog);
+
+	//-------------------------------------------------------------------------
+	// The lights
+	m_Renderer->GetParam("ambient") = m_AmbientColor;
+
+	m_Renderer->ClearLights();
+
+	size_t maxLightCount = m_Renderer->GetMaxLightCount();
+	maxLightCount = math::Min(maxLightCount, m_LightList.Size());
+
+	size_t count = 0;
+	for(auto it = m_LightList.First(); it != m_LightList.End(); ++it) {
+		if(it->node->IsTrulyVisible()) {
+			it->light->Render(m_Renderer, it->node);
+			++count;
+			if(count == maxLightCount)
+				break;
+		}
+	}
+
+	//-------------------------------------------------------------------------
+	// Skyboxes
+	EnableOverwrite(ERenderPass::SkyBox);
+
+	for(auto it = m_SkyBoxList.First(); it != m_SkyBoxList.End(); ++it) {
+		if(it->node->IsTrulyVisible())
+			it->renderable->Render(it->node, m_Renderer, ERenderPass::SkyBox);
+	}
+
+	DisableOverwrite(ERenderPass::SkyBox);
+
+	//-------------------------------------------------------------------------
+	// Solid objects
+	EnableOverwrite(ERenderPass::SolidAndTransparent);
+	EnableOverwrite(ERenderPass::Solid);
+
+	for(auto it = m_SolidNodeList.First(); it != m_SolidNodeList.End(); ++it) {
+		if(it->node->IsTrulyVisible())
+			it->renderable->Render(it->node, m_Renderer, ERenderPass::Solid);
+	}
+
+	DisableOverwrite(ERenderPass::Solid);
+
+	//-------------------------------------------------------------------------
+	// Transparent objects
+	EnableOverwrite(ERenderPass::Transparent);
+
+	// Update the distances in the transparent nodes
+	for(auto it = m_TransparentNodeList.First(); it != m_TransparentNodeList.End(); ++it)
+		it->UpdateDistance(m_AbsoluteCamPos);
+
+	// Sort by distance
+	m_TransparentNodeList.Sort();
+
+	for(auto it = m_TransparentNodeList.First(); it != m_TransparentNodeList.End(); ++it) {
+		if(it->node->IsTrulyVisible())
+			it->renderable->Render(it->node, m_Renderer, ERenderPass::Transparent);
+	}
+
+	DisableOverwrite(ERenderPass::Transparent);
+	DisableOverwrite(ERenderPass::SolidAndTransparent);
+}
+
+} // namespace scene
+} // namespace lux

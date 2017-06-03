@@ -682,6 +682,34 @@ public:
 		return ConstIterator(m_Entries + m_Used - 1);
 	}
 
+	//! The i-th element from the back of the array
+	const T& Back(size_t i = 0) const
+	{
+		lxAssert(i < m_Used);
+		return m_Entries[m_Used-i-1];
+	}
+
+	//! The i-th element from the back of the array
+	T& Back(size_t i = 0)
+	{
+		lxAssert(i < m_Used);
+		return m_Entries[m_Used-i-1];
+	}
+
+	//! The i-th element from the front of the array
+	const T& Front(size_t i = 0) const
+	{
+		lxAssert(i < m_Used);
+		return m_Entries[i];
+	}
+
+	//! The i-th element from the front of the array
+	T& Front(size_t i = 0)
+	{
+		lxAssert(i < m_Used);
+		return m_Entries[i];
+	}
+
 	//! Swap the content of two interators
 	void Swap(Iterator a, Iterator b)
 	{
@@ -761,14 +789,14 @@ public:
 	//! Access a single element
 	const T& operator[](size_t entry) const
 	{
-		lxAssert(entry <= m_Used);
+		lxAssert(entry < m_Used);
 		return m_Entries[entry];
 	}
 
 	//! Access a single element
 	T& operator[](size_t entry)
 	{
-		lxAssert(entry <= m_Used);
+		lxAssert(entry < m_Used);
 		return m_Entries[entry];
 	}
 

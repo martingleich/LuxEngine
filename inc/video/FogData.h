@@ -7,20 +7,19 @@ namespace lux
 namespace video
 {
 
+enum class EFogType
+{
+	Linear,
+	Exp,
+	ExpSq,
+};
+
 class FogData
 {
 public:
-	enum class EType
-	{
-		Linear,
-		Exp,
-		ExpSq,
-	};
-
-public:
 	bool isActive;
 
-	EType type;
+	EFogType type;
 
 	float start;
 	float end;
@@ -31,7 +30,7 @@ public:
 
 	FogData() :
 		isActive(true),
-		type(EType::Linear),
+		type(EFogType::Linear),
 		start(0.0f),
 		end(100.0f),
 		density(0.0f),

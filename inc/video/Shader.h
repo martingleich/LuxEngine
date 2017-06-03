@@ -2,6 +2,7 @@
 #define INCLUDED_SHADER_H
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
+#include "core/ParamPackage.h"
 
 namespace lux
 {

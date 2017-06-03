@@ -5,7 +5,7 @@
 #include "math/CollisionHelper.h"
 #include "scene/zones/ZoneSphere.h"
 #include "scene/zones/ZoneBox.h"
-#include "scene/SceneNode.h"
+#include "scene/Node.h"
 
 #include "core/ReferableRegister.h"
 
@@ -17,7 +17,7 @@ namespace lux
 namespace scene
 {
 
-bool BoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool BoxCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
@@ -38,7 +38,7 @@ bool BoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* re
 		throw core::NotImplementedException();
 }
 
-bool BoxCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
+bool BoxCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
@@ -75,7 +75,7 @@ bool BoxCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQuery
 	return procceed;
 }
 
-bool BoxCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
+bool BoxCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
@@ -114,7 +114,7 @@ bool BoxCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, Spher
 	return procceed;
 }
 
-bool BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
+bool BoxCollider::ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
@@ -139,7 +139,7 @@ bool BoxCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone*
 	return procceed;
 }
 
-bool BoundingBoxCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool BoundingBoxCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result)
 {
 	SetHalfSize(owner->GetBoundingBox().GetExtent() / 2);
 	return BoxCollider::ExecuteQuery(owner, query, result);

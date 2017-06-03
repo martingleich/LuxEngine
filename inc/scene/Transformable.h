@@ -12,22 +12,9 @@ namespace scene
 class Transformable : public virtual ReferenceCounted
 {
 public:
-	//! Called when a new relative transformation must be set
-	/**
-	\param t The new relative transform
-	*/
-	virtual void SetRelativeTransform(const math::Transformation& t) = 0;
-	//! Called to retrieve the relative transform
-	/**
-	\return The current relative transform
-	*/
-	virtual const math::Transformation& GetRelativeTransform() const = 0;
-	
-	//! Called to retrieve the absolute transform
-	/**
-	\return The current absolute transform
-	*/
-	virtual const math::Transformation& GetAbsoluteTransform() const = 0;
+	Transformable() :
+		m_IsDirty(true)
+	{}
 
 	//! Set a new uniform scalation
 	/**
@@ -35,20 +22,18 @@ public:
 	*/
 	void SetScale(float s)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.scale = s;
-		SetRelativeTransform(t);
+		m_RelativeTrans.scale = s;
+		SetDirty();
 	}
 
 	//! Change the scale
-	/** 
+	/**
 	\param s The change of the scale
 	*/
 	void Scale(float s)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.scale *= s;
-		SetRelativeTransform(t);
+		m_RelativeTrans.scale *= s;
+		SetDirty();
 	}
 
 	//! Set a new position
@@ -57,9 +42,13 @@ public:
 	*/
 	void SetPosition(const math::vector3f& p)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.translation = p;
-		SetRelativeTransform(t);
+		m_RelativeTrans.translation = p;
+		SetDirty();
+	}
+
+	void SetPosition(float x, float y, float z)
+	{
+		SetPosition(math::vector3f(x, y, z));
 	}
 
 	//! Translate the node in relative coordinates
@@ -68,11 +57,16 @@ public:
 	*/
 	void Translate(const math::vector3f& p)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.translation += p;
-		SetRelativeTransform(t);
+		m_RelativeTrans.translation += p;
+		SetDirty();
 	}
 
+	void Translate(float x, float y, float z)
+	{
+		Translate(math::vector3f(x, y, z));
+	}
+
+#if 0
 	//! Translate the node in global coordinates
 	/**
 	\param p The translation
@@ -83,6 +77,7 @@ public:
 		t.translation += t.TransformDir(GetAbsoluteTransform().TransformInvDir(p));
 		SetRelativeTransform(t);
 	}
+#endif
 
 	//! Set a new orientation
 	/**
@@ -90,9 +85,8 @@ public:
 	*/
 	void SetOrientation(const math::quaternionf& o)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.orientation = o;
-		SetRelativeTransform(t);
+		m_RelativeTrans.orientation = o;
+		SetDirty();
 	}
 
 	//! Apply a rotation to the transformable
@@ -101,9 +95,28 @@ public:
 	*/
 	void Rotate(const math::quaternionf& o)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.orientation *= o;
-		SetRelativeTransform(t);
+		m_RelativeTrans.orientation *= o;
+		SetDirty();
+	}
+
+	void Rotate(const math::vector3f& axis, math::anglef alpha)
+	{
+		Rotate(math::quaternionf(axis, alpha));
+	}
+
+	void RotateX(math::anglef alpha)
+	{
+		Rotate(math::vector3f::UNIT_X, alpha);
+	}
+
+	void RotateY(math::anglef alpha)
+	{
+		Rotate(math::vector3f::UNIT_Y, alpha);
+	}
+
+	void RotateZ(math::anglef alpha)
+	{
+		Rotate(math::vector3f::UNIT_Z, alpha);
 	}
 
 	//! Get the current relative scale
@@ -112,7 +125,7 @@ public:
 	*/
 	float GetScale() const
 	{
-		return GetRelativeTransform().scale;
+		return m_RelativeTrans.scale;
 	}
 
 	//! Get the current relative position
@@ -121,7 +134,7 @@ public:
 	*/
 	const math::vector3f& GetPosition() const
 	{
-		return GetRelativeTransform().translation;
+		return m_RelativeTrans.translation;
 	}
 
 	//! Get the current relative orientation
@@ -130,9 +143,10 @@ public:
 	*/
 	const math::quaternionf& GetOrientation() const
 	{
-		return GetRelativeTransform().orientation;
+		return m_RelativeTrans.orientation;
 	}
 
+#if 0
 	//! Get the current absolute position
 	/**
 	\return The current absolute position
@@ -174,7 +188,6 @@ public:
 
 		return GetAbsoluteTransform().TransformInvPoint(out);
 	}
-
 	//! Transforms a relative direction to another coordinate system
 	/**
 	\param Dir The direction to transform
@@ -207,6 +220,7 @@ public:
 
 		return GetAbsoluteTransform().TransformInvDir(out);
 	}
+#endif
 
 	//! Set the looking direction of the transfomable
 	/**
@@ -216,9 +230,8 @@ public:
 	*/
 	void SetDirection(const math::vector3f& dir, const math::vector3f& local = math::vector3f::UNIT_Z)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.orientation = math::quaternionf::FromTo(local, dir);
-		SetRelativeTransform(t);
+		m_RelativeTrans.orientation = math::quaternionf::FromTo(local, dir);
+		SetDirty();
 	}
 
 	//! Set the looking directon of the transformable
@@ -234,12 +247,31 @@ public:
 		const math::vector3f& local_dir = math::vector3f::UNIT_Z,
 		const math::vector3f& local_up = math::vector3f::UNIT_Y)
 	{
-		math::Transformation t = GetRelativeTransform();
-		t.orientation = math::quaternionf::FromTo(
+		m_RelativeTrans.orientation = math::quaternionf::FromTo(
 			local_dir, local_up,
 			dir, up);
-		SetRelativeTransform(t);
+		SetDirty();
 	}
+
+protected:
+	bool IsDirty() const
+	{
+		return m_IsDirty;
+	}
+
+	void SetDirty()
+	{
+		m_IsDirty = true;
+	}
+
+	void ClearDirty()
+	{
+		m_IsDirty = false;
+	}
+
+protected:
+	math::Transformation m_RelativeTrans;
+	bool m_IsDirty;
 };
 
 } // namespace scene

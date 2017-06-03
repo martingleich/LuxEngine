@@ -16,7 +16,7 @@ Returns all objects intersecting a given line.
 class LineQuery : public Query
 {
 public:
-	LineQuery(SceneNode* rootNode, const math::line3df& line = math::line3df()) :
+	LineQuery(Node* rootNode, const math::line3df& line = math::line3df()) :
 		Query(rootNode),
 		m_Line(line)
 	{
@@ -59,7 +59,7 @@ public:
 	Will be called for each object in a EQueryLevel::Collision query.
 	Defaults to all call to the OnObject method.
 	*/
-	virtual bool OnCollision(SceneNode* node, const LineQueryResult& result)
+	virtual bool OnCollision(Node* node, const LineQueryResult& result)
 	{
 		LUX_UNUSED(result);
 		return OnObject(node, result);

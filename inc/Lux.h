@@ -96,25 +96,29 @@ namespace input
 #include "video/ColorConverter.h"
 
 #include "video/HardwareBufferManager.h"
-#include "video/Shader.h"
 #include "video/VertexTypes.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
+
 #include "video/Texture.h"
 #include "video/CubeTexture.h"
-#include "video/Material.h"
+#include "video/RenderTarget.h"
+
+#include "video/RenderStatistics.h"
 #include "video/VideoDriver.h"
+#include "video/Renderer.h"
+
+#include "video/Shader.h"
+#include "video/Material.h"
 #include "video/MaterialRenderer.h"
 #include "video/MaterialLibrary.h"
-#include "video/SubMesh.h"
-#include "video/SpriteBank.h"
-#include "video/RenderStatistics.h"
-#include "video/Renderer.h"
+
 #include "video/LightData.h"
 #include "video/FogData.h"
 #include "video/AlphaSettings.h"
 #include "video/PipelineSettings.h"
-#include "video/RenderTarget.h"
+
+#include "video/SpriteBank.h"
 
 #include "video/images/Image.h"
 #include "video/images/ImageSystem.h"
@@ -123,23 +127,27 @@ namespace input
 #include "video/DrawingCanvas.h"
 
 #include "scene/SceneManager.h"
-#include "scene/SceneNode.h"
 #include "scene/Transformable.h"
+
 #include "scene/collider/Collider.h"
+
 #include "scene/query/QueryCallback.h"
 #include "scene/query/Query.h"
 
-#include "scene/components/CameraFPSAnimator.h"
+#include "scene/Node.h"
+#include "scene/components/Camera.h"
+#include "scene/components/Light.h"
+#include "scene/components/SceneMesh.h"
+#include "scene/components/SkyBox.h"
+
+#include "scene/components/CameraControl.h"
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/RotationAnimator.h"
 
-#include "scene/nodes/CameraSceneNode.h"
-#include "scene/nodes/MeshSceneNode.h"
-#include "scene/nodes/LightSceneNode.h"
-
-#include "scene/mesh/Mesh.h"
-#include "scene/mesh/MeshSystem.h"
-#include "scene/mesh/GeometryCreatorLib.h"
+#include "video/mesh/SubMesh.h"
+#include "video/mesh/VideoMesh.h"
+#include "video/mesh/MeshSystem.h"
+#include "video/mesh/GeometryCreatorLib.h"
 
 #include "gui/GUIEnvironment.h"
 #include "gui/Font.h"

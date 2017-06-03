@@ -230,11 +230,11 @@ math::matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool acti
 		return matrix;
 	}
 
-	if(data.type == LightData::EType::Directional)
+	if(data.type == ELightType::Directional)
 		matrix(0, 3) = 1.0f;
-	else if(data.type == LightData::EType::Point)
+	else if(data.type == ELightType::Point)
 		matrix(0, 3) = 2.0f;
-	else if(data.type == LightData::EType::Spot)
+	else if(data.type == ELightType::Spot)
 		matrix(0, 3) = 3.0f;
 	else
 		throw core::Exception("Unknown data type");

@@ -63,6 +63,7 @@ public:
 	virtual void SetPipeline(const PipelineSettings& set) = 0;
 
 	virtual const core::ParamPackage& GetPackage() const = 0;
+	virtual core::ParamPackage& GetPackage() = 0;
 	virtual StrongRef<Shader> GetShader() const = 0;
 
 	virtual const string& GetName() const = 0;

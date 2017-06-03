@@ -17,7 +17,7 @@ WARNING: Not all zones are supported, watch out for NotImplemented results.
 class VolumeQuery : public Query
 {
 public:
-	VolumeQuery(SceneNode* rootNode, Zone* zone = nullptr) :
+	VolumeQuery(Node* rootNode, Zone* zone = nullptr) :
 		Query(rootNode),
 		m_Zone(zone)
 	{
@@ -63,7 +63,7 @@ public:
 	Will be called for each object in a EQueryLevel::Collision query.
 	Defaults to all call to the OnObject method.
 	*/
-	virtual bool OnCollision(SceneNode* node, const VolumeQueryResult& result)
+	virtual bool OnCollision(Node* node, const VolumeQueryResult& result)
 	{
 		LUX_UNUSED(result);
 		return QueryCallback::OnObject(node, result);

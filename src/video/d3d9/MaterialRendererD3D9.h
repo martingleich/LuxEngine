@@ -59,6 +59,11 @@ public:
 		return m_Package;
 	}
 
+	virtual core::ParamPackage& GetPackage()
+	{
+		return m_Package;
+	}
+
 	virtual StrongRef<Shader> GetShader() const
 	{
 		return m_Shader;

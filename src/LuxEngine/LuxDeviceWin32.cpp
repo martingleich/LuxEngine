@@ -8,7 +8,7 @@
 
 #include "input/InputSystemImpl.h"
 #include "scene/SceneManagerImpl.h"
-#include "scene/mesh/MeshSystemImpl.h"
+#include "video/mesh/MeshSystemImpl.h"
 #include "resources/ResourceSystemImpl.h"
 #include "video/MaterialLibraryImpl.h"
 #include "core/ReferableFactoryImpl.h"
@@ -367,7 +367,7 @@ void LuxDeviceWin32::BuildSceneManager()
 	if(!m_Filesystem)
 		throw core::Exception("Missing file system");
 
-	m_MeshSystem = LUX_NEW(scene::MeshSystemImpl)(m_ResourceSystem, m_Driver, m_MaterialLibrary);
+	m_MeshSystem = LUX_NEW(video::MeshSystemImpl)(m_ResourceSystem, m_Driver, m_MaterialLibrary);
 
 	// Scene-Manager erstellen
 	log::Info("Build Scene Manager.");
@@ -493,8 +493,6 @@ LuxDeviceWin32::~LuxDeviceWin32()
 		UnregisterClassW(m_LuxWindowClassName, g_Instance);
 
 	log::Info("Shutdown complete.");
-
-	log::EngineLog.Exit();
 }
 
 void LuxDeviceWin32::CloseDevice()
@@ -622,7 +620,7 @@ StrongRef<core::ResourceSystem> LuxDeviceWin32::GetResourceSystem() const
 	return m_ResourceSystem;
 }
 
-StrongRef<scene::MeshSystem> LuxDeviceWin32::GetMeshSystem() const
+StrongRef<video::MeshSystem> LuxDeviceWin32::GetMeshSystem() const
 {
 	return m_MeshSystem;
 }

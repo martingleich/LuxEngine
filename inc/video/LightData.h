@@ -8,31 +8,31 @@ namespace lux
 namespace video
 {
 
+//! The diffrent lighttypes
+enum class ELightType
+{
+	//! Casts light from a single point into all directions
+	Point = 0,
+
+	//! Cast infinite long parallel lightrays
+	/**
+	Comparable to the sun.
+	*/
+	Directional,
+
+	//! Cast light from a single point into a cone
+	/**
+	Comparable to a spotlight.
+	*/
+	Spot,
+};
+
 //! Contains all data needed to represent a light
 class LightData
 {
 public:
-	//! The diffrent lighttypes
-	enum class EType
-	{
-		//! Casts light from a single point into all directions
-		Point = 0,
-
-		//! Cast infinite long parallel lightrays
-		/**
-		Comparable to the sun.
-		*/
-		Directional,
-
-		//! Cast light from a single point into a cone
-		/**
-		Comparable to a spotlight.
-		*/
-		Spot,
-	};
-
-	LightData() : 
-		type(EType::Point),
+	LightData() :
+		type(ELightType::Point),
 		color(1.0f, 1.0f, 1.0f),
 		position(0.0f, 0.0f, 0.0f),
 		range(100.0f),
@@ -44,7 +44,7 @@ public:
 	}
 
 	//! The light type
-	EType type;
+	ELightType type;
 
 	//! The color of the light
 	/**

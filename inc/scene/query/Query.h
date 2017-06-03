@@ -8,7 +8,7 @@ namespace lux
 namespace scene
 {
 class QueryCallback;
-class SceneNode;
+class Node;
 class Collider;
 
 //! A collision query.
@@ -38,7 +38,7 @@ public:
 	};
 
 public:
-	LUX_API Query(SceneNode* rootNode);
+	LUX_API Query(Node* rootNode);
 
 	//! Execute the query.
 	/**
@@ -78,7 +78,7 @@ public:
 	}
 
 protected:
-	WeakRef<SceneNode> m_QueryRootNode;
+	WeakRef<Node> m_QueryRootNode;
 	EQueryLevel m_Level;
 
 	u32 m_Tags;

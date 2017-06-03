@@ -21,7 +21,7 @@ public:
 	static const aabbox3d<type> EMPTY;
 
 	//! default-Constructor
-	aabbox3d() : minCorner(-1, -1, -1), maxCorner(1, 1, 1)
+	aabbox3d() : minCorner(0, 0, 0), maxCorner(0, 0, 0)
 	{
 	}
 	//! from two edges

@@ -8,7 +8,7 @@
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "video/d3d9/RendererD3D9.h"
 
-#include "video/SubMeshImpl.h"
+#include "video/mesh/SubMeshImpl.h"
 
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"

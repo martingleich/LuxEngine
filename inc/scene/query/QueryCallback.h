@@ -6,7 +6,7 @@ namespace lux
 {
 namespace scene
 {
-class SceneNode;
+class Node;
 class Collider;
 
 //! The base result of a query.
@@ -39,7 +39,7 @@ public:
 	\param result More information about the collision.
 	\return Return true to resume the query, return false to abort it.
 	*/
-	virtual bool OnObject(SceneNode* node, const QueryResult& result)
+	virtual bool OnObject(Node* node, const QueryResult& result)
 	{
 		LUX_UNUSED(node);
 		LUX_UNUSED(result);

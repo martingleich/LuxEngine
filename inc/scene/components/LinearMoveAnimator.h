@@ -1,6 +1,6 @@
-#ifndef INCLUDED_LINEAR_MOVE_ANIMATOR_H
-#define INCLUDED_LINEAR_MOVE_ANIMATOR_H
-#include "scene/SceneNodeComponent.h"
+#ifndef INCLUDED_SCENE_LINEAR_MOVE_ANIMATOR_H
+#define INCLUDED_SCENE_LINEAR_MOVE_ANIMATOR_H
+#include "scene/components/Animator.h"
 #include "math/line3d.h"
 
 namespace lux
@@ -8,7 +8,7 @@ namespace lux
 namespace scene
 {
 
-class LinearMoveAnimator : public scene::AnimatedSceneNodeComponent
+class LinearMoveAnimator : public Animator
 {
 public:
 	LUX_API LinearMoveAnimator();
@@ -18,7 +18,7 @@ public:
 		bool jumpBack = false,
 		u32 count = std::numeric_limits<u32>::max());
 
-	void Animate(float secsPassed);
+	void Animate(Node* node, float secsPassed);
 
 	StrongRef<Referable> Clone() const;
 	core::Name GetReferableSubType() const;

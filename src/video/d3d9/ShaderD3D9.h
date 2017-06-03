@@ -32,7 +32,7 @@ public:
 	void Disable();
 
 	const core::ParamPackage& GetParamPackage() const;
-
+	core::PackageParam ParamDefault(const string_type& param);
 	size_t GetSceneParamCount() const;
 	u32 GetSceneParam(size_t id) const;
 

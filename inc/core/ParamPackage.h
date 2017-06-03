@@ -22,7 +22,7 @@ struct ParamDesc
 	core::Type type; //!< The type of the parameter
 	u32 id;
 
-	const void* defaultValue;
+	void* defaultValue;
 
 	u32 reserved;
 };
@@ -401,13 +401,11 @@ public:
 	*/
 	PackageParam GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const;
 
-	//! Set a new default value for a param
+	//! Access the default value of a param
 	/**
 	\param param The id of the Param, which default value should be changed
-	\param defaultValue A pointer to the new default value
-	\exception OutOfRange param is out of range
 	*/
-	void SetDefaultValue(u32 param, const void* defaultValue, core::Type type = core::Type::Unknown);
+	PackageParam DefaultValue(u32 param);
 
 	//! Set a new default value for a param
 	/**
@@ -415,21 +413,7 @@ public:
 	\param defaultValue A pointer to the new default value
 	\exception Exception name does not exist
 	*/
-	void SetDefaultValue(const string_type& param, const void* defaultValue, core::Type type = core::Type::Unknown);
-
-	//! Convienice function for SetDefaultValue.
-	template <typename T>
-	void SetDefaultValue(const char* name, const T& defaultValue)
-	{
-		SetDefaultValue(name, &defaultValue, core::GetTypeInfo<T>());
-	}
-
-	//! Convienice function for SetDefaultValue.
-	template <typename T>
-	void SetDefaultValue(u32 param, const T& defaultValue)
-	{
-		SetDefaultValue(param, &defaultValue, core::GetTypeInfo<T>());
-	}
+	PackageParam DefaultValue(const string_type& param);
 
 	//! Get the id of a parameter by it's name.
 	/**

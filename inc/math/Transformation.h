@@ -283,6 +283,14 @@ public:
 		out(3, 3) = 1.0f;
 	}
 
+	math::matrix4 ToMatrix() const
+	{
+		math::matrix4 out;
+		ToMatrix(out);
+
+		return out;
+	}
+
 	//! Builds a inverted matrix from this transform
 	/**
 	\param out: Here the new matrix is written
@@ -323,6 +331,14 @@ public:
 		out(3, 1) = InvTrans.y;
 		out(3, 2) = InvTrans.z;
 		out(3, 3) = 1.0f;
+	}
+
+	math::matrix4 ToMatrixInv() const
+	{
+		math::matrix4 out;
+		ToMatrixInv(out);
+
+		return out;
 	}
 
 	//! Can be specialized by a user to transform other classes

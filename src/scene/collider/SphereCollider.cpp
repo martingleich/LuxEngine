@@ -5,7 +5,7 @@
 #include "math/CollisionHelper.h"
 #include "scene/zones/ZoneSphere.h"
 #include "scene/zones/ZoneBox.h"
-#include "scene/SceneNode.h"
+#include "scene/Node.h"
 
 #include "core/ReferableRegister.h"
 
@@ -17,7 +17,7 @@ namespace lux
 namespace scene
 {
 
-bool SphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool SphereCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
@@ -37,7 +37,7 @@ bool SphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback*
 		throw core::NotImplementedException();
 }
 
-bool SphereCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
+bool SphereCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallback* result)
 {
 	math::line3df line = query->GetLine();
 
@@ -75,7 +75,7 @@ bool SphereCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQu
 	return true;
 }
 
-bool SphereCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
+bool SphereCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(zone);
 
@@ -115,7 +115,7 @@ bool SphereCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, Sp
 	return true;
 }
 
-bool SphereCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
+bool SphereCollider::ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(zone);
 
@@ -152,7 +152,7 @@ bool SphereCollider::ExecuteBoxQuery(SceneNode* owner, VolumeQuery* query, BoxZo
 	return procceed;
 }
 
-bool BoundingSphereCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool BoundingSphereCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result)
 {
 	SetRadius(owner->GetBoundingBox().GetExtent().Average() / 2);
 	return SphereCollider::ExecuteQuery(owner, query, result);

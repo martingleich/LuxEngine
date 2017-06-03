@@ -5,9 +5,9 @@
 #include "math/CollisionHelper.h"
 #include "scene/zones/ZoneSphere.h"
 #include "scene/zones/ZoneBox.h"
-#include "scene/SceneNode.h"
-#include "scene/mesh/Mesh.h"
-#include "video/SubMesh.h"
+#include "scene/Node.h"
+#include "video/mesh/VideoMesh.h"
+#include "video/mesh/SubMesh.h"
 #include "video/VertexFormats.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
@@ -21,7 +21,7 @@ namespace lux
 namespace scene
 {
 
-MeshCollider::MeshCollider(scene::Mesh* mesh)
+MeshCollider::MeshCollider(video::Mesh* mesh)
 {
 	m_BoundingBox = mesh->GetBoundingBox();
 	size_t bufferCount = mesh->GetSubMeshCount();
@@ -53,7 +53,7 @@ MeshCollider::MeshCollider(scene::Mesh* mesh)
 	}
 }
 
-bool MeshCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* result)
+bool MeshCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
@@ -70,7 +70,7 @@ bool MeshCollider::ExecuteQuery(SceneNode* owner, Query* query, QueryCallback* r
 		throw core::NotImplementedException();
 }
 
-bool MeshCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQueryCallback* result)
+bool MeshCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
@@ -113,7 +113,7 @@ bool MeshCollider::ExecuteLineQuery(SceneNode* owner, LineQuery* query, LineQuer
 	return procceed;
 }
 
-bool MeshCollider::ExecuteSphereQuery(SceneNode* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
+bool MeshCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result)
 {
 	LX_CHECK_NULL_ARG(owner);
 	LX_CHECK_NULL_ARG(query);
