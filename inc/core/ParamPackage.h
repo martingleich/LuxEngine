@@ -127,37 +127,6 @@ public:
 	}
 
 
-	//! Casting from color to colorf
-	template <>
-	PackageParam& operator=(const video::Color& color)
-	{
-		if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
-			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
-
-		if(m_Desc.type == core::Type::Color)
-			*((video::Color*)m_Data) = color;
-
-		if(m_Desc.type == core::Type::Colorf)
-			*((video::Colorf*)m_Data) = video::Colorf(color);
-
-		return *this;
-	}
-
-	template <>
-	PackageParam& operator=(const video::Color::EPredefinedColors& color)
-	{
-		if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
-			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
-
-		if(m_Desc.type == core::Type::Color)
-			*((video::Color*)m_Data) = color;
-
-		if(m_Desc.type == core::Type::Colorf)
-			*((video::Colorf*)m_Data) = video::Colorf(color);
-
-		return *this;
-	}
-
 	//! Access as texture
 	PackageParam& operator=(video::BaseTexture* texture)
 	{
@@ -735,6 +704,37 @@ private:
 private:
 	core::array<Param> m_Params;
 };
+
+//! Casting from color to colorf
+template <>
+inline PackageParam& PackageParam::operator=(const video::Color& color)
+{
+	if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
+		throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
+
+	if(m_Desc.type == core::Type::Color)
+		*((video::Color*)m_Data) = color;
+
+	if(m_Desc.type == core::Type::Colorf)
+		*((video::Colorf*)m_Data) = video::Colorf(color);
+
+	return *this;
+}
+
+template <>
+inline PackageParam& PackageParam::operator=(const video::Color::EPredefinedColors& color)
+{
+	if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
+		throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
+
+	if(m_Desc.type == core::Type::Color)
+		*((video::Color*)m_Data) = color;
+
+	if(m_Desc.type == core::Type::Colorf)
+		*((video::Colorf*)m_Data) = video::Colorf(color);
+
+	return *this;
+}
 
 } // namespace core
 } // namespace video
