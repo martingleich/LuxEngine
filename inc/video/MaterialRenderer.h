@@ -1,6 +1,7 @@
 #ifndef INCLUDED_MATERIALRENDERER_H
 #define INCLUDED_MATERIALRENDERER_H
 #include "core/ReferenceCounted.h"
+#include "core/lxString.h"
 
 namespace lux
 {

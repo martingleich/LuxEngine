@@ -4,6 +4,9 @@
 #include "video/DeviceState.h"
 #include "video/Color.h"
 
+#include "video/PipelineSettings.h"
+#include "video/AlphaSettings.h"
+#include "video/TextureStageSettings.h"
 #include "math/matrix4.h"
 
 #include "video/Shader.h"
@@ -27,10 +30,18 @@ public:
 	void EnablePipeline(const PipelineSettings& pipeline);
 
 	void EnableTextureLayer(u32 stage, const TextureLayer& layer);
+	void EnableTextureStage(u32 stage, const TextureStageSettings& settings);
+	void DisableTextureStage(u32 stage);
+
+	void EnableVertexData();
+	void DisableVertexData();
+
 	void EnableAlpha(const AlphaBlendSettings& settings);
+	void DisableAlpha();
 	void* GetLowLevelDevice();
 	void SetRenderState(D3DRENDERSTATETYPE state, DWORD value);
 	void SetRenderStateF(D3DRENDERSTATETYPE state, float value);
+	void SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value);
 	void SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material* mat);
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::matrix4& m);
 	void SetFog(bool active, const FogData& fog);
@@ -57,12 +68,18 @@ private:
 	static u32 GetCullMode(const PipelineSettings& pipeline);
 	static u32 Float2U32(float f);
 
+	static u32 GetTextureOperator(ETextureOperator op);
+	static u32 GetTextureArgument(ETextureArgument arg);
+
 private:
 	IDirect3DDevice9* m_Device;
 	video::BaseTexture* m_RenderTargetTexture;
 	WeakRef<video::Shader> m_CurShader;
 
 	size_t m_LightCount;
+
+	PipelineSettings m_CurPipeline;
+	AlphaBlendSettings m_CurAlpha;
 };
 
 } // namespace video

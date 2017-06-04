@@ -57,55 +57,42 @@ enum class EBlendOperator
 	Max,
 };
 
-//! The source of alpha values
-enum class EAlphaSource
-{
-	VertexColor, //!< From each vertex color
-	Texture, //!< From the current texture
-	VertexAndTexture //! From the vertex color and the texture combined
-};
-
 class AlphaBlendSettings
 {
 public:
 	EBlendFactor SrcBlend;
 	EBlendFactor DstBlend;
 	EBlendOperator Operator;
-	EAlphaSource AlphaSrc;
 
-	AlphaBlendSettings(EBlendFactor src, EBlendFactor dst, EBlendOperator op, EAlphaSource alpha) :
+	AlphaBlendSettings(EBlendFactor src, EBlendFactor dst, EBlendOperator op) :
 		SrcBlend(src),
 		DstBlend(dst),
-		Operator(op),
-		AlphaSrc(alpha)
+		Operator(op)
 	{
 	}
 	AlphaBlendSettings() :
 		SrcBlend(EBlendFactor::One),
 		DstBlend(EBlendFactor::Zero),
-		Operator(EBlendOperator::None),
-		AlphaSrc(EAlphaSource::Texture)
+		Operator(EBlendOperator::None)
 	{
 	}
 
 	static AlphaBlendSettings Disabled()
 	{
-		return AlphaBlendSettings(EBlendFactor::One, EBlendFactor::Zero, EBlendOperator::None, EAlphaSource::Texture);
+		return AlphaBlendSettings(EBlendFactor::One, EBlendFactor::Zero, EBlendOperator::None);
 	}
 
 	u32 Pack() const
 	{
-		// 0000000000000000aaaaoooossssdddd
-		return 
-			(((u32)AlphaSrc << 12) & 0xF000) |
-			(((u32)Operator <<  8) & 0x0F00) |
-			(((u32)SrcBlend <<  4) & 0x00F0) |
-			(((u32)DstBlend <<  0) & 0x000F);
+		// 00000000000000000000oooossssdddd
+		return
+			(((u32)Operator << 8) & 0x0F00) |
+			(((u32)SrcBlend << 4) & 0x00F0) |
+			(((u32)DstBlend << 0) & 0x000F);
 	}
 
 	void Unpack(u32 packed)
 	{
-		AlphaSrc = EAlphaSource((packed & 0x0000F000) >> 12);
 		Operator = EBlendOperator((packed & 0x00000F00) >> 8);
 		SrcBlend = EBlendFactor((packed & 0x000000F0) >> 4);
 		DstBlend = EBlendFactor((packed & 0x0000000F));

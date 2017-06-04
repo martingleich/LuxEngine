@@ -37,6 +37,8 @@ public:
 	const Colorf& GetSpecular() const;
 	void SetShininess(float shininess);
 	float GetShininess() const;
+	void SetPower(float power);
+	float GetPower() const;
 
 	////////////////////////////////////////////////////////////////////
 
@@ -63,6 +65,7 @@ private:
 	Colorf m_Emissive;
 	Colorf m_Specular;
 	float m_Shininess;
+	float m_Power;
 
 	WeakRef<MaterialRenderer> m_Renderer;
 	core::PackagePuffer m_Puffer;

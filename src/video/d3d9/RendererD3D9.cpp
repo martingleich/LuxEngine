@@ -349,6 +349,12 @@ void RendererD3D9::LoadSettings()
 
 	LoadLightSettings(settings);
 
+	// Enable the pipeline
+	if(IsDirty(Dirty_Pipeline)) {
+		m_State.EnablePipeline(settings.pipeline);
+		ClearDirty(Dirty_Pipeline);
+	}
+
 	// Begin the new renderer
 	auto newRenderer = settings.renderer;
 	if(IsDirty(Dirty_MaterialRenderer) || IsDirty(Dirty_Material)) {
@@ -369,12 +375,6 @@ void RendererD3D9::LoadSettings()
 
 	if(m_MaterialRenderer->GetShader())
 		m_MaterialRenderer->GetShader()->LoadSettings(settings);
-
-	// Enable the pipeline
-	if(IsDirty(Dirty_Pipeline)) {
-		m_State.EnablePipeline(settings.pipeline);
-		ClearDirty(Dirty_Pipeline);
-	}
 }
 
 void RendererD3D9::LoadTransforms(const RenderSettings& settings)

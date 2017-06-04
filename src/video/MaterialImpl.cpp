@@ -12,6 +12,7 @@ MaterialImpl::MaterialImpl(MaterialRenderer* renderer) :
 	m_Emissive(Color::Black),
 	m_Specular(Color::White),
 	m_Shininess(0.0f),
+	m_Power(1.0f),
 	m_Renderer(renderer),
 	m_Puffer(renderer ? &renderer->GetPackage() : nullptr)
 {
@@ -49,6 +50,7 @@ void MaterialImpl::CopyFrom(const Material* _other)
 	m_Emissive = other->m_Emissive;
 	m_Specular = other->m_Specular;
 	m_Shininess = other->m_Shininess;
+	m_Power = other->m_Power;
 }
 
 bool MaterialImpl::Equal(const Material* _other) const
@@ -124,6 +126,16 @@ void MaterialImpl::SetShininess(float shininess)
 float MaterialImpl::GetShininess() const
 {
 	return m_Shininess;
+}
+
+void MaterialImpl::SetPower(float power)
+{
+	m_Power=power;
+}
+
+float MaterialImpl::GetPower() const
+{
+	return m_Power;
 }
 
 ////////////////////////////////////////////////////////////////////

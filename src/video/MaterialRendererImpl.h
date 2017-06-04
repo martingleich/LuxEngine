@@ -1,28 +1,29 @@
-#ifndef INCLUDED_MATERIALRENDERER_D3D9_H
-#define INCLUDED_MATERIALRENDERER_D3D9_H
-#ifdef LUX_COMPILE_WITH_D3D9
+#ifndef INCLUDED_MATERIALRENDERER_IMPL_H
+#define INCLUDED_MATERIALRENDERER_IMPL_H
 #include "video/MaterialRenderer.h"
 #include "video/MaterialImpl.h"
+
 #include "video/RenderSettings.h"
+#include "video/TextureStageSettings.h"
+#include "video/AlphaSettings.h"
+#include "video/PipelineSettings.h"
+
 #include "video/Renderer.h"
 #include "video/DeviceState.h"
 #include "video/Shader.h"
 
 #include "core/ParamPackage.h"
 
-#include "StrippedD3D9.h"
-#include "video/d3d9/D3DHelper.h"
-
 namespace lux
 {
 namespace video
 {
 
-//! The base class for d3d9 material renderers
-class MaterialRendererD3D9 : public MaterialRenderer
+//! The base class for material renderers
+class MaterialRendererImpl : public MaterialRenderer
 {
 public:
-	MaterialRendererD3D9(const string& name, Shader* shader) :
+	MaterialRendererImpl(const string& name, Shader* shader) :
 		m_Shader(shader),
 		m_Name(name)
 	{
@@ -32,11 +33,10 @@ public:
 	{
 		EnableTextures(settings, state);
 
-		if(m_Shader) {
+		if(m_Shader)
 			state.EnableShader(m_Shader);
-		} else {
+		else
 			state.DisableCurShader();
-		}
 	}
 
 	virtual void End(DeviceState& state)
@@ -110,11 +110,11 @@ protected:
 	string m_Name;
 };
 
-class MaterialRenderer_DebugOverlay_d3d9 : public MaterialRendererD3D9
+class MaterialRenderer_DebugOverlay : public MaterialRendererImpl
 {
 public:
-	MaterialRenderer_DebugOverlay_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(name, shader)
+	MaterialRenderer_DebugOverlay(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererImpl(name, shader)
 	{
 		m_Pipeline.fogEnabled = false;
 		m_Pipeline.lighting = false;
@@ -125,12 +125,22 @@ public:
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
 	{
-		MaterialRendererD3D9::Begin(settings, state);
-		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
+		MaterialRendererImpl::Begin(settings, state);
 
-		device->SetRenderState(D3DRS_TEXTUREFACTOR, settings.material->GetDiffuse().ToHex());
-		device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-		device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TFACTOR);
+		state.EnableVertexData();
+		TextureStageSettings tss;
+		tss.colorOperator = ETextureOperator::SelectArg1;
+		tss.colorArg1 = ETextureArgument::Diffuse;
+
+		state.EnableTextureStage(0, tss);
+	}
+
+	void End(DeviceState& state)
+	{
+		state.DisableVertexData();
+		state.DisableTextureStage(0);
+
+		MaterialRendererImpl::End(state);
 	}
 
 	ERequirement GetRequirements() const
@@ -140,17 +150,17 @@ public:
 
 	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_DebugOverlay_d3d9> renderer = LUX_NEW(MaterialRenderer_DebugOverlay_d3d9)(name, shader, basePackage);
+		StrongRef<MaterialRenderer_DebugOverlay> renderer = LUX_NEW(MaterialRenderer_DebugOverlay)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
 };
 
-class MaterialRenderer_BaseSolid_d3d9 : public MaterialRendererD3D9
+class MaterialRenderer_BaseSolid : public MaterialRendererImpl
 {
 public:
-	MaterialRenderer_BaseSolid_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(name, shader)
+	MaterialRenderer_BaseSolid(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererImpl(name, shader)
 	{
 		if(basePackage)
 			m_Package = *basePackage;
@@ -158,7 +168,7 @@ public:
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
 	{
-		MaterialRendererD3D9::Begin(settings, state);
+		MaterialRendererImpl::Begin(settings, state);
 	}
 
 	ERequirement GetRequirements() const
@@ -168,23 +178,22 @@ public:
 
 	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_BaseSolid_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseSolid_d3d9)(name, shader, basePackage);
+		StrongRef<MaterialRenderer_BaseSolid> renderer = LUX_NEW(MaterialRenderer_BaseSolid)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
 };
 
-class MaterialRenderer_BaseTransparent_d3d9 : public MaterialRendererD3D9
+class MaterialRenderer_BaseTransparent : public MaterialRendererImpl
 {
 public:
-	MaterialRenderer_BaseTransparent_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(name, shader)
+	MaterialRenderer_BaseTransparent(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererImpl(name, shader)
 	{
 		AlphaBlendSettings defaultSettings;
 		defaultSettings.SrcBlend = video::EBlendFactor::SrcAlpha;
 		defaultSettings.DstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		defaultSettings.Operator = video::EBlendOperator::Add;
-		defaultSettings.AlphaSrc = video::EAlphaSource::Texture;
 		m_Package.AddParam<u32>("blendFunc", defaultSettings.Pack());
 
 		if(basePackage)
@@ -196,7 +205,7 @@ public:
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
 	{
-		MaterialRendererD3D9::Begin(settings, state);
+		MaterialRendererImpl::Begin(settings, state);
 
 		AlphaBlendSettings blend;
 		blend.Unpack(settings.material->Param(0));
@@ -207,7 +216,7 @@ public:
 	void End(DeviceState& state)
 	{
 		state.EnableAlpha(video::AlphaBlendSettings::Disabled());
-		MaterialRendererD3D9::End(state);
+		MaterialRendererImpl::End(state);
 	}
 
 	ERequirement GetRequirements() const
@@ -217,18 +226,18 @@ public:
 
 	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_BaseTransparent_d3d9> renderer = LUX_NEW(MaterialRenderer_BaseTransparent_d3d9)(name, shader, basePackage);
+		StrongRef<MaterialRenderer_BaseTransparent> renderer = LUX_NEW(MaterialRenderer_BaseTransparent)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
 };
 
 //! Render a solid/oname, pak material
-class MaterialRenderer_Solid_d3d9 : public MaterialRendererD3D9
+class MaterialRenderer_Solid : public MaterialRendererImpl
 {
 public:
-	MaterialRenderer_Solid_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(name, shader)
+	MaterialRenderer_Solid(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererImpl(name, shader)
 	{
 		m_Package.AddParam("diffMap", TextureLayer());
 		if(basePackage)
@@ -237,25 +246,14 @@ public:
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
 	{
-		MaterialRendererD3D9::Begin(settings, state);
-		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
+		MaterialRendererImpl::Begin(settings, state);
 
-		BaseTexture* firstLayer = settings.material->Layer(0);
+		TextureStageSettings tss0;
+		tss0.colorOperator = ETextureOperator::Modulate;
+		tss0.colorArg1 = ETextureArgument::Texture;
+		tss0.colorArg2 = ETextureArgument::Diffuse;
 
-		if(!settings.pipeline.lighting) {
-			device->SetRenderState(D3DRS_TEXTUREFACTOR, settings.material->GetDiffuse().ToHex());
-			device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
-		} else {
-			device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-		}
-
-		if(firstLayer) {
-			device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-			device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		} else {
-			// Use only the diffuse color
-			device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);
-		}
+		state.EnableTextureStage(0, tss0);
 	}
 
 	ERequirement GetRequirements() const
@@ -265,24 +263,23 @@ public:
 
 	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_Solid_d3d9> renderer = LUX_NEW(MaterialRenderer_Solid_d3d9)(name, shader, basePackage);
+		StrongRef<MaterialRenderer_Solid> renderer = LUX_NEW(MaterialRenderer_Solid)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
 };
 
 //! Render a transparent material with a single texture, alpha from texture or color
-class MaterialRenderer_OneTextureBlend_d3d9 : public MaterialRendererD3D9
+class MaterialRenderer_OneTextureBlend : public MaterialRendererImpl
 {
 public:
-	MaterialRenderer_OneTextureBlend_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(name, shader)
+	MaterialRenderer_OneTextureBlend(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererImpl(name, shader)
 	{
 		AlphaBlendSettings defaultSettings;
 		defaultSettings.SrcBlend = video::EBlendFactor::SrcAlpha;
 		defaultSettings.DstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		defaultSettings.Operator = video::EBlendOperator::Add;
-		defaultSettings.AlphaSrc = video::EAlphaSource::Texture;
 		m_Package.AddParam<u32>("blendFunc", defaultSettings.Pack());
 		m_Package.AddParam("diffMap", TextureLayer());
 
@@ -295,37 +292,18 @@ public:
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
 	{
-		MaterialRendererD3D9::Begin(settings, state);
-		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
+		MaterialRendererImpl::Begin(settings, state);
 
 		AlphaBlendSettings blend;
 		blend.Unpack(settings.material->Param(0));
 
 		state.EnableAlpha(blend);
-
-		device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-
-		if(HasTextureBlendAlpha(blend.SrcBlend) || HasTextureBlendAlpha(blend.DstBlend)) {
-			if(blend.AlphaSrc == EAlphaSource::VertexColor) {
-				device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-				device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-			} else if(blend.AlphaSrc == EAlphaSource::VertexAndTexture || (blend.AlphaSrc == EAlphaSource::Texture && settings.material->GetDiffuse().HasAlpha())) {
-				device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-				device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-				device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-			} else if(blend.AlphaSrc == EAlphaSource::Texture) {
-				device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-				device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-			}
-		}
 	}
 
 	void End(DeviceState& state)
 	{
-		state.EnableAlpha(video::AlphaBlendSettings::Disabled());
-		MaterialRendererD3D9::End(state);
+		state.DisableAlpha();
+		MaterialRendererImpl::End(state);
 	}
 
 	ERequirement GetRequirements() const
@@ -335,7 +313,7 @@ public:
 
 	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_OneTextureBlend_d3d9> renderer = LUX_NEW(MaterialRenderer_OneTextureBlend_d3d9)(name, shader, basePackage);
+		StrongRef<MaterialRenderer_OneTextureBlend> renderer = LUX_NEW(MaterialRenderer_OneTextureBlend)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -343,10 +321,10 @@ public:
 
 /*
 //! Render a transparent material with a single texture, alpha from vertex
-class CMaterialRenderer_VertexAlpha_d3d9 : public MaterialRendererD3D9
+class CMaterialRenderer_VertexAlpha : public MaterialRendererImpl
 {
 public:
-	CMaterialRenderer_VertexAlpha_d3d9(const string& name, VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererD3D9(p, pShader, BasePackagename, )
+	CMaterialRenderer_VertexAlpha(const string& name, VideoDriver* p, Shader* pShader = nullptr, const core::ParamPackage* BasePackage = nullptr) : MaterialRendererImpl(p, pShader, BasePackagename, )
 	{
 		m_Package.AddParam<float>("AlphaFactor", 1.0f);
 		m_Package.AddParam("diffMap", TextureLayer());
@@ -393,7 +371,7 @@ public:
 		if(!pShader)
 			return nullptr;
 
-		CMname, aterialRenderer_VertexAlpha_d3d9* renderer = LUX_NEW(CMaterialRenderer_VertexAlpha_d3d9)(m_Driver, pShader, BasePackage);
+		CMname, aterialRenderer_VertexAlpha* renderer = LUX_NEW(CMaterialRenderer_VertexAlpha)(m_Driver, pShader, BasePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -404,11 +382,11 @@ public:
 /**
 The alpha color of the vertices determinates the interpolation value
 */
-class MaterialRenderer_Solid_Mix_d3d9 : public MaterialRendererD3D9
+class MaterialRenderer_Solid_Mix : public MaterialRendererImpl
 {
 public:
-	MaterialRenderer_Solid_Mix_d3d9(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
-		MaterialRendererD3D9(name, shader)
+	MaterialRenderer_Solid_Mix(const string& name, Shader* shader, const core::ParamPackage* basePackage) :
+		MaterialRendererImpl(name, shader)
 	{
 		m_Package.AddParam("diffMap1", TextureLayer());
 		m_Package.AddParam("diffMap2", TextureLayer());
@@ -419,37 +397,36 @@ public:
 
 	void Begin(const RenderSettings& settings, DeviceState& state)
 	{
-		MaterialRendererD3D9::Begin(settings, state);
+		MaterialRendererImpl::Begin(settings, state);
 
-		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
-
+		state.EnableVertexData();
+	
 		// Blend(Diff*Texture1, Texture2, DiffAlpha)
-		device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-		device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		//device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
+		TextureStageSettings tss0, tss1, tss2;
+		tss0.colorOperator = ETextureOperator::SelectArg1;
+		tss0.colorArg1 = ETextureArgument::Texture;
 
-		device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
-		device->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
-		device->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEXTURE);
+		tss1.colorOperator = ETextureOperator::Blend;
+		tss1.colorArg1 = ETextureArgument::Current;
+		tss1.colorArg2 = ETextureArgument::Texture;
+		tss1.coordSource = 0;
 
-		device->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_MODULATE);
-		device->SetTextureStageState(2, D3DTSS_COLORARG1, D3DTA_CURRENT);
-		device->SetTextureStageState(2, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+		tss2.colorOperator = ETextureOperator::Modulate;
+		tss2.colorArg1 = ETextureArgument::Current;
+		tss2.colorArg2 = ETextureArgument::Diffuse;
+		tss2.coordSource = 0;
 
-		// Use the same texture-coordinates as the first layer
-		device->SetTextureStageState(1, D3DTSS_TEXCOORDINDEX, 0);
-		device->SetTextureStageState(2, D3DTSS_TEXCOORDINDEX, 0);
-
-		device->SetRenderState(D3DRS_COLORVERTEX, TRUE);
+		state.EnableTextureStage(0, tss0);
+		state.EnableTextureStage(1, tss1);
+		state.EnableTextureStage(2, tss2);
 	}
 
 	void End(DeviceState& state)
 	{
-		auto device = (IDirect3DDevice9*)state.GetLowLevelDevice();
-
-		device->SetRenderState(D3DRS_COLORVERTEX, FALSE);
-		device->SetTextureStageState(2, D3DTSS_COLOROP, D3DTOP_DISABLE);
-		device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+		state.DisableTextureStage(0);
+		state.DisableTextureStage(1);
+		state.DisableTextureStage(2);
+		state.DisableVertexData();
 	}
 
 	ERequirement GetRequirements() const
@@ -459,7 +436,7 @@ public:
 
 	StrongRef<MaterialRenderer> Clone(const string& name, Shader* shader, const core::ParamPackage* basePackage) const
 	{
-		StrongRef<MaterialRenderer_Solid_Mix_d3d9> renderer = LUX_NEW(MaterialRenderer_Solid_Mix_d3d9)(name, shader, basePackage);
+		StrongRef<MaterialRenderer_Solid_Mix> renderer = LUX_NEW(MaterialRenderer_Solid_Mix)(name, shader, basePackage);
 		renderer->m_Pipeline = m_Pipeline;
 		return renderer;
 	}
@@ -468,5 +445,4 @@ public:
 } // namespace video
 } // namespace lux
 
-#endif // LUX_COMPILE_WITH_D3D9
 #endif

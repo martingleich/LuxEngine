@@ -599,6 +599,8 @@ int ShaderD3D9::GetDefaultId(const char* name)
 		"diffuse",
 		"emissive",
 		"specular"
+		"ambient",
+		"power",
 	};
 
 	for(u32 i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
@@ -613,6 +615,8 @@ ShaderD3D9::EType ShaderD3D9::GetDefaultType(u32 id)
 {
 	switch(id) {
 	case DefaultParam_Shininess:
+	case DefaultParam_Ambient:
+	case DefaultParam_Power:
 		return EType::Float;
 	case DefaultParam_Diffuse:
 	case DefaultParam_Emissive:

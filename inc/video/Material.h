@@ -47,6 +47,9 @@ public:
 	virtual void SetShininess(float shininess) = 0;
 	virtual float GetShininess() const = 0;
 
+	virtual void SetPower(float power) = 0;
+	virtual float GetPower() const = 0;
+
 	////////////////////////////////////////////////////////////////////
 
 	virtual core::PackageParam Param(const string_type& name) = 0;

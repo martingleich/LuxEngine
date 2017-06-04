@@ -40,6 +40,8 @@ void DeviceStateD3D9::EnablePipeline(const PipelineSettings& pipeline)
 	m_Device->SetRenderState(D3DRS_FILLMODE, GetFillMode(pipeline));
 	m_Device->SetRenderState(D3DRS_SHADEMODE, pipeline.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
 	m_Device->SetRenderState(D3DRS_CULLMODE, GetCullMode(pipeline));
+
+	m_CurPipeline = pipeline;
 }
 
 void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
@@ -91,6 +93,34 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 	}
 }
 
+void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
+{
+	if(!m_CurPipeline.lighting && settings.colorArg1 == ETextureArgument::Diffuse)
+		SetTextureStageState(stage, D3DTSS_COLORARG1, D3DTA_TFACTOR);
+	else
+		SetTextureStageState(stage, D3DTSS_COLORARG1, GetTextureArgument(settings.colorArg1));
+	if(!m_CurPipeline.lighting && settings.colorArg2 == ETextureArgument::Diffuse)
+		SetTextureStageState(stage, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+	else
+		SetTextureStageState(stage, D3DTSS_COLORARG2, GetTextureArgument(settings.colorArg2));
+
+	SetTextureStageState(stage, D3DTSS_COLOROP, GetTextureOperator(settings.colorOperator));
+
+	SetTextureStageState(stage, D3DTSS_ALPHAARG1, GetTextureArgument(settings.alphaArg1));
+	SetTextureStageState(stage, D3DTSS_ALPHAARG2, GetTextureArgument(settings.alphaArg2));
+	SetTextureStageState(stage, D3DTSS_ALPHAOP, GetTextureOperator(settings.alphaOperator));
+
+	if(settings.HasAlternateCoordSource())
+		SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, settings.coordSource);
+}
+
+void DeviceStateD3D9::DisableTextureStage(u32 stage)
+{
+	SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	SetTextureStageState(stage, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+	SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, stage);
+}
+
 void DeviceStateD3D9::EnableAlpha(const AlphaBlendSettings& settings)
 {
 	if(settings.Operator == EBlendOperator::None) {
@@ -101,6 +131,28 @@ void DeviceStateD3D9::EnableAlpha(const AlphaBlendSettings& settings)
 		m_Device->SetRenderState(D3DRS_SRCBLEND, GetD3DBlend(settings.SrcBlend));
 		m_Device->SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(settings.Operator));
 	}
+
+	if(HasTextureBlendAlpha(settings.SrcBlend) || HasTextureBlendAlpha(settings.DstBlend)) {
+		SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+		SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TEXTURE);
+		SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+	}
+
+	m_CurAlpha = settings;
+}
+
+void DeviceStateD3D9::DisableAlpha()
+{
+	SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+}
+void DeviceStateD3D9::EnableVertexData()
+{
+	SetRenderState(D3DRS_COLORVERTEX, TRUE);
+}
+
+void DeviceStateD3D9::DisableVertexData()
+{
+	SetRenderState(D3DRS_COLORVERTEX, FALSE);
 }
 
 void* DeviceStateD3D9::GetLowLevelDevice()
@@ -120,17 +172,23 @@ void DeviceStateD3D9::SetRenderStateF(D3DRENDERSTATETYPE state, float value)
 	SetRenderState(state, v);
 }
 
+void DeviceStateD3D9::SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value)
+{
+	m_Device->SetTextureStageState(stage, state, value);
+}
+
 void DeviceStateD3D9::SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material* mat)
 {
 	D3DMATERIAL9 D3DMaterial = {
 		SColorToD3DColor(mat->GetDiffuse()),
 		SColorToD3DColor(mat->GetDiffuse()*mat->GetAmbient()),
-		SColorToD3DColor(mat->GetSpecular()),
+		SColorToD3DColor(mat->GetSpecular()*mat->GetPower()),
 		SColorToD3DColor(mat->GetEmissive()),
 		mat->GetShininess()
 	};
 	m_Device->SetMaterial(&D3DMaterial);
 
+	SetRenderState(D3DRS_TEXTUREFACTOR, mat->GetDiffuse().ToHex());
 	SetRenderState(D3DRS_AMBIENT, ambient.ToHex());
 	if(pipeline.lighting && !math::IsZero(D3DMaterial.Power))
 		SetRenderState(D3DRS_SPECULARENABLE, 1);
@@ -173,6 +231,48 @@ u32 DeviceStateD3D9::Float2U32(float f)
 	memcpy(&out, &f, 4);
 
 	return out;
+}
+
+u32 DeviceStateD3D9::GetTextureOperator(ETextureOperator op)
+{
+	switch(op) {
+	case ETextureOperator::Disable:
+		return D3DTOP_DISABLE;
+	case ETextureOperator::SelectArg1:
+		return D3DTOP_SELECTARG1;
+	case ETextureOperator::SelectArg2:
+		return D3DTOP_SELECTARG2;
+	case ETextureOperator::Modulate:
+		return D3DTOP_MODULATE;
+	case ETextureOperator::Add:
+		return D3DTOP_ADD;
+	case ETextureOperator::AddSigned:
+		return D3DTOP_ADDSIGNED;
+	case ETextureOperator::AddSmoth:
+		return D3DTOP_ADDSMOOTH;
+	case ETextureOperator::Subtract:
+		return D3DTOP_SUBTRACT;
+	case ETextureOperator::Blend:
+		return D3DTOP_BLENDDIFFUSEALPHA;
+	case ETextureOperator::Dot:
+		return D3DTOP_DOTPRODUCT3;
+	}
+	throw core::InvalidArgumentException("operator");
+}
+
+u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
+{
+	switch(arg) {
+	case ETextureArgument::Current:
+		return D3DTA_CURRENT;
+	case ETextureArgument::Texture:
+		return D3DTA_TEXTURE;
+	case ETextureArgument::Diffuse:
+		return D3DTA_DIFFUSE;
+	case ETextureArgument::AlphaRep:
+		return D3DTA_ALPHAREPLICATE;
+	}
+	throw core::InvalidArgumentException("arg");
 }
 
 void DeviceStateD3D9::SetFog(bool active, const FogData& fog)
@@ -231,7 +331,7 @@ void DeviceStateD3D9::EnableLight(const LightData& light)
 	D3DCOLORVALUE Specular = {1.0f, 1.0f, 1.0f, 1.0f};
 	D3DCOLORVALUE Ambient = {0.0f, 0.0f, 0.0f, 0.0f};
 	D3DLight.Diffuse = SColorToD3DColor(light.color);
-	D3DLight.Specular = Specular;
+	D3DLight.Specular = SColorToD3DColor(light.color);
 	D3DLight.Ambient = Ambient;
 
 	D3DLight.Attenuation0 = 0.0f;
