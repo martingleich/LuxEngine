@@ -1,5 +1,5 @@
 #include "GeometryCreatorPlane.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 #include "video/VideoDriver.h"
@@ -29,7 +29,7 @@ const string& GeometryCreatorPlane::GetName() const
 	return name;
 }
 
-StrongRef<SubMesh> GeometryCreatorPlane::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorPlane::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
 {
 	const math::vector2f size = params.FromID(0, true);
 	const math::vector2i tesselation = params.FromID(1, true);
@@ -38,7 +38,7 @@ StrongRef<SubMesh> GeometryCreatorPlane::CreateSubMesh(VideoDriver* driver, cons
 	return CreateSubMesh(driver, size.x, size.y, tesselation.x, tesselation.y, textureRepeat.x, textureRepeat.y, nullptr, nullptr);
 }
 
-StrongRef<SubMesh> GeometryCreatorPlane::CreateSubMesh(
+StrongRef<Geometry> GeometryCreatorPlane::CreateSubMesh(
 	VideoDriver* driver,
 	float sizeX, float sizeY,
 	s32 tesX, s32 tesY,
@@ -61,7 +61,7 @@ StrongRef<SubMesh> GeometryCreatorPlane::CreateSubMesh(
 
 	auto GetVertexIndex = [=](s32 x, s32 y) -> u16 { return (u16)(y * tesX + x); };
 
-	StrongRef<SubMesh> subMesh = driver->CreateSubMesh(
+	StrongRef<Geometry> subMesh = driver->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
 		EPrimitiveType::Triangles);

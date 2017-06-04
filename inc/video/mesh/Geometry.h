@@ -16,10 +16,10 @@ class IndexBuffer;
 class VertexFormat;
 
 //! The most simple mesh, contains a index- and vertexbuffer and a single material
-class SubMesh : public ReferenceCounted
+class Geometry : public ReferenceCounted
 {
 public:
-	virtual ~SubMesh()
+	virtual ~Geometry()
 	{
 	}
 
@@ -31,39 +31,24 @@ public:
 	*/
 	virtual void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
 
-	//! Get the primitve type used by this mesh
+	//! Get the primitive type used by this mesh
 	/**
 	\return primitive type
 	*/
 	virtual EPrimitiveType GetPrimitiveType() const = 0;
 
-	//! Set a new primitve type
+	//! Set a new primitive type
 	/**
-	\param type The new primitve type
+	\param type The new primitive type
 	*/
 	virtual void SetPrimitiveType(EPrimitiveType type) = 0;
 
 	//! Get the total number of primitves in this mesh
 	/**
 	Degenerated primitves are also counted.
-	\return The number of primitves
+	\return The number of primitives
 	*/
-	virtual u32 GetPrimitveCount() const = 0;
-
-	//! Ask the material of this submesh
-	/**
-	\return The constant material of the submesh
-	*/
-	virtual const Material* GetMaterial() const = 0;
-
-	//! Ask the material of this submesh
-	/**
-	\return The changeable material of the submesh
-	*/
-	virtual Material* GetMaterial() = 0;
-
-	//! Set a new material for the submesh
-	virtual void SetMaterial(Material* material) = 0;
+	virtual u32 GetPrimitiveCount() const = 0;
 
 	//! Set new vertices for the submesh
 	/**

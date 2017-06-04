@@ -3,7 +3,7 @@
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
 #include "video/VertexTypes.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 
 namespace lux
 {
@@ -36,7 +36,7 @@ const core::ParamPackage& GeometryCreatorCube::GetParams() const
 	return m_Package;
 }
 
-StrongRef<SubMesh> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
 {
 	LX_CHECK_NULL_ARG(driver);
 
@@ -52,7 +52,7 @@ StrongRef<SubMesh> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver, const
 		inside);
 }
 
-StrongRef<SubMesh> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver,
 	float sizeX, float sizeY, float sizeZ,
 	s32 tesX, s32 tesY, s32 tesZ,
 	float texX, float texY, float texZ,
@@ -79,7 +79,7 @@ StrongRef<SubMesh> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver,
 	const math::vector3i tes(tesX, tesY, tesZ);
 	const math::vector3f size(sizeX, sizeY, sizeZ);
 
-	StrongRef<SubMesh> subMesh = driver->CreateSubMesh(
+	StrongRef<Geometry> subMesh = driver->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
 		EPrimitiveType::Triangles);

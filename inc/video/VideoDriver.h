@@ -29,7 +29,7 @@ class Texture;
 class CubeTexture;
 class BaseTexture;
 
-class SubMesh;
+class Geometry;
 class RenderStatistics;
 class BufferManager;
 
@@ -40,12 +40,12 @@ class VideoDriver : public ReferenceCounted
 public:
 	virtual ~VideoDriver() {}
 
-	virtual StrongRef<SubMesh> CreateEmptySubMesh(EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
-	virtual StrongRef<SubMesh> CreateSubMesh(
+	virtual StrongRef<Geometry> CreateEmptyGeometry(EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
+	virtual StrongRef<Geometry> CreateGeometry(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
 		EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
 		EPrimitiveType primitiveType) = 0;
-	virtual StrongRef<SubMesh> CreateSubMesh(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
+	virtual StrongRef<Geometry> CreateGeometry(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
 		u32 primitiveCount = 0,
 		bool dynamic = false) = 0;

@@ -75,12 +75,12 @@ public:
 			is3D);
 	}
 
-	void DrawSubMesh(const SubMesh* subMesh, bool is3D = true)
+	void DrawGeometry(const Geometry* geo, bool is3D = true)
 	{
-		RendererD3D9::DrawSubMesh(subMesh, 0xFFFFFFFF, is3D);
+		RendererD3D9::DrawGeometry(geo, 0xFFFFFFFF, is3D);
 	}
 
-	void DrawSubMesh(const SubMesh* subMesh, u32 primitiveCount, bool is3D = true);
+	void DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is3D = true);
 
 	///////////////////////////////////////////////////////////////////////////
 private:

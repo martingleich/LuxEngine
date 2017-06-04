@@ -31,13 +31,13 @@ public:
 	void Init(const DriverConfig& config, gui::Window* Window);
 
 	//------------------------------------------------------------------
-	virtual StrongRef<SubMesh> CreateEmptySubMesh(EPrimitiveType primitiveType = EPrimitiveType::Triangles);
-	virtual StrongRef<SubMesh> CreateSubMesh(
+	virtual StrongRef<Geometry> CreateEmptyGeometry(EPrimitiveType primitiveType = EPrimitiveType::Triangles);
+	virtual StrongRef<Geometry> CreateGeometry(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
 		EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, u32 IndexCount,
 		EPrimitiveType primitiveType);
 
-	virtual StrongRef<SubMesh> CreateSubMesh(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
+	virtual StrongRef<Geometry> CreateGeometry(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
 		u32 primitiveCount = 0,
 		bool dynamic = false);

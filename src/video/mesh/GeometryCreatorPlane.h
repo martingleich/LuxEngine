@@ -15,7 +15,7 @@ public:
 	const core::ParamPackage& GetParams() const;
 	const string& GetName() const;
 
-	StrongRef<SubMesh> CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params);
 
 	//! Create a tesselated plane
 	/**
@@ -28,7 +28,7 @@ public:
 	\param texY The number of texturerepeats in y direction
 	\return The created plane
 	*/
-	StrongRef<SubMesh> CreateSubMesh(VideoDriver* driver,
+	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver,
 		float sizeX, float sizeY,
 		s32 tesX, s32 tesY,
 		float texX, float texY,

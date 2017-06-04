@@ -1,5 +1,5 @@
 #include "video/mesh/StaticMesh.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/Material.h"
 
 #include "video/VideoDriver.h"
@@ -20,23 +20,23 @@ StaticMesh::StaticMesh(VideoDriver* driver) :
 
 void StaticMesh::Clear()
 {
-	m_MeshBuffers.Clear();
+	m_Data.Clear();
 	m_BoundingBox.Set(0.0f, 0.0f, 0.0f);
 }
 
 size_t StaticMesh::GetSubMeshCount() const
 {
-	return m_MeshBuffers.Size();
+	return m_Data.Size();
 }
 
-const SubMesh* StaticMesh::GetSubMesh(size_t i) const
+const Geometry* StaticMesh::GetGeometry(size_t i) const
 {
-	return m_MeshBuffers[i];
+	return m_Data.At(i).geo;
 }
 
-StrongRef<SubMesh> StaticMesh::GetSubMesh(size_t i)
+StrongRef<Geometry> StaticMesh::GetGeometry(size_t i)
 {
-	return m_MeshBuffers[i];
+	return m_Data.At(i).geo;
 }
 
 const math::aabbox3df& StaticMesh::GetBoundingBox() const
@@ -51,67 +51,68 @@ void StaticMesh::SetBoundingBox(const math::aabbox3df& box)
 
 void StaticMesh::RecalculateBoundingBox()
 {
-	if(m_MeshBuffers.Size() > 0) {
-		m_BoundingBox = m_MeshBuffers[0]->GetBoundingBox();
-		for(size_t i = 0; i < m_MeshBuffers.Size(); ++i)
-			m_BoundingBox.AddBox(m_MeshBuffers[i]->GetBoundingBox());
+	if(m_Data.Size() > 0) {
+		m_BoundingBox = m_Data[0].geo->GetBoundingBox();
+		for(size_t i = 0; i < m_Data.Size(); ++i)
+			m_BoundingBox.AddBox(m_Data[i].geo->GetBoundingBox());
 	} else {
 		m_BoundingBox.Set(0.0f, 0.0f, 0.0f);
 	}
 }
 
-StrongRef<SubMesh> StaticMesh::AddSubMesh(SubMesh* subMesh)
+StrongRef<Geometry> StaticMesh::AddGeometry(Geometry* subMesh)
 {
 	if(subMesh)
-		m_MeshBuffers.PushBack(subMesh);
+		m_Data.PushBack(subMesh);
 
 	return subMesh;
 }
 
-StrongRef<SubMesh> StaticMesh::AddSubMesh(
+StrongRef<Geometry> StaticMesh::AddGeometry(
 	const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
 	EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
 	EPrimitiveType primitiveType)
 {
-	return AddSubMesh(m_Driver->CreateSubMesh(
+	return AddGeometry(m_Driver->CreateGeometry(
 		vertexFormat, vertexHWMapping, vertexCount,
 		indexType, indexHWMapping, indexCount,
 		primitiveType));
 }
 
-StrongRef<SubMesh> StaticMesh::AddSubMesh(const VertexFormat& vertexFormat,
+StrongRef<Geometry> StaticMesh::AddGeometry(const VertexFormat& vertexFormat,
 	EPrimitiveType primitiveType,
 	u32 primitiveCount,
 	bool dynamic)
 {
-	return AddSubMesh(m_Driver->CreateSubMesh(vertexFormat, primitiveType, primitiveCount, dynamic));
+	return AddGeometry(m_Driver->CreateGeometry(vertexFormat, primitiveType, primitiveCount, dynamic));
 }
 
-void StaticMesh::RemoveSubMesh(size_t index)
+void StaticMesh::RemoveGeometry(size_t index)
 {
-	m_MeshBuffers.Erase(m_MeshBuffers.First() + index);
+	m_Data.Erase(m_Data.First() + index);
 }
 
-void StaticMesh::RemoveSubMesh(SubMesh* subMesh)
+void StaticMesh::RemoveGeometry(Geometry* subMesh)
 {
-	auto it = core::LinearSearch(subMesh, m_MeshBuffers.First(), m_MeshBuffers.End());
-	if(it != m_MeshBuffers.End())
-		m_MeshBuffers.Erase(it);
+	Entry e(subMesh);
+	auto it = core::LinearSearch(e, m_Data.First(), m_Data.End());
+	if(it != m_Data.End())
+		m_Data.Erase(it);
 }
 
 Material* StaticMesh::GetMaterial(size_t index)
 {
-	return m_MeshBuffers.At(index)->GetMaterial();
+	return m_Data.At(index).mat;
 }
 
 const Material* StaticMesh::GetMaterial(size_t index) const
 {
-	return m_MeshBuffers.At(index)->GetMaterial();
+	return m_Data.At(index).mat;
 }
 
 void StaticMesh::SetMaterial(size_t index, Material* m)
 {
-	m_MeshBuffers.At(index)->SetMaterial(m);
+	m_Data.At(index).mat = m;
 }
 
 VideoDriver* StaticMesh::GetDriver() const

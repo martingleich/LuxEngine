@@ -20,7 +20,7 @@ class PackageParam;
 
 namespace video
 {
-class SubMesh;
+class Geometry;
 class LightData;
 class FogData;
 class RenderTarget;
@@ -226,20 +226,20 @@ public:
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		bool is3D) = 0;
 
-	//! Draw a sub mesh
+	//! Draw some geometry
 	/**
-	\param subMesh The submesh to draw
+	\param geo The geometry to draw
 	\param primitiveCount The number of primitives to draw
 	\param is3D Is the 3d or the 2d pipeline used
 	*/
-	virtual void DrawSubMesh(const SubMesh* subMesh, u32 primitiveCount, bool is3D = true) = 0;
+	virtual void DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is3D = true) = 0;
 
-	//! Draw a sub mesh
+	//! Draw some geometry
 	/**
-	\param subMesh The submesh to draw
+	\param geo The geometry to draw
 	\param is3D Is the 3d or the 2d pipeline used
 	*/
-	virtual void DrawSubMesh(const SubMesh* subMesh, bool is3D = true) = 0;
+	virtual void DrawGeometry(const Geometry* geo, bool is3D = true) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

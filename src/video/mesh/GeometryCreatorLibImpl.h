@@ -30,7 +30,7 @@ public:
 
 	core::PackagePuffer GetCreatorParams(const string& name);
 	StrongRef<Mesh> CreateMesh(const string& name, const core::PackagePuffer& params);
-	StrongRef<SubMesh> CreateSubMesh(const string& name, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateSubMesh(const string& name, const core::PackagePuffer& params);
 
 	StrongRef<Mesh> CreatePlaneMesh(float sizeX, float sizeY, s32 tesX, s32 tesY, float texX, float texY, float(*function)(void* ctx, float x, float y), void* context);
 	StrongRef<Mesh> CreateSphereMesh(float radius, s32 rings, s32 segments, float texX, float texY, bool inside);

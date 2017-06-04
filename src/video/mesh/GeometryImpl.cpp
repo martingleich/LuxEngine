@@ -1,4 +1,4 @@
-#include "SubMeshImpl.h"
+#include "video/mesh/GeometryImpl.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 #include "video/VertexFormats.h"
@@ -8,31 +8,31 @@ namespace lux
 namespace video
 {
 
-SubMeshImpl::SubMeshImpl() :
+GeometryImpl::GeometryImpl() :
 	m_PrimitveType(EPrimitiveType::Triangles)
 {
 }
 
-SubMeshImpl::SubMeshImpl(VertexBuffer* vertices, IndexBuffer* indices) :
+GeometryImpl::GeometryImpl(VertexBuffer* vertices, IndexBuffer* indices) :
 	m_Vertices(vertices),
 	m_Indices(indices),
 	m_PrimitveType(EPrimitiveType::Triangles)
 {
 }
 
-void SubMeshImpl::SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType)
+void GeometryImpl::SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType)
 {
 	m_Vertices = vertices;
 	m_Indices = indices;
 	m_PrimitveType = primitiveType;
 }
 
-video::EPrimitiveType SubMeshImpl::GetPrimitiveType() const
+video::EPrimitiveType GeometryImpl::GetPrimitiveType() const
 {
 	return m_PrimitveType;
 }
 
-u32 SubMeshImpl::GetPrimitveCount() const
+u32 GeometryImpl::GetPrimitiveCount() const
 {
 	u32 pointCount;
 	if(m_Indices != nullptr)
@@ -57,42 +57,27 @@ u32 SubMeshImpl::GetPrimitveCount() const
 	return 0;
 }
 
-void SubMeshImpl::SetPrimitiveType(video::EPrimitiveType type)
+void GeometryImpl::SetPrimitiveType(video::EPrimitiveType type)
 {
 	m_PrimitveType = type;
 }
 
-const video::Material* SubMeshImpl::GetMaterial() const
-{
-	return m_Material;
-}
-
-video::Material* SubMeshImpl::GetMaterial()
-{
-	return m_Material;
-}
-
-void SubMeshImpl::SetMaterial(video::Material* material)
-{
-	m_Material = material;
-}
-
-void SubMeshImpl::SetVertices(VertexBuffer* vertices)
+void GeometryImpl::SetVertices(VertexBuffer* vertices)
 {
 	m_Vertices = vertices;
 }
 
-StrongRef<VertexBuffer> SubMeshImpl::GetVertices()
+StrongRef<VertexBuffer> GeometryImpl::GetVertices()
 {
 	return m_Vertices;
 }
 
-const VertexBuffer* SubMeshImpl::GetVertices() const
+const VertexBuffer* GeometryImpl::GetVertices() const
 {
 	return m_Vertices;
 }
 
-u32 SubMeshImpl::GetVertexCount() const
+u32 GeometryImpl::GetVertexCount() const
 {
 	if(!m_Vertices)
 		return 0;
@@ -100,7 +85,7 @@ u32 SubMeshImpl::GetVertexCount() const
 		return m_Vertices->GetSize();
 }
 
-const video::VertexFormat& SubMeshImpl::GetVertexFormat() const
+const video::VertexFormat& GeometryImpl::GetVertexFormat() const
 {
 	if(!m_Vertices)
 		return video::VertexFormat::STANDARD;
@@ -108,22 +93,22 @@ const video::VertexFormat& SubMeshImpl::GetVertexFormat() const
 		return m_Vertices->GetFormat();
 }
 
-void SubMeshImpl::SetIndices(IndexBuffer* indices)
+void GeometryImpl::SetIndices(IndexBuffer* indices)
 {
 	m_Indices = indices;
 }
 
-const IndexBuffer* SubMeshImpl::GetIndices() const
+const IndexBuffer* GeometryImpl::GetIndices() const
 {
 	return m_Indices;
 }
 
-StrongRef<IndexBuffer> SubMeshImpl::GetIndices()
+StrongRef<IndexBuffer> GeometryImpl::GetIndices()
 {
 	return m_Indices;
 }
 
-u32 SubMeshImpl::GetIndexCount() const
+u32 GeometryImpl::GetIndexCount() const
 {
 	if(!m_Indices)
 		return 0;
@@ -131,24 +116,24 @@ u32 SubMeshImpl::GetIndexCount() const
 		return m_Indices->GetSize();
 }
 
-video::EIndexFormat SubMeshImpl::GetIndexType() const
+video::EIndexFormat GeometryImpl::GetIndexType() const
 {
 	if(!m_Indices)
 		return video::EIndexFormat::Bit16;
 	else
 		return m_Indices->GetType();
 }
-const math::aabbox3df& SubMeshImpl::GetBoundingBox() const
+const math::aabbox3df& GeometryImpl::GetBoundingBox() const
 {
 	return m_BoundingBox;
 }
 
-void SubMeshImpl::SetBoundingBox(const math::aabbox3df& box)
+void GeometryImpl::SetBoundingBox(const math::aabbox3df& box)
 {
 	m_BoundingBox = box;
 }
 
-void SubMeshImpl::RecalculateBoundingBox()
+void GeometryImpl::RecalculateBoundingBox()
 {
 	if(GetVertexCount() == 0) {
 		m_BoundingBox.Set(0.0f, 0.0f, 0.0f);

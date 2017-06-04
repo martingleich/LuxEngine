@@ -2,7 +2,7 @@
 #include "scene/Node.h"
 
 #include "video/mesh/VideoMesh.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/Renderer.h"
 #include "video/MaterialRenderer.h"
 
@@ -40,24 +40,22 @@ void Mesh::Render(const Node* node, video::Renderer* renderer, ERenderPass pass)
 
 	const bool isTransparentPass = (pass == ERenderPass::Transparent);
 	for(size_t i = 0; i < m_Mesh->GetSubMeshCount(); ++i) {
-		video::SubMesh* sub = m_Mesh->GetSubMesh(i);
-		if(sub) {
-			const video::Material* material = m_OnlyReadMaterials ? sub->GetMaterial() : (const video::Material*)m_Materials[i];
+		video::Geometry* geo = m_Mesh->GetGeometry(i);
+		const video::Material* material = m_OnlyReadMaterials ? m_Mesh->GetMaterial(i) : (const video::Material*)m_Materials[i];
 
-			video::MaterialRenderer* matRenderer = nullptr;
-			if(material)
-				matRenderer = material->GetRenderer();
+		video::MaterialRenderer* matRenderer = nullptr;
+		if(material)
+			matRenderer = material->GetRenderer();
 
-			// Default to solid if not more information
-			bool isTransparent = false;
-			if(matRenderer)
-				isTransparent = TestFlag(matRenderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent);
+		// Default to solid if not more information
+		bool isTransparent = false;
+		if(matRenderer)
+			isTransparent = TestFlag(matRenderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent);
 
-			// Draw transparent sub meshes in transparent pass, and solid in solid path
-			if(isTransparent == isTransparentPass) {
-				renderer->SetMaterial(material);
-				renderer->DrawSubMesh(sub);
-			}
+		// Draw transparent geo meshes in transparent pass, and solid in solid path
+		if(isTransparent == isTransparentPass) {
+			renderer->SetMaterial(material);
+			renderer->DrawGeometry(geo);
 		}
 	}
 }
@@ -89,7 +87,7 @@ ERenderPass Mesh::GetRenderPass() const
 	if(solid && transparent)
 		m_RenderPass = ERenderPass::SolidAndTransparent;
 	else if(solid)
-		m_RenderPass =  ERenderPass::Solid;
+		m_RenderPass = ERenderPass::Solid;
 	else if(transparent)
 		m_RenderPass = ERenderPass::Transparent;
 	else
@@ -106,7 +104,7 @@ const math::aabbox3df& Mesh::GetBoundingBox() const
 video::Material* Mesh::GetMaterial(size_t index)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
-		return m_Mesh->GetSubMesh(index)->GetMaterial();
+		return m_Mesh->GetMaterial(index);
 	else
 		return m_Materials.At(index);
 }
@@ -114,7 +112,7 @@ video::Material* Mesh::GetMaterial(size_t index)
 const video::Material* Mesh::GetMaterial(size_t index) const
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
-		return m_Mesh->GetSubMesh(index)->GetMaterial();
+		return m_Mesh->GetMaterial(index);
 	else
 		return m_Materials.At(index);
 }
@@ -122,7 +120,7 @@ const video::Material* Mesh::GetMaterial(size_t index) const
 void Mesh::SetMaterial(size_t index, video::Material* m)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
-		m_Mesh->GetSubMesh(index)->SetMaterial(m);
+		m_Mesh->SetMaterial(index, m);
 	else
 		m_Materials.At(index) = m;
 
@@ -176,11 +174,7 @@ void Mesh::CopyMaterials()
 	size_t materialCount = m_Mesh->GetSubMeshCount();
 	m_Materials.Resize(materialCount);
 	for(size_t i = 0; i < materialCount; ++i) {
-		video::SubMesh* subMesh = m_Mesh->GetSubMesh(i);
-		StrongRef<video::Material> material;
-		if(subMesh)
-			material = subMesh->GetMaterial()->Clone();
-
+		auto material = m_Mesh->GetMaterial(i)->Clone();
 		m_Materials.PushBack(material);
 	}
 }

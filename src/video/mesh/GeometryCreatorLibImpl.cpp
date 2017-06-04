@@ -1,7 +1,7 @@
 #include "video/mesh/GeometryCreatorLibImpl.h"
 #include "core/ParamPackage.h"
 #include "video/VideoDriver.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/MaterialLibrary.h"
 #include "video/Material.h"
 
@@ -86,22 +86,17 @@ core::PackagePuffer GeometryCreatorLibImpl::GetCreatorParams(const string& name)
 	return core::PackagePuffer(&it->creator->GetParams());
 }
 
-StrongRef<SubMesh> GeometryCreatorLibImpl::CreateSubMesh(const string& name, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorLibImpl::CreateSubMesh(const string& name, const core::PackagePuffer& params)
 {
-	auto sub = GetByName(name)->CreateSubMesh(m_Driver, params);
-	if(!sub->GetMaterial())
-		sub->SetMaterial(m_MatLib->CreateMaterial());
-
-	return sub;
+	return GetByName(name)->CreateSubMesh(m_Driver, params);
 }
 
 StrongRef<Mesh> GeometryCreatorLibImpl::CreateMesh(const string& name, const core::PackagePuffer& params)
 {
-	StrongRef<SubMesh> sub = GetByName(name)->CreateSubMesh(m_Driver, params);
-	if(!sub->GetMaterial())
-		sub->SetMaterial(m_MatLib->CreateMaterial());
+	StrongRef<Geometry> sub = GetByName(name)->CreateSubMesh(m_Driver, params);
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
-	out->AddSubMesh(sub);
+	out->AddGeometry(sub);
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
 
 	return out;
@@ -116,11 +111,10 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreatePlaneMesh(
 {
 	StrongRef<GeometryCreatorPlane> creator = m_PlaneCreator;
 
-	StrongRef<SubMesh> sub = creator->CreateSubMesh(m_Driver, sizeX, sizeY, tesX, tesY, texX, texY, function, context);
-	if(!sub->GetMaterial())
-		sub->SetMaterial(m_MatLib->CreateMaterial());
+	StrongRef<Geometry> sub = creator->CreateSubMesh(m_Driver, sizeX, sizeY, tesX, tesY, texX, texY, function, context);
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
-	out->AddSubMesh(sub);
+	out->AddGeometry(sub);
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
 
 	return out;
@@ -133,11 +127,10 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateSphereMesh(
 	bool inside)
 {
 	StrongRef<GeometryCreatorSphereUV> creator = m_SphereUVCreator;
-	StrongRef<SubMesh> sub = creator->CreateSubMesh(m_Driver, radius, rings, segments, texX, texY, inside);
-	if(!sub->GetMaterial())
-		sub->SetMaterial(m_MatLib->CreateMaterial());
+	StrongRef<Geometry> sub = creator->CreateSubMesh(m_Driver, radius, rings, segments, texX, texY, inside);
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
-	out->AddSubMesh(sub);
+	out->AddGeometry(sub);
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
 
 	return out;
@@ -150,16 +143,15 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateCubeMesh(
 	bool inside)
 {
 	StrongRef<GeometryCreatorCube> creator = m_CubeGenerator;
-	StrongRef<SubMesh> sub = creator->CreateSubMesh(
+	StrongRef<Geometry> sub = creator->CreateSubMesh(
 		m_Driver,
 		sizeX, sizeY, sizeZ,
 		tesX, tesY, tesZ,
 		texX, texY, texZ,
 		inside);
-	if(!sub->GetMaterial())
-		sub->SetMaterial(m_MatLib->CreateMaterial());
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
-	out->AddSubMesh(sub);
+	out->AddGeometry(sub);
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
 
 	return out;
@@ -171,15 +163,14 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateArrowMesh(
 	s32 sectors)
 {
 	StrongRef<GeometryCreatorArrow> creator = m_ArrowCreator;
-	StrongRef<SubMesh> sub = creator->CreateSubMesh(
+	StrongRef<Geometry> sub = creator->CreateSubMesh(
 		m_Driver,
 		shaft_height, head_height,
 		shaft_radius, head_radius,
 		sectors);
-	if(!sub->GetMaterial())
-		sub->SetMaterial(m_MatLib->CreateMaterial());
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
-	out->AddSubMesh(sub);
+	out->AddGeometry(sub);
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
 
 	return out;

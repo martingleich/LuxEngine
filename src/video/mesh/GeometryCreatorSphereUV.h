@@ -16,7 +16,7 @@ public:
 	const string& GetName() const;
 	const core::ParamPackage& GetParams() const;
 
-	StrongRef<SubMesh> CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params);
 
 	//! Create a uv sphere
 	/**
@@ -28,7 +28,7 @@ public:
 	\param texY The texturerepeats on the sphere in Y direction
 	\param inside If true, the normals point inside the cube, otherwise they show outside.
 	*/
-	StrongRef<SubMesh> CreateSubMesh(VideoDriver* driver,
+	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver,
 		float radius,
 		s32 rings, s32 segments, float texX, float texY,
 		bool inside);

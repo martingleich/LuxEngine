@@ -3,7 +3,7 @@
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
 #include "video/VertexTypes.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 
 #define GEO_CREATOR_ARROW_SPLIT_POINT
 
@@ -32,7 +32,7 @@ const core::ParamPackage& GeometryCreatorArrow::GetParams() const
 	return m_Package;
 }
 
-StrongRef<SubMesh> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
 {
 	LX_CHECK_NULL_ARG(driver);
 
@@ -48,7 +48,7 @@ StrongRef<SubMesh> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver, cons
 		sectors);
 }
 
-StrongRef<SubMesh> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver,
 	float shaft_height, float head_height,
 	float shaft_radius, float head_radius,
 	s32 sectors)
@@ -72,7 +72,7 @@ StrongRef<SubMesh> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver,
 	// Circle + Pipe  + Ring  + Head
 	// sec-2  + sec*2 + sec*2 + sec Triangles
 	const u32 indexCount = 3 * (6 * sectors - 2);
-	StrongRef<SubMesh> subMesh = driver->CreateSubMesh(
+	StrongRef<Geometry> subMesh = driver->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
 		EPrimitiveType::Triangles);

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_SUBMESH_IMPL_H
 #define INCLUDED_SUBMESH_IMPL_H
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/Material.h"
 
 namespace lux
@@ -8,18 +8,15 @@ namespace lux
 namespace video
 {
 
-class SubMeshImpl : public SubMesh
+class GeometryImpl : public Geometry
 {
 public:
-	SubMeshImpl();
-	SubMeshImpl(VertexBuffer* vertices, IndexBuffer* indices);
+	GeometryImpl();
+	GeometryImpl(VertexBuffer* vertices, IndexBuffer* indices);
 	void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = video::EPrimitiveType::Triangles);
 	video::EPrimitiveType GetPrimitiveType() const;
-	u32 GetPrimitveCount() const;
+	u32 GetPrimitiveCount() const;
 	void SetPrimitiveType(video::EPrimitiveType type);
-	const video::Material* GetMaterial() const;
-	video::Material* GetMaterial();
-	void SetMaterial(video::Material* material);
 	void SetVertices(VertexBuffer* vertices);
 	StrongRef<VertexBuffer> GetVertices();
 	const VertexBuffer* GetVertices() const;
@@ -35,10 +32,11 @@ public:
 	void RecalculateBoundingBox();
 
 private:
-	StrongRef<Material> m_Material;
 	StrongRef<VertexBuffer> m_Vertices;
 	StrongRef<IndexBuffer> m_Indices;
+
 	EPrimitiveType m_PrimitveType;
+
 	math::aabbox3df m_BoundingBox;
 };
 

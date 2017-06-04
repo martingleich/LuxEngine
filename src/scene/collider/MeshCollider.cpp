@@ -7,7 +7,7 @@
 #include "scene/zones/ZoneBox.h"
 #include "scene/Node.h"
 #include "video/mesh/VideoMesh.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/VertexFormats.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
@@ -27,13 +27,13 @@ MeshCollider::MeshCollider(video::Mesh* mesh)
 	size_t bufferCount = mesh->GetSubMeshCount();
 	size_t faceCount = 0;
 	for(size_t i = 0; i < bufferCount; ++i)
-		faceCount += mesh->GetSubMesh(i)->GetPrimitveCount();
+		faceCount += mesh->GetGeometry(i)->GetPrimitiveCount();
 
 	m_Triangles.Clear();
 	m_Triangles.Reserve(faceCount);
 
 	for(size_t i = 0; i < bufferCount; ++i) {
-		auto sub = mesh->GetSubMesh(i);
+		auto sub = mesh->GetGeometry(i);
 		auto indices = sub->GetIndices();
 		auto vertices = sub->GetVertices();
 		u32 offset = sub->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;

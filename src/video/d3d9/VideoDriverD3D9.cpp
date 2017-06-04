@@ -8,7 +8,7 @@
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "video/d3d9/RendererD3D9.h"
 
-#include "video/mesh/SubMeshImpl.h"
+#include "video/mesh/GeometryImpl.h"
 
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
@@ -333,20 +333,20 @@ IDirect3DSurface9* VideoDriverD3D9::GetD3D9MatchingDepthBuffer(IDirect3DSurface9
 	return nullptr;
 }
 
-StrongRef<SubMesh> VideoDriverD3D9::CreateEmptySubMesh(EPrimitiveType primitiveType)
+StrongRef<Geometry> VideoDriverD3D9::CreateEmptyGeometry(EPrimitiveType primitiveType)
 {
-	StrongRef<SubMesh> out = LUX_NEW(SubMeshImpl);
+	StrongRef<Geometry> out = LUX_NEW(GeometryImpl);
 	out->SetPrimitiveType(primitiveType);
 
 	return out;
 }
 
-StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(
+StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(
 	const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
 	EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, u32 IndexCount,
 	EPrimitiveType primitiveType)
 {
-	StrongRef<SubMesh> out = CreateEmptySubMesh(primitiveType);
+	StrongRef<Geometry> out = CreateEmptyGeometry(primitiveType);
 	StrongRef<IndexBuffer> ib = m_BufferManager->CreateIndexBuffer();
 	ib->SetType(indexType);
 	ib->SetHWMapping(IndexHWMapping);
@@ -363,13 +363,13 @@ StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(
 	return out;
 }
 
-StrongRef<SubMesh> VideoDriverD3D9::CreateSubMesh(const VertexFormat& vertexFormat,
+StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(const VertexFormat& vertexFormat,
 	EPrimitiveType primitiveType,
 	u32 primitiveCount,
 	bool dynamic)
 {
 	LUX_UNUSED(primitiveCount);
-	return CreateSubMesh(vertexFormat, dynamic ? EHardwareBufferMapping::Dynamic : EHardwareBufferMapping::Static, 0,
+	return CreateGeometry(vertexFormat, dynamic ? EHardwareBufferMapping::Dynamic : EHardwareBufferMapping::Static, 0,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, 0,
 		primitiveType);
 }

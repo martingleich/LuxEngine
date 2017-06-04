@@ -13,7 +13,7 @@ class ParamPackage;
 namespace video
 {
 class VideoDriver;
-class SubMesh;
+class Geometry;
 class Mesh;
 
 //! Interface to create geometry on the fly.
@@ -31,7 +31,7 @@ public:
 		retrieved with \ref GeometryCreator::GetParams
 	\return A newly created sub mesh.
 	*/
-	virtual StrongRef<video::SubMesh> CreateSubMesh(video::VideoDriver* driver, const core::PackagePuffer& params) = 0;
+	virtual StrongRef<video::Geometry> CreateSubMesh(video::VideoDriver* driver, const core::PackagePuffer& params) = 0;
 
 	//! Get the name of the geometry creator.
 	/**
@@ -91,7 +91,7 @@ public:
 	\param params The parameter for the geometry creator, retrieved by \ref GetCreatorParams
 	\return A newly created sub mesh.
 	*/
-	virtual StrongRef<video::SubMesh> CreateSubMesh(const string& name, const core::PackagePuffer& params) = 0;
+	virtual StrongRef<video::Geometry> CreateSubMesh(const string& name, const core::PackagePuffer& params) = 0;
 
 	//! Create a new plane mesh.
 	/**

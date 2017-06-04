@@ -19,21 +19,21 @@ public:
 	StaticMesh(VideoDriver* driver);
 	void Clear();
 	size_t GetSubMeshCount() const;
-	const SubMesh* GetSubMesh(size_t i) const;
-	StrongRef<SubMesh> GetSubMesh(size_t i);
+	const Geometry* GetGeometry(size_t i) const;
+	StrongRef<Geometry> GetGeometry(size_t i);
 	const math::aabbox3df& GetBoundingBox() const;
 	void SetBoundingBox(const math::aabbox3df& box);
 	void RecalculateBoundingBox();
-	StrongRef<SubMesh> AddSubMesh(SubMesh* subMesh);
-	StrongRef<SubMesh> AddSubMesh(const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
+	StrongRef<Geometry> AddGeometry(Geometry* subMesh);
+	StrongRef<Geometry> AddGeometry(const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
 		EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
 		EPrimitiveType primitiveType);
-	StrongRef<SubMesh> AddSubMesh(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
+	StrongRef<Geometry> AddGeometry(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
 		u32 primitiveCount = 0,
 		bool dynamic = false);
-	void RemoveSubMesh(size_t index);
-	void RemoveSubMesh(SubMesh* subMesh);
+	void RemoveGeometry(size_t index);
+	void RemoveGeometry(Geometry* subMesh);
 	Material* GetMaterial(size_t index);
 	const Material* GetMaterial(size_t index) const;
 	void SetMaterial(size_t index, Material* m);
@@ -44,7 +44,23 @@ public:
 
 private:
 	math::aabbox3df m_BoundingBox;
-	core::array<StrongRef<SubMesh>> m_MeshBuffers;
+	struct Entry
+	{
+		StrongRef<Geometry> geo;
+		StrongRef<Material> mat;
+
+		Entry(Geometry* g) :
+			geo(g),
+			mat(nullptr)
+		{}
+
+		bool operator==(const Entry& other) const
+		{
+			return geo == other.geo;
+		}
+	};
+
+	core::array<Entry> m_Data;
 	VideoDriver* m_Driver;
 };
 

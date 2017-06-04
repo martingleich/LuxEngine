@@ -2,7 +2,7 @@
 #define INCLUDED_COBJMESHLOADER_H
 #include "StaticMesh.h"
 #include "video/VertexTypes.h"
-#include "video/mesh/SubMeshImpl.h"
+#include "video/mesh/GeometryImpl.h"
 #include "io/path.h"
 #include "video/MaterialLibrary.h"
 #include "resources/ResourceLoader.h"
@@ -31,7 +31,7 @@ private:
 		SObjMtl() : Meshbuffer(0), Bumpiness(1.0f), Illumination(0),
 			RecalculateNormals(false)
 		{
-			Meshbuffer = LUX_NEW(video::SubMeshImpl);
+			Meshbuffer = LUX_NEW(video::GeometryImpl);
 		}
 
 		SObjMtl(const SObjMtl& other)
@@ -39,12 +39,13 @@ private:
 			Bumpiness(other.Bumpiness), Illumination(other.Illumination),
 			RecalculateNormals(false)
 		{
-			Meshbuffer = LUX_NEW(video::SubMeshImpl);
-			Meshbuffer->SetMaterial(other.Meshbuffer->GetMaterial());
+			Meshbuffer = LUX_NEW(video::GeometryImpl);
+			material = other.material;
 		}
 
 		std::map<video::Vertex3D, s32> VertMap;
-		StrongRef<video::SubMeshImpl> Meshbuffer;
+		StrongRef<video::GeometryImpl> Meshbuffer;
+		StrongRef<video::Material> material;
 		string name;
 		string Group;
 		float Bumpiness;

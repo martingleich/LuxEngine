@@ -144,7 +144,7 @@ namespace input
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/RotationAnimator.h"
 
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/mesh/VideoMesh.h"
 #include "video/mesh/MeshSystem.h"
 #include "video/mesh/GeometryCreatorLib.h"

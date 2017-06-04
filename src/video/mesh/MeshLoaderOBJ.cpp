@@ -68,7 +68,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 	core::array<math::vector2f> TCoordBuffer;
 
 	SObjMtl* pCurrMtl = LUX_NEW(SObjMtl);
-	pCurrMtl->Meshbuffer->SetMaterial(m_MatLib->CreateMaterial());
+	pCurrMtl->material = m_MatLib->CreateMaterial();
 	m_Materials.PushBack(pCurrMtl);
 
 	const io::FileDescription fileDesc = file->GetDescription();
@@ -182,7 +182,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			}
 
 			if(pCurrMtl)
-				v.color = ColorFToColor(pCurrMtl->Meshbuffer->GetMaterial()->GetDiffuse());
+				v.color = ColorFToColor(pCurrMtl->material->GetDiffuse());
 
 			//v.color = video::Color::White;
 
@@ -279,7 +279,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 				m_Materials[m]->Meshbuffer->RecalculateBoundingBox();
 				m_Materials[m]->Meshbuffer->GetIndices()->Update();
 				m_Materials[m]->Meshbuffer->GetVertices()->Update();
-				mesh->AddSubMesh(m_Materials[m]->Meshbuffer);
+				mesh->AddGeometry(m_Materials[m]->Meshbuffer);
 			}
 		}
 
@@ -319,7 +319,7 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 		if (!strncmp(pFrom, "-bm", 3))
 		{
 			pFrom = CopyNextWord(pFrom, pTo, textureNameBuf, WORD_BUFFER_LENGTH);
-			pCurrMaterial->Meshbuffer->GetMaterial().MaterialTypeParam=core::fast_atof(textureNameBuf);
+			pCurrMaterial->material.MaterialTypeParam=core::fast_atof(textureNameBuf);
 			bufPtr = goAndCopyNextWord(textureNameBuf, bufPtr, WORD_BUFFER_LENGTH, bufEnd);
 			continue;
 		}
@@ -409,8 +409,8 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 	if(texture) {
 		// Standardtexture
 		if(type == 0) {
-			pCurrMaterial->Meshbuffer->GetMaterial()->SetRenderer(m_MatLib->GetMaterialRenderer("solid"));
-			pCurrMaterial->Meshbuffer->GetMaterial()->Layer(0) = (video::BaseTexture*)texture;
+			pCurrMaterial->material->SetRenderer(m_MatLib->GetMaterialRenderer("solid"));
+			pCurrMaterial->material->Layer(0) = (video::BaseTexture*)texture;
 		}
 
 		// TODO: Andere Texturverwendungen, noch nicht implementiert
@@ -429,8 +429,8 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 		}*/
 
 		// Streufarbe auf Weiß setzen
-		pCurrMaterial->Meshbuffer->GetMaterial()->SetDiffuse(video::Colorf(
-			pCurrMaterial->Meshbuffer->GetMaterial()->GetDiffuse().a, 1.0f, 1.0f, 1.0f));
+		pCurrMaterial->material->SetDiffuse(video::Colorf(
+			pCurrMaterial->material->GetDiffuse().a, 1.0f, 1.0f, 1.0f));
 	}
 
 	return pFrom;
@@ -481,7 +481,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 			pBufferPtr = CopyNextWord(pBufferPtr, pBufferEnd, mtlNameBuf, WORD_BUFFER_LENGTH);
 
 			currMaterial = LUX_NEW(SObjMtl);
-			currMaterial->Meshbuffer->SetMaterial(m_MatLib->CreateMaterial());
+			currMaterial->material = m_MatLib->CreateMaterial();
 			currMaterial->name = mtlNameBuf;
 		}
 		break;
@@ -505,7 +505,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 					pBufferPtr = CopyNextWord(pBufferPtr, pBufferEnd, nsStr, COLOR_BUFFER_LENGTH);
 					float shininessValue = (float)(atof(nsStr));
 
-					currMaterial->Meshbuffer->GetMaterial()->SetShininess(shininessValue);
+					currMaterial->material->SetShininess(shininessValue);
 				}
 				break;
 				case 'i': // Ni - Brechungsindex ( verwerfen)
@@ -524,7 +524,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 				{
 					video::Colorf diffuse;
 					pBufferPtr = ReadColor(pBufferPtr, pBufferEnd, diffuse);
-					currMaterial->Meshbuffer->GetMaterial()->SetDiffuse(diffuse);
+					currMaterial->material->SetDiffuse(diffuse);
 				}
 				break;
 
@@ -532,7 +532,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 				{
 					video::Colorf specular;
 					pBufferPtr = ReadColor(pBufferPtr, pBufferEnd, specular);
-					currMaterial->Meshbuffer->GetMaterial()->SetSpecular(specular);
+					currMaterial->material->SetSpecular(specular);
 				}
 				break;
 
@@ -540,14 +540,14 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 				{
 					video::Colorf AmbientColor;
 					pBufferPtr = ReadColor(pBufferPtr, pBufferEnd, AmbientColor);
-					currMaterial->Meshbuffer->GetMaterial()->SetAmbient(AmbientColor.GetLuminance() / 255.0f);
+					currMaterial->material->SetAmbient(AmbientColor.GetLuminance() / 255.0f);
 				}
 				break;
 				case 'e':        // Ke = emissive
 				{
 					video::Colorf emissive;
 					pBufferPtr = ReadColor(pBufferPtr, pBufferEnd, emissive);
-					currMaterial->Meshbuffer->GetMaterial()->SetEmissive(emissive);
+					currMaterial->material->SetEmissive(emissive);
 				}
 				break;
 				}
@@ -567,9 +567,9 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 				pBufferPtr = CopyNextWord(pBufferPtr, pBufferEnd, dStr, COLOR_BUFFER_LENGTH);
 				float dValue = (float)(atof(dStr));
 
-				auto d = currMaterial->Meshbuffer->GetMaterial()->GetDiffuse();
+				auto d = currMaterial->material->GetDiffuse();
 				d.SetAlpha(dValue);
-				currMaterial->Meshbuffer->GetMaterial()->SetDiffuse(d);
+				currMaterial->material->SetDiffuse(d);
 				// TODO: Richtiges material setzen
 			}
 			break;
@@ -588,9 +588,9 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 
 					float transparency = (float)((atof(redStr) + atof(greenStr) + atof(blueStr)) / 3);
 
-					auto d = currMaterial->Meshbuffer->GetMaterial()->GetDiffuse();
+					auto d = currMaterial->material->GetDiffuse();
 					d.SetAlpha(transparency);
-					currMaterial->Meshbuffer->GetMaterial()->SetDiffuse(d);
+					currMaterial->material->SetDiffuse(d);
 					// TODO: Materialtyp setzen
 				}
 			}
@@ -604,8 +604,8 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 
 	// Ende der Datei wenn ein material erstellt wurde speichern
 	if(currMaterial) {
-		if(currMaterial->Meshbuffer->GetMaterial()->GetRenderer() == nullptr)
-			currMaterial->Meshbuffer->GetMaterial()->SetRenderer(m_MatLib->GetMaterialRenderer("solid"));
+		if(currMaterial->material->GetRenderer() == nullptr)
+			currMaterial->material->SetRenderer(m_MatLib->GetMaterialRenderer("solid"));
 
 		m_Materials.PushBack(currMaterial);
 	}

@@ -16,7 +16,7 @@ public:
 	const string& GetName() const;
 	const core::ParamPackage& GetParams() const;
 
-	StrongRef<SubMesh> CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params);
 
 	//! Create a arrow
 	/**
@@ -28,7 +28,7 @@ public:
 	\param sectors The number of sectors.
 	\return The created plane
 	*/
-	StrongRef<SubMesh> CreateSubMesh(VideoDriver* driver,
+	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver,
 		float shaft_height, float head_height,
 		float shaft_radius, float head_radius,
 		s32 sectors);

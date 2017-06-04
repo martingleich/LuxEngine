@@ -6,7 +6,7 @@
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "video/d3d9/D3D9Exception.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
-#include "video/mesh/SubMesh.h"
+#include "video/mesh/Geometry.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 #include "video/VertexTypes.h"
@@ -214,12 +214,12 @@ void RendererD3D9::DrawPrimitiveList(
 	m_RenderStatistics->AddPrimitves(primitiveCount);
 }
 
-void RendererD3D9::DrawSubMesh(const SubMesh* subMesh, u32 primitiveCount, bool is3D)
+void RendererD3D9::DrawGeometry(const Geometry* subMesh, u32 primitiveCount, bool is3D)
 {
 	LX_CHECK_NULL_ARG(subMesh);
 
 	if(primitiveCount == 0xFFFFFFFF)
-		primitiveCount = subMesh->GetPrimitveCount();
+		primitiveCount = subMesh->GetPrimitiveCount();
 
 	if(primitiveCount == 0)
 		return;
