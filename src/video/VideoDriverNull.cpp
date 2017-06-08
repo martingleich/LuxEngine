@@ -5,11 +5,6 @@ namespace lux
 namespace video
 {
 
-VideoDriverNull::VideoDriverNull(core::ReferableFactory* refFactory) :
-	m_RefFactory(refFactory)
-{
-}
-
 void VideoDriverNull::Init(const DriverConfig& config, gui::Window* window)
 {
 	LUX_UNUSED(window);

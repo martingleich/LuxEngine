@@ -14,11 +14,6 @@
 
 namespace lux
 {
-namespace core
-{
-class ResourceSystem;
-class ReferableFactory;
-}
 namespace math
 {
 class Transformation;
@@ -37,11 +32,6 @@ class Mesh;
 class MeshSystem;
 }
 
-namespace io
-{
-class FileSystem;
-class File;
-}
 namespace scene
 {
 class Component;
@@ -135,11 +125,8 @@ public:
 
 	virtual video::VideoDriver* GetDriver() const = 0;
 	virtual video::Renderer* GetRenderer() const = 0;
-	virtual io::FileSystem* GetFileSystem() const = 0;
 	virtual video::MaterialLibrary* GetMaterialLibrary() const = 0;
 	virtual video::ImageSystem* GetImageSystem() const = 0;
-	virtual core::ReferableFactory* GetReferableFactory() const = 0;
-	virtual core::ResourceSystem* GetResourceSystem() const = 0;
 	virtual video::MeshSystem* GetMeshSystem() const = 0;
 };
 

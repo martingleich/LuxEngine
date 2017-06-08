@@ -24,11 +24,15 @@ Get information, or do anything about files
 class FileSystem : public ReferenceCounted
 {
 public:
-
-public:
 	virtual ~FileSystem()
 	{
 	}
+
+	//! Access the global filesystem
+	LUX_API static FileSystem* Instance();
+
+	//! Destroys the global filesystem
+	LUX_API static void Destroy();
 
 	//! Open a new file from file description
 	/**

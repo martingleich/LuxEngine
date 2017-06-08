@@ -42,20 +42,16 @@ const string& MeshLoaderOBJ::GetName() const
 
 static const u32 WORD_BUFFER_LENGTH = 512;
 
-MeshLoaderOBJ::MeshLoaderOBJ(video::VideoDriver* driver, video::MaterialLibrary* matLib,
-	core::ResourceSystem* resSys) :
+MeshLoaderOBJ::MeshLoaderOBJ(video::VideoDriver* driver, video::MaterialLibrary* matLib) :
 	m_MatLib(matLib),
-	m_Driver(driver),
-	m_ResSys(resSys)
+	m_Driver(driver)
 {
-	m_Filesystem = m_ResSys->GetFileSystem().GetWeak();
 }
 
 void MeshLoaderOBJ::CleanUp()
 {
 	m_Materials.Clear();
 }
-
 
 void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 {
@@ -393,16 +389,16 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 
 	StrongRef<video::Texture> texture;
 	if(!texname.IsEmpty()) {
-		if(m_Filesystem->ExistFile(texname)) {
-			texture = m_ResSys->GetResource(
+		if(io::FileSystem::Instance()->ExistFile(texname)) {
+			texture = core::ResourceSystem::Instance()->GetResource(
 				core::ResourceType::Texture, texname);
 		} else {
 			// Über einen relativen Pfad laden
 			io::FileDescription texFile = io::ConcatFileDesc(fileDesc, texname);
 
-			texture = m_ResSys->GetResource(
+			texture = core::ResourceSystem::Instance()->GetResource(
 				core::ResourceType::Texture,
-				m_Filesystem->OpenFile(texFile));
+				io::FileSystem::Instance()->OpenFile(texFile));
 		}
 	}
 
@@ -442,11 +438,12 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 	const io::path realFile = pcFilename;
 	StrongRef<io::File> mtlReader;
 
-	if(m_Filesystem->ExistFile(realFile))
-		mtlReader = m_Filesystem->OpenFile(realFile);
+	auto fileSys = io::FileSystem::Instance();
+	if(fileSys->ExistFile(realFile))
+		mtlReader = fileSys->OpenFile(realFile);
 	if(mtlReader == nullptr) {
 		io::FileDescription newFile = io::ConcatFileDesc(fileDesc, realFile);
-		mtlReader = m_Filesystem->OpenFile(newFile);
+		mtlReader = fileSys->OpenFile(newFile);
 	}
 	if(!mtlReader) {
 		log::Warning("Can't open the material file: ~s.", realFile);

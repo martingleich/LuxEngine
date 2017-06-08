@@ -23,7 +23,7 @@ class RendererD3D9;
 class VideoDriverD3D9 : public VideoDriverNull
 {
 public:
-	VideoDriverD3D9(core::ReferableFactory* refFactory);
+	VideoDriverD3D9();
 	~VideoDriverD3D9();
 
 	void CleanUp();

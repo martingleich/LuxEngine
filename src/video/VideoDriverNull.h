@@ -12,8 +12,6 @@ namespace video
 class VideoDriverNull : public VideoDriver
 {
 public:
-	VideoDriverNull(core::ReferableFactory* refFactory);
-
 	virtual void Init(const DriverConfig& config, gui::Window* Window);
 
 	virtual EDriverType GetVideoDriverType() const;
@@ -22,7 +20,6 @@ public:
 	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
 
 protected:
-	StrongRef<core::ReferableFactory> m_RefFactory;
 	DriverConfig m_Config;
 	u32 m_DriverCaps[(u32)EDriverCaps::EDriverCaps_Count];
 };

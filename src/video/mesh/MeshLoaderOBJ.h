@@ -17,8 +17,7 @@ class SceneManager;
 class MeshLoaderOBJ : public core::ResourceLoader
 {
 public:
-	MeshLoaderOBJ(video::VideoDriver* driver, video::MaterialLibrary* matLib,
-		core::ResourceSystem* resSys);
+	MeshLoaderOBJ(video::VideoDriver* driver, video::MaterialLibrary* matLib);
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
 	void LoadResource(io::File* file, core::Resource* dst);
@@ -91,15 +90,11 @@ private:
 private:
 	WeakRef<video::MaterialLibrary> m_MatLib;
 	WeakRef<video::VideoDriver> m_Driver;
-	WeakRef<core::ResourceSystem> m_ResSys;
-	WeakRef<io::FileSystem> m_Filesystem;
 
 	core::array<SObjMtl*> m_Materials;
 };
 
 }
-
 }
-
 
 #endif

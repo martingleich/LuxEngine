@@ -20,10 +20,9 @@ namespace lux
 namespace video
 {
 
-GeometryCreatorLibImpl::GeometryCreatorLibImpl(MaterialLibrary* matLib, VideoDriver* driver, MeshSystem* meshCache, core::ResourceSystem* resSys) :
+GeometryCreatorLibImpl::GeometryCreatorLibImpl(MaterialLibrary* matLib, VideoDriver* driver, MeshSystem* meshCache) :
 	m_Driver(driver),
 	m_MeshSystem(meshCache),
-	m_ResourceSystem(resSys),
 	m_MatLib(matLib)
 {
 	m_PlaneCreator = LUX_NEW(GeometryCreatorPlane);

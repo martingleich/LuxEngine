@@ -14,19 +14,11 @@ class FontCreator;
 class GUIEnvironment : public ReferenceCounted
 {
 public:
-	//! Retrieve a font from a path
-	/**
-	\return The font from this path
-	*/
-	virtual StrongRef<Font> GetFont(const io::path& name) = 0;
-
 	//! Retrieve the font creator.
 	virtual StrongRef<FontCreator> GetFontCreator() = 0;
 };
 
-} 
-
-} 
-
+} // namespace gui
+} // namespace lux
 
 #endif // INCLUDED_GUIENVIRONMENT_H

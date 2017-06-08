@@ -20,20 +20,9 @@ namespace gui
 class GUIEnvironment;
 }
 
-namespace io
-{
-class FileSystem;
-}
-
 namespace video
 {
 class ImageSystem;
-}
-
-namespace core
-{
-class ReferableFactory;
-class ResourceSystem;
 }
 
 namespace input
@@ -72,11 +61,8 @@ public:
 	StrongRef<scene::SceneManager> GetSceneManager() const;
 	StrongRef<input::InputSystem> GetInputSystem() const;
 	StrongRef<video::MaterialLibrary> GetMaterialLibrary() const;
-	StrongRef<io::FileSystem> GetFileSystem() const;
 	StrongRef<video::ImageSystem> GetImageSystem() const;
 	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const;
-	StrongRef<core::ReferableFactory> GetReferableFactory() const;
-	StrongRef<core::ResourceSystem> GetResourceSystem() const;
 	StrongRef<video::MeshSystem> GetMeshSystem() const;
 
 	LRESULT WinProc(HWND window,
@@ -127,10 +113,7 @@ private:
 	StrongRef<video::VideoDriver> m_Driver;
 	StrongRef<video::ImageSystem> m_ImageSystem;
 	StrongRef<scene::SceneManager> m_SceneManager;
-	StrongRef<io::FileSystem> m_Filesystem;
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;
-	StrongRef<core::ReferableFactory> m_ReferableFactory;
-	StrongRef<core::ResourceSystem> m_ResourceSystem;
 	StrongRef<video::MaterialLibrary> m_MaterialLibrary;
 	StrongRef<video::MeshSystem> m_MeshSystem;
 

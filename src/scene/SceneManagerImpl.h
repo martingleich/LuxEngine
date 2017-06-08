@@ -16,10 +16,7 @@ public:
 	SceneManagerImpl(
 		video::VideoDriver* driver,
 		video::ImageSystem* imageSystem,
-		io::FileSystem* fileSystem,
-		core::ReferableFactory* refFactory,
 		video::MeshSystem* meshCache,
-		core::ResourceSystem* resourceSystem,
 		video::MaterialLibrary* matLib);
 
 	~SceneManagerImpl();
@@ -94,11 +91,8 @@ public:
 
 	video::VideoDriver* GetDriver() const;
 	video::Renderer* GetRenderer() const;
-	io::FileSystem* GetFileSystem() const;
 	video::MaterialLibrary* GetMaterialLibrary() const;
 	video::ImageSystem* GetImageSystem() const;
-	core::ReferableFactory* GetReferableFactory() const;
-	core::ResourceSystem* GetResourceSystem() const;
 	video::MeshSystem* GetMeshSystem() const;
 
 private:
@@ -247,11 +241,8 @@ private:
 	StrongRef<video::VideoDriver> m_Driver;
 	video::Renderer* m_Renderer;
 
-	StrongRef<io::FileSystem> m_Filesystem;
 	StrongRef<video::MeshSystem> m_MeshSystem;
-	StrongRef<core::ReferableFactory> m_RefFactory;
 	StrongRef<video::ImageSystem> m_ImagSys;
-	StrongRef<core::ResourceSystem> m_ResourceSystem;
 	StrongRef<video::MaterialLibrary> m_MatLib;
 };
 

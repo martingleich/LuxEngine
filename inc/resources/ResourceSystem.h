@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RESOURCESYSTEM
-#define INCLUDED_RESOURCESYSTEM
+#ifndef INCLUDED_RESOURCESYSTEM_H
+#define INCLUDED_RESOURCESYSTEM_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 
@@ -7,13 +7,11 @@ namespace lux
 {
 namespace io
 {
-class FileSystem;
 class File;
 }
 namespace core
 {
 class ResourceLoader;
-class ReferableFactory;
 class Resource;
 
 //! Caching and loading for engine resources
@@ -25,6 +23,12 @@ The resource system saves data as a map from names to resources.
 class ResourceSystem : public ReferenceCounted
 {
 public:
+	//! Access the global resource system
+	LUX_API static ResourceSystem* Instance();
+
+	//! Destroys the global resource system
+	LUX_API static void Destroy();
+
 	virtual ~ResourceSystem() {}
 
 	//! Query the number of loaded resources of a given type.
@@ -192,12 +196,9 @@ public:
 	\param name The new type.
 	*/
 	virtual void AddType(Name name) = 0;
-
-	virtual StrongRef<ReferableFactory> GetReferableFactory() = 0;
-	virtual StrongRef<io::FileSystem> GetFileSystem() = 0;
 };
 
-}
-}
+} // namespace core
+} // namespace lux
 
-#endif // #ifndef INCLUDED_RESOURCESYSTEM
+#endif // #ifndef INCLUDED_RESOURCESYSTEM_H

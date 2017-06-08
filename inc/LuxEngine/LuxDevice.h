@@ -6,17 +6,6 @@
 namespace lux
 {
 
-namespace core
-{
-class ReferableFactory;
-class ResourceSystem;
-}
-
-namespace io
-{
-class FileSystem;
-}
-
 namespace input
 {
 class InputSystem;
@@ -117,12 +106,9 @@ public:
 	virtual StrongRef<scene::SceneManager> GetSceneManager() const = 0;
 	virtual StrongRef<input::InputSystem> GetInputSystem() const = 0;
 	virtual StrongRef<video::MaterialLibrary> GetMaterialLibrary() const = 0;
-	virtual StrongRef<io::FileSystem> GetFileSystem() const = 0;
 	virtual StrongRef<video::ImageSystem> GetImageSystem() const = 0;
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;
-	virtual StrongRef<core::ReferableFactory> GetReferableFactory() const = 0;
 	virtual StrongRef<gui::Window> GetWindow() const = 0;
-	virtual StrongRef<core::ResourceSystem> GetResourceSystem() const = 0;
 	virtual StrongRef<video::MeshSystem> GetMeshSystem() const = 0;
 };
 

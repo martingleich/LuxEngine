@@ -21,7 +21,7 @@ class MeshSystem;
 class GeometryCreatorLibImpl : public GeometryCreatorLib
 {
 public:
-	GeometryCreatorLibImpl(MaterialLibrary* matLib, VideoDriver* driver, MeshSystem* meshCache, core::ResourceSystem* resSystem);
+	GeometryCreatorLibImpl(MaterialLibrary* matLib, VideoDriver* driver, MeshSystem* meshCache);
 	StrongRef<GeometryCreator> GetByName(const string& name) const;
 	void AddCreator(GeometryCreator* creator);
 	void RemoveCreator(GeometryCreator* creator);
@@ -55,7 +55,6 @@ private:
 	core::HashMap<string, Entry> m_Creators;
 	WeakRef<VideoDriver> m_Driver;
 	WeakRef<MeshSystem> m_MeshSystem;
-	WeakRef<core::ResourceSystem> m_ResourceSystem;
 	WeakRef<MaterialLibrary> m_MatLib;
 
 	StrongRef<GeometryCreator> m_PlaneCreator;

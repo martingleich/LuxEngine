@@ -4,10 +4,6 @@
 
 namespace lux
 {
-namespace core
-{
-class ResourceSystem;
-}
 namespace video
 {
 class VideoDriver;
@@ -19,7 +15,7 @@ namespace video
 class MeshSystemImpl : public MeshSystem
 {
 public:
-	MeshSystemImpl(core::ResourceSystem* resourceSystem, video::VideoDriver* driver, video::MaterialLibrary* matLib);
+	MeshSystemImpl(video::VideoDriver* driver, video::MaterialLibrary* matLib);
 
 	StrongRef<Mesh> AddMesh(const io::path& name);
 	StrongRef<Mesh> CreateMesh();
@@ -27,7 +23,6 @@ public:
 	StrongRef<GeometryCreatorLib> GetGeometryCreatorLib();
 
 private:
-	StrongRef<core::ResourceSystem> m_ResourceSystem;
 	StrongRef<video::VideoDriver> m_VideoDriver;
 	StrongRef<GeometryCreatorLib> m_GeoCreatorLib;
 	StrongRef<video::MaterialLibrary> m_MatLib;

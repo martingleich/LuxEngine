@@ -39,9 +39,8 @@ namespace video
 class ImageToTextureLoader : public core::ResourceLoader
 {
 public:
-	ImageToTextureLoader(core::ResourceSystem* resSys, ImageSystemImpl* imagSys) :
-		m_ImageSystem(imagSys),
-		m_ResourceSystem(resSys)
+	ImageToTextureLoader(ImageSystemImpl* imagSys) :
+		m_ImageSystem(imagSys)
 	{
 	}
 
@@ -50,9 +49,10 @@ public:
 		const u32 fileCursor = file->GetCursor();
 		StrongRef<ResourceLoader> result;
 
-		u32 count = m_ResourceSystem->GetResourceLoaderCount();
+		auto resSys = core::ResourceSystem::Instance();
+		u32 count = resSys->GetResourceLoaderCount();
 		for(u32 i = 0; i < count; ++i) {
-			auto loader = m_ResourceSystem->GetResourceLoader(count - i - 1);
+			auto loader = resSys->GetResourceLoader(count - i - 1);
 			if(loader == this)
 				continue;
 			core::Name fileType = loader->GetResourceType(file);
@@ -82,7 +82,7 @@ public:
 
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
-		StrongRef<core::Resource> r = m_ResourceSystem->GetResource(core::ResourceType::Image, file);
+		StrongRef<core::Resource> r = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, file);
 		StrongRef<Image> img = r;
 		Texture* texture = dynamic_cast<Texture*>(dst);
 		ColorFormat format = img->GetColorFormat();
@@ -112,7 +112,6 @@ public:
 
 private:
 	ImageSystemImpl* m_ImageSystem;
-	core::ResourceSystem* m_ResourceSystem;
 };
 
 class MultiImageToCubeTextureLoader : public core::ResourceLoader
@@ -127,9 +126,8 @@ private:
 	};
 
 public:
-	MultiImageToCubeTextureLoader(core::ResourceSystem* resSys, ImageSystemImpl* imagSys) :
-		m_ImageSystem(imagSys),
-		m_ResSys(resSys)
+	MultiImageToCubeTextureLoader(ImageSystemImpl* imagSys) :
+		m_ImageSystem(imagSys)
 	{
 	}
 
@@ -192,7 +190,7 @@ public:
 		if(requestedType && requestedType != core::ResourceType::CubeTexture)
 			return core::Name::INVALID;
 
-		auto fileSys = m_ImageSystem->m_Filesystem;
+		auto fileSys = io::FileSystem::Instance();
 		auto filename = file->GetName();
 		if(fileSys->ExistFile(filename)) {
 			string baseName;
@@ -213,7 +211,7 @@ public:
 
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
-		auto fileSys = m_ImageSystem->m_Filesystem;
+		auto fileSys = io::FileSystem::Instance();
 		auto filename = file->GetName();
 
 		io::path basePath = io::GetFileDir(filename);
@@ -233,7 +231,7 @@ public:
 
 		if(isValid) {
 			for(size_t i = 0; i < 6; ++i)
-				images[i] = m_ResSys->GetResource(core::ResourceType::Image, image_path[i]);
+				images[i] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, image_path[i]);
 		} else {
 			throw core::FileNotFoundException(filename.Data());
 		}
@@ -249,30 +247,29 @@ public:
 
 private:
 	ImageSystemImpl* m_ImageSystem;
-	core::ResourceSystem* m_ResSys;
 };
 
-ImageSystemImpl::ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver* driver, core::ResourceSystem* resSys) :
-	m_ResourceSystem(resSys),
-	m_Filesystem(fileSystem),
+ImageSystemImpl::ImageSystemImpl(video::VideoDriver* driver) :
 	m_Driver(driver),
 	m_TextureCreationFlags(ETCF_ALPHA_CHANNEL | ETCF_CREATE_MIP_MAPS)
 {
+	auto resSys = core::ResourceSystem::Instance();
+
 	// Register before image loaders, to make default load type images, instead of textures.
-	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageToTextureLoader)(m_ResourceSystem, this));
-	m_ResourceSystem->AddResourceLoader(LUX_NEW(MultiImageToCubeTextureLoader)(m_ResourceSystem, this));
+	resSys->AddResourceLoader(LUX_NEW(ImageToTextureLoader)(this));
+	resSys->AddResourceLoader(LUX_NEW(MultiImageToCubeTextureLoader)(this));
 
 #ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 	if(m_Driver && m_Driver->GetVideoDriverType() == EDriverType::Direct3D9) {
 		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetLowLevelDevice());
-		m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderD3DX)(d3dDevice));
+		resSys->AddResourceLoader(LUX_NEW(ImageLoaderD3DX)(d3dDevice));
 	}
 #endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 
-	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderBMP));
-	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderPNM));
-	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderTGA));
-	m_ResourceSystem->AddResourceLoader(LUX_NEW(ImageLoaderPNG));
+	resSys->AddResourceLoader(LUX_NEW(ImageLoaderBMP));
+	resSys->AddResourceLoader(LUX_NEW(ImageLoaderPNM));
+	resSys->AddResourceLoader(LUX_NEW(ImageLoaderTGA));
+	resSys->AddResourceLoader(LUX_NEW(ImageLoaderPNG));
 
 	AddExternalImageWriter(LUX_NEW(ImageWriterBMP));
 	AddExternalImageWriter(LUX_NEW(ImageWriterTGA));
@@ -484,7 +481,7 @@ void ImageSystemImpl::WriteImageDataToFile(const math::dimension2du& size, Color
 {
 	LX_CHECK_NULL_ARG(data);
 
-	StrongRef<io::File> file = m_Filesystem->OpenFile(filePath, io::EFileMode::Write, true);
+	StrongRef<io::File> file = io::FileSystem::Instance()->OpenFile(filePath, io::EFileMode::Write, true);
 	WriteImageDataToFile(size, format, data, file);
 }
 
@@ -522,7 +519,7 @@ StrongRef<Texture> ImageSystemImpl::AddTexture(const string& name, const math::d
 {
 	StrongRef<Texture> texture = CreateTexture(format, size, isDynamic, nullptr);
 
-	m_ResourceSystem->AddResource(name, texture);
+	core::ResourceSystem::Instance()->AddResource(name, texture);
 
 	return texture;
 }
@@ -531,7 +528,7 @@ StrongRef<Texture> ImageSystemImpl::AddTexture(const string& name, Image* image,
 {
 	StrongRef<Texture> texture = CreateTexture(image, isDynamic);
 
-	m_ResourceSystem->AddResource(name, texture);
+	core::ResourceSystem::Instance()->AddResource(name, texture);
 
 	return texture;
 }
@@ -561,27 +558,27 @@ StrongRef<video::Texture> ImageSystemImpl::AddChromaKeyedTexture(video::Image* i
 
 StrongRef<Texture> ImageSystemImpl::GetChromaKeyedTexture(const io::path& p, video::Color key)
 {
-	StrongRef<Image> image = m_ResourceSystem->GetResource(core::ResourceType::Image, p);
+	StrongRef<Image> image = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, p);
 	return AddChromaKeyedTexture(image, key);
 }
 
 StrongRef<Texture> ImageSystemImpl::GetChromaKeyedTexture(const io::path& p, const math::vector2i& pos)
 {
-	StrongRef<Image> image = m_ResourceSystem->GetResource(core::ResourceType::Image, p);
+	StrongRef<Image> image = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, p);
 	return AddChromaKeyedTexture(image, image->GetPixel(pos.x, pos.y));
 }
 
 StrongRef<CubeTexture> ImageSystemImpl::AddCubeTexture(const string& name, StrongRef<Image> images[6])
 {
 	StrongRef<video::CubeTexture> texture = CreateCubeTexture(images);
-	m_ResourceSystem->AddResource(name, texture);
+	core::ResourceSystem::Instance()->AddResource(name, texture);
 	return texture;
 }
 
 StrongRef<CubeTexture> ImageSystemImpl::AddCubeTexture(const string& name, ColorFormat format, u32 size)
 {
 	StrongRef<video::CubeTexture> texture = CreateCubeTexture(format, size);
-	m_ResourceSystem->AddResource(name, texture);
+	core::ResourceSystem::Instance()->AddResource(name, texture);
 	return texture;
 }
 
@@ -591,7 +588,7 @@ StrongRef<Texture> ImageSystemImpl::AddRendertargetTexture(const string& name, c
 		throw core::Exception("No driver available");
 
 	StrongRef<Texture> texture = m_Driver->CreateRendertargetTexture(size, format);
-	m_ResourceSystem->AddResource(name, texture);
+	core::ResourceSystem::Instance()->AddResource(name, texture);
 	m_Rendertargets.PushBack(texture);
 	return texture;
 }

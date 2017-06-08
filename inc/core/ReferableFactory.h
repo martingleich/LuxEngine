@@ -21,6 +21,12 @@ public:
 	{
 	}
 
+	//! Access the global referable factory
+	LUX_API static ReferableFactory* Instance();
+
+	//! Destroys the global referable factory
+	LUX_API static void Destroy();
+
 	//! Register a new type
 	/**
 	The type name, resource type, type id are automatic read from the object.

@@ -14,8 +14,6 @@ class ReferableFactoryImpl : public ReferableFactory
 public:
 	ReferableFactoryImpl();
 
-	static ReferableFactoryImpl* Instance();
-
 	void RegisterType(Referable* prototype);
 	void UnregisterType(Name type, Name subType);
 

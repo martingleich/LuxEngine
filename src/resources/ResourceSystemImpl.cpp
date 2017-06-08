@@ -1,10 +1,12 @@
 #include "ResourceSystemImpl.h"
 #include "io/FileSystem.h"
 #include "io/File.h"
-#include "core/lxAlgorithm.h"
-#include "core/Logger.h"
+
 #include "resources/ResourceLoader.h"
 #include "core/ReferableFactory.h"
+
+#include "core/lxAlgorithm.h"
+#include "core/Logger.h"
 
 namespace lux
 {
@@ -169,15 +171,15 @@ struct ResourceSystemImpl::SelfType
 	core::array<TypeEntry> types;
 	core::array<ResourceBlock> resources;
 
-	StrongRef<io::FileSystem> fileSystem;
-	ReferableFactory* refFactory;
+	io::FileSystem* fileSystem;
+	core::ReferableFactory* refFactory;
 };
 
-ResourceSystemImpl::ResourceSystemImpl(io::FileSystem* fileSys, ReferableFactory* refFactory) :
+ResourceSystemImpl::ResourceSystemImpl() :
 	self(LUX_NEW(SelfType))
 {
-	self->fileSystem = fileSys;
-	self->refFactory = refFactory;
+	self->fileSystem = io::FileSystem::Instance();
+	self->refFactory = core::ReferableFactory::Instance();
 }
 
 ResourceSystemImpl::~ResourceSystemImpl()
@@ -452,17 +454,6 @@ StrongRef<ResourceLoader> ResourceSystemImpl::GetResourceLoader(core::Name& type
 	}
 
 	return result;
-}
-
-
-StrongRef<ReferableFactory> ResourceSystemImpl::GetReferableFactory()
-{
-	return self->refFactory;
-}
-
-StrongRef<io::FileSystem> ResourceSystemImpl::GetFileSystem()
-{
-	return self->fileSystem;
 }
 
 }

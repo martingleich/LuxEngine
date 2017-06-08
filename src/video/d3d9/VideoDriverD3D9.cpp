@@ -36,8 +36,7 @@ VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(IDirect3DSurface9* surface) 
 
 //////////////////////////////////////////////////////////////////////
 
-VideoDriverD3D9::VideoDriverD3D9(core::ReferableFactory* refFactory) :
-	VideoDriverNull(refFactory),
+VideoDriverD3D9::VideoDriverD3D9() :
 	m_HasStencilBuffer(false)
 {
 }
@@ -253,8 +252,9 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
 	m_Renderer = new RendererD3D9(this);
 
-	m_RefFactory->RegisterType(LUX_NEW(TextureD3D9)(m_D3DDevice));
-	m_RefFactory->RegisterType(LUX_NEW(CubeTextureD3D9)(m_D3DDevice));
+	auto refFactory = core::ReferableFactory::Instance();
+	refFactory->RegisterType(LUX_NEW(TextureD3D9)(m_D3DDevice));
+	refFactory->RegisterType(LUX_NEW(CubeTextureD3D9)(m_D3DDevice));
 }
 
 VideoDriverD3D9::~VideoDriverD3D9()

@@ -17,10 +17,8 @@ namespace gui
 {
 
 FontCreatorNull::FontCreatorNull(video::MaterialLibrary* matLib,
-	io::FileSystem* fileSys,
 	video::VideoDriver* driver,
 	video::MaterialRenderer* defaultFontMaterial) :
-	m_FileSystem(fileSys),
 	m_Driver(driver),
 	m_DefaultFontMaterial(defaultFontMaterial)
 {
@@ -34,7 +32,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromFile(const io::path& path,
 	const FontDescription& desc,
 	const core::array<u32>& charSet)
 {
-	StrongRef<io::File> file = m_FileSystem->OpenFile(path);
+	StrongRef<io::File> file = io::FileSystem::Instance()->OpenFile(path);
 	return CreateFontFromFile(file, desc, charSet);
 }
 

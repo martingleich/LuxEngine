@@ -7,7 +7,7 @@
 #include "video/PipelineSettings.h"
 #include "video/MaterialRenderer.h"
 
-#include "FontLoader.h"
+#include "gui/FontLoader.h"
 #include "gui/FontImpl.h"
 
 #include "gui/FontCreator.h"
@@ -22,12 +22,9 @@ namespace gui
 {
 
 GUIEnvironmentImpl::GUIEnvironmentImpl(
-	core::ResourceSystem* resSys,
 	video::ImageSystem* ImagSys,
 	video::VideoDriver* Driver,
-	video::MaterialLibrary* matLib,
-	io::FileSystem* fileSystem) :
-	m_ResSys(resSys),
+	video::MaterialLibrary* matLib) :
 	m_MatLibrary(matLib),
 	m_ImageSystem(ImagSys),
 	m_VideoDriver(Driver)
@@ -43,25 +40,16 @@ GUIEnvironmentImpl::GUIEnvironmentImpl(
 	FontRenderer->SetPipeline(ps);
 
 	// Register font loader
-	m_ResSys->AddResourceLoader(LUX_NEW(FontLoader)(
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader)(
 		m_ImageSystem,
 		m_VideoDriver,
 		m_MatLibrary));
 
 #ifdef LUX_WINDOWS
-	m_FontCreator = LUX_NEW(FontCreatorWin32)(m_MatLibrary, fileSystem, m_VideoDriver, FontRenderer);
+	m_FontCreator = LUX_NEW(FontCreatorWin32)(m_MatLibrary, m_VideoDriver, FontRenderer);
 #else
 	m_FontCreator = nullptr;
 #endif
-}
-
-GUIEnvironmentImpl::~GUIEnvironmentImpl()
-{
-}
-
-StrongRef<Font> GUIEnvironmentImpl::GetFont(const io::path& path)
-{
-	return m_ResSys->GetResource(core::ResourceType::Font, path);
 }
 
 StrongRef<FontCreator> GUIEnvironmentImpl::GetFontCreator()
@@ -69,7 +57,5 @@ StrongRef<FontCreator> GUIEnvironmentImpl::GetFontCreator()
 	return m_FontCreator;
 }
 
-} 
-
-} 
-
+}
+}

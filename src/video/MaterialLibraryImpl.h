@@ -5,10 +5,6 @@
 
 namespace lux
 {
-namespace io
-{
-class FileSystem;
-}
 namespace video
 {
 class VideoDriver;
@@ -16,7 +12,7 @@ class VideoDriver;
 class MaterialLibraryImpl : public MaterialLibrary
 {
 public:
-	MaterialLibraryImpl(VideoDriver* driver, io::FileSystem* fileSys);
+	MaterialLibraryImpl(VideoDriver* driver);
 
 	StrongRef<Material> CreateMaterial(const string& name);
 	StrongRef<Material> CreateMaterial(MaterialRenderer* renderer = nullptr);
@@ -47,11 +43,8 @@ private:
 
 private:
 	core::array<StrongRef<MaterialRenderer>> m_Renderers;
-
 	StrongRef<MaterialRenderer> m_Solid;
-
 	StrongRef<VideoDriver> m_VideoDriver;
-	StrongRef<io::FileSystem> m_FileSystem;
 };
 
 } // namespace video

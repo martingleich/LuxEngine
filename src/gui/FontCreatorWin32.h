@@ -12,10 +12,9 @@ class FontCreatorWin32 : public FontCreatorNull
 {
 public:
 	FontCreatorWin32(video::MaterialLibrary* matLib,
-		io::FileSystem* fileSys,
 		video::VideoDriver* driver,
 		video::MaterialRenderer* defaultFontMaterial) :
-		FontCreatorNull(matLib, fileSys, driver, defaultFontMaterial)
+		FontCreatorNull(matLib, driver, defaultFontMaterial)
 	{
 	}
 

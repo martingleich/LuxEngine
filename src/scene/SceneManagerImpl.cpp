@@ -8,8 +8,8 @@
 #include "video/images/ImageSystem.h"
 #include "video/mesh/MeshSystem.h"
 #include "video/mesh/VideoMesh.h"
+
 #include "resources/ResourceSystem.h"
-#include "io/FileSystem.h"
 #include "core/ReferableFactory.h"
 
 #include "scene/components/Camera.h"
@@ -37,18 +37,12 @@ namespace scene
 
 SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
 	video::ImageSystem* imagSys,
-	io::FileSystem* fileSystem,
-	core::ReferableFactory* refFactory,
 	video::MeshSystem* meshCache,
-	core::ResourceSystem* resourceSystem,
 	video::MaterialLibrary* matLib) :
 	m_CollectedRoot(nullptr),
 	m_Driver(driver),
-	m_Filesystem(fileSystem),
 	m_MeshSystem(meshCache),
-	m_RefFactory(refFactory),
 	m_ImagSys(imagSys),
-	m_ResourceSystem(resourceSystem),
 	m_MatLib(matLib)
 {
 	m_RootSceneNode = LUX_NEW(Node)(this, true);
@@ -95,7 +89,7 @@ StrongRef<Camera> SceneManagerImpl::CreateCamera()
 
 StrongRef<Mesh> SceneManagerImpl::CreateMesh(const io::path& path)
 {
-	return CreateMesh(m_ResourceSystem->GetResource(core::ResourceType::Mesh, path).As<video::Mesh>());
+	return CreateMesh(core::ResourceSystem::Instance()->GetResource(core::ResourceType::Mesh, path).As<video::Mesh>());
 }
 
 StrongRef<Mesh> SceneManagerImpl::CreateMesh(video::Mesh* mesh)
@@ -151,7 +145,7 @@ StrongRef<CameraControl> SceneManagerImpl::CreateCameraControl(float moveSpeed, 
 
 StrongRef<Component> SceneManagerImpl::CreateComponent(core::Name type)
 {
-	return m_RefFactory->Create(ReferableType::SceneNodeComponent, type);
+	return core::ReferableFactory::Instance()->Create(ReferableType::SceneNodeComponent, type);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -373,11 +367,6 @@ video::Renderer* SceneManagerImpl::GetRenderer() const
 	return m_Renderer;
 }
 
-io::FileSystem* SceneManagerImpl::GetFileSystem() const
-{
-	return m_Filesystem;
-}
-
 video::MaterialLibrary* SceneManagerImpl::GetMaterialLibrary() const
 {
 	return m_MatLib;
@@ -386,16 +375,6 @@ video::MaterialLibrary* SceneManagerImpl::GetMaterialLibrary() const
 video::ImageSystem* SceneManagerImpl::GetImageSystem() const
 {
 	return m_ImagSys;
-}
-
-core::ReferableFactory* SceneManagerImpl::GetReferableFactory() const
-{
-	return m_RefFactory;
-}
-
-core::ResourceSystem* SceneManagerImpl::GetResourceSystem() const
-{
-	return m_ResourceSystem;
 }
 
 video::MeshSystem* SceneManagerImpl::GetMeshSystem() const

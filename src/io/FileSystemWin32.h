@@ -1,9 +1,8 @@
 #ifndef INCLUDED_FILESYSTEM_WIN32_H
 #define INCLUDED_FILESYSTEM_WIN32_H
+#ifdef LUX_WINDOWS
 #include "io/FileSystem.h"
 #include "core/lxArray.h"
-
-#ifdef LUX_WINDOWS
 
 #include "io/ArchiveFolderWin32.h"
 
@@ -66,13 +65,8 @@ private:
 	core::array<MountEntry> m_Mounts;
 };
 
-
-
 }
-
 }
-
 
 #endif // LUX_WINDOWS
-
 #endif

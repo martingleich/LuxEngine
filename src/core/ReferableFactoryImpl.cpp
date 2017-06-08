@@ -22,17 +22,8 @@ void RegisterReferable(ReferableRegisterBlock* block)
 void RunAllRegisterReferableFunctions()
 {
 	for(auto block = g_FirstReferableBlock; block; block = block->nextBlock)
-		ReferableFactoryImpl::Instance()->RegisterType(block->prototypeCreator());
+		ReferableFactory::Instance()->RegisterType(block->prototypeCreator());
 }
-}
-
-ReferableFactoryImpl* ReferableFactoryImpl::Instance()
-{
-	static StrongRef<ReferableFactoryImpl> instance = nullptr;
-	if(!instance)
-		instance = LUX_NEW(ReferableFactoryImpl);
-
-	return instance;
 }
 
 core::array<ReferableFactoryImpl::ReferableType>::Iterator ReferableFactoryImpl::FindEntry(Name type, Name subType) const

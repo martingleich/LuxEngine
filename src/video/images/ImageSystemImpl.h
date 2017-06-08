@@ -13,7 +13,7 @@ class ImageSystemImpl : public ImageSystem
 	friend class ImageToTextureLoader;
 	friend class MultiImageToCubeTextureLoader;
 public:
-	ImageSystemImpl(io::FileSystem* fileSystem, video::VideoDriver* driver, core::ResourceSystem* resSys);
+	ImageSystemImpl(video::VideoDriver* driver);
 
 	StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format);
 	StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMem = true, bool deleteOnDrop = true);
@@ -56,10 +56,7 @@ private:
 
 private:
 	core::array<StrongRef<ImageWriter>> m_WriterList;
-
-	StrongRef<core::ResourceSystem> m_ResourceSystem;
-	StrongRef<io::FileSystem> m_Filesystem;
-	WeakRef<video::VideoDriver> m_Driver; // VideoDriver owns ImageSystem prevent circular reference.
+	StrongRef<video::VideoDriver> m_Driver;
 
 	u32 m_TextureCreationFlags;
 

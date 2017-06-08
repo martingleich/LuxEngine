@@ -15,9 +15,8 @@ namespace lux
 namespace video
 {
 
-MaterialLibraryImpl::MaterialLibraryImpl(VideoDriver* driver, io::FileSystem* fileSys) :
-	m_VideoDriver(driver),
-	m_FileSystem(fileSys)
+MaterialLibraryImpl::MaterialLibraryImpl(VideoDriver* driver) :
+	m_VideoDriver(driver)
 {
 }
 
@@ -104,10 +103,10 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 	StrongRef<io::File> PSFile;
 	StrongRef<io::File> VSFile;
 	if(VSPath == PSPath) {
-		PSFile = VSFile = m_FileSystem->OpenFile(VSPath);
+		PSFile = VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
 	} else {
-		PSFile = m_FileSystem->OpenFile(PSPath);
-		VSFile = m_FileSystem->OpenFile(VSPath);
+		PSFile = io::FileSystem::Instance()->OpenFile(PSPath);
+		VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
 	}
 
 	core::mem::RawMemory vsCodeBuffer;

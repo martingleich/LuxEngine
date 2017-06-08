@@ -4,19 +4,13 @@
 
 namespace lux
 {
-
-namespace io
-{
-class FileSystem;
-}
-
 namespace core
 {
 
 class ResourceSystemImpl : public ResourceSystem
 {
 public:
-	ResourceSystemImpl(io::FileSystem* fileSys, ReferableFactory* refFactory);
+	ResourceSystemImpl();
 	~ResourceSystemImpl();
 	u32 GetResourceCount(Name type) const;
 	const string& GetResourceName(Name type, u32 id) const;
@@ -39,8 +33,6 @@ public:
 	Name GetType(u32 id) const;
 	void AddType(Name name);
 
-	StrongRef<ReferableFactory> GetReferableFactory();
-	StrongRef<io::FileSystem> GetFileSystem();
 private:
 	u32 GetTypeID(Name type) const;
 

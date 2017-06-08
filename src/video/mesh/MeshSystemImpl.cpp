@@ -12,28 +12,26 @@ namespace lux
 namespace video
 {
 
-MeshSystemImpl::MeshSystemImpl(core::ResourceSystem* resourceSystem,video::VideoDriver* driver, video::MaterialLibrary* matLib) :
-	m_ResourceSystem(resourceSystem),
+MeshSystemImpl::MeshSystemImpl(video::VideoDriver* driver, video::MaterialLibrary* matLib) :
 	m_VideoDriver(driver),
 	m_MatLib(matLib)
 {
-	m_GeoCreatorLib = LUX_NEW(GeometryCreatorLibImpl)(m_MatLib, m_VideoDriver, this, m_ResourceSystem);
+	m_GeoCreatorLib = LUX_NEW(GeometryCreatorLibImpl)(m_MatLib, m_VideoDriver, this);
 
-	m_ResourceSystem->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(m_VideoDriver, m_MatLib, m_ResourceSystem));
-
-	m_ResourceSystem->GetReferableFactory()->RegisterType(LUX_NEW(StaticMesh)(m_VideoDriver));
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(m_VideoDriver, m_MatLib));
+	core::ReferableFactory::Instance()->RegisterType(LUX_NEW(StaticMesh)(m_VideoDriver));
 }
 
 StrongRef<Mesh> MeshSystemImpl::AddMesh(const io::path& name)
 {
 	auto mesh = CreateMesh();
-	m_ResourceSystem->AddResource(name, mesh);
+	core::ResourceSystem::Instance()->AddResource(name, mesh);
 	return mesh;
 }
 
 StrongRef<Mesh> MeshSystemImpl::CreateMesh()
 {
-	return m_ResourceSystem->GetReferableFactory()->Create(ReferableType::Resource, core::ResourceType::Mesh);
+	return core::ReferableFactory::Instance()->Create(ReferableType::Resource, core::ResourceType::Mesh);
 }
 
 StrongRef<GeometryCreatorLib> MeshSystemImpl::GetGeometryCreatorLib()

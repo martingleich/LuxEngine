@@ -11,17 +11,12 @@ class MaterialLibrary;
 class MaterialRenderer;
 class VideoDriver;
 }
-namespace io
-{
-class FileSystem;
-}
 namespace gui
 {
 
 class FontCreatorNull : public FontCreator
 {
 private:
-	io::FileSystem* m_FileSystem;
 	video::VideoDriver* m_Driver;
 	video::MaterialRenderer* m_DefaultFontMaterial;
 
@@ -29,7 +24,6 @@ private:
 
 public:
 	FontCreatorNull(video::MaterialLibrary* matLib,
-		io::FileSystem* fileSys,
 		video::VideoDriver* driver,
 		video::MaterialRenderer* defaultFontMaterial);
 

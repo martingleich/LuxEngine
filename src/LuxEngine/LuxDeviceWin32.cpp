@@ -5,32 +5,33 @@
 #include "core/Logger.h"
 #include "core/lxRandom.h"
 #include "core/StringConverter.h"
+#include "core/ReferableFactory.h"
 
-#include "input/InputSystemImpl.h"
+#include "resources/ResourceSystem.h"
+
 #include "scene/SceneManagerImpl.h"
-#include "video/mesh/MeshSystemImpl.h"
-#include "resources/ResourceSystemImpl.h"
-#include "video/MaterialLibraryImpl.h"
-#include "core/ReferableFactoryImpl.h"
 
-#include "io/FileSystemWin32.h"
+#include "io/FileSystem.h"
+
 #include "gui/WindowWin32.h"
 #include "gui/CursorControlWin32.h"
 #include "gui/GUIEnvironmentImpl.h"
-
-#include "video/images/ImageSystemImpl.h"
 
 #include "core/lxUnicodeConversion.h"
 
 #include "core/ReferableRegister.h"
 
+#include "video/mesh/MeshSystemImpl.h"
+#include "video/MaterialLibraryImpl.h"
+#include "video/images/ImageSystemImpl.h"
 #include "video/VideoDriver.h"
+#include "video/MaterialRendererImpl.h"
 
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/d3d9/VideoDriverD3D9.h"
 #endif
-#include "video/MaterialRendererImpl.h"
 
+#include "input/InputSystemImpl.h"
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "input/raw_input/RawInputReceiver.h"
 #endif
@@ -219,24 +220,28 @@ LuxDeviceWin32::LuxDeviceWin32() :
 	if(log::EngineLog.HasUnsetLogs())
 		log::EngineLog.SetNewPrinter(log::FilePrinter, true);
 
-	m_Filesystem = LUX_NEW(io::FileSystemWin32);
-	m_ReferableFactory = core::ReferableFactoryImpl::Instance();
+	// Force creation of singleton classes
+	io::FileSystem::Instance();
+	core::ReferableFactory::Instance();
+	auto resourceSystem = core::ResourceSystem::Instance();
+
 	m_Window = LUX_NEW(gui::WindowWin32);
-	m_ResourceSystem = LUX_NEW(core::ResourceSystemImpl)(m_Filesystem, m_ReferableFactory);
 
 	log::Log("Starting time ~a", core::Clock::GetDateAndTime());
 
-	m_ResourceSystem->AddType(core::ResourceType::Mesh);
-	m_ResourceSystem->AddType(core::ResourceType::Image);
-	m_ResourceSystem->AddType(core::ResourceType::ImageList);
-	m_ResourceSystem->AddType(core::ResourceType::Texture);
-	m_ResourceSystem->AddType(core::ResourceType::CubeTexture);
-	m_ResourceSystem->AddType(core::ResourceType::Font);
-	m_ResourceSystem->AddType(core::ResourceType::Sound);
+	// Register resource types
+	resourceSystem->AddType(core::ResourceType::Mesh);
+	resourceSystem->AddType(core::ResourceType::Image);
+	resourceSystem->AddType(core::ResourceType::ImageList);
+	resourceSystem->AddType(core::ResourceType::Texture);
+	resourceSystem->AddType(core::ResourceType::CubeTexture);
+	resourceSystem->AddType(core::ResourceType::Font);
+	resourceSystem->AddType(core::ResourceType::Sound);
 
-	m_ResourceSystem->SetCaching(core::ResourceType::ImageList, false);
-	m_ResourceSystem->SetCaching(core::ResourceType::Image, false);
+	resourceSystem->SetCaching(core::ResourceType::ImageList, false);
+	resourceSystem->SetCaching(core::ResourceType::Image, false);
 
+	// Register all referable object registers with LUX_REGISTER_REFERABLE_CLASS
 	lux::core::impl::RunAllRegisterReferableFunctions();
 
 	log::Info("Lux core was build.");
@@ -317,7 +322,7 @@ void LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 
 	log::Info("Building Video Driver.");
 #ifdef LUX_COMPILE_WITH_D3D9
-	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9)(m_ReferableFactory);
+	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9);
 	driver->Init(config, m_Window);
 	m_Driver = driver;
 
@@ -336,7 +341,7 @@ void LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 
 void LuxDeviceWin32::BuildMaterials()
 {
-	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver, m_Filesystem);
+	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver);
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseSolid)("solid_base", nullptr, nullptr));
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseTransparent)("transparent_base", nullptr, nullptr));
 	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid)("solid", nullptr, nullptr));
@@ -357,20 +362,14 @@ void LuxDeviceWin32::BuildSceneManager()
 	if(!m_Driver)
 		throw core::Exception("Missing video driver");
 
-	if(!m_Filesystem)
-		throw core::Exception("Missing file system");
-
-	m_MeshSystem = LUX_NEW(video::MeshSystemImpl)(m_ResourceSystem, m_Driver, m_MaterialLibrary);
+	m_MeshSystem = LUX_NEW(video::MeshSystemImpl)(m_Driver, m_MaterialLibrary);
 
 	// Scene-Manager erstellen
 	log::Info("Build Scene Manager.");
 	m_SceneManager = LUX_NEW(scene::SceneManagerImpl)(
 		m_Driver,
 		m_ImageSystem,
-		m_Filesystem,
-		m_ReferableFactory,
 		m_MeshSystem,
-		m_ResourceSystem,
 		m_MaterialLibrary);
 }
 
@@ -382,7 +381,7 @@ void LuxDeviceWin32::BuildImageSystem()
 	}
 
 	log::Info("Build Image System.");
-	m_ImageSystem = LUX_NEW(video::ImageSystemImpl)(m_Filesystem, m_Driver, m_ResourceSystem);
+	m_ImageSystem = LUX_NEW(video::ImageSystemImpl)(m_Driver);
 }
 
 void LuxDeviceWin32::BuildGUIEnvironment()
@@ -398,7 +397,7 @@ void LuxDeviceWin32::BuildGUIEnvironment()
 	}
 
 	log::Info("Build GUI Environment.");
-	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl)(m_ResourceSystem, m_ImageSystem, m_Driver, m_MaterialLibrary, m_Filesystem);
+	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl)(m_ImageSystem, m_Driver, m_MaterialLibrary);
 }
 
 void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
@@ -466,11 +465,9 @@ LuxDeviceWin32::~LuxDeviceWin32()
 
 	m_Driver = nullptr;
 
-	m_ResourceSystem = nullptr;
-
-	m_Filesystem = nullptr;
-
-	m_ReferableFactory = nullptr;
+	core::ResourceSystem::Destroy();
+	core::ReferableFactory::Destroy();
+	io::FileSystem::Destroy();
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 	m_RawInputReceiver = nullptr;
@@ -555,11 +552,6 @@ StrongRef<input::InputSystem> LuxDeviceWin32::GetInputSystem() const
 	return m_InputSystem;
 }
 
-StrongRef<io::FileSystem> LuxDeviceWin32::GetFileSystem() const
-{
-	return m_Filesystem;
-}
-
 StrongRef<video::ImageSystem> LuxDeviceWin32::GetImageSystem() const
 {
 	return m_ImageSystem;
@@ -580,21 +572,11 @@ StrongRef<gui::Window> LuxDeviceWin32::GetWindow() const
 	return m_Window;
 }
 
-StrongRef<core::ReferableFactory> LuxDeviceWin32::GetReferableFactory() const
-{
-	return m_ReferableFactory;
-}
-
-StrongRef<core::ResourceSystem> LuxDeviceWin32::GetResourceSystem() const
-{
-	return m_ResourceSystem;
-}
-
 StrongRef<video::MeshSystem> LuxDeviceWin32::GetMeshSystem() const
 {
 	return m_MeshSystem;
 }
 
+} // namespace lux
 
-}    //Namespace Lux  
 #endif // LUX_WINDOWS
