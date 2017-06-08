@@ -14,10 +14,10 @@ namespace video
 
 GeometryCreatorArrow::GeometryCreatorArrow()
 {
-	m_Package.AddParam("shaft_height", 2.0f);
-	m_Package.AddParam("head_heigth", 1.0f);
-	m_Package.AddParam("shaft_radius", 0.5f);
-	m_Package.AddParam("head_radius", 0.75f);
+	m_Package.AddParam("shaftHeight", 2.0f);
+	m_Package.AddParam("headHeigth", 1.0f);
+	m_Package.AddParam("shaftRadius", 0.5f);
+	m_Package.AddParam("headRadius", 0.75f);
 	m_Package.AddParam("sectors", 8);
 }
 
@@ -32,7 +32,7 @@ const core::ParamPackage& GeometryCreatorArrow::GetParams() const
 	return m_Package;
 }
 
-StrongRef<Geometry> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
 {
 	LX_CHECK_NULL_ARG(driver);
 
@@ -42,13 +42,13 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver, con
 	const float head_radius = params.Param(3).Default(0.75f);
 	const s32 sectors = params.Param(4).Default(8);
 
-	return CreateSubMesh(driver,
+	return CreateGeometry(driver,
 		shaft_height, head_height,
 		shaft_radius, head_radius,
 		sectors);
 }
 
-StrongRef<Geometry> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(VideoDriver* driver,
 	float shaft_height, float head_height,
 	float shaft_radius, float head_radius,
 	s32 sectors)
@@ -56,10 +56,10 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateSubMesh(VideoDriver* driver,
 	LX_CHECK_NULL_ARG(driver);
 
 	if(shaft_height <= 0.0f || head_height <= 0.0f || shaft_radius <= 0.0f || head_radius <= 0.0f)
-		throw core::InvalidArgumentException("shaft_height, head_height, shaft_radius, head_radius", "Must be bigger than zero");
+		throw core::InvalidArgumentException("shaftHeight, headHeight, shaftRadius, head_radius", "Must be bigger than zero");
 
 	if(head_radius < shaft_radius)
-		throw core::InvalidArgumentException("head_radius, shaft_radius", "Head radius must be bigger than shaft_radius");
+		throw core::InvalidArgumentException("headRadius, shaftRadius", "Head radius must be bigger than shaft_radius");
 
 	if(sectors < 3)
 		throw core::InvalidArgumentException("sectors", "Number of sectors must be bigger than 2");

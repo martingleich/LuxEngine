@@ -234,15 +234,20 @@ public:
 	{
 		lxAssert(this != &old);
 
-		for(u32 i = 0; i < old.m_Used; ++i)
-			m_Entries[i].~T();
-		Free(m_Entries);
+		if(m_Entries) {
+			for(u32 i = 0; i < old.m_Used; ++i)
+				m_Entries[i].~T();
+			Free(m_Entries);
+		}
 
 		m_Entries = old.m_Entries;
 		m_Used = old.m_Used;
 		m_Alloc = old.m_Alloc;
 		m_Sorted = old.m_Sorted;
 		old.m_Entries = nullptr;
+		old.m_Used = 0;
+		old.m_Alloc = 0;
+		old.m_Sorted = true;
 
 		return *this;
 	}
@@ -686,14 +691,14 @@ public:
 	const T& Back(size_t i = 0) const
 	{
 		lxAssert(i < m_Used);
-		return m_Entries[m_Used-i-1];
+		return m_Entries[m_Used - i - 1];
 	}
 
 	//! The i-th element from the back of the array
 	T& Back(size_t i = 0)
 	{
 		lxAssert(i < m_Used);
-		return m_Entries[m_Used-i-1];
+		return m_Entries[m_Used - i - 1];
 	}
 
 	//! The i-th element from the front of the array
@@ -863,9 +868,9 @@ struct HashType<array<T>>
 	}
 };
 
-}    
+}
 
-}    
+}
 
 
 #endif

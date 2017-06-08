@@ -16,7 +16,7 @@ public:
 	const string& GetName() const;
 	const core::ParamPackage& GetParams() const;
 
-	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params);
 
 	//! Create a cube
 	/**
@@ -33,7 +33,7 @@ public:
 	\param inside If true, the normals point inside the cube, otherwise they show outside.
 	\return The created plane
 	*/
-	StrongRef<Geometry> CreateSubMesh(VideoDriver* driver,
+	StrongRef<Geometry> CreateGeometry(VideoDriver* driver,
 		float sizeX, float sizeY, float sizeZ,
 		s32 tesX, s32 tesY, s32 tesZ,
 		float texX, float texY, float texZ,

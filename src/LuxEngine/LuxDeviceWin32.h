@@ -63,9 +63,6 @@ public:
 	HWND CreateNewWindow(u32 width, u32 height, const string& title);
 	void CloseDevice();
 	bool HandleSystemMessages();
-	void PostEvent(const input::Event& event, input::EEventTarget target = input::EEventTarget::All);
-	void SetUserEventReceiver(input::UserEventReceiver* receiver);
-	StrongRef<input::UserEventReceiver> GetUserEventReceiver() const;
 	bool Run(float& fNumSecsPassed);
 
 	double GetTime() const;
@@ -96,22 +93,6 @@ private:
 	void BuildMaterials();
 
 private:
-	struct InputEventProxy : public input::EventReceiver
-	{
-		InputEventProxy(LuxDeviceWin32* d) :
-			device(d)
-		{
-		}
-
-		bool OnEvent(const input::Event& event)
-		{
-			device->PostEvent(event, input::EEventTarget::All);
-			return true;
-		}
-
-		LuxDeviceWin32* device;
-	};
-
 	struct WindowCallback : public gui::WindowEventCallback
 	{
 	public:
@@ -133,7 +114,6 @@ private:
 	};
 
 	WindowCallback m_WindowCallback;
-	InputEventProxy m_InputEventProxy;
 
 	bool m_OwnWindow;
 	StrongRef<gui::Window> m_Window;
@@ -142,8 +122,6 @@ private:
 	bool m_Quit;
 
 	double m_Time;
-
-	WeakRef<input::UserEventReceiver> m_UserEventReceiver;
 
 	StrongRef<input::InputSystem> m_InputSystem;
 	StrongRef<video::VideoDriver> m_Driver;

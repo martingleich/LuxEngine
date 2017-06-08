@@ -20,11 +20,9 @@ Node::Node(SceneManager* creator, bool isRoot) :
 	m_Tags(0),
 	m_DebugFlags(EDD_NONE),
 	m_IsVisible(true),
-	m_EventReceiverCount(0),
 	m_SceneManager(creator),
 	m_HasAbsTransChanged(true),
 	m_HasUserBoundingBox(false),
-	m_RegisteredEventReceiver(false),
 	m_IsRoot(isRoot)
 {
 	UpdateAbsTransform();
@@ -452,10 +450,8 @@ Node::Node(const Node& other) :
 	m_Tags(other.m_Tags),
 	m_DebugFlags(other.m_DebugFlags),
 	m_IsVisible(other.m_IsVisible),
-	m_EventReceiverCount(0),
 	m_SceneManager(m_SceneManager),
-	m_HasAbsTransChanged(true),
-	m_RegisteredEventReceiver(false)
+	m_HasAbsTransChanged(true)
 {
 	for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it) {
 		StrongRef<Node> node = (*it)->Clone();
@@ -468,34 +464,12 @@ Node::Node(const Node& other) :
 	}
 }
 
-bool Node::OnEvent(const input::Event& e)
-{
-	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
-		if(it->comp->IsEventReceiver())
-			it->comp->OnEvent(e);
-	}
-
-	return false;
-}
-
 void Node::OnAttach()
 {
-	if(m_SceneManager) {
-		if(!m_RegisteredEventReceiver && m_EventReceiverCount) {
-			m_SceneManager->RegisterEventReceiver(this);
-			m_RegisteredEventReceiver = true;
-		}
-	}
 }
 
 void Node::OnDettach()
 {
-	if(m_SceneManager) {
-		if(m_RegisteredEventReceiver) {
-			m_SceneManager->UnregisterEventReceiver(this);
-			m_RegisteredEventReceiver = false;
-		}
-	}
 }
 
 void Node::OnAddComponent(Component* c)
@@ -508,15 +482,6 @@ void Node::OnAddComponent(Component* c)
 		auto light = dynamic_cast<Light*>(c);
 		if(light)
 			m_SceneManager->RegisterLight(this, light);
-
-		if(c->IsEventReceiver()) {
-			if(!m_RegisteredEventReceiver) {
-				m_SceneManager->RegisterEventReceiver(this);
-				m_RegisteredEventReceiver = true;
-			}
-
-			++m_EventReceiverCount;
-		}
 	}
 
 	if(!m_HasUserBoundingBox)
@@ -535,14 +500,6 @@ void Node::OnRemoveComponent(Component* c)
 		auto light = dynamic_cast<Light*>(c);
 		if(light)
 			m_SceneManager->UnregisterLight(this, light);
-
-		if(c->IsEventReceiver()) {
-			--m_EventReceiverCount;
-			if(m_RegisteredEventReceiver) {
-				m_SceneManager->UnregisterEventReceiver(this);
-				m_RegisteredEventReceiver = false;
-			}
-		}
 	}
 
 	if(!m_HasUserBoundingBox)

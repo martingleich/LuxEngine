@@ -212,7 +212,6 @@ LUX_API StrongRef<LuxDevice> CreateDevice()
 LuxDeviceWin32::LuxDeviceWin32() :
 	m_Time(0.0),
 	m_Quit(false),
-	m_InputEventProxy(this),
 	m_LuxWindowClassName(WIN32_CLASS_NAME),
 	m_WindowCallback(this)
 {
@@ -295,7 +294,6 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 	m_InputSystem = LUX_NEW(input::InputSystemImpl)(isForeground);
-	m_InputSystem->SetInputReceiver(&m_InputEventProxy);
 	m_InputSystem->SetForegroundState(m_Window->IsFocused());
 
 	m_RawInputReceiver = LUX_NEW(input::RawInputReceiver)(m_InputSystem, (HWND)m_Window->GetDeviceWindow());
@@ -453,8 +451,6 @@ HWND LuxDeviceWin32::CreateNewWindow(u32 width, u32 height, const string& title)
 
 LuxDeviceWin32::~LuxDeviceWin32()
 {
-	m_UserEventReceiver = nullptr;
-
 	m_GUIEnv = nullptr;
 	m_SceneManager = nullptr;
 
@@ -508,26 +504,6 @@ bool LuxDeviceWin32::HandleSystemMessages()
 	return m_Quit;
 }
 
-void LuxDeviceWin32::PostEvent(const input::Event& event, input::EEventTarget target)
-{
-	bool Handled = false;
-	if(m_UserEventReceiver && !Handled && TestFlag(target, input::EEventTarget::User))
-		Handled = m_UserEventReceiver->OnEvent(event);
-
-	if(m_SceneManager && !Handled && TestFlag(target, input::EEventTarget::Scene))
-		Handled = m_SceneManager->OnEvent(event);
-}
-
-void LuxDeviceWin32::SetUserEventReceiver(input::UserEventReceiver* receiver)
-{
-	m_UserEventReceiver = receiver;
-}
-
-StrongRef<input::UserEventReceiver> LuxDeviceWin32::GetUserEventReceiver() const
-{
-	return m_UserEventReceiver;
-}
-
 bool LuxDeviceWin32::Run(float& fNumSecsPassed)
 {
 	static auto StartTime = core::Clock::GetTicks();
@@ -558,7 +534,6 @@ bool LuxDeviceWin32::Run(float& fNumSecsPassed)
 	m_Quit = false; // Restore quit flag.
 	return !ret;
 }
-
 
 double LuxDeviceWin32::GetTime() const
 {

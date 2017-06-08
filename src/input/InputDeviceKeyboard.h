@@ -15,9 +15,9 @@ public:
 	void Reset();
 	void DisconnectReporting(InputSystem* system);
 	EEventSource GetType() const;
-	bool GetButtonState(u32 buttonCode) const;
-	int GetAxisState(u32 axisCode) const;
-	math::vector2i GetAreaState(u32 areaCode) const;
+	const Button* GetButton(u32 buttonCode) const;
+	const Axis* GetAxis(u32 axisCode) const;
+	const Area* GetArea(u32 areaCode) const;
 	bool Update(Event& event);
 
 	const string& GetElementName(EEventType type, u32 code) const;
@@ -25,7 +25,7 @@ public:
 	size_t GetElementCount(EEventType type) const;
 
 private:
-	core::array<Button> m_Buttons;
+	core::array<ButtonElement> m_Buttons;
 };
 
 }

@@ -21,7 +21,7 @@ GeometryCreatorSphereUV::GeometryCreatorSphereUV()
 {
 	m_Params.AddParam("radius", 1.0f);
 	m_Params.AddParam("rings", 16);
-	m_Params.AddParam("segments", 32);
+	m_Params.AddParam("sectors", 32);
 	m_Params.AddParam("tex", math::vector2f(1, 1));
 	m_Params.AddParam("inside", false);
 }
@@ -37,20 +37,20 @@ const core::ParamPackage& GeometryCreatorSphereUV::GetParams() const
 	return m_Params;
 }
 
-StrongRef<Geometry> GeometryCreatorSphereUV::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
 {
 	const float radius = params.Param(0);
 	const s32 rings = params.Param(1);
-	const s32 segments = params.Param(2);
+	const s32 sectors = params.Param(2);
 	const math::vector2f tex = params.Param(3);
 	const bool inside = params.Param(4);
 
-	return CreateSubMesh(driver, radius, rings, segments, tex.x, tex.y, inside);
+	return CreateGeometry(driver, radius, rings, sectors, tex.x, tex.y, inside);
 }
 
-StrongRef<Geometry> GeometryCreatorSphereUV::CreateSubMesh(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(VideoDriver* driver,
 	float radius,
-	s32 rings, s32 segments, float texX, float texY,
+	s32 rings, s32 sectors, float texX, float texY,
 	bool inside)
 {
 	LX_CHECK_NULL_ARG(driver);
@@ -61,11 +61,11 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateSubMesh(VideoDriver* driver,
 	if(rings < 2)
 		throw core::InvalidArgumentException("rings", "Must be bigger than 1");
 
-	if(segments < 3)
-		throw core::InvalidArgumentException("segments", "Must be bigger than 2");
+	if(sectors < 3)
+		throw core::InvalidArgumentException("sectors", "Must be bigger than 2");
 
-	const u32 vertexCount = (rings - 1) * (segments + 1) + 2;
-	const u32 indexCount = 6 * segments * (rings - 1);
+	const u32 vertexCount = (rings - 1) * (sectors + 1) + 2;
+	const u32 indexCount = 6 * sectors * (rings - 1);
 
 	if(vertexCount > 0xFFFF)
 		throw core::InvalidArgumentException("Too many arguments");
@@ -84,8 +84,8 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateSubMesh(VideoDriver* driver,
 	math::anglef alpha;
 	math::anglef beta;
 	Vertex.texture = math::vector2f(0.0f);
-	for(s32 x = 0; x <= segments; ++x) {
-		alpha = x * (math::anglef::FULL / segments);
+	for(s32 x = 0; x <= sectors; ++x) {
+		alpha = x * (math::anglef::FULL / sectors);
 
 		for(s32 y = 0; y < temp; ++y) {
 			beta = math::anglef::Radian(float(math::Constants<float>::pi() / rings)*(y - ((rings - 2)*0.5f)));
@@ -111,8 +111,8 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateSubMesh(VideoDriver* driver,
 	Vertex.texture = math::vector2f(0.5f*texX, texY);
 	vertexBuffer->AddVertex(&Vertex);
 
-	for(s32 quad = 0; quad < segments; ++quad) {
-		indices[0] = (u16)((rings - 1) * (segments + 1) + 1);
+	for(s32 quad = 0; quad < sectors; ++quad) {
+		indices[0] = (u16)((rings - 1) * (sectors + 1) + 1);
 		indices[1] = (u16)(temp * (quad + 1));
 		indices[2] = (u16)(temp * quad);
 

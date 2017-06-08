@@ -11,31 +11,37 @@ namespace scene
 {
 
 CameraControl::CameraControl() :
-	CameraControl(4.0f, math::anglef::Degree(90.0f), math::anglef::Degree(89.0f), false)
+	CameraControl(4.0f, math::anglef::Degree(30.0f), math::anglef::Degree(89.0f), false)
 {
 }
 
-CameraControl::CameraControl(float moveSpeed, math::anglef rotSpeed, math::anglef maxAngle, bool noVertical) : 
+CameraControl::CameraControl(float moveSpeed, math::anglef rotSpeed, math::anglef maxAngle, bool noVertical) :
 	m_MoveSpeed(moveSpeed),
 	m_RotSpeed(rotSpeed),
 	m_MaxVerticalAngle(maxAngle),
-	m_NoVerticalMovement(noVertical),
-	m_MouseMove(0.0f, 0.0f)
+	m_NoVerticalMovement(noVertical)
 {
-	m_IsEventReceiver = true;
+}
 
-	m_KeyMap[EA_FORWARD] = input::KEY_KEY_W;
-	m_KeyMap[EA_BACKWARD] = input::KEY_KEY_S;
-	m_KeyMap[EA_LEFT] = input::KEY_KEY_A;
-	m_KeyMap[EA_RIGHT] = input::KEY_KEY_D;
-	m_KeyMap[EA_FAST] = input::KEY_LSHIFT;
-	m_KeyMap[EA_SLOW] = input::KEY_LCONTROL;
-	m_KeyMap[EA_UP] = input::KEY_KEY_Q;
-	m_KeyMap[EA_DOWN] = input::KEY_KEY_E;
+CameraControl::~CameraControl()
+{
 }
 
 void CameraControl::Animate(Node* node, float time)
 {
+	if(!m_Forward) {
+		m_Forward = events::ActionList::Instance()->GetAxisAction("cam_forward");
+		m_Flank = events::ActionList::Instance()->GetAxisAction("cam_stride");
+		m_Up = events::ActionList::Instance()->GetAxisAction("cam_up");
+
+		auto lookX = events::ActionList::Instance()->GetAxisAction("cam_look_x");
+		if(lookX)
+			lookX->signal.Connect(this, &CameraControl::MouseMoveX);
+		auto lookY = events::ActionList::Instance()->GetAxisAction("cam_look_y");
+		if(lookY)
+			lookY->signal.Connect(this, &CameraControl::MouseMoveY);
+	}
+
 	node->UpdateAbsTransform();
 
 	math::vector3f pos = node->GetAbsoluteTransform().translation;
@@ -49,8 +55,8 @@ void CameraControl::Animate(Node* node, float time)
 		move.Normalize();
 	}
 
-	auto deltaRotY = m_MouseMove.x * m_RotSpeed * 0.001f;
-	auto deltaRotX = -m_MouseMove.y * m_RotSpeed * 0.001f;
+	auto deltaRotY = m_MouseMove.x * m_RotSpeed;
+	auto deltaRotX = -m_MouseMove.y * m_RotSpeed;
 
 	auto curAngleX = math::ArcCos(up.y);
 	if(look.y < 0)
@@ -67,80 +73,18 @@ void CameraControl::Animate(Node* node, float time)
 
 	node->SetOrientation(node->GetOrientation() * rot);
 
-	float realSpeed = m_MoveSpeed;
-	if(IsKeyDown(EA_FAST))
-		realSpeed *= 2.0f;
+	if(m_Forward)
+		pos += move * m_Forward->GetState() * m_MoveSpeed * time;
 
-	if(IsKeyDown(EA_SLOW))
-		realSpeed *= 0.5f;
+	if(m_Flank)
+		pos += flank * m_Flank->GetState() * m_MoveSpeed * time;
 
-	if(IsKeyDown(EA_FORWARD))
-		pos += move * realSpeed * time;
-
-	if(IsKeyDown(EA_BACKWARD))
-		pos -= move * realSpeed * time;
-
-	if(IsKeyDown(EA_LEFT))
-		pos -= flank * realSpeed * time;
-
-	if(IsKeyDown(EA_RIGHT))
-		pos += flank * realSpeed * time;
-
-	if(m_NoVerticalMovement == false) {
-		if(IsKeyDown(EA_UP))
-			pos.y += realSpeed * time;
-
-		if(IsKeyDown(EA_DOWN))
-			pos.y -= realSpeed * time;
-	}
+	if(!m_NoVerticalMovement && m_Up)
+		pos.y += m_Up->GetState() * m_MoveSpeed * time;
 
 	node->SetPosition(pos);
 
-	m_MouseMove.Set(0.0f, 0.0f);
-}
-
-StrongRef<Referable> CameraControl::Clone() const
-{
-	StrongRef<CameraControl> out = LUX_NEW(CameraControl)(m_MoveSpeed, m_RotSpeed,
-		m_MaxVerticalAngle, m_NoVerticalMovement);
-
-	for(int i = 0; i < EA_COUNT; ++i)
-		out->SetKeyCode((EAction)i, this->GetKeyCode((EAction)i));
-
-	return out;
-}
-
-void CameraControl::SetKeyCode(EAction Action, input::EKeyCode key)
-{
-	m_KeyMap[Action] = SKey(key);
-}
-
-input::EKeyCode CameraControl::GetKeyCode(EAction Action) const
-{
-	return m_KeyMap[Action].keyCode;
-}
-
-bool CameraControl::OnEvent(const input::Event& event)
-{
-	if(event.type == input::EEventType::Button) {
-		for(int i = 0; i < EA_COUNT; ++i) {
-			if(m_KeyMap[i].keyCode == event.button.code) {
-				m_KeyMap[i].state = event.button.pressedDown;
-				break;
-			}
-		}
-	} else if(event.type == input::EEventType::Area &&
-		event.source == input::EEventSource::Mouse &&
-		event.area.code == input::AREA_MOUSE) {
-		m_MouseMove.Set((float)event.area.relX, (float)event.area.relY);
-	}
-
-	return false;
-}
-
-bool CameraControl::IsKeyDown(EAction Action) const
-{
-	return m_KeyMap[Action].state;
+	m_MouseMove.Set(0, 0);
 }
 
 float CameraControl::GetMoveSpeed() const
@@ -151,6 +95,15 @@ float CameraControl::GetMoveSpeed() const
 void CameraControl::SetMoveSpeed(float fSpeed)
 {
 	m_MoveSpeed = fSpeed;
+}
+
+void CameraControl::SetMaxVerticalAngle(math::anglef a)
+{
+	m_MaxVerticalAngle = a;
+}
+math::anglef CameraControl::GetMaxVerticalAngle() const
+{
+	return m_MaxVerticalAngle;
 }
 
 math::anglef CameraControl::GetRotationSpeed() const
@@ -178,10 +131,52 @@ core::Name CameraControl::GetReferableSubType() const
 	return SceneComponentType::CameraControl;
 }
 
-void CameraControl::OnAttach(Node* node)
+StrongRef<Referable> CameraControl::Clone() const
 {
-	m_MouseMove.Set(0.0f, 0.0f);
-	Animator::OnAttach(node);
+	return LUX_NEW(CameraControl)(*this);
+}
+
+void CameraControl::DefaultEventToCameraAction(const input::Event& event)
+{
+	static WeakRef<events::AxisAction> lookX = events::ActionList::Instance()->GetAxisAction("cam_look_x");
+	static WeakRef<events::AxisAction> lookY = events::ActionList::Instance()->GetAxisAction("cam_look_y");
+
+	static struct
+	{
+		input::EKeyCode a, b;
+		WeakRef<events::AxisAction> action;
+	} ENTRIES[] = {
+		{input::KEY_KEY_W, input::KEY_KEY_S, events::ActionList::Instance()->GetAxisAction("cam_forward")},
+		{input::KEY_KEY_D, input::KEY_KEY_A, events::ActionList::Instance()->GetAxisAction("cam_stride")},
+		{input::KEY_KEY_Q, input::KEY_KEY_E, events::ActionList::Instance()->GetAxisAction("cam_up")},
+	};
+
+	if(event.type == input::EEventType::Button && event.source == input::EEventSource::Keyboard) {
+		float value = event.button.state ? 1.0f : -1.0f;
+		for(auto it = ENTRIES; it != ENTRIES + 3; ++it) {
+			float v = it->action->GetState();
+			if(event.button.code == it->a)
+				v += value;
+			if(event.button.code == it->b)
+				v -= value;
+			if(v != it->action->GetState())
+				it->action->FireAxis(v);
+		}
+	} else if(event.type == input::EEventType::Area && event.source == input::EEventSource::Mouse) {
+		if(lookX)
+			lookX->FireAxis(event.area.relX);
+		if(lookY)
+			lookY->FireAxis(event.area.relY);
+	}
+}
+void CameraControl::MouseMoveX(float v)
+{
+	m_MouseMove.x += v;
+}
+
+void CameraControl::MouseMoveY(float v)
+{
+	m_MouseMove.y += v;
 }
 
 }

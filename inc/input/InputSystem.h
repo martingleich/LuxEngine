@@ -1,30 +1,25 @@
 #ifndef INCLUDED_INPUT_SYSTEM_H
 #define INCLUDED_INPUT_SYSTEM_H
 #include "core/ReferenceCounted.h"
+#include "input/InputEvent.h"
+#include "events/lxSignal.h"
 
 namespace lux
 {
 namespace input
 {
 class InputDevice;
-class EventReceiver;
-class Event;
 class DeviceCreationDesc;
 
 //! The input system of the lux engine.
 class InputSystem : public ReferenceCounted
 {
 public:
-	//! Set the input receiver used by the input system.
+	//! Get the event signal
 	/**
-	The default input receiver is the engine-core.
-	It should never be necessary to change this value.
-	If it's changed the rest of the engine won't receiver input.
+	All input events created by the system are broadcast to this event
 	*/
-	virtual void SetInputReceiver(EventReceiver* receiver) = 0;
-
-	//! Get the current input receiver.
-	virtual EventReceiver* GetInputReceiver() const = 0;
+	virtual events::signal<const Event&>& GetEventSignal() = 0;
 
 	//! Set the current foreground state of the active window
 	/**
@@ -54,11 +49,7 @@ public:
 	*/
 	virtual void Update(Event& event) = 0;
 
-	//! Sent a user event.
-	/**
-	This method only send's the event to the event receiver.
-	To emulate user input use Update().
-	*/
+	//! Send a event directly to the user, without updating the devices.
 	virtual void SendUserEvent(const Event& event) = 0;
 
 	//! Create a new input device.

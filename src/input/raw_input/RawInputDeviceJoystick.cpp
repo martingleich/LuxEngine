@@ -475,23 +475,19 @@ void RawJoystickDevice::HandleInput(RAWINPUT* input)
 				int32_t min = m_Axes[axisCur].isCalibrated ? m_Axes[axisCur].logicalCalibratedMin : m_Axes[axisCur].logicalMin;
 				int32_t max = m_Axes[axisCur].isCalibrated ? m_Axes[axisCur].logicalCalibratedMax : m_Axes[axisCur].logicalMax;
 
-				if((int32_t)data[i].RawValue < m_Axes[axisCur].logicalMin || (int32_t)data[i].RawValue > m_Axes[axisCur].logicalMax) {
-					event.axis.abs = 1023;
-					SendInputEvent(event);
-				} else {
-					if((int32_t)data[i].RawValue < min)
-						data[i].RawValue = min;
-					if((int32_t)data[i].RawValue > max)
-						data[i].RawValue = max;
-					if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x39)
-						event.axis.abs = (data[i].RawValue - m_Axes[axisCur].logicalMin) * (1024 / (m_Axes[axisCur].logicalMax - m_Axes[axisCur].logicalMin + 1));
-					else if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x36)
-						event.axis.abs = ((data[i].RawValue - min) * 1024) / (max - min);
-					else
-						event.axis.abs = ((data[i].RawValue - min) * 2048) / (max - min) - 1024;
+				if((int32_t)data[i].RawValue < min)
+					data[i].RawValue = min;
+				if((int32_t)data[i].RawValue > max)
+					data[i].RawValue = max;
 
-					SendInputEvent(event);
-				}
+				if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x39) // Hat switch
+					event.axis.abs = float(data[i].RawValue - m_Axes[axisCur].logicalMin) / float(m_Axes[axisCur].logicalMax - m_Axes[axisCur].logicalMin + 1); // Map to [0, 1]
+				else if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x36) // Slider
+					event.axis.abs = float(data[i].RawValue - min) / float(max - min); // Map to [0, 1]
+				else // All the other things
+					event.axis.abs = (float(data[i].RawValue - min) * 2) / float(max - min) - 1.0f; // Map to [-1, 1]
+
+				SendInputEvent(event);
 
 				++axisCur;
 				matched = true;

@@ -14,6 +14,11 @@ InputSystemImpl::InputSystemImpl(bool defaultForeground) :
 {
 }
 
+events::signal<const Event&>& InputSystemImpl::GetEventSignal()
+{
+	return m_EventSignal;
+}
+
 StrongRef<InputDevice> InputSystemImpl::CreateDevice(const DeviceCreationDesc* desc)
 {
 	InputDevice* device = nullptr;
@@ -46,12 +51,6 @@ StrongRef<InputDevice> InputSystemImpl::CreateDevice(const DeviceCreationDesc* d
 	return device;
 }
 
-void InputSystemImpl::SendUserEvent(const Event& event)
-{
-	if(m_Receiver)
-		m_Receiver->OnEvent(event);
-}
-
 void InputSystemImpl::Update(Event& event)
 {
 	if(event.device) {
@@ -60,19 +59,14 @@ void InputSystemImpl::Update(Event& event)
 			m_KeyboardDevice = event.device;
 		}
 
-		if(event.device->Update(event) && event.device->IsAquired() && m_Receiver)
-			m_Receiver->OnEvent(event);
+		if(event.device->Update(event) && event.device->IsAquired())
+			m_EventSignal.Broadcast(event);
 	}
 }
 
-void InputSystemImpl::SetInputReceiver(EventReceiver* receiver)
+void InputSystemImpl::SendUserEvent(const Event& event)
 {
-	m_Receiver = receiver;
-}
-
-EventReceiver* InputSystemImpl::GetInputReceiver() const
-{
-	return m_Receiver;
+	m_EventSignal.Broadcast(event);
 }
 
 void InputSystemImpl::SetForegroundState(bool isForeground)

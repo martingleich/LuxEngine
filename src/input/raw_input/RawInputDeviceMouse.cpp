@@ -5,6 +5,10 @@
 #define RI_MOUSE_HWHEEL 0x800
 #endif
 
+static const float mouseNormalization = 100.0f;
+
+// TODO: Normalize the mouse event size, 1.0 should equal round about the same movement
+
 namespace lux
 {
 namespace input
@@ -66,9 +70,7 @@ size_t RawMouseDevice::GetElementCount(EEventType type) const
 	if(type == EEventType::Button)
 		return m_ButtonCount;
 	else if(type == EEventType::Axis)
-		return m_HasHWheel ? 2 : 1;
-	else
-		return 1;
+		return m_HasHWheel ? 4 : 3;
 }
 
 RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 code) const
@@ -82,10 +84,9 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 cod
 
 	static const string axis_names[] = {
 		"Wheel",
-		"Horizontal Wheel"};
-
-	static const string area_names[] = {
-		"Position"};
+		"Horizontal Wheel",
+		"Position X",
+		"Position Y"};
 
 	static const string unknown = "(unknown)";
 
@@ -97,10 +98,6 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 cod
 		if(code >= ARRAYSIZE(axis_names))
 			return ElemDesc(unknown, 0, 0, EElementType::Other);
 		return ElemDesc(axis_names[code], 0, 0, EElementType::Other);
-	} else if(type == EEventType::Area) {
-		if(code >= ARRAYSIZE(area_names))
-			return ElemDesc(unknown, 0, 0, EElementType::Other);
-		return ElemDesc(area_names[code], 0, 0, EElementType::Other);
 	} else {
 		return ElemDesc(unknown, 0, 0, EElementType::Other);
 	}
@@ -133,11 +130,11 @@ void RawMouseDevice::SendPosEvent(bool relative, s32 x, s32 y)
 
 	event.area.code = EAreaCode::AREA_MOUSE;
 	if(relative) {
-		event.area.relX = x;
-		event.area.relY = y;
+		event.area.relX = x/mouseNormalization;
+		event.area.relY = y/mouseNormalization;
 	} else {
-		event.area.absX = x;
-		event.area.absY = y;
+		event.area.absX = x/mouseNormalization;
+		event.area.absY = y/mouseNormalization;
 	}
 
 	SendInputEvent(event);
@@ -152,7 +149,7 @@ void RawMouseDevice::SendWheelEvent(s32 move)
 	event.internal_rel_only = true;
 
 	event.axis.code = EAxisCode::AXIS_MOUSE_WHEEL;
-	event.axis.rel = move;
+	event.axis.rel = (float)move;
 
 	SendInputEvent(event);
 }
@@ -169,7 +166,7 @@ void RawMouseDevice::SendHWheelEvent(s32 move)
 	event.internal_rel_only = true;
 
 	event.axis.code = EAxisCode::AXIS_MOUSE_HWHEEL;
-	event.axis.rel = move;
+	event.axis.rel = (float)move;
 
 	SendInputEvent(event);
 }

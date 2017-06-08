@@ -249,9 +249,14 @@ public:
 		MaterialRendererImpl::Begin(settings, state);
 
 		TextureStageSettings tss0;
-		tss0.colorOperator = ETextureOperator::Modulate;
-		tss0.colorArg1 = ETextureArgument::Texture;
-		tss0.colorArg2 = ETextureArgument::Diffuse;
+		if((BaseTexture*)settings.material->Layer(0)) {
+			tss0.colorOperator = ETextureOperator::Modulate;
+			tss0.colorArg1 = ETextureArgument::Texture;
+			tss0.colorArg2 = ETextureArgument::Diffuse;
+		} else {
+			tss0.colorOperator = ETextureOperator::SelectArg1;
+			tss0.colorArg1 = ETextureArgument::Diffuse;
+		}
 
 		state.EnableTextureStage(0, tss0);
 	}
@@ -298,6 +303,18 @@ public:
 		blend.Unpack(settings.material->Param(0));
 
 		state.EnableAlpha(blend);
+
+		TextureStageSettings tss0;
+		if((BaseTexture*)settings.material->Layer(0)) {
+			tss0.colorOperator = ETextureOperator::Modulate;
+			tss0.colorArg1 = ETextureArgument::Texture;
+			tss0.colorArg2 = ETextureArgument::Diffuse;
+		} else {
+			tss0.colorOperator = ETextureOperator::SelectArg1;
+			tss0.colorArg1 = ETextureArgument::Diffuse;
+		}
+
+		state.EnableTextureStage(0, tss0);
 	}
 
 	void End(DeviceState& state)
@@ -400,7 +417,7 @@ public:
 		MaterialRendererImpl::Begin(settings, state);
 
 		state.EnableVertexData();
-	
+
 		// Blend(Diff*Texture1, Texture2, DiffAlpha)
 		TextureStageSettings tss0, tss1, tss2;
 		tss0.colorOperator = ETextureOperator::SelectArg1;

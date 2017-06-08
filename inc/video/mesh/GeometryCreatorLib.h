@@ -31,7 +31,7 @@ public:
 		retrieved with \ref GeometryCreator::GetParams
 	\return A newly created sub mesh.
 	*/
-	virtual StrongRef<video::Geometry> CreateSubMesh(video::VideoDriver* driver, const core::PackagePuffer& params) = 0;
+	virtual StrongRef<video::Geometry> CreateGeometry(video::VideoDriver* driver, const core::PackagePuffer& params) = 0;
 
 	//! Get the name of the geometry creator.
 	/**
@@ -91,7 +91,7 @@ public:
 	\param params The parameter for the geometry creator, retrieved by \ref GetCreatorParams
 	\return A newly created sub mesh.
 	*/
-	virtual StrongRef<video::Geometry> CreateSubMesh(const string& name, const core::PackagePuffer& params) = 0;
+	virtual StrongRef<video::Geometry> CreateGeometry(const string& name, const core::PackagePuffer& params) = 0;
 
 	//! Create a new plane mesh.
 	/**
@@ -113,13 +113,13 @@ public:
 	Creates a globe like sphere
 	\param radius The radius of the sphere
 	\param rings The number of rings on the sphere, i.e. the number of longitude pieces, must be at least 2.
-	\param segements The number of segemnts on the sphere, i.e. the number of latitude pieces, must be at least 2.
+	\param sector The number of sectors on the sphere, i.e. the number of latitude pieces, must be at least 2.
 	\param texX The number of texture repeats in the x direction.
 	\param texY The number of texture repeats in the y direction.
 	\param inside If true, the normals point inside the cube, otherwise they show outside.
 	\return A newly created sphere.
 	*/
-	virtual StrongRef<Mesh> CreateSphereMesh(float radius=1.0f, s32 rings=16, s32 segments=32, float texX=1.0f, float texY=1.0f, bool inside=false) = 0;
+	virtual StrongRef<Mesh> CreateSphereMesh(float radius=1.0f, s32 rings=16, s32 sectors=32, float texX=1.0f, float texY=1.0f, bool inside=false) = 0;
 
 	//! Create a cube
 	/**

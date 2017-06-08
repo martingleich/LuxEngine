@@ -44,7 +44,7 @@ enum class HIDUsagePage
 	BarCodeScannerPage = 0x8C,
 	MSRDevices = 0x8E,
 	ReservedPointOfSalePages = 0x8F,
-	CameraContorlPage = 0x90,
+	CameraControlPage = 0x90,
 };
 
 class RawInputReceiver : public ReferenceCounted

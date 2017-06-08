@@ -29,16 +29,16 @@ const string& GeometryCreatorPlane::GetName() const
 	return name;
 }
 
-StrongRef<Geometry> GeometryCreatorPlane::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
 {
 	const math::vector2f size = params.FromID(0, true);
 	const math::vector2i tesselation = params.FromID(1, true);
 	const math::vector2f textureRepeat = params.FromID(2, true);
 
-	return CreateSubMesh(driver, size.x, size.y, tesselation.x, tesselation.y, textureRepeat.x, textureRepeat.y, nullptr, nullptr);
+	return CreateGeometry(driver, size.x, size.y, tesselation.x, tesselation.y, textureRepeat.x, textureRepeat.y, nullptr, nullptr);
 }
 
-StrongRef<Geometry> GeometryCreatorPlane::CreateSubMesh(
+StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 	VideoDriver* driver,
 	float sizeX, float sizeY,
 	s32 tesX, s32 tesY,

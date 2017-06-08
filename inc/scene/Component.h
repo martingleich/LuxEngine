@@ -1,7 +1,6 @@
 #ifndef INCLUDED_SCENE_COMPONENT_H
 #define INCLUDED_SCENE_COMPONENT_H
 #include "core/Referable.h"
-#include "input/EventReceiver.h"
 
 namespace lux
 {
@@ -25,13 +24,7 @@ LUX_API extern const core::Name SkyBox;
 }
 
 //! A scene node component
-/**
-An component can change all parameters of a scenenode.
-For example position, materials, play animations.
-An component can receive Userinput, usefull for i.e. Cameracontrol.
-A component can add any further information to scene nodes.
-*/
-class Component : public Referable/*temporary*/, public input::EventReceiver
+class Component : public Referable
 {
 	friend class Node;
 public:
@@ -46,7 +39,6 @@ public:
 
 public:
 	Component() :
-		m_IsEventReceiver(false),
 		m_IsAnimated(false),
 		m_Listener(nullptr)
 	{
@@ -91,11 +83,6 @@ public:
 		return m_IsAnimated;
 	}
 
-	bool IsEventReceiver() const
-	{
-		return m_IsEventReceiver;
-	}
-
 	//! Clone this component
 	/**
 	See \ref Referable
@@ -134,7 +121,6 @@ protected:
 	}
 
 protected:
-	bool m_IsEventReceiver;
 	bool m_IsAnimated;
 	Listener* m_Listener;
 };

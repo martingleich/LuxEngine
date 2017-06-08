@@ -14,7 +14,7 @@ MouseDevice::MouseDevice(const DeviceCreationDesc* desc, InputSystem* system) :
 	m_Axes.Resize(desc->GetElementCount(EEventType::Axis));
 
 	for(size_t i = 0; i < m_Buttons.Size(); ++i) {
-		Button& button = m_Buttons[i];
+		auto& button = m_Buttons[i];
 		auto elemDesc = desc->GetElementDesc(EEventType::Button, (u32)i);
 		button.type = EElementType::Input | EElementType::Button | EElementType::PushButton;
 		button.name = elemDesc.name;
@@ -24,7 +24,7 @@ MouseDevice::MouseDevice(const DeviceCreationDesc* desc, InputSystem* system) :
 	}
 
 	for(size_t i = 0; i < m_Axes.Size(); ++i) {
-		Axis& axis = m_Axes[i];
+		auto& axis = m_Axes[i];
 		auto elemDesc = desc->GetElementDesc(EEventType::Axis, (u32)i);
 		axis.type = EElementType::Input | EElementType::Axis | EElementType::Rel;
 		axis.name = elemDesc.name;
@@ -86,22 +86,22 @@ EEventSource MouseDevice::GetType() const
 	return EEventSource::Mouse;
 }
 
-bool MouseDevice::GetButtonState(u32 buttonCode) const
+const Button* MouseDevice::GetButton(u32 buttonCode) const
 {
-	return m_Buttons.At(buttonCode).state;
+	return &m_Buttons.At(buttonCode);
 }
 
-int MouseDevice::GetAxisState(u32 axisCode) const
+const Axis* MouseDevice::GetAxis(u32 axisCode) const
 {
-	return m_Axes.At(axisCode).state;
+	return &m_Axes.At(axisCode);
 }
 
-math::vector2i MouseDevice::GetAreaState(u32 areaCode) const
+const Area* MouseDevice::GetArea(u32 areaCode) const
 {
 	if(areaCode != 0)
 		throw core::OutOfRangeException();
 
-	return m_Pos.state;
+	return &m_Pos;
 }
 
 bool MouseDevice::Update(Event& event)
@@ -126,8 +126,8 @@ bool MouseDevice::Update(Event& event)
 		else if(event.internal_rel_only)
 			event.axis.abs = m_Axes[event.axis.code].state + event.axis.rel;
 
-		if(m_Axes[event.axis.code].state != event.axis.abs) {
-			m_Axes[event.axis.code].state = event.axis.abs;
+		if(event.axis.rel != 0.0) {
+			m_Axes[event.axis.code].state += event.axis.rel;
 			return true;
 		}
 

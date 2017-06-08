@@ -28,19 +28,19 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	StrongRef<Node> AddNode(Component* baseComp=nullptr, Node* parent=nullptr);
+	StrongRef<Node> AddNode(Component* baseComp = nullptr, Node* parent = nullptr);
 
 	// Object components
 	StrongRef<Camera> CreateCamera();
 	StrongRef<Mesh> CreateMesh(const io::path& path);
-	StrongRef<Mesh> CreateMesh(video::Mesh* mesh=nullptr);
-	StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture=nullptr);
+	StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr);
+	StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture = nullptr);
 	StrongRef<Light> CreateLight();
 
 	// Animatoren
-	StrongRef<RotationAnimator> CreateRotator(const math::vector3f& axis=math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f));
+	StrongRef<RotationAnimator> CreateRotator(const math::vector3f& axis = math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f));
 	StrongRef<LinearMoveAnimator> CreateLinearMover(const math::line3df& line, float duration);
-	StrongRef<CameraControl> CreateCameraControl(float moveSpeed=4.0f, math::anglef rotSpeed=math::anglef::Degree(90.0f), bool noVerticalMovement=false);
+	StrongRef<CameraControl> CreateCameraControl(float moveSpeed = 4.0f, math::anglef rotSpeed = math::anglef::Degree(30.0f), bool noVerticalMovement = false);
 
 	StrongRef<Component> CreateComponent(core::Name type);
 
@@ -61,7 +61,7 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	bool DrawAll(bool beginScene=true, bool endScene=true);
+	bool DrawAll(bool beginScene = true, bool endScene = true);
 	void AnimateAll(float secsPassed);
 
 	////////////////////////////////////////////////////////////////////////////////////
@@ -71,9 +71,6 @@ public:
 
 	void RegisterLight(Node* node, Light* light);
 	void UnregisterLight(Node* node, Light* light);
-
-	void RegisterEventReceiver(input::EventReceiver* receiver);
-	void UnregisterEventReceiver(input::EventReceiver* receiver);
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -105,7 +102,6 @@ public:
 	video::MeshSystem* GetMeshSystem() const;
 
 private:
-	bool OnEvent(const input::Event& e);
 	void EnableOverwrite(ERenderPass pass);
 	void DisableOverwrite(ERenderPass pass);
 
@@ -127,12 +123,14 @@ private:
 		RenderEntry() :
 			node(nullptr),
 			renderable(nullptr)
-		{}
+		{
+		}
 
 		RenderEntry(Node* n, Renderable* r) :
 			node(n),
 			renderable(r)
-		{}
+		{
+		}
 	};
 
 	struct DistanceRenderEntry : public RenderEntry
@@ -141,7 +139,8 @@ private:
 		math::vector3f pos;
 
 		DistanceRenderEntry()
-		{}
+		{
+		}
 
 		DistanceRenderEntry(Node* n, Renderable* r) :
 			RenderEntry(n, r)
@@ -153,7 +152,7 @@ private:
 		{
 			distance = pos.GetDistanceToSq(camera);
 		}
-	
+
 		bool operator<(const DistanceRenderEntry& other) const
 		{
 			// The farthest element must be first in list
@@ -169,7 +168,8 @@ private:
 		CameraEntry() :
 			node(nullptr),
 			camera(nullptr)
-		{}
+		{
+		}
 		CameraEntry(Node* n, Camera* c) :
 			node(n),
 			camera(c)
@@ -194,7 +194,8 @@ private:
 		LightEntry() :
 			node(nullptr),
 			light(nullptr)
-		{}
+		{
+		}
 
 		LightEntry(Node* n, Light* l) :
 			node(n),
@@ -226,7 +227,6 @@ private:
 	math::vector3f m_AbsoluteCamPos;
 
 	core::array<StrongRef<Node>> m_DeletionQueue; //!< Nodes to delete on next deletion run
-	core::array<input::EventReceiver*> m_EventReceivers; //!< List of event receiving nodes
 
 	/////////////////////////////////////////////////////////////////////////
 	// Settings and parameters

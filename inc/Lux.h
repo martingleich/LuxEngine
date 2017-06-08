@@ -88,7 +88,7 @@ namespace input
 
 #include "input/InputSystem.h"
 #include "input/InputDevice.h"
-#include "input/EventReceiver.h"
+#include "input/InputReceiver.h"
 #include "input/Keycodes.h"
 
 #include "video/Color.h"
@@ -143,6 +143,9 @@ namespace input
 #include "scene/components/CameraControl.h"
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/RotationAnimator.h"
+
+#include "events/lxSignal.h"
+#include "events/lxActions.h"
 
 #include "video/mesh/Geometry.h"
 #include "video/mesh/VideoMesh.h"

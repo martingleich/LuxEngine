@@ -36,8 +36,8 @@ void RawInputDevice::SendInputEvent(Event& event)
 	event.device = m_Device;
 	event.source = m_Device->GetType();
 
-	event.shift = ((GetKeyState(VK_SHIFT) & 0x8000) != 0);
-	event.control = ((GetKeyState(VK_CONTROL) & 0x8000) != 0);
+	event.shift = (GetKeyState(VK_SHIFT)&0x8000) != 0;
+	event.control = (GetKeyState(VK_CONTROL)&0x8000) != 0;
 
 	m_System->Update(event);
 }

@@ -7,8 +7,6 @@
 #include "scene/Transformable.h"
 #include "scene/Component.h"
 
-#include "input/EventReceiver.h"
-
 namespace lux
 {
 namespace scene
@@ -29,7 +27,7 @@ enum EDebugData : u32
 	EDD_ALL_BBOX = EDD_SUB_BBOX | EDD_MAIN_BBOX,        // Sowohl Haupt- als auch Unterboundingbox zeichnen
 };
 
-class Node : public Referable, public scene::Transformable/*temporary*/, public input::EventReceiver
+class Node : public Referable, public scene::Transformable
 {
 private:
 	class ComponentEntry
@@ -454,8 +452,6 @@ public:
 protected:
 	LUX_API Node(const Node& other);
 	
-	LUX_API bool OnEvent(const input::Event& e);
-
 private:
 	void OnAttach();
 	void OnDettach();
@@ -472,8 +468,6 @@ private:
 
 	u32 m_DebugFlags;
 	bool m_IsVisible;
-	u32 m_EventReceiverCount; //!< The number of eventreceiving components
-	bool m_RegisteredEventReceiver;
 
 	SceneNodeComponentList m_Components;
 

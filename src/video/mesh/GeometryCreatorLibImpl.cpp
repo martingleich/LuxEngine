@@ -86,14 +86,14 @@ core::PackagePuffer GeometryCreatorLibImpl::GetCreatorParams(const string& name)
 	return core::PackagePuffer(&it->creator->GetParams());
 }
 
-StrongRef<Geometry> GeometryCreatorLibImpl::CreateSubMesh(const string& name, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorLibImpl::CreateGeometry(const string& name, const core::PackagePuffer& params)
 {
-	return GetByName(name)->CreateSubMesh(m_Driver, params);
+	return GetByName(name)->CreateGeometry(m_Driver, params);
 }
 
 StrongRef<Mesh> GeometryCreatorLibImpl::CreateMesh(const string& name, const core::PackagePuffer& params)
 {
-	StrongRef<Geometry> sub = GetByName(name)->CreateSubMesh(m_Driver, params);
+	StrongRef<Geometry> sub = GetByName(name)->CreateGeometry(m_Driver, params);
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
@@ -111,7 +111,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreatePlaneMesh(
 {
 	StrongRef<GeometryCreatorPlane> creator = m_PlaneCreator;
 
-	StrongRef<Geometry> sub = creator->CreateSubMesh(m_Driver, sizeX, sizeY, tesX, tesY, texX, texY, function, context);
+	StrongRef<Geometry> sub = creator->CreateGeometry(m_Driver, sizeX, sizeY, tesX, tesY, texX, texY, function, context);
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
@@ -122,12 +122,12 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreatePlaneMesh(
 
 StrongRef<Mesh> GeometryCreatorLibImpl::CreateSphereMesh(
 	float radius,
-	s32 rings, s32 segments,
+	s32 rings, s32 sectors,
 	float texX, float texY,
 	bool inside)
 {
 	StrongRef<GeometryCreatorSphereUV> creator = m_SphereUVCreator;
-	StrongRef<Geometry> sub = creator->CreateSubMesh(m_Driver, radius, rings, segments, texX, texY, inside);
+	StrongRef<Geometry> sub = creator->CreateGeometry(m_Driver, radius, rings, sectors, texX, texY, inside);
 	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
@@ -143,7 +143,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateCubeMesh(
 	bool inside)
 {
 	StrongRef<GeometryCreatorCube> creator = m_CubeGenerator;
-	StrongRef<Geometry> sub = creator->CreateSubMesh(
+	StrongRef<Geometry> sub = creator->CreateGeometry(
 		m_Driver,
 		sizeX, sizeY, sizeZ,
 		tesX, tesY, tesZ,
@@ -163,7 +163,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateArrowMesh(
 	s32 sectors)
 {
 	StrongRef<GeometryCreatorArrow> creator = m_ArrowCreator;
-	StrongRef<Geometry> sub = creator->CreateSubMesh(
+	StrongRef<Geometry> sub = creator->CreateGeometry(
 		m_Driver,
 		shaft_height, head_height,
 		shaft_radius, head_radius,

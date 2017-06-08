@@ -1,6 +1,7 @@
 #ifndef INCLUDED_INPUT_DEVICE_H
 #define INCLUDED_INPUT_DEVICE_H
-#include "input/EventReceiver.h"
+#include "core/ReferenceCounted.h"
+#include "input/InputReceiver.h"
 #include "core/lxString.h"
 #include "math/vector2.h"
 
@@ -38,6 +39,21 @@ public:
 	virtual const string& GetGUID() const = 0;
 	virtual size_t GetElementCount(EEventType type) const = 0;
 	virtual ElemDesc GetElementDesc(EEventType type, u32 id) const = 0;
+};
+
+struct Button
+{
+	bool state;
+};
+
+struct Axis
+{
+	float state;
+};
+
+struct Area
+{
+	math::vector2f state;
 };
 
 //! Class for a single input device.
@@ -80,27 +96,23 @@ public:
 
 	//! Get the state of a button
 	/**
-	If the button doesn't exist false is returned
 	\param buttonCode The id of the button.
-	\return Is the button pressed.
 	*/
-	virtual bool GetButtonState(u32 buttonCode) const = 0;
+	virtual const Button* GetButton(u32 buttonCode) const = 0;
 
 	//! Get the state of an axis.
 	/**
-	If the axis doesn't exist 0 is returned.
 	\param axisCode The id of the axis.
 	\return The value of the axis in device units.
 	*/
-	virtual int GetAxisState(u32 axisCode) const = 0;
+	virtual const Axis* GetAxis(u32 axisCode) const = 0;
 
 	//! Get the state of an area.
 	/**
-	If the area doesn't exist (0,0) is returned.
 	\param areaCode The id of the area.
 	\return The value of the area in device units.
 	*/
-	virtual math::vector2i GetAreaState(u32 areaCode) const = 0;
+	virtual const Area* GetArea(u32 areaCode) const = 0;
 
 	//! Update the device with this event.
 	/**

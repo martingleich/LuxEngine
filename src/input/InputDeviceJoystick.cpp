@@ -14,7 +14,7 @@ JoystickDevice::JoystickDevice(const DeviceCreationDesc* desc, InputSystem* syst
 	m_Axes.Resize(desc->GetElementCount(EEventType::Axis));
 
 	for(size_t i = 0; i < m_Buttons.Size(); ++i) {
-		Button& button = m_Buttons[i];
+		auto& button = m_Buttons[i];
 		auto elemDesc = desc->GetElementDesc(EEventType::Button, (u32)i);
 		button.name = elemDesc.name;
 		button.type = elemDesc.type;
@@ -24,7 +24,7 @@ JoystickDevice::JoystickDevice(const DeviceCreationDesc* desc, InputSystem* syst
 	}
 
 	for(size_t i = 0; i < m_Axes.Size(); ++i) {
-		Axis& axis = m_Axes[i];
+		auto& axis = m_Axes[i];
 		auto elemDesc = desc->GetElementDesc(EEventType::Axis, (u32)i);
 		axis.name = elemDesc.name;
 		axis.type = elemDesc.type;
@@ -79,17 +79,17 @@ EEventSource JoystickDevice::GetType() const
 	return EEventSource::Joystick;
 }
 
-bool JoystickDevice::GetButtonState(u32 buttonCode) const
+const Button* JoystickDevice::GetButton(u32 buttonCode) const
 {
-	return m_Buttons.At(buttonCode).state;
+	return &m_Buttons.At(buttonCode);
 }
 
-int JoystickDevice::GetAxisState(u32 axisCode) const
+const Axis* JoystickDevice::GetAxis(u32 axisCode) const
 {
-	return m_Axes.At(axisCode).state;
+	return &m_Axes.At(axisCode);
 }
 
-math::vector2i JoystickDevice::GetAreaState(u32 areaCode) const
+const Area* JoystickDevice::GetArea(u32 areaCode) const
 {
 	LUX_UNUSED(areaCode);
 	throw core::OutOfRangeException();

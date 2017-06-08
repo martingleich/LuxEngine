@@ -15,9 +15,9 @@ public:
 	void Reset();
 	void DisconnectReporting(InputSystem* system);
 	EEventSource GetType() const;
-	bool GetButtonState(u32 buttonCode) const;
-	int GetAxisState(u32 axisCode) const;
-	math::vector2i GetAreaState(u32 areaCode) const;
+	const Button* GetButton(u32 buttonCode) const;
+	const Axis* GetAxis(u32 axisCode) const;
+	const Area* GetArea(u32 areaCode) const;
 	bool Update(Event& event);
 
 	const string& GetElementName(EEventType type, u32 code) const;
@@ -45,8 +45,8 @@ public:
 	*/
 
 private:
-	core::array<Button> m_Buttons;
-	core::array<Axis> m_Axes;
+	core::array<ButtonElement> m_Buttons;
+	core::array<AxisElement> m_Axes;
 	
 	//std::vector<Calibration> m_Calibration(m_Axes.size());
 };

@@ -70,7 +70,6 @@ void SceneManagerImpl::Clear()
 
 	m_CameraList.Clear();
 	m_LightList.Clear();
-	m_EventReceivers.Clear();
 
 	m_RootSceneNode->RemoveAllChildren();
 }
@@ -305,21 +304,6 @@ void SceneManagerImpl::UnregisterLight(Node* node, Light* light)
 		m_LightList.Erase(it);
 }
 
-void SceneManagerImpl::RegisterEventReceiver(input::EventReceiver* receiver)
-{
-	m_EventReceivers.PushBack(receiver);
-}
-
-void SceneManagerImpl::UnregisterEventReceiver(input::EventReceiver* receiver)
-{
-	for(auto it = m_EventReceivers.First(); it != m_EventReceivers.End(); ++it) {
-		if(*it == receiver) {
-			m_EventReceivers.Erase(it);
-			return;
-		}
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 void SceneManagerImpl::AddToDeletionQueue(Node* node)
@@ -422,16 +406,6 @@ video::MeshSystem* SceneManagerImpl::GetMeshSystem() const
 ////////////////////////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////////////////////////
-
-bool SceneManagerImpl::OnEvent(const input::Event& event)
-{
-	for(auto it = m_EventReceivers.First(); it != m_EventReceivers.End(); ++it) {
-		if((*it)->OnEvent(event))
-			return true;
-	}
-
-	return false;
-}
 
 void SceneManagerImpl::EnableOverwrite(ERenderPass pass)
 {

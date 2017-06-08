@@ -25,26 +25,17 @@ public:
 	virtual void Configure(bool isForeground);
 
 protected:
-	struct Button
+	struct ElementData
 	{
-		bool state;
 		string name;
 		EElementType type;
 	};
 
-	struct Axis
-	{
-		int state;
-		string name;
-		EElementType type;
-	};
+	struct ButtonElement : Button, ElementData {};
 
-	struct Area
-	{
-		math::vector2i state;
-		string name;
-		EElementType type;
-	};
+	struct AxisElement : Axis, ElementData {};
+
+	struct AreaElement : Area, ElementData {};
 
 private:
 	string m_Name;

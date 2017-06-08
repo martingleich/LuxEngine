@@ -12,8 +12,6 @@
 
 #include "video/Color.h"
 
-#include "input/EventReceiver.h"
-
 namespace lux
 {
 namespace core
@@ -44,10 +42,6 @@ namespace io
 class FileSystem;
 class File;
 }
-namespace input
-{
-class EventReceiver;
-}
 namespace scene
 {
 class Component;
@@ -66,7 +60,7 @@ class Collider;
 class VolumeQuery;
 class LineQuery;
 
-class SceneManager : public ReferenceCounted, public input::EventReceiver
+class SceneManager : public ReferenceCounted
 {
 public:
 	virtual ~SceneManager() {}
@@ -87,7 +81,7 @@ public:
 	// Animatoren
 	virtual StrongRef<RotationAnimator> CreateRotator(const math::vector3f& axis=math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f)) = 0;
 	virtual StrongRef<LinearMoveAnimator> CreateLinearMover(const math::line3df& line, float duration) = 0;
-	virtual StrongRef<CameraControl> CreateCameraControl(float moveSpeed=4.0f, math::anglef rotSpeed=math::anglef::Degree(90.0f), bool noVerticalMovement=false) = 0;
+	virtual StrongRef<CameraControl> CreateCameraControl(float moveSpeed=4.0f, math::anglef rotSpeed=math::anglef::Degree(9.0f), bool noVerticalMovement=false) = 0;
 
 	virtual StrongRef<Component> CreateComponent(core::Name type) = 0;
 
@@ -118,9 +112,6 @@ public:
 
 	virtual void RegisterLight(Node* node, Light* light) = 0;
 	virtual void UnregisterLight(Node* node, Light* light) = 0;
-
-	virtual void RegisterEventReceiver(input::EventReceiver* receiver) = 0;
-	virtual void UnregisterEventReceiver(input::EventReceiver* receiver) = 0;
 
 	////////////////////////////////////////////////////////////////////////////////////
 

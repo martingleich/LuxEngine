@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUXDEVICE_H
 #define INCLUDED_LUXDEVICE_H
 #include "core/lxString.h"
-#include "input/EventReceiver.h"
+#include "core/ReferenceCounted.h"
 
 namespace lux
 {
@@ -103,9 +103,6 @@ public:
 	virtual void CloseDevice() = 0;
 
 	virtual bool HandleSystemMessages() = 0;
-	virtual void SetUserEventReceiver(input::UserEventReceiver* Receiver) = 0;
-	virtual StrongRef<input::UserEventReceiver> GetUserEventReceiver() const = 0;
-	virtual void PostEvent(const input::Event& event, input::EEventTarget target = input::EEventTarget::All) = 0;
 
 	//! Runs all engine internal actions.
 	/**

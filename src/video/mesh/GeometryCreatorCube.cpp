@@ -36,7 +36,7 @@ const core::ParamPackage& GeometryCreatorCube::GetParams() const
 	return m_Package;
 }
 
-StrongRef<Geometry> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
 {
 	LX_CHECK_NULL_ARG(driver);
 
@@ -45,14 +45,14 @@ StrongRef<Geometry> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver, cons
 	const math::vector3f tex = params.FromID(2, true);
 	const bool inside = params.FromID(3, true);
 
-	return CreateSubMesh(driver,
+	return CreateGeometry(driver,
 		size.x, size.y, size.z,
 		tes.x, tes.y, tes.z,
 		tex.x, tex.y, tex.z,
 		inside);
 }
 
-StrongRef<Geometry> GeometryCreatorCube::CreateSubMesh(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(VideoDriver* driver,
 	float sizeX, float sizeY, float sizeZ,
 	s32 tesX, s32 tesY, s32 tesZ,
 	float texX, float texY, float texZ,
