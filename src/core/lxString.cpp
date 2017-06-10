@@ -220,6 +220,27 @@ bool string::EqualCaseInsensitive(const string_type& other) const
 	return (ac == bc);
 }
 
+bool string::SmallerCaseInsensitive(const string_type& other) const
+{
+	const char* a = Data();
+	const char* b = other.data;
+	u32 ac;
+	u32 bc;
+	do {
+		ac = core::AdvanceCursorUTF8(a);
+		bc = core::AdvanceCursorUTF8(b);
+
+		u32 iac = core::ToLowerChar(ac);
+		u32 ibc = core::ToLowerChar(bc);
+		if(iac < ibc)
+			return true;
+		if(iac > ibc)
+			return false;
+	} while(ac && bc);
+
+	return (ac < bc);
+}
+
 string::ConstIterator string::Insert(ConstIterator pos, const string_type& other, size_t count)
 {
 	lxAssert(pos.m_First == Data());
@@ -821,6 +842,32 @@ EStringType string::Classify() const
 		out |= EStringType::AlphaNum;
 	else if(spaceCount == m_Length && spaceCount > 0)
 		out |= EStringType::Space;
+
+	return out;
+}
+
+string string::GetLower() const
+{
+	string out;
+	out.Reserve(Size());
+
+	for(auto it = First(); it != End(); ++it) {
+		u32 c = core::ToLowerChar(*it);
+		out.Append(c);
+	}
+
+	return out;
+}
+
+string string::GetUpper() const
+{
+	string out;
+	out.Reserve(Size());
+
+	for(auto it = First(); it != End(); ++it) {
+		u32 c = core::ToUpperChar(*it);
+		out.Append(c);
+	}
 
 	return out;
 }

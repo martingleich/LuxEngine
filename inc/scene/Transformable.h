@@ -9,7 +9,7 @@ namespace scene
 {
 
 //! Any transformable object, placed in a hierachy.
-class Transformable : public virtual ReferenceCounted
+class Transformable
 {
 public:
 	Transformable() :

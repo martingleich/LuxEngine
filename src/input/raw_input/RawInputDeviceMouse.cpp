@@ -70,7 +70,9 @@ size_t RawMouseDevice::GetElementCount(EEventType type) const
 	if(type == EEventType::Button)
 		return m_ButtonCount;
 	else if(type == EEventType::Axis)
-		return m_HasHWheel ? 4 : 3;
+		return m_HasHWheel ? 2 : 1;
+	else
+		return 1;
 }
 
 RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 code) const
@@ -84,20 +86,25 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 cod
 
 	static const string axis_names[] = {
 		"Wheel",
-		"Horizontal Wheel",
-		"Position X",
-		"Position Y"};
+		"Horizontal Wheel"};
+
+	static const string area_names[] = {
+		"Position"};
 
 	static const string unknown = "(unknown)";
 
 	if(type == EEventType::Button) {
 		if(code >= ARRAYSIZE(button_names))
-			return ElemDesc(unknown, 0, 0, EElementType::Other);
+			throw core::OutOfRangeException();
 		return ElemDesc(button_names[code], 0, 0, EElementType::Other);
 	} else if(type == EEventType::Axis) {
 		if(code >= ARRAYSIZE(axis_names))
-			return ElemDesc(unknown, 0, 0, EElementType::Other);
+			throw core::OutOfRangeException();
 		return ElemDesc(axis_names[code], 0, 0, EElementType::Other);
+	} else if(type == EEventType::Area) {
+		if(code >= ARRAYSIZE(area_names))
+			throw core::OutOfRangeException();
+		return ElemDesc(area_names[code], 0, 0, EElementType::Other);
 	} else {
 		return ElemDesc(unknown, 0, 0, EElementType::Other);
 	}

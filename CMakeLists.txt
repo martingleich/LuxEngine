@@ -30,6 +30,7 @@ add_subdirectory(external/format)
 add_subdirectory(external/libpng)
 add_subdirectory(external/libtga)
 add_subdirectory(external/zlib)
+add_subdirectory(external/utf8proc)
 
 add_subdirectory(testing/UnitTest)
 
@@ -68,7 +69,7 @@ assign_source_group(${INCS})
 
 # TODO cmake should already know these libs (we are calling add_dependencies)
 # for them later ...
-set(USED_LIBS ${USED_LIBS} format zlib libtga libpng)
+set(USED_LIBS ${USED_LIBS} format zlib libtga libpng utf8proc)
 
 # Add plattform dependend libs and compiler-flags
 if(MSVC)
@@ -87,7 +88,7 @@ else()
 endif()
 
 add_library(LuxEngine SHARED ${SRCS} ${INCS})
-add_dependencies(LuxEngine format zlib libpng libtga)
+add_dependencies(LuxEngine format zlib libpng libtga utf8proc)
 target_link_libraries(LuxEngine ${USED_LIBS})
 
 # Add tests

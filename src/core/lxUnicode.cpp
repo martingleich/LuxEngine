@@ -1,6 +1,10 @@
 #include "core/lxUnicode.h"
-#include "core/lxCharacter.h"
 #include "core/lxException.h"
+
+extern "C"
+{
+#include "../external/utf8proc/utf8proc.h"
+}
 
 namespace lux
 {
@@ -134,9 +138,48 @@ u32 GetCharacterUTF16(const char* _ptr)
 
 bool IsEqualCaseInsensitive(u32 a, u32 b)
 {
-	// TODO: This is wrong. Use full unicode library to solve this
-	return ToLowerChar(a) == ToLowerChar(b);
+	// TODO: This is wrong. Use case folding to do this
+	return utf8proc_tolower(a) == utf8proc_tolower(b);
 }
 
+u32 ToLowerChar(u32 c)
+{
+	return utf8proc_tolower(c);
+}
+
+u32 ToUpperChar(u32 c)
+{
+	return utf8proc_toupper(c);
+}
+
+bool IsDigit(u32 c)
+{
+	return utf8proc_category(c) == UTF8PROC_CATEGORY_ND;
+}
+
+bool IsSpace(u32 c)
+{
+	return utf8proc_category(c) == UTF8PROC_CATEGORY_ZS;
+}
+
+bool IsAlpha(u32 c)
+{
+	auto cat = utf8proc_category(c);
+	return (cat == UTF8PROC_CATEGORY_LU ||
+			cat == UTF8PROC_CATEGORY_LL ||
+			cat == UTF8PROC_CATEGORY_LT ||
+			cat == UTF8PROC_CATEGORY_LM ||
+			cat == UTF8PROC_CATEGORY_LO);
+}
+
+bool IsUpper(u32 c)
+{
+	return utf8proc_category(c) == UTF8PROC_CATEGORY_LU;
+}
+
+bool IsLower(u32 c)
+{
+	return utf8proc_category(c) == UTF8PROC_CATEGORY_LL;
+}
 }
 }

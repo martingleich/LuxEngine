@@ -56,6 +56,27 @@ LUX_API u32 GetCharacterUTF16(const char* ptr);
 //! Compares two unicode code-points case insensitive.
 LUX_API bool IsEqualCaseInsensitive(u32 a, u32 b);
 
+//! Convert to lower-case
+LUX_API u32 ToLowerChar(u32 c);
+
+//! Convert to upper-case
+LUX_API u32 ToUpperChar(u32 c);
+
+//! Is the character a digit
+LUX_API bool IsDigit(u32 c);
+
+//! Is the character invisible if printed
+LUX_API bool IsSpace(u32 c);
+
+//! Is the character a letter
+LUX_API bool IsAlpha(u32 c);
+
+//! Is the character in upper-case
+LUX_API bool IsUpper(u32 c);
+
+//! Is the character in lower-case
+LUX_API bool IsLower(u32 c);
+
 }
 }
 #endif // #ifndef INCLUDED_LX_UNICODE_H

@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LXSTRING_H
 #define INCLUDED_LXSTRING_H
 #include "lxMemory.h"
-#include "lxCharacter.h"
 #include "lxUnicode.h"
 #include "lxUtil.h"
 #include "lxIterator.h"
@@ -314,6 +313,12 @@ public:
 	*/
 	bool EqualCaseInsensitive(const string_type& other) const;
 
+	//! Compare two strings, case insensitive.
+	/*
+	No unicode normalization is performed
+	*/
+	bool SmallerCaseInsensitive(const string_type& other) const;
+
 	//! Insert another string into this one.
 	/**
 	\param pos The location of the first inserted character.
@@ -579,6 +584,12 @@ public:
 	See \ref{EStringType} for more information about string classification.
 	*/
 	EStringType Classify() const;
+
+	//! Get a string in lower case
+	string GetLower() const;
+
+	//! Get a string in upper case
+	string GetUpper() const;
 
 private:
 	//! Is the string saved in short format.
