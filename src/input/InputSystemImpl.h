@@ -13,7 +13,7 @@ namespace input
 class InputSystemImpl : public InputSystem
 {
 public:
-	InputSystemImpl(bool defaultForeground);
+	InputSystemImpl();
 
 	events::signal<const Event&>& GetEventSignal();
 

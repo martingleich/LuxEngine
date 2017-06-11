@@ -2,7 +2,9 @@
 #define INCLUDED_MATERIALLIBRARY_H
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
-#include "EShaderTypes.h"
+#include "core/lxArray.h"
+#include "video/MaterialRenderer.h"
+#include "video/EShaderTypes.h"
 
 namespace lux
 {
@@ -10,7 +12,6 @@ namespace video
 {
 class Shader;
 class Material;
-class MaterialRenderer;
 
 //! The material library
 /**
@@ -19,28 +20,31 @@ Caches materialsrenders and is used to created new ones.
 class MaterialLibrary : public ReferenceCounted
 {
 public:
-	virtual ~MaterialLibrary()
-	{
-	}
+	LUX_API MaterialLibrary();
+	LUX_API virtual ~MaterialLibrary();
+
+	LUX_API static void Initialize(MaterialLibrary* library = nullptr);
+	LUX_API static MaterialLibrary* Instance();
+	LUX_API static void Destroy();
 
 	//! Create a new material
 	/**
 	\param renderer The material renderer of the new material, if null is passed the solid renderer is used
 	*/
-	virtual StrongRef<Material> CreateMaterial(MaterialRenderer* renderer = nullptr) = 0;
+	LUX_API StrongRef<Material> CreateMaterial(MaterialRenderer* renderer = nullptr) ;
 
 	//! Create a new material
 	/**
 	\param rendererName The name of the material renderer
 	*/
-	virtual StrongRef<Material> CreateMaterial(const string& rendererName) = 0;
+	LUX_API StrongRef<Material> CreateMaterial(const string& rendererName) ;
 
 	//! Add a new material renderer
 	/**
 	\param renderer The material renderer
 	\param name The name of the material renderer
 	*/
-	virtual StrongRef<MaterialRenderer> AddMaterialRenderer(MaterialRenderer* renderer) = 0;
+	LUX_API StrongRef<MaterialRenderer> AddMaterialRenderer(MaterialRenderer* renderer) ;
 
 	//! Clone an old material renderer
 	/**
@@ -48,7 +52,7 @@ public:
 	\param baseName The name of the copied renderer
 	\return The new material renderer
 	*/
-	virtual StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& newName, const string& baseName) = 0;
+	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& newName, const string& baseName) ;
 
 	//! Clone an old material renderer
 	/**
@@ -56,7 +60,7 @@ public:
 	\param old The copied material renderer
 	\return The new material renderer
 	*/
-	virtual StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const MaterialRenderer* old) = 0;
+	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const string& name, const MaterialRenderer* old) ;
 
 	//! Add a shader material renderer
 	/**
@@ -73,12 +77,12 @@ public:
 	\throws ShaderCompileException
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
+	LUX_API StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
 		video::EShaderLanguage language,
 		const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
 		const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
 		const MaterialRenderer* baseMaterial, const string& name,
-		core::array<string>* errorList=nullptr) = 0;
+		core::array<string>* errorList = nullptr) ;
 
 	//! Add a shader material renderer
 	/**
@@ -87,25 +91,32 @@ public:
 	\param name The name of the new material renderer
 	\return The new material renderer
 	*/
-	virtual StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
+	LUX_API StrongRef<MaterialRenderer> AddShaderMaterialRenderer(
 		Shader* shader,
-		const MaterialRenderer* baseMaterial, const string& name) = 0;
+		const MaterialRenderer* baseMaterial, const string& name) ;
 
 	//! Removes a material renderer from the scene graph
 	/**
 	The user should only remove material renderer which he created by himself.
 	All materials using this renderer will become invalid materials.
 	*/
-	virtual void RemoveMaterialRenderer(MaterialRenderer* renderer) = 0;
+	LUX_API void RemoveMaterialRenderer(MaterialRenderer* renderer) ;
 
 	//! Returns a material renderer by its index
-	virtual StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const = 0;
+	LUX_API StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const ;
 
 	//! Returns a material renderer by its name
-	virtual StrongRef<MaterialRenderer> GetMaterialRenderer(const string& name) const = 0;
+	LUX_API StrongRef<MaterialRenderer> GetMaterialRenderer(const string& name) const ;
 
 	//! Returns the total number of material renderers
-	virtual size_t GetMaterialRendererCount() const = 0;
+	LUX_API size_t GetMaterialRendererCount() const ;
+
+private:
+	bool FindRenderer(const string& name, size_t& id) const;
+
+private:
+	core::array<StrongRef<MaterialRenderer>> m_Renderers;
+	StrongRef<MaterialRenderer> m_Solid;
 };
 
 } // namespace video

@@ -21,17 +21,17 @@
 
 #include "core/ReferableRegister.h"
 
-#include "video/mesh/MeshSystemImpl.h"
-#include "video/MaterialLibraryImpl.h"
-#include "video/images/ImageSystemImpl.h"
-#include "video/VideoDriver.h"
-#include "video/MaterialRendererImpl.h"
+#include "video/mesh/MeshSystem.h"
+#include "video/MaterialLibrary.h"
 
+#include "video/images/ImageSystemImpl.h"
+
+#include "video/VideoDriver.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/d3d9/VideoDriverD3D9.h"
 #endif
+#include "video/Renderer.h"
 
-#include "input/InputSystemImpl.h"
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "input/raw_input/RawInputReceiver.h"
 #endif
@@ -220,9 +220,11 @@ LuxDeviceWin32::LuxDeviceWin32() :
 	if(log::EngineLog.HasUnsetLogs())
 		log::EngineLog.SetNewPrinter(log::FilePrinter, true);
 
-	// Force creation of singleton classes
-	io::FileSystem::Instance();
-	core::ReferableFactory::Instance();
+	// Create the singleton classes
+	io::FileSystem::Initialize();
+	core::ReferableFactory::Initialize();
+	core::ResourceSystem::Initialize();
+
 	auto resourceSystem = core::ResourceSystem::Instance();
 
 	m_Window = LUX_NEW(gui::WindowWin32);
@@ -289,7 +291,7 @@ void LuxDeviceWin32::SetOwnWindow(void* hOwnWindow)
 void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 {
 	// If system already build -> no op
-	if(m_InputSystem) {
+	if(input::InputSystem::Instance()) {
 		log::Warning("Input system alread built.");
 		return;
 	}
@@ -297,11 +299,13 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	if(!m_Window->GetDeviceWindow())
 		throw core::ErrorException("Missing window");
 
-#ifdef LUX_COMPILE_WITH_RAW_INPUT
-	m_InputSystem = LUX_NEW(input::InputSystemImpl)(isForeground);
-	m_InputSystem->SetForegroundState(m_Window->IsFocused());
+	input::InputSystem::Initialize();
+	auto inputSys = input::InputSystem::Instance();
+	inputSys->SetDefaultForegroundHandling(isForeground);
+	inputSys->SetForegroundState(m_Window->IsFocused());
 
-	m_RawInputReceiver = LUX_NEW(input::RawInputReceiver)(m_InputSystem, (HWND)m_Window->GetDeviceWindow());
+#ifdef LUX_COMPILE_WITH_RAW_INPUT
+	m_RawInputReceiver = LUX_NEW(input::RawInputReceiver)(inputSys, (HWND)m_Window->GetDeviceWindow());
 	u32 keyboardCount = m_RawInputReceiver->DiscoverDevices(input::EEventSource::Keyboard);
 	if(keyboardCount == 0)
 		throw core::RuntimeException("No keyboard found on system.");
@@ -315,40 +319,34 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 void LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 {
 	// If system already build -> no op
-	if(m_Driver) {
+	if(video::VideoDriver::Instance()) {
 		log::Warning("Videodriver already build.");
 		return;
 	}
 
 	log::Info("Building Video Driver.");
+
+	video::VideoDriver* driver;
+
 #ifdef LUX_COMPILE_WITH_D3D9
-	video::VideoDriverD3D9* driver = LUX_NEW(video::VideoDriverD3D9);
-	driver->Init(config, m_Window);
-	m_Driver = driver;
+	video::VideoDriverD3D9* d3d9Driver = LUX_NEW(video::VideoDriverD3D9);
+	d3d9Driver->Init(config, m_Window);
+	driver = d3d9Driver;
+	video::VideoDriver::Initialize(driver);
+#endif
 
-	BuildMaterials();
+	if(!driver)
+		throw core::NotImplementedException();
 
-	auto invalidMaterial = m_MaterialLibrary->CreateMaterial(m_MaterialLibrary->GetMaterialRenderer("debug_overlay"));
+	video::MaterialLibrary::Initialize();
+
+	auto invalidMaterial = video::MaterialLibrary::Instance()->CreateMaterial("debug_overlay");
 	invalidMaterial->SetDiffuse(video::Color(255, 0, 255));
 	driver->GetRenderer()->SetInvalidMaterial(invalidMaterial);
 
-#else
-	throw core::NotImplementedException();
-#endif
-
 	BuildImageSystem();
-}
 
-void LuxDeviceWin32::BuildMaterials()
-{
-	m_MaterialLibrary = LUX_NEW(video::MaterialLibraryImpl)(m_Driver);
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseSolid)("solid_base", nullptr, nullptr));
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseTransparent)("transparent_base", nullptr, nullptr));
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid)("solid", nullptr, nullptr));
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix)("solid_mix", nullptr, nullptr));
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend)("transparent", nullptr, nullptr));
-	m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_DebugOverlay)("debug_overlay", nullptr, nullptr));
-	//m_MaterialLibrary->AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(nullptr, nullptr), "transparent_alpha");
+	video::MeshSystem::Initialize();
 }
 
 void LuxDeviceWin32::BuildSceneManager()
@@ -359,18 +357,8 @@ void LuxDeviceWin32::BuildSceneManager()
 		return;
 	}
 
-	if(!m_Driver)
-		throw core::Exception("Missing video driver");
-
-	m_MeshSystem = LUX_NEW(video::MeshSystemImpl)(m_Driver, m_MaterialLibrary);
-
-	// Scene-Manager erstellen
 	log::Info("Build Scene Manager.");
-	m_SceneManager = LUX_NEW(scene::SceneManagerImpl)(
-		m_Driver,
-		m_ImageSystem,
-		m_MeshSystem,
-		m_MaterialLibrary);
+	m_SceneManager = LUX_NEW(scene::SceneManagerImpl)(m_ImageSystem);
 }
 
 void LuxDeviceWin32::BuildImageSystem()
@@ -381,7 +369,7 @@ void LuxDeviceWin32::BuildImageSystem()
 	}
 
 	log::Info("Build Image System.");
-	m_ImageSystem = LUX_NEW(video::ImageSystemImpl)(m_Driver);
+	m_ImageSystem = LUX_NEW(video::ImageSystemImpl);
 }
 
 void LuxDeviceWin32::BuildGUIEnvironment()
@@ -391,13 +379,8 @@ void LuxDeviceWin32::BuildGUIEnvironment()
 		return;
 	}
 
-	if(!m_Driver) {
-		throw core::Exception("Missing video driver");
-		return;
-	}
-
 	log::Info("Build GUI Environment.");
-	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl)(m_ImageSystem, m_Driver, m_MaterialLibrary);
+	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl)(m_ImageSystem);
 }
 
 void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
@@ -455,24 +438,24 @@ LuxDeviceWin32::~LuxDeviceWin32()
 
 	m_ImageSystem = nullptr;
 
-	video::VideoDriverD3D9* driver = m_Driver.As<video::VideoDriverD3D9>();
+	video::VideoDriverD3D9* driver = dynamic_cast<video::VideoDriverD3D9*>(video::VideoDriver::Instance());
 
 	// Free all shared resources, default materials, invalid materials and so on
 	if(driver)
 		driver->CleanUp();
-	
-	m_MaterialLibrary = nullptr;
 
-	m_Driver = nullptr;
+	video::MaterialLibrary::Destroy();
+	video::VideoDriver::Destroy();
 
 	core::ResourceSystem::Destroy();
 	core::ReferableFactory::Destroy();
 	io::FileSystem::Destroy();
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
-	m_RawInputReceiver = nullptr;
+	m_RawInputReceiver.Reset();
 #endif
-	m_InputSystem = nullptr;
+
+	input::InputSystem::Destroy();
 
 	m_Window = nullptr;
 
@@ -537,19 +520,9 @@ double LuxDeviceWin32::GetTime() const
 	return m_Time;
 }
 
-StrongRef<video::VideoDriver> LuxDeviceWin32::GetDriver() const
-{
-	return m_Driver;
-}
-
 StrongRef<scene::SceneManager> LuxDeviceWin32::GetSceneManager() const
 {
 	return m_SceneManager;
-}
-
-StrongRef<input::InputSystem> LuxDeviceWin32::GetInputSystem() const
-{
-	return m_InputSystem;
 }
 
 StrongRef<video::ImageSystem> LuxDeviceWin32::GetImageSystem() const
@@ -562,19 +535,9 @@ StrongRef<gui::GUIEnvironment> LuxDeviceWin32::GetGUIEnvironment() const
 	return m_GUIEnv;
 }
 
-StrongRef<video::MaterialLibrary> LuxDeviceWin32::GetMaterialLibrary() const
-{
-	return m_MaterialLibrary;
-}
-
 StrongRef<gui::Window> LuxDeviceWin32::GetWindow() const
 {
 	return m_Window;
-}
-
-StrongRef<video::MeshSystem> LuxDeviceWin32::GetMeshSystem() const
-{
-	return m_MeshSystem;
 }
 
 } // namespace lux

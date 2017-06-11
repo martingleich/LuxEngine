@@ -8,10 +8,17 @@ namespace core
 {
 
 static StrongRef<ResourceSystem> g_ResourceSystem;
+
+void ResourceSystem::Initialize(ResourceSystem* resSys)
+{
+	if(!resSys)
+		resSys = LUX_NEW(ResourceSystemImpl);
+
+	g_ResourceSystem = resSys;
+}
+
 ResourceSystem* ResourceSystem::Instance()
 {
-	if(!g_ResourceSystem)
-		g_ResourceSystem = LUX_NEW(ResourceSystemImpl);
 	return g_ResourceSystem;
 }
 

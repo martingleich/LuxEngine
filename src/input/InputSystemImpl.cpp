@@ -8,9 +8,9 @@ namespace lux
 namespace input
 {
 
-InputSystemImpl::InputSystemImpl(bool defaultForeground) :
+InputSystemImpl::InputSystemImpl() :
 	m_IsForeground(false),
-	m_DefaultForegroundHandling(defaultForeground)
+	m_DefaultForegroundHandling(true)
 {
 }
 

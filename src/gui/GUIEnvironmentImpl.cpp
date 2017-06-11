@@ -21,16 +21,11 @@ namespace lux
 namespace gui
 {
 
-GUIEnvironmentImpl::GUIEnvironmentImpl(
-	video::ImageSystem* ImagSys,
-	video::VideoDriver* Driver,
-	video::MaterialLibrary* matLib) :
-	m_MatLibrary(matLib),
-	m_ImageSystem(ImagSys),
-	m_VideoDriver(Driver)
+GUIEnvironmentImpl::GUIEnvironmentImpl(video::ImageSystem* imagSys) :
+	m_ImageSystem(imagSys)
 {
 	// Register font material renderer
-	video::MaterialRenderer* FontRenderer = m_MatLibrary->CloneMaterialRenderer("font", "transparent");
+	video::MaterialRenderer* FontRenderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
 	video::PipelineSettings ps = FontRenderer->GetPipeline();
 	ps.zWriteEnabled = false;
 	ps.zBufferFunc = video::EZComparisonFunc::Always;
@@ -40,13 +35,10 @@ GUIEnvironmentImpl::GUIEnvironmentImpl(
 	FontRenderer->SetPipeline(ps);
 
 	// Register font loader
-	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader)(
-		m_ImageSystem,
-		m_VideoDriver,
-		m_MatLibrary));
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader)(m_ImageSystem));
 
 #ifdef LUX_WINDOWS
-	m_FontCreator = LUX_NEW(FontCreatorWin32)(m_MatLibrary, m_VideoDriver, FontRenderer);
+	m_FontCreator = LUX_NEW(FontCreatorWin32)(FontRenderer);
 #else
 	m_FontCreator = nullptr;
 #endif

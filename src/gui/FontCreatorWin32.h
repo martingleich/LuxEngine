@@ -11,10 +11,8 @@ namespace gui
 class FontCreatorWin32 : public FontCreatorNull
 {
 public:
-	FontCreatorWin32(video::MaterialLibrary* matLib,
-		video::VideoDriver* driver,
-		video::MaterialRenderer* defaultFontMaterial) :
-		FontCreatorNull(matLib, driver, defaultFontMaterial)
+	FontCreatorWin32(video::MaterialRenderer* defaultFontMaterial) :
+		FontCreatorNull(defaultFontMaterial)
 	{
 	}
 

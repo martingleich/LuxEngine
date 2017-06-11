@@ -67,7 +67,7 @@ class FontImpl : public Font
 public:
 	FontImpl();
 	~FontImpl();
-	void Init(video::VideoDriver* driver, const FontCreationData& data);
+	void Init(const FontCreationData& data);
 
 	void SetMaterial(const video::Material* material);
 	const video::Material* GetMaterial() const;
@@ -97,8 +97,6 @@ private:
 	const CharInfo& GetCharInfo(u32 c);
 
 private:
-	video::VideoDriver* m_Driver;
-
 	core::HashMap<u32, CharInfo> m_CharMap;
 	float m_CharHeight;
 

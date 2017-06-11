@@ -16,15 +16,9 @@ namespace lux
 namespace gui
 {
 
-FontCreatorNull::FontCreatorNull(video::MaterialLibrary* matLib,
-	video::VideoDriver* driver,
-	video::MaterialRenderer* defaultFontMaterial) :
-	m_Driver(driver),
+FontCreatorNull::FontCreatorNull(video::MaterialRenderer* defaultFontMaterial) :
 	m_DefaultFontMaterial(defaultFontMaterial)
 {
-	if(!m_DefaultFontMaterial)
-		m_DefaultFontMaterial = matLib->GetMaterialRenderer("font");
-
 	AddDefaultCharSet("german", " AA«»íéáóúôîûâê1234567890AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZzÖöÜüÄäß²³{}[]()<>+-*,;.:!?&%§/\\'#~^°\"_´`$€@µ|=");
 }
 
@@ -130,7 +124,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::ar
 	data.baseLine = 0.0f;
 
 	StrongRef<FontImpl> font = LUX_NEW(FontImpl);
-	font->Init(m_Driver, data);
+	font->Init(data);
 
 	return font;
 }

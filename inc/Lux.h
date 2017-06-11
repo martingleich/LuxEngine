@@ -152,7 +152,6 @@ namespace input
 #include "video/mesh/Geometry.h"
 #include "video/mesh/VideoMesh.h"
 #include "video/mesh/MeshSystem.h"
-#include "video/mesh/GeometryCreatorLib.h"
 
 #include "gui/GUIEnvironment.h"
 #include "gui/Font.h"

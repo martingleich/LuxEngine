@@ -8,15 +8,23 @@ namespace io
 {
 
 static StrongRef<FileSystem> g_FileSystem;
+
+void FileSystem::Initialize(FileSystem* fileSys)
+{
+	if(!fileSys) {
+#ifdef LUX_WINDOWS
+		fileSys = LUX_NEW(FileSystemWin32);
+#endif
+	}
+
+	if(!fileSys)
+		throw core::ErrorException("No filesystem available");
+	g_FileSystem = fileSys;
+}
+
 FileSystem* FileSystem::Instance()
 {
-#ifdef LUX_WINDOWS
-	if(!g_FileSystem)
-		g_FileSystem = LUX_NEW(FileSystemWin32);
 	return g_FileSystem;
-#else
-	throw core::ErrorException("No filesystem available");
-#endif
 }
 
 void FileSystem::Destroy()

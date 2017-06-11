@@ -8,10 +8,17 @@ namespace core
 {
 
 static StrongRef<ReferableFactory> g_ReferableFactory;
+
+void ReferableFactory::Initialize(ReferableFactory* refFactory)
+{
+	if(!refFactory)
+		refFactory = LUX_NEW(ReferableFactoryImpl);
+
+	g_ReferableFactory = refFactory;
+}
+
 ReferableFactory* ReferableFactory::Instance()
 {
-	if(!g_ReferableFactory)
-		g_ReferableFactory = LUX_NEW(ReferableFactoryImpl);
 	return g_ReferableFactory;
 }
 

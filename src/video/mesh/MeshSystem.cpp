@@ -1,14 +1,10 @@
-#include "video/mesh/GeometryCreatorLibImpl.h"
-#include "core/ParamPackage.h"
-#include "video/VideoDriver.h"
-#include "video/mesh/Geometry.h"
-#include "video/MaterialLibrary.h"
-#include "video/Material.h"
-
-#include "video/mesh/VideoMesh.h"
 #include "video/mesh/MeshSystem.h"
+#include "video/mesh/StaticMesh.h"
 
-#include "resources/ResourceSystem.h"
+#include "core/ReferableFactory.h"
+
+#include "video/VideoDriver.h"
+#include "video/mesh/MeshLoaderOBJ.h"
 
 #include "video/mesh/GeometryCreatorPlane.h"
 #include "video/mesh/GeometryCreatorSphereUV.h"
@@ -20,11 +16,36 @@ namespace lux
 namespace video
 {
 
-GeometryCreatorLibImpl::GeometryCreatorLibImpl(MaterialLibrary* matLib, VideoDriver* driver, MeshSystem* meshCache) :
-	m_Driver(driver),
-	m_MeshSystem(meshCache),
-	m_MatLib(matLib)
+static StrongRef<MeshSystem> g_MeshSystem;
+
+void MeshSystem::Initialize(MeshSystem* system)
 {
+	if(!system)
+		system = LUX_NEW(MeshSystem);
+
+	if(!system)
+		throw core::ErrorException("No mesh system available");
+	g_MeshSystem = system;
+}
+
+MeshSystem* MeshSystem::Instance()
+{
+	return g_MeshSystem;
+}
+
+void MeshSystem::Destroy()
+{
+	g_MeshSystem.Reset();
+}
+
+MeshSystem::MeshSystem()
+{
+	m_Driver = video::VideoDriver::Instance();
+	m_MatLib = video::MaterialLibrary::Instance();
+
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(m_Driver, m_MatLib));
+	core::ReferableFactory::Instance()->RegisterType(LUX_NEW(StaticMesh)(m_Driver));
+
 	m_PlaneCreator = LUX_NEW(GeometryCreatorPlane);
 	AddCreator(m_PlaneCreator);
 	m_SphereUVCreator = LUX_NEW(GeometryCreatorSphereUV);
@@ -35,16 +56,25 @@ GeometryCreatorLibImpl::GeometryCreatorLibImpl(MaterialLibrary* matLib, VideoDri
 	AddCreator(m_ArrowCreator);
 }
 
-StrongRef<GeometryCreator> GeometryCreatorLibImpl::GetByName(const string& name) const
+MeshSystem::~MeshSystem()
+{
+}
+
+StrongRef<Mesh> MeshSystem::CreateMesh()
+{
+	return core::ReferableFactory::Instance()->Create(ReferableType::Resource, core::ResourceType::Mesh);
+}
+
+StrongRef<GeometryCreator> MeshSystem::GetCreatorByName(const string& name) const
 {
 	auto it = m_Creators.Find(name);
 	if(it == m_Creators.End())
 		throw core::ObjectNotFoundException(name.Data());
 
-	return it->creator;
+	return *it;
 }
 
-void GeometryCreatorLibImpl::AddCreator(GeometryCreator* creator)
+void MeshSystem::AddCreator(GeometryCreator* creator)
 {
 	LX_CHECK_NULL_ARG(creator);
 
@@ -52,48 +82,46 @@ void GeometryCreatorLibImpl::AddCreator(GeometryCreator* creator)
 	if(it != m_Creators.End())
 		throw core::ErrorException("Geometry creator alredy exists");
 
-	Entry entry;
-	entry.creator = creator;
-	m_Creators.Set(creator->GetName(), entry);
+	m_Creators.Set(creator->GetName(), creator);
 }
 
-void GeometryCreatorLibImpl::RemoveCreator(GeometryCreator* creator)
+void MeshSystem::RemoveCreator(GeometryCreator* creator)
 {
-	if(creator)
-		m_Creators.Erase(creator->GetName());
+	LX_CHECK_NULL_ARG(creator);
+	m_Creators.Erase(creator->GetName());
 }
 
-size_t GeometryCreatorLibImpl::GetCreatorCount() const
+size_t MeshSystem::GetCreatorCount() const
 {
 	return m_Creators.Size();
 }
 
-StrongRef<GeometryCreator> GeometryCreatorLibImpl::GetById(size_t id) const
+StrongRef<GeometryCreator> MeshSystem::GetCreatorById(size_t id) const
 {
 	if(id >= m_Creators.Size())
 		throw core::OutOfRangeException();
 
-	return core::AdvanceIterator(m_Creators.First(), id)->creator;
+	return *core::AdvanceIterator(m_Creators.First(), id);
 }
 
-core::PackagePuffer GeometryCreatorLibImpl::GetCreatorParams(const string& name)
+core::PackagePuffer MeshSystem::GetCreatorParams(const string& name)
 {
 	auto it = m_Creators.Find(name);
 	if(it == m_Creators.End())
 		throw core::ObjectNotFoundException(name.Data());
 
-	return core::PackagePuffer(&it->creator->GetParams());
+	return core::PackagePuffer(&((*it)->GetParams()));
 }
 
-StrongRef<Geometry> GeometryCreatorLibImpl::CreateGeometry(const string& name, const core::PackagePuffer& params)
+StrongRef<Geometry> MeshSystem::CreateGeometry(const string& name, const core::PackagePuffer& params)
 {
-	return GetByName(name)->CreateGeometry(m_Driver, params);
+	return GetCreatorByName(name)->CreateGeometry(m_Driver, params);
 }
 
-StrongRef<Mesh> GeometryCreatorLibImpl::CreateMesh(const string& name, const core::PackagePuffer& params)
+StrongRef<Mesh> MeshSystem::CreateMesh(const string& name, const core::PackagePuffer& params)
 {
-	StrongRef<Geometry> sub = GetByName(name)->CreateGeometry(m_Driver, params);
-	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
+	StrongRef<Geometry> sub = GetCreatorByName(name)->CreateGeometry(m_Driver, params);
+	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
@@ -101,7 +129,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateMesh(const string& name, const cor
 	return out;
 }
 
-StrongRef<Mesh> GeometryCreatorLibImpl::CreatePlaneMesh(
+StrongRef<Mesh> MeshSystem::CreatePlaneMesh(
 	float sizeX, float sizeY,
 	s32 tesX, s32 tesY,
 	float texX, float texY,
@@ -111,7 +139,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreatePlaneMesh(
 	StrongRef<GeometryCreatorPlane> creator = m_PlaneCreator;
 
 	StrongRef<Geometry> sub = creator->CreateGeometry(m_Driver, sizeX, sizeY, tesX, tesY, texX, texY, function, context);
-	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
+	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
@@ -119,7 +147,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreatePlaneMesh(
 	return out;
 }
 
-StrongRef<Mesh> GeometryCreatorLibImpl::CreateSphereMesh(
+StrongRef<Mesh> MeshSystem::CreateSphereMesh(
 	float radius,
 	s32 rings, s32 sectors,
 	float texX, float texY,
@@ -127,7 +155,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateSphereMesh(
 {
 	StrongRef<GeometryCreatorSphereUV> creator = m_SphereUVCreator;
 	StrongRef<Geometry> sub = creator->CreateGeometry(m_Driver, radius, rings, sectors, texX, texY, inside);
-	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
+	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
@@ -135,7 +163,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateSphereMesh(
 	return out;
 }
 
-StrongRef<Mesh> GeometryCreatorLibImpl::CreateCubeMesh(
+StrongRef<Mesh> MeshSystem::CreateCubeMesh(
 	float sizeX, float sizeY, float sizeZ,
 	s32 tesX, s32 tesY, s32 tesZ,
 	float texX, float texY, float texZ,
@@ -148,7 +176,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateCubeMesh(
 		tesX, tesY, tesZ,
 		texX, texY, texZ,
 		inside);
-	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
+	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
@@ -156,7 +184,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateCubeMesh(
 	return out;
 }
 
-StrongRef<Mesh> GeometryCreatorLibImpl::CreateArrowMesh(
+StrongRef<Mesh> MeshSystem::CreateArrowMesh(
 	float shaft_height, float head_height,
 	float shaft_radius, float head_radius,
 	s32 sectors)
@@ -167,7 +195,7 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateArrowMesh(
 		shaft_height, head_height,
 		shaft_radius, head_radius,
 		sectors);
-	StrongRef<Mesh> out = m_MeshSystem->CreateMesh();
+	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->RecalculateBoundingBox();
@@ -175,5 +203,5 @@ StrongRef<Mesh> GeometryCreatorLibImpl::CreateArrowMesh(
 	return out;
 }
 
-}
-}
+} // namespace scene
+} // namespace lux

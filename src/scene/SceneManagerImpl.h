@@ -13,11 +13,7 @@ namespace scene
 class SceneManagerImpl : public SceneManager
 {
 public:
-	SceneManagerImpl(
-		video::VideoDriver* driver,
-		video::ImageSystem* imageSystem,
-		video::MeshSystem* meshCache,
-		video::MaterialLibrary* matLib);
+	SceneManagerImpl(video::ImageSystem* imageSystem);
 
 	~SceneManagerImpl();
 
@@ -238,12 +234,8 @@ private:
 	// References to other classes
 	/////////////////////////////////////////////////////////////////////////
 
-	StrongRef<video::VideoDriver> m_Driver;
 	video::Renderer* m_Renderer;
-
-	StrongRef<video::MeshSystem> m_MeshSystem;
 	StrongRef<video::ImageSystem> m_ImagSys;
-	StrongRef<video::MaterialLibrary> m_MatLib;
 };
 
 } // namespace scene

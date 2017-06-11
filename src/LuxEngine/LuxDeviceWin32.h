@@ -57,13 +57,9 @@ public:
 	double GetTime() const;
 	StrongRef<gui::Window> GetWindow() const;
 
-	StrongRef<video::VideoDriver> GetDriver() const;
 	StrongRef<scene::SceneManager> GetSceneManager() const;
-	StrongRef<input::InputSystem> GetInputSystem() const;
-	StrongRef<video::MaterialLibrary> GetMaterialLibrary() const;
 	StrongRef<video::ImageSystem> GetImageSystem() const;
 	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const;
-	StrongRef<video::MeshSystem> GetMeshSystem() const;
 
 	LRESULT WinProc(HWND window,
 		UINT uiMessage,
@@ -75,8 +71,6 @@ private:
 		UINT uiMessage,
 		WPARAM WParam,
 		LPARAM LParam);
-
-	void BuildMaterials();
 
 private:
 	struct WindowCallback : public gui::WindowEventCallback
@@ -109,13 +103,10 @@ private:
 
 	double m_Time;
 
-	StrongRef<input::InputSystem> m_InputSystem;
-	StrongRef<video::VideoDriver> m_Driver;
 	StrongRef<video::ImageSystem> m_ImageSystem;
+
 	StrongRef<scene::SceneManager> m_SceneManager;
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;
-	StrongRef<video::MaterialLibrary> m_MaterialLibrary;
-	StrongRef<video::MeshSystem> m_MeshSystem;
 
 	const wchar_t* const m_LuxWindowClassName;
 

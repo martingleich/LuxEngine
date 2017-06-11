@@ -161,7 +161,6 @@ public:
 	//virtual Texture* AddRendertargetCubeTexture(u32 size, const string& name = "rt", ColorFormat format = UNKNOWN) = 0;
 };
 
-
 }
 }
 

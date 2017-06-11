@@ -13,7 +13,6 @@ namespace gui
 {
 
 FontImpl::FontImpl() :
-	m_Driver(nullptr),
 	m_Image(nullptr),
 	m_ImageWidth(0),
 	m_ImageHeight(0)
@@ -25,10 +24,8 @@ FontImpl::~FontImpl()
 	LUX_FREE_ARRAY(m_Image);
 }
 
-void FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
+void FontImpl::Init(const FontCreationData& data)
 {
-	m_Driver = driver;
-
 	m_CharDistance = data.charDistance;
 	m_WordDistance = data.wordDistance;
 	m_LineDistance = data.lineDistance;
@@ -55,7 +52,7 @@ void FontImpl::Init(video::VideoDriver* driver, const FontCreationData& data)
 
 		memcpy(m_Image, data.image, m_ImageWidth*m_ImageHeight * sizeof(FontPixel));
 
-		m_Texture = m_Driver->CreateTexture(math::dimension2du(m_ImageWidth, m_ImageHeight), video::ColorFormat::A8R8G8B8, 0, false);
+		m_Texture = video::VideoDriver::Instance()->CreateTexture(math::dimension2du(m_ImageWidth, m_ImageHeight), video::ColorFormat::A8R8G8B8, 0, false);
 
 		video::TextureLock lock(m_Texture, video::BaseTexture::ELockMode::Overwrite);
 
@@ -117,7 +114,7 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 {
 	LUX_UNUSED(clip);
 
-	auto renderer = m_Driver->GetRenderer();
+	auto renderer = video::VideoDriver::Instance()->GetRenderer();
 	renderer->SetMaterial(m_Material);
 
 	const float italic = 0.0f * m_Scale;

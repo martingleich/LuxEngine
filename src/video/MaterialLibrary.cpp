@@ -1,7 +1,7 @@
-#include "MaterialLibraryImpl.h"
+#include "video/MaterialLibrary.h"
 
 #include "video/Shader.h"
-#include "video/MaterialRenderer.h"
+#include "video/MaterialRendererImpl.h"
 #include "video/VideoDriver.h"
 
 #include "io/FileSystem.h"
@@ -15,25 +15,57 @@ namespace lux
 namespace video
 {
 
-MaterialLibraryImpl::MaterialLibraryImpl(VideoDriver* driver) :
-	m_VideoDriver(driver)
+static StrongRef<MaterialLibrary> g_MaterialLibrary;
+
+void MaterialLibrary::Initialize(MaterialLibrary* matLib)
+{
+	if(!matLib)
+		matLib = LUX_NEW(MaterialLibrary);
+
+	if(!matLib)
+		throw core::ErrorException("No material library available");
+	g_MaterialLibrary = matLib;
+}
+
+MaterialLibrary::~MaterialLibrary()
 {
 }
 
-StrongRef<Material> MaterialLibraryImpl::CreateMaterial(const string& name)
+MaterialLibrary* MaterialLibrary::Instance()
+{
+	return g_MaterialLibrary;
+}
+
+void MaterialLibrary::Destroy()
+{
+	g_MaterialLibrary.Reset();
+}
+
+MaterialLibrary::MaterialLibrary()
+{
+	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseSolid)("solid_base", nullptr, nullptr));
+	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseTransparent)("transparent_base", nullptr, nullptr));
+	m_Solid = AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid)("solid", nullptr, nullptr));
+	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix)("solid_mix", nullptr, nullptr));
+	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend)("transparent", nullptr, nullptr));
+	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_DebugOverlay)("debug_overlay", nullptr, nullptr));
+	//AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(nullptr, nullptr), "transparent_alpha");
+}
+
+StrongRef<Material> MaterialLibrary::CreateMaterial(const string& name)
 {
 	return CreateMaterial(GetMaterialRenderer(name));
 }
 
-StrongRef<Material> MaterialLibraryImpl::CreateMaterial(MaterialRenderer* renderer)
+StrongRef<Material> MaterialLibrary::CreateMaterial(MaterialRenderer* renderer)
 {
 	if(renderer == nullptr)
-		renderer = GetSolidRenderer();
+		renderer = m_Solid;
 
 	return renderer->CreateMaterial();
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::AddMaterialRenderer(MaterialRenderer* renderer)
+StrongRef<MaterialRenderer> MaterialLibrary::AddMaterialRenderer(MaterialRenderer* renderer)
 {
 	LX_CHECK_NULL_ARG(renderer);
 
@@ -49,19 +81,19 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddMaterialRenderer(MaterialRen
 	return renderer;
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::CloneMaterialRenderer(const string& name, const string& oldName)
+StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const string& name, const string& oldName)
 {
 	return CloneMaterialRenderer(name, GetMaterialRenderer(oldName));
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::CloneMaterialRenderer(const string& name, const MaterialRenderer* old)
+StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const string& name, const MaterialRenderer* old)
 {
 	LX_CHECK_NULL_ARG(old);
 
 	return AddMaterialRenderer(old->Clone(name));
 }
 
-void MaterialLibraryImpl::RemoveMaterialRenderer(MaterialRenderer* renderer)
+void MaterialLibrary::RemoveMaterialRenderer(MaterialRenderer* renderer)
 {
 	for(auto it = m_Renderers.First(); it != m_Renderers.End(); ++it) {
 		if(*it == renderer) {
@@ -71,7 +103,7 @@ void MaterialLibraryImpl::RemoveMaterialRenderer(MaterialRenderer* renderer)
 	}
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
+StrongRef<MaterialRenderer> MaterialLibrary::AddShaderMaterialRenderer(
 	Shader* shader,
 	const MaterialRenderer* baseMaterial, const string& name)
 {
@@ -88,7 +120,7 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 	return AddMaterialRenderer(renderer);
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
+StrongRef<MaterialRenderer> MaterialLibrary::AddShaderMaterialRenderer(
 	video::EShaderLanguage language,
 	const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
 	const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
@@ -129,7 +161,7 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 			psCode[PSFile->GetSize()] = 0;
 		}
 	}
-	StrongRef<video::Shader> shader = m_VideoDriver->CreateShader(
+	StrongRef<video::Shader> shader = video::VideoDriver::Instance()->CreateShader(
 		language,
 		vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSMajor, VSMinor,
 		psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSMajor, PSMinor,
@@ -138,12 +170,12 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::AddShaderMaterialRenderer(
 	return AddShaderMaterialRenderer(shader, baseMaterial, name);
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(size_t index) const
+StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(size_t index) const
 {
 	return m_Renderers.At(index);
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(const string& name) const
+StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(const string& name) const
 {
 	size_t id;
 	if(!FindRenderer(name, id))
@@ -152,20 +184,12 @@ StrongRef<MaterialRenderer> MaterialLibraryImpl::GetMaterialRenderer(const strin
 	return m_Renderers[id];
 }
 
-size_t MaterialLibraryImpl::GetMaterialRendererCount() const
+size_t MaterialLibrary::GetMaterialRendererCount() const
 {
 	return m_Renderers.Size();
 }
 
-StrongRef<MaterialRenderer> MaterialLibraryImpl::GetSolidRenderer()
-{
-	if(!m_Solid)
-		m_Solid = GetMaterialRenderer("solid");
-
-	return m_Solid;
-}
-
-bool MaterialLibraryImpl::FindRenderer(const string& name, size_t& id) const
+bool MaterialLibrary::FindRenderer(const string& name, size_t& id) const
 {
 	for(id = 0; id < m_Renderers.Size(); ++id) {
 		if(m_Renderers[id]->GetName() == name)
@@ -174,6 +198,5 @@ bool MaterialLibraryImpl::FindRenderer(const string& name, size_t& id) const
 
 	return false;
 }
-
-} // !namespace video
-} // !namespace lux
+}
+}

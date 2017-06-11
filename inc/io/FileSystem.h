@@ -28,6 +28,9 @@ public:
 	{
 	}
 
+	//! Initialize the global filesystem
+	LUX_API static void Initialize(FileSystem* fileSys=nullptr);
+
 	//! Access the global filesystem
 	LUX_API static FileSystem* Instance();
 

@@ -23,6 +23,9 @@ The resource system saves data as a map from names to resources.
 class ResourceSystem : public ReferenceCounted
 {
 public:
+	//! Initialize the global resource system
+	LUX_API static void Initialize(ResourceSystem* resSys=nullptr);
+
 	//! Access the global resource system
 	LUX_API static ResourceSystem* Instance();
 

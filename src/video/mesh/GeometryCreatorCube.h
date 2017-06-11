@@ -1,6 +1,6 @@
 #ifndef INCLUDED_GEOMETRY_CREATOR_CUBE_H
 #define INCLUDED_GEOMETRY_CREATOR_CUBE_H
-#include "video/mesh/GeometryCreatorLib.h"
+#include "video/mesh/GeometryCreator.h"
 #include "core/ParamPackage.h"
 
 namespace lux

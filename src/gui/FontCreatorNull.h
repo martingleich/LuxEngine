@@ -9,7 +9,6 @@ namespace video
 {
 class MaterialLibrary;
 class MaterialRenderer;
-class VideoDriver;
 }
 namespace gui
 {
@@ -17,15 +16,12 @@ namespace gui
 class FontCreatorNull : public FontCreator
 {
 private:
-	video::VideoDriver* m_Driver;
 	video::MaterialRenderer* m_DefaultFontMaterial;
 
 	core::HashMap<string, core::array<u32>> m_DefaultCharSets;
 
 public:
-	FontCreatorNull(video::MaterialLibrary* matLib,
-		video::VideoDriver* driver,
-		video::MaterialRenderer* defaultFontMaterial);
+	FontCreatorNull(video::MaterialRenderer* defaultFontMaterial);
 
 	StrongRef<Font> CreateFont(
 		const string& name,

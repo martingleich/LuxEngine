@@ -24,7 +24,14 @@ namespace scene
 SkyBox::SkyBox() :
 	m_UseCubeTexture(true)
 {
+}
 
+SkyBox::SkyBox(const SkyBox& other)
+{
+	if(other.m_Material)
+		m_Material = other.m_Material->Clone();
+	else
+		m_Material = video::MaterialLibrary::Instance()->CreateMaterial();
 }
 
 SkyBox::~SkyBox()

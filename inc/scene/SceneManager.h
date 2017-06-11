@@ -123,11 +123,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	virtual video::VideoDriver* GetDriver() const = 0;
 	virtual video::Renderer* GetRenderer() const = 0;
-	virtual video::MaterialLibrary* GetMaterialLibrary() const = 0;
 	virtual video::ImageSystem* GetImageSystem() const = 0;
-	virtual video::MeshSystem* GetMeshSystem() const = 0;
 };
 
 } // namespace scene

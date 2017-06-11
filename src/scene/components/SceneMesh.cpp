@@ -21,6 +21,19 @@ Mesh::Mesh() :
 {
 }
 
+Mesh::Mesh(const Mesh& other) :
+	m_Mesh(other.m_Mesh),
+	m_DirtyMaterials(true),
+	m_OnlyReadMaterials(other.m_OnlyReadMaterials),
+	m_BoundingBox(other.m_BoundingBox)
+{
+	if(!m_OnlyReadMaterials) {
+		for(auto it = other.m_Materials.First(); it != other.m_Materials.End(); ++it) {
+			m_Materials.PushBack((*it)->Clone());
+		}
+	}
+}
+
 Mesh::~Mesh()
 {
 }
@@ -186,10 +199,7 @@ core::Name Mesh::GetReferableSubType() const
 
 StrongRef<Referable> Mesh::Clone() const
 {
-	StrongRef<Mesh> out = LUX_NEW(Mesh)(*this);
-	out->SetMesh(m_Mesh);
-
-	return out;
+	return LUX_NEW(Mesh(*this));
 }
 
 } // namespace scene

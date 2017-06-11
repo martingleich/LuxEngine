@@ -16,6 +16,7 @@ class SkyBox : public Component, public Renderable
 {
 public:
 	LUX_API SkyBox();
+	LUX_API SkyBox(const SkyBox& other);
 	LUX_API ~SkyBox();
 
 	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);

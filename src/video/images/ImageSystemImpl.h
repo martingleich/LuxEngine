@@ -13,7 +13,7 @@ class ImageSystemImpl : public ImageSystem
 	friend class ImageToTextureLoader;
 	friend class MultiImageToCubeTextureLoader;
 public:
-	ImageSystemImpl(video::VideoDriver* driver);
+	ImageSystemImpl();
 
 	StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format);
 	StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMem = true, bool deleteOnDrop = true);

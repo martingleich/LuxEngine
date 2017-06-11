@@ -40,6 +40,15 @@ class VideoDriver : public ReferenceCounted
 public:
 	virtual ~VideoDriver() {}
 
+	//! Initialize the global driver
+	LUX_API static void Initialize(VideoDriver* driver=nullptr);
+
+	//! Access the global driver
+	LUX_API static VideoDriver* Instance();
+
+	//! Destroys the global driver
+	LUX_API static void Destroy();
+
 	virtual StrongRef<Geometry> CreateEmptyGeometry(EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
 	virtual StrongRef<Geometry> CreateGeometry(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,

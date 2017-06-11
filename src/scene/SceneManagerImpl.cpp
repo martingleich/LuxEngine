@@ -35,18 +35,12 @@ namespace lux
 namespace scene
 {
 
-SceneManagerImpl::SceneManagerImpl(video::VideoDriver* driver,
-	video::ImageSystem* imagSys,
-	video::MeshSystem* meshCache,
-	video::MaterialLibrary* matLib) :
+SceneManagerImpl::SceneManagerImpl(video::ImageSystem* imagSys) :
 	m_CollectedRoot(nullptr),
-	m_Driver(driver),
-	m_MeshSystem(meshCache),
-	m_ImagSys(imagSys),
-	m_MatLib(matLib)
+	m_ImagSys(imagSys)
 {
 	m_RootSceneNode = LUX_NEW(Node)(this, true);
-	m_Renderer = m_Driver->GetRenderer();
+	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
 
 	m_Overwrites.Resize((size_t)ERenderPass::COUNT);
 
@@ -103,9 +97,6 @@ StrongRef<Mesh> SceneManagerImpl::CreateMesh(video::Mesh* mesh)
 StrongRef<SkyBox> SceneManagerImpl::CreateSkyBox(video::CubeTexture* skyTexture)
 {
 	StrongRef<SkyBox> out = CreateComponent(SceneComponentType::SkyBox);
-
-	// Use a simple solid matrial for the sky box
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
 	out->SetSkyTexture(skyTexture);
 
 	return out;
@@ -357,29 +348,14 @@ void SceneManagerImpl::RemovePipelineOverwrite(ERenderPass pass, const video::Pi
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-video::VideoDriver* SceneManagerImpl::GetDriver() const
-{
-	return m_Driver;
-}
-
 video::Renderer* SceneManagerImpl::GetRenderer() const
 {
 	return m_Renderer;
 }
 
-video::MaterialLibrary* SceneManagerImpl::GetMaterialLibrary() const
-{
-	return m_MatLib;
-}
-
 video::ImageSystem* SceneManagerImpl::GetImageSystem() const
 {
 	return m_ImagSys;
-}
-
-video::MeshSystem* SceneManagerImpl::GetMeshSystem() const
-{
-	return m_MeshSystem;
 }
 
 ////////////////////////////////////////////////////////////////////////////

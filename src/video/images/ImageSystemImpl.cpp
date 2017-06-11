@@ -249,10 +249,13 @@ private:
 	ImageSystemImpl* m_ImageSystem;
 };
 
-ImageSystemImpl::ImageSystemImpl(video::VideoDriver* driver) :
-	m_Driver(driver),
+ImageSystemImpl::ImageSystemImpl() :
+	m_Driver(video::VideoDriver::Instance()),
 	m_TextureCreationFlags(ETCF_ALPHA_CHANNEL | ETCF_CREATE_MIP_MAPS)
 {
+	if(!m_Driver)
+		throw core::ErrorException("Missing video driver");
+
 	auto resSys = core::ResourceSystem::Instance();
 
 	// Register before image loaders, to make default load type images, instead of textures.
@@ -354,7 +357,6 @@ StrongRef<CubeTexture> ImageSystemImpl::CreateCubeTexture(StrongRef<Image> image
 
 	return texture;
 }
-
 
 void ImageSystemImpl::InitCubeTexture(StrongRef<Image> images[6], CubeTexture* tex)
 {
@@ -532,6 +534,7 @@ StrongRef<Texture> ImageSystemImpl::AddTexture(const string& name, Image* image,
 
 	return texture;
 }
+
 StrongRef<video::Texture> ImageSystemImpl::AddChromaKeyedTexture(video::Image* image, video::Color key)
 {
 	LX_CHECK_NULL_ARG(image);

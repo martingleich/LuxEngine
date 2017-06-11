@@ -29,7 +29,7 @@ core::Name FontLoader::GetResourceType(io::File* file, core::Name requestedType)
 
 void FontLoader::LoadResource(io::File* file, core::Resource* dst)
 {
-	if(!m_Driver || !m_ImageSystem || !m_MaterialLibrary)
+	if(!video::VideoDriver::Instance() || !m_ImageSystem || !video::MaterialLibrary::Instance())
 		throw core::Exception("Font loader is missing driver, imageSystem or materialLibrary");
 
 	LoadFontFromFile(file, dst);
@@ -170,7 +170,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	FontCreationData data;
 	data.charMap = charMap;
 	data.charHeight = info.height;
-	data.material = m_MaterialLibrary->CreateMaterial("font");
+	data.material = video::MaterialLibrary::Instance()->CreateMaterial("font");
 	data.material->Layer(0) = fontTexture;
 	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha, video::EBlendOperator::Add);
 	data.material->Param("blendFunc") = alpha.Pack();
@@ -183,7 +183,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 	gui::FontImpl* real_dst = dynamic_cast<gui::FontImpl*>(dst);
 	if(!real_dst)
 		throw core::Exception("Passed wrong resource type to loader");
-	real_dst->Init(m_Driver, data);
+	real_dst->Init(data);
 }
 
 }

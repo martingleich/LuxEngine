@@ -15,6 +15,15 @@ class DeviceCreationDesc;
 class InputSystem : public ReferenceCounted
 {
 public:
+	//! Initialize the global referable factory
+	LUX_API static void Initialize(InputSystem* inputSystem=nullptr);
+
+	//! Access the global referable factory
+	LUX_API static InputSystem* Instance();
+
+	//! Destroys the global referable factory
+	LUX_API static void Destroy();
+
 	//! Get the event signal
 	/**
 	All input events created by the system are broadcast to this event

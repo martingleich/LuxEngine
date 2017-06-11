@@ -21,6 +21,9 @@ public:
 	{
 	}
 
+	//! Initialize the global referable factory
+	LUX_API static void Initialize(ReferableFactory* refFactory=nullptr);
+
 	//! Access the global referable factory
 	LUX_API static ReferableFactory* Instance();
 

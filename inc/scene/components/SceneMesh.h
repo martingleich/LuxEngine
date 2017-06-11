@@ -19,6 +19,7 @@ class Mesh : public Component, public Renderable
 {
 public:
 	LUX_API Mesh();
+	LUX_API Mesh(const Mesh& other);
 	LUX_API ~Mesh();
 
 	//! Get the currently used model

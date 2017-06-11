@@ -6,18 +6,10 @@
 namespace lux
 {
 
-namespace input
-{
-class InputSystem;
-}
-
 namespace video
 {
-class VideoDriver;
-class MaterialLibrary;
 class ImageSystem;
 struct DriverConfig;
-class MeshSystem;
 }
 
 namespace scene
@@ -102,14 +94,12 @@ public:
 
 	virtual double GetTime() const = 0;
 
-	virtual StrongRef<video::VideoDriver> GetDriver() const = 0;
-	virtual StrongRef<scene::SceneManager> GetSceneManager() const = 0;
-	virtual StrongRef<input::InputSystem> GetInputSystem() const = 0;
-	virtual StrongRef<video::MaterialLibrary> GetMaterialLibrary() const = 0;
 	virtual StrongRef<video::ImageSystem> GetImageSystem() const = 0;
+
+	virtual StrongRef<scene::SceneManager> GetSceneManager() const = 0;
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;
+
 	virtual StrongRef<gui::Window> GetWindow() const = 0;
-	virtual StrongRef<video::MeshSystem> GetMeshSystem() const = 0;
 };
 
 //! Create a new lux device.

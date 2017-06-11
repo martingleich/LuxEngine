@@ -60,7 +60,7 @@ void StaticMesh::RecalculateBoundingBox()
 	}
 }
 
-StrongRef<Geometry> StaticMesh::AddGeometry(Geometry* subMesh)
+StrongRef<Geometry> StaticMesh::AddGeometry(Geometry* subMesh = nullptr)
 {
 	if(subMesh)
 		m_Data.PushBack(subMesh);
