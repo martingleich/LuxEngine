@@ -72,6 +72,8 @@ namespace input
 #include "core/lxList.h"
 #include "core/lxArray.h"
 #include "core/lxHashMap.h"
+#include "core/lxOrderedSet.h"
+#include "core/lxOrderedMap.h"
 #include "core/Clock.h"
 #include "core/lxName.h"
 #include "core/lxString.h"
