@@ -63,7 +63,7 @@ public:
 	LUX_API virtual ERenderPass GetRenderPass() const;
 
 	LUX_API virtual video::Material* GetMaterial(size_t index);
-	LUX_API virtual const video::Material* Mesh::GetMaterial(size_t index) const;
+	LUX_API virtual const video::Material* GetMaterial(size_t index) const;
 	LUX_API virtual void SetMaterial(size_t index, video::Material* m);
 
 	LUX_API virtual size_t GetMaterialCount() const;

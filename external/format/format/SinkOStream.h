@@ -1,6 +1,6 @@
 #pragma once
 #include "Sink.h"
-#include <iostream>
+#include <ostream>
 
 namespace format
 {
@@ -8,7 +8,7 @@ namespace format
 class ostream_sink : public sink
 {
 public:
-	ostream_sink(std::ostream& o, size_t collumn=0) :
+	ostream_sink(std::ostream& o, size_t collumn = 0) :
 		sink(collumn),
 		m_Stream(o)
 	{

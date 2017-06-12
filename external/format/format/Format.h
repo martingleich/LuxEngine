@@ -1,6 +1,6 @@
 #pragma once
 #include "FormatConfig.h"
-#include "Locale.h"
+#include "FormatLocale.h"
 #include "StringType.h"
 #include "FormatMagicTemplates.h"
 #include "Placeholder.h"

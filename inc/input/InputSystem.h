@@ -28,7 +28,7 @@ public:
 	/**
 	All input events created by the system are broadcast to this event
 	*/
-	virtual events::signal<const Event&>& GetEventSignal() = 0;
+	virtual events::Signal<const Event&>& GetEventSignal() = 0;
 
 	//! Set the current foreground state of the active window
 	/**

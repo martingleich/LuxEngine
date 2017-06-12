@@ -24,7 +24,7 @@ public:
 class EventAction : public Action
 {
 public:
-	signal<> signal;
+	Signal<> signal;
 
 	void FireEvent()
 	{
@@ -37,7 +37,7 @@ public:
 class ButtonAction : public Action
 {
 public:
-	signal<bool> signal;
+	Signal<bool> signal;
 
 	ButtonAction(bool init)
 	{
@@ -75,7 +75,7 @@ private:
 class AxisAction : public Action
 {
 public:
-	signal<float> signal;
+	Signal<float> signal;
 
 	AxisAction(float init)
 	{

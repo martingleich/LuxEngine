@@ -10,11 +10,11 @@ namespace lux
 namespace events
 {
 template <typename... Args>
-struct signal_func
+struct SignalFunc
 {
-	virtual ~signal_func() {}
+	virtual ~SignalFunc() {}
 	virtual void Call(Args...) const = 0;
-	virtual bool Equal(const signal_func& other) const = 0;
+	virtual bool Equal(const SignalFunc& other) const = 0;
 	virtual const void* GetOwner() const = 0;
 	virtual bool IsDestroyed() const = 0;
 };
@@ -32,14 +32,14 @@ struct Select<T1, T2, false> { using type = T2; };
 }
 
 template <typename Class, typename... Args>
-struct signal_memberfunc_safe : signal_func<Args...>
+struct SignalMemberFuncSafe : SignalFunc<Args...>
 {
 	using MemPtr = void (Class::*)(Args...);
 
 	WeakRef<Class> owner;
 	MemPtr proc;
 
-	signal_memberfunc_safe(Class* o, MemPtr proc) :
+	SignalMemberFuncSafe(Class* o, MemPtr proc) :
 		owner(o),
 		proc(proc)
 	{
@@ -52,9 +52,9 @@ struct signal_memberfunc_safe : signal_func<Args...>
 		(owner->*proc)(args...);
 	}
 
-	bool Equal(const signal_func<Args...>& other) const
+	bool Equal(const SignalFunc<Args...>& other) const
 	{
-		auto that = dynamic_cast<const signal_memberfunc_safe*>(&other);
+		auto that = dynamic_cast<const SignalMemberFuncSafe*>(&other);
 		if(!that)
 			return false;
 
@@ -76,14 +76,14 @@ struct signal_memberfunc_safe : signal_func<Args...>
 };
 
 template <typename Class, typename... Args>
-struct signal_memberfunc_unsafe : signal_func<Args...>
+struct SignalMemberFuncUnsafe : SignalFunc<Args...>
 {
 	using MemPtr = void (Class::*)(Args...);
 
 	Class* owner;
 	MemPtr proc;
 
-	signal_memberfunc_unsafe(Class* o, MemPtr proc) :
+	SignalMemberFuncUnsafe(Class* o, MemPtr proc) :
 		owner(o),
 		proc(proc)
 	{
@@ -96,9 +96,9 @@ struct signal_memberfunc_unsafe : signal_func<Args...>
 		(owner->*proc)(args...);
 	}
 
-	bool Equal(const signal_func<Args...>& other) const
+	bool Equal(const SignalFunc<Args...>& other) const
 	{
-		auto that = dynamic_cast<const signal_memberfunc_unsafe*>(&other);
+		auto that = dynamic_cast<const SignalMemberFuncUnsafe*>(&other);
 		if(!that)
 			return false;
 
@@ -120,13 +120,13 @@ struct signal_memberfunc_unsafe : signal_func<Args...>
 };
 
 template <typename... Args>
-struct signal_staticfunc : signal_func<Args...>
+struct SignalStaticFunc : SignalFunc<Args...>
 {
 	using FuncPtr = void(*)(Args...);
 
 	FuncPtr proc;
 
-	signal_staticfunc(FuncPtr p) :
+	SignalStaticFunc(FuncPtr p) :
 		proc(p)
 	{
 		lxAssert(proc);
@@ -137,9 +137,9 @@ struct signal_staticfunc : signal_func<Args...>
 		proc(args...);
 	}
 
-	bool Equal(const signal_func<Args...>& other) const
+	bool Equal(const SignalFunc<Args...>& other) const
 	{
-		auto that = dynamic_cast<const signal_staticfunc*>(&other);
+		auto that = dynamic_cast<const SignalStaticFunc*>(&other);
 		if(!that)
 			return false;
 
@@ -161,48 +161,48 @@ struct signal_staticfunc : signal_func<Args...>
 };
 
 template <typename... Args>
-class signal_ref;
+class SignalRef;
 
 template <typename... Args>
-class signal
+class Signal
 {
-	friend class signal_ref<Args...>;
+	friend class SignalRef<Args...>;
 
 	template <typename Class, typename... Args2>
 	using signal_memberfunc_auto = typename impl::Select<
-		signal_memberfunc_safe<Class, Args2...>,
-		signal_memberfunc_unsafe<Class, Args2...>,
+		SignalMemberFuncSafe<Class, Args2...>,
+		SignalMemberFuncUnsafe<Class, Args2...>,
 		std::is_base_of<ReferenceCounted, Class>::value>::type;
 
 public:
-	signal() :
+	Signal() :
 		m_FirstRef(nullptr)
 	{
 	}
 
-	~signal();
+	~Signal();
 
 	// Signals can be copied but will lose all their listeners on the way.
-	signal(const signal& other) :
+	Signal(const Signal& other) :
 		m_FirstRef(nullptr)
 	{
 	}
 
 	// Signals can be copied but will lose all their listeners on the way.
-	signal& operator=(const signal& other)
+	Signal& operator=(const Signal& other)
 	{
-		~signal();
+		~Signal();
 		m_FirstRef = nullptr;
 		return *this;
 	}
 
-	signal(signal&& old) :
+	Signal(Signal&& old) :
 		m_FirstRef(nullptr)
 	{
 		*this = std::move(old);
 	}
 
-	signal& operator=(signal&& old);
+	Signal& operator=(Signal&& old);
 
 	template <typename Class>
 	void Connect(Class* owner, void (Class::*proc)(Args...))
@@ -214,7 +214,7 @@ public:
 	void Connect(void(*proc)(Args...))
 	{
 		if(proc)
-			m_Callfuncs.PushBack(std::make_unique<signal_staticfunc<Args...>>(proc));
+			m_Callfuncs.PushBack(std::make_unique<SignalStaticFunc<Args...>>(proc));
 	}
 
 	template <typename Class>
@@ -231,7 +231,7 @@ public:
 
 	void Disconnect(void(*proc)(Args...))
 	{
-		signal_staticfunc<Args...> compare_dummy(proc);
+		SignalStaticFunc<Args...> compare_dummy(proc);
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End(); ++it) {
 			if((*it)->Equal(compare_dummy)) {
 				it = m_Callfuncs.Erase(it);
@@ -275,22 +275,22 @@ public:
 	}
 
 private:
-	signal_ref<Args...>* m_FirstRef;
-	mutable core::array<std::unique_ptr<signal_func<Args...>>> m_Callfuncs;
+	SignalRef<Args...>* m_FirstRef;
+	mutable core::array<std::unique_ptr<SignalFunc<Args...>>> m_Callfuncs;
 };
 
 template <typename... Args>
-class signal_ref
+class SignalRef
 {
-	friend class signal<Args...>;
+	friend class Signal<Args...>;
 public:
-	signal_ref(signal<Args...>& s) :
-		signal_ref(&s)
+	SignalRef(Signal<Args...>& s) :
+		SignalRef(&s)
 	{
 
 	}
 
-	signal_ref(signal<Args...>* s)
+	SignalRef(Signal<Args...>* s)
 	{
 		m_Signal = s;
 
@@ -305,11 +305,11 @@ public:
 		}
 	}
 
-	signal_ref(const signal_ref& other) : signal_ref(other.m_Signal)
+	SignalRef(const SignalRef& other) : SignalRef(other.m_Signal)
 	{
 	}
 
-	~signal_ref()
+	~SignalRef()
 	{
 		if(m_Signal) {
 			if(m_Next)
@@ -321,9 +321,9 @@ public:
 		}
 	}
 
-	signal_ref& operator=(const signal_ref& other)
+	SignalRef& operator=(const SignalRef& other)
 	{
-		this->~signal_ref();
+		this->~SignalRef();
 		m_Signal = other.m_Signal;
 
 		if(m_Signal) {
@@ -338,49 +338,49 @@ public:
 		return *this;
 	}
 
-	signal<Args...>* operator->() const
+	Signal<Args...>* operator->() const
 	{
 		return m_Signal;
 	}
 
-	bool operator==(const signal<Args...>& s) const
+	bool operator==(const Signal<Args...>& s) const
 	{
 		return m_Signal == &s;
 	}
 
-	bool operator==(const signal<Args...>* s) const
+	bool operator==(const Signal<Args...>* s) const
 	{
 		return m_Signal == s;
 	}
 
-	bool operator==(const signal_ref& other) const
+	bool operator==(const SignalRef& other) const
 	{
 		return m_Signal == other.m_Signal;
 	}
 
-	bool operator!=(const signal<Args...>& s) const
+	bool operator!=(const Signal<Args...>& s) const
 	{
 		return m_Signal != &s;
 	}
 
-	bool operator!=(const signal<Args...>* s) const
+	bool operator!=(const Signal<Args...>* s) const
 	{
 		return m_Signal != s;
 	}
 
-	bool operator!=(const signal_ref& other) const
+	bool operator!=(const SignalRef& other) const
 	{
 		return m_Signal != other.m_Signal;
 	}
 
-	operator signal<Args...>*() const
+	operator Signal<Args...>*() const
 	{
 		return m_Signal;
 	}
 
-	void ChangeSignal(signal<Args...>* newPtr)
+	void ChangeSignal(Signal<Args...>* newPtr)
 	{
-		signal_ref* ptr = this;
+		SignalRef* ptr = this;
 		while(ptr) {
 			ptr->m_Signal = newPtr;
 			ptr = ptr->m_Next;
@@ -388,13 +388,13 @@ public:
 	}
 
 private:
-	signal<Args...>* m_Signal;
-	signal_ref* m_Next;
-	signal_ref* m_Prev;
+	Signal<Args...>* m_Signal;
+	SignalRef* m_Next;
+	SignalRef* m_Prev;
 };
 
 template <typename... Args>
-inline signal<Args...>::~signal()
+inline Signal<Args...>::~Signal()
 {
 	auto* cur = m_FirstRef;
 	while(cur) {
@@ -409,7 +409,7 @@ inline signal<Args...>::~signal()
 }
 
 template <typename... Args>
-signal<Args...>& signal<Args...>::operator=(signal&& old)
+Signal<Args...>& Signal<Args...>::operator=(Signal&& old)
 {
 	m_FirstRef = old.m_FirstRef;
 	if(m_FirstRef)

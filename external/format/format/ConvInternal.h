@@ -2,7 +2,7 @@
 #include <cassert>
 #include "StringBasics.h"
 #include "Context.h"
-#include "Locale.h"
+#include "FormatLocale.h"
 #include "Placeholder.h"
 
 namespace format

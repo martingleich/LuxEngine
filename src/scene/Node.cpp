@@ -450,7 +450,7 @@ Node::Node(const Node& other) :
 	m_Tags(other.m_Tags),
 	m_DebugFlags(other.m_DebugFlags),
 	m_IsVisible(other.m_IsVisible),
-	m_SceneManager(m_SceneManager),
+	m_SceneManager(other.m_SceneManager),
 	m_HasAbsTransChanged(true)
 {
 	for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it) {

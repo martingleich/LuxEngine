@@ -1,5 +1,4 @@
 #include "SinkOStream.h"
-#include <ostream>
 
 namespace format
 {

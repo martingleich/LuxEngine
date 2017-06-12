@@ -1,6 +1,6 @@
 #pragma once
 #include "Slice.h"
-#include "Memory.h"
+#include "FormatMemory.h"
 #include "StringType.h"
 #include "StringBasics.h"
 #include <limits>
