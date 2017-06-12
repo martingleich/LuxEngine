@@ -169,7 +169,7 @@ class Signal
 	friend class SignalRef<Args...>;
 
 	template <typename Class, typename... Args2>
-	using signal_memberfunc_auto = typename impl::Select<
+	using SignalMemberFuncAuto = typename impl::Select<
 		SignalMemberFuncSafe<Class, Args2...>,
 		SignalMemberFuncUnsafe<Class, Args2...>,
 		std::is_base_of<ReferenceCounted, Class>::value>::type;
@@ -208,19 +208,21 @@ public:
 	void Connect(Class* owner, void (Class::*proc)(Args...))
 	{
 		if(owner && proc)
-			m_Callfuncs.PushBack(std::make_unique<signal_memberfunc_auto<Class, Args...>>(owner, proc));
+			m_Callfuncs.PushBack(std::unique_ptr<SignalMemberFuncAuto<Class, Args...>>(
+				new SignalMemberFuncAuto<Class, Args...>(owner, proc)));
 	}
 
 	void Connect(void(*proc)(Args...))
 	{
 		if(proc)
-			m_Callfuncs.PushBack(std::make_unique<SignalStaticFunc<Args...>>(proc));
+			m_Callfuncs.PushBack(std::unique_ptr<SignalStaticFunc<Args...>>(
+				new SignalStaticFunc<Args...>(proc)));
 	}
 
 	template <typename Class>
 	void Disconnect(Class* owner, void (Class::*proc)(Args...))
 	{
-		signal_memberfunc_auto<Class, Args...> compare_dummy(owner, proc);
+		SignalMemberFuncAuto<Class, Args...> compare_dummy(owner, proc);
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End(); ++it) {
 			if((*it)->Equal(compare_dummy)) {
 				it = m_Callfuncs.Erase(it);

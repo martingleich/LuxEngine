@@ -84,7 +84,7 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34265 ") # 'class': class has virtual functions, but destructor is not virtual
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34928 ") # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
 else()
-	add_definitions(-std=c++14 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
+	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
 endif()
 
 add_library(LuxEngine SHARED ${SRCS} ${INCS})

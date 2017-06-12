@@ -4,8 +4,7 @@
 
 UNIT_SUITE(FileSystem)
 {
-	StrongRef<LuxDevice> g_Device;
-	StrongRef<io::FileSystem> g_FileSys;
+	io::FileSystem* g_FileSys;
 	io::path m_WorkingDir;
 
 	void CreateTestDirectory()
@@ -44,8 +43,9 @@ UNIT_SUITE(FileSystem)
 	{
 		log::EngineLog.SetLogLevel(log::ELogLevel::None);
 
-		g_Device = lux::CreateDevice();
-		g_FileSys = g_Device->GetFileSystem();
+		io::FileSystem::Initialize();
+		g_FileSys = io::FileSystem::Instance();
+
 		m_WorkingDir = g_FileSys->GetWorkingDirectory();
 		
 		RemoveTestDirectory();
@@ -54,9 +54,8 @@ UNIT_SUITE(FileSystem)
 
 	UNIT_SUITE_EXIT()
 	{
-		g_FileSys.Reset();
-		g_Device.Reset();
-
+		io::FileSystem::Destroy();
+		g_FileSys = nullptr;
 		RemoveTestDirectory();
 	}
 
