@@ -36,30 +36,26 @@ const core::ParamPackage& GeometryCreatorCube::GetParams() const
 	return m_Package;
 }
 
-StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(const core::PackagePuffer& params)
 {
-	LX_CHECK_NULL_ARG(driver);
-
 	const math::vector3f size = params.FromID(0, true);
 	const math::vector3i tes = params.FromID(1, true);
 	const math::vector3f tex = params.FromID(2, true);
 	const bool inside = params.FromID(3, true);
 
-	return CreateGeometry(driver,
+	return CreateGeometry(
 		size.x, size.y, size.z,
 		tes.x, tes.y, tes.z,
 		tex.x, tex.y, tex.z,
 		inside);
 }
 
-StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(
 	float sizeX, float sizeY, float sizeZ,
 	s32 tesX, s32 tesY, s32 tesZ,
 	float texX, float texY, float texZ,
 	bool inside)
 {
-	LX_CHECK_NULL_ARG(driver);
-
 	if(sizeX <= 0.0f || sizeY <= 0.0f || sizeZ <= 0.0f)
 		throw core::InvalidArgumentException("sizeX, sizeY, sizeZ", "Must be bigger than zero");
 
@@ -79,7 +75,7 @@ StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(VideoDriver* driver,
 	const math::vector3i tes(tesX, tesY, tesZ);
 	const math::vector3f size(sizeX, sizeY, sizeZ);
 
-	StrongRef<Geometry> subMesh = driver->CreateGeometry(
+	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
 		EPrimitiveType::Triangles);

@@ -26,7 +26,7 @@ private:
 		u32 frameTime;
 	};
 public:
-	SpriteBankImpl(VideoDriver* videoDriver);
+	SpriteBankImpl();
 	virtual ~SpriteBankImpl();
 
 	SpriteBank::Sprite AddSprite(Texture* texture, const math::rect<u16>& rect);
@@ -40,7 +40,6 @@ private:
 	core::array<Sprite> m_Sprites;
 	core::array<AnimatedSprite> m_AnimatedSprites;
 	core::array<StrongRef<Texture>> m_Textures;
-	StrongRef<VideoDriver> m_Driver;
 };
 
 }

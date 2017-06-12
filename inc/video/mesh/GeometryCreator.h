@@ -12,7 +12,6 @@ class ParamPackage;
 }
 namespace video
 {
-class VideoDriver;
 class Geometry;
 class Mesh;
 
@@ -31,7 +30,7 @@ public:
 		retrieved with \ref GeometryCreator::GetParams
 	\return A newly created sub mesh.
 	*/
-	virtual StrongRef<video::Geometry> CreateGeometry(video::VideoDriver* driver, const core::PackagePuffer& params) = 0;
+	virtual StrongRef<video::Geometry> CreateGeometry(const core::PackagePuffer& params) = 0;
 
 	//! Get the name of the geometry creator.
 	/**

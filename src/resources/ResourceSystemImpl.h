@@ -27,6 +27,12 @@ public:
 	void SetCaching(Name type, bool caching);
 	u32 GetResourceLoaderCount() const;
 	StrongRef<ResourceLoader> GetResourceLoader(u32 id) const;
+	void AddResourceWriter(ResourceWriter* writer);
+	u32 GetResourceWriterCount() const;
+	StrongRef<ResourceWriter> GetResourceWriter(u32 id) const;
+	StrongRef<ResourceWriter> GetResourceWriter(core::Name resourceType, const string& ext) const;
+	void WriteResource(Resource* resource,  io::File* file, const string& ext)  const;
+	void WriteResource(Resource* resource, const io::path& path) const;
 	core::Name GetFileType(io::File* file) const;
 	void AddResourceLoader(ResourceLoader* loader);
 	u32 GetTypeCount() const;

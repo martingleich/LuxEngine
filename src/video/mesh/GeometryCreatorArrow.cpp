@@ -32,29 +32,25 @@ const core::ParamPackage& GeometryCreatorArrow::GetParams() const
 	return m_Package;
 }
 
-StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(const core::PackagePuffer& params)
 {
-	LX_CHECK_NULL_ARG(driver);
-
 	const float shaft_height = params.Param(0).Default(2.0f);
 	const float head_height = params.Param(1).Default(1.0f);
 	const float shaft_radius = params.Param(2).Default(0.5f);
 	const float head_radius = params.Param(3).Default(0.75f);
 	const s32 sectors = params.Param(4).Default(8);
 
-	return CreateGeometry(driver,
+	return CreateGeometry(
 		shaft_height, head_height,
 		shaft_radius, head_radius,
 		sectors);
 }
 
-StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 	float shaft_height, float head_height,
 	float shaft_radius, float head_radius,
 	s32 sectors)
 {
-	LX_CHECK_NULL_ARG(driver);
-
 	if(shaft_height <= 0.0f || head_height <= 0.0f || shaft_radius <= 0.0f || head_radius <= 0.0f)
 		throw core::InvalidArgumentException("shaftHeight, headHeight, shaftRadius, head_radius", "Must be bigger than zero");
 
@@ -72,7 +68,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(VideoDriver* driver,
 	// Circle + Pipe  + Ring  + Head
 	// sec-2  + sec*2 + sec*2 + sec Triangles
 	const u32 indexCount = 3 * (6 * sectors - 2);
-	StrongRef<Geometry> subMesh = driver->CreateGeometry(
+	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
 		EPrimitiveType::Triangles);

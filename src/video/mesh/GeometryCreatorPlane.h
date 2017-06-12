@@ -15,11 +15,10 @@ public:
 	const core::ParamPackage& GetParams() const;
 	const string& GetName() const;
 
-	StrongRef<Geometry> CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
 
 	//! Create a tesselated plane
 	/**
-	\param cache The mesh cache of the engine
 	\param sizeX The x size of the plane
 	\param sizeY The y size of the plane
 	\param tesX The number of tesselations in x direction
@@ -28,7 +27,7 @@ public:
 	\param texY The number of texturerepeats in y direction
 	\return The created plane
 	*/
-	StrongRef<Geometry> CreateGeometry(VideoDriver* driver,
+	StrongRef<Geometry> CreateGeometry(
 		float sizeX, float sizeY,
 		s32 tesX, s32 tesY,
 		float texX, float texY,

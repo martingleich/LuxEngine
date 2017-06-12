@@ -40,11 +40,10 @@ void MeshSystem::Destroy()
 
 MeshSystem::MeshSystem()
 {
-	m_Driver = video::VideoDriver::Instance();
-	m_MatLib = video::MaterialLibrary::Instance();
+	m_MatLib = MaterialLibrary::Instance();
 
-	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(m_Driver, m_MatLib));
-	core::ReferableFactory::Instance()->RegisterType(LUX_NEW(StaticMesh)(m_Driver));
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(VideoDriver::Instance(), m_MatLib));
+	core::ReferableFactory::Instance()->RegisterType(LUX_NEW(StaticMesh));
 
 	m_PlaneCreator = LUX_NEW(GeometryCreatorPlane);
 	AddCreator(m_PlaneCreator);
@@ -115,12 +114,12 @@ core::PackagePuffer MeshSystem::GetCreatorParams(const string& name)
 
 StrongRef<Geometry> MeshSystem::CreateGeometry(const string& name, const core::PackagePuffer& params)
 {
-	return GetCreatorByName(name)->CreateGeometry(m_Driver, params);
+	return GetCreatorByName(name)->CreateGeometry(params);
 }
 
 StrongRef<Mesh> MeshSystem::CreateMesh(const string& name, const core::PackagePuffer& params)
 {
-	StrongRef<Geometry> sub = GetCreatorByName(name)->CreateGeometry(m_Driver, params);
+	StrongRef<Geometry> sub = GetCreatorByName(name)->CreateGeometry(params);
 	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
@@ -138,7 +137,7 @@ StrongRef<Mesh> MeshSystem::CreatePlaneMesh(
 {
 	StrongRef<GeometryCreatorPlane> creator = m_PlaneCreator;
 
-	StrongRef<Geometry> sub = creator->CreateGeometry(m_Driver, sizeX, sizeY, tesX, tesY, texX, texY, function, context);
+	StrongRef<Geometry> sub = creator->CreateGeometry(sizeX, sizeY, tesX, tesY, texX, texY, function, context);
 	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
@@ -154,7 +153,7 @@ StrongRef<Mesh> MeshSystem::CreateSphereMesh(
 	bool inside)
 {
 	StrongRef<GeometryCreatorSphereUV> creator = m_SphereUVCreator;
-	StrongRef<Geometry> sub = creator->CreateGeometry(m_Driver, radius, rings, sectors, texX, texY, inside);
+	StrongRef<Geometry> sub = creator->CreateGeometry(radius, rings, sectors, texX, texY, inside);
 	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
@@ -171,7 +170,6 @@ StrongRef<Mesh> MeshSystem::CreateCubeMesh(
 {
 	StrongRef<GeometryCreatorCube> creator = m_CubeGenerator;
 	StrongRef<Geometry> sub = creator->CreateGeometry(
-		m_Driver,
 		sizeX, sizeY, sizeZ,
 		tesX, tesY, tesZ,
 		texX, texY, texZ,
@@ -191,7 +189,6 @@ StrongRef<Mesh> MeshSystem::CreateArrowMesh(
 {
 	StrongRef<GeometryCreatorArrow> creator = m_ArrowCreator;
 	StrongRef<Geometry> sub = creator->CreateGeometry(
-		m_Driver,
 		shaft_height, head_height,
 		shaft_radius, head_radius,
 		sectors);

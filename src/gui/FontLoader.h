@@ -16,8 +16,7 @@ class Font;
 class FontLoader : public core::ResourceLoader
 {
 public:
-	FontLoader(video::ImageSystem* imgSys) :
-		m_ImageSystem(imgSys)
+	FontLoader()
 	{}
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
@@ -26,9 +25,6 @@ public:
 
 private:
 	void LoadFontFromFile(io::File* file, core::Resource* dst);
-
-private:
-	WeakRef<video::ImageSystem> m_ImageSystem;
 };
 
 }

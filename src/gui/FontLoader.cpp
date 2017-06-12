@@ -29,7 +29,7 @@ core::Name FontLoader::GetResourceType(io::File* file, core::Name requestedType)
 
 void FontLoader::LoadResource(io::File* file, core::Resource* dst)
 {
-	if(!video::VideoDriver::Instance() || !m_ImageSystem || !video::MaterialLibrary::Instance())
+	if(!video::VideoDriver::Instance() || !video::MaterialLibrary::Instance())
 		throw core::Exception("Font loader is missing driver, imageSystem or materialLibrary");
 
 	LoadFontFromFile(file, dst);
@@ -132,7 +132,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 			SImageInfo image;
 			file->ReadBinary(sizeof(SImageInfo), &image);
 
-			fontTexture = m_ImageSystem->AddTexture(file->GetName(), math::dimension2du(image.TextureWidth, image.TextureHeight), video::ColorFormat::A8R8G8B8, false);
+			fontTexture = video::VideoDriver::Instance()->CreateTexture(math::dimension2du(image.TextureWidth, image.TextureHeight), video::ColorFormat::A8R8G8B8);
 
 			{
 				video::TextureLock texLock(fontTexture, video::BaseTexture::ELockMode::Overwrite);

@@ -10,9 +10,8 @@ namespace video
 
 const SpriteBank::Sprite SpriteBank::Sprite::INVALID = SpriteBank::Sprite(0);
 
-SpriteBankImpl::SpriteBankImpl(VideoDriver* videoDriver)
+SpriteBankImpl::SpriteBankImpl()
 {
-	m_Driver = videoDriver;
 }
 
 SpriteBankImpl::~SpriteBankImpl()

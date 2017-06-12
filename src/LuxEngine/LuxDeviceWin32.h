@@ -20,11 +20,6 @@ namespace gui
 class GUIEnvironment;
 }
 
-namespace video
-{
-class ImageSystem;
-}
-
 namespace input
 {
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
@@ -58,7 +53,6 @@ public:
 	StrongRef<gui::Window> GetWindow() const;
 
 	StrongRef<scene::SceneManager> GetSceneManager() const;
-	StrongRef<video::ImageSystem> GetImageSystem() const;
 	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const;
 
 	LRESULT WinProc(HWND window,
@@ -102,8 +96,6 @@ private:
 	bool m_Quit;
 
 	double m_Time;
-
-	StrongRef<video::ImageSystem> m_ImageSystem;
 
 	StrongRef<scene::SceneManager> m_SceneManager;
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;

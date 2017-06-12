@@ -16,11 +16,10 @@ public:
 	const string& GetName() const;
 	const core::ParamPackage& GetParams() const;
 
-	StrongRef<Geometry> CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
 
 	//! Create a cube
 	/**
-	\param driver The video driver used to create resources.
 	\param sizeX The x size of the cube, must be positive.
 	\param sizeY The y size of the cube, must be positive.
 	\param sizeZ The z size of the cube, must be positive.
@@ -33,7 +32,7 @@ public:
 	\param inside If true, the normals point inside the cube, otherwise they show outside.
 	\return The created plane
 	*/
-	StrongRef<Geometry> CreateGeometry(VideoDriver* driver,
+	StrongRef<Geometry> CreateGeometry(
 		float sizeX, float sizeY, float sizeZ,
 		s32 tesX, s32 tesY, s32 tesZ,
 		float texX, float texY, float texZ,

@@ -12,7 +12,6 @@ namespace video
 {
 class Geometry;
 class Material;
-class VideoDriver;
 
 //! A complex mesh composed of simple Sub-Meshs
 class Mesh : public core::Resource
@@ -83,9 +82,6 @@ public:
 	virtual const Material* GetMaterial(size_t index) const = 0;
 
 	virtual void SetMaterial(size_t index, Material* m) = 0;
-
-	//! Get the video driver used by this mesh
-	virtual VideoDriver* GetDriver() const = 0;
 
 	virtual core::Name GetResourceType() const
 	{

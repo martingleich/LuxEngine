@@ -29,24 +29,21 @@ const string& GeometryCreatorPlane::GetName() const
 	return name;
 }
 
-StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry( const core::PackagePuffer& params)
 {
 	const math::vector2f size = params.FromID(0, true);
 	const math::vector2i tesselation = params.FromID(1, true);
 	const math::vector2f textureRepeat = params.FromID(2, true);
 
-	return CreateGeometry(driver, size.x, size.y, tesselation.x, tesselation.y, textureRepeat.x, textureRepeat.y, nullptr, nullptr);
+	return CreateGeometry(size.x, size.y, tesselation.x, tesselation.y, textureRepeat.x, textureRepeat.y, nullptr, nullptr);
 }
 
 StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
-	VideoDriver* driver,
 	float sizeX, float sizeY,
 	s32 tesX, s32 tesY,
 	float texX, float texY,
 	float(*function)(void* ctx, float x, float y), void* context)
 {
-	LX_CHECK_NULL_ARG(driver);
-
 	if(sizeX <= 0.0f || sizeY <= 0.0f)
 		throw core::InvalidArgumentException("sizeX, sizeY", "Must be bigger than zero");
 
@@ -61,7 +58,7 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 
 	auto GetVertexIndex = [=](s32 x, s32 y) -> u16 { return (u16)(y * tesX + x); };
 
-	StrongRef<Geometry> subMesh = driver->CreateGeometry(
+	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
 		EPrimitiveType::Triangles);

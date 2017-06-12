@@ -10,7 +10,13 @@ namespace video
 class ImageWriterTGA : public video::ImageWriter
 {
 public:
-	bool CanWriteFile(const io::path& file);
+	const string& GetName() const
+	{
+		static const string name = "Lux TGA-Writer";
+		return name;
+	}
+
+	bool CanWriteFile(const string& ext);
 	void WriteFile(io::File* file, void* data, video::ColorFormat format, math::dimension2du size, u32 pitch, u32 writerParam);
 };
 

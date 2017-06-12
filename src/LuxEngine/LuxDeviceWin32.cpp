@@ -24,7 +24,7 @@
 #include "video/mesh/MeshSystem.h"
 #include "video/MaterialLibrary.h"
 
-#include "video/images/ImageSystemImpl.h"
+#include "video/images/ImageSystem.h"
 
 #include "video/VideoDriver.h"
 #ifdef LUX_COMPILE_WITH_D3D9
@@ -358,18 +358,18 @@ void LuxDeviceWin32::BuildSceneManager()
 	}
 
 	log::Info("Build Scene Manager.");
-	m_SceneManager = LUX_NEW(scene::SceneManagerImpl)(m_ImageSystem);
+	m_SceneManager = LUX_NEW(scene::SceneManagerImpl);
 }
 
 void LuxDeviceWin32::BuildImageSystem()
 {
-	if(m_ImageSystem != nullptr) {
+	if(video::ImageSystem::Instance()) {
 		log::Warning("Image system already built.");
 		return;
 	}
 
 	log::Info("Build Image System.");
-	m_ImageSystem = LUX_NEW(video::ImageSystemImpl);
+	video::ImageSystem::Initialize();
 }
 
 void LuxDeviceWin32::BuildGUIEnvironment()
@@ -380,7 +380,7 @@ void LuxDeviceWin32::BuildGUIEnvironment()
 	}
 
 	log::Info("Build GUI Environment.");
-	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl)(m_ImageSystem);
+	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl);
 }
 
 void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
@@ -433,10 +433,10 @@ HWND LuxDeviceWin32::CreateNewWindow(u32 width, u32 height, const string& title)
 
 LuxDeviceWin32::~LuxDeviceWin32()
 {
-	m_GUIEnv = nullptr;
-	m_SceneManager = nullptr;
+	m_GUIEnv.Reset();
+	m_SceneManager.Reset();
 
-	m_ImageSystem = nullptr;
+	video::ImageSystem::Destroy();
 
 	video::VideoDriverD3D9* driver = dynamic_cast<video::VideoDriverD3D9*>(video::VideoDriver::Instance());
 
@@ -457,9 +457,8 @@ LuxDeviceWin32::~LuxDeviceWin32()
 
 	input::InputSystem::Destroy();
 
-	m_Window = nullptr;
+	m_Window.Reset();
 
-	// Fenster schlieﬂen
 	if(m_OwnWindow)
 		UnregisterClassW(m_LuxWindowClassName, g_Instance);
 
@@ -523,11 +522,6 @@ double LuxDeviceWin32::GetTime() const
 StrongRef<scene::SceneManager> LuxDeviceWin32::GetSceneManager() const
 {
 	return m_SceneManager;
-}
-
-StrongRef<video::ImageSystem> LuxDeviceWin32::GetImageSystem() const
-{
-	return m_ImageSystem;
 }
 
 StrongRef<gui::GUIEnvironment> LuxDeviceWin32::GetGUIEnvironment() const

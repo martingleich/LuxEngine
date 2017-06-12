@@ -35,9 +35,8 @@ namespace lux
 namespace scene
 {
 
-SceneManagerImpl::SceneManagerImpl(video::ImageSystem* imagSys) :
-	m_CollectedRoot(nullptr),
-	m_ImagSys(imagSys)
+SceneManagerImpl::SceneManagerImpl() :
+	m_CollectedRoot(nullptr)
 {
 	m_RootSceneNode = LUX_NEW(Node)(this, true);
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
@@ -344,18 +343,6 @@ void SceneManagerImpl::RemovePipelineOverwrite(ERenderPass pass, const video::Pi
 			return;
 		}
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-
-video::Renderer* SceneManagerImpl::GetRenderer() const
-{
-	return m_Renderer;
-}
-
-video::ImageSystem* SceneManagerImpl::GetImageSystem() const
-{
-	return m_ImagSys;
 }
 
 ////////////////////////////////////////////////////////////////////////////

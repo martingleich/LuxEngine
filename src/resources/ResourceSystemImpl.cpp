@@ -3,6 +3,8 @@
 #include "io/File.h"
 
 #include "resources/ResourceLoader.h"
+#include "resources/ResourceWriter.h"
+
 #include "core/ReferableFactory.h"
 
 #include "core/lxAlgorithm.h"
@@ -168,6 +170,8 @@ struct ResourceBlock
 struct ResourceSystemImpl::SelfType
 {
 	core::array<LoaderEntry> loaders;
+	core::array<StrongRef<ResourceWriter>> writers;
+
 	core::array<TypeEntry> types;
 	core::array<ResourceBlock> resources;
 
@@ -378,6 +382,51 @@ u32 ResourceSystemImpl::GetResourceLoaderCount() const
 StrongRef<ResourceLoader> ResourceSystemImpl::GetResourceLoader(u32 id) const
 {
 	return self->loaders.At(id).loader;
+}
+
+void ResourceSystemImpl::AddResourceWriter(ResourceWriter* writer)
+{
+	LX_CHECK_NULL_ARG(writer);
+
+	log::Debug("Registered resource writer: ~s.", writer->GetName());
+	self->writers.PushBack(writer);
+}
+
+u32 ResourceSystemImpl::GetResourceWriterCount() const
+{
+	return self->writers.Size();
+}
+
+StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(core::Name resourceType, const string& ext) const
+{
+	for(auto it = self->writers.Last(); it != self->writers.Begin(); --it) {
+		bool canWrite = (*it)->CanWriteType(ext, resourceType);
+		if(canWrite)
+			return *it;
+	}
+
+	return nullptr;
+}
+
+StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(u32 id) const
+{
+	return self->writers.At(id);
+}
+
+void ResourceSystemImpl::WriteResource(Resource* resource,  io::File* file, const string& ext)  const
+{
+	auto writer = GetResourceWriter(resource->GetReferableSubType(), ext);
+	if(!writer)
+		throw core::FileFormatException("File format not supported", ext.Data());
+
+	writer->WriteResource(file, resource);
+}
+
+void ResourceSystemImpl::WriteResource(Resource* resource, const io::path& path) const
+{
+	auto file = io::FileSystem::Instance()->OpenFile(path, io::EFileMode::Write, true);
+	auto ext = io::GetFileExtension(path);
+	WriteResource(resource, file, ext);
 }
 
 core::Name ResourceSystemImpl::GetFileType(io::File* file) const

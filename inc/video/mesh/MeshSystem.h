@@ -6,15 +6,10 @@
 
 namespace lux
 {
-namespace io
-{
-class File;
-}
 namespace video
 {
 class Mesh;
 class GeometryCreator;
-class VideoDriver;
 class MaterialLibrary;
 
 //! Class todo mesh related things
@@ -135,7 +130,6 @@ private:
 	LUX_API MeshSystem();
 
 private:
-	StrongRef<VideoDriver> m_Driver;
 	StrongRef<MaterialLibrary> m_MatLib;
 
 	core::HashMap<string, StrongRef<GeometryCreator>> m_Creators;

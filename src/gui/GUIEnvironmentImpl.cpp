@@ -21,8 +21,7 @@ namespace lux
 namespace gui
 {
 
-GUIEnvironmentImpl::GUIEnvironmentImpl(video::ImageSystem* imagSys) :
-	m_ImageSystem(imagSys)
+GUIEnvironmentImpl::GUIEnvironmentImpl()
 {
 	// Register font material renderer
 	video::MaterialRenderer* FontRenderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
@@ -35,7 +34,7 @@ GUIEnvironmentImpl::GUIEnvironmentImpl(video::ImageSystem* imagSys) :
 	FontRenderer->SetPipeline(ps);
 
 	// Register font loader
-	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader)(m_ImageSystem));
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader));
 
 #ifdef LUX_WINDOWS
 	m_FontCreator = LUX_NEW(FontCreatorWin32)(FontRenderer);

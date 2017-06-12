@@ -37,7 +37,7 @@ const core::ParamPackage& GeometryCreatorSphereUV::GetParams() const
 	return m_Params;
 }
 
-StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params)
+StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(const core::PackagePuffer& params)
 {
 	const float radius = params.Param(0);
 	const s32 rings = params.Param(1);
@@ -45,16 +45,14 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(VideoDriver* driver,
 	const math::vector2f tex = params.Param(3);
 	const bool inside = params.Param(4);
 
-	return CreateGeometry(driver, radius, rings, sectors, tex.x, tex.y, inside);
+	return CreateGeometry(radius, rings, sectors, tex.x, tex.y, inside);
 }
 
-StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(VideoDriver* driver,
+StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(
 	float radius,
 	s32 rings, s32 sectors, float texX, float texY,
 	bool inside)
 {
-	LX_CHECK_NULL_ARG(driver);
-
 	if(radius <= 0.0f)
 		throw core::InvalidArgumentException("radius", "Must be bigger than zero");
 
@@ -70,7 +68,7 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(VideoDriver* driver,
 	if(vertexCount > 0xFFFF)
 		throw core::InvalidArgumentException("Too many arguments");
 
-	StrongRef<Geometry> subMesh = driver->CreateGeometry(
+	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
 		EPrimitiveType::Triangles);

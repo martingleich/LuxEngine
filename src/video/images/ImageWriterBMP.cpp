@@ -32,9 +32,8 @@ struct BITMAPINFOHEADER
 };
 #pragma pack(pop)
 
-bool ImageWriterBMP::CanWriteFile(const io::path& file)
+bool ImageWriterBMP::CanWriteFile(const string& ext)
 {
-	string ext = io::GetFileExtension(file);
 	return ext.EqualCaseInsensitive("bmp") || ext.EqualCaseInsensitive("dib");
 }
 

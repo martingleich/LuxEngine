@@ -41,7 +41,7 @@ public:
 	virtual ~VideoDriver() {}
 
 	//! Initialize the global driver
-	LUX_API static void Initialize(VideoDriver* driver=nullptr);
+	LUX_API static void Initialize(VideoDriver* driver = nullptr);
 
 	//! Access the global driver
 	LUX_API static VideoDriver* Instance();
@@ -60,8 +60,15 @@ public:
 		bool dynamic = false) = 0;
 
 	virtual bool CheckTextureFormat(ColorFormat format, bool cube) = 0;
-	virtual StrongRef<Texture> CreateTexture(const math::dimension2du& size, ColorFormat format, u32 mipCount, bool isDynamic) = 0;
-	virtual StrongRef<CubeTexture> CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic) = 0;
+
+	virtual bool GetFittingTextureFormat(ColorFormat& format, math::dimension2du& size, bool cube) = 0;
+
+	virtual StrongRef<Texture> CreateFittingTexture(const math::dimension2du& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false) = 0;
+	virtual StrongRef<CubeTexture> CreateFittingCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false) = 0;
+	virtual StrongRef<Texture> CreateFittingRendertargetTexture(const math::dimension2du& size, ColorFormat format) = 0;
+
+	virtual StrongRef<Texture> CreateTexture(const math::dimension2du& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false) = 0;
+	virtual StrongRef<CubeTexture> CreateCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false) = 0;
 	virtual StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format) = 0;
 
 	//! Creates a new shader from code

@@ -4,11 +4,6 @@
 
 namespace lux
 {
-namespace video
-{
-class Image;
-class ImageSystem;
-}
 namespace gui
 {
 class Font;
@@ -16,12 +11,11 @@ class Font;
 class GUIEnvironmentImpl : public GUIEnvironment
 {
 public:
-	GUIEnvironmentImpl(video::ImageSystem* imagSys);
+	GUIEnvironmentImpl();
 	StrongRef<FontCreator> GetFontCreator();
 
 private:
 	StrongRef<FontCreator> m_FontCreator;
-	StrongRef<video::ImageSystem> m_ImageSystem;
 };
 
 } 

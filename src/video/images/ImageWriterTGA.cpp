@@ -31,9 +31,9 @@ struct destroyer
 };
 }
 
-bool ImageWriterTGA::CanWriteFile(const io::path& file)
+bool ImageWriterTGA::CanWriteFile(const string& ext)
 {
-	return io::GetFileExtension(file).EqualCaseInsensitive("tga");
+	return ext.EqualCaseInsensitive("tga");
 }
 
 static uint32_t tga_proc_write(tga_struct* tga, uint32_t size, void* buffer)

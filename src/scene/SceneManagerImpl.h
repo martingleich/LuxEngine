@@ -13,7 +13,7 @@ namespace scene
 class SceneManagerImpl : public SceneManager
 {
 public:
-	SceneManagerImpl(video::ImageSystem* imageSystem);
+	SceneManagerImpl();
 
 	~SceneManagerImpl();
 
@@ -84,12 +84,6 @@ public:
 	void RemovePipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over);
 
 	////////////////////////////////////////////////////////////////////////////////////
-
-	video::VideoDriver* GetDriver() const;
-	video::Renderer* GetRenderer() const;
-	video::MaterialLibrary* GetMaterialLibrary() const;
-	video::ImageSystem* GetImageSystem() const;
-	video::MeshSystem* GetMeshSystem() const;
 
 private:
 	void EnableOverwrite(ERenderPass pass);
@@ -235,7 +229,6 @@ private:
 	/////////////////////////////////////////////////////////////////////////
 
 	video::Renderer* m_Renderer;
-	StrongRef<video::ImageSystem> m_ImagSys;
 };
 
 } // namespace scene

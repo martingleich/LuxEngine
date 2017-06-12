@@ -11,12 +11,6 @@ namespace video
 class StaticMesh : public Mesh
 {
 public:
-	StaticMesh() :
-		m_Driver(nullptr)
-	{
-	}
-
-	StaticMesh(VideoDriver* driver);
 	void Clear();
 	size_t GetSubMeshCount() const;
 	const Geometry* GetGeometry(size_t i) const;
@@ -37,7 +31,6 @@ public:
 	Material* GetMaterial(size_t index);
 	const Material* GetMaterial(size_t index) const;
 	void SetMaterial(size_t index, Material* m);
-	VideoDriver* GetDriver() const;
 
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;
@@ -61,7 +54,6 @@ private:
 	};
 
 	core::array<Entry> m_Data;
-	VideoDriver* m_Driver;
 };
 
 

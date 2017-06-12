@@ -120,11 +120,6 @@ public:
 
 	virtual void AddPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over) = 0;
 	virtual void RemovePipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over) = 0;
-
-	////////////////////////////////////////////////////////////////////////////////////
-
-	virtual video::Renderer* GetRenderer() const = 0;
-	virtual video::ImageSystem* GetImageSystem() const = 0;
 };
 
 } // namespace scene

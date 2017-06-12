@@ -12,12 +12,6 @@ namespace lux
 namespace video
 {
 
-StaticMesh::StaticMesh(VideoDriver* driver) :
-	m_BoundingBox(math::vector3f::ZERO),
-	m_Driver(driver)
-{
-}
-
 void StaticMesh::Clear()
 {
 	m_Data.Clear();
@@ -73,7 +67,7 @@ StrongRef<Geometry> StaticMesh::AddGeometry(
 	EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
 	EPrimitiveType primitiveType)
 {
-	return AddGeometry(m_Driver->CreateGeometry(
+	return AddGeometry(VideoDriver::Instance()->CreateGeometry(
 		vertexFormat, vertexHWMapping, vertexCount,
 		indexType, indexHWMapping, indexCount,
 		primitiveType));
@@ -84,7 +78,7 @@ StrongRef<Geometry> StaticMesh::AddGeometry(const VertexFormat& vertexFormat,
 	u32 primitiveCount,
 	bool dynamic)
 {
-	return AddGeometry(m_Driver->CreateGeometry(vertexFormat, primitiveType, primitiveCount, dynamic));
+	return AddGeometry(VideoDriver::Instance()->CreateGeometry(vertexFormat, primitiveType, primitiveCount, dynamic));
 }
 
 void StaticMesh::RemoveGeometry(size_t index)
@@ -115,11 +109,6 @@ void StaticMesh::SetMaterial(size_t index, Material* m)
 	m_Data.At(index).mat = m;
 }
 
-VideoDriver* StaticMesh::GetDriver() const
-{
-	return m_Driver;
-}
-
 core::Name StaticMesh::GetReferableSubType() const
 {
 	return core::ResourceType::Mesh;
@@ -127,7 +116,7 @@ core::Name StaticMesh::GetReferableSubType() const
 
 StrongRef<Referable> StaticMesh::Clone() const
 {
-	return LUX_NEW(StaticMesh)(m_Driver);
+	return LUX_NEW(StaticMesh);
 }
 
 }

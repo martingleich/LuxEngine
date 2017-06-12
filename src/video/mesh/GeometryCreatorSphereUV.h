@@ -16,11 +16,10 @@ public:
 	const string& GetName() const;
 	const core::ParamPackage& GetParams() const;
 
-	StrongRef<Geometry> CreateGeometry(VideoDriver* driver, const core::PackagePuffer& params);
+	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
 
 	//! Create a uv sphere
 	/**
-	\param cache The mesh cache of the engine
 	\param radius The radius of the sphere
 	\param rings The number of rings on the sphere
 	\param sectors The number of sectors on the sphere
@@ -28,7 +27,7 @@ public:
 	\param texY The texturerepeats on the sphere in Y direction
 	\param inside If true, the normals point inside the cube, otherwise they show outside.
 	*/
-	StrongRef<Geometry> CreateGeometry(VideoDriver* driver,
+	StrongRef<Geometry> CreateGeometry(
 		float radius,
 		s32 rings, s32 sectors, float texX, float texY,
 		bool inside);

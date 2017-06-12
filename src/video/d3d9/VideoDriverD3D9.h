@@ -19,6 +19,7 @@ namespace lux
 namespace video
 {
 class RendererD3D9;
+class TextureD3D9;
 
 class VideoDriverD3D9 : public VideoDriverNull
 {
@@ -48,6 +49,7 @@ public:
 	StrongRef<Texture> CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
 	StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format);
 	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool isDynamic);
+	bool GetFittingTextureFormat(ColorFormat& format, math::dimension2du& size, bool cube);
 
 	// Cache for auxalarity textures
 	/*
@@ -132,6 +134,8 @@ private:
 private:
 	RendertargetD3D9 m_BackBufferTarget;
 	core::array<DepthBuffer_d3d9> m_DepthBuffers;
+
+	core::array<WeakRef<TextureD3D9>> m_RenderTargets;
 
 	StrongRef<BufferManager> m_BufferManager;
 	StrongRef<RendererD3D9> m_Renderer;

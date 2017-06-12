@@ -3,11 +3,15 @@
 #include "resources/Resource.h"
 #include "math/dimension2d.h"
 #include "video/Color.h"
+#include "video/DrawingCanvas.h"
 
 namespace lux
 {
 namespace video
 {
+class Image;
+template <>
+class DrawingCanvasAuto<Image>;
 
 //! A image in system memory
 class Image : public core::Resource
@@ -60,7 +64,7 @@ public:
 	/**
 	\param color The color to fill the image with
 	*/
-	virtual void Fill(Color color=video::Color::Black) = 0;
+	virtual void Fill(Color color = video::Color::Black) = 0;
 
 	//! Get the pitch of the image
 	/**
@@ -85,7 +89,58 @@ public:
 	If the image isn't locked nothing happens
 	*/
 	virtual void Unlock() = 0;
+
+	inline DrawingCanvasAuto<Image> GetCanvas();
 };
+
+template <>
+class DrawingCanvasAuto<Image> : public DrawingCanvas
+{
+public:
+	DrawingCanvasAuto(Image* image) :
+		DrawingCanvas(image->Lock(), image->GetColorFormat(),
+			image->GetSize(), image->GetPitch()),
+		img(image)
+	{
+	}
+
+	DrawingCanvasAuto(const DrawingCanvasAuto& other) = delete;
+
+	DrawingCanvasAuto(DrawingCanvasAuto&& old)
+	{
+		img = old.img;
+		old.img = nullptr;
+	}
+	~DrawingCanvasAuto()
+	{
+		Unlock();
+	}
+
+	void Unlock()
+	{
+		if(img) {
+			img->Unlock();
+			img = nullptr;
+		}
+	}
+
+	DrawingCanvasAuto& operator=(const DrawingCanvasAuto& other) = delete;
+
+	DrawingCanvasAuto& operator=(DrawingCanvasAuto&& old)
+	{
+		Unlock();
+		img = old.img;
+		old.img = nullptr;
+		return *this;
+	}
+
+	Image* img;
+};
+
+inline DrawingCanvasAuto<Image> Image::GetCanvas()
+{
+	return DrawingCanvasAuto<Image>(this);
+}
 
 struct ImageLock
 {
@@ -135,7 +190,6 @@ struct ImageLock
 	u8* data;
 	u32 pitch;
 };
-
 
 class ImageList : public core::Resource
 {

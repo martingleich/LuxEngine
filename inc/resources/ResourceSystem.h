@@ -12,6 +12,7 @@ class File;
 namespace core
 {
 class ResourceLoader;
+class ResourceWriter;
 class Resource;
 
 //! Caching and loading for engine resources
@@ -163,6 +164,44 @@ public:
 	\return A resource loader.
 	*/
 	virtual StrongRef<ResourceLoader> GetResourceLoader(u32 id) const = 0;
+
+	//! Add a resource writer
+	virtual void AddResourceWriter(ResourceWriter* writer) = 0;
+
+	//! Query the number of total resource writers.
+	/**
+	\return The number of resource writers.
+	*/
+	virtual u32 GetResourceWriterCount() const = 0;
+
+	//! Query a resource writer
+	/**
+	\param id The id of the resource writer must be between 0 and the number of resource writer.
+	\return A resource writer.
+	*/
+	virtual StrongRef<ResourceWriter> GetResourceWriter(u32 id) const = 0;
+
+	//! Get a resource writer for a type and a extension
+	/**
+	Returns null if the resource writer does not exist
+	*/
+	virtual StrongRef<ResourceWriter> GetResourceWriter(core::Name resourceType, const string& ext) const = 0;
+
+	//! Write a resource to a file
+	/**
+	\param resource The resource to write to the file.
+	\param file The target file to write the resource to
+	\param ext The extension(i.e. filetype) of the resource
+	\throws FileFormatException
+	*/
+	virtual void WriteResource(Resource* resource,  io::File* file, const string& ext)  const = 0;
+	//! Write a resource to a file
+	/**
+	\param resource The resource to write to the file.
+	\param path The path of the file to write to.
+	\throws FileFormatException
+	*/
+	virtual void WriteResource(Resource* resource, const io::path& path) const = 0;
 
 	//! Get the type of resource contained in a file.
 	/**

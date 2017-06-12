@@ -8,7 +8,6 @@ namespace lux
 
 namespace video
 {
-class ImageSystem;
 struct DriverConfig;
 }
 
@@ -93,8 +92,6 @@ public:
 	virtual bool Run(float& numSecsPassed) = 0;
 
 	virtual double GetTime() const = 0;
-
-	virtual StrongRef<video::ImageSystem> GetImageSystem() const = 0;
 
 	virtual StrongRef<scene::SceneManager> GetSceneManager() const = 0;
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;

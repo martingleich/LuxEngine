@@ -408,6 +408,8 @@ StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::dimens
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
 	out->Init(size, format, 1, true, false);
+
+	m_RenderTargets.PushBack(out);
 	return out;
 }
 
@@ -416,6 +418,36 @@ StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat 
 	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
 	out->Init(size, format, isDynamic);
 	return out;
+}
+
+bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::dimension2du& size, bool cube)
+{
+	LUX_UNUSED(size);
+
+	// TODO: Handle size
+	// TODO: How to use floating-point formats
+	bool hasAlpha = format.HasAlpha();
+	if(hasAlpha) {
+		if(CheckTextureFormat(format, cube))
+			format = format;
+		else if(CheckTextureFormat(ColorFormat::A8R8G8B8, cube))
+			format = ColorFormat::A8R8G8B8;
+		else if(CheckTextureFormat(ColorFormat::A1R5G5B5, cube))
+			format = ColorFormat::A1R5G5B5;
+		else
+			return false;
+	} else {
+		if(CheckTextureFormat(format, cube))
+			format = format;
+		else if(CheckTextureFormat(ColorFormat::A8R8G8B8, cube))
+			format = ColorFormat::A8R8G8B8;
+		else if(CheckTextureFormat(ColorFormat::R5G6B5, cube))
+			format = ColorFormat::A1R5G5B5;
+		else
+			return false;
+	}
+
+	return true;
 }
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
