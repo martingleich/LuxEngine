@@ -3,7 +3,7 @@ file(GLOB_RECURSE FORMAT_INCS "format/*.h")
 file(GLOB_RECURSE FORMAT_SRCS "format/*.cpp")
 
 # Always include the inc folder!
-include_directories("inc")
+include_directories("format")
 
 if(WIN32)
 	set(Format_OS_WINDOWS true)
@@ -22,7 +22,7 @@ configure_file(
 if(MSVC)
 	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"FormatConfig.h")
 else()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC -include "format/FormatConfig.h")
+	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC -include "FormatConfig.h")
 endif()
 
 add_library(format ${FORMAT_SRCS} ${FORMAT_INCS})

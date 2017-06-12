@@ -34,7 +34,7 @@ struct Select<T1, T2, false> { using type = T2; };
 template <typename Class, typename... Args>
 struct signal_memberfunc_safe : signal_func<Args...>
 {
-	using MemPtr = typename void (Class::*)(Args...);
+	using MemPtr = void (Class::*)(Args...);
 
 	WeakRef<Class> owner;
 	MemPtr proc;
@@ -78,7 +78,7 @@ struct signal_memberfunc_safe : signal_func<Args...>
 template <typename Class, typename... Args>
 struct signal_memberfunc_unsafe : signal_func<Args...>
 {
-	using MemPtr = typename void (Class::*)(Args...);
+	using MemPtr = void (Class::*)(Args...);
 
 	Class* owner;
 	MemPtr proc;
@@ -122,7 +122,7 @@ struct signal_memberfunc_unsafe : signal_func<Args...>
 template <typename... Args>
 struct signal_staticfunc : signal_func<Args...>
 {
-	using FuncPtr = typename void(*)(Args...);
+	using FuncPtr = void(*)(Args...);
 
 	FuncPtr proc;
 
@@ -168,10 +168,10 @@ class signal
 {
 	friend class signal_ref<Args...>;
 
-	template <typename Class, typename... Args>
+	template <typename Class, typename... Args2>
 	using signal_memberfunc_auto = typename impl::Select<
-		signal_memberfunc_safe<Class, Args...>,
-		signal_memberfunc_unsafe<Class, Args...>,
+		signal_memberfunc_safe<Class, Args2...>,
+		signal_memberfunc_unsafe<Class, Args2...>,
 		std::is_base_of<ReferenceCounted, Class>::value>::type;
 
 public:
@@ -255,8 +255,8 @@ public:
 		m_Callfuncs.Clear();
 	}
 
-	template <typename... Args>
-	void Broadcast(Args... args) const
+	template <typename... Args2>
+	void Broadcast(Args2... args) const
 	{
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End();) {
 			if((*it)->IsDestroyed()) {
@@ -292,47 +292,47 @@ public:
 
 	signal_ref(signal<Args...>* s)
 	{
-		signal = s;
+		m_Signal = s;
 
-		if(signal) {
-			this->prev = nullptr;
-			this->next = signal->m_FirstRef;
-			if(signal->m_FirstRef)
-				signal->m_FirstRef->prev = this;
-			signal->m_FirstRef = this;
+		if(m_Signal) {
+			this->m_Prev = nullptr;
+			this->m_Next = m_Signal->m_FirstRef;
+			if(m_Signal->m_FirstRef)
+				m_Signal->m_FirstRef->m_Prev = this;
+			m_Signal->m_FirstRef = this;
 		} else {
-			this->next = this->prev = nullptr;
+			this->m_Next = this->m_Prev = nullptr;
 		}
 	}
 
-	signal_ref(const signal_ref& other) : signal_ref(other.signal)
+	signal_ref(const signal_ref& other) : signal_ref(other.m_Signal)
 	{
 	}
 
 	~signal_ref()
 	{
-		if(signal) {
-			if(next)
-				next->prev = prev;
-			if(prev)
-				prev->next = next;
-			if(this == signal->m_FirstRef)
-				signal->m_FirstRef = next;
+		if(m_Signal) {
+			if(m_Next)
+				m_Next->m_Prev = m_Prev;
+			if(m_Prev)
+				m_Prev->m_Next = m_Next;
+			if(this == m_Signal->m_FirstRef)
+				m_Signal->m_FirstRef = m_Next;
 		}
 	}
 
 	signal_ref& operator=(const signal_ref& other)
 	{
 		this->~signal_ref();
-		signal = other.signal;
+		m_Signal = other.m_Signal;
 
-		if(signal) {
-			this->next = signal->m_FirstRef;
-			if(signal->m_FirstRef)
-				signal->m_FirstRef->prev = this;
-			signal->m_FirstRef = this;
+		if(m_Signal) {
+			this->m_Next = m_Signal->m_FirstRef;
+			if(m_Signal->m_FirstRef)
+				m_Signal->m_FirstRef->m_Prev = this;
+			m_Signal->m_FirstRef = this;
 		} else {
-			next = prev = nullptr;
+			m_Next = m_Prev = nullptr;
 		}
 
 		return *this;
@@ -340,57 +340,57 @@ public:
 
 	signal<Args...>* operator->() const
 	{
-		return signal;
+		return m_Signal;
 	}
 
 	bool operator==(const signal<Args...>& s) const
 	{
-		return signal == &s;
+		return m_Signal == &s;
 	}
 
 	bool operator==(const signal<Args...>* s) const
 	{
-		return signal == s;
+		return m_Signal == s;
 	}
 
 	bool operator==(const signal_ref& other) const
 	{
-		return signal == other.signal;
+		return m_Signal == other.m_Signal;
 	}
 
 	bool operator!=(const signal<Args...>& s) const
 	{
-		return signal != &s;
+		return m_Signal != &s;
 	}
 
 	bool operator!=(const signal<Args...>* s) const
 	{
-		return signal != s;
+		return m_Signal != s;
 	}
 
 	bool operator!=(const signal_ref& other) const
 	{
-		return signal != other.signal;
+		return m_Signal != other.m_Signal;
 	}
 
 	operator signal<Args...>*() const
 	{
-		return signal;
+		return m_Signal;
 	}
 
 	void ChangeSignal(signal<Args...>* newPtr)
 	{
 		signal_ref* ptr = this;
 		while(ptr) {
-			ptr->signal = newPtr;
-			ptr = ptr->next;
+			ptr->m_Signal = newPtr;
+			ptr = ptr->m_Next;
 		}
 	}
 
 private:
-	signal<Args...>* signal;
-	signal_ref* next;
-	signal_ref* prev;
+	signal<Args...>* m_Signal;
+	signal_ref* m_Next;
+	signal_ref* m_Prev;
 };
 
 template <typename... Args>
@@ -398,10 +398,10 @@ inline signal<Args...>::~signal()
 {
 	auto* cur = m_FirstRef;
 	while(cur) {
-		auto tmp = m_FirstRef->next;
-		cur->signal = nullptr;
-		cur->next = nullptr;
-		cur->prev = nullptr;
+		auto tmp = m_FirstRef->m_Next;
+		cur->m_Signal = nullptr;
+		cur->m_Next = nullptr;
+		cur->m_Prev = nullptr;
 		cur = tmp;
 	}
 

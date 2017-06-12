@@ -73,7 +73,7 @@ set(USED_LIBS ${USED_LIBS} format zlib libtga libpng utf8proc)
 
 # Add plattform dependend libs and compiler-flags
 if(MSVC)
-	add_definitions(-std=c++11 -DLUX_EXPORT -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"LuxConfig.h" -W4)
+	add_definitions(-DLUX_EXPORT -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"LuxConfig.h" -W4)
 	set(USED_LIBS ${USED_LIBS} d3d9 d3dx9 Hid)
 	link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 	set(SRCS ${SRCS} "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def")
@@ -84,7 +84,7 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34265 ") # 'class': class has virtual functions, but destructor is not virtual
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34928 ") # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
 else()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
+	add_definitions(-std=c++14 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
 endif()
 
 add_library(LuxEngine SHARED ${SRCS} ${INCS})
