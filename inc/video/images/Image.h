@@ -64,7 +64,7 @@ public:
 	/**
 	\param color The color to fill the image with
 	*/
-	virtual void Fill(Color color = video::Color::Black) = 0;
+	virtual void Fill(Color color = Color::Black) = 0;
 
 	//! Get the pitch of the image
 	/**

@@ -126,6 +126,23 @@ public:
 	*/
 	LUX_API StrongRef<Mesh> CreateArrowMesh(float shaft_height = 2.0f, float head_height = 2.0f, float shaft_radius = 0.4f, float head_radius = 1.0f, s32 sectors = 32);
 
+	//! Create a cylinder
+	/**
+	The origin of the cylinder is the center, y axis along the height.
+	\param radius The radius of the cylinder.
+	\param height The height of the cylinder.
+	\param sectors The number of circle divison around the cylinder(number of cakepieces), must be bigger than two.
+	\param planes The number horizontal subdivison, i.e. cuts through the cylinder, default is 2, the upper and lower cap, must be bigger than 1.
+	\param texX The number of texturerepeats in the x direction in texturespace
+	\param texX The number of texturerepeats in the y direction in texturespace
+	\param inside If true the normals point inside the torus otherwise they point outside.
+	\return The created cylinder
+	*/
+	LUX_API StrongRef<Mesh> CreateCylinderMesh(float radius = 0.5f, float height = 1.0f, s32 sectors = 16, s32 planes = 2, s32 texX = 1, s32 texY = 1, bool inside = false);
+
+	//! Create a torus
+	LUX_API StrongRef<Mesh> CreateTorusMesh(float radiusMajor = 1.0f, float radiusMinor = 0.5f, s32 sectorsMajor = 48, s32 sectorsMinor = 12, s32 texX = 1, s32 texY = 1, bool inside = false);
+
 private:
 	LUX_API MeshSystem();
 
@@ -138,6 +155,8 @@ private:
 	StrongRef<GeometryCreator> m_SphereUVCreator;
 	StrongRef<GeometryCreator> m_ArrowCreator;
 	StrongRef<GeometryCreator> m_CubeGenerator;
+	StrongRef<GeometryCreator> m_TorusGenerator;
+	StrongRef<GeometryCreator> m_CylinderGenerator;
 };
 
 } // namespace scene

@@ -10,6 +10,8 @@
 #include "video/mesh/GeometryCreatorSphereUV.h"
 #include "video/mesh/GeometryCreatorCube.h"
 #include "video/mesh/GeometryCreatorArrow.h"
+#include "video/mesh/GeometryCreatorCylinder.h"
+#include "video/mesh/GeometryCreatorTorus.h"
 
 namespace lux
 {
@@ -53,6 +55,11 @@ MeshSystem::MeshSystem()
 	AddCreator(m_CubeGenerator);
 	m_ArrowCreator = LUX_NEW(GeometryCreatorArrow);
 	AddCreator(m_ArrowCreator);
+	m_TorusGenerator = LUX_NEW(GeometryCreatorTorus);
+	AddCreator(m_TorusGenerator);
+	m_CylinderGenerator = LUX_NEW(GeometryCreatorCylinder);
+	AddCreator(m_CylinderGenerator);
+
 }
 
 MeshSystem::~MeshSystem()
@@ -192,6 +199,38 @@ StrongRef<Mesh> MeshSystem::CreateArrowMesh(
 		shaft_height, head_height,
 		shaft_radius, head_radius,
 		sectors);
+	StrongRef<Mesh> out = CreateMesh();
+	out->AddGeometry(sub);
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
+	out->RecalculateBoundingBox();
+
+	return out;
+}
+
+StrongRef<Mesh> MeshSystem::CreateCylinderMesh(float radius, float height, s32 sectors, s32 planes, s32 texX, s32 texY, bool inside)
+{
+	StrongRef<GeometryCreatorCylinder> creator = m_CylinderGenerator;
+	StrongRef<Geometry> sub = creator->CreateGeometry(
+		radius, height,
+		sectors, planes,
+		texX, texY,
+		inside);
+	StrongRef<Mesh> out = CreateMesh();
+	out->AddGeometry(sub);
+	out->SetMaterial(0, m_MatLib->CreateMaterial());
+	out->RecalculateBoundingBox();
+
+	return out;
+}
+
+StrongRef<Mesh> MeshSystem::CreateTorusMesh(float radiusMajor, float radiusMinor, s32 sectorsMajor, s32 sectorsMinor, s32 texX, s32 texY, bool inside)
+{
+	StrongRef<GeometryCreatorTorus> creator = m_TorusGenerator;
+	StrongRef<Geometry> sub = creator->CreateGeometry(
+		radiusMajor, radiusMinor,
+		sectorsMajor, sectorsMinor,
+		texX, texY,
+		inside);
 	StrongRef<Mesh> out = CreateMesh();
 	out->AddGeometry(sub);
 	out->SetMaterial(0, m_MatLib->CreateMaterial());
