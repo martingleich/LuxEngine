@@ -101,6 +101,16 @@ Node::ComponentIterator Node::GetComponentsEnd()
 	return ComponentIterator(m_Components.End());
 }
 
+Node::ConstComponentIterator Node::GetComponentsFirst() const
+{
+	return ConstComponentIterator(m_Components.First());
+}
+
+Node::ConstComponentIterator Node::GetComponentsEnd() const
+{
+	return ConstComponentIterator(m_Components.End());
+}
+
 bool Node::HasComponents() const
 {
 	return !m_Components.IsEmpty();
@@ -311,6 +321,16 @@ Node::ChildIterator Node::GetChildrenFirst()
 Node::ChildIterator Node::GetChildrenEnd()
 {
 	return ChildIterator(nullptr);
+}
+
+Node::ConstChildIterator Node::GetChildrenFirst() const
+{
+	return ConstChildIterator(m_Child);
+}
+
+Node::ConstChildIterator Node::GetChildrenEnd() const
+{
+	return ConstChildIterator(nullptr);
 }
 
 void Node::MarkForDelete()

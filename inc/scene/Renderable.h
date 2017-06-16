@@ -27,10 +27,22 @@ enum class ERenderPass
 class Renderable
 {
 public:
-	virtual size_t GetMaterialCount() const = 0;
-	virtual video::Material* GetMaterial(size_t mat) = 0;
-	virtual const video::Material* GetMaterial(size_t mat) const = 0;
-	virtual void SetMaterial(size_t i, video::Material* m) = 0;
+	virtual size_t GetMaterialCount() const
+	{
+		return 0;
+	}
+	virtual video::Material* GetMaterial(size_t)
+	{
+		throw core::OutOfRangeException();
+	}
+	virtual const video::Material* GetMaterial(size_t) const
+	{
+		throw core::OutOfRangeException();
+	}
+	virtual void SetMaterial(size_t, video::Material*)
+	{
+		throw core::OutOfRangeException();
+	}
 
 	virtual void Render(const Node* node, video::Renderer* renderer, ERenderPass pass) = 0;
 	virtual ERenderPass GetRenderPass() const = 0;

@@ -49,6 +49,7 @@ public:
 	class ComponentIterator : core::BaseIterator<core::BidirectionalIteratorTag, Component*>
 	{
 	private:
+		friend class ConstComponentIterator;
 		friend class Node;
 
 		explicit ComponentIterator(typename SceneNodeComponentList::Iterator begin) : m_Current(begin)
@@ -109,6 +110,77 @@ public:
 		SceneNodeComponentList::Iterator m_Current;
 	};
 
+	class ConstComponentIterator : core::BaseIterator<core::BidirectionalIteratorTag, Component*>
+	{
+	private:
+		friend class Node;
+
+		explicit ConstComponentIterator(typename SceneNodeComponentList::ConstIterator begin) : m_Current(begin)
+		{
+		}
+
+	public:
+		ConstComponentIterator()
+		{
+		}
+
+		ConstComponentIterator& operator++()
+		{
+			++m_Current; return *this;
+		}
+
+		ConstComponentIterator  operator++(int)
+		{
+			ConstComponentIterator temp = *this; ++m_Current; return temp;
+		}
+
+		ConstComponentIterator& operator+=(unsigned int num)
+		{
+			while(num--) ++(*this);
+
+			return *this;
+		}
+
+		ConstComponentIterator  operator+ (unsigned int num) const
+		{
+			ConstComponentIterator temp = *this; return temp += num;
+		}
+
+		bool operator==(const ConstComponentIterator& other) const
+		{
+			return m_Current == other.m_Current;
+		}
+		bool operator!=(const ConstComponentIterator& other) const
+		{
+			return m_Current != other.m_Current;
+		}
+
+		bool operator==(const ComponentIterator& other) const
+		{
+			return m_Current == other.m_Current;
+		}
+
+		bool operator!=(const ComponentIterator& other) const
+		{
+			return m_Current != other.m_Current;
+		}
+		const Component* operator*()
+		{
+			return Pointer();
+		}
+		const Component* operator->()
+		{
+			return Pointer();
+		}
+
+		const Component* Pointer()
+		{
+			return m_Current->comp;
+		}
+
+	private:
+		SceneNodeComponentList::ConstIterator m_Current;
+	};
 	class ConstChildIterator;
 
 	class ChildIterator : core::BaseIterator<core::BidirectionalIteratorTag, Node*>
@@ -282,6 +354,38 @@ public:
 	LUX_API virtual StrongRef<Component> AddComponent(Component* component);
 	LUX_API virtual ComponentIterator GetComponentsFirst();
 	LUX_API virtual ComponentIterator GetComponentsEnd();
+	LUX_API virtual ConstComponentIterator GetComponentsFirst() const;
+	LUX_API virtual ConstComponentIterator GetComponentsEnd() const;
+	template <typename T>
+	T* GetComponent(T* cur=nullptr)
+	{
+		for(auto it = GetComponentsFirst(); it != GetComponentsEnd(); ++it) {
+			T* p = dynamic_cast<T*>(*it);
+			if(p && p != cur)
+				return p;
+		}
+
+		return nullptr;
+	}
+
+	template <typename T>
+	const T* GetComponent(const T* cur=nullptr) const
+	{
+		for(auto it = GetComponentsFirst(); it != GetComponentsEnd(); ++it) {
+			const T* p = dynamic_cast<const T*>(*it);
+			if(p && p != cur)
+				return p;
+		}
+
+		return nullptr;
+	}
+
+	template <typename T>
+	bool HasComponent() const
+	{
+		return (GetComponent<T>() != nullptr);
+	}
+
 	LUX_API virtual bool HasComponents() const;
 
 	//! Removes a component from the scene node
@@ -415,6 +519,8 @@ public:
 	LUX_API virtual void Remove();
 	LUX_API ChildIterator GetChildrenFirst();
 	LUX_API ChildIterator GetChildrenEnd();
+	LUX_API ConstChildIterator GetChildrenFirst() const;
+	LUX_API ConstChildIterator GetChildrenEnd() const;
 
 	////////////////////////////////////////////////////////////////////////////////
 

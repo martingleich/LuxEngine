@@ -410,6 +410,14 @@ public:
 		return Iterator(m_Set.Insert(Tuple(key, value)));
 	}
 
+	void SetIfNotExist(const K& key, const V& value)
+	{
+		auto it = Find(key);
+		if(it != End())
+			return;
+		Insert(key, value);
+	}
+
 	Iterator Find(const K& key)
 	{
 		return Iterator(m_Set.Find(Tuple(key)));

@@ -55,6 +55,16 @@ void DrawingCanvas::SetPixel(s32 x, s32 y, Color color)
 	SetPixelUnchecked(x, y, color);
 }
 
+Color DrawingCanvas::GetPixel(s32 x, s32 y)
+{
+	if(x < 0 || x >= m_Width)
+		return 0;
+	if(y < 0 || y >= m_Height)
+		return 0;
+
+	return GetPixelUnchecked(x, y);
+}
+
 void DrawingCanvas::DrawHLine(s32 y, s32 left, s32 right, Color color)
 {
 	if(y < 0 || y >= m_Height)
@@ -418,60 +428,6 @@ bool DrawingCanvas::ClipRectangle(s32& left, s32& top, s32& right, s32& bottom, 
 		return false;
 
 	return true;
-}
-
-void DrawingCanvas::SetFastPixelCheck(s32 x, s32 y, u8 native_color[4])
-{
-	if(x < 0 || x >= m_Width)
-		return;
-	if(y < 0 || y >= m_Height)
-		return;
-
-	SetFastPixel(x, y, native_color);
-}
-
-void DrawingCanvas::SetFastPixel(s32 x, s32 y, u8 native_color[4])
-{
-	u32 b = m_Format.GetBytePerPixel();
-	memcpy(m_Data + y*m_Pitch + b * x, native_color, b);
-}
-
-void DrawingCanvas::SetPixelUnchecked(s32 x, s32 y, Color color)
-{
-	m_Format.A8R8G8B8ToFormat((u32)color, m_Data + y*m_Pitch + x*m_Format.GetBytePerPixel());
-}
-
-Color DrawingCanvas::GetPixelUnchecked(s32 x, s32 y)
-{
-	return m_Format.FormatToA8R8G8B8(m_Data + y*m_Pitch + x*m_Format.GetBytePerPixel());
-}
-
-void DrawingCanvas::DrawAlphaPixel(s32 x, s32 y, s32 blend, Color color)
-{
-	if(x < 0)
-		return;
-	if(y < 0)
-		return;
-	if(x >= m_Width)
-		return;
-	if(y >= m_Height)
-		return;
-
-	blend = 255 - blend;
-
-	Color c0 = GetPixelUnchecked(x, y);
-	u32 r0 = c0.GetRed();
-	u32 g0 = c0.GetGreen();
-	u32 b0 = c0.GetBlue();
-
-	u32 r1 = color.GetRed();
-	u32 g1 = color.GetGreen();
-	u32 b1 = color.GetBlue();
-
-	u32 r = (r1*blend + r0*(255 - blend)) / 255;
-	u32 g = (g1*blend + g0*(255 - blend)) / 255;
-	u32 b = (b1*blend + b0*(255 - blend)) / 255;
-	SetPixelUnchecked(x, y, Color(r, g, b));
 }
 
 } // namespace video
