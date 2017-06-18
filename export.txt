@@ -6,30 +6,34 @@
 # symbols in this namespace or class are exported.
 # The file must end with an empty line.
 
-format::locale::GetLocale
-format::locale::SetLocale
+format::GetLocale
+format::SetLocale
 
-format::locale::English
-format::locale::German
-format::locale::NumericalFormat
-format::locale::BooleanFormat
+format::English
+format::German
+format::NumericalFormat
+format::BooleanFormat
 
-format::locale::NumericalFormat_English
-format::locale::NumericalFormat_German
+format::NumericalFormat_English
+format::NumericalFormat_German
 
-format::locale::BooleanFormat_English
-format::locale::BooleanFormat_German
-format::locale::BooleanFormat_Digit
+format::BooleanFormat_English
+format::BooleanFormat_German
+format::BooleanFormat_Digit
 
+format::Context::Context
+format::Context::AddSlice
+format::Context::InsertSlice
 format::Context::GetCollumn
+format::Context::SaveSubContext
+format::Context::RestoreSubContext
+
 format::conv_data
 format::IntToString
 format::UIntToString
 format::FloatToString
 
-format::internal::ParseUntilPlaceholder
-format::internal::ReplaceSubPlaceholder
-format::internal::AlignString
+format::internal::format
 format::internal::TryFormatArgFree
 format::ConvertAddString
 

@@ -191,7 +191,7 @@ public:
 		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel && m_LogSystem.GetLogLevel() != ELogLevel::None) {
 			ifconst(sizeof...(data)) {
 				string out;
-				core::string_sink sink(out);
+				core::StringSink sink(out);
 				format::format(sink, format, data...);
 
 				m_Printer->Print(out, m_MyLogLevel);

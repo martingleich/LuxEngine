@@ -84,7 +84,7 @@ public:
 	template <typename... T>
 	static void AppendFormat(string& str, string_type format, T... args)
 	{
-		core::string_sink sink(str);
+		core::StringSink sink(str);
 		format::format(sink, format.data, args...);
 	}
 

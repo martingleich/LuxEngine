@@ -143,7 +143,7 @@ public:
 
 		inline void operator()(
 			u8, u8 r, u8 g, u8 b,
-			u8& _a, u8& _r, u8&, u8&) const
+			u8& _a, u8&, u8&, u8&) const
 		{
 			if(r == key_r && g == key_g && b == key_b)
 				_a = 0;

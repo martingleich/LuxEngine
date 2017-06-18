@@ -8,6 +8,8 @@
 #include "resources/ResourceLoader.h"
 #include "resources/ResourceSystem.h"
 
+#include <map>
+
 namespace lux
 {
 namespace video

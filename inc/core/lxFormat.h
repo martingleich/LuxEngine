@@ -1,8 +1,9 @@
 #ifndef INCLUDED_LX_FORMAT_H
 #define INCLUDED_LX_FORMAT_H
-#include "../external/format/format/Format.h"
-#include "../external/format/format/Sink.h"
-#include "../external/format/format/Converters.h"
+#include "../external/format/src/ConvInternal.h"
+#include "../external/format/src/Format.h"
+#include "../external/format/src/Sink.h"
+#include "../external/format/src/Converters.h"
 #include "core/lxString.h"
 
 namespace lux
@@ -10,16 +11,16 @@ namespace lux
 namespace core
 {
 
-class string_sink : public format::sink
+class StringSink : public format::Sink
 {
 public:
-	string_sink(string& s, size_t collumn=0) :
-		sink(collumn),
+	StringSink(string& s, size_t collumn=0) :
+		Sink(collumn),
 		m_Str(s)
 	{
 	}
 
-	virtual size_t Write(format::Context& ctx, const format::slice* firstSlice, int flags)
+	virtual size_t Write(format::Context& ctx, const format::Slice* firstSlice, int flags)
 	{
 		if(ctx.stringType == format::StringType::CodePoint)
 			return 0;
