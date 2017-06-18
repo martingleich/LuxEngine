@@ -6,7 +6,7 @@ namespace lux
 class Referable;
 namespace core
 {
-namespace impl
+namespace impl_referableRegister
 {
 struct ReferableRegisterBlock;
 
@@ -33,10 +33,10 @@ struct ReferableRegisterBlock
 
 #define LUX_REGISTER_REFERABLE_CLASS(class) \
 static ::lux::Referable* InternalReferableRegisterPrototypeCreator() { return LUX_NEW(class); } \
-static ::lux::core::impl::ReferableRegisterBlock InternalReferableRegisterStaticObject(&InternalReferableRegisterPrototypeCreator);
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(&InternalReferableRegisterPrototypeCreator);
 		
 #define LUX_REGISTER_REFERABLE_CLASS_NAMED(name, class) \
 static ::lux::Referable* InternalReferableRegisterPrototypeCreator_##name() { return LUX_NEW(class); } \
-static ::lux::core::impl::ReferableRegisterBlock InternalReferableRegisterStaticObject_##name(&InternalReferableRegisterPrototypeCreator_##name);
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject_##name(&InternalReferableRegisterPrototypeCreator_##name);
 
 #endif // #ifndef INCLUDED_REFERABLE_REGISTER_H

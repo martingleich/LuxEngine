@@ -12,7 +12,7 @@ namespace lux
 namespace gui
 {
 
-namespace impl
+namespace impl_fontCreatorWin32
 {
 struct CharInfo
 {
@@ -42,7 +42,7 @@ struct Context
 
 }
 
-static bool GenerateDC(impl::Context* ctx)
+static bool GenerateDC(impl_fontCreatorWin32::Context* ctx)
 {
 	ctx->dc = CreateCompatibleDC(NULL);
 	SetMapMode(ctx->dc, MM_TEXT); // Set logical units to pixel
@@ -50,7 +50,7 @@ static bool GenerateDC(impl::Context* ctx)
 	return (ctx->dc != NULL);
 }
 
-static void GenerateCharInfo(impl::Context* ctx)
+static void GenerateCharInfo(impl_fontCreatorWin32::Context* ctx)
 {
 	SelectObject(ctx->dc, ctx->font);
 	SetTextAlign(ctx->dc, TA_TOP | TA_LEFT);
@@ -81,7 +81,7 @@ static void GenerateCharInfo(impl::Context* ctx)
 			a = b = c = 0;
 		}
 
-		impl::CharInfo info;
+		impl_fontCreatorWin32::CharInfo info;
 		info.a = a;
 		info.b = b;
 		info.c = c;
@@ -101,7 +101,7 @@ static u32 NextPower2(u32 x)
 	return x + 1;
 }
 
-static void CalculateImageSize(impl::Context* ctx)
+static void CalculateImageSize(impl_fontCreatorWin32::Context* ctx)
 {
 	u32 count = 0;
 	float sum_length = 0;
@@ -134,7 +134,7 @@ static void CalculateImageSize(impl::Context* ctx)
 	ctx->imageSize.height = p2height;
 }
 
-static bool AllocBitmap(impl::Context* ctx)
+static bool AllocBitmap(impl_fontCreatorWin32::Context* ctx)
 {
 	ctx->bitmap = CreateCompatibleBitmap(GetDC(NULL),
 		ctx->imageSize.width, ctx->imageSize.height);
@@ -142,22 +142,22 @@ static bool AllocBitmap(impl::Context* ctx)
 	return (ctx->bitmap != NULL);
 }
 
-static void FreeBitmap(impl::Context* ctx)
+static void FreeBitmap(impl_fontCreatorWin32::Context* ctx)
 {
 	DeleteObject(ctx->bitmap);
 }
 
-static void FreeDC(impl::Context* ctx)
+static void FreeDC(impl_fontCreatorWin32::Context* ctx)
 {
 	DeleteDC(ctx->dc);
 }
 
-static void FreeFont(impl::Context* ctx)
+static void FreeFont(impl_fontCreatorWin32::Context* ctx)
 {
 	DeleteObject(ctx->font);
 }
 
-static void GenerateFont(impl::Context* ctx)
+static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 {
 	SelectObject(ctx->dc, ctx->font);
 	SelectObject(ctx->dc, ctx->bitmap);
@@ -177,7 +177,7 @@ static void GenerateFont(impl::Context* ctx)
 	u32 cur_y = 0;
 	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {
 		const u32 c = it.key();
-		const impl::CharInfo& info = it.value();
+		const impl_fontCreatorWin32::CharInfo& info = it.value();
 
 		if(cur_x + info.b + 2 > width) {
 			cur_x = 0;
@@ -271,7 +271,7 @@ int CALLBACK EnumFontFamExProc(
 	return 1;
 }
 
-static bool DoesFontFamilyExist(impl::Context* ctx, const string& name)
+static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const string& name)
 {
 	LOGFONTW logFont;
 	ZeroMemory(&logFont, sizeof(logFont));
@@ -374,7 +374,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const string& name,
 	const FontDescription& desc,
 	const core::array<u32>& charSet)
 {
-	impl::Context* ctx = new impl::Context;
+	impl_fontCreatorWin32::Context* ctx = new impl_fontCreatorWin32::Context;
 	ctx->characters = charSet;
 	ctx->antialiased = desc.antialiased;
 
@@ -420,7 +420,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const string& name,
 
 bool FontCreatorWin32::GetFontImage(void* void_ctx, FontPixel*& image, math::dimension2du& imageSize)
 {
-	impl::Context* ctx = (impl::Context*)void_ctx;
+	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)
 		return false;
 
@@ -432,7 +432,7 @@ bool FontCreatorWin32::GetFontImage(void* void_ctx, FontPixel*& image, math::dim
 
 void FontCreatorWin32::GetFontInfo(void* void_ctx, u32& fontHeight)
 {
-	impl::Context* ctx = (impl::Context*)void_ctx;
+	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)
 		return;
 
@@ -441,7 +441,7 @@ void FontCreatorWin32::GetFontInfo(void* void_ctx, u32& fontHeight)
 
 bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo)
 {
-	impl::Context* ctx = (impl::Context*)void_ctx;
+	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)
 		return false;
 
@@ -456,7 +456,7 @@ bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character, CharInfo& 
 
 void FontCreatorWin32::EndFontCreation(void* void_ctx)
 {
-	impl::Context* ctx = (impl::Context*)void_ctx;
+	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)
 		return;
 

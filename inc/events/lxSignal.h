@@ -19,7 +19,7 @@ struct SignalFunc
 	virtual bool IsDestroyed() const = 0;
 };
 
-namespace impl
+namespace signal_impl
 {
 template <typename T1, typename T2, bool First>
 struct Select;
@@ -169,7 +169,7 @@ class Signal
 	friend class SignalRef<Args...>;
 
 	template <typename Class, typename... Args2>
-	using SignalMemberFuncAuto = typename impl::Select<
+	using SignalMemberFuncAuto = typename signal_impl::Select<
 		SignalMemberFuncSafe<Class, Args2...>,
 		SignalMemberFuncUnsafe<Class, Args2...>,
 		std::is_base_of<ReferenceCounted, Class>::value>::type;

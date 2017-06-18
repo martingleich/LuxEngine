@@ -4,7 +4,7 @@
 
 namespace lux
 {
-namespace assert_namespace
+namespace impl_assert
 {
 
 typedef bool (*AssertHandler)(const char* file, size_t line, const char* assert_msg, const char* msg);
@@ -25,10 +25,10 @@ LUX_API bool Report(const char* file, size_t line, const char* lxAssert, const c
 #endif
 
 #ifdef LUX_ENABLE_ASSERTS
-#define lxAssert(_Expression)            ((void)(!(_Expression) && ::lux::assert_namespace::Report(__FILE__, __LINE__, #_Expression, nullptr) && (LUX_DEBUG_BREAK, 1)))
-#define lxAssertEx(_Expression, _Msg)    ((void)(!(_Expression) && ::lux::assert_namespace::Report(__FILE__, __LINE__, #_Expression, (_Msg)) && (LUX_DEBUG_BREAK, 1)))
-#define lxAssertMsg(_Msg)                ((void)(::lux::assert_namespace::Report(__FILE__, __LINE__, nullptr, (_Msg)) && (LUX_DEBUG_BREAK, 1)))
-#define lxAssertNeverReach(_Msg)         ((void)(::lux::assert_namespace::Report(__FILE__, __LINE__, nullptr, (_Msg)) && (LUX_DEBUG_BREAK, 1)))
+#define lxAssert(_Expression)            ((void)(!(_Expression) && ::lux::impl_assert::Report(__FILE__, __LINE__, #_Expression, nullptr) && (LUX_DEBUG_BREAK, 1)))
+#define lxAssertEx(_Expression, _Msg)    ((void)(!(_Expression) && ::lux::impl_assert::Report(__FILE__, __LINE__, #_Expression, (_Msg)) && (LUX_DEBUG_BREAK, 1)))
+#define lxAssertMsg(_Msg)                ((void)(::lux::impl_assert::Report(__FILE__, __LINE__, nullptr, (_Msg)) && (LUX_DEBUG_BREAK, 1)))
+#define lxAssertNeverReach(_Msg)         ((void)(::lux::impl_assert::Report(__FILE__, __LINE__, nullptr, (_Msg)) && (LUX_DEBUG_BREAK, 1)))
 #else
 #define lxAssert(_Expression)         ((void)0)
 #define lxAssertEx(_Expression, _Msg) ((void)0)

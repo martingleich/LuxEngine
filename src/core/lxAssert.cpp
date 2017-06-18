@@ -5,7 +5,7 @@
 
 namespace lux
 {
-namespace assert_namespace
+namespace impl_assert
 {
 
 static bool DefaultHandler(const char* file, size_t line, const char* assert_str, const char* msg)

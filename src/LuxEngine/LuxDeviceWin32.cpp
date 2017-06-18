@@ -244,7 +244,7 @@ LuxDeviceWin32::LuxDeviceWin32() :
 	resourceSystem->SetCaching(core::ResourceType::Image, false);
 
 	// Register all referable object registers with LUX_REGISTER_REFERABLE_CLASS
-	lux::core::impl::RunAllRegisterReferableFunctions();
+	lux::core::impl_referableRegister::RunAllRegisterReferableFunctions();
 
 	log::Info("Lux core was build.");
 }

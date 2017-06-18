@@ -14,7 +14,7 @@ namespace math
 {
 
 ///\cond INTERNAL
-namespace impl
+namespace impl_math
 {
 template <typename T>
 struct BaseConstants
@@ -82,7 +82,7 @@ rad_to_deg<br>
 rounding_error<br>
 */
 template <typename T>
-struct Constants : impl::BaseConstants<T>
+struct Constants : impl_math::BaseConstants<T>
 {};
 
 
@@ -116,7 +116,7 @@ const int Constants<int>::epsilon = 1;
 #endif
 
 template <>
-struct Constants<float> : impl::BaseConstants<float>
+struct Constants<float> : impl_math::BaseConstants<float>
 {
 	static float rounding_error()
 	{
@@ -137,7 +137,7 @@ struct Constants<float> : impl::BaseConstants<float>
 };
 
 template <>
-struct Constants<double> : impl::BaseConstants<double>
+struct Constants<double> : impl_math::BaseConstants<double>
 {
 	static double rounding_error()
 	{
@@ -158,7 +158,7 @@ struct Constants<double> : impl::BaseConstants<double>
 };
 
 template <>
-struct Constants<int> : impl::BaseConstants<int>
+struct Constants<int> : impl_math::BaseConstants<int>
 {
 	static int rounding_error()
 	{
@@ -183,7 +183,7 @@ struct Constants<int> : impl::BaseConstants<int>
 };
 
 template <>
-struct Constants<u8> : impl::BaseConstants<u8>
+struct Constants<u8> : impl_math::BaseConstants<u8>
 {
 	static const u8 rounding_error()
 	{
@@ -204,7 +204,7 @@ struct Constants<u8> : impl::BaseConstants<u8>
 };
 
 template <>
-struct Constants<u16> : impl::BaseConstants<u16>
+struct Constants<u16> : impl_math::BaseConstants<u16>
 {
 	static const u16 rounding_error()
 	{
@@ -225,7 +225,7 @@ struct Constants<u16> : impl::BaseConstants<u16>
 };
 
 template <>
-struct Constants<u32> : impl::BaseConstants<u32>
+struct Constants<u32> : impl_math::BaseConstants<u32>
 {
 	static const u32 rounding_error()
 	{

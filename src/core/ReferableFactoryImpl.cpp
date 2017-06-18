@@ -8,7 +8,7 @@ namespace lux
 namespace core
 {
 
-namespace impl
+namespace impl_referableRegister
 {
 static ReferableRegisterBlock* g_FirstReferableBlock = nullptr;
 void RegisterReferable(ReferableRegisterBlock* block)

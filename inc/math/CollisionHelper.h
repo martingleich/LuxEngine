@@ -219,7 +219,7 @@ bool LineTestBox(
 	return box.IntersectWithLine(transLine);
 }
 
-namespace implCollision
+namespace impl_collision
 {
 template <typename T>
 bool Clip(T denom, T numer, T& t0, T& t1)
@@ -256,12 +256,12 @@ bool LineHitBox(
 	T t1 = std::numeric_limits<T>::max();
 
 	if(
-		implCollision::Clip(+dir.x, -origin.x - halfSize.x, t0, t1) &&
-		implCollision::Clip(-dir.x, +origin.x - halfSize.x, t0, t1) &&
-		implCollision::Clip(+dir.y, -origin.y - halfSize.y, t0, t1) &&
-		implCollision::Clip(-dir.y, +origin.y - halfSize.y, t0, t1) &&
-		implCollision::Clip(+dir.z, -origin.z - halfSize.z, t0, t1) &&
-		implCollision::Clip(-dir.z, +origin.z - halfSize.z, t0, t1)) {
+		impl_collision::Clip(+dir.x, -origin.x - halfSize.x, t0, t1) &&
+		impl_collision::Clip(-dir.x, +origin.x - halfSize.x, t0, t1) &&
+		impl_collision::Clip(+dir.y, -origin.y - halfSize.y, t0, t1) &&
+		impl_collision::Clip(-dir.y, +origin.y - halfSize.y, t0, t1) &&
+		impl_collision::Clip(+dir.z, -origin.z - halfSize.z, t0, t1) &&
+		impl_collision::Clip(-dir.z, +origin.z - halfSize.z, t0, t1)) {
 
 		if(t1 > t0) {
 			bool found = false;
@@ -290,7 +290,7 @@ bool LineHitBox(
 	return false;
 }
 
-namespace implCollision
+namespace impl_collision
 {
 template <typename T>
 struct CollisionBox
@@ -375,8 +375,8 @@ bool BoxTestBox(
 	const math::vector3<T>& halfSizeA, const math::Transformation& transA,
 	const math::vector3<T>& halfSizeB, const math::Transformation& transB)
 {
-	implCollision::CollisionBox<T> a(halfSizeA, transA);
-	implCollision::CollisionBox<T> b(halfSizeB, transB);
+	impl_collision::CollisionBox<T> a(halfSizeA, transA);
+	impl_collision::CollisionBox<T> b(halfSizeB, transB);
 
 	return BoxTestBox(a, b);
 }
