@@ -40,6 +40,7 @@ public:
 	ETextureOperator alphaOperator;
 
 	u32 coordSource;
+	bool useVertex;
 
 	TextureStageSettings() :
 		colorArg1(ETextureArgument::Diffuse),
@@ -48,7 +49,8 @@ public:
 		alphaArg1(ETextureArgument::Diffuse),
 		alphaArg2(ETextureArgument::Diffuse),
 		alphaOperator(ETextureOperator::SelectArg1),
-		coordSource(0xFFFFFFFF)
+		coordSource(0xFFFFFFFF),
+		useVertex(false)
 	{}
 
 	bool HasAlternateCoordSource() const

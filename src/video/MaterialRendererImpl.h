@@ -258,6 +258,7 @@ public:
 			tss0.colorArg1 = ETextureArgument::Diffuse;
 		}
 
+		tss0.useVertex = settings.pipeline.useVertex;
 		state.EnableTextureStage(0, tss0);
 	}
 
@@ -314,6 +315,7 @@ public:
 			tss0.colorArg1 = ETextureArgument::Diffuse;
 		}
 
+		tss0.useVertex = settings.pipeline.useVertex;
 		state.EnableTextureStage(0, tss0);
 	}
 

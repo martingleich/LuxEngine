@@ -159,6 +159,14 @@ public:
 		return *this;
 	}
 
+	StrongRef<T>& operator=(std::nullptr_t)
+	{
+		if(m_Object)
+			m_Object->Drop();
+		m_Object = nullptr;
+		return *this;
+	}
+
 	T* operator->() const
 	{
 		if(!m_Object)

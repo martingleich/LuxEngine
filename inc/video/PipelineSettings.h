@@ -51,6 +51,7 @@ public:
 	bool gouraudShading : 1;
 	bool backfaceCulling : 1;
 	bool frontfaceCulling : 1;
+	bool useVertex:1;
 
 	PipelineSettings() :
 		zBufferFunc(EZComparisonFunc::LessEqual),
@@ -63,7 +64,8 @@ public:
 		normalizeNormals(true),
 		gouraudShading(true),
 		backfaceCulling(true),
-		frontfaceCulling(false)
+		frontfaceCulling(false),
+		useVertex(false)
 	{
 	}
 
@@ -80,7 +82,8 @@ public:
 			zBufferFunc != other.zBufferFunc ||
 			normalizeNormals != other.normalizeNormals ||
 			colorPlane != other.colorPlane ||
-			polygonOffset != other.polygonOffset;
+			polygonOffset != other.polygonOffset ||
+			useVertex != other.useVertex;
 	}
 
 	bool operator==(const PipelineSettings& other) const

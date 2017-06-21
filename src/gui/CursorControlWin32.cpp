@@ -111,11 +111,12 @@ void CursorControlWin32::Tick()
 		SetPosition(m_GrabbingPosition.x, m_GrabbingPosition.y);
 }
 
-void CursorControlWin32::OnResize(Window& Window, const math::dimension2du& newSize)
+void CursorControlWin32::OnResize(Window& window, const math::dimension2du& newSize)
 {
 	// Should never happen, but isn't a problem
-	lxAssert(m_Window == &Window);
-
+	lxAssert(m_Window == &window);
+	
+	LUX_UNUSED(window);
 	LUX_UNUSED(newSize); // The size is read directly from the window.
 	UpdateSize();
 }

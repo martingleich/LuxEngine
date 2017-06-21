@@ -45,7 +45,7 @@ void SkyBox::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 	visitor->Visit(this);
 }
 
-void SkyBox::Render(const Node* node, video::Renderer* renderer, ERenderPass pass)
+void SkyBox::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
 {
 	if(pass != ERenderPass::SkyBox)
 		return;

@@ -52,6 +52,15 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 		u16 charCount;
 		u16 TextureWidth : 16;
 		u16 TextureHeight : 16;
+
+		SFontInfo() :
+			height(0),
+			LineSpace(0.0f),
+			CharSpace(0.0f),
+			charCount(0),
+			TextureWidth(0),
+			TextureHeight(0)
+		{}
 	};
 
 	struct SCharInfo
@@ -95,7 +104,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 		throw core::FileFormatException("Unsupported version", "font");
 
 	core::HashMap<u32, gui::CharInfo> charMap;
-	video::Texture* fontTexture;
+	video::Texture* fontTexture = nullptr;
 	SFontInfo info;
 	while(file->IsEOF() == false) {
 		SChunkHead Header;

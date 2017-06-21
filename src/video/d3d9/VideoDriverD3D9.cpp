@@ -88,7 +88,7 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 		D3DFMT_D16};
 
 	PresentParams.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
-	D3DFORMAT FallbackFormat;
+	D3DFORMAT FallbackFormat = D3DFMT_D24S8;
 	for(u32 format = m_Config.stencil ? 0 : 3; format < 6; format++) {
 		if(SUCCEEDED(m_D3D->CheckDeviceFormat(m_Adapter,
 			D3DDEVTYPE_HAL,

@@ -116,9 +116,9 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 			WORD currentIndex = it->Range.DataIndexMin + (currentUsage - firstUsage);
 
 			bool isCalibrated = false;
-			int32_t calibratedMin;
-			int32_t calibratedMax;
-			int32_t calibratedCenter;
+			int32_t calibratedMin = 0;
+			int32_t calibratedMax = 0;
+			int32_t calibratedCenter = 0;
 			wchar_t const *toName = L"";
 
 			for(size_t i = 0; i < ARRAYSIZE(directInputAxisMapping); ++i) {

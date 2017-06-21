@@ -104,6 +104,7 @@ inline void* HardwareBuffer::Pointer(u32 n, u32 count)
 
 inline const void* HardwareBuffer::Pointer(u32 n, u32 count) const
 {
+	LUX_UNUSED(count);
 	lxAssert(n + count <= m_Size);
 	return m_Data + n*m_Stride;
 }

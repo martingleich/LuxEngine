@@ -46,7 +46,7 @@ void Mesh::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 		visitor->Visit(this);
 }
 
-void Mesh::Render(const Node* node, video::Renderer* renderer, ERenderPass pass)
+void Mesh::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
 {
 	const auto worldMat = node->GetAbsoluteTransform().ToMatrix();
 	renderer->SetTransform(video::ETransform::World, worldMat);

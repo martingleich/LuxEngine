@@ -95,14 +95,17 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 
 void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
 {
-	if(!m_CurPipeline.lighting && settings.colorArg1 == ETextureArgument::Diffuse)
+	if(!m_CurPipeline.lighting && settings.colorArg1 == ETextureArgument::Diffuse && !settings.useVertex)
 		SetTextureStageState(stage, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 	else
 		SetTextureStageState(stage, D3DTSS_COLORARG1, GetTextureArgument(settings.colorArg1));
-	if(!m_CurPipeline.lighting && settings.colorArg2 == ETextureArgument::Diffuse)
+	if(!m_CurPipeline.lighting && settings.colorArg2 == ETextureArgument::Diffuse && !settings.useVertex)
 		SetTextureStageState(stage, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 	else
 		SetTextureStageState(stage, D3DTSS_COLORARG2, GetTextureArgument(settings.colorArg2));
+
+	if(settings.useVertex)
+		EnableVertexData();
 
 	SetTextureStageState(stage, D3DTSS_COLOROP, GetTextureOperator(settings.colorOperator));
 
@@ -119,6 +122,8 @@ void DeviceStateD3D9::DisableTextureStage(u32 stage)
 	SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	SetTextureStageState(stage, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, stage);
+
+	DisableVertexData();
 }
 
 void DeviceStateD3D9::EnableAlpha(const AlphaBlendSettings& settings)

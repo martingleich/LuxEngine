@@ -59,6 +59,16 @@ public:
 		return out;
 	}
 
+	//! Make a Transformation, reversing this one
+	/**
+	\return The inverted transform
+	*/
+	Transformation GetInverted() const
+	{
+		Transformation out;
+		return GetInverted(out);
+	}
+
 	//! Transforms a single Point
 	/**
 	\param in: The point to transform

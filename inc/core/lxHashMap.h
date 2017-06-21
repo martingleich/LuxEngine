@@ -791,7 +791,7 @@ private:
 
 			m_Buckets = m_BucketAllocator.Allocate(newBucketCount + 1);
 			for(size_t i = 0; i < newBucketCount + 1; ++i)
-				m_BucketAllocator.Construct(m_Buckets + i, nullptr);
+				m_BucketAllocator.Construct(m_Buckets + i);
 			m_Buckets[newBucketCount] =
 				reinterpret_cast<HashValue<K, V>*>(m_Buckets + newBucketCount);
 

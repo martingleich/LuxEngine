@@ -23,6 +23,11 @@ public:
 		InternalDelete(pointer);
 	}
 
+	void Construct(T* pointer)
+	{
+		new ((void*)pointer) T();
+	}
+
 	void Construct(T* pointer, const T& e)
 	{
 		new ((void*)pointer) T(e);

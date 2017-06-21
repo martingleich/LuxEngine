@@ -253,9 +253,9 @@ public:
 		math::vector3f v;
 		do {
 			v = GetVector3();
-		} while(v.GetLengthSq() <= radius*radius);
+		} while(v.GetLengthSq() >= 1.0f);
 
-		return v;
+		return v*radius;
 	}
 
 	//! Generate a random vector inside a box

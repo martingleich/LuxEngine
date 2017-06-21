@@ -20,7 +20,7 @@ public:
 	LUX_API ~SkyBox();
 
 	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
-	LUX_API virtual void Render(const Node* node, video::Renderer* renderer, ERenderPass pass);
+	LUX_API virtual void Render(Node* node, video::Renderer* renderer, ERenderPass pass);
 	LUX_API virtual ERenderPass GetRenderPass() const;
 
 	LUX_API virtual void UseCubeTexture(bool cube);
