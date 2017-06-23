@@ -159,7 +159,8 @@ bool IsDigit(u32 c)
 
 bool IsSpace(u32 c)
 {
-	return utf8proc_category(c) == UTF8PROC_CATEGORY_ZS;
+	auto cat = utf8proc_category(c);
+	return c == '\n' || c == '\r' || c == ' ' || c == '\t' || cat == UTF8PROC_CATEGORY_ZS || cat == UTF8PROC_CATEGORY_ZL || cat == UTF8PROC_CATEGORY_ZP;
 }
 
 bool IsAlpha(u32 c)

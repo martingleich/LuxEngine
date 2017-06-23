@@ -1,11 +1,11 @@
 #include "UnitTestEx.h"
-#include "../external/format/format/SinkStdString.h"
+#include "../external/format/src/sinks/SinkStdString.h"
 
 UNIT_SUITE(format)
 {
 	UNIT_TEST(GetLocale)
 	{
-		format::locale::GetLocale();
+		format::GetLocale();
 	}
 
 	UNIT_TEST(IntPrecision)

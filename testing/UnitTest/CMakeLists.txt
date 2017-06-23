@@ -34,3 +34,10 @@ endfunction(assign_source_group)
 # Create the filters for visual studio
 assign_source_group(${UNITTEST_SRCS})
 assign_source_group(${UNITTEST_INCS})
+
+add_custom_command(
+	TARGET UnitTest
+	POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+        $<TARGET_FILE:LuxEngine>      # <--this is in-file
+        $<TARGET_FILE_DIR:UnitTest>)               # <--this is out-file path

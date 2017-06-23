@@ -604,7 +604,7 @@ private:
 	\param a The number of allocated bytes, including NUL.
 	\param short_string Is the string a short string.
 	*/
-	void SetAllocated(size_t a, bool short_string = false);
+	void SetAllocated(size_t a);
 
 	//! The maximum number of bytes contained in a short-string.
 	size_t MaxShortStringBytes() const;
@@ -622,16 +622,15 @@ private:
 	*/
 	char* m_Data;
 
+	// The size of the array pointed to by m_Data, if m_Data is a pointer.
+	// If smaller than MaxShortCharacters(), m_Data contains the string-data itself
+	size_t m_Allocated;
+
 	/*
 		Contains the number of bytes in the string.
 		Without NUL
 	*/
 	size_t m_Size;
-
-	// The size of the array pointed to by m_Data, if m_Data is a pointer.
-	// If the high-order bit is set, this is a short string, m_Data contains the string-data itself.
-	// With NUL
-	size_t m_Allocated;
 
 	/*
 	Contains the number of codepoints in the string.

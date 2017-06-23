@@ -29,6 +29,10 @@ public:
 	{
 	}
 
+	line3d(type x1, type y1, type z1, type x2, type y2, type z2) : start(x1, y1, z1), end(x2, y2, z2)
+	{
+	}
+
 	line3d<type>& operator=(const line3d<type>& other)
 	{
 		start = other.start; end = other.end; return *this;
@@ -200,5 +204,6 @@ public:
 //! typdef for 3D Line with floating precision
 typedef line3d<float> line3df;
 
-}    }    
+}
+}
 #endif

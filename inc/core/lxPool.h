@@ -445,6 +445,13 @@ public:
 			int i = 0;
 	}
 
+	void Disable(T* x)
+	{
+		lxAssert(x >= m_Data && x <= m_Data+m_Active);
+
+		Disable(Iterator(x));
+	}
+
 	//! Disables all elements in the pool
 	void DisableAll()
 	{

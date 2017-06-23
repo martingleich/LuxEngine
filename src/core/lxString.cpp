@@ -107,7 +107,7 @@ void string::Reserve(size_t size)
 	if(!isShort)
 		m_Data = newData;
 
-	SetAllocated(newAlloc, isShort);
+	SetAllocated(newAlloc);
 }
 
 string& string::operator=(const string& other)
@@ -874,20 +874,17 @@ string string::GetUpper() const
 
 bool string::IsShortString() const
 {
-	// Check the most siginficant bit.
-	return ((m_Allocated&((size_t)1 << (sizeof(m_Allocated) * 8 - 1))) != 0) || m_Allocated == 0;
+	return m_Allocated <= MaxShortStringBytes();
 }
 
 size_t string::GetAllocated() const
 {
-	static const size_t flag = ((size_t)1 << (sizeof(m_Allocated) * 8 - 1));
-	return (m_Allocated & (flag - 1));
+	return m_Allocated;
 }
 
-void string::SetAllocated(size_t a, bool short_string)
+void string::SetAllocated(size_t a)
 {
-	static const size_t flag = ((size_t)1 << (sizeof(m_Allocated) * 8 - 1));
-	m_Allocated = a | (short_string ? flag : 0);
+	m_Allocated = a;
 }
 
 size_t string::MaxShortStringBytes() const
