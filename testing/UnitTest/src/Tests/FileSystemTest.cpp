@@ -1,4 +1,4 @@
-#include "UnitTestEx.h"
+#include "stdafx.h"
 
 #include <sys/stat.h>
 

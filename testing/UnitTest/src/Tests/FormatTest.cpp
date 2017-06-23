@@ -1,4 +1,4 @@
-#include "UnitTestEx.h"
+#include "stdafx.h"
 #include "../external/format/src/sinks/SinkStdString.h"
 
 UNIT_SUITE(format)

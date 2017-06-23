@@ -1,4 +1,4 @@
-#include "UnitTestEx.h"
+#include "stdafx.h"
 
 UNIT_SUITE(QuaternionTest)
 {

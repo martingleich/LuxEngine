@@ -1,4 +1,4 @@
-#include "UnitTestEx.h"
+#include "stdafx.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4244)
