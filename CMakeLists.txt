@@ -5,20 +5,18 @@ project(LuxEngine)
 set(LuxEngine_VERSION_MAJOR 0)
 set(LuxEngine_VERSION_MINOR 1)
 
-# TODO It would be better if the user could specify 
-# LuxEngine_COMPILE_WITH_D3D9 directly
 if(WIN32)
 	set(LuxEngine_OS_WINDOWS true)
 	set(LuxEngine_OS_LINUX false)
-	set(LuxEngine_COMPILE_WITH_D3D9 true)
-	set(LuxEngine_COMPILE_WITH_D3DX_IMAGE_LOADER true)
-	set(LuxEngine_COMPILE_WITH_RAW_INPUT true)
+	option(LUX_COMPILE_WITH_D3D9 "" ON)
+	option(LUX_COMPILE_WITH_D3DX_IMAGE_LOADER "" ON)
+	option(LUX_COMPILE_WITH_RAW_INPUT "" ON)
 elseif(UNIX AND NOT APPLE)
 	set(LuxEngine_OS_WINDOWS false)
 	set(LuxEngine_OS_LINUX true)
-	set(LuxEngine_COMPILE_WITH_D3D9 false)
-	set(LuxEngine_COMPILE_WITH_D3DX_IMAGE_LOADER false)
-	set(LuxEngine_COMPILE_WITH_RAW_INPUT false)
+	option(LUX_COMPILE_WITH_D3D9 "" OFF)
+	option(LUX_COMPILE_WITH_D3DX_IMAGE_LOADER "" OFF)
+	option(LUX_COMPILE_WITH_RAW_INPUT "" OFF)
 endif()
 
 configure_file(
@@ -35,7 +33,6 @@ add_subdirectory(external/utf8proc)
 add_subdirectory(testing/UnitTest)
 
 if(WIN32)
-	# TODO Ugly hacks to create the def file ...
 	add_subdirectory(external/FilterExportFiles)
 endif()
 
@@ -48,6 +45,52 @@ file(GLOB_RECURSE SRCS_CPP "src/*.cpp")
 file(GLOB_RECURSE SRCS_H "src/*.h")
 set(SRCS ${SRCS_CPP} ${SRCS_H})
 file(GLOB_RECURSE INCS "inc/*.h")
+
+# Create the Porject and set link files
+add_library(LuxEngine SHARED ${SRCS} ${INCS} )
+target_link_libraries(LuxEngine format zlib libtga libpng utf8proc)
+
+# Create and add the .def file for the linker
+# TODO Create def file for diffrent windows compilers(mingw etc.)
+if(MSVC)
+	get_filename_component(MSVC_PATH ${CMAKE_CXX_COMPILER} DIRECTORY)
+	
+	set(def_file "${CMAKE_BINARY_DIR}/defFile.def")
+	add_custom_command(
+		TARGET LuxEngine
+		PRE_LINK
+		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" ${MSVC_PATH} $<TARGET_FILE:FilterExportFiles> $<TARGET_FILE_DIR:format> "${PROJECT_SOURCE_DIR}/export.txt" "${def_file}"
+		DEPENDS "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" ${MSVC_PATH} $<TARGET_FILE:FilterExportFiles> $<TARGET_FILE_DIR:format> "${PROJECT_SOURCE_DIR}/export.txt"
+		COMMENT "Build .def file"
+		VERBATIM
+	)
+	
+	set_target_properties(LuxEngine
+		PROPERTIES 
+		LINK_FLAGS ${CMAKE_LINK_DEF_FILE_FLAG}"${def_file}") 
+endif()
+
+
+# Add plattform dependend libs and compiler-flags
+if(MSVC)
+	add_definitions(-DLUX_EXPORT -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"LuxConfig.h" -W4)
+	
+	find_library(D3DLIB d3d9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
+	find_library(D3DXLIB d3dx9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
+	target_link_libraries(LuxEngine ${D3DLIB} ${D3DXLIB} Hid)
+
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34296 ") #'operator': expression is always false
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34062 ") # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34264 ") # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34265 ") # 'class': class has virtual functions, but destructor is not virtual
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34928 ") # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
+else()
+	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
+endif()
+
+# Add tests
+enable_testing()
+add_test(NAME BasicTest COMMAND UnitTest)
 
 # http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
 function(assign_source_group)
@@ -66,55 +109,3 @@ endfunction(assign_source_group)
 # Create the filters for visual studio
 assign_source_group(${SRCS})
 assign_source_group(${INCS})
-
-# TODO cmake should already know these libs (we are calling add_dependencies)
-# for them later ...
-set(USED_LIBS ${USED_LIBS} format zlib libtga libpng utf8proc)
-
-# Add plattform dependend libs and compiler-flags
-if(MSVC)
-	add_definitions(-DLUX_EXPORT -DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -FI"LuxConfig.h" -W4)
-	set(USED_LIBS ${USED_LIBS} d3d9 d3dx9 Hid)
-	link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
-	set(SRCS ${SRCS} "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def")
-
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34296 ") #'operator': expression is always false
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34062 ") # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34264 ") # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34265 ") # 'class': class has virtual functions, but destructor is not virtual
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34928 ") # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
-else()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -fPIC -include "LuxConfig.h")
-endif()
-
-add_library(LuxEngine SHARED ${SRCS} ${INCS})
-add_dependencies(LuxEngine format zlib libpng libtga utf8proc)
-target_link_libraries(LuxEngine ${USED_LIBS})
-
-# Add tests
-enable_testing()
-add_test(NAME BasicTest COMMAND UnitTest)
-
-if(WIN32)
-	# TODO Ugly hacks to create the def file ...
-	add_dependencies(LuxEngine FilterExportFiles)
-	add_custom_command(
-		TARGET LuxEngine
-		PRE_BUILD
-		COMMAND "${PROJECT_SOURCE_DIR}/scripts/ValidateDependencies.bat"
-		COMMENT "Validate dependencies"
-		VERBATIM
-	)
-	set_source_files_properties(
-		"${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
-		PROPERTIES GENERATED TRUE
-	)
-	add_custom_command(
-		TARGET LuxEngine
-		PRE_LINK
-		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" $<TARGET_FILE:FilterExportFiles> $<TARGET_FILE_DIR:format> "${PROJECT_SOURCE_DIR}/export.txt" "${PROJECT_SOURCE_DIR}/tmp/$(Platform)$(Configuration).def"
-		COMMENT "Build .def file"
-		VERBATIM
-	)
-endif()
-
