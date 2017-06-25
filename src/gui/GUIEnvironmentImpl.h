@@ -12,6 +12,8 @@ class GUIEnvironmentImpl : public GUIEnvironment
 {
 public:
 	GUIEnvironmentImpl();
+	~GUIEnvironmentImpl();
+
 	StrongRef<FontCreator> GetFontCreator();
 
 private:

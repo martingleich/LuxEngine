@@ -4,6 +4,10 @@
 #include "video/Texture.h"
 #include "core/ReferableRegister.h"
 #include "video/VertexTypes.h"
+#include "video/MaterialLibrary.h"
+#include "video/PipelineSettings.h"
+#include "video/AlphaSettings.h"
+#include "video/images/ImageSystem.h"
 
 LUX_REGISTER_REFERABLE_CLASS(lux::gui::FontImpl);
 
@@ -12,20 +16,39 @@ namespace lux
 namespace gui
 {
 
-FontImpl::FontImpl() :
-	m_Image(nullptr),
-	m_ImageWidth(0),
-	m_ImageHeight(0)
+static StrongRef<video::MaterialRenderer> FONT_RENDERER;
+
+void FontImpl::InitFontData()
+{
+	FONT_RENDERER = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
+	video::PipelineSettings ps = FONT_RENDERER->GetPipeline();
+	ps.zWriteEnabled = false;
+	ps.zBufferFunc = video::EZComparisonFunc::Always;
+	ps.backfaceCulling = false;
+	ps.lighting = false;
+	ps.fogEnabled = false;
+	ps.useVertex = true;
+	FONT_RENDERER->SetPipeline(ps);
+}
+
+void FontImpl::DestroyFontData()
+{
+	video::MaterialLibrary::Instance()->RemoveMaterialRenderer(FONT_RENDERER);
+	FONT_RENDERER = nullptr;
+}
+
+FontImpl::FontImpl()
 {
 }
 
 FontImpl::~FontImpl()
 {
-	LUX_FREE_ARRAY(m_Image);
 }
 
 void FontImpl::Init(const FontCreationData& data)
 {
+	m_Desc = data.desc;
+
 	m_CharDistance = data.charDistance;
 	m_WordDistance = data.wordDistance;
 	m_LineDistance = data.lineDistance;
@@ -44,24 +67,19 @@ void FontImpl::Init(const FontCreationData& data)
 		}
 	}
 
-	LUX_FREE_ARRAY(m_Image);
 	if(data.image) {
-		m_Image = LUX_NEW_ARRAY(FontPixel, data.imageWidth * data.imageHeight);
-		m_ImageWidth = data.imageWidth;
-		m_ImageHeight = data.imageHeight;
-
-		memcpy(m_Image, data.image, m_ImageWidth*m_ImageHeight * sizeof(FontPixel));
-
-		m_Texture = video::VideoDriver::Instance()->CreateTexture(math::dimension2du(m_ImageWidth, m_ImageHeight), video::ColorFormat::A8R8G8B8, 0, false);
+		m_Image = video::ImageSystem::Instance()->CreateImage(data.imageSize, video::ColorFormat::X8, data.image, true, true);
+		m_Texture = video::VideoDriver::Instance()->CreateTexture(data.imageSize, video::ColorFormat::A8R8G8B8, 0, false);
 
 		video::TextureLock lock(m_Texture, video::BaseTexture::ELockMode::Overwrite);
+		video::ImageLock imgLock(m_Image);
 
-		const FontPixel* srcRow = m_Image;
+		const FontPixel* srcRow = (const FontPixel*)imgLock.data;
 		u8* dstRow = lock.data;
-		for(u32 y = 0; y < m_ImageHeight; ++y) {
+		for(u32 y = 0; y < data.imageSize.height; ++y) {
 			const FontPixel* srcPixel = srcRow;
 			u8* dstPixel = dstRow;
-			for(u32 x = 0; x < m_ImageWidth; ++x) {
+			for(u32 x = 0; x < data.imageSize.width; ++x) {
 				u8 value = srcPixel->intensity;
 				srcPixel++;
 
@@ -71,25 +89,18 @@ void FontImpl::Init(const FontCreationData& data)
 				*dstPixel++ = value;        // Blue
 			}
 
-			dstRow += m_ImageWidth * 4;
-			srcRow += m_ImageWidth * sizeof(FontPixel);
+			dstRow += lock.pitch;
+			srcRow += imgLock.pitch;
 		}
 	} else {
 		m_Image = nullptr;
 		m_Texture = nullptr;
-		m_ImageWidth = 0;
-		m_ImageHeight = 0;
 	}
 
-	SetMaterial(data.material);
-}
 
-void FontImpl::SetMaterial(const video::Material* material)
-{
-	if(material->Layer(0).IsValid() == false)
-		throw core::InvalidArgumentException("material", "Material must have at least one texture layer");
-
-	m_Material = material->Clone();
+	m_Material = FONT_RENDERER->CreateMaterial();
+	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha, video::EBlendOperator::Add);
+	m_Material->Param("blendFunc") = alpha.Pack();
 
 	if(m_Texture)
 		m_Material->Layer(0) = m_Texture;
@@ -364,7 +375,11 @@ StrongRef<Referable> FontImpl::Clone() const
 	return LUX_NEW(FontImpl)(*this);
 }
 
-} 
+const FontDescription& FontImpl::GetDescription() const
+{
+	return m_Desc;
+}
 
-} 
+} // namespace gui
+} // namespace lux
 

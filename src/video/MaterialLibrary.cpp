@@ -95,6 +95,9 @@ StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const string&
 
 void MaterialLibrary::RemoveMaterialRenderer(MaterialRenderer* renderer)
 {
+	if(!renderer)
+		return;
+
 	for(auto it = m_Renderers.First(); it != m_Renderers.End(); ++it) {
 		if(*it == renderer) {
 			m_Renderers.Erase(it);

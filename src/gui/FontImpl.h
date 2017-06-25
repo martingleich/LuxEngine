@@ -33,10 +33,10 @@ struct FontPixel
 
 struct FontCreationData
 {
-	StrongRef<video::Material> material;
+	FontDescription desc;
+
 	FontPixel* image;
-	u32 imageWidth;
-	u32 imageHeight;
+	math::dimension2du imageSize;
 
 	core::HashMap<u32, CharInfo> charMap;
 	float charHeight;
@@ -49,8 +49,6 @@ struct FontCreationData
 
 	FontCreationData() :
 		image(nullptr),
-		imageWidth(0),
-		imageHeight(0),
 		charHeight(0.0f),
 		scale(1.0f),
 		charDistance(0.0f),
@@ -65,11 +63,14 @@ struct FontCreationData
 class FontImpl : public Font
 {
 public:
+	static void InitFontData();
+	static void DestroyFontData();
+
 	FontImpl();
 	~FontImpl();
+
 	void Init(const FontCreationData& data);
 
-	void SetMaterial(const video::Material* material);
 	const video::Material* GetMaterial() const;
 	float GetBaseLine() const;
 	void SetBaseLine(float base);
@@ -90,6 +91,8 @@ public:
 	void SetWordDistance(float Space);
 	void SetScaling(float Scale);
 
+	const FontDescription& GetDescription() const;
+
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;
 
@@ -107,13 +110,12 @@ private:
 	float m_BaseLine;
 
 	StrongRef<video::Material> m_Material;
-	FontPixel* m_Image;
-	u32 m_ImageWidth;
-	u32 m_ImageHeight;
-
+	StrongRef<video::Image> m_Image;
 	StrongRef<video::Texture> m_Texture;
 
 	CharInfo m_ErrorChar;
+
+	FontDescription m_Desc;
 };
 
 } // namespace gui

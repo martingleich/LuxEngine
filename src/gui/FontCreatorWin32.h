@@ -11,11 +11,6 @@ namespace gui
 class FontCreatorWin32 : public FontCreatorNull
 {
 public:
-	FontCreatorWin32(video::MaterialRenderer* defaultFontMaterial) :
-		FontCreatorNull(defaultFontMaterial)
-	{
-	}
-
 	void* BeginFontCreation(io::File* file,
 		const FontDescription& desc,
 		const core::array<u32>& charSet);
@@ -27,7 +22,7 @@ public:
 		const FontDescription& desc,
 		const core::array<u32>& charSet);
 	bool GetFontImage(void* void_ctx, FontPixel*& image, math::dimension2du& imageSize);
-	void GetFontInfo(void*, u32& fontHeight);
+	void GetFontInfo(void*, u32& fontHeight, FontDescription& desc);
 	bool GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo);
 	void EndFontCreation(void* void_ctx);
 };

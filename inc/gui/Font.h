@@ -15,6 +15,54 @@ class Material;
 namespace gui
 {
 
+//! The weight/thickness of a font
+enum class EFontWeight
+{
+	ExtraThin,
+	Thin,
+	Normal,
+	Bolt,
+	ExtraBolt
+};
+
+//! Contains information about a font.
+struct FontDescription
+{
+	string name; //!< The name of the font family, empty if not available
+
+	u32 size; //!< The size of the base font in pixel, 0 if not available
+	EFontWeight weight; //!< The weight of the font
+	bool italic; //!< Is the font italic, false if not available
+	bool antialiased; //!< Is the font antialiased, false if not available
+
+	FontDescription()
+	{
+	}
+
+	FontDescription(
+		const string& _name,
+		u32 _size,
+		EFontWeight _weight = EFontWeight::Normal,
+		bool _italic = false,
+		bool _antialiased = true) :
+		name(_name),
+		size(_size),
+		weight(_weight),
+		italic(_italic),
+		antialiased(_antialiased)
+	{}
+	FontDescription(
+		u32 _size,
+		EFontWeight _weight = EFontWeight::Normal,
+		bool _italic = false,
+		bool _antialiased = true) :
+		size(_size),
+		weight(_weight),
+		italic(_italic),
+		antialiased(_antialiased)
+	{}
+};
+
 //! A font object
 /**
 Render lines of text with this object, or get information about
@@ -41,7 +89,7 @@ public:
 public:
 	virtual ~Font()
 	{
-	};
+	}
 
 	//! Draw a line of unformated text
 	/**
@@ -158,19 +206,14 @@ public:
 	*/
 	virtual void SetBaseLine(float base) = 0;
 
-	//! Set the material used for rendering the font
-	/**
-	The material must support at least one texture,
-	for more see "font Rendering in Lux"
-	\param material The new material to use
-	*/
-	virtual void SetMaterial(const video::Material* material) = 0;
-
 	//! Retrieve the material used for rendering the font
 	/**
 	\return The new material used for rendering the font
 	*/
 	virtual const video::Material* GetMaterial() const = 0;
+
+	//! Get a description of the font
+	virtual const FontDescription& GetDescription() const = 0;
 
 	core::Name GetResourceType() const
 	{
@@ -178,13 +221,10 @@ public:
 	}
 };
 
-
-}    
-
+} // namespace gui
 
 DECLARE_FLAG_CLASS(lux::gui::Font::EAlign);
 
-}    
-
+} // namespace lux
 
 #endif

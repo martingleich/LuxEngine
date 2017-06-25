@@ -38,6 +38,12 @@ struct Context
 
 	FontPixel* image;
 	bool antialiased;
+
+	u32 size;
+	bool italic;
+	string name;
+
+	EFontWeight weight;
 };
 
 }
@@ -376,7 +382,12 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const string& name,
 {
 	impl_fontCreatorWin32::Context* ctx = new impl_fontCreatorWin32::Context;
 	ctx->characters = charSet;
+
 	ctx->antialiased = desc.antialiased;
+	ctx->italic = desc.italic;
+	ctx->weight = desc.weight;
+	ctx->size = desc.size;
+	ctx->name = name;
 
 	if(!GenerateDC(ctx)) {
 		delete ctx;
@@ -385,8 +396,8 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const string& name,
 
 	if(isFileFont || DoesFontFamilyExist(ctx, name)) {
 		ctx->font = CreateFontW(desc.size, 0,
-			0, 0, GetWin32FontWeight(desc.weight),
-			desc.italic != 0 ? TRUE : FALSE,
+			0, 0, GetWin32FontWeight(ctx->weight),
+			ctx->italic != 0 ? TRUE : FALSE,
 			FALSE, FALSE, DEFAULT_CHARSET,
 			OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS,
 			ctx->antialiased ? ANTIALIASED_QUALITY : NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, core::StringToUTF16W(name));
@@ -430,13 +441,18 @@ bool FontCreatorWin32::GetFontImage(void* void_ctx, FontPixel*& image, math::dim
 	return true;
 }
 
-void FontCreatorWin32::GetFontInfo(void* void_ctx, u32& fontHeight)
+void FontCreatorWin32::GetFontInfo(void* void_ctx, u32& fontHeight, FontDescription& desc)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)
 		return;
 
 	fontHeight = ctx->fontHeight;
+	desc.name = ctx->name;
+	desc.italic = ctx->italic;
+	desc.antialiased = ctx->antialiased;
+	desc.size = ctx->size;
+	desc.weight = ctx->weight;
 }
 
 bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo)

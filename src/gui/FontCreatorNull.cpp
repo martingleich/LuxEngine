@@ -16,8 +16,7 @@ namespace lux
 namespace gui
 {
 
-FontCreatorNull::FontCreatorNull(video::MaterialRenderer* defaultFontMaterial) :
-	m_DefaultFontMaterial(defaultFontMaterial)
+FontCreatorNull::FontCreatorNull()
 {
 	AddDefaultCharSet("german", " AA«»íéáóúôîûâê1234567890AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZzÖöÜüÄäß²³{}[]()<>+-*,;.:!?&%§/\\'#~^°\"_´`$€@µ|=");
 }
@@ -74,12 +73,12 @@ StrongRef<Font> FontCreatorNull::CreateFontFromFile(io::File* file,
 	}
 }
 
-StrongRef<Font> FontCreatorNull::CreateFont(const string& name,
+StrongRef<Font> FontCreatorNull::CreateFont(
 	const FontDescription& desc,
 	const core::array<u32>& charSet)
 {
 	core::array<u32> realCharSet = CorrectCharSet(charSet);
-	void* creationContext = this->BeginFontCreation(name, desc, realCharSet);
+	void* creationContext = this->BeginFontCreation(desc.name, desc, realCharSet);
 	try {
 		auto out = CreateFontFromContext(creationContext, realCharSet);
 		this->EndFontCreation(creationContext);
@@ -108,15 +107,10 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::ar
 			data.charMap.Set(*it, info);
 	}
 
-	this->GetFontInfo(ctx, fontHeight);
-
+	this->GetFontInfo(ctx, fontHeight, data.desc);
 	data.charHeight = (float)fontHeight;
-	data.material = m_DefaultFontMaterial->CreateMaterial();
-	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha, video::EBlendOperator::Add);
-	data.material->Param("blendFunc") = alpha.Pack();
 	data.image = image;
-	data.imageWidth = imageSize.width;
-	data.imageHeight = imageSize.height;
+	data.imageSize = imageSize;
 	data.charDistance = 0.0f;
 	data.wordDistance = 1.0f;
 	data.lineDistance = 1.0f;

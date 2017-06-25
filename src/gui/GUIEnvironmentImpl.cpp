@@ -23,25 +23,22 @@ namespace gui
 
 GUIEnvironmentImpl::GUIEnvironmentImpl()
 {
-	// Register font material renderer
-	video::MaterialRenderer* FontRenderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
-	video::PipelineSettings ps = FontRenderer->GetPipeline();
-	ps.zWriteEnabled = false;
-	ps.zBufferFunc = video::EZComparisonFunc::Always;
-	ps.backfaceCulling = false;
-	ps.lighting = false;
-	ps.fogEnabled = false;
-	ps.useVertex = true;
-	FontRenderer->SetPipeline(ps);
+	// Initialize shared font data
+	FontImpl::InitFontData();
 
-	// Register font loader
 	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader));
 
 #ifdef LUX_WINDOWS
-	m_FontCreator = LUX_NEW(FontCreatorWin32)(FontRenderer);
+	m_FontCreator = LUX_NEW(FontCreatorWin32);
 #else
 	m_FontCreator = nullptr;
 #endif
+}
+
+GUIEnvironmentImpl::~GUIEnvironmentImpl()
+{
+	// Destroy shared font data
+	FontImpl::DestroyFontData();
 }
 
 StrongRef<FontCreator> GUIEnvironmentImpl::GetFontCreator()

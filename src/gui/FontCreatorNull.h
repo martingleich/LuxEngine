@@ -16,15 +16,12 @@ namespace gui
 class FontCreatorNull : public FontCreator
 {
 private:
-	video::MaterialRenderer* m_DefaultFontMaterial;
-
 	core::HashMap<string, core::array<u32>> m_DefaultCharSets;
 
 public:
-	FontCreatorNull(video::MaterialRenderer* defaultFontMaterial);
+	FontCreatorNull();
 
 	StrongRef<Font> CreateFont(
-		const string& name,
 		const FontDescription& desc,
 		const core::array<u32>& charSet);
 
@@ -51,7 +48,7 @@ private:
 	virtual void* BeginFontCreation(const string& name,
 		const FontDescription& desc,
 		const core::array<u32>& charSet) = 0;
-	virtual void GetFontInfo(void*, u32& fontHeight) = 0;
+	virtual void GetFontInfo(void*, u32& fontHeight, FontDescription& desc) = 0;
 	virtual bool GetFontImage(void*, FontPixel*& image, math::dimension2du& imageSize) = 0;
 	virtual bool GetFontCharInfo(void*, u32 character, CharInfo& outInfo) = 0;
 	virtual void EndFontCreation(void*) = 0;

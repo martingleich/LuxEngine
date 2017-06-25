@@ -2,10 +2,10 @@
 #include "io/File.h"
 #include "core/Logger.h"
 #include "video/images/ImageSystem.h"
+#include "video/images/Image.h"
 #include "video/VideoDriver.h"
 #include "core/lxHashMap.h"
 #include "gui/FontImpl.h"
-#include "video/Texture.h"
 #include "video/MaterialLibrary.h"
 #include "video/AlphaSettings.h"
 
@@ -60,7 +60,8 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 			charCount(0),
 			TextureWidth(0),
 			TextureHeight(0)
-		{}
+		{
+		}
 	};
 
 	struct SCharInfo
@@ -104,7 +105,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 		throw core::FileFormatException("Unsupported version", "font");
 
 	core::HashMap<u32, gui::CharInfo> charMap;
-	video::Texture* fontTexture = nullptr;
+	StrongRef<video::Image> fontImage;
 	SFontInfo info;
 	while(file->IsEOF() == false) {
 		SChunkHead Header;
@@ -140,13 +141,12 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 		{
 			SImageInfo image;
 			file->ReadBinary(sizeof(SImageInfo), &image);
-
-			fontTexture = video::VideoDriver::Instance()->CreateTexture(math::dimension2du(image.TextureWidth, image.TextureHeight), video::ColorFormat::A8R8G8B8);
+			fontImage = video::ImageSystem::Instance()->CreateImage(math::dimension2du(image.TextureWidth, image.TextureHeight), video::ColorFormat::X8);
 
 			{
-				video::TextureLock texLock(fontTexture, video::BaseTexture::ELockMode::Overwrite);
+				video::ImageLock imgLock(fontImage);
 
-				u8* rowData = texLock.data;
+				u8* rowData = imgLock.data;
 				if(image.Compression == 0) {
 					u8 value;
 					for(u32 y = 0; y < image.TextureHeight; ++y) {
@@ -155,17 +155,11 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 							if(file->ReadBinary(1, &value) == 0)
 								throw core::FileFormatException("Unexpected end of file", "font");
 
-							*pixel = value;        // Alpha
-							++pixel;
-							*pixel = value;        // Red
-							++pixel;
-							*pixel = value;        // Green
-							++pixel;
-							*pixel = value;        // Blue
+							*pixel = value;
 							++pixel;
 						}
 
-						rowData += texLock.pitch;
+						rowData += imgLock.pitch;
 					}
 				}
 			}
@@ -176,23 +170,31 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 		}
 	}
 
-	FontCreationData data;
-	data.charMap = charMap;
-	data.charHeight = info.height;
-	data.material = video::MaterialLibrary::Instance()->CreateMaterial("font");
-	data.material->Layer(0) = fontTexture;
-	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha, video::EBlendOperator::Add);
-	data.material->Param("blendFunc") = alpha.Pack();
-	data.charDistance = 0.0f;
-	data.wordDistance = 1.0f;
-	data.lineDistance = 1.0f;
-	data.scale = 1.0f;
-	data.baseLine = 0.0f;
+	{
+		video::ImageLock imgLock(fontImage);
 
-	gui::FontImpl* real_dst = dynamic_cast<gui::FontImpl*>(dst);
-	if(!real_dst)
-		throw core::Exception("Passed wrong resource type to loader");
-	real_dst->Init(data);
+		FontCreationData data;
+		data.desc.name = file->GetName();
+		data.desc.size = 0;
+		data.desc.antialiased = false;
+		data.desc.italic = false;
+		data.desc.weight = EFontWeight::Normal;
+
+		data.charMap = charMap;
+		data.charHeight = info.height;
+		data.charDistance = 0.0f;
+		data.wordDistance = 1.0f;
+		data.lineDistance = 1.0f;
+		data.scale = 1.0f;
+		data.baseLine = 0.0f;
+		data.image = (FontPixel*)imgLock.data;
+		data.imageSize = fontImage->GetSize();
+
+		gui::FontImpl* real_dst = dynamic_cast<gui::FontImpl*>(dst);
+		if(!real_dst)
+			throw core::Exception("Passed wrong resource type to loader");
+		real_dst->Init(data);
+	}
 }
 
 }
