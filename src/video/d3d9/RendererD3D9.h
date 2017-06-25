@@ -45,7 +45,7 @@ public:
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
-		bool is3D);
+		bool is3D, bool user);
 
 	void DrawIndexedPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
@@ -59,7 +59,7 @@ public:
 		return DrawPrimitiveList(primitiveType, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			indexData, indexType,
-			is3D);
+			is3D, true);
 	}
 
 	void DrawPrimitiveList(
@@ -72,7 +72,7 @@ public:
 		return DrawPrimitiveList(primitiveType, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			nullptr, EIndexFormat::Bit16,
-			is3D);
+			is3D, true);
 	}
 
 	void DrawGeometry(const Geometry* geo, bool is3D = true)

@@ -31,6 +31,7 @@ GUIEnvironmentImpl::GUIEnvironmentImpl()
 	ps.backfaceCulling = false;
 	ps.lighting = false;
 	ps.fogEnabled = false;
+	ps.useVertex = true;
 	FontRenderer->SetPipeline(ps);
 
 	// Register font loader

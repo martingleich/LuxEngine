@@ -37,7 +37,7 @@ public:
 	\param format The colorformat of the new image
 	\param data The imagedata of the image, the size and the format must be euqal to the previouse params
 	\param copyMem Should the data from the original location be copied or only referenced
-	\param deleteOnDrop Only if copyMem=true. Should the referenced memory be deleted if the image is destructed.
+	\param deleteOnDrop Only if copyMem=true. Should the referenced memory be deleted if the image is destructed(memory is freed via delete[](u8*) operator)
 	\return The newly created image
 	*/
 	LUX_API StrongRef<Image> CreateImage(const math::dimension2du& size, ColorFormat format, void* data, bool copyMem, bool deleteOnDrop);
