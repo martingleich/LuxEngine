@@ -60,7 +60,7 @@ public:
 		return m_ContextLevel;
 	}
 
-	virtual void SetSettings(const Settings& data) { LUX_UNUSED(data); }
+	virtual void Configure(const Settings& data) { LUX_UNUSED(data); }
 	virtual void Init()
 	{
 		m_IsInit = true;

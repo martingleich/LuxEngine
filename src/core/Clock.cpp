@@ -22,7 +22,8 @@ static DateAndTime::EWeekDay TimeStructToWeekDay(int tm)
 
 DateAndTime Clock::GetDateAndTime()
 {
-	time_t secondsSince1970;
+	auto now = std::chrono::system_clock::now();
+	time_t secondsSince1970 = std::chrono::system_clock::to_time_t(now);
 	time(&secondsSince1970);
 	tm* timeStruct = localtime(&secondsSince1970);
 	DateAndTime out;
@@ -32,6 +33,7 @@ DateAndTime Clock::GetDateAndTime()
 	out.minutes = timeStruct->tm_min;
 	out.month = timeStruct->tm_mon + 1;
 	out.seconds = timeStruct->tm_sec;
+	out.milliseconds = std::chrono::duration_cast<std::chrono::duration<u64, std::ratio<1, 1000>>>(now.time_since_epoch()).count() % 1000;
 	out.weekDay = TimeStructToWeekDay(timeStruct->tm_wday);
 	out.year = timeStruct->tm_year + 1900;
 

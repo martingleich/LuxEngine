@@ -3,6 +3,7 @@
 #include "LuxBase.h"
 #include <cstring>
 #include <cstdlib>
+#include <stdarg.h>
 
 namespace lux
 {
@@ -33,6 +34,32 @@ public:
 			data[0] = 1;
 			memcpy(data + 1, s, len + 1);
 		}
+	}
+
+	ExceptionSafeString& Append(const char* s)
+	{
+		if(!s)
+			return *this;
+
+		if(!data) {
+			*this = s;
+			return *this;
+		}
+
+
+		size_t oldlen = strlen(Data());
+		size_t newlen = strlen(s) + oldlen;
+		char* newdata = (char*)std::malloc(newlen + 1 + 1);
+		if(newdata) {
+			newdata[0] = 1;
+			memcpy(newdata + 1, Data(), oldlen);
+			memcpy(newdata + 1 + oldlen, s, newlen - oldlen + 1);
+		}
+
+		this->~ExceptionSafeString();
+		data = newdata;
+
+		return *this;
 	}
 
 	ExceptionSafeString(const ExceptionSafeString& other) :
@@ -92,7 +119,7 @@ struct Exception
 		return m_What.Data();
 	}
 
-private:
+protected:
 	ExceptionSafeString m_What;
 };
 
@@ -134,10 +161,17 @@ struct NotImplementedException : ErrorException
 struct InvalidArgumentException : ErrorException
 {
 	explicit InvalidArgumentException(const char* _arg, const char* _assertion = "") :
-		ErrorException("invalid argument"),
+		ErrorException(nullptr),
 		arg(_arg),
 		assertion(_assertion)
 	{
+		m_What.Append("invalid_argument(");
+		m_What.Append(arg);
+		if(assertion) {
+			m_What.Append(", ");
+			m_What.Append(assertion);
+		}
+		m_What.Append(")");
 	}
 
 	//! The argument which was invalid
@@ -153,9 +187,12 @@ struct InvalidArgumentException : ErrorException
 struct FileNotFoundException : Exception
 {
 	explicit FileNotFoundException(const char* _path) :
-		Exception("file not found"),
+		Exception(nullptr),
 		path(_path)
 	{
+		m_What.Append("file_not_found(");
+		m_What.Append(_path);
+		m_What.Append(")");
 	}
 
 	//! The path to the invalid, only for debuging purposes.
@@ -210,15 +247,17 @@ For example a parameter in a ParamPackage
 struct ObjectNotFoundException : ErrorException
 {
 	explicit ObjectNotFoundException(const char* _object) :
-		ErrorException("object not found"),
+		ErrorException(nullptr),
 		object(_object)
 	{
+		m_What.Append("object_not_found(");
+		m_What.Append(object);
+		m_What.Append(")");
 	}
 
 	//! The name of the queried object.
 	ExceptionSafeString object;
 };
-
 
 //! Exception dealing with a file format
 /**
@@ -238,7 +277,7 @@ struct FileFormatException : Exception
 	ExceptionSafeString msg;
 };
 
-}
-}
+} // namespace core
+} // namespace lux 
 
 #endif // #ifndef INCLUDED_LX_EXCEPTION_H

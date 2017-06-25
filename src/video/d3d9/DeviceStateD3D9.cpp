@@ -137,12 +137,6 @@ void DeviceStateD3D9::EnableAlpha(const AlphaBlendSettings& settings)
 		m_Device->SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(settings.Operator));
 	}
 
-	if(HasTextureBlendAlpha(settings.SrcBlend) || HasTextureBlendAlpha(settings.DstBlend)) {
-		SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
-		SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TEXTURE);
-		SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-	}
-
 	m_CurAlpha = settings;
 }
 

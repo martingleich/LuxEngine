@@ -120,12 +120,12 @@ StrongRef<File> FileSystemWin32::OpenFile(const path& filename, EFileMode mode, 
 
 	if(!ExistFile(absPath)) {
 		if(!createIfNotExist) {
-			throw core::FileNotFoundException(absPath.Data());
+			throw core::FileNotFoundException(filename.Data());
 		} else {
 			log::Info("The file \"~s\" was created.", absPath);
 			file = core::FOpenUTF8(absPath.Data(), GetFileOpenString(mode).Data());
 			if(!file)
-				throw core::FileNotFoundException(absPath.Data());
+				throw core::FileNotFoundException(filename.Data());
 			try {
 				desc = GetFileDescription(absPath);
 				return LUX_NEW(StreamFile)(file, desc, absPath);
@@ -138,7 +138,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const path& filename, EFileMode mode, 
 
 	file = core::FOpenUTF8(absPath.Data(), GetFileOpenString(mode).Data());
 	if(!file)
-		throw core::FileNotFoundException(absPath.Data());
+		throw core::FileNotFoundException(filename.Data());
 
 
 	try {

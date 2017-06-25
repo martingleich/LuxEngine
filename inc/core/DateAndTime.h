@@ -23,6 +23,7 @@ struct DateAndTime
 		Saturday,
 	};
 
+	u32 milliseconds;      //!< Milliseconds - [0, 999]
 	u32 seconds;           //!< Seconds - [0,59] 
 	u32 minutes;           //!< Minutes - [0,59] 
 	u32 hours;             //!< Hours - [0,23] 

@@ -310,9 +310,14 @@ public:
 			tss0.colorOperator = ETextureOperator::Modulate;
 			tss0.colorArg1 = ETextureArgument::Texture;
 			tss0.colorArg2 = ETextureArgument::Diffuse;
+			tss0.alphaOperator = ETextureOperator::Modulate;
+			tss0.alphaArg1 = ETextureArgument::Texture;
+			tss0.alphaArg2 = ETextureArgument::Diffuse;
 		} else {
 			tss0.colorOperator = ETextureOperator::SelectArg1;
 			tss0.colorArg1 = ETextureArgument::Diffuse;
+			tss0.alphaOperator = ETextureOperator::SelectArg1;
+			tss0.alphaArg1 = ETextureArgument::Diffuse;
 		}
 
 		tss0.useVertex = settings.pipeline.useVertex;

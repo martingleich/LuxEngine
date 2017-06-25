@@ -89,7 +89,7 @@ public:
 		m_Settings("Log.html")
 	{
 	}
-	virtual void SetSettings(const Printer::Settings& settings)
+	virtual void Configure(const Printer::Settings& settings)
 	{
 		const HTMLPrinterSettings* data = dynamic_cast<const HTMLPrinterSettings*>(&settings);
 		if(data)
@@ -216,7 +216,7 @@ public:
 		m_Settings("Log.txt")
 	{
 	}
-	virtual void SetSettings(const Printer::Settings& settings)
+	virtual void Configure(const Printer::Settings& settings)
 	{
 		const FilePrinterSettings* data = dynamic_cast<const FilePrinterSettings*>(&settings);
 		if(data)
@@ -240,7 +240,7 @@ public:
 			fputs(GetLogLevelName(ll), m_File);
 			if(m_Settings.ShowTime) {
 				auto time = core::Clock::GetDateAndTime();
-				fprintf(m_File, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
+				fprintf(m_File, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
 			}
 			fputs(": ", m_File);
 		}
@@ -273,7 +273,7 @@ public:
 		Printer::Init();
 	}
 
-	virtual void SetSettings(const Printer::Settings& settings)
+	virtual void Configure(const Printer::Settings& settings)
 	{
 		const ConsolePrinterSettings* data = dynamic_cast<const ConsolePrinterSettings*>(&settings);
 		if(data)
@@ -286,7 +286,7 @@ public:
 			fputs(GetLogLevelName(ll), stdout);
 			if(m_Settings.ShowTime) {
 				auto time = core::Clock::GetDateAndTime();
-				fprintf(stdout, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
+				fprintf(stdout, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
 			}
 
 			fputs(": ", stdout);
@@ -327,7 +327,7 @@ public:
 			out += GetLogLevelName(ll);
 
 			auto time = core::Clock::GetDateAndTime();
-			sprintf(BUFFER, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds);
+			sprintf(BUFFER, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
 			out += BUFFER;
 
 			out += ": ";
