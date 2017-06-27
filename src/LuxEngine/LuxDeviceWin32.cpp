@@ -438,13 +438,14 @@ LuxDeviceWin32::~LuxDeviceWin32()
 
 	video::ImageSystem::Destroy();
 
+	video::MaterialLibrary::Destroy();
+
 	video::VideoDriverD3D9* driver = dynamic_cast<video::VideoDriverD3D9*>(video::VideoDriver::Instance());
 
 	// Free all shared resources, default materials, invalid materials and so on
 	if(driver)
 		driver->CleanUp();
 
-	video::MaterialLibrary::Destroy();
 	video::VideoDriver::Destroy();
 
 	core::ResourceSystem::Destroy();

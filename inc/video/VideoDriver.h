@@ -14,6 +14,7 @@
 #include "video/EDriverCaps.h"
 
 #include "video/HardwareBufferConstants.h"
+#include "video/HardwareBufferManager.h"
 
 namespace lux
 {
@@ -31,7 +32,6 @@ class BaseTexture;
 
 class Geometry;
 class RenderStatistics;
-class BufferManager;
 
 class Renderer;
 

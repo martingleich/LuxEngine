@@ -249,7 +249,7 @@ private:
 /**
 Can be compared with a class, this class contains members and types, but no values.
 */
-class LUX_API ParamPackage
+class ParamPackage
 {
 private:
 	struct Entry
@@ -267,13 +267,13 @@ private:
 	};
 
 public:
-	ParamPackage();
-	~ParamPackage();
-	ParamPackage(const ParamPackage& other);
-	ParamPackage& operator=(const ParamPackage& other);
+	LUX_API ParamPackage();
+	LUX_API ~ParamPackage();
+	LUX_API ParamPackage(const ParamPackage& other);
+	LUX_API ParamPackage& operator=(const ParamPackage& other);
 
 	//! Clears the param package
-	void Clear();
+	LUX_API void Clear();
 
 	//! Creates a new Param
 	/**
@@ -299,29 +299,29 @@ public:
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	\param reserved Reserved for internal use, dont use this param
 	*/
-	void AddParam(core::Type type, const string_type& name, const void* defaultValue, u16 reserved = -1);
+	LUX_API void AddParam(core::Type type, const string_type& name, const void* defaultValue, u16 reserved = -1);
 
 	//! Merges two packages
 	/**
 	Objects with the same name and type will be combined into one parameters.
 	Combination of objects with the same name and diffrent types will fail.
 	*/
-	void MergePackage(const ParamPackage& other);
+	LUX_API void MergePackage(const ParamPackage& other);
 
 	//! Creates a new ParamPackage
 	/**
 	\return A pointer to the newly created paramblock
 	*/
-	void* CreatePackage() const;
+	LUX_API void* CreatePackage() const;
 
 	//! Destroys a with CreatePackage created ParamBlock
-	void DestroyPackage(void* p) const;
+	LUX_API void DestroyPackage(void* p) const;
 
 	//! Compare the data of two packages
-	bool ComparePackage(const void* a, const void* b) const;
+	LUX_API bool ComparePackage(const void* a, const void* b) const;
 
 	//! Create a new package with the same content as an other one
-	void* CopyPackage(const void* b) const;
+	LUX_API void* CopyPackage(const void* b) const;
 
 	//! Retrieves Information about the Param from a index
 	/**
@@ -329,7 +329,7 @@ public:
 	\param [out] desc The description of the parameter
 	\exception OutOfRange param is out of range
 	*/
-	ParamDesc GetParamDesc(u32 param) const;
+	LUX_API ParamDesc GetParamDesc(u32 param) const;
 
 	//! Retrieve the name of a param
 	/**
@@ -337,7 +337,7 @@ public:
 	\return The name of the param
 	\exception OutOfRange param is out of range
 	*/
-	const string& GetParamName(u32 param) const;
+	LUX_API const string& GetParamName(u32 param) const;
 
 	//! Get a param from a id
 	/**
@@ -347,7 +347,7 @@ public:
 	\return The found param
 	\exception OutOfRange param is out of range
 	*/
-	PackageParam GetParam(u32 param, void* baseData, bool isConst) const;
+	LUX_API PackageParam GetParam(u32 param, void* baseData, bool isConst) const;
 
 	//! Get a param from a name
 	/**
@@ -357,7 +357,7 @@ public:
 	\return The found param
 	\exception Exception name does not exist
 	*/
-	PackageParam GetParamFromName(const string_type& name, void* baseData, bool isConst) const;
+	LUX_API PackageParam GetParamFromName(const string_type& name, void* baseData, bool isConst) const;
 
 	//! Get the n-th Param of a specific type
 	/**
@@ -368,13 +368,13 @@ public:
 	\param isConst Should the package param be constant, i.e. can't be changed
 	\return The index of the found param, if no param could be found the invalid param is returned
 	*/
-	PackageParam GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const;
+	LUX_API PackageParam GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const;
 
 	//! Access the default value of a param
 	/**
 	\param param The id of the Param, which default value should be changed
 	*/
-	PackageParam DefaultValue(u32 param);
+	LUX_API PackageParam DefaultValue(u32 param);
 
 	//! Set a new default value for a param
 	/**
@@ -382,7 +382,7 @@ public:
 	\param defaultValue A pointer to the new default value
 	\exception Exception name does not exist
 	*/
-	PackageParam DefaultValue(const string_type& param);
+	LUX_API PackageParam DefaultValue(const string_type& param);
 
 	//! Get the id of a parameter by it's name.
 	/**
@@ -391,20 +391,20 @@ public:
 	\return The id of the parameter.
 	\exception Exception name does not exist
 	*/
-	u32 GetParamId(const string_type& name, core::Type type = core::Type::Unknown) const;
+	LUX_API u32 GetParamId(const string_type& name, core::Type type = core::Type::Unknown) const;
 
 	//! The number of existing params in this package
-	u32 GetParamCount() const;
+	LUX_API u32 GetParamCount() const;
 
 	//! The number of texturelayers in this package
-	u32 GetTextureCount() const;
+	LUX_API u32 GetTextureCount() const;
 
 	//! The size of the allocated data, in bytes
-	u32 GetTotalSize() const;
+	LUX_API u32 GetTotalSize() const;
 
 private:
-	void AddEntry(Entry& entry, const void* defaultValue);
-	bool GetId(string_type name, core::Type t, u32& outId) const;
+	LUX_API void AddEntry(Entry& entry, const void* defaultValue);
+	LUX_API bool GetId(string_type name, core::Type t, u32& outId) const;
 
 private:
 	struct SelfData;
@@ -474,18 +474,16 @@ public:
 	*/
 	void SetType(const ParamPackage* pack)
 	{
-		if(!pack) {
-			m_Pack = pack;
+		if(m_Pack == pack)
 			return;
-		}
 
-		if(m_Pack != pack) {
-			// TÓDO: Move data from the old package to the new one
-			if(m_Pack)
-				m_Pack->DestroyPackage(m_Data);
+		if(m_Pack)
+			m_Pack->DestroyPackage(m_Data);
+
+		m_Pack = pack;
+
+		if(m_Pack)
 			m_Data = pack->CreatePackage();
-			m_Pack = pack;
-		}
 	}
 
 	//! Get the type of the puffer

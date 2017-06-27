@@ -13,8 +13,11 @@ MaterialImpl::MaterialImpl(MaterialRenderer* renderer) :
 	m_Specular(Color::White),
 	m_Shininess(0.0f),
 	m_Power(1.0f),
-	m_Renderer(renderer),
-	m_Puffer(renderer ? &renderer->GetPackage() : nullptr)
+	m_RenderData(renderer)
+{
+}
+
+MaterialImpl::~MaterialImpl()
 {
 }
 
@@ -22,16 +25,12 @@ MaterialImpl::MaterialImpl(MaterialRenderer* renderer) :
 
 void MaterialImpl::SetRenderer(MaterialRenderer* renderer)
 {
-	m_Renderer = renderer;
-	if(m_Renderer)
-		m_Puffer.SetType(&m_Renderer->GetPackage());
-	else
-		m_Puffer.SetType(nullptr);
+	m_RenderData.Set(renderer);
 }
 
 MaterialRenderer* MaterialImpl::GetRenderer() const
 {
-	return m_Renderer;
+	return m_RenderData.renderer;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -42,8 +41,7 @@ void MaterialImpl::CopyFrom(const Material* _other)
 		return;
 
 	const MaterialImpl* other = dynamic_cast<const MaterialImpl*>(_other);
-	m_Puffer = other->m_Puffer;
-	m_Renderer = other->m_Renderer;
+	m_RenderData = other->m_RenderData;
 
 	m_Ambient = other->m_Ambient;
 	m_Diffuse = other->m_Diffuse;
@@ -59,7 +57,7 @@ bool MaterialImpl::Equal(const Material* _other) const
 		return true;
 
 	const MaterialImpl* other = dynamic_cast<const MaterialImpl*>(_other);
-	return m_Puffer == other->m_Puffer &&
+	return m_RenderData.puffer == other->m_RenderData.puffer &&
 		m_Ambient == other->m_Ambient &&
 		m_Diffuse == other->m_Diffuse &&
 		m_Emissive == other->m_Emissive &&
@@ -142,42 +140,42 @@ float MaterialImpl::GetPower() const
 
 core::PackageParam MaterialImpl::Param(const string_type& name)
 {
-	return m_Puffer.FromName(name, false);
+	return m_RenderData.puffer.FromName(name, false);
 }
 
 core::PackageParam MaterialImpl::Param(const string_type& name) const
 {
-	return m_Puffer.FromName(name, true);
+	return m_RenderData.puffer.FromName(name, true);
 }
 
 core::PackageParam MaterialImpl::Param(u32 id)
 {
-	return m_Puffer.FromID(id, false);
+	return m_RenderData.puffer.FromID(id, false);
 }
 core::PackageParam MaterialImpl::Param(u32 id) const
 {
-	return m_Puffer.FromID(id, true);
+	return m_RenderData.puffer.FromID(id, true);
 }
 
 core::PackageParam MaterialImpl::Layer(u32 layer)
 {
-	return m_Puffer.FromType(core::Type::Texture, layer, false);
+	return m_RenderData.puffer.FromType(core::Type::Texture, layer, false);
 }
 core::PackageParam MaterialImpl::Layer(u32 layer) const
 {
-	return m_Puffer.FromType(core::Type::Texture, layer, true);
+	return m_RenderData.puffer.FromType(core::Type::Texture, layer, true);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 u32 MaterialImpl::GetTextureCount() const
 {
-	return m_Puffer.GetTextureCount();
+	return m_RenderData.puffer.GetTextureCount();
 }
 
 u32 MaterialImpl::GetParamCount() const
 {
-	return m_Puffer.GetParamCount();
+	return m_RenderData.puffer.GetParamCount();
 }
 
 ////////////////////////////////////////////////////////////////////

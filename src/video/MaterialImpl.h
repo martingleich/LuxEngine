@@ -1,6 +1,7 @@
 #ifndef INCLUDED_MATERIAL_IMPL_H
 #define INCLUDED_MATERIAL_IMPL_H
 #include "video/Material.h"
+#include "video/MaterialRenderer.h"
 
 namespace lux
 {
@@ -12,6 +13,7 @@ class MaterialImpl : public Material
 {
 public:
 	MaterialImpl(MaterialRenderer* renderer);
+	~MaterialImpl();
 
 	////////////////////////////////////////////////////////////////////
 
@@ -59,7 +61,54 @@ public:
 	core::Name GetReferableSubType() const;
 	StrongRef<Referable> Clone() const;
 
+	////////////////////////////////////////////////////////////////////
+
+
 private:
+	struct RenderData : public WeakRefBase
+	{
+		MaterialRenderer* renderer;
+		core::PackagePuffer puffer;
+
+		RenderData(MaterialRenderer* _renderer) :
+			renderer(_renderer),
+			puffer(_renderer ? &_renderer->GetPackage() : nullptr)
+		{
+			AddTo(renderer);
+		}
+
+		~RenderData()
+		{
+			RemoveFrom(renderer);
+		}
+
+
+		RenderData& operator=(const RenderData& other)
+		{
+			puffer = other.puffer;
+			AssignTo(renderer, other.renderer);
+			renderer = other.renderer;
+			return *this;
+		}
+
+		void Destroy()
+		{
+			puffer.SetType(nullptr);
+			renderer = nullptr;
+		}
+
+		void Set(MaterialRenderer* r)
+		{
+			AssignTo(renderer, r);
+
+			renderer = r;
+			if(renderer)
+				puffer.SetType(&renderer->GetPackage());
+			else
+				puffer.SetType(nullptr);
+		}
+	};
+
 	float m_Ambient;
 	Colorf m_Diffuse;
 	Colorf m_Emissive;
@@ -67,8 +116,7 @@ private:
 	float m_Shininess;
 	float m_Power;
 
-	WeakRef<MaterialRenderer> m_Renderer;
-	core::PackagePuffer m_Puffer;
+	RenderData m_RenderData;
 };
 
 } // namespace video

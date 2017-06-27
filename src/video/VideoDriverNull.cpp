@@ -1,5 +1,4 @@
 #include "video/VideoDriverNull.h"
-
 namespace lux
 {
 namespace video

@@ -29,7 +29,7 @@ SkyBox::SkyBox() :
 SkyBox::SkyBox(const SkyBox& other)
 {
 	if(other.m_Material)
-		m_Material = other.m_Material->Clone();
+		m_Material = other.m_Material->Clone().As<video::Material>();
 	else
 		m_Material = video::MaterialLibrary::Instance()->CreateMaterial();
 }

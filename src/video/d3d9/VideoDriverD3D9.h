@@ -13,12 +13,13 @@
 #include "video/d3d9/RenderTargetD3D9.h"
 #include "video/d3d9/UnknownRefCounted.h"
 
+#include "RendererD3D9.h"
+
 namespace lux
 {
 
 namespace video
 {
-class RendererD3D9;
 class TextureD3D9;
 
 class VideoDriverD3D9 : public VideoDriverNull

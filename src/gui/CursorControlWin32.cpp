@@ -20,7 +20,8 @@ CursorControlWin32::CursorControlWin32(Window* Window) : m_Window(Window), m_Gra
 
 CursorControlWin32::~CursorControlWin32()
 {
-	m_Window->UnregisterCallback(this);
+	if(m_Window)
+		m_Window->UnregisterCallback(this);
 }
 
 void CursorControlWin32::UpdateSize()
@@ -35,6 +36,7 @@ void CursorControlWin32::SetPosition(int x, int y)
 	// Nur wenn das Fenster aktiv ist
 	if(m_Window->IsActive()) {
 		POINT p;
+
 		p.x = x;
 		p.y = y;
 		ClientToScreen((HWND)m_Window->GetDeviceWindow(), &p);
@@ -115,7 +117,7 @@ void CursorControlWin32::OnResize(Window& window, const math::dimension2du& newS
 {
 	// Should never happen, but isn't a problem
 	lxAssert(m_Window == &window);
-	
+
 	LUX_UNUSED(window);
 	LUX_UNUSED(newSize); // The size is read directly from the window.
 	UpdateSize();

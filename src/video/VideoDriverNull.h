@@ -4,6 +4,9 @@
 #include "core/ReferableFactory.h"
 #include "video/RenderStatistics.h"
 
+#include "video/CubeTexture.h"
+#include "video/Texture.h"
+
 namespace lux
 {
 namespace video

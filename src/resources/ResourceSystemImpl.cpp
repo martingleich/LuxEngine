@@ -349,7 +349,7 @@ StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, io::File* file
 		throw core::FileFormatException("File format not supported", type.c_str());
 
 	// TODO: Use origin and originloader to load data
-	StrongRef<Resource> resource = self->refFactory->Create(ReferableType::Resource, type);
+	StrongRef<Resource> resource = self->refFactory->Create(ReferableType::Resource, type).As<Resource>();
 
 	const u32 oldCursor = file->GetCursor();
 	try {

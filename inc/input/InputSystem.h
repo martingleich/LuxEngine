@@ -3,12 +3,12 @@
 #include "core/ReferenceCounted.h"
 #include "input/InputEvent.h"
 #include "events/lxSignal.h"
+#include "InputDevice.h"
 
 namespace lux
 {
 namespace input
 {
-class InputDevice;
 class DeviceCreationDesc;
 
 //! The input system of the lux engine.

@@ -6,7 +6,6 @@
 #include "video/d3d9/ShaderD3D9.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
 #include "video/d3d9/VideoDriverD3D9.h"
-#include "video/d3d9/RendererD3D9.h"
 
 #include "video/mesh/GeometryImpl.h"
 

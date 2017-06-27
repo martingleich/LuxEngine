@@ -32,14 +32,6 @@ public:
 
 	~WindowBase()
 	{
-		WindowEventCallback* callback = m_FirstCallback;
-		while(callback) {
-			WindowEventCallback* next = callback->m_Next;
-			callback->m_Prev = nullptr;
-			callback->m_Next = nullptr;
-			callback->m_Window = nullptr;
-			callback = next;
-		}
 	}
 
 	virtual bool SwitchFullscreen(bool fullscreen) = 0;
