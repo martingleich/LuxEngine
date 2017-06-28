@@ -38,6 +38,7 @@ protected:
 		Dirty_Lights,
 		Dirty_Pipeline,
 		Dirty_Rendertarget,
+		Dirty_RenderMode,
 		Dirty_Fog,
 		Dirty_PolygonOffset,
 	};

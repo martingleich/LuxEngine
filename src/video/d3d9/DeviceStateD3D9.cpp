@@ -106,6 +106,8 @@ void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& 
 
 	if(settings.useVertex)
 		EnableVertexData();
+	else
+		DisableVertexData();
 
 	SetTextureStageState(stage, D3DTSS_COLOROP, GetTextureOperator(settings.colorOperator));
 

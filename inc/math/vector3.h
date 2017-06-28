@@ -493,6 +493,14 @@ public:
 		return (x + y + z) / 3;
 	}
 
+	vector3 Absolute() const
+	{
+		return vector3(
+			abs(x),
+			abs(y),
+			abs(z));
+	}
+
 	//! Returns a vector with component either 1, 0, or -1, which point in the same direction as this vector.
 	/**
 	The angle between the returned vector and this one, is the smallest of all possibles.

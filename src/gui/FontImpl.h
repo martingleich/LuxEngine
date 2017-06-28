@@ -75,9 +75,9 @@ public:
 	float GetBaseLine() const;
 	void SetBaseLine(float base);
 	void Draw(const string& Text, const math::vector2f& Position, EAlign Align, video::Color color, const math::rectf* clip);
-	float GetTextWidth(const string& Text, size_t charCount);
+	float GetTextWidth(const string& Text, size_t charCount = std::numeric_limits<size_t>::max());
 	size_t GetCaretFromOffset(const string& Text, float XPosition);
-	void GetTextCarets(const string& Text, core::array<float>& carets, size_t charCount);
+	void GetTextCarets(const string& Text, core::array<float>& carets, size_t charCount = std::numeric_limits<size_t>::max());
 
 	float GetFontHeight() const;
 

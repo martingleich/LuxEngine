@@ -107,7 +107,7 @@ u32 AdvanceCursorUTF16(const char*& _ptr)
 		_ptr += 2;
 		return h;
 	}
-	
+
 	h &= ~0xFC00;
 	u16 l = (ptr[2] | ptr[3] << 8);
 	l &= ~0xFC00;
@@ -126,7 +126,7 @@ u32 GetCharacterUTF16(const char* _ptr)
 		_ptr += 2;
 		return h;
 	}
-	
+
 	h &= ~0xFC00;
 	u16 l = (ptr[2] | ptr[3] << 8);
 	l &= ~0xFC00;
@@ -167,10 +167,10 @@ bool IsAlpha(u32 c)
 {
 	auto cat = utf8proc_category(c);
 	return (cat == UTF8PROC_CATEGORY_LU ||
-			cat == UTF8PROC_CATEGORY_LL ||
-			cat == UTF8PROC_CATEGORY_LT ||
-			cat == UTF8PROC_CATEGORY_LM ||
-			cat == UTF8PROC_CATEGORY_LO);
+		cat == UTF8PROC_CATEGORY_LL ||
+		cat == UTF8PROC_CATEGORY_LT ||
+		cat == UTF8PROC_CATEGORY_LM ||
+		cat == UTF8PROC_CATEGORY_LO);
 }
 
 bool IsUpper(u32 c)
@@ -182,5 +182,45 @@ bool IsLower(u32 c)
 {
 	return utf8proc_category(c) == UTF8PROC_CATEGORY_LL;
 }
+
+EUnicodeClass CategorizeCodePoint(u32 c)
+{
+	auto cat = utf8proc_category(c);
+	switch(cat) {
+	case UTF8PROC_CATEGORY_CN: return EUnicodeClass::Other;
+	case UTF8PROC_CATEGORY_LU: return EUnicodeClass::LetterUpper;
+	case UTF8PROC_CATEGORY_LL: return EUnicodeClass::LetterLower;
+	case UTF8PROC_CATEGORY_LT: return EUnicodeClass::LetterTitel;
+	case UTF8PROC_CATEGORY_LM: return EUnicodeClass::LetterModifier;
+	case UTF8PROC_CATEGORY_LO: return EUnicodeClass::LetterOther;
+	case UTF8PROC_CATEGORY_MN: return EUnicodeClass::MarkNonSpacing;
+	case UTF8PROC_CATEGORY_MC: return EUnicodeClass::MarkSpacingCombining;
+	case UTF8PROC_CATEGORY_ME: return EUnicodeClass::MarkEnclosing;
+	case UTF8PROC_CATEGORY_ND: return EUnicodeClass::NumberDecimalDigit;
+	case UTF8PROC_CATEGORY_NL: return EUnicodeClass::NumberLetter;
+	case UTF8PROC_CATEGORY_NO: return EUnicodeClass::NumberOther;
+	case UTF8PROC_CATEGORY_PC: return EUnicodeClass::PunctuationConnector;
+	case UTF8PROC_CATEGORY_PD: return EUnicodeClass::PunctuationDash;
+	case UTF8PROC_CATEGORY_PS: return EUnicodeClass::PunctuationOpen;
+	case UTF8PROC_CATEGORY_PE: return EUnicodeClass::PunctuationClose;
+	case UTF8PROC_CATEGORY_PI: return EUnicodeClass::PunctuationInitialQuote;
+	case UTF8PROC_CATEGORY_PF: return EUnicodeClass::PunctuationFinalQuote;
+	case UTF8PROC_CATEGORY_PO: return EUnicodeClass::PunctuationOther;
+	case UTF8PROC_CATEGORY_SM: return EUnicodeClass::SymbolMath;
+	case UTF8PROC_CATEGORY_SC: return EUnicodeClass::SymbolCurrency;
+	case UTF8PROC_CATEGORY_SK: return EUnicodeClass::SymbolModifier;
+	case UTF8PROC_CATEGORY_SO: return EUnicodeClass::SymbolOther;
+	case UTF8PROC_CATEGORY_ZS: return EUnicodeClass::SeperatorSpace;
+	case UTF8PROC_CATEGORY_ZL: return EUnicodeClass::SeperatorLine;
+	case UTF8PROC_CATEGORY_ZP: return EUnicodeClass::SeperatorParagraph;
+	case UTF8PROC_CATEGORY_CC: return EUnicodeClass::OtherControl;
+	case UTF8PROC_CATEGORY_CF: return EUnicodeClass::OtherFormat;
+	case UTF8PROC_CATEGORY_CS: return EUnicodeClass::OtherSurrogate;
+	case UTF8PROC_CATEGORY_CO: return EUnicodeClass::OtherPrivateUse;
+	default: lxAssertNeverReach("Unknown unicode category");
+		return EUnicodeClass::Other;
+	}
+}
+
 }
 }

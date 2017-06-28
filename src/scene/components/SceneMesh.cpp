@@ -185,7 +185,7 @@ void Mesh::CopyMaterials()
 		return;
 
 	size_t materialCount = m_Mesh->GetSubMeshCount();
-	m_Materials.Resize(materialCount);
+	m_Materials.Reserve(materialCount);
 	for(size_t i = 0; i < materialCount; ++i) {
 		auto material = m_Mesh->GetMaterial(i)->Clone();
 		m_Materials.PushBack(material);

@@ -127,6 +127,7 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
 	renderer->SetMaterial(m_Material);
+	renderer->SetTransform(video::ETransform::World, math::matrix4::IDENTITY);
 
 	const float italic = 0.0f * m_Scale;
 	const float charHeight = m_CharHeight * m_Scale;
@@ -134,9 +135,9 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 
 	math::vector2f cursor;
 	if(TestFlag(align, Font::EAlign::HCenter))
-		cursor.x = position.x - 0.5f * (GetTextWidth(text, 0) + italic);
+		cursor.x = position.x - 0.5f * (GetTextWidth(text) + italic);
 	else if(TestFlag(align, Font::EAlign::HRight))
-		cursor.x = position.x - (GetTextWidth(text, 0) + italic);
+		cursor.x = position.x - (GetTextWidth(text) + italic);
 	else
 		cursor.x = position.x;
 

@@ -77,6 +77,42 @@ LUX_API bool IsUpper(u32 c);
 //! Is the character in lower-case
 LUX_API bool IsLower(u32 c);
 
+enum class EUnicodeClass
+{
+	Other,
+	LetterUpper,
+	LetterLower,
+	LetterTitel,
+	LetterModifier,
+	LetterOther,
+	MarkNonSpacing,
+	MarkSpacingCombining,
+	MarkEnclosing,
+	NumberDecimalDigit,
+	NumberLetter,
+	NumberOther,
+	PunctuationConnector,
+	PunctuationDash,
+	PunctuationOpen,
+	PunctuationClose,
+	PunctuationInitialQuote,
+	PunctuationFinalQuote,
+	PunctuationOther,
+	SymbolMath,
+	SymbolCurrency,
+	SymbolModifier,
+	SymbolOther,
+	SeperatorSpace,
+	SeperatorLine,
+	SeperatorParagraph,
+	OtherControl,
+	OtherFormat,
+	OtherSurrogate,
+	OtherPrivateUse,
+};
+
+LUX_API EUnicodeClass CategorizeCodePoint(u32 c);
+
 }
 }
 #endif // #ifndef INCLUDED_LX_UNICODE_H

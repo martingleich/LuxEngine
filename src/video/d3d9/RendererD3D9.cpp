@@ -326,6 +326,9 @@ void RendererD3D9::SwitchRenderMode(ERenderMode mode)
 	case ERenderMode::Mode3D: EnterRenderMode3D(); break;
 	}
 
+	if(m_RenderMode != mode)
+		SetDirty(Dirty_RenderMode);
+
 	m_RenderMode = mode;
 }
 
@@ -402,7 +405,7 @@ void RendererD3D9::LoadTransforms(const RenderSettings& settings)
 {
 	// Load transforms
 	if(m_RenderMode == ERenderMode::Mode3D) {
-		if(IsDirty(Dirty_PolygonOffset)) {
+		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode)) {
 			math::matrix4 projCopy = m_TransformProj; // The userset projection matrix
 			if(m_Pipeline.polygonOffset) {
 				const u32 zBits = m_Driver->GetConfig().zBits;
@@ -414,7 +417,7 @@ void RendererD3D9::LoadTransforms(const RenderSettings& settings)
 			SetDirty(Dirty_Transform);
 		}
 	} else if(m_RenderMode == ERenderMode::Mode2D) {
-		if(IsDirty(Dirty_Rendertarget)) {
+		if(IsDirty(Dirty_Rendertarget) || IsDirty(Dirty_RenderMode)) {
 			auto ssize = GetRenderTarget().GetSize();
 			math::matrix4 view = math::matrix4(
 				1.0f, 0.0f, 0.0f, 0.0f,

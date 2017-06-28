@@ -82,8 +82,11 @@ public:
 		VCenter = 16,       //!< Align to the vertical center
 		VTop = 32,          //!< Align to the top
 
-		Centered = VCenter | HCenter,        //!< Algin text in the center
-		BottomLeft = VBottom | HLeft,       //!< Algin to the bottom left
+		Centered = VCenter | HCenter,        //!< Align text in the center
+		BottomLeft = VBottom | HLeft,       //!< Align to the bottom left
+		TopLeft = VTop | HLeft, //!< Align to the top left
+		BottomRight = VBottom | HRight,       //!< Align to the bottom right
+		TopRight = VTop | HRight, //!< Align to the top right
 	};
 
 public:

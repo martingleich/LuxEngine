@@ -34,11 +34,13 @@ void RawKeyboardDevice::HandleInput(RAWINPUT* input)
 	if(event.button.code == -1)
 		throw core::RuntimeException("Unknown key code");
 
+	bool isControl = false;
 	if(event.button.code == 143) {
 		if(input->data.keyboard.MakeCode == 0x2a)
 			event.button.code = EKeyCode::KEY_LSHIFT;
 		else
 			event.button.code = EKeyCode::KEY_RSHIFT;
+		isControl = true;
 	}
 
 	if(event.button.code == 143 || event.button.code == 144 || event.button.code == 145) {
@@ -49,9 +51,23 @@ void RawKeyboardDevice::HandleInput(RAWINPUT* input)
 			event.button.code = right ? EKeyCode::KEY_RCONTROL : EKeyCode::KEY_LCONTROL;
 		if(event.button.code == 145)
 			event.button.code = right ? EKeyCode::KEY_RMENU : EKeyCode::KEY_LMENU;
+		isControl = true;
 	}
 
-	GetKeyCharacter(input->data.keyboard, event.keyInput.character, 4);
+	if(!isControl) {
+		wchar_t BUFFER[10];
+		GetKeyCharacter(input->data.keyboard, BUFFER, 10);
+		if(BUFFER[0] != 0) {
+			const char* cur = (const char*)BUFFER;
+			event.keyInput.character[0] = core::AdvanceCursorUTF16(cur);
+			event.keyInput.character[1] = core::AdvanceCursorUTF16(cur);
+			event.keyInput.character[2] = 0;
+		} else {
+			event.keyInput.character[0] = 0;
+		}
+	} else {
+		event.keyInput.character[0] = 0;
+	}
 
 	SendInputEvent(event);
 }
@@ -231,6 +247,28 @@ u32 RawKeyboardDevice::VKeyCodeToKeyCode(u16 code)
 	return (u32)EKeyCode::KEY_NONE;
 }
 
+static u32 KeyToComb(u32 c)
+{
+	if(c == '^')
+		return 0x302;
+	else if(c == 180) // Accent ´
+		return 0x301;
+	else if(c == '`')
+		return 0x300;
+	return c;
+}
+
+static u32 CombToKey(u32 c)
+{
+	if(c == 0x302)
+		return '^';
+	else if(c == 0x301)
+		return 180;
+	else if(c == 0x300)
+		return '`';
+	return c;
+}
+
 void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 	wchar_t* character, u32 maxSize)
 {
@@ -264,10 +302,12 @@ void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 	} else if(conversionResult == -1) {
 		// Dead-Key character
 		if(!m_DeadKey) {
-			m_DeadKey = translatedKey[0];
+			m_DeadKey = (wchar_t)KeyToComb(translatedKey[0]);
 			character[0] = 0;
 		} else {
-			TranslateCharacter(m_DeadKey, translatedKey[0], character, maxSize);
+			character[0] = (wchar_t)CombToKey(m_DeadKey);
+			character[1] = (wchar_t)CombToKey(translatedKey[0]);
+			character[2] = 0;
 			m_DeadKey = 0;
 		}
 	} else if(conversionResult == 1) {
@@ -299,12 +339,12 @@ void RawKeyboardDevice::TranslateCharacter(wchar_t c1, wchar_t c2, wchar_t* out,
 	}
 
 	if(c2 == ' ') {
-		out[0] = c1;
+		out[0] = (wchar_t)CombToKey(c1);
 		out[1] = 0;
 		return;
 	}
 
-	wchar_t srcStr[2] = {c1, c2};
+	wchar_t srcStr[2] = {c2, c1};
 	int result = NormalizeString(NormalizationKC, srcStr, 2, out, maxSize - 1);
 	if(result <= 0)
 		out[0] = 0;
