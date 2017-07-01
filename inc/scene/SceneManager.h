@@ -60,6 +60,11 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	virtual StrongRef<Node> AddNode(Component* baseComp=nullptr, Node* parent=nullptr) = 0;
+	virtual StrongRef<Node> AddMesh(const io::path& path) = 0;
+	virtual StrongRef<Node> AddMesh(video::Mesh* mesh) = 0;
+	virtual StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture=nullptr) = 0;
+	virtual StrongRef<Node> AddLight() = 0;
+	virtual StrongRef<Node> AddCamera() = 0;
 
 	// Object components
 	virtual StrongRef<Camera> CreateCamera() = 0;

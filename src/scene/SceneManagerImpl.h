@@ -22,6 +22,11 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	StrongRef<Node> AddNode(Component* baseComp = nullptr, Node* parent = nullptr);
+	StrongRef<Node> AddMesh(const io::path& path);
+	StrongRef<Node> AddMesh(video::Mesh* mesh);
+	StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture=nullptr);
+	StrongRef<Node> AddLight();
+	StrongRef<Node> AddCamera();
 
 	// Object components
 	StrongRef<Camera> CreateCamera();

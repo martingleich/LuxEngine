@@ -39,6 +39,21 @@ struct DriverConfig
 	{
 	}
 
+	inline static DriverConfig WindowedDefault(
+		u32 _width,
+		u32 _height,
+		bool vSync = true)
+	{
+		DriverConfig config;
+		config.width = _width;
+		config.height = _height;
+		config.vSync = vSync;
+		config.driverType = EDriverType::Direct3D9;
+		config.windowed = true;
+
+		return config;
+	}
+
 	inline static DriverConfig WindowedDirect3D(
 		u32 _width,
 		u32 _height,

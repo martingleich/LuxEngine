@@ -118,7 +118,7 @@ StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(
 				v.texture.x = (i * tex[a]) / (ta - 1);
 				v.texture.y = (j * tex[b]) / (tb - 1);
 
-				//v.color = video::Color::White;
+				v.color = video::Color::White;
 
 				vertexBuffer->AddVertex(&v);
 			}

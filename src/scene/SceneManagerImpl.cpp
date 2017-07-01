@@ -75,6 +75,31 @@ StrongRef<Node> SceneManagerImpl::AddNode(Component* baseComp, Node* parent)
 	return node;
 }
 
+StrongRef<Node> SceneManagerImpl::AddMesh(const io::path& path)
+{
+	 return AddNode(CreateMesh(path));
+}
+
+StrongRef<Node> SceneManagerImpl::AddMesh(video::Mesh* mesh)
+{
+	return AddNode(CreateMesh(mesh));
+}
+
+StrongRef<Node> SceneManagerImpl::AddSkyBox(video::CubeTexture* skyTexture)
+{
+	return AddNode(CreateSkyBox(skyTexture));
+}
+
+StrongRef<Node> SceneManagerImpl::AddLight()
+{
+	return AddNode(CreateLight());
+}
+
+StrongRef<Node> SceneManagerImpl::AddCamera()
+{
+	return AddNode(CreateCamera());
+}
+
 StrongRef<Camera> SceneManagerImpl::CreateCamera()
 {
 	return CreateComponent(SceneComponentType::Camera);

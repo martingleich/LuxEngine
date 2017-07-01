@@ -16,6 +16,7 @@
 #ifdef LUX_WINDOWS
 #include <direct.h>
 #include "StrippedWindows.h"
+#include "../LuxEngine/Win32Exception.h"
 #endif
 
 #include <stdlib.h>
@@ -64,15 +65,21 @@ FileSystemWin32::FileSystemWin32()
 {
 	Win32Path path;
 	DWORD ret;
-	do {
-		path.Resize(MAX_PATH);
-		ret = GetModuleFileNameW(NULL, (wchar_t*)path.Data(), (DWORD)path.Allocated());
-		if(ret == ERROR_INSUFFICIENT_BUFFER)
-			path.Resize((path.Allocated() + 1) * 2);
-		else if(ret > 0) {
+	path.Resize(MAX_PATH);
+	while(true) {
+		DWORD nSize = (DWORD)path.Size();
+		ret = GetModuleFileNameW(NULL, (wchar_t*)path.Data(), nSize);
+		if(ret == nSize) {
+			DWORD err = GetLastError();
+			if(err == ERROR_INSUFFICIENT_BUFFER)
+				path.Resize((path.Allocated() + 1) * 2);
+			else
+				throw core::Win32Exception(err);
+		} else {
 			path.Resize(ret);
+			break;
 		}
-	} while(ret == ERROR_INSUFFICIENT_BUFFER);
+	};
 
 	io::path p = core::UTF16ToString(path.Data_c());
 	if(p.StartsWith("\\\\?\\"))

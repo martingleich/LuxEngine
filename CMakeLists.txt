@@ -31,6 +31,7 @@ add_subdirectory(external/zlib)
 add_subdirectory(external/utf8proc)
 
 add_subdirectory(testing/UnitTest)
+add_subdirectory(testing/MaterialTest)
 
 if(WIN32)
 	add_subdirectory(external/FilterExportFiles)
