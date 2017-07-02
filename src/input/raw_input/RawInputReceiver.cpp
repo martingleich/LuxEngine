@@ -5,7 +5,7 @@
 #include "RawInputDeviceMouse.h"
 #include "RawInputDeviceJoystick.h"
 
-#include "LuxEngine/Win32Exception.h"
+#include "Win32Exception.h"
 
 #include "core/Logger.h"
 

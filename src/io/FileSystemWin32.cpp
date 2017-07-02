@@ -16,7 +16,7 @@
 #ifdef LUX_WINDOWS
 #include <direct.h>
 #include "StrippedWindows.h"
-#include "../LuxEngine/Win32Exception.h"
+#include "Win32Exception.h"
 #endif
 
 #include <stdlib.h>

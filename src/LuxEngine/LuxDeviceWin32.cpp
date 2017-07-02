@@ -37,7 +37,7 @@
 #endif
 
 #include <WinUser.h>
-#include "LuxEngine/Win32Exception.h"
+#include "Win32Exception.h"
 
 namespace lux
 {

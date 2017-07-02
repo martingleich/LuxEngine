@@ -1,7 +1,7 @@
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputDevice.h"
 #include "core/lxUnicodeConversion.h"
-#include "LuxEngine/Win32Exception.h"
+#include "Win32Exception.h"
 
 namespace lux
 {

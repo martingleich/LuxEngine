@@ -35,6 +35,7 @@ add_subdirectory(testing/MaterialTest)
 
 if(WIN32)
 	add_subdirectory(external/FilterExportFiles)
+	add_subdirectory(external/dxerr)
 endif()
 
 # Always include inc!
@@ -78,7 +79,7 @@ if(MSVC)
 	
 	find_library(D3DLIB d3d9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 	find_library(D3DXLIB d3dx9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
-	target_link_libraries(LuxEngine ${D3DLIB} ${D3DXLIB} Hid)
+	target_link_libraries(LuxEngine ${D3DLIB} ${D3DXLIB} Hid dxerr)
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34296 ") #'operator': expression is always false
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34062 ") # enumerator 'identifier' in a switch of enum 'enumeration' is not handled

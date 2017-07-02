@@ -5,7 +5,7 @@
 #include "core/StringConverter.h"
 
 #include "core/lxUnicodeConversion.h"
-#include "LuxEngine/Win32Exception.h"
+#include "Win32Exception.h"
 
 #ifdef BREAK_ON_FAIL
 #error BREAK_ON_FAIL makro already defined
