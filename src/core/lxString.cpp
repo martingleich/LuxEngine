@@ -9,16 +9,16 @@ const string string::EMPTY = string();
 
 string::string() :
 	m_Data(nullptr),
-	m_Size(0),
 	m_Allocated(0),
+	m_Size(0),
 	m_Length(0)
 {
 }
 
 string::string(const char* data, size_t length) :
 	m_Data(nullptr),
-	m_Size(0),
 	m_Allocated(0),
+	m_Size(0),
 	m_Length(0)
 {
 	if(!data || !length) {
@@ -51,8 +51,8 @@ string::string(const char* data, size_t length) :
 
 string::string(const string& other) :
 	m_Data(nullptr),
-	m_Size(0),
 	m_Allocated(0),
+	m_Size(0),
 	m_Length(0)
 {
 	Reserve(other.m_Size);
@@ -64,13 +64,13 @@ string::string(const string& other) :
 
 string::string(string&& old) :
 	m_Data(old.m_Data),
-	m_Size(old.m_Size),
 	m_Allocated(old.m_Allocated),
+	m_Size(old.m_Size),
 	m_Length(old.m_Length)
 {
 	old.m_Data = nullptr;
-	old.m_Size = 0;
 	old.m_Allocated = 0;
+	old.m_Size = 0;
 	old.m_Length = 0;
 }
 
@@ -145,8 +145,8 @@ string& string::operator=(string&& old)
 {
 	this->~string();
 	m_Data = old.m_Data;
-	m_Size = old.m_Size;
 	m_Allocated = old.m_Allocated;
+	m_Size = old.m_Size;
 	m_Length = old.m_Length;
 	old.m_Data = nullptr;
 	old.m_Allocated = 0;

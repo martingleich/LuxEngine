@@ -8,6 +8,8 @@
 namespace lux
 {
 
+class ReferenceCounted;
+
 class WeakRefBase
 {
 	friend class ReferenceCounted;

@@ -152,7 +152,7 @@ void MaterialTest::OnEvent(const input::Event& e)
 {
 }
 
-void main()
+int main(int arg, char **argv)
 {
 	try {
 		MaterialTest mt;
@@ -162,5 +162,6 @@ void main()
 	}
 
 	getchar();
+	return 0;
 }
 
