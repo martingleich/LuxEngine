@@ -14,15 +14,21 @@
 	#define LUX_LINUX @LuxEngine_OS_LINUX@
 #endif
 
+#define LUX_ON 1
+#define LUX_OFF 0
+
 // Library specific variables
-#if @LUX_COMPILE_WITH_D3D9@ == ON
+#if LUX_@LUX_COMPILE_WITH_D3D9@ == LUX_ON
 	#define LUX_COMPILE_WITH_D3D9
 #endif
-#if @LUX_COMPILE_WITH_D3DX_IMAGE_LOADER@ == ON
+#if LUX_@LUX_COMPILE_WITH_D3DX_IMAGE_LOADER@ == LUX_ON
 	#define LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 #endif
-#if @LUX_COMPILE_WITH_RAW_INPUT@ == ON
+#if LUX_@LUX_COMPILE_WITH_RAW_INPUT@ == LUX_ON
 	#define LUX_COMPILE_WITH_RAW_INPUT
 #endif
+
+#undef LUX_ON
+#undef LUX_OFF
 
 #endif /*INC_LUXCONFIG_H_*/
