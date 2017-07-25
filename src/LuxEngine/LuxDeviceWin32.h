@@ -33,7 +33,7 @@ public:
 	LuxDeviceWin32();
 	~LuxDeviceWin32();
 
-	void BuildWindow(u32 Width, u32 height, const string& stitle);
+	void BuildWindow(u32 Width, u32 height, const String& stitle);
 	void SetOwnWindow(void* hOwnWindow);
 
 	void BuildInputSystem(bool isForeground = true);
@@ -44,7 +44,7 @@ public:
 	void BuildGUIEnvironment();
 	void BuildAll(const video::DriverConfig& config);
 
-	HWND CreateNewWindow(u32 width, u32 height, const string& title);
+	HWND CreateNewWindow(u32 width, u32 height, const String& title);
 	void CloseDevice();
 	bool HandleSystemMessages();
 	bool Run(float& fNumSecsPassed);
@@ -108,7 +108,6 @@ private:
 };
 
 }    //namespace lux
-
 
 #endif // LUX_WINDOWS
 #endif

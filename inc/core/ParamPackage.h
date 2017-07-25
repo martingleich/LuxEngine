@@ -2,8 +2,6 @@
 #define INCLUDED_PARAMPACKAGE_H
 #include "core/lxString.h"
 #include "core/lxArray.h"
-#include "math/vector2.h"
-#include "math/vector3.h"
 
 #include "video/TextureLayer.h"
 #include "video/Texture.h"
@@ -20,11 +18,9 @@ struct ParamDesc
 	const char* name; //!< The name of the parameter
 	u8 size; //!< The size of the parameter in bytes
 	core::Type type; //!< The type of the parameter
-	u32 id;
+	u32 id; //!< The id of the parameter
 
-	void* defaultValue;
-
-	u32 reserved;
+	void* defaultValue; //!< Pointer to the default data of the parameter
 };
 
 //! Represents a single parameter in a parameter package
@@ -38,7 +34,7 @@ public:
 	\param data A pointer to the data of the param, must be valid for the lifetime of this object
 	\param name The name of parameter, must be valid for the lifetime of this object(i.e. Is not copied)
 	*/
-	PackageParam(const ParamDesc& desc, u8* data) :
+	PackageParam(const ParamDesc& desc, void* data) :
 		m_Data(data),
 		m_Desc(desc)
 	{
@@ -52,7 +48,7 @@ public:
 
 	//! Access as any type
 	template <typename T>
-	operator T()
+	operator T() const
 	{
 		if(IsValid()) {
 			if(!IsConvertible(m_Desc.type, core::GetTypeInfo<T>()))
@@ -75,25 +71,24 @@ public:
 			return (T)(*this);
 	}
 
-	//! Access as TextureLayer
-	operator video::TextureLayer()
+	operator const char*() const
 	{
-		if(m_Desc.type != core::Type::Texture)
-			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Texture);
+		if(m_Desc.type != core::Types::String())
+			throw TypeException("Incompatible types used", m_Desc.type, core::Types::String());
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		return *(video::TextureLayer*)m_Data;
+		return ((String*)m_Data)->Data_c();
 	}
 
 	//! Access as texture
-	operator video::BaseTexture*()
+	operator video::BaseTexture*() const
 	{
 		return ((video::TextureLayer)*this).texture;
 	}
 	//! Access as texture
-	operator video::Texture*()
+	operator video::Texture*() const
 	{
 		auto base = (video::BaseTexture*)*this;
 		auto out = dynamic_cast<video::Texture*>(base);
@@ -104,7 +99,7 @@ public:
 	}
 
 	//! Access as texture
-	operator video::CubeTexture*()
+	operator video::CubeTexture*() const
 	{
 		auto base = (video::BaseTexture*)*this;
 		auto out = dynamic_cast<video::CubeTexture*>(base);
@@ -126,12 +121,24 @@ public:
 		return *this;
 	}
 
+	PackageParam& operator=(const char* string)
+	{
+		if(m_Desc.type != core::Types::String())
+			throw TypeException("Incompatible types used", m_Desc.type, core::Types::String());
+
+		if(!IsValid())
+			throw Exception("Accessed invalid package parameter");
+
+		(*(String*)m_Data) = string;
+
+		return *this;
+	}
 
 	//! Access as texture
 	PackageParam& operator=(video::BaseTexture* texture)
 	{
-		if(m_Desc.type != core::Type::Texture)
-			throw TypeException("Incompatible types used", m_Desc.type, core::Type::Texture);
+		if(m_Desc.type != core::Types::Texture())
+			throw TypeException("Incompatible types used", m_Desc.type, core::Types::Texture());
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
@@ -208,6 +215,18 @@ public:
 		return (m_Data != nullptr);
 	}
 
+	//! Access the raw data
+	const void* Data() const
+	{
+		return m_Data;
+	}
+
+	//! Access the raw data
+	void* Data()
+	{
+		return m_Data;
+	}
+
 	//! The name of the param
 	const char* GetName() const
 	{
@@ -254,11 +273,10 @@ class ParamPackage
 private:
 	struct Entry
 	{
-		string name;
+		String name;
 		u8 size;
 		u8 offset;
 		core::Type type;
-		u16 reserved;    // Reservierte Variable, z.B. Der zugehörige ShaderParam
 
 		bool operator<(const Entry& other) const
 		{
@@ -279,17 +297,17 @@ public:
 	/**
 	\param T: The type of the param
 	\param name The name of the new Param(should be unique for package)
-	\param defaultValue The default value for this Param, when a new material is created this is the used Value
+	\param defaultValue The default value for this Param, when a new material is created this is the used Value, if null the param is default constructed.
 	\param reserved Reserved for internal use, dont use this param
 	*/
 	template <typename T>
-	void AddParam(const string_type& name, const T& defaultValue, u16 reserved = -1)
+	u32 AddParam(const StringType& name, const T& defaultValue)
 	{
 		core::Type type = core::GetTypeInfo<T>();
 		if(type == core::Type::Unknown)
 			throw TypeException("Unsupported type used");
 
-		AddParam(type, name, &defaultValue, reserved);
+		return AddParam(type, name, &defaultValue);
 	}
 
 	//! Creates a new Param
@@ -299,7 +317,7 @@ public:
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	\param reserved Reserved for internal use, dont use this param
 	*/
-	LUX_API void AddParam(core::Type type, const string_type& name, const void* defaultValue, u16 reserved = -1);
+	LUX_API u32 AddParam(core::Type type, const StringType& name, const void* defaultValue=nullptr);
 
 	//! Merges two packages
 	/**
@@ -337,7 +355,7 @@ public:
 	\return The name of the param
 	\exception OutOfRange param is out of range
 	*/
-	LUX_API const string& GetParamName(u32 param) const;
+	LUX_API const String& GetParamName(u32 param) const;
 
 	//! Get a param from a id
 	/**
@@ -357,7 +375,7 @@ public:
 	\return The found param
 	\exception Exception name does not exist
 	*/
-	LUX_API PackageParam GetParamFromName(const string_type& name, void* baseData, bool isConst) const;
+	LUX_API PackageParam GetParamFromName(const StringType& name, void* baseData, bool isConst) const;
 
 	//! Get the n-th Param of a specific type
 	/**
@@ -382,7 +400,7 @@ public:
 	\param defaultValue A pointer to the new default value
 	\exception Exception name does not exist
 	*/
-	LUX_API PackageParam DefaultValue(const string_type& param);
+	LUX_API PackageParam DefaultValue(const StringType& param);
 
 	//! Get the id of a parameter by it's name.
 	/**
@@ -391,7 +409,7 @@ public:
 	\return The id of the parameter.
 	\exception Exception name does not exist
 	*/
-	LUX_API u32 GetParamId(const string_type& name, core::Type type = core::Type::Unknown) const;
+	LUX_API u32 GetParamId(const StringType& name, core::Type type = core::Type::Unknown) const;
 
 	//! The number of existing params in this package
 	LUX_API u32 GetParamCount() const;
@@ -403,8 +421,8 @@ public:
 	LUX_API u32 GetTotalSize() const;
 
 private:
-	LUX_API void AddEntry(Entry& entry, const void* defaultValue);
-	LUX_API bool GetId(string_type name, core::Type t, u32& outId) const;
+	LUX_API u32 AddEntry(Entry& entry, const void* defaultValue);
+	LUX_API bool GetId(StringType name, core::Type t, u32& outId) const;
 
 private:
 	struct SelfData;
@@ -506,7 +524,7 @@ public:
 	\param name The name of the param
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromName(const string_type& name, bool isConst) const
+	PackageParam FromName(const StringType& name, bool isConst) const
 	{
 		if(!m_Pack)
 			throw Exception("No param pack set");
@@ -559,12 +577,12 @@ public:
 			return 0;
 	}
 
-	core::PackageParam Param(const string_type& name)
+	core::PackageParam Param(const StringType& name)
 	{
 		return FromName(name, false);
 	}
 
-	core::PackageParam Param(const string_type& name) const
+	core::PackageParam Param(const StringType& name) const
 	{
 		return FromName(name, true);
 	}
@@ -589,7 +607,7 @@ class ParamList
 public:
 	struct Param
 	{
-		string name;
+		String name;
 		u8* data;
 		core::Type type;
 
@@ -635,7 +653,7 @@ public:
 			return *this;
 		}
 
-		Param(const string_type& n, core::Type t) :
+		Param(const StringType& n, core::Type t) :
 			name(n.data),
 			type(t)
 		{
@@ -651,7 +669,7 @@ public:
 	};
 
 public:
-	u32 AddParam(const string_type& name, core::Type type)
+	u32 AddParam(const StringType& name, core::Type type)
 	{
 		u32 id;
 		if(GetId(name, id))
@@ -661,7 +679,7 @@ public:
 		return (m_Params.Size() - 1);
 	}
 
-	u32 GetId(const string_type& name) const
+	u32 GetId(const StringType& name) const
 	{
 		u32 id;
 		if(!GetId(name, id))
@@ -688,7 +706,7 @@ public:
 	}
 
 private:
-	bool GetId(const string_type& name, u32& outId) const
+	bool GetId(const StringType& name, u32& outId) const
 	{
 		for(size_t i = 0; i < m_Params.Size(); ++i) {
 			if(m_Params[i].name == name) {
@@ -700,20 +718,20 @@ private:
 	}
 
 private:
-	core::array<Param> m_Params;
+	core::Array<Param> m_Params;
 };
 
 //! Casting from color to colorf
 template <>
 inline PackageParam& PackageParam::operator=(const video::Color& color)
 {
-	if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
-		throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
+	if(m_Desc.type != core::Types::Color() && m_Desc.type != core::Types::Colorf())
+		throw TypeException("Incompatible types used", m_Desc.type, core::Types::Color());
 
-	if(m_Desc.type == core::Type::Color)
+	if(m_Desc.type == core::Types::Color())
 		*((video::Color*)m_Data) = color;
 
-	if(m_Desc.type == core::Type::Colorf)
+	if(m_Desc.type == core::Types::Colorf())
 		*((video::Colorf*)m_Data) = video::Colorf(color);
 
 	return *this;
@@ -722,13 +740,13 @@ inline PackageParam& PackageParam::operator=(const video::Color& color)
 template <>
 inline PackageParam& PackageParam::operator=(const video::Color::EPredefinedColors& color)
 {
-	if(m_Desc.type != core::Type::Color && m_Desc.type != core::Type::Colorf)
-		throw TypeException("Incompatible types used", m_Desc.type, core::Type::Color);
+	if(m_Desc.type != core::Types::Color() && m_Desc.type != core::Types::Colorf())
+		throw TypeException("Incompatible types used", m_Desc.type, core::Types::Color());
 
-	if(m_Desc.type == core::Type::Color)
+	if(m_Desc.type == core::Types::Color())
 		*((video::Color*)m_Data) = color;
 
-	if(m_Desc.type == core::Type::Colorf)
+	if(m_Desc.type == core::Types::Colorf())
 		*((video::Colorf*)m_Data) = video::Colorf(color);
 
 	return *this;

@@ -13,7 +13,7 @@ class GeometryCreatorPlane : public GeometryCreator
 public:
 	GeometryCreatorPlane();
 	const core::ParamPackage& GetParams() const;
-	const string& GetName() const;
+	const String& GetName() const;
 
 	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
 

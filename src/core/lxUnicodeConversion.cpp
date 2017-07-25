@@ -22,10 +22,10 @@ u16* CodePointToUTF16(u32 c, u16* dst)
 	return (u16*)out;
 }
 
-array<u8> UTF16ToUTF8(const void* _data)
+Array<u8> UTF16ToUTF8(const void* _data)
 {
 	const char* data = (const char*)_data;
-	array<u8> out;
+	Array<u8> out;
 	while(u32 c = AdvanceCursorUTF16(data)) {
 		u8 buffer[6];
 		u8* cur = buffer;
@@ -39,10 +39,10 @@ array<u8> UTF16ToUTF8(const void* _data)
 	return out;
 }
 
-string UTF16ToString(const void* _data)
+String UTF16ToString(const void* _data)
 {
 	const char* data = (const char*)_data;
-	string out;
+	String out;
 	while(u32 c = AdvanceCursorUTF16(data)) {
 		u8 buffer[6];
 		u8* cur = buffer;
@@ -54,10 +54,10 @@ string UTF16ToString(const void* _data)
 	return out;
 }
 
-array<u16> UTF8ToUTF16(const void* _data)
+Array<u16> UTF8ToUTF16(const void* _data)
 {
 	const char* data = (const char*)_data;
-	array<u16> out;
+	Array<u16> out;
 	while(u32 c = AdvanceCursorUTF8(data)) {
 		u16 buffer[2];
 		u16* cur = buffer;
@@ -76,7 +76,7 @@ WCharAlias UTF8ToUTF16W(const void* data)
 	return WCharAlias(UTF8ToUTF16(data));
 }
 
-WCharAlias StringToUTF16W(const string& data)
+WCharAlias StringToUTF16W(const String& data)
 {
 	return WCharAlias(UTF8ToUTF16(data.Data_c()));
 }

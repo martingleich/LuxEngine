@@ -11,19 +11,21 @@ namespace impl_referableRegister
 struct ReferableRegisterBlock;
 
 // Implemented in ReferableFactoryImpl.cpp
-void RegisterReferable(ReferableRegisterBlock* block);
+void RegisterReferableBlock(ReferableRegisterBlock* block);
 void RunAllRegisterReferableFunctions();
 
 struct ReferableRegisterBlock
 {
-	Referable* (*prototypeCreator)();
+	Name type;
+	Referable* (*creator)();
 	ReferableRegisterBlock* nextBlock;
 
-	ReferableRegisterBlock(Referable* (*_prototypeCreator)()) :
-		prototypeCreator(_prototypeCreator),
+	ReferableRegisterBlock(Name t, Referable* (*_creator)()) :
+		type(t),
+		creator(_creator),
 		nextBlock(nullptr)
 	{
-		RegisterReferable(this);
+		RegisterReferableBlock(this);
 	}
 };
 
@@ -31,12 +33,12 @@ struct ReferableRegisterBlock
 }
 }
 
-#define LUX_REGISTER_REFERABLE_CLASS(class) \
-static ::lux::Referable* InternalReferableRegisterPrototypeCreator() { return LUX_NEW(class); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(&InternalReferableRegisterPrototypeCreator);
+#define LUX_REGISTER_REFERABLE_CLASS(type, class) \
+static ::lux::Referable* InternalCreatorFunc() { return LUX_NEW(class); } \
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(type, &InternalCreatorFunc);
 		
-#define LUX_REGISTER_REFERABLE_CLASS_NAMED(name, class) \
-static ::lux::Referable* InternalReferableRegisterPrototypeCreator_##name() { return LUX_NEW(class); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject_##name(&InternalReferableRegisterPrototypeCreator_##name);
+#define LUX_REGISTER_REFERABLE_CLASS_NAMED(name, type, class) \
+static ::lux::Referable* InternalCreatorFunc_##name() { return LUX_NEW(class); } \
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject_##name(type, &InternalCreatorFunc_##name);
 
 #endif // #ifndef INCLUDED_REFERABLE_REGISTER_H

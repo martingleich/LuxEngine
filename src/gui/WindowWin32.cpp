@@ -170,14 +170,14 @@ bool WindowWin32::Init(HWND Window)
 	length = (size_t)SendMessageTimeoutW(m_Window, WM_GETTEXT,
 		200, reinterpret_cast<LPARAM>(text),
 		SMTO_ABORTIFHUNG, 2000, &result);
-	string newTitle = core::UTF16ToString(text);
+	String newTitle = core::UTF16ToString(text);
 
 	OnTitleChange(newTitle);
 
 	return true;
 }
 
-void WindowWin32::SetTitle(const string& title)
+void WindowWin32::SetTitle(const String& title)
 {
 	auto data = core::UTF8ToUTF16(title.Data());
 	DWORD_PTR result;
@@ -188,7 +188,6 @@ void WindowWin32::SetTitle(const string& title)
 
 void WindowWin32::SetSize(const math::dimension2du& Size)
 {
-
 	RECT rect;
 	SetRect(&rect, 0, 0, Size.width, Size.height);
 	// TODO: Get Correct flags from window

@@ -190,9 +190,9 @@ static bool Init(Context& ctx, io::File* file)
 	return true;
 }
 
-const string& ImageLoaderPNG::GetName() const
+const String& ImageLoaderPNG::GetName() const
 {
-	static const string name = "Lux PNG-Loader";
+	static const String name = "Lux PNG-Loader";
 	return name;
 }
 

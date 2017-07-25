@@ -31,8 +31,6 @@ public:
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
 
-	StrongRef<Referable> Clone() const;
-
 private:
 	IDirect3DCubeTexture9* m_Texture;
 	u32 m_LockedLevel;

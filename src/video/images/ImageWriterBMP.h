@@ -10,13 +10,13 @@ namespace video
 class ImageWriterBMP : public ImageWriter
 {
 public:
-	const string& GetName() const
+	const String& GetName() const
 	{
-		static const string name = "Lux BMP-Writer";
+		static const String name = "Lux BMP-Writer";
 		return name;
 	}
 
-	bool CanWriteFile(const string& ext);
+	bool CanWriteFile(const String& ext);
 	void WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::dimension2du Size, u32 Pitch, u32 WriterParam = 0);
 };
 

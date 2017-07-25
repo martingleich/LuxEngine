@@ -89,7 +89,7 @@ RawInputDevice::ElemDesc RawKeyboardDevice::GetElementDesc(EEventType type, u32 
 {
 	LUX_UNUSED(code);
 	LUX_UNUSED(type);
-	static const string name = "(unknown)";
+	static const String name = "(unknown)";
 
 	return ElemDesc(name, 0, 0, EElementType::Other);
 }
@@ -332,7 +332,6 @@ void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 
 void RawKeyboardDevice::TranslateCharacter(wchar_t c1, wchar_t c2, wchar_t* out, u32 maxSize)
 {
-	// TODO: Convert spacing dead-keys to non-spacing dead-keys.
 	if(c2 == 0 || c1 == 0) {
 		out[0] = 0;
 		return;

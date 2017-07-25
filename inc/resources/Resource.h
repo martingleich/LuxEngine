@@ -30,7 +30,7 @@ class Resource;
 class ResourceOrigin
 {
 public:
-	string str;
+	String str;
 };
 
 class OriginResourceLoader
@@ -51,11 +51,6 @@ public:
 
 	virtual ~Resource()
 	{
-	}
-
-	Name GetReferableType() const
-	{
-		return ReferableType::Resource;
 	}
 
 	virtual bool Load()

@@ -99,7 +99,7 @@ public:
 	LUX_API void Render(video::Renderer* r, const Node* n);
 	LUX_API void PostRender(video::Renderer* renderer, const Node* node);
 
-	LUX_API core::Name GetReferableSubType() const;
+	LUX_API core::Name GetReferableType() const;
 	LUX_API StrongRef<Referable> Clone() const;
 
 private:

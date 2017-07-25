@@ -33,7 +33,7 @@ public:
 public:
 	LUX_API INIFile(FileSystem* FileSys);
 	LUX_API INIFile(FileSystem* FileSys, File* f);
-	LUX_API INIFile(FileSystem* FileSys, const io::path& p);
+	LUX_API INIFile(FileSystem* FileSys, const io::Path& p);
 	LUX_API ~INIFile();
 
 	// Close this ini file
@@ -43,8 +43,8 @@ public:
 	// Commit all changes to the file, automatic called on Close
 	LUX_API bool Commit();
 
-	LUX_API const string& GetCommentChars() const;
-	LUX_API void SetCommentChars(const string& chars);
+	LUX_API const String& GetCommentChars() const;
+	LUX_API void SetCommentChars(const String& chars);
 	LUX_API u32 GetCommentChar() const;
 
 	LUX_API size_t GetSectionCount();
@@ -53,8 +53,8 @@ public:
 	LUX_API bool RemoveSection(const char* section);
 	LUX_API bool SetSectionName(const char* section, const char* name);
 	LUX_API bool SetSectionComment(const char* section, const char* comment);
-	LUX_API const string& GetSectionName(SectionID id);
-	LUX_API const string& GetSectionComment(const char* section);
+	LUX_API const String& GetSectionName(SectionID id);
+	LUX_API const String& GetSectionComment(const char* section);
 
 	LUX_API size_t GetElementCount(const char* section);
 	LUX_API bool SortElements(const char* section, ESorting sorting);
@@ -63,9 +63,9 @@ public:
 	LUX_API bool SetElementName(const char* section, const char* element, const char* name);
 	LUX_API bool SetElementComment(const char* section, const char* element, const char* comment);
 	LUX_API bool SetElementValue(const char* section, const char* element, const char* value);
-	LUX_API const string& GetElementName(const char* section, ElementID id);
-	LUX_API const string& GetElementComment(const char* section, const char* element);
-	LUX_API const string& GetElementValue(const char* section, const char* element);
+	LUX_API const String& GetElementName(const char* section, ElementID id);
+	LUX_API const String& GetElementComment(const char* section, const char* element);
+	LUX_API const String& GetElementValue(const char* section, const char* element);
 	LUX_API void SetElementCommentPos(ECommentPos pos);
 	LUX_API ECommentPos GetElementCommentPos() const;
 	LUX_API bool IsEmpty();
@@ -73,16 +73,16 @@ public:
 private:
 	struct SINIElement
 	{
-		string name;
-		string comment;
-		string value;
+		String name;
+		String comment;
+		String value;
 		SectionID section;
 	};
 
 	struct SINISection
 	{
-		string name;
-		string comment;
+		String name;
+		String comment;
 		ElementID firstElem;
 		size_t elemCount;
 		bool sorted : 1;
@@ -94,21 +94,21 @@ private:
 
 	StrongRef<File> m_File;
 
-	io::path m_FilePath;
+	io::Path m_FilePath;
 
 	bool m_AutoReload;  // Check for reload on every Data access
 	bool m_AutoCommit;  // Commit file to disc after each change to data
 	bool m_UseFilePath; // Can the file be reopened using m_FilePath
 
-	core::array<SINISection> m_Sections;
-	core::array<SINIElement> m_Elements;
+	core::Array<SINISection> m_Sections;
+	core::Array<SINIElement> m_Elements;
 
 	SectionID m_CurrentSection;
 	ElementID m_CurrentElement;
 
-	string m_LastComment;
-	string m_Work;
-	string m_CommentChars;
+	String m_LastComment;
+	String m_Work;
+	String m_CommentChars;
 
 	bool m_IsEOF;
 	bool m_SectionSorted;
@@ -118,13 +118,13 @@ private:
 
 private:
 	bool LoadData();
-	bool ReadLine(string& out);
-	bool ParseSectionName(string& work, string& out);
+	bool ReadLine(String& out);
+	bool ParseSectionName(String& work, String& out);
 	bool ReadSections();
-	bool ReadElement(string& work, SINIElement& element);
-	bool IsComment(const string& work, string::ConstIterator& CommentBegin);
+	bool ReadElement(String& work, SINIElement& element);
+	bool IsComment(const String& work, String::ConstIterator& CommentBegin);
 
-	void WriteComment(const string& comment, size_t identDepth, ECommentPos pos);
+	void WriteComment(const String& comment, size_t identDepth, ECommentPos pos);
 
 	SectionID GetSectionID(const char* Section);
 	ElementID GetElemID(const char* Section, const char* Element, SectionID& outSection);
@@ -133,7 +133,7 @@ private:
 	void InitValues();
 	
 	void Init(File* file);
-	void Init(const io::path& path);
+	void Init(const io::Path& path);
 };
 
 } // namespace io

@@ -63,9 +63,6 @@ struct FontCreationData
 class FontImpl : public Font
 {
 public:
-	static void InitFontData();
-	static void DestroyFontData();
-
 	FontImpl();
 	~FontImpl();
 
@@ -74,10 +71,10 @@ public:
 	const video::Material* GetMaterial() const;
 	float GetBaseLine() const;
 	void SetBaseLine(float base);
-	void Draw(const string& Text, const math::vector2f& Position, EAlign Align, video::Color color, const math::rectf* clip);
-	float GetTextWidth(const string& Text, size_t charCount = std::numeric_limits<size_t>::max());
-	size_t GetCaretFromOffset(const string& Text, float XPosition);
-	void GetTextCarets(const string& Text, core::array<float>& carets, size_t charCount = std::numeric_limits<size_t>::max());
+	void Draw(const String& Text, const math::vector2f& Position, EAlign Align, video::Color color, const math::rectf* clip);
+	float GetTextWidth(const String& Text, size_t charCount = std::numeric_limits<size_t>::max());
+	size_t GetCaretFromOffset(const String& Text, float XPosition);
+	void GetTextCarets(const String& Text, core::Array<float>& carets, size_t charCount = std::numeric_limits<size_t>::max());
 
 	float GetFontHeight() const;
 
@@ -93,7 +90,7 @@ public:
 
 	const FontDescription& GetDescription() const;
 
-	core::Name GetReferableSubType() const;
+	core::Name GetReferableType() const;
 	StrongRef<Referable> Clone() const;
 
 private:

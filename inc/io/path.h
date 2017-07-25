@@ -9,11 +9,11 @@ namespace lux
 namespace io
 {
 
-typedef string path;
+typedef String Path;
 
-LUX_API path GetFileExtension(const path& p);
-LUX_API path GetFileDir(const path& p);
-LUX_API path GetFilenameOnly(const path& p, bool keepExtension = true);
+LUX_API Path GetFileExtension(const Path& p);
+LUX_API Path GetFileDir(const Path& p);
+LUX_API Path GetFilenameOnly(const Path& p, bool keepExtension = true);
 
 //! Normalizes a path
 /**
@@ -23,7 +23,7 @@ A normllaized directory path end with and / character
 \param isDirectory Is the path a directory
 \return The normalized path
 */
-LUX_API path NormalizePath(const path& p, bool isDirectory = false);
+LUX_API Path NormalizePath(const Path& p, bool isDirectory = false);
 
 //! Creates a new absolute path, concating a base path and a path relative to the base.
 /*
@@ -34,7 +34,7 @@ The returned path is normalized.
 \param rel The path relative to base, can contain /../ segements
 \return The absolute path by concating base and rel
 */
-LUX_API path MakeAbsolutePath(const path& base, const path& rel);
+LUX_API Path MakeAbsolutePath(const Path& base, const Path& rel);
 
 class FileSystem;
 class Archive;
@@ -55,8 +55,8 @@ public:
 	{
 	}
 
-	FileDescription(const path& path,
-		const string& name,
+	FileDescription(const Path& path,
+		const String& name,
 		u32 size,
 		EType type,
 		const core::DateAndTime& creationDate,
@@ -81,22 +81,22 @@ public:
 		return !(*this == other);
 	}
 
-	void SetPath(const path& p)
+	void SetPath(const Path& p)
 	{
 		m_Path = NormalizePath(p, true);
 	}
 
-	void SetName(const string& n)
+	void SetName(const String& n)
 	{
 		m_Name = n;
 	}
 
-	const path& GetPath() const
+	const Path& GetPath() const
 	{
 		return m_Path;
 	}
 
-	const string& GetName() const
+	const String& GetName() const
 	{
 		return m_Name;
 	}
@@ -152,8 +152,8 @@ public:
 	}
 
 private:
-	path m_Path;
-	string m_Name;
+	Path m_Path;
+	String m_Name;
 	Archive* m_Archive;
 
 	u32 m_Size;
@@ -162,10 +162,10 @@ private:
 	bool m_IsVirtual;
 };
 
-inline FileDescription ConcatFileDesc(const FileDescription& base, const io::path& relative)
+inline FileDescription ConcatFileDesc(const FileDescription& base, const io::Path& relative)
 {
-	path absPath = MakeAbsolutePath(base.GetPath(), GetFileDir(relative));
-	string fileName = GetFilenameOnly(relative);
+	Path absPath = MakeAbsolutePath(base.GetPath(), GetFileDir(relative));
+	String fileName = GetFilenameOnly(relative);
 
 	FileDescription out(absPath,
 		fileName,

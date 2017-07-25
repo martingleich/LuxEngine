@@ -53,7 +53,7 @@ public:
 	\return The opend file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenFile(const path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
+	virtual StrongRef<File> OpenFile(const Path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
 	//! Open a file inside the archive.
 	/**
@@ -66,10 +66,10 @@ public:
 	virtual StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
 	//! Check if a files exists
-	virtual bool ExistFile(const path& p) = 0;
+	virtual bool ExistFile(const Path& p) = 0;
 
 	//! Create a enumerator for a subdirecorty in the archive.
-	virtual StrongRef<FileEnumerator> EnumerateFiles(const path& subDir = string::EMPTY) = 0;
+	virtual StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = String::EMPTY) = 0;
 
 	//! Get the capabilites of the archive
 	virtual EArchiveCapabilities GetCaps() const = 0;
@@ -78,7 +78,7 @@ public:
 	/**
 	This only works if the requested file has an absolute path in the _real_ file system.
 	*/
-	virtual path GetAbsolutePath(const path& p) = 0;
+	virtual Path GetAbsolutePath(const Path& p) = 0;
 };
 
 }

@@ -8,7 +8,7 @@
 
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::Mesh)
+LUX_REGISTER_REFERABLE_CLASS("lux.comp.Mesh", lux::scene::Mesh)
 
 namespace lux
 {
@@ -192,7 +192,7 @@ void Mesh::CopyMaterials()
 	}
 }
 
-core::Name Mesh::GetReferableSubType() const
+core::Name Mesh::GetReferableType() const
 {
 	return SceneComponentType::Mesh;
 }

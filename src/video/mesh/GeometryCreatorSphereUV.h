@@ -13,7 +13,7 @@ class GeometryCreatorSphereUV : public GeometryCreator
 public:
 	GeometryCreatorSphereUV();
 
-	const string& GetName() const;
+	const String& GetName() const;
 	const core::ParamPackage& GetParams() const;
 
 	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);

@@ -26,16 +26,16 @@ core::Name MeshLoaderOBJ::GetResourceType(io::File* file, core::Name requestedTy
 	if(requestedType && requestedType != core::ResourceType::Mesh)
 		return core::Name::INVALID;
 
-	string ext = io::GetFileExtension(file->GetDescription().GetName());
+	String ext = io::GetFileExtension(file->GetDescription().GetName());
 	if(ext.EqualCaseInsensitive("obj"))
 		return core::ResourceType::Mesh;
 	else
 		return core::Name::INVALID;
 }
 
-const string& MeshLoaderOBJ::GetName() const
+const String& MeshLoaderOBJ::GetName() const
 {
-	static const string name = "Lux OBJ-Loader";
+	static const String name = "Lux OBJ-Loader";
 	return name;
 }
 //TODO Enable normal calculation from smoothing groups
@@ -59,9 +59,9 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 	if(!filesize)
 		throw core::FileFormatException("Can't load streaming file", "obj");
 
-	core::array<math::vector3f> vertexBuffer;
-	core::array<math::vector3f> NormalBuffer;
-	core::array<math::vector2f> TCoordBuffer;
+	core::Array<math::vector3f> vertexBuffer;
+	core::Array<math::vector3f> NormalBuffer;
+	core::Array<math::vector2f> TCoordBuffer;
 
 	SObjMtl* pCurrMtl = LUX_NEW(SObjMtl);
 	pCurrMtl->material = m_MatLib->CreateMaterial();
@@ -76,7 +76,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 
 	// Inhalt der Datei verarbeiten
 	const char* pcBuffPtr = pcBuffer;
-	string grpName, mtlName;
+	String grpName, mtlName;
 	bool mtlChanged = false;
 
 	while(pcBuffPtr != pcBufferEnd) {
@@ -183,11 +183,11 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			//v.color = video::Color::White;
 
 			// Vertexdaten des Faces laden
-			const string WordBuffer = CopyLine(pcBuffPtr, pcBufferEnd);
+			const String WordBuffer = CopyLine(pcBuffPtr, pcBufferEnd);
 			const char* pcLinePtr = WordBuffer.Data();
 			const char* const pcEndPtr = pcLinePtr + WordBuffer.Size();
 
-			core::array<s32> FaceCorners;
+			core::Array<s32> FaceCorners;
 			FaceCorners.Reserve(32);
 
 			// Alle Vertizes einlesen
@@ -384,7 +384,7 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 	}
 	*/
 
-	io::path texname = textureNameBuf;
+	io::Path texname = textureNameBuf;
 	texname.Replace("\\", "/");
 
 	StrongRef<video::Texture> texture;
@@ -435,7 +435,7 @@ const char* MeshLoaderOBJ::ReadTextures(const char* pFrom, const char* const pTo
 // Liest das gegebene material ein
 void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescription& fileDesc)
 {
-	const io::path realFile = pcFilename;
+	const io::Path realFile = pcFilename;
 	StrongRef<io::File> mtlReader;
 
 	auto fileSys = io::FileSystem::Instance();
@@ -611,7 +611,7 @@ void MeshLoaderOBJ::ReadMaterial(const char* pcFilename, const io::FileDescripti
 }
 
 // Findet und liefert das material mit dem Namen
-MeshLoaderOBJ::SObjMtl* MeshLoaderOBJ::FindMaterial(const string& mtlName, const string& grpName)
+MeshLoaderOBJ::SObjMtl* MeshLoaderOBJ::FindMaterial(const String& mtlName, const String& grpName)
 {
 	MeshLoaderOBJ::SObjMtl* pTmp = nullptr;
 
@@ -762,7 +762,7 @@ u32 MeshLoaderOBJ::CopyWord(const char* pFrom, const char* pTo, char* out, u32 d
 }
 
 // Liest die aktuelle Zeile am Cursor aus
-string MeshLoaderOBJ::CopyLine(const char* pFrom, const char* pTo)
+String MeshLoaderOBJ::CopyLine(const char* pFrom, const char* pTo)
 {
 	const char* pTmp = pFrom;
 	while(pTmp < pTo) {
@@ -771,7 +771,7 @@ string MeshLoaderOBJ::CopyLine(const char* pFrom, const char* pTo)
 		++pTmp;
 	}
 
-	return string(pFrom, (u32)(pTmp - pFrom + ((pTmp < pTo) ? 1 : 0)));
+	return String(pFrom, (u32)(pTmp - pFrom + ((pTmp < pTo) ? 1 : 0)));
 }
 
 // Kombination aus MoveToNextWord und CopyWord

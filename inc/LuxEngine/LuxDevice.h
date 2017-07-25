@@ -38,7 +38,7 @@ public:
 	\param height The height of the window.
 	\param title The title of the window.
 	*/
-	virtual void BuildWindow(u32 Width, u32 height, const string& title) = 0;
+	virtual void BuildWindow(u32 Width, u32 height, const String& title) = 0;
 	virtual void SetOwnWindow(void* OwnWindow) = 0;
 
 	//! Create the input system of the engine.

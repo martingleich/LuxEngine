@@ -21,7 +21,7 @@ private:
 	bool m_IsMaximized;
 	math::dimension2du m_Size;
 	math::vector2i m_Position;
-	string m_Title;
+	String m_Title;
 
 public:
 	WindowBase() :
@@ -119,7 +119,7 @@ public:
 		}
 	}
 
-	void OnTitleChange(const string& title)
+	void OnTitleChange(const String& title)
 	{
 		m_Title = title;
 	}
@@ -164,7 +164,7 @@ public:
 		call->m_Window = nullptr;
 	}
 
-	const string& GetTitle() const
+	const String& GetTitle() const
 	{
 		return m_Title;
 	}

@@ -67,16 +67,17 @@ public:
 		m_Transformation = transform;
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "box";
-		return name;
+		return TypeName;
 	}
 
 	StrongRef<Referable> Clone() const
 	{
 		return LUX_NEW(BoxZone)(*this);
 	}
+
+	static const core::Name TypeName;
 
 private:
 	math::vector3f m_HalfSize;

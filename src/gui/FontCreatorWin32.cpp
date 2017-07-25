@@ -31,7 +31,7 @@ struct Context
 	HFONT font;
 	u8 fontHeight;
 
-	core::array<u32> characters;
+	core::Array<u32> characters;
 
 	core::HashMap<u32, CharInfo> charInfos;
 	core::HashMap<u32, gui::CharInfo> outCharInfo;
@@ -41,7 +41,7 @@ struct Context
 
 	u32 size;
 	bool italic;
-	string name;
+	String name;
 
 	EFontWeight weight;
 };
@@ -277,7 +277,7 @@ int CALLBACK EnumFontFamExProc(
 	return 1;
 }
 
-static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const string& name)
+static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const String& name)
 {
 	LOGFONTW logFont;
 	ZeroMemory(&logFont, sizeof(logFont));
@@ -303,7 +303,7 @@ static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const strin
 		return false;
 }
 
-static bool RegisterFileFont(io::File* file, HANDLE& outHandle, string& outFontFamily)
+static bool RegisterFileFont(io::File* file, HANDLE& outHandle, String& outFontFamily)
 {
 	core::mem::RawMemory data(file->GetSize());
 
@@ -337,10 +337,10 @@ static void UnRegisterFileFont(HANDLE handle)
 
 void* FontCreatorWin32::BeginFontCreation(io::File* file,
 	const FontDescription& desc,
-	const core::array<u32>& charSet)
+	const core::Array<u32>& charSet)
 {
 	HANDLE fontResource;
-	string fontFamily;
+	String fontFamily;
 	if(!RegisterFileFont(file, fontResource, fontFamily))
 		return nullptr;
 
@@ -351,9 +351,9 @@ void* FontCreatorWin32::BeginFontCreation(io::File* file,
 	return ctx;
 }
 
-void* FontCreatorWin32::BeginFontCreation(const string& name,
+void* FontCreatorWin32::BeginFontCreation(const String& name,
 	const FontDescription& desc,
-	const core::array<u32>& charSet)
+	const core::Array<u32>& charSet)
 {
 	return BeginFontCreation(false, name, desc, charSet);
 }
@@ -376,9 +376,9 @@ static DWORD GetWin32FontWeight(EFontWeight weight)
 	}
 }
 
-void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const string& name,
+void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const String& name,
 	const FontDescription& desc,
-	const core::array<u32>& charSet)
+	const core::Array<u32>& charSet)
 {
 	impl_fontCreatorWin32::Context* ctx = new impl_fontCreatorWin32::Context;
 	ctx->characters = charSet;

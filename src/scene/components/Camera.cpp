@@ -3,7 +3,7 @@
 #include "video/Renderer.h"
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::Camera);
+LUX_REGISTER_REFERABLE_CLASS("lux.comp.Camera", lux::scene::Camera);
 
 namespace lux
 {
@@ -226,7 +226,7 @@ math::matrix4 Camera::CalculateViewMatrix(video::Renderer* r, const Node* n)
 	return out;
 }
 
-core::Name Camera::GetReferableSubType() const
+core::Name Camera::GetReferableType() const
 {
 	return SceneComponentType::Camera;
 }

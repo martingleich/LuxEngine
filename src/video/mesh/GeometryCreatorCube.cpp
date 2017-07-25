@@ -25,9 +25,9 @@ GeometryCreatorCube::GeometryCreatorCube()
 	m_Package.AddParam("inside", false);
 }
 
-const string& GeometryCreatorCube::GetName() const
+const String& GeometryCreatorCube::GetName() const
 {
-	static const string name = "cube";
+	static const String name = "cube";
 	return name;
 }
 

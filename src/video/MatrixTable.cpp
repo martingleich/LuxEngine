@@ -51,7 +51,7 @@ core::PackageParam MatrixTable::GetParamById(u32 id) const
 	core::ParamDesc desc;
 	desc.id = id;
 	desc.name = GetMatrixName((EMatrixType)id);
-	desc.type = core::Type::Matrix;
+	desc.type = core::Types::Matrix();
 	desc.type = desc.type.GetConstantType();
 	desc.size = (u8)desc.type.GetSize();
 	return core::PackageParam(desc, (u8*)&m);

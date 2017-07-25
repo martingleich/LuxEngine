@@ -14,7 +14,7 @@ namespace core
 class StringSink : public format::Sink
 {
 public:
-	StringSink(string& s, size_t collumn=0) :
+	StringSink(String& s, size_t collumn=0) :
 		Sink(collumn),
 		m_Str(s)
 	{
@@ -49,16 +49,15 @@ public:
 	}
 
 private:
-	string& m_Str;
+	String& m_Str;
 };
 
 }
 
-inline void conv_data(format::Context& ctx, const string& s, format::Placeholder& placeholder)
+inline void conv_data(format::Context& ctx, const String& s, format::Placeholder& placeholder)
 {
-	using namespace format;
 	LUX_UNUSED(placeholder);
-	ConvertAddString(ctx, StringType::Unicode, s.Data_c(), s.Size());
+	format::ConvertAddString(ctx, format::StringType::Unicode, s.Data_c(), s.Size());
 }
 
 }

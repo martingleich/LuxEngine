@@ -5,7 +5,6 @@
 #include "video/Material.h"
 #include "video/LightData.h"
 #include "math/matrix4.h"
-#include "video/PipelineSettings.h"
 
 #include "core/lxHashMap.h"
 
@@ -61,7 +60,7 @@ public:
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
-		core::array<string>* errorList);
+		core::Array<String>* errorList);
 
 	const RendertargetD3D9& GetBackbufferTarget();
 
@@ -134,9 +133,9 @@ private:
 
 private:
 	RendertargetD3D9 m_BackBufferTarget;
-	core::array<DepthBuffer_d3d9> m_DepthBuffers;
+	core::Array<DepthBuffer_d3d9> m_DepthBuffers;
 
-	core::array<WeakRef<TextureD3D9>> m_RenderTargets;
+	core::Array<WeakRef<TextureD3D9>> m_RenderTargets;
 
 	StrongRef<BufferManager> m_BufferManager;
 	StrongRef<RendererD3D9> m_Renderer;

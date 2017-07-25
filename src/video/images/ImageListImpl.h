@@ -42,7 +42,7 @@ public:
 		m_Images.Clear();
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
 		return core::ResourceType::ImageList;
 	}
@@ -53,7 +53,7 @@ public:
 	}
 
 private:
-	core::array<StrongRef<Image>> m_Images;
+	core::Array<StrongRef<Image>> m_Images;
 };
 
 }

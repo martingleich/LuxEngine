@@ -7,24 +7,25 @@ namespace lux
 namespace video
 {
 
-RendererNull::RendererNull(VideoDriver* driver) :
+RendererNull::RendererNull(VideoDriver* driver, DeviceState& deviceState) :
+	m_DeviceState(deviceState),
 	m_RenderMode(ERenderMode::None),
 	m_DirtyFlags(0xFFFFFFFF), // Set all dirty flags at start
 	m_Driver(driver)
 {
 	m_Fog.isActive = false;
 
-	m_ParamId.lighting = AddParam("lighting", core::Type::Float);
+	m_ParamId.lighting = AddParam("lighting", core::Types::Float());
 	GetParam(m_ParamId.lighting) = 1.0f;
-	m_ParamId.ambient = AddParam("ambient", core::Type::Colorf);
+	m_ParamId.ambient = AddParam("ambient", core::Types::Colorf());
 	GetParam(m_ParamId.ambient) = video::Colorf(0.0f, 0.0f, 0.0f);
-	m_ParamId.time = AddParam("time", core::Type::Float);
+	m_ParamId.time = AddParam("time", core::Types::Float());
 	GetParam(m_ParamId.time) = 0.0f;
 
-	m_ParamId.fogColor = AddInternalParam("fogColor", core::Type::Colorf);
+	m_ParamId.fogColor = AddInternalParam("fogColor", core::Types::Colorf());
 
-	m_ParamId.fogRange = AddInternalParam("fogRange", core::Type::Vector3);
-	m_ParamId.fogInfo = AddInternalParam("fogInfo", core::Type::Vector3);
+	m_ParamId.fogRange = AddInternalParam("fogRange", core::Types::Vector3f());
+	m_ParamId.fogInfo = AddInternalParam("fogInfo", core::Types::Vector3f());
 
 	m_RenderStatistics = LUX_NEW(RenderStatistics);
 
@@ -66,13 +67,25 @@ const Material* RendererNull::GetInvalidMaterial()
 void RendererNull::PushPipelineOverwrite(const PipelineOverwrite& over)
 {
 	m_PipelineOverwrites.PushBack(over);
-	SetDirty(Dirty_PipelineOverwrites);
+	UpdatePipelineOverwrite();
 }
 
 void RendererNull::PopPipelineOverwrite()
 {
 	m_PipelineOverwrites.PopBack();
-	SetDirty(Dirty_PipelineOverwrites);
+	UpdatePipelineOverwrite();
+}
+
+void RendererNull::UpdatePipelineOverwrite()
+{
+	if(m_PipelineOverwrites.IsEmpty()) {
+		m_FinalOverwrite = PipelineOverwrite();
+		return;
+	}
+
+	m_FinalOverwrite = m_PipelineOverwrites[0];
+	for(size_t i = 1; i < m_PipelineOverwrites.Size(); ++i)
+		m_FinalOverwrite.Append(m_PipelineOverwrites[i]);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -85,7 +98,7 @@ void RendererNull::AddLight(const LightData& light)
 	// Fill remaining light objects
 	for(size_t i = m_ParamId.lights.Size(); i < m_Lights.Size() + 1; ++i) {
 		m_ParamId.lights.PushBack(
-			AddInternalParam("light" + core::StringConverter::ToString(i), core::Type::Matrix));
+			AddInternalParam("light" + core::StringConverter::ToString(i), core::Types::Matrix()));
 	}
 
 	m_Lights.PushBack(light);
@@ -143,17 +156,17 @@ const math::matrix4& RendererNull::GetTransform(ETransform transform) const
 
 ///////////////////////////////////////////////////////////////////////////
 
-u32 RendererNull::AddParam(const string_type& name, core::Type type)
+u32 RendererNull::AddParam(const StringType& name, core::Type type)
 {
 	return AddParamEx(name, type, false);
 }
 
-u32 RendererNull::AddInternalParam(const string_type& name, core::Type type)
+u32 RendererNull::AddInternalParam(const StringType& name, core::Type type)
 {
 	return AddParamEx(name, type, true);
 }
 
-u32 RendererNull::AddParamEx(const string_type& name, core::Type type, bool isInternal)
+u32 RendererNull::AddParamEx(const StringType& name, core::Type type, bool isInternal)
 {
 	// Check for name in matrices
 	u32 id;
@@ -192,7 +205,7 @@ core::PackageParam RendererNull::GetParamInternal(u32 id)
 	return GetParamEx(id, true);
 }
 
-core::PackageParam RendererNull::GetParam(const string_type& string)
+core::PackageParam RendererNull::GetParam(const StringType& string)
 {
 	u32 id;
 	if(m_MatrixTable.GetParamIdByName(string.data, id))
@@ -262,7 +275,7 @@ math::matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool acti
 	return matrix;
 }
 
-bool RendererNull::GetLightId(const string_type& string, u32& outId)
+bool RendererNull::GetLightId(const StringType& string, u32& outId)
 {
 	if(strncmp(string.data, "light", 5) != 0)
 		return false;
@@ -281,7 +294,7 @@ bool RendererNull::GetLightId(const string_type& string, u32& outId)
 	// Fill remaining light objects
 	for(size_t i = m_ParamId.lights.Size(); i < (size_t)id + 1; ++i) {
 		m_ParamId.lights.PushBack(
-			AddInternalParam("light" + core::StringConverter::ToString(i), core::Type::Matrix));
+			AddInternalParam("light" + core::StringConverter::ToString(i), core::Types::Matrix()));
 	}
 
 	// Use the param id as id

@@ -12,13 +12,13 @@ namespace core
 
 //! A template dynamic array
 template <typename T>
-class array
+class Array
 {
 public:
 	class ConstIterator;
 	class Iterator : public BaseIterator<RandomAccessIteratorTag, T>
 	{
-		friend class array<T>;
+		friend class Array<T>;
 		friend class ConstIterator;
 	private:
 		T* m_Current;
@@ -42,11 +42,11 @@ public:
 		{
 			--m_Current; return *this;
 		}
-		Iterator  operator++(int)
+		Iterator operator++(int)
 		{
 			Iterator Temp = *this; ++m_Current; return Temp;
 		}
-		Iterator  operator--(int)
+		Iterator operator--(int)
 		{
 			Iterator Temp = *this; --m_Current; return Temp;
 		}
@@ -57,7 +57,7 @@ public:
 			return *this;
 		}
 
-		Iterator  operator+ (intptr_t num) const
+		Iterator operator+ (intptr_t num) const
 		{
 			Iterator temp = *this; return temp += num;
 		}
@@ -65,7 +65,7 @@ public:
 		{
 			return (*this) += (-num);
 		}
-		Iterator  operator- (intptr_t num) const
+		Iterator operator- (intptr_t num) const
 		{
 			return (*this) + (-num);
 		}
@@ -104,7 +104,7 @@ public:
 	class ConstIterator : public BaseIterator<RandomAccessIteratorTag, T>
 	{
 		friend class Iterator;
-		friend class array<T>;
+		friend class Array<T>;
 	public:
 		typedef RandomAccessIteratorTag IteratorCategory;
 	private:
@@ -132,11 +132,11 @@ public:
 		{
 			--m_Current; return *this;
 		}
-		ConstIterator  operator++(int)
+		ConstIterator operator++(int)
 		{
 			ConstIterator Temp = *this; ++m_Current; return Temp;
 		}
-		ConstIterator  operator--(int)
+		ConstIterator operator--(int)
 		{
 			ConstIterator Temp = *this; --m_Current; return Temp;
 		}
@@ -147,7 +147,7 @@ public:
 			return *this;
 		}
 
-		ConstIterator  operator+ (intptr_t num) const
+		ConstIterator operator+ (intptr_t num) const
 		{
 			ConstIterator temp = *this; return temp += num;
 		}
@@ -155,7 +155,7 @@ public:
 		{
 			return (*this) += (-num);
 		}
-		ConstIterator  operator- (intptr_t num) const
+		ConstIterator operator- (intptr_t num) const
 		{
 			return (*this) + (-num);
 		}
@@ -206,31 +206,29 @@ public:
 	/**
 	Create an empty array
 	*/
-	array() : m_Entries(nullptr),
+	Array() : m_Entries(nullptr),
 		m_Used(0),
-		m_Alloc(0),
-		m_Sorted(true)
+		m_Alloc(0)
 	{
 	}
 
 	//! Destruktor
-	~array()
+	~Array()
 	{
 		Clear();
 	}
 
 	//! Move constructor
-	array(array<T>&& old) :
+	Array(Array<T>&& old) :
 		m_Entries(old.m_Entries),
 		m_Used(old.m_Used),
-		m_Alloc(old.m_Alloc),
-		m_Sorted(old.m_Sorted)
+		m_Alloc(old.m_Alloc)
 	{
 		old.m_Entries = nullptr;
 	}
 
 	//! Move assignment 
-	array<T>& operator=(array<T>&& old)
+	Array<T>& operator=(Array<T>&& old)
 	{
 		lxAssert(this != &old);
 
@@ -243,27 +241,24 @@ public:
 		m_Entries = old.m_Entries;
 		m_Used = old.m_Used;
 		m_Alloc = old.m_Alloc;
-		m_Sorted = old.m_Sorted;
 		old.m_Entries = nullptr;
 		old.m_Used = 0;
 		old.m_Alloc = 0;
-		old.m_Sorted = true;
 
 		return *this;
 	}
 
 	//! Copyconstructor
-	array(const array<T>& other) :
+	Array(const Array<T>& other) :
 		m_Entries(nullptr),
 		m_Used(0),
-		m_Alloc(0),
-		m_Sorted(true)
+		m_Alloc(0)
 	{
 		*this = other;
 	}
 
 	//! Assignment
-	array<T>& operator=(const array<T>& other)
+	Array<T>& operator=(const Array<T>& other)
 	{
 		// Alte Einträge löschen
 		if(m_Entries)
@@ -278,7 +273,6 @@ public:
 		// Alles kopieren
 		m_Used = other.m_Used;
 		m_Alloc = other.m_Alloc;
-		m_Sorted = other.m_Sorted;
 
 		lxAssert(m_Used <= m_Alloc);
 
@@ -321,7 +315,6 @@ public:
 		else
 			new ((void*)(&m_Entries[pos])) T(std::move(element));
 
-		m_Sorted = false;
 		++m_Used;
 	}
 
@@ -356,7 +349,6 @@ public:
 		else
 			new ((void*)(&m_Entries[pos])) T(std::move(element));
 
-		m_Sorted = false;
 		++m_Used;
 	}
 
@@ -402,7 +394,7 @@ public:
 		Insert(entry, First());
 	}
 
-	void PushBack(const core::array<T>& entries)
+	void PushBack(const core::Array<T>& entries)
 	{
 		PushBack(entries.Data_c(), entries.Size());
 	}
@@ -420,8 +412,6 @@ public:
 
 		for(size_t entry = 0; entry < numEntries; ++entry)
 			new ((void*)(&m_Entries[m_Used + entry]))T(entries[entry]);
-
-		m_Sorted = false;
 
 		m_Used += numEntries;
 	}
@@ -447,8 +437,6 @@ public:
 
 		// Vieleicht soll das Feld, nie sortiert werden und definiert keinen Vergleichsoperator,
 		// dann müsste jeder Typ den Vergleichsoperator implementieren
-		m_Sorted = false;
-
 		m_Used += numEntries;
 	}
 
@@ -470,19 +458,15 @@ public:
 	*/
 	void Sort()
 	{
-		if(!m_Sorted && m_Used > 1)
+		if(m_Used > 1)
 			core::Sort(First(), End(), core::CompareType<T>());
-
-		m_Sorted = true;
 	}
 
 	template <typename CompareT>
 	void Sort(const CompareT& compare)
 	{
-		if(!m_Sorted && m_Used > 1)
+		if(m_Used > 1)
 			core::Sort(First(), End(), compare);
-
-		m_Sorted = true;
 	}
 
 	//! Remove an entry in the array
@@ -499,7 +483,6 @@ public:
 			for(T* i = it.m_Current; i < m_Entries + m_Used - 1; ++i)
 				*(i) = std::move(*(i + 1));
 		} else {
-			m_Sorted = false;
 			if(m_Used > 1)
 				*it = std::move(*Last());
 		}
@@ -527,8 +510,6 @@ public:
 			for(T* i = from.m_Current; i < m_Entries + m_Used - count; ++i)
 				*(i) = std::move(*(i + count));
 		} else {
-			m_Sorted = false;
-
 			size_t offset = m_Used - count - (from.m_Current - m_Entries);
 			size_t ToCopy = math::Min(count, offset);
 
@@ -761,7 +742,7 @@ public:
 	/**
 	\return The size of the array
 	*/
-	size_t Size()      const
+	size_t Size() const
 	{
 		return m_Used;
 	}
@@ -772,23 +753,6 @@ public:
 	size_t Allocated() const
 	{
 		return m_Alloc;
-	}
-	//! Is the array sorted
-	/**
-	\return Is the array sorted
-	*/
-	bool IsSorted() const
-	{
-		return m_Sorted;
-	}
-	//! Set sorting state of the array
-	/**
-	Call this to resort the array, by the next call to Sort()
-	\param Sorted The new sorted state
-	*/
-	void SetSorted(bool Sorted)
-	{
-		m_Sorted = Sorted;
 	}
 
 	//! Access a single element
@@ -805,7 +769,34 @@ public:
 		return m_Entries[entry];
 	}
 
+	//! Support for foreach loop
+	Iterator begin()
+	{
+		return Iterator(m_Entries);
+	}
 
+	//! Support for foreach loop
+	ConstIterator begin() const
+	{
+		return ConstIterator(m_Entries);
+	}
+
+	//! Support for foreach loop
+	Iterator end()
+	{
+		return Iterator(m_Entries + m_Used);
+	}
+
+	//! Support for foreach loop
+	ConstIterator end() const
+	{
+		return ConstIterator(m_Entries + m_Used);
+	}
+
+	//! Access entry with check for array size
+	/**
+	\throws OutOfRangeException
+	*/
 	const T& At(size_t entry) const
 	{
 		if(entry >= m_Used)
@@ -814,6 +805,10 @@ public:
 		return m_Entries[entry];
 	}
 
+	//! Access entry with check for array size
+	/**
+	\throws OutOfRangeException
+	*/
 	T& At(size_t entry)
 	{
 		if(entry >= m_Used)
@@ -821,6 +816,7 @@ public:
 
 		return m_Entries[entry];
 	}
+
 private:
 	T* Allocate(size_t count)
 	{
@@ -836,24 +832,23 @@ private:
 	T* m_Entries;
 	size_t m_Used;
 	size_t m_Alloc;
-	bool m_Sorted;
 };
 
 template <typename T>
-bool array<T>::Iterator::operator==(const ConstIterator& other) const
+bool Array<T>::Iterator::operator==(const ConstIterator& other) const
 {
 	return m_Current == other.m_Current;
 }
 template <typename T>
-bool array<T>::Iterator::operator!=(const ConstIterator& other) const
+bool Array<T>::Iterator::operator!=(const ConstIterator& other) const
 {
 	return m_Current != other.m_Current;
 }
 
 template <typename T>
-struct HashType<array<T>>
+struct HashType<Array<T>>
 {
-	size_t operator()(const array<T>& arr) const
+	size_t operator()(const Array<T>& arr) const
 	{
 		if(arr.IsEmpty())
 			return 0;
@@ -868,9 +863,7 @@ struct HashType<array<T>>
 	}
 };
 
-}
-
-}
-
+} // namespace core
+} // namespace lux
 
 #endif

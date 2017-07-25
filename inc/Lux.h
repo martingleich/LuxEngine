@@ -118,7 +118,6 @@ namespace input
 #include "video/LightData.h"
 #include "video/FogData.h"
 #include "video/AlphaSettings.h"
-#include "video/PipelineSettings.h"
 
 #include "video/SpriteBank.h"
 

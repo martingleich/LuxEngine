@@ -46,7 +46,7 @@ struct AppContext
 		if(MatLib) {
 			SolidRenderer = MatLib->GetMaterialRenderer("solid");
 			TransparentRenderer = MatLib->GetMaterialRenderer("transparent");
-			MixRenderer = MatLib->GetMaterialRenderer("solid_mix");
+			MixRenderer = MatLib->GetMaterialRenderer("solidMix");
 		} else {
 			SolidRenderer = nullptr;
 			TransparentRenderer = nullptr;
@@ -74,43 +74,24 @@ struct AppContext
 	video::MaterialRenderer* TransparentRenderer;
 	video::MaterialRenderer* MixRenderer;
 
-	StrongRef<scene::Mesh> GetMesh(const io::path& path)
+	StrongRef<scene::Mesh> GetMesh(const io::Path& path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::Mesh, path).As<scene::Mesh>();
 	}
 
-	StrongRef<video::Texture> GetTexture(const io::path& path)
+	StrongRef<video::Texture> GetTexture(const io::Path& path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::Texture, path).As<video::Texture>();
 	}
 
-	StrongRef<video::CubeTexture> GetCubeTexture(const io::path& path)
+	StrongRef<video::CubeTexture> GetCubeTexture(const io::Path& path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::CubeTexture, path).As<video::CubeTexture>();
 	}
 
-	StrongRef<video::Image> GetImage(const io::path& path)
+	StrongRef<video::Image> GetImage(const io::Path& path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::Image, path).As<video::Image>();
-	}
-
-	StrongRef<video::MaterialRenderer> CreateHLSLShader(const io::path& path, bool isSolid=true)
-	{
-		core::array<string> errorList;
-		StrongRef<video::MaterialRenderer> shader;
-		try {
-			shader = MatLib->AddShaderMaterialRenderer(video::EShaderLanguage::HLSL,
-				path, "mainVS", 2, 0,
-				path, "mainPS", 2, 0,
-				MatLib->GetMaterialRenderer(isSolid?"solid_base":"transparent_base"),
-				path, &errorList);
-		} catch(video::ShaderCompileException&) {
-			for(auto it = errorList.First(); it != errorList.End(); ++it)
-				log::Error(*it);
-			throw;
-		}
-
-		return shader;
 	}
 };
 

@@ -1,7 +1,6 @@
 #include "video/MaterialLibrary.h"
 
 #include "video/Shader.h"
-#include "video/MaterialRendererImpl.h"
 #include "video/VideoDriver.h"
 
 #include "io/FileSystem.h"
@@ -29,6 +28,13 @@ void MaterialLibrary::Initialize(MaterialLibrary* matLib)
 
 MaterialLibrary::~MaterialLibrary()
 {
+	m_Solid.Reset();
+
+	// At this point there shouldn't be any references to renderers
+	for(auto& x : m_Renderers) {
+		if(x->GetReferenceCount() != 1)
+			log::Error("~MaterialLibrary still references to renderers");
+	}
 }
 
 MaterialLibrary* MaterialLibrary::Instance()
@@ -43,16 +49,76 @@ void MaterialLibrary::Destroy()
 
 MaterialLibrary::MaterialLibrary()
 {
-	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseSolid)("solid_base", nullptr, nullptr));
-	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_BaseTransparent)("transparent_base", nullptr, nullptr));
-	m_Solid = AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid)("solid", nullptr, nullptr));
-	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_Solid_Mix)("solid_mix", nullptr, nullptr));
-	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_OneTextureBlend)("transparent", nullptr, nullptr));
-	AddMaterialRenderer(LUX_NEW(video::MaterialRenderer_DebugOverlay)("debug_overlay", nullptr, nullptr));
-	//AddMaterialRenderer(LUX_NEW(video::CMaterialRenderer_VertexAlpha_d3d9)(nullptr, nullptr), "transparent_alpha");
+	{
+		AddMaterialRenderer("solidBase");
+	}
+
+	{
+		auto transparentBase = AddMaterialRenderer("transparentBase");
+		transparentBase->GetPass(0).isTransparent = true;
+	}
+
+	{
+		m_Solid = AddMaterialRenderer("solid");
+		m_Solid->GetPass(0).AddTexture();
+		m_Solid->AddParam("diffMap", 0, (u32)EOptionId::Layer0);
+	}
+
+	{
+		auto debug = AddMaterialRenderer("debugOverlay");
+		auto& pass = debug->GetPass(0);
+		pass.fogEnabled = false;
+		pass.lighting = false;
+
+		TextureStageSettings tss0;
+		tss0.colorOperator = ETextureOperator::SelectArg1;
+		tss0.colorArg1 = ETextureArgument::Diffuse;
+		pass.layerSettings.PushBack(tss0);
+		pass.useVertexColor = true;
+	}
+
+	{
+		auto solidMix = AddMaterialRenderer("solidMix");
+		auto& pass = solidMix->GetPass(0);
+		pass.AddTexture(2);
+		pass.useVertexColor = true;
+		// Blend(Diff*Texture1, Texture2, DiffAlpha)
+		TextureStageSettings tss0, tss1, tss2;
+		tss0.colorOperator = ETextureOperator::SelectArg1;
+		tss0.colorArg1 = ETextureArgument::Texture;
+
+		tss1.colorOperator = ETextureOperator::Blend;
+		tss1.colorArg1 = ETextureArgument::Current;
+		tss1.colorArg2 = ETextureArgument::Texture;
+		tss1.coordSource = 0;
+
+		tss2.colorOperator = ETextureOperator::Modulate;
+		tss2.colorArg1 = ETextureArgument::Current;
+		tss2.colorArg2 = ETextureArgument::Diffuse;
+		tss2.coordSource = 0;
+		pass.layerSettings.PushBack(tss0);
+		pass.layerSettings.PushBack(tss1);
+		pass.layerSettings.PushBack(tss2);
+
+		solidMix->AddParam("diffMap1", 0, (u32)EOptionId::Layer0);
+		solidMix->AddParam("diffMap2", 0, (u32)EOptionId::Layer1);
+	}
+
+	{
+		auto transparent = AddMaterialRenderer("transparent");
+		auto& pass = transparent->GetPass(0);
+		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+		pass.alphaOperator = video::EBlendOperator::Add;
+		pass.zWriteEnabled = false;
+		pass.fogEnabled = false;
+		pass.AddTexture();
+
+		transparent->AddParam("diffMap", 0, (u32)EOptionId::Layer0);
+	}
 }
 
-StrongRef<Material> MaterialLibrary::CreateMaterial(const string& name)
+StrongRef<Material> MaterialLibrary::CreateMaterial(const String& name)
 {
 	return CreateMaterial(GetMaterialRenderer(name));
 }
@@ -81,16 +147,23 @@ StrongRef<MaterialRenderer> MaterialLibrary::AddMaterialRenderer(MaterialRendere
 	return renderer;
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const string& name, const string& oldName)
+StrongRef<MaterialRenderer> MaterialLibrary::AddMaterialRenderer(const String& newName)
+{
+	StrongRef<MaterialRenderer> r = LUX_NEW(MaterialRenderer)(newName);
+	return AddMaterialRenderer(r);
+}
+
+StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const String& name, const String& oldName)
 {
 	return CloneMaterialRenderer(name, GetMaterialRenderer(oldName));
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const string& name, const MaterialRenderer* old)
+StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const String& name, const MaterialRenderer* old)
 {
 	LX_CHECK_NULL_ARG(old);
 
-	return AddMaterialRenderer(old->Clone(name));
+	auto r = LUX_NEW(MaterialRenderer)(name, old);
+	return AddMaterialRenderer(r);
 }
 
 void MaterialLibrary::RemoveMaterialRenderer(MaterialRenderer* renderer)
@@ -106,35 +179,12 @@ void MaterialLibrary::RemoveMaterialRenderer(MaterialRenderer* renderer)
 	}
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::AddShaderMaterialRenderer(
-	Shader* shader,
-	const MaterialRenderer* baseMaterial, const string& name)
-{
-	LX_CHECK_NULL_ARG(shader);
-	LX_CHECK_NULL_ARG(baseMaterial);
-
-	if(baseMaterial->GetShader() != nullptr)
-		throw core::InvalidArgumentException("baseMaterial", "Base Material must not have a shader");
-
-	StrongRef<video::MaterialRenderer> renderer;
-	if(shader)
-		renderer = baseMaterial->Clone(name, shader, &shader->GetParamPackage());
-
-	return AddMaterialRenderer(renderer);
-}
-
-StrongRef<MaterialRenderer> MaterialLibrary::AddShaderMaterialRenderer(
+StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 	video::EShaderLanguage language,
-	const io::path& VSPath, const string& VSEntryPoint, int VSMajor, int VSMinor,
-	const io::path& PSPath, const string& PSEntryPoint, int PSMajor, int PSMinor,
-	const MaterialRenderer* baseMaterial, const string& name,
-	core::array<string>* errorList)
+	const io::Path& VSPath, const String& VSEntryPoint, int VSMajor, int VSMinor,
+	const io::Path& PSPath, const String& PSEntryPoint, int PSMajor, int PSMinor,
+	core::Array<String>* errorList)
 {
-	LX_CHECK_NULL_ARG(baseMaterial);
-
-	if(baseMaterial->GetShader() != nullptr)
-		throw core::InvalidArgumentException("baseMaterial", "Base Material must not have a shader");
-
 	StrongRef<io::File> PSFile;
 	StrongRef<io::File> VSFile;
 	if(VSPath == PSPath) {
@@ -164,13 +214,12 @@ StrongRef<MaterialRenderer> MaterialLibrary::AddShaderMaterialRenderer(
 			psCode[PSFile->GetSize()] = 0;
 		}
 	}
-	StrongRef<video::Shader> shader = video::VideoDriver::Instance()->CreateShader(
+
+	return video::VideoDriver::Instance()->CreateShader(
 		language,
 		vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSMajor, VSMinor,
 		psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSMajor, PSMinor,
 		errorList);
-
-	return AddShaderMaterialRenderer(shader, baseMaterial, name);
 }
 
 StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(size_t index) const
@@ -178,7 +227,7 @@ StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(size_t index) c
 	return m_Renderers.At(index);
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(const string& name) const
+StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(const String& name) const
 {
 	size_t id;
 	if(!FindRenderer(name, id))
@@ -187,12 +236,23 @@ StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(const string& n
 	return m_Renderers[id];
 }
 
+bool MaterialLibrary::ExistsMaterialRenderer(const String& name, MaterialRenderer** outRenderer) const
+{
+	size_t id;
+	if(!FindRenderer(name, id))
+		return false;
+
+	if(outRenderer)
+		*outRenderer = m_Renderers[id];
+	return true;
+}
+
 size_t MaterialLibrary::GetMaterialRendererCount() const
 {
 	return m_Renderers.Size();
 }
 
-bool MaterialLibrary::FindRenderer(const string& name, size_t& id) const
+bool MaterialLibrary::FindRenderer(const String& name, size_t& id) const
 {
 	for(id = 0; id < m_Renderers.Size(); ++id) {
 		if(m_Renderers[id]->GetName() == name)
@@ -201,5 +261,19 @@ bool MaterialLibrary::FindRenderer(const string& name, size_t& id) const
 
 	return false;
 }
+
+StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
+	EShaderLanguage language,
+	const String& VSCode, const char* VSEntryPoint, int VSmajorVersion, int VSminorVersion,
+	const String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
+	core::Array<String>* errorList)
+{
+	return video::VideoDriver::Instance()->CreateShader(
+		language,
+		VSCode.Data_c(), VSEntryPoint, VSCode.Size(), VSmajorVersion, VSminorVersion,
+		PSCode.Data_c(), PSEntryPoint, PSCode.Size(), PSmajorVersion, PSminorVersion,
+		errorList);
 }
-}
+
+} // namespace video
+} // namespace lux

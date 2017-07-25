@@ -27,11 +27,6 @@ public:
 	\return True if the run trough, false if it was aborted
 	*/
 	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result) = 0;
-
-	core::Name GetReferableType() const
-	{
-		return ReferableType::Collider;
-	}
 };
 
 //! A triangle-base collider.

@@ -38,7 +38,7 @@ private:
 		UpdateEntry& operator=(const UpdateEntry&& old);
 	};
 
-	core::array<UpdateEntry> m_Updates;
+	core::Array<UpdateEntry> m_Updates;
 
 protected:
 	VideoDriver* m_Driver;

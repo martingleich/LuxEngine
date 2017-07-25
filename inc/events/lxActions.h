@@ -125,31 +125,31 @@ class ActionList : public ReferenceCounted
 public:
 	LUX_API static ActionList* Instance();
 
-	LUX_API void AddEvent(const string& name);
-	LUX_API void AddButton(const string& name, bool init = false);
-	LUX_API void AddAxis(const string& name, float init = 0);
+	LUX_API void AddEvent(const String& name);
+	LUX_API void AddButton(const String& name, bool init = false);
+	LUX_API void AddAxis(const String& name, float init = 0);
 
-	LUX_API void AddAction(const string& name, Action* a);
+	LUX_API void AddAction(const String& name, Action* a);
 
-	LUX_API void Remove(const string& name);
+	LUX_API void Remove(const String& name);
 	LUX_API void RemoveAll();
 
-	LUX_API EventAction* GetEventAction(const string& name);
-	LUX_API ButtonAction* GetButtonAction(const string& name);
-	LUX_API AxisAction* GetAxisAction(const string& name);
+	LUX_API EventAction* GetEventAction(const String& name);
+	LUX_API ButtonAction* GetButtonAction(const String& name);
+	LUX_API AxisAction* GetAxisAction(const String& name);
 
-	LUX_API Action* GetAction(const string& name);
+	LUX_API Action* GetAction(const String& name);
 
 	LUX_API Action* GetAction(size_t i);
 
-	LUX_API const string& GetActionName(size_t i) const;
+	LUX_API const String& GetActionName(size_t i) const;
 
 	LUX_API size_t GetActionCount() const;
 
 private:
 	ActionList();
 private:
-	core::HashMap<string, StrongRef<Action>> m_Actions;
+	core::HashMap<String, StrongRef<Action>> m_Actions;
 };
 
 }

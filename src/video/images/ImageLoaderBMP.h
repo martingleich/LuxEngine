@@ -14,7 +14,7 @@ class ImageLoaderBMP : public core::ResourceLoader
 public:
 	void LoadResource(io::File* file, core::Resource* dst);
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
-	const string& GetName() const;
+	const String& GetName() const;
 };
 
 }

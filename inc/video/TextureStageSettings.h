@@ -40,18 +40,35 @@ public:
 	ETextureOperator alphaOperator;
 
 	u32 coordSource;
-	bool useVertex;
 
 	TextureStageSettings() :
 		colorArg1(ETextureArgument::Diffuse),
-		colorArg2(ETextureArgument::Diffuse),
-		colorOperator(ETextureOperator::SelectArg1),
+		colorArg2(ETextureArgument::Texture),
+		colorOperator(ETextureOperator::Modulate),
 		alphaArg1(ETextureArgument::Diffuse),
-		alphaArg2(ETextureArgument::Diffuse),
-		alphaOperator(ETextureOperator::SelectArg1),
-		coordSource(0xFFFFFFFF),
-		useVertex(false)
-	{}
+		alphaArg2(ETextureArgument::Texture),
+		alphaOperator(ETextureOperator::Modulate),
+		coordSource(0xFFFFFFFF)
+	{
+	}
+
+	TextureStageSettings(
+		ETextureArgument _colorArg1,
+		ETextureArgument _colorArg2,
+		ETextureOperator _colorOperator,
+		ETextureArgument _alphaArg1,
+		ETextureArgument _alphaArg2,
+		ETextureOperator _alphaOperator,
+		u32 _coordSource = 0xFFFFFFFF) :
+		colorArg1(_colorArg1),
+		colorArg2(_colorArg2),
+		colorOperator(_colorOperator),
+		alphaArg1(_alphaArg1),
+		alphaArg2(_alphaArg2),
+		alphaOperator(_alphaOperator),
+		coordSource(_coordSource)
+	{
+	}
 
 	bool HasAlternateCoordSource() const
 	{

@@ -26,12 +26,6 @@ public:
 		LUX_UNUSED(point);
 		return math::vector3f::ZERO;
 	}
-
-	core::Name GetReferableType() const
-	{
-		static const core::Name name = "zone";
-		return name;
-	}
 };
 
 } // namespace scene

@@ -33,7 +33,7 @@ public:
 	LUX_API bool VerticalMovementAllowed() const;
 	LUX_API void AllowVerticalMovement(bool Allow);
 
-	LUX_API core::Name GetReferableSubType() const;
+	LUX_API core::Name GetReferableType() const;
 	LUX_API StrongRef<Referable> Clone() const;
 
 	//! Maps a event to the camera actions

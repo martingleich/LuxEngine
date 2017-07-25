@@ -52,8 +52,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	virtual core::PackageParam Param(const string_type& name) = 0;
-	virtual core::PackageParam Param(const string_type& name) const = 0;
+	virtual core::PackageParam Param(const StringType& name) = 0;
+	virtual core::PackageParam Param(const StringType& name) const = 0;
 	virtual core::PackageParam Param(u32 id) = 0;
 	virtual core::PackageParam Param(u32 id) const = 0;
 
@@ -67,7 +67,7 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
 		return core::ResourceType::Material;
 	}

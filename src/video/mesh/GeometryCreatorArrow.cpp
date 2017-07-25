@@ -21,9 +21,9 @@ GeometryCreatorArrow::GeometryCreatorArrow()
 	m_Package.AddParam("sectors", 8);
 }
 
-const string& GeometryCreatorArrow::GetName() const
+const String& GeometryCreatorArrow::GetName() const
 {
-	static const string name = "arrow";
+	static const String name = "arrow";
 	return name;
 }
 
@@ -84,7 +84,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 		float c;
 	};
 
-	core::array<SinCos> sinCos;
+	core::Array<SinCos> sinCos;
 	sinCos.Reserve(sectors);
 	for(s32 i = 0; i <= sectors; ++i) {
 		math::anglef a = i * (math::anglef::FULL / sectors);

@@ -3,7 +3,7 @@
 #include "core/ReferableRegister.h"
 #include "core/Logger.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::CameraControl)
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::SceneComponentType::CameraControl, lux::scene::CameraControl)
 
 namespace lux
 {
@@ -126,7 +126,7 @@ void CameraControl::AllowVerticalMovement(bool Allow)
 	m_NoVerticalMovement = !Allow;
 }
 
-core::Name CameraControl::GetReferableSubType() const
+core::Name CameraControl::GetReferableType() const
 {
 	return SceneComponentType::CameraControl;
 }

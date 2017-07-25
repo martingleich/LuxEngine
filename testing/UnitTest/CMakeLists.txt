@@ -53,7 +53,7 @@ else()
 	add_definitions(-std=c++11 -Wall -DUNICODE -D_UNICODE -DNDEBUG)
 endif()
 
-# Not using full path to stdafx.h since the include in the cpp must be equal to this string.
+# Not using full path to stdafx.h since the include in the cpp must be equal to this String.
 ADD_PRECOMPILED_HEADER("stdafx.h" "src/stdafx.cpp" UNITTEST_SRCS)
 
 add_executable(UnitTest ${UNITTEST_SRCS} ${UNITTEST_INCS})
@@ -68,7 +68,7 @@ function(assign_source_group)
 			set(_source_rel "${_source}")
 		endif()
 		get_filename_component(_source_path "${_source_rel}" PATH)
-		string(REPLACE "/" "\\" _source_path_msvc "${_source_path}")
+		String(REPLACE "/" "\\" _source_path_msvc "${_source_path}")
 		source_group("${_source_path_msvc}" FILES "${_source}")
 	endforeach()
 endfunction(assign_source_group)

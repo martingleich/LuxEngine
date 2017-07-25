@@ -36,9 +36,9 @@ private:
 };
 
 RendererD3D9::RendererD3D9(VideoDriverD3D9* driver) :
-	RendererNull(driver),
+	RendererNull(driver, m_DeviceState),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
-	m_State((IDirect3DDevice9*)driver->GetLowLevelDevice()),
+	m_DeviceState((IDirect3DDevice9*)driver->GetLowLevelDevice()),
 	m_Driver(driver),
 	m_MaterialRenderer(nullptr)
 {
@@ -142,7 +142,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget& target)
 		throw core::D3D9Exception(hr);
 	}
 
-	m_State.SetRenderTargetTexture(target.GetTexture());
+	m_DeviceState.SetRenderTargetTexture(target.GetTexture());
 
 	m_CurrentRendertarget = newRendertarget;
 }
@@ -170,55 +170,58 @@ void RendererD3D9::DrawPrimitiveList(
 	if(primitiveCount == 0)
 		return;
 
-	SetupRendering(is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
-
+	SwitchRenderMode(is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 	SetVertexFormat(vertexFormat);
 	u32 stride = vertexFormat.GetStride(0);
 
-	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(primitiveType);
+	for(size_t i = 0; i < m_Material->GetRenderer()->GetPassCount(); ++i) {
+		SetupRendering(i);
 
-	HRESULT hr = E_FAIL;
-	if(!user) {
-		if(indexData) {
-			// Indexed from stream
-			StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
+		D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(primitiveType);
 
-			BufferManagerD3D9::VertexStream vs;
-			BufferManagerD3D9::IndexStream is;
+		HRESULT hr = E_FAIL;
+		if(!user) {
+			if(indexData) {
+				// Indexed from stream
+				StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
 
-			u32 vertexOffset = 0;
-			u32 indexOffset = 0;
-			if(d3d9Manager->GetVertexStream(0, vs))
-				vertexOffset = vs.offset;
+				BufferManagerD3D9::VertexStream vs;
+				BufferManagerD3D9::IndexStream is;
 
-			if(d3d9Manager->GetIndexStream(is))
-				indexOffset = is.offset;
+				u32 vertexOffset = 0;
+				u32 indexOffset = 0;
+				if(d3d9Manager->GetVertexStream(0, vs))
+					vertexOffset = vs.offset;
 
-			hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
+				if(d3d9Manager->GetIndexStream(is))
+					indexOffset = is.offset;
+
+				hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
+			} else {
+				// Not indexed from stream
+				StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
+
+				BufferManagerD3D9::VertexStream vs;
+				u32 vertexOffset = 0;
+				if(d3d9Manager->GetVertexStream(0, vs))
+					vertexOffset = vs.offset;
+
+				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
+			}
 		} else {
-			// Not indexed from stream
-			StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
-
-			BufferManagerD3D9::VertexStream vs;
-			u32 vertexOffset = 0;
-			if(d3d9Manager->GetVertexStream(0, vs))
-				vertexOffset = vs.offset;
-
-			hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
+			if(indexData) {
+				// Indexed from memory
+				D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
+				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
+					indexData, d3dIndexFormat, vertexData, stride);
+			} else
+				// Not indexed from memory
+				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
 		}
-	} else {
-		if(indexData) {
-			// Indexed from memory
-			D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
-			hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
-				indexData, d3dIndexFormat, vertexData, stride);
-		} else
-			// Not indexed from memory
-			hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
-	}
-	if(FAILED(hr)) {
-		log::Error("Error while drawing.");
-		return;
+		if(FAILED(hr)) {
+			log::Error("Error while drawing.");
+			return;
+		}
 	}
 
 	m_RenderStatistics->AddPrimitves(primitiveCount);
@@ -276,36 +279,47 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererD3D9::SetupRendering(ERenderMode mode)
+void RendererD3D9::SetupRendering(size_t passId)
 {
-	// Generate pipeline
-	if(IsDirty(Dirty_MaterialRenderer) || IsDirty(Dirty_PipelineOverwrites)) {
-		bool oldLighting = m_Pipeline.lighting;
-		bool oldFogging = m_Pipeline.fogEnabled;
-		float oldPolyOffset = m_Pipeline.polygonOffset;
+	ParamListAccessNull listAccess(this);
+	RenderSettings settings(
+		*m_Material->GetRenderer(),
+		m_FinalOverwrite,
+		**m_Material,
+		listAccess);
 
-		m_Pipeline = m_Material->GetRenderer()->GetPipeline();
-
-		// Apply overwrites
-		for(auto it = m_PipelineOverwrites.First(); it != m_PipelineOverwrites.End(); ++it)
-			it->Apply(m_Pipeline);
-
-		if(m_Pipeline.fogEnabled != oldFogging)
-			SetDirty(Dirty_Fog);
-
-		if(m_Pipeline.lighting != oldLighting)
-			SetDirty(Dirty_Lights);
-
-		if(m_Pipeline.polygonOffset != oldPolyOffset)
-			SetDirty(Dirty_PolygonOffset);
-
-		SetDirty(Dirty_Pipeline);
-		ClearDirty(Dirty_PipelineOverwrites);
+	if(m_MaterialRenderer != &settings.renderer) {
+		// Force update all.
+		SetDirty(Dirty_MaterialRenderer);
+		m_MaterialRenderer = m_Material->GetRenderer();
 	}
 
-	SwitchRenderMode(mode);
+	// Get current pass, with applied options and overwrites
+	Pass pass = settings.renderer.GeneratePassData(passId, settings);
+	m_FinalOverwrite.Apply(pass);
 
-	LoadSettings();
+	if((pass.shader != nullptr) != m_UseShader) {
+		SetDirty(Dirty_Fog);
+		SetDirty(Dirty_Lights);
+		m_UseShader = (pass.shader != nullptr);
+	}
+
+	if(pass.polygonOffset != m_PrePolyOffset) {
+		SetDirty(Dirty_PolygonOffset);
+		m_PrePolyOffset = pass.polygonOffset;
+	}
+
+	// Enable pass settings
+	m_DeviceState.SetD3DColors(GetParam(m_ParamId.ambient), settings.material);
+	m_DeviceState.EnablePass(pass);
+
+	// Generate data for transforms, fog and light
+	LoadTransforms(pass, settings);
+	LoadFogSettings(pass, settings);
+	LoadLightSettings(pass, settings);
+
+	// Send the generated data to the shader
+	settings.renderer.SendShaderSettings(passId, pass, settings);
 
 	ClearAllDirty();
 }
@@ -342,76 +356,25 @@ void RendererD3D9::LeaveRenderMode3D()
 
 void RendererD3D9::EnterRenderMode2D()
 {
-	SetDirty(Dirty_Lights);
-	SetDirty(Dirty_Fog);
 }
 
 void RendererD3D9::LeaveRenderMode2D()
 {
-	SetDirty(Dirty_Lights);
-	SetDirty(Dirty_Fog);
 }
 
-void RendererD3D9::LoadSettings()
+void RendererD3D9::LoadTransforms(const Pass& pass, const RenderSettings& settings)
 {
-	// Collect rendersettings
-	ParamListAccessNull listAccess(this);
-	RenderSettings settings(
-		m_Material->GetRenderer(),
-		m_Material,
-		m_Pipeline,
-		listAccess);
+	LUX_UNUSED(settings);
 
-	if(IsDirty(Dirty_MaterialRenderer)) {
-		SetDirty(Dirty_Lights);
-		SetDirty(Dirty_Fog);
-	}
-
-	LoadTransforms(settings);
-
-	LoadFogSettings(settings);
-
-	LoadLightSettings(settings);
-
-	// Enable the pipeline
-	if(IsDirty(Dirty_Pipeline)) {
-		m_State.EnablePipeline(settings.pipeline);
-		ClearDirty(Dirty_Pipeline);
-	}
-
-	// Begin the new renderer
-	auto newRenderer = settings.renderer;
-	if(IsDirty(Dirty_MaterialRenderer) || IsDirty(Dirty_Material)) {
-		if(m_MaterialRenderer)
-			m_MaterialRenderer->End(m_State);
-
-		if(newRenderer)
-			newRenderer->Begin(settings, m_State);
-
-		m_MaterialRenderer = newRenderer;
-
-		// Enable the d3d material
-		m_State.SetD3DMaterial(
-			GetParam(m_ParamId.ambient),
-			settings.pipeline,
-			settings.material);
-	}
-
-	if(m_MaterialRenderer->GetShader())
-		m_MaterialRenderer->GetShader()->LoadSettings(settings);
-}
-
-void RendererD3D9::LoadTransforms(const RenderSettings& settings)
-{
 	// Load transforms
 	if(m_RenderMode == ERenderMode::Mode3D) {
 		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode)) {
 			math::matrix4 projCopy = m_TransformProj; // The userset projection matrix
-			if(m_Pipeline.polygonOffset) {
+			if(pass.polygonOffset) {
 				const u32 zBits = m_Driver->GetConfig().zBits;
 				const u32 values = 1 << zBits;
 				const float min = 1.0f / values;
-				projCopy.AddTranslation(math::vector3f(0.0f, 0.0f, -min *m_Pipeline.polygonOffset));
+				projCopy.AddTranslation(math::vector3f(0.0f, 0.0f, -min * pass.polygonOffset));
 			}
 			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, projCopy);
 			SetDirty(Dirty_Transform);
@@ -439,27 +402,33 @@ void RendererD3D9::LoadTransforms(const RenderSettings& settings)
 	}
 
 	if(IsDirty(Dirty_Transform)) {
-		if(settings.renderer->GetShader() == nullptr) {
-			m_State.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
-			m_State.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
-			m_State.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
+		if(!pass.shader) {
+			m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
+			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
+			m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
 		}
 
 		ClearDirty(Dirty_Transform);
 	}
+
+	ClearDirty(Dirty_PolygonOffset);
 }
 
-void RendererD3D9::LoadFogSettings(const RenderSettings& settings)
+void RendererD3D9::LoadFogSettings(const Pass& pass, const RenderSettings& settings)
 {
+	LUX_UNUSED(settings);
+
+	bool useFog = pass.fogEnabled && m_Fog.isActive;
+	if(m_RenderMode == ERenderMode::Mode2D)
+		useFog = false;
+
+	bool useFixedFog = useFog;
+	if(pass.shader)
+		useFixedFog = false;
+
+	m_DeviceState.EnableFog(useFixedFog);
+
 	if(IsDirty(Dirty_Fog)) {
-		bool useFog = settings.pipeline.fogEnabled && m_Fog.isActive;
-		if(m_RenderMode == ERenderMode::Mode2D)
-			useFog = false;
-
-		bool useFixedFog = useFog;
-		if(settings.renderer->GetShader() != nullptr)
-			useFixedFog = false;
-
 		math::vector3f fogInfo;
 		fogInfo.x = useFog;
 		fogInfo.y =
@@ -469,48 +438,47 @@ void RendererD3D9::LoadFogSettings(const RenderSettings& settings)
 		fogInfo.z = 0;
 		GetParamInternal(m_ParamId.fogInfo) = fogInfo;
 
-		if(useFog) {
-			GetParamInternal(m_ParamId.fogColor) = m_Fog.color;
-			GetParamInternal(m_ParamId.fogRange) = math::vector3f(
-				m_Fog.start,
-				m_Fog.end,
-				m_Fog.density);
-		}
+		GetParamInternal(m_ParamId.fogColor) = m_Fog.color;
+		GetParamInternal(m_ParamId.fogRange) = math::vector3f(
+			m_Fog.start,
+			m_Fog.end,
+			m_Fog.density);
 
 		// Only use the fixed pipeline if there is no shader
-		m_State.SetFog(useFixedFog, m_Fog);
+		m_DeviceState.SetFog(m_Fog);
 		ClearDirty(Dirty_Fog);
 	}
 }
 
-void RendererD3D9::LoadLightSettings(const RenderSettings& settings)
+void RendererD3D9::LoadLightSettings(const Pass& pass, const RenderSettings& settings)
 {
+	LUX_UNUSED(settings);
+
+	bool useLights = pass.lighting;
+	if(m_RenderMode == ERenderMode::Mode2D)
+		useLights = false;
+
+	bool useFixedLights = useLights;
+	if(pass.shader)
+		useFixedLights = false;
+
+	m_DeviceState.EnableLight(useFixedLights);
+
 	if(IsDirty(Dirty_Lights)) {
-		bool useLights = settings.pipeline.lighting;
-		if(m_RenderMode == ERenderMode::Mode2D)
-			useLights = false;
-
-		bool useFixedLights = useLights;
-		if(settings.renderer->GetShader() != nullptr)
-			useFixedLights = false;
-
-		m_State.ClearLights(useFixedLights);
-		GetParam(m_ParamId.lighting) = settings.pipeline.lighting ? 1.0f : 0.0f;
-		if(useLights) {
-			// Only use the fixed pipeline if there is no shader
-			if(!settings.renderer->GetShader()) {
-				// Enable fixed pipeline lights
-				for(auto it = m_Lights.First(); it != m_Lights.End(); ++it)
-					m_State.EnableLight(*it);
-			} else {
-				// Generate light matrices and set as param.
-				for(size_t i = 0; i < m_Lights.Size(); ++i)
-					GetParamInternal(m_ParamId.lights[i]) = GenerateLightMatrix(m_Lights[i], true);
-			}
+		m_DeviceState.ClearLights();
+		GetParam(m_ParamId.lighting) = pass.lighting ? 1.0f : 0.0f;
+		// Only use the fixed pipeline if there is no shader
+		if(!pass.shader) {
+			// Enable fixed pipeline lights
+			for(auto it = m_Lights.First(); it != m_Lights.End(); ++it)
+				m_DeviceState.AddLight(*it);
+		} else {
+			// Generate light matrices and set as param.
+			for(size_t i = 0; i < m_Lights.Size(); ++i)
+				GetParamInternal(m_ParamId.lights[i]) = GenerateLightMatrix(m_Lights[i], true);
 		}
 		ClearDirty(Dirty_Lights);
 	}
-
 }
 
 void RendererD3D9::SetVertexFormat(const VertexFormat& format)

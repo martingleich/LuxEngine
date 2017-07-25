@@ -5,9 +5,21 @@
 namespace lux
 {
 
-const string string::EMPTY = string();
+namespace core
+{
+namespace Types
+{
+Type String()
+{
+	static const Type t(new core::TypeInfoTemplate<lux::String>("string"));
+	return t;
+}
+} // namespace Types
+}
 
-string::string() :
+const String String::EMPTY = String();
+
+String::String() :
 	m_Data(nullptr),
 	m_Allocated(0),
 	m_Size(0),
@@ -15,7 +27,7 @@ string::string() :
 {
 }
 
-string::string(const char* data, size_t length) :
+String::String(const char* data, size_t length) :
 	m_Data(nullptr),
 	m_Allocated(0),
 	m_Size(0),
@@ -49,7 +61,7 @@ string::string(const char* data, size_t length) :
 	m_Size = size;
 }
 
-string::string(const string& other) :
+String::String(const String& other) :
 	m_Data(nullptr),
 	m_Allocated(0),
 	m_Size(0),
@@ -62,7 +74,7 @@ string::string(const string& other) :
 	m_Size = other.m_Size;
 }
 
-string::string(string&& old) :
+String::String(String&& old) :
 	m_Data(old.m_Data),
 	m_Allocated(old.m_Allocated),
 	m_Size(old.m_Size),
@@ -74,19 +86,19 @@ string::string(string&& old) :
 	old.m_Length = 0;
 }
 
-string::~string()
+String::~String()
 {
 	if(!IsShortString())
 		delete[] m_Data;
 }
 
 
-string string::Copy()
+String String::Copy()
 {
-	return string(*this);
+	return String(*this);
 }
 
-void string::Reserve(size_t size)
+void String::Reserve(size_t size)
 {
 	size_t alloc = GetAllocated();
 	size_t newAlloc = size + 1;
@@ -110,7 +122,7 @@ void string::Reserve(size_t size)
 	SetAllocated(newAlloc);
 }
 
-string& string::operator=(const string& other)
+String& String::operator=(const String& other)
 {
 	if(this == &other)
 		return *this;
@@ -123,7 +135,7 @@ string& string::operator=(const string& other)
 	return *this;
 }
 
-string& string::operator=(const char* other)
+String& String::operator=(const char* other)
 {
 	if(Data_c() == other)
 		return *this;
@@ -141,9 +153,9 @@ string& string::operator=(const char* other)
 	return *this;
 }
 
-string& string::operator=(string&& old)
+String& String::operator=(String&& old)
 {
-	this->~string();
+	this->~String();
 	m_Data = old.m_Data;
 	m_Allocated = old.m_Allocated;
 	m_Size = old.m_Size;
@@ -156,18 +168,18 @@ string& string::operator=(string&& old)
 	return *this;
 }
 
-string& string::operator+=(const string_type& str)
+String& String::operator+=(const StringType& str)
 {
 	return Append(str);
 }
-string string::operator+(const string_type& str) const
+String String::operator+(const StringType& str) const
 {
-	string n(*this);
+	String n(*this);
 	n += str;
 	return n;
 }
 
-bool string::operator==(const string_type& other) const
+bool String::operator==(const StringType& other) const
 {
 	other.EnsureSize();
 	if(m_Size != other.size)
@@ -176,27 +188,24 @@ bool string::operator==(const string_type& other) const
 	return (memcmp(Data(), other.data, m_Size) == 0);
 }
 
-bool string::operator<(const string_type& other) const
+bool String::operator<(const StringType& other) const
 {
 	other.EnsureSize();
-
 	size_t s = m_Size < other.size ? m_Size : other.size;
-
-	// TODO: This is not the correct way to compare strings.
 	return (memcmp(Data(), other.data, s) < 0);
 }
 
-bool string::operator!=(const string_type& other) const
+bool String::operator!=(const StringType& other) const
 {
 	return !(*this == other);
 }
 
-bool string::Equal(const string_type& other) const
+bool String::Equal(const StringType& other) const
 {
 	return (*this == other);
 }
 
-bool string::EqualCaseInsensitive(const string_type& other) const
+bool String::EqualCaseInsensitive(const StringType& other) const
 {
 	other.EnsureSize();
 	if(m_Size != other.size)
@@ -220,7 +229,7 @@ bool string::EqualCaseInsensitive(const string_type& other) const
 	return (ac == bc);
 }
 
-bool string::SmallerCaseInsensitive(const string_type& other) const
+bool String::SmallerCaseInsensitive(const StringType& other) const
 {
 	const char* a = Data();
 	const char* b = other.data;
@@ -241,7 +250,7 @@ bool string::SmallerCaseInsensitive(const string_type& other) const
 	return (ac < bc);
 }
 
-string::ConstIterator string::Insert(ConstIterator pos, const string_type& other, size_t count)
+String::ConstIterator String::Insert(ConstIterator pos, const StringType& other, size_t count)
 {
 	lxAssert(pos.m_First == Data());
 
@@ -276,7 +285,7 @@ string::ConstIterator string::Insert(ConstIterator pos, const string_type& other
 	return ConstIterator(data + pos_off + size, Data_c());
 }
 
-string::ConstIterator string::Insert(ConstIterator pos, ConstIterator first, ConstIterator end)
+String::ConstIterator String::Insert(ConstIterator pos, ConstIterator first, ConstIterator end)
 {
 	// This assumes, string::ConstIterator point to a continues block of memory until end.
 	// This is always the case for string::ConstIterator.
@@ -301,7 +310,7 @@ string::ConstIterator string::Insert(ConstIterator pos, ConstIterator first, Con
 	return ConstIterator(data + pos_off + size, Data_c());
 }
 
-string& string::AppendRaw(const char* data, size_t bytes)
+String& String::AppendRaw(const char* data, size_t bytes)
 {
 	Reserve(bytes);
 	memcpy(Data() + m_Size, data, bytes);
@@ -311,25 +320,25 @@ string& string::AppendRaw(const char* data, size_t bytes)
 	return *this;
 }
 
-string& string::Append(const string_type& other, size_t count)
+String& String::Append(const StringType& other, size_t count)
 {
 	Insert(End(), other, count);
 	return *this;
 }
 
-string& string::Append(ConstIterator first, ConstIterator end)
+String& String::Append(ConstIterator first, ConstIterator end)
 {
 	Insert(End(), first, end);
 	return *this;
 }
 
-string& string::Append(ConstIterator character)
+String& String::Append(ConstIterator character)
 {
 	PushCharacter(character.Pointer());
 	return *this;
 }
 
-string& string::Append(u32 character)
+String& String::Append(u32 character)
 {
 	u8 buffer[6];
 	u8* end = core::CodePointToUTF8(character, buffer);
@@ -345,7 +354,7 @@ string& string::Append(u32 character)
 	return *this;
 }
 
-void string::Resize(size_t newLength, const string_type& filler)
+void String::Resize(size_t newLength, const StringType& filler)
 {
 	if(newLength == 0) {
 		m_Length = 0;
@@ -405,48 +414,48 @@ void string::Resize(size_t newLength, const string_type& filler)
 	Data()[m_Size] = 0;
 }
 
-void string::Clear()
+void String::Clear()
 {
 	Data()[0] = 0;
 	m_Length = 0;
 	m_Size = 0;
 }
 
-size_t string::Size() const
+size_t String::Size() const
 {
 	return m_Size;
 }
 
-size_t string::Length() const
+size_t String::Length() const
 {
 	return m_Length;
 }
 
-bool string::IsEmpty() const
+bool String::IsEmpty() const
 {
 	return (Size() == 0);
 }
 
-const char* string::Data_c() const
+const char* String::Data_c() const
 {
 	return Data();
 }
 
-const char* string::Data() const
+const char* String::Data() const
 {
 	if(IsShortString() || !m_Data)
 		return (const char*)&m_Data;
 	return m_Data;
 }
 
-char* string::Data()
+char* String::Data()
 {
 	if(IsShortString() || !m_Data)
 		return (char*)&m_Data;
 	return m_Data;
 }
 
-void string::PushByte(u8 byte)
+void String::PushByte(u8 byte)
 {
 	if(m_Size + 1 >= GetAllocated())
 		Reserve(GetAllocated() * 2 + 1);
@@ -462,17 +471,17 @@ void string::PushByte(u8 byte)
 		++m_Length;
 }
 
-string::ConstIterator string::Begin() const
+String::ConstIterator String::Begin() const
 {
 	return ConstIterator(Data_c() - 1, Data_c());
 }
 
-string::ConstIterator string::First() const
+String::ConstIterator String::First() const
 {
 	return ConstIterator(Data_c(), Data_c());
 }
 
-string::ConstIterator string::Last() const
+String::ConstIterator String::Last() const
 {
 	if(m_Size > 0)
 		return End() - 1;
@@ -480,12 +489,12 @@ string::ConstIterator string::Last() const
 		return End();
 }
 
-string::ConstIterator string::End() const
+String::ConstIterator String::End() const
 {
 	return ConstIterator(Data_c() + m_Size, Data_c());
 }
 
-bool string::StartsWith(const string_type& data, ConstIterator first) const
+bool String::StartsWith(const StringType& data, ConstIterator first) const
 {
 	if(first == ConstIterator::Invalid())
 		first = First();
@@ -504,7 +513,7 @@ bool string::StartsWith(const string_type& data, ConstIterator first) const
 	return true;
 }
 
-bool string::EndsWith(const string_type& data, ConstIterator end) const
+bool String::EndsWith(const StringType& data, ConstIterator end) const
 {
 	if(end == ConstIterator::Invalid())
 		end = End();
@@ -526,7 +535,7 @@ bool string::EndsWith(const string_type& data, ConstIterator end) const
 	return (i == data.size);
 }
 
-size_t string::Replace(const string_type& replace, const string_type& search, ConstIterator first, ConstIterator end)
+size_t String::Replace(const StringType& replace, const StringType& search, ConstIterator first, ConstIterator end)
 {
 	if(end == ConstIterator::Invalid())
 		end = End();
@@ -549,7 +558,7 @@ size_t string::Replace(const string_type& replace, const string_type& search, Co
 	return count;
 }
 
-string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIterator rangeFirst, ConstIterator rangeEnd)
+String::ConstIterator String::ReplaceRange(const StringType& replace, ConstIterator rangeFirst, ConstIterator rangeEnd)
 {
 	if(rangeEnd == ConstIterator::Invalid())
 		rangeEnd = End();
@@ -557,7 +566,7 @@ string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIter
 	return ReplaceRange(replace, rangeFirst, core::IteratorDistance(rangeFirst, rangeEnd));
 }
 
-string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIterator rangeFirst, size_t count)
+String::ConstIterator String::ReplaceRange(const StringType& replace, ConstIterator rangeFirst, size_t count)
 {
 	lxAssert(rangeFirst.m_First == Data());
 
@@ -582,7 +591,7 @@ string::ConstIterator string::ReplaceRange(const string_type& replace, ConstIter
 	return ConstIterator(data + replaceOffset + replacedSize, data);
 }
 
-string::ConstIterator string::Find(const string_type& search, ConstIterator first, ConstIterator end) const
+String::ConstIterator String::Find(const StringType& search, ConstIterator first, ConstIterator end) const
 {
 	if(first == ConstIterator::Invalid())
 		first = First();
@@ -606,7 +615,7 @@ string::ConstIterator string::Find(const string_type& search, ConstIterator firs
 	return end;
 }
 
-string::ConstIterator string::FindReverse(const string_type& search, ConstIterator first, ConstIterator end) const
+String::ConstIterator String::FindReverse(const StringType& search, ConstIterator first, ConstIterator end) const
 {
 	if(first == ConstIterator::Invalid())
 		first = First();
@@ -635,19 +644,19 @@ string::ConstIterator string::FindReverse(const string_type& search, ConstIterat
 	return end;
 }
 
-string string::SubString(ConstIterator first, size_t count) const
+String String::SubString(ConstIterator first, size_t count) const
 {
 	lxAssert(first.m_First == Data());
 
-	return string(first.Pointer(), count);
+	return String(first.Pointer(), count);
 }
 
-string string::SubString(ConstIterator first, ConstIterator end) const
+String String::SubString(ConstIterator first, ConstIterator end) const
 {
 	lxAssert(first.m_First == Data());
 	lxAssert(end.m_First == Data());
 
-	string out;
+	String out;
 	ConstIterator it = first;
 	while(it != end) {
 		out.Append(it);
@@ -657,7 +666,7 @@ string string::SubString(ConstIterator first, ConstIterator end) const
 	return out;
 }
 
-size_t string::Pop(size_t count)
+size_t String::Pop(size_t count)
 {
 	ConstIterator it = Last();
 	size_t oldCount = count;
@@ -681,7 +690,7 @@ size_t string::Pop(size_t count)
 	return removed;
 }
 
-string::ConstIterator string::Remove(ConstIterator pos, size_t count)
+String::ConstIterator String::Remove(ConstIterator pos, size_t count)
 {
 	lxAssert(pos.m_First == Data());
 
@@ -703,12 +712,12 @@ string::ConstIterator string::Remove(ConstIterator pos, size_t count)
 	return ConstIterator(data + removeOffset, m_Data);
 }
 
-string::ConstIterator string::Remove(ConstIterator from, ConstIterator to)
+String::ConstIterator String::Remove(ConstIterator from, ConstIterator to)
 {
 	return Remove(from, core::IteratorDistance(from, to));
 }
 
-string& string::RStrip(ConstIterator end)
+String& String::RStrip(ConstIterator end)
 {
 	if(end == ConstIterator::Invalid())
 		end = End();
@@ -740,7 +749,7 @@ string& string::RStrip(ConstIterator end)
 	return *this;
 }
 
-string& string::LStrip(ConstIterator first)
+String& String::LStrip(ConstIterator first)
 {
 	if(first == ConstIterator::Invalid())
 		first = First();
@@ -764,12 +773,12 @@ string& string::LStrip(ConstIterator first)
 	return *this;
 }
 
-size_t string::Split(u32 ch, string* outArray, size_t maxCount) const
+size_t String::Split(u32 ch, String* outArray, size_t maxCount) const
 {
 	if(maxCount == 0)
 		return 0;
 
-	string* cur = outArray;
+	String* cur = outArray;
 	size_t count = 1;
 	cur->Clear();
 	for(auto it = First(); it != End(); ++it) {
@@ -787,10 +796,10 @@ size_t string::Split(u32 ch, string* outArray, size_t maxCount) const
 	return count;
 }
 
-core::array<string> string::Split(u32 ch) const
+core::Array<String> String::Split(u32 ch) const
 {
-	core::array<string> out;
-	string buffer;
+	core::Array<String> out;
+	String buffer;
 	for(auto it = First(); it != End(); ++it) {
 		if(*it == ch) {
 			out.PushBack(std::move(buffer));
@@ -803,7 +812,7 @@ core::array<string> string::Split(u32 ch) const
 	return out;
 }
 
-EStringType string::Classify() const
+EStringType String::Classify() const
 {
 	size_t alphaCount = 0;
 	size_t digitCount = 0;
@@ -846,9 +855,9 @@ EStringType string::Classify() const
 	return out;
 }
 
-string string::GetLower() const
+String String::GetLower() const
 {
-	string out;
+	String out;
 	out.Reserve(Size());
 
 	for(auto it = First(); it != End(); ++it) {
@@ -859,9 +868,9 @@ string string::GetLower() const
 	return out;
 }
 
-string string::GetUpper() const
+String String::GetUpper() const
 {
-	string out;
+	String out;
 	out.Reserve(Size());
 
 	for(auto it = First(); it != End(); ++it) {
@@ -872,27 +881,27 @@ string string::GetUpper() const
 	return out;
 }
 
-bool string::IsShortString() const
+bool String::IsShortString() const
 {
 	return m_Allocated <= MaxShortStringBytes();
 }
 
-size_t string::GetAllocated() const
+size_t String::GetAllocated() const
 {
 	return m_Allocated;
 }
 
-void string::SetAllocated(size_t a)
+void String::SetAllocated(size_t a)
 {
 	m_Allocated = a;
 }
 
-size_t string::MaxShortStringBytes() const
+size_t String::MaxShortStringBytes() const
 {
 	return sizeof(m_Data);
 }
 
-void string::PushCharacter(const char* ptr)
+void String::PushCharacter(const char* ptr)
 {
 	if(m_Size + 6 >= GetAllocated()) // Maximal 6 utf-8 bytes
 		Reserve(GetAllocated() * 2 + 6);

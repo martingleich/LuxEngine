@@ -223,7 +223,15 @@ inline void conv_data(format::Context& ctx, Color format, format::Placeholder& p
 
 namespace core
 {
-template<> inline Type GetTypeInfo<video::Color>() { return Type::Color; }
+namespace Types
+{
+inline Type Color()
+{
+	static const Type t(new core::TypeInfoTemplate<video::Color>("color"));
+	return t;
+}
+}
+template<> inline Type GetTypeInfo<video::Color>() { return Types::Color(); }
 } // namespace core
 
 namespace math

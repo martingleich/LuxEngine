@@ -7,6 +7,8 @@
 #include "core/lxAlgorithm.h"
 #include "core/ReferableRegister.h"
 
+LUX_REGISTER_REFERABLE_CLASS("lux.resource.Mesh", lux::video::StaticMesh);
+
 namespace lux
 {
 namespace video
@@ -109,7 +111,7 @@ void StaticMesh::SetMaterial(size_t index, Material* m)
 	m_Data.At(index).mat = m;
 }
 
-core::Name StaticMesh::GetReferableSubType() const
+core::Name StaticMesh::GetReferableType() const
 {
 	return core::ResourceType::Mesh;
 }

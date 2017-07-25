@@ -43,7 +43,7 @@ private:
 		bool markForDelete;
 	};
 
-	typedef core::array<ComponentEntry> SceneNodeComponentList;
+	typedef core::Array<ComponentEntry> SceneNodeComponentList;
 
 public:
 	class ComponentIterator : core::BaseIterator<core::BidirectionalIteratorTag, Component*>
@@ -550,8 +550,7 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API StrongRef<Referable> Clone() const;
-	LUX_API core::Name GetReferableType() const;
-	LUX_API virtual core::Name GetReferableSubType() const;
+	LUX_API virtual core::Name GetReferableType() const;
 
 	////////////////////////////////////////////////////////////////////////////////
 

@@ -10,24 +10,24 @@ namespace io
 {
 
 class FileSystem;
-using Win32Path = core::array<u16>;
+using Win32Path = core::Array<u16>;
 
 class ArchiveFolderWin32 : public Archive
 {
 public:
-	ArchiveFolderWin32(io::FileSystem* fileSystem, const path& dir);
+	ArchiveFolderWin32(io::FileSystem* fileSystem, const Path& dir);
 	~ArchiveFolderWin32();
-	StrongRef<File> OpenFile(const path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
+	StrongRef<File> OpenFile(const Path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	bool ExistFile(const path& p);
-	StrongRef<FileEnumerator> EnumerateFiles(const path& subDir = string::EMPTY);
+	bool ExistFile(const Path& p);
+	StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = String::EMPTY);
 	EArchiveCapabilities GetCaps() const;
-	path GetAbsolutePath(const path& p);
+	Path GetAbsolutePath(const Path& p);
 
 private:
-	void SetPath(const path& dir);
-	Win32Path ConvertPathToWin32WidePath(const path& p) const;
-	u32 GetWin32FileAttributes(const path& p) const;
+	void SetPath(const Path& dir);
+	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
+	u32 GetWin32FileAttributes(const Path& p) const;
 
 private:
 	struct SelfData;
@@ -40,7 +40,7 @@ public:
 	ArchiveLoaderFolderWin32(FileSystem* fileSystem);
 	~ArchiveLoaderFolderWin32();
 
-	bool CanLoadFile(const path& p)
+	bool CanLoadFile(const Path& p)
 	{
 		LUX_UNUSED(p);
 		return true;
@@ -52,7 +52,7 @@ public:
 		return false;
 	}
 
-	StrongRef<Archive> LoadArchive(const path& p);
+	StrongRef<Archive> LoadArchive(const Path& p);
 	StrongRef<Archive> LoadArchive(File* f)
 	{
 		LUX_UNUSED(f);

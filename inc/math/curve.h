@@ -80,7 +80,7 @@ public:
 			else
 				m_Samples.PushBack(Sample(x, value));
 		} else {
-			typename core::array<Sample>::Iterator n, i;
+			typename core::Array<Sample>::Iterator n, i;
 			Sample dummy;
 			dummy.x = x;
 			n = core::BinarySearch(dummy, m_Samples.First(), m_Samples.End(), &i);
@@ -333,7 +333,7 @@ private:
 	//! The index of the next element >= x, to the right.
 	u32 GetUpperBound(float x) const
 	{
-		typename core::array<Sample>::ConstIterator n, i;
+		typename core::Array<Sample>::ConstIterator n, i;
 		Sample dummy;
 		dummy.x = x;
 		n = core::BinarySearch(dummy, m_Samples.First(), m_Samples.End(), &i);
@@ -344,7 +344,7 @@ private:
 	}
 
 private:
-	core::array<Sample> m_Samples;
+	core::Array<Sample> m_Samples;
 	EEdgeHandling m_EdgeHandling;
 	EInterpolation m_Interpolation;
 };

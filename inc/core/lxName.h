@@ -33,15 +33,15 @@ public:
 	void SetHandle(StringTableHandle handle);
 	Name& operator=(const Name& other);
 	Name& operator=(const char* str);
-	Name& operator=(const string& str);
+	Name& operator=(const String& str);
 
 	const char* c_str() const;
 	bool operator==(const Name& other) const;
 	bool operator==(const char* str) const;
-	bool operator==(const string& str) const;
+	bool operator==(const String& str) const;
 	bool operator!=(const Name& other) const;
 	bool operator!=(const char* str) const;
-	bool operator!=(const string& str) const;
+	bool operator!=(const String& str) const;
 
 	operator bool() const
 	{
@@ -53,7 +53,7 @@ public:
 	bool IsEmpty() const;
 
 	void Set(const char* str, int action = ADD, StringTable* table = nullptr);
-	void Set(const string& str, int action = ADD, StringTable* table = nullptr);
+	void Set(const String& str, int action = ADD, StringTable* table = nullptr);
 
 private:
 	StringTableHandle m_Handle;
@@ -69,12 +69,12 @@ inline bool operator!=(const char* cstr, const Name& namestring)
 	return (namestring != cstr);
 }
 
-inline bool operator==(const string& str, const Name& namestring)
+inline bool operator==(const String& str, const Name& namestring)
 {
 	return (namestring == str);
 }
 
-inline bool operator!=(const string& str, const Name& namestring)
+inline bool operator!=(const String& str, const Name& namestring)
 {
 	return (namestring != str);
 }

@@ -43,16 +43,17 @@ public:
 		return m_Triangles[id];
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "mesh";
-		return name;
+		return TypeName;
 	}
 
 	StrongRef<Referable> Clone() const
 	{
-		return new MeshCollider(*this);
+		return LUX_NEW(MeshCollider)(*this);
 	}
+
+	static const core::Name TypeName;
 
 private:
 	struct FindEntry
@@ -79,8 +80,8 @@ private:
 	bool SelectFirstTriangle(const math::line3df& line, math::vector3f& pos, size_t& triId, float& distance, bool testOnly);
 
 private:
-	core::array<math::triangle3df> m_Triangles;
-	core::array<FindEntry> m_Temp;
+	core::Array<math::triangle3df> m_Triangles;
+	core::Array<FindEntry> m_Temp;
 	math::aabbox3df m_BoundingBox;
 };
 

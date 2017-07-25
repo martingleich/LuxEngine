@@ -58,6 +58,16 @@ public:
 	{
 	}
 
+	//! Remove all referenced when copying a refernec counted object.
+	ReferenceCounted(const ReferenceCounted&) :
+		m_ReferenceCounter(0),
+		m_FirstWeak(nullptr)
+	{
+	}
+
+	//! Don't allow assignment.
+	ReferenceCounted& operator=(const ReferenceCounted& other) = delete;
+
 	inline virtual ~ReferenceCounted();
 
 	//! Reserve this object for me

@@ -128,7 +128,7 @@ StringTableHandle StringTable::FindString(const char* str)
 	return AddFindString(str, true);
 }
 
-StringTableHandle StringTable::FindString(const string& str)
+StringTableHandle StringTable::FindString(const String& str)
 {
 	return AddFindString(str.Data(), true);
 }
@@ -138,7 +138,7 @@ StringTableHandle StringTable::AddString(const char* str)
 	return AddFindString(str, false);
 }
 
-StringTableHandle StringTable::AddString(const string& str)
+StringTableHandle StringTable::AddString(const String& str)
 {
 	return AddFindString(str.Data(), false);
 }

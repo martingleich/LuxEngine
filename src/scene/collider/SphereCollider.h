@@ -54,16 +54,17 @@ public:
 			m_Center + math::vector3f(m_Radius, m_Radius, m_Radius));
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "sphere";
-		return name;
+		return TypeName;
 	}
 
 	StrongRef<Referable> Clone() const
 	{
-		return new SphereCollider(*this);
+		return LUX_NEW(SphereCollider)(*this);
 	}
+
+	static const core::Name TypeName;
 
 private:
 	float m_Radius;
@@ -82,16 +83,17 @@ public:
 
 	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result);
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "bounding_sphere";
-		return name;
+		return TypeName;
 	}
 
 	StrongRef<Referable> Clone() const
 	{
-		return new BoundingSphereCollider(*this);
+		return LUX_NEW(BoundingSphereCollider)(*this);
 	}
+
+	static const core::Name TypeName;
 };
 
 }

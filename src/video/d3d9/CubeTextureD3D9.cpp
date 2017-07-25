@@ -130,13 +130,7 @@ ColorFormat CubeTextureD3D9::GetColorFormat() const
 	return m_Format;
 }
 
-StrongRef<Referable> CubeTextureD3D9::Clone() const
-{
-	return new CubeTextureD3D9(m_D3DDevice);
 }
-
-}
-
 }
 
 #endif // LUX_COMPILE_WITH_D3D9

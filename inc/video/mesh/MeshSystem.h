@@ -33,7 +33,7 @@ public:
 	The library takes ownege of the creator.
 	\param creator The creator to add.
 	*/
-	LUX_API void AddCreator(GeometryCreator* creator);
+	LUX_API StrongRef<GeometryCreator> AddCreator(GeometryCreator* creator);
 
 	//! Removes a creator from the library.
 	LUX_API void RemoveCreator(GeometryCreator* creator);
@@ -42,7 +42,7 @@ public:
 	LUX_API size_t GetCreatorCount() const;
 
 	//! Retrieve a geometry creator based on it's name.
-	LUX_API StrongRef<GeometryCreator> GetCreatorByName(const string& name) const;
+	LUX_API StrongRef<GeometryCreator> GetCreatorByName(const String& name) const;
 
 	//! Returns a creator by it's index.
 	LUX_API StrongRef<GeometryCreator> GetCreatorById(size_t id) const;
@@ -52,7 +52,7 @@ public:
 	\param name The name of the geometry creator.
 	\return A param package puffer matching the geometry creator
 	*/
-	LUX_API core::PackagePuffer GetCreatorParams(const string& name);
+	LUX_API core::PackagePuffer GetCreatorParams(const String& name);
 
 	//! Create a new mesh
 	/**
@@ -61,7 +61,7 @@ public:
 	\param params The parameter for the geometry creator, retrieved by \ref GetCreatorParams
 	\return A newly created mesh
 	*/
-	LUX_API StrongRef<Mesh> CreateMesh(const string& name, const core::PackagePuffer& params);
+	LUX_API StrongRef<Mesh> CreateMesh(const String& name, const core::PackagePuffer& params);
 
 	//! Create a new sub mesh.
 	/**
@@ -69,7 +69,7 @@ public:
 	\param params The parameter for the geometry creator, retrieved by \ref GetCreatorParams
 	\return A newly created sub mesh.
 	*/
-	LUX_API StrongRef<Geometry> CreateGeometry(const string& name, const core::PackagePuffer& params);
+	LUX_API StrongRef<Geometry> CreateGeometry(const String& name, const core::PackagePuffer& params);
 
 	//! Create a new plane mesh.
 	/**
@@ -149,7 +149,7 @@ private:
 private:
 	StrongRef<MaterialLibrary> m_MatLib;
 
-	core::HashMap<string, StrongRef<GeometryCreator>> m_Creators;
+	core::HashMap<String, StrongRef<GeometryCreator>> m_Creators;
 
 	StrongRef<GeometryCreator> m_PlaneCreator;
 	StrongRef<GeometryCreator> m_SphereUVCreator;

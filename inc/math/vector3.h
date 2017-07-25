@@ -570,18 +570,18 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 	bool printLength = placeholder.hash.IsEnabled();
 	placeholder.hash.Disable();
 
-	ConvertAddString(ctx, StringType::Ascii, "[x=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, "[x=", 3);
 	conv_data(ctx, v.x, placeholder);
-	ConvertAddString(ctx, StringType::Ascii, " y=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, " y=", 3);
 	conv_data(ctx, v.y, placeholder);
-	ConvertAddString(ctx, StringType::Ascii, " z=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, " z=", 3);
 	conv_data(ctx, v.z, placeholder);
 	if(printLength) {
-		ConvertAddString(ctx, StringType::Ascii, " len=", 5);
+		ConvertAddString(ctx, format::StringType::Ascii, " len=", 5);
 		conv_data(ctx, v.GetLength(), placeholder);
 	}
 
-	ConvertAddString(ctx, StringType::Ascii, "]", 1);
+	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
 }
 
 template <typename T>
@@ -606,8 +606,14 @@ bool IsZero(const vector3<T>& v, const T tolerance = math::Constants<T>::roundin
 
 namespace core
 {
-template<> inline Type GetTypeInfo<math::vector3<float>>() { return Type::Vector3; };
-template<> inline Type GetTypeInfo<math::vector3<int>>() { return Type::Vector3Int; };
+namespace Types
+{
+LUX_API Type Vector3f();
+LUX_API Type Vector3i();
+}
+
+template<> inline Type GetTypeInfo<math::vector3<float>>() { return Types::Vector3f(); };
+template<> inline Type GetTypeInfo<math::vector3<int>>() { return Types::Vector3i(); };
 } // namespace core
 
 } // namespace lux

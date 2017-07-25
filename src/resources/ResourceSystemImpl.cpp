@@ -17,27 +17,27 @@ namespace core
 
 namespace ResourceType
 {
-const Name Image = "image";
-const Name ImageList = "imagelist";
-const Name Texture = "texture";
-const Name CubeTexture = "cubetexture";
-const Name Mesh = "mesh";
-const Name Font = "font";
-const Name Sound = "sound";
-const Name Material = "material";
+const Name Image = "lux.resource.Image";
+const Name ImageList = "lux.resouce.Imagelist";
+const Name Texture = "lux.resource.Texture";
+const Name CubeTexture = "lux.resource.CubeTexture";
+const Name Mesh = "lux.resource.Mesh";
+const Name Font = "lux.resource.Font";
+const Name Sound = "lux.resource.Sound";
+const Name Material = "lux.resource.Material";
 }
 
 static u32 INVALID_ID = 0xFFFFFFFF;
 
 struct Entry
 {
-	string name;
+	String name;
 	StrongRef<Resource> resource;
 
 	Entry()
 	{
 	}
-	Entry(const string& n, Resource* r) : name(n), resource(r)
+	Entry(const String& n, Resource* r) : name(n), resource(r)
 	{
 	}
 
@@ -87,7 +87,7 @@ struct LoaderEntry
 
 struct ResourceBlock
 {
-	core::array<Entry> resources;
+	core::Array<Entry> resources;
 
 	u32 Size() const
 	{
@@ -99,7 +99,7 @@ struct ResourceBlock
 		return resources.At(id).resource;
 	}
 
-	const string& GetName(u32 id) const
+	const String& GetName(u32 id) const
 	{
 		return resources.At(id).name;
 	}
@@ -114,7 +114,7 @@ struct ResourceBlock
 		return INVALID_ID;
 	}
 
-	u32 GetResourceId(const string& name) const
+	u32 GetResourceId(const String& name) const
 	{
 		if(name.IsEmpty())
 			return INVALID_ID;
@@ -127,7 +127,7 @@ struct ResourceBlock
 		return (u32)core::IteratorDistance(resources.First(), it);
 	}
 
-	void AddResource(const string& name, Resource* resource)
+	void AddResource(const String& name, Resource* resource)
 	{
 		lxAssert(resource);
 		if(!resource)
@@ -137,7 +137,7 @@ struct ResourceBlock
 			throw core::InvalidArgumentException("name", "Must not be empty");
 
 		Entry entry(name, resource);
-		core::array<Entry>::Iterator n;
+		core::Array<Entry>::Iterator n;
 		auto it = core::BinarySearch(entry, resources.First(), resources.End(), &n);
 		if(it != resources.End())
 			throw core::Exception("Resource already exists");
@@ -169,11 +169,11 @@ struct ResourceBlock
 
 struct ResourceSystemImpl::SelfType
 {
-	core::array<LoaderEntry> loaders;
-	core::array<StrongRef<ResourceWriter>> writers;
+	core::Array<LoaderEntry> loaders;
+	core::Array<StrongRef<ResourceWriter>> writers;
 
-	core::array<TypeEntry> types;
-	core::array<ResourceBlock> resources;
+	core::Array<TypeEntry> types;
+	core::Array<ResourceBlock> resources;
 
 	io::FileSystem* fileSystem;
 	core::ReferableFactory* refFactory;
@@ -200,7 +200,7 @@ u32 ResourceSystemImpl::GetResourceCount(Name type) const
 	return (u32)self->resources[typeID].Size();
 }
 
-const string& ResourceSystemImpl::GetResourceName(Name type, u32 id) const
+const String& ResourceSystemImpl::GetResourceName(Name type, u32 id) const
 {
 	const u32 typeId = GetTypeID(type);
 	if(typeId > GetTypeCount())
@@ -214,7 +214,7 @@ u32 ResourceSystemImpl::GetResourceId(Resource* resource) const
 	if(!resource)
 		throw core::InvalidArgumentException("resource", "Must not be null");
 
-	const u32 typeId = GetTypeID(resource->GetReferableSubType());
+	const u32 typeId = GetTypeID(resource->GetReferableType());
 
 	const u32 resId = self->resources[typeId].GetResourceId(resource);
 	if(resId == INVALID_ID)
@@ -223,7 +223,7 @@ u32 ResourceSystemImpl::GetResourceId(Resource* resource) const
 	return resId;
 }
 
-u32 ResourceSystemImpl::GetResourceId(Name type, const string& name) const
+u32 ResourceSystemImpl::GetResourceId(Name type, const String& name) const
 {
 	u32 id = GetResourceIdUnsafe(type, name);
 	if(id == INVALID_ID)
@@ -232,7 +232,7 @@ u32 ResourceSystemImpl::GetResourceId(Name type, const string& name) const
 	return id;
 }
 
-u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const string& name) const
+u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const String& name) const
 {
 	if(name.IsEmpty())
 		throw core::InvalidArgumentException("name", "Must not be empty");
@@ -243,19 +243,19 @@ u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const string& name) const
 		return INVALID_ID; 
 
 	if(self->fileSystem->ExistFile(name)) {
-		const string abs_path = self->fileSystem->GetAbsoluteFilename(name);
+		const String abs_path = self->fileSystem->GetAbsoluteFilename(name);
 		return self->resources[typeId].GetResourceId(abs_path);
 	} else {
 		return self->resources[typeId].GetResourceId(name);
 	}
 }
 
-void ResourceSystemImpl::AddResource(const string& name, Resource* resource)
+void ResourceSystemImpl::AddResource(const String& name, Resource* resource)
 {
 	if(!resource)
 		throw core::InvalidArgumentException("resource", "Must not be null");
 
-	const u32 typeId = GetTypeID(resource->GetReferableSubType());
+	const u32 typeId = GetTypeID(resource->GetReferableType());
 	if(self->types[typeId].isCached == false)
 		return;
 
@@ -291,7 +291,7 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, u32 id)
 	return self->resources[typeId].GetResource(id);
 }
 
-StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const string& name)
+StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const String& name)
 {
 	if(name.IsEmpty())
 		return nullptr;
@@ -328,7 +328,7 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, io::File* file)
 	return resource;
 }
 
-StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, const string& name)
+StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, const String& name)
 {
 	if(name.IsEmpty())
 		return nullptr;
@@ -349,7 +349,9 @@ StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, io::File* file
 		throw core::FileFormatException("File format not supported", type.c_str());
 
 	// TODO: Use origin and originloader to load data
-	StrongRef<Resource> resource = self->refFactory->Create(ReferableType::Resource, type).As<Resource>();
+	StrongRef<Resource> resource = self->refFactory->Create(type).As<Resource>();
+	if(!resource)
+		throw core::InvalidArgumentException("type", "Is no valid resource type");
 
 	const u32 oldCursor = file->GetCursor();
 	try {
@@ -397,7 +399,7 @@ u32 ResourceSystemImpl::GetResourceWriterCount() const
 	return self->writers.Size();
 }
 
-StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(core::Name resourceType, const string& ext) const
+StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(core::Name resourceType, const String& ext) const
 {
 	for(auto it = self->writers.Last(); it != self->writers.Begin(); --it) {
 		bool canWrite = (*it)->CanWriteType(ext, resourceType);
@@ -413,16 +415,16 @@ StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(u32 id) const
 	return self->writers.At(id);
 }
 
-void ResourceSystemImpl::WriteResource(Resource* resource,  io::File* file, const string& ext)  const
+void ResourceSystemImpl::WriteResource(Resource* resource,  io::File* file, const String& ext)  const
 {
-	auto writer = GetResourceWriter(resource->GetReferableSubType(), ext);
+	auto writer = GetResourceWriter(resource->GetReferableType(), ext);
 	if(!writer)
 		throw core::FileFormatException("File format not supported", ext.Data());
 
 	writer->WriteResource(file, resource);
 }
 
-void ResourceSystemImpl::WriteResource(Resource* resource, const io::path& path) const
+void ResourceSystemImpl::WriteResource(Resource* resource, const io::Path& path) const
 {
 	auto file = io::FileSystem::Instance()->OpenFile(path, io::EFileMode::Write, true);
 	auto ext = io::GetFileExtension(path);

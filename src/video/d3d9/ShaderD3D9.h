@@ -25,16 +25,17 @@ public:
 	void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
-		core::array<string>* errorList);
+		core::Array<String>* errorList);
 
 	void Enable();
-	void LoadSettings(const RenderSettings& settings);
+	void SetParam(const void* data, u32 paramId);
+	void LoadSceneParams(const RenderSettings& settings, u32 baseLayer);
 	void Disable();
 
-	const core::ParamPackage& GetParamPackage() const;
-	core::PackageParam ParamDefault(const string_type& param);
 	size_t GetSceneParamCount() const;
 	u32 GetSceneParam(size_t id) const;
+	bool HasTextureSceneParam() const;
+	const core::ParamPackage& GetParamPackage() const;
 
 private:
 	enum EParamType
@@ -74,6 +75,7 @@ private:
 		DefaultParam_Specular = 3,
 		DefaultParam_Ambient = 4,
 		DefaultParam_Power = 5,
+		DefaultParam_COUNT
 	};
 
 	struct HelperEntry
@@ -126,12 +128,12 @@ private:
 private:
 	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
 
-	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, core::array<string>* errorList);
+	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<String>* errorList);
 
 	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(const char* code, const char* entryPoint, size_t length, const char* profile,
-		core::array<string>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
+		core::Array<String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile,
-		core::array<string>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
+		core::Array<String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 
 	void SetShaderValue(const Param& p, const void* data);
 
@@ -152,8 +154,9 @@ private:
 	UnknownRefCounted<IDirect3DVertexShader9> m_VertexShader;
 	UnknownRefCounted<IDirect3DPixelShader9> m_PixelShader;
 
-	core::array<Param> m_Params;
-	core::array<Param> m_SceneValues;
+	core::Array<Param> m_Params;
+	core::Array<Param> m_SceneValues;
+	bool m_HasTextureSceneParam;
 
 	core::mem::RawMemory m_Names;
 	core::ParamPackage m_ParamPackage;

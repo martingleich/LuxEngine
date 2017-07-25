@@ -79,7 +79,7 @@ public:
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
-		core::array<string>* errorList) = 0;
+		core::Array<String>* errorList) = 0;
 
 	virtual EDriverType GetVideoDriverType() const = 0;
 	virtual const DriverConfig& GetConfig() const = 0;

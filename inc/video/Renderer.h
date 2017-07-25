@@ -176,7 +176,7 @@ public:
 	\return The id which was assign to this scene parameter
 	\throws InvalidArgumentException If the name is already in use
 	*/
-	virtual u32 AddParam(const string_type& name, core::Type type) = 0;
+	virtual u32 AddParam(const StringType& name, core::Type type) = 0;
 
 	//! Retrieve a scene parameter by it's id
 	virtual core::PackageParam GetParam(u32 id) = 0;
@@ -185,7 +185,7 @@ public:
 	/**
 	\throws ObjectNotFoundException If the parameter can not be found
 	*/
-	virtual core::PackageParam GetParam(const string_type& string) = 0;
+	virtual core::PackageParam GetParam(const StringType& string) = 0;
 
 	//! Get the total number of parameters
 	/**
@@ -248,6 +248,30 @@ public:
 
 	//! Retrieve the driver owning this renderer
 	virtual VideoDriver* GetDriver() const = 0;
+};
+
+struct PipelineOverwriteToken
+{
+	PipelineOverwriteToken(Renderer* renderer, const PipelineOverwrite& overwrite) :
+		m_Renderer(renderer)
+	{
+		if(m_Renderer)
+			m_Renderer->PushPipelineOverwrite(overwrite);
+	}
+
+	~PipelineOverwriteToken()
+	{
+		if(m_Renderer)
+			m_Renderer->PopPipelineOverwrite();
+	}
+
+	void Unlock()
+	{
+		m_Renderer = nullptr;
+	}
+
+private:
+	Renderer* m_Renderer;
 };
 
 } // namespace video

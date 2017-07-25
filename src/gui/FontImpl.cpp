@@ -5,37 +5,15 @@
 #include "core/ReferableRegister.h"
 #include "video/VertexTypes.h"
 #include "video/MaterialLibrary.h"
-#include "video/PipelineSettings.h"
 #include "video/AlphaSettings.h"
 #include "video/images/ImageSystem.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::gui::FontImpl);
+LUX_REGISTER_REFERABLE_CLASS("lux.resource.Font", lux::gui::FontImpl);
 
 namespace lux
 {
 namespace gui
 {
-
-static StrongRef<video::MaterialRenderer> FONT_RENDERER;
-
-void FontImpl::InitFontData()
-{
-	FONT_RENDERER = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
-	video::PipelineSettings ps = FONT_RENDERER->GetPipeline();
-	ps.zWriteEnabled = false;
-	ps.zBufferFunc = video::EZComparisonFunc::Always;
-	ps.backfaceCulling = false;
-	ps.lighting = false;
-	ps.fogEnabled = false;
-	ps.useVertex = true;
-	FONT_RENDERER->SetPipeline(ps);
-}
-
-void FontImpl::DestroyFontData()
-{
-	video::MaterialLibrary::Instance()->RemoveMaterialRenderer(FONT_RENDERER);
-	FONT_RENDERER = nullptr;
-}
 
 FontImpl::FontImpl()
 {
@@ -57,7 +35,7 @@ void FontImpl::Init(const FontCreationData& data)
 	m_BaseLine = data.baseLine;
 	m_CharMap = data.charMap;
 
-	string errorChars = "? ";
+	String errorChars = "? ";
 
 	for(auto it = errorChars.First(); it != errorChars.End(); ++it) {
 		auto jt = m_CharMap.Find(*it);
@@ -97,10 +75,23 @@ void FontImpl::Init(const FontCreationData& data)
 		m_Texture = nullptr;
 	}
 
+	video::MaterialRenderer* renderer;
+	if(!video::MaterialLibrary::Instance()->ExistsMaterialRenderer("font", &renderer)) {
+		renderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
+		video::Pass pass = renderer->GetPass(0);
+		pass.zWriteEnabled = false;
+		pass.zBufferFunc = video::EZComparisonFunc::Always;
+		pass.backfaceCulling = false;
+		pass.lighting = false;
+		pass.fogEnabled = false;
+		pass.useVertexColor = true;
+		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+		pass.alphaOperator = video::EBlendOperator::Add;
+		renderer->AddParam("texture", 0, (u32)video::EOptionId::Layer0);
+	}
 
-	m_Material = FONT_RENDERER->CreateMaterial();
-	video::AlphaBlendSettings alpha(video::EBlendFactor::SrcAlpha, video::EBlendFactor::OneMinusSrcAlpha, video::EBlendOperator::Add);
-	m_Material->Param("blendFunc") = alpha.Pack();
+	m_Material = renderer->CreateMaterial();
 
 	if(m_Texture)
 		m_Material->Layer(0) = m_Texture;
@@ -121,7 +112,7 @@ void FontImpl::SetBaseLine(float base)
 	m_BaseLine = base;
 }
 
-void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign align, video::Color color, const math::rectf* clip)
+void FontImpl::Draw(const String& text, const math::vector2f& position, EAlign align, video::Color color, const math::rectf* clip)
 {
 	LUX_UNUSED(clip);
 
@@ -223,7 +214,7 @@ void FontImpl::Draw(const string& text, const math::vector2f& position, EAlign a
 	}
 }
 
-float FontImpl::GetTextWidth(const string& text, size_t charCount)
+float FontImpl::GetTextWidth(const String& text, size_t charCount)
 {
 	const float charSpace = m_CharHeight * m_CharDistance * m_Scale;
 
@@ -249,7 +240,7 @@ float FontImpl::GetTextWidth(const string& text, size_t charCount)
 	return width;
 }
 
-size_t FontImpl::GetCaretFromOffset(const string& text, float XPosition)
+size_t FontImpl::GetCaretFromOffset(const String& text, float XPosition)
 {
 	if(XPosition < 0.0f)
 		return 0;
@@ -286,7 +277,7 @@ size_t FontImpl::GetCaretFromOffset(const string& text, float XPosition)
 	return counter;
 }
 
-void FontImpl::GetTextCarets(const string& text, core::array<float>& carets, size_t charCount)
+void FontImpl::GetTextCarets(const String& text, core::Array<float>& carets, size_t charCount)
 {
 	const float charSpace = m_CharHeight * m_CharDistance;
 
@@ -366,7 +357,7 @@ const CharInfo& FontImpl::GetCharInfo(u32 c)
 	return (it != m_CharMap.End()) ? *it : m_ErrorChar;
 }
 
-core::Name FontImpl::GetReferableSubType() const
+core::Name FontImpl::GetReferableType() const
 {
 	return core::ResourceType::Font;
 }

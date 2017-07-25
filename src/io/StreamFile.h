@@ -13,7 +13,7 @@ public:
 	StreamFile(
 		FILE* file,
 		const FileDescription& desc,
-		const string& name);
+		const String& name);
 
 	~StreamFile();
 	u32 ReadBinary(u32 dwNumBytes, void* out);

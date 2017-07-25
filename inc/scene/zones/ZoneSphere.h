@@ -52,10 +52,9 @@ public:
 		m_Center = center;
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "sphere";
-		return name;
+		return TypeName;
 	}
 
 	void SetRadius(float radius)
@@ -67,6 +66,8 @@ public:
 	{
 		return LUX_NEW(SphereZone)(*this);
 	}
+
+	static const core::Name TypeName;
 
 private:
 	math::vector3f m_Center;

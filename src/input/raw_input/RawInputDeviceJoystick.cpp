@@ -56,11 +56,11 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 
 	m_ReportSize = caps.InputReportByteLength;
 
-	core::array<HIDP_BUTTON_CAPS> buttonCaps;
+	core::Array<HIDP_BUTTON_CAPS> buttonCaps;
 	size_t buttonCount = 0;
 	GetButtonCaps(caps, buttonCaps, buttonCount);
 
-	core::array<HIDP_VALUE_CAPS> axesCaps;
+	core::Array<HIDP_VALUE_CAPS> axesCaps;
 	size_t axesCount = 0;
 	GetAxesCaps(caps, axesCaps, axesCount);
 
@@ -221,7 +221,7 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 
 	m_CodeHIDMapping.Resize(m_Buttons.Size() + m_Axes.Size());
 
-	core::array<HIDObjectWrapper> temp;
+	core::Array<HIDObjectWrapper> temp;
 	int index = 0;
 	for(auto it = m_Buttons.First(); it != m_Buttons.End(); ++it) {
 		HIDObjectWrapper wrapper;
@@ -274,7 +274,7 @@ RawJoystickDevice::~RawJoystickDevice()
 
 HANDLE RawJoystickDevice::GetDeviceHandle()
 {
-	string path = GetDevicePath(m_RawInputHandle);
+	String path = GetDevicePath(m_RawInputHandle);
 
 	HANDLE ntHandle = CreateFileW(core::StringToUTF16W(path), 0,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -288,7 +288,7 @@ HANDLE RawJoystickDevice::GetDeviceHandle()
 	return ntHandle;
 }
 
-string RawJoystickDevice::GetDeviceName()
+String RawJoystickDevice::GetDeviceName()
 {
 	const size_t max_size = 127;
 
@@ -310,7 +310,7 @@ string RawJoystickDevice::GetDeviceName()
 		return core::UTF16ToString(nameBuffer);
 }
 
-void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount)
+void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount)
 {
 	buttonCaps.Clear();
 	buttonCaps.Resize(deviceCaps.NumberInputButtonCaps);
@@ -337,7 +337,7 @@ void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::array<H
 	}
 }
 
-void RawJoystickDevice::GetAxesCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount)
+void RawJoystickDevice::GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount)
 {
 	valueCaps.Clear();
 	valueCaps.Resize(deviceCaps.NumberInputValueCaps);
@@ -550,7 +550,7 @@ RawJoystickDevice::ElemDesc RawJoystickDevice::GetElementDesc(EEventType type, u
 			elem_type = EElementType::Input | EElementType::Axis | EElementType::POV;
 		return ElemDesc(axis.name, axis.usagePage, axis.usage, elem_type);
 	} else {
-		static const string name = "(unknown)";
+		static const String name = "(unknown)";
 		return ElemDesc(name, 0, 0, EElementType::Other);
 	}
 }

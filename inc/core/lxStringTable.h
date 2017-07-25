@@ -51,7 +51,7 @@ public:
 	\param str The string to check
 	\return The handle of the entry
 	*/
-	StringTableHandle FindString(const string& str);
+	StringTableHandle FindString(const String& str);
 
 	//! Add a string to the string table
 	/**
@@ -67,7 +67,7 @@ public:
 	\param str The string to add
 	\return The handle to the entry
 	*/
-	StringTableHandle AddString(const string& str);
+	StringTableHandle AddString(const String& str);
 
 private:
 	struct MemBlock;

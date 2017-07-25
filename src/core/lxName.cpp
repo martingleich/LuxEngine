@@ -55,12 +55,12 @@ void Name::Set(const char* str, int action, StringTable* table)
 		(void)0;
 }
 
-void Name::Set(const string& str, int action, StringTable* table)
+void Name::Set(const String& str, int action, StringTable* table)
 {
 	Set(str.Data(), action, table);
 }
 
-Name& Name::operator=(const string& str)
+Name& Name::operator=(const String& str)
 {
 	return (*this = str.Data());
 }
@@ -76,7 +76,7 @@ const char* Name::c_str() const
 	return m_Handle.c_str();
 }
 
-bool Name::operator==(const string& other) const
+bool Name::operator==(const String& other) const
 {
 	return (*this == other.Data());
 }
@@ -96,7 +96,7 @@ bool Name::operator==(const char* str) const
 }
 
 
-bool Name::operator!=(const string& other) const
+bool Name::operator!=(const String& other) const
 {
 	return !(*this == other.Data());
 }

@@ -10,7 +10,7 @@ namespace io
 
 StreamFile::StreamFile(FILE* file,
 	const FileDescription& desc,
-	const string& name) :
+	const String& name) :
 	File(name, desc),
 	m_File(file),
 	m_FileSize(desc.GetSize())

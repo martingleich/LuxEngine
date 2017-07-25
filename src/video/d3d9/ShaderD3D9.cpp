@@ -25,7 +25,7 @@ ShaderD3D9::ShaderD3D9(VideoDriver* driver) :
 void ShaderD3D9::Init(
 	const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 	const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
-	core::array<string>* errorList)
+	core::Array<String>* errorList)
 {
 	LX_CHECK_NULL_ARG(vsCode);
 	LX_CHECK_NULL_ARG(psCode);
@@ -45,13 +45,14 @@ void ShaderD3D9::Init(
 	UnknownRefCounted<ID3DXConstantTable> vertexShaderConstants;
 	UnknownRefCounted<ID3DXConstantTable> pixelShaderConstants;
 
+	m_HasTextureSceneParam = false;
 	m_VertexShader = CreateVertexShader(vsCode, vsEntryPoint, vsLength, vsProfile, errorList, vertexShaderConstants);
 
 	if(psCode)
 		m_PixelShader = CreatePixelShader(psCode, psEntryPoint, psLength, psProfile, errorList, pixelShaderConstants);
 
 	// Load all shader parameters.
-	core::array<HelperEntry> helper;
+	core::Array<HelperEntry> helper;
 	u32 nameMemoryNeeded = 0;
 	LoadAllParams(true, vertexShaderConstants, helper, nameMemoryNeeded, errorList);
 	LoadAllParams(false, pixelShaderConstants, helper, nameMemoryNeeded, errorList);
@@ -87,9 +88,7 @@ void ShaderD3D9::Init(
 					CastShaderToType(h.type, h.defaultValue, tempMemory);
 				else
 					memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
-				m_ParamPackage.AddParam(GetCoreType(h.type), h.name, tempMemory, (u16)paramId);
-
-				entry.index = 0;
+				entry.index = DefaultParam_COUNT + m_ParamPackage.AddParam(GetCoreType(h.type), h.name, tempMemory);
 				entry.paramType = ParamType_ParamMaterial;
 			}
 
@@ -119,6 +118,8 @@ void ShaderD3D9::Init(
 
 			entry.index = param.GetDesc().id;
 			entry.paramType = ParamType_Scene;
+			if(entry.type == EType::Texture)
+				m_HasTextureSceneParam = true;
 		}
 		break;
 		}
@@ -140,7 +141,7 @@ void ShaderD3D9::Init(
 	}
 }
 
-void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::array<HelperEntry>& outParams, u32& outStringSize, core::array<string>* errorList)
+void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<String>* errorList)
 {
 	D3DXCONSTANTTABLE_DESC tableDesc;
 	HRESULT hr;
@@ -231,7 +232,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::a
 
 UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	const char* code, const char* entryPoint, size_t length, const char* profile,
-	core::array<string>* errorList,
+	core::Array<String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
 	ID3DXBuffer* output = 0;
@@ -247,7 +248,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	if(FAILED(hr)) {
 		if(errors) {
 			if(errorList) {
-				string err = (const char*)errors->GetBufferPointer();
+				String err = (const char*)errors->GetBufferPointer();
 				auto err2 = err.Split('\n');
 				errorList->PushBackm(err2.Data(), err2.Size());
 			}
@@ -260,7 +261,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	// Warnings.
 	if(errors) {
 		if(errorList) {
-			string err = (const char*)errors->GetBufferPointer();
+			String err = (const char*)errors->GetBufferPointer();
 			auto err2 = err.Split('\n');
 			errorList->PushBackm(err2.Data(), err2.Size());
 		}
@@ -280,7 +281,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 
 UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	const char* code, const char* entryPoint, size_t length, const char* profile,
-	core::array<string>* errorList,
+	core::Array<String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
 	ID3DXBuffer* output = 0;
@@ -297,7 +298,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	if(FAILED(hr)) {
 		if(errors) {
 			if(errorList) {
-				string err = (const char*)errors->GetBufferPointer();
+				String err = (const char*)errors->GetBufferPointer();
 				auto err2 = err.Split('\n');
 				errorList->PushBackm(err2.Data(), err2.Size());
 			}
@@ -310,7 +311,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	// Warnings.
 	if(errors) {
 		if(errorList) {
-			string err = (const char*)errors->GetBufferPointer();
+			String err = (const char*)errors->GetBufferPointer();
 			auto err2 = err.Split('\n');
 			errorList->PushBackm(err2.Data(), err2.Size());
 		}
@@ -339,6 +340,11 @@ u32 ShaderD3D9::GetSceneParam(size_t id) const
 	return m_SceneValues.At(id).index;
 }
 
+bool ShaderD3D9::HasTextureSceneParam() const
+{
+	return m_HasTextureSceneParam;
+}
+
 void ShaderD3D9::Enable()
 {
 	HRESULT hr;
@@ -350,23 +356,35 @@ void ShaderD3D9::Enable()
 		throw core::D3D9Exception(hr);
 }
 
-void ShaderD3D9::LoadSettings(const RenderSettings& settings)
+void ShaderD3D9::SetParam(const void* data, u32 paramId)
 {
-	int layerId = 0;
-	auto& material = settings.material;
-	for(u32 i = 0; i < material->GetParamCount(); ++i) {
-		auto desc = material->GetRenderer()->GetPackage().GetParamDesc(i);
-		if(desc.reserved != 0xFFFF) {
-			// It's a shader param
-			Param& param = m_Params[desc.reserved];
-			if(param.type == EType::Texture)
-				SetShaderValue(param, &layerId);
-			else
-				SetShaderValue(param, material->Param(i).Pointer());
+	bool found = false;
+	u32 realId = 0;
+	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
+		if(it->index == paramId + DefaultParam_COUNT) {
+			found = true;
+			break;
 		}
+		++realId;
+	}
 
-		if(desc.type == core::Type::Texture)
-			layerId++;
+	if(!found)
+		throw core::ObjectNotFoundException("paramId");
+
+	SetShaderValue(m_Params[realId], data);
+}
+
+void ShaderD3D9::LoadSceneParams(const RenderSettings& settings, u32 baseLayer)
+{
+	u32 layerId = baseLayer;
+
+	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
+		if(it->type == EType::Texture) {
+			SetShaderValue(*it, &layerId);
+			++layerId;
+		} else {
+			SetShaderValue(*it, m_Renderer->GetParam(it->index).Pointer());
+		}
 	}
 
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
@@ -375,31 +393,19 @@ void ShaderD3D9::LoadSettings(const RenderSettings& settings)
 			video::Colorf c;
 			switch(it->index) {
 			case DefaultParam_Shininess:
-				f = material->GetShininess();
+				f = settings.material.GetShininess();
 				SetShaderValue(*it, &f); break;
 			case DefaultParam_Diffuse:
-				c = material->GetDiffuse();
+				c = settings.material.GetDiffuse();
 				SetShaderValue(*it, &c); break;
 			case DefaultParam_Emissive:
-				c = material->GetEmissive();
+				c = settings.material.GetEmissive();
 				SetShaderValue(*it, &c); break;
 			case DefaultParam_Specular:
-				c = material->GetSpecular();
+				c = settings.material.GetSpecular();
 				SetShaderValue(*it, &c); break;
 			default: continue;
 			}
-		}
-	}
-
-	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
-		if(it->paramType == ParamType_Scene) {
-			if(it->type == EType::Texture)
-				SetShaderValue(*it, &layerId);
-			else
-				SetShaderValue(*it, m_Renderer->GetParam(it->index).Pointer());
-
-			if(it->type == EType::Texture)
-				layerId++;
 		}
 	}
 }
@@ -641,20 +647,20 @@ core::Type ShaderD3D9::GetCoreType(EType type)
 {
 	switch(type) {
 	case EType::Unknown: return core::Type::Unknown;
-	case EType::Integer: return core::Type::Integer;
-	case EType::Float: return core::Type::Float;
-	case EType::Boolean: return core::Type::Boolean;
-	case EType::U32: return core::Type::U32;
-	case EType::Texture: return core::Type::Texture;
-	case EType::Color: return core::Type::Color;
-	case EType::Colorf: return core::Type::Colorf;
-	case EType::Vector2: return core::Type::Vector2;
-	case EType::Vector3: return core::Type::Vector3;
-	case EType::Vector2Int: return core::Type::Vector2Int;
-	case EType::Vector3Int: return core::Type::Vector3Int;
-	case EType::Matrix: return core::Type::Matrix;
-	case EType::Matrix_ColMajor: return core::Type::Matrix;
-	case EType::Structure: return core::Type::Unknown;
+	case EType::Integer: return core::Types::Integer();
+	case EType::Float: return core::Types::Float();
+	case EType::Boolean: return core::Types::Boolean();
+	case EType::U32: return core::Types::U32();
+	case EType::Texture: return core::Types::Texture();
+	case EType::Color: return core::Types::Color();
+	case EType::Colorf: return core::Types::Colorf();
+	case EType::Vector2: return core::Types::Vector2f();
+	case EType::Vector3: return core::Types::Vector3f();
+	case EType::Vector2Int: return core::Types::Vector2i();
+	case EType::Vector3Int: return core::Types::Vector3i();
+	case EType::Matrix: return core::Types::Matrix();
+	case EType::Matrix_ColMajor: return core::Types::Matrix();
+	case EType::Structure: return core::Types::Unknown();
 	default: return core::Type::Unknown;
 	}
 }

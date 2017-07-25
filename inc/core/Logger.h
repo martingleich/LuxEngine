@@ -87,9 +87,9 @@ public:
 		++m_RefCount;
 	}
 
-	virtual void Print(const string& s, ELogLevel ll) = 0;
+	virtual void Print(const String& s, ELogLevel ll) = 0;
 
-	void FinishEntry(const string& s, ELogLevel ll)
+	void FinishEntry(const String& s, ELogLevel ll)
 	{
 		m_PrinterLock.lock();
 		Print(s, ll);
@@ -108,7 +108,7 @@ class Logger;
 class LogSystem
 {
 private:
-	core::array<Logger*> m_Loggers;
+	core::Array<Logger*> m_Loggers;
 	ELogLevel m_LogLevel;
 
 public:
@@ -190,7 +190,7 @@ public:
 
 		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel && m_LogSystem.GetLogLevel() != ELogLevel::None) {
 			ifconst(sizeof...(data)) {
-				string out;
+				String out;
 				core::StringSink sink(out);
 				format::format(sink, format, data...);
 
@@ -208,7 +208,7 @@ public:
 	}
 
 	template <typename... T>
-	void operator()(const string& format, T... data)
+	void operator()(const String& format, T... data)
 	{
 		Write(format.Data(), data...);
 	}
@@ -216,22 +216,22 @@ public:
 
 struct HTMLPrinterSettings : public Printer::Settings
 {
-	HTMLPrinterSettings(const io::path& p) :
+	HTMLPrinterSettings(const io::Path& p) :
 		FilePath(p)
 	{
 	}
 
-	io::path FilePath;
+	io::Path FilePath;
 };
 
 struct FilePrinterSettings : public Printer::Settings
 {
-	FilePrinterSettings(const io::path& p) :
+	FilePrinterSettings(const io::Path& p) :
 		FilePath(p)
 	{
 	}
 
-	io::path FilePath;
+	io::Path FilePath;
 };
 
 struct ConsolePrinterSettings : public Printer::Settings

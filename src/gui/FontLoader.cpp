@@ -35,9 +35,9 @@ void FontLoader::LoadResource(io::File* file, core::Resource* dst)
 	LoadFontFromFile(file, dst);
 }
 
-const string& FontLoader::GetName() const
+const String& FontLoader::GetName() const
 {
-	static const string name = "Lux Font Loader";
+	static const String name = "Lux Font Loader";
 	return name;
 }
 

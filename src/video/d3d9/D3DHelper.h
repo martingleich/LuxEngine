@@ -6,12 +6,12 @@
 
 #include "video/Color.h"
 #include "video/VertexFormats.h"
-#include "video/PipelineSettings.h"
 #include "video/AlphaSettings.h"
 #include "video/TextureLayer.h"
 #include "video/FogData.h"
 #include "video/HardwareBufferConstants.h"
 #include "video/EPrimitiveType.h"
+#include "video/Pass.h"
 
 namespace lux
 {

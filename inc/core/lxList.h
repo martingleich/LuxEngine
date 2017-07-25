@@ -428,6 +428,30 @@ public:
 		return ReturnIter;
 	}
 
+	//! Support for foreach loop
+	Iterator begin()
+	{
+		return Iterator(m_First);
+	}
+
+	//! Support for foreach loop
+	ConstIterator begin() const
+	{
+		return ConstIterator(m_First);
+	}
+
+	//! Support for foreach loop
+	Iterator end()
+	{
+		return Iterator(nullptr);
+	}
+
+	//! Support for foreach loop
+	ConstIterator end() const
+	{
+		return ConstIterator(nullptr);
+	}
+
 private:
 	ListEntry*    m_First;
 	ListEntry*    m_Last;

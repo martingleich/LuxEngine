@@ -32,7 +32,7 @@ public:
 	const Material* GetMaterial(size_t index) const;
 	void SetMaterial(size_t index, Material* m);
 
-	core::Name GetReferableSubType() const;
+	core::Name GetReferableType() const;
 	StrongRef<Referable> Clone() const;
 
 private:
@@ -53,7 +53,7 @@ private:
 		}
 	};
 
-	core::array<Entry> m_Data;
+	core::Array<Entry> m_Data;
 };
 
 

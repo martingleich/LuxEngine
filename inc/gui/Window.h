@@ -62,7 +62,7 @@ public:
 
 	\ref GetTitle
 	*/
-	virtual void SetTitle(const string& title) = 0;
+	virtual void SetTitle(const String& title) = 0;
 
 	//! Get the current title of the window
 	/**
@@ -70,7 +70,7 @@ public:
 
 	\ref SetTitle
 	*/
-	virtual const string& GetTitle() const = 0;
+	virtual const String& GetTitle() const = 0;
 
 	//! Set the size of the window in pixel
 	/**

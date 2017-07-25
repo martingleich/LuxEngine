@@ -6,14 +6,14 @@ namespace scene
 {
 namespace SceneComponentType
 {
-const core::Name Rotation("rotation");
-const core::Name CameraControl("camera_control");
-const core::Name LinearMove("linear_move");
+const core::Name Rotation("lux.comp.Rotation");
+const core::Name CameraControl("lux.comp.CameraControl");
+const core::Name LinearMove("lux.comp.LinearMove");
 
-const core::Name Camera("camera");
-const core::Name Mesh("mesh");
-const core::Name Light("light");
-const core::Name SkyBox("skybox");
+const core::Name Camera("lux.comp.Camera");
+const core::Name Mesh("lux.comp.Mesh");
+const core::Name Light("lux.comp.Light");
+const core::Name SkyBox("lux.comp.Skybox");
 
 }
 }

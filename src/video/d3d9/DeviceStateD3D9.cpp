@@ -4,14 +4,12 @@
 #include "video/d3d9/D3DHelper.h"
 #include "video/d3d9/D3D9Exception.h"
 
-#include "video/PipelineSettings.h"
-#include "video/AlphaSettings.h"
-
 #include "video/FogData.h"
 #include "video/LightData.h"
 #include "video/Material.h"
 
 #include "video/BaseTexture.h"
+#include "video/MaterialRenderer.h"
 
 namespace lux
 {
@@ -21,44 +19,106 @@ namespace video
 DeviceStateD3D9::DeviceStateD3D9(IDirect3DDevice9* device) :
 	m_Device(device),
 	m_RenderTargetTexture(nullptr),
-	m_CurShader(nullptr),
-	m_LightCount(0)
+	m_Shader(nullptr),
+	m_LightCount(0),
+	m_UsedTextureLayers(0),
+	m_UseVertexData(true),
+	m_ResetAll(true)
 {
-	SetRenderState(D3DRS_COLORVERTEX, FALSE);
 }
 
-void DeviceStateD3D9::EnablePipeline(const PipelineSettings& pipeline)
+void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material& m)
 {
-	// These are handled elsewhere
-	/*
-	pipeline.Lightning
-	pipeling.FogEnabled
-	*/
-	m_Device->SetRenderState(D3DRS_ZFUNC, GetD3DZBufferFunc(pipeline.zBufferFunc));
-	m_Device->SetRenderState(D3DRS_ZWRITEENABLE, pipeline.zWriteEnabled ? TRUE : FALSE);
-	m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, pipeline.normalizeNormals ? TRUE : FALSE);
-	m_Device->SetRenderState(D3DRS_FILLMODE, GetFillMode(pipeline));
-	m_Device->SetRenderState(D3DRS_SHADEMODE, pipeline.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
-	m_Device->SetRenderState(D3DRS_CULLMODE, GetCullMode(pipeline));
+	// Enable d3d material
+	D3DMATERIAL9 D3DMaterial = {
+		SColorToD3DColor(m.GetDiffuse()),
+		SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()),
+		SColorToD3DColor(m.GetSpecular()*m.GetPower()),
+		SColorToD3DColor(m.GetEmissive()),
+		m.GetShininess()
+	};
 
-	m_CurPipeline = pipeline;
+	m_D3DMaterial = D3DMaterial;
+	m_Device->SetMaterial(&m_D3DMaterial);
+	m_Ambient = ambient;
+
+	SetRenderState(D3DRS_TEXTUREFACTOR, m.GetDiffuse().ToHex());
+}
+
+void DeviceStateD3D9::EnablePass(const Pass& p)
+{
+	m_UseLighting = p.lighting;
+
+	EnableShader(p.shader);
+
+	// Apply overwrite and enable pipeline settings.
+	EnableAlpha(p.alphaSrcBlend, p.alphaDstBlend, p.alphaOperator);
+	EnableVertexData(p.useVertexColor);
+
+	// Enable layers
+	static const TextureStageSettings DEFAULT_STAGE;
+	static const TextureStageSettings DIFFUSE_ONLY_STAGE(
+		ETextureArgument::Diffuse,
+		ETextureArgument::Diffuse,
+		ETextureOperator::SelectArg1,
+		ETextureArgument::Diffuse,
+		ETextureArgument::Diffuse,
+		ETextureOperator::SelectArg1);
+	for(size_t i = 0; i < p.layers.Size(); ++i) {
+		EnableTextureLayer(i, p.layers[i]);
+
+		const TextureStageSettings* settings;
+		if(!p.layers[i].texture)
+			settings = &DIFFUSE_ONLY_STAGE;
+		else
+			settings = i < p.layerSettings.Size() ? &p.layerSettings[i] : &DEFAULT_STAGE;
+
+		EnableTextureStage(i, *settings);
+	}
+
+	for(size_t i = p.layers.Size(); i < p.layerSettings.Size(); ++i)
+		EnableTextureStage(i, p.layerSettings[i]);
+
+	// Disable old layers
+	for(size_t i = p.layers.Size(); i < m_UsedTextureLayers; ++i)
+		DisableTexture(i);
+
+	m_UsedTextureLayers = math::Max(p.layers.Size(), p.layerSettings.Size());
+
+
+	// Set Material parameters
+	if(p.lighting)
+		SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
+	if(p.lighting && !math::IsZero(m_D3DMaterial.Power))
+		SetRenderState(D3DRS_SPECULARENABLE, 1);
+	else
+		SetRenderState(D3DRS_SPECULARENABLE, 0);
+
+	m_Device->SetRenderState(D3DRS_ZFUNC, GetD3DZBufferFunc(p.zBufferFunc));
+	m_Device->SetRenderState(D3DRS_ZWRITEENABLE, p.zWriteEnabled ? TRUE : FALSE);
+	m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, p.normalizeNormals ? TRUE : FALSE);
+	m_Device->SetRenderState(D3DRS_FILLMODE, GetFillMode(p));
+	m_Device->SetRenderState(D3DRS_SHADEMODE, p.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
+	m_Device->SetRenderState(D3DRS_CULLMODE, GetCullMode(p));
+
+	m_ResetAll = false;
 }
 
 void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 {
-	HRESULT hr;
 	if(layer.texture) {
 		// The current rendertarget can't be used as texture -> set texture channel to black
 		// But tell all people asking that the correct texture was set.
-		if(layer.texture == m_RenderTargetTexture)
-			hr = m_Device->SetTexture(stage, nullptr);
-		else
-			hr = m_Device->SetTexture(stage, (IDirect3DBaseTexture9*)(layer.texture->GetRealTexture()));
+		if(layer.texture == m_RenderTargetTexture) {
+			SetTexture(stage, nullptr);
+		} else {
+			SetTexture(stage, (IDirect3DBaseTexture9*)(layer.texture->GetRealTexture()));
+		}
 	} else {
-		hr = m_Device->SetTexture(stage, nullptr);
+		SetTexture(stage, nullptr);
 	}
 
-	if(layer.texture) {
+	if(m_Textures[stage]) {
 		m_Device->SetSamplerState(stage, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
 		m_Device->SetSamplerState(stage, D3DSAMP_ADDRESSV, GetD3DRepeatMode(layer.repeat.v));
 
@@ -95,19 +155,14 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 
 void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
 {
-	if(!m_CurPipeline.lighting && settings.colorArg1 == ETextureArgument::Diffuse && !settings.useVertex)
+	if(!m_UseLighting && settings.colorArg1 == ETextureArgument::Diffuse && !m_UseVertexData)
 		SetTextureStageState(stage, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 	else
 		SetTextureStageState(stage, D3DTSS_COLORARG1, GetTextureArgument(settings.colorArg1));
-	if(!m_CurPipeline.lighting && settings.colorArg2 == ETextureArgument::Diffuse && !settings.useVertex)
+	if(!m_UseLighting && settings.colorArg2 == ETextureArgument::Diffuse && !m_UseVertexData)
 		SetTextureStageState(stage, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 	else
 		SetTextureStageState(stage, D3DTSS_COLORARG2, GetTextureArgument(settings.colorArg2));
-
-	if(settings.useVertex)
-		EnableVertexData();
-	else
-		DisableVertexData();
 
 	SetTextureStageState(stage, D3DTSS_COLOROP, GetTextureOperator(settings.colorOperator));
 
@@ -119,41 +174,40 @@ void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& 
 		SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, settings.coordSource);
 }
 
-void DeviceStateD3D9::DisableTextureStage(u32 stage)
+void DeviceStateD3D9::DisableTexture(u32 stage)
 {
+	SetTexture(stage, nullptr);
 	SetTextureStageState(stage, D3DTSS_COLOROP, D3DTOP_DISABLE);
 	SetTextureStageState(stage, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 	SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, stage);
-
-	DisableVertexData();
 }
 
-void DeviceStateD3D9::EnableAlpha(const AlphaBlendSettings& settings)
+void DeviceStateD3D9::EnableAlpha(EBlendFactor src, EBlendFactor dst, EBlendOperator op)
 {
-	if(settings.Operator == EBlendOperator::None) {
+	if(m_SrcBlendFactor == src && m_DstBlendFactor == dst && m_BlendOperator == op && !m_ResetAll)
+		return;
+
+	if(op == EBlendOperator::None) {
 		m_Device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 	} else {
 		m_Device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		m_Device->SetRenderState(D3DRS_DESTBLEND, GetD3DBlend(settings.DstBlend));
-		m_Device->SetRenderState(D3DRS_SRCBLEND, GetD3DBlend(settings.SrcBlend));
-		m_Device->SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(settings.Operator));
+		m_Device->SetRenderState(D3DRS_DESTBLEND, GetD3DBlend(dst));
+		m_Device->SetRenderState(D3DRS_SRCBLEND, GetD3DBlend(src));
+		m_Device->SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(op));
 	}
 
-	m_CurAlpha = settings;
+	m_SrcBlendFactor = src;
+	m_DstBlendFactor = dst;
+	m_BlendOperator = op;
 }
 
-void DeviceStateD3D9::DisableAlpha()
+void DeviceStateD3D9::EnableVertexData(bool useColor)
 {
-	SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-}
-void DeviceStateD3D9::EnableVertexData()
-{
-	SetRenderState(D3DRS_COLORVERTEX, TRUE);
-}
+	if(m_UseVertexData == useColor && !m_ResetAll)
+		return;
 
-void DeviceStateD3D9::DisableVertexData()
-{
-	SetRenderState(D3DRS_COLORVERTEX, FALSE);
+	SetRenderState(D3DRS_COLORVERTEX, useColor ? TRUE : FALSE);
+	m_UseVertexData = useColor;
 }
 
 void* DeviceStateD3D9::GetLowLevelDevice()
@@ -178,23 +232,18 @@ void DeviceStateD3D9::SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE s
 	m_Device->SetTextureStageState(stage, state, value);
 }
 
-void DeviceStateD3D9::SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material* mat)
+void DeviceStateD3D9::SetTexture(u32 stage, IDirect3DBaseTexture9* tex)
 {
-	D3DMATERIAL9 D3DMaterial = {
-		SColorToD3DColor(mat->GetDiffuse()),
-		SColorToD3DColor(mat->GetDiffuse()*mat->GetAmbient()),
-		SColorToD3DColor(mat->GetSpecular()*mat->GetPower()),
-		SColorToD3DColor(mat->GetEmissive()),
-		mat->GetShininess()
-	};
-	m_Device->SetMaterial(&D3DMaterial);
+	if(stage >= m_Textures.Size())
+		m_Textures.Resize(stage + 1, nullptr);
 
-	SetRenderState(D3DRS_TEXTUREFACTOR, mat->GetDiffuse().ToHex());
-	SetRenderState(D3DRS_AMBIENT, ambient.ToHex());
-	if(pipeline.lighting && !math::IsZero(D3DMaterial.Power))
-		SetRenderState(D3DRS_SPECULARENABLE, 1);
-	else
-		SetRenderState(D3DRS_SPECULARENABLE, 0);
+	if(tex != m_Textures[stage] || m_ResetAll) {
+		HRESULT hr = m_Device->SetTexture(stage, tex);
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
+
+		m_Textures[stage] = tex;
+	}
 }
 
 void DeviceStateD3D9::SetTransform(D3DTRANSFORMSTATETYPE type, const math::matrix4& m)
@@ -202,9 +251,9 @@ void DeviceStateD3D9::SetTransform(D3DTRANSFORMSTATETYPE type, const math::matri
 	m_Device->SetTransform(type, (D3DMATRIX*)m.DataRowMajor());
 }
 
-u32 DeviceStateD3D9::GetFillMode(const PipelineSettings& pipeline)
+u32 DeviceStateD3D9::GetFillMode(const Pass& p)
 {
-	switch(pipeline.drawMode) {
+	switch(p.drawMode) {
 	case EDrawMode::Fill:
 		return D3DFILL_SOLID;
 	case EDrawMode::Wire:
@@ -215,11 +264,11 @@ u32 DeviceStateD3D9::GetFillMode(const PipelineSettings& pipeline)
 	}
 }
 
-u32 DeviceStateD3D9::GetCullMode(const PipelineSettings& pipeline)
+u32 DeviceStateD3D9::GetCullMode(const Pass& p)
 {
-	if(pipeline.backfaceCulling)
+	if(p.backfaceCulling)
 		return D3DCULL_CCW;
-	else if(pipeline.frontfaceCulling)
+	else if(p.frontfaceCulling)
 		return D3DCULL_CW;
 	else
 		return D3DCULL_NONE;
@@ -276,15 +325,13 @@ u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
 	throw core::InvalidArgumentException("arg");
 }
 
-void DeviceStateD3D9::SetFog(bool active, const FogData& fog)
+void DeviceStateD3D9::EnableFog(bool enable)
 {
-	if(!active) {
-		SetRenderState(D3DRS_FOGENABLE, FALSE);
-		return;
-	}
+	SetRenderState(D3DRS_FOGENABLE, enable?TRUE:FALSE);
+}
 
-	SetRenderState(D3DRS_FOGENABLE, TRUE);
-
+void DeviceStateD3D9::SetFog(const FogData& fog)
+{
 	DWORD type = GetD3DFogType(fog.type);
 
 	// TODO: Handle per pixel fog
@@ -297,15 +344,20 @@ void DeviceStateD3D9::SetFog(bool active, const FogData& fog)
 	SetRenderStateF(D3DRS_FOGDENSITY, fog.density);
 }
 
-void DeviceStateD3D9::ClearLights(bool useLights)
+void DeviceStateD3D9::EnableLight(bool enable)
+{
+	SetRenderState(D3DRS_LIGHTING, enable?TRUE:FALSE);
+	m_UseLighting = enable;
+}
+
+void DeviceStateD3D9::ClearLights()
 {
 	for(size_t i = 0; i < m_LightCount; ++i)
 		m_Device->LightEnable((DWORD)i, FALSE);
-
-	SetRenderState(D3DRS_LIGHTING, useLights ? 1 : 0);
+	m_LightCount = 0;
 }
 
-void DeviceStateD3D9::EnableLight(const LightData& light)
+void DeviceStateD3D9::AddLight(const LightData& light)
 {
 	DWORD lightId = (DWORD)m_LightCount;
 

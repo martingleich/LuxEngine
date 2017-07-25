@@ -41,7 +41,7 @@ public:
 	This name is only for the user, and has no limitations.
 	\return The name of the loader.
 	*/
-	virtual const string& GetName() const = 0;
+	virtual const String& GetName() const = 0;
 };
 
 }

@@ -31,7 +31,7 @@ public:
 	StrongRef<InputDevice> GetKeyboard();
 
 private:
-	core::HashMap<string, StrongRef<InputDevice>> m_GUIDMap;
+	core::HashMap<String, StrongRef<InputDevice>> m_GUIDMap;
 	WeakRef<InputDevice> m_KeyboardDevice;
 
 	events::Signal<const input::Event&> m_EventSignal;

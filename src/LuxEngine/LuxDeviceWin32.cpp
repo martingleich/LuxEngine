@@ -3,7 +3,6 @@
 
 #include "core/Clock.h"
 #include "core/Logger.h"
-#include "core/lxRandom.h"
 #include "core/StringConverter.h"
 #include "core/ReferableFactory.h"
 
@@ -93,9 +92,9 @@ struct LogWin32Error
 	}
 };
 
-lux::string GetWin32ErrorString(DWORD error)
+lux::String GetWin32ErrorString(DWORD error)
 {
-	lux::string out;
+	lux::String out;
 	if(NOERROR != error) {
 		const DWORD formatControl =
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -126,7 +125,7 @@ void conv_data(format::Context& ctx, const LogWin32Error& v, format::Placeholder
 	LUX_UNUSED(placeholder);
 
 	using namespace format;
-	lux::string str = GetWin32ErrorString(v.error);
+	lux::String str = GetWin32ErrorString(v.error);
 	format::CopyConvertAddString(ctx, StringType::Unicode, str.Data_c(), str.Size());
 }
 
@@ -211,10 +210,12 @@ LUX_API StrongRef<LuxDevice> CreateDevice()
 }
 
 LuxDeviceWin32::LuxDeviceWin32() :
-	m_Time(0.0),
+	m_WindowCallback(this),
+	m_OwnWindow(false),
+	m_IsAppActive(false),
 	m_Quit(false),
-	m_LuxWindowClassName(WIN32_CLASS_NAME),
-	m_WindowCallback(this)
+	m_Time(0.0),
+	m_LuxWindowClassName(WIN32_CLASS_NAME)
 {
 	// If there are logs which aren't written, write them to the default file.
 	if(log::EngineLog.HasUnsetLogs())
@@ -249,7 +250,7 @@ LuxDeviceWin32::LuxDeviceWin32() :
 	log::Info("Lux core was build.");
 }
 
-void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const string& title)
+void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const String& title)
 {
 	if(m_Window->GetDeviceWindow()) {
 		log::Warning("Window already built.");
@@ -340,7 +341,7 @@ void LuxDeviceWin32::BuildVideoDriver(const video::DriverConfig& config)
 
 	video::MaterialLibrary::Initialize();
 
-	auto invalidMaterial = video::MaterialLibrary::Instance()->CreateMaterial("debug_overlay");
+	auto invalidMaterial = video::MaterialLibrary::Instance()->CreateMaterial("debugOverlay");
 	invalidMaterial->SetDiffuse(video::Color(255, 0, 255));
 	driver->GetRenderer()->SetInvalidMaterial(invalidMaterial);
 
@@ -393,7 +394,7 @@ void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
 }
 
 // Erstellt ein neues Fenster
-HWND LuxDeviceWin32::CreateNewWindow(u32 width, u32 height, const string& title)
+HWND LuxDeviceWin32::CreateNewWindow(u32 width, u32 height, const String& title)
 {
 	if(width > (u32)GetSystemMetrics(SM_CXSCREEN) || height > (u32)GetSystemMetrics(SM_CYSCREEN)) {
 		throw core::Exception("The window is bigger than the screen and can't be created.");
@@ -436,16 +437,17 @@ LuxDeviceWin32::~LuxDeviceWin32()
 	m_GUIEnv.Reset();
 	m_SceneManager.Reset();
 
-	video::ImageSystem::Destroy();
-
-	video::MaterialLibrary::Destroy();
-
+#ifdef LUX_COMPILE_WITH_D3D9
 	video::VideoDriverD3D9* driver = dynamic_cast<video::VideoDriverD3D9*>(video::VideoDriver::Instance());
 
 	// Free all shared resources, default materials, invalid materials and so on
 	if(driver)
 		driver->CleanUp();
+#endif
 
+	video::MeshSystem::Destroy();
+	video::ImageSystem::Destroy();
+	video::MaterialLibrary::Destroy();
 	video::VideoDriver::Destroy();
 
 	core::ResourceSystem::Destroy();

@@ -14,11 +14,11 @@ namespace io
 class File : public ReferenceCounted
 {
 protected:
-	string m_Name;
+	String m_Name;
 	FileDescription m_Desc;
 
 public:
-	File(const string& name, const FileDescription& desc) : m_Name(name), m_Desc(desc)
+	File(const String& name, const FileDescription& desc) : m_Name(name), m_Desc(desc)
 	{
 	}
 	virtual ~File()
@@ -30,7 +30,7 @@ public:
 	May be an empty string, must not be the path of the file
 	\return The name of the file
 	*/
-	virtual const string& GetName() const
+	virtual const String& GetName() const
 	{
 		return m_Name;
 	}
@@ -60,7 +60,7 @@ public:
 	virtual u32 WriteBinary(const void* data, u32 length) = 0;
 
 	//! Write a string to the file
-	virtual u32 WriteString(const string& str)
+	virtual u32 WriteString(const String& str)
 	{
 		lxAssert(str.Size() < std::numeric_limits<u32>::max());
 		return WriteBinary(str.Data(), (u32)str.Size());
@@ -135,9 +135,9 @@ public:
 	\param size The maximal number of bytes to read
 	\return The read string
 	*/
-	virtual string ReadString(u32 size = 0)
+	virtual String ReadString(u32 size = 0)
 	{
-		string str;
+		String str;
 		if(size != 0)
 			str.Reserve(size);
 		else

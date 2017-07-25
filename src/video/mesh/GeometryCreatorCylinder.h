@@ -13,7 +13,7 @@ class GeometryCreatorCylinder : public GeometryCreator
 public:
 	GeometryCreatorCylinder();
 	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
-	const string& GetName() const;
+	const String& GetName() const;
 	const core::ParamPackage& GetParams() const;
 	StrongRef<Geometry> CreateGeometry(
 		float radius = 0.5f,

@@ -4,7 +4,6 @@
 #include "video/VideoDriver.h"
 #include "video/images/ImageSystem.h"
 #include "video/MaterialLibrary.h"
-#include "video/PipelineSettings.h"
 #include "video/MaterialRenderer.h"
 
 #include "gui/FontLoader.h"
@@ -23,9 +22,6 @@ namespace gui
 
 GUIEnvironmentImpl::GUIEnvironmentImpl()
 {
-	// Initialize shared font data
-	FontImpl::InitFontData();
-
 	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader));
 
 #ifdef LUX_WINDOWS
@@ -37,8 +33,6 @@ GUIEnvironmentImpl::GUIEnvironmentImpl()
 
 GUIEnvironmentImpl::~GUIEnvironmentImpl()
 {
-	// Destroy shared font data
-	FontImpl::DestroyFontData();
 }
 
 StrongRef<FontCreator> GUIEnvironmentImpl::GetFontCreator()

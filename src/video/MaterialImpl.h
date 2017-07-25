@@ -12,6 +12,7 @@ class MaterialRenderer;
 class MaterialImpl : public Material
 {
 public:
+	MaterialImpl();
 	MaterialImpl(MaterialRenderer* renderer);
 	~MaterialImpl();
 
@@ -44,8 +45,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	core::PackageParam Param(const string_type& name);
-	core::PackageParam Param(const string_type& name) const;
+	core::PackageParam Param(const StringType& name);
+	core::PackageParam Param(const StringType& name) const;
 	core::PackageParam Param(u32 id);
 	core::PackageParam Param(u32 id) const;
 	core::PackageParam Layer(u32 layer);
@@ -58,11 +59,10 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	core::Name GetReferableSubType() const;
+	core::Name GetReferableType() const;
 	StrongRef<Referable> Clone() const;
 
 	////////////////////////////////////////////////////////////////////
-
 
 private:
 	struct RenderData : public WeakRefBase
@@ -72,7 +72,14 @@ private:
 
 		RenderData(MaterialRenderer* _renderer) :
 			renderer(_renderer),
-			puffer(_renderer ? &_renderer->GetPackage() : nullptr)
+			puffer(_renderer ? &_renderer->GetParams() : nullptr)
+		{
+			AddTo(renderer);
+		}
+
+		RenderData(const RenderData& other) :
+			renderer(other.renderer),
+			puffer(other.renderer ? &other.renderer->GetParams() : nullptr)
 		{
 			AddTo(renderer);
 		}
@@ -81,7 +88,6 @@ private:
 		{
 			RemoveFrom(renderer);
 		}
-
 
 		RenderData& operator=(const RenderData& other)
 		{
@@ -103,7 +109,7 @@ private:
 
 			renderer = r;
 			if(renderer)
-				puffer.SetType(&renderer->GetPackage());
+				puffer.SetType(&renderer->GetParams());
 			else
 				puffer.SetType(nullptr);
 		}

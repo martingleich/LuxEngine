@@ -13,7 +13,7 @@ public:
 	MemoryFile(
 		void* Buffer,
 		const FileDescription& desc,
-		string name,
+		String name,
 		bool DeleteBufferOnDrop,
 		bool Expandable);
 	~MemoryFile();

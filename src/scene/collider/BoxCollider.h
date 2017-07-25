@@ -51,16 +51,17 @@ public:
 		m_Box.AddPoint(m_Transform.TransformPoint(-m_HalfSize));
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "box";
-		return name;
+		return TypeName;
 	}
 
 	StrongRef<Referable> Clone() const
 	{
 		return new BoxCollider(*this);
 	}
+
+	static const core::Name TypeName;
 
 protected:
 	math::vector3f m_HalfSize;
@@ -79,10 +80,9 @@ public:
 
 	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result);
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "bounding_box";
-		return name;
+		return TypeName;
 	}
 
 	StrongRef<Referable> Clone() const
@@ -90,6 +90,7 @@ public:
 		return new BoundingBoxCollider(*this);
 	}
 
+	static const core::Name TypeName;
 };
 
 

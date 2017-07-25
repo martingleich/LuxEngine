@@ -37,7 +37,7 @@ private:
 
 		USHORT index;
 
-		string name;
+		String name;
 
 		u32 code;
 
@@ -79,9 +79,9 @@ public:
 	RawJoystickDevice(InputSystem* system, HANDLE rawHandle);
 	~RawJoystickDevice();
 	HANDLE GetDeviceHandle();
-	string GetDeviceName();
-	void GetButtonCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount);
-	void GetAxesCaps(const HIDP_CAPS& deviceCaps, core::array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount);
+	String GetDeviceName();
+	void GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount);
+	void GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount);
 	void LoadDirectInputMapping(bool isAxis, Mapping* mappings, size_t mappingCount, size_t offset, const HIDD_ATTRIBUTES& attribs);
 	void LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, size_t mappingCount, const HIDD_ATTRIBUTES& attribs);
 	void HandleInput(RAWINPUT* input);
@@ -97,13 +97,13 @@ private:
 
 	PHIDP_PREPARSED_DATA m_InputReportProtocol;
 
-	core::array<Axis> m_Axes;
-	core::array<Button> m_Buttons;
+	core::Array<Axis> m_Axes;
+	core::Array<Button> m_Buttons;
 
-	core::array<int> m_CodeHIDMapping;
+	core::Array<int> m_CodeHIDMapping;
 
-	core::array<bool> m_ButtonStates;
-	core::array<bool> m_NewButtonStates;
+	core::Array<bool> m_ButtonStates;
+	core::Array<bool> m_NewButtonStates;
 };
 
 }

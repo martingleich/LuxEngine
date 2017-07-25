@@ -15,38 +15,38 @@ class FileSystemWin32 : public FileSystem
 public:
 	FileSystemWin32();
 	StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenFile(const path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const string& name, bool deleteOnDrop);
-	bool ExistFile(const path& filename) const;
-	bool ExistDirectory(const path& filename) const;
-	path GetAbsoluteFilename(const path& filename) const;
-	const path& GetWorkingDirectory() const;
+	StrongRef<File> OpenFile(const Path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
+	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop);
+	bool ExistFile(const Path& filename) const;
+	bool ExistDirectory(const Path& filename) const;
+	Path GetAbsoluteFilename(const Path& filename) const;
+	const Path& GetWorkingDirectory() const;
 
 	File* CreateTemporaryFile(u32 Size);
-	FileDescription GetFileDescription(const path& name);
+	FileDescription GetFileDescription(const Path& name);
 
-	StrongRef<INIFile> CreateINIFile(const path& filename);
+	StrongRef<INIFile> CreateINIFile(const Path& filename);
 	StrongRef<INIFile> CreateINIFile(File* file);
 
-	StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 Size, const string& name);
+	StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 Size, const String& name);
 
-	bool CreateFile(const path& path, bool recursive = false);
+	bool CreateFile(const Path& path, bool recursive = false);
 	/*
-	bool DeleteFile(const path& path);
-	bool CopyFile(const path& srcPath, const path& dstPath, bool createDstPath, bool replace);
-	bool MoveFile(const path& srcPath, const path& dstPath, bool createDstPath, bool replace);
+	bool DeleteFile(const Path& path);
+	bool CopyFile(const Path& srcPath, const path& dstPath, bool createDstPath, bool replace);
+	bool MoveFile(const Path& srcPath, const path& dstPath, bool createDstPath, bool replace);
 	*/
 
 	StrongRef<Archive> GetRootArchive();
-	StrongRef<Archive> CreateArchive(const path& path);
+	StrongRef<Archive> CreateArchive(const Path& path);
 
-	void AddMountPoint(const path& point, Archive* archive);
-	void RemoveMountPoint(const path& point, Archive* archive = nullptr);
+	void AddMountPoint(const Path& point, Archive* archive);
+	void RemoveMountPoint(const Path& point, Archive* archive = nullptr);
 
 private:
-	string GetFileOpenString(EFileMode mode) const;
-	Win32Path ConvertPathToWin32WidePath(const path& p) const;
-	u32 GetWin32FileAttributes(const path& p) const;
+	String GetFileOpenString(EFileMode mode) const;
+	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
+	u32 GetWin32FileAttributes(const Path& p) const;
 
 	bool CreateWin32File(Win32Path& path, bool recursive = false);
 	bool CreateWin32Directory(Win32Path& path, bool recursive = false);
@@ -54,15 +54,15 @@ private:
 private:
 	struct MountEntry
 	{
-		path mountpoint;
+		Path mountpoint;
 		StrongRef<Archive> archive;
 	};
 
 private:
-	path m_WorkingDirectory;
+	Path m_WorkingDirectory;
 
 	StrongRef<ArchiveFolderWin32> m_RootArchive;
-	core::array<MountEntry> m_Mounts;
+	core::Array<MountEntry> m_Mounts;
 };
 
 }

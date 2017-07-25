@@ -14,16 +14,16 @@ namespace gui
 class FontCreator : public ReferenceCounted
 {
 public:
-	virtual StrongRef<Font> CreateFontFromFile(const io::path& path,
+	virtual StrongRef<Font> CreateFontFromFile(const io::Path& path,
 		const FontDescription& desc,
-		const core::array<u32>& charSet) = 0;
+		const core::Array<u32>& charSet) = 0;
 	virtual StrongRef<Font> CreateFontFromFile(io::File* file,
 		const FontDescription& desc,
-		const core::array<u32>& charSet) = 0;
+		const core::Array<u32>& charSet) = 0;
 	virtual StrongRef<Font> CreateFont(const FontDescription& desc,
-		const core::array<u32>& charSet) = 0;
+		const core::Array<u32>& charSet) = 0;
 
-	virtual const core::array<u32>& GetDefaultCharset(const string& name) const = 0;
+	virtual const core::Array<u32>& GetDefaultCharset(const String& name) const = 0;
 };
 
 }

@@ -93,7 +93,7 @@ public:
 					return false;
 				SetCursor(nameOffset + data_off + off);
 
-				core::array<u16> utf16Buffer;
+				core::Array<u16> utf16Buffer;
 				utf16Buffer.Reserve(len / 2);
 				for(u32 j = 0; j < len / 2; ++j)
 					utf16Buffer.PushBack((u16)ReadUShort());
@@ -107,7 +107,7 @@ public:
 		return false;
 	}
 
-	const string& GetFontFamily() const
+	const String& GetFontFamily() const
 	{
 		return m_FontFamily;
 	}
@@ -202,7 +202,7 @@ public:
 	}
 
 private:
-	string m_FontFamily;
+	String m_FontFamily;
 
 	bool m_IsValid;
 

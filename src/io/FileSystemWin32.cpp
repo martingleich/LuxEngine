@@ -81,7 +81,7 @@ FileSystemWin32::FileSystemWin32()
 		}
 	};
 
-	io::path p = core::UTF16ToString(path.Data_c());
+	io::Path p = core::UTF16ToString(path.Data_c());
 	if(p.StartsWith("\\\\?\\"))
 		p.Remove(p.First(), 4);
 
@@ -104,7 +104,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const FileDescription& desc, EFileMode
 	return OpenFile(desc.GetPath() + desc.GetName(), mode, createIfNotExist);
 }
 
-StrongRef<File> FileSystemWin32::OpenFile(const path& filename, EFileMode mode, bool createIfNotExist)
+StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, bool createIfNotExist)
 {
 	// Scan mount list
 	// Found: Open file with archive.
@@ -112,7 +112,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const path& filename, EFileMode mode, 
 	if(mode == EFileMode::Read || mode == EFileMode::ReadWrite) {
 		for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
 			if(filename.StartsWith(it->mountpoint)) {
-				path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
+				Path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
 				if(it->archive->ExistFile(subPath)) {
 					return it->archive->OpenFile(subPath, mode);
 				}
@@ -123,7 +123,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const path& filename, EFileMode mode, 
 	FILE* file;
 	FileDescription desc;
 
-	path absPath = GetAbsoluteFilename(filename);
+	Path absPath = GetAbsoluteFilename(filename);
 
 	if(!ExistFile(absPath)) {
 		if(!createIfNotExist) {
@@ -157,14 +157,14 @@ StrongRef<File> FileSystemWin32::OpenFile(const path& filename, EFileMode mode, 
 	}
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const string& name, bool deleteOnDrop)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop)
 {
 	if(!memory || size == 0)
 		throw core::FileNotFoundException("[Empty Memory file]");
 
 	FileDescription desc(
-		path::EMPTY,
-		string::EMPTY,
+		Path::EMPTY,
+		String::EMPTY,
 		size,
 		FileDescription::EType::Other,
 		core::DateAndTime(),
@@ -173,11 +173,11 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const s
 	return LUX_NEW(MemoryFile)(memory, desc, name, deleteOnDrop, false);
 }
 
-path FileSystemWin32::GetAbsoluteFilename(const path& filename) const
+Path FileSystemWin32::GetAbsoluteFilename(const Path& filename) const
 {
 	for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
 		if(filename.StartsWith(it->mountpoint)) {
-			path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
+			Path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
 			if(it->archive->ExistFile(subPath))
 				return it->archive->GetAbsolutePath(subPath);
 		}
@@ -185,17 +185,17 @@ path FileSystemWin32::GetAbsoluteFilename(const path& filename) const
 	return io::MakeAbsolutePath(m_WorkingDirectory, filename);
 }
 
-const path& FileSystemWin32::GetWorkingDirectory() const
+const Path& FileSystemWin32::GetWorkingDirectory() const
 {
 	return m_WorkingDirectory;
 }
 
-bool FileSystemWin32::ExistFile(const path& filename) const
+bool FileSystemWin32::ExistFile(const Path& filename) const
 {
 	// Scan mount-list
 	for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
 		if(filename.StartsWith(it->mountpoint)) {
-			path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
+			Path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
 			if(it->archive->ExistFile(subPath))
 				return true;
 		}
@@ -209,7 +209,7 @@ bool FileSystemWin32::ExistFile(const path& filename) const
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
-bool FileSystemWin32::ExistDirectory(const path& filename) const
+bool FileSystemWin32::ExistDirectory(const Path& filename) const
 {
 	DWORD fatt = GetWin32FileAttributes(filename);
 	if(fatt == INVALID_FILE_ATTRIBUTES)
@@ -222,10 +222,10 @@ File* FileSystemWin32::CreateTemporaryFile(u32 Size)
 {
 	void* ptr = LUX_NEW_ARRAY(u8, Size);
 
-	return OpenVirtualFile(ptr, Size, string::EMPTY, true);
+	return OpenVirtualFile(ptr, Size, String::EMPTY, true);
 }
 
-FileDescription FileSystemWin32::GetFileDescription(const path& name)
+FileDescription FileSystemWin32::GetFileDescription(const Path& name)
 {
 	WIN32_FIND_DATAW FindData;
 	HANDLE FindHandle = FindFirstFileW((const wchar_t*)ConvertPathToWin32WidePath(name).Data_c(), &FindData);
@@ -247,7 +247,7 @@ FileDescription FileSystemWin32::GetFileDescription(const path& name)
 	return outDesc;
 }
 
-StrongRef<INIFile> FileSystemWin32::CreateINIFile(const path& filename)
+StrongRef<INIFile> FileSystemWin32::CreateINIFile(const Path& filename)
 {
 	return LUX_NEW(INIFile)(this, filename);
 }
@@ -257,7 +257,7 @@ StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 	return LUX_NEW(INIFile)(this, file);
 }
 
-StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const string& name)
+StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const String& name)
 {
 	if(!file)
 		throw core::FileNotFoundException("[Empty file]");
@@ -266,8 +266,8 @@ StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size
 		throw core::Exception("Limited file size is to big");
 
 	FileDescription desc(
-		string::EMPTY,
-		string::EMPTY,
+		String::EMPTY,
+		String::EMPTY,
 		size,
 		io::FileDescription::EType::Other,
 		core::DateAndTime(),
@@ -277,7 +277,7 @@ StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size
 }
 
 
-bool FileSystemWin32::CreateFile(const path& path, bool recursive)
+bool FileSystemWin32::CreateFile(const Path& path, bool recursive)
 {
 	Win32Path win32Path = ConvertPathToWin32WidePath(path);
 	if(*win32Path.Last() == L'\\')
@@ -289,17 +289,17 @@ bool FileSystemWin32::CreateFile(const path& path, bool recursive)
 
 /*
 // TODO
-bool FileSystemWin32::DeleteFile(const path& path)
+bool FileSystemWin32::DeleteFile(const Path& Path)
 {
 	return false;
 }
 // TODO
-bool FileSystemWin32::CopyFile(const path& srcPath, const path& dstPath, bool createDstPath, bool replace)
+bool FileSystemWin32::CopyFile(const Path& srcPath, const Path& dstPath, bool createDstPath, bool replace)
 {
 	return false;
 }
 // TODO
-bool FileSystemWin32::MoveFile(const path& srcPath, const path& dstPath, bool createDstPath, bool replace)
+bool FileSystemWin32::MoveFile(const Path& srcPath, const Path& dstPath, bool createDstPath, bool replace)
 {
 	return false;
 }
@@ -310,12 +310,12 @@ StrongRef<Archive> FileSystemWin32::GetRootArchive()
 	return m_RootArchive;
 }
 
-StrongRef<Archive> FileSystemWin32::CreateArchive(const path& path)
+StrongRef<Archive> FileSystemWin32::CreateArchive(const Path& path)
 {
 	return LUX_NEW(ArchiveFolderWin32)(this, GetAbsoluteFilename(path));
 }
 
-void FileSystemWin32::AddMountPoint(const path& point, Archive* archive)
+void FileSystemWin32::AddMountPoint(const Path& point, Archive* archive)
 {
 	if(!archive || point.IsEmpty())
 		return;
@@ -326,9 +326,9 @@ void FileSystemWin32::AddMountPoint(const path& point, Archive* archive)
 	m_Mounts.PushBack(e);
 }
 
-void FileSystemWin32::RemoveMountPoint(const path& point, Archive* archive)
+void FileSystemWin32::RemoveMountPoint(const Path& point, Archive* archive)
 {
-	const path normal = io::NormalizePath(point, true);
+	const Path normal = io::NormalizePath(point, true);
 	for(auto it = m_Mounts.Last(); it != m_Mounts.Begin();) {
 		if(it->mountpoint == normal && (!archive || archive == it->archive))
 			it = m_Mounts.Erase(it, true) - 1;
@@ -337,7 +337,7 @@ void FileSystemWin32::RemoveMountPoint(const path& point, Archive* archive)
 	}
 }
 
-string FileSystemWin32::GetFileOpenString(EFileMode mode) const
+String FileSystemWin32::GetFileOpenString(EFileMode mode) const
 {
 	if(mode == EFileMode::ReadWrite)
 		return "r+b";
@@ -348,13 +348,13 @@ string FileSystemWin32::GetFileOpenString(EFileMode mode) const
 	if(TestFlag(mode, EFileMode::Write))
 		return "wb";
 
-	return string::EMPTY;
+	return String::EMPTY;
 }
 
-Win32Path FileSystemWin32::ConvertPathToWin32WidePath(const path& p) const
+Win32Path FileSystemWin32::ConvertPathToWin32WidePath(const Path& p) const
 {
-	core::array<u16> out;
-	core::array<u16> p2 = core::UTF8ToUTF16(GetAbsoluteFilename(p).Data());
+	core::Array<u16> out;
+	core::Array<u16> p2 = core::UTF8ToUTF16(GetAbsoluteFilename(p).Data());
 	out.Reserve(4 + p2.Size() + 1);
 
 	out.PushBack((const u16*)L"\\\\?\\", 4);
@@ -368,7 +368,7 @@ Win32Path FileSystemWin32::ConvertPathToWin32WidePath(const path& p) const
 	return out;
 }
 
-u32 FileSystemWin32::GetWin32FileAttributes(const path& p) const
+u32 FileSystemWin32::GetWin32FileAttributes(const Path& p) const
 {
 	const Win32Path& win32Path = ConvertPathToWin32WidePath(p);
 	return (u32)GetFileAttributesW((const wchar_t*)win32Path.Data_c());
@@ -415,7 +415,7 @@ bool FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 	wchar_t* path = (wchar_t*)_path.Data_c();
 	wchar_t* path_ptr = path + _path.Size();
 
-	core::array<wchar_t*> subDirs;
+	core::Array<wchar_t*> subDirs;
 	subDirs.PushBack(path_ptr);
 	do {
 		**subDirs.Last() = L'\0';

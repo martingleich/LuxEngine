@@ -56,7 +56,7 @@ public:
 	\return The newly created file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenFile(const path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
+	virtual StrongRef<File> OpenFile(const Path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
 	//! Create a file from Memory for read and write
 	/**
@@ -67,7 +67,7 @@ public:
 	\return The newly created file.
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const string& name, bool deleteOnDrop) = 0;
+	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop) = 0;
 
 	//! Create a limited file
 	/**
@@ -79,35 +79,35 @@ public:
 	\return The new file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const string& name) = 0;
+	virtual StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const String& name) = 0;
 
 	//! Test if a file exist
 	/**
 	\param path The filename to test
 	\return True, if the file exists otherwise false
 	*/
-	virtual bool ExistFile(const path& path) const = 0;
+	virtual bool ExistFile(const Path& path) const = 0;
 
 	//! The if a directory exists
 	/**
 	\param path The filename to test
 	\return True if the directory exists otherwise false
 	*/
-	virtual bool ExistDirectory(const path& path) const = 0;
+	virtual bool ExistDirectory(const Path& path) const = 0;
 
 	//! Expands an filename to an absolute path
 	/**
 	\param filename The filename to use
 	\return The absolute filename of this file
 	*/
-	virtual path GetAbsoluteFilename(const path& filename) const = 0;
+	virtual Path GetAbsoluteFilename(const Path& filename) const = 0;
 
 	//! Get the current working directory
 	/**
 	All relative Pathes, orgins from this path
 	\return The current relative path
 	*/
-	virtual const path& GetWorkingDirectory() const = 0;
+	virtual const Path& GetWorkingDirectory() const = 0;
 
 	//! Create a new temporary file
 	/**
@@ -124,7 +124,7 @@ public:
 	\return The information about the file is written here
 	\throws FileNotFoundException
 	*/
-	virtual FileDescription GetFileDescription(const path& path) = 0;
+	virtual FileDescription GetFileDescription(const Path& path) = 0;
 
 	//! Create a ini file reader
 	/**
@@ -132,7 +132,7 @@ public:
 	\return The new INI File
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<INIFile> CreateINIFile(const path& filename) = 0;
+	virtual StrongRef<INIFile> CreateINIFile(const Path& filename) = 0;
 
 	//! Create a ini file reader
 	/**
@@ -148,7 +148,7 @@ public:
 	it'S created
 	\return True, if the file or directory was created or already existed, false if the creation failed
 	*/
-	virtual bool CreateFile(const path& path, bool recursive = false) = 0;
+	virtual bool CreateFile(const Path& path, bool recursive = false) = 0;
 #if 0
 	//! Delete a file or directory
 	/**
@@ -156,7 +156,7 @@ public:
 	\param path The path of the file or directory to delete, the path must end with / to delete a directory
 	\return True, if the file or directory were removed, false otherwise
 	*/
-	virtual bool DeleteFile(const path& path) = 0;
+	virtual bool DeleteFile(const Path& Path) = 0;
 
 	//! Copies a file or directory
 	/**
@@ -166,7 +166,7 @@ public:
 	\param createDstPath If the subpath of the new file doesn't exist it's created
 	\param replace If theres already data on the new path it's replaced by the copied data
 	*/
-	virtual bool CopyFile(const path& srcPath, const path& dstPath, bool createDstPath, bool replace) = 0;
+	virtual bool CopyFile(const Path& srcPath, const Path& dstPath, bool createDstPath, bool replace) = 0;
 
 	//! Moves a file or directory
 	/**
@@ -178,7 +178,7 @@ public:
 	\param createDstPath If the subpath of the new file doesn't exist it's created
 	\param replace If theres already data on the new path it's replaced by the moved data
 	*/
-	virtual bool MoveFile(const path& srcPath, const path& dstPath, bool createDstPath, bool replace) = 0;
+	virtual bool MoveFile(const Path& srcPath, const Path& dstPath, bool createDstPath, bool replace) = 0;
 #endif
 
 	//! Get the folder archive representing the working directory.
@@ -189,14 +189,14 @@ public:
 	If the path points to a directory, a folder archive is created.
 	Otherwise the type of archive depend on the file contents. (i.e. zip, tar, etc.)
 	*/
-	virtual StrongRef<Archive> CreateArchive(const path& path) = 0;
+	virtual StrongRef<Archive> CreateArchive(const Path& path) = 0;
 
 	//! Add a mount point
 	/**
 	\param point The path to the mount-point.
 	\param archive The archive loaded into the mount-point.
 	*/
-	virtual void AddMountPoint(const path& point, Archive* archive) = 0;
+	virtual void AddMountPoint(const Path& point, Archive* archive) = 0;
 
 	//! Remove a mount-point.
 	/**
@@ -204,7 +204,7 @@ public:
 	\param archive The archive to remove from the mount-point,
 	if NULL remove the whole mount-point.
 	*/
-	virtual void RemoveMountPoint(const path& point, Archive* archive = nullptr) = 0;
+	virtual void RemoveMountPoint(const Path& point, Archive* archive = nullptr) = 0;
 	//virtual StrongRef<Archive> CreateArchive(File* file) = 0;
 };
 

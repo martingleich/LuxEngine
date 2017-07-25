@@ -7,6 +7,7 @@
 #include "scene/components/Camera.h"
 #include "scene/components/Light.h"
 #include "core/Logger.h"
+#include "core/ReferableRegister.h"
 
 namespace lux
 {
@@ -450,17 +451,13 @@ void Node::RecalculateBoundingBox()
 
 StrongRef<Referable> Node::Clone() const
 {
-	return new Node(*this);
+	return LUX_NEW(Node)(*this);
 }
 
 core::Name Node::GetReferableType() const
 {
-	return ReferableType::SceneNode;
-}
-
-core::Name Node::GetReferableSubType() const
-{
-	return ReferableType::SceneNode;
+	static const core::Name name = "lux.node";
+	return name;
 }
 
 Node::Node(const Node& other) :

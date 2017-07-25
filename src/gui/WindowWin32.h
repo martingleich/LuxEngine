@@ -33,7 +33,7 @@ public:
 
 	bool SwitchFullscreen(bool Fullscreen);
 	bool Init(HWND Window);
-	void SetTitle(const string& title);
+	void SetTitle(const String& title);
 	void SetSize(const math::dimension2du& Size);
 	void SetPosition(const math::vector2i& Position);
 	bool Maximize();

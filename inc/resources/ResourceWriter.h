@@ -21,7 +21,7 @@ public:
 	\param requestedType The type of the resource, the user wishes to write to file.
 	\return Can the writer, write the given type
 	*/
-	virtual bool CanWriteType(const string& ext, Name requestedType) = 0;
+	virtual bool CanWriteType(const String& ext, Name requestedType) = 0;
 
 	//! Write a resource to file
 	virtual void WriteResource(io::File* file, Resource* resource) = 0;
@@ -31,7 +31,7 @@ public:
 	This name is only for the user, and has no limitations.
 	\return The name of the writer.
 	*/
-	virtual const string& GetName() const = 0;
+	virtual const String& GetName() const = 0;
 };
 
 } // namespace core

@@ -37,11 +37,9 @@ public:
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
 
-	StrongRef<Referable> Clone() const;
-
 private:
 	static u32 s_TextureCount;
-	static core::array<IDirect3DSurface9*> s_TempSurfaces;
+	static core::Array<IDirect3DSurface9*> s_TempSurfaces;
 
 	IDirect3DSurface9* GetTempSurface(u32 width, u32 height, D3DFORMAT format);
 	void FreeTempSurface(IDirect3DSurface9* surface);

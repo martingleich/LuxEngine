@@ -9,8 +9,11 @@
 
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS_NAMED(box, lux::scene::BoxCollider);
-LUX_REGISTER_REFERABLE_CLASS_NAMED(bounding_box, lux::scene::BoundingBoxCollider);
+const lux::core::Name lux::scene::BoxCollider::TypeName = "lux.collider.Box";
+const lux::core::Name lux::scene::BoundingBoxCollider::TypeName = "lux.collider.BBox";
+
+LUX_REGISTER_REFERABLE_CLASS_NAMED(box, lux::scene::BoxCollider::TypeName, lux::scene::BoxCollider);
+LUX_REGISTER_REFERABLE_CLASS_NAMED(bounding_box, lux::scene::BoundingBoxCollider::TypeName, lux::scene::BoundingBoxCollider);
 
 namespace lux
 {
@@ -29,7 +32,7 @@ bool BoxCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result)
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);
 	VolumeQueryCallback* vcallback = dynamic_cast<VolumeQueryCallback*>(result);
 
-	core::Name zoneType = vquery->GetZone()->GetReferableSubType();
+	core::Name zoneType = vquery->GetZone()->GetReferableType();
 	if(zoneType == "sphere")
 		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), vcallback);
 	else if(zoneType == "box")

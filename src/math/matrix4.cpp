@@ -4,7 +4,14 @@ namespace lux
 {
 namespace core
 {
-const Type Type::Matrix(new TypeInfoTemplate<math::matrix4>("matrix", true));
+namespace Types
+{
+Type Matrix()
+{
+	static const Type t(new core::TypeInfoTemplate<math::matrix4>("matrix4"));
+	return t;
+}
+}
 }
 
 namespace math

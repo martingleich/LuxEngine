@@ -74,7 +74,7 @@ private:
 	StrongRef<InputSystem> m_InputSystem;
 
 	core::HashMap<HANDLE, StrongRef<RawInputDevice>> m_DeviceMap;
-	core::array<RAWINPUTDEVICE> m_Subscribed;
+	core::Array<RAWINPUTDEVICE> m_Subscribed;
 };
 
 }

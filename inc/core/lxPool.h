@@ -15,7 +15,7 @@ A pool is optimized for repeated creation and destruction
 of unordered data
 */
 template <typename T>
-class pool
+class Pool
 {
 public:
 	class ConstIterator;
@@ -94,7 +94,7 @@ public:
 		explicit Iterator(T* _current) : m_Current(_current)
 		{
 		}
-		friend class pool<T>;
+		friend class Pool<T>;
 		friend class ConstIterator;
 
 	private:
@@ -191,7 +191,7 @@ public:
 		}
 
 		friend class Iterator;
-		friend class pool<T>;
+		friend class Pool<T>;
 
 	private:
 		const T* m_Current;
@@ -202,7 +202,7 @@ public:
 	/**
 	\param capactatiy The max number of elements in the pool
 	*/
-	pool(size_t capacity = 1024)
+	Pool(size_t capacity = 1024)
 	{
 		m_Data = new T[capacity];
 		m_Alloc = capacity;
@@ -210,17 +210,17 @@ public:
 		m_AutoAllocation = false;
 	}
 
-	pool(const pool<T>& other)
+	Pool(const Pool<T>& other)
 	{
 		*this = other;
 	}
 
-	pool(pool<T>&& old)
+	Pool(Pool<T>&& old)
 	{
 		*this = std::move(old);
 	}
 
-	pool& operator=(const pool<T>& other)
+	Pool& operator=(const Pool<T>& other)
 	{
 		m_Alloc = other.m_Alloc;
 		m_Active = other.m_Active;
@@ -230,7 +230,7 @@ public:
 			m_Data[i] = std::move(other.m_Data);
 	}
 
-	pool& operator=(pool<T>&& old)
+	Pool& operator=(Pool<T>&& old)
 	{
 		m_Alloc = old.m_Alloc;
 		m_Active = old.m_Active;
@@ -335,6 +335,30 @@ public:
 	ConstIterator Last() const
 	{
 		return ConstIterator(m_Data + m_Active - 1);
+	}
+
+	//! Support for foreach loop
+	Iterator begin()
+	{
+		return First();
+	}
+
+	//! Support for foreach loop
+	Iterator end()
+	{
+		return End();
+	}
+
+	//! Support for foreach loop
+	ConstIterator begin() const
+	{
+		return First();
+	}
+
+	//! Support for foreach loop
+	ConstIterator end() const
+	{
+		return End();
 	}
 
 	//! Add a new active element to the pool

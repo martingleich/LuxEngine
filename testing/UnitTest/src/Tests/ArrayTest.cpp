@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-UNIT_SUITE(array)
+UNIT_SUITE(Array)
 {
 	struct Type
 	{
@@ -39,7 +39,7 @@ UNIT_SUITE(array)
 
 	UNIT_TEST(init)
 	{
-		core::array<Type> arr;
+		core::Array<Type> arr;
 
 		UNIT_ASSERT(arr.IsEmpty());
 		UNIT_ASSERT(arr.Size() == 0);
@@ -51,7 +51,7 @@ UNIT_SUITE(array)
 		int refCount2 = 0;
 		int refCount3 = 0;
 
-		core::array<Type> arr;
+		core::Array<Type> arr;
 		arr.PushBack(Type(refCount1, 111));
 		arr.PushBack(Type(refCount2, 222));
 		arr.PushBack(Type(refCount3, 333));
@@ -72,7 +72,7 @@ UNIT_SUITE(array)
 		int refCount2 = 0;
 		int refCount3 = 0;
 
-		core::array<Type> arr;
+		core::Array<Type> arr;
 		arr.PushFront(Type(refCount1, 111));
 		arr.PushFront(Type(refCount2, 222));
 		arr.PushFront(Type(refCount3, 333));
@@ -93,7 +93,7 @@ UNIT_SUITE(array)
 		int refCount2 = 0;
 		int refCount3 = 0;
 
-		core::array<Type> arr;
+		core::Array<Type> arr;
 		arr.PushBack(Type(refCount1, 111));
 		arr.PushBack(Type(refCount2, 222));
 		arr.Insert(Type(refCount3, 333), arr.First()+1);
@@ -114,7 +114,7 @@ UNIT_SUITE(array)
 		int refCount2 = 0;
 		int refCount3 = 0;
 
-		core::array<Type> arr;
+		core::Array<Type> arr;
 		arr.PushBack(Type(refCount1, 111));
 		arr.PushBack(Type(refCount2, 222));
 		arr.PushBack(Type(refCount3, 333));

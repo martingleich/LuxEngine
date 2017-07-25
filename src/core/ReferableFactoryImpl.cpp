@@ -11,7 +11,7 @@ namespace core
 namespace impl_referableRegister
 {
 static ReferableRegisterBlock* g_FirstReferableBlock = nullptr;
-void RegisterReferable(ReferableRegisterBlock* block)
+void RegisterReferableBlock(ReferableRegisterBlock* block)
 {
 	if(g_FirstReferableBlock)
 		block->nextBlock = g_FirstReferableBlock;
@@ -22,17 +22,8 @@ void RegisterReferable(ReferableRegisterBlock* block)
 void RunAllRegisterReferableFunctions()
 {
 	for(auto block = g_FirstReferableBlock; block; block = block->nextBlock)
-		ReferableFactory::Instance()->RegisterType(block->prototypeCreator());
+		ReferableFactory::Instance()->RegisterType(block->type, block->creator);
 }
-}
-
-core::array<ReferableFactoryImpl::ReferableType>::Iterator ReferableFactoryImpl::FindEntry(Name type, Name subType) const
-{
-	ReferableType dummy;
-	dummy.type = type;
-	dummy.subType = subType;
-
-	return core::BinarySearch(dummy, m_Referables.First(), m_Referables.End());
 }
 
 ReferableFactoryImpl::ReferableFactoryImpl() :
@@ -40,92 +31,61 @@ ReferableFactoryImpl::ReferableFactoryImpl() :
 {
 }
 
-void ReferableFactoryImpl::RegisterType(Referable* prototype)
+void ReferableFactoryImpl::RegisterType(Name type, CreationFunc create)
 {
-	ReferableType entry;
-	entry.type = prototype->GetReferableType();
-	entry.subType = prototype->GetReferableSubType();
-	entry.prototype = prototype;
+	if(type == Name::INVALID)
+		throw InvalidArgumentException("type", "An empty name is not allowed.");
+	if(!create)
+		throw InvalidArgumentException("create", "A creation function must be given.");
 
-	if(entry.type == Name::INVALID || entry.subType == Name::INVALID)
-		throw Exception("Invalid prototype type or name");
+	if(m_Types.HasKey(type))
+		throw core::InvalidArgumentException("type", "Type name is already used");
 
-	core::array<ReferableType>::Iterator i, n;
-	i = core::BinarySearch(entry, m_Referables.First(), m_Referables.End(), &n);
-	if(i != m_Referables.End())
-		throw Exception("Prototype already registered");
+	m_Types.Set(type, ReferableType(create));
 
-	if(i == m_Referables.End()) {
-		m_Referables.Insert(entry, n);
-		log::Debug("Registered new ~s: ~s.", entry.type, entry.subType);
-	}
+	log::Debug("Registerd type ~s.", type);
 }
 
-void ReferableFactoryImpl::UnregisterType(Name type, Name name)
+void ReferableFactoryImpl::UnregisterType(Name type)
 {
-	auto it = FindEntry(type, name);
-	if(it != m_Referables.End()) {
-		log::Debug("Unregistered type ~s: ~s.", type, name);
-		m_Referables.Erase(it, true);
-	}
+	if(m_Types.Erase(type))
+		log::Debug("Unregistered type ~s.", type);
 }
 
-void ReferableFactoryImpl::SetPrototype(Referable* prototype)
+StrongRef<Referable> ReferableFactoryImpl::Create(Name type)
 {
-	auto it = FindEntry(prototype->GetReferableType(), prototype->GetReferableSubType());
-	if(it != m_Referables.End())
-		it->prototype = prototype;
-}
+	CreationFunc create = m_Types.At(type).create;
+	Referable* r = create ? create() : nullptr;
+	if(!r)
+		throw Exception("Can't create new instance of given type.");
 
-StrongRef<Referable> ReferableFactoryImpl::GetPrototype(Name type, Name name) const
-{
-	auto it = FindEntry(type, name);
-	if(it == m_Referables.End())
-		throw ObjectNotFoundException((string(type.c_str()) + "." + string(name.c_str())).Data());
+	r->SetID(MakeId(r));
 
-	return it->prototype;
-}
-
-StrongRef<Referable> ReferableFactoryImpl::GetPrototype(size_t id) const
-{
-	return m_Referables.At(id).prototype;
-}
-
-StrongRef<Referable> ReferableFactoryImpl::Create(Name type, Name subType)
-{
-	if(m_NextID == 0)
-		throw Exception("Out of unique referable id's");
-
-	return Create(type, subType, MakeId());
-}
-
-StrongRef<Referable> ReferableFactoryImpl::Create(Name type, Name subType, lxID id)
-{
-	StrongRef<Referable> prototype = GetPrototype(type, subType);
-	StrongRef<Referable> out = prototype->Clone();
-
-	if(!out)
-		throw Exception("Cloning of prototype failed");
-
-	out->SetID(id);
-
-	return out;
+	return r;
 }
 
 size_t ReferableFactoryImpl::GetTypeCount() const
 {
-	return m_Referables.Size();
+	return m_Types.Size();
 }
 
-lxID ReferableFactoryImpl::MakeId()
+lxID ReferableFactoryImpl::MakeId(Referable* r)
 {
+	LUX_UNUSED(r);
+
+	if(m_NextID == 0)
+		throw RuntimeException("Out of unique referable id's");
+
 	lxID id;
 	id.value = m_NextID;
 	++m_NextID;
 	return id;
 }
 
+void ReferableFactoryImpl::FreeId(lxID id)
+{
+	LUX_UNUSED(id);
 }
 
 }
-
+}

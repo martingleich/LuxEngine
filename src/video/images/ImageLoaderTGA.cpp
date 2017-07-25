@@ -111,9 +111,9 @@ static void LoadImageToMemory(Context& ctx, void* dest)
 		throw core::FileFormatException("Corrupted or unsupported", "tga");
 }
 
-const string& ImageLoaderTGA::GetName() const
+const String& ImageLoaderTGA::GetName() const
 {
-	static const string name = "Lux TGA-Loader";
+	static const String name = "Lux TGA-Loader";
 	return name;
 }
 

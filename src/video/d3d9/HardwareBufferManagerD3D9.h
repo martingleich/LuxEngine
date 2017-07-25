@@ -40,7 +40,7 @@ public:
 private:
 	IDirect3DDevice9* m_D3DDevice;
 
-	core::array<VertexStream> m_VStreams;
+	core::Array<VertexStream> m_VStreams;
 	u32 m_UsedStreams;
 	IndexStream m_IStream;
 	bool m_AllowStreamOffset;

@@ -3,7 +3,7 @@
 #include "core/ReferableRegister.h"
 #include "video/DrawingCanvas.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::video::ImageImpl);
+LUX_REGISTER_REFERABLE_CLASS("lux.resource.Image", lux::video::ImageImpl);
 
 namespace lux
 {

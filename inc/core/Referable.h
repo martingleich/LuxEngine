@@ -6,13 +6,6 @@
 
 namespace lux
 {
-namespace ReferableType
-{
-LUX_API extern const core::Name Resource;
-LUX_API extern const core::Name SceneNode;
-LUX_API extern const core::Name SceneNodeComponent;
-LUX_API extern const core::Name Collider;
-}
 
 //! A referable object
 /**
@@ -22,21 +15,16 @@ They also can be used with the \ref ReferableFactory and created there my name o
 class Referable : public ReferenceCounted
 {
 public:
+	LUX_API Referable();
+	LUX_API Referable(const Referable& other);
+	LUX_API virtual ~Referable();
+
 	//! Get the name of the referable type
 	/**
-	Returns something like "scenenode" or "scenenodecomponent" or "resource"
 	Must be unique over all types
 	\return The name of the referable type
 	*/
 	virtual core::Name GetReferableType() const = 0;
-
-	//! Returns the name of the exact type or the referable
-	/**
-	Returns something like "skybox", "cameracontrol", "texture" or "mesh".
-	Must be unique over a group of main types.
-	\return The name of the resource type
-	*/
-	virtual core::Name GetReferableSubType() const = 0;
 
 	//! Returns the id of the object
 	virtual core::lxID GetID() const
@@ -46,9 +34,8 @@ public:
 
 	//! Set's the id of the object
 	/**
-	This function should be use with extreme care.
-	There should be no reference to the old id of the object.
-	The new id shouldn't already be in use by another object.
+	This method is for internal use.
+	The user should never call it.
 	\param newID The new id of the object.
 	*/
 	virtual void SetID(core::lxID id)
@@ -62,7 +49,10 @@ public:
 	Should copy data from the old object, but doesn't have too.
 	\return The new object
 	*/
-	virtual StrongRef<Referable> Clone() const = 0;
+	virtual StrongRef<Referable> Clone() const
+	{
+		throw core::NotImplementedException();
+	}
 
 private:
 	core::lxID m_ID;

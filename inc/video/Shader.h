@@ -26,7 +26,8 @@ public:
 	virtual ~Shader() {}
 
 	virtual void Enable() = 0;
-	virtual void LoadSettings(const RenderSettings& settings) = 0;
+	virtual void SetParam(const void* data, u32 paramId) = 0;
+	virtual void LoadSceneParams(const RenderSettings& settings, u32 baseLayer) = 0;
 	virtual void Disable() = 0;
 
 	//! Initializes the shader from code
@@ -36,12 +37,13 @@ public:
 	virtual void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
-		core::array<string>* errorList) = 0;
+		core::Array<String>* errorList) = 0;
 
 	virtual const core::ParamPackage& GetParamPackage() const = 0;
 
 	virtual size_t GetSceneParamCount() const = 0;
 	virtual u32 GetSceneParam(size_t id) const = 0;
+	virtual bool HasTextureSceneParam() const = 0;
 };
 
 } // namespace video

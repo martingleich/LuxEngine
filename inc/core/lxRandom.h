@@ -1,6 +1,6 @@
 #ifndef INCLUDED_LXRANDOM_H
 #define INCLUDED_LXRANDOM_H
-#include "ReferenceCounted.h"
+#include "core/Clock.h"
 
 #include "video/Color.h"
 #include "math/vector2.h"
@@ -8,8 +8,6 @@
 #include "math/angle.h"
 #include "math/aabbox3d.h"
 #include "math/rect.h"
-
-#include <ctime>
 
 namespace lux
 {
@@ -33,29 +31,11 @@ public:
 		ReSeed(seed);
 	}
 
-	static Randomizer& Instance()
-	{
-		static Randomizer r;
-		return r;
-	}
-
 	//! Seed the random number generator, with the current time
 	void ReSeed()
 	{
-		clock_t time = std::clock();
-		u32 seed;
-		// We don't care what exactly clock_t is,
-		// real or integer or what size
-		// We just want a pseudo random number from it.
-		ifconst(sizeof(clock_t) == 8) {
-			u32 s1, s2;
-			memcpy(&s1, &time, 4);
-			memcpy(&s2, ((u8*)&time) + 4, 4);
-			seed = s1 ^ s2;
-		} else {
-			memcpy(&seed, &time, sizeof(clock_t));
-		}
-
+		u64 ticks = core::Clock::GetTicks();
+		u32 seed = (u32)((ticks >> 32) ^ ticks);
 		ReSeed(seed);
 	}
 
@@ -136,7 +116,7 @@ public:
 	*/
 	inline float GetFloat(float min, float max) const
 	{
-		return min + GetFloat() * (max-min);
+		return min + GetFloat() * (max - min);
 	}
 
 	//! Generate a random color
@@ -207,7 +187,7 @@ public:
 	inline math::vector2f GetVector2Circle(float radius = 1.0f) const
 	{
 		const float baseLine = GetFloat(-1.0f, 1.0f);
-		const float s = sqrt(1-baseLine*baseLine);
+		const float s = sqrt(1 - baseLine*baseLine);
 		const float height = GetFloat(-s, s);
 
 		return radius * math::vector2f(baseLine, height);
@@ -248,7 +228,7 @@ public:
 	\param radius The radius of the sphere.
 	\return A random point in the sphere.
 	*/
-	inline math::vector3f GetVector3Sphere(float radius=1.0f) const
+	inline math::vector3f GetVector3Sphere(float radius = 1.0f) const
 	{
 		math::vector3f v;
 		do {
@@ -292,8 +272,7 @@ private:
 	mutable u32 m_State;
 };
 
-} // namspace core
-} 
-
+} // namespace core
+} // namespace lux
 
 #endif

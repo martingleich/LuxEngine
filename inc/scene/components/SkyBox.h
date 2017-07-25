@@ -36,7 +36,7 @@ public:
 
 	LUX_API virtual const math::aabbox3df& GetBoundingBox() const;
 
-	LUX_API virtual core::Name GetReferableSubType() const;
+	LUX_API virtual core::Name GetReferableType() const;
 	LUX_API virtual StrongRef<Referable> Clone() const;
 
 protected:

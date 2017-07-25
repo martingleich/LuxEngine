@@ -389,8 +389,8 @@ private:
 	};
 
 private:
-	core::array<Stream> m_Streams;
-	core::array<Element> m_Data;
+	core::Array<Stream> m_Streams;
+	core::Array<Element> m_Data;
 
 	Stream* m_CurrentStream;
 	u32 m_Stride;
@@ -416,7 +416,7 @@ public:
 	{
 	}
 
-	VertexFormat(const string& name, const VertexDeclaration& decl) :
+	VertexFormat(const String& name, const VertexDeclaration& decl) :
 		m_Name(name)
 	{
 		m_Declaration = std::make_shared<VertexDeclaration>(decl);
@@ -457,7 +457,7 @@ public:
 		return !(*this == other);
 	}
 
-	const string& GetName() const
+	const String& GetName() const
 	{
 		return m_Name;
 	}
@@ -567,7 +567,7 @@ private:
 	}
 
 private:
-	string m_Name;
+	String m_Name;
 	std::shared_ptr<VertexDeclaration> m_Declaration;
 	bool m_IsValid;
 

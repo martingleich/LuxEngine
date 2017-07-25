@@ -93,16 +93,17 @@ public:
 		m_HalfHeight = h / 2;
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "ring";
-		return name;
+		return TypeName;
 	}
 
 	StrongRef<Referable> Clone() const
 	{
 		return LUX_NEW(RingZone)(*this);
 	}
+
+	static const core::Name TypeName;
 
 private:
 	float m_MinRadius;

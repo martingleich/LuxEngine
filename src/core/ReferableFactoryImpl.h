@@ -3,6 +3,7 @@
 #include "core/ReferableFactory.h"
 #include "core/lxArray.h"
 #include "core/lxName.h"
+#include "core/lxOrderedMap.h"
 
 namespace lux
 {
@@ -14,46 +15,31 @@ class ReferableFactoryImpl : public ReferableFactory
 public:
 	ReferableFactoryImpl();
 
-	void RegisterType(Referable* prototype);
-	void UnregisterType(Name type, Name subType);
+	void RegisterType(Name type, CreationFunc create);
+	void UnregisterType(Name type);
 
-	void SetPrototype(Referable* prototype);
-	StrongRef<Referable> GetPrototype(Name type, Name subType) const;
-	StrongRef<Referable> GetPrototype(size_t id) const;
-
-	StrongRef<Referable> Create(Name type, Name subType);
-	StrongRef<Referable> Create(Name type, Name subType, lxID id);
+	StrongRef<Referable> Create(Name type);
 
 	size_t GetTypeCount() const;
 
-	lxID MakeId();
+	lxID MakeId(Referable* r);
+	void FreeId(lxID id);
 
 private:
 	struct ReferableType
 	{
-		Name type;
-		Name subType;
-		StrongRef<Referable> prototype;
+		CreationFunc create;
 
-		bool operator<(const ReferableType& other) const
-		{
-			if(type == other.type)
-				return subType < other.subType;
-			else
-				return type < other.type;
-		}
-
-		bool operator==(const ReferableType& other) const
-		{
-			return type == other.type && subType == other.subType;
-		}
+		ReferableType() :
+			create(nullptr)
+		{}
+		ReferableType(CreationFunc c) :
+			create(c)
+		{}
 	};
 
 private:
-	core::array<ReferableType>::Iterator FindEntry(Name type, Name subType) const;
-
-private:
-	mutable core::array<ReferableType> m_Referables;
+	core::OrderedMap<Name, ReferableType> m_Types;
 	u32 m_NextID;
 };
 

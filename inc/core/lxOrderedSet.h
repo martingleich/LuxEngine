@@ -174,6 +174,29 @@ public:
 		return Iterator(m_Tree.GetRoot(), nullptr);
 	}
 
+	//! Support for foreach loop
+	Iterator begin()
+	{
+		return First();
+	}
+
+	//! Support for foreach loop
+	Iterator end()
+	{
+		return End();
+	}
+
+	//! Support for foreach loop
+	ConstIterator begin() const
+	{
+		return FirstC();
+	}
+
+	//! Support for foreach loop
+	ConstIterator end() const
+	{
+		return EndC();
+	}
 	bool IsEmpty() const
 	{
 		return m_Tree.IsEmpty();

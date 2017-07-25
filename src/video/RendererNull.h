@@ -11,7 +11,7 @@
 #include "video/FogData.h"
 #include "video/RenderStatistics.h"
 #include "video/MatrixTable.h"
-#include "video/PipelineSettings.h"
+#include "video/Pass.h"
 
 namespace lux
 {
@@ -33,10 +33,8 @@ protected:
 	{
 		Dirty_Material,
 		Dirty_MaterialRenderer,
-		Dirty_PipelineOverwrites,
 		Dirty_Transform,
 		Dirty_Lights,
-		Dirty_Pipeline,
 		Dirty_Rendertarget,
 		Dirty_RenderMode,
 		Dirty_Fog,
@@ -53,11 +51,11 @@ protected:
 		u32 fogColor;
 		u32 fogInfo;
 
-		core::array<u32> lights;
+		core::Array<u32> lights;
 	};
 
 public:
-	RendererNull(VideoDriver* driver);
+	RendererNull(VideoDriver* driver, DeviceState& deviceState);
 	virtual ~RendererNull() {}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -72,6 +70,10 @@ public:
 
 	void PushPipelineOverwrite(const PipelineOverwrite& over);
 	void PopPipelineOverwrite();
+
+private:
+	void UpdatePipelineOverwrite();
+public:
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -90,13 +92,13 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	u32 AddParam(const string_type& name, core::Type type);
-	u32 AddInternalParam(const string_type& name, core::Type type);
-	u32 AddParamEx(const string_type& name, core::Type type, bool isInternal);
+	u32 AddParam(const StringType& name, core::Type type);
+	u32 AddInternalParam(const StringType& name, core::Type type);
+	u32 AddParamEx(const StringType& name, core::Type type, bool isInternal);
 	core::PackageParam GetParamEx(u32 id, bool internal);
 	core::PackageParam GetParam(u32 id);
 	core::PackageParam GetParamInternal(u32 id);
-	core::PackageParam GetParam(const string_type& string);
+	core::PackageParam GetParam(const StringType& string);
 	u32 GetParamCount() const;
 
 	///////////////////////////////////////////////////////////////////////////
@@ -128,18 +130,21 @@ protected:
 	math::matrix4 GenerateLightMatrix(const LightData& data, bool active);
 
 private:
-	bool GetLightId(const string_type& string, u32& outId);
+	bool GetLightId(const StringType& string, u32& outId);
 
 protected:
+	DeviceState& m_DeviceState;
+
 	ERenderMode m_RenderMode; //!< Active rendermode
 
 	// The userset parameters are only rememberd they don't have to be activated immediatly
 	StrongRef<Material> m_Material; //!< User set material
 	StrongRef<Material> m_InvalidMaterial; //!< The material used to render invalid materials
 
-	core::array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
+	core::Array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
+	PipelineOverwrite m_FinalOverwrite;
 
-	core::array<LightData> m_Lights; //!< User set lights
+	core::Array<LightData> m_Lights; //!< User set lights
 
 	FogData m_Fog; //!< User set fog data
 
@@ -149,7 +154,7 @@ protected:
 
 	MatrixTable m_MatrixTable; //! The currently set matrices, these are used as arguments for shaders and other rendercomponents
 
-	core::array<bool> m_InternalTable; //! Saves if a parameter is internal
+	core::Array<bool> m_InternalTable; //! Saves if a parameter is internal
 	core::ParamList m_ParamList; //!< User set parameters
 	ParamIdCollection m_ParamId; //!< Collection of default param id's
 

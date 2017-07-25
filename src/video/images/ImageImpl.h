@@ -32,7 +32,7 @@ public:
 	void* Lock();
 	void Unlock();
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
 		return core::ResourceType::Image;
 	}

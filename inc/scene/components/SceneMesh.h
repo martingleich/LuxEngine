@@ -70,7 +70,7 @@ public:
 
 	LUX_API virtual const math::aabbox3df& GetBoundingBox() const;
 
-	LUX_API virtual core::Name GetReferableSubType() const;
+	LUX_API virtual core::Name GetReferableType() const;
 	LUX_API virtual StrongRef<Referable> Clone() const;
 
 private:
@@ -82,7 +82,7 @@ protected:
 	mutable bool m_DirtyMaterials;
 
 	bool m_OnlyReadMaterials;
-	core::array<StrongRef<video::Material>> m_Materials;
+	core::Array<StrongRef<video::Material>> m_Materials;
 
 	math::aabbox3df m_BoundingBox;
 

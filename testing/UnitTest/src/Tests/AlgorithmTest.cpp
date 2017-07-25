@@ -4,7 +4,7 @@ UNIT_SUITE(algorithm)
 {
 	UNIT_TEST(sort)
 	{
-		core::array<int> arr;
+		core::Array<int> arr;
 		arr.PushBack(3);
 		arr.PushBack(2);
 		arr.PushBack(1);

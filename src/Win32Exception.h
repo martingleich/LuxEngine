@@ -10,9 +10,9 @@
 
 namespace lux
 {
-inline lux::string GetWin32ErrorString(DWORD error)
+inline lux::String GetWin32ErrorString(DWORD error)
 {
-	lux::string out;
+	lux::String out;
 	if(NOERROR != error) {
 		const DWORD formatControl =
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |

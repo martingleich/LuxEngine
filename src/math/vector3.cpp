@@ -2,11 +2,21 @@
 
 namespace lux
 {
+
 namespace core
 {
-
-const Type Type::Vector3(new TypeInfoTemplate<math::vector3f>("vector3", true));
-const Type Type::Vector3Int(new TypeInfoTemplate<math::vector3i>("vector3i", true));
-
-} // namespace core
+namespace Types
+{
+Type Vector3f()
+{
+	static const Type t(new core::TypeInfoTemplate<math::vector3f>("vector3f"));
+	return t;
+}
+Type Vector3i()
+{
+	static const Type t(new core::TypeInfoTemplate<math::vector3i>("vector3i"));
+	return t;
+}
+}
+}
 } // namespace lux

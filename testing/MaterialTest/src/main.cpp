@@ -16,7 +16,9 @@ public:
 		log::EngineLog.SetNewPrinter(log::ConsolePrinter);
 
 		m_Device = CreateDevice();
-		m_Device->BuildAll(video::DriverConfig::WindowedDefault(800, 600));
+		auto config = video::DriverConfig::WindowedDefault(800, 600);
+		config.multiSampling = 10;
+		m_Device->BuildAll(config);
 
 		Context = AppContext(m_Device);
 
@@ -82,7 +84,7 @@ public:
 
 	void OnEvent(const input::Event& e);
 
-	core::array<StrongRef<video::Material>> GenMaterialList();
+	core::Array<StrongRef<video::Material>> GenMaterialList();
 
 private:
 	StrongRef<scene::Node> m_CameraNode;
@@ -105,9 +107,9 @@ void MaterialTest::Render()
 	}
 }
 
-core::array<StrongRef<video::Material>> MaterialTest::GenMaterialList()
+core::Array<StrongRef<video::Material>> MaterialTest::GenMaterialList()
 {
-	core::array<StrongRef<video::Material>> out;
+	core::Array<StrongRef<video::Material>> out;
 
 	auto mat = Context.MatLib->CreateMaterial("solid");
 	mat->SetDiffuse(video::Color::Red);
@@ -154,11 +156,9 @@ void MaterialTest::OnEvent(const input::Event& e)
 
 int main(int arg, char **argv)
 {
-	try {
+	{
 		MaterialTest mt;
 		mt.Run();
-	} catch(const core::Exception& e) {
-		log::Error(e.What());
 	}
 
 	getchar();

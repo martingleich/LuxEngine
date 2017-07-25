@@ -8,13 +8,12 @@
 #include "video/Renderer.h"
 #include "video/VertexFormats.h"
 #include "video/VertexTypes.h"
-#include "video/PipelineSettings.h"
 
 #include "math/Transformation.h"
 
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::SkyBox)
+LUX_REGISTER_REFERABLE_CLASS("lux.comp.Skybox", lux::scene::SkyBox)
 
 namespace lux
 {
@@ -24,14 +23,22 @@ namespace scene
 SkyBox::SkyBox() :
 	m_UseCubeTexture(true)
 {
+	video::MaterialRenderer* renderer;
+	if(!video::MaterialLibrary::Instance()->ExistsMaterialRenderer("skyBox", &renderer)) {
+		renderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("skyBox", "solid");
+		auto& pass = renderer->GetPass(0);
+		pass.fogEnabled = false;
+		pass.lighting = false;
+		renderer->AddParam("tex", 0, (u32)video::EOptionId::Layer0);
+	}
+
+	m_Material = renderer->CreateMaterial();
 }
 
 SkyBox::SkyBox(const SkyBox& other)
 {
 	if(other.m_Material)
 		m_Material = other.m_Material->Clone().As<video::Material>();
-	else
-		m_Material = video::MaterialLibrary::Instance()->CreateMaterial();
 }
 
 SkyBox::~SkyBox()
@@ -65,13 +72,6 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
 	math::matrix4 m;
 	t.ToMatrix(m);
 	renderer->SetTransform(video::ETransform::World, m);
-
-	// Adjust Pipeline for Skyboxes
-	video::PipelineOverwrite over;
-	over.disableFog = true;
-	over.disableLighting = true;
-	over.disableZCmp = true;
-	renderer->PushPipelineOverwrite(over);
 
 	static const video::Vertex3DTCoord Vertices3D[8] =
 	{
@@ -152,6 +152,11 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
 		4, 5, 6, 7, 4, 6     // Down
 	};
 
+	// Disable z comparison for sky box renderering
+	video::PipelineOverwrite over;
+	over.disableZCmp = true;
+	video::PipelineOverwriteToken tok(renderer, over);
+
 	if(m_SkyTexture)
 		m_Material->Layer(0) = m_SkyTexture;
 
@@ -175,8 +180,6 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
 			video::VertexFormat::STANDARD,
 			true);
 	}
-
-	renderer->PopPipelineOverwrite();
 }
 
 ERenderPass SkyBox::GetRenderPass() const
@@ -238,7 +241,7 @@ const math::aabbox3df& SkyBox::GetBoundingBox() const
 	return math::aabbox3df::EMPTY;
 }
 
-core::Name SkyBox::GetReferableSubType() const
+core::Name SkyBox::GetReferableType() const
 {
 	return SceneComponentType::SkyBox;
 }

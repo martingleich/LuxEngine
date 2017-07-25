@@ -22,15 +22,15 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	StrongRef<Node> AddNode(Component* baseComp = nullptr, Node* parent = nullptr);
-	StrongRef<Node> AddMesh(const io::path& path);
+	StrongRef<Node> AddMesh(const io::Path& path);
 	StrongRef<Node> AddMesh(video::Mesh* mesh);
-	StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture=nullptr);
+	StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr);
 	StrongRef<Node> AddLight();
 	StrongRef<Node> AddCamera();
 
 	// Object components
 	StrongRef<Camera> CreateCamera();
-	StrongRef<Mesh> CreateMesh(const io::path& path);
+	StrongRef<Mesh> CreateMesh(const io::Path& path);
 	StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr);
 	StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture = nullptr);
 	StrongRef<Light> CreateLight();
@@ -203,11 +203,11 @@ private:
 	// Caches and temporary values
 	/////////////////////////////////////////////////////////////////////////
 	// The used renderqueues
-	core::array<CameraEntry> m_CameraList;
-	core::array<LightEntry> m_LightList;
-	core::array<RenderEntry> m_SkyBoxList;
-	core::array<RenderEntry> m_SolidNodeList;
-	core::array<DistanceRenderEntry> m_TransparentNodeList;
+	core::Array<CameraEntry> m_CameraList;
+	core::Array<LightEntry> m_LightList;
+	core::Array<RenderEntry> m_SkyBoxList;
+	core::Array<RenderEntry> m_SolidNodeList;
+	core::Array<DistanceRenderEntry> m_TransparentNodeList;
 	Node* m_CollectedRoot;
 
 	// Information about the current camera
@@ -215,7 +215,7 @@ private:
 	WeakRef<Camera> m_ActiveCamera;
 	math::vector3f m_AbsoluteCamPos;
 
-	core::array<StrongRef<Node>> m_DeletionQueue; //!< Nodes to delete on next deletion run
+	core::Array<StrongRef<Node>> m_DeletionQueue; //!< Nodes to delete on next deletion run
 
 	/////////////////////////////////////////////////////////////////////////
 	// Settings and parameters
@@ -225,7 +225,7 @@ private:
 	video::Colorf m_AmbientColor;
 	video::FogData m_Fog;
 
-	core::array<core::array<video::PipelineOverwrite>> m_Overwrites; //!< User-set pipeline overwrites
+	core::Array<core::Array<video::PipelineOverwrite>> m_Overwrites; //!< User-set pipeline overwrites
 
 	StrongRef<Node> m_RootSceneNode; //!< The root of the scenegraph
 

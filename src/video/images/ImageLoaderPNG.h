@@ -10,7 +10,7 @@ namespace video
 class ImageLoaderPNG : public core::ResourceLoader
 {
 public:
-	const string& GetName() const;
+	const String& GetName() const;
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
 	void LoadResource(io::File* file, core::Resource* dst);
 };

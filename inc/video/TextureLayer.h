@@ -71,7 +71,12 @@ public:
 
 namespace core
 {
-template<> inline Type GetTypeInfo<video::TextureLayer>() { return Type::Texture; }
+namespace Types
+{
+LUX_API Type Texture();
+}
+
+template<> inline Type GetTypeInfo<video::TextureLayer>() { return Types::Texture(); }
 } // namespace core
 } // namespace lux
 

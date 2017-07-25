@@ -2,7 +2,6 @@
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
 #include "video/RenderTarget.h"
-#include "video/PipelineSettings.h"
 
 #include "video/MaterialLibrary.h"
 #include "video/images/ImageSystem.h"
@@ -75,7 +74,7 @@ StrongRef<Node> SceneManagerImpl::AddNode(Component* baseComp, Node* parent)
 	return node;
 }
 
-StrongRef<Node> SceneManagerImpl::AddMesh(const io::path& path)
+StrongRef<Node> SceneManagerImpl::AddMesh(const io::Path& path)
 {
 	 return AddNode(CreateMesh(path));
 }
@@ -105,7 +104,7 @@ StrongRef<Camera> SceneManagerImpl::CreateCamera()
 	return CreateComponent(SceneComponentType::Camera);
 }
 
-StrongRef<Mesh> SceneManagerImpl::CreateMesh(const io::path& path)
+StrongRef<Mesh> SceneManagerImpl::CreateMesh(const io::Path& path)
 {
 	return CreateMesh(core::ResourceSystem::Instance()->GetResource(core::ResourceType::Mesh, path).As<video::Mesh>());
 }
@@ -160,7 +159,7 @@ StrongRef<CameraControl> SceneManagerImpl::CreateCameraControl(float moveSpeed, 
 
 StrongRef<Component> SceneManagerImpl::CreateComponent(core::Name type)
 {
-	return core::ReferableFactory::Instance()->Create(ReferableType::SceneNodeComponent, type);
+	return core::ReferableFactory::Instance()->Create(type);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_UNITTESTING_H
 #define INCLUDED_UNITTESTING_H
-#include <string>
+#include <String>
 #include <vector>
 #include <map>
 #include <iostream>

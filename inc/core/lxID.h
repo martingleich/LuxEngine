@@ -13,6 +13,16 @@ struct lxID
 		value(0)
 	{}
 
+	bool IsValid() const
+	{
+		return (value != 0);
+	}
+
+	//! The internal value of the id
+	/**
+	There are no guarantees about the type or content of this variable, except its uniqueness.
+	It should never be used directly.
+	*/
 	u32 value;
 };
 

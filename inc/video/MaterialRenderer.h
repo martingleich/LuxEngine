@@ -2,6 +2,8 @@
 #define INCLUDED_MATERIALRENDERER_H
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
+#include "video/Pass.h"
+#include "video/Material.h"
 
 namespace lux
 {
@@ -12,16 +14,34 @@ class ParamPackage;
 namespace video
 {
 class VideoDriver;
-class Material;
 class RenderSettings;
 class Shader;
-class PipelineSettings;
 class DeviceState;
+
+class ParamSetCallback : public ReferenceCounted
+{
+public:
+	virtual ~ParamSetCallback() {}
+
+	virtual void GeneratePass(u32 passId, const RenderSettings& settings, Pass& outPass)
+	{
+		LUX_UNUSED(passId);	
+		LUX_UNUSED(settings);	
+		LUX_UNUSED(outPass);	
+	}
+	virtual void SendShaderSettings(u32 passId, const Pass& pass, const RenderSettings& settings)
+	{
+		LUX_UNUSED(passId);	
+		LUX_UNUSED(pass);
+		LUX_UNUSED(settings);	
+	}
+};
 
 //! A Materialrenderer
 /**
 Material rendered communicate the data inside a material to the driver.
 */
+// TODO: Fix handling of texturelayers.
 class MaterialRenderer : public ReferenceCounted
 {
 public:
@@ -33,41 +53,73 @@ public:
 	};
 
 public:
-	virtual ~MaterialRenderer() {}
+	LUX_API MaterialRenderer(const String& name, const MaterialRenderer* old = nullptr);
+	MaterialRenderer(const MaterialRenderer&) = delete;
+	MaterialRenderer& operator=(const MaterialRenderer&) = delete;
+	LUX_API ~MaterialRenderer();
 
-	// Wird von der Video-Schnittstelle aufgerufen und lässt den renderer seine Renderstates setzen
-	// Wird während VideoDriver::SetMaterial aufgerufen
-	//! Enable a material
-	/**
-	\param material The material to enable
-	*/
-	virtual void Begin(const RenderSettings& settings, DeviceState& state) = 0;
+	LUX_API void SetParamSetCallback(ParamSetCallback* callback);
+	LUX_API ParamSetCallback* GetParamSetCallback() const;
+	
+	LUX_API Pass GeneratePassData(size_t passId, const RenderSettings& settings) const;
+	LUX_API void SendShaderSettings(size_t passId, const Pass& pass, const RenderSettings& settings) const;
 
-	// Wird aufgerufen, wenn das material nicht mehr gebraucht wird
-	// Wird in VideoDriver::SetMaterial aufgerufen wenn ein material ersetzt wird
-	//! Will be called when a material is disabled
-	/**
-	You only should reset renderstates which no other MaterialRenders uses.
-	The other will be set in OnSetMaterial
-	*/
-	virtual void End(DeviceState& state) = 0;
+	LUX_API const core::ParamPackage& GetParams() const;
 
-	//! Get the requirements of this renderer
-	virtual ERequirement GetRequirements() const = 0;
+	LUX_API StrongRef<Material> CreateMaterial();
 
-	//! Clones the material renderer
-	virtual StrongRef<MaterialRenderer> Clone(const string& newName, Shader* shader = nullptr, const core::ParamPackage* basePackage = nullptr) const = 0;
+	LUX_API const String& GetName() const;
 
-	virtual StrongRef<Material> CreateMaterial() = 0;
+	LUX_API ERequirement GetRequirements() const;
+	LUX_API size_t AddPass(const Pass& pass = Pass());
+	LUX_API void SetPass(size_t passId, const Pass& pass);
+	LUX_API const Pass& GetPass(size_t passId) const;
+	LUX_API Pass& GetPass(size_t passId);
+	LUX_API size_t GetPassCount();
 
-	virtual const PipelineSettings& GetPipeline() const = 0;
-	virtual void SetPipeline(const PipelineSettings& set) = 0;
+	LUX_API core::PackageParam AddParam(const String& paramName, const core::Type& type);
 
-	virtual const core::ParamPackage& GetPackage() const = 0;
-	virtual core::ParamPackage& GetPackage() = 0;
-	virtual StrongRef<Shader> GetShader() const = 0;
+	LUX_API core::PackageParam SetShaderValue(u32 passId, const String& name);
+	LUX_API core::PackageParam AddShaderParam(const String& paramName, u32 passId, const String& name);
+	LUX_API core::PackageParam AddShaderParam(const String& paramName, u32 passId, u32 paramId);
 
-	virtual const string& GetName() const = 0;
+	LUX_API core::PackageParam AddParam(const String& paramName, u32 passId, u32 optionId);
+
+private:
+	struct ParamMapping
+	{
+		u32 id; // The id of the param in the package
+
+		u32 pass; // The corresponding pass-id
+		bool isShader; // Corressponds the mapping to a shader
+		u32 mappingId; // The correspoding option or shaderparam id
+	};
+
+	struct ShaderValue
+	{
+		u32 pass;
+		u32 id;
+		core::AnyObject obj;
+
+		ShaderValue(u32 p, u32 i, core::Type t) :
+			pass(p),
+			id(i),
+			obj(t)
+		{}
+	};
+
+	core::PackageParam AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader);
+
+private:
+	core::ParamPackage m_Params;
+	core::Array<Pass> m_Passes;
+
+	core::Array<ShaderValue> m_ShaderValues;
+
+	core::Array<ParamMapping> m_Options;
+	StrongRef<ParamSetCallback> m_ParamCallback;
+
+	String m_Name;
 };
 
 } // namespace video

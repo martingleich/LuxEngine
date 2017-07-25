@@ -337,9 +337,9 @@ core::Name ImageLoaderBMP::GetResourceType(io::File* file, core::Name requestedT
 	return core::ResourceType::Image;
 }
 
-const string& ImageLoaderBMP::GetName() const
+const String& ImageLoaderBMP::GetName() const
 {
-	static const string name = "Lux BMP-Loader";
+	static const String name = "Lux BMP-Loader";
 
 	return name;
 }

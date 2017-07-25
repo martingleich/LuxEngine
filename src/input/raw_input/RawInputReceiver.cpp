@@ -214,7 +214,7 @@ u32 RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 	else
 		return 0;
 
-	core::array<RAWINPUTDEVICELIST> device_list;
+	core::Array<RAWINPUTDEVICELIST> device_list;
 	UINT device_count;
 
 	if(GetRawInputDeviceList(nullptr, &device_count, sizeof(RAWINPUTDEVICELIST)) == -1)

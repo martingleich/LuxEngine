@@ -2,7 +2,6 @@
 #define INCLUDED_RENDERER_D3D9_H
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/RendererNull.h"
-#include "video/PipelineSettings.h"
 
 #include "StrippedD3D9.h"
 
@@ -84,21 +83,23 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 private:
-	void SetupRendering(ERenderMode mode);
+	void SetupRendering(size_t passId);
+
 	void SwitchRenderMode(ERenderMode mode);
 	void EnterRenderMode3D();
 	void LeaveRenderMode3D();
 	void EnterRenderMode2D();
 	void LeaveRenderMode2D();
-	void LoadSettings();
-	void LoadTransforms(const RenderSettings& settings);
-	void LoadFogSettings(const RenderSettings& settings);
-	void LoadLightSettings(const RenderSettings& settings);
+
+	void LoadTransforms(const Pass& pass, const RenderSettings& settings);
+	void LoadFogSettings(const Pass& pass, const RenderSettings& settings);
+	void LoadLightSettings(const Pass& pass, const RenderSettings& settings);
+
 	void SetVertexFormat(const VertexFormat& format);
 
 private:
 	IDirect3DDevice9* m_Device;
-	DeviceStateD3D9 m_State;
+	DeviceStateD3D9 m_DeviceState;
 
 	RendertargetD3D9 m_CurrentRendertarget;
 	RendertargetD3D9 m_BackbufferTarget;
@@ -106,9 +107,10 @@ private:
 	VideoDriverD3D9* m_Driver;
 
 	// The current state of rendersettings, for optimization purposes
-	PipelineSettings m_Pipeline;
 	MaterialRenderer* m_MaterialRenderer;
 	VertexFormat m_VertexFormat;
+	bool m_UseShader=false;
+	float m_PrePolyOffset=0.0f;
 };
 
 } // namespace video

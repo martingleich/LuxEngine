@@ -5,14 +5,14 @@
 UNIT_SUITE(FileSystem)
 {
 	io::FileSystem* g_FileSys;
-	io::path m_WorkingDir;
+	io::Path m_WorkingDir;
 
 	void CreateTestDirectory()
 	{
 #ifdef LUX_WINDOWS
-		io::path testDir = m_WorkingDir + "FileSystemTestDir";
+		io::Path testDir = m_WorkingDir + "FileSystemTestDir";
 		testDir.Replace("\\", "/");
-		string cmd = "if not exist \"" + testDir + "\" mkdir \"" + testDir + "\"";
+		String cmd = "if not exist \"" + testDir + "\" mkdir \"" + testDir + "\"";
 		system(cmd.Data());
 #else
 		throw "Not implemented";
@@ -22,9 +22,9 @@ UNIT_SUITE(FileSystem)
 	void RemoveTestDirectory()
 	{
 #ifdef LUX_WINDOWS
-		io::path testDir = m_WorkingDir + "FileSystemTestDir";
+		io::Path testDir = m_WorkingDir + "FileSystemTestDir";
 		testDir.Replace("\\", "/");
-		string cmd = "if exist \"" + testDir + "\" rmdir \"" + testDir + "\" /s /q";
+		String cmd = "if exist \"" + testDir + "\" rmdir \"" + testDir + "\" /s /q";
 		system(cmd.Data());
 #else
 		throw "Not implemented";
@@ -33,7 +33,7 @@ UNIT_SUITE(FileSystem)
 
 	bool CheckForFile(const char* p)
 	{
-		io::path testDir = m_WorkingDir + p;
+		io::Path testDir = m_WorkingDir + p;
 
 		struct stat buffer;
 		return (stat(testDir.Data(), &buffer) == 0);

@@ -133,7 +133,7 @@ public:
 		}
 	}
 
-	void Print(const string& s, ELogLevel ll)
+	void Print(const String& s, ELogLevel ll)
 	{
 		if(ll != ELogLevel::None) {
 			fputs(m_File, "<tr><td><font size=\"2\"><b><font color=\"#");
@@ -152,10 +152,10 @@ public:
 		fflush(m_File);
 	}
 
-	const string& EscapeString(const string& str)
+	const String& EscapeString(const String& str)
 	{
 		lxAssert(false);
-		return string::EMPTY;
+		return String::EMPTY;
 		/*
 		m_ConversionBuffer.Clear();
 		for(size_t i = 0; i < str.Length(); ++i)
@@ -234,7 +234,7 @@ public:
 		Printer::Init();
 	}
 
-	void Print(const string& s, ELogLevel ll)
+	void Print(const String& s, ELogLevel ll)
 	{
 		if(ll != ELogLevel::None) {
 			fputs(GetLogLevelName(ll), m_File);
@@ -280,7 +280,7 @@ public:
 			m_Settings = *data;
 	}
 
-	void Print(const string& s, ELogLevel ll)
+	void Print(const String& s, ELogLevel ll)
 	{
 		if(ll != ELogLevel::None) {
 			fputs(GetLogLevelName(ll), stdout);
@@ -318,11 +318,11 @@ public:
 		Printer::Init();
 	}
 
-	void Print(const string& s, ELogLevel ll)
+	void Print(const String& s, ELogLevel ll)
 	{
 		static char BUFFER[100];
 
-		string out;
+		String out;
 		if(ll != ELogLevel::None) {
 			out += GetLogLevelName(ll);
 

@@ -14,7 +14,9 @@
 
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::MeshCollider);
+const lux::core::Name lux::scene::MeshCollider::TypeName("lux.collider.Mesh");
+
+LUX_REGISTER_REFERABLE_CLASS(lux::scene::MeshCollider::TypeName, lux::scene::MeshCollider);
 
 namespace lux
 {
@@ -63,7 +65,7 @@ bool MeshCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result
 		return ExecuteLineQuery(owner, dynamic_cast<LineQuery*>(query), dynamic_cast<LineQueryCallback*>(result));
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);
 
-	core::Name zoneType = vquery->GetZone()->GetReferableSubType();
+	core::Name zoneType = vquery->GetZone()->GetReferableType();
 	if(zoneType == "sphere")
 		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
 	else

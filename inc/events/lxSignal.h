@@ -278,7 +278,7 @@ public:
 
 private:
 	SignalRef<Args...>* m_FirstRef;
-	mutable core::array<std::unique_ptr<SignalFunc<Args...>>> m_Callfuncs;
+	mutable core::Array<std::unique_ptr<SignalFunc<Args...>>> m_Callfuncs;
 };
 
 template <typename... Args>

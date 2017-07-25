@@ -18,12 +18,12 @@ StrongRef<InputDevice> RawInputDevice::GetDevice() const
 	return m_Device;
 }
 
-const string& RawInputDevice::GetName() const
+const String& RawInputDevice::GetName() const
 {
 	return m_Name;
 }
 
-const string& RawInputDevice::GetGUID() const
+const String& RawInputDevice::GetGUID() const
 {
 	return m_GUID;
 }
@@ -42,7 +42,7 @@ void RawInputDevice::SendInputEvent(Event& event)
 	m_System->Update(event);
 }
 
-string RawInputDevice::GetDevicePath(HANDLE raw_handle)
+String RawInputDevice::GetDevicePath(HANDLE raw_handle)
 {
 	// Get Buffer Size
 	UINT bufferSize = 0;
@@ -50,20 +50,20 @@ string RawInputDevice::GetDevicePath(HANDLE raw_handle)
 		throw core::Win32Exception(GetLastError());
 
 	// Get Buffer Data
-	core::array<u16> str;
+	core::Array<u16> str;
 	str.Resize(bufferSize);
 	if(GetRawInputDeviceInfoW(raw_handle, RIDI_DEVICENAME, str.Data(), &bufferSize) == -1)
 		throw core::Win32Exception(GetLastError());
 
-	string path = core::UTF16ToString(str.Data_c());
+	String path = core::UTF16ToString(str.Data_c());
 	path.ReplaceRange("\\", path.First() + 1, 1); // Old windows bug, sometimes the second character is not a backslash.
 
 	return path;
 }
 
-string RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
+String RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
 {
-	string path = GetDevicePath(raw_handle);
+	String path = GetDevicePath(raw_handle);
 
 	// A guid is build like: random_characters{<guid>}
 	for(auto it = path.First(); it != path.End(); ++it) {

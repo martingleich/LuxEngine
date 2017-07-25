@@ -158,9 +158,9 @@ bool MouseDevice::Update(Event& event)
 	return false;
 }
 
-const string& MouseDevice::GetElementName(EEventType type, u32 code) const
+const String& MouseDevice::GetElementName(EEventType type, u32 code) const
 {
-	static string unknown = "(unknown)";
+	static String unknown = "(unknown)";
 	if(type == EEventType::Button && code < m_Buttons.Size())
 		return m_Buttons[code].name;
 

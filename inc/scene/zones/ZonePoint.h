@@ -34,9 +34,9 @@ public:
 		return math::vector3f::ZERO;
 	}
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
-		static const core::Name name = "point";
+		static const core::Name name = "pointZone";
 		return name;
 	}
 
@@ -54,6 +54,8 @@ public:
 	{
 		return LUX_NEW(PointZone)(*this);
 	}
+	
+	static const core::Name TypeName;
 
 private:
 	math::vector3f m_Point;

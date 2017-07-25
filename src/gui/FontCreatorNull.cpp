@@ -21,17 +21,17 @@ FontCreatorNull::FontCreatorNull()
 	AddDefaultCharSet("german", " AA«»íéáóúôîûâê1234567890AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZzÖöÜüÄäß²³{}[]()<>+-*,;.:!?&%§/\\'#~^°\"_´`$€@µ|=");
 }
 
-StrongRef<Font> FontCreatorNull::CreateFontFromFile(const io::path& path,
+StrongRef<Font> FontCreatorNull::CreateFontFromFile(const io::Path& path,
 	const FontDescription& desc,
-	const core::array<u32>& charSet)
+	const core::Array<u32>& charSet)
 {
 	StrongRef<io::File> file = io::FileSystem::Instance()->OpenFile(path);
 	return CreateFontFromFile(file, desc, charSet);
 }
 
-core::array<u32> FontCreatorNull::CorrectCharSet(const core::array<u32>& set)
+core::Array<u32> FontCreatorNull::CorrectCharSet(const core::Array<u32>& set)
 {
-	core::array<u32> out = set;
+	core::Array<u32> out = set;
 	out.PushBack(' ');
 
 	out.Sort();
@@ -56,12 +56,12 @@ core::array<u32> FontCreatorNull::CorrectCharSet(const core::array<u32>& set)
 
 StrongRef<Font> FontCreatorNull::CreateFontFromFile(io::File* file,
 	const FontDescription& desc,
-	const core::array<u32>& charSet)
+	const core::Array<u32>& charSet)
 {
 	if(!file)
 		throw core::InvalidArgumentException("file", "File must not be null");
 
-	core::array<u32> realCharSet = CorrectCharSet(charSet);
+	core::Array<u32> realCharSet = CorrectCharSet(charSet);
 	void* creationContext = this->BeginFontCreation(file, desc, realCharSet);
 	try {
 		auto out = CreateFontFromContext(creationContext, realCharSet);
@@ -75,9 +75,9 @@ StrongRef<Font> FontCreatorNull::CreateFontFromFile(io::File* file,
 
 StrongRef<Font> FontCreatorNull::CreateFont(
 	const FontDescription& desc,
-	const core::array<u32>& charSet)
+	const core::Array<u32>& charSet)
 {
-	core::array<u32> realCharSet = CorrectCharSet(charSet);
+	core::Array<u32> realCharSet = CorrectCharSet(charSet);
 	void* creationContext = this->BeginFontCreation(desc.name, desc, realCharSet);
 	try {
 		auto out = CreateFontFromContext(creationContext, realCharSet);
@@ -89,7 +89,7 @@ StrongRef<Font> FontCreatorNull::CreateFont(
 	}
 }
 
-StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::array<u32>& charSet)
+StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Array<u32>& charSet)
 {
 	if(!ctx)
 		throw core::Exception("Font creation failed");
@@ -123,7 +123,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::ar
 	return font;
 }
 
-const core::array<u32>& FontCreatorNull::GetDefaultCharset(const string& name) const
+const core::Array<u32>& FontCreatorNull::GetDefaultCharset(const String& name) const
 {
 	auto it = m_DefaultCharSets.Find(name);
 	if(it != m_DefaultCharSets.End())
@@ -131,9 +131,9 @@ const core::array<u32>& FontCreatorNull::GetDefaultCharset(const string& name) c
 	return *m_DefaultCharSets.First();
 }
 
-void FontCreatorNull::AddDefaultCharSet(const string& name, const string& data)
+void FontCreatorNull::AddDefaultCharSet(const String& name, const String& data)
 {
-	core::array<u32> a;
+	core::Array<u32> a;
 	for(auto it = data.First(); it != data.End(); ++it)
 		a.PushBack(*it);
 

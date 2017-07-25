@@ -1,12 +1,12 @@
 #include "stdafx.h"
 
-UNIT_SUITE(string)
+UNIT_SUITE(String)
 {
 	UNIT_SUITE_DEPEND_ON(unicode);
 
-	UNIT_TEST(empty_string)
+	UNIT_TEST(empty_String)
 	{
-		string str;
+		String str;
 		UNIT_ASSERT_EQUAL(str.Length(), 0);
 		UNIT_ASSERT_EQUAL(str.Size(), 0);
 		UNIT_ASSERT_EQUAL(str.First(), str.End());
@@ -14,7 +14,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(from_cstr)
 	{
-		string str("Tes☠t");
+		String str("Tes☠t");
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
@@ -25,7 +25,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(from_cstr_partial)
 	{
-		string str("Tes☠ta☠", 5);
+		String str("Tes☠ta☠", 5);
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
@@ -34,10 +34,10 @@ UNIT_SUITE(string)
 			UNIT_ASSERT_EQUAL(chars[i], *it);
 	}
 
-	UNIT_TEST(copy_string)
+	UNIT_TEST(copy_String)
 	{
-		string base("Tes☠t");
-		string str(base);
+		String base("Tes☠t");
+		String str(base);
 
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
@@ -47,9 +47,9 @@ UNIT_SUITE(string)
 			UNIT_ASSERT_EQUAL(chars[i], *it);
 	}
 
-	UNIT_TEST(short_string)
+	UNIT_TEST(short_String)
 	{
-		string str("ab");
+		String str("ab");
 		UNIT_ASSERT_EQUAL(str.Length(), 2);
 		UNIT_ASSERT_EQUAL(str.Size(), 2);
 
@@ -59,9 +59,9 @@ UNIT_SUITE(string)
 			UNIT_ASSERT_EQUAL(chars[i], *it);
 	}
 
-	UNIT_TEST(assign_string)
+	UNIT_TEST(assign_String)
 	{
-		string str = "abc";
+		String str = "abc";
 		str = "Tes☠t";
 
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
@@ -72,13 +72,13 @@ UNIT_SUITE(string)
 			UNIT_ASSERT_EQUAL(chars[i], *it);
 	}
 
-	UNIT_TEST(compare_string)
+	UNIT_TEST(compare_String)
 	{
-		string a = "abc";
-		string b = "Tes☠t";
-		string c = "Tes☠t";
-		string d = "Tes☠a";
-		string e = "";
+		String a = "abc";
+		String b = "Tes☠t";
+		String c = "Tes☠t";
+		String d = "Tes☠a";
+		String e = "";
 
 		UNIT_ASSERT_TRUE(a != b);
 		UNIT_ASSERT_TRUE(b == c);
@@ -89,27 +89,27 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(compare_case_insensitive)
 	{
-		string a = "abc";
-		string b = "Tes☠t";
-		string d = "tes☠T";
-		string e = "";
+		String a = "abc";
+		String b = "Tes☠t";
+		String d = "tes☠T";
+		String e = "";
 
 		UNIT_ASSERT_TRUE(a.EqualCaseInsensitive(b) == false);
 		UNIT_ASSERT_TRUE(b.EqualCaseInsensitive(d) == true);
 		UNIT_ASSERT_TRUE(b.EqualCaseInsensitive(e) == false);
 	}
 
-	UNIT_TEST(sub_string_1)
+	UNIT_TEST(sub_String_1)
 	{
-		string a = "Tes☠a";
+		String a = "Tes☠a";
 
 		UNIT_ASSERT_EQUAL(a.SubString(a.First() + 2, a.End()), "s☠a");
 		UNIT_ASSERT_EQUAL(a.SubString(a.First(), a.First()), "");
 	}
 
-	UNIT_TEST(sub_string_2)
+	UNIT_TEST(sub_String_2)
 	{
-		string a = "Tes☠a";
+		String a = "Tes☠a";
 
 		UNIT_ASSERT_EQUAL(a.SubString(a.First() + 2, 2), "s☠");
 		UNIT_ASSERT_EQUAL(a.SubString(a.First(), 0), "");
@@ -117,7 +117,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(insert_middle)
 	{
-		string a = "FooBar";
+		String a = "FooBar";
 
 		a.Insert(a.First() + 3, "Bib");
 
@@ -126,7 +126,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(insert_begin)
 	{
-		string a = "FooBar";
+		String a = "FooBar";
 
 		a.Insert(a.First(), "Bib");
 
@@ -135,7 +135,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(insert_end)
 	{
-		string a = "FooBar";
+		String a = "FooBar";
 
 		a.Insert(a.End(), "Bib");
 
@@ -144,7 +144,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(insert_empty)
 	{
-		string a = "str";
+		String a = "str";
 
 		a.Insert(a.First(), "");
 		UNIT_ASSERT_EQUAL(a, "str");
@@ -155,7 +155,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(resize)
 	{
-		string a = "abc";
+		String a = "abc";
 		a.Resize(1);
 		UNIT_ASSERT_EQUAL(a, "a");
 
@@ -178,8 +178,8 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(start_width)
 	{
-		string str = "FooBarBib";
-		string e = "";
+		String str = "FooBarBib";
+		String e = "";
 
 		UNIT_ASSERT_TRUE(str.StartsWith(""));
 		UNIT_ASSERT_TRUE(str.StartsWith("Foo"));
@@ -190,8 +190,8 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(end_width)
 	{
-		string str = "FooBarBib";
-		string e = "";
+		String str = "FooBarBib";
+		String e = "";
 
 		UNIT_ASSERT_TRUE(str.EndsWith(""));
 		UNIT_ASSERT_TRUE(str.EndsWith("Bib"));
@@ -202,7 +202,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(find)
 	{
-		string str = "FooBarBib";
+		String str = "FooBarBib";
 
 		UNIT_ASSERT_EQUAL(str.Find("Bar"), str.First() + 3);
 		UNIT_ASSERT_EQUAL(str.Find("Bib"), str.First() + 6);
@@ -212,7 +212,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(find_reverse)
 	{
-		string str = "FooBarBib";
+		String str = "FooBarBib";
 
 		UNIT_ASSERT_EQUAL(str.FindReverse("Bar"), str.First() + 3);
 		UNIT_ASSERT_EQUAL(str.FindReverse("Bib"), str.First() + 6);
@@ -222,7 +222,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(replace_range)
 	{
-		string str = "Hallo Welt";
+		String str = "Hallo Welt";
 		str.ReplaceRange("Bye", str.First(), 5);
 		UNIT_ASSERT_EQUAL(str, "Bye Welt");
 		str = "Hallo Welt";
@@ -235,7 +235,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(rstrip)
 	{
-		string str = "Hallo";
+		String str = "Hallo";
 		UNIT_ASSERT_EQUAL(str.RStrip(), "Hallo");
 		str = "";
 		UNIT_ASSERT_EQUAL(str.RStrip(), "");
@@ -247,7 +247,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(lstrip)
 	{
-		string str = "Hallo";
+		String str = "Hallo";
 		UNIT_ASSERT_EQUAL(str.LStrip(), "Hallo");
 		str = "";
 		UNIT_ASSERT_EQUAL(str.LStrip(), "");
@@ -259,7 +259,7 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(pop)
 	{
-		string str = "abc";
+		String str = "abc";
 		UNIT_ASSERT_EQUAL(str.Pop(1), 1);
 		UNIT_ASSERT_EQUAL(str, "ab");
 		str = "ab☠c";
@@ -272,8 +272,8 @@ UNIT_SUITE(string)
 
 	UNIT_TEST(split)
 	{
-		string str = "ab,b,,c";
-		string out[5];
+		String str = "ab,b,,c";
+		String out[5];
 		size_t count = str.Split(',', out, 5);
 		UNIT_ASSERT_EQUAL(count, 4);
 		UNIT_ASSERT_EQUAL(out[0], "ab");

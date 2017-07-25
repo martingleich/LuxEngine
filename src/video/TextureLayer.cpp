@@ -4,8 +4,13 @@ namespace lux
 {
 namespace core
 {
-
-const Type Type::Texture(new TypeInfoTemplate<video::TextureLayer>("texture", false));
-
-} // namespace core
+namespace Types
+{
+Type Texture()
+{
+	static const Type t(new core::TypeInfoTemplate<video::TextureLayer>("texture"));
+	return t;
+}
+}
+}
 } // namespace lux

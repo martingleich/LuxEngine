@@ -9,7 +9,7 @@ namespace io
 
 MemoryFile::MemoryFile(void* Buffer,
 	const FileDescription& desc,
-	string name,
+	String name,
 	bool DeleteBufferOnDrop,
 	bool Expandable) :
 	File(name, desc),

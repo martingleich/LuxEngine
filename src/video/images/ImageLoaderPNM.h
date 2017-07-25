@@ -11,7 +11,7 @@ class ImageLoaderPNM : public core::ResourceLoader
 {
 public:
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
-	const string& GetName() const;
+	const String& GetName() const;
 	void LoadResource(io::File* file, core::Resource* dst);
 };
 

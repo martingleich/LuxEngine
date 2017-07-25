@@ -8,7 +8,10 @@ add_library(libtga ${LIBTGA_SRCS} ${LIBTGA_INCS})
 if(MSVC)
 	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS)
 else()
-	add_definitions(-std=c++11 -DUNICODE -D_UNICODE -DNDEBUG -fpermissive -fPIC)
+	if(NOT WIN32)
+		add_definitions(-fPIC)
+	endif()
+	add_definitions(-std=c++11 -DUNICODE -D_UNICODE -DNDEBUG -fpermissive)
 endif()
 
 # http://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake

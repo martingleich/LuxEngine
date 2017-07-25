@@ -23,7 +23,7 @@ public:
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
 	void LoadResource(io::File* file, core::Resource* dst);
-	const string& GetName() const;
+	const String& GetName() const;
 
 private:
 	// Eine subMesh der OBJ-Datei
@@ -47,8 +47,8 @@ private:
 		std::map<video::Vertex3D, s32> VertMap;
 		StrongRef<video::GeometryImpl> Meshbuffer;
 		StrongRef<video::Material> material;
-		string name;
-		string Group;
+		String name;
+		String Group;
 		float Bumpiness;
 		u8 Illumination;
 		bool RecalculateNormals;
@@ -66,7 +66,7 @@ private:
 	u32 CopyWord(const char* pFrom, const char* pTo, char* out, u32 dwMaxLength);
 
 	// Liest die aktuelle Zeile am Cursor aus
-	string CopyLine(const char* pFrom, const char* pTo);
+	String CopyLine(const char* pFrom, const char* pTo);
 
 	// Kombination aus MoveToNextWord und CopyWord
 	const char* CopyNextWord(const char* pFrom, const char* pTo, char* out, u32 dwMaxLength);
@@ -78,7 +78,7 @@ private:
 	void ReadMaterial(const char* pcFilename, const io::FileDescription& fileDesc);
 
 	// Findet und liefert das material mit dem Namen
-	SObjMtl* FindMaterial(const string& mtlName, const string& grpName);
+	SObjMtl* FindMaterial(const String& mtlName, const String& grpName);
 
 	const char*  ReadColor(const char* pFrom, const char* pTo, video::Colorf& out);
 	const char*  Read3DVec(const char* pFrom, const char* pTo, math::vector3f& out);
@@ -93,7 +93,7 @@ private:
 	WeakRef<video::MaterialLibrary> m_MatLib;
 	WeakRef<video::VideoDriver> m_Driver;
 
-	core::array<SObjMtl*> m_Materials;
+	core::Array<SObjMtl*> m_Materials;
 };
 
 }

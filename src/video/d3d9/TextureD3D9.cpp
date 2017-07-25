@@ -10,7 +10,7 @@ namespace lux
 namespace video
 {
 u32 TextureD3D9::s_TextureCount = 0;
-core::array<IDirect3DSurface9*> TextureD3D9::s_TempSurfaces;
+core::Array<IDirect3DSurface9*> TextureD3D9::s_TempSurfaces;
 
 TextureD3D9::TextureD3D9(IDirect3DDevice9* device) :
 	m_Texture(nullptr),
@@ -213,7 +213,7 @@ IDirect3DSurface9* TextureD3D9::GetTempSurface(u32 width, u32 height, D3DFORMAT 
 {
 	HRESULT hr;
 
-	core::array<IDirect3DSurface9*>::Iterator matchingFormat = s_TempSurfaces.End();
+	core::Array<IDirect3DSurface9*>::Iterator matchingFormat = s_TempSurfaces.End();
 	for(auto it = s_TempSurfaces.First(); it != s_TempSurfaces.End(); ++it) {
 
 		D3DSURFACE_DESC desc;
@@ -254,12 +254,6 @@ void TextureD3D9::FreeTempSurface(IDirect3DSurface9* surface)
 {
 	if(surface)
 		surface->Release();
-}
-
-
-StrongRef<Referable> TextureD3D9::Clone() const
-{
-	return new TextureD3D9(m_Device);
 }
 
 }

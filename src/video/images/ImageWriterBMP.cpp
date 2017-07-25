@@ -32,7 +32,7 @@ struct BITMAPINFOHEADER
 };
 #pragma pack(pop)
 
-bool ImageWriterBMP::CanWriteFile(const string& ext)
+bool ImageWriterBMP::CanWriteFile(const String& ext)
 {
 	return ext.EqualCaseInsensitive("bmp") || ext.EqualCaseInsensitive("dib");
 }

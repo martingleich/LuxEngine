@@ -45,6 +45,18 @@ void VideoDriverD3D9::CleanUp()
 	m_Renderer->CleanUp();
 }
 
+static IDirect3DDevice9* g_D3DDevice9 = nullptr;
+
+Referable* CreateTexture()
+{
+	return LUX_NEW(TextureD3D9)(g_D3DDevice9);
+}
+
+Referable* CreateCubeTexture()
+{
+	return LUX_NEW(CubeTextureD3D9)(g_D3DDevice9);
+}
+
 void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 {
 	VideoDriverNull::Init(config, window);
@@ -251,9 +263,11 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
 	m_Renderer = new RendererD3D9(this);
 
+	g_D3DDevice9 = m_D3DDevice;
+
 	auto refFactory = core::ReferableFactory::Instance();
-	refFactory->RegisterType(LUX_NEW(TextureD3D9)(m_D3DDevice));
-	refFactory->RegisterType(LUX_NEW(CubeTextureD3D9)(m_D3DDevice));
+	refFactory->RegisterType(core::ResourceType::Texture, &lux::video::CreateTexture);
+	refFactory->RegisterType(core::ResourceType::CubeTexture, &lux::video::CreateCubeTexture);
 }
 
 VideoDriverD3D9::~VideoDriverD3D9()
@@ -453,7 +467,7 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
 	const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 	const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
-	core::array<string>* errorList)
+	core::Array<String>* errorList)
 {
 	if(language != EShaderLanguage::HLSL)
 		throw core::InvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");
@@ -502,7 +516,7 @@ IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFor
 		format.GetElement(0, VertexElement::EUsage::PositionNT).sematic != VertexElement::EUsage::PositionNT)
 		throw core::InvalidArgumentException("format", "Missing position usage");
 
-	core::array<D3DVERTEXELEMENT9> d3dElements;
+	core::Array<D3DVERTEXELEMENT9> d3dElements;
 	d3dElements.Resize(format.GetElemCount() + 1);
 
 	for(u32 stream = 0; stream < format.GetStreamCount(); ++stream) {

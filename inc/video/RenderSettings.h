@@ -12,7 +12,7 @@ namespace video
 {
 class Material;
 class MaterialRenderer;
-class PipelineSettings;
+class PipelineOverwrite;
 class RenderTarget;
 
 class RenderSettings
@@ -24,17 +24,21 @@ public:
 		virtual core::PackageParam operator[](u32 id) const = 0;
 	};
 
-	RenderSettings(MaterialRenderer* r, const Material* m, const PipelineSettings& ps, const ParamListAccess& pa) :
-		renderer(r),
+	RenderSettings(
+		const MaterialRenderer& ren,
+		const PipelineOverwrite& o,
+		const Material& m,
+		const ParamListAccess& pa) :
+		renderer(ren),
+		overwrite(o),
 		material(m),
-		pipeline(ps),
 		params(pa)
 	{
 	}
 
-	MaterialRenderer* renderer;
-	const Material* material;
-	const PipelineSettings& pipeline;
+	const MaterialRenderer& renderer;
+	const PipelineOverwrite& overwrite;
+	const Material& material;
 	const ParamListAccess& params;
 };
 

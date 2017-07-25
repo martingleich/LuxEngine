@@ -28,7 +28,7 @@ public:
 	virtual void Unlock() = 0;
 	virtual bool IsRendertarget() const = 0;
 
-	core::Name GetReferableSubType() const
+	core::Name GetReferableType() const
 	{
 		return core::ResourceType::Texture;
 	}

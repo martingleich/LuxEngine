@@ -20,12 +20,12 @@ public:
 	const Area* GetArea(u32 areaCode) const;
 	bool Update(Event& event);
 
-	const string& GetElementName(EEventType type, u32 code) const;
+	const String& GetElementName(EEventType type, u32 code) const;
 	EElementType GetElementType(EEventType type, u32 id) const;
 	size_t GetElementCount(EEventType type) const;
 
 private:
-	core::array<ButtonElement> m_Buttons;
+	core::Array<ButtonElement> m_Buttons;
 };
 
 }

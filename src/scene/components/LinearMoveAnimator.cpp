@@ -2,7 +2,7 @@
 #include "scene/Node.h"
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::LinearMoveAnimator)
+LUX_REGISTER_REFERABLE_CLASS("lux.comp.LinearMove", lux::scene::LinearMoveAnimator)
 
 namespace lux
 {
@@ -68,7 +68,7 @@ StrongRef<Referable> LinearMoveAnimator::Clone() const
 	return LUX_NEW(LinearMoveAnimator)(*this);
 }
 
-core::Name LinearMoveAnimator::GetReferableSubType() const
+core::Name LinearMoveAnimator::GetReferableType() const
 {
 	return SceneComponentType::LinearMove;
 }

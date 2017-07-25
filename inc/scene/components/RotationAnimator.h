@@ -23,7 +23,7 @@ public:
 	LUX_API const math::anglef& GetRotationSpeed() const;
 
 	LUX_API StrongRef<Referable> Clone() const;
-	LUX_API core::Name GetReferableSubType() const;
+	LUX_API core::Name GetReferableType() const;
 
 private:
 	math::vector3f m_Axis;

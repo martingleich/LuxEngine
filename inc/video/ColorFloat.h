@@ -246,23 +246,31 @@ inline void conv_data(format::Context& ctx, Colorf format, format::Placeholder& 
 	using namespace format;
 	placeholder.type = 'a';
 
-	ConvertAddString(ctx, StringType::Ascii, "[r=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, "[r=", 3);
 	conv_data(ctx, format.r, placeholder);
-	ConvertAddString(ctx, StringType::Ascii, " g=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, " g=", 3);
 	conv_data(ctx, format.g, placeholder);
-	ConvertAddString(ctx, StringType::Ascii, " b=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, " b=", 3);
 	conv_data(ctx, format.b, placeholder);
-	ConvertAddString(ctx, StringType::Ascii, " a=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, " a=", 3);
 	conv_data(ctx, format.a, placeholder);
 
-	ConvertAddString(ctx, StringType::Ascii, "]", 1);
+	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
 }
 
 }
 
 namespace core
 {
-template<> inline Type GetTypeInfo<video::Colorf>() { return Type::Colorf; }
+namespace Types
+{
+inline Type Colorf()
+{
+	static const Type t(new core::TypeInfoTemplate<video::Colorf>("colorF"));
+	return t;
+}
+}
+template<> inline Type GetTypeInfo<video::Colorf>() { return Types::Colorf(); }
 } // namespace core
 
 }

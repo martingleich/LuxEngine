@@ -749,6 +749,170 @@ public:
 		return m_Allocator;
 	}
 
+	//! Support for foreach loop
+	Iterator begin()
+	{
+		return Iterator(m_Buckets + m_FirstBucket);
+	}
+
+	//! Support for foreach loop
+	Iterator end()
+	{
+		return Iterator(m_Buckets + m_BucketCount);
+	}
+
+	//! Support for foreach loop
+	ConstIterator begin() const
+	{
+		return FirstC();
+	}
+
+	//! Support for foreach loop
+	ConstIterator end() const
+	{
+		return EndC();
+	}
+
+	struct ValueAccess
+	{
+		HashMap& ref;
+		ValueAccess(HashMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		Iterator begin()
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		Iterator end()
+		{
+			return ref.end();
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.end();
+		}
+	};
+
+	struct ConstValueAccess
+	{
+		const HashMap& ref;
+		ConstValueAccess(const HashMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		Iterator begin()
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		Iterator end()
+		{
+			return ref.end();
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.end();
+		}
+	};
+	
+	ValueAccess Values()
+	{
+		return ValueAccess(*this);
+	}
+
+	ConstValueAccess Values() const
+	{
+		return ConstValueAccess(*this);
+	}
+
+	struct KeyAccess
+	{
+		HashMap& ref;
+		KeyAccess(HashMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		Iterator begin()
+		{
+			return ref.FirstKey();
+		}
+
+		//! Support for foreach loop
+		Iterator end()
+		{
+			return ref.EndKey();
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.FirstKey();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.EndKey();
+		}
+	};
+
+	struct ConstKeyAccess
+	{
+		const HashMap& ref;
+		ConstKeyAccess(const HashMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.FirstKey();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.EndKey();
+		}
+	};
+	
+	KeyAccess Keys()
+	{
+		return KeyAccess(*this);
+	}
+
+	ConstKeyAccess Keys() const
+	{
+		return ConstKeyAccess(*this);
+	}
+
 private:
 	template <typename T>
 	static T* PointerAnd(T* ptr, size_t v)
@@ -984,7 +1148,5 @@ private:
 
 }
 }
-
-
 
 #endif // !INCLUDED_LX_HASH_MAP_H

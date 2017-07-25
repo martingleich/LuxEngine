@@ -4,7 +4,6 @@
 #include "video/DeviceState.h"
 #include "video/Color.h"
 
-#include "video/PipelineSettings.h"
 #include "video/AlphaSettings.h"
 #include "video/TextureStageSettings.h"
 #include "math/matrix4.h"
@@ -17,7 +16,6 @@ namespace lux
 {
 namespace video
 {
-class PipelineSettings;
 class Material;
 class FogData;
 class LightData;
@@ -27,59 +25,75 @@ class DeviceStateD3D9 : public DeviceState
 {
 public:
 	DeviceStateD3D9(IDirect3DDevice9* device);
-	void EnablePipeline(const PipelineSettings& pipeline);
+
+	void SetD3DColors(const video::Colorf& ambient, const Material& m);
+	void EnablePass(const Pass& p);
 
 	void EnableTextureLayer(u32 stage, const TextureLayer& layer);
 	void EnableTextureStage(u32 stage, const TextureStageSettings& settings);
-	void DisableTextureStage(u32 stage);
 
-	void EnableVertexData();
-	void DisableVertexData();
+	void DisableTexture(u32 stage);
 
-	void EnableAlpha(const AlphaBlendSettings& settings);
-	void DisableAlpha();
+	void EnableVertexData(bool useColor);
+
+	void EnableAlpha(EBlendFactor src, EBlendFactor dst, EBlendOperator op);
+
 	void* GetLowLevelDevice();
 	void SetRenderState(D3DRENDERSTATETYPE state, DWORD value);
 	void SetRenderStateF(D3DRENDERSTATETYPE state, float value);
 	void SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value);
-	void SetD3DMaterial(const video::Colorf& ambient, const PipelineSettings& pipeline, const video::Material* mat);
+	void SetTexture(u32 stage, IDirect3DBaseTexture9* tex);
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::matrix4& m);
-	void SetFog(bool active, const FogData& fog);
-	void ClearLights(bool useLights);
-	void EnableLight(const LightData& light);
+
+	void EnableFog(bool enable);
+	void SetFog(const FogData& fog);
+
+	void EnableLight(bool enable);
+	void ClearLights();
+	void AddLight(const LightData& light);
+
 	void SetRenderTargetTexture(video::BaseTexture* t);
 
 	void EnableShader(Shader* s)
 	{
-		if(s != m_CurShader)
+		if(s == nullptr && m_Shader)
+			m_Shader->Disable();
+		else if(s != m_Shader)
 			s->Enable();
-		m_CurShader = s;
-	}
 
-	void DisableCurShader()
-	{
-		m_Device->SetVertexShader(NULL);
-		m_Device->SetPixelShader(NULL);
-		m_CurShader = nullptr;
+		m_Shader = s;
 	}
 
 private:
-	static u32 GetFillMode(const PipelineSettings& pipeline);
-	static u32 GetCullMode(const PipelineSettings& pipeline);
+	static u32 GetFillMode(const Pass& p);
+	static u32 GetCullMode(const Pass& p);
 	static u32 Float2U32(float f);
 
 	static u32 GetTextureOperator(ETextureOperator op);
 	static u32 GetTextureArgument(ETextureArgument arg);
 
 private:
+	D3DMATERIAL9 m_D3DMaterial;
+	video::Colorf m_Ambient;
+
 	IDirect3DDevice9* m_Device;
 	video::BaseTexture* m_RenderTargetTexture;
-	WeakRef<video::Shader> m_CurShader;
 
 	size_t m_LightCount;
+	bool m_UseLighting;
 
-	PipelineSettings m_CurPipeline;
-	AlphaBlendSettings m_CurAlpha;
+	WeakRef<video::Shader> m_Shader;
+
+	size_t m_UsedTextureLayers;
+	core::Array<void*> m_Textures;
+
+	EBlendFactor m_SrcBlendFactor;
+	EBlendFactor m_DstBlendFactor;
+	EBlendOperator m_BlendOperator;
+
+	bool m_UseVertexData;
+
+	bool m_ResetAll;
 };
 
 } // namespace video

@@ -21,7 +21,7 @@ public:
 	void Animate(Node* node, float secsPassed);
 
 	StrongRef<Referable> Clone() const;
-	core::Name GetReferableSubType() const;
+	core::Name GetReferableType() const;
 
 private:
 	math::line3df m_Line;

@@ -478,7 +478,12 @@ inline bool IsEqual(const matrix4& a, const matrix4& b, float tolerance = math::
 
 namespace core
 {
-template<> inline Type GetTypeInfo<math::matrix4>() { return Type::Matrix; };
+namespace Types
+{
+LUX_API Type Matrix();
+}
+
+template<> inline Type GetTypeInfo<math::matrix4>() { return Types::Matrix(); };
 } // namespace core
 
 } // namespace lux

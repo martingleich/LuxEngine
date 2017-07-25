@@ -428,9 +428,13 @@ public:
 		return ConstIterator(m_Set.Find(Tuple(key)));
 	}
 
-	void Erase(const K& key)
+	bool Erase(const K& key)
 	{
-		Erase(Find(key));
+		auto it = Find(key);
+		if(it == End())
+			return false;
+		Erase(it);
+		return true;
 	}
 
 	Iterator Erase(const Iterator& it)
@@ -532,6 +536,169 @@ public:
 		return KeyIterator(m_Set.End());
 	}
 
+	//! Support for foreach loop
+	Iterator begin()
+	{
+		return First();
+	}
+
+	//! Support for foreach loop
+	Iterator end()
+	{
+		return End();
+	}
+
+	//! Support for foreach loop
+	ConstIterator begin() const
+	{
+		return FirstC();
+	}
+
+	//! Support for foreach loop
+	ConstIterator end() const
+	{
+		return EndC();
+	}
+
+	struct ValueAccess
+	{
+		OrderedMap& ref;
+		ValueAccess(OrderedMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		Iterator begin()
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		Iterator end()
+		{
+			return ref.end();
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.end();
+		}
+	};
+
+	struct ConstValueAccess
+	{
+		const OrderedMap& ref;
+		ConstValueAccess(const OrderedMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		Iterator begin()
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		Iterator end()
+		{
+			return ref.end();
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.begin();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.end();
+		}
+	};
+	
+	ValueAccess Values()
+	{
+		return ValueAccess(*this);
+	}
+
+	ConstValueAccess Values() const
+	{
+		return ConstValueAccess(*this);
+	}
+
+	struct KeyAccess
+	{
+		OrderedMap& ref;
+		KeyAccess(OrderedMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		Iterator begin()
+		{
+			return ref.FirstKey();
+		}
+
+		//! Support for foreach loop
+		Iterator end()
+		{
+			return ref.EndKey();
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.FirstKey();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.EndKey();
+		}
+	};
+
+	struct ConstKeyAccess
+	{
+		const OrderedMap& ref;
+		ConstKeyAccess(const OrderedMap& r) :
+			ref(r)
+		{
+		}
+
+		//! Support for foreach loop
+		ConstIterator begin() const
+		{
+			return ref.FirstKey();
+		}
+
+		//! Support for foreach loop
+		ConstIterator end() const
+		{
+			return ref.EndKey();
+		}
+	};
+	
+	KeyAccess Keys()
+	{
+		return KeyAccess(*this);
+	}
+
+	ConstKeyAccess Keys() const
+	{
+		return ConstKeyAccess(*this);
+	}
 	size_t Size() const
 	{
 		return m_Set.Size();

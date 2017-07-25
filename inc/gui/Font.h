@@ -28,7 +28,7 @@ enum class EFontWeight
 //! Contains information about a font.
 struct FontDescription
 {
-	string name; //!< The name of the font family, empty if not available
+	String name; //!< The name of the font family, empty if not available
 
 	u32 size; //!< The size of the base font in pixel, 0 if not available
 	EFontWeight weight; //!< The weight of the font
@@ -40,7 +40,7 @@ struct FontDescription
 	}
 
 	FontDescription(
-		const string& _name,
+		const String& _name,
 		u32 _size,
 		EFontWeight _weight = EFontWeight::Normal,
 		bool _italic = false,
@@ -109,7 +109,7 @@ public:
 	\param color in which color the text is drawn
 	\param clip If non null the text is clipped against this rect
 	*/
-	virtual void Draw(const string& text,
+	virtual void Draw(const String& text,
 		const math::vector2f& position,
 		EAlign align = EAlign::BottomLeft,
 		video::Color color = video::Color::Black,
@@ -121,7 +121,7 @@ public:
 	\param charCount The count of chars of the text to use, max_size_t for all chars
 	\return The length of the text, ignores all boundaries like the end of screen
 	*/
-	virtual float GetTextWidth(const string& text, size_t charCount = std::numeric_limits<size_t>::max()) = 0;
+	virtual float GetTextWidth(const String& text, size_t charCount = std::numeric_limits<size_t>::max()) = 0;
 
 	//! The text caret from a x position
 	/**
@@ -133,7 +133,7 @@ public:
 	\param xPosition The text position from the begin of the text, 0.0 is the left edge of the text box
 	\return The hit caret
 	*/
-	virtual size_t GetCaretFromOffset(const string& text, float xPosition) = 0;
+	virtual size_t GetCaretFromOffset(const String& text, float xPosition) = 0;
 
 	//! All text carets in a given text
 	/**
@@ -145,7 +145,7 @@ public:
 	\param [out] carets Here the caret positions are written, it always writes exactly CharCount+1 Charrets
 	\param charCount The number of chars of the text to use, or max_size_t for all chars
 	*/
-	virtual void GetTextCarets(const string& text, core::array<float>& carets, size_t charCount = std::numeric_limits<size_t>::max()) = 0;
+	virtual void GetTextCarets(const String& text, core::Array<float>& carets, size_t charCount = std::numeric_limits<size_t>::max()) = 0;
 
 	//! Get the height of the font in pixel.
 	/**

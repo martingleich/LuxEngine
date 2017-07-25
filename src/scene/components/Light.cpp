@@ -3,7 +3,7 @@
 #include "video/Renderer.h"
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::Light);
+LUX_REGISTER_REFERABLE_CLASS("lux.comp.Light", lux::scene::Light);
 
 namespace lux
 {
@@ -95,7 +95,7 @@ void Light::Render(video::Renderer* r, const Node* n)
 	r->AddLight(m_LightData);
 }
 
-core::Name Light::GetReferableSubType() const
+core::Name Light::GetReferableType() const
 {
 	return SceneComponentType::Light;
 }

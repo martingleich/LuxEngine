@@ -37,9 +37,9 @@ public:
 	bool DrawSprite(SpriteBank::Sprite index, const math::vector2i& pos, u32 time = 0, bool looped = true, bool centered = false);
 
 private:
-	core::array<Sprite> m_Sprites;
-	core::array<AnimatedSprite> m_AnimatedSprites;
-	core::array<StrongRef<Texture>> m_Textures;
+	core::Array<Sprite> m_Sprites;
+	core::Array<AnimatedSprite> m_AnimatedSprites;
+	core::Array<StrongRef<Texture>> m_Textures;
 };
 
 }

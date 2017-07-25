@@ -1,10 +1,20 @@
 #include "MaterialImpl.h"
 #include "video/MaterialRenderer.h"
 
+#include "core/ReferableRegister.h"
+
+LUX_REGISTER_REFERABLE_CLASS("lux.resource.Material", lux::video::MaterialImpl)
+
 namespace lux
 {
 namespace video
 {
+
+MaterialImpl::MaterialImpl() :
+	MaterialImpl(nullptr)
+{
+
+}
 
 MaterialImpl::MaterialImpl(MaterialRenderer* renderer) :
 	m_Ambient(1.0f),
@@ -128,7 +138,7 @@ float MaterialImpl::GetShininess() const
 
 void MaterialImpl::SetPower(float power)
 {
-	m_Power=power;
+	m_Power = power;
 }
 
 float MaterialImpl::GetPower() const
@@ -138,12 +148,12 @@ float MaterialImpl::GetPower() const
 
 ////////////////////////////////////////////////////////////////////
 
-core::PackageParam MaterialImpl::Param(const string_type& name)
+core::PackageParam MaterialImpl::Param(const StringType& name)
 {
 	return m_RenderData.puffer.FromName(name, false);
 }
 
-core::PackageParam MaterialImpl::Param(const string_type& name) const
+core::PackageParam MaterialImpl::Param(const StringType& name) const
 {
 	return m_RenderData.puffer.FromName(name, true);
 }
@@ -159,11 +169,11 @@ core::PackageParam MaterialImpl::Param(u32 id) const
 
 core::PackageParam MaterialImpl::Layer(u32 layer)
 {
-	return m_RenderData.puffer.FromType(core::Type::Texture, layer, false);
+	return m_RenderData.puffer.FromType(core::Types::Texture(), layer, false);
 }
 core::PackageParam MaterialImpl::Layer(u32 layer) const
 {
-	return m_RenderData.puffer.FromType(core::Type::Texture, layer, true);
+	return m_RenderData.puffer.FromType(core::Types::Texture(), layer, true);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -180,7 +190,7 @@ u32 MaterialImpl::GetParamCount() const
 
 ////////////////////////////////////////////////////////////////////
 
-core::Name MaterialImpl::GetReferableSubType() const
+core::Name MaterialImpl::GetReferableType() const
 {
 	return core::ResourceType::Material;
 }

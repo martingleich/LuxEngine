@@ -77,21 +77,21 @@ size_t RawMouseDevice::GetElementCount(EEventType type) const
 
 RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 code) const
 {
-	static const string button_names[] = {
+	static const String button_names[] = {
 		"Left Button",
 		"Right Button",
 		"Middle Button",
 		"X1 Button",
 		"X2 Button"};
 
-	static const string axis_names[] = {
+	static const String axis_names[] = {
 		"Wheel",
 		"Horizontal Wheel"};
 
-	static const string area_names[] = {
+	static const String area_names[] = {
 		"Position"};
 
-	static const string unknown = "(unknown)";
+	static const String unknown = "(unknown)";
 
 	if(type == EEventType::Button) {
 		if(code >= ARRAYSIZE(button_names))

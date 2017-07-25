@@ -383,7 +383,7 @@ const vector2<T>  vector2<T>::UNIT_scale = math::vector2<T>(1, 1);
 template <typename T>
 bool IsEqual(const vector2<T>& a, const vector2<T>& b, T tolerance = math::Constants<T>::rounding_error())
 {
-	return 
+	return
 		math::IsEqual(a.x, b.x, tolerance) &&
 		math::IsEqual(a.y, b.y, tolerance);
 }
@@ -391,7 +391,7 @@ bool IsEqual(const vector2<T>& a, const vector2<T>& b, T tolerance = math::Const
 template <typename T>
 bool IsZero(const vector2<T>& v, T tolerance = math::Constants<T>::rounding_error())
 {
-	return 
+	return
 		math::IsZero(v.x, tolerance) &&
 		math::IsZero(v.y, tolerance);
 }
@@ -405,16 +405,16 @@ void conv_data(format::Context& ctx, const vector2<T>& v, format::Placeholder& p
 	bool printLength = placeholder.hash.IsEnabled();
 	placeholder.hash.Disable();
 
-	ConvertAddString(ctx, StringType::Ascii, "[x=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, "[x=", 3);
 	conv_data(ctx, v.x, placeholder);
-	ConvertAddString(ctx, StringType::Ascii, " y=", 3);
+	ConvertAddString(ctx, format::StringType::Ascii, " y=", 3);
 	conv_data(ctx, v.y, placeholder);
 	if(printLength) {
-		ConvertAddString(ctx, StringType::Ascii, " len=", 5);
+		ConvertAddString(ctx, format::StringType::Ascii, " len=", 5);
 		conv_data(ctx, v.GetLength(), placeholder);
 	}
 
-	ConvertAddString(ctx, StringType::Ascii, "]", 1);
+	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
 }
 
 
@@ -422,8 +422,14 @@ void conv_data(format::Context& ctx, const vector2<T>& v, format::Placeholder& p
 
 namespace core
 {
-template<> inline Type GetTypeInfo<math::vector2<float>>() { return Type::Vector2; };
-template<> inline Type GetTypeInfo<math::vector2<int>>() { return Type::Vector2Int; };
+namespace Types
+{
+LUX_API Type Vector2f();
+LUX_API Type Vector2i();
+}
+
+template<> inline Type GetTypeInfo<math::vector2<float>>() { return Types::Vector2f(); };
+template<> inline Type GetTypeInfo<math::vector2<int>>() { return Types::Vector2i(); };
 } // namespace core
 
 } // namespace lux

@@ -1,12 +1,23 @@
 #include "core/Referable.h"
+#include "core/ReferableFactory.h"
 
 namespace lux
 {
-namespace ReferableType
+Referable::Referable()
 {
-const core::Name Resource = "resource";
-const core::Name SceneNode = "scenenode";
-const core::Name SceneNodeComponent = "component";
-const core::Name Collider = "collider";
+	m_ID = core::ReferableFactory::Instance()->MakeId(this);
 }
+
+Referable::Referable(const Referable& other)
+{
+	LUX_UNUSED(other);
+	m_ID = core::ReferableFactory::Instance()->MakeId(this);
 }
+
+Referable::~Referable()
+{
+	core::ReferableFactory::Instance()->FreeId(m_ID);
+}
+
+}
+

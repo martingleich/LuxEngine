@@ -5,16 +5,16 @@ namespace lux
 namespace io
 {
 
-path GetFileExtension(const path& filename)
+Path GetFileExtension(const Path& filename)
 {
 	auto lastDot = filename.FindReverse(".");
 	if(lastDot == filename.End())
-		return path::EMPTY;
+		return Path::EMPTY;
 	else
 		return filename.SubString(lastDot.Next(), filename.End());
 }
 
-static path::ConstIterator FindLastSlash(const path& filename)
+static Path::ConstIterator FindLastSlash(const Path& filename)
 {
 	auto it = filename.Last();
 	for(; it != filename.First(); --it) {
@@ -26,19 +26,19 @@ static path::ConstIterator FindLastSlash(const path& filename)
 	return filename.End();
 }
 
-path GetFileDir(const path& filename)
+Path GetFileDir(const Path& filename)
 {
 	auto lastSlash = FindLastSlash(filename);
 	if(lastSlash == filename.End())
-		return path::EMPTY;
+		return Path::EMPTY;
 	else
 		return NormalizePath(filename.SubString(filename.First(), lastSlash), true);
 }
 
-string GetFilenameOnly(const path& filename, bool keepExtension)
+String GetFilenameOnly(const Path& filename, bool keepExtension)
 {
 	auto lastSlash = FindLastSlash(filename);
-	path::ConstIterator cut;
+	Path::ConstIterator cut;
 	if(lastSlash == filename.End())
 		cut = filename.First();
 	else
@@ -52,12 +52,12 @@ string GetFilenameOnly(const path& filename, bool keepExtension)
 		return filename.SubString(cut, lastDot);
 }
 
-path NormalizePath(const path& filename, bool isDirectory)
+Path NormalizePath(const Path& filename, bool isDirectory)
 {
 	if(filename.IsEmpty())
-		return path::EMPTY;
+		return Path::EMPTY;
 
-	path out(filename);
+	Path out(filename);
 	out.Replace("/", "\\");
 	if(isDirectory && !out.EndsWith("/"))
 		out += "/";
@@ -65,12 +65,12 @@ path NormalizePath(const path& filename, bool isDirectory)
 	return out;
 }
 
-io::path MakeAbsolutePath(const io::path& base, const io::path& rel)
+io::Path MakeAbsolutePath(const io::Path& base, const io::Path& rel)
 {
 	if(rel.IsEmpty())
 		return base;
 
-	io::path out;
+	io::Path out;
 	auto first = rel.First();
 	auto second = first + 1;
 	if(*first == '/' || *first == '\\')
@@ -95,10 +95,10 @@ io::path MakeAbsolutePath(const io::path& base, const io::path& rel)
 			else if(state == 2) { // Two dots
 				size_t removed = out.Pop(3); // Erase the two dots and the last slash
 				if(removed != 3)
-					return path::EMPTY;
+					return Path::EMPTY;
 				auto lastSlash = out.FindReverse("/"); // Find the last slash...
 				if(lastSlash == out.End())
-					return path::EMPTY;
+					return Path::EMPTY;
 				out.Remove(lastSlash + 1, out.End()); //...and remove all after it.
 			}
 			state = 0;

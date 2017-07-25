@@ -83,30 +83,6 @@ public:
 		return m_IsAnimated;
 	}
 
-	//! Clone this component
-	/**
-	See \ref Referable
-	\return The cloned scenenode
-	*/
-	virtual StrongRef<Referable> Clone() const
-	{
-		throw core::NotImplementedException();
-	}
-
-	//! The type of the component
-	/**
-	\return The type of the component
-	*/
-	virtual core::Name GetReferableSubType() const
-	{
-		return core::Name::INVALID;
-	}
-
-	core::Name GetReferableType() const
-	{
-		return ReferableType::SceneNodeComponent;
-	}
-
 protected:
 	virtual void OnAttach(Node* n)
 	{

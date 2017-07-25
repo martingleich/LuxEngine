@@ -23,9 +23,9 @@ const core::ParamPackage& GeometryCreatorPlane::GetParams() const
 	return m_Params;
 }
 
-const string& GeometryCreatorPlane::GetName() const
+const String& GeometryCreatorPlane::GetName() const
 {
-	static const string name = "plane";
+	static const String name = "plane";
 	return name;
 }
 
