@@ -8,7 +8,7 @@ namespace lux
 namespace scene
 {
 
-//! Any transformable object, placed in a hierachy.
+//! Any transformable object
 class Transformable
 {
 public:
@@ -259,19 +259,19 @@ protected:
 		return m_IsDirty;
 	}
 
-	void SetDirty()
+	void SetDirty() const
 	{
 		m_IsDirty = true;
 	}
 
-	void ClearDirty()
+	void ClearDirty() const
 	{
 		m_IsDirty = false;
 	}
 
 protected:
 	math::Transformation m_RelativeTrans;
-	bool m_IsDirty;
+	mutable bool m_IsDirty;
 };
 
 } // namespace scene

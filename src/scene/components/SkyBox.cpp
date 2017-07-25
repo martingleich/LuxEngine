@@ -35,7 +35,9 @@ SkyBox::SkyBox() :
 	m_Material = renderer->CreateMaterial();
 }
 
-SkyBox::SkyBox(const SkyBox& other)
+SkyBox::SkyBox(const SkyBox& other) :
+	m_SkyTexture(other.m_SkyTexture),
+	m_UseCubeTexture(other.m_UseCubeTexture)
 {
 	if(other.m_Material)
 		m_Material = other.m_Material->Clone().As<video::Material>();

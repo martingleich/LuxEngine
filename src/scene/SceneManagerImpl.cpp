@@ -210,7 +210,9 @@ StrongRef<Camera> SceneManagerImpl::GetActiveCamera()
 
 void SceneManagerImpl::AnimateAll(float secsPassed)
 {
-	m_RootSceneNode->Animate(secsPassed);
+	for(auto node : m_AnimatedNodes) {
+		node->Animate(secsPassed);
+	}
 }
 
 bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
@@ -310,6 +312,16 @@ void SceneManagerImpl::UnregisterLight(Node* node, Light* light)
 	auto it = core::LinearSearch(entry, m_LightList.First(), m_LightList.End());
 	if(it != m_LightList.End())
 		m_LightList.Erase(it);
+}
+
+void SceneManagerImpl::RegisterAnimated(Node* node)
+{
+	m_AnimatedNodes.Insert(node);
+}
+
+void SceneManagerImpl::UnregisterAnimated(Node* node)
+{
+	m_AnimatedNodes.Erase(node);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

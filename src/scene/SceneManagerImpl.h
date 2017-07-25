@@ -4,6 +4,7 @@
 #include "video/FogData.h"
 #include "scene/components/Camera.h"
 #include "scene/Node.h"
+#include "core/lxOrderedSet.h"
 
 namespace lux
 {
@@ -69,6 +70,9 @@ public:
 
 	void RegisterLight(Node* node, Light* light);
 	void UnregisterLight(Node* node, Light* light);
+
+	void RegisterAnimated(Node* node);
+	void UnregisterAnimated(Node* node);
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -216,6 +220,8 @@ private:
 	math::vector3f m_AbsoluteCamPos;
 
 	core::Array<StrongRef<Node>> m_DeletionQueue; //!< Nodes to delete on next deletion run
+
+	core::OrderedSet<Node*> m_AnimatedNodes;
 
 	/////////////////////////////////////////////////////////////////////////
 	// Settings and parameters

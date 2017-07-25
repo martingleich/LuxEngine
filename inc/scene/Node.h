@@ -336,7 +336,6 @@ public:
 
 	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
 	LUX_API virtual void Animate(float time);
-	LUX_API virtual void Update();
 
 	////////////////////////////////////////////////////////////////////////////////
 	//! Marks a scene node componenent for deletion.
@@ -356,6 +355,7 @@ public:
 	LUX_API virtual ComponentIterator GetComponentsEnd();
 	LUX_API virtual ConstComponentIterator GetComponentsFirst() const;
 	LUX_API virtual ConstComponentIterator GetComponentsEnd() const;
+	
 	template <typename T>
 	T* GetComponent(T* cur=nullptr)
 	{
@@ -492,10 +492,6 @@ public:
 		return GetAbsoluteTransform().TransformInvDir(out);
 	}
 	
-	// Aktualisiert die Absolute Transformation
-	// ACHTUNG: Arbeitet nicht rekursiv, also müssen die Eltern vorher auch aktualisiert werden
-	LUX_API virtual void UpdateAbsTransform();
-
 	////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API virtual bool IsVisible() const;
@@ -564,6 +560,8 @@ private:
 	void OnAddComponent(Component* c);
 	void OnRemoveComponent(Component* c);
 
+	void UpdateAbsTransform() const;
+
 private:
 	Node* m_Parent; //!< Pointer to the parent of this node
 	Node* m_Sibling; //!< Pointer to the sibling(i.e. the next child of the parent) of this node
@@ -572,20 +570,21 @@ private:
 	u32 m_Tags;
 
 	u32 m_DebugFlags;
-	bool m_IsVisible;
 
+	u32 m_AnimatedCount;
 	SceneNodeComponentList m_Components;
 
 	SceneManager* m_SceneManager;
 
-	math::Transformation m_AbsoluteTrans;
-	bool m_HasAbsTransChanged;
+	mutable math::Transformation m_AbsoluteTrans;
 
 	StrongRef<Collider> m_Collider;
 
-	bool m_HasUserBoundingBox;
 	math::aabbox3df m_BoundingBox;
 
+	mutable bool m_HasAbsTransChanged;
+	bool m_IsVisible;
+	bool m_HasUserBoundingBox;
 	bool m_IsRoot;
 };
 

@@ -42,9 +42,7 @@ void CameraControl::Animate(Node* node, float time)
 			lookY->signal.Connect(this, &CameraControl::MouseMoveY);
 	}
 
-	node->UpdateAbsTransform();
-
-	math::vector3f pos = node->GetAbsoluteTransform().translation;
+	math::vector3f pos = node->GetAbsolutePosition();
 	math::vector3f flank = node->FromRelativeDir(math::vector3f::UNIT_X);
 	math::vector3f up = node->FromRelativeDir(math::vector3f::UNIT_Y);
 	math::vector3f look = node->FromRelativeDir(math::vector3f::UNIT_Z);

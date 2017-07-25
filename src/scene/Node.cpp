@@ -20,9 +20,10 @@ Node::Node(SceneManager* creator, bool isRoot) :
 	m_Child(nullptr),
 	m_Tags(0),
 	m_DebugFlags(EDD_NONE),
-	m_IsVisible(true),
+	m_AnimatedCount(0),
 	m_SceneManager(creator),
 	m_HasAbsTransChanged(true),
+	m_IsVisible(true),
 	m_HasUserBoundingBox(false),
 	m_IsRoot(isRoot)
 {
@@ -45,24 +46,23 @@ void Node::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 
 void Node::Animate(float time)
 {
+	// Animate the node, i.e. its components
 	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
 		Component* component = it->comp;
 		if(!it->markForDelete) {
-			if(component->IsAnimated()) {
+			if(component->IsAnimated())
 				component->Animate(this, time);
-			}
 		}
 	}
 
+	// Update its transform
 	UpdateAbsTransform();
 
-	for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it)
-		it->Animate(time);
-}
-
-void Node::Update()
-{
-	UpdateAbsTransform();
+	// Update its children transforms
+	if(m_HasAbsTransChanged) {
+		for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it)
+			it->UpdateAbsTransform();
+	}
 }
 
 void Node::CleanDeletionQueue()
@@ -159,6 +159,7 @@ void Node::SetRelativeTransform(const math::Transformation& t)
 
 const math::Transformation& Node::GetAbsoluteTransform() const
 {
+	UpdateAbsTransform();
 	return m_AbsoluteTrans;
 }
 
@@ -167,14 +168,14 @@ const math::Transformation& Node::GetRelativeTransform() const
 	return m_RelativeTrans;
 }
 
-void Node::UpdateAbsTransform()
+void Node::UpdateAbsTransform() const
 {
 	m_HasAbsTransChanged = false;
 
 	Node* parent = GetParent();
 	if(parent && !parent->m_IsRoot) {
-		if(parent->m_HasAbsTransChanged || Transformable::IsDirty()) {
-			m_AbsoluteTrans = parent->m_AbsoluteTrans.CombineLeft(m_RelativeTrans);
+		if(parent->IsDirty() || parent->m_HasAbsTransChanged || Transformable::IsDirty()) {
+			m_AbsoluteTrans = parent->GetAbsoluteTransform().CombineLeft(m_RelativeTrans);
 			m_HasAbsTransChanged = true;
 		}
 	} else {
@@ -499,6 +500,12 @@ void Node::OnAddComponent(Component* c)
 		auto light = dynamic_cast<Light*>(c);
 		if(light)
 			m_SceneManager->RegisterLight(this, light);
+
+		if(c->IsAnimated()) {
+			if(m_AnimatedCount == 0)
+				m_SceneManager->RegisterAnimated(this);
+			++m_AnimatedCount;
+		}
 	}
 
 	if(!m_HasUserBoundingBox)
@@ -517,6 +524,11 @@ void Node::OnRemoveComponent(Component* c)
 		auto light = dynamic_cast<Light*>(c);
 		if(light)
 			m_SceneManager->UnregisterLight(this, light);
+		if(c->IsAnimated()) {
+			--m_AnimatedCount;
+			if(m_AnimatedCount == 0)
+				m_SceneManager->UnregisterAnimated(this);
+		}
 	}
 
 	if(!m_HasUserBoundingBox)

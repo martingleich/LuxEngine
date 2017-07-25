@@ -108,6 +108,9 @@ public:
 	virtual void RegisterLight(Node* node, Light* light) = 0;
 	virtual void UnregisterLight(Node* node, Light* light) = 0;
 
+	virtual void RegisterAnimated(Node* node) = 0;
+	virtual void UnregisterAnimated(Node* node) = 0;
+
 	////////////////////////////////////////////////////////////////////////////////////
 
 	virtual void AddToDeletionQueue(Node* node) = 0;
