@@ -259,7 +259,7 @@ protected:
 		return m_IsDirty;
 	}
 
-	void SetDirty() const
+	virtual void SetDirty() const
 	{
 		m_IsDirty = true;
 	}

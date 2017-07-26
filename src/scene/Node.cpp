@@ -22,7 +22,6 @@ Node::Node(SceneManager* creator, bool isRoot) :
 	m_DebugFlags(EDD_NONE),
 	m_AnimatedCount(0),
 	m_SceneManager(creator),
-	m_HasAbsTransChanged(true),
 	m_IsVisible(true),
 	m_HasUserBoundingBox(false),
 	m_IsRoot(isRoot)
@@ -53,15 +52,6 @@ void Node::Animate(float time)
 			if(component->IsAnimated())
 				component->Animate(this, time);
 		}
-	}
-
-	// Update its transform
-	UpdateAbsTransform();
-
-	// Update its children transforms
-	if(m_HasAbsTransChanged) {
-		for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it)
-			it->UpdateAbsTransform();
 	}
 }
 
@@ -168,24 +158,20 @@ const math::Transformation& Node::GetRelativeTransform() const
 	return m_RelativeTrans;
 }
 
-void Node::UpdateAbsTransform() const
+bool Node::UpdateAbsTransform() const
 {
-	m_HasAbsTransChanged = false;
+	if(!Transformable::IsDirty())
+		return false;
 
 	Node* parent = GetParent();
 	if(parent && !parent->m_IsRoot) {
-		if(parent->IsDirty() || parent->m_HasAbsTransChanged || Transformable::IsDirty()) {
-			m_AbsoluteTrans = parent->GetAbsoluteTransform().CombineLeft(m_RelativeTrans);
-			m_HasAbsTransChanged = true;
-		}
+		m_AbsoluteTrans = parent->GetAbsoluteTransform().CombineLeft(m_RelativeTrans);
 	} else {
-		if(Transformable::IsDirty()) {
-			m_AbsoluteTrans = m_RelativeTrans;
-			m_HasAbsTransChanged = true;
-		}
+		m_AbsoluteTrans = m_RelativeTrans;
 	}
 
 	Transformable::ClearDirty();
+	return true;
 }
 
 bool Node::IsVisible() const
@@ -468,8 +454,7 @@ Node::Node(const Node& other) :
 	m_Tags(other.m_Tags),
 	m_DebugFlags(other.m_DebugFlags),
 	m_IsVisible(other.m_IsVisible),
-	m_SceneManager(other.m_SceneManager),
-	m_HasAbsTransChanged(true)
+	m_SceneManager(other.m_SceneManager)
 {
 	for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it) {
 		StrongRef<Node> node = (*it)->Clone();
@@ -535,6 +520,18 @@ void Node::OnRemoveComponent(Component* c)
 		RecalculateBoundingBox();
 
 	c->OnDettach(this);
+}
+
+void Node::SetDirty() const
+{
+	if(IsDirty())
+		return;
+
+	Transformable::SetDirty();
+
+	// Set all children dirty to
+	for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it)
+		it->SetDirty();
 }
 
 } // namespace scene

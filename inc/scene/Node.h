@@ -33,7 +33,7 @@ private:
 	class ComponentEntry
 	{
 	public:
-		ComponentEntry() { }
+		ComponentEntry() {}
 		ComponentEntry(Component* c) : comp(c),
 			markForDelete(false)
 		{
@@ -331,7 +331,7 @@ public:
 	};
 
 public:
-	LUX_API Node(SceneManager* creator, bool isRoot=false);
+	LUX_API Node(SceneManager* creator, bool isRoot = false);
 	LUX_API virtual ~Node();
 
 	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
@@ -355,9 +355,9 @@ public:
 	LUX_API virtual ComponentIterator GetComponentsEnd();
 	LUX_API virtual ConstComponentIterator GetComponentsFirst() const;
 	LUX_API virtual ConstComponentIterator GetComponentsEnd() const;
-	
+
 	template <typename T>
-	T* GetComponent(T* cur=nullptr)
+	T* GetComponent(T* cur = nullptr)
 	{
 		for(auto it = GetComponentsFirst(); it != GetComponentsEnd(); ++it) {
 			T* p = dynamic_cast<T*>(*it);
@@ -369,7 +369,7 @@ public:
 	}
 
 	template <typename T>
-	const T* GetComponent(const T* cur=nullptr) const
+	const T* GetComponent(const T* cur = nullptr) const
 	{
 		for(auto it = GetComponentsFirst(); it != GetComponentsEnd(); ++it) {
 			const T* p = dynamic_cast<const T*>(*it);
@@ -458,7 +458,7 @@ public:
 
 		return GetAbsoluteTransform().TransformInvPoint(out);
 	}
-	
+
 	//! Transforms a relative direction to another coordinate system
 	/**
 	\param Dir The direction to transform
@@ -491,7 +491,7 @@ public:
 
 		return GetAbsoluteTransform().TransformInvDir(out);
 	}
-	
+
 	////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API virtual bool IsVisible() const;
@@ -552,7 +552,7 @@ public:
 
 protected:
 	LUX_API Node(const Node& other);
-	
+
 private:
 	void OnAttach();
 	void OnDettach();
@@ -560,7 +560,9 @@ private:
 	void OnAddComponent(Component* c);
 	void OnRemoveComponent(Component* c);
 
-	void UpdateAbsTransform() const;
+	bool UpdateAbsTransform() const;
+
+	void SetDirty() const;
 
 private:
 	Node* m_Parent; //!< Pointer to the parent of this node
@@ -582,7 +584,6 @@ private:
 
 	math::aabbox3df m_BoundingBox;
 
-	mutable bool m_HasAbsTransChanged;
 	bool m_IsVisible;
 	bool m_HasUserBoundingBox;
 	bool m_IsRoot;
