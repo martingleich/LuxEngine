@@ -83,7 +83,7 @@ public:
 	LUX_API core::PackageParam AddShaderParam(const String& paramName, u32 passId, const String& name);
 	LUX_API core::PackageParam AddShaderParam(const String& paramName, u32 passId, u32 paramId);
 
-	LUX_API core::PackageParam AddParam(const String& paramName, u32 passId, u32 optionId);
+	LUX_API core::PackageParam AddParam(const String& paramName, u32 passId, EOptionId optionId);
 
 private:
 	struct ParamMapping

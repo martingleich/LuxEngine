@@ -88,7 +88,7 @@ void FontImpl::Init(const FontCreationData& data)
 		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		pass.alphaOperator = video::EBlendOperator::Add;
-		renderer->AddParam("texture", 0, (u32)video::EOptionId::Layer0);
+		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
 
 	m_Material = renderer->CreateMaterial();

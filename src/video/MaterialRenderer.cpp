@@ -218,12 +218,12 @@ core::PackageParam MaterialRenderer::AddShaderParam(const String& paramName, u32
 	return AddParamMapping(desc.type, name, passId, paramId, true);
 }
 
-core::PackageParam MaterialRenderer::AddParam(const String& paramName, u32 passId, u32 optionId)
+core::PackageParam MaterialRenderer::AddParam(const String& paramName, u32 passId, EOptionId optionId)
 {
 	auto& pass = m_Passes.At(passId);
-	auto optionType = pass.GetOptionType(optionId);
-	const String& name = paramName.IsEmpty() ? pass.GetOptionName(optionId) : paramName;
-	return AddParamMapping(optionType, name, passId, optionId, false);
+	auto optionType = pass.GetOptionType((u32)optionId);
+	const String& name = paramName.IsEmpty() ? pass.GetOptionName((u32)optionId) : paramName;
+	return AddParamMapping(optionType, name, passId, (u32)optionId, false);
 }
 
 core::PackageParam MaterialRenderer::AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader)

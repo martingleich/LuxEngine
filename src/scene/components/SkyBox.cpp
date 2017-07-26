@@ -29,7 +29,7 @@ SkyBox::SkyBox() :
 		auto& pass = renderer->GetPass(0);
 		pass.fogEnabled = false;
 		pass.lighting = false;
-		renderer->AddParam("tex", 0, (u32)video::EOptionId::Layer0);
+		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
 
 	m_Material = renderer->CreateMaterial();

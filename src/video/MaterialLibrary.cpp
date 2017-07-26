@@ -61,7 +61,7 @@ MaterialLibrary::MaterialLibrary()
 	{
 		m_Solid = AddMaterialRenderer("solid");
 		m_Solid->GetPass(0).AddTexture();
-		m_Solid->AddParam("diffMap", 0, (u32)EOptionId::Layer0);
+		m_Solid->AddParam("diffMap", 0, EOptionId::Layer0);
 	}
 
 	{
@@ -100,8 +100,8 @@ MaterialLibrary::MaterialLibrary()
 		pass.layerSettings.PushBack(tss1);
 		pass.layerSettings.PushBack(tss2);
 
-		solidMix->AddParam("diffMap1", 0, (u32)EOptionId::Layer0);
-		solidMix->AddParam("diffMap2", 0, (u32)EOptionId::Layer1);
+		solidMix->AddParam("diffMap1", 0, EOptionId::Layer0);
+		solidMix->AddParam("diffMap2", 0, EOptionId::Layer1);
 	}
 
 	{
@@ -114,7 +114,7 @@ MaterialLibrary::MaterialLibrary()
 		pass.fogEnabled = false;
 		pass.AddTexture();
 
-		transparent->AddParam("diffMap", 0, (u32)EOptionId::Layer0);
+		transparent->AddParam("diffMap", 0, EOptionId::Layer0);
 	}
 }
 
