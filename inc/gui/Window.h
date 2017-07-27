@@ -2,7 +2,7 @@
 #define INCLUDED_WINDOW_H
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
-#include "math/rect.h"
+#include "math/Rect.h"
 
 namespace lux
 {

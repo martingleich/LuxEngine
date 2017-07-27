@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SUBMESH_H
 #define INCLUDED_SUBMESH_H
 #include "core/ReferenceCounted.h"
-#include "math/aabbox3d.h"
+#include "math/AABBox.h"
 
 #include "video/EPrimitiveType.h"
 #include "video/HardwareBufferConstants.h"

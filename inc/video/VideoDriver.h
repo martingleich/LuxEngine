@@ -2,8 +2,8 @@
 #define INCLUDED_VIDEODRIVER_H
 #include "core/ReferenceCounted.h"
 
-#include "math/rect.h"
-#include "math/aabbox3d.h"
+#include "math/Rect.h"
+#include "math/AABBox.h"
 
 #include "video/Color.h"
 #include "video/VertexFormats.h"

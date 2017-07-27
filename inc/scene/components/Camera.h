@@ -2,7 +2,7 @@
 #define INCLUDED_CAMERASCENENODE_H
 #include "scene/Component.h"
 #include "video/RenderTarget.h"
-#include "math/matrix4.h"
+#include "math/Matrix4.h"
 
 namespace lux
 {

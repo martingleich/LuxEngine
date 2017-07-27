@@ -1,7 +1,7 @@
 #ifndef INCLUDED_TRANSFORMATION_H
 #define INCLUDED_TRANSFORMATION_H
-#include "math/matrix4.h"
-#include "math/triangle3d.h"
+#include "math/Matrix4.h"
+#include "math/Triangle3.h"
 
 namespace lux
 {
@@ -399,7 +399,7 @@ inline math::PlaneF& Transformation::TransformObject(const math::PlaneF& in, mat
 }
 
 template <>
-inline math::triangle3df& Transformation::TransformObject(const math::triangle3df& in, math::triangle3df& out) const
+inline math::Triangle3F& Transformation::TransformObject(const math::Triangle3F& in, math::Triangle3F& out) const
 {
 	out.Set(TransformPoint(in.A), TransformPoint(in.B), TransformPoint(in.C));
 	return out;

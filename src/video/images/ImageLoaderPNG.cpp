@@ -1,7 +1,7 @@
 #include "ImageLoaderPNG.h"
 #include "video/images/Image.h"
 #include "io/File.h"
-#include "math/dimension2d.h"
+#include "math/Dimension2.h"
 #include "video/Color.h"
 #include "../external/libpng/src/png.h"
 

@@ -6,9 +6,9 @@
 #include "video/HardwareBufferConstants.h"
 #include "video/Color.h"
 
-#include "math/aabbox3d.h"
-#include "math/rect.h"
-#include "math/matrix4.h"
+#include "math/AABBox.h"
+#include "math/Rect.h"
+#include "math/Matrix4.h"
 
 namespace lux
 {

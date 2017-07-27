@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SCENE_MESH_H
 #define INCLUDED_SCENE_MESH_H
 #include "scene/Component.h"
-#include "math/aabbox3d.h"
+#include "math/AABBox.h"
 #include "video/Material.h"
 #include "scene/Renderable.h"
 

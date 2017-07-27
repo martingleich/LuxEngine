@@ -1,8 +1,8 @@
 #ifndef INCLUDED_FPS_CONTROL_H
 #define INCLUDED_FPS_CONTROL_H
 #include "scene/components/Animator.h"
-#include "math/angle.h"
-#include "math/vector2.h"
+#include "math/Angle.h"
+#include "math/Vector2.h"
 
 #include "events/lxActions.h"
 

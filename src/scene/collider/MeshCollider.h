@@ -1,7 +1,7 @@
 #ifndef INCLUDED_MESH_COLLIDER_H
 #define INCLUDED_MESH_COLLIDER_H
 #include "scene/collider/Collider.h"
-#include "math/triangle3d.h"
+#include "math/Triangle3.h"
 #include "core/lxArray.h"
 
 namespace lux
@@ -12,14 +12,12 @@ class Mesh;
 }
 namespace scene
 {
-
 class LineQuery;
 class VolumeQuery;
 class SphereZone;
 class BoxZone;
 class LineQueryCallback;
 class VolumeQueryCallback;
-
 
 class MeshCollider : public TriangleCollider
 {
@@ -38,7 +36,7 @@ public:
 		return m_BoundingBox;
 	}
 
-	const math::triangle3df& GetTriangle(u32 id) const
+	const math::Triangle3F& GetTriangle(u32 id) const
 	{
 		return m_Triangles[id];
 	}
@@ -80,7 +78,7 @@ private:
 	bool SelectFirstTriangle(const math::Line3F& line, math::Vector3F& pos, size_t& triId, float& distance, bool testOnly);
 
 private:
-	core::Array<math::triangle3df> m_Triangles;
+	core::Array<math::Triangle3F> m_Triangles;
 	core::Array<FindEntry> m_Temp;
 	math::AABBoxF m_BoundingBox;
 };

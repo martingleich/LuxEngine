@@ -1,6 +1,6 @@
 #include "scene/components/RotationAnimator.h"
 #include "scene/Node.h"
-#include "math/quaternion.h"
+#include "math/Quaternion.h"
 #include "core/ReferableRegister.h"
 
 LUX_REGISTER_REFERABLE_CLASS("lux.comp.Rotation", lux::scene::RotationAnimator)

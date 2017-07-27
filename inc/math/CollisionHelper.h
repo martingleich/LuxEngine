@@ -1,7 +1,7 @@
 #ifndef INCLUDED_COLLISION_HELPER_H
 #define INCLUDED_COLLISION_HELPER_H
 #include "math/vector3.h"
-#include "math/line3d.h"
+#include "math/Line3.h"
 #include "math/Transformation.h"
 
 namespace lux
@@ -386,7 +386,7 @@ template <typename T>
 bool TriangleTestSphere(
 	const math::Vector3<T>& center,
 	T radius,
-	const math::triangle3d<T>& tri)
+	const math::Triangle3<T>& tri)
 {
 	// Translate world, so sphere is centered in origin.
 	auto A = tri.A - center;

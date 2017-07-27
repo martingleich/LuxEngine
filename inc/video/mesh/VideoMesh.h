@@ -1,6 +1,6 @@
 #ifndef INCLUDED_MESH_H
 #define INCLUDED_MESH_H
-#include "math/aabbox3d.h"
+#include "math/AABBox.h"
 #include "video/VertexFormats.h"
 #include "video/HardwareBufferConstants.h"
 #include "video/EPrimitiveType.h"

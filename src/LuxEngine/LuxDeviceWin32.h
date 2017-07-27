@@ -2,7 +2,7 @@
 #define INCLUDED_LUXDEVICE_WIN32_H
 #include "LuxEngine/LuxDevice.h"
 
-#include "math/dimension2d.h"
+#include "math/Dimension2.h"
 
 #include "core/lxAlgorithm.h"
 #include "core/lxArray.h"

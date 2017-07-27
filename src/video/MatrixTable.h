@@ -1,6 +1,6 @@
 #ifndef INCLUDED_MATRIX_TABLE_H
 #define INCLUDED_MATRIX_TABLE_H
-#include "math/matrix4.h"
+#include "math/Matrix4.h"
 #include "core/ParamPackage.h"
 
 namespace lux

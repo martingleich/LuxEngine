@@ -1,8 +1,8 @@
 #ifndef INCLUDED_SCENE_COLLIDER_H
 #define INCLUDED_SCENE_COLLIDER_H
 #include "core/Referable.h"
-#include "math/aabbox3d.h"
-#include "math/triangle3d.h"
+#include "math/AABBox.h"
+#include "math/Triangle3.h"
 
 namespace lux
 {
@@ -39,7 +39,7 @@ class TriangleCollider : public Collider
 {
 public:
 	//! Get a triangle contained in the collider, by it's id.
-	virtual const math::triangle3df& GetTriangle(u32 id) const = 0;
+	virtual const math::Triangle3F& GetTriangle(u32 id) const = 0;
 };
 
 }

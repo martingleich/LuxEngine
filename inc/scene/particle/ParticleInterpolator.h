@@ -4,7 +4,7 @@
 
 #include "core/lxArray.h"
 #include "core/lxAlgorithm.h"
-#include "math/curve.h"
+#include "math/Curve.h"
 
 #include "Particle.h"
 

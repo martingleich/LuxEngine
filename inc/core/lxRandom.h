@@ -3,11 +3,11 @@
 #include "core/Clock.h"
 
 #include "video/Color.h"
-#include "math/vector2.h"
+#include "math/Vector2.h"
 #include "math/vector3.h"
-#include "math/angle.h"
-#include "math/aabbox3d.h"
-#include "math/rect.h"
+#include "math/Angle.h"
+#include "math/AABBox.h"
+#include "math/Rect.h"
 
 namespace lux
 {

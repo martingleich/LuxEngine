@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SCENE_RENDERABLE_H
 #define INCLUDED_SCENE_RENDERABLE_H
 #include "video/Material.h"
-#include "math/aabbox3d.h"
+#include "math/AABBox.h"
 
 namespace lux
 {

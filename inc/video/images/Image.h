@@ -1,7 +1,7 @@
 #ifndef INCLUDED_IMAGE_H
 #define INCLUDED_IMAGE_H
 #include "resources/Resource.h"
-#include "math/dimension2d.h"
+#include "math/Dimension2.h"
 #include "video/Color.h"
 #include "video/DrawingCanvas.h"
 

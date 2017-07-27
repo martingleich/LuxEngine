@@ -1,6 +1,6 @@
 #ifndef INCLUDED_RECT_H
 #define INCLUDED_RECT_H
-#include "dimension2d.h"
+#include "Dimension2.h"
 
 namespace lux
 {

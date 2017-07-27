@@ -5,7 +5,7 @@
 
 #include "video/mesh/Geometry.h"
 #include "video/VertexTypes.h"
-#include "math/matrix4.h"
+#include "math/Matrix4.h"
 #include "video/Renderer.h"
 #include "video/MaterialRenderer.h"
 

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SPRITEBANK_H
 #define INCLUDED_SPRITEBANK_H
 #include "core/ReferenceCounted.h"
-#include "math/rect.h"
+#include "math/Rect.h"
 
 namespace lux
 {

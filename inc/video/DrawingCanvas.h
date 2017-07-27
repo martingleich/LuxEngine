@@ -1,6 +1,6 @@
 #ifndef INCLUDED_DRAWING_CANVAS_H
 #define INCLUDED_DRAWING_CANVAS_H
-#include "math/rect.h"
+#include "math/Rect.h"
 #include "video/ColorFormat.h"
 #include "video/Color.h"
 

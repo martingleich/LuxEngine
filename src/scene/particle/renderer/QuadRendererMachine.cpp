@@ -81,6 +81,12 @@ void QuadRendererMachine::ComputeGlobalOrientation()
 {
 	m_Look = m_HelpLook;
 	m_Up = m_HelpUp;
+	if(m_Look == m_Up) {
+		if(m_Data->LockedAxis == ELockedAxis::Look)
+			m_Up = m_Look.GetOrthoNormal();
+		else
+			m_Look = m_Up.GetOrthoNormal();
+	}
 
 	m_Side = m_Look.Cross(m_Up);
 	if(m_Data->LockedAxis == ELockedAxis::Look) {
@@ -102,7 +108,6 @@ void QuadRendererMachine::ComputeLocalOrientation(const Particle& particle)
 		m_Look -= particle.position;
 	}
 
-
 	if(m_Data->UpOrient == EUpOrientation::Direction) {
 		m_Up = particle.velocity;
 	} else if(m_Data->UpOrient == EUpOrientation::Point) {
@@ -112,6 +117,12 @@ void QuadRendererMachine::ComputeLocalOrientation(const Particle& particle)
 		m_Up = m_HelpUp;
 	}
 
+	if(m_Look == m_Up) {
+		if(m_Data->LockedAxis == ELockedAxis::Look)
+			m_Up = m_Look.GetOrthoNormal();
+		else
+			m_Look = m_Up.GetOrthoNormal();
+	}
 	m_Side = m_Look.Cross(m_Up);
 	if(m_Data->LockedAxis == ELockedAxis::Look) {
 		m_Up = m_Look.Cross(m_Side);
@@ -168,9 +179,9 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 
 	math::Matrix4 world = videoRenderer->GetTransform(video::ETransform::World);
 	math::Matrix4 view = videoRenderer->GetTransform(video::ETransform::View);
-	math::Matrix4 worldView = world * view;
+	math::Matrix4 invWorldView(world * view, math::Matrix4::M4C_INV);
 
-	bool globalOrientation = PrecomputeOrientation(worldView.Invert());
+	bool globalOrientation = PrecomputeOrientation(invWorldView);
 	if(globalOrientation)
 		ComputeGlobalOrientation();
 

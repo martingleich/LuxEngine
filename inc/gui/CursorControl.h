@@ -1,7 +1,7 @@
 #ifndef INCLUDED_CURSORCONTROL_H
 #define INCLUDED_CURSORCONTROL_H
 #include "core/ReferenceCounted.h"
-#include "math/dimension2d.h"
+#include "math/Dimension2.h"
 
 namespace lux
 {

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_VECTOR3_H
 #define INCLUDED_VECTOR3_H
-#include "math/vector2.h"
-#include "math/angle.h"
+#include "math/Vector2.h"
+#include "math/Angle.h"
 
 namespace lux
 {
@@ -510,10 +510,10 @@ public:
 	*/
 	Vector3 GetOrthoNormal() const
 	{
-		if(n.x == 0)
-			return Vector3(0, n.z, -n.y) / std::sqrt(n.z*n.z + n.y*n.y);
-		else if(n.z != 0 && n.x != 0)
-			return Vector3(n.z, 0, -n.x) / std::sqrt(n.z*n.z + n.x*n.x);
+		if(x == 0)
+			return Vector3(0, z, -y) / sqrt(z*z + y*y);
+		else if(z != 0 && x != 0)
+			return Vector3(z, 0, -x) / sqrt(z*z + x*x);
 		else
 			return Vector3(1, 0, 0);
 	}

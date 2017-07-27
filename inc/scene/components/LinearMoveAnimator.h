@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SCENE_LINEAR_MOVE_ANIMATOR_H
 #define INCLUDED_SCENE_LINEAR_MOVE_ANIMATOR_H
 #include "scene/components/Animator.h"
-#include "math/line3d.h"
+#include "math/Line3.h"
 
 namespace lux
 {

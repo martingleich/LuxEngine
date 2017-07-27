@@ -1,6 +1,6 @@
 #ifndef INCLUDED_S3DVERTEX_H
 #define INCLUDED_S3DVERTEX_H
-#include "math/vector2.h"
+#include "math/Vector2.h"
 #include "math/vector3.h"
 #include "video/Color.h"
 

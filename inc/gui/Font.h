@@ -3,7 +3,7 @@
 #include "resources/Resource.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
-#include "math/rect.h"
+#include "math/Rect.h"
 #include "video/Color.h"
 
 namespace lux

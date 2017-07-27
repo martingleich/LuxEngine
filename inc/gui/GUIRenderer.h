@@ -1,7 +1,7 @@
 #ifndef INCLUDED_IGUIRENDERER_H
 #define INCLUDED_IGUIRENDERER_H
 #include "core/ReferenceCounted.h"
-#include "math/rect.h"
+#include "math/Rect.h"
 #include "video/Color.h"
 #include "video/SpriteBank.h"
 #include "core/lxString.h"

@@ -3,7 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "input/InputReceiver.h"
 #include "core/lxString.h"
-#include "math/vector2.h"
+#include "math/Vector2.h"
 
 namespace lux
 {

@@ -1,5 +1,5 @@
 #include "ImageLoaderBMP.h"
-#include "math/dimension2d.h"
+#include "math/Dimension2.h"
 #include "video/Color.h"
 #include "io/File.h"
 #include "video/images/Image.h"

@@ -6,7 +6,7 @@
 
 #include "video/AlphaSettings.h"
 #include "video/TextureStageSettings.h"
-#include "math/matrix4.h"
+#include "math/Matrix4.h"
 
 #include "video/Shader.h"
 

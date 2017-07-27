@@ -7,8 +7,8 @@
 #include "core/lxName.h"
 
 #include "math/vector3.h"
-#include "math/quaternion.h"
-#include "math/line3d.h"
+#include "math/Quaternion.h"
+#include "math/Line3.h"
 
 #include "video/Color.h"
 

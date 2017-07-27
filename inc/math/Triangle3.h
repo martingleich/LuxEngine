@@ -1,6 +1,6 @@
 #ifndef INCLUDED_TRIANGLE3D_H
 #define INCLUDED_TRIANGLE3D_H
-#include "math/aabbox3d.h"
+#include "math/AABBox.h"
 
 namespace lux
 {
@@ -8,40 +8,40 @@ namespace math
 {
 
 //! A triangle in the third dimension
-template <typename type>
-class triangle3d
+template <typename T>
+class Triangle3
 {
 public:
-	Vector3<type> A;    //!< The first point of the triangle
-	Vector3<type> B;    //!< The second point of the triangle
-	Vector3<type> C;    //!< The third point of the triangle
+	Vector3<T> A;    //!< The first point of the triangle
+	Vector3<T> B;    //!< The second point of the triangle
+	Vector3<T> C;    //!< The third point of the triangle
 
 public:
 	//! default-Constructor: All 0 triangle
-	triangle3d()
+	Triangle3()
 	{
 	}
 	//! Constructor from 3 points
-	triangle3d(const Vector3<type>& a,
-		const Vector3<type>& b,
-		const Vector3<type>& c) : A(a), B(b), C(c)
+	Triangle3(const Vector3<T>& a,
+		const Vector3<T>& b,
+		const Vector3<T>& c) : A(a), B(b), C(c)
 	{
 	}
 
 	//! Equality
-	bool operator==(const triangle3d<type>& other) const
+	bool operator==(const Triangle3<T>& other) const
 	{
 		return other.A == A && other.B == other.B && other.C == C;
 	}
 
 	//! Inequality
-	bool operator!=(const triangle3d<type>& other) const
+	bool operator!=(const Triangle3<T>& other) const
 	{
 		return other.A != A || other.B != B || other.C != C;
 	}
 
 	//! Set triangle points
-	triangle3d<type>& Set(const Vector3<type>& a, const Vector3<type>& b, const Vector3<type>& c)
+	Triangle3<T>& Set(const Vector3<T>& a, const Vector3<T>& b, const Vector3<T>& c)
 	{
 		A = a;
 		B = b;
@@ -55,7 +55,7 @@ public:
 	Computed normal is not normalized
 	\return The normal of the triangle
 	*/
-	Vector3<type> GetNormal() const
+	Vector3<T> GetNormal() const
 	{
 		return (B - A).Cross(C - A);
 	}
@@ -64,7 +64,7 @@ public:
 	/**
 	\return The center of the triangle
 	*/
-	Vector3<type> GetCenter() const
+	Vector3<T> GetCenter() const
 	{
 		return (A + B + C) / 3;
 	}
@@ -74,21 +74,21 @@ public:
 	Plane is normalized
 	\return The plane of the triangle
 	*/
-	Plane<type> GetPlane() const
+	Plane<T> GetPlane() const
 	{
-		return Plane<type>(A, B, C);
+		return Plane<T>(A, B, C);
 	}
 
 	//! The area of the triangle
 	/**
 	\return The area of the triangle
 	*/
-	type GetArea() const
+	T GetArea() const
 	{
-		return (B - A).Cross(C - A).GetLength() / (type)(2);
+		return (B - A).Cross(C - A).GetLength() / (T)(2);
 	}
 
-	type GetCircumference() const
+	T GetCircumference() const
 	{
 		return (B-A).GetLength() + (A-C).GetLength() + (C-B).GetLength();
 	}
@@ -98,7 +98,7 @@ public:
 	\param box The box test against
 	\return Is the triangle totally inside the box
 	*/
-	bool IsTotalInsideBox(const AABBox<type>& box) const
+	bool IsTotalInsideBox(const AABBox<T>& box) const
 	{
 		return (box.IsPointInside(A) &&
 			box.IsPointInside(B) &&
@@ -110,15 +110,15 @@ public:
 	\param point Point which must be on the same plane as the triangle
 	\return The nearest point on the triangle
 	*/
-	Vector3<type> ClosestPointOnTriangle(const Vector3<type>& point) const
+	Vector3<T> ClosestPointOnTriangle(const Vector3<T>& point) const
 	{
-		const Vector3<type> pointToEdgeAB = Line3<type>(A, B).GetClosestPoint(point);
-		const Vector3<type> pointToEdgeBC = Line3<type>(B, C).GetClosestPoint(point);
-		const Vector3<type> pointToEdgeAC = Line3<type>(A, C).GetDinstanceTo(point);
+		const Vector3<T> pointToEdgeAB = Line3<T>(A, B).GetClosestPoint(point);
+		const Vector3<T> pointToEdgeBC = Line3<T>(B, C).GetClosestPoint(point);
+		const Vector3<T> pointToEdgeAC = Line3<T>(A, C).GetDinstanceTo(point);
 
-		const type toEdgeAB = pointToEdgeAB.GetDistanceToSq(point);
-		const type toEdgeBC = pointToEdgeBC.GetDistanceToSq(point);
-		const type toEdgeAC = pointToEdgeAC.GetDistanceToSq(point);
+		const T toEdgeAB = pointToEdgeAB.GetDistanceToSq(point);
+		const T toEdgeBC = pointToEdgeBC.GetDistanceToSq(point);
+		const T toEdgeAC = pointToEdgeAC.GetDistanceToSq(point);
 
 		if(toEdgeAB < toEdgeBC)
 			return toEdgeAB < toEdgeAC ? pointToEdgeAB : pointToEdgeAC;
@@ -132,20 +132,20 @@ public:
 	\param out If != NULL the coords of the intersection are written there
 	\return True if there is a intersection otherwise false
 	*/
-	bool IntersectWithLine(const Line3<type>& line, Vector3<type>* out = nullptr) const
+	bool IntersectWithLine(const Line3<T>& line, Vector3<T>* out = nullptr) const
 	{
-		const Vector3<type> AB = A - B;
-		const Vector3<type> BC = B - C;
-		const Vector3<type> Normal = AB.Cross(BC);
+		const Vector3<T> AB = A - B;
+		const Vector3<T> BC = B - C;
+		const Vector3<T> Normal = AB.Cross(BC);
 
-		Plane<type> plane = Plane<type>(A, Normal);
-		type s;
+		Plane<T> plane = Plane<T>(A, Normal);
+		T s;
 		if(!plane.IntersectWithLine(line, &s))
 			return false;
 
-		const Vector3<type> point = line.GetPoint(s);
+		const Vector3<T> point = line.GetPoint(s);
 
-		Vector3<type> subNormal = AB.Cross(Normal);
+		Vector3<T> subNormal = AB.Cross(Normal);
 		if(point.Dot(subNormal) < A.Dot(subNormal))
 			return false;
 
@@ -168,33 +168,33 @@ public:
 	\param out If != NULL the coords of the intersection are written there
 	\return True if there is a intersection otherwise false
 	*/
-	bool IntersectWithLineBary(const Line3<type>& line, Vector3<type>* out = nullptr) const
+	bool IntersectWithLineBary(const Line3<T>& line, Vector3<T>* out = nullptr) const
 	{
-		const Vector3<type> a(C - A);
-		const Vector3<type> b(B - A);
+		const Vector3<T> a(C - A);
+		const Vector3<T> b(B - A);
 
-		Plane<type> plane = Plane<type>(A, a.Cross(b));
-		type s;
+		Plane<T> plane = Plane<T>(A, a.Cross(b));
+		T s;
 		if(!plane.IntersectWithLine(line, &s))
 			return false;
 
-		const Vector3<type> c(line.GetPoint(s) - A);
+		const Vector3<T> c(line.GetPoint(s) - A);
 
-		type dotAA = a.Dot(a);
-		type dotAB = a.Dot(b);
-		type dotAC = a.Dot(c);
-		type dotBB = b.Dot(b);
-		type dotBC = b.Dot(c);
+		T dotAA = a.Dot(a);
+		T dotAB = a.Dot(b);
+		T dotAC = a.Dot(c);
+		T dotBB = b.Dot(b);
+		T dotBC = b.Dot(c);
 
-		type invDenom = 1 / (dotAA * dotBB - dotAB * dotAB);
+		T invDenom = 1 / (dotAA * dotBB - dotAB * dotAB);
 
-		type u = (dotBB * dotAC - dotAB * dotBC) * invDenom;
-		type v = (dotAA * dotBC - dotAB * dotAC) * invDenom;
+		T u = (dotBB * dotAC - dotAB * dotBC) * invDenom;
+		T v = (dotAA * dotBC - dotAB * dotAC) * invDenom;
 
 		if(
-			(u > -math::Constants<type>::rounding_error()) &&
-			(v > -math::Constants<type>::rounding_error()) &&
-			(u + v < 1 + math::Constants<type>::rounding_error())) {
+			(u > -math::Constants<T>::rounding_error()) &&
+			(v > -math::Constants<T>::rounding_error()) &&
+			(u + v < 1 + math::Constants<T>::rounding_error())) {
 
 			if(out)
 				*out = line.GetPoint(s);
@@ -207,12 +207,9 @@ public:
 };
 
 //! Typedef for triangles with float precision
-typedef triangle3d<float> triangle3df;
+typedef Triangle3<float> Triangle3F;
 
-
-}    
-
-}    
-
+} // namespace math
+} // namespace lux
 
 #endif

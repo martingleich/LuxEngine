@@ -45,7 +45,7 @@ MeshCollider::MeshCollider(video::Mesh* mesh)
 			u32 i0 = indices->GetIndex(j + 0);
 			u32 i1 = indices->GetIndex(j + 1);
 			u32 i2 = indices->GetIndex(j + 2);
-			math::triangle3df tri(
+			math::Triangle3F tri(
 				*(const math::Vector3F*)(data + stride*i0 + offset),
 				*(const math::Vector3F*)(data + stride*i1 + offset),
 				*(const math::Vector3F*)(data + stride*i2 + offset));

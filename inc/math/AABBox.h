@@ -1,6 +1,6 @@
 #ifndef INCLUDED_AABBOX3D_H
 #define INCLUDED_AABBOX3D_H
-#include "plane3d.h"
+#include "math/Plane.h"
 
 namespace lux
 {

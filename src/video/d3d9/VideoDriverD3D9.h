@@ -4,7 +4,7 @@
 #include "video/VideoDriverNull.h"
 #include "video/Material.h"
 #include "video/LightData.h"
-#include "math/matrix4.h"
+#include "math/Matrix4.h"
 
 #include "core/lxHashMap.h"
 

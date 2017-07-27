@@ -2,7 +2,7 @@
 #define INCLUDED_LINE_QUERY_H
 #include "scene/query/Query.h"
 #include "scene/query/QueryCallback.h"
-#include "math/line3d.h"
+#include "math/Line3.h"
 
 namespace lux
 {
