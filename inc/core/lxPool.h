@@ -465,8 +465,6 @@ public:
 		*Last() = Tmp;
 
 		--m_Active;
-		if(m_Active == 0)
-			int i = 0;
 	}
 
 	void Disable(T* x)

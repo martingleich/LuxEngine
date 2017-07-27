@@ -82,24 +82,18 @@ StrongRef<Component> Node::AddComponent(Component* component)
 	return component;
 }
 
-Node::ComponentIterator Node::GetComponentsFirst()
+core::Range<Node::ComponentIterator> Node::Components()
 {
-	return ComponentIterator(m_Components.First());
+	return  core::Range<Node::ComponentIterator>(
+		ComponentIterator(m_Components.First()),
+		ComponentIterator(m_Components.End()));
 }
 
-Node::ComponentIterator Node::GetComponentsEnd()
+core::Range<Node::ConstComponentIterator> Node::Components() const
 {
-	return ComponentIterator(m_Components.End());
-}
-
-Node::ConstComponentIterator Node::GetComponentsFirst() const
-{
-	return ConstComponentIterator(m_Components.First());
-}
-
-Node::ConstComponentIterator Node::GetComponentsEnd() const
-{
-	return ConstComponentIterator(m_Components.End());
+	return  core::Range<Node::ConstComponentIterator>(
+		ConstComponentIterator(m_Components.First()),
+		ConstComponentIterator(m_Components.End()));
 }
 
 bool Node::HasComponents() const
@@ -301,24 +295,16 @@ void Node::Remove()
 		parent->RemoveChild(this);
 }
 
-Node::ChildIterator Node::GetChildrenFirst()
+core::Range<Node::ChildIterator> Node::Children()
 {
-	return ChildIterator(m_Child);
+	return core::Range<Node::ChildIterator>(
+		ChildIterator(m_Child), ChildIterator(nullptr));
 }
 
-Node::ChildIterator Node::GetChildrenEnd()
+core::Range<Node::ConstChildIterator> Node::Children() const
 {
-	return ChildIterator(nullptr);
-}
-
-Node::ConstChildIterator Node::GetChildrenFirst() const
-{
-	return ConstChildIterator(m_Child);
-}
-
-Node::ConstChildIterator Node::GetChildrenEnd() const
-{
-	return ConstChildIterator(nullptr);
+	return core::Range<Node::ConstChildIterator>(
+		ConstChildIterator(m_Child), ConstChildIterator(nullptr));
 }
 
 void Node::MarkForDelete()
@@ -394,8 +380,11 @@ bool Node::ExecuteQuery(Query* query, QueryCallback* callback)
 	if(HasTag(query->GetTags()) && m_Collider)
 		wasNotAborted = m_Collider->ExecuteQuery(this, query, callback);
 
-	for(auto it = GetChildrenFirst(); wasNotAborted && it != GetChildrenEnd(); ++it)
-		wasNotAborted = it->ExecuteQuery(query, callback);
+	for(auto child : Children()) {
+		wasNotAborted = child->ExecuteQuery(query, callback);
+		if(!wasNotAborted)
+			break;
+	}
 
 	return wasNotAborted;
 }
@@ -456,13 +445,13 @@ Node::Node(const Node& other) :
 	m_IsVisible(other.m_IsVisible),
 	m_SceneManager(other.m_SceneManager)
 {
-	for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it) {
-		StrongRef<Node> node = (*it)->Clone();
+	for(auto child : Children()) {
+		StrongRef<Node> node = child->Clone();
 		node->SetParent(this);
 	}
 
-	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
-		StrongRef<Component> comp = it->comp->Clone();
+	for(auto& ce : m_Components) {
+		StrongRef<Component> comp = ce.comp->Clone();
 		AddComponent(comp);
 	}
 }
@@ -530,8 +519,8 @@ void Node::SetDirty() const
 	Transformable::SetDirty();
 
 	// Set all children dirty to
-	for(auto it = GetChildrenFirst(); it != GetChildrenEnd(); ++it)
-		it->SetDirty();
+	for(auto child : Children())
+		child->SetDirty();
 }
 
 } // namespace scene

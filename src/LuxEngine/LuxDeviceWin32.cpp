@@ -9,6 +9,7 @@
 #include "resources/ResourceSystem.h"
 
 #include "scene/SceneManagerImpl.h"
+#include "scene/particle/ParticleSystemManager.h"
 
 #include "io/FileSystem.h"
 
@@ -31,6 +32,7 @@
 #endif
 #include "video/Renderer.h"
 
+#include "input/InputSystem.h"
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "input/raw_input/RawInputReceiver.h"
 #endif
@@ -358,6 +360,9 @@ void LuxDeviceWin32::BuildSceneManager()
 		return;
 	}
 
+	if(!scene::ParticleSystemManager::Instance())
+		scene::ParticleSystemManager::Initialize();
+
 	log::Info("Build Scene Manager.");
 	m_SceneManager = LUX_NEW(scene::SceneManagerImpl);
 }
@@ -436,6 +441,8 @@ LuxDeviceWin32::~LuxDeviceWin32()
 {
 	m_GUIEnv.Reset();
 	m_SceneManager.Reset();
+
+	scene::ParticleSystemManager::Destroy();
 
 #ifdef LUX_COMPILE_WITH_D3D9
 	video::VideoDriverD3D9* driver = dynamic_cast<video::VideoDriverD3D9*>(video::VideoDriver::Instance());

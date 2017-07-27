@@ -351,16 +351,14 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API virtual StrongRef<Component> AddComponent(Component* component);
-	LUX_API virtual ComponentIterator GetComponentsFirst();
-	LUX_API virtual ComponentIterator GetComponentsEnd();
-	LUX_API virtual ConstComponentIterator GetComponentsFirst() const;
-	LUX_API virtual ConstComponentIterator GetComponentsEnd() const;
+	LUX_API virtual core::Range<ComponentIterator> Components();
+	LUX_API virtual core::Range<ConstComponentIterator> Components() const;
 
 	template <typename T>
 	T* GetComponent(T* cur = nullptr)
 	{
-		for(auto it = GetComponentsFirst(); it != GetComponentsEnd(); ++it) {
-			T* p = dynamic_cast<T*>(*it);
+		for(auto comp : Components()) {
+			T* p = dynamic_cast<T*>(comp);
 			if(p && p != cur)
 				return p;
 		}
@@ -371,8 +369,8 @@ public:
 	template <typename T>
 	const T* GetComponent(const T* cur = nullptr) const
 	{
-		for(auto it = GetComponentsFirst(); it != GetComponentsEnd(); ++it) {
-			const T* p = dynamic_cast<const T*>(*it);
+		for(auto comp : Components()) {
+			const T* p = dynamic_cast<const T*>(comp);
 			if(p && p != cur)
 				return p;
 		}
@@ -513,10 +511,8 @@ public:
 	To delete a node while doing this use SceneManager::AddToDeletionQueue or Node::MarkForDelete
 	*/
 	LUX_API virtual void Remove();
-	LUX_API ChildIterator GetChildrenFirst();
-	LUX_API ChildIterator GetChildrenEnd();
-	LUX_API ConstChildIterator GetChildrenFirst() const;
-	LUX_API ConstChildIterator GetChildrenEnd() const;
+	LUX_API core::Range<ChildIterator> Children();
+	LUX_API core::Range<ConstChildIterator> Children() const;
 
 	////////////////////////////////////////////////////////////////////////////////
 

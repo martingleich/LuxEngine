@@ -169,6 +169,40 @@ void SwapIterator(IterType& a, IterType& b)
 	*b = std::move(tmp);
 }
 
+template <typename IterT>
+class Range
+{
+public:
+	Range(IterT f, IterT e) :
+		m_First(f),
+		m_End(e)
+	{}
+
+	IterT First()
+	{
+		return m_First;
+	}
+
+	IterT begin()
+	{
+		return m_First;
+	}
+
+	IterT End()
+	{
+		return m_End;
+	}
+
+	IterT end()
+	{
+		return m_End;
+	}
+
+private:
+	IterT m_First;
+	IterT m_End;
+};
+
 }
 }
 

@@ -116,6 +116,30 @@ MaterialLibrary::MaterialLibrary()
 
 		transparent->AddParam("diffMap", 0, EOptionId::Layer0);
 	}
+	{
+		auto particleTransp = CloneMaterialRenderer("particleTransparent", "transparent");
+		auto& ps = particleTransp->GetPass(0);
+		ps.lighting = false;
+		ps.fogEnabled = false;
+		ps.zWriteEnabled = false;
+		ps.useVertexColor = true;
+		ps.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+		ps.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+		ps.alphaOperator = video::EBlendOperator::Add;
+		particleTransp->AddParam("texture", 0, video::EOptionId::Layer0);
+	}
+	{
+		auto particleEmit = CloneMaterialRenderer("particleEmit", "transparent");
+		auto& ps = particleEmit->GetPass(0);
+		ps.lighting = false;
+		ps.fogEnabled = false;
+		ps.zWriteEnabled = false;
+		ps.useVertexColor = true;
+		ps.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+		ps.alphaDstBlend = video::EBlendFactor::One;
+		ps.alphaOperator = video::EBlendOperator::Add;
+		particleEmit->AddParam("texture", 0, video::EOptionId::Layer0);
+	}
 }
 
 StrongRef<Material> MaterialLibrary::CreateMaterial(const String& name)

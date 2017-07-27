@@ -619,12 +619,12 @@ public:
 
 	ConstKeyIterator FirstKey() const
 	{
-		return FirstC();
+		return FirstKeyC();
 	}
 
 	ConstKeyIterator EndKey() const
 	{
-		return EndC();
+		return EndKeyC();
 	}
 
 	ConstKeyIterator FirstKeyC() const

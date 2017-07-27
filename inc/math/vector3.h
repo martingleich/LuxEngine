@@ -524,6 +524,20 @@ public:
 
 		return out;
 	}
+
+	//! Returns a vector orthonormal to this one.
+	/**
+	If the null vector is passed (1,0,0) is returned.
+	*/
+	vector3 GetOrthoNormal() const
+	{
+		if(n.x == 0)
+			return vector3(0, n.z, -n.y) / std::sqrt(n.z*n.z + n.y*n.y);
+		else if(n.z != 0 && n.x != 0)
+			return vector3(n.z, 0, -n.x) / std::sqrt(n.z*n.z + n.x*n.x);
+		else
+			return vector3(1, 0, 0);
+	}
 };
 
 ///\cond INTERNAL
@@ -587,7 +601,7 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 template <typename T>
 bool IsEqual(const vector3<T>& a, const vector3<T>& b, const T tolerance = math::Constants<T>::rounding_error())
 {
-	return 
+	return
 		math::IsEqual(a.x, b.x, tolerance) &&
 		math::IsEqual(a.y, b.y, tolerance) &&
 		math::IsEqual(a.z, b.z, tolerance);
@@ -596,7 +610,7 @@ bool IsEqual(const vector3<T>& a, const vector3<T>& b, const T tolerance = math:
 template <typename T>
 bool IsZero(const vector3<T>& v, const T tolerance = math::Constants<T>::rounding_error())
 {
-	return 
+	return
 		math::IsZero(v.x, tolerance) &&
 		math::IsZero(v.y, tolerance) &&
 		math::IsZero(v.z, tolerance);
