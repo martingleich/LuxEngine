@@ -166,7 +166,9 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 			RenderQuad = &QuadRendererMachine::RenderQuad_Scaled;
 	}
 
-	math::matrix4 worldView = videoRenderer->GetTransform(video::ETransform::View);
+	math::matrix4 world = videoRenderer->GetTransform(video::ETransform::World);
+	math::matrix4 view = videoRenderer->GetTransform(video::ETransform::View);
+	math::matrix4 worldView = world * view;
 
 	bool globalOrientation = PrecomputeOrientation(worldView.Invert());
 	if(globalOrientation)
