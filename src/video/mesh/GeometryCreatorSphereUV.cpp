@@ -22,7 +22,7 @@ GeometryCreatorSphereUV::GeometryCreatorSphereUV()
 	m_Params.AddParam("radius", 1.0f);
 	m_Params.AddParam("rings", 16);
 	m_Params.AddParam("sectors", 32);
-	m_Params.AddParam("tex", math::vector2f(1, 1));
+	m_Params.AddParam("tex", math::Vector2F(1, 1));
 	m_Params.AddParam("inside", false);
 }
 
@@ -42,7 +42,7 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(const core::PackageP
 	const float radius = params.Param(0);
 	const s32 rings = params.Param(1);
 	const s32 sectors = params.Param(2);
-	const math::vector2f tex = params.Param(3);
+	const math::Vector2F tex = params.Param(3);
 	const bool inside = params.Param(4);
 
 	return CreateGeometry(radius, rings, sectors, tex.x, tex.y, inside);
@@ -79,19 +79,19 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(
 	const s32 temp = rings-1;
 	Vertex3D Vertex;
 	u16 indices[6];
-	math::anglef alpha;
-	math::anglef beta;
-	Vertex.texture = math::vector2f(0.0f);
+	math::AngleF alpha;
+	math::AngleF beta;
+	Vertex.texture = math::Vector2F(0.0f);
 	for(s32 x = 0; x <= sectors; ++x) {
-		alpha = x * (math::anglef::FULL / sectors);
+		alpha = x * (math::AngleF::FULL / sectors);
 
 		for(s32 y = 0; y < temp; ++y) {
-			beta = math::anglef::Radian(float(math::Constants<float>::pi() / rings)*(y - ((rings - 2)*0.5f)));
+			beta = math::AngleF::Radian(float(math::Constants<float>::pi() / rings)*(y - ((rings - 2)*0.5f)));
 
-			Vertex.normal = math::vector3f::BuildFromPolar(alpha, beta, 1.0f);
+			Vertex.normal = math::Vector3F::BuildFromPolar(alpha, beta, 1.0f);
 			Vertex.position = Vertex.normal * radius;
-			Vertex.texture.x = texX*(alpha/math::anglef::FULL);
-			Vertex.texture.y = texY*(0.5f - beta/math::anglef::HALF);
+			Vertex.texture.x = texX*(alpha/math::AngleF::FULL);
+			Vertex.texture.y = texY*(0.5f - beta/math::AngleF::HALF);
 
 			Vertex.color = Color::White;
 
@@ -99,14 +99,14 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(
 		}
 	}
 
-	Vertex.position = math::vector3f(0.0f, radius, 0.0f);
-	Vertex.normal = math::vector3f(0.0f, 1.0f, 0.0f);
-	Vertex.texture = math::vector2f(0.5f*texX, 0.0f);
+	Vertex.position = math::Vector3F(0.0f, radius, 0.0f);
+	Vertex.normal = math::Vector3F(0.0f, 1.0f, 0.0f);
+	Vertex.texture = math::Vector2F(0.5f*texX, 0.0f);
 	vertexBuffer->AddVertex(&Vertex);
 
 	Vertex.position *= -1.0f;
 	Vertex.normal *= -1.0f;
-	Vertex.texture = math::vector2f(0.5f*texX, texY);
+	Vertex.texture = math::Vector2F(0.5f*texX, texY);
 	vertexBuffer->AddVertex(&Vertex);
 
 	for(s32 quad = 0; quad < sectors; ++quad) {
@@ -146,7 +146,7 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(
 	vertexBuffer->Update();
 	indexBuffer->Update();
 
-	subMesh->SetBoundingBox(math::aabbox3df(-radius, -radius, -radius, radius, radius, radius));
+	subMesh->SetBoundingBox(math::AABBoxF(-radius, -radius, -radius, radius, radius, radius));
 
 	return subMesh;
 }

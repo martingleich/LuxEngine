@@ -13,7 +13,7 @@ DrawingCanvas::DrawingCanvas() :
 	m_Rect.right = m_Width - 1;
 }
 
-DrawingCanvas::DrawingCanvas(void* d, ColorFormat f, const math::dimension2du& dim, u32 p) :
+DrawingCanvas::DrawingCanvas(void* d, ColorFormat f, const math::Dimension2U& dim, u32 p) :
 	m_Data((u8*)d), m_Format(f), m_Width(dim.width), m_Height(dim.height), m_Pitch(p)
 {
 	m_Rect.top = 0;
@@ -355,7 +355,7 @@ s32 DrawingCanvas::orient2d(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2)
 	return (x1 - x0)*(y2 - y0) - (y1 - y0)*(x2 - x0);
 }
 
-u8 DrawingCanvas::ComputeOutCode(s32 x, s32 y, const math::recti& r)
+u8 DrawingCanvas::ComputeOutCode(s32 x, s32 y, const math::RectI& r)
 {
 	u8 code = 0;
 
@@ -371,7 +371,7 @@ u8 DrawingCanvas::ComputeOutCode(s32 x, s32 y, const math::recti& r)
 	return code;
 }
 
-bool DrawingCanvas::ClipLine(s32& x0, s32& y0, s32& x1, s32& y1, const math::recti& r)
+bool DrawingCanvas::ClipLine(s32& x0, s32& y0, s32& x1, s32& y1, const math::RectI& r)
 {
 	u8 out0 = ComputeOutCode(x0, y0, r);
 	u8 out1 = ComputeOutCode(x1, y1, r);
@@ -411,7 +411,7 @@ bool DrawingCanvas::ClipLine(s32& x0, s32& y0, s32& x1, s32& y1, const math::rec
 	}
 }
 
-bool DrawingCanvas::ClipRectangle(s32& left, s32& top, s32& right, s32& bottom, const math::recti&r)
+bool DrawingCanvas::ClipRectangle(s32& left, s32& top, s32& right, s32& bottom, const math::RectI&r)
 {
 	if(left < r.left)
 		left = r.left;

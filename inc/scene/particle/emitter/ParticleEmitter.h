@@ -135,7 +135,7 @@ public:
 		m_IsGlobal = isGlobal;
 	}
 
-	void SetPosition(const math::vector3f& pos)
+	void SetPosition(const math::Vector3F& pos)
 	{
 		m_Position = pos;
 	}
@@ -152,7 +152,7 @@ public:
 protected:
 	core::Randomizer m_Rand;
 
-	math::vector3f m_Position;
+	math::Vector3F m_Position;
 	bool m_IsGlobal;
 	mutable math::Transformation m_Transform;
 

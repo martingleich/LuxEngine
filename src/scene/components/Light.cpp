@@ -30,24 +30,24 @@ float Light::GetRange() const
 	return m_LightData.range;
 }
 
-void Light::SetInnerCone(math::anglef angle)
+void Light::SetInnerCone(math::AngleF angle)
 {
 	m_LightData.innerCone = angle.Radian();
 }
 
-math::anglef Light::GetInnerCone() const
+math::AngleF Light::GetInnerCone() const
 {
-	return math::anglef::Radian(m_LightData.innerCone);
+	return math::AngleF::Radian(m_LightData.innerCone);
 }
 
-void Light::SetOuterCone(math::anglef angle)
+void Light::SetOuterCone(math::AngleF angle)
 {
 	m_LightData.outerCone = angle.Radian();
 }
 
-math::anglef Light::GetOuterCone() const
+math::AngleF Light::GetOuterCone() const
 {
-	return math::anglef::Radian(m_LightData.outerCone);
+	return math::AngleF::Radian(m_LightData.outerCone);
 }
 
 void Light::SetSpotFalloff(float falloff)
@@ -84,7 +84,7 @@ void Light::Render(video::Renderer* r, const Node* n)
 {
 	if(m_LightData.type == video::ELightType::Spot ||
 		m_LightData.type == video::ELightType::Directional) {
-		m_LightData.direction = n->FromRelativeDir(math::vector3f::UNIT_Z);
+		m_LightData.direction = n->FromRelativeDir(math::Vector3F::UNIT_Z);
 	}
 
 	if(m_LightData.type == video::ELightType::Spot ||

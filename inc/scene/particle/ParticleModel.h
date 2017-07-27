@@ -129,8 +129,8 @@ public:
 	LUX_API void InitParticle(Particle& particle) const;
 	LUX_API void UpdateParticle(Particle& particle, float secsPassed) const;
 
-	LUX_API void SetGravity(const math::vector3f& v);
-	LUX_API const math::vector3f& GetGravity() const;
+	LUX_API void SetGravity(const math::Vector3F& v);
+	LUX_API const math::Vector3F& GetGravity() const;
 
 	LUX_API StrongRef<ParticleRenderer> SetRenderer(ParticleRenderer* r);
 	LUX_API StrongRef<ParticleRenderer> GetRenderer();
@@ -204,7 +204,7 @@ private:
 	mutable core::Randomizer m_Randomizer;
 
 	StrongRef<ParticleRenderer> m_Renderer; //!< The renderer used to display the particles
-	math::vector3f m_Gravity; //!< The gravity used by the group
+	math::Vector3F m_Gravity; //!< The gravity used by the group
 
 	u32 m_Capacity; //!< The maximal number of particles of this model or 0 to auto calculate the capacititys
 };

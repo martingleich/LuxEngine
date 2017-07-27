@@ -48,7 +48,7 @@ public:
 
 	\ref SetPosition
 	*/
-	virtual math::vector2i GetPosition() const = 0;
+	virtual math::Vector2I GetPosition() const = 0;
 
 	//! Retrieve the relative Positon of the mouse
 	/**
@@ -59,14 +59,14 @@ public:
 
 	\ref SetRelPosition
 	*/
-	virtual math::vector2f GetRelPosition() const = 0;
+	virtual math::Vector2F GetRelPosition() const = 0;
 
 	//! Retrieve the size of the screen used by the cursor
 	/**
 	This is mostly the size of the active window
 	\return The size of the screen used by the cursor
 	*/
-	virtual const math::dimension2du& GetScreenSize() const = 0;
+	virtual const math::Dimension2U& GetScreenSize() const = 0;
 
 	//! Set the cursor visibility
 	/**
@@ -104,7 +104,7 @@ public:
 	virtual void SetGrabbing(bool grab) = 0;
 
 	//! Get the current grabbing position
-	virtual const math::vector2i& GetGrabbingPosition() const = 0;
+	virtual const math::Vector2I& GetGrabbingPosition() const = 0;
 
 	//! Disables the cursor.
 	/**

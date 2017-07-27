@@ -109,7 +109,7 @@ ERenderPass Mesh::GetRenderPass() const
 	return m_RenderPass;
 }
 
-const math::aabbox3df& Mesh::GetBoundingBox() const
+const math::AABBoxF& Mesh::GetBoundingBox() const
 {
 	return m_BoundingBox;
 }
@@ -159,7 +159,7 @@ void Mesh::SetMesh(video::Mesh* mesh)
 	if(m_Mesh)
 		m_BoundingBox = mesh->GetBoundingBox();
 	else
-		m_BoundingBox = math::aabbox3df::EMPTY;
+		m_BoundingBox = math::AABBoxF::EMPTY;
 
 	CopyMaterials();
 }

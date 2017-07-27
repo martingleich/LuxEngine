@@ -1,6 +1,5 @@
 #include "scene/SceneManagerImpl.h"
 #include "video/VideoDriver.h"
-#include "video/Renderer.h"
 #include "video/RenderTarget.h"
 
 #include "video/MaterialLibrary.h"
@@ -130,7 +129,7 @@ StrongRef<Light> SceneManagerImpl::CreateLight()
 	return CreateComponent(SceneComponentType::Light);
 }
 
-StrongRef<RotationAnimator> SceneManagerImpl::CreateRotator(const math::vector3f& axis, math::anglef rotSpeed)
+StrongRef<RotationAnimator> SceneManagerImpl::CreateRotator(const math::Vector3F& axis, math::AngleF rotSpeed)
 {
 	StrongRef<RotationAnimator> out = CreateComponent(SceneComponentType::Rotation);
 	out->SetAxis(axis);
@@ -139,7 +138,7 @@ StrongRef<RotationAnimator> SceneManagerImpl::CreateRotator(const math::vector3f
 	return out;
 }
 
-StrongRef<LinearMoveAnimator> SceneManagerImpl::CreateLinearMover(const math::line3df& line, float duration)
+StrongRef<LinearMoveAnimator> SceneManagerImpl::CreateLinearMover(const math::Line3F& line, float duration)
 {
 	StrongRef<LinearMoveAnimator> out = CreateComponent(SceneComponentType::LinearMove);
 	out->SetData(line, duration);
@@ -147,7 +146,7 @@ StrongRef<LinearMoveAnimator> SceneManagerImpl::CreateLinearMover(const math::li
 	return out;
 }
 
-StrongRef<CameraControl> SceneManagerImpl::CreateCameraControl(float moveSpeed, math::anglef rotSpeed, bool noVerticalMovement)
+StrongRef<CameraControl> SceneManagerImpl::CreateCameraControl(float moveSpeed, math::AngleF rotSpeed, bool noVerticalMovement)
 {
 	StrongRef<CameraControl> out = CreateComponent(SceneComponentType::CameraControl);
 	out->SetMoveSpeed(moveSpeed);
@@ -179,12 +178,12 @@ StrongRef<Collider> SceneManagerImpl::CreateBoundingSphereCollider()
 	return LUX_NEW(BoundingSphereCollider)();
 }
 
-StrongRef<Collider> SceneManagerImpl::CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans)
+StrongRef<Collider> SceneManagerImpl::CreateBoxCollider(const math::Vector3F& halfSize, const math::Transformation& trans)
 {
 	return LUX_NEW(BoxCollider)(halfSize, trans);
 }
 
-StrongRef<Collider> SceneManagerImpl::CreateSphereCollider(const math::vector3f& center, float radius)
+StrongRef<Collider> SceneManagerImpl::CreateSphereCollider(const math::Vector3F& center, float radius)
 {
 	return LUX_NEW(SphereCollider)(center, radius);
 }
@@ -385,19 +384,19 @@ void SceneManagerImpl::RemovePipelineOverwrite(ERenderPass pass, const video::Pi
 // Private functions
 ////////////////////////////////////////////////////////////////////////////
 
-void SceneManagerImpl::EnableOverwrite(ERenderPass pass)
+void SceneManagerImpl::EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
 	size_t id = GetPassId(pass);
 	for(auto& over : m_Overwrites[id])
-		m_Renderer->PushPipelineOverwrite(over);
+		m_Renderer->PushPipelineOverwrite(over, &token);
 }
 
-void SceneManagerImpl::DisableOverwrite(ERenderPass pass)
+void SceneManagerImpl::DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
 	size_t id = GetPassId(pass);
 	for(auto& over : m_Overwrites[id]) {
 		LUX_UNUSED(over);
-		m_Renderer->PopPipelineOverwrite();
+		m_Renderer->PopPipelineOverwrite(&token);
 	}
 }
 
@@ -484,32 +483,34 @@ void SceneManagerImpl::DrawScene()
 		}
 	}
 
+	video::PipelineOverwriteToken pot;
+
 	//-------------------------------------------------------------------------
 	// Skyboxes
-	EnableOverwrite(ERenderPass::SkyBox);
+	EnableOverwrite(ERenderPass::SkyBox, pot);
 
 	for(auto& e : m_SkyBoxList) {
 		if(e.node->IsTrulyVisible())
 			e.renderable->Render(e.node, m_Renderer, ERenderPass::SkyBox);
 	}
 
-	DisableOverwrite(ERenderPass::SkyBox);
+	DisableOverwrite(ERenderPass::SkyBox, pot);
 
 	//-------------------------------------------------------------------------
 	// Solid objects
-	EnableOverwrite(ERenderPass::SolidAndTransparent);
-	EnableOverwrite(ERenderPass::Solid);
+	EnableOverwrite(ERenderPass::SolidAndTransparent, pot);
+	EnableOverwrite(ERenderPass::Solid, pot);
 
 	for(auto& e : m_SolidNodeList) {
 		if(e.node->IsTrulyVisible())
 			e.renderable->Render(e.node, m_Renderer, ERenderPass::Solid);
 	}
 
-	DisableOverwrite(ERenderPass::Solid);
+	DisableOverwrite(ERenderPass::Solid, pot);
 
 	//-------------------------------------------------------------------------
 	// Transparent objects
-	EnableOverwrite(ERenderPass::Transparent);
+	EnableOverwrite(ERenderPass::Transparent, pot);
 
 	// Update the distances in the transparent nodes
 	for(auto& e : m_TransparentNodeList) {
@@ -524,8 +525,8 @@ void SceneManagerImpl::DrawScene()
 			e.renderable->Render(e.node, m_Renderer, ERenderPass::Transparent);
 	}
 
-	DisableOverwrite(ERenderPass::Transparent);
-	DisableOverwrite(ERenderPass::SolidAndTransparent);
+	DisableOverwrite(ERenderPass::Transparent, pot);
+	DisableOverwrite(ERenderPass::SolidAndTransparent, pot);
 }
 
 } // namespace scene

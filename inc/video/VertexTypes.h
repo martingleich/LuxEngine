@@ -26,10 +26,10 @@ namespace video
 */
 struct Vertex3D
 {
-	math::vector3f position; //!< The vertex position
-	math::vector3f normal; //!< The vertex normal
+	math::Vector3F position; //!< The vertex position
+	math::Vector3F normal; //!< The vertex normal
 	video::Color color; //!< The vertex color
-	math::vector2f texture; //!< The vertex texturecoords
+	math::Vector2F texture; //!< The vertex texturecoords
 
 	//! Default constructor
 	Vertex3D()
@@ -43,7 +43,7 @@ struct Vertex3D
 	}
 
 	//! Construct from combined values
-	Vertex3D(const math::vector3f& _Pos, Color _Color, const math::vector3f& _Normal, const math::vector2f& _TCoords)
+	Vertex3D(const math::Vector3F& _Pos, Color _Color, const math::Vector3F& _Normal, const math::Vector2F& _TCoords)
 		: position(_Pos), normal(_Normal), color(_Color), texture(_TCoords)
 	{
 	}
@@ -78,9 +78,9 @@ struct Vertex3D
 */
 struct Vertex2D
 {
-	math::vector2f position; //!< The vertex position
+	math::Vector2F position; //!< The vertex position
 	video::Color color; //!< The vertex color
-	math::vector2f texture; //! The vertex texturecoords
+	math::Vector2F texture; //! The vertex texturecoords
 
 	//! Default constructor
 	Vertex2D()
@@ -100,7 +100,7 @@ struct Vertex2D
 	}
 
 	//! Full constructor
-	Vertex2D(const math::vector2f& _Pos, Color _Color, const math::vector2f& _TCoords)
+	Vertex2D(const math::Vector2F& _Pos, Color _Color, const math::Vector2F& _TCoords)
 		: position(_Pos), color(_Color), texture(_TCoords)
 	{
 	}
@@ -133,10 +133,10 @@ struct Vertex2D
 */
 struct VertexTransformed
 {
-	math::vector3f position; //!< The vertex position
+	math::Vector3F position; //!< The vertex position
 	float RHW; //!< Reciproc W
 	video::Color color; //! The vertex color
-	math::vector2f texture; //! The vertex texturecoordinate
+	math::Vector2F texture; //! The vertex texturecoordinate
 
 	//! Default constructor
 	VertexTransformed()
@@ -150,7 +150,7 @@ struct VertexTransformed
 	}
 
 	//! Construct from multiple values
-	VertexTransformed(const math::vector3f& _Pos, float Prhw, Color _Color, const math::vector2f& _TCoords)
+	VertexTransformed(const math::Vector3F& _Pos, float Prhw, Color _Color, const math::Vector2F& _TCoords)
 		: position(_Pos), RHW(Prhw), color(_Color), texture(_TCoords)
 	{
 	}
@@ -159,7 +159,7 @@ struct VertexTransformed
 	/**
 	Set color to white
 	*/
-	VertexTransformed(const math::vector3f& _Pos, float Prhw, const math::vector2f& _TCoords)
+	VertexTransformed(const math::Vector3F& _Pos, float Prhw, const math::Vector2F& _TCoords)
 		: position(_Pos), RHW(Prhw), color(0xFFFFFFFF), texture(_TCoords)
 	{
 	}
@@ -189,11 +189,11 @@ struct VertexTransformed
 */
 struct Vertex2TCoords
 {
-	math::vector3f position; //!< The vertex position
-	math::vector3f normal; //!< The vertex normal
+	math::Vector3F position; //!< The vertex position
+	math::Vector3F normal; //!< The vertex normal
 	video::Color color; //!< The vertex color
-	math::vector2f texture; //!< The vertex texturecoords
-	math::vector2f texture2; //!<< The second vertex texture coordinates
+	math::Vector2F texture; //!< The vertex texturecoords
+	math::Vector2F texture2; //!<< The second vertex texture coordinates
 
 	//! Default constructor
 	Vertex2TCoords()
@@ -202,11 +202,11 @@ struct Vertex2TCoords
 
 	//! Construct from combines values
 	Vertex2TCoords(
-			const math::vector3f& _Pos,
+			const math::Vector3F& _Pos,
 			Color _Color,
-			const math::vector3f& _Normal,
-			const math::vector2f& _TCoords,
-			const math::vector2f& _TCoords2) :
+			const math::Vector3F& _Normal,
+			const math::Vector2F& _TCoords,
+			const math::Vector2F& _TCoords2) :
 		position(_Pos),
 		normal(_Normal),
 		color(_Color),
@@ -231,8 +231,8 @@ struct Vertex2TCoords
 	}
 
 	//! Construct without normal
-	Vertex2TCoords(const math::vector3f& _Pos, Color _Color,
-		const math::vector2f& _TCoords, const math::vector2f& _TCoords2) :
+	Vertex2TCoords(const math::Vector3F& _Pos, Color _Color,
+		const math::Vector2F& _TCoords, const math::Vector2F& _TCoords2) :
 		position(_Pos),
 		color(_Color),
 		texture(_TCoords),
@@ -241,8 +241,8 @@ struct Vertex2TCoords
 	}
 
 	//! Construct with identical texture coordinates
-	Vertex2TCoords(const math::vector3f& _Pos, Color _Color,
-		const math::vector3f& _Normal, const math::vector2f& _TCoords) :
+	Vertex2TCoords(const math::Vector3F& _Pos, Color _Color,
+		const math::Vector3F& _Normal, const math::Vector2F& _TCoords) :
 		position(_Pos),
 		normal(_Normal),
 		color(_Color),
@@ -275,12 +275,12 @@ struct Vertex2TCoords
 */
 struct VertexTangents
 {
-	math::vector3f position; //!< The vertex position
-	math::vector3f normal; //!< The vertex normal
+	math::Vector3F position; //!< The vertex position
+	math::Vector3F normal; //!< The vertex normal
 	video::Color color; //!< The vertex color
-	math::vector2f texture; //!< The vertex texturecoords
-	math::vector3f tangent; //!< The tangent vector
-	math::vector3f binormal; //!< The binormal vector
+	math::Vector2F texture; //!< The vertex texturecoords
+	math::Vector3F tangent; //!< The tangent vector
+	math::Vector3F binormal; //!< The binormal vector
 
 	//! Default constructor
 	VertexTangents()
@@ -305,15 +305,15 @@ struct VertexTangents
 	}
 
 	//! Construct from combined values
-	VertexTangents(const math::vector3f& _Pos, const math::vector3f& _Normal, Color _Color,
-		const math::vector2f& _TCoords, const math::vector3f& _Tangent, const math::vector3f& _Binormal) :
+	VertexTangents(const math::Vector3F& _Pos, const math::Vector3F& _Normal, Color _Color,
+		const math::Vector2F& _TCoords, const math::Vector3F& _Tangent, const math::Vector3F& _Binormal) :
 		position(_Pos), normal(_Normal), color(_Color), texture(_TCoords), tangent(_Tangent), binormal(_Binormal)
 	{
 	}
 
 	//! Construct without tangents
-	VertexTangents(const math::vector3f& _Pos, const math::vector3f& _Normal, Color _Color,
-		const math::vector2f& _TCoords) :
+	VertexTangents(const math::Vector3F& _Pos, const math::Vector3F& _Normal, Color _Color,
+		const math::Vector2F& _TCoords) :
 		position(_Pos), normal(_Normal), color(_Color), texture(_TCoords)
 	{
 	}
@@ -343,8 +343,8 @@ struct VertexTangents
 */
 struct Vertex3DTCoord
 {
-	math::vector3f position; //!< The vertex position
-	math::vector3f texture; //!< The 3d texture coordinate
+	math::Vector3F position; //!< The vertex position
+	math::Vector3F texture; //!< The 3d texture coordinate
 
 	//! Default constructor
 	Vertex3DTCoord()
@@ -358,7 +358,7 @@ struct Vertex3DTCoord
 	}
 
 	//! Construct from combined values
-	Vertex3DTCoord(const math::vector3f& _Pos, const math::vector3f& _TCoords)
+	Vertex3DTCoord(const math::Vector3F& _Pos, const math::Vector3F& _TCoords)
 		: position(_Pos), texture(_TCoords)
 	{
 	}

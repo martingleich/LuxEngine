@@ -32,12 +32,15 @@ class RenderStatistics;
 class VideoDriver;
 class AlphaBlendSettings;
 
+//! The diffrent transforms which can be set in the renderer
 enum class ETransform
 {
-	World,
-	View,
-	Projection
+	World, //!< The current world transformation
+	View, //!< The current view transformation
+	Projection, //!< The current projection transformation.
 };
+
+struct PipelineOverwriteToken;
 
 /**
 Rendering 2d or 3d data:
@@ -132,12 +135,17 @@ public:
 
 	//! Apply a pipeline overwrite
 	/**
-	See \ref PipelineOverwrite about the usage of pipeline overwrites
+	See \ref PipelineOverwrite about the usage of pipeline overwrites.
+	\param over The overwrite to apply
+	\param token A token to restore the previous state of the overwrites, see \ref PipelineOverwriteToken for more
 	*/
-	virtual void PushPipelineOverwrite(const PipelineOverwrite& over) = 0;
+	virtual void PushPipelineOverwrite(const PipelineOverwrite& over, PipelineOverwriteToken* token=nullptr) = 0;
 
 	//! Remove the previous added pipeline overwrite
-	virtual void PopPipelineOverwrite() = 0;
+	/*
+	\param token A token to restore the previous state of the overwrites, see \ref PipelineOverwriteToken for more
+	*/
+	virtual void PopPipelineOverwrite(PipelineOverwriteToken* token=nullptr) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -161,10 +169,10 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	//! Set a transform matrix
-	virtual void SetTransform(ETransform transform, const math::matrix4& matrix) = 0;
+	virtual void SetTransform(ETransform transform, const math::Matrix4& matrix) = 0;
 
 	//! Get a active transform matrix
-	virtual const math::matrix4& GetTransform(ETransform transform) const = 0;
+	virtual const math::Matrix4& GetTransform(ETransform transform) const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -250,28 +258,37 @@ public:
 	virtual VideoDriver* GetDriver() const = 0;
 };
 
+//! A token to restore the previous state of the overwrite system.
+/**
+Pass a token to PushPipelineOverwrite so that when the token is destructed the
+corresponding overwrite is automatically removed from the pipeline.<br>
+If you pop the overwrite by yourself, pass the token too so that is doesn't pop
+the same entry twice.<br>
+The same token can be used with multiple pushs and pops.<br>
+An example:
+\code{.cpp}
+PipelineOverwriteToken token;
+PipelineOverwrite over;
+// Set values for overwrite...
+renderer->PushPipelineOverwrite(over, &token);
+// Render things...
+// The PopPipelineOverwrite is automatically called by the token.
+\endcode
+It's recommended to used the token instead of restoring the pipeline by yourself
+since it works reliably in the presence of exceptions and can't be forgotten.
+*/
 struct PipelineOverwriteToken
 {
-	PipelineOverwriteToken(Renderer* renderer, const PipelineOverwrite& overwrite) :
-		m_Renderer(renderer)
-	{
-		if(m_Renderer)
-			m_Renderer->PushPipelineOverwrite(overwrite);
-	}
-
 	~PipelineOverwriteToken()
 	{
-		if(m_Renderer)
-			m_Renderer->PopPipelineOverwrite();
+		if(renderer) {
+			while(count)
+				renderer->PopPipelineOverwrite(this);
+		}
 	}
 
-	void Unlock()
-	{
-		m_Renderer = nullptr;
-	}
-
-private:
-	Renderer* m_Renderer;
+	Renderer* renderer = nullptr;
+	u32 count = 0;
 };
 
 } // namespace video

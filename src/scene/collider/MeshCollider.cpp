@@ -46,9 +46,9 @@ MeshCollider::MeshCollider(video::Mesh* mesh)
 			u32 i1 = indices->GetIndex(j + 1);
 			u32 i2 = indices->GetIndex(j + 2);
 			math::triangle3df tri(
-				*(const math::vector3f*)(data + stride*i0 + offset),
-				*(const math::vector3f*)(data + stride*i1 + offset),
-				*(const math::vector3f*)(data + stride*i2 + offset));
+				*(const math::Vector3F*)(data + stride*i0 + offset),
+				*(const math::Vector3F*)(data + stride*i1 + offset),
+				*(const math::Vector3F*)(data + stride*i2 + offset));
 
 			m_Triangles.PushBack(tri);
 		}
@@ -78,13 +78,13 @@ bool MeshCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCall
 	LX_CHECK_NULL_ARG(query);
 	LX_CHECK_NULL_ARG(result);
 
-	math::line3df line = query->GetLine();
+	math::Line3F line = query->GetLine();
 	const auto& trans = owner->GetAbsoluteTransform();
-	math::line3df transLine = math::line3df(
+	math::Line3F transLine = math::Line3F(
 		trans.TransformInvPoint(line.start),
 		trans.TransformInvPoint(line.end));
 
-	math::vector3f pos;
+	math::Vector3F pos;
 	size_t id;
 	float distance;
 	bool found = SelectFirstTriangle(transLine, pos, id, distance, query->GetLevel() == Query::EQueryLevel::Object);
@@ -147,14 +147,14 @@ bool MeshCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZon
 	return procceed;
 }
 
-bool MeshCollider::SelectFirstTriangle(const math::line3df& line, math::vector3f& out_pos, size_t& triId, float& distance, bool testOnly)
+bool MeshCollider::SelectFirstTriangle(const math::Line3F& line, math::Vector3F& out_pos, size_t& triId, float& distance, bool testOnly)
 {
 	if(!m_BoundingBox.IntersectWithLine(line))
 		return false;
 
 	size_t i = 0;
 	for(auto it = m_Triangles.First(); it != m_Triangles.End(); ++it) {
-		math::vector3f pos;
+		math::Vector3F pos;
 		if(it->IntersectWithLineBary(line, &pos)) {
 			if(testOnly)
 				return true;

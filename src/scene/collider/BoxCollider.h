@@ -20,15 +20,15 @@ class BoxCollider : public Collider
 public:
 	BoxCollider()
 	{
-		SetHalfSize(math::vector3f(1.0f, 1.0f, 1.0f));
+		SetHalfSize(math::Vector3F(1.0f, 1.0f, 1.0f));
 	}
 
-	BoxCollider(const math::vector3f& halfSize)
+	BoxCollider(const math::Vector3F& halfSize)
 	{
 		SetHalfSize(halfSize);
 	}
 
-	BoxCollider(const math::vector3f& halfSize, const math::Transformation& trans) :
+	BoxCollider(const math::Vector3F& halfSize, const math::Transformation& trans) :
 		m_Transform(trans)
 	{
 		SetHalfSize(halfSize);
@@ -39,12 +39,12 @@ public:
 	virtual bool ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result);
 	virtual bool ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result);
 
-	const math::aabbox3df& GetBoundingBox() const
+	const math::AABBoxF& GetBoundingBox() const
 	{
 		return m_Box;
 	}
 
-	void SetHalfSize(const math::vector3f& halfSize)
+	void SetHalfSize(const math::Vector3F& halfSize)
 	{
 		m_HalfSize = halfSize;
 		m_Box.Set(m_Transform.TransformPoint(m_HalfSize));
@@ -64,17 +64,17 @@ public:
 	static const core::Name TypeName;
 
 protected:
-	math::vector3f m_HalfSize;
+	math::Vector3F m_HalfSize;
 	math::Transformation m_Transform;
 
-	math::aabbox3df m_Box;
+	math::AABBoxF m_Box;
 };
 
 class BoundingBoxCollider : public BoxCollider
 {
 public:
 	BoundingBoxCollider() :
-		BoxCollider(math::vector3f::ZERO, math::Transformation::DEFAULT)
+		BoxCollider(math::Vector3F::ZERO, math::Transformation::DEFAULT)
 	{
 	}
 

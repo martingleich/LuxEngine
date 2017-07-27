@@ -71,7 +71,7 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
 	// Die Sky-box genau zwischen die Clipping-Ebenen legen
 	t.scale = 0.5f * (camera->GetNearPlane() + camera->GetFarPlane());
 
-	math::matrix4 m;
+	math::Matrix4 m;
 	t.ToMatrix(m);
 	renderer->SetTransform(video::ETransform::World, m);
 
@@ -157,7 +157,8 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
 	// Disable z comparison for sky box renderering
 	video::PipelineOverwrite over;
 	over.disableZCmp = true;
-	video::PipelineOverwriteToken tok(renderer, over);
+	video::PipelineOverwriteToken token;
+	renderer->PushPipelineOverwrite(over, &token);
 
 	if(m_SkyTexture)
 		m_Material->Layer(0) = m_SkyTexture;
@@ -238,9 +239,9 @@ size_t SkyBox::GetMaterialCount() const
 	return 1;
 }
 
-const math::aabbox3df& SkyBox::GetBoundingBox() const
+const math::AABBoxF& SkyBox::GetBoundingBox() const
 {
-	return math::aabbox3df::EMPTY;
+	return math::AABBoxF::EMPTY;
 }
 
 core::Name SkyBox::GetReferableType() const

@@ -68,8 +68,8 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void PushPipelineOverwrite(const PipelineOverwrite& over);
-	void PopPipelineOverwrite();
+	void PushPipelineOverwrite(const PipelineOverwrite& over, PipelineOverwriteToken* token);
+	void PopPipelineOverwrite(PipelineOverwriteToken* token);
 
 private:
 	void UpdatePipelineOverwrite();
@@ -87,8 +87,8 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void SetTransform(ETransform transform, const math::matrix4& matrix);
-	const math::matrix4& GetTransform(ETransform transform) const;
+	void SetTransform(ETransform transform, const math::Matrix4& matrix);
+	const math::Matrix4& GetTransform(ETransform transform) const;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -127,7 +127,7 @@ protected:
 		m_DirtyFlags = 0;
 	}
 
-	math::matrix4 GenerateLightMatrix(const LightData& data, bool active);
+	math::Matrix4 GenerateLightMatrix(const LightData& data, bool active);
 
 private:
 	bool GetLightId(const StringType& string, u32& outId);
@@ -148,9 +148,9 @@ protected:
 
 	FogData m_Fog; //!< User set fog data
 
-	math::matrix4 m_TransformWorld;
-	math::matrix4 m_TransformView;
-	math::matrix4 m_TransformProj;
+	math::Matrix4 m_TransformWorld;
+	math::Matrix4 m_TransformView;
+	math::Matrix4 m_TransformProj;
 
 	MatrixTable m_MatrixTable; //! The currently set matrices, these are used as arguments for shaders and other rendercomponents
 

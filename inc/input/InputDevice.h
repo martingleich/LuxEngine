@@ -53,7 +53,7 @@ struct Axis
 
 struct Area
 {
-	math::vector2f state;
+	math::Vector2F state;
 };
 
 //! Class for a single input device.

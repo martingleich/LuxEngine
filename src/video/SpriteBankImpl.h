@@ -15,7 +15,7 @@ private:
 	struct Sprite
 	{
 		u16	textureID;
-		math::rectf rect;
+		math::RectF rect;
 	};
 
 	struct AnimatedSprite
@@ -29,12 +29,12 @@ public:
 	SpriteBankImpl();
 	virtual ~SpriteBankImpl();
 
-	SpriteBank::Sprite AddSprite(Texture* texture, const math::rect<u16>& rect);
+	SpriteBank::Sprite AddSprite(Texture* texture, const math::Rect<u16>& rect);
 	SpriteBank::Sprite AddTextureAsSprite(Texture* texture);
 	SpriteBank::Sprite AddAnimatedSprite(SpriteBank::Sprite first, SpriteBank::Sprite last, u32 frameTime);
 	void Clear();
-	bool GetSprite(SpriteBank::Sprite index, u32 time, bool looped, math::rectf*& outCoords, Texture*& outTex);
-	bool DrawSprite(SpriteBank::Sprite index, const math::vector2i& pos, u32 time = 0, bool looped = true, bool centered = false);
+	bool GetSprite(SpriteBank::Sprite index, u32 time, bool looped, math::RectF*& outCoords, Texture*& outTex);
+	bool DrawSprite(SpriteBank::Sprite index, const math::Vector2I& pos, u32 time = 0, bool looped = true, bool centered = false);
 
 private:
 	core::Array<Sprite> m_Sprites;

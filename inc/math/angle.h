@@ -8,27 +8,27 @@ namespace math
 {
 
 template <typename T>
-class angle
+class Angle
 {
 public:
-	angle() :
+	Angle() :
 		value(0)
 	{
 	}
 
-	static angle<T> Radian(T f)
+	static Angle<T> Radian(T f)
 	{
-		return angle<T>(f);
+		return Angle<T>(f);
 	}
 
-	static angle<T> Degree(T f)
+	static Angle<T> Degree(T f)
 	{
-		return angle<T>((f / 180.0f) * math::Constants<T>::pi());
+		return Angle<T>((f / 180.0f) * math::Constants<T>::pi());
 	}
 
-	static angle<T> Gon(T f)
+	static Angle<T> Gon(T f)
 	{
-		return angle<T>((f / 200.0f) * math::Constants<T>::pi());
+		return Angle<T>((f / 200.0f) * math::Constants<T>::pi());
 	}
 
 	T Radian()
@@ -46,208 +46,208 @@ public:
 		return ((value / math::Constants<T>::pi()) * 200.0f);
 	}
 
-	angle<T>& Normalize()
+	Angle<T>& Normalize()
 	{
 		value = fmodf(value, math::Constants<T>::two_pi());
 		return *this;
 	}
 
-	angle<T> Normal() const
+	Angle<T> Normal() const
 	{
-		angle<T> out(*this);
+		Angle<T> out(*this);
 		out.Normalize();
 		return out;
 	}
 
-	explicit angle(T _value) :
+	explicit Angle(T _value) :
 		value(_value)
 	{
 	}
 
-	static const angle ZERO;
-	static const angle QUATER;
-	static const angle HALF;
-	static const angle FULL;
+	static const Angle ZERO;
+	static const Angle QUATER;
+	static const Angle HALF;
+	static const Angle FULL;
 
 public:
 	T value;
 };
 
 template <typename T>
-const angle<T>  angle<T>::ZERO = angle<T>(0);
+const Angle<T> Angle<T>::ZERO = Angle<T>(0);
 
 template <typename T>
-const angle<T>  angle<T>::QUATER = angle<T>(math::Constants<T>::half_pi());
+const Angle<T> Angle<T>::QUATER = Angle<T>(math::Constants<T>::half_pi());
 
 template <typename T>
-const angle<T>  angle<T>::HALF = angle<T>(math::Constants<T>::pi());
+const Angle<T> Angle<T>::HALF = Angle<T>(math::Constants<T>::pi());
 
 template <typename T>
-const angle<T>  angle<T>::FULL = angle<T>(math::Constants<T>::two_pi());
+const Angle<T> Angle<T>::FULL = Angle<T>(math::Constants<T>::two_pi());
 
 template <typename T>
-inline bool operator==(angle<T> a, angle<T> b)
+inline bool operator==(Angle<T> a, Angle<T> b)
 {
 	return (a.Radian() == b.Radian());
 }
 
 template <typename T>
-inline bool operator!=(angle<T> a, angle<T> b)
+inline bool operator!=(Angle<T> a, Angle<T> b)
 {
 	return !(a == b);
 }
 
 template <typename T>
-inline bool operator<(angle<T> a, angle<T> b)
+inline bool operator<(Angle<T> a, Angle<T> b)
 {
 	return (a.Radian() < b.Radian());
 }
 
 template <typename T>
-inline bool operator>(angle<T> a, angle<T> b)
+inline bool operator>(Angle<T> a, Angle<T> b)
 {
 	return (b < a);
 }
 
 template <typename T>
-inline bool operator<=(angle<T> a, angle<T> b)
+inline bool operator<=(Angle<T> a, Angle<T> b)
 {
 	return !(a > b);
 }
 
 template <typename T>
-inline bool operator>=(angle<T> a, angle<T> b)
+inline bool operator>=(Angle<T> a, Angle<T> b)
 {
 	return !(a < b);
 }
 
 template <typename T>
-inline angle<T> operator+(angle<T> a, angle<T> b)
+inline Angle<T> operator+(Angle<T> a, Angle<T> b)
 {
-	return angle<T>::Radian(a.Radian() + b.Radian());
+	return Angle<T>::Radian(a.Radian() + b.Radian());
 }
 
 template <typename T>
-inline angle<T> operator-(angle<T> a, angle<T> b)
+inline Angle<T> operator-(Angle<T> a, Angle<T> b)
 {
-	return angle<T>::Radian(a.Radian() - b.Radian());
+	return Angle<T>::Radian(a.Radian() - b.Radian());
 }
 
 template <typename T>
-inline T operator/(angle<T> a, angle<T> b)
+inline T operator/(Angle<T> a, Angle<T> b)
 {
 	return (a.Radian() / b.Radian());
 }
 
 template <typename T>
-inline angle<T> operator%(angle<T> a, angle<T> b)
+inline Angle<T> operator%(Angle<T> a, Angle<T> b)
 {
-	return angle<T>::Radian(fmodf(a.Radian(), b.Radian()));
+	return Angle<T>::Radian(fmodf(a.Radian(), b.Radian()));
 }
 
 template <typename T, typename T2>
-inline angle<T> operator*(T2 f, angle<T> a)
+inline Angle<T> operator*(T2 f, Angle<T> a)
 {
-	return angle<T>::Radian(f*a.Radian());
+	return Angle<T>::Radian(f*a.Radian());
 }
 
 template <typename T, typename T2>
-inline angle<T> operator*(angle<T> a, T2 f)
+inline Angle<T> operator*(Angle<T> a, T2 f)
 {
-	return angle<T>::Radian(f*a.Radian());
+	return Angle<T>::Radian(f*a.Radian());
 }
 
 template <typename T, typename T2>
-inline angle<T> operator/(angle<T> a, T2 f)
+inline Angle<T> operator/(Angle<T> a, T2 f)
 {
-	return angle<T>::Radian(a.Radian() / f);
+	return Angle<T>::Radian(a.Radian() / f);
 }
 
 template <typename T>
-inline angle<T> operator-(angle<T> a)
+inline Angle<T> operator-(Angle<T> a)
 {
-	return angle<T>::Radian(-a.Radian());
+	return Angle<T>::Radian(-a.Radian());
 }
 
 template <typename T>
-inline angle<T>& operator-=(angle<T>& a, angle<T> b)
+inline Angle<T>& operator-=(Angle<T>& a, Angle<T> b)
 {
 	a = a - b;
 	return a;
 }
 
 template <typename T>
-inline angle<T>& operator+=(angle<T>& a, angle<T> b)
+inline Angle<T>& operator+=(Angle<T>& a, Angle<T> b)
 {
 	a = a + b;
 	return a;
 }
 
 template <typename T>
-inline angle<T>& operator*=(angle<T>& a, float f)
+inline Angle<T>& operator*=(Angle<T>& a, float f)
 {
 	a = a * f;
 	return a;
 }
 
 template <typename T>
-inline angle<T>& operator/=(angle<T>& a, float f)
+inline Angle<T>& operator/=(Angle<T>& a, float f)
 {
 	a = a / f;
 	return a;
 }
 
 template <typename T>
-inline angle<T>& operator%=(angle<T>& a, angle<T> b)
+inline Angle<T>& operator%=(Angle<T>& a, Angle<T> b)
 {
 	a = a % b;
 	return a;
 }
 template <typename T>
-inline T Cos(angle<T> a)
+inline T Cos(Angle<T> a)
 {
 	return cosf(a.Radian());
 }
 
 template <typename T>
-inline T Sin(angle<T> a)
+inline T Sin(Angle<T> a)
 {
 	return sinf(a.Radian());
 }
 
 template <typename T>
-inline T Tan(angle<T> a)
+inline T Tan(Angle<T> a)
 {
 	return tanf(a.Radian());
 }
 
 template <typename T>
-inline angle<T> ArcCos(T f)
+inline Angle<T> ArcCos(T f)
 {
-	return angle<T>::Radian(acosf(f));
+	return Angle<T>::Radian(acosf(f));
 }
 
 template <typename T>
-inline angle<T> ArcSin(T f)
+inline Angle<T> ArcSin(T f)
 {
-	return angle<T>::Radian(asinf(f));
+	return Angle<T>::Radian(asinf(f));
 }
 
 template <typename T>
-inline angle<T> ArcTan(T f)
+inline Angle<T> ArcTan(T f)
 {
-	return angle<T>::Radian(atanf(f));
+	return Angle<T>::Radian(atanf(f));
 }
 
 template <typename T>
-inline angle<T> ArcTan2(T y, T x)
+inline Angle<T> ArcTan2(T y, T x)
 {
-	return angle<T>::Radian(atan2f(y, x));
+	return Angle<T>::Radian(atan2f(y, x));
 }
 
-typedef angle<float> anglef;
+typedef Angle<float> AngleF;
 
-}
-}
+} // namespace math
+} // namespace lux
 
 #endif // #ifndef INCLUDED_ANGLE_H

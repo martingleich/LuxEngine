@@ -21,11 +21,11 @@ public:
 	{
 	}
 
-	virtual void Init(const math::dimension2du& size, ColorFormat format) = 0;
-	virtual void Init(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop) = 0;
+	virtual void Init(const math::Dimension2U& size, ColorFormat format) = 0;
+	virtual void Init(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop) = 0;
 
 	//! Get the size of the image in pixel
-	virtual const math::dimension2du& GetSize() const = 0;
+	virtual const math::Dimension2U& GetSize() const = 0;
 
 	//! Get the colorformat of the image
 	virtual ColorFormat GetColorFormat() const = 0;

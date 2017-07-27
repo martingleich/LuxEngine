@@ -96,7 +96,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 
 	CharInfo info;
 	FontPixel* image;
-	math::dimension2du imageSize;
+	math::Dimension2U imageSize;
 	u32 fontHeight;
 
 	GetFontImage(ctx, image, imageSize);

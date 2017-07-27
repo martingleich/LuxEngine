@@ -5,6 +5,7 @@
 #include "scene/components/Camera.h"
 #include "scene/Node.h"
 #include "core/lxOrderedSet.h"
+#include "video/Renderer.h"
 
 namespace lux
 {
@@ -37,9 +38,9 @@ public:
 	StrongRef<Light> CreateLight();
 
 	// Animatoren
-	StrongRef<RotationAnimator> CreateRotator(const math::vector3f& axis = math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f));
-	StrongRef<LinearMoveAnimator> CreateLinearMover(const math::line3df& line, float duration);
-	StrongRef<CameraControl> CreateCameraControl(float moveSpeed = 4.0f, math::anglef rotSpeed = math::anglef::Degree(30.0f), bool noVerticalMovement = false);
+	StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f));
+	StrongRef<LinearMoveAnimator> CreateLinearMover(const math::Line3F& line, float duration);
+	StrongRef<CameraControl> CreateCameraControl(float moveSpeed = 4.0f, math::AngleF rotSpeed = math::AngleF::Degree(30.0f), bool noVerticalMovement = false);
 
 	StrongRef<Component> CreateComponent(core::Name type);
 
@@ -48,8 +49,8 @@ public:
 	StrongRef<Collider> CreateMeshCollider(video::Mesh* mesh);
 	StrongRef<Collider> CreateBoundingBoxCollider();
 	StrongRef<Collider> CreateBoundingSphereCollider();
-	StrongRef<Collider> CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans);
-	StrongRef<Collider> CreateSphereCollider(const math::vector3f& center, float radius);
+	StrongRef<Collider> CreateBoxCollider(const math::Vector3F& halfSize, const math::Transformation& trans);
+	StrongRef<Collider> CreateSphereCollider(const math::Vector3F& center, float radius);
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -95,8 +96,8 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 private:
-	void EnableOverwrite(ERenderPass pass);
-	void DisableOverwrite(ERenderPass pass);
+	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
+	void DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
 
 	size_t GetPassId(ERenderPass pass) const;
 
@@ -129,7 +130,7 @@ private:
 	struct DistanceRenderEntry : public RenderEntry
 	{
 		float distance;
-		math::vector3f pos;
+		math::Vector3F pos;
 
 		DistanceRenderEntry()
 		{
@@ -141,7 +142,7 @@ private:
 			pos = node->GetAbsolutePosition();
 		}
 
-		void UpdateDistance(const math::vector3f& camera)
+		void UpdateDistance(const math::Vector3F& camera)
 		{
 			distance = pos.GetDistanceToSq(camera);
 		}
@@ -217,7 +218,7 @@ private:
 	// Information about the current camera
 	WeakRef<Node> m_ActiveCameraNode;
 	WeakRef<Camera> m_ActiveCamera;
-	math::vector3f m_AbsoluteCamPos;
+	math::Vector3F m_AbsoluteCamPos;
 
 	core::Array<StrongRef<Node>> m_DeletionQueue; //!< Nodes to delete on next deletion run
 

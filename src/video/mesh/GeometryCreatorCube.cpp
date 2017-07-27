@@ -19,9 +19,9 @@ static void Swap(u16& a, u16& b)
 
 GeometryCreatorCube::GeometryCreatorCube()
 {
-	m_Package.AddParam("size", math::vector3f(1.0f, 1.0f, 1.0f));
+	m_Package.AddParam("size", math::Vector3F(1.0f, 1.0f, 1.0f));
 	m_Package.AddParam("tes", math::vector3i(2, 2, 2));
-	m_Package.AddParam("tex", math::vector3f(1.0f, 1.0f, 1.0f));
+	m_Package.AddParam("tex", math::Vector3F(1.0f, 1.0f, 1.0f));
 	m_Package.AddParam("inside", false);
 }
 
@@ -38,9 +38,9 @@ const core::ParamPackage& GeometryCreatorCube::GetParams() const
 
 StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(const core::PackagePuffer& params)
 {
-	const math::vector3f size = params.FromID(0, true);
+	const math::Vector3F size = params.FromID(0, true);
 	const math::vector3i tes = params.FromID(1, true);
-	const math::vector3f tex = params.FromID(2, true);
+	const math::Vector3F tex = params.FromID(2, true);
 	const bool inside = params.FromID(3, true);
 
 	return CreateGeometry(
@@ -71,9 +71,9 @@ StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(
 		(tesX - 1)*(tesZ - 1) * 2 +
 		(tesY - 1)*(tesZ - 1) * 2);
 
-	const math::vector3f tex(texX, texY, texZ);
+	const math::Vector3F tex(texX, texY, texZ);
 	const math::vector3i tes(tesX, tesY, tesZ);
-	const math::vector3f size(sizeX, sizeY, sizeZ);
+	const math::Vector3F size(sizeX, sizeY, sizeZ);
 
 	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
@@ -148,7 +148,7 @@ StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(
 	indexBuffer->Update();
 	vertexBuffer->Update();
 
-	subMesh->SetBoundingBox(math::aabbox3df(
+	subMesh->SetBoundingBox(math::AABBoxF(
 		-sizeX / 2, -sizeY / 2, -sizeZ / 2,
 		sizeX / 2, sizeY / 2, sizeZ / 2));
 

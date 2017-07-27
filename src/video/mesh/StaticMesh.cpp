@@ -35,12 +35,12 @@ StrongRef<Geometry> StaticMesh::GetGeometry(size_t i)
 	return m_Data.At(i).geo;
 }
 
-const math::aabbox3df& StaticMesh::GetBoundingBox() const
+const math::AABBoxF& StaticMesh::GetBoundingBox() const
 {
 	return m_BoundingBox;
 }
 
-void StaticMesh::SetBoundingBox(const math::aabbox3df& box)
+void StaticMesh::SetBoundingBox(const math::AABBoxF& box)
 {
 	m_BoundingBox = box;
 }

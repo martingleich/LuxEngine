@@ -11,10 +11,10 @@ class LinearForceAffector : public ParticleAffector
 {
 public:
 	LinearForceAffector() :
-		m_Direction(math::vector3f::UNIT_Y)
+		m_Direction(math::Vector3F::UNIT_Y)
 	{}
 
-	LinearForceAffector(const math::vector3f& force) :
+	LinearForceAffector(const math::Vector3F& force) :
 		m_Direction(force)
 	{
 	}
@@ -41,8 +41,8 @@ public:
 	}
 
 private:
-	math::vector3f m_Direction;
-	math::vector3f m_TransDirection;
+	math::Vector3F m_Direction;
+	math::Vector3F m_TransDirection;
 };
 
 }

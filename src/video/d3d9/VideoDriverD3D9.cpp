@@ -314,13 +314,13 @@ IDirect3DSurface9* VideoDriverD3D9::GetD3D9MatchingDepthBuffer(IDirect3DSurface9
 	D3DSURFACE_DESC desc;
 	target->GetDesc(&desc);
 
-	math::dimension2du size = math::dimension2du(desc.Width, desc.Height);
+	math::Dimension2U size = math::Dimension2U(desc.Width, desc.Height);
 
 	size.GetConstrained(
 		GetDeviceCapability(EDriverCaps::TexturesPowerOfTwoOnly) == 1,
 		GetDeviceCapability(EDriverCaps::TextureSquareOnly) == 1,
 		true,
-		math::dimension2du(
+		math::Dimension2U(
 			GetDeviceCapability(EDriverCaps::MaxTextureWidth),
 			GetDeviceCapability(EDriverCaps::MaxTextureWidth)));
 
@@ -410,14 +410,14 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube)
 	return SUCCEEDED(hr);
 }
 
-StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::dimension2du& size, ColorFormat format, u32 mipCount, bool isDynamic)
+StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2U& size, ColorFormat format, u32 mipCount, bool isDynamic)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
 	out->Init(size, format, mipCount, false, isDynamic);
 	return out;
 }
 
-StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format)
+StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
 	out->Init(size, format, 1, true, false);
@@ -433,7 +433,7 @@ StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat 
 	return out;
 }
 
-bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::dimension2du& size, bool cube)
+bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube)
 {
 	LUX_UNUSED(size);
 

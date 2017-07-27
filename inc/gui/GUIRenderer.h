@@ -22,8 +22,8 @@ public:
 
 	};
 public:
-	virtual void AddRect(const math::recti& rect, GUIElement* elem, video::SpriteBank::SSprite sprite, video::Color color = video::Color::White) = 0;
-	virtual void AddRect(const math::recti& rect, GUIElement* elem, video::Color color = video::Color::White) = 0;
+	virtual void AddRect(const math::RectI& rect, GUIElement* elem, video::SpriteBank::SSprite sprite, video::Color color = video::Color::White) = 0;
+	virtual void AddRect(const math::RectI& rect, GUIElement* elem, video::Color color = video::Color::White) = 0;
 
 	virtual video::Color GetDefaultColor(EDefaultColor color) = 0;
 

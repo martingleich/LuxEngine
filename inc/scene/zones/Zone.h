@@ -15,16 +15,16 @@ namespace scene
 class Zone : public Referable
 {
 public:
-	virtual bool IsInside(const math::vector3f& point) const = 0;
-	virtual math::vector3f GetPointInside(const core::Randomizer& rand) const
+	virtual bool IsInside(const math::Vector3F& point) const = 0;
+	virtual math::Vector3F GetPointInside(const core::Randomizer& rand) const
 	{
 		LUX_UNUSED(rand);
-		return math::vector3f::ZERO;
+		return math::Vector3F::ZERO;
 	}
-	virtual math::vector3f GetNormal(const math::vector3f& point) const
+	virtual math::Vector3F GetNormal(const math::Vector3F& point) const
 	{
 		LUX_UNUSED(point);
-		return math::vector3f::ZERO;
+		return math::Vector3F::ZERO;
 	}
 };
 

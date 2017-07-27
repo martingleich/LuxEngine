@@ -11,11 +11,11 @@ namespace scene
 
 LinearMoveAnimator::LinearMoveAnimator()
 {
-	SetData(math::line3df(), 1.0f);
+	SetData(math::Line3F(), 1.0f);
 }
 
 void LinearMoveAnimator::SetData(
-	const math::line3df& line,
+	const math::Line3F& line,
 	float duration,
 	bool jumpBack,
 	u32 count)

@@ -26,7 +26,7 @@ QuadRendererMachine::~QuadRendererMachine()
 {
 }
 
-bool QuadRendererMachine::PrecomputeOrientation(const math::matrix4& invModelView)
+bool QuadRendererMachine::PrecomputeOrientation(const math::Matrix4& invModelView)
 {
 	bool globalOrientation = true;
 	switch(m_Data->LookOrient) {
@@ -146,7 +146,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 
 	{
 		video::Texture* texture;
-		math::rectf* rect;
+		math::RectF* rect;
 		int offset = m_Model->GetOffset(Particle::EParameter::Sprite);
 		video::SpriteBank::Sprite sprite;
 		if(offset < 0)
@@ -166,9 +166,9 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 			RenderQuad = &QuadRendererMachine::RenderQuad_Scaled;
 	}
 
-	math::matrix4 world = videoRenderer->GetTransform(video::ETransform::World);
-	math::matrix4 view = videoRenderer->GetTransform(video::ETransform::View);
-	math::matrix4 worldView = world * view;
+	math::Matrix4 world = videoRenderer->GetTransform(video::ETransform::World);
+	math::Matrix4 view = videoRenderer->GetTransform(video::ETransform::View);
+	math::Matrix4 worldView = world * view;
 
 	bool globalOrientation = PrecomputeOrientation(worldView.Invert());
 	if(globalOrientation)
@@ -198,8 +198,8 @@ void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Par
 {
 	float Size = m_Model->ReadValue(particle, Particle::EParameter::Size);
 
-	math::vector3f Side = m_Side * m_Data->Scaling.x * Size;
-	math::vector3f Up = m_Up * m_Data->Scaling.y * Size;
+	math::Vector3F Side = m_Side * m_Data->Scaling.x * Size;
+	math::Vector3F Up = m_Up * m_Data->Scaling.y * Size;
 	if(m_Data->ScaleLengthSpeedSq)
 		Up *= particle.velocity.GetLengthSq()*m_Data->ScaleLengthSpeedSq;
 
@@ -224,7 +224,7 @@ void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Par
 		sprite = video::SpriteBank::Sprite(spriteID);
 	}
 
-	math::rectf* rect;
+	math::RectF* rect;
 	video::Texture* texture;
 	// Spritebank works in milliseconds instead of seconds
 	if(m_Data->SpriteBank->GetSprite(sprite, (u32)(1000.0f * particle.age), true, rect, texture)) {
@@ -243,8 +243,8 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 	float sa = sinf(angle);
 	float ca = cosf(angle);
 
-	math::vector3f Side = (ca*m_Side - sa*m_Up)* m_Data->Scaling.x * Size;
-	math::vector3f Up = (sa*m_Side + ca*m_Up) * m_Data->Scaling.y * Size;
+	math::Vector3F Side = (ca*m_Side - sa*m_Up)* m_Data->Scaling.x * Size;
+	math::Vector3F Up = (sa*m_Side + ca*m_Up) * m_Data->Scaling.y * Size;
 	if(m_Data->ScaleLengthSpeedSq)
 		Up *= particle.velocity.GetLengthSq()*m_Data->ScaleLengthSpeedSq;
 
@@ -269,7 +269,7 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 		sprite = video::SpriteBank::Sprite(spriteID);
 	}
 
-	math::rectf* rect;
+	math::RectF* rect;
 	video::Texture* texture;
 	if(m_Data->SpriteBank->GetSprite(sprite, (u32)(1000.0f * particle.age), true, rect, texture)) {
 		vertices[0].texture.Set(rect->left, rect->top);

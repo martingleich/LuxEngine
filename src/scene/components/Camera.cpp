@@ -28,13 +28,13 @@ Camera::~Camera()
 {
 }
 
-void Camera::SetCustomProjection(const math::matrix4& proj)
+void Camera::SetCustomProjection(const math::Matrix4& proj)
 {
 	m_CustomProjection = proj;
 	m_HasCustomProjection = true;
 }
 
-const math::matrix4& Camera::GetCustomProjection()
+const math::Matrix4& Camera::GetCustomProjection()
 {
 	return m_CustomProjection;
 }
@@ -44,12 +44,12 @@ void Camera::ClearCustomProjection()
 	m_HasCustomProjection = false;
 }
 
-void Camera::SetViewModification(const math::matrix4& mod)
+void Camera::SetViewModification(const math::Matrix4& mod)
 {
 	m_ViewModification = mod;
 }
 
-const math::matrix4& Camera::GetViewModification()
+const math::Matrix4& Camera::GetViewModification()
 {
 	return m_ViewModification;
 }
@@ -177,7 +177,7 @@ void Camera::PostRender(video::Renderer* renderer, const Node* node)
 		m_Listener->PostRender(this, node);
 }
 
-math::matrix4 Camera::CalculateProjectionMatrix(video::Renderer* r, const Node* n)
+math::Matrix4 Camera::CalculateProjectionMatrix(video::Renderer* r, const Node* n)
 {
 	LUX_UNUSED(n);
 
@@ -194,7 +194,7 @@ math::matrix4 Camera::CalculateProjectionMatrix(video::Renderer* r, const Node* 
 		aspect = m_Aspect;
 	}
 
-	math::matrix4 out;
+	math::Matrix4 out;
 	if(m_IsOrtho) {
 		out.BuildProjection_Ortho(
 			m_XMax,
@@ -212,14 +212,14 @@ math::matrix4 Camera::CalculateProjectionMatrix(video::Renderer* r, const Node* 
 	return out;
 }
 
-math::matrix4 Camera::CalculateViewMatrix(video::Renderer* r, const Node* n)
+math::Matrix4 Camera::CalculateViewMatrix(video::Renderer* r, const Node* n)
 {
 	LUX_UNUSED(r);
-	math::vector3f position = n->GetAbsolutePosition();
-	math::vector3f direction = n->FromRelativeDir(math::vector3f::UNIT_Z);
-	math::vector3f up = n->FromRelativeDir(math::vector3f::UNIT_Y);
+	math::Vector3F position = n->GetAbsolutePosition();
+	math::Vector3F direction = n->FromRelativeDir(math::Vector3F::UNIT_Z);
+	math::Vector3F up = n->FromRelativeDir(math::Vector3F::UNIT_Y);
 
-	math::matrix4 out;
+	math::Matrix4 out;
 	out.BuildCameraLookAt(position, position + direction, up);
 	out *= m_ViewModification;
 

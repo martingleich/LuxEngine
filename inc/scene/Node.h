@@ -418,7 +418,7 @@ public:
 
 	LUX_API virtual void SetRelativeTransform(const math::Transformation& t);
 	LUX_API virtual const math::Transformation& GetAbsoluteTransform() const;
-	LUX_API virtual const math::vector3f& GetAbsolutePosition() const
+	LUX_API virtual const math::Vector3F& GetAbsolutePosition() const
 	{
 		return GetAbsoluteTransform().translation;
 	}
@@ -431,9 +431,9 @@ public:
 	\param target The target coordinate system, use NULL to get absolute coordinates
 	\return The transformed position
 	*/
-	math::vector3f FromRelativePos(const math::vector3f& point, const Node* target = nullptr) const
+	math::Vector3F FromRelativePos(const math::Vector3F& point, const Node* target = nullptr) const
 	{
-		math::vector3f out = GetAbsoluteTransform().TransformPoint(point);
+		math::Vector3F out = GetAbsoluteTransform().TransformPoint(point);
 		if(target)
 			out = target->GetAbsoluteTransform().TransformInvPoint(out);
 
@@ -446,9 +446,9 @@ public:
 	\param source The source coordinate system, use NULL for absolute coordinates
 	\return The positon in relative coordinates
 	*/
-	math::vector3f ToRelativePos(const math::vector3f& point, const Node* source = nullptr) const
+	math::Vector3F ToRelativePos(const math::Vector3F& point, const Node* source = nullptr) const
 	{
-		math::vector3f out;
+		math::Vector3F out;
 		if(source)
 			out = source->GetAbsoluteTransform().TransformPoint(point);
 		else
@@ -463,9 +463,9 @@ public:
 	\param target The target coordinate system, use NULL for absolute coordinates
 	\return The transformed direction
 	*/
-	math::vector3f FromRelativeDir(const math::vector3f& Dir, const Node* target = nullptr) const
+	math::Vector3F FromRelativeDir(const math::Vector3F& Dir, const Node* target = nullptr) const
 	{
-		math::vector3f out = GetAbsoluteTransform().TransformDir(Dir);
+		math::Vector3F out = GetAbsoluteTransform().TransformDir(Dir);
 		if(target) {
 			out = target->GetAbsoluteTransform().TransformInvDir(out);
 		}
@@ -479,9 +479,9 @@ public:
 	\param source The source coordinate system, use NULL for absolute coordinates
 	\return The direction in relative coordinates
 	*/
-	math::vector3f ToRelativeDir(const math::vector3f& dir, const Node* source = nullptr) const
+	math::Vector3F ToRelativeDir(const math::Vector3F& dir, const Node* source = nullptr) const
 	{
-		math::vector3f out;
+		math::Vector3F out;
 		if(source)
 			out = source->GetAbsoluteTransform().TransformDir(dir);
 		else
@@ -535,8 +535,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API const math::aabbox3df& GetBoundingBox() const;
-	LUX_API void SetBoundingBox(const math::aabbox3df& box);
+	LUX_API const math::AABBoxF& GetBoundingBox() const;
+	LUX_API void SetBoundingBox(const math::AABBoxF& box);
 	LUX_API void RecalculateBoundingBox();
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -578,7 +578,7 @@ private:
 
 	StrongRef<Collider> m_Collider;
 
-	math::aabbox3df m_BoundingBox;
+	math::AABBoxF m_BoundingBox;
 
 	bool m_IsVisible;
 	bool m_HasUserBoundingBox;

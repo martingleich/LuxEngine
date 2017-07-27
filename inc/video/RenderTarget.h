@@ -15,7 +15,7 @@ class RenderTarget
 {
 public:
 	//! Create a backbuffer rendertarget of a given size
-	RenderTarget(const math::dimension2du& size = math::dimension2du(0, 0)) :
+	RenderTarget(const math::Dimension2U& size = math::Dimension2U(0, 0)) :
 		m_Texture(nullptr),
 		m_Size(size)
 	{
@@ -57,7 +57,7 @@ public:
 	}
 
 	//! The size of the rendertarget texture
-	const math::dimension2du& GetSize() const
+	const math::Dimension2U& GetSize() const
 	{
 		return m_Size;
 	}
@@ -70,7 +70,7 @@ public:
 
 protected:
 	WeakRef<Texture> m_Texture;
-	math::dimension2du m_Size;
+	math::Dimension2U m_Size;
 };
 
 } // namespace video

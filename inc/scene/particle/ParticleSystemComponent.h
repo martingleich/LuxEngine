@@ -26,7 +26,7 @@ public:
 	LUX_API void Animate(Node* node, float time);
 	LUX_API void Render(Node* node, video::Renderer* renderer, ERenderPass pass);
 	LUX_API ERenderPass GetRenderPass() const;
-	LUX_API const math::aabbox3df& GetBoundingBox() const;
+	LUX_API const math::AABBoxF& GetBoundingBox() const;
 	LUX_API void UpdateGroups();
 	LUX_API StrongRef<ParticleSystemTemplate> ConvertToTemplate();
 	LUX_API void SetGlobalParticles(bool isGlobal);

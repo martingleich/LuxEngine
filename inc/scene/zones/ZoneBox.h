@@ -17,29 +17,29 @@ public:
 	{
 	}
 
-	BoxZone(const math::vector3f& halfSize, const math::Transformation& transform = math::Transformation::DEFAULT) :
+	BoxZone(const math::Vector3F& halfSize, const math::Transformation& transform = math::Transformation::DEFAULT) :
 		m_HalfSize(halfSize),
 		m_Transformation(transform)
 	{
 	}
 
-	bool IsInside(const math::vector3f& point) const
+	bool IsInside(const math::Vector3F& point) const
 	{
-		math::vector3f p = m_Transformation.TransformInvPoint(point);
+		math::Vector3F p = m_Transformation.TransformInvPoint(point);
 		if(fabsf(p.x) > m_HalfSize.x || fabsf(p.y) > m_HalfSize.y || fabsf(p.z) > m_HalfSize.z)
 			return false;
 		else
 			return true;
 	}
 
-	math::vector3f GetPointInside(const core::Randomizer& rand) const
+	math::Vector3F GetPointInside(const core::Randomizer& rand) const
 	{
 		return m_Transformation.TransformPoint(rand.GetVector3(-m_HalfSize, m_HalfSize));
 	}
 
-	math::vector3f GetNormal(const math::vector3f& point) const
+	math::Vector3F GetNormal(const math::Vector3F& point) const
 	{
-		math::vector3f p = m_Transformation.TransformInvPoint(point);
+		math::Vector3F p = m_Transformation.TransformInvPoint(point);
 		p.x /= m_HalfSize.x;
 		p.y /= m_HalfSize.y;
 		p.z /= m_HalfSize.z;
@@ -47,7 +47,7 @@ public:
 		return p.GetUnitCubeVector();
 	}
 
-	const math::vector3f& GetHalfSize() const
+	const math::Vector3F& GetHalfSize() const
 	{
 		return m_HalfSize;
 	}
@@ -57,7 +57,7 @@ public:
 		return m_Transformation;
 	}
 
-	void SetHalfSize(const math::vector3f& halfSize)
+	void SetHalfSize(const math::Vector3F& halfSize)
 	{
 		m_HalfSize = halfSize;
 	}
@@ -80,7 +80,7 @@ public:
 	static const core::Name TypeName;
 
 private:
-	math::vector3f m_HalfSize;
+	math::Vector3F m_HalfSize;
 	math::Transformation m_Transformation;
 };
 

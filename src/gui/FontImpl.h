@@ -36,7 +36,7 @@ struct FontCreationData
 	FontDescription desc;
 
 	FontPixel* image;
-	math::dimension2du imageSize;
+	math::Dimension2U imageSize;
 
 	core::HashMap<u32, CharInfo> charMap;
 	float charHeight;
@@ -71,7 +71,7 @@ public:
 	const video::Material* GetMaterial() const;
 	float GetBaseLine() const;
 	void SetBaseLine(float base);
-	void Draw(const String& Text, const math::vector2f& Position, EAlign Align, video::Color color, const math::rectf* clip);
+	void Draw(const String& Text, const math::Vector2F& Position, EAlign Align, video::Color color, const math::RectF* clip);
 	float GetTextWidth(const String& Text, size_t charCount = std::numeric_limits<size_t>::max());
 	size_t GetCaretFromOffset(const String& Text, float XPosition);
 	void GetTextCarets(const String& Text, core::Array<float>& carets, size_t charCount = std::numeric_limits<size_t>::max());

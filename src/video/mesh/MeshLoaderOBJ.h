@@ -81,8 +81,8 @@ private:
 	SObjMtl* FindMaterial(const String& mtlName, const String& grpName);
 
 	const char*  ReadColor(const char* pFrom, const char* pTo, video::Colorf& out);
-	const char*  Read3DVec(const char* pFrom, const char* pTo, math::vector3f& out);
-	const char*  Read2DVec(const char* pFrom, const char* pTo, math::vector2f& out);
+	const char*  Read3DVec(const char* pFrom, const char* pTo, math::Vector3F& out);
+	const char*  Read2DVec(const char* pFrom, const char* pTo, math::Vector2F& out);
 	const char*  ReadBool(const char* pFrom, const char* pTo, bool& out);
 
 	bool RetrieveVertexIndices(const char* pFrom, const char* pTo, s32* indices, u32 vbsize, u32 vtsize, u32 vnsize);

@@ -71,7 +71,7 @@ public:
 	virtual ColorFormat GetColorFormat() const = 0;
 
 	//! Returns the resolution of a texture surface in pixel
-	virtual const math::dimension2du& GetSize() const = 0;
+	virtual const math::Dimension2U& GetSize() const = 0;
 
 	//! Get the filtering method used for this texture.
 	virtual const Filter& GetFiltering() const = 0;

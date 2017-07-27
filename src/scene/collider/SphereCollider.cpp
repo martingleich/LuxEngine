@@ -42,9 +42,9 @@ bool SphereCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* resu
 
 bool SphereCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallback* result)
 {
-	math::line3df line = query->GetLine();
+	math::Line3F line = query->GetLine();
 
-	math::vector3f center = owner->GetAbsoluteTransform().TransformPoint(m_Center);
+	math::Vector3F center = owner->GetAbsoluteTransform().TransformPoint(m_Center);
 	float radius = owner->GetAbsoluteTransform().scale * m_Radius;
 
 	math::LineSphereInfo<float> info;
@@ -82,10 +82,10 @@ bool SphereCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZ
 {
 	LX_CHECK_NULL_ARG(zone);
 
-	const math::vector3f centerA = owner->GetAbsoluteTransform().TransformPoint(m_Center);
+	const math::Vector3F centerA = owner->GetAbsoluteTransform().TransformPoint(m_Center);
 	const float radiusA = owner->GetAbsoluteTransform().scale * m_Radius;
 
-	const math::vector3f centerB = zone->GetCenter();
+	const math::Vector3F centerB = zone->GetCenter();
 	const float radiusB = zone->GetRadius();
 
 	bool procceed = true;
@@ -122,10 +122,10 @@ bool SphereCollider::ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* z
 {
 	LX_CHECK_NULL_ARG(zone);
 
-	const math::vector3f center = owner->GetAbsoluteTransform().TransformPoint(m_Center);
+	const math::Vector3F center = owner->GetAbsoluteTransform().TransformPoint(m_Center);
 	const float radius = owner->GetAbsoluteTransform().scale * m_Radius;
 
-	const math::vector3f halfSize = zone->GetHalfSize();
+	const math::Vector3F halfSize = zone->GetHalfSize();
 	const math::Transformation trans = zone->GetTransformation();
 
 	bool procceed = true;

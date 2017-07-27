@@ -64,14 +64,24 @@ const Material* RendererNull::GetInvalidMaterial()
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::PushPipelineOverwrite(const PipelineOverwrite& over)
+void RendererNull::PushPipelineOverwrite(const PipelineOverwrite& over, PipelineOverwriteToken* token)
 {
 	m_PipelineOverwrites.PushBack(over);
+	if(token) {
+		lxAssert(token->renderer == nullptr || token->renderer == this);
+		token->renderer = this;
+		token->count++;
+	}
 	UpdatePipelineOverwrite();
 }
 
-void RendererNull::PopPipelineOverwrite()
+void RendererNull::PopPipelineOverwrite(PipelineOverwriteToken* token)
 {
+	if(token) {
+		lxAssert(token->renderer == this);
+		lxAssert(token->count > 0);
+		token->count--;
+	}
 	m_PipelineOverwrites.PopBack();
 	UpdatePipelineOverwrite();
 }
@@ -124,7 +134,7 @@ const FogData& RendererNull::GetFog() const
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void RendererNull::SetTransform(ETransform transform, const math::matrix4& matrix)
+void RendererNull::SetTransform(ETransform transform, const math::Matrix4& matrix)
 {
 	switch(transform) {
 	case ETransform::World:
@@ -144,7 +154,7 @@ void RendererNull::SetTransform(ETransform transform, const math::matrix4& matri
 	SetDirty(Dirty_Transform);
 }
 
-const math::matrix4& RendererNull::GetTransform(ETransform transform) const
+const math::Matrix4& RendererNull::GetTransform(ETransform transform) const
 {
 	switch(transform) {
 	case ETransform::World: return m_TransformWorld;
@@ -234,9 +244,9 @@ VideoDriver* RendererNull::GetDriver() const
 }
 
 ///////////////////////////////////////////////////////////////////////////
-math::matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool active)
+math::Matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool active)
 {
-	math::matrix4 matrix;
+	math::Matrix4 matrix;
 
 	if(!active) {
 		matrix(0, 3) = 0.0f;

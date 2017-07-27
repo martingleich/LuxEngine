@@ -13,9 +13,9 @@ namespace video
 
 GeometryCreatorPlane::GeometryCreatorPlane()
 {
-	m_Params.AddParam("size", math::vector2f(1.0f, 1.0f));
-	m_Params.AddParam("tes", math::vector2i(1, 1));
-	m_Params.AddParam("tex", math::vector2f(1, 1));
+	m_Params.AddParam("size", math::Vector2F(1.0f, 1.0f));
+	m_Params.AddParam("tes", math::Vector2I(1, 1));
+	m_Params.AddParam("tex", math::Vector2F(1, 1));
 }
 
 const core::ParamPackage& GeometryCreatorPlane::GetParams() const
@@ -31,9 +31,9 @@ const String& GeometryCreatorPlane::GetName() const
 
 StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry( const core::PackagePuffer& params)
 {
-	const math::vector2f size = params.FromID(0, true);
-	const math::vector2i tesselation = params.FromID(1, true);
-	const math::vector2f textureRepeat = params.FromID(2, true);
+	const math::Vector2F size = params.FromID(0, true);
+	const math::Vector2I tesselation = params.FromID(1, true);
+	const math::Vector2F textureRepeat = params.FromID(2, true);
 
 	return CreateGeometry(size.x, size.y, tesselation.x, tesselation.y, textureRepeat.x, textureRepeat.y, nullptr, nullptr);
 }
@@ -66,12 +66,12 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 	StrongRef<VertexBuffer> vertexBuffer = subMesh->GetVertices();
 	StrongRef<IndexBuffer> indexBuffer = subMesh->GetIndices();
 
-	math::aabbox3df boundingBox;
+	math::AABBoxF boundingBox;
 	Vertex3D vertex;
 	for(s32 x = 0; x < tesX; ++x) {
 		for(s32 y = 0; y < tesY; ++y) {
 			vertex.color = Color::White;
-			vertex.position = math::vector3f(
+			vertex.position = math::Vector3F(
 				((float)(x) / (float)(tesX - 1) - 0.5f) * sizeX,
 				0.0f,
 				((float)(-y) / (float)(tesX - 1) + 0.5f) * sizeY);
@@ -79,7 +79,7 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 			if(function)
 				vertex.position.y = function(context, vertex.position.x, vertex.position.z);
 
-			vertex.texture = math::vector2f((float)(x) / (tesX-1) * texX, (float)(y) / (tesY-1) * texY);
+			vertex.texture = math::Vector2F((float)(x) / (tesX-1) * texX, (float)(y) / (tesY-1) * texY);
 			vertexBuffer->SetVertex(&vertex, GetVertexIndex(x, y));
 
 			boundingBox.AddPoint(vertex.position);
@@ -100,9 +100,9 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 	for(s32 x = 0; x < tesX; ++x) {
 		for(s32 y = 0; y < tesY; ++y) {
 			if(function) {
-				math::vector3f h1, h2;
-				math::vector3f v1, v2;
-				math::vector3f c;
+				math::Vector3F h1, h2;
+				math::Vector3F v1, v2;
+				math::Vector3F c;
 
 				c = ((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x, y), 1))->position;
 				if(x + 1 < tesX)
@@ -122,13 +122,13 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 				else
 					v2 = c;
 
-				math::vector3f tan = ((c - h1) + (h2 - c));
-				math::vector3f bin = ((c - v1) + (v2 - c));
+				math::Vector3F tan = ((c - h1) + (h2 - c));
+				math::Vector3F bin = ((c - v1) + (v2 - c));
 
-				math::vector3f normal = tan.Cross(bin).Normalize();
+				math::Vector3F normal = tan.Cross(bin).Normalize();
 				((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x, y), 1))->normal = normal;
 			} else {
-				((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x, y), 1))->normal = math::vector3f::UNIT_Y;
+				((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x, y), 1))->normal = math::Vector3F::UNIT_Y;
 			}
 		}
 	}

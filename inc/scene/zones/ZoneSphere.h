@@ -16,28 +16,28 @@ public:
 	{
 	}
 
-	SphereZone(float radius, const math::vector3f& center = math::vector3f::ZERO) :
+	SphereZone(float radius, const math::Vector3F& center = math::Vector3F::ZERO) :
 		m_Center(center),
 		m_Radius(radius)
 	{
 	}
 
-	bool IsInside(const math::vector3f& point) const
+	bool IsInside(const math::Vector3F& point) const
 	{
 		return point.GetDistanceToSq(m_Center) <= m_Radius*m_Radius;
 	}
 
-	math::vector3f GetPointInside(const core::Randomizer& rand) const
+	math::Vector3F GetPointInside(const core::Randomizer& rand) const
 	{
 		return rand.GetVector3Sphere(m_Radius) + m_Center;
 	}
 
-	math::vector3f GetNormal(const math::vector3f& point) const
+	math::Vector3F GetNormal(const math::Vector3F& point) const
 	{
-		return (point - m_Center).Normal_s();
+		return (point - m_Center).Normal();
 	}
 
-	const math::vector3f& GetCenter() const
+	const math::Vector3F& GetCenter() const
 	{
 		return m_Center;
 	}
@@ -47,7 +47,7 @@ public:
 		return m_Radius;
 	}
 
-	void SetCenter(const math::vector3f& center)
+	void SetCenter(const math::Vector3F& center)
 	{
 		m_Center = center;
 	}
@@ -70,7 +70,7 @@ public:
 	static const core::Name TypeName;
 
 private:
-	math::vector3f m_Center;
+	math::Vector3F m_Center;
 	float m_Radius;
 };
 

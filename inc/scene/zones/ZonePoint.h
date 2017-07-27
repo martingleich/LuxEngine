@@ -12,26 +12,26 @@ class PointZone : public Zone
 public:
 	PointZone() {}
 
-	PointZone(const math::vector3f& v) :
+	PointZone(const math::Vector3F& v) :
 		m_Point(v)
 	{
 	}
 
-	bool IsInside(const math::vector3f& point) const
+	bool IsInside(const math::Vector3F& point) const
 	{
 		return math::IsEqual(point, m_Point);
 	}
 
-	math::vector3f GetPointInside(const core::Randomizer& rand) const
+	math::Vector3F GetPointInside(const core::Randomizer& rand) const
 	{
 		LUX_UNUSED(rand);
 		return m_Point;
 	}
 
-	math::vector3f GetNormal(const math::vector3f& point) const
+	math::Vector3F GetNormal(const math::Vector3F& point) const
 	{
 		LUX_UNUSED(point);
-		return math::vector3f::ZERO;
+		return math::Vector3F::ZERO;
 	}
 
 	core::Name GetReferableType() const
@@ -40,12 +40,12 @@ public:
 		return name;
 	}
 
-	void SetPoint(const math::vector3f& point)
+	void SetPoint(const math::Vector3F& point)
 	{
 		m_Point = point;
 	}
 
-	const math::vector3f& GetPoint() const
+	const math::Vector3F& GetPoint() const
 	{
 		return m_Point;
 	}
@@ -58,7 +58,7 @@ public:
 	static const core::Name TypeName;
 
 private:
-	math::vector3f m_Point;
+	math::Vector3F m_Point;
 };
 
 }

@@ -46,10 +46,10 @@ public:
 	//------------------------------------------------------------------
 	// Textur-Methoden
 	bool CheckTextureFormat(ColorFormat format, bool cube);
-	StrongRef<Texture> CreateTexture(const math::dimension2du& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
-	StrongRef<Texture> CreateRendertargetTexture(const math::dimension2du& size, ColorFormat format);
+	StrongRef<Texture> CreateTexture(const math::Dimension2U& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
+	StrongRef<Texture> CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
 	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool isDynamic);
-	bool GetFittingTextureFormat(ColorFormat& format, math::dimension2du& size, bool cube);
+	bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube);
 
 	// Cache for auxalarity textures
 	/*
@@ -117,11 +117,11 @@ private:
 	public:
 		DepthBuffer_d3d9() {}
 		DepthBuffer_d3d9(IDirect3DSurface9* surface);
-		const math::dimension2du& GetSize() const { return m_Size; }
+		const math::Dimension2U& GetSize() const { return m_Size; }
 		IDirect3DSurface9* GetSurface() const { return m_Surface; }
 
 	private:
-		math::dimension2du m_Size;
+		math::Dimension2U m_Size;
 		UnknownRefCounted<IDirect3DSurface9> m_Surface;
 	};
 

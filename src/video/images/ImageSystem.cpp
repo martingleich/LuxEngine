@@ -77,7 +77,7 @@ public:
 		StrongRef<Image> img = r;
 		Texture* texture = dynamic_cast<Texture*>(dst);
 		ColorFormat format = img->GetColorFormat();
-		math::dimension2du size = img->GetSize();
+		math::Dimension2U size = img->GetSize();
 
 		bool result = VideoDriver::Instance()->GetFittingTextureFormat(format, size, false);
 		if(!result)
@@ -247,7 +247,7 @@ private:
 		if(real_count != 6)
 			throw core::InvalidArgumentException("images", "Must not be null");
 
-		math::dimension2du ds(size, size);
+		math::Dimension2U ds(size, size);
 		if(!VideoDriver::Instance()->GetFittingTextureFormat(format, ds, true))
 			throw core::ColorFormatException(format);
 
@@ -313,14 +313,14 @@ ImageSystem::~ImageSystem()
 {
 }
 
-StrongRef<Image> ImageSystem::CreateImage(const math::dimension2du& size, ColorFormat format)
+StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format)
 {
 	StrongRef<Image> img = LUX_NEW(ImageImpl);
 	img->Init(size, format);
 	return img;
 }
 
-StrongRef<Image> ImageSystem::CreateImage(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMem, bool deleteOnDrop)
+StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMem, bool deleteOnDrop)
 {
 	StrongRef<Image> img = LUX_NEW(ImageImpl);
 	img->Init(size, format, data, CopyMem, deleteOnDrop);

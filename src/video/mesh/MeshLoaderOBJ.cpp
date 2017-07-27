@@ -59,9 +59,9 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 	if(!filesize)
 		throw core::FileFormatException("Can't load streaming file", "obj");
 
-	core::Array<math::vector3f> vertexBuffer;
-	core::Array<math::vector3f> NormalBuffer;
-	core::Array<math::vector2f> TCoordBuffer;
+	core::Array<math::Vector3F> vertexBuffer;
+	core::Array<math::Vector3F> NormalBuffer;
+	core::Array<math::Vector2F> TCoordBuffer;
 
 	SObjMtl* pCurrMtl = LUX_NEW(SObjMtl);
 	pCurrMtl->material = m_MatLib->CreateMaterial();
@@ -96,7 +96,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 			switch(pcBuffPtr[1]) {
 			case ' ':    // Position
 			{
-				math::vector3f vPos;
+				math::Vector3F vPos;
 				pcBuffPtr = Read3DVec(pcBuffPtr, pcBufferEnd, vPos);
 				vertexBuffer.PushBack(vPos);
 			}
@@ -104,7 +104,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 
 			case 'n':    // Normal
 			{
-				math::vector3f vNor;
+				math::Vector3F vNor;
 				pcBuffPtr = Read3DVec(pcBuffPtr, pcBufferEnd, vNor);
 				NormalBuffer.PushBack(vNor);
 			}
@@ -112,7 +112,7 @@ void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
 
 			case 't':    // Texturkoordinate
 			{
-				math::vector2f vTex;
+				math::Vector2F vTex;
 				pcBuffPtr = Read2DVec(pcBuffPtr, pcBufferEnd, vTex);
 				TCoordBuffer.PushBack(vTex);
 			}
@@ -803,7 +803,7 @@ const char*  MeshLoaderOBJ::ReadColor(const char* pFrom, const char* pTo, video:
 }
 
 // Liest einen 3D-Vektor
-const char*  MeshLoaderOBJ::Read3DVec(const char* pFrom, const char* pTo, math::vector3f& out)
+const char*  MeshLoaderOBJ::Read3DVec(const char* pFrom, const char* pTo, math::Vector3F& out)
 {
 	const u32 BUFFER_LENGHT = 256;
 	char aBuffer[BUFFER_LENGHT];
@@ -821,7 +821,7 @@ const char*  MeshLoaderOBJ::Read3DVec(const char* pFrom, const char* pTo, math::
 }
 
 // Liest einen 2D-Vektor
-const char*  MeshLoaderOBJ::Read2DVec(const char* pFrom, const char* pTo, math::vector2f& out)
+const char*  MeshLoaderOBJ::Read2DVec(const char* pFrom, const char* pTo, math::Vector2F& out)
 {
 	const u32 BUFFER_LENGHT = 256;
 	char aBuffer[BUFFER_LENGHT];

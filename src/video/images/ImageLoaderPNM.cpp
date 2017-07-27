@@ -239,7 +239,7 @@ void ImageLoaderPNM::LoadResource(io::File* file, core::Resource* dst)
 		throw core::FileFormatException("Corrupted or unsupported", "pnm");
 
 	img->Init(
-		math::dimension2du(ctx.m_Width, ctx.m_Height),
+		math::Dimension2U(ctx.m_Width, ctx.m_Height),
 		ctx.m_OutputFormat);
 
 	video::ImageLock lock(img);

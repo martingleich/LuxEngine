@@ -369,12 +369,12 @@ void RendererD3D9::LoadTransforms(const Pass& pass, const RenderSettings& settin
 	// Load transforms
 	if(m_RenderMode == ERenderMode::Mode3D) {
 		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode)) {
-			math::matrix4 projCopy = m_TransformProj; // The userset projection matrix
+			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
 			if(pass.polygonOffset) {
 				const u32 zBits = m_Driver->GetConfig().zBits;
 				const u32 values = 1 << zBits;
 				const float min = 1.0f / values;
-				projCopy.AddTranslation(math::vector3f(0.0f, 0.0f, -min * pass.polygonOffset));
+				projCopy.AddTranslation(math::Vector3F(0.0f, 0.0f, -min * pass.polygonOffset));
 			}
 			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, projCopy);
 			SetDirty(Dirty_Transform);
@@ -382,13 +382,13 @@ void RendererD3D9::LoadTransforms(const Pass& pass, const RenderSettings& settin
 	} else if(m_RenderMode == ERenderMode::Mode2D) {
 		if(IsDirty(Dirty_Rendertarget) || IsDirty(Dirty_RenderMode)) {
 			auto ssize = GetRenderTarget().GetSize();
-			math::matrix4 view = math::matrix4(
+			math::Matrix4 view = math::Matrix4(
 				1.0f, 0.0f, 0.0f, 0.0f,
 				0.0f, -1.0f, 0.0f, 0.0f,
 				0.0f, 0.0f, 1.0f, 0.0f,
 				-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 - 0.5f, 0.0f, 1.0f);
 
-			math::matrix4 proj = math::matrix4(
+			math::Matrix4 proj = math::Matrix4(
 				2.0f / ssize.width, 0.0f, 0.0f, 0.0f,
 				0.0f, 2.0f / ssize.height, 0.0f, 0.0f,
 				0.0f, 0.0f, 1.0f, 0.0f,
@@ -429,7 +429,7 @@ void RendererD3D9::LoadFogSettings(const Pass& pass, const RenderSettings& setti
 	m_DeviceState.EnableFog(useFixedFog);
 
 	if(IsDirty(Dirty_Fog)) {
-		math::vector3f fogInfo;
+		math::Vector3F fogInfo;
 		fogInfo.x = useFog;
 		fogInfo.y =
 			m_Fog.type == EFogType::Linear ? 1.0f :
@@ -439,7 +439,7 @@ void RendererD3D9::LoadFogSettings(const Pass& pass, const RenderSettings& setti
 		GetParamInternal(m_ParamId.fogInfo) = fogInfo;
 
 		GetParamInternal(m_ParamId.fogColor) = m_Fog.color;
-		GetParamInternal(m_ParamId.fogRange) = math::vector3f(
+		GetParamInternal(m_ParamId.fogRange) = math::Vector3F(
 			m_Fog.start,
 			m_Fog.end,
 			m_Fog.density);

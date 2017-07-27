@@ -112,19 +112,19 @@ void FontImpl::SetBaseLine(float base)
 	m_BaseLine = base;
 }
 
-void FontImpl::Draw(const String& text, const math::vector2f& position, EAlign align, video::Color color, const math::rectf* clip)
+void FontImpl::Draw(const String& text, const math::Vector2F& position, EAlign align, video::Color color, const math::RectF* clip)
 {
 	LUX_UNUSED(clip);
 
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
 	renderer->SetMaterial(m_Material);
-	renderer->SetTransform(video::ETransform::World, math::matrix4::IDENTITY);
+	renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 
 	const float italic = 0.0f * m_Scale;
 	const float charHeight = m_CharHeight * m_Scale;
 	const float charSpace = m_CharHeight * m_CharDistance * m_Scale;
 
-	math::vector2f cursor;
+	math::Vector2F cursor;
 	if(TestFlag(align, Font::EAlign::HCenter))
 		cursor.x = position.x - 0.5f * (GetTextWidth(text) + italic);
 	else if(TestFlag(align, Font::EAlign::HRight))

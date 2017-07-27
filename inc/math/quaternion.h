@@ -9,7 +9,7 @@ namespace math
 
 //! Represent a quaternion
 template <typename T>
-class quaternion
+class Quaternion
 {
 public:
 	T x;
@@ -18,23 +18,23 @@ public:
 	T w;
 
 	//! default Constructor, Imaginary part is 0 real part is 1
-	quaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f)
+	Quaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f)
 	{
 	}
 
 	//! Constructor
-	quaternion(T X, T Y, T Z, T W) : x(X), y(Y), z(Z), w(W)
+	Quaternion(T X, T Y, T Z, T W) : x(X), y(Y), z(Z), w(W)
 	{
 	}
 
 	//! Constructor from rotationaxis and rotationangle in rad
-	quaternion(const math::vector3<T>& axis, angle<T> Angle)
+	Quaternion(const math::Vector3<T>& axis, Angle<T> Angle)
 	{
 		*this = FromAngleAxis(Angle, axis);
 	}
 
 	//!Copyconstuctor
-	quaternion(const quaternion& other) :
+	Quaternion(const Quaternion& other) :
 		x(other.x),
 		y(other.y),
 		z(other.z),
@@ -43,19 +43,19 @@ public:
 	}
 
 	//! Equality
-	bool operator==(const quaternion<T>& other) const
+	bool operator==(const Quaternion<T>& other) const
 	{
 		return x == other.x && y == other.y && z == other.z && w == other.w;
 	}
 
 	//! Inequality
-	bool operator!=(const quaternion<T>& other) const
+	bool operator!=(const Quaternion<T>& other) const
 	{
 		return x != other.x || y != other.y || z != other.z || x != other.w;
 	}
 
 	//! Assignment
-	quaternion<T>& operator=(const quaternion<T>& other)
+	Quaternion<T>& operator=(const Quaternion<T>& other)
 	{
 		x = other.x;
 		y = other.y;
@@ -66,7 +66,7 @@ public:
 	}
 
 	//! Short addition
-	quaternion<T>& operator+=(const quaternion<T>& other)
+	Quaternion<T>& operator+=(const Quaternion<T>& other)
 	{
 		x += other.x;
 		y += other.y;
@@ -75,13 +75,13 @@ public:
 	}
 
 	//! Addition
-	quaternion<T> operator+(const quaternion<T>& other) const
+	Quaternion<T> operator+(const Quaternion<T>& other) const
 	{
-		return quaternion<T>(x + other.x, y + other.y, z + other.z, w + other.w);
+		return Quaternion<T>(x + other.x, y + other.y, z + other.z, w + other.w);
 	}
 
 	//! Short subtraction
-	quaternion<T>& operator-=(const quaternion<T>& other)
+	Quaternion<T>& operator-=(const Quaternion<T>& other)
 	{
 		x -= other.x;
 		y -= other.y;
@@ -90,13 +90,13 @@ public:
 	}
 
 	//! Subtraction
-	quaternion<T> operator-(const quaternion<T>& other) const
+	Quaternion<T> operator-(const Quaternion<T>& other) const
 	{
-		return quaternion<T>(x - other.x, y - other.y, z - other.z, w - other.w);
+		return Quaternion<T>(x - other.x, y - other.y, z - other.z, w - other.w);
 	}
 
 	//! Short multiplication
-	quaternion<T>& operator*=(const quaternion<T>& other)
+	Quaternion<T>& operator*=(const Quaternion<T>& other)
 	{
 		float tmp[4];
 		tmp[0] = other.w*w - other.x*x - other.y*y - other.z*z;
@@ -108,22 +108,22 @@ public:
 	}
 
 	//! Multiplication
-	quaternion<T> operator*(const quaternion<T>& other) const
+	Quaternion<T> operator*(const Quaternion<T>& other) const
 	{
-		quaternion<T> tmp = *this;
+		Quaternion<T> tmp = *this;
 		tmp *= other;
 
 		return tmp;
 	}
 
 	//! Scalar multiplication
-	quaternion<T> operator*(T s) const
+	Quaternion<T> operator*(T s) const
 	{
-		return quaternion<T>(x*s, y*s, z*s, w*s);
+		return Quaternion<T>(x*s, y*s, z*s, w*s);
 	}
 
 	//! Short scalar multiplication
-	quaternion<T>& operator*=(T s)
+	Quaternion<T>& operator*=(T s)
 	{
 		x *= s;
 		y *= s;
@@ -134,16 +134,16 @@ public:
 	}
 
 	//! Negate the quaternion
-	quaternion<T> operator-() const
+	Quaternion<T> operator-() const
 	{
-		return quaternion<T>(-x, -y, -z, -w);
+		return Quaternion<T>(-x, -y, -z, -w);
 	}
 
 	//! Conjugate this quaternion
 	/**
 	\return Selfreference
 	*/
-	quaternion<T>& Conjungate()
+	Quaternion<T>& Conjungate()
 	{
 		x = -x;
 		y = -y;
@@ -152,16 +152,16 @@ public:
 	}
 
 	//! Get the conjugate of this quaternion
-	quaternion<T> GetConjungate() const
+	Quaternion<T> GetConjungate() const
 	{
-		return quaternion<T>(-x, -y, -z, w);
+		return Quaternion<T>(-x, -y, -z, w);
 	}
 
 	//! Invert this quaternion
 	/**
 	\return Selfreference
 	*/
-	quaternion<T>& Invert()
+	Quaternion<T>& Invert()
 	{
 		Conjungate();
 		*this *= 1 / GetLengthSq();
@@ -169,9 +169,9 @@ public:
 	}
 
 	//! Get the inverse of this quaternion
-	quaternion<T> GetInverse() const
+	Quaternion<T> GetInverse() const
 	{
-		quaternion<T> tmp = *this;
+		Quaternion<T> tmp = *this;
 		return tmp.Invert();
 	}
 
@@ -179,7 +179,7 @@ public:
 	/**
 	\return Selfreference
 	*/
-	quaternion<T>& Set(T _x, T _y, T _z, T _w)
+	Quaternion<T>& Set(T _x, T _y, T _z, T _w)
 	{
 		x = _x;
 		y = _y;
@@ -193,10 +193,10 @@ public:
 	/**
 	\return Selfreference
 	*/
-	quaternion<T>& Normalize()
+	Quaternion<T>& Normalize()
 	{
 		T l = x*x + y*y + z*z + w*w;
-		if(l == 1)
+		if(IsZero(l))
 			return *this;
 
 		l = 1 / (T)sqrt(l);
@@ -208,9 +208,9 @@ public:
 	/**
 	\return The normal of this quaternion
 	*/
-	quaternion<T> Normal() const
+	Quaternion<T> Normal() const
 	{
-		quaternion<T> tmp = *this;
+		Quaternion<T> tmp = *this;
 		return tmp.Normalize();
 	}
 
@@ -218,7 +218,7 @@ public:
 	/**
 	\return The dotproduct between this and other
 	*/
-	T Dot(const quaternion<T>& other) const
+	T Dot(const Quaternion<T>& other) const
 	{
 		return x*other.x + y*other.y + z*other.z + w*other.w;
 	}
@@ -227,7 +227,7 @@ public:
 	/**
 	\return Selfreference
 	*/
-	quaternion<T>& MakeIdent()
+	Quaternion<T>& MakeIdent()
 	{
 		x = 0;
 		y = 0;
@@ -257,26 +257,26 @@ public:
 
 	//! Build this quaternion form a rotation angle, and a rotation axis
 	/**
-	\param Angle The rotation angle in rad
-	\param Axis The rotation axis
+	\param angle The rotation angle in rad
+	\param axis The rotation axis
 	\return A reference to this quaternion
 	*/
-	static quaternion FromAngleAxis(angle<T> Angle, const vector3<T>& axis)
+	static Quaternion FromAngleAxis(Angle<T> angle, const Vector3<T>& axis)
 	{
 		T length = axis.GetLength();
 		if(IsZero(length))
-			return quaternion();
+			return Quaternion();
 
-		quaternion<T> out;
+		Quaternion<T> out;
 		T invLength = 1 / length;
-		const angle<T> HalfAngle = Angle / 2;
-		const T s = (T)Sin(HalfAngle);
+		const Angle<T> halfAngle = angle / 2;
+		const T s = (T)Sin(halfAngle);
 
-		return quaternion(
+		return Quaternion(
 			axis.x * s * invLength,
 			axis.y * s * invLength,
 			axis.z * s * invLength,
-			(T)Cos(HalfAngle));
+			(T)Cos(halfAngle));
 	}
 
 	//! Read the rotation angle and rotation axis from this quaternion
@@ -284,17 +284,17 @@ public:
 	\param Angle The rotation angle in rad
 	\param Axis The rotation axis
 	*/
-	void ToAngleAxis(angle<T>& Angle, vector3<T>& axis) const
+	void ToAngleAxis(Angle<T>& angle, Vector3<T>& axis) const
 	{
 		const T scale = GetLength();
 		if(IsZero(scale) || w > 1 || w < -1) {
-			Angle = angle<T>::ZERO;
+			angle = Angle<T>::ZERO;
 			axis.x = 0;
 			axis.y = 1;
 			axis.z = 0;
 		} else {
 			const T Invscale = 1 / scale;
-			Angle = 2 * ArcCos(w);
+			angle = 2 * ArcCos(w);
 			axis.x = Invscale*x;
 			axis.y = Invscale*y;
 			axis.z = Invscale*z;
@@ -304,30 +304,30 @@ public:
 	//! Make this quaternion from a Eulerrotation
 	/**
 	The Eulerrotation is specified in (XYZ) and rad
-	\param Euler The Euler rotation
+	\param euler The euler rotation
 	\return Selfreference
 	*/
-	static quaternion<T> FromEuler(const vector3<T>& Euler)
+	static Quaternion<T> FromEuler(const Vector3<T>& euler)
 	{
-		T Angle;
-		Angle = Euler.x / 2;
-		const T sr = sin(Angle);
-		const T cr = cos(Angle);
+		T angle;
+		angle = euler.x / 2;
+		const T sr = sin(angle);
+		const T cr = cos(angle);
 
-		Angle = Euler.y / 2;
-		const T sp = sin(Angle);
-		const T cp = cos(Angle);
+		angle = euler.y / 2;
+		const T sp = sin(angle);
+		const T cp = cos(angle);
 
-		Angle = Euler.z / 2;
-		const T sy = sin(Angle);
-		const T cy = cos(Angle);
+		angle = euler.z / 2;
+		const T sy = sin(angle);
+		const T cy = cos(angle);
 
 		const T cpcy = cp * cy;
 		const T spcy = sp * cy;
 		const T cpsy = cp * sy;
 		const T spsy = sp * sy;
 
-		quaternion<T> out(
+		Quaternion<T> out(
 			sr*cpcy - cr*spsy,
 			cr*spcy + sr*cpsy,
 			cr*cpsy - sr*spcy,
@@ -343,31 +343,31 @@ public:
 	The rotation is specified in XYZ and rad
 	\return The Eulerrotation done by this quaternion
 	*/
-	vector3<T> ToEuler() const
+	Vector3<T> ToEuler() const
 	{
 		const T test = 2 * (y*w - x*z);
-		vector3<T> Euler;
+		Vector3<T> euler;
 
 		if(IsEqual(test, (T)1)) {
-			Euler.z = -2 * atan2(x, w);
-			Euler.x = 0;
-			Euler.y = math::Constants<T>::half_pi();
+			euler.z = -2 * atan2(x, w);
+			euler.x = 0;
+			euler.y = math::Constants<T>::half_pi();
 		} else if(IsEqual(test, (T)-1)) {
-			Euler.z = 2 * atan2(x, w);
-			Euler.x = 0;
-			Euler.y = -math::Constants<T>::half_pi();
+			euler.z = 2 * atan2(x, w);
+			euler.x = 0;
+			euler.y = -math::Constants<T>::half_pi();
 		} else {
 			const T sqW = w*w;
 			const T sqX = x*x;
 			const T sqY = y*y;
 			const T sqZ = z*z;
 
-			Euler.z = atan2(2 * (x*y + z*w), sqX - sqY - sqZ + sqW);
-			Euler.x = atan2(2 * (y*z + x*w), -sqX - sqY + sqZ + sqW);
-			Euler.y = asin(Clamp(test, (T)-1, (T)1));
+			euler.z = atan2(2 * (x*y + z*w), sqX - sqY - sqZ + sqW);
+			euler.x = atan2(2 * (y*z + x*w), -sqX - sqY + sqZ + sqW);
+			euler.y = asin(Clamp(test, (T)-1, (T)1));
 		}
 
-		return Euler;
+		return euler;
 	}
 
 	//! transform a vector with this quaternion
@@ -375,10 +375,10 @@ public:
 	\param v The vector to transform
 	\return The transformed vector
 	*/
-	vector3<T> Transform(const vector3<T>& v) const
+	Vector3<T> Transform(const Vector3<T>& v) const
 	{
-		vector3<T> uv, uuv;
-		math::vector3<T> imag(x, y, z);
+		Vector3<T> uv, uuv;
+		math::Vector3<T> imag(x, y, z);
 		uv = imag.Cross(v);
 		uuv = imag.Cross(uv);
 		uv *= 2 * w;
@@ -392,10 +392,10 @@ public:
 	\param v The vector to transform
 	\return The transformed vector
 	*/
-	vector3<T> TransformInv(const vector3<T>& v) const
+	Vector3<T> TransformInv(const Vector3<T>& v) const
 	{
-		vector3<T> uv, uuv;
-		vector3<T> imag(x, y, z);
+		Vector3<T> uv, uuv;
+		Vector3<T> imag(x, y, z);
 		uv = imag.Cross(v);
 		uuv = imag.Cross(uv);
 		uv *= 2 * w;
@@ -409,10 +409,10 @@ public:
 	\param v The vector to transform
 	\return The transformed vector
 	*/
-	vector3<T>& TransformInPlace(vector3<T>& v) const
+	Vector3<T>& TransformInPlace(Vector3<T>& v) const
 	{
-		vector3<T> uv, uuv;
-		vector3<T> imag(x, y, z);
+		Vector3<T> uv, uuv;
+		Vector3<T> imag(x, y, z);
 		uv = imag.Cross(v);
 		uuv = imag.Cross(uv);
 		uv *= 2 * w;
@@ -428,10 +428,10 @@ public:
 	\param v The vector to transform
 	\return The transformed vector
 	*/
-	vector3<T>& TransformInPlaceInv(vector3<T>& v) const
+	Vector3<T>& TransformInPlaceInv(Vector3<T>& v) const
 	{
-		vector3<T> uv, uuv;
-		vector3<T> imag(x, y, z);
+		Vector3<T> uv, uuv;
+		Vector3<T> imag(x, y, z);
 		uv = imag.Cross(v);
 		uuv = imag.Cross(uv);
 		uv *= 2 * w;
@@ -451,9 +451,9 @@ public:
 	\param to_dir The direction in the to system
 	\param to_up The up in the to system
 	*/
-	static quaternion FromTo(
-		const math::vector3<T>& from_dir, const math::vector3<T>& from_up,
-		const math::vector3<T>& to_dir, const math::vector3<T>& to_up)
+	static Quaternion FromTo(
+		const math::Vector3<T>& from_dir, const math::Vector3<T>& from_up,
+		const math::Vector3<T>& to_dir, const math::Vector3<T>& to_up)
 	{
 		auto lu = from_up.Normal(); // localUp
 		auto lf = from_dir.Normal(); // localForward
@@ -501,7 +501,7 @@ public:
 		z = (m10 - m01)/(4w)
 		*/
 
-		math::quaternion<T> quat;
+		math::Quaternion<T> quat;
 		quat.w = sqrt(1.0f + wr.Dot(lr) + wu.Dot(lu) + wf.Dot(lf)) / 2;
 		const T w4recip = 1 / (4 * quat.w);
 
@@ -527,49 +527,49 @@ public:
 	\param to The endvector
 	\return Selfreference
 	*/
-	static quaternion<T> FromTo(
-		const vector3<T>& from,
-		const vector3<T>& to)
+	static Quaternion<T> FromTo(
+		const Vector3<T>& from,
+		const Vector3<T>& to)
 	{
-		vector3<T> v0 = from;
-		vector3<T> v1 = to;
+		Vector3<T> v0 = from;
+		Vector3<T> v1 = to;
 		v0.Normalize();
 		v1.Normalize();
 
 		const T d = v0.Dot(v1);
 		if(d >= 1) {
-			return quaternion();
+			return Quaternion();
 		} else if(d <= -1.0f) {
-			vector3<T> axis = math::vector3<T>::UNIT_X;
+			Vector3<T> axis = math::Vector3<T>::UNIT_X;
 			axis = axis.Cross(v0);
 			if(IsZero(axis.GetLengthSq())) {
 				axis.Set(0, 1, 0);
 				axis = axis.Cross(v0);
 			}
 
-			return quaternion(axis.x, axis.y, axis.z, 0).Normal();
+			return Quaternion(axis.x, axis.y, axis.z, 0).Normal();
 		}
 
 		const T s = (T)sqrt((1 + d) * 2);
 		const T InvS = 1 / s;
-		const vector3<T> c = v0.Cross(v1) * InvS;
-		return quaternion(c.x, c.y, c.z, s / 2).Normal();
+		const Vector3<T> c = v0.Cross(v1) * InvS;
+		return Quaternion(c.x, c.y, c.z, s / 2).Normal();
 	}
 };
 
 ///\cond INTERNAL
 template <typename T>
-quaternion<T> operator*(T s, const quaternion<T>& q)
+Quaternion<T> operator*(T s, const Quaternion<T>& q)
 {
 	return q*s;
 }
 ///\endcond
 
 //! Typedef for quaternion with float precision
-typedef quaternion<float> quaternionf;
+typedef Quaternion<float> QuaternionF;
 
 template <typename T>
-bool IsEqual(const quaternion<T>& a, const quaternion<T>& b, const T tolerance = math::Constants<T>::rounding_error())
+bool IsEqual(const Quaternion<T>& a, const Quaternion<T>& b, const T tolerance = math::Constants<T>::rounding_error())
 {
 	return 
 		math::IsEqual(a.x, b.x, tolerance) &&
@@ -579,7 +579,7 @@ bool IsEqual(const quaternion<T>& a, const quaternion<T>& b, const T tolerance =
 }
 
 template <typename T>
-bool IsZero(const quaternion<T>& v, const T tolerance = math::Constants<T>::rounding_error())
+bool IsZero(const Quaternion<T>& v, const T tolerance = math::Constants<T>::rounding_error())
 {
 	return 
 		math::IsZero(v.x, tolerance) &&

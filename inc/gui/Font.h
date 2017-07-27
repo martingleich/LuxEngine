@@ -110,10 +110,10 @@ public:
 	\param clip If non null the text is clipped against this rect
 	*/
 	virtual void Draw(const String& text,
-		const math::vector2f& position,
+		const math::Vector2F& position,
 		EAlign align = EAlign::BottomLeft,
 		video::Color color = video::Color::Black,
-		const math::rectf* clip = nullptr) = 0;
+		const math::RectF* clip = nullptr) = 0;
 
 	//! Get the width of some text
 	/**

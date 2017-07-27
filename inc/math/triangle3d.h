@@ -12,9 +12,9 @@ template <typename type>
 class triangle3d
 {
 public:
-	vector3<type> A;    //!< The first point of the triangle
-	vector3<type> B;    //!< The second point of the triangle
-	vector3<type> C;    //!< The third point of the triangle
+	Vector3<type> A;    //!< The first point of the triangle
+	Vector3<type> B;    //!< The second point of the triangle
+	Vector3<type> C;    //!< The third point of the triangle
 
 public:
 	//! default-Constructor: All 0 triangle
@@ -22,9 +22,9 @@ public:
 	{
 	}
 	//! Constructor from 3 points
-	triangle3d(const vector3<type>& a,
-		const vector3<type>& b,
-		const vector3<type>& c) : A(a), B(b), C(c)
+	triangle3d(const Vector3<type>& a,
+		const Vector3<type>& b,
+		const Vector3<type>& c) : A(a), B(b), C(c)
 	{
 	}
 
@@ -41,7 +41,7 @@ public:
 	}
 
 	//! Set triangle points
-	triangle3d<type>& Set(const vector3<type>& a, const vector3<type>& b, const vector3<type>& c)
+	triangle3d<type>& Set(const Vector3<type>& a, const Vector3<type>& b, const Vector3<type>& c)
 	{
 		A = a;
 		B = b;
@@ -55,7 +55,7 @@ public:
 	Computed normal is not normalized
 	\return The normal of the triangle
 	*/
-	vector3<type> GetNormal() const
+	Vector3<type> GetNormal() const
 	{
 		return (B - A).Cross(C - A);
 	}
@@ -64,7 +64,7 @@ public:
 	/**
 	\return The center of the triangle
 	*/
-	vector3<type> GetCenter() const
+	Vector3<type> GetCenter() const
 	{
 		return (A + B + C) / 3;
 	}
@@ -74,9 +74,9 @@ public:
 	Plane is normalized
 	\return The plane of the triangle
 	*/
-	plane3d<type> GetPlane() const
+	Plane<type> GetPlane() const
 	{
-		return plane3d<type>(A, B, C);
+		return Plane<type>(A, B, C);
 	}
 
 	//! The area of the triangle
@@ -98,7 +98,7 @@ public:
 	\param box The box test against
 	\return Is the triangle totally inside the box
 	*/
-	bool IsTotalInsideBox(const aabbox3d<type>& box) const
+	bool IsTotalInsideBox(const AABBox<type>& box) const
 	{
 		return (box.IsPointInside(A) &&
 			box.IsPointInside(B) &&
@@ -110,11 +110,11 @@ public:
 	\param point Point which must be on the same plane as the triangle
 	\return The nearest point on the triangle
 	*/
-	vector3<type> ClosestPointOnTriangle(const vector3<type>& point) const
+	Vector3<type> ClosestPointOnTriangle(const Vector3<type>& point) const
 	{
-		const vector3<type> pointToEdgeAB = line3d<type>(A, B).GetClosestPoint(point);
-		const vector3<type> pointToEdgeBC = line3d<type>(B, C).GetClosestPoint(point);
-		const vector3<type> pointToEdgeAC = line3d<type>(A, C).GetDinstanceTo(point);
+		const Vector3<type> pointToEdgeAB = Line3<type>(A, B).GetClosestPoint(point);
+		const Vector3<type> pointToEdgeBC = Line3<type>(B, C).GetClosestPoint(point);
+		const Vector3<type> pointToEdgeAC = Line3<type>(A, C).GetDinstanceTo(point);
 
 		const type toEdgeAB = pointToEdgeAB.GetDistanceToSq(point);
 		const type toEdgeBC = pointToEdgeBC.GetDistanceToSq(point);
@@ -132,20 +132,20 @@ public:
 	\param out If != NULL the coords of the intersection are written there
 	\return True if there is a intersection otherwise false
 	*/
-	bool IntersectWithLine(const line3d<type>& line, vector3<type>* out = nullptr) const
+	bool IntersectWithLine(const Line3<type>& line, Vector3<type>* out = nullptr) const
 	{
-		const vector3<type> AB = A - B;
-		const vector3<type> BC = B - C;
-		const vector3<type> Normal = AB.Cross(BC);
+		const Vector3<type> AB = A - B;
+		const Vector3<type> BC = B - C;
+		const Vector3<type> Normal = AB.Cross(BC);
 
-		plane3d<type> plane = plane3d<type>(A, Normal);
+		Plane<type> plane = Plane<type>(A, Normal);
 		type s;
 		if(!plane.IntersectWithLine(line, &s))
 			return false;
 
-		const vector3<type> point = line.GetPoint(s);
+		const Vector3<type> point = line.GetPoint(s);
 
-		vector3<type> subNormal = AB.Cross(Normal);
+		Vector3<type> subNormal = AB.Cross(Normal);
 		if(point.Dot(subNormal) < A.Dot(subNormal))
 			return false;
 
@@ -168,17 +168,17 @@ public:
 	\param out If != NULL the coords of the intersection are written there
 	\return True if there is a intersection otherwise false
 	*/
-	bool IntersectWithLineBary(const line3d<type>& line, vector3<type>* out = nullptr) const
+	bool IntersectWithLineBary(const Line3<type>& line, Vector3<type>* out = nullptr) const
 	{
-		const vector3<type> a(C - A);
-		const vector3<type> b(B - A);
+		const Vector3<type> a(C - A);
+		const Vector3<type> b(B - A);
 
-		plane3d<type> plane = plane3d<type>(A, a.Cross(b));
+		Plane<type> plane = Plane<type>(A, a.Cross(b));
 		type s;
 		if(!plane.IntersectWithLine(line, &s))
 			return false;
 
-		const vector3<type> c(line.GetPoint(s) - A);
+		const Vector3<type> c(line.GetPoint(s) - A);
 
 		type dotAA = a.Dot(a);
 		type dotAB = a.Dot(b);

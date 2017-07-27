@@ -87,7 +87,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 	core::Array<SinCos> sinCos;
 	sinCos.Reserve(sectors);
 	for(s32 i = 0; i <= sectors; ++i) {
-		math::anglef a = i * (math::anglef::FULL / sectors);
+		math::AngleF a = i * (math::AngleF::FULL / sectors);
 		SinCos sc;
 		sc.c = math::Cos(a);
 		sc.s = math::Sin(a);
@@ -205,7 +205,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 	baseIndex = vertexBuffer->GetCursor();
 
 	const float head_s = sqrt(head_radius*head_radius + head_height*head_height);
-	const math::anglef unroll_sector_angle = (head_radius / head_s) * math::anglef::FULL;
+	const math::AngleF unroll_sector_angle = (head_radius / head_s) * math::AngleF::FULL;
 	for(s32 i = 0; i <= sectors; ++i) {
 		Vertex3D v;
 
@@ -221,7 +221,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 		v.normal.z = head_radius / head_height;
 		v.normal /= sqrt(1 + v.normal.z*v.normal.z);
 
-		const math::anglef sector_angle = unroll_sector_angle * ((float)i / sectors);
+		const math::AngleF sector_angle = unroll_sector_angle * ((float)i / sectors);
 		v.texture.x = (head_s / shaft_circum) * math::Sin(sector_angle) + 0.5f;
 		v.texture.y = (head_s / shaft_circum) * math::Cos(sector_angle) + 0.5f;
 
@@ -258,7 +258,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 	indexBuffer->Update();
 	vertexBuffer->Update();
 
-	subMesh->SetBoundingBox(math::aabbox3df(
+	subMesh->SetBoundingBox(math::AABBoxF(
 		-head_radius, -head_radius, 0.0f,
 		head_radius, head_radius, shaft_height + head_height));
 

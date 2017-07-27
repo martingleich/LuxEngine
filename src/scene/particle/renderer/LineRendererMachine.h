@@ -20,7 +20,7 @@ class LineRendererMachine : public RendererMachine
 private:
 	struct LineVertex
 	{
-		math::vector3f position;
+		math::Vector3F position;
 		video::Color color;
 	};
 

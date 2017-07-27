@@ -4,7 +4,7 @@ UNIT_SUITE(MatrixTest)
 {
 	UNIT_TEST(Constructor)
 	{
-		math::matrix4 a(
+		math::Matrix4 a(
 			1, 2, 3, 4,
 			5, 6, 7, 8,
 			9, 10, 11, 12,
@@ -29,17 +29,17 @@ UNIT_SUITE(MatrixTest)
 
 	UNIT_TEST(Multiply)
 	{
-		math::matrix4 a(
+		math::Matrix4 a(
 			1, 2, 3, 4,
 			5, 6, 7, 8,
 			9, 10, 11, 12,
 			13, 14, 15, 16);
-		math::matrix4 b(
+		math::Matrix4 b(
 			17, 18, 19, 20,
 			21, 22, 23, 24,
 			25, 26, 27, 28,
 			29, 30, 31, 32);
-		math::matrix4 result(
+		math::Matrix4 result(
 			250, 260, 270, 280,
 			618, 644, 670, 696,
 			986, 1028, 1070, 1112, 

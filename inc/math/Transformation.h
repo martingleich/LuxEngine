@@ -16,8 +16,8 @@ class Transformation
 {
 public:
 	float                scale;              //!< The Scalation in all directions
-	math::quaternionf    orientation;        //!< A quaternion holding the orientation, user should ensure unit-length
-	math::vector3f       translation;        //!< The translation
+	math::QuaternionF    orientation;        //!< A quaternion holding the orientation, user should ensure unit-length
+	math::Vector3F       translation;        //!< The translation
 
 public:
 	LUX_API static const Transformation DEFAULT;    //! The default transformation
@@ -32,8 +32,8 @@ public:
 	}
 
 	//! Constructor
-	Transformation(const math::vector3f& Trans,
-		const math::quaternionf& Orient = math::quaternionf(0.0f, 0.0f, 0.0f, 1.0f),
+	Transformation(const math::Vector3F& Trans,
+		const math::QuaternionF& Orient = math::QuaternionF(0.0f, 0.0f, 0.0f, 1.0f),
 		float _Scale = 1.0f) : scale(_Scale), orientation(Orient), translation(Trans)
 	{
 	}
@@ -75,8 +75,8 @@ public:
 	\param out: Here the transformed point is written
 	\return: The transformed point
 	*/
-	math::vector3f& TransformPoint(const math::vector3f& in,
-		math::vector3f& out) const
+	math::Vector3F& TransformPoint(const math::Vector3F& in,
+		math::Vector3F& out) const
 	{
 		out = in * scale;
 		orientation.TransformInPlace(out);
@@ -89,9 +89,9 @@ public:
 	\param in: The point to transform
 	\return: The transformed point
 	*/
-	math::vector3f TransformPoint(const math::vector3f& in) const
+	math::Vector3F TransformPoint(const math::Vector3F& in) const
 	{
-		math::vector3f out;
+		math::Vector3F out;
 		return TransformPoint(in, out);
 	}
 
@@ -101,8 +101,8 @@ public:
 	\param out: Here the transformed point is written
 	\return: The transformed point
 	*/
-	math::vector3f& TransformInvPoint(const math::vector3f& in,
-		math::vector3f& out) const
+	math::Vector3F& TransformInvPoint(const math::Vector3F& in,
+		math::Vector3F& out) const
 	{
 		const float recScale = 1.0f / scale;
 		out = in * recScale;
@@ -116,9 +116,9 @@ public:
 	\param in: The point to transform
 	\return: The transformed point
 	*/
-	math::vector3f TransformInvPoint(const math::vector3f& in) const
+	math::Vector3F TransformInvPoint(const math::Vector3F& in) const
 	{
-		math::vector3f out;
+		math::Vector3F out;
 		return TransformInvPoint(in, out);
 	}
 
@@ -128,8 +128,8 @@ public:
 	\param out: Here the transformed direction is written
 	\return: The transformed direction
 	*/
-	math::vector3f& TransformDir(const math::vector3f& in,
-		math::vector3f& out) const
+	math::Vector3F& TransformDir(const math::Vector3F& in,
+		math::Vector3F& out) const
 	{
 
 		out = orientation.Transform(in * scale);
@@ -141,9 +141,9 @@ public:
 	\param in: The direction to transform
 	\return: The transformed direction
 	*/
-	math::vector3f TransformDir(const math::vector3f& in) const
+	math::Vector3F TransformDir(const math::Vector3F& in) const
 	{
-		math::vector3f out;
+		math::Vector3F out;
 		return TransformDir(in, out);
 	}
 
@@ -153,8 +153,8 @@ public:
 	\param out: Here the transformed direction is written
 	\return: The transformed direction
 	*/
-	math::vector3f& TransformInvDir(const math::vector3f& in,
-		math::vector3f& out) const
+	math::Vector3F& TransformInvDir(const math::Vector3F& in,
+		math::Vector3F& out) const
 	{
 		out = orientation.TransformInv(in) / scale;
 		return out;
@@ -165,9 +165,9 @@ public:
 	\param in: The direction to transform
 	\return: The transformed direction
 	*/
-	math::vector3f TransformInvDir(const math::vector3f& in) const
+	math::Vector3F TransformInvDir(const math::Vector3F& in) const
 	{
-		math::vector3f out;
+		math::Vector3F out;
 		return TransformInvDir(in, out);
 	}
 
@@ -195,7 +195,7 @@ public:
 	*/
 	Transformation& AddLeft(const Transformation& other)
 	{
-		const math::vector3f v = translation;
+		const math::Vector3F v = translation;
 
 		translation = other.translation * scale;
 		orientation.TransformInPlace(translation);
@@ -258,7 +258,7 @@ public:
 	/**
 	\param out: Here the new matrix is written
 	*/
-	void ToMatrix(math::matrix4& out) const
+	void ToMatrix(math::Matrix4& out) const
 	{
 		const float xy = orientation.x * orientation.y;
 		const float yy = orientation.y * orientation.y;
@@ -293,9 +293,9 @@ public:
 		out(3, 3) = 1.0f;
 	}
 
-	math::matrix4 ToMatrix() const
+	math::Matrix4 ToMatrix() const
 	{
-		math::matrix4 out;
+		math::Matrix4 out;
 		ToMatrix(out);
 
 		return out;
@@ -305,7 +305,7 @@ public:
 	/**
 	\param out: Here the new matrix is written
 	*/
-	void ToMatrixInv(math::matrix4& out) const
+	void ToMatrixInv(math::Matrix4& out) const
 	{
 		const float xy = orientation.x * orientation.y;
 		const float yy = orientation.y * orientation.y;
@@ -335,7 +335,7 @@ public:
 		out(2, 2) = recScale * (1.0f - 2.0f * (xx + yy));
 		out(2, 3) = 0.0f;
 
-		const math::vector3f InvTrans = -recScale * orientation.TransformInv(translation);
+		const math::Vector3F InvTrans = -recScale * orientation.TransformInv(translation);
 
 		out(3, 0) = InvTrans.x;
 		out(3, 1) = InvTrans.y;
@@ -343,9 +343,9 @@ public:
 		out(3, 3) = 1.0f;
 	}
 
-	math::matrix4 ToMatrixInv() const
+	math::Matrix4 ToMatrixInv() const
 	{
-		math::matrix4 out;
+		math::Matrix4 out;
 		ToMatrixInv(out);
 
 		return out;
@@ -381,7 +381,7 @@ inline bool IsEqual(const Transformation& a, const Transformation& b, float tole
 }
 
 template <>
-inline math::line3df& Transformation::TransformObject(const math::line3df& in, math::line3df& out) const
+inline math::Line3F& Transformation::TransformObject(const math::Line3F& in, math::Line3F& out) const
 {
 	this->TransformPoint(in.start, out.start);
 	this->TransformPoint(in.end, out.end);
@@ -390,9 +390,9 @@ inline math::line3df& Transformation::TransformObject(const math::line3df& in, m
 }
 
 template <>
-inline math::plane3df& Transformation::TransformObject(const math::plane3df& in, math::plane3df& out) const
+inline math::PlaneF& Transformation::TransformObject(const math::PlaneF& in, math::PlaneF& out) const
 {
-	this->TransformDir(in.Normal, out.Normal);
+	this->TransformDir(in.normal, out.normal);
 	out.RecalculateD(this->TransformPoint(in.GetMemberPoint()));
 
 	return out;

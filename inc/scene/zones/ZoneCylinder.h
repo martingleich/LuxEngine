@@ -22,7 +22,7 @@ public:
 	{
 	}
 
-	bool IsInside(const math::vector3f& point) const
+	bool IsInside(const math::Vector3F& point) const
 	{
 		if(m_HalfHeight <= fabsf(point.y)) {
 			const float xzsq = point.x*point.x + point.z*point.z;
@@ -33,27 +33,27 @@ public:
 		return false;
 	}
 
-	math::vector3f GetPointInside(const core::Randomizer& rand) const
+	math::Vector3F GetPointInside(const core::Randomizer& rand) const
 	{
-		const math::vector2f base = rand.GetVector2Circle(m_Radius);
+		const math::Vector2F base = rand.GetVector2Circle(m_Radius);
 		const float y = rand.GetFloat(-m_HalfHeight, m_HalfHeight);
 
-		return math::vector3f(base.x, y, base.y);
+		return math::Vector3F(base.x, y, base.y);
 	}
 
-	math::vector3f GetNormal(const math::vector3f& point) const
+	math::Vector3F GetNormal(const math::Vector3F& point) const
 	{
 		if(point.y >= m_HalfHeight)
-			return math::vector3f::UNIT_Y;
+			return math::Vector3F::UNIT_Y;
 		if(point.y <= -m_HalfHeight)
-			return math::vector3f::NEGATIVE_UNIT_Y;
+			return math::Vector3F::NEGATIVE_UNIT_Y;
 		float x = point.x;
 		float z = point.z;
 		float len = sqrt(x*x + z*z);
 		if(math::IsZero(len))
-			return math::vector3f::ZERO;
+			return math::Vector3F::ZERO;
 		else
-			return math::vector3f(x, 0.0f, z) / len;
+			return math::Vector3F(x, 0.0f, z) / len;
 	}
 
 	float GetRadius() const

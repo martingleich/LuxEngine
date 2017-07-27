@@ -47,9 +47,9 @@ private:
 struct VolumeQueryResult : QueryResult
 {
 	//! The position of the collision, the position of the "worst", the deepest collision, in world-coordinates.
-	math::vector3f position;
+	math::Vector3F position;
 	//! The direction in which to move the collider object, to resolve the collision, in world-coordinates.
-	math::vector3f seperation;
+	math::Vector3F seperation;
 	//! The depth of the collision, if the collider is moved by penetration*seperation, the collision will be resolved.
 	float penetration;
 };

@@ -21,7 +21,7 @@ public:
 	void* BeginFontCreation(bool isFileFont, const String& name,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet);
-	bool GetFontImage(void* void_ctx, FontPixel*& image, math::dimension2du& imageSize);
+	bool GetFontImage(void* void_ctx, FontPixel*& image, math::Dimension2U& imageSize);
 	void GetFontInfo(void*, u32& fontHeight, FontDescription& desc);
 	bool GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo);
 	void EndFontCreation(void* void_ctx);

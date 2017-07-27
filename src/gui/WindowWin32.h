@@ -34,13 +34,13 @@ public:
 	bool SwitchFullscreen(bool Fullscreen);
 	bool Init(HWND Window);
 	void SetTitle(const String& title);
-	void SetSize(const math::dimension2du& Size);
-	void SetPosition(const math::vector2i& Position);
+	void SetSize(const math::Dimension2U& Size);
+	void SetPosition(const math::Vector2I& Position);
 	bool Maximize();
 	bool Minimize();
 	bool SetResizable(bool Resize);
 	bool Close();
-	bool Present(video::Image* image, const math::recti& SourceRect = math::recti::EMPTY, const math::recti& DestRect = math::recti::EMPTY);
+	bool Present(video::Image* image, const math::RectI& SourceRect = math::RectI::EMPTY, const math::RectI& DestRect = math::RectI::EMPTY);
 	bool Restore();
 
 	// Cast the return value the HWND to get the device window

@@ -40,7 +40,7 @@ public:
 	/**
 	\param p The new position
 	*/
-	void SetPosition(const math::vector3f& p)
+	void SetPosition(const math::Vector3F& p)
 	{
 		m_RelativeTrans.translation = p;
 		SetDirty();
@@ -48,14 +48,14 @@ public:
 
 	void SetPosition(float x, float y, float z)
 	{
-		SetPosition(math::vector3f(x, y, z));
+		SetPosition(math::Vector3F(x, y, z));
 	}
 
 	//! Translate the node in relative coordinates
 	/**
 	\param p The translation
 	*/
-	void Translate(const math::vector3f& p)
+	void Translate(const math::Vector3F& p)
 	{
 		m_RelativeTrans.translation += p;
 		SetDirty();
@@ -63,7 +63,7 @@ public:
 
 	void Translate(float x, float y, float z)
 	{
-		Translate(math::vector3f(x, y, z));
+		Translate(math::Vector3F(x, y, z));
 	}
 
 #if 0
@@ -71,7 +71,7 @@ public:
 	/**
 	\param p The translation
 	*/
-	void TranslateGlobal(const math::vector3f& p)
+	void TranslateGlobal(const math::Vector3F& p)
 	{
 		math::Transformation t = GetRelativeTransform();
 		t.translation += t.TransformDir(GetAbsoluteTransform().TransformInvDir(p));
@@ -83,7 +83,7 @@ public:
 	/**
 	\param o The new orientation
 	*/
-	void SetOrientation(const math::quaternionf& o)
+	void SetOrientation(const math::QuaternionF& o)
 	{
 		m_RelativeTrans.orientation = o;
 		SetDirty();
@@ -93,30 +93,30 @@ public:
 	/**
 	\param o The orientation to apply.
 	*/
-	void Rotate(const math::quaternionf& o)
+	void Rotate(const math::QuaternionF& o)
 	{
 		m_RelativeTrans.orientation *= o;
 		SetDirty();
 	}
 
-	void Rotate(const math::vector3f& axis, math::anglef alpha)
+	void Rotate(const math::Vector3F& axis, math::AngleF alpha)
 	{
-		Rotate(math::quaternionf(axis, alpha));
+		Rotate(math::QuaternionF(axis, alpha));
 	}
 
-	void RotateX(math::anglef alpha)
+	void RotateX(math::AngleF alpha)
 	{
-		Rotate(math::vector3f::UNIT_X, alpha);
+		Rotate(math::Vector3F::UNIT_X, alpha);
 	}
 
-	void RotateY(math::anglef alpha)
+	void RotateY(math::AngleF alpha)
 	{
-		Rotate(math::vector3f::UNIT_Y, alpha);
+		Rotate(math::Vector3F::UNIT_Y, alpha);
 	}
 
-	void RotateZ(math::anglef alpha)
+	void RotateZ(math::AngleF alpha)
 	{
-		Rotate(math::vector3f::UNIT_Z, alpha);
+		Rotate(math::Vector3F::UNIT_Z, alpha);
 	}
 
 	//! Get the current relative scale
@@ -132,7 +132,7 @@ public:
 	/**
 	\return The current relative position
 	*/
-	const math::vector3f& GetPosition() const
+	const math::Vector3F& GetPosition() const
 	{
 		return m_RelativeTrans.translation;
 	}
@@ -141,86 +141,10 @@ public:
 	/**
 	\return The current relative orientation
 	*/
-	const math::quaternionf& GetOrientation() const
+	const math::QuaternionF& GetOrientation() const
 	{
 		return m_RelativeTrans.orientation;
 	}
-
-#if 0
-	//! Get the current absolute position
-	/**
-	\return The current absolute position
-	*/
-	const math::vector3f& GetAbsolutePosition() const
-	{
-		return GetAbsoluteTransform().translation;
-	}
-
-	//! transform a relative position to another coordinate system
-	/**
-	\param point The relative position
-	\param target The target coordinate system, use NULL to get absolute coordinates
-	\return The transformed position
-	*/
-	math::vector3f FromRelativePos(const math::vector3f& point, const Transformable* target = nullptr)
-	{
-		math::vector3f out = GetAbsoluteTransform().TransformPoint(point);
-		if(target) {
-			out = target->GetAbsoluteTransform().TransformInvPoint(out);
-		}
-
-		return out;
-	}
-
-	//! Transforms a position to relative coordinates
-	/**
-	\param point The position to transform
-	\param source The source coordinate system, use NULL for absolute coordinates
-	\return The positon in relative coordinates
-	*/
-	math::vector3f ToRelativePos(const math::vector3f& point, const Transformable* source = nullptr)
-	{
-		math::vector3f out;
-		if(source)
-			out = source->GetAbsoluteTransform().TransformPoint(point);
-		else
-			out = point;
-
-		return GetAbsoluteTransform().TransformInvPoint(out);
-	}
-	//! Transforms a relative direction to another coordinate system
-	/**
-	\param Dir The direction to transform
-	\param target The target coordinate system, use NULL for absolute coordinates
-	\return The transformed direction
-	*/
-	math::vector3f FromRelativeDir(const math::vector3f& Dir, const Transformable* target = nullptr)
-	{
-		math::vector3f out = GetAbsoluteTransform().TransformDir(Dir);
-		if(target) {
-			out = target->GetAbsoluteTransform().TransformInvDir(out);
-		}
-
-		return out;
-	}
-
-	//! Transforms a direction to relative coordinates
-	/**
-	\param dir The direction to transform
-	\param source The source coordinate system, use NULL for absolute coordinates
-	\return The direction in relative coordinates
-	*/
-	math::vector3f ToRelativeDir(const math::vector3f& dir, const Transformable* source = nullptr)
-	{
-		math::vector3f out;
-		if(source)
-			out = source->GetAbsoluteTransform().TransformDir(dir);
-		else
-			out = dir;
-
-		return GetAbsoluteTransform().TransformInvDir(out);
-	}
-#endif
 
 	//! Set the looking direction of the transfomable
 	/**
@@ -228,9 +152,9 @@ public:
 	\param dir The direction in which the local direction should point
 	\param local The local vector which should used as pointer
 	*/
-	void SetDirection(const math::vector3f& dir, const math::vector3f& local = math::vector3f::UNIT_Z)
+	void SetDirection(const math::Vector3F& dir, const math::Vector3F& local = math::Vector3F::UNIT_Z)
 	{
-		m_RelativeTrans.orientation = math::quaternionf::FromTo(local, dir);
+		m_RelativeTrans.orientation = math::QuaternionF::FromTo(local, dir);
 		SetDirty();
 	}
 
@@ -242,12 +166,12 @@ public:
 	\param local_dir The local direction vector
 	\param local_up The local up vector
 	*/
-	void SetDirectionUp(const math::vector3f& dir,
-		const math::vector3f& up = math::vector3f::UNIT_Y,
-		const math::vector3f& local_dir = math::vector3f::UNIT_Z,
-		const math::vector3f& local_up = math::vector3f::UNIT_Y)
+	void SetDirectionUp(const math::Vector3F& dir,
+		const math::Vector3F& up = math::Vector3F::UNIT_Y,
+		const math::Vector3F& local_dir = math::Vector3F::UNIT_Z,
+		const math::Vector3F& local_up = math::Vector3F::UNIT_Y)
 	{
-		m_RelativeTrans.orientation = math::quaternionf::FromTo(
+		m_RelativeTrans.orientation = math::QuaternionF::FromTo(
 			local_dir, local_up,
 			dir, up);
 		SetDirty();
@@ -277,4 +201,4 @@ protected:
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_ITRANSFORMABLE_H
+#endif // !INCLUDED_TRANSFORMABLE_H

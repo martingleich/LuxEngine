@@ -123,12 +123,12 @@ video::EIndexFormat GeometryImpl::GetIndexType() const
 	else
 		return m_Indices->GetType();
 }
-const math::aabbox3df& GeometryImpl::GetBoundingBox() const
+const math::AABBoxF& GeometryImpl::GetBoundingBox() const
 {
 	return m_BoundingBox;
 }
 
-void GeometryImpl::SetBoundingBox(const math::aabbox3df& box)
+void GeometryImpl::SetBoundingBox(const math::AABBoxF& box)
 {
 	m_BoundingBox = box;
 }
@@ -141,11 +141,11 @@ void GeometryImpl::RecalculateBoundingBox()
 		const u32 posOffset = GetVertexFormat().GetElement(0, video::VertexElement::EUsage::Position).offset;
 
 		const u8* vertex = reinterpret_cast<const u8*>(m_Vertices->Pointer_c(0, 1));
-		m_BoundingBox.Set(*reinterpret_cast<const math::vector3f*>(vertex + posOffset));
+		m_BoundingBox.Set(*reinterpret_cast<const math::Vector3F*>(vertex + posOffset));
 
 		for(u32 i = 1; i < m_Vertices->GetSize(); ++i) {
 			vertex = reinterpret_cast<const u8*>(m_Vertices->Pointer_c(i, 1));
-			m_BoundingBox.AddPoint(*reinterpret_cast<const math::vector3f*>(vertex + posOffset));
+			m_BoundingBox.AddPoint(*reinterpret_cast<const math::Vector3F*>(vertex + posOffset));
 		}
 	}
 }

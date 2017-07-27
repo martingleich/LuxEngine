@@ -48,12 +48,12 @@ public:
 	LUX_API Camera();
 	LUX_API ~Camera();
 
-	LUX_API void SetCustomProjection(const math::matrix4& proj);
-	LUX_API const math::matrix4& GetCustomProjection();
+	LUX_API void SetCustomProjection(const math::Matrix4& proj);
+	LUX_API const math::Matrix4& GetCustomProjection();
 	LUX_API void ClearCustomProjection();
 
-	LUX_API void SetViewModification(const math::matrix4& mod);
-	LUX_API const math::matrix4& GetViewModification();
+	LUX_API void SetViewModification(const math::Matrix4& mod);
+	LUX_API const math::Matrix4& GetViewModification();
 
 	LUX_API void SetAspect(float aspect);
 	LUX_API float GetAspect() const;
@@ -103,14 +103,14 @@ public:
 	LUX_API StrongRef<Referable> Clone() const;
 
 private:
-	math::matrix4 CalculateProjectionMatrix(video::Renderer* r, const Node* n);
-	math::matrix4 CalculateViewMatrix(video::Renderer* r, const Node* n);
+	math::Matrix4 CalculateProjectionMatrix(video::Renderer* r, const Node* n);
+	math::Matrix4 CalculateViewMatrix(video::Renderer* r, const Node* n);
 
 private:
-	math::matrix4 m_CustomProjection;
+	math::Matrix4 m_CustomProjection;
 	bool m_HasCustomProjection;
 
-	math::matrix4 m_ViewModification;
+	math::Matrix4 m_ViewModification;
 
 	float m_FOV;
 	float m_XMax;

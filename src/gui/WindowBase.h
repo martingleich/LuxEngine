@@ -19,8 +19,8 @@ private:
 	bool m_IsActive;
 	bool m_IsFocused;
 	bool m_IsMaximized;
-	math::dimension2du m_Size;
-	math::vector2i m_Position;
+	math::Dimension2U m_Size;
+	math::Vector2I m_Position;
 	String m_Title;
 
 public:
@@ -169,12 +169,12 @@ public:
 		return m_Title;
 	}
 
-	const math::dimension2du& GetSize() const
+	const math::Dimension2U& GetSize() const
 	{
 		return m_Size;
 	}
 
-	const math::vector2i& GetPosition() const
+	const math::Vector2I& GetPosition() const
 	{
 		return m_Position;
 	}

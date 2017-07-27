@@ -12,41 +12,41 @@ namespace math
 in cartesian coordinates
 */
 template <typename T>
-class vector2
+class Vector2
 {
 public:
 	T x; //!< The x-coordinate of the vector
 	T y; //!< The y-coordinate of the vector
 
 public:
-	static const vector2 UNIT_X;    //!< Constant for the x-axis
-	static const vector2 UNIT_Y;    //!< Constant for the y-axis
-	static const vector2 NEGATIVE_UNIT_X; //!< Constant for the negative x-axis    
-	static const vector2 NEGATIVE_UNIT_Y; //!< Constant for the negative y-axis    
-	static const vector2 ZERO; //!< Constant for the null vector    
-	static const vector2 UNIT_scale; //!< Constant for the unitscale vector(both componets are 1)
+	static const Vector2 UNIT_X;    //!< Constant for the x-axis
+	static const Vector2 UNIT_Y;    //!< Constant for the y-axis
+	static const Vector2 NEGATIVE_UNIT_X; //!< Constant for the negative x-axis    
+	static const Vector2 NEGATIVE_UNIT_Y; //!< Constant for the negative y-axis    
+	static const Vector2 ZERO; //!< Constant for the null vector    
+	static const Vector2 UNIT_scale; //!< Constant for the unitscale vector(both componets are 1)
 
 public:
 	//! Defaultconstructor both components are zero
-	vector2() : x(0), y(0)
+	Vector2() : x(0), y(0)
 	{
 	}
 	//! Copyconstructor
-	vector2(const vector2<T>& v) : x(v.x), y(v.y)
+	Vector2(const Vector2<T>& v) : x(v.x), y(v.y)
 	{
 	}
 	//! Constructor from values
-	vector2(T X, T Y) : x(X), y(Y)
+	Vector2(T X, T Y) : x(X), y(Y)
 	{
 	}
 	//! Constructor from single value, both componets get this value
-	explicit vector2(const T a) : x(a), y(a)
+	explicit Vector2(const T a) : x(a), y(a)
 	{
 	}
 
 	template <typename Type2>
 	//! Constructor from other T-vector
-	vector2(const vector2<Type2> v) : x((T)v.x), y((T)v.y)
+	Vector2(const Vector2<Type2> v) : x((T)v.x), y((T)v.y)
 	{
 	}
 
@@ -55,84 +55,84 @@ public:
 	\param Alpha The polar angle in rad
 	\param Length The length of the polar vector
 	*/
-	static vector2<T> BuildFromPolar(angle<T> alpha, T length)
+	static Vector2<T> BuildFromPolar(Angle<T> alpha, T length)
 	{
-		return vector2<T>(
+		return Vector2<T>(
 			(T)(math::Sin(alpha) * length),
 			(T)(math::Cos(alpha) * length));
 	}
 
-	vector2<T> operator-() const
+	Vector2<T> operator-() const
 	{
-		return vector2<T>(-x, -y);
+		return Vector2<T>(-x, -y);
 	}
-	vector2<T>& operator=(const vector2<T>& v)
+	Vector2<T>& operator=(const Vector2<T>& v)
 	{
 		x = v.x; y = v.y; return *this;
 	}
-	vector2<T>& operator+= (const vector2<T>& v)
+	Vector2<T>& operator+= (const Vector2<T>& v)
 	{
 		x = x + v.x; y = y + v.y; return *this;
 	}
-	vector2<T>& operator-= (const vector2<T>& v)
+	Vector2<T>& operator-= (const Vector2<T>& v)
 	{
 		x = x - v.x; y = y - v.y; return *this;
 	}
-	vector2<T>& operator*= (T f)
+	Vector2<T>& operator*= (T f)
 	{
 		x = x*f; y = y*f; return *this;
 	}
-	vector2<T>& operator/= (T f)
+	Vector2<T>& operator/= (T f)
 	{
 		x = x / f; y = y / f; return *this;
 	}
-	vector2<T>& operator*= (const vector2<T>& v)
+	Vector2<T>& operator*= (const Vector2<T>& v)
 	{
 		x = x*v.x; y = y*v.y; return *this;
 	}
-	vector2<T>& operator/= (const vector2<T>& v)
+	Vector2<T>& operator/= (const Vector2<T>& v)
 	{
 		x = x / v.x; y = y / v.y; return *this;
 	}
-	vector2<T> operator+ (const vector2<T>& other) const
+	Vector2<T> operator+ (const Vector2<T>& other) const
 	{
-		return vector2<T>(x + other.x, y + other.y);
+		return Vector2<T>(x + other.x, y + other.y);
 	}
-	vector2<T> operator- (const vector2<T>& other) const
+	Vector2<T> operator- (const Vector2<T>& other) const
 	{
-		return vector2<T>(x - other.x, y - other.y);
+		return Vector2<T>(x - other.x, y - other.y);
 	}
-	vector2<T> operator* (const vector2<T>& other) const
+	Vector2<T> operator* (const Vector2<T>& other) const
 	{
-		return vector2<T>(x*other.x, y*other.y);
+		return Vector2<T>(x*other.x, y*other.y);
 	}
-	vector2<T> operator/ (const vector2<T>& other) const
+	Vector2<T> operator/ (const Vector2<T>& other) const
 	{
-		return vector2<T>(x / other.x, y / other.y);
+		return Vector2<T>(x / other.x, y / other.y);
 	}
-	vector2<T> operator* (T f) const
+	Vector2<T> operator* (T f) const
 	{
-		return vector2<T>(x*f, y*f);
+		return Vector2<T>(x*f, y*f);
 	}
-	vector2<T> operator/ (T f) const
+	Vector2<T> operator/ (T f) const
 	{
-		return vector2<T>(x / f, y / f);
+		return Vector2<T>(x / f, y / f);
 	}
 
 	//! Equality
-	bool operator==(const vector2<T>& other) const
+	bool operator==(const Vector2<T>& other) const
 	{
 		return x == other.x && y == other.y;
 	}
 
 	//! Unequality
-	bool operator!=(const vector2<T>& other) const
+	bool operator!=(const Vector2<T>& other) const
 	{
 		return x != other.x || y != other.y;
 	}
 
 	//! Smallercomparsion for sorting.
-	bool operator<(const vector2<T>& other) const
+	bool operator<(const Vector2<T>& other) const
 	{
 		return (x < other.x && x != other.x) ||
 			(x == other.x && y < other.y && y != other.y);
@@ -161,7 +161,7 @@ public:
 	}
 
 	//! Set from components.
-	vector2<T>& Set(T X, T Y)
+	Vector2<T>& Set(T X, T Y)
 	{
 		x = X;
 		y = Y;
@@ -193,9 +193,9 @@ public:
 	\param v The point to which the distance is calculated.
 	\return The distance to point v.
 	*/
-	T GetDistanceTo(const vector2<T>& v) const
+	T GetDistanceTo(const Vector2<T>& v) const
 	{
-		return vector2<T>(x - v.x, y - v.y).GetLength();
+		return Vector2<T>(x - v.x, y - v.y).GetLength();
 	}
 
 	//! The squared distance to another point
@@ -204,43 +204,23 @@ public:
 	\param v The point to which the distance is calculated
 	\return The squareddistance to point v.
 	*/
-	T GetDistanceToSq(const vector2<T>& v) const
+	T GetDistanceToSq(const Vector2<T>& v) const
 	{
-		return vector2<T>(x - v.x, y - v.y).GetLengthSq();
+		return Vector2<T>(x - v.x, y - v.y).GetLengthSq();
 	}
 
-	vector2<T> Normal()
+	Vector2<T> Normal()
 	{
-		vector2<T> out(*this);
+		Vector2<T> out(*this);
 		return out.Normalize();
-	}
-	vector2<T> Normal_s()
-	{
-		vector2<T> out(*this);
-		return out.Normalize_s();
 	}
 	//! Normalize this vector
 	/**
 	\return A reference to this vector
 	*/
-	vector2<T>& Normalize()
+	Vector2<T>& Normalize()
 	{
 		SetLength(1);
-		return *this;
-	}
-
-	//! Normalized this vector, watching out for length zero
-	/**
-	\return A reference to this vector
-	*/
-	vector2<T>& Normalize_s()
-	{
-		double length = GetLengthSq();
-		if(length > 0) {
-			length = 1.0 / sqrt(length);
-			x *= T(length);
-			y *= T(length);
-		}
 		return *this;
 	}
 
@@ -249,7 +229,7 @@ public:
 	\param newLength The new length of the vector
 	\return A reference to this vector
 	*/
-	vector2<T>& SetLength(T newLength)
+	Vector2<T>& SetLength(T newLength)
 	{
 		if(isinf(x) || isinf(y)) {
 			if(isinf(x))
@@ -262,7 +242,11 @@ public:
 				y = 0;
 		}
 
-		double factor = newLength / GetLength();
+		double len = GetLength();
+		if(IsZero(len))
+			return *this;
+
+		double factor = newLength / len;
 		x *= T(factor);
 		y *= T(factor);
 		return *this;
@@ -274,7 +258,7 @@ public:
 	\param v2 The second point
 	\return Is the vector between the two points
 	*/
-	bool IsBetweenPoints(const vector2<T>& v1, const vector2<T>& v2) const
+	bool IsBetweenPoints(const Vector2<T>& v1, const Vector2<T>& v2) const
 	{
 		if(v1.x != v2.x) {
 			return ((v1.x <= x && v2.x >= x) ||
@@ -289,9 +273,9 @@ public:
 	/**
 	\return A vector orthogonal to this one, creating a left-hand-system
 	*/
-	vector2<T> Cross() const
+	Vector2<T> Cross() const
 	{
-		return vector2<T>(y, -x);
+		return Vector2<T>(y, -x);
 	}
 
 	//! The dot product between this vector an another
@@ -299,7 +283,7 @@ public:
 	\param v The vector to compute with
 	\return The dot product between this vector an another
 	*/
-	T Dot(const vector2<T>& v) const
+	T Dot(const Vector2<T>& v) const
 	{
 		return x*v.x + y*v.y;
 	}
@@ -310,7 +294,7 @@ public:
 	\param b The vector to which the angle is calculated
 	\return The Angle between this vector an another
 	*/
-	angle<T> Angle(const vector2<T>& b) const
+	Angle<T> Angle(const Vector2<T>& b) const
 	{
 		return math::ArcCos<T>(Dot(b) / (T)sqrt(GetLengthSq()*b.GetLengthSq()));
 	}
@@ -319,14 +303,14 @@ public:
 	/**
 	\return The new polar vector
 	*/
-	vector2<T> ToPolar() const
+	Vector2<T> ToPolar() const
 	{
 		double length = x*x + y*y;
 		if(length > 0) {
-			return vector2<T>(atan2(y, x), sqrt(length));
+			return Vector2<T>(atan2(y, x), sqrt(length));
 		}
 
-		return vector2<T>(0.0, 0.0);
+		return Vector2<T>(0.0, 0.0);
 	}
 
 	//! Return the minimum component
@@ -350,38 +334,38 @@ public:
 
 ///\cond INTERNAL
 template <typename T>
-inline vector2<T> operator* (const T f, const vector2<T>& v)
+inline Vector2<T> operator* (const T f, const Vector2<T>& v)
 {
 	return v*f;
 }
 
 template <typename T>
-inline vector2<T> operator/ (const T f, const vector2<T>& v)
+inline Vector2<T> operator/ (const T f, const Vector2<T>& v)
 {
-	return vector2<T>(f / v.x, f / v.y);
+	return Vector2<T>(f / v.x, f / v.y);
 }
 ///\endcond
 
 //! A 2d vector with float precision
-typedef vector2<float> vector2f;
+typedef Vector2<float> Vector2F;
 //! A 2d vector with integer precision
-typedef vector2<s32> vector2i;
+typedef Vector2<s32> Vector2I;
 
 template <typename T>
-const vector2<T>  vector2<T>::UNIT_X = math::vector2<T>(1, 0);
+const Vector2<T>  Vector2<T>::UNIT_X = math::Vector2<T>(1, 0);
 template <typename T>
-const vector2<T>  vector2<T>::UNIT_Y = math::vector2<T>(0, 1);
+const Vector2<T>  Vector2<T>::UNIT_Y = math::Vector2<T>(0, 1);
 template <typename T>
-const vector2<T>  vector2<T>::NEGATIVE_UNIT_X = math::vector2<T>(-1, 0);
+const Vector2<T>  Vector2<T>::NEGATIVE_UNIT_X = math::Vector2<T>(-1, 0);
 template <typename T>
-const vector2<T>  vector2<T>::NEGATIVE_UNIT_Y = math::vector2<T>(0, -1);
+const Vector2<T>  Vector2<T>::NEGATIVE_UNIT_Y = math::Vector2<T>(0, -1);
 template <typename T>
-const vector2<T>  vector2<T>::ZERO = math::vector2<T>(0, 0);
+const Vector2<T>  Vector2<T>::ZERO = math::Vector2<T>(0, 0);
 template <typename T>
-const vector2<T>  vector2<T>::UNIT_scale = math::vector2<T>(1, 1);
+const Vector2<T>  Vector2<T>::UNIT_scale = math::Vector2<T>(1, 1);
 
 template <typename T>
-bool IsEqual(const vector2<T>& a, const vector2<T>& b, T tolerance = math::Constants<T>::rounding_error())
+bool IsEqual(const Vector2<T>& a, const Vector2<T>& b, T tolerance = math::Constants<T>::rounding_error())
 {
 	return
 		math::IsEqual(a.x, b.x, tolerance) &&
@@ -389,7 +373,7 @@ bool IsEqual(const vector2<T>& a, const vector2<T>& b, T tolerance = math::Const
 }
 
 template <typename T>
-bool IsZero(const vector2<T>& v, T tolerance = math::Constants<T>::rounding_error())
+bool IsZero(const Vector2<T>& v, T tolerance = math::Constants<T>::rounding_error())
 {
 	return
 		math::IsZero(v.x, tolerance) &&
@@ -397,7 +381,7 @@ bool IsZero(const vector2<T>& v, T tolerance = math::Constants<T>::rounding_erro
 }
 
 template <typename T>
-void conv_data(format::Context& ctx, const vector2<T>& v, format::Placeholder& placeholder)
+void conv_data(format::Context& ctx, const Vector2<T>& v, format::Placeholder& placeholder)
 {
 	using namespace format;
 
@@ -428,8 +412,8 @@ LUX_API Type Vector2f();
 LUX_API Type Vector2i();
 }
 
-template<> inline Type GetTypeInfo<math::vector2<float>>() { return Types::Vector2f(); };
-template<> inline Type GetTypeInfo<math::vector2<int>>() { return Types::Vector2i(); };
+template<> inline Type GetTypeInfo<math::Vector2<float>>() { return Types::Vector2f(); };
+template<> inline Type GetTypeInfo<math::Vector2<int>>() { return Types::Vector2i(); };
 } // namespace core
 
 } // namespace lux

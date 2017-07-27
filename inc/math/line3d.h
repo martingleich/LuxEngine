@@ -1,6 +1,5 @@
 #ifndef INCLUDED_LINE3D_H
 #define INCLUDED_LINE3D_H
-
 #include "math/vector3.h"
 
 namespace lux
@@ -9,15 +8,15 @@ namespace math
 {
 
 //! Specifies a limited line in the third dimension
-template <typename type>
-class line3d
+template <typename T>
+class Line3
 {
 public:
-	vector3<type> start;    //! The startpoint of the line
-	vector3<type> end;        //! The endpoint of the line
+	Vector3<T> start;    //! The startpoint of the line
+	Vector3<T> end;        //! The endpoint of the line
 
 	//! Defaultconstructor: A noexisting line from 0 to 0
-	line3d() : start(0, 0, 0), end(0, 0, 0)
+	Line3() : start(0, 0, 0), end(0, 0, 0)
 	{
 	}
 	//! Constructor from one point to another
@@ -25,15 +24,15 @@ public:
 	\param start The startpoint of the line
 	\param end The endpoint of the line
 	*/
-	line3d(const vector3<type>& start, const vector3<type> end) : start(start), end(end)
+	Line3(const Vector3<T>& start, const Vector3<T> end) : start(start), end(end)
 	{
 	}
 
-	line3d(type x1, type y1, type z1, type x2, type y2, type z2) : start(x1, y1, z1), end(x2, y2, z2)
+	Line3(T x1, T y1, T z1, T x2, T y2, T z2) : start(x1, y1, z1), end(x2, y2, z2)
 	{
 	}
 
-	line3d<type>& operator=(const line3d<type>& other)
+	Line3<T>& operator=(const Line3<T>& other)
 	{
 		start = other.start; end = other.end; return *this;
 	}
@@ -44,7 +43,7 @@ public:
 	\param other The line to compare
 	\return Are the lines equal
 	*/
-	bool operator==(const line3d<type>& other) const
+	bool operator==(const Line3<T>& other) const
 	{
 		return (start == other.start && end == other.end) || (start == other.end && end == other.start);
 	}
@@ -54,7 +53,7 @@ public:
 	\param other The line to compare
 	\return Are the lines unequal
 	*/
-	bool operator!=(const line3d<type>& other) const
+	bool operator!=(const Line3<T>& other) const
 	{
 		return !(other == *this);
 	}
@@ -63,7 +62,7 @@ public:
 	/**
 	\return The length of the line
 	*/
-	type GetLength() const
+	T GetLength() const
 	{
 		return start.GetDistanceTo(end);
 	}
@@ -73,7 +72,7 @@ public:
 	Much faster than GetLength()
 	\return The squared length of the line
 	*/
-	type GetLengthSq() const
+	T GetLengthSq() const
 	{
 		return start.GetDistanceToSq(end);
 	}
@@ -82,9 +81,9 @@ public:
 	/**
 	\return The middle point of the line
 	*/
-	vector3<type> GetMiddle() const
+	Vector3<T> GetMiddle() const
 	{
-		return (start + end) / (type)(2);
+		return (start + end) / (T)(2);
 	}
 
 	//! Retrieves a point on the line
@@ -93,7 +92,7 @@ public:
 	\param p Specifies which point on the line 0 is the startpoint, 1 is the end point
 	\return The point
 	*/
-	vector3<type> GetPoint(float p) const
+	Vector3<T> GetPoint(float p) const
 	{
 		return start + p*(end - start);
 	}
@@ -102,7 +101,7 @@ public:
 	/**
 	\return The direction vector of the line
 	*/
-	vector3<type> GetVector() const
+	Vector3<T> GetVector() const
 	{
 		return end - start;
 	}
@@ -112,7 +111,7 @@ public:
 	\param p The point to check, this point must be kolinear with the line
 	\return Is the point between start and end
 	*/
-	bool IsPointOnLimited(const vector3<type>& p) const
+	bool IsPointOnLimited(const Vector3<T>& p) const
 	{
 		return p.IsBetweenPoints(start, end);
 	}
@@ -122,15 +121,15 @@ public:
 	\param Point The point to compare with
 	\return The nearest point to the param, which is on the line
 	*/
-	vector3<type> GetClosestPoint(const vector3<type>& Point) const
+	Vector3<T> GetClosestPoint(const Vector3<T>& Point) const
 	{
-		const vector3<type> v(end - start);
-		const vector3<type> w(Point - start);
+		const Vector3<T> v(end - start);
+		const Vector3<T> w(Point - start);
 
-		const type d = w.Dot(v) / v.GetLengthSq();
-		if(d < (type)0.0)
+		const T d = w.Dot(v) / v.GetLengthSq();
+		if(d < (T)0.0)
 			return start;
-		else if(d > (type)0)
+		else if(d > (T)0)
 			return end;
 
 		v *= d;
@@ -144,28 +143,28 @@ public:
 	\param outLineSegment Here the linesegemnt of the first intersection is written
 	\return Is there a intersection between the line and the sphere
 	*/
-	bool HitsSphere(const vector3<type>& s,
-		type r, float& outLineSegment) const
+	bool HitsSphere(const Vector3<T>& s,
+		T r, float& outLineSegment) const
 	{
-		outLineSegment = (type)0;
+		outLineSegment = (T)0;
 
-		const vector3<type> p = start - s;
+		const Vector3<T> p = start - s;
 		if(p.GetLengthSq() <= r*r)
 			return true;
 
-		const vector3<type> u = GetVector();
-		const type x = u.Dot(p);
-		const type DirSq = u.GetLengthSq();
+		const Vector3<T> u = GetVector();
+		const T x = u.Dot(p);
+		const T DirSq = u.GetLengthSq();
 
-		const type d = x*x - DirSq * (p.GetLengthSq() - r);
-		if(d < (type)0)
+		const T d = x*x - DirSq * (p.GetLengthSq() - r);
+		if(d < (T)0)
 			return false;
 		else if(IsZero(d))
 			outLineSegment = -x * DirSq;
 		else
 			outLineSegment = (-x - sqrt(d)) * DirSq;
 
-		if(outLineSegment < (type)0 || outLineSegment >(type)1)
+		if(outLineSegment < (T)0 || outLineSegment >(T)1)
 			return false;
 		else
 			return true;
@@ -176,11 +175,11 @@ public:
 	\param other The other line
 	\return The distance to the other line
 	*/
-	float GetDinstanceTo(const line3d& other) const
+	float GetDinstanceTo(const Line3& other) const
 	{
-		vector3f u = end - start;
-		vector3f v = other.end - other.start;
-		vector3f w = start - other.start;
+		Vector3F u = end - start;
+		Vector3F v = other.end - other.start;
+		Vector3F w = start - other.start;
 		float a = u.GetLengthSq();
 		float c = v.GetLengthSq();
 		float b = u.Dot(v);
@@ -202,8 +201,9 @@ public:
 };
 
 //! typdef for 3D Line with floating precision
-typedef line3d<float> line3df;
+typedef Line3<float> Line3F;
 
-}
-}
+} // namespace math
+} // namespace lux
+
 #endif

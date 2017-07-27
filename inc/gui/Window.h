@@ -78,7 +78,7 @@ public:
 
 	\ref GetSize
 	*/
-	virtual void SetSize(const math::dimension2du& Size) = 0;
+	virtual void SetSize(const math::Dimension2U& Size) = 0;
 
 	//! Get the current size of the window in pixel
 	/**
@@ -86,7 +86,7 @@ public:
 
 	\ref SetSize
 	*/
-	virtual const math::dimension2du& GetSize() const = 0;
+	virtual const math::Dimension2U& GetSize() const = 0;
 
 	//! Set the position of the window
 	/**
@@ -95,7 +95,7 @@ public:
 
 	\ref GetPosition
 	*/
-	virtual void SetPosition(const math::vector2i& Position) = 0;
+	virtual void SetPosition(const math::Vector2I& Position) = 0;
 
 	//! Get the current position of the window
 	/**
@@ -104,7 +104,7 @@ public:
 
 	\ref SetPosition
 	*/
-	virtual const math::vector2i& GetPosition() const = 0;
+	virtual const math::Vector2I& GetPosition() const = 0;
 
 	//! Maximize the window
 	/**
@@ -184,11 +184,11 @@ public:
 	/**
 	The image is scaled between SourceRect and DestRect
 	\param image The image to draw to the window
-	\param SourceRect The part of the image to use, math::recti::EMPTY to draw the full image
-	\param DestRect Where should the image be drawn, math::recti::EMPTY to fill to full window
+	\param SourceRect The part of the image to use, math::RectI::EMPTY to draw the full image
+	\param DestRect Where should the image be drawn, math::RectI::EMPTY to fill to full window
 	\return Was the image successfully drawn
 	*/
-	virtual bool Present(video::Image* image, const math::recti& SourceRect = math::recti::EMPTY, const math::recti& DestRect = math::recti::EMPTY) = 0;
+	virtual bool Present(video::Image* image, const math::RectI& SourceRect = math::RectI::EMPTY, const math::RectI& DestRect = math::RectI::EMPTY) = 0;
 
 	//! Restore the state of the window
 	/**
@@ -256,7 +256,7 @@ public:
 
 	\ref Window::GetSize
 	*/
-	virtual void OnResize(Window& window, const math::dimension2du& newSize)
+	virtual void OnResize(Window& window, const math::Dimension2U& newSize)
 	{
 		LUX_UNUSED(window);
 		LUX_UNUSED(newSize);
@@ -269,7 +269,7 @@ public:
 
 	\ref Window::GetPosition
 	*/
-	virtual void OnMove(Window& window, const math::vector2i& NewPos)
+	virtual void OnMove(Window& window, const math::Vector2I& NewPos)
 	{
 		LUX_UNUSED(window);
 		LUX_UNUSED(NewPos);

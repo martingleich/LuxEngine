@@ -19,7 +19,7 @@ public:
 	~TextureD3D9();
 
 	void Init(
-		const math::dimension2du& Size,
+		const math::Dimension2U& Size,
 		ColorFormat format,
 		u32 MipCount, bool isRendertarget, bool isDynamic);
 
@@ -32,7 +32,7 @@ public:
 	ColorFormat GetColorFormat() const;
 	void* GetRealTexture();
 	u32 GetLevelCount() const;
-	const math::dimension2du& GetSize() const;
+	const math::Dimension2U& GetSize() const;
 
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
@@ -51,7 +51,7 @@ protected:
 	ColorFormat m_Format;
 	Filter m_Filtering;
 
-	math::dimension2du m_Dimension;
+	math::Dimension2U m_Dimension;
 
 	bool m_IsLocked;
 	u32 m_LockedLevel;

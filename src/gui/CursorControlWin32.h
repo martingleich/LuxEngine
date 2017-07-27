@@ -17,17 +17,17 @@ public:
 	~CursorControlWin32();
 	void SetPosition(int x, int y);
 	void SetRelPosition(float x, float y);
-	math::vector2i GetPosition() const;
-	math::vector2f GetRelPosition() const;
-	const math::dimension2du& GetScreenSize() const;
+	math::Vector2I GetPosition() const;
+	math::Vector2F GetRelPosition() const;
+	const math::Dimension2U& GetScreenSize() const;
 	void SetVisible(bool Visible);
 	bool IsVisible() const;
 	bool IsGrabbing() const;
 	void SetGrabbing(bool Grab);
 	void Tick();
-	void OnResize(Window& window, const math::dimension2du& newSize);
+	void OnResize(Window& window, const math::Dimension2U& newSize);
 
-	const math::vector2i& GetGrabbingPosition() const
+	const math::Vector2I& GetGrabbingPosition() const
 	{
 		return m_GrabbingPosition;
 	}
@@ -38,11 +38,11 @@ private:
 private:
 	bool m_IsVisible;
 	WeakRef<Window> m_Window;
-	math::dimension2du m_WindowSize;
-	math::dimension2df m_InvWindowSize;
+	math::Dimension2U m_WindowSize;
+	math::Dimension2F m_InvWindowSize;
 
 	bool m_Grabbing;
-	math::vector2i m_GrabbingPosition;
+	math::Vector2I m_GrabbingPosition;
 };
 
 }

@@ -16,7 +16,7 @@ GeometryCreatorCylinder::GeometryCreatorCylinder()
 	m_Package.AddParam("height", 1.0f);
 	m_Package.AddParam("sectors", 16);
 	m_Package.AddParam("planes", 2);
-	m_Package.AddParam("tex", math::vector2i(1, 1));
+	m_Package.AddParam("tex", math::Vector2I(1, 1));
 	m_Package.AddParam("inside", false);
 }
 
@@ -26,7 +26,7 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(const core::PackageP
 	float height = params.Param(1);
 	s32 sectors = params.Param(2);
 	s32 planes = params.Param(3);
-	math::vector2i tex = params.Param(4);
+	math::Vector2I tex = params.Param(4);
 	bool inside = params.Param(5);
 
 	return CreateGeometry(radius, height, sectors, planes, tex.x, tex.y, inside);
@@ -84,15 +84,15 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(
 		float y = height / (planes - 1)*i;
 		y = y - height / 2;
 		for(s32 j = 0; j < sectors + 1; ++j) {
-			math::anglef alpha = (math::anglef::FULL / sectors) * j;
-			math::vector3f off = math::vector3f(
+			math::AngleF alpha = (math::AngleF::FULL / sectors) * j;
+			math::Vector3F off = math::Vector3F(
 				math::Sin(alpha),
 				0.0f,
 				math::Cos(alpha));
 
-			vertex.position = radius * off + math::vector3f(0.0f, y, 0.0f);
+			vertex.position = radius * off + math::Vector3F(0.0f, y, 0.0f);
 			vertex.normal = inside ? -off : off;
-			vertex.texture.x = texX * (alpha / math::anglef::FULL);
+			vertex.texture.x = texX * (alpha / math::AngleF::FULL);
 			vertex.texture.y = texY * ((float)i / (planes - 1));
 
 			vertexBuffer->AddVertex(&vertex);
@@ -128,14 +128,14 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(
 		curId = baseId;
 		u16 centerId = (u16)(curId + sectors);
 		for(s32 j = 0; j < sectors; ++j) {
-			math::anglef alpha = (math::anglef::FULL / sectors) * j;
-			math::vector3f off = math::vector3f(
+			math::AngleF alpha = (math::AngleF::FULL / sectors) * j;
+			math::Vector3F off = math::Vector3F(
 				math::Sin(alpha),
 				0.0f,
 				math::Cos(alpha));
 
-			vertex.position = radius * off + math::vector3f(0.0f, y, 0.0f);
-			vertex.normal = math::vector3f(0.0f, ny, 0.0f);
+			vertex.position = radius * off + math::Vector3F(0.0f, y, 0.0f);
+			vertex.normal = math::Vector3F(0.0f, ny, 0.0f);
 			vertex.texture.x = texX * (0.5f*off.x + 0.5f);
 			vertex.texture.y = texY * (0.5f*off.z + 0.5f);
 
@@ -161,16 +161,16 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(
 			++curId;
 		}
 
-		vertex.position = math::vector3f(0.0f, height / 2 * ny, 0.0f);
-		vertex.normal = math::vector3f(0.0f, ny, 0.0f);
-		vertex.texture = math::vector2f(0.5f, 0.5f);
+		vertex.position = math::Vector3F(0.0f, height / 2 * ny, 0.0f);
+		vertex.normal = math::Vector3F(0.0f, ny, 0.0f);
+		vertex.texture = math::Vector2F(0.5f, 0.5f);
 		vertexBuffer->AddVertex(&vertex);
 	}
 
 	vertexBuffer->Update();
 	indexBuffer->Update();
 
-	geo->SetBoundingBox(math::aabbox3df(
+	geo->SetBoundingBox(math::AABBoxF(
 		-radius, -height / 2, -radius,
 		radius, height / 2, radius));
 

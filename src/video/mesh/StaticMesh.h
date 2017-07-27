@@ -15,8 +15,8 @@ public:
 	size_t GetSubMeshCount() const;
 	const Geometry* GetGeometry(size_t i) const;
 	StrongRef<Geometry> GetGeometry(size_t i);
-	const math::aabbox3df& GetBoundingBox() const;
-	void SetBoundingBox(const math::aabbox3df& box);
+	const math::AABBoxF& GetBoundingBox() const;
+	void SetBoundingBox(const math::AABBoxF& box);
 	void RecalculateBoundingBox();
 	StrongRef<Geometry> AddGeometry(Geometry* subMesh);
 	StrongRef<Geometry> AddGeometry(const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
@@ -36,7 +36,7 @@ public:
 	StrongRef<Referable> Clone() const;
 
 private:
-	math::aabbox3df m_BoundingBox;
+	math::AABBoxF m_BoundingBox;
 	struct Entry
 	{
 		StrongRef<Geometry> geo;

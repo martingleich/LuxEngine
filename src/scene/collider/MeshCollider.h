@@ -33,7 +33,7 @@ public:
 	virtual bool ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallback* result);
 	virtual bool ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result);
 
-	const math::aabbox3df& GetBoundingBox() const
+	const math::AABBoxF& GetBoundingBox() const
 	{
 		return m_BoundingBox;
 	}
@@ -60,10 +60,10 @@ private:
 	{
 		size_t id;
 		float distanceSq;
-		math::vector3f pos;
+		math::Vector3F pos;
 
 		FindEntry() = default;
-		FindEntry(size_t i, float ds, const math::vector3f& p) :
+		FindEntry(size_t i, float ds, const math::Vector3F& p) :
 			id(i),
 			distanceSq(ds),
 			pos(p)
@@ -77,12 +77,12 @@ private:
 	};
 
 private:
-	bool SelectFirstTriangle(const math::line3df& line, math::vector3f& pos, size_t& triId, float& distance, bool testOnly);
+	bool SelectFirstTriangle(const math::Line3F& line, math::Vector3F& pos, size_t& triId, float& distance, bool testOnly);
 
 private:
 	core::Array<math::triangle3df> m_Triangles;
 	core::Array<FindEntry> m_Temp;
-	math::aabbox3df m_BoundingBox;
+	math::AABBoxF m_BoundingBox;
 };
 
 }

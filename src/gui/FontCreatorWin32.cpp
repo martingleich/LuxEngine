@@ -25,7 +25,7 @@ struct Context
 {
 	HDC dc;
 
-	math::dimension2du imageSize;
+	math::Dimension2U imageSize;
 	HBITMAP bitmap;
 
 	HFONT font;
@@ -429,7 +429,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const String& name,
 	return ctx;
 }
 
-bool FontCreatorWin32::GetFontImage(void* void_ctx, FontPixel*& image, math::dimension2du& imageSize)
+bool FontCreatorWin32::GetFontImage(void* void_ctx, FontPixel*& image, math::Dimension2U& imageSize)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)

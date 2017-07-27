@@ -27,8 +27,8 @@ public:
 	StrongRef<IndexBuffer> GetIndices();
 	u32 GetIndexCount() const;
 	video::EIndexFormat GetIndexType() const;
-	const math::aabbox3df& GetBoundingBox() const;
-	void SetBoundingBox(const math::aabbox3df& box);
+	const math::AABBoxF& GetBoundingBox() const;
+	void SetBoundingBox(const math::AABBoxF& box);
 	void RecalculateBoundingBox();
 
 private:
@@ -37,7 +37,7 @@ private:
 
 	EPrimitiveType m_PrimitveType;
 
-	math::aabbox3df m_BoundingBox;
+	math::AABBoxF m_BoundingBox;
 };
 
 } // namespace video

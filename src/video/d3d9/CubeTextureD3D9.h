@@ -26,7 +26,7 @@ public:
 	ColorFormat GetColorFormat() const;
 	void* GetRealTexture();
 	u32 GetLevelCount() const;
-	const math::dimension2du& GetSize() const;
+	const math::Dimension2U& GetSize() const;
 
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
@@ -39,7 +39,7 @@ private:
 	ColorFormat m_Format;
 	Filter m_Filtering;
 
-	math::dimension2du m_Dimension;
+	math::Dimension2U m_Dimension;
 
 	IDirect3DDevice9* m_D3DDevice;
 };

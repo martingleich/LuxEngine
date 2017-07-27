@@ -43,16 +43,16 @@ public:
 	LUX_API virtual float GetRange() const;
 
 	//! Set the inner cone of a spotlight
-	LUX_API virtual void SetInnerCone(math::anglef angle);
+	LUX_API virtual void SetInnerCone(math::AngleF angle);
 
 	//! Get the inner cone of a spotlight
-	LUX_API virtual math::anglef GetInnerCone() const;
+	LUX_API virtual math::AngleF GetInnerCone() const;
 
 	//! Set the outer cone of a spotlight
-	LUX_API virtual void SetOuterCone(math::anglef angle);
+	LUX_API virtual void SetOuterCone(math::AngleF angle);
 
 	//! Get the outer cone of a spotlight
-	LUX_API virtual math::anglef GetOuterCone() const;
+	LUX_API virtual math::AngleF GetOuterCone() const;
 
 	//! Set the spotlight falloff
 	LUX_API virtual void SetSpotFalloff(float falloff);

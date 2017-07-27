@@ -15,13 +15,13 @@ public:
 	{
 	}
 
-	LookAtEmitter(const math::vector3f& point, float scatter=0.0f)
+	LookAtEmitter(const math::Vector3F& point, float scatter=0.0f)
 	{
 		SetPoint(point);
 		m_Scatter = scatter;
 	}
 
-	void SetPoint(const math::vector3f& point)
+	void SetPoint(const math::Vector3F& point)
 	{
 		m_Point = point;
 	}
@@ -31,7 +31,7 @@ public:
 		m_Scatter = scatter;
 	}
 
-	const math::vector3f& GetPoint() const
+	const math::Vector3F& GetPoint() const
 	{
 		return m_Point;
 	}
@@ -57,17 +57,17 @@ public:
 protected:
 	void GenerateVelocity(Particle& particle, float speed) const
 	{
-		math::vector3f scatter = m_Rand.GetVector3() * m_Scatter;
-		math::vector3f dir = (m_TransformedPoint - particle.position).Normal_s();
-		math::vector3f s = scatter - dir.Dot(scatter)*dir;
+		math::Vector3F scatter = m_Rand.GetVector3() * m_Scatter;
+		math::Vector3F dir = (m_TransformedPoint - particle.position).Normal();
+		math::Vector3F s = scatter - dir.Dot(scatter)*dir;
 		particle.velocity = speed * (dir + s);
 	}
 
 private:
-	math::vector3f m_Point;
+	math::Vector3F m_Point;
 	float m_Scatter;
 
-	mutable math::vector3f m_TransformedPoint;
+	mutable math::Vector3F m_TransformedPoint;
 };
 
 } // namespace scene

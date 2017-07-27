@@ -90,10 +90,10 @@ public:
 	EUpOrientation UpOrient;
 	ELockedAxis LockedAxis;
 
-	math::vector3f LookValue;
-	math::vector3f UpValue;
+	math::Vector3F LookValue;
+	math::Vector3F UpValue;
 
-	math::vector2f Scaling;
+	math::Vector2F Scaling;
 	StrongRef<video::SpriteBank> SpriteBank;
 	video::SpriteBank::Sprite DefaultSprite;
 
@@ -110,7 +110,7 @@ public:
 		ScaleSpeed(false),
 		Length(1.0f),
 		EmitLight(false),
-		DefaultDir(math::vector3f::UNIT_Y)
+		DefaultDir(math::Vector3F::UNIT_Y)
 	{
 	}
 
@@ -119,7 +119,7 @@ public:
 	float Length;
 	bool EmitLight;
 
-	math::vector3f DefaultDir;
+	math::Vector3F DefaultDir;
 };
 
 class PointRenderer : public ParticleRenderer

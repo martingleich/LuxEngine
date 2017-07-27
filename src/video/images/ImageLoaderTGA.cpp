@@ -18,7 +18,7 @@ struct Context
 	tga_struct* tga;
 	tga_info* info;
 
-	math::dimension2du size;
+	math::Dimension2U size;
 	video::ColorFormat format;
 
 	Context() :

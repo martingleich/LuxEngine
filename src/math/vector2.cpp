@@ -8,12 +8,12 @@ namespace Types
 {
 Type Vector2f()
 {
-	static const Type t(new core::TypeInfoTemplate<math::vector2f>("vector2f"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector2F>("vector2f"));
 	return t;
 }
 Type Vector2i()
 {
-	static const Type t(new core::TypeInfoTemplate<math::vector2i>("vector2i"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector2I>("vector2i"));
 	return t;
 }
 }

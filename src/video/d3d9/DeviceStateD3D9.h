@@ -43,7 +43,7 @@ public:
 	void SetRenderStateF(D3DRENDERSTATETYPE state, float value);
 	void SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value);
 	void SetTexture(u32 stage, IDirect3DBaseTexture9* tex);
-	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::matrix4& m);
+	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matrix4& m);
 
 	void EnableFog(bool enable);
 	void SetFog(const FogData& fog);

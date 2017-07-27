@@ -28,7 +28,7 @@ public:
 	StrongRef<ParticleRenderer> CreateRenderer();
 
 private:
-	bool PrecomputeOrientation(const math::matrix4& invModelView);
+	bool PrecomputeOrientation(const math::Matrix4& invModelView);
 	void ComputeGlobalOrientation();
 	void ComputeLocalOrientation(const Particle& particle);
 	void SetIndexBuffer(video::IndexBuffer* indexBuffer, u32 from, u32 to);
@@ -44,12 +44,12 @@ private:
 
 	StrongRef<video::Geometry> m_Buffer;
 
-	math::vector3f m_HelpLook;
-	math::vector3f m_HelpUp;
+	math::Vector3F m_HelpLook;
+	math::Vector3F m_HelpUp;
 
-	math::vector3f m_Up;
-	math::vector3f m_Look;
-	math::vector3f m_Side;
+	math::Vector3F m_Up;
+	math::Vector3F m_Look;
+	math::Vector3F m_Side;
 	bool m_IsRotationEnabled;
 
 	StrongRef<video::Material> m_BaseMaterial;

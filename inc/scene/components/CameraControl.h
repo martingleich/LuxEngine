@@ -15,7 +15,7 @@ class CameraControl : public Animator
 {
 public:
 	LUX_API CameraControl();
-	LUX_API CameraControl(float moveSpeed, math::anglef rotSpeed, math::anglef maxVerticalAngle, bool noVerticalMovement);
+	LUX_API CameraControl(float moveSpeed, math::AngleF rotSpeed, math::AngleF maxVerticalAngle, bool noVerticalMovement);
 
 	LUX_API ~CameraControl();
 
@@ -24,11 +24,11 @@ public:
 	LUX_API float GetMoveSpeed() const;
 	LUX_API void SetMoveSpeed(float fSpeed);
 
-	LUX_API void SetMaxVerticalAngle(math::anglef a);
-	LUX_API math::anglef GetMaxVerticalAngle() const;
+	LUX_API void SetMaxVerticalAngle(math::AngleF a);
+	LUX_API math::AngleF GetMaxVerticalAngle() const;
 
-	LUX_API math::anglef GetRotationSpeed() const;
-	LUX_API void SetRotationSpeed(math::anglef fSpeed);
+	LUX_API math::AngleF GetRotationSpeed() const;
+	LUX_API void SetRotationSpeed(math::AngleF fSpeed);
 
 	LUX_API bool VerticalMovementAllowed() const;
 	LUX_API void AllowVerticalMovement(bool Allow);
@@ -49,15 +49,15 @@ private:
 
 private:
 	float m_MoveSpeed;
-	math::anglef m_RotSpeed;
-	math::anglef m_MaxVerticalAngle;
+	math::AngleF m_RotSpeed;
+	math::AngleF m_MaxVerticalAngle;
 	bool m_NoVerticalMovement;
 
 	WeakRef<events::AxisAction> m_Forward;
 	WeakRef<events::AxisAction> m_Flank;
 	WeakRef<events::AxisAction> m_Up;
 
-	math::vector2f m_MouseMove;
+	math::Vector2F m_MouseMove;
 };
 
 } // namespace scene

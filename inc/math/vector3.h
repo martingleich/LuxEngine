@@ -13,7 +13,7 @@ namespace math
 in cartesian coordinates
 */
 template <typename T>
-class vector3
+class Vector3
 {
 public:
 	T x; //!< The x component of the vector.
@@ -21,43 +21,43 @@ public:
 	T z; //!< The z component of the vector.
 
 public:
-	static const vector3 UNIT_X;    //!< Constant for the x-axis
-	static const vector3 UNIT_Y;    //!< Constant for the y-axis
-	static const vector3 UNIT_Z;    //!< Constant for the z-axis
-	static const vector3 NEGATIVE_UNIT_X;    //!< Constant for the negative x-axis
-	static const vector3 NEGATIVE_UNIT_Y;    //!< Constant for the negative y-axis
-	static const vector3 NEGATIVE_UNIT_Z;    //!< Constant for the negative z-axis
-	static const vector3 ZERO;    //!< Constant for the nullvector
-	static const vector3 UNIT_scale;    //!< Constant for the unitscale-vector(all components are 1)
+	static const Vector3 UNIT_X;    //!< Constant for the x-axis
+	static const Vector3 UNIT_Y;    //!< Constant for the y-axis
+	static const Vector3 UNIT_Z;    //!< Constant for the z-axis
+	static const Vector3 NEGATIVE_UNIT_X;    //!< Constant for the negative x-axis
+	static const Vector3 NEGATIVE_UNIT_Y;    //!< Constant for the negative y-axis
+	static const Vector3 NEGATIVE_UNIT_Z;    //!< Constant for the negative z-axis
+	static const Vector3 ZERO;    //!< Constant for the nullvector
+	static const Vector3 UNIT_scale;    //!< Constant for the unitscale-vector(all components are 1)
 
 public:
 	//! Defaultconstructor
 	/**
 	All components are zero
 	*/
-	vector3() : x(0), y(0), z(0)
+	Vector3() : x(0), y(0), z(0)
 	{
 	}
 	//! Copyconstructor
-	vector3(const vector3& v) : x(v.x), y(v.y), z(v.z)
+	Vector3(const Vector3& v) : x(v.x), y(v.y), z(v.z)
 	{
 	}
 	//! Constructor from 2d vector and depth
-	vector3(const vector2<T>& v, float _z) : x(v.x), y(v.y), z(z)
+	Vector3(const Vector2<T>& v, float _z) : x(v.x), y(v.y), z(z)
 	{
 	}
 	//! Constructor from componenents
-	vector3(const T X, const T Y, const T Z) : x(X), y(Y), z(Z)
+	Vector3(const T X, const T Y, const T Z) : x(X), y(Y), z(Z)
 	{
 	}
 	//! Constructor from single value, all componets get this value
-	explicit vector3(const T a) : x(a), y(a), z(a)
+	explicit Vector3(const T a) : x(a), y(a), z(a)
 	{
 	}
 
 	//! Copyconstruct from vector3 with other base T.
 	template <typename Type2>
-	vector3(const vector3<Type2> v) : x((T)v.x), y((T)v.y), z((T)v.z)
+	Vector3(const Vector3<Type2> v) : x((T)v.x), y((T)v.y), z((T)v.z)
 	{
 	}
 
@@ -67,105 +67,105 @@ public:
 	\param beta The vertical angle
 	\param length The length of the vector
 	*/
-	static vector3<T> BuildFromPolar(angle<T> alpha, angle<T> beta, T length)
+	static Vector3<T> BuildFromPolar(Angle<T> alpha, Angle<T> beta, T length)
 	{
-		return vector3<T>(
+		return Vector3<T>(
 			Sin(alpha) * Cos(beta) * length,
 			Sin(beta) * length,
 			Cos(alpha) * Cos(beta) * length);
 	}
 
 	//! Negation
-	vector3<T> operator-() const
+	Vector3<T> operator-() const
 	{
-		return vector3<T>(-x, -y, -z);
+		return Vector3<T>(-x, -y, -z);
 	}
 
 	//! Assignment
-	vector3<T>& operator=(const vector3<T>& v)
+	Vector3<T>& operator=(const Vector3<T>& v)
 	{
 		x = v.x; y = v.y; z = v.z; return *this;
 	}
 
 	//! Shortaddition
-	vector3<T>& operator+= (const vector3<T>& v)
+	Vector3<T>& operator+= (const Vector3<T>& v)
 	{
 		x = x + v.x; y = y + v.y; z = z + v.z; return *this;
 	}
 	//! Shortsubtraction
-	vector3<T>& operator-= (const vector3<T>& v)
+	Vector3<T>& operator-= (const Vector3<T>& v)
 	{
 		x = x - v.x; y = y - v.y; z = z - v.z; return *this;
 	}
 	//! Shortmultiplication with scalar.
-	vector3<T>& operator*= (const T f)
+	Vector3<T>& operator*= (const T f)
 	{
 		x = x*f; y = y*f; z = z*f; return *this;
 	}
 	//! Shortdivision with scalaer
-	vector3<T>& operator/= (const T f)
+	Vector3<T>& operator/= (const T f)
 	{
 		x = x / f; y = y / f; z = z / f; return *this;
 	}
 
 	//! Short componentwise divison with other vector.
-	vector3<T>& operator/= (const vector3<T>& v)
+	Vector3<T>& operator/= (const Vector3<T>& v)
 	{
 		x = x / v.x; y = y / v.y; z = z / v.z; return *this;
 	}
 	//! Short componentwise multiplication with other vector.
-	vector3<T>& operator*= (const vector3<T>& v)
+	Vector3<T>& operator*= (const Vector3<T>& v)
 	{
 		x = x*v.x; y = y*v.y; z = z*v.z; return *this;
 	}
 
 	//! Addition
-	vector3<T> operator+ (const vector3<T>& other) const
+	Vector3<T> operator+ (const Vector3<T>& other) const
 	{
-		return vector3<T>(x + other.x, y + other.y, z + other.z);
+		return Vector3<T>(x + other.x, y + other.y, z + other.z);
 	}
 
 	//! Subtraction
-	vector3<T> operator- (const vector3<T>& other) const
+	Vector3<T> operator- (const Vector3<T>& other) const
 	{
-		return vector3<T>(x - other.x, y - other.y, z - other.z);
+		return Vector3<T>(x - other.x, y - other.y, z - other.z);
 	}
 	//! Componentwise multiplication with other vector.
-	vector3<T> operator* (const vector3<T>& other) const
+	Vector3<T> operator* (const Vector3<T>& other) const
 	{
-		return vector3<T>(x*other.x, y*other.y, z*other.z);
+		return Vector3<T>(x*other.x, y*other.y, z*other.z);
 	}
 	//! Componentwise divison with other vector.
-	vector3<T> operator/ (const vector3<T>& other) const
+	Vector3<T> operator/ (const Vector3<T>& other) const
 	{
-		return vector3<T>(x / other.x, y / other.y, z / other.z);
+		return Vector3<T>(x / other.x, y / other.y, z / other.z);
 	}
 	//! Multiplication with scalar.
-	vector3<T> operator* (const T f) const
+	Vector3<T> operator* (const T f) const
 	{
-		return vector3<T>(x*f, y*f, z*f);
+		return Vector3<T>(x*f, y*f, z*f);
 	}
 	//! Division with scalar.
-	vector3<T> operator/ (const T f) const
+	Vector3<T> operator/ (const T f) const
 	{
-		return vector3<T>(x / f, y / f, z / f);
+		return Vector3<T>(x / f, y / f, z / f);
 	}
 
 
 	//! Equality
-	bool operator== (const vector3<T>& other) const
+	bool operator== (const Vector3<T>& other) const
 	{
 		return x == other.x && y == other.y && z == other.z;
 	}
 
 	//! Inequality
-	bool operator!= (const vector3<T>& other) const
+	bool operator!= (const Vector3<T>& other) const
 	{
 		return x != other.x || y != other.y || z != other.z;
 	}
 
 	//! Smaller operator, for sorting.
-	bool operator<(const vector3<T>& other) const
+	bool operator<(const Vector3<T>& other) const
 	{
 		return (x < other.x && x != other.x) ||
 			(x == other.x && y < other.y && y != other.y) ||
@@ -211,7 +211,7 @@ public:
 	\param Z The new z coordinate
 	\return Selfreference
 	*/
-	vector3<T>& Set(T X, T Y, T Z)
+	Vector3<T>& Set(T X, T Y, T Z)
 	{
 		x = X;
 		y = Y;
@@ -244,9 +244,9 @@ public:
 	\param v The point to which the distance is calculated
 	\return The distance between this and the other point
 	*/
-	T GetDistanceTo(const vector3<T>& v) const
+	T GetDistanceTo(const Vector3<T>& v) const
 	{
-		return vector3<T>(x - v.x, y - v.y, z - v.z).GetLength();
+		return Vector3<T>(x - v.x, y - v.y, z - v.z).GetLength();
 	}
 
 	//! The squared distance to another point
@@ -255,51 +255,26 @@ public:
 	\param v The point to which the distance is calculated
 	\return The squered distance between this and the other point
 	*/
-	T GetDistanceToSq(const vector3<T>& v) const
+	T GetDistanceToSq(const Vector3<T>& v) const
 	{
-		return vector3<T>(x - v.x, y - v.y, z - v.z).GetLengthSq();
+		return Vector3<T>(x - v.x, y - v.y, z - v.z).GetLengthSq();
 	}
 
 	//! Normalized vector
-	vector3<T> Normal() const
+	Vector3<T> Normal() const
 	{
-		vector3<T> out(*this);
+		Vector3<T> out(*this);
 		out.Normalize();
 		return out;
 	}
 
-	//! Normalized vector
-	vector3<T> Normal_s() const
-	{
-		vector3<T> out(*this);
-		out.Normalize_s();
-		return out;
-	}
-
 	//! Normalize this vector
 	/**
 	\return Selfreference
 	*/
-	vector3<T>& Normalize()
+	Vector3<T>& Normalize()
 	{
 		SetLength(1);
-		return *this;
-	}
-
-	//! Normalize this vector
-	/**
-	Checks for length 0
-	\return Selfreference
-	*/
-	vector3<T>& Normalize_s()
-	{
-		double length = GetLengthSq();
-		if(length > 0) {
-			length = 1.0 / sqrt(length);
-			x *= T(length);
-			y *= T(length);
-			z *= T(length);
-		}
 		return *this;
 	}
 
@@ -308,7 +283,7 @@ public:
 	\param newLength The new length of the vector
 	\return Selfreference
 	*/
-	vector3<T>& SetLength(T newLength)
+	Vector3<T>& SetLength(T newLength)
 	{
 		if(isinf(x) || isinf(y) || isinf(z)) {
 			if(isinf(x))
@@ -325,7 +300,11 @@ public:
 				z = 0;
 		}
 
-		double factor = newLength / GetLength();
+		double len = GetLength();
+		if(IsZero(len))
+			return *this;
+		
+		double factor = newLength / len;
 		x *= T(factor);
 		y *= T(factor);
 		z *= T(factor);
@@ -338,9 +317,9 @@ public:
 	\param v The other vector
 	\return The crossproduct between this and the other vector
 	*/
-	vector3<T> Cross(const vector3<T>& v)    const
+	Vector3<T> Cross(const Vector3<T>& v)    const
 	{
-		return vector3<T>(y*v.z - z*v.y,
+		return Vector3<T>(y*v.z - z*v.y,
 			z*v.x - x*v.z,
 			x*v.y - y*v.x);
 	}
@@ -350,7 +329,7 @@ public:
 	\param v The other vector
 	\return The dotproduct between this and the other vector
 	*/
-	T Dot(const vector3<T>& v) const
+	T Dot(const Vector3<T>& v) const
 	{
 		return x*v.x + y*v.y + z*v.z;
 	}
@@ -362,7 +341,7 @@ public:
 	\param v2 The second point
 	\return True if this vector is between v1 and v2 otherwise false
 	*/
-	bool IsBetweenPoints(const vector3<T>& v1, const vector3<T>& v2) const
+	bool IsBetweenPoints(const Vector3<T>& v1, const Vector3<T>& v2) const
 	{
 		const T f = (v2 - v1).GetLengthSq();
 		return GetDistanceToSq(v1) <= f &&
@@ -375,7 +354,7 @@ public:
 	\param b The vector to which the angle is calculated
 	\return The angle between this and b
 	*/
-	angle<T> AngleTo(const vector3<T>& b) const
+	Angle<T> AngleTo(const Vector3<T>& b) const
 	{
 		return math::ArcCos<T>(Dot(b)) / (T)sqrt(double(GetLengthSq()*b.GetLengthSq()));
 	}
@@ -386,7 +365,7 @@ public:
 	\param v The vector to rotate
 	\return The rotated vector
 	*/
-	vector3<T> RotToDir(const vector3<T>& v = vector3<T>::UNIT_Z) const
+	Vector3<T> RotToDir(const Vector3<T>& v = Vector3<T>::UNIT_Z) const
 	{
 		const double cx = cos(x);
 		const double sx = sin(x);
@@ -403,7 +382,7 @@ public:
 			(sxsy*cz - cx*sz), (sxsy*sz + cx*cz), (sx*cy),
 			(cxsy*cz + sx*sz), (cxsy*sz - sx*cz), (cx*cy)};
 
-		return vector3<T>(
+		return Vector3<T>(
 			(T)(v.x * pseudoMatrix[0] +
 				v.y * pseudoMatrix[3] +
 				v.z * pseudoMatrix[6]),
@@ -420,9 +399,9 @@ public:
 	The output is horicontal angle, vertical angle, Length
 	\return The vector in polarcoordinates
 	*/
-	vector3<T> ToPolar() const
+	Vector3<T> ToPolar() const
 	{
-		vector3<T> vOut;
+		Vector3<T> vOut;
 
 		double length = x*x + y*y + z*z;
 		if(length > 0) {
@@ -450,9 +429,9 @@ public:
 	/**
 	\return The needed rotation in Eulerangles(XYZ and rad)
 	*/
-	vector3<T> GetRotAngles() const
+	Vector3<T> GetRotAngles() const
 	{
-		vector3<T> vOut;
+		Vector3<T> vOut;
 
 		double length = x*x + y*y + z*z;
 		if(length > 0) {
@@ -493,9 +472,9 @@ public:
 		return (x + y + z) / 3;
 	}
 
-	vector3 Absolute() const
+	Vector3 Absolute() const
 	{
-		return vector3(
+		return Vector3(
 			abs(x),
 			abs(y),
 			abs(z));
@@ -507,14 +486,14 @@ public:
 	If this vector is the null vector, the null vector is returned.
 	This function works with infinite vectors.
 	*/
-	vector3 GetUnitCubeVector() const
+	Vector3 GetUnitCubeVector() const
 	{
 		T ax = abs(x), ay = abs(y), az = abs(z);
 		T max = math::Max(ax, ay, az);
 		if(max == 0)
-			return vector3::ZERO;
+			return Vector3::ZERO;
 
-		vector3 out;
+		Vector3 out;
 		if(max == ax)
 			out.x = x < 0 ? (T)-1 : (T)1;
 		if(max == ay)
@@ -529,55 +508,55 @@ public:
 	/**
 	If the null vector is passed (1,0,0) is returned.
 	*/
-	vector3 GetOrthoNormal() const
+	Vector3 GetOrthoNormal() const
 	{
 		if(n.x == 0)
-			return vector3(0, n.z, -n.y) / std::sqrt(n.z*n.z + n.y*n.y);
+			return Vector3(0, n.z, -n.y) / std::sqrt(n.z*n.z + n.y*n.y);
 		else if(n.z != 0 && n.x != 0)
-			return vector3(n.z, 0, -n.x) / std::sqrt(n.z*n.z + n.x*n.x);
+			return Vector3(n.z, 0, -n.x) / std::sqrt(n.z*n.z + n.x*n.x);
 		else
-			return vector3(1, 0, 0);
+			return Vector3(1, 0, 0);
 	}
 };
 
 ///\cond INTERNAL
 template <typename T>
-inline vector3<T> operator* (const T f, const vector3<T>& v)
+inline Vector3<T> operator* (const T f, const Vector3<T>& v)
 {
 	return v*f;
 }
 
 template <typename T>
-inline vector3<T> operator/ (const T f, const vector3<T>& v)
+inline Vector3<T> operator/ (const T f, const Vector3<T>& v)
 {
-	return vector3<T>(f / v.x, f / v.y, f / v.z);
+	return Vector3<T>(f / v.x, f / v.y, f / v.z);
 }
 ///\endcond
 
 //! A 3d vector with float precision
-typedef vector3<float> vector3f;
+typedef Vector3<float> Vector3F;
 //! A 3d vector with integer precision
-typedef vector3<s32>   vector3i;
+typedef Vector3<s32>   vector3i;
 
 template <typename T>
-const vector3<T>  vector3<T>::UNIT_X = math::vector3<T>(1, 0, 0);
+const Vector3<T> Vector3<T>::UNIT_X = math::Vector3<T>(1, 0, 0);
 template <typename T>
-const vector3<T>  vector3<T>::UNIT_Y = math::vector3<T>(0, 1, 0);
+const Vector3<T> Vector3<T>::UNIT_Y = math::Vector3<T>(0, 1, 0);
 template <typename T>
-const vector3<T>  vector3<T>::UNIT_Z = math::vector3<T>(0, 0, 1);
+const Vector3<T> Vector3<T>::UNIT_Z = math::Vector3<T>(0, 0, 1);
 template <typename T>
-const vector3<T>  vector3<T>::NEGATIVE_UNIT_X = math::vector3<T>(-1, 0, 0);
+const Vector3<T> Vector3<T>::NEGATIVE_UNIT_X = math::Vector3<T>(-1, 0, 0);
 template <typename T>
-const vector3<T>  vector3<T>::NEGATIVE_UNIT_Y = math::vector3<T>(0, -1, 0);
+const Vector3<T> Vector3<T>::NEGATIVE_UNIT_Y = math::Vector3<T>(0, -1, 0);
 template <typename T>
-const vector3<T>  vector3<T>::NEGATIVE_UNIT_Z = math::vector3<T>(0, 0, -1);
+const Vector3<T> Vector3<T>::NEGATIVE_UNIT_Z = math::Vector3<T>(0, 0, -1);
 template <typename T>
-const vector3<T>  vector3<T>::ZERO = math::vector3<T>(0, 0, 0);
+const Vector3<T> Vector3<T>::ZERO = math::Vector3<T>(0, 0, 0);
 template <typename T>
-const vector3<T>  vector3<T>::UNIT_scale = math::vector3<T>(1, 1, 1);
+const Vector3<T> Vector3<T>::UNIT_scale = math::Vector3<T>(1, 1, 1);
 
 template <typename T>
-void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& placeholder)
+void conv_data(format::Context& ctx, const Vector3<T>& v, format::Placeholder& placeholder)
 {
 	using namespace format;
 	placeholder.type = 'a';
@@ -599,7 +578,7 @@ void conv_data(format::Context& ctx, const vector3<T>& v, format::Placeholder& p
 }
 
 template <typename T>
-bool IsEqual(const vector3<T>& a, const vector3<T>& b, const T tolerance = math::Constants<T>::rounding_error())
+bool IsEqual(const Vector3<T>& a, const Vector3<T>& b, const T tolerance = math::Constants<T>::rounding_error())
 {
 	return
 		math::IsEqual(a.x, b.x, tolerance) &&
@@ -608,7 +587,7 @@ bool IsEqual(const vector3<T>& a, const vector3<T>& b, const T tolerance = math:
 }
 
 template <typename T>
-bool IsZero(const vector3<T>& v, const T tolerance = math::Constants<T>::rounding_error())
+bool IsZero(const Vector3<T>& v, const T tolerance = math::Constants<T>::rounding_error())
 {
 	return
 		math::IsZero(v.x, tolerance) &&
@@ -626,8 +605,8 @@ LUX_API Type Vector3f();
 LUX_API Type Vector3i();
 }
 
-template<> inline Type GetTypeInfo<math::vector3<float>>() { return Types::Vector3f(); };
-template<> inline Type GetTypeInfo<math::vector3<int>>() { return Types::Vector3i(); };
+template<> inline Type GetTypeInfo<math::Vector3<float>>() { return Types::Vector3f(); };
+template<> inline Type GetTypeInfo<math::Vector3<int>>() { return Types::Vector3i(); };
 } // namespace core
 
 } // namespace lux

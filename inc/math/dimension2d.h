@@ -9,7 +9,7 @@ namespace math
 
 //! Specifies a 2 dimensional size
 template <typename T>
-class dimension2d
+class Dimension2
 {
 public:
 	//! Width of the dimension
@@ -18,26 +18,26 @@ public:
 	T height;
 
 	//! default constructor for empty dimension
-	dimension2d() : width(0), height(0)
+	Dimension2() : width(0), height(0)
 	{
 	}
 	//! Constructor from width and height
-	dimension2d(const T& width, const T& height) : width(width), height(height)
+	Dimension2(const T& width, const T& height) : width(width), height(height)
 	{
 	}
 	//! Constructor from vector2
-	dimension2d(const vector2<T>& v) : width(v.x), height(v.y)
+	Dimension2(const Vector2<T>& v) : width(v.x), height(v.y)
 	{
 	}
 
 	template <typename UType>
-	explicit dimension2d(const dimension2d<UType>& other) : width((T)other.width), height((T)other.height)
+	explicit Dimension2(const Dimension2<UType>& other) : width((T)other.width), height((T)other.height)
 	{
 	}
 
 	//! Assingment
 	template <typename UType>
-	dimension2d<T>& operator=(const dimension2d<UType>& other)
+	Dimension2<T>& operator=(const Dimension2<UType>& other)
 	{
 		width = (T)other.width;
 		height = (T)other.height;
@@ -46,19 +46,19 @@ public:
 	}
 
 	//! Equality
-	bool operator==(const dimension2d<T>& other) const
+	bool operator==(const Dimension2<T>& other) const
 	{
 		return (width == other.width) && (height == other.height);
 	}
 
 	//! Unquality
-	bool operator!=(const dimension2d<T>& other) const
+	bool operator!=(const Dimension2<T>& other) const
 	{
 		return !(*this == other);
 	}
 
 	//! Set the dimension
-	dimension2d<T>& Set(const T& w, const T& h)
+	Dimension2<T>& Set(const T& w, const T& h)
 	{
 		width = w;
 		height = h;
@@ -67,7 +67,7 @@ public:
 	}
 
 	//! scale dimension
-	dimension2d<T>& operator/=(T s)
+	Dimension2<T>& operator/=(T s)
 	{
 		width /= s;
 		height /= s;
@@ -76,13 +76,13 @@ public:
 	}
 
 	//! scale dimension
-	dimension2d<T> operator/(T s) const
+	Dimension2<T> operator/(T s) const
 	{
-		return dimension2d<T>(width / s, height / s);
+		return Dimension2<T>(width / s, height / s);
 	}
 
 	//! scale dimension
-	dimension2d<T>& operator*=(T s)
+	Dimension2<T>& operator*=(T s)
 	{
 		width *= s;
 		height *= s;
@@ -91,9 +91,9 @@ public:
 	}
 
 	//! scale dimension
-	dimension2d<T> operator*(T s) const
+	Dimension2<T> operator*(T s) const
 	{
-		return dimension2d<T>(width*s, height*s);
+		return Dimension2<T>(width*s, height*s);
 	}
 
 	//! The area of the dimension
@@ -106,9 +106,9 @@ public:
 	}
 
 	//! Get a vector to the center of the area.
-	vector2<T> GetCenter() const
+	Vector2<T> GetCenter() const
 	{
-		return vector2<T>(width/2, height/2);
+		return Vector2<T>(width/2, height/2);
 	}
 
 	//! Linear interpolation betwenn this dimension and another
@@ -117,10 +117,10 @@ public:
 	\param d The interpolation param between 0 and 1
 	\return The interpolated dimension
 	*/
-	dimension2d<T> GetInterpolated(const dimension2d<T>& other, float d) const
+	Dimension2<T> GetInterpolated(const Dimension2<T>& other, float d) const
 	{
 		float inv = (1.0f - d);
-		return dimension2d<T>((T)(other.width*inv + width*d), (T)(other.height*inv + height*d));
+		return Dimension2<T>((T)(other.width*inv + width*d), (T)(other.height*inv + height*d));
 	}
 
 	//! Is the dimension a square
@@ -165,7 +165,7 @@ public:
 	\param other The dimension to test
 	\return Does this dimension fist
 	*/
-	bool DoesFitInto(const dimension2d<T>& other) const
+	bool DoesFitInto(const Dimension2<T>& other) const
 	{
 		return (width <= other.width && height <= other.height);
 	}
@@ -181,11 +181,11 @@ public:
 		this value must fullfil the condition.
 	\return The nearest dimension under the given constraints
 	*/
-	dimension2d<T> GetConstrained(
+	Dimension2<T> GetConstrained(
 		bool powerOfTwo = true,
 		bool square = false,
 		bool larger = true,
-		const dimension2d<T> maxValue = 0) const
+		const Dimension2<T> maxValue = 0) const
 	{
 		T i = 1;
 		T j = 1;
@@ -216,32 +216,32 @@ public:
 		if(maxValue.height > 0 && j > maxValue.height)
 			j = maxValue.height;
 
-		return dimension2d(i, j);
+		return Dimension2(i, j);
 	}
 };
 
 ///\cond INTERNAL
 template <typename T>
-dimension2d<T> operator/(T s, const dimension2d<T>& d)
+Dimension2<T> operator/(T s, const Dimension2<T>& d)
 {
 	return d / s;
 }
 
 template <typename T>
-dimension2d<T> operator*(T s, const dimension2d<T>& d)
+Dimension2<T> operator*(T s, const Dimension2<T>& d)
 {
 	return d*s;
 }
 ///\endcond
 
 //! Dimension with float precision
-typedef dimension2d<float> dimension2df;
+typedef Dimension2<float> Dimension2F;
 
-//! Dimensino with unsigned int precision
-typedef dimension2d<u32> dimension2du;
+//! Dimension with unsigned int precision
+typedef Dimension2<u32> Dimension2U;
 
-}
-}
+} // namespace math
+} // namespace lux
 
 #endif // INCLUDED_DIMENSION2D_H
 

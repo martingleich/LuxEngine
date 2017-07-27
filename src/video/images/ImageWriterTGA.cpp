@@ -50,7 +50,7 @@ static uint32_t tga_proc_seek(tga_struct* tga, uint32_t offset)
 	return success ? 0 : 1;
 }
 
-void ImageWriterTGA::WriteFile(io::File* file, void* data, video::ColorFormat format, math::dimension2du size, u32 pitch, u32 writerParam)
+void ImageWriterTGA::WriteFile(io::File* file, void* data, video::ColorFormat format, math::Dimension2U size, u32 pitch, u32 writerParam)
 {
 	LX_CHECK_NULL_ARG(file);
 	LX_CHECK_NULL_ARG(data);

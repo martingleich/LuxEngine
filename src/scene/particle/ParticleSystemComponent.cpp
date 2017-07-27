@@ -110,9 +110,9 @@ void ParticleSystem::Render(Node* node, video::Renderer* renderer, ERenderPass p
 		return;
 
 	if(m_IsGlobal) {
-		renderer->SetTransform(video::ETransform::World, math::matrix4::IDENTITY);
+		renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 	} else {
-		math::matrix4 mat;
+		math::Matrix4 mat;
 		node->GetAbsoluteTransform().ToMatrix(mat);
 		renderer->SetTransform(video::ETransform::World, mat);
 	}
@@ -128,9 +128,9 @@ ERenderPass ParticleSystem::GetRenderPass() const
 	return ERenderPass::Transparent;
 }
 
-const math::aabbox3df& ParticleSystem::GetBoundingBox() const
+const math::AABBoxF& ParticleSystem::GetBoundingBox() const
 {
-	return math::aabbox3df::EMPTY;
+	return math::AABBoxF::EMPTY;
 }
 
 void ParticleSystem::UpdateGroups()

@@ -173,7 +173,7 @@ void ParticleModel::InitParticle(Particle& particle) const
 {
 	particle.age = 0.0f;
 	particle.life = m_Randomizer.GetFloat(m_LifeTimeMin, m_LifeTimeMax);
-	particle.velocity = math::vector3f::ZERO;
+	particle.velocity = math::Vector3F::ZERO;
 
 	float* p_val = particle.params;
 	float* p_delta = p_val + m_StaticCount + m_ChangingCount;
@@ -251,12 +251,12 @@ void ParticleModel::UpdateParticle(Particle& particle, float secsPassed) const
 	}
 }
 
-void ParticleModel::SetGravity(const math::vector3f& v)
+void ParticleModel::SetGravity(const math::Vector3F& v)
 {
 	m_Gravity = v;
 }
 
-const math::vector3f& ParticleModel::GetGravity() const
+const math::Vector3F& ParticleModel::GetGravity() const
 {
 	return m_Gravity;
 }

@@ -17,7 +17,7 @@ public:
 	}
 
 	bool CanWriteFile(const String& ext);
-	void WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::dimension2du Size, u32 Pitch, u32 WriterParam = 0);
+	void WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::Dimension2U Size, u32 Pitch, u32 WriterParam = 0);
 };
 
 }

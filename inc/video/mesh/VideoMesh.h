@@ -40,7 +40,7 @@ public:
 	virtual StrongRef<Geometry> GetGeometry(size_t i) = 0;
 
 	//! Returns the Bounding-box of the whole mesh
-	virtual const math::aabbox3df& GetBoundingBox() const = 0;
+	virtual const math::AABBoxF& GetBoundingBox() const = 0;
 
 	//! Add a new geometry to the mesh
 	/**
@@ -73,7 +73,7 @@ public:
 	virtual void RecalculateBoundingBox() = 0;
 
 	//! Set a user-defined bounding box
-	virtual void SetBoundingBox(const math::aabbox3df& box) = 0;
+	virtual void SetBoundingBox(const math::AABBoxF& box) = 0;
 
 	//! Get a submesh material by index.
 	virtual Material* GetMaterial(size_t index) = 0;

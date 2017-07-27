@@ -106,7 +106,7 @@ bool ParticleGroupData::LaunchParticle(Particle& particle, float secsPassed)
 	return true;
 }
 
-void ParticleGroupData::AddParticle(u32 count, const math::vector3f& position, const math::vector3f& velocity)
+void ParticleGroupData::AddParticle(u32 count, const math::Vector3F& position, const math::Vector3F& velocity)
 {
 	CreationData Data;
 	Data.count = count;
@@ -169,7 +169,7 @@ void ParticleGroupData::Update(float secsPassed, const SystemData& data)
 	}
 
 	// Animate particles
-	math::vector3f gravity = m_Model->GetGravity();
+	math::Vector3F gravity = m_Model->GetGravity();
 	for(core::Pool<Particle>::Iterator it = m_Pool.First(); it != m_Pool.End();) {
 		if(AnimateParticle(*it, secsPassed, data)) {
 			// If the particle was destroyed, reuse it for another emitter

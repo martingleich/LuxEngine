@@ -19,7 +19,7 @@ bool WindowWin32::SwitchFullscreen(bool Fullscreen)
 	if(m_ShouldFullscreen == false)
 		return true;
 */
-	math::dimension2du FullscreenSize = GetSize();
+	math::Dimension2U FullscreenSize = GetSize();
 	u32 FullscreenBits = 32;
 
 	if(Fullscreen == false) {
@@ -186,7 +186,7 @@ void WindowWin32::SetTitle(const String& title)
 		SMTO_ABORTIFHUNG, 2000, &result);
 }
 
-void WindowWin32::SetSize(const math::dimension2du& Size)
+void WindowWin32::SetSize(const math::Dimension2U& Size)
 {
 	RECT rect;
 	SetRect(&rect, 0, 0, Size.width, Size.height);
@@ -204,7 +204,7 @@ void WindowWin32::SetSize(const math::dimension2du& Size)
 	SetWindowPlacement(m_Window, &plc);
 }
 
-void WindowWin32::SetPosition(const math::vector2i& Position)
+void WindowWin32::SetPosition(const math::Vector2I& Position)
 {
 	WINDOWPLACEMENT plc;
 	plc.length = sizeof(WINDOWPLACEMENT);
@@ -271,7 +271,7 @@ bool WindowWin32::Close()
 	return true;
 }
 
-bool WindowWin32::Present(video::Image* image, const math::recti& SourceRect, const math::recti& DestRect)
+bool WindowWin32::Present(video::Image* image, const math::RectI& SourceRect, const math::RectI& DestRect)
 {
 	if(!image)
 		return true;
@@ -284,21 +284,21 @@ bool WindowWin32::Present(video::Image* image, const math::recti& SourceRect, co
 		return false;
 	video::ColorFormat Format = image->GetColorFormat();
 
-	math::recti DstRect = DestRect;
-	math::recti WinRect = math::recti(rect.left, rect.top, rect.right, rect.bottom);
+	math::RectI DstRect = DestRect;
+	math::RectI WinRect = math::RectI(rect.left, rect.top, rect.right, rect.bottom);
 	if(DestRect.IsEmpty())
 		DstRect = WinRect;
 	else
 		DstRect.FitInto(WinRect);
 
-	math::recti SrcRect = SourceRect;
-	math::recti ImageRect = math::recti(0, 0, image->GetSize().width, image->GetSize().height);
+	math::RectI SrcRect = SourceRect;
+	math::RectI ImageRect = math::RectI(0, 0, image->GetSize().width, image->GetSize().height);
 	if(SrcRect.IsEmpty())
 		SrcRect = ImageRect;
 	else
 		SrcRect.FitInto(ImageRect);
 
-	math::dimension2d<int> ImageDim = ImageRect.GetSize();
+	math::Dimension2<int> ImageDim = ImageRect.GetSize();
 	void* data = nullptr;
 	if(image->GetBitsPerPixel() == 8) {
 		// Immer nach ARGB
@@ -394,7 +394,7 @@ bool WindowWin32::HandleMessages(UINT Message,
 	case WM_MOUSEMOVE:
 		if(m_CursorControl->IsGrabbing()) {
 			POINTS p = MAKEPOINTS(LParam);
-			math::vector2i pos = m_CursorControl->GetGrabbingPosition();
+			math::Vector2I pos = m_CursorControl->GetGrabbingPosition();
 			if(p.x != pos.x || p.y != pos.y)
 				m_CursorControl->SetPosition(pos.x, pos.y);
 

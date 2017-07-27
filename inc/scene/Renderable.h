@@ -47,7 +47,7 @@ public:
 	virtual void Render(Node* node, video::Renderer* renderer, ERenderPass pass) = 0;
 	virtual ERenderPass GetRenderPass() const = 0;
 	
-	virtual const math::aabbox3df& GetBoundingBox() const = 0;
+	virtual const math::AABBoxF& GetBoundingBox() const = 0;
 };
 
 class RenderableVisitor

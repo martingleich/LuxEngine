@@ -11,7 +11,7 @@ MatrixTable::MatrixTable() :
 	m_UpToDate = 1 | 2 | 4; // world, view and proj are up to date
 }
 
-void MatrixTable::SetMatrix(EMatrixType type, const math::matrix4& matrix)
+void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 {
 	if(type > MAT_PROJ)
 		throw core::InvalidArgumentException("type");
@@ -46,7 +46,7 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::matrix4& matrix)
 
 core::PackageParam MatrixTable::GetParamById(u32 id) const
 {
-	const math::matrix4& m = GetMatrix((EMatrixType)id);
+	const math::Matrix4& m = GetMatrix((EMatrixType)id);
 
 	core::ParamDesc desc;
 	desc.id = id;
@@ -67,7 +67,7 @@ bool MatrixTable::GetParamIdByName(const char* name, u32& id)
 	return false;
 }
 
-const math::matrix4& MatrixTable::GetMatrix(EMatrixType type) const
+const math::Matrix4& MatrixTable::GetMatrix(EMatrixType type) const
 {
 	if(!IsUpToDate(type))
 		UpdateMatrix(type);

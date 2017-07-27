@@ -21,7 +21,7 @@ struct Context
 
 	int depth;
 	int colorType;
-	math::dimension2du size;
+	math::Dimension2U size;
 	ColorFormat format;
 
 	Context() :

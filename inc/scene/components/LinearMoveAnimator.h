@@ -13,7 +13,7 @@ class LinearMoveAnimator : public Animator
 public:
 	LUX_API LinearMoveAnimator();
 	LUX_API void SetData(
-		const math::line3df& line,
+		const math::Line3F& line,
 		float duration,
 		bool jumpBack = false,
 		u32 count = std::numeric_limits<u32>::max());
@@ -24,7 +24,7 @@ public:
 	core::Name GetReferableType() const;
 
 private:
-	math::line3df m_Line;
+	math::Line3F m_Line;
 	u32 m_Count;
 	float m_Period;
 	float m_Time;

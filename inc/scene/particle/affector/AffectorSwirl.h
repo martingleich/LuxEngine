@@ -12,7 +12,7 @@ class SwirlAffector : public ParticleAffector
 {
 public:
 	SwirlAffector() :
-		m_Axis(math::vector3f::UNIT_Y),
+		m_Axis(math::Vector3F::UNIT_Y),
 		m_FixedAttractionSpeed(true),
 		m_AttractionSpeed(1.0f),
 		m_FixedAngularSpeed(true),
@@ -42,10 +42,10 @@ public:
 
 	virtual void Apply(Particle& particle, float secsPassed)
 	{
-		const math::vector3f delta = particle.position - m_TransCenter;
+		const math::Vector3F delta = particle.position - m_TransCenter;
 		const float planeDist = m_TransAxis.Dot(delta); // Distance to the main rotation plane.
 
-		const math::vector3f rotCenter = m_TransCenter + planeDist * m_TransAxis;
+		const math::Vector3F rotCenter = m_TransCenter + planeDist * m_TransAxis;
 
 		const float dist = rotCenter.GetDistanceTo(particle.position);
 
@@ -66,14 +66,14 @@ public:
 		const float angleSpeed = (m_FixedAngularSpeed ? m_AngularSpeed : m_AngularSpeed / dist);
 		const float deltaAngle = secsPassed * angleSpeed;
 
-		const math::vector3f normal = (particle.position - rotCenter) / dist;
-		const math::vector3f tangent = normal.Cross(m_TransAxis);
+		const math::Vector3F normal = (particle.position - rotCenter) / dist;
+		const math::Vector3F tangent = normal.Cross(m_TransAxis);
 
-		const math::vector3f newPos = rotCenter + newRadius * (normal*cosf(deltaAngle) + tangent*sinf(deltaAngle));
+		const math::Vector3F newPos = rotCenter + newRadius * (normal*cosf(deltaAngle) + tangent*sinf(deltaAngle));
 
 		// The velocity is calculated to transport it directly to the correct position
-		math::vector3f newVelocity = (newPos - particle.position) / secsPassed;
-		math::vector3f orthoVelocity = m_TransAxis * particle.velocity.Dot(m_TransAxis);
+		math::Vector3F newVelocity = (newPos - particle.position) / secsPassed;
+		math::Vector3F orthoVelocity = m_TransAxis * particle.velocity.Dot(m_TransAxis);
 		particle.velocity = orthoVelocity + newVelocity;
 	}
 
@@ -82,8 +82,8 @@ public:
 		return LUX_NEW(SwirlAffector)(*this);
 	}
 
-	void SetCenter(const math::vector3f& v) { m_Center = v; }
-	void SetAxis(const math::vector3f& a) { m_Axis = a; }
+	void SetCenter(const math::Vector3F& v) { m_Center = v; }
+	void SetAxis(const math::Vector3F& a) { m_Axis = a; }
 	void SetFixedAttractionSpeed(bool fixed) { m_FixedAttractionSpeed = fixed; }
 	void SetAttractionSpeed(float speed) { m_AttractionSpeed = speed; }
 	void SetFixedAngularSpeed(bool fixed) { m_FixedAngularSpeed = fixed; }
@@ -92,8 +92,8 @@ public:
 	void SetKillRadius(float radius) { m_KillRadius = radius; }
 	void SetParticleKilling(bool kill) { m_ParticleKilling = kill; }
 
-	const math::vector3f& GetCenter() const { return m_Center; }
-	const math::vector3f& GetAxis() const { return m_Axis; }
+	const math::Vector3F& GetCenter() const { return m_Center; }
+	const math::Vector3F& GetAxis() const { return m_Axis; }
 	bool GetFixedAttractionSpeed() const { return m_FixedAttractionSpeed; }
 	float GetAttractionSpeed() const { return m_AttractionSpeed; }
 	bool GetFixedAngularSpeed() const { return m_FixedAngularSpeed; }
@@ -103,8 +103,8 @@ public:
 	bool GetParticleKilling() const { return m_ParticleKilling; }
 
 private:
-	math::vector3f m_Center; // The center of the swirl
-	math::vector3f m_Axis; // The axis of the swirl, normalized.
+	math::Vector3F m_Center; // The center of the swirl
+	math::Vector3F m_Axis; // The axis of the swirl, normalized.
 
 	bool m_FixedAttractionSpeed; // Is the attraction speed always the same, other the speed is directly proportional to the distance to the eye of the swirl.
 	float m_AttractionSpeed; // The speed of attraction to the center, the number of units each particle get closer to the center per second.
@@ -115,8 +115,8 @@ private:
 	float m_KillRadius;
 	bool m_ParticleKilling; // Particles which reach the "eye" of the swirl are destroied.
 
-	math::vector3f m_TransCenter;
-	math::vector3f m_TransAxis; // normalized
+	math::Vector3F m_TransCenter;
+	math::Vector3F m_TransAxis; // normalized
 };
 
 }

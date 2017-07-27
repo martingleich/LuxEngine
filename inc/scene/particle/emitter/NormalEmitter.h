@@ -34,8 +34,8 @@ public:
 protected:
 	void GenerateVelocity(Particle& particle, float speed) const
 	{
-		math::vector3f scatter = m_Rand.GetVector3() * m_Scatter;
-		math::vector3f s = m_Zone->GetNormal(particle.position) + scatter;
+		math::Vector3F scatter = m_Rand.GetVector3() * m_Scatter;
+		math::Vector3F s = m_Zone->GetNormal(particle.position) + scatter;
 		particle.velocity = speed * s;
 	}
 

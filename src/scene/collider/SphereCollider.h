@@ -22,7 +22,7 @@ public:
 		SetRadius(1.0f);
 	}
 
-	SphereCollider(const math::vector3f& center, float radius)
+	SphereCollider(const math::Vector3F& center, float radius)
 	{
 		SetRadius(radius);
 		SetCenter(center);
@@ -33,7 +33,7 @@ public:
 	virtual bool ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone* zone, VolumeQueryCallback* result);
 	virtual bool ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* zone, VolumeQueryCallback* result);
 
-	virtual const math::aabbox3df& GetBoundingBox() const
+	virtual const math::AABBoxF& GetBoundingBox() const
 	{
 		return m_Box;
 	}
@@ -41,17 +41,17 @@ public:
 	void SetRadius(float radius)
 	{
 		m_Radius = radius;
-		m_Box = math::aabbox3df(
-			m_Center - math::vector3f(m_Radius, m_Radius, m_Radius),
-			m_Center + math::vector3f(m_Radius, m_Radius, m_Radius));
+		m_Box = math::AABBoxF(
+			m_Center - math::Vector3F(m_Radius, m_Radius, m_Radius),
+			m_Center + math::Vector3F(m_Radius, m_Radius, m_Radius));
 	}
 
-	void SetCenter(const math::vector3f& center)
+	void SetCenter(const math::Vector3F& center)
 	{
 		m_Center = center;
-		m_Box = math::aabbox3df(
-			m_Center - math::vector3f(m_Radius, m_Radius, m_Radius),
-			m_Center + math::vector3f(m_Radius, m_Radius, m_Radius));
+		m_Box = math::AABBoxF(
+			m_Center - math::Vector3F(m_Radius, m_Radius, m_Radius),
+			m_Center + math::Vector3F(m_Radius, m_Radius, m_Radius));
 	}
 
 	core::Name GetReferableType() const
@@ -68,16 +68,16 @@ public:
 
 private:
 	float m_Radius;
-	math::vector3f m_Center;
+	math::Vector3F m_Center;
 
-	math::aabbox3df m_Box;
+	math::AABBoxF m_Box;
 };
 
 class BoundingSphereCollider : public SphereCollider
 {
 public:
 	BoundingSphereCollider() :
-		SphereCollider(math::vector3f::ZERO, 0.0f)
+		SphereCollider(math::Vector3F::ZERO, 0.0f)
 	{
 	}
 

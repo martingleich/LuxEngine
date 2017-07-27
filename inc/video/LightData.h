@@ -53,7 +53,7 @@ public:
 	Colorf color;
 
 	//! The lightposition in world coordinates
-	math::vector3f position;
+	math::Vector3F position;
 
 	//! The light range
 	/**
@@ -63,7 +63,7 @@ public:
 	float range;
 
 	//! The lightdirection in world coordinates
-	math::vector3f direction;
+	math::Vector3F direction;
 
 	//! The inner lightcone of a spotlight
 	/**

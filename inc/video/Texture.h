@@ -20,7 +20,7 @@ public:
 	}
 
 	virtual void Init(
-		const math::dimension2du& Size,
+		const math::Dimension2U& Size,
 		ColorFormat format,
 		u32 MipCount, bool isRendertarget, bool isDynamic) = 0;
 

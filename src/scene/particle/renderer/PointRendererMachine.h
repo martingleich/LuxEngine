@@ -20,7 +20,7 @@ class PointRendererMachine : public RendererMachine
 private:
 	struct PointVertex
 	{
-		math::vector3f position;
+		math::Vector3F position;
 		video::Color color;
 	};
 

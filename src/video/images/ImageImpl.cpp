@@ -27,7 +27,7 @@ void ImageImpl::Clear()
 	m_Data = nullptr;
 }
 
-void ImageImpl::Init(const math::dimension2du& size, ColorFormat format)
+void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format)
 {
 	Clear();
 
@@ -43,7 +43,7 @@ void ImageImpl::Init(const math::dimension2du& size, ColorFormat format)
 		m_Data = nullptr;
 }
 
-void ImageImpl::Init(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop)
+void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop)
 {
 	Clear();
 
@@ -66,7 +66,7 @@ void ImageImpl::Init(const math::dimension2du& size, ColorFormat format, void* d
 	}
 }
 
-const math::dimension2du& ImageImpl::GetSize() const
+const math::Dimension2U& ImageImpl::GetSize() const
 {
 	return m_Dimension;
 }

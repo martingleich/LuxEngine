@@ -49,23 +49,23 @@ void CursorControlWin32::SetRelPosition(float x, float y)
 	SetPosition((int)(x * m_WindowSize.width), (int)(y * m_WindowSize.height));
 }
 
-math::vector2i CursorControlWin32::GetPosition() const
+math::Vector2I CursorControlWin32::GetPosition() const
 {
 	POINT p;
 	GetCursorPos(&p);
 	ScreenToClient((HWND)m_Window->GetDeviceWindow(), &p);
 
-	return math::vector2i(p.x, p.y);
+	return math::Vector2I(p.x, p.y);
 }
 
-math::vector2f CursorControlWin32::GetRelPosition() const
+math::Vector2F CursorControlWin32::GetRelPosition() const
 {
-	math::vector2i AbsPos = GetPosition();
+	math::Vector2I AbsPos = GetPosition();
 
-	return math::vector2f(AbsPos.x * m_InvWindowSize.width, AbsPos.y * m_InvWindowSize.height);
+	return math::Vector2F(AbsPos.x * m_InvWindowSize.width, AbsPos.y * m_InvWindowSize.height);
 }
 
-const math::dimension2du& CursorControlWin32::GetScreenSize() const
+const math::Dimension2U& CursorControlWin32::GetScreenSize() const
 {
 	return m_WindowSize;
 }
@@ -113,7 +113,7 @@ void CursorControlWin32::Tick()
 		SetPosition(m_GrabbingPosition.x, m_GrabbingPosition.y);
 }
 
-void CursorControlWin32::OnResize(Window& window, const math::dimension2du& newSize)
+void CursorControlWin32::OnResize(Window& window, const math::Dimension2U& newSize)
 {
 	// Should never happen, but isn't a problem
 	lxAssert(m_Window == &window);

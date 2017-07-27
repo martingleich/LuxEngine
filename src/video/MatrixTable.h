@@ -40,10 +40,10 @@ public:
 
 public:
 	MatrixTable();
-	void SetMatrix(EMatrixType type, const math::matrix4& matrix);
+	void SetMatrix(EMatrixType type, const math::Matrix4& matrix);
 	core::PackageParam GetParamById(u32 id) const;
 	bool GetParamIdByName(const char* name, u32& id);
-	const math::matrix4& GetMatrix(EMatrixType type) const;
+	const math::Matrix4& GetMatrix(EMatrixType type) const;
 	bool IsDirty(EMatrixType type) const;
 	void ClearDirty(EMatrixType type) const;
 	u32 GetCount() const;
@@ -54,7 +54,7 @@ private:
 	const char* GetMatrixName(u32 id) const;
 
 private:
-	mutable math::matrix4 m_Matrices[MAT_COUNT];
+	mutable math::Matrix4 m_Matrices[MAT_COUNT];
 	mutable u32 m_UpToDate;
 	mutable u32 m_Dirty;
 };

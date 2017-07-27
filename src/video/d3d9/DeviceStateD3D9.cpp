@@ -246,7 +246,7 @@ void DeviceStateD3D9::SetTexture(u32 stage, IDirect3DBaseTexture9* tex)
 	}
 }
 
-void DeviceStateD3D9::SetTransform(D3DTRANSFORMSTATETYPE type, const math::matrix4& m)
+void DeviceStateD3D9::SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matrix4& m)
 {
 	m_Device->SetTransform(type, (D3DMATRIX*)m.DataRowMajor());
 }

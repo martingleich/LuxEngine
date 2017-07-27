@@ -50,7 +50,7 @@ public:
 		return emitter;
 	}
 
-	StrongRef<StraightEmitter> AddStraightEmitter(const math::vector3f& dir)
+	StrongRef<StraightEmitter> AddStraightEmitter(const math::Vector3F& dir)
 	{
 		auto out = LUX_NEW(StraightEmitter)(dir);
 		AddEmitter(out);

@@ -141,7 +141,7 @@ void FontLoader::LoadFontFromFile(io::File* file, core::Resource* dst)
 		{
 			SImageInfo image;
 			file->ReadBinary(sizeof(SImageInfo), &image);
-			fontImage = video::ImageSystem::Instance()->CreateImage(math::dimension2du(image.TextureWidth, image.TextureHeight), video::ColorFormat::X8);
+			fontImage = video::ImageSystem::Instance()->CreateImage(math::Dimension2U(image.TextureWidth, image.TextureHeight), video::ColorFormat::X8);
 
 			{
 				video::ImageLock imgLock(fontImage);

@@ -14,17 +14,17 @@ namespace math
 template <typename T>
 struct LineSphereInfo
 {
-	vector3<T> normal;
+	Vector3<T> normal;
 	T distance;
 };
 
 template <typename T>
 bool LineHitSphere(
-	const line3d<T>& line,
-	const vector3<T>& center, T radius,
+	const Line3<T>& line,
+	const Vector3<T>& center, T radius,
 	LineSphereInfo<T>* out)
 {
-	const vector3<T> delta = line.start - center;
+	const Vector3<T> delta = line.start - center;
 	const T distSq = delta.GetLengthSq();
 	const T rSq = radius*radius;
 
@@ -34,7 +34,7 @@ bool LineHitSphere(
 			// Take the startpoint of the line as collision point
 			// this isn't always exact, but will work for most collision
 			// when the line isn't to deep inside the sphere.
-			out->normal = delta.Normal_s();
+			out->normal = delta.Normal();
 			out->distance = 0;
 		}
 		return true;
@@ -57,7 +57,7 @@ bool LineHitSphere(
 	The solution for s is
 	s = (-b +- sqrt(b²-4c)) / 2a
 	*/
-	const vector3<T> dir = line.GetVector();
+	const Vector3<T> dir = line.GetVector();
 	const T lenSq = dir.GetLengthSq();
 
 	// u *(p-m)
@@ -79,7 +79,7 @@ bool LineHitSphere(
 
 		if(out) {
 			out->distance = s;
-			const vector3<T> pos = line.start + s*dir;
+			const Vector3<T> pos = line.start + s*dir;
 			out->normal = (pos - center) / radius;
 		}
 
@@ -96,8 +96,8 @@ bool LineHitSphere(
 
 		if(out) {
 			out->distance = s;
-			const vector3<T> pos = line.start + s*dir;
-			out->normal = (pos - center).Normal_s();
+			const Vector3<T> pos = line.start + s*dir;
+			out->normal = (pos - center).Normal();
 		}
 
 		return true;
@@ -107,28 +107,28 @@ bool LineHitSphere(
 template <typename T>
 struct SphereSphereInfo
 {
-	vector3<T> position;
-	vector3<T> seperation;
+	Vector3<T> position;
+	Vector3<T> seperation;
 	T penetration;
 };
 
 template <typename T>
 struct SphereBoxInfo
 {
-	vector3<T> position;
-	vector3<T> seperation;
+	Vector3<T> position;
+	Vector3<T> seperation;
 	T penetration;
 };
 
 template <typename T>
 bool SphereHitSphere(
-	const vector3<T>& centerA, T radiusA,
-	const vector3<T>& centerB, T radiusB,
+	const Vector3<T>& centerA, T radiusA,
+	const Vector3<T>& centerB, T radiusB,
 	SphereSphereInfo<T>* out = nullptr)
 {
 	const T r = radiusA + radiusB;
 
-	const math::vector3<T> delta = centerA - centerB;
+	const math::Vector3<T> delta = centerA - centerB;
 	const T distanceSq = delta.GetLengthSq();
 	if(distanceSq <= r*r) {
 		if(out) {
@@ -144,16 +144,16 @@ bool SphereHitSphere(
 
 template <typename T>
 bool SphereHitBox(
-	const math::vector3<T>& center, T radius,
-	const math::vector3<T>& halfSize, const math::Transformation& trans,
+	const math::Vector3<T>& center, T radius,
+	const math::Vector3<T>& halfSize, const math::Transformation& trans,
 	SphereBoxInfo<T>* out = nullptr)
 {
 	// Transform the sphere to box space.
-	const math::vector3<T> relCenter = trans.TransformInvPoint(center);
+	const math::Vector3<T> relCenter = trans.TransformInvPoint(center);
 	const T relRadius = radius / trans.scale;
 
 	// Get the next point in teh box to the sphere.
-	const math::vector3<T> nearest(
+	const math::Vector3<T> nearest(
 		math::Clamp(relCenter.x, -halfSize.x, halfSize.x),
 		math::Clamp(relCenter.y, -halfSize.y, halfSize.y),
 		math::Clamp(relCenter.z, -halfSize.z, halfSize.z));
@@ -166,11 +166,11 @@ bool SphereHitBox(
 			T f = sqrt(distanceSq);
 			if(nearest == relCenter) {
 				out->seperation = relCenter.GetUnitCubeVector();
-				if(out->seperation == math::vector3<T>::ZERO)
-					out->seperation = math::vector3<T>::UNIT_X;
+				if(out->seperation == math::Vector3<T>::ZERO)
+					out->seperation = math::Vector3<T>::UNIT_X;
 				else
 					out->seperation.Normalize();
-				const math::vector3<T> nearestOnWall(
+				const math::Vector3<T> nearestOnWall(
 					relCenter.x < 0 ? -halfSize.x : halfSize.x,
 					relCenter.y < 0 ? -halfSize.y : halfSize.y,
 					relCenter.z < 0 ? -halfSize.z : halfSize.z);
@@ -189,10 +189,10 @@ bool SphereHitBox(
 
 template <typename T>
 bool PointTestBox(
-	const math::vector3<T>& point,
-	const math::vector3<T>& halfSize, const math::Transformation& trans)
+	const math::Vector3<T>& point,
+	const math::Vector3<T>& halfSize, const math::Transformation& trans)
 {
-	math::vector3<T> p = trans.TransformInvPoint(point);
+	math::Vector3<T> p = trans.TransformInvPoint(point);
 	if(abs(p.x) > halfSize.x || abs(p.y) > halfSize.y || abs(p.z) > halfSize.z)
 		return false;
 	else
@@ -202,18 +202,18 @@ bool PointTestBox(
 template <typename T>
 struct LineBoxInfo
 {
-	math::vector3<T> normal;
+	math::Vector3<T> normal;
 	T distance;
 };
 
 template <typename T>
 bool LineTestBox(
-	const math::line3d<T>& line,
-	const math::vector3<T>& halfSize, const math::Transformation& trans)
+	const math::Line3<T>& line,
+	const math::Vector3<T>& halfSize, const math::Transformation& trans)
 {
-	math::aabbox3d<T> box(-halfSize, halfSize);
+	math::AABBox<T> box(-halfSize, halfSize);
 
-	math::line3d<T> transLine;
+	math::Line3<T> transLine;
 	trans.TransformObject(line, transLine);
 
 	return box.IntersectWithLine(transLine);
@@ -243,14 +243,14 @@ bool Clip(T denom, T numer, T& t0, T& t1)
 
 template <typename T>
 bool LineHitBox(
-	const math::line3d<T>& line,
-	const math::vector3<T>& halfSize, const math::Transformation& trans,
+	const math::Line3<T>& line,
+	const math::Vector3<T>& halfSize, const math::Transformation& trans,
 	LineBoxInfo<T>* out)
 {
-	math::line3d<T> transLine = math::line3d<T>(trans.TransformInvPoint(line.start), trans.TransformInvPoint(line.end));
+	math::Line3<T> transLine = math::Line3<T>(trans.TransformInvPoint(line.start), trans.TransformInvPoint(line.end));
 	T len = transLine.GetVector().GetLength();
-	math::vector3<T> dir = transLine.GetVector() / len;
-	math::vector3<T> origin = transLine.start;
+	math::Vector3<T> dir = transLine.GetVector() / len;
+	math::Vector3<T> origin = transLine.start;
 
 	T t0 = -std::numeric_limits<T>::max();
 	T t1 = std::numeric_limits<T>::max();
@@ -278,7 +278,7 @@ bool LineHitBox(
 			}
 
 			if(found) {
-				math::vector3<T> transPos = transLine.start + out->distance*transLine.GetVector() / len;
+				math::Vector3<T> transPos = transLine.start + out->distance*transLine.GetVector() / len;
 				transPos.x /= halfSize.x;
 				transPos.y /= halfSize.y;
 				transPos.z /= halfSize.z;
@@ -295,22 +295,22 @@ namespace impl_collision
 template <typename T>
 struct CollisionBox
 {
-	math::vector3<T> axes[3];
-	math::vector3<T> center;
+	math::Vector3<T> axes[3];
+	math::Vector3<T> center;
 
-	CollisionBox(const math::vector3<T>& halfSize, const math::Transformation& trans)
+	CollisionBox(const math::Vector3<T>& halfSize, const math::Transformation& trans)
 	{
-		center = trans.TransformPoint(math::vector3<T>::ZERO);
-		axes[0] = halfSize.x * trans.TransformDir(math::vector3<T>::UNIT_X);
-		axes[1] = halfSize.y * trans.TransformDir(math::vector3<T>::UNIT_Y);
-		axes[2] = halfSize.z * trans.TransformDir(math::vector3<T>::UNIT_Z);
+		center = trans.TransformPoint(math::Vector3<T>::ZERO);
+		axes[0] = halfSize.x * trans.TransformDir(math::Vector3<T>::UNIT_X);
+		axes[1] = halfSize.y * trans.TransformDir(math::Vector3<T>::UNIT_Y);
+		axes[2] = halfSize.z * trans.TransformDir(math::Vector3<T>::UNIT_Z);
 	}
 };
 
 template <typename T>
 T TransformToAxis(
 	const CollisionBox<T>& box,
-	const math::vector3<T>& axis)
+	const math::Vector3<T>& axis)
 {
 	return
 		math::Abs(axis.Dot(box.axes[0])) +
@@ -329,8 +329,8 @@ template <typename T>
 bool OverlapOnAxis(
 	const CollisionBox<T>& one,
 	const CollisionBox<T>& two,
-	const math::vector3<T>& axis,
-	const math::vector3<T>& toCenter)
+	const math::Vector3<T>& axis,
+	const math::Vector3<T>& toCenter)
 {
 	T oneProject = TransformToAxis(one, axis);
 	T twoProject = TransformToAxis(two, axis);
@@ -345,7 +345,7 @@ bool BoxTestBox(
 	const CollisionBox<T>& one,
 	const CollisionBox<T>& two)
 {
-	math::vector3<T> toCenter = two.center - one.center;
+	math::Vector3<T> toCenter = two.center - one.center;
 
 	return
 		OverlapOnAxis(one, two, one.axes[0], toCenter) &&
@@ -372,8 +372,8 @@ bool BoxTestBox(
 
 template <typename T>
 bool BoxTestBox(
-	const math::vector3<T>& halfSizeA, const math::Transformation& transA,
-	const math::vector3<T>& halfSizeB, const math::Transformation& transB)
+	const math::Vector3<T>& halfSizeA, const math::Transformation& transA,
+	const math::Vector3<T>& halfSizeB, const math::Transformation& transB)
 {
 	impl_collision::CollisionBox<T> a(halfSizeA, transA);
 	impl_collision::CollisionBox<T> b(halfSizeB, transB);
@@ -384,7 +384,7 @@ bool BoxTestBox(
 
 template <typename T>
 bool TriangleTestSphere(
-	const math::vector3<T>& center,
+	const math::Vector3<T>& center,
 	T radius,
 	const math::triangle3d<T>& tri)
 {

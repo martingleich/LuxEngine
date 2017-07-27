@@ -59,13 +59,13 @@ public:
 		m_Camera = Context.Smgr->CreateCamera();
 		m_CameraNode = Context.Smgr->AddNode(m_Camera);
 		m_CameraNode->SetPosition(0.0f, 0.0f, -15.0f);
-		m_CameraNode->SetDirectionUp(math::vector3f(0.0f, 0.0f, 1.0f));
+		m_CameraNode->SetDirectionUp(math::Vector3F(0.0f, 0.0f, 1.0f));
 
 		m_Light = Context.Smgr->CreateLight();
 		m_Light->SetLightType(video::ELightType::Directional);
 		m_Light->SetColor(video::Color::White);
 		node = Context.Smgr->AddNode(m_Light);
-		node->SetDirection(math::vector3f::UNIT_Z);
+		node->SetDirection(math::Vector3F::UNIT_Z);
 
 		node = Context.Smgr->AddSkyBox();
 		node->GetComponent<scene::SkyBox>()->GetMaterial(0)->SetDiffuse(video::Color::Blue);
@@ -101,7 +101,7 @@ void MaterialTest::Render()
 {
 	if(fmodf(m_Time, 2.0f) < 1.0f) {
 		m_Font->Draw("Blinking Text",
-			math::vector2f(0.0f, 50.0f),
+			math::Vector2F(0.0f, 50.0f),
 			gui::Font::EAlign::BottomLeft,
 			video::Color::Green);
 	}
@@ -128,7 +128,7 @@ void MaterialTest::Load()
 
 	auto materials = GenMaterialList();
 
-	const math::vector3f startPoint = math::vector3f(-8.0f, 6.0f, 0.0f);
+	const math::Vector3F startPoint = math::Vector3F(-8.0f, 6.0f, 0.0f);
 	const float delta = 3.0f;
 
 	StrongRef<video::Mesh> geo = Context.MeshSystem->CreateSphereMesh();
@@ -142,7 +142,7 @@ void MaterialTest::Load()
 
 		auto node = Context.Smgr->AddNode(comp);
 
-		math::vector3f pos(
+		math::Vector3F pos(
 			startPoint.x + col*delta,
 			startPoint.y + row*delta,
 			0.0f);

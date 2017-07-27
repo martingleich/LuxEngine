@@ -10,7 +10,7 @@ namespace math
 {
 
 //! Represent a 4x4 matrix
-class LUX_API matrix4
+class LUX_API Matrix4
 {
 public:
 	//! How should a matrix be created
@@ -28,24 +28,24 @@ private:
 	float m[4][4];
 
 public:
-	static const matrix4 IDENTITY;    //!< The identity matrix
-	static const matrix4 ZERO;    //!< The null matrix
+	static const Matrix4 IDENTITY;    //!< The identity matrix
+	static const Matrix4 ZERO;    //!< The null matrix
 
 	//! Constructor for a new matrix
 	/**
 	\param Constructor How should the new matrix created, only M4C_NOTHING and M4C_IDENT
 	*/
-	matrix4(EMatrix4Constructor Constructor = M4C_IDENT);
+	Matrix4(EMatrix4Constructor Constructor = M4C_IDENT);
 
 	//! Copyconstructor
 	/**
 	\param m The other matrix
 	\param Constructor How should the new matrix created
 	*/
-	matrix4(const matrix4& m, EMatrix4Constructor Constructor = M4C_COPY);
+	Matrix4(const Matrix4& m, EMatrix4Constructor Constructor = M4C_COPY);
 
 	//! Full constructor
-	matrix4(float c11, float c12, float c13, float c14,
+	Matrix4(float c11, float c12, float c13, float c14,
 		float c21, float c22, float c23, float c24,
 		float c31, float c32, float c33, float c34,
 		float c41, float c42, float c43, float c44)
@@ -65,19 +65,19 @@ public:
 	/**
 	\param [out] out Here the transposed matrix is written
 	*/
-	void    GetTransposed(matrix4& out) const;
+	void    GetTransposed(Matrix4& out) const;
 	//! Invert this matrix
 	/**
 	\param [out] out Here the inverted matrix is written
 	\return false if the inversion is imposible
 	*/
-	bool    GetInverted(matrix4& out) const;
+	bool    GetInverted(Matrix4& out) const;
 	//! transform this matrix to a 3x3 matrix(the last row and collum are empty)
 	/**
 	For transfomations of twodimension objects
 	\param [out] out Here the 3x3 matrix is written
 	*/
-	void    Get3x3(matrix4& out) const;
+	void    Get3x3(Matrix4& out) const;
 	//! Returns the determinant of the matrix
 	/**
 	Calculates only the determinant of the 3x4 matrix
@@ -89,17 +89,17 @@ public:
 	/**
 	\return Selfreference
 	*/
-	matrix4& MakeIdent();
+	Matrix4& MakeIdent();
 	//! Invert this matrix
 	/**
 	\return Selfreference
 	*/
-	matrix4& Invert();
+	Matrix4& Invert();
 	//! Transpose this matrix
 	/**
 	\return Selfreference
 	*/
-	matrix4& Transpose();
+	Matrix4& Transpose();
 
 	//! Transforms a vector with this matrix
 	/**
@@ -107,9 +107,9 @@ public:
 	\param v The vector to transform
 	\return The transformed vector
 	*/
-	inline vector3f TransformVector(const vector3f& v) const
+	inline Vector3F TransformVector(const Vector3F& v) const
 	{
-		vector3f out;
+		Vector3F out;
 
 		out.x = v.x*m[0][0] + v.y*m[1][0] + v.z*m[2][0] + m[3][0];
 		out.y = v.x*m[0][1] + v.y*m[1][1] + v.z*m[2][1] + m[3][1];
@@ -123,9 +123,9 @@ public:
 	\param v The vector to rotate
 	\return The rotated vector
 	*/
-	inline vector3f RotateVector(const vector3f& v) const
+	inline Vector3F RotateVector(const Vector3F& v) const
 	{
-		vector3f out;
+		Vector3F out;
 		out.x = v.x * m[0][0] + v.y * m[0][1] + v.z * m[0][2];
 		out.y = v.x * m[1][0] + v.y * m[1][1] + v.z * m[1][2];
 		out.z = v.x * m[2][0] + v.y * m[2][1] + v.z * m[2][2];
@@ -140,7 +140,7 @@ public:
 	\param [out] out The array where the transformend vectors are written
 	\param count The number of vectors in the array
 	*/
-	inline void TransformVectorArray(const vector3f in[], vector3f out[], int count) const
+	inline void TransformVectorArray(const Vector3F in[], Vector3F out[], int count) const
 	{
 		for(int i = 0; i < count; ++i, ++in, ++out) {
 			const float x = in->x*m[0][0] + in->y*m[1][0] + in->z*m[2][0] + m[3][0];
@@ -157,7 +157,7 @@ public:
 	\param in The vector to transform
 	\param [out] out Here the transformed vector is written
 	*/
-	inline void TransformVectorW(const vector3f& in, float out[4]) const
+	inline void TransformVectorW(const Vector3F& in, float out[4]) const
 	{
 		out[0] = in.x*m[0][0] + in.y*m[1][0] + in.z*m[2][0] + m[3][0];
 		out[1] = in.x*m[0][1] + in.y*m[1][1] + in.z*m[2][1] + m[3][1];
@@ -170,13 +170,13 @@ public:
 	\param p The plane to transform
 	\return The transformed plane
 	*/
-	inline plane3df TransformPlane(const plane3df& p) const
+	inline PlaneF TransformPlane(const PlaneF& p) const
 	{
-		plane3df out;
-		out.Normal.x = p.Normal.x * m[0][0] + p.Normal.y * m[1][0] + p.Normal.z * m[2][0];
-		out.Normal.y = p.Normal.x * m[0][1] + p.Normal.y * m[1][1] + p.Normal.z * m[2][1];
-		out.Normal.z = p.Normal.x * m[0][2] + p.Normal.y * m[1][2] + p.Normal.z * m[2][2];
-		out.D = p.D - p.Normal.x * m[0][3] + p.Normal.y * m[1][3] + p.Normal.z * m[2][3];
+		PlaneF out;
+		out.normal.x = p.normal.x * m[0][0] + p.normal.y * m[1][0] + p.normal.z * m[2][0];
+		out.normal.y = p.normal.x * m[0][1] + p.normal.y * m[1][1] + p.normal.z * m[2][1];
+		out.normal.z = p.normal.x * m[0][2] + p.normal.y * m[1][2] + p.normal.z * m[2][2];
+		out.d = p.d - p.normal.x * m[0][3] + p.normal.y * m[1][3] + p.normal.z * m[2][3];
 		return out;
 	}
 
@@ -186,20 +186,20 @@ public:
 	\param Trans The new used translation
 	\return Selfreference
 	*/
-	matrix4& SetTranslation(const vector3f& Trans);
+	Matrix4& SetTranslation(const Vector3F& Trans);
 
 	//! Creates a Translationmatrix and combine it with this matrix
 	/**
 	\param Trans The Translation to add
 	\return Selfreference
 	*/
-	matrix4& AddTranslation(const vector3f& Trans);
+	Matrix4& AddTranslation(const Vector3F& Trans);
 
 	//! The current translation done by this matrix
 	/**
 	\return The Translation done by this matrix
 	*/
-	vector3f GetTranslation() const;
+	Vector3F GetTranslation() const;
 
 	//! Set the scaling done by this matrix
 	/**
@@ -207,20 +207,20 @@ public:
 	\param scale The new used scale
 	\return Selfreference
 	*/
-	matrix4& SetScale(const vector3f& scale);
+	Matrix4& SetScale(const Vector3F& scale);
 
 	//! Creates a scalematrix and combine it with this matrix
 	/**
 	\param scale The new used scale
 	\return Selfreference
 	*/
-	matrix4& AddScale(const vector3f& scale);
+	Matrix4& AddScale(const Vector3F& scale);
 
 	//! The current scale done by this matrix
 	/**
 	\return The scale done by this matrix
 	*/
-	vector3f GetScale() const;
+	Vector3F GetScale() const;
 
 	//! Set the rotation done by this matrix
 	/**
@@ -230,7 +230,7 @@ public:
 	\param z The z angle.
 	\return Selfreference
 	*/
-	matrix4& SetRotationEuler(anglef x, anglef y, anglef z);
+	Matrix4& SetRotationEuler(AngleF x, AngleF y, AngleF z);
 
 	//! Set the rotation done by this matrix
 	/**
@@ -238,7 +238,7 @@ public:
 	\param f The rotation about the x axis.
 	\return Selfreference
 	*/
-	matrix4& SetRotationX(anglef f);
+	Matrix4& SetRotationX(AngleF f);
 
 	//! Set the rotation done by this matrix
 	/**
@@ -246,7 +246,7 @@ public:
 	\param f The rotation about the y axis
 	\return Selfreference
 	*/
-	matrix4& SetRotationY(anglef f);
+	Matrix4& SetRotationY(AngleF f);
 
 	//! Set the rotation done by this matrix
 	/**
@@ -254,42 +254,42 @@ public:
 	\param f The rotation about the z axis.
 	\return Selfreference
 	*/
-	matrix4& SetRotationZ(anglef f);
+	Matrix4& SetRotationZ(AngleF f);
 
 	//! Add a rotation about the x axis
 	/**
 	\param f The rotation about the x axis.
 	\return Selfreference
 	*/
-	matrix4& AddRotationX(anglef f);
+	Matrix4& AddRotationX(AngleF f);
 
 	//! Add a rotation about the y axis
 	/**
 	\param f The rotation about the y axis.
 	\return Selfreference
 	*/
-	matrix4& AddRotationY(anglef f);
+	Matrix4& AddRotationY(AngleF f);
 
 	//! Add a rotation about the z axis
 	/**
 	\param f The rotation about the z axis.
 	\return Selfreference
 	*/
-	matrix4& AddRotationZ(anglef f);
+	Matrix4& AddRotationZ(AngleF f);
 
 	//! Add a euler rotation to this matrix
 	/**
 	\param Rot The rotation vector in Eulerangle(XYZ) and Rad
 	\return Selfreference
 	*/
-	matrix4& AddRotation(anglef x, anglef y, anglef z);
+	Matrix4& AddRotation(AngleF x, AngleF y, AngleF z);
 
 	//! The rotation done by this matrix
 	/**
 	Calculates the rotation in Eulerangle(XYZ) and Degree
 	\return The rotation done by this matrix
 	*/
-	vector3f GetRotationDeg() const;
+	Vector3F GetRotationDeg() const;
 
 	//! Set this matrix to the product of two other matrices
 	/**
@@ -297,7 +297,7 @@ public:
 	\param b The second factor
 	\return Selfreference
 	*/
-	matrix4& SetByProduct(const matrix4& a, const matrix4& b);
+	Matrix4& SetByProduct(const Matrix4& a, const Matrix4& b);
 
 	//! Make a worldmatrix
 	/**
@@ -307,9 +307,9 @@ public:
 	\param Trans The translation to perform
 	\return Selfreference
 	*/
-	matrix4& BuildWorld(const vector3f& scale,
-		const vector3f& Rot,
-		const vector3f& Trans);
+	Matrix4& BuildWorld(const Vector3F& scale,
+		const Vector3F& Rot,
+		const Vector3F& Trans);
 
 	//! Make a worldmatrix
 	/**
@@ -319,9 +319,9 @@ public:
 	\param Trans The translation to perform
 	\return Selfreference
 	*/
-	matrix4& BuildWorld(const vector3f& scale,
-		const quaternionf& Orient,
-		const vector3f& Trans);
+	Matrix4& BuildWorld(const Vector3F& scale,
+		const QuaternionF& Orient,
+		const Vector3F& Trans);
 
 	//! Make a perspective projection matrix(hyperbolic Z-transform)
 	/**
@@ -331,7 +331,7 @@ public:
 	\param FarPlane The far clipping plane
 	\return Selfreference
 	*/
-	matrix4& BuildProjection_Persp(float FOV,
+	Matrix4& BuildProjection_Persp(float FOV,
 		float Aspect,
 		float NearPlane,
 		float FarPlane);
@@ -344,7 +344,7 @@ public:
 	\param FarPlane The far clipping plane
 	\return Selfreference
 	*/
-	matrix4& BuildProjection_Ortho(float XMax,
+	Matrix4& BuildProjection_Ortho(float XMax,
 		float Aspect,
 		float NearPlane,
 		float FarPlane);
@@ -357,9 +357,9 @@ public:
 	\param Up The upside of the camera, must not be normalized
 	\return Selfreference
 	*/
-	matrix4& BuildCamera(const vector3f& position,
-		const vector3f& Dir,
-		const vector3f& Up = vector3f::UNIT_Y);
+	Matrix4& BuildCamera(const Vector3F& position,
+		const Vector3F& Dir,
+		const Vector3F& Up = Vector3F::UNIT_Y);
 
 	//! Make a camera matrix
 	/**
@@ -368,9 +368,9 @@ public:
 	\param Up The upside of the camera, must not be normalized
 	\return Selfreference
 	*/
-	matrix4& BuildCameraLookAt(const vector3f& position,
-		const vector3f& LookAt,
-		const vector3f& Up = vector3f::UNIT_Y);
+	Matrix4& BuildCameraLookAt(const Vector3F& position,
+		const Vector3F& LookAt,
+		const Vector3F& Up = Vector3F::UNIT_Y);
 
 	//! Access a element of the matrix
 	/**
@@ -431,40 +431,40 @@ public:
 	}
 
 	//! Addition
-	matrix4  operator+ (const matrix4& other) const;
+	Matrix4  operator+ (const Matrix4& other) const;
 	//! Short addition
-	matrix4& operator+=(const matrix4& other);
+	Matrix4& operator+=(const Matrix4& other);
 	//! Subtraction
-	matrix4  operator- (const matrix4& other) const;
+	Matrix4  operator- (const Matrix4& other) const;
 	//! Short subtraction
-	matrix4& operator-=(const matrix4& other);
+	Matrix4& operator-=(const Matrix4& other);
 	//! Scalar multiplication
-	matrix4  operator* (float f) const;
+	Matrix4  operator* (float f) const;
 	//! Short scalar multiplication
-	matrix4& operator*=(float f);
+	Matrix4& operator*=(float f);
 	//! Multiplication
-	matrix4  operator* (const matrix4& other) const;
+	Matrix4  operator* (const Matrix4& other) const;
 	//! Shortmuliplication
-	matrix4& operator*=(const matrix4& other);
+	Matrix4& operator*=(const Matrix4& other);
 
 	//! Assignment
-	matrix4& operator= (const matrix4& other);
+	Matrix4& operator= (const Matrix4& other);
 
 	//! Equality
-	bool operator==(const matrix4& other) const;
+	bool operator==(const Matrix4& other) const;
 	//! Unequality
-	bool operator!=(const matrix4& other) const;
+	bool operator!=(const Matrix4& other) const;
 };
 
 ///\cond INTERNAL
-inline matrix4 operator*(float f, const matrix4& m)
+inline Matrix4 operator*(float f, const Matrix4& m)
 {
 	return m*f;
 }
 ///\endcond
 
 
-inline bool IsEqual(const matrix4& a, const matrix4& b, float tolerance = math::Constants<float>::rounding_error())
+inline bool IsEqual(const Matrix4& a, const Matrix4& b, float tolerance = math::Constants<float>::rounding_error())
 {
 	for(int i = 0; i < 16; ++i) {
 		if(!math::IsEqual(a[i], b[i], tolerance))
@@ -483,7 +483,7 @@ namespace Types
 LUX_API Type Matrix();
 }
 
-template<> inline Type GetTypeInfo<math::matrix4>() { return Types::Matrix(); };
+template<> inline Type GetTypeInfo<math::Matrix4>() { return Types::Matrix(); };
 } // namespace core
 
 } // namespace lux

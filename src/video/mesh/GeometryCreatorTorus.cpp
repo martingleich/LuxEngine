@@ -17,7 +17,7 @@ GeometryCreatorTorus::GeometryCreatorTorus()
 	m_Package.AddParam("radius_minor", 0.5f);
 	m_Package.AddParam("sectors_major", 48);
 	m_Package.AddParam("sectors_minor", 12);
-	m_Package.AddParam("tex", math::vector2i(1, 1));
+	m_Package.AddParam("tex", math::Vector2I(1, 1));
 	m_Package.AddParam("inside", false);
 }
 
@@ -27,7 +27,7 @@ StrongRef<Geometry> GeometryCreatorTorus::CreateGeometry(const core::PackagePuff
 	float radiusMinor = params.Param(1);
 	s32 sectorsMajor = params.Param(2);
 	s32 sectorsMinor = params.Param(3);
-	math::vector2i tex = params.Param(4);
+	math::Vector2I tex = params.Param(4);
 	bool inside = params.Param(5);
 
 	return CreateGeometry(radiusMajor, radiusMinor, sectorsMajor, sectorsMinor, tex.x, tex.y, inside);
@@ -78,20 +78,20 @@ StrongRef<Geometry> GeometryCreatorTorus::CreateGeometry(
 	vertex.color = Color::White;
 	u16 curId = 0;
 	for(s32 i = 0; i < sectorsMajor + 1; ++i) {
-		math::anglef alpha = (math::anglef::FULL / sectorsMajor) * i;
-		math::vector3f base(
+		math::AngleF alpha = (math::AngleF::FULL / sectorsMajor) * i;
+		math::Vector3F base(
 			radiusMajor*math::Sin(alpha),
 			0.0f,
 			radiusMajor*math::Cos(alpha));
 		for(s32 j = 0; j < sectorsMinor + 1; ++j) {
-			math::anglef beta = (math::anglef::FULL / sectorsMinor) * j;
-			math::vector3f off = math::vector3f::BuildFromPolar(
+			math::AngleF beta = (math::AngleF::FULL / sectorsMinor) * j;
+			math::Vector3F off = math::Vector3F::BuildFromPolar(
 				alpha, beta, 1.0f);
 
 			vertex.position = base + radiusMinor*off;
 			vertex.normal = inside ? -off : off;
-			vertex.texture.x = texX * (alpha / math::anglef::FULL);
-			vertex.texture.y = texY * (beta / math::anglef::FULL);
+			vertex.texture.x = texX * (alpha / math::AngleF::FULL);
+			vertex.texture.y = texY * (beta / math::AngleF::FULL);
 
 			vertexBuffer->AddVertex(&vertex);
 
@@ -121,7 +121,7 @@ StrongRef<Geometry> GeometryCreatorTorus::CreateGeometry(
 	indexBuffer->Update();
 
 	float r = radiusMajor + radiusMinor;
-	geo->SetBoundingBox(math::aabbox3df(
+	geo->SetBoundingBox(math::AABBoxF(
 		-r, -radiusMinor, -r, r, radiusMinor, r));
 
 	return geo;

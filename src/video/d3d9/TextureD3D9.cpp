@@ -44,7 +44,7 @@ void TextureD3D9::RegenerateMIPMaps()
 }
 
 void TextureD3D9::Init(
-	const math::dimension2du& Size,
+	const math::Dimension2U& Size,
 	video::ColorFormat lxFormat,
 	u32 MipCount, bool isRendertarget, bool isDynamic)
 {
@@ -195,7 +195,7 @@ u32 TextureD3D9::GetLevelCount() const
 	return m_Texture->GetLevelCount();
 }
 
-const math::dimension2du& TextureD3D9::GetSize() const
+const math::Dimension2U& TextureD3D9::GetSize() const
 {
 	return m_Dimension;
 }

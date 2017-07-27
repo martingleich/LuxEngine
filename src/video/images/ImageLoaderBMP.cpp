@@ -47,7 +47,7 @@ struct SColorMasks
 
 struct Context
 {
-	math::dimension2du size;
+	math::Dimension2U size;
 	ColorFormat format;
 	u8* colorTable;
 	u32 dataOffset;

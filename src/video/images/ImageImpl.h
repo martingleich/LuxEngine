@@ -16,10 +16,10 @@ public:
 	~ImageImpl();
 
 	void Clear();
-	void Init(const math::dimension2du& size, ColorFormat format);
-	void Init(const math::dimension2du& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop);
+	void Init(const math::Dimension2U& size, ColorFormat format);
+	void Init(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop);
 
-	const math::dimension2du& GetSize() const;
+	const math::Dimension2U& GetSize() const;
 	ColorFormat GetColorFormat() const;
 	u32 GetBitsPerPixel() const;
 	u32 GetBytesPerPixel() const;
@@ -40,7 +40,7 @@ public:
 	StrongRef<Referable> Clone() const;
 
 private:
-	math::dimension2du m_Dimension;
+	math::Dimension2U m_Dimension;
 	ColorFormat m_Format;
 	u32 m_Pitch;
 	u32 m_BytePerPixel;

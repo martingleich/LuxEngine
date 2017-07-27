@@ -13,7 +13,7 @@ class DrawingCanvas
 {
 public:
 	LUX_API DrawingCanvas();
-	LUX_API DrawingCanvas(void* d, ColorFormat f, const math::dimension2du& dim, u32 p);
+	LUX_API DrawingCanvas(void* d, ColorFormat f, const math::Dimension2U& dim, u32 p);
 	LUX_API ~DrawingCanvas();
 
 	LUX_API bool IsValid();
@@ -175,9 +175,9 @@ public:
 
 private:
 	LUX_API s32 orient2d(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2);
-	LUX_API u8 ComputeOutCode(s32 x, s32 y, const math::recti& r);
-	LUX_API bool ClipLine(s32& x0, s32& y0, s32& x1, s32& y1, const math::recti& r);
-	LUX_API bool ClipRectangle(s32& left, s32& top, s32& right, s32& bottom, const math::recti&r);
+	LUX_API u8 ComputeOutCode(s32 x, s32 y, const math::RectI& r);
+	LUX_API bool ClipLine(s32& x0, s32& y0, s32& x1, s32& y1, const math::RectI& r);
+	LUX_API bool ClipRectangle(s32& left, s32& top, s32& right, s32& bottom, const math::RectI&r);
 
 private:
 	u8* m_Data;
@@ -185,7 +185,7 @@ private:
 	s32 m_Width;
 	s32 m_Height;
 
-	math::recti m_Rect;
+	math::RectI m_Rect;
 
 	u32 m_Pitch;
 };

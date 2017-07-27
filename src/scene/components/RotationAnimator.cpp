@@ -15,7 +15,7 @@ RotationAnimator::RotationAnimator()
 {
 }
 
-RotationAnimator::RotationAnimator(const math::vector3f& axis, math::anglef RotSpeed)
+RotationAnimator::RotationAnimator(const math::Vector3F& axis, math::AngleF RotSpeed)
 	: m_Axis(axis), m_RotSpeed(RotSpeed)
 {
 }
@@ -25,28 +25,28 @@ void RotationAnimator::Animate(Node* node, float time)
 	if(!node)
 		return;
 
-	math::quaternionf quat = node->GetOrientation();
-	quat *= math::quaternionf(m_Axis, time*m_RotSpeed);
+	math::QuaternionF quat = node->GetOrientation();
+	quat *= math::QuaternionF(m_Axis, time*m_RotSpeed);
 	quat.Normalize();
 	node->SetOrientation(quat);
 }
 
-void RotationAnimator::SetAxis(const math::vector3f& axis)
+void RotationAnimator::SetAxis(const math::Vector3F& axis)
 {
 	m_Axis = axis;
 }
 
-void RotationAnimator::SetRotationSpeed(const math::anglef& speed)
+void RotationAnimator::SetRotationSpeed(const math::AngleF& speed)
 {
 	m_RotSpeed = speed;
 }
 
-const math::vector3f& RotationAnimator::GetAxis() const
+const math::Vector3F& RotationAnimator::GetAxis() const
 {
 	return m_Axis;
 }
 
-const math::anglef& RotationAnimator::GetRotationSpeed() const
+const math::AngleF& RotationAnimator::GetRotationSpeed() const
 {
 	return m_RotSpeed;
 }

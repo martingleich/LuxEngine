@@ -389,12 +389,12 @@ bool Node::ExecuteQuery(Query* query, QueryCallback* callback)
 	return wasNotAborted;
 }
 
-const math::aabbox3df& Node::GetBoundingBox() const
+const math::AABBoxF& Node::GetBoundingBox() const
 {
 	return m_BoundingBox;
 }
 
-void Node::SetBoundingBox(const math::aabbox3df& box)
+void Node::SetBoundingBox(const math::AABBoxF& box)
 {
 	m_BoundingBox = box;
 	m_HasUserBoundingBox = true;
@@ -415,7 +415,7 @@ void Node::RecalculateBoundingBox()
 			}
 		}
 
-		math::aabbox3df box = math::aabbox3df::EMPTY;
+		math::AABBoxF box = math::AABBoxF::EMPTY;
 	};
 
 	BoxVisitor visitor;

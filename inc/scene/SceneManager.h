@@ -74,9 +74,9 @@ public:
 	virtual StrongRef<Light> CreateLight() = 0;
 
 	// Animatoren
-	virtual StrongRef<RotationAnimator> CreateRotator(const math::vector3f& axis=math::vector3f::UNIT_Y, math::anglef rotSpeed = math::anglef::Degree(45.0f)) = 0;
-	virtual StrongRef<LinearMoveAnimator> CreateLinearMover(const math::line3df& line, float duration) = 0;
-	virtual StrongRef<CameraControl> CreateCameraControl(float moveSpeed=4.0f, math::anglef rotSpeed=math::anglef::Degree(9.0f), bool noVerticalMovement=false) = 0;
+	virtual StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis=math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f)) = 0;
+	virtual StrongRef<LinearMoveAnimator> CreateLinearMover(const math::Line3F& line, float duration) = 0;
+	virtual StrongRef<CameraControl> CreateCameraControl(float moveSpeed=4.0f, math::AngleF rotSpeed=math::AngleF::Degree(9.0f), bool noVerticalMovement=false) = 0;
 
 	virtual StrongRef<Component> CreateComponent(core::Name type) = 0;
 
@@ -85,8 +85,8 @@ public:
 	virtual StrongRef<Collider> CreateMeshCollider(video::Mesh* mesh) = 0;
 	virtual StrongRef<Collider> CreateBoundingBoxCollider() = 0;
 	virtual StrongRef<Collider> CreateBoundingSphereCollider() = 0;
-	virtual StrongRef<Collider> CreateBoxCollider(const math::vector3f& halfSize, const math::Transformation& trans) = 0;
-	virtual StrongRef<Collider> CreateSphereCollider(const math::vector3f& center, float radius) = 0;
+	virtual StrongRef<Collider> CreateBoxCollider(const math::Vector3F& halfSize, const math::Transformation& trans) = 0;
+	virtual StrongRef<Collider> CreateSphereCollider(const math::Vector3F& center, float radius) = 0;
 
 	////////////////////////////////////////////////////////////////////////////////////
 

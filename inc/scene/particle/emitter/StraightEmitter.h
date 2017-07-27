@@ -11,21 +11,21 @@ class StraightEmitter : public ParticleEmitter
 {
 public:
 	StraightEmitter() :
-		m_Direction(math::vector3f::UNIT_X),
+		m_Direction(math::Vector3F::UNIT_X),
 		m_Scatter(0.0f)
 	{
 	}
 
-	StraightEmitter(const math::vector3f& dir, float scatter=0.0f)
+	StraightEmitter(const math::Vector3F& dir, float scatter=0.0f)
 	{
 		SetDirection(dir);
 		m_Scatter = scatter;
 	}
 
-	void SetDirection(const math::vector3f& dir)
+	void SetDirection(const math::Vector3F& dir)
 	{
 		m_Direction = dir;
-		m_Direction.Normalize_s();
+		m_Direction.Normalize();
 	}
 
 	void SetScattering(float scatter)
@@ -33,7 +33,7 @@ public:
 		m_Scatter = scatter;
 	}
 
-	const math::vector3f& GetDirection() const
+	const math::Vector3F& GetDirection() const
 	{
 		return m_Direction;
 	}
@@ -59,16 +59,16 @@ public:
 protected:
 	void GenerateVelocity(Particle& particle, float speed) const
 	{
-		math::vector3f scatter = m_Rand.GetVector3() * m_Scatter;
-		math::vector3f s = scatter - m_TransformedDirection.Dot(scatter)*m_TransformedDirection;
+		math::Vector3F scatter = m_Rand.GetVector3() * m_Scatter;
+		math::Vector3F s = scatter - m_TransformedDirection.Dot(scatter)*m_TransformedDirection;
 		particle.velocity = speed * (m_TransformedDirection + s);
 	}
 
 private:
-	math::vector3f m_Direction;
+	math::Vector3F m_Direction;
 	float m_Scatter;
 
-	mutable math::vector3f m_TransformedDirection;
+	mutable math::Vector3F m_TransformedDirection;
 };
 
 } // namespace scene

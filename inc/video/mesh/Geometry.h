@@ -99,13 +99,13 @@ public:
 	virtual video::EIndexFormat GetIndexType() const = 0;
 
 	//! The bounding box of the submesh data
-	virtual const math::aabbox3df& GetBoundingBox() const = 0;
+	virtual const math::AABBoxF& GetBoundingBox() const = 0;
 
 	//! Set a user defined bounding box for the data
 	/**
 	\param box The user's bounding box
 	*/
-	virtual void SetBoundingBox(const math::aabbox3df& box) = 0;
+	virtual void SetBoundingBox(const math::AABBoxF& box) = 0;
 
 	//! Recalculate the bounding box from the vertex data
 	/**

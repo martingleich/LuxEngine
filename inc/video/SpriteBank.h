@@ -68,7 +68,7 @@ public:
 	\param rect The part of the texture which contatins the sprite
 	\return A handle to the new sprite
 	*/
-	virtual Sprite AddSprite(Texture* texture, const math::rect<u16>& rect) = 0;
+	virtual Sprite AddSprite(Texture* texture, const math::Rect<u16>& rect) = 0;
 
 	//! Add a new sprite
 	/**
@@ -101,7 +101,7 @@ public:
 	\param [out] outText The texture to set for rendering
 	\return Could all information be retrieved
 	*/
-	virtual bool GetSprite(Sprite sprite, u32 Time, bool Looped, math::rectf*& outCoords, Texture*& outTex) = 0;
+	virtual bool GetSprite(Sprite sprite, u32 Time, bool Looped, math::RectF*& outCoords, Texture*& outTex) = 0;
 
 	//! Draws a single sprite
 	/**
@@ -115,7 +115,7 @@ public:
 	\param Centered Should the sprite be centerd on the draw position or should it be drawn from upper-left down
 	\return Could the sprite be drawn
 	*/
-	virtual bool DrawSprite(Sprite sprite, const math::vector2i& Position, u32 Time = 0, bool Looped = true, bool Centered = false) = 0;
+	virtual bool DrawSprite(Sprite sprite, const math::Vector2I& Position, u32 Time = 0, bool Looped = true, bool Centered = false) = 0;
 };
 
 }

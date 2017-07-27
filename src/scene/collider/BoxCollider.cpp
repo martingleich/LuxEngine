@@ -47,7 +47,7 @@ bool BoxCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallb
 	LX_CHECK_NULL_ARG(query);
 	LX_CHECK_NULL_ARG(result);
 
-	math::line3df line = query->GetLine();
+	math::Line3F line = query->GetLine();
 
 	math::Transformation fullTransform = owner->GetAbsoluteTransform().CombineRight(m_Transform);
 
@@ -65,7 +65,7 @@ bool BoxCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallb
 			r.colliderData = 0;
 			r.distance = info.distance;
 			r.normal = info.normal;
-			r.position = line.start + info.distance * line.GetVector().Normal_s();
+			r.position = line.start + info.distance * line.GetVector().Normal();
 			r.sceneCollider = this;
 			procceed = result->OnCollision(owner, r);
 		}
@@ -84,10 +84,10 @@ bool BoxCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone
 	LX_CHECK_NULL_ARG(query);
 	LX_CHECK_NULL_ARG(result);
 
-	const math::vector3f center = zone->GetCenter();
+	const math::Vector3F center = zone->GetCenter();
 	const float radius = zone->GetRadius();
 
-	const math::vector3f halfSize = m_HalfSize;
+	const math::Vector3F halfSize = m_HalfSize;
 	const math::Transformation trans = owner->GetAbsoluteTransform().CombineRight(m_Transform);
 
 	bool procceed = true;
@@ -123,10 +123,10 @@ bool BoxCollider::ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* zone
 	LX_CHECK_NULL_ARG(query);
 	LX_CHECK_NULL_ARG(result);
 
-	const math::vector3f halfSizeA = zone->GetHalfSize();
+	const math::Vector3F halfSizeA = zone->GetHalfSize();
 	const math::Transformation transA = zone->GetTransformation();
 
-	const math::vector3f halfSizeB = m_HalfSize;
+	const math::Vector3F halfSizeB = m_HalfSize;
 	const math::Transformation transB = owner->GetAbsoluteTransform().CombineRight(m_Transform);
 
 	bool procceed = true;

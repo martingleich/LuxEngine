@@ -265,7 +265,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 		throw core::FileFormatException("Unsupported color format", io::GetFileExtension(file->GetName()).Data());
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
-	img->Init(math::dimension2du(desc.Width, desc.Height), lxFormat);
+	img->Init(math::Dimension2U(desc.Width, desc.Height), lxFormat);
 
 	video::ImageLock imgLock(img);
 	CopyTextureData(0, imgLock.data, texture, info, desc, lxFormat);

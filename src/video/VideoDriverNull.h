@@ -20,9 +20,9 @@ public:
 	virtual EDriverType GetVideoDriverType() const;
 	virtual const DriverConfig& GetConfig() const;
 	
-	virtual StrongRef<Texture> CreateFittingTexture(const math::dimension2du& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false);
+	virtual StrongRef<Texture> CreateFittingTexture(const math::Dimension2U& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false);
 	virtual StrongRef<CubeTexture> CreateFittingCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false);
-	virtual StrongRef<Texture> CreateFittingRendertargetTexture(const math::dimension2du& size, ColorFormat format);
+	virtual StrongRef<Texture> CreateFittingRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
 
 	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
 

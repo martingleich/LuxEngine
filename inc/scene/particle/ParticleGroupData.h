@@ -89,8 +89,8 @@ private:
 		u32 count;
 		ParticleEmitter* emitter;
 
-		math::vector3f position;
-		math::vector3f velocity;
+		math::Vector3F position;
+		math::Vector3F velocity;
 
 		CreationData()
 		{
@@ -103,7 +103,7 @@ public:
 
 	LUX_API void Update(float secsPassed, const SystemData& data);
 
-	LUX_API void AddParticle(u32 count, const math::vector3f& position, const math::vector3f& velocity);
+	LUX_API void AddParticle(u32 count, const math::Vector3F& position, const math::Vector3F& velocity);
 	LUX_API void AddParticle(u32 count, ParticleEmitter* emitter);
 
 	LUX_API u32 GetParticleCount() const;

@@ -9,7 +9,7 @@ namespace math
 
 //! Object for planes in 3D
 template <typename type>
-class plane3d
+class Plane
 {
 public:
 	//! Classifies a intersection with a plane
@@ -22,49 +22,49 @@ public:
 	};
 
 public:
-	vector3<type> Normal;
-	type D;
+	Vector3<type> normal;
+	type d;
 
 	//! default constructor the XZ-Plane
-	plane3d() : Normal(0, 1, 0), D(0)
+	Plane() : normal(0, 1, 0), d(0)
 	{
 	}
 	//! Construct from Normal and d value
-	plane3d(const vector3<type>& _Normal, const type d) : Normal(_Normal), D(d)
+	Plane(const Vector3<type>& _Normal, const type d) : normal(_Normal), d(d)
 	{
 	}
 	//! Construct from a point on the plane and the normal
-	plane3d(const vector3<type>& Point, const vector3<type>& _Normal) : Normal(_Normal)
+	Plane(const Vector3<type>& Point, const Vector3<type>& _Normal) : normal(_Normal)
 	{
 		RecalculateD(Point);
 	}
 	//! Constructor from three points on the plane
-	plane3d(const vector3<type>& A, const vector3<type>& B, const vector3<type>& C)
+	Plane(const Vector3<type>& A, const Vector3<type>& B, const Vector3<type>& C)
 	{
 		SetPlane(A, B, C);
 	}
 
 	//! Copyconstuctor
-	plane3d(const plane3d& other) :
-		Normal(other.Normal),
-		D(other.D)
+	Plane(const Plane& other) :
+		normal(other.normal),
+		d(other.d)
 	{
 	}
 
 	//! Assignment
-	plane3d<type> operator= (const plane3d<type> other)
+	Plane<type> operator= (const Plane<type> other)
 	{
-		Normal = other.Normal; D = other.D; return *this;
+		normal = other.normal; d = other.d; return *this;
 	}
 
 	//! Equality
-	inline bool operator== (const plane3d<type>& other) const
+	inline bool operator== (const Plane<type>& other) const
 	{
-		return Equal(D, other.D) && Normal == other.Normal;
+		return Equal(d, other.d) && normal == other.normal;
 	}
 
 	//! Unequality
-	inline bool operator!= (const plane3d<type>& other) const
+	inline bool operator!= (const Plane<type>& other) const
 	{
 		return !(*this == other);
 	}
@@ -74,21 +74,21 @@ public:
 	\param point A memberpoint of the plane
 	\param _Normal The normalvector of the plane
 	*/
-	void SetPlane(const vector3<type>& point, const vector3<type>& _Normal)
+	void SetPlane(const Vector3<type>& point, const Vector3<type>& _Normal)
 	{
-		Normal = _Normal;
+		normal = _Normal;
 		RecalculateD(point);
 	}
 
-	//! Construct a plane from Normalvektor and D
+	//! Construct a plane from Normalvektor and d
 	/**
 	\param _Normal Normalvector of the plane
-	\param d D value of the plane
+	\param d d value of the plane
 	*/
-	void SetPlane(const vector3<type>& _Normal, type d)
+	void SetPlane(const Vector3<type>& _Normal, type d)
 	{
-		Normal = _Normal;
-		D = d;
+		normal = _Normal;
+		d = d;
 	}
 
 	//! Construct a plane from 3 Points
@@ -97,10 +97,10 @@ public:
 	\param B Second point on the plane
 	\param C Third point on the plane
 	*/
-	void SetPlane(const vector3<type>& A, const vector3<type>& B, const vector3<type>& C)
+	void SetPlane(const Vector3<type>& A, const Vector3<type>& B, const Vector3<type>& C)
 	{
-		Normal = (B - A).Cross(C - A);
-		Normal.Normalize_s();
+		normal = (B - A).Cross(C - A);
+		normal.Normalize_s();
 		RecalculateD(A);
 	}
 
@@ -108,9 +108,9 @@ public:
 	/**
 	\param point New Member point to apply
 	*/
-	void RecalculateD(const vector3<type>& point)
+	void RecalculateD(const Vector3<type>& point)
 	{
-		D = -point.Dot(Normal);
+		d = -point.Dot(normal);
 	}
 
 	//! Normalize the plane
@@ -118,11 +118,11 @@ public:
 	After this operation the Normalvector of the plane has the length 1
 	\return A reference to the current plane
 	*/
-	plane3d<type>& Normalize()
+	Plane<type>& Normalize()
 	{
-		const double dInvLength = 1.0 / Normal.GetLength();
-		Normal *= dInvLength;
-		D *= dInvLength;
+		const double dInvLength = 1.0 / normal.GetLength();
+		normal *= dInvLength;
+		d *= dInvLength;
 		return *this;
 	}
 
@@ -130,9 +130,9 @@ public:
 	/**
 	\return A point located on the plane
 	*/
-	vector3<type> GetMemberPoint() const
+	Vector3<type> GetMemberPoint() const
 	{
-		return Normal * -D;
+		return normal * -d;
 	}
 
 	//! Compute the minimal distance to a point
@@ -140,10 +140,10 @@ public:
 	\param p Point to which the distance should computed
 	\return The distance to the point
 	*/
-	type GetDistanceTo(const vector3<type>& p) const
+	type GetDistanceTo(const Vector3<type>& p) const
 	{
-		type out = p.Dot(Normal) + D;
-		float lsq = Normal.GetLengthSq();
+		type out = p.Dot(normal) + d;
+		float lsq = normal.GetLengthSq();
 		if(lsq != 1.0f)
 			out /= sqrt(lsq);
 		return out;
@@ -155,14 +155,14 @@ public:
 	\param out If != NULL, the linesegment intersected is written there
 	\return True, if an intersection occured
 	*/
-	bool IntersectWithLine(const line3d<type>& line,
+	bool IntersectWithLine(const Line3<type>& line,
 		float* out = nullptr) const
 	{
-		const float denominator = Normal.Dot(line.GetVector());
+		const float denominator = normal.Dot(line.GetVector());
 
 		if(IsZero(denominator)) {
 			// Line and plane are parallel
-			if(IsZero(Normal.Dot(line.start) + D)) {
+			if(IsZero(normal.Dot(line.start) + d)) {
 				// Line lies on the plane
 				if(out) *out = 0.0f;
 				return true;
@@ -171,7 +171,7 @@ public:
 			}
 		}
 
-		const float segment = -(Normal.Dot(line.start) + D) / denominator;
+		const float segment = -(normal.Dot(line.start) + d) / denominator;
 
 		if(segment < 0.0f || segment > 1.0f)
 			return false;
@@ -185,7 +185,7 @@ public:
 	\param line Line to check the intersection
 	\return True, if an intersection occured, False otherwise
 	*/
-	bool IntesectWithLineFast(const line3d<type>& line) const
+	bool IntesectWithLineFast(const Line3<type>& line) const
 	{
 		const float d1 = GetDistanceTo(line.start);
 		const float d2 = GetDistanceTo(line.end);
@@ -199,11 +199,9 @@ public:
 };
 
 //! typedef for plane with float precision
-typedef plane3d<float> plane3df;
+typedef Plane<float> PlaneF;
 
-}    
-
-}    
-
+} // namespace math
+} // namespace lux
 
 #endif

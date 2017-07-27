@@ -31,8 +31,8 @@ struct Particle
 	};
 
 	// Often accessed parameters(many times per frame)
-	math::vector3f position;
-	math::vector3f velocity;
+	math::Vector3F position;
+	math::Vector3F velocity;
 	float age;
 	float life;
 

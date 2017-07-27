@@ -9,7 +9,7 @@ namespace Types
 {
 Type Vector3f()
 {
-	static const Type t(new core::TypeInfoTemplate<math::vector3f>("vector3f"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector3F>("vector3f"));
 	return t;
 }
 Type Vector3i()

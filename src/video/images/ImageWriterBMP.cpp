@@ -37,7 +37,7 @@ bool ImageWriterBMP::CanWriteFile(const String& ext)
 	return ext.EqualCaseInsensitive("bmp") || ext.EqualCaseInsensitive("dib");
 }
 
-void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::dimension2du Size, u32 Pitch, u32 WriterParam)
+void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::Dimension2U Size, u32 Pitch, u32 WriterParam)
 {
 	LUX_UNUSED(WriterParam);
 

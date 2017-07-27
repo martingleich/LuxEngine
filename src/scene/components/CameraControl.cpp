@@ -11,11 +11,11 @@ namespace scene
 {
 
 CameraControl::CameraControl() :
-	CameraControl(4.0f, math::anglef::Degree(30.0f), math::anglef::Degree(89.0f), false)
+	CameraControl(4.0f, math::AngleF::Degree(30.0f), math::AngleF::Degree(89.0f), false)
 {
 }
 
-CameraControl::CameraControl(float moveSpeed, math::anglef rotSpeed, math::anglef maxAngle, bool noVertical) :
+CameraControl::CameraControl(float moveSpeed, math::AngleF rotSpeed, math::AngleF maxAngle, bool noVertical) :
 	m_MoveSpeed(moveSpeed),
 	m_RotSpeed(rotSpeed),
 	m_MaxVerticalAngle(maxAngle),
@@ -42,12 +42,12 @@ void CameraControl::Animate(Node* node, float time)
 			lookY->signal.Connect(this, &CameraControl::MouseMoveY);
 	}
 
-	math::vector3f pos = node->GetAbsolutePosition();
-	math::vector3f flank = node->FromRelativeDir(math::vector3f::UNIT_X);
-	math::vector3f up = node->FromRelativeDir(math::vector3f::UNIT_Y);
-	math::vector3f look = node->FromRelativeDir(math::vector3f::UNIT_Z);
+	math::Vector3F pos = node->GetAbsolutePosition();
+	math::Vector3F flank = node->FromRelativeDir(math::Vector3F::UNIT_X);
+	math::Vector3F up = node->FromRelativeDir(math::Vector3F::UNIT_Y);
+	math::Vector3F look = node->FromRelativeDir(math::Vector3F::UNIT_Z);
 
-	math::vector3f move = look;
+	math::Vector3F move = look;
 	if(m_NoVerticalMovement) {
 		move.y = 0.0f;
 		move.Normalize();
@@ -66,8 +66,8 @@ void CameraControl::Animate(Node* node, float time)
 		deltaRotX = -m_MaxVerticalAngle - curAngleX;
 
 	auto rot =
-		math::quaternionf(flank, -deltaRotX) *
-		math::quaternionf(math::vector3f::UNIT_Y, deltaRotY);
+		math::QuaternionF(flank, -deltaRotX) *
+		math::QuaternionF(math::Vector3F::UNIT_Y, deltaRotY);
 
 	node->SetOrientation(node->GetOrientation() * rot);
 
@@ -95,21 +95,21 @@ void CameraControl::SetMoveSpeed(float fSpeed)
 	m_MoveSpeed = fSpeed;
 }
 
-void CameraControl::SetMaxVerticalAngle(math::anglef a)
+void CameraControl::SetMaxVerticalAngle(math::AngleF a)
 {
 	m_MaxVerticalAngle = a;
 }
-math::anglef CameraControl::GetMaxVerticalAngle() const
+math::AngleF CameraControl::GetMaxVerticalAngle() const
 {
 	return m_MaxVerticalAngle;
 }
 
-math::anglef CameraControl::GetRotationSpeed() const
+math::AngleF CameraControl::GetRotationSpeed() const
 {
 	return m_RotSpeed;
 }
 
-void CameraControl::SetRotationSpeed(math::anglef fSpeed)
+void CameraControl::SetRotationSpeed(math::AngleF fSpeed)
 {
 	m_RotSpeed = fSpeed;
 }

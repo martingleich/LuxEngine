@@ -153,9 +153,9 @@ public:
 	/**
 	\return A random generated vector
 	*/
-	inline math::vector2f GetVector2() const
+	inline math::Vector2F GetVector2() const
 	{
-		return math::vector2f(GetFloat(-1.0f, 1.0f), GetFloat(-1.0f, 1.0f));
+		return math::Vector2F(GetFloat(-1.0f, 1.0f), GetFloat(-1.0f, 1.0f));
 	}
 
 	//! Generate a random vector inside a box
@@ -164,9 +164,9 @@ public:
 	\param max The max corner of the box
 	\return A random vector
 	*/
-	inline math::vector2f GetVector2(const math::vector2f& min, const math::vector2f& max) const
+	inline math::Vector2F GetVector2(const math::Vector2F& min, const math::Vector2F& max) const
 	{
-		return math::vector2f(
+		return math::Vector2F(
 			GetFloat(min.x, max.x),
 			GetFloat(min.y, max.y));
 	}
@@ -176,37 +176,37 @@ public:
 	\param rect The rect in which the vector is placed
 	\return A random vector
 	*/
-	inline math::vector2f GetVector2(const math::rectf& rect) const
+	inline math::Vector2F GetVector2(const math::RectF& rect) const
 	{
-		return math::vector2f(
+		return math::Vector2F(
 			GetFloat(rect.left, rect.right),
 			GetFloat(rect.bottom, rect.top));
 	}
 
 	//! Generate a random vector inside the unit circle
-	inline math::vector2f GetVector2Circle(float radius = 1.0f) const
+	inline math::Vector2F GetVector2Circle(float radius = 1.0f) const
 	{
 		const float baseLine = GetFloat(-1.0f, 1.0f);
 		const float s = sqrt(1 - baseLine*baseLine);
 		const float height = GetFloat(-s, s);
 
-		return radius * math::vector2f(baseLine, height);
+		return radius * math::Vector2F(baseLine, height);
 	}
 
 	//! Generate a random vector on the circle curve
-	inline math::vector2f GetVector2CircleBorder(float radius = 1.0f) const
+	inline math::Vector2F GetVector2CircleBorder(float radius = 1.0f) const
 	{
 		const auto angle = GetAngle();
-		return math::vector2f::BuildFromPolar(angle, radius);
+		return math::Vector2F::BuildFromPolar(angle, radius);
 	}
 
 	//! Generate a random vector inside the unit cube
 	/**
 	\return A random vector
 	*/
-	inline math::vector3f GetVector3() const
+	inline math::Vector3F GetVector3() const
 	{
-		return math::vector3f(GetFloat(-1.0f, 1.0f), GetFloat(-1.0f, 1.0f), GetFloat(-1.0f, 1.0f));
+		return math::Vector3F(GetFloat(-1.0f, 1.0f), GetFloat(-1.0f, 1.0f), GetFloat(-1.0f, 1.0f));
 	}
 
 	//! Generate a random vector inside a box
@@ -215,9 +215,9 @@ public:
 	\param max The max corner of the box
 	\return A random vector
 	*/
-	inline math::vector3f GetVector3(const math::vector3f& min, const math::vector3f& max) const
+	inline math::Vector3F GetVector3(const math::Vector3F& min, const math::Vector3F& max) const
 	{
-		return math::vector3f(
+		return math::Vector3F(
 			GetFloat(min.x, max.x),
 			GetFloat(min.y, max.y),
 			GetFloat(min.z, max.z));
@@ -228,9 +228,9 @@ public:
 	\param radius The radius of the sphere.
 	\return A random point in the sphere.
 	*/
-	inline math::vector3f GetVector3Sphere(float radius = 1.0f) const
+	inline math::Vector3F GetVector3Sphere(float radius = 1.0f) const
 	{
-		math::vector3f v;
+		math::Vector3F v;
 		do {
 			v = GetVector3();
 		} while(v.GetLengthSq() >= 1.0f);
@@ -243,7 +243,7 @@ public:
 	\param box The box in which the vector is placed
 	\return A random vector
 	*/
-	inline math::vector3f GetVector3(const math::aabbox3df& box) const
+	inline math::Vector3F GetVector3(const math::AABBoxF& box) const
 	{
 		return GetVector3(box.minCorner, box.maxCorner);
 	}
@@ -254,18 +254,18 @@ public:
 	\param max The upper bound
 	\return A random angle between min and max.
 	*/
-	inline math::anglef GetAngle(math::anglef min, math::anglef max) const
+	inline math::AngleF GetAngle(math::AngleF min, math::AngleF max) const
 	{
-		return math::anglef::Radian(GetFloat(min.Radian(), max.Radian()));
+		return math::AngleF::Radian(GetFloat(min.Radian(), max.Radian()));
 	}
 
 	//! Generate a random angle on the full circle
 	/**
 	\reutnr A random angle
 	*/
-	inline math::anglef GetAngle() const
+	inline math::AngleF GetAngle() const
 	{
-		return GetAngle(math::anglef::ZERO, math::anglef::FULL);
+		return GetAngle(math::AngleF::ZERO, math::AngleF::FULL);
 	}
 
 private:

@@ -34,7 +34,7 @@ public:
 	LUX_API virtual void SetMaterial(size_t i, video::Material* m);
 	LUX_API virtual size_t GetMaterialCount() const;
 
-	LUX_API virtual const math::aabbox3df& GetBoundingBox() const;
+	LUX_API virtual const math::AABBoxF& GetBoundingBox() const;
 
 	LUX_API virtual core::Name GetReferableType() const;
 	LUX_API virtual StrongRef<Referable> Clone() const;
