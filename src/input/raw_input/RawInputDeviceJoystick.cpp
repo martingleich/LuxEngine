@@ -452,7 +452,7 @@ void RawJoystickDevice::HandleInput(RAWINPUT* input)
 	size_t axisCur = 0;
 	size_t buttonCur = 0;
 
-	core::Fill(m_NewButtonStates.First(), m_NewButtonStates.End(), false);
+	core::Fill(m_NewButtonStates, false);
 	for(size_t i = 0; i < dataCount; ++i) {
 		USHORT dataIndex = data[i].DataIndex;
 		bool matched = false;

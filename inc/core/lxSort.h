@@ -55,10 +55,10 @@ inline void Heapsort(RanIt first, RanIt end, const Compare& compare)
 	}
 }
 
-template <typename RanIt, typename CompareType>
-void Sort(RanIt first, RanIt end, CompareType compare)
+template <typename RangeT, typename CompareType>
+void Sort(RangeT&& range, CompareType compare)
 {
-	Heapsort(first, end, compare);
+	Heapsort(range.begin(), range.end(), compare);
 }
 
 }    

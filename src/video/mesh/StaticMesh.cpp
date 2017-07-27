@@ -91,7 +91,7 @@ void StaticMesh::RemoveGeometry(size_t index)
 void StaticMesh::RemoveGeometry(Geometry* subMesh)
 {
 	Entry e(subMesh);
-	auto it = core::LinearSearch(e, m_Data.First(), m_Data.End());
+	auto it = core::LinearSearch(e, m_Data);
 	if(it != m_Data.End())
 		m_Data.Erase(it);
 }

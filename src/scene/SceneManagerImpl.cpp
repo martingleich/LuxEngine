@@ -226,7 +226,7 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 	if(camList.Size() == 0)
 		return false;
 
-	auto newEnd = core::RemoveIf(camList.First(), camList.End(),
+	auto newEnd = core::RemoveIf(camList,
 		[](const CameraEntry& e) -> bool {
 		return !e.node->IsTrulyVisible();
 	});
@@ -295,7 +295,7 @@ void SceneManagerImpl::RegisterCamera(Node* node, Camera* camera)
 void SceneManagerImpl::UnregisterCamera(Node* node, Camera* camera)
 {
 	CameraEntry entry(node, camera);
-	auto it = core::LinearSearch(entry, m_CameraList.First(), m_CameraList.End());
+	auto it = core::LinearSearch(entry, m_CameraList);
 	if(it != m_CameraList.End())
 		m_CameraList.Erase(it);
 }
@@ -308,7 +308,7 @@ void SceneManagerImpl::RegisterLight(Node* node, Light* light)
 void SceneManagerImpl::UnregisterLight(Node* node, Light* light)
 {
 	LightEntry entry(node, light);
-	auto it = core::LinearSearch(entry, m_LightList.First(), m_LightList.End());
+	auto it = core::LinearSearch(entry, m_LightList);
 	if(it != m_LightList.End())
 		m_LightList.Erase(it);
 }

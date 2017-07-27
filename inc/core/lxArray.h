@@ -459,14 +459,14 @@ public:
 	void Sort()
 	{
 		if(m_Used > 1)
-			core::Sort(First(), End(), core::CompareType<T>());
+			core::Sort(*this, core::CompareType<T>());
 	}
 
 	template <typename CompareT>
 	void Sort(const CompareT& compare)
 	{
 		if(m_Used > 1)
-			core::Sort(First(), End(), compare);
+			core::Sort(*this, compare);
 	}
 
 	//! Remove an entry in the array
@@ -611,9 +611,13 @@ public:
 	*/
 	ConstIterator First() const
 	{
-		return ConstIterator(m_Entries);
+		return FirstC();
 	}
 
+	ConstIterator FirstC() const
+	{
+		return ConstIterator(m_Entries);
+	}
 	//! Iterator to the last element in the array
 	/**
 	\return The element beyond the last in the array
@@ -629,9 +633,13 @@ public:
 	*/
 	ConstIterator End() const
 	{
-		return ConstIterator(m_Entries + m_Used);
+		return EndC();
 	}
 
+	ConstIterator EndC() const
+	{
+		return ConstIterator(m_Entries + m_Used);
+	}
 	//! Iterator to the first element in the array
 	/**
 	\return The element before the first in the array

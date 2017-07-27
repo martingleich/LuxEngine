@@ -16,16 +16,16 @@ namespace core
 returns true if the entry matches otherwise false
 \return An iterator to the searched entry if found, otherwise from
 */
-template <typename Iterator, typename type, typename Condition>
-Iterator LinearSearch(const type& entry, Iterator from, Iterator to, Condition con)
+template <typename RangeT, typename type, typename Condition>
+decltype(std::declval<RangeT>().begin()) LinearSearch(const type& entry, RangeT&& range, Condition con)
 {
-	// Lineare Suche
-	for(; from != to; ++from) {
-		if(con(*from, entry))
+	auto it = range.first();
+	for(; it != range.end(); ++it) {
+		if(con(*it, entry))
 			break;
 	}
 
-	return from;
+	return it;
 }
 
 //! Performs a linear search for an element
@@ -37,18 +37,19 @@ The operation
 \param entry The entry to scan for
 \return An iterator to the searched entry if found, otherwise from
 */
-template <typename Iterator, typename type>
-Iterator LinearSearch(const type& entry, Iterator from, Iterator to)
+template <typename RangeT, typename type>
+decltype(std::declval<RangeT>().begin()) LinearSearch(const type& entry, RangeT&& range)
 {
 	// Lineare Suche
-	for(; from != to; ++from) {
-		if(*from == entry)
+	auto it = range.begin();
+	for(; it != range.end(); ++it) {
+		if(*it == entry)
 			break;
 	}
 
-	return from;
+	return it;
 }
-
+#if 0
 //! Performs a reverse linear search for an element
 /**
 The operation (*Iterator == type), must be defined
@@ -90,6 +91,7 @@ Iterator ReverseLinearSearch(const type& entry, Iterator from, Iterator to, Cond
 
 	return to;
 }
+#endif
 
 //! Performs an action for each element
 /**
@@ -98,11 +100,13 @@ Performs an action for each element between two iterators
 \param to The forward-iterator which limits the elements, must be after from
 \param Action An unary function, taking an *Iterator, which is called for each element
 */
-template <typename Iterator, typename Action>
-void Foreach(Iterator from, Iterator to, Action act)
+template <typename RangeT, typename Action>
+void Foreach(RangeT&& range, Action act)
 {
-	for(; from != to; ++from)
-		act(*from);
+	auto it = range.begin();
+	for(; it != range.end(); ++it) {
+		act(*it);
+	}
 }
 
 //! Performs a binary search in an sorted array
@@ -113,18 +117,21 @@ void Foreach(Iterator from, Iterator to, Action act)
 \param outNewEntry If not null and the entry was not found here the Interator where it should placed to keep the array sorted is written.
 \return The iterator to the search interator or end if it couldn't be found.
 */
-template <typename Iterator, typename T>
-Iterator BinarySearch(const T& entry, Iterator begin, Iterator end, Iterator* outNextEntry = nullptr)
+template <typename RangeT, typename T, typename IterT = decltype(std::declval<RangeT>().begin())>
+IterT BinarySearch(const T& entry, RangeT&& range, IterT* outNextEntry = nullptr)
 {
+	auto begin = range.begin();
+	auto end = range.end();
+
 	if(begin == end) {
 		if(outNextEntry)
 			*outNextEntry = end;
 		return end;
 	}
 
-	Iterator left = begin;
-	Iterator right = end - 1;
-	Iterator middle = left;
+	IterT left = begin;
+	IterT right = end - 1;
+	IterT middle = left;
 	while(IteratorDistance(left, right) >= 0) {
 		middle = AdvanceIterator(left, IteratorDistance(left, right) / 2);
 		if(*middle == entry)
@@ -155,10 +162,12 @@ contains elements not fullfilling the condition.
 \param predicate The condition, returns true to delete a element.
 \return The end iterator of the new sequence.
 */
-template <typename Iterator, typename Predicate>
-Iterator RemoveIf(Iterator first, Iterator end, Predicate pred)
+template <typename RangeT, typename Predicate, typename IterT = decltype(std::declval<RangeT>().begin())>
+IterT RemoveIf(RangeT&& range, Predicate pred)
 {
-	Iterator cursor = first;
+	IterT first = range.begin();
+	IterT cursor = first;
+	IterT end = range.end();
 	while(first != end) {
 		if(!pred(*first)) {
 			if(cursor != first)
@@ -179,10 +188,12 @@ The order of the not removed elements is preserved.
 \param value The value to remove
 \return The end iterator of the new sequence.
 */
-template <typename Iterator, typename Value>
-Iterator Remove(Iterator first, Iterator end, Value& value)
+template <typename RangeT, typename ValueT, typename IterT = decltype(std::declval<RangeT>().begin())>
+IterT Remove(RangeT&& range, ValueT& value)
 {
-	Iterator cursor = first;
+	IterT first = range.begin();
+	IterT end = range.end();
+	IterT cursor = first;
 	while(first != end) {
 		if(*first != value) {
 			if(cursor != first)
@@ -201,18 +212,18 @@ Iterator Remove(Iterator first, Iterator end, Value& value)
 \param end The end iterator of the fill range.
 \param v The value to fill with.
 */
-template <typename Iterator, typename Value>
-void Fill(Iterator first, Iterator end, Value v)
+template <typename RangeT, typename Value>
+void Fill(RangeT&& range, Value v)
 {
+	auto first = range.begin();
+	auto end = range.end();
 	while(first != end) {
 		*first = v;
 		++first;
 	}
 }
 
-} 
-
-} 
-
+}
+}
 
 #endif

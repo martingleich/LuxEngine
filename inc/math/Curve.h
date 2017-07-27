@@ -336,7 +336,7 @@ private:
 		typename core::Array<Sample>::ConstIterator n, i;
 		Sample dummy;
 		dummy.x = x;
-		n = core::BinarySearch(dummy, m_Samples.First(), m_Samples.End(), &i);
+		n = core::BinarySearch(dummy, m_Samples, &i);
 		if(n == m_Samples.End())
 			return core::IteratorDistance(m_Samples.First(), i);
 		else

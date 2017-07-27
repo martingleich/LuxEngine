@@ -34,7 +34,7 @@ UNIT_SUITE(algorithm)
 	{
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
-		int* it = core::BinarySearch(4, array, array+10);
+		int* it = core::BinarySearch(4, core::MakeRange(array, array+10));
 
 		UNIT_ASSERT(*it == 4);
 	}
@@ -43,7 +43,7 @@ UNIT_SUITE(algorithm)
 	{
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
-		int* it = core::LinearSearch(4, array, array+10);
+		int* it = core::LinearSearch(4, core::MakeRange(array, array+10));
 
 		UNIT_ASSERT(*it == 4);
 	}
@@ -53,7 +53,7 @@ UNIT_SUITE(algorithm)
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
 		int* jt;
-		int* it = core::BinarySearch(17, array, array+10, &jt);
+		int* it = core::BinarySearch(17, core::MakeRange(array, array+10), &jt);
 
 		UNIT_ASSERT(it == array+10);
 		UNIT_ASSERT(jt == array+5);
@@ -64,7 +64,7 @@ UNIT_SUITE(algorithm)
 		int array[11] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543, 600};
 
 		int* jt;
-		int* it = core::BinarySearch(17, array, array+11, &jt);
+		int* it = core::BinarySearch(17, core::MakeRange(array, array+11), &jt);
 
 		UNIT_ASSERT(it == array+11);
 		UNIT_ASSERT(jt == array+5);
@@ -74,7 +74,7 @@ UNIT_SUITE(algorithm)
 	{
 		int array[10] = {1, 3, 4,6, 8, 32, 46, 122, 467, 543};
 
-		int* it = core::LinearSearch(17, array, array+10);
+		int* it = core::LinearSearch(17, core::MakeRange(array, array+10));
 
 		UNIT_ASSERT(it == array+10);
 	}

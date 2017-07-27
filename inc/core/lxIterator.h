@@ -176,24 +176,25 @@ public:
 	Range(IterT f, IterT e) :
 		m_First(f),
 		m_End(e)
-	{}
+	{
+	}
 
-	IterT First()
+	IterT First() const
 	{
 		return m_First;
 	}
 
-	IterT begin()
+	IterT begin() const
 	{
 		return m_First;
 	}
 
-	IterT End()
+	IterT End() const
 	{
 		return m_End;
 	}
 
-	IterT end()
+	IterT end() const
 	{
 		return m_End;
 	}
@@ -202,6 +203,36 @@ private:
 	IterT m_First;
 	IterT m_End;
 };
+
+template <typename RangeT>
+size_t RangeLength(const RangeT& r)
+{
+	return IteratorDistance(r.begin(), r.end());
+}
+
+template <typename IterT>
+Range<IterT> MakeRange(IterT first, IterT end)
+{
+	return Range<IterT>(first, end);
+}
+
+template <typename RangeT, typename IterT = decltype(std::declval<RangeT>().begin())>
+Range<IterT> SliceRange(RangeT&& range, intptr_t first, intptr_t end = -1)
+{
+	size_t len = RangeLength(std::forward<RangeT>(range));
+	if(end < 0)
+		end = len + end + 1;
+	lxAssert(end >= first);
+	IterT itFirst = AdvanceIterator(range.begin(), first);
+	IterT itEnd = AdvanceIterator(itFirst, end - first);
+	return Range<IterT>(itFirst, itEnd);
+}
+
+template <typename RangeT, typename IterT = decltype(std::declval<RangeT>().begin())>
+Range<IterT> SliceRangeCount(RangeT&& range, intptr_t first, intptr_t count)
+{
+	return SliceRange(std::forward<RangeT>(range), first, first+count);
+}
 
 }
 }

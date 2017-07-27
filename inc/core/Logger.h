@@ -122,7 +122,8 @@ public:
 
 	void RemoveLogger(Logger* l)
 	{
-		core::Remove(m_Loggers.First(), m_Loggers.End(), l);
+		auto newEnd = core::Remove(m_Loggers, l);
+		m_Loggers.Resize(core::IteratorDistance(m_Loggers.First(), newEnd));
 	}
 
 	void SetLogLevel(ELogLevel ll)

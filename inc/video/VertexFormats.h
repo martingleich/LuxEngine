@@ -266,8 +266,7 @@ public:
 			const auto& stream = m_Streams[streamId];
 
 			core::Sort(
-				m_Data.First() + stream.firstElement,
-				m_Data.First() + stream.firstElement + stream.elemCount,
+				core::SliceRangeCount(m_Data, stream.firstElement, stream.elemCount),
 				SortByOffset());
 		}
 

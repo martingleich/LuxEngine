@@ -120,7 +120,7 @@ struct ResourceBlock
 			return INVALID_ID;
 
 		Entry entry(name, nullptr);
-		auto it = core::BinarySearch(entry, resources.First(), resources.End());
+		auto it = core::BinarySearch(entry, resources);
 		if(it == resources.End())
 			return INVALID_ID;
 
@@ -138,7 +138,7 @@ struct ResourceBlock
 
 		Entry entry(name, resource);
 		core::Array<Entry>::Iterator n;
-		auto it = core::BinarySearch(entry, resources.First(), resources.End(), &n);
+		auto it = core::BinarySearch(entry, resources, &n);
 		if(it != resources.End())
 			throw core::Exception("Resource already exists");
 
@@ -157,7 +157,7 @@ struct ResourceBlock
 	{
 		const u32 oldCount = (u32)resources.Size();
 		if(resources.Size() > 0) {
-			auto newEnd1 = core::RemoveIf(resources.First(), resources.End(), [](const Entry& e) -> bool { return e.resource->GetReferenceCount() == 1; });
+			auto newEnd1 = core::RemoveIf(resources, [](const Entry& e) -> bool { return e.resource->GetReferenceCount() == 1; });
 			resources.Resize(core::IteratorDistance(resources.First(), newEnd1));
 		}
 
@@ -462,7 +462,7 @@ Name ResourceSystemImpl::GetType(u32 id) const
 void ResourceSystemImpl::AddType(Name name)
 {
 	TypeEntry entry(name);
-	auto it = core::LinearSearch(entry, self->types.First(), self->types.End());
+	auto it = core::LinearSearch(entry, self->types);
 	if(it != self->types.End())
 		throw core::Exception("Resource type already exists");
 
@@ -474,7 +474,7 @@ void ResourceSystemImpl::AddType(Name name)
 u32 ResourceSystemImpl::GetTypeID(Name type) const
 {
 	TypeEntry entry(type);
-	auto it = core::LinearSearch(entry, self->types.First(), self->types.End());
+	auto it = core::LinearSearch(entry, self->types);
 	if(it == self->types.End())
 		throw core::Exception("Resourcetype does not exist");
 

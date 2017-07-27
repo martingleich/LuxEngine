@@ -24,7 +24,7 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::Rect<
 	if(!texture)
 		return 0;
 
-	auto it = core::LinearSearch(texture, m_Textures.First(), m_Textures.End());
+	auto it = core::LinearSearch(texture, m_Textures);
 	if(it == m_Textures.End())
 		it = m_Textures.PushBack(texture);
 
@@ -44,7 +44,7 @@ SpriteBank::Sprite SpriteBankImpl::AddTextureAsSprite(Texture* texture)
 	if(!texture)
 		return 0;
 
-	auto it = core::LinearSearch(texture, m_Textures.First(), m_Textures.End());
+	auto it = core::LinearSearch(texture, m_Textures);
 	if(it == m_Textures.End())
 		it = m_Textures.PushBack(texture);
 

@@ -33,7 +33,7 @@ public:
 
 	void RemoveImage(Image* img)
 	{
-		auto newEnd = core::Remove(m_Images.First(), m_Images.End(), img);
+		auto newEnd = core::Remove(m_Images, img);
 		m_Images.Resize(core::IteratorDistance(m_Images.First(), newEnd));
 	}
 
