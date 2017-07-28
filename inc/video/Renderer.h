@@ -2,8 +2,7 @@
 #define INCLUDED_RENDERER_H
 #include "core/ReferenceCounted.h"
 
-#include "video/EPrimitiveType.h"
-#include "video/HardwareBufferConstants.h"
+#include "video/VideoEnums.h"
 #include "video/Color.h"
 
 #include "math/AABBox.h"
@@ -30,7 +29,6 @@ class PipelineOverwrite;
 class VertexFormat;
 class RenderStatistics;
 class VideoDriver;
-class AlphaBlendSettings;
 
 //! The diffrent transforms which can be set in the renderer
 enum class ETransform
@@ -41,6 +39,44 @@ enum class ETransform
 };
 
 struct PipelineOverwriteToken;
+struct ScissorRectToken;
+struct StencilModeToken;
+
+struct StencilMode
+{
+	u32 ref = 0;
+
+	u32 readMask = 0xFFFFFFFF;
+	u32 writeMask = 0xFFFFFFFF;
+
+	EComparisonFunc test = EComparisonFunc::Always;
+
+	EStencilOperator pass = EStencilOperator::Keep;
+	EStencilOperator fail = EStencilOperator::Keep;
+	EStencilOperator zFail = EStencilOperator::Keep;
+
+	EStencilOperator passCCW = EStencilOperator::Keep;
+	EStencilOperator failCCW = EStencilOperator::Keep;
+	EStencilOperator zFailCCW = EStencilOperator::Keep;
+
+	bool IsTwoSided() const
+	{
+		return pass != EStencilOperator::Keep ||
+			fail != EStencilOperator::Keep ||
+			zFail != EStencilOperator::Keep;
+	}
+
+	bool IsEnabled() const
+	{
+		return !(test == EComparisonFunc::Always &&
+			pass == EStencilOperator::Keep &&
+			fail == EStencilOperator::Keep &&
+			zFail == EStencilOperator::Keep &&
+			passCCW == EStencilOperator::Keep &&
+			failCCW == EStencilOperator::Keep &&
+			zFailCCW == EStencilOperator::Keep);
+	}
+};
 
 /**
 Rendering 2d or 3d data:
@@ -82,12 +118,14 @@ public:
 	Each begun scene must be finished with EndScene.
 	\param clearColor Shall the color of the rendertarget be cleared
 	\param clearZBuffer Shall the z buffer be cleared
+	\param clearStencil Shall the stencil buffer be cleared
 	\param color The color to set the rendertarget to
 	\param z The value to which the zBuffer is set
+	\param stencil The value to which the stencil buffer is cleared
 	*/
 	virtual void BeginScene(
-		bool clearColor, bool clearZBuffer,
-		video::Color color = video::Color::Black, float z = 1.0f) = 0;
+		bool clearColor, bool clearZBuffer, bool clearStencil,
+		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil=0) = 0;
 
 	//! Finishes a scene
 	/**
@@ -139,13 +177,19 @@ public:
 	\param over The overwrite to apply
 	\param token A token to restore the previous state of the overwrites, see \ref PipelineOverwriteToken for more
 	*/
-	virtual void PushPipelineOverwrite(const PipelineOverwrite& over, PipelineOverwriteToken* token=nullptr) = 0;
+	virtual void PushPipelineOverwrite(const PipelineOverwrite& over, PipelineOverwriteToken* token = nullptr) = 0;
 
 	//! Remove the previous added pipeline overwrite
 	/*
 	\param token A token to restore the previous state of the overwrites, see \ref PipelineOverwriteToken for more
 	*/
-	virtual void PopPipelineOverwrite(PipelineOverwriteToken* token=nullptr) = 0;
+	virtual void PopPipelineOverwrite(PipelineOverwriteToken* token = nullptr) = 0;
+
+	virtual void SetScissorRect(const math::RectU& rect, ScissorRectToken* token = nullptr) = 0;
+	virtual const math::RectU& GetScissorRect() const = 0;
+
+	virtual void SetStencilMode(const StencilMode& mode, StencilModeToken*token = nullptr) = 0;
+	virtual const StencilMode& GetStencilMode() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -258,6 +302,15 @@ public:
 	virtual VideoDriver* GetDriver() const = 0;
 };
 
+struct VideoRendererToken
+{
+	Renderer* renderer = nullptr;
+	void Unlock()
+	{
+		renderer = nullptr;
+	}
+};
+
 //! A token to restore the previous state of the overwrite system.
 /**
 Pass a token to PushPipelineOverwrite so that when the token is destructed the
@@ -277,7 +330,7 @@ renderer->PushPipelineOverwrite(over, &token);
 It's recommended to used the token instead of restoring the pipeline by yourself
 since it works reliably in the presence of exceptions and can't be forgotten.
 */
-struct PipelineOverwriteToken
+struct PipelineOverwriteToken : VideoRendererToken
 {
 	~PipelineOverwriteToken()
 	{
@@ -287,9 +340,31 @@ struct PipelineOverwriteToken
 		}
 	}
 
-	Renderer* renderer = nullptr;
 	u32 count = 0;
 };
+
+struct StencilModeToken : VideoRendererToken
+{
+	~StencilModeToken()
+	{
+		if(renderer)
+			renderer->SetStencilMode(prevMode);
+	}
+
+	StencilMode prevMode;
+};
+
+struct ScissorRectToken : VideoRendererToken
+{
+	~ScissorRectToken()
+	{
+		if(renderer)
+			renderer->SetScissorRect(prevRect);
+	}
+
+	math::RectU prevRect;
+};
+
 
 } // namespace video
 } // namespace lux

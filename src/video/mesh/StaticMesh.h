@@ -11,6 +11,10 @@ namespace video
 class StaticMesh : public Mesh
 {
 public:
+	StaticMesh(const core::ResourceOrigin& origin) :
+		Mesh(origin)
+	{}
+
 	void Clear();
 	size_t GetSubMeshCount() const;
 	const Geometry* GetGeometry(size_t i) const;
@@ -33,7 +37,6 @@ public:
 	void SetMaterial(size_t index, Material* m);
 
 	core::Name GetReferableType() const;
-	StrongRef<Referable> Clone() const;
 
 private:
 	math::AABBoxF m_BoundingBox;

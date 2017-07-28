@@ -1,36 +1,18 @@
 #ifndef INCLUDED_TEXTURE_STAGE_SETTINGS_H
 #define INCLUDED_TEXTURE_STAGE_SETTINGS_H
+#include "core/LuxBase.h"
+#include "video/VideoEnums.h"
 
 namespace lux
 {
 namespace video
 {
 
-enum class ETextureOperator
-{
-	Disable,
-	SelectArg1,
-	SelectArg2,
-	Modulate,
-	Add,
-	AddSigned,
-	AddSmoth,
-	Subtract,
-	Blend,
-	Dot,
-};
-
-enum class ETextureArgument
-{
-	Current,
-	Texture,
-	Diffuse,
-	AlphaRep,
-};
-
 class TextureStageSettings
 {
 public:
+	u32 coordSource;
+
 	ETextureArgument colorArg1;
 	ETextureArgument colorArg2;
 	ETextureOperator colorOperator;
@@ -39,16 +21,14 @@ public:
 	ETextureArgument alphaArg2;
 	ETextureOperator alphaOperator;
 
-	u32 coordSource;
-
 	TextureStageSettings() :
+		coordSource(0xFFFFFFFF),
 		colorArg1(ETextureArgument::Diffuse),
 		colorArg2(ETextureArgument::Texture),
 		colorOperator(ETextureOperator::Modulate),
 		alphaArg1(ETextureArgument::Diffuse),
 		alphaArg2(ETextureArgument::Texture),
-		alphaOperator(ETextureOperator::Modulate),
-		coordSource(0xFFFFFFFF)
+		alphaOperator(ETextureOperator::Modulate)
 	{
 	}
 
@@ -60,13 +40,13 @@ public:
 		ETextureArgument _alphaArg2,
 		ETextureOperator _alphaOperator,
 		u32 _coordSource = 0xFFFFFFFF) :
+		coordSource(_coordSource),
 		colorArg1(_colorArg1),
 		colorArg2(_colorArg2),
 		colorOperator(_colorOperator),
 		alphaArg1(_alphaArg1),
 		alphaArg2(_alphaArg2),
-		alphaOperator(_alphaOperator),
-		coordSource(_coordSource)
+		alphaOperator(_alphaOperator)
 	{
 	}
 

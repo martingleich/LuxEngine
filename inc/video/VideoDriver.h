@@ -8,12 +8,10 @@
 #include "video/Color.h"
 #include "video/VertexFormats.h"
 
-#include "video/EPrimitiveType.h"
-#include "video/EShaderTypes.h"
+#include "video/VideoEnums.h"
 #include "video/DriverConfig.h"
 #include "video/EDriverCaps.h"
 
-#include "video/HardwareBufferConstants.h"
 #include "video/HardwareBufferManager.h"
 
 namespace lux
@@ -31,7 +29,6 @@ class CubeTexture;
 class BaseTexture;
 
 class Geometry;
-class RenderStatistics;
 
 class Renderer;
 
@@ -40,8 +37,7 @@ class VideoDriver : public ReferenceCounted
 public:
 	virtual ~VideoDriver() {}
 
-	//! Initialize the global driver
-	LUX_API static void Initialize(VideoDriver* driver = nullptr);
+	LUX_API static void Initialize(VideoDriver* driver);
 
 	//! Access the global driver
 	LUX_API static VideoDriver* Instance();
@@ -49,28 +45,41 @@ public:
 	//! Destroys the global driver
 	LUX_API static void Destroy();
 
-	virtual StrongRef<Geometry> CreateEmptyGeometry(EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
+	//////////////////////////////////////////////////////////////////////////////
+
+	virtual StrongRef<Geometry> CreateEmptyGeometry(
+		EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
 	virtual StrongRef<Geometry> CreateGeometry(
 		const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
 		EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
 		EPrimitiveType primitiveType) = 0;
-	virtual StrongRef<Geometry> CreateGeometry(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
+	virtual StrongRef<Geometry> CreateGeometry(
+		const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
 		u32 primitiveCount = 0,
 		bool dynamic = false) = 0;
 
-	virtual bool CheckTextureFormat(ColorFormat format, bool cube) = 0;
+	//////////////////////////////////////////////////////////////////////////////
 
-	virtual bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube) = 0;
+	virtual bool CheckTextureFormat(ColorFormat format, bool cube, bool rendertarget) = 0;
+	virtual bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube, bool rendertarget) = 0;
 
-	virtual StrongRef<Texture> CreateFittingTexture(const math::Dimension2U& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false) = 0;
-	virtual StrongRef<CubeTexture> CreateFittingCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false) = 0;
-	virtual StrongRef<Texture> CreateFittingRendertargetTexture(const math::Dimension2U& size, ColorFormat format) = 0;
+	virtual StrongRef<Texture> CreateTexture(
+		const math::Dimension2U& size,
+		ColorFormat format = ColorFormat::R8G8B8,
+		u32 mipCount = 0,
+		bool isDynamic = false) = 0;
 
-	virtual StrongRef<Texture> CreateTexture(const math::Dimension2U& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false) = 0;
-	virtual StrongRef<CubeTexture> CreateCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false) = 0;
-	virtual StrongRef<Texture> CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format) = 0;
+	virtual StrongRef<CubeTexture> CreateCubeTexture(
+		u32 size,
+		ColorFormat format = ColorFormat::R8G8B8,
+		bool isDynamic = false) = 0;
 
+	virtual StrongRef<Texture> CreateRendertargetTexture(
+		const math::Dimension2U& size,
+		ColorFormat format) = 0;
+
+	//////////////////////////////////////////////////////////////////////////////
 	//! Creates a new shader from code
 	/**
 	\throws ShaderCompileException
@@ -81,13 +90,16 @@ public:
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
 		core::Array<String>* errorList) = 0;
 
-	virtual EDriverType GetVideoDriverType() const = 0;
-	virtual const DriverConfig& GetConfig() const = 0;
-	virtual u32 GetDeviceCapability(EDriverCaps Capability) const = 0;
-	virtual StrongRef<BufferManager> GetBufferManager() const = 0;
-	virtual void* GetLowLevelDevice() const = 0;
+	//////////////////////////////////////////////////////////////////////////////
 
+	virtual const DriverConfig& GetConfig() const = 0;
+
+	virtual StrongRef<BufferManager> GetBufferManager() const = 0;
 	virtual StrongRef<Renderer> GetRenderer() const = 0;
+
+	virtual u32 GetDeviceCapability(EDriverCaps capability) const = 0;
+	virtual EDriverType GetVideoDriverType() const = 0;
+	virtual void* GetLowLevelDevice() const = 0;
 };
 
 } // namespace video

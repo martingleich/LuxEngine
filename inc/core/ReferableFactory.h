@@ -10,7 +10,7 @@ namespace core
 class ReferableFactory : public ReferenceCounted
 {
 public:
-	typedef Referable* (*CreationFunc)();
+	typedef Referable* (*CreationFunc)(const void*);
 
 public:
 	virtual ~ReferableFactory()
@@ -43,9 +43,10 @@ public:
 	//! Create a new object
 	/**
 	\param type The type
+	\param data Additinal data to pass to constructor, depends on type.
 	\return The new object
 	*/
-	virtual StrongRef<Referable> Create(Name type) = 0;
+	virtual StrongRef<Referable> Create(Name type, const void* data=nullptr) = 0;
 
 	//! The total number of types
 	/**

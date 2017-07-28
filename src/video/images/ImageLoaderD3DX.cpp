@@ -81,7 +81,9 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 
 		Tex->GetLevelDesc(0, &outDesc);
 
-		return Tex;
+		UnknownRefCounted<IDirect3DTexture9> out = Tex;
+		Tex->Release();
+		return out;
 	}
 	break;
 	case D3DRTYPE_CUBETEXTURE:
@@ -96,7 +98,9 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 		if(FAILED(hr))
 			return nullptr;
 		Tex->GetLevelDesc(0, &outDesc);
-		return Tex;
+		UnknownRefCounted<IDirect3DCubeTexture9> out = Tex;
+		Tex->Release();
+		return out;
 	}
 	break;
 	case D3DRTYPE_VOLUMETEXTURE:
@@ -119,7 +123,9 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 		outDesc.Type = desc.Type;
 		outDesc.Usage = desc.Usage;
 		outDesc.Width = desc.Width;
-		return tex;
+		UnknownRefCounted<IDirect3DVolumeTexture9> out = tex;
+		tex->Release();
+		return out;
 	}
 	break;
 	default:

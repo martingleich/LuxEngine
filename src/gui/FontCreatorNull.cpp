@@ -1,15 +1,16 @@
 #include "FontCreatorNull.h"
-#include "video/VideoDriver.h"
-#include "video/MaterialLibrary.h"
-#include "video/Texture.h"
-#include "gui/FontImpl.h"
-#include "io/FileSystem.h"
 #include "core/Logger.h"
-#include "io/File.h"
 #include "core/lxAlgorithm.h"
-#include "core/lxSort.h"
-#include "video/AlphaSettings.h"
-#include "video/MaterialRenderer.h"
+
+#include "io/FileSystem.h"
+#include "io/File.h"
+
+#include "video/VideoDriver.h"
+#include "video/Texture.h"
+#include "video/MaterialLibrary.h"
+
+#include "gui/FontImpl.h"
+
 
 namespace lux
 {
@@ -117,7 +118,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	data.scale = 1.0f;
 	data.baseLine = 0.0f;
 
-	StrongRef<FontImpl> font = LUX_NEW(FontImpl);
+	StrongRef<FontImpl> font = LUX_NEW(FontImpl)(core::ResourceOrigin());
 	font->Init(data);
 
 	return font;

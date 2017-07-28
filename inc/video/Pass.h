@@ -3,7 +3,6 @@
 #include "core/LuxBase.h"
 #include "video/TextureLayer.h"
 #include "video/TextureStageSettings.h"
-#include "video/AlphaSettings.h"
 #include "core/lxArray.h"
 #include "core/lxString.h"
 #include "video/Shader.h"
@@ -13,36 +12,6 @@ namespace lux
 {
 namespace video
 {
-
-enum class EZComparisonFunc
-{
-	Never,
-	Less,
-	Equal,
-	LessEqual,
-	Greater,
-	NotEqual,
-	GreaterEqual,
-	Always,
-};
-
-enum class EColorPlane // enum class flag at end of file
-{
-	None = 0,
-	Alpha = 1,
-	Red = 2,
-	Green = 4,
-	Blue = 8,
-	RGB = Red | Green | Blue,
-	All = RGB | Alpha,
-};
-
-enum class EDrawMode
-{
-	Fill,
-	Wire,
-	Point,
-};
 
 enum class EOptionId
 {
@@ -63,13 +32,6 @@ class Pass
 public:
 	Pass() :
 		isTransparent(false),
-		alphaSrcBlend(EBlendFactor::One),
-		alphaDstBlend(EBlendFactor::Zero),
-		alphaOperator(EBlendOperator::None),
-		zBufferFunc(EZComparisonFunc::LessEqual),
-		colorPlane(EColorPlane::All),
-		drawMode(EDrawMode::Fill),
-		polygonOffset(0.0f),
 		fogEnabled(true),
 		lighting(true),
 		zWriteEnabled(true),
@@ -81,20 +43,22 @@ public:
 	{
 	}
 
-	bool isTransparent;
-
 	core::Array<TextureLayer> layers;
 	core::Array<TextureStageSettings> layerSettings;
 
-	EBlendFactor alphaSrcBlend;
-	EBlendFactor alphaDstBlend;
-	EBlendOperator alphaOperator;
+	StrongRef<Shader> shader;
 
-	EZComparisonFunc zBufferFunc;
-	EColorPlane colorPlane;
-	EDrawMode drawMode;
-	float polygonOffset;
+	float polygonOffset = 0.0f;
 
+	EBlendFactor alphaSrcBlend = EBlendFactor::One;
+	EBlendFactor alphaDstBlend = EBlendFactor::Zero;
+	EBlendOperator alphaOperator =  EBlendOperator::None;
+
+	EComparisonFunc zBufferFunc = EComparisonFunc::LessEqual;
+	EColorPlane colorPlane = EColorPlane::All;
+	EDrawMode drawMode = EDrawMode::Fill;
+
+	bool isTransparent : 1;
 	bool fogEnabled : 1;
 	bool lighting : 1;
 	bool zWriteEnabled : 1;
@@ -104,8 +68,6 @@ public:
 	bool frontfaceCulling : 1;
 
 	bool useVertexColor : 1;
-
-	StrongRef<Shader> shader;
 
 	u32 AddTexture(u32 count = 1)
 	{
@@ -153,23 +115,25 @@ class PipelineOverwrite
 {
 public:
 	float polygonOffset;
-	bool disableLighting;
-	bool disableFog;
-
 	EDrawMode drawMode;
+	EColorPlane colorPlane;
 
-	bool disableZWrite;
-	bool disableZCmp;
-	bool normalizeNormals;
+	bool disableLighting:1;
+	bool disableFog:1;
 
-	bool disableBackfaceCulling;
-	bool enableFrontfaceCulling;
+	bool disableZWrite:1;
+	bool disableZCmp:1;
+	bool normalizeNormals:1;
+
+	bool disableBackfaceCulling:1;
+	bool enableFrontfaceCulling:1;
 
 	PipelineOverwrite() :
 		polygonOffset(0.0f),
+		drawMode(EDrawMode::Fill),
+		colorPlane(EColorPlane::All),
 		disableLighting(false),
 		disableFog(false),
-		drawMode(EDrawMode::Fill),
 		disableZWrite(false),
 		disableZCmp(false),
 		normalizeNormals(false),
@@ -215,7 +179,7 @@ public:
 			pass.drawMode = EDrawMode::Point;
 
 		if(disableZCmp)
-			pass.zBufferFunc = EZComparisonFunc::Always;
+			pass.zBufferFunc = EComparisonFunc::Always;
 		if(disableZWrite)
 			pass.zWriteEnabled = false;
 		if(normalizeNormals)

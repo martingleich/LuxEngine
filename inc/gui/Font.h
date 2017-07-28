@@ -50,7 +50,8 @@ struct FontDescription
 		weight(_weight),
 		italic(_italic),
 		antialiased(_antialiased)
-	{}
+	{
+	}
 	FontDescription(
 		u32 _size,
 		EFontWeight _weight = EFontWeight::Normal,
@@ -60,7 +61,8 @@ struct FontDescription
 		weight(_weight),
 		italic(_italic),
 		antialiased(_antialiased)
-	{}
+	{
+	}
 };
 
 //! A font object
@@ -90,6 +92,12 @@ public:
 	};
 
 public:
+	Font() {}
+	Font(const core::ResourceOrigin& origin) :
+		Resource(origin)
+	{
+	}
+
 	virtual ~Font()
 	{
 	}
@@ -173,7 +181,7 @@ public:
 
 	//! Set the line distance.
 	/**
-	A new-line advances the y cursor about 
+	A new-line advances the y cursor about
 	the font-height multiplied with the line-distance
 	\param space The new line distance.
 	*/
@@ -183,7 +191,7 @@ public:
 	/**
 	All sizes and distances are multiplied with the scale
 	before rendering.
-	A scale diffrent than 1, can lead to pixellated or 
+	A scale diffrent than 1, can lead to pixellated or
 	unsharp fonts.
 	*/
 	virtual void SetScaling(float scaling) = 0;

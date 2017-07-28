@@ -4,6 +4,7 @@
 
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "StrippedD3D9.h"
+#include "AuxiliaryTextureD3D9.h"
 
 namespace lux
 {
@@ -13,7 +14,7 @@ namespace video
 class CubeTextureD3D9 : public CubeTexture
 {
 public:
-	CubeTextureD3D9(IDirect3DDevice9* d3dDevice);
+	CubeTextureD3D9(IDirect3DDevice9* d3dDevice, const core::ResourceOrigin& origin);
 	virtual ~CubeTextureD3D9();
 
 	void Init(u32 Size, ColorFormat lxFormat, bool isDynamic);
@@ -32,9 +33,12 @@ public:
 	void SetFiltering(const Filter& f);
 
 private:
-	IDirect3DCubeTexture9* m_Texture;
+	UnknownRefCounted<IDirect3DCubeTexture9> m_Texture;
+
 	u32 m_LockedLevel;
 	D3DCUBEMAP_FACES m_LockedFace;
+	UnknownRefCounted<IDirect3DSurface9> m_TempSurface;
+
 	D3DSURFACE_DESC m_Desc;
 	ColorFormat m_Format;
 	Filter m_Filtering;

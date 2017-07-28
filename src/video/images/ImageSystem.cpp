@@ -1,17 +1,16 @@
 #include "video/images/ImageSystem.h"
 
+#include "resources/ResourceSystem.h"
+#include "core/ReferableFactory.h"
+
 #include "video/VideoDriver.h"
 #include "video/ColorConverter.h"
 
 #include "io/File.h"
 #include "io/FileSystem.h"
-#include "resources/ResourceSystem.h"
 
 #include "video/CubeTexture.h"
-
 #include "video/SpriteBankImpl.h"
-
-#include "video/images/ImageImpl.h"
 
 #include "video/images/ImageLoaderBMP.h"
 #include "video/images/ImageLoaderPNM.h"
@@ -79,7 +78,7 @@ public:
 		ColorFormat format = img->GetColorFormat();
 		math::Dimension2U size = img->GetSize();
 
-		bool result = VideoDriver::Instance()->GetFittingTextureFormat(format, size, false);
+		bool result = VideoDriver::Instance()->GetFittingTextureFormat(format, size, false, false);
 		if(!result)
 			throw core::FileFormatException("No matching texture format", "texture_loader_proxy");
 		texture->Init(size, format, 0, false, false);
@@ -248,7 +247,7 @@ private:
 			throw core::InvalidArgumentException("images", "Must not be null");
 
 		math::Dimension2U ds(size, size);
-		if(!VideoDriver::Instance()->GetFittingTextureFormat(format, ds, true))
+		if(!VideoDriver::Instance()->GetFittingTextureFormat(format, ds, true, false))
 			throw core::ColorFormatException(format);
 
 		tex->Init(size, format, false);
@@ -265,7 +264,6 @@ private:
 	}
 };
 }
-
 static StrongRef<ImageSystem> g_ImageSystem;
 
 void ImageSystem::Initialize(ImageSystem* system)
@@ -287,6 +285,7 @@ void ImageSystem::Destroy()
 ImageSystem::ImageSystem()
 {
 	auto resSys = core::ResourceSystem::Instance();
+	m_Driver = VideoDriver::Instance();
 
 	// Register before image loaders, to make default load type images, instead of textures.
 	resSys->AddResourceLoader(LUX_NEW(ImageToTextureLoader));
@@ -315,14 +314,14 @@ ImageSystem::~ImageSystem()
 
 StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format)
 {
-	StrongRef<Image> img = LUX_NEW(ImageImpl);
+	StrongRef<Image> img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image);
 	img->Init(size, format);
 	return img;
 }
 
 StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMem, bool deleteOnDrop)
 {
-	StrongRef<Image> img = LUX_NEW(ImageImpl);
+	StrongRef<Image> img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image);
 	img->Init(size, format, data, CopyMem, deleteOnDrop);
 	return img;
 }
@@ -330,6 +329,33 @@ StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFo
 StrongRef<SpriteBank> ImageSystem::CreateSpriteBank()
 {
 	return LUX_NEW(SpriteBankImpl);
+}
+
+StrongRef<Texture> ImageSystem::CreateFittingTexture(const math::Dimension2U& size, ColorFormat format, u32 mipCount, bool isDynamic)
+{
+	math::Dimension2U copy(size);
+	if(!m_Driver->GetFittingTextureFormat(format, copy, false, false))
+		throw core::RuntimeException("No matching texture format found");
+
+	return m_Driver->CreateTexture(copy, format, mipCount, isDynamic);
+}
+
+StrongRef<CubeTexture> ImageSystem::CreateFittingCubeTexture(u32 size, ColorFormat format, bool isDynamic)
+{
+	math::Dimension2U copy(size, size);
+	if(!m_Driver->GetFittingTextureFormat(format, copy, true, false))
+		throw core::RuntimeException("No matching texture format found");
+
+	return m_Driver->CreateCubeTexture(copy.width, format, isDynamic);
+}
+
+StrongRef<Texture> ImageSystem::CreateFittingRendertargetTexture(const math::Dimension2U& size, ColorFormat format)
+{
+	math::Dimension2U copy(size);
+	if(!m_Driver->GetFittingTextureFormat(format, copy, false, true))
+		throw core::RuntimeException("No matching texture format found");
+
+	return m_Driver->CreateRendertargetTexture(copy, format);
 }
 
 } // namespace video

@@ -1,8 +1,9 @@
 #ifndef INCLUDED_HARDWAREBUFFER_H
 #define INCLUDED_HARDWAREBUFFER_H
 #include "core/ReferenceCounted.h"
-#include "video/HardwareBufferConstants.h"
 #include "math/lxMath.h"
+
+#include "video/VideoEnums.h"
 
 namespace lux
 {

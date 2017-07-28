@@ -18,7 +18,7 @@ public:
 	void RegisterType(Name type, CreationFunc create);
 	void UnregisterType(Name type);
 
-	StrongRef<Referable> Create(Name type);
+	StrongRef<Referable> Create(Name type, const void* data=nullptr);
 
 	size_t GetTypeCount() const;
 

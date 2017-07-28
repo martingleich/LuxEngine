@@ -3,19 +3,24 @@
 
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.resource.Material", lux::video::MaterialImpl)
+LUX_REGISTER_RESOURCE_CLASS("lux.resource.Material", lux::video::MaterialImpl)
 
 namespace lux
 {
 namespace video
 {
 
-MaterialImpl::MaterialImpl() :
-	MaterialImpl(nullptr)
+MaterialImpl::MaterialImpl(const core::ResourceOrigin& origin) :
+	Material(origin),
+	m_Ambient(1.0f),
+	m_Diffuse(Color::LightGray),
+	m_Emissive(Color::Black),
+	m_Specular(Color::White),
+	m_Shininess(0.0f),
+	m_Power(1.0f),
+	m_RenderData(nullptr)
 {
-
 }
-
 MaterialImpl::MaterialImpl(MaterialRenderer* renderer) :
 	m_Ambient(1.0f),
 	m_Diffuse(Color::LightGray),

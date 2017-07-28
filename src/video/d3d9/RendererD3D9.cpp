@@ -43,6 +43,7 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver) :
 	m_MaterialRenderer(nullptr)
 {
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
+	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
 	m_CurrentRendertarget = m_BackbufferTarget;
 }
 
@@ -52,8 +53,9 @@ void RendererD3D9::CleanUp()
 	m_Material.Reset();
 }
 
-void RendererD3D9::BeginScene(bool clearColor, bool clearZ,
-	video::Color color, float z)
+void RendererD3D9::BeginScene(
+	bool clearColor, bool clearZ, bool clearStencil,
+	video::Color color, float z, u32 stencil)
 {
 	if((m_CurrentRendertarget.GetTexture() == nullptr) && m_CurrentRendertarget != m_BackbufferTarget) {
 		log::Warning("The current rendertarget texture was destroyed, fallback to normal backbuffer.");
@@ -65,6 +67,8 @@ void RendererD3D9::BeginScene(bool clearColor, bool clearZ,
 		flags = D3DCLEAR_TARGET;
 	if(clearZ)
 		flags |= D3DCLEAR_ZBUFFER;
+	if(clearStencil && m_Driver->GetConfig().stencil)
+		flags |= D3DCLEAR_STENCIL;
 
 	HRESULT hr = S_OK;
 
@@ -73,7 +77,7 @@ void RendererD3D9::BeginScene(bool clearColor, bool clearZ,
 		if(FAILED(hr = m_Device->Clear(
 			0, nullptr,
 			flags,
-			d3dClear, z, 0))) {
+			d3dClear, z, stencil))) {
 			throw core::D3D9Exception(hr);
 		}
 	}
@@ -142,6 +146,9 @@ void RendererD3D9::SetRenderTarget(const RenderTarget& target)
 		throw core::D3D9Exception(hr);
 	}
 
+	// Reset scissor rectangle
+	SetScissorRect(math::RectU(0, 0, target.GetSize().width, target.GetSize().height));
+
 	m_DeviceState.SetRenderTargetTexture(target.GetTexture());
 
 	m_CurrentRendertarget = newRendertarget;
@@ -150,6 +157,82 @@ void RendererD3D9::SetRenderTarget(const RenderTarget& target)
 const RenderTarget& RendererD3D9::GetRenderTarget()
 {
 	return m_CurrentRendertarget;
+}
+
+void RendererD3D9::SetScissorRect(const math::RectU& rect, ScissorRectToken* token)
+{
+	auto bufferSize = GetRenderTarget().GetSize();
+	math::RectU fittedRect = rect;
+	fittedRect.FitInto(math::RectU(0, 0, bufferSize.width, bufferSize.height));
+	if(!fittedRect.IsValid())
+		throw core::InvalidArgumentException("rect", "Rectangle is invalid");
+
+	if(fittedRect.IsEmpty() || rect.GetSize() == GetRenderTarget().GetSize()) {
+		m_DeviceState.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+	} else {
+		RECT r = {
+			(LONG)fittedRect.left,
+			(LONG)fittedRect.top,
+			(LONG)fittedRect.right,
+			(LONG)fittedRect.bottom};
+		HRESULT hr = m_Device->SetScissorRect(&r);
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
+		m_DeviceState.SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+	}
+
+	if(token) {
+		lxAssert(token->renderer == nullptr || token->renderer == this);
+		if(token->renderer == nullptr) { // If the token was already used don't change it's values
+			token->renderer = this;
+			token->prevRect = m_ScissorRect;
+		}
+	}
+
+	m_ScissorRect = fittedRect;
+}
+
+const math::RectU& RendererD3D9::GetScissorRect() const
+{
+	return m_ScissorRect;
+}
+
+void RendererD3D9::SetStencilMode(const StencilMode& mode, StencilModeToken*token)
+{
+	bool isEnabled = mode.IsEnabled();
+	m_DeviceState.SetRenderState(D3DRS_STENCILENABLE, isEnabled ? TRUE : FALSE);
+	if(isEnabled) {
+		m_DeviceState.SetRenderState(D3DRS_STENCILREF, mode.ref);
+		m_DeviceState.SetRenderState(D3DRS_STENCILMASK, mode.readMask);
+		m_DeviceState.SetRenderState(D3DRS_STENCILWRITEMASK, mode.writeMask);
+
+		m_DeviceState.SetRenderState(D3DRS_STENCILPASS, GetD3DStencilOperator(mode.pass));
+		m_DeviceState.SetRenderState(D3DRS_STENCILFAIL, GetD3DStencilOperator(mode.fail));
+		m_DeviceState.SetRenderState(D3DRS_STENCILZFAIL, GetD3DStencilOperator(mode.zFail));
+
+		bool isTwosided = mode.IsTwoSided();
+		m_DeviceState.SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, isTwosided ? TRUE : FALSE);
+		if(isTwosided) {
+			m_DeviceState.SetRenderState(D3DRS_CCW_STENCILPASS, GetD3DStencilOperator(mode.passCCW));
+			m_DeviceState.SetRenderState(D3DRS_CCW_STENCILFAIL, GetD3DStencilOperator(mode.failCCW));
+			m_DeviceState.SetRenderState(D3DRS_CCW_STENCILZFAIL, GetD3DStencilOperator(mode.zFailCCW));
+		}
+	}
+
+	if(token) {
+		lxAssert(token->renderer == nullptr || token->renderer == this);
+		if(token->renderer == nullptr) { // If the token was already used don't change it's values
+			token->renderer = this;
+			token->prevMode = m_StencilMode;
+		}
+	}
+
+	m_StencilMode = mode;
+}
+
+const StencilMode& RendererD3D9::GetStencilMode() const
+{
+	return m_StencilMode;
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -6,11 +6,9 @@
 
 #include "video/Color.h"
 #include "video/VertexFormats.h"
-#include "video/AlphaSettings.h"
+#include "video/VideoEnums.h"
 #include "video/TextureLayer.h"
 #include "video/FogData.h"
-#include "video/HardwareBufferConstants.h"
-#include "video/EPrimitiveType.h"
 #include "video/Pass.h"
 
 namespace lux
@@ -224,6 +222,22 @@ inline DWORD GetD3DTextureFilter(BaseTexture::Filter::EFilter filter)
 	};
 }
 
+inline DWORD GetD3DStencilOperator(EStencilOperator op)
+{
+	switch(op) {
+	case EStencilOperator::Keep: return D3DSTENCILOP_KEEP;
+	case EStencilOperator::Zero: return D3DSTENCILOP_ZERO;
+	case EStencilOperator::Replace: return D3DSTENCILOP_REPLACE;
+	case EStencilOperator::Invert: return D3DSTENCILOP_INVERT;
+	case EStencilOperator::Increment: return D3DSTENCILOP_INCR;
+	case EStencilOperator::Decrement:  return D3DSTENCILOP_DECR;
+	case EStencilOperator::IncrementSat: return D3DSTENCILOP_INCRSAT;
+	case EStencilOperator::DecrementSat: return D3DSTENCILOP_DECRSAT;
+	default:
+		throw core::InvalidArgumentException("op");
+	}
+}
+
 inline const char* GetD3DXShaderProfile(
 	bool isPixel,
 	int major, int minor)
@@ -302,24 +316,24 @@ inline DWORD GetD3DBlend(EBlendFactor factor)
 	}
 }
 
-inline DWORD GetD3DZBufferFunc(EZComparisonFunc func)
+inline DWORD GetD3DComparisonFunc(EComparisonFunc func)
 {
 	switch(func) {
-	case EZComparisonFunc::Always:
+	case EComparisonFunc::Always:
 		return D3DCMP_ALWAYS;
-	case EZComparisonFunc::Equal:
+	case EComparisonFunc::Equal:
 		return D3DCMP_EQUAL;
-	case EZComparisonFunc::Greater:
+	case EComparisonFunc::Greater:
 		return D3DCMP_GREATER;
-	case EZComparisonFunc::GreaterEqual:
+	case EComparisonFunc::GreaterEqual:
 		return D3DCMP_GREATEREQUAL;
-	case EZComparisonFunc::Less:
+	case EComparisonFunc::Less:
 		return D3DCMP_LESS;
-	case EZComparisonFunc::LessEqual:
+	case EComparisonFunc::LessEqual:
 		return D3DCMP_LESSEQUAL;
-	case EZComparisonFunc::Never:
+	case EComparisonFunc::Never:
 		return D3DCMP_NEVER;
-	case EZComparisonFunc::NotEqual:
+	case EComparisonFunc::NotEqual:
 		return D3DCMP_NOTEQUAL;
 	default: throw core::InvalidArgumentException("func");
 	}

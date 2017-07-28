@@ -15,6 +15,8 @@ class DrawingCanvasAuto<Texture>;
 class Texture : public BaseTexture
 {
 public:
+	Texture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
+
 	virtual ~Texture()
 	{
 	}

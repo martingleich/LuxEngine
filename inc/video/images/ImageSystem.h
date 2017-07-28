@@ -9,6 +9,9 @@ namespace lux
 
 namespace video
 {
+class Texture;
+class CubeTexture;
+class VideoDriver;
 class SpriteBank;
 class Image;
 
@@ -44,6 +47,13 @@ public:
 
 	//! Create s new sprite bank
 	LUX_API StrongRef<SpriteBank> CreateSpriteBank();
+
+	LUX_API StrongRef<Texture> CreateFittingTexture(const math::Dimension2U& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false);
+	LUX_API StrongRef<CubeTexture> CreateFittingCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false);
+	LUX_API StrongRef<Texture> CreateFittingRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
+
+private:
+	VideoDriver* m_Driver;
 };
 
 }

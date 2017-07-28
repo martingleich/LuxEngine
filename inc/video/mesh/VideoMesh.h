@@ -1,10 +1,12 @@
 #ifndef INCLUDED_MESH_H
 #define INCLUDED_MESH_H
 #include "math/AABBox.h"
-#include "video/VertexFormats.h"
-#include "video/HardwareBufferConstants.h"
-#include "video/EPrimitiveType.h"
+
 #include "resources/Resource.h"
+
+#include "video/VertexFormats.h"
+#include "video/VideoEnums.h"
+
 
 namespace lux
 {
@@ -17,6 +19,10 @@ class Material;
 class Mesh : public core::Resource
 {
 public:
+	Mesh(const core::ResourceOrigin& origin) :
+		Resource(origin)
+	{}
+
 	virtual ~Mesh() {}
 
 	//! Removes all Submeshes

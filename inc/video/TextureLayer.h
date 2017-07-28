@@ -2,20 +2,12 @@
 #define INCLUDED_SMATERIALLAYER_H
 #include "core/lxTypes.h"
 #include "video/BaseTexture.h"
+#include "video/VideoEnums.h"
 
 namespace lux
 {
 namespace video
 {
-
-//! How are texturecoordinates outside of [0,1] handeled
-enum class ETextureRepeat
-{
-	Wrap = 0,
-	Mirror,
-	Clamp,
-	MirrorOnce,
-};
 
 //! A single texture layer in a material
 class TextureLayer

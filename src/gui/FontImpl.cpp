@@ -1,21 +1,23 @@
 #include "FontImpl.h"
+
+#include "core/ReferableRegister.h"
+
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
 #include "video/Texture.h"
-#include "core/ReferableRegister.h"
 #include "video/VertexTypes.h"
 #include "video/MaterialLibrary.h"
-#include "video/AlphaSettings.h"
 #include "video/images/ImageSystem.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.resource.Font", lux::gui::FontImpl);
+LUX_REGISTER_RESOURCE_CLASS("lux.resource.Font", lux::gui::FontImpl);
 
 namespace lux
 {
 namespace gui
 {
 
-FontImpl::FontImpl()
+FontImpl::FontImpl(const core::ResourceOrigin& origin) :
+	Font(origin)
 {
 }
 
@@ -80,7 +82,7 @@ void FontImpl::Init(const FontCreationData& data)
 		renderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
 		video::Pass pass = renderer->GetPass(0);
 		pass.zWriteEnabled = false;
-		pass.zBufferFunc = video::EZComparisonFunc::Always;
+		pass.zBufferFunc = video::EComparisonFunc::Always;
 		pass.backfaceCulling = false;
 		pass.lighting = false;
 		pass.fogEnabled = false;

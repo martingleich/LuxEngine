@@ -15,6 +15,12 @@ class MaterialRenderer;
 class Material : public core::Resource
 {
 public:
+	Material()
+	{}
+	Material(const core::ResourceOrigin& origin) :
+		Resource(origin)
+	{}
+
 	virtual ~Material() {}
 
 	////////////////////////////////////////////////////////////////////

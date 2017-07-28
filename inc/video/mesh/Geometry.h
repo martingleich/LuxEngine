@@ -2,9 +2,7 @@
 #define INCLUDED_SUBMESH_H
 #include "core/ReferenceCounted.h"
 #include "math/AABBox.h"
-
-#include "video/EPrimitiveType.h"
-#include "video/HardwareBufferConstants.h"
+#include "video/VideoEnums.h"
 
 namespace lux
 {

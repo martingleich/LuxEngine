@@ -63,7 +63,7 @@ struct FontCreationData
 class FontImpl : public Font
 {
 public:
-	FontImpl();
+	FontImpl(const core::ResourceOrigin& origin);
 	~FontImpl();
 
 	void Init(const FontCreationData& data);

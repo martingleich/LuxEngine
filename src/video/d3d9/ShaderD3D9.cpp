@@ -235,16 +235,15 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	core::Array<String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
-	ID3DXBuffer* output = 0;
-	ID3DXBuffer* errors = 0;
-	ID3DXConstantTable* table = nullptr;
-	IDirect3DVertexShader9* shader = nullptr;
+	UnknownRefCounted<ID3DXBuffer> output;
+	UnknownRefCounted<ID3DXBuffer> errors;
+	UnknownRefCounted<IDirect3DVertexShader9> shader = nullptr;
 
 	HRESULT hr = D3DXCompileShader(code, (UINT)length,
 		NULL, NULL, entryPoint,
 		profile,
-		0, &output, &errors,
-		&table);
+		0, output.Access(), errors.Access(),
+		outTable.Access());
 	if(FAILED(hr)) {
 		if(errors) {
 			if(errorList) {
@@ -252,12 +251,10 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 				auto err2 = err.Split('\n');
 				errorList->PushBackm(err2.Data(), err2.Size());
 			}
-			errors->Release();
 		}
 		throw ShaderCompileException();
 	}
 
-	outTable = table;
 	// Warnings.
 	if(errors) {
 		if(errorList) {
@@ -265,16 +262,11 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 			auto err2 = err.Split('\n');
 			errorList->PushBackm(err2.Data(), err2.Size());
 		}
-		errors->Release();
 	}
 
-	hr = m_D3DDevice->CreateVertexShader((DWORD*)output->GetBufferPointer(), &shader);
-	if(FAILED(hr)) {
-		output->Release();
+	hr = m_D3DDevice->CreateVertexShader((DWORD*)output->GetBufferPointer(), shader.Access());
+	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
-	}
-
-	output->Release();
 
 	return shader;
 }
@@ -284,17 +276,16 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	core::Array<String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
-	ID3DXBuffer* output = 0;
-	ID3DXBuffer* errors = 0;
-	ID3DXConstantTable* table = nullptr;
-	IDirect3DPixelShader9* shader = nullptr;
+	UnknownRefCounted<ID3DXBuffer> output;
+	UnknownRefCounted<ID3DXBuffer> errors;
+	UnknownRefCounted<IDirect3DPixelShader9> shader = nullptr;
 
 	HRESULT hr;
 	hr = D3DXCompileShader(code, (UINT)length,
 		NULL, NULL, entryPoint,
 		profile,
-		0, &output, &errors,
-		&table);
+		0, output.Access(), errors.Access(),
+		outTable.Access());
 	if(FAILED(hr)) {
 		if(errors) {
 			if(errorList) {
@@ -302,12 +293,10 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 				auto err2 = err.Split('\n');
 				errorList->PushBackm(err2.Data(), err2.Size());
 			}
-			errors->Release();
 		}
 		throw ShaderCompileException();
 	}
 
-	outTable = table;
 	// Warnings.
 	if(errors) {
 		if(errorList) {
@@ -315,17 +304,12 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 			auto err2 = err.Split('\n');
 			errorList->PushBackm(err2.Data(), err2.Size());
 		}
-		errors->Release();
 	}
 
 	DWORD* data = (DWORD*)output->GetBufferPointer();
-	hr = m_D3DDevice->CreatePixelShader(data, &shader);
-	if(FAILED(hr)) {
-		output->Release();
+	hr = m_D3DDevice->CreatePixelShader(data, shader.Access());
+	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
-	}
-
-	output->Release();
 
 	return shader;
 }

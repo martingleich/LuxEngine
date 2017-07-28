@@ -52,10 +52,10 @@ void ReferableFactoryImpl::UnregisterType(Name type)
 		log::Debug("Unregistered type ~s.", type);
 }
 
-StrongRef<Referable> ReferableFactoryImpl::Create(Name type)
+StrongRef<Referable> ReferableFactoryImpl::Create(Name type, const void* data)
 {
 	CreationFunc create = m_Types.At(type).create;
-	Referable* r = create ? create() : nullptr;
+	Referable* r = create ? create(data) : nullptr;
 	if(!r)
 		throw Exception("Can't create new instance of given type.");
 

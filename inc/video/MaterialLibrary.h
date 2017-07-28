@@ -3,9 +3,10 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
+
 #include "video/MaterialRenderer.h"
 #include "video/Shader.h"
-#include "video/EShaderTypes.h"
+#include "video/VideoEnums.h"
 
 namespace lux
 {

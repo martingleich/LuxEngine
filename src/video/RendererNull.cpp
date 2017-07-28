@@ -1,6 +1,7 @@
 #include "RendererNull.h"
 #include "core/Logger.h"
 #include "video/MaterialImpl.h"
+#include "video/RenderTarget.h"
 
 namespace lux
 {

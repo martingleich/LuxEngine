@@ -17,6 +17,8 @@ public:
 	UnknownRefCounted(T* ptr) :
 		m_Pointer(ptr)
 	{
+		if(ptr)
+			ptr->AddRef();
 	}
 
 	UnknownRefCounted(const UnknownRefCounted& other)
@@ -60,6 +62,12 @@ public:
 	T* operator->() const
 	{
 		return m_Pointer;
+	}
+
+	T** Access()
+	{
+		*this = nullptr;
+		return &m_Pointer;
 	}
 
 private:

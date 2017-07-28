@@ -56,6 +56,8 @@ public:
 	};
 
 public:
+	BaseTexture(const core::ResourceOrigin& origin) : Resource(origin) {}
+
 	virtual ~BaseTexture() {}
 
 	//! The number of mip-maps, these texture contains, 0 for none

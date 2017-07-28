@@ -5,6 +5,8 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "StrippedD3D9.h"
 
+#include "UnknownRefCounted.h"
+
 namespace lux
 {
 namespace video
@@ -13,8 +15,7 @@ namespace video
 class RendertargetD3D9 : public RenderTarget
 {
 public:
-	RendertargetD3D9() :
-		m_Surface(nullptr)
+	RendertargetD3D9()
 	{
 	}
 
@@ -25,7 +26,7 @@ public:
 		if(m_Texture) {
 			lxAssert(m_Texture->IsRendertarget());
 			IDirect3DTexture9* d3dTexture = (IDirect3DTexture9*)texture->GetRealTexture();
-			if(FAILED(d3dTexture->GetSurfaceLevel(0, &m_Surface))) {
+			if(FAILED(d3dTexture->GetSurfaceLevel(0, m_Surface.Access()))) {
 				m_Texture = nullptr;
 				m_Surface = nullptr;
 				m_Size.Set(0, 0);
@@ -38,7 +39,7 @@ public:
 	{
 	}
 
-	RendertargetD3D9(IDirect3DSurface9* surface) :
+	RendertargetD3D9(UnknownRefCounted<IDirect3DSurface9> surface) :
 		m_Surface(surface)
 	{
 		if(m_Surface) {
@@ -62,7 +63,7 @@ public:
 	}
 
 private:
-	IDirect3DSurface9* m_Surface;
+	UnknownRefCounted<IDirect3DSurface9> m_Surface;
 };
 
 }

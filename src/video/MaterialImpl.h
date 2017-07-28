@@ -12,7 +12,7 @@ class MaterialRenderer;
 class MaterialImpl : public Material
 {
 public:
-	MaterialImpl();
+	MaterialImpl(const core::ResourceOrigin& origin);
 	MaterialImpl(MaterialRenderer* renderer);
 	~MaterialImpl();
 

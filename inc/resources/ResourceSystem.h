@@ -125,6 +125,7 @@ public:
 	*/
 	virtual StrongRef<Resource> GetResource(Name type, io::File* file) = 0;
 
+#if 0
 	//! Create a unmanaged resource base on a file
 	/**
 	\param type The type of the resource.
@@ -144,6 +145,7 @@ public:
 	\throws FileFormatException
 	*/
 	virtual StrongRef<Resource> CreateResource(Name type, const String& name) = 0;
+#endif
 
 	//! Enabled or disables caching for a given resource type.
 	/**

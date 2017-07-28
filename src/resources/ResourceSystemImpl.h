@@ -1,13 +1,14 @@
 #ifndef INCLUDED_RESOURCE_SYSTEM_IMPL
 #define INCLUDED_RESOURCE_SYSTEM_IMPL
 #include "resources/ResourceSystem.h"
+#include "resources/Resource.h"
 
 namespace lux
 {
 namespace core
 {
 
-class ResourceSystemImpl : public ResourceSystem
+class ResourceSystemImpl : public ResourceSystem, public OriginResourceLoader
 {
 public:
 	ResourceSystemImpl();
@@ -38,6 +39,10 @@ public:
 	u32 GetTypeCount() const;
 	Name GetType(u32 id) const;
 	void AddType(Name name);
+
+private:
+	StrongRef<Resource> CreateResource(Name type, io::File* file, const ResourceOrigin* origin);
+	void LoadResource(const ResourceOrigin& origin, Resource* dst) const;
 
 private:
 	u32 GetTypeID(Name type) const;

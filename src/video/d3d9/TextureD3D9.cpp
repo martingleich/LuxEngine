@@ -4,36 +4,22 @@
 #include "StrippedD3D9X.h"
 #include "D3DHelper.h"
 #include "D3D9Exception.h"
+#include "AuxiliaryTextureD3D9.h"
 
 namespace lux
 {
 namespace video
 {
-u32 TextureD3D9::s_TextureCount = 0;
-core::Array<IDirect3DSurface9*> TextureD3D9::s_TempSurfaces;
-
-TextureD3D9::TextureD3D9(IDirect3DDevice9* device) :
-	m_Texture(nullptr),
+TextureD3D9::TextureD3D9(IDirect3DDevice9* device, const core::ResourceOrigin& origin) :
+	Texture(origin),
 	m_LockedLevel(0),
 	m_IsLocked(false),
-	m_TempSurface(nullptr),
 	m_Device(device)
 {
-	++s_TextureCount;
 }
 
 TextureD3D9::~TextureD3D9()
 {
-	if(m_Texture)
-		m_Texture->Release();
-	--s_TextureCount;
-
-	if(s_TextureCount == 0) {
-		for(auto it = s_TempSurfaces.First(); it != s_TempSurfaces.End(); ++it) {
-			(*it)->Release();
-		}
-		s_TempSurfaces.Clear();
-	}
 }
 
 void TextureD3D9::RegenerateMIPMaps()
@@ -52,7 +38,7 @@ void TextureD3D9::Init(
 		throw core::Exception("No driver available");
 
 	if(m_Texture)
-		m_Texture->Release();
+		m_Texture = nullptr;
 
 	D3DFORMAT format = GetD3DFormat(lxFormat, lxFormat.HasAlpha());
 	if(format == D3DFMT_UNKNOWN)
@@ -63,19 +49,19 @@ void TextureD3D9::Init(
 		Levels = 0;
 
 	DWORD usage = 0;
-	D3DPOOL pool = D3DPOOL_MANAGED;
+	// Put in managed pool if there no origin loader
+	D3DPOOL pool = GetOrigin().loader ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
 	if(isDynamic) {
 		usage = D3DUSAGE_DYNAMIC;
 		pool = D3DPOOL_DEFAULT;
-	}
-	if(isRendertarget) {
+	} if(isRendertarget) {
 		usage = D3DUSAGE_RENDERTARGET;
 		pool = D3DPOOL_DEFAULT;
 	}
 
 	HRESULT hr = m_Device->CreateTexture(Size.width, Size.height, Levels,
 		usage, format,
-		D3DPOOL_DEFAULT, &m_Texture, nullptr);
+		pool, m_Texture.Access(), nullptr);
 
 	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
@@ -111,11 +97,11 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode Mode, u32 MipLevel)
 
 	if(FAILED(hr)) {
 		if(Mode == ELockMode::Overwrite && m_Desc.Usage == 0) {
-			m_TempSurface = GetTempSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
+			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface)
 				hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_DISCARD);
 			if(FAILED(hr)) {
-				FreeTempSurface(m_TempSurface);
+				m_TempSurface = nullptr;
 				throw core::D3D9Exception(hr);
 			}
 		} else if(Mode == ELockMode::ReadOnly && m_Desc.Usage == 0) {
@@ -123,7 +109,7 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode Mode, u32 MipLevel)
 		} else if(Mode == ELockMode::ReadWrite && m_Desc.Usage == 0) {
 			throw core::Exception("Can't lock static texture in read mode");
 		} else if(Mode == ELockMode::ReadOnly && m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
-			m_TempSurface = GetTempSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
+			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface) {
 				IDirect3DDevice9* device;
 				IDirect3DSurface9* surface;
@@ -133,7 +119,7 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode Mode, u32 MipLevel)
 				hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_READONLY);
 			}
 			if(FAILED(hr)) {
-				FreeTempSurface(m_TempSurface);
+				m_TempSurface = nullptr;
 				throw core::D3D9Exception(hr);
 			}
 		}
@@ -166,7 +152,6 @@ void TextureD3D9::Unlock()
 				throw core::D3D9Exception(hr);
 		}
 
-		FreeTempSurface(m_TempSurface);
 		m_TempSurface = nullptr;
 	} else {
 		m_Texture->UnlockRect(m_LockedLevel);
@@ -207,53 +192,6 @@ const BaseTexture::Filter& TextureD3D9::GetFiltering() const
 void TextureD3D9::SetFiltering(const Filter& f)
 {
 	m_Filtering = f;
-}
-
-IDirect3DSurface9* TextureD3D9::GetTempSurface(u32 width, u32 height, D3DFORMAT format)
-{
-	HRESULT hr;
-
-	core::Array<IDirect3DSurface9*>::Iterator matchingFormat = s_TempSurfaces.End();
-	for(auto it = s_TempSurfaces.First(); it != s_TempSurfaces.End(); ++it) {
-
-		D3DSURFACE_DESC desc;
-		(*it)->GetDesc(&desc);
-		if(desc.Width <= width && desc.Height <= height && desc.Format == format) {
-			if((*it)->AddRef() == 2) {
-				(*it)->Release();
-				if(desc.Format == format)
-					matchingFormat = it;
-				continue;
-			}
-
-			return *it;
-		}
-	}
-
-	if(matchingFormat != s_TempSurfaces.End()) {
-		IDirect3DSurface9* surface = *matchingFormat;
-		s_TempSurfaces.Erase(matchingFormat);
-		surface->Release();
-	}
-
-	IDirect3DDevice9* device;
-	m_Texture->GetDevice(&device);
-	IDirect3DSurface9* surface;
-	hr = device->CreateOffscreenPlainSurface(width, height, format, D3DPOOL_SYSTEMMEM, &surface, nullptr);
-
-	if(FAILED(hr))
-		return nullptr;
-
-	surface->AddRef();
-	s_TempSurfaces.PushBack(surface);
-
-	return surface;
-}
-
-void TextureD3D9::FreeTempSurface(IDirect3DSurface9* surface)
-{
-	if(surface)
-		surface->Release();
 }
 
 }

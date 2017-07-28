@@ -1,14 +1,15 @@
 #ifdef LUX_COMPILE_WITH_D3D9
+#include "video/d3d9/VideoDriverD3D9.h"
 #include "core/Logger.h"
+
+#include "core/ReferableFactory.h"
 
 #include "video/d3d9/TextureD3D9.h"
 #include "video/d3d9/CubeTextureD3D9.h"
 #include "video/d3d9/ShaderD3D9.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
-#include "video/d3d9/VideoDriverD3D9.h"
 
 #include "video/mesh/GeometryImpl.h"
-
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
 
@@ -16,13 +17,14 @@
 
 #include "D3DHelper.h"
 #include "D3D9Exception.h"
+#include "AuxiliaryTextureD3D9.h"
 
 namespace lux
 {
 namespace video
 {
 
-VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(IDirect3DSurface9* surface) :
+VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(UnknownRefCounted<IDirect3DSurface9> surface) :
 	m_Surface(surface)
 {
 	if(m_Surface) {
@@ -47,14 +49,14 @@ void VideoDriverD3D9::CleanUp()
 
 static IDirect3DDevice9* g_D3DDevice9 = nullptr;
 
-Referable* CreateTexture()
+Referable* CreateTexture(const void* origin)
 {
-	return LUX_NEW(TextureD3D9)(g_D3DDevice9);
+	return LUX_NEW(TextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
 }
 
-Referable* CreateCubeTexture()
+Referable* CreateCubeTexture(const void* origin)
 {
-	return LUX_NEW(CubeTextureD3D9)(g_D3DDevice9);
+	return LUX_NEW(CubeTextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
 }
 
 void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
@@ -198,7 +200,6 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 	}
 
 	// Geräteschnittstelle generieren
-	IDirect3DDevice9* newDevice;
 	HRESULT hr;
 	if(m_Config.pureSoftware) {
 		if(FAILED(hr = m_D3D->CreateDevice(m_Adapter,
@@ -206,7 +207,7 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 			windowHandle,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 			&PresentParams,
-			&newDevice))) {
+			m_D3DDevice.Access()))) {
 			throw core::D3D9Exception(hr);
 		}
 	} else {
@@ -215,14 +216,14 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 			windowHandle,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING,
 			&PresentParams,
-			&newDevice);
+			m_D3DDevice.Access());
 		if(FAILED(hr))
 			hr = m_D3D->CreateDevice(m_Adapter,
 				D3DDEVTYPE_HAL,
 				windowHandle,
 				D3DCREATE_MIXED_VERTEXPROCESSING,
 				&PresentParams,
-				&newDevice);
+				m_D3DDevice.Access());
 
 		if(FAILED(hr))
 			hr = m_D3D->CreateDevice(m_Adapter,
@@ -230,13 +231,11 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 				windowHandle,
 				D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 				&PresentParams,
-				&newDevice);
+				m_D3DDevice.Access());
 
 		if(FAILED(hr))
 			throw core::D3D9Exception(hr);
 	}
-
-	m_D3DDevice = newDevice;
 
 	D3DADAPTER_IDENTIFIER9 AdapterIdent;
 	m_D3D->GetAdapterIdentifier(m_Adapter, 0, &AdapterIdent);
@@ -265,6 +264,8 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 
 	g_D3DDevice9 = m_D3DDevice;
 
+	AuxiliaryTextureManagerD3D9::Initialize(m_D3DDevice);
+
 	auto refFactory = core::ReferableFactory::Instance();
 	refFactory->RegisterType(core::ResourceType::Texture, &lux::video::CreateTexture);
 	refFactory->RegisterType(core::ResourceType::CubeTexture, &lux::video::CreateCubeTexture);
@@ -272,6 +273,8 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 
 VideoDriverD3D9::~VideoDriverD3D9()
 {
+	AuxiliaryTextureManagerD3D9::Destroy();
+
 	// Destroy buffer manager before the device is destroyed
 	m_BufferManager.Reset();
 
@@ -295,21 +298,20 @@ void VideoDriverD3D9::FillCaps()
 void VideoDriverD3D9::InitRendertargetData()
 {
 	HRESULT hr;
-	IDirect3DSurface9* backbuffer = nullptr;
-	if(FAILED(hr = m_D3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backbuffer)))
+	UnknownRefCounted<IDirect3DSurface9> backbuffer;
+	if(FAILED(hr = m_D3DDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, backbuffer.Access())))
 		throw core::D3D9Exception(hr);
 
 	m_BackBufferTarget = backbuffer;
 
-	IDirect3DSurface9* depthStencilBuffer = nullptr;
-	if(FAILED(hr = m_D3DDevice->GetDepthStencilSurface(&depthStencilBuffer)))
+	UnknownRefCounted<IDirect3DSurface9> depthStencilBuffer;
+	if(FAILED(hr = m_D3DDevice->GetDepthStencilSurface(depthStencilBuffer.Access())))
 		throw core::D3D9Exception(hr);
 
-	DepthBuffer_d3d9 depthBuffer(depthStencilBuffer);
-	m_DepthBuffers.PushBack(depthBuffer);
+	m_DepthBuffers.PushBack(depthStencilBuffer);
 }
 
-IDirect3DSurface9* VideoDriverD3D9::GetD3D9MatchingDepthBuffer(IDirect3DSurface9* target)
+UnknownRefCounted<IDirect3DSurface9> VideoDriverD3D9::GetD3D9MatchingDepthBuffer(IDirect3DSurface9* target)
 {
 	D3DSURFACE_DESC desc;
 	target->GetDesc(&desc);
@@ -332,12 +334,12 @@ IDirect3DSurface9* VideoDriverD3D9::GetD3D9MatchingDepthBuffer(IDirect3DSurface9
 			return it->GetSurface();
 	}
 
-	IDirect3DSurface9* depthStencil = nullptr;
+	UnknownRefCounted<IDirect3DSurface9> depthStencil;
 	if(SUCCEEDED(m_D3DDevice->CreateDepthStencilSurface(size.width, size.height,
 		m_PresentParams.AutoDepthStencilFormat,
 		desc.MultiSampleType, desc.MultiSampleQuality,
 		TRUE,
-		&depthStencil, nullptr))) {
+		depthStencil.Access(), nullptr))) {
 		DepthBuffer_d3d9 buffer(depthStencil);
 		m_DepthBuffers.PushBack(buffer);
 		return depthStencil;
@@ -387,7 +389,7 @@ StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(const VertexFormat& vertexFo
 		primitiveType);
 }
 
-bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube)
+bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube, bool rendertarget)
 {
 	D3DFORMAT d3dFormat = GetD3DFormat(format, format.HasAlpha());
 
@@ -399,6 +401,8 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube)
 		rType = D3DRTYPE_TEXTURE;
 
 	usage = 0;
+	if(rendertarget)
+		usage |= D3DUSAGE_RENDERTARGET;
 
 	HRESULT hr = m_D3D->CheckDeviceFormat(m_Adapter,
 		D3DDEVTYPE_HAL,
@@ -410,16 +414,46 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube)
 	return SUCCEEDED(hr);
 }
 
+bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube, bool rendertarget)
+{
+	LUX_UNUSED(size);
+
+	// TODO: Handle size
+	// TODO: How to use floating-point formats
+	bool hasAlpha = format.HasAlpha();
+	if(hasAlpha) {
+		if(CheckTextureFormat(format, cube, rendertarget))
+			format = format;
+		else if(CheckTextureFormat(ColorFormat::A8R8G8B8, cube, rendertarget))
+			format = ColorFormat::A8R8G8B8;
+		else if(CheckTextureFormat(ColorFormat::A1R5G5B5, cube, rendertarget))
+			format = ColorFormat::A1R5G5B5;
+		else
+			return false;
+	} else {
+		if(CheckTextureFormat(format, cube, rendertarget))
+			format = format;
+		else if(CheckTextureFormat(ColorFormat::A8R8G8B8, cube, rendertarget))
+			format = ColorFormat::A8R8G8B8;
+		else if(CheckTextureFormat(ColorFormat::R5G6B5, cube, rendertarget))
+			format = ColorFormat::A1R5G5B5;
+		else
+			return false;
+	}
+
+	return true;
+}
+
 StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2U& size, ColorFormat format, u32 mipCount, bool isDynamic)
 {
-	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
+	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, mipCount, false, isDynamic);
 	return out;
 }
 
 StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format)
 {
-	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
+	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, 1, true, false);
 
 	m_RenderTargets.PushBack(out);
@@ -428,39 +462,9 @@ StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimens
 
 StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic)
 {
-	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
+	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, isDynamic);
 	return out;
-}
-
-bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube)
-{
-	LUX_UNUSED(size);
-
-	// TODO: Handle size
-	// TODO: How to use floating-point formats
-	bool hasAlpha = format.HasAlpha();
-	if(hasAlpha) {
-		if(CheckTextureFormat(format, cube))
-			format = format;
-		else if(CheckTextureFormat(ColorFormat::A8R8G8B8, cube))
-			format = ColorFormat::A8R8G8B8;
-		else if(CheckTextureFormat(ColorFormat::A1R5G5B5, cube))
-			format = ColorFormat::A1R5G5B5;
-		else
-			return false;
-	} else {
-		if(CheckTextureFormat(format, cube))
-			format = format;
-		else if(CheckTextureFormat(ColorFormat::A8R8G8B8, cube))
-			format = ColorFormat::A8R8G8B8;
-		else if(CheckTextureFormat(ColorFormat::R5G6B5, cube))
-			format = ColorFormat::A1R5G5B5;
-		else
-			return false;
-	}
-
-	return true;
 }
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
@@ -492,12 +496,12 @@ const RendertargetD3D9& VideoDriverD3D9::GetBackbufferTarget()
 	return m_BackBufferTarget;
 }
 
-IDirect3DVertexDeclaration9* VideoDriverD3D9::GetD3D9VertexDeclaration(const VertexFormat& format)
+UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::GetD3D9VertexDeclaration(const VertexFormat& format)
 {
 	VertexFormat_d3d9 vf;
 	auto it = m_VertexFormats.Find(format);
 	if(it == m_VertexFormats.End()) {
-		IDirect3DVertexDeclaration9* d3d = CreateVertexFormat(format);
+		auto d3d = CreateVertexFormat(format);
 		vf = VertexFormat_d3d9(d3d);
 		m_VertexFormats[format] = vf;
 	} else {
@@ -507,7 +511,7 @@ IDirect3DVertexDeclaration9* VideoDriverD3D9::GetD3D9VertexDeclaration(const Ver
 	return vf.GetD3D();
 }
 
-IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFormat& format)
+UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::CreateVertexFormat(const VertexFormat& format)
 {
 	if(!format.IsValid())
 		throw core::InvalidArgumentException("format");
@@ -562,9 +566,9 @@ IDirect3DVertexDeclaration9* VideoDriverD3D9::CreateVertexFormat(const VertexFor
 	d3dElements[size].Usage = 0;
 	d3dElements[size].UsageIndex = 0;
 
-	IDirect3DVertexDeclaration9* d3dDecl;
+	UnknownRefCounted<IDirect3DVertexDeclaration9> d3dDecl;
 	HRESULT hr;
-	if(FAILED(hr = m_D3DDevice->CreateVertexDeclaration(d3dElements.Data(), &d3dDecl)))
+	if(FAILED(hr = m_D3DDevice->CreateVertexDeclaration(d3dElements.Data(), d3dDecl.Access())))
 		throw core::D3D9Exception(hr);
 
 	return d3dDecl;

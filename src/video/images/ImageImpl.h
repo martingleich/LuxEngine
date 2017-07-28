@@ -12,7 +12,7 @@ namespace video
 class ImageImpl : public Image
 {
 public:
-	ImageImpl();
+	ImageImpl(const core::ResourceOrigin& origin);
 	~ImageImpl();
 
 	void Clear();
@@ -36,8 +36,6 @@ public:
 	{
 		return core::ResourceType::Image;
 	}
-
-	StrongRef<Referable> Clone() const;
 
 private:
 	math::Dimension2U m_Dimension;

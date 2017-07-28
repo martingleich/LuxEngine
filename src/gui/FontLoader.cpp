@@ -1,13 +1,16 @@
 #include "FontLoader.h"
-#include "io/File.h"
+
 #include "core/Logger.h"
+#include "core/lxHashMap.h"
+
+#include "gui/FontImpl.h"
+
+#include "io/File.h"
+
 #include "video/images/ImageSystem.h"
 #include "video/images/Image.h"
 #include "video/VideoDriver.h"
-#include "core/lxHashMap.h"
-#include "gui/FontImpl.h"
 #include "video/MaterialLibrary.h"
-#include "video/AlphaSettings.h"
 
 namespace lux
 {

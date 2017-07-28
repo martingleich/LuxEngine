@@ -27,45 +27,71 @@ LUX_API extern const Name Material; //!< Resources of type \ref lux::sound::Soun
 }
 
 class Resource;
-class ResourceOrigin
+class OriginResourceLoader;
+
+struct ResourceOrigin
 {
-public:
+	ResourceOrigin() :
+		loader(nullptr)
+	{}
+	ResourceOrigin(OriginResourceLoader* l, const String& s) :
+		str(s),
+		loader(l)
+	{
+	}
+
 	String str;
+	OriginResourceLoader* loader;
+
+	inline void Load(Resource* dst);
 };
 
 class OriginResourceLoader
 {
 public:
-	virtual bool LoadResource(const ResourceOrigin& origin, Resource* dst) const = 0;
+	virtual void LoadResource(const ResourceOrigin& origin, Resource* dst) const = 0;
 };
+
+void ResourceOrigin::Load(Resource* dst)
+{
+	if(loader)
+		loader->LoadResource(*this, dst);
+}
 
 //! A engine resource object
 class Resource : public Referable
 {
 public:
+	Resource(const ResourceOrigin& origin) :
+		m_Origin(origin),
+		m_Loaded(origin.loader?false:true)
+	{
+	}
+
+	Resource(const Resource& other) :
+		m_Origin(other.m_Origin),
+		m_Loaded(other.m_Loaded)
+	{
+
+	}
+
 	Resource() :
-		m_Loader(nullptr),
-		m_Loaded(false)
+		m_Loaded(true)
 	{
 	}
 
-	virtual ~Resource()
+	virtual ~Resource() {}
+
+	virtual void Load()
 	{
+		if(!m_Loaded)
+			m_Origin.Load(this);
 	}
 
-	virtual bool Load()
+	virtual void Reload()
 	{
-		if(m_Loaded)
-			return true;
-
-		bool result = false;
-		if(m_Loader)
-			result = m_Loader->LoadResource(m_Origin, this);
-
-		if(result)
-			m_Loaded = true;
-
-		return m_Loaded;
+		Unload();
+		Load();
 	}
 
 	virtual void Unload()
@@ -73,25 +99,14 @@ public:
 		m_Loaded = false;
 	}
 
-	void SetLoaded(bool loaded)
-	{
-		m_Loaded = loaded;
-	}
-
 	bool IsLoaded() const
 	{
 		return m_Loaded;
 	}
 
-	void SetOrigin(const OriginResourceLoader* loader, const ResourceOrigin& origin)
+	void SetLoaded(bool loaded)
 	{
-		m_Loader = loader;
-		m_Origin = origin;
-	}
-
-	const OriginResourceLoader* GetOriginLoader() const
-	{
-		return m_Loader;
+		m_Loaded = loaded;
 	}
 
 	const ResourceOrigin& GetOrigin() const
@@ -100,12 +115,11 @@ public:
 	}
 
 private:
-	const OriginResourceLoader* m_Loader;
 	ResourceOrigin m_Origin;
 	bool m_Loaded;
 };
 
-}
-}
+} // namespace core
+} // namespace lux
 
 #endif // #ifndef INCLUDED_RESOURCE_H

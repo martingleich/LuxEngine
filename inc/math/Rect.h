@@ -73,12 +73,12 @@ public:
 		return !(*this == other);
 	}
 
-	void Set(T left, T top, T right, T bottom)
+	void Set(T _left, T _top, T _right, T _bottom)
 	{
-		left = left;
-		bottom = bottom;
-		right = right;
-		top = top;
+		left = _left;
+		bottom = _bottom;
+		right = _right;
+		top = _top;
 	}
 
 	//! Return width of rect
@@ -146,6 +146,15 @@ public:
 		}
 	}
 
+	//! Is the rectangle valie
+	/**
+	Invalid means min-edge is bigger than max-edge
+	*/
+	bool IsValid() const
+	{
+		return left <= right && top <= bottom;
+	}
+
 	//! The lower left corner.
 	Vector2<T> Min() const
 	{
@@ -194,6 +203,7 @@ const Rect<T> Rect<T>::EMPTY = Rect<T>(0, 0, 0, 0);
 typedef Rect<float> RectF;
 //! Typedef for rect with integer precision
 typedef Rect<s32> RectI;
+typedef Rect<u32> RectU;
 
 } // !namespace math
 } // !namespace lux

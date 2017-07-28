@@ -2,9 +2,6 @@
 #define INCLUDED_VIDEODRIVER_D3D9_H
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/VideoDriverNull.h"
-#include "video/Material.h"
-#include "video/LightData.h"
-#include "math/Matrix4.h"
 
 #include "core/lxHashMap.h"
 
@@ -45,11 +42,12 @@ public:
 
 	//------------------------------------------------------------------
 	// Textur-Methoden
-	bool CheckTextureFormat(ColorFormat format, bool cube);
+	bool CheckTextureFormat(ColorFormat format, bool cube, bool rendertarget);
+	bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube, bool rendertarget);
+
 	StrongRef<Texture> CreateTexture(const math::Dimension2U& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
 	StrongRef<Texture> CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
 	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool isDynamic);
-	bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube);
 
 	// Cache for auxalarity textures
 	/*
@@ -68,6 +66,11 @@ public:
 	EDriverType GetVideoDriverType() const
 	{
 		return EDriverType::Direct3D9;
+	}
+
+	bool HasStencil() const
+	{
+		return m_HasStencilBuffer;
 	}
 
 	void* GetLowLevelDevice() const
@@ -93,15 +96,15 @@ public:
 		return m_Renderer;
 	}
 
-	IDirect3DSurface9* GetD3D9MatchingDepthBuffer(IDirect3DSurface9* target);
-	IDirect3DVertexDeclaration9* GetD3D9VertexDeclaration(const VertexFormat& format);
+	UnknownRefCounted<IDirect3DSurface9> GetD3D9MatchingDepthBuffer(IDirect3DSurface9* target);
+	UnknownRefCounted<IDirect3DVertexDeclaration9> GetD3D9VertexDeclaration(const VertexFormat& format);
 
 private:
 	class VertexFormat_d3d9
 	{
 	public:
 		VertexFormat_d3d9() {}
-		VertexFormat_d3d9(IDirect3DVertexDeclaration9* d3dDecl) :
+		VertexFormat_d3d9(UnknownRefCounted<IDirect3DVertexDeclaration9> d3dDecl) :
 			m_D3DDeclaration(d3dDecl)
 		{
 		}
@@ -116,7 +119,7 @@ private:
 	{
 	public:
 		DepthBuffer_d3d9() {}
-		DepthBuffer_d3d9(IDirect3DSurface9* surface);
+		DepthBuffer_d3d9(UnknownRefCounted<IDirect3DSurface9> surface);
 		const math::Dimension2U& GetSize() const { return m_Size; }
 		IDirect3DSurface9* GetSurface() const { return m_Surface; }
 
@@ -129,7 +132,7 @@ private:
 	void FillCaps();
 	void InitRendertargetData();
 
-	IDirect3DVertexDeclaration9* CreateVertexFormat(const VertexFormat& format);
+	UnknownRefCounted<IDirect3DVertexDeclaration9> CreateVertexFormat(const VertexFormat& format);
 
 private:
 	RendertargetD3D9 m_BackBufferTarget;

@@ -94,7 +94,7 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 	else
 		SetRenderState(D3DRS_SPECULARENABLE, 0);
 
-	m_Device->SetRenderState(D3DRS_ZFUNC, GetD3DZBufferFunc(p.zBufferFunc));
+	m_Device->SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(p.zBufferFunc));
 	m_Device->SetRenderState(D3DRS_ZWRITEENABLE, p.zWriteEnabled ? TRUE : FALSE);
 	m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, p.normalizeNormals ? TRUE : FALSE);
 	m_Device->SetRenderState(D3DRS_FILLMODE, GetFillMode(p));

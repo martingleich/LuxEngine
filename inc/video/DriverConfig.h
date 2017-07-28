@@ -7,6 +7,7 @@ namespace lux
 {
 namespace video
 {
+
 struct DriverConfig
 {
 	EDriverType driverType;

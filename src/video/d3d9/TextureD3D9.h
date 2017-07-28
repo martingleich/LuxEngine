@@ -6,6 +6,7 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 
 #include "StrippedD3D9.h"
+#include "UnknownRefCounted.h"
 
 namespace lux
 {
@@ -15,7 +16,7 @@ namespace video
 class TextureD3D9 : public Texture
 {
 public:
-	TextureD3D9(IDirect3DDevice9* device);
+	TextureD3D9(IDirect3DDevice9* device, const core::ResourceOrigin& origin);
 	~TextureD3D9();
 
 	void Init(
@@ -37,16 +38,9 @@ public:
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
 
-private:
-	static u32 s_TextureCount;
-	static core::Array<IDirect3DSurface9*> s_TempSurfaces;
-
-	IDirect3DSurface9* GetTempSurface(u32 width, u32 height, D3DFORMAT format);
-	void FreeTempSurface(IDirect3DSurface9* surface);
-
 protected:
 	IDirect3DDevice9* m_Device;
-	IDirect3DTexture9* m_Texture;
+	UnknownRefCounted<IDirect3DTexture9> m_Texture;
 	D3DSURFACE_DESC m_Desc;
 	ColorFormat m_Format;
 	Filter m_Filtering;
@@ -56,13 +50,11 @@ protected:
 	bool m_IsLocked;
 	u32 m_LockedLevel;
 	ELockMode m_LockedMode;
-	IDirect3DSurface9* m_TempSurface;
+	UnknownRefCounted<IDirect3DSurface9> m_TempSurface;
 };
 
 }
-
 }
-
 
 #endif // LUX_COMPILE_WITH_D3D9
 

@@ -27,6 +27,8 @@ public:
 		NegZ
 	};
 
+	CubeTexture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
+
 	virtual ~CubeTexture()
 	{
 	}

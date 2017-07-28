@@ -258,7 +258,7 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 				clearZ = true;
 				clearColor = true;
 			}
-			m_Renderer->BeginScene(clearColor, clearZ, video::Color::Black, 1.0f);
+			m_Renderer->BeginScene(clearColor, clearZ, true);
 		}
 
 		m_ActiveCamera->PreRender(m_Renderer, m_ActiveCameraNode);

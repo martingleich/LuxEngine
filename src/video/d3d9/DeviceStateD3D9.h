@@ -2,12 +2,11 @@
 #define INCLUDED_DEVICE_STATE_D3D9_H
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/DeviceState.h"
-#include "video/Color.h"
 
-#include "video/AlphaSettings.h"
-#include "video/TextureStageSettings.h"
 #include "math/Matrix4.h"
 
+#include "video/Color.h"
+#include "video/TextureStageSettings.h"
 #include "video/Shader.h"
 
 #include "StrippedD3D9.h"

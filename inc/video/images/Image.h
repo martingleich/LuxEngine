@@ -17,6 +17,11 @@ class DrawingCanvasAuto<Image>;
 class Image : public core::Resource
 {
 public:
+	Image(const core::ResourceOrigin& origin) :
+		Resource(origin)
+	{
+	}
+
 	virtual ~Image()
 	{
 	}

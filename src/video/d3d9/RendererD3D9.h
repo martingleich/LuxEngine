@@ -24,8 +24,8 @@ public:
 	void CleanUp();
 
 	void BeginScene(
-		bool clearColor, bool clearZBuffer,
-		video::Color color = video::Color::Black, float z = 1.0f);
+		bool clearColor, bool clearZBuffer, bool clearStencil,
+		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil=0);
 
 	void EndScene();
 	bool Present();
@@ -33,6 +33,12 @@ public:
 	void SetRenderTarget(const RenderTarget& target);
 
 	const RenderTarget& GetRenderTarget();
+
+	void SetScissorRect(const math::RectU& rect, ScissorRectToken* token=nullptr);
+	const math::RectU& GetScissorRect() const;
+
+	void SetStencilMode(const StencilMode& mode, StencilModeToken*token=nullptr);
+	const StencilMode& GetStencilMode() const;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +109,9 @@ private:
 
 	RendertargetD3D9 m_CurrentRendertarget;
 	RendertargetD3D9 m_BackbufferTarget;
+
+	StencilMode m_StencilMode;
+	math::RectU m_ScissorRect;
 
 	VideoDriverD3D9* m_Driver;
 

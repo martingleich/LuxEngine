@@ -9,8 +9,8 @@ namespace lux
 namespace video
 {
 
-CubeTextureD3D9::CubeTextureD3D9(IDirect3DDevice9* dev) :
-	m_Texture(nullptr),
+CubeTextureD3D9::CubeTextureD3D9(IDirect3DDevice9* dev, const core::ResourceOrigin& origin) :
+	CubeTexture(origin),
 	m_LockedLevel(0xFFFFFFFF),
 	m_D3DDevice(dev)
 {
@@ -18,31 +18,27 @@ CubeTextureD3D9::CubeTextureD3D9(IDirect3DDevice9* dev) :
 
 CubeTextureD3D9::~CubeTextureD3D9()
 {
-	if(m_Texture)
-		m_Texture->Release();
 }
 
-void CubeTextureD3D9::Init(u32 Size, ColorFormat lxFormat, bool isDynamic)
+void CubeTextureD3D9::Init(u32 size, ColorFormat lxFormat, bool isDynamic)
 {
 	if(!m_D3DDevice)
 		throw core::Exception("No driver available");
 
-	if(m_Texture) {
-		m_Texture->Release();
+	if(m_Texture)
 		m_Texture = nullptr;
-	}
 
 	D3DFORMAT format = GetD3DFormat(lxFormat, lxFormat.HasAlpha());
 	if(format == D3DFMT_UNKNOWN)
 		throw core::ColorFormatException(lxFormat);
 
 	DWORD usage = 0;
-	D3DPOOL pool = D3DPOOL_MANAGED;
+	D3DPOOL pool = GetOrigin().loader ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
 	if(isDynamic) {
 		usage = D3DUSAGE_DYNAMIC;
 		pool = D3DPOOL_DEFAULT;
 	}
-	HRESULT hr = m_D3DDevice->CreateCubeTexture(Size, 1, usage, format, pool, &m_Texture, nullptr);
+	HRESULT hr = m_D3DDevice->CreateCubeTexture(size, 1, usage, format, pool, m_Texture.Access(), nullptr);
 
 	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
@@ -82,9 +78,21 @@ BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode Mode, EFace Face, u32 Mi
 		Flags = D3DLOCK_READONLY;
 
 	HRESULT hr = m_Texture->LockRect(m_LockedFace, MipLevel, &Locked, nullptr, Flags);
-	if(FAILED(hr))
-		throw core::D3D9Exception(hr);
-
+	if(FAILED(hr)) {
+		if(Mode == ELockMode::Overwrite && m_Desc.Usage == 0) {
+			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
+			if(m_TempSurface)
+				hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_DISCARD);
+			if(FAILED(hr)) {
+				m_TempSurface = nullptr;
+				throw core::D3D9Exception(hr);
+			}
+		} else if(Mode == ELockMode::ReadOnly && m_Desc.Usage == 0) {
+			throw core::Exception("Can't lock static texture in read mode");
+		} else if(Mode == ELockMode::ReadWrite && m_Desc.Usage == 0) {
+			throw core::Exception("Can't lock static texture in read mode");
+		}
+	}
 	LockedRect locked;
 	locked.bits = (u8*)Locked.pBits;
 	locked.pitch = Locked.Pitch;
@@ -94,8 +102,27 @@ BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode Mode, EFace Face, u32 Mi
 
 void CubeTextureD3D9::Unlock()
 {
-	if(m_LockedLevel != 0xFFFFFFFF)
+	if(m_LockedLevel == 0xFFFFFFFF)
+		return;
+
+	HRESULT hr;
+	if(m_TempSurface) {
+		m_TempSurface->UnlockRect();
+		if(m_Desc.Usage == 0) {
+			IDirect3DDevice9* device;
+			IDirect3DSurface9* surface;
+			m_Texture->GetDevice(&device);
+			m_Texture->GetCubeMapSurface(m_LockedFace, m_LockedLevel, &surface);
+
+			hr = device->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
+			if(FAILED(hr))
+				throw core::D3D9Exception(hr);
+		}
+
+		m_TempSurface = nullptr;
+	} else {
 		m_Texture->UnlockRect(m_LockedFace, m_LockedLevel);
+	}
 
 	m_LockedLevel = 0xFFFFFFFF;
 }

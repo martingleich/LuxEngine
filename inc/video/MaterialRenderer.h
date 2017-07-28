@@ -41,7 +41,6 @@ public:
 /**
 Material rendered communicate the data inside a material to the driver.
 */
-// TODO: Fix handling of texturelayers.
 class MaterialRenderer : public ReferenceCounted
 {
 public:

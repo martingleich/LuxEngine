@@ -3,14 +3,15 @@
 #include "core/ReferableRegister.h"
 #include "video/DrawingCanvas.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.resource.Image", lux::video::ImageImpl);
+LUX_REGISTER_RESOURCE_CLASS("lux.resource.Image", lux::video::ImageImpl);
 
 namespace lux
 {
 namespace video
 {
 
-ImageImpl::ImageImpl() :
+ImageImpl::ImageImpl(const core::ResourceOrigin& origin) :
+	Image(origin),
 	m_Data(nullptr)
 {
 }
@@ -132,13 +133,6 @@ void ImageImpl::Unlock()
 	m_Locked = false;
 }
 
-StrongRef<Referable> ImageImpl::Clone() const
-{
-	return LUX_NEW(ImageImpl);
 }
-
-
-}
-
 }
 

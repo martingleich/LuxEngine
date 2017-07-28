@@ -240,7 +240,7 @@ u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const String& name) const
 	const u32 typeId = GetTypeID(type);
 
 	if(self->types[typeId].isCached == false)
-		return INVALID_ID; 
+		return INVALID_ID;
 
 	if(self->fileSystem->ExistFile(name)) {
 		const String abs_path = self->fileSystem->GetAbsoluteFilename(name);
@@ -302,13 +302,11 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const String& nam
 
 	StrongRef<io::File> file = self->fileSystem->OpenFile(name);
 
-	auto out = GetResource(type, file);
+	ResourceOrigin origin(this, name);
+	StrongRef<Resource> resource = CreateResource(type, file, &origin);
+	AddResource(file->GetName(), resource);
 
-	ResourceOrigin origin;
-	origin.str = name;
-	out->SetOrigin(nullptr, origin);
-
-	return out;
+	return resource;
 }
 
 StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, io::File* file)
@@ -317,13 +315,7 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, io::File* file)
 		throw core::InvalidArgumentException("file", "Must not be null");
 
 	StrongRef<Resource> resource = CreateResource(type, file);
-
 	AddResource(file->GetName(), resource);
-
-	ResourceOrigin origin;
-	origin.str = file->GetName();
-	resource->SetOrigin(nullptr, origin);
-	resource->SetLoaded(true);
 
 	return resource;
 }
@@ -331,37 +323,21 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, io::File* file)
 StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, const String& name)
 {
 	if(name.IsEmpty())
-		return nullptr;
+		throw core::InvalidArgumentException("name", "Name may not be empty");
 
 	const u32 id = GetResourceIdUnsafe(type, name);
 	if(id != INVALID_ID)
 		return GetResource(type, id);
 
 	StrongRef<io::File> file = self->fileSystem->OpenFile(name);
-	return CreateResource(type, file);
+
+	ResourceOrigin origin(this, name);
+	return CreateResource(type, file, &origin);
 }
 
 StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, io::File* file)
 {
-	// Get loader and correct resource type from file
-	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file);
-	if(!loader)
-		throw core::FileFormatException("File format not supported", type.c_str());
-
-	// TODO: Use origin and originloader to load data
-	StrongRef<Resource> resource = self->refFactory->Create(type).As<Resource>();
-	if(!resource)
-		throw core::InvalidArgumentException("type", "Is no valid resource type");
-
-	const u32 oldCursor = file->GetCursor();
-	try {
-		loader->LoadResource(file, resource);
-	} catch(...) {
-		file->Seek(oldCursor, io::ESeekOrigin::Start);
-		throw;
-	}
-
-	return resource;
+	return CreateResource(type, file, nullptr);
 }
 
 void ResourceSystemImpl::SetCaching(Name type, bool caching)
@@ -415,7 +391,7 @@ StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(u32 id) const
 	return self->writers.At(id);
 }
 
-void ResourceSystemImpl::WriteResource(Resource* resource,  io::File* file, const String& ext)  const
+void ResourceSystemImpl::WriteResource(Resource* resource, io::File* file, const String& ext)  const
 {
 	auto writer = GetResourceWriter(resource->GetReferableType(), ext);
 	if(!writer)
@@ -505,6 +481,52 @@ StrongRef<ResourceLoader> ResourceSystemImpl::GetResourceLoader(core::Name& type
 	}
 
 	return result;
+}
+
+void ResourceSystemImpl::LoadResource(const ResourceOrigin& origin, Resource* dst) const
+{
+	StrongRef<io::File> file = io::FileSystem::Instance()->OpenFile(origin.str);
+	Name type = dst->GetReferableType();
+
+	// Get loader and correct resource type from file
+	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file);
+	if(!loader)
+		throw core::FileFormatException("File format not supported", type.c_str());
+
+	// Load the resource
+	const u32 oldCursor = file->GetCursor();
+	try {
+		loader->LoadResource(file, dst);
+		dst->SetLoaded(true);
+	} catch(...) {
+		file->Seek(oldCursor, io::ESeekOrigin::Start);
+		throw;
+	}
+}
+
+StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, io::File* file, const ResourceOrigin* origin)
+{
+	// Get loader and correct resource type from file
+	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file);
+	if(!loader)
+		throw core::FileFormatException("File format not supported", type.c_str());
+
+	// Create the resource
+	StrongRef<Resource> resource = self->refFactory->Create(type, origin).As<Resource>();
+	if(!resource)
+		throw core::InvalidArgumentException("type", "Is no valid resource type");
+
+	// Load the resource
+	const u32 oldCursor = file->GetCursor();
+	try {
+		loader->LoadResource(file, resource);
+		resource->SetLoaded(true);
+	} catch(...) {
+		file->Seek(oldCursor, io::ESeekOrigin::Start);
+		throw;
+	}
+
+	return resource;
 }
 
 }
