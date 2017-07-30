@@ -1,10 +1,11 @@
 #include "video/VideoDriverNull.h"
+
 namespace lux
 {
 namespace video
 {
 
-void VideoDriverNull::Init(const DriverConfig& config, gui::Window* window)
+VideoDriverNull::VideoDriverNull(const DriverConfig& config, gui::Window* window)
 {
 	LUX_UNUSED(window);
 	m_Config = config;

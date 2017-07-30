@@ -1,6 +1,7 @@
 #ifndef INCLUDED_VIDEO_DRIVER_NULL_H
 #define INCLUDED_VIDEO_DRIVER_NULL_H
 #include "video/VideoDriver.h"
+#include "video/DriverConfig.h"
 
 namespace lux
 {
@@ -10,7 +11,7 @@ namespace video
 class VideoDriverNull : public VideoDriver
 {
 public:
-	virtual void Init(const DriverConfig& config, gui::Window* Window);
+	VideoDriverNull(const DriverConfig& config, gui::Window* window);
 
 	virtual EDriverType GetVideoDriverType() const;
 	virtual const DriverConfig& GetConfig() const;

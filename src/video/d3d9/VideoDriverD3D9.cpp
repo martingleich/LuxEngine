@@ -37,16 +37,6 @@ VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(UnknownRefCounted<IDirect3DS
 
 //////////////////////////////////////////////////////////////////////
 
-VideoDriverD3D9::VideoDriverD3D9() :
-	m_HasStencilBuffer(false)
-{
-}
-
-void VideoDriverD3D9::CleanUp()
-{
-	m_Renderer->CleanUp();
-}
-
 static IDirect3DDevice9* g_D3DDevice9 = nullptr;
 
 Referable* CreateTexture(const void* origin)
@@ -59,202 +49,71 @@ Referable* CreateCubeTexture(const void* origin)
 	return LUX_NEW(CubeTextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
 }
 
-void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
+//////////////////////////////////////////////////////////////////////
+
+VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window) :
+	VideoDriverNull(config, window)
 {
-	VideoDriverNull::Init(config, window);
-
-	D3DPRESENT_PARAMETERS PresentParams;
-
-	m_Adapter = 0;
-
-	m_D3D = Direct3DCreate9(D3D_SDK_VERSION);
-	if(!m_D3D)
-		throw core::RuntimeException("Couldn't create the direct3D9 interface.");
-
 	HWND windowHandle = (HWND)window->GetDeviceWindow();
-	// Präsentationsstruktur ausfüllen
-	D3DDISPLAYMODE CurrentVideoMode;
-	m_D3D->GetAdapterDisplayMode(m_Adapter, &CurrentVideoMode);
-	memset(&PresentParams, 0, sizeof(D3DPRESENT_PARAMETERS));
-	PresentParams.BackBufferWidth = m_Config.width;
-	PresentParams.BackBufferHeight = m_Config.height;
-	if(m_Config.windowed) {
-		PresentParams.BackBufferFormat = CurrentVideoMode.Format;
-	} else {
-		PresentParams.BackBufferFormat = m_Config.backbuffer16Bit ? D3DFMT_R5G6B5 : D3DFMT_X8R8G8B8;
-	}
-	PresentParams.BackBufferCount = 1;
-	PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	PresentParams.hDeviceWindow = windowHandle;
-	PresentParams.Windowed = m_Config.windowed;
-	PresentParams.EnableAutoDepthStencil = TRUE;
-	PresentParams.Flags = 0;
-	PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
-	PresentParams.PresentationInterval = m_Config.vSync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	m_Adapter = config.adapter.As<AdapterD3D9>();
+	if(!m_Adapter)
+		throw core::InvalidArgumentException("config", "Contains invalid adapter");
 
-	// Z-Stencil-Format wählen
-	D3DFORMAT aZStencilFormat[] = {D3DFMT_D24X4S4,
-		D3DFMT_D24S8,
-		D3DFMT_D15S1,
-		D3DFMT_D32,
-		D3DFMT_D24X8,
-		D3DFMT_D16};
+	m_D3D = m_Adapter->GetD3D9();
 
-	PresentParams.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
-	D3DFORMAT FallbackFormat = D3DFMT_D24S8;
-	for(u32 format = m_Config.stencil ? 0 : 3; format < 6; format++) {
-		if(SUCCEEDED(m_D3D->CheckDeviceFormat(m_Adapter,
-			D3DDEVTYPE_HAL,
-			PresentParams.BackBufferFormat,
-			D3DUSAGE_DEPTHSTENCIL,
-			D3DRTYPE_SURFACE,
-			aZStencilFormat[format]))) {
-			//Passt es zum Bildpufferformat
-			if(SUCCEEDED(m_D3D->CheckDepthStencilMatch(m_Adapter,
-				D3DDEVTYPE_HAL,
-				PresentParams.BackBufferFormat,
-				PresentParams.BackBufferFormat,
-				aZStencilFormat[format]))) {
-				// Wieviele ZBits hat das gewählte Format
-				u32 numZBits;
-				switch(aZStencilFormat[format]) {
-				case D3DFMT_D32:
-					numZBits = 32;
-					break;
+	// Fill presentation params
+	D3DPRESENT_PARAMETERS presentParams = {0};
+	presentParams.BackBufferWidth = config.display.width;
+	presentParams.BackBufferHeight = config.display.height;
+	presentParams.BackBufferFormat = GetD3DFormat(config.display.format);
+	presentParams.FullScreen_RefreshRateInHz = config.windowed ? 0 : config.display.refreshRate;
+	presentParams.BackBufferCount = 1;
+	presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	presentParams.hDeviceWindow = windowHandle;
+	presentParams.Windowed = m_Config.windowed;
+	presentParams.EnableAutoDepthStencil = TRUE;
+	presentParams.Flags = 0;
+	presentParams.PresentationInterval = m_Config.vSync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	presentParams.AutoDepthStencilFormat = GetD3DFormat(config.zsFormat);
+	presentParams.MultiSampleType = static_cast<D3DMULTISAMPLE_TYPE>(m_Config.multiSamples);
+	presentParams.MultiSampleQuality = m_Config.multiQuality;
 
-				case D3DFMT_D24X8:
-				case D3DFMT_D24S8:
-				case D3DFMT_D24X4S4:
-					numZBits = 24;
-					break;
-
-				case D3DFMT_D16:
-				case D3DFMT_D15S1:        //Nicht ganz exakt aber was solls
-					numZBits = 16;
-					break;
-				default:
-					numZBits = 0; // This will fail later on.
-				}
-
-				FallbackFormat = aZStencilFormat[format];
-
-				// Hat das Format genug Bits
-				if(m_Config.zBits == numZBits) {
-					// Format speichern und abbrechen
-					PresentParams.AutoDepthStencilFormat = aZStencilFormat[format];
-
-					// Ist ein Stencilbuffer vorhanden
-					switch(PresentParams.AutoDepthStencilFormat) {
-					case D3DFMT_D15S1:
-					case D3DFMT_D24S8:
-					case D3DFMT_D24X8:
-					case D3DFMT_D24X4S4:
-					case D3DFMT_D24FS8:
-						m_HasStencilBuffer = true;
-						break;
-					default:
-						m_HasStencilBuffer = false;
-					}
-
-					// Information nach außen zurückgeben
-					m_Config.stencil = m_HasStencilBuffer;
-					break;
-				}
-			}
-		}
-	}
-
-	// Kein passendes Format dabei
-	if(PresentParams.AutoDepthStencilFormat == D3DFMT_UNKNOWN) {
-		PresentParams.AutoDepthStencilFormat = FallbackFormat;
-		log::Warning("The requested z-stencil-format isn't supported, using fallback.");
-	}
-
-	// Multisampling einstellen
-	if(m_Config.multiSampling > 0) {
-		if(m_Config.multiSampling > 16)
-			m_Config.multiSampling = 16;
-
-		DWORD numQualities = 0;
-		while(m_Config.multiSampling > 0) {
-			// Ist das Verfahren vorhanden
-			if(SUCCEEDED(m_D3D->CheckDeviceMultiSampleType(m_Adapter,
-				D3DDEVTYPE_HAL,
-				PresentParams.BackBufferFormat,
-				m_Config.windowed,
-				(D3DMULTISAMPLE_TYPE)(m_Config.multiSampling),
-				&numQualities))) {
-				// Aktivieren und abbrechen
-				PresentParams.MultiSampleType = static_cast<D3DMULTISAMPLE_TYPE>(m_Config.multiSampling);
-				PresentParams.MultiSampleQuality = numQualities - 1;
-				break;
-			}
-
-			--m_Config.multiSampling;
-		}
-
-		if(m_Config.multiSampling <= 0) {
-			// Nichts hat funktioniert
-			log::Warning("Multisampling isn't supported by the hardware.");
-		}
-	}
-
-	// Geräteschnittstelle generieren
+	UINT adapterId = m_Adapter->GetAdapter();
 	HRESULT hr;
-	if(m_Config.pureSoftware) {
-		if(FAILED(hr = m_D3D->CreateDevice(m_Adapter,
+	hr = m_D3D->CreateDevice(adapterId,
+		D3DDEVTYPE_HAL,
+		windowHandle,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING,
+		&presentParams,
+		m_D3DDevice.Access());
+
+	if(FAILED(hr))
+		hr = m_D3D->CreateDevice(adapterId,
+			D3DDEVTYPE_HAL,
+			windowHandle,
+			D3DCREATE_MIXED_VERTEXPROCESSING,
+			&presentParams,
+			m_D3DDevice.Access());
+
+	if(FAILED(hr))
+		hr = m_D3D->CreateDevice(adapterId,
 			D3DDEVTYPE_HAL,
 			windowHandle,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING,
-			&PresentParams,
-			m_D3DDevice.Access()))) {
-			throw core::D3D9Exception(hr);
-		}
-	} else {
-		hr = m_D3D->CreateDevice(m_Adapter,
-			D3DDEVTYPE_HAL,
-			windowHandle,
-			D3DCREATE_HARDWARE_VERTEXPROCESSING,
-			&PresentParams,
+			&presentParams,
 			m_D3DDevice.Access());
-		if(FAILED(hr))
-			hr = m_D3D->CreateDevice(m_Adapter,
-				D3DDEVTYPE_HAL,
-				windowHandle,
-				D3DCREATE_MIXED_VERTEXPROCESSING,
-				&PresentParams,
-				m_D3DDevice.Access());
 
-		if(FAILED(hr))
-			hr = m_D3D->CreateDevice(m_Adapter,
-				D3DDEVTYPE_HAL,
-				windowHandle,
-				D3DCREATE_SOFTWARE_VERTEXPROCESSING,
-				&PresentParams,
-				m_D3DDevice.Access());
+	if(FAILED(hr))
+		throw core::D3D9Exception(hr);
 
-		if(FAILED(hr))
-			throw core::D3D9Exception(hr);
-	}
+	// Save present params
+	m_PresentParams = presentParams;
 
-	D3DADAPTER_IDENTIFIER9 AdapterIdent;
-	m_D3D->GetAdapterIdentifier(m_Adapter, 0, &AdapterIdent);
-	log::Info("Using Direct3D-Driver ~d.~d.~d.~d on ~s.",
-		HIWORD(AdapterIdent.DriverVersion.HighPart),
-		LOWORD(AdapterIdent.DriverVersion.HighPart),
-		HIWORD(AdapterIdent.DriverVersion.LowPart),
-		LOWORD(AdapterIdent.DriverVersion.LowPart),
-		AdapterIdent.Description);
-
-	//Parameter eintragen
-	m_PresentParams = PresentParams;
-
-	// Gerätefähigkeiten speichern
-	// Aktuellen Status speichern
+	// Save device caps and convert them to platform independent
 	m_D3DDevice->GetDeviceCaps(&m_Caps);
-
 	FillCaps();
 
+	// Init rendertarget data
 	InitRendertargetData();
 
 	m_D3DDevice->SetRenderState(D3DRS_AMBIENT, 0xFFFFFFFF);
@@ -269,6 +128,11 @@ void VideoDriverD3D9::Init(const DriverConfig& config, gui::Window* window)
 	auto refFactory = core::ReferableFactory::Instance();
 	refFactory->RegisterType(core::ResourceType::Texture, &lux::video::CreateTexture);
 	refFactory->RegisterType(core::ResourceType::CubeTexture, &lux::video::CreateCubeTexture);
+}
+
+void VideoDriverD3D9::CleanUp()
+{
+	m_Renderer->CleanUp();
 }
 
 VideoDriverD3D9::~VideoDriverD3D9()
@@ -391,7 +255,7 @@ StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(const VertexFormat& vertexFo
 
 bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube, bool rendertarget)
 {
-	D3DFORMAT d3dFormat = GetD3DFormat(format, format.HasAlpha());
+	D3DFORMAT d3dFormat = GetD3DFormat(format);
 
 	D3DRESOURCETYPE rType;
 	DWORD usage;
@@ -404,7 +268,7 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube, bool ren
 	if(rendertarget)
 		usage |= D3DUSAGE_RENDERTARGET;
 
-	HRESULT hr = m_D3D->CheckDeviceFormat(m_Adapter,
+	HRESULT hr = m_D3D->CheckDeviceFormat(m_Adapter->GetAdapter(),
 		D3DDEVTYPE_HAL,
 		m_PresentParams.BackBufferFormat,
 		usage,

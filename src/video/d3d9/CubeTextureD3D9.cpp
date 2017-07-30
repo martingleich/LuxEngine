@@ -28,7 +28,7 @@ void CubeTextureD3D9::Init(u32 size, ColorFormat lxFormat, bool isDynamic)
 	if(m_Texture)
 		m_Texture = nullptr;
 
-	D3DFORMAT format = GetD3DFormat(lxFormat, lxFormat.HasAlpha());
+	D3DFORMAT format = GetD3DFormat(lxFormat);
 	if(format == D3DFMT_UNKNOWN)
 		throw core::ColorFormatException(lxFormat);
 

@@ -10,6 +10,13 @@ namespace lux
 namespace gui
 {
 class CursorControl;
+class WindowWin32MsgCallback
+{
+public:
+	virtual ~WindowWin32MsgCallback() {}
+
+	virtual bool OnMsg(UINT msg, WPARAM wParam, LPARAM lParam, LRESULT& outResult) = 0;
+};
 
 class WindowWin32 : public WindowBase
 {
@@ -27,12 +34,18 @@ private:
 	SavedWindow m_SavedWindow;
 
 	StrongRef<CursorControl> m_CursorControl;
+	WindowWin32MsgCallback* m_MsgCallback;
+
 public:
-	WindowWin32();
+	WindowWin32(HWND window, WindowWin32MsgCallback* msgCallback);
+	WindowWin32(const math::Dimension2U& size, const String& title, WindowWin32MsgCallback* msgCallbac);
+
+	HWND CreateNewWindow(const math::Dimension2U& size, const String& title);
+	void Init(HWND window);
+
 	~WindowWin32();
 
 	bool SwitchFullscreen(bool Fullscreen);
-	bool Init(HWND Window);
 	void SetTitle(const String& title);
 	void SetSize(const math::Dimension2U& Size);
 	void SetPosition(const math::Vector2I& Position);
@@ -48,7 +61,7 @@ public:
 
 	WeakRef<CursorControl> GetCursorControl();
 
-	void Tick();
+	bool RunMessageQueue();
 
 	bool HandleMessages(UINT Message,
 		WPARAM WParam,
@@ -57,7 +70,6 @@ public:
 };
 
 }
-
 }
 
 #endif // LUX_WINDOWS

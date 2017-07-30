@@ -67,7 +67,7 @@ void RendererD3D9::BeginScene(
 		flags = D3DCLEAR_TARGET;
 	if(clearZ)
 		flags |= D3DCLEAR_ZBUFFER;
-	if(clearStencil && m_Driver->GetConfig().stencil)
+	if(clearStencil && m_Driver->GetConfig().zsFormat.sBits != 0)
 		flags |= D3DCLEAR_STENCIL;
 
 	HRESULT hr = S_OK;
@@ -454,7 +454,7 @@ void RendererD3D9::LoadTransforms(const Pass& pass, const RenderSettings& settin
 		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode)) {
 			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
 			if(pass.polygonOffset) {
-				const u32 zBits = m_Driver->GetConfig().zBits;
+				const u32 zBits = m_Driver->GetConfig().zsFormat.zBits;
 				const u32 values = 1 << zBits;
 				const float min = 1.0f / values;
 				projCopy.AddTranslation(math::Vector3F(0.0f, 0.0f, -min * pass.polygonOffset));

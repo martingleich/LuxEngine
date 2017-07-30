@@ -2,14 +2,10 @@
 #define INCLUDED_LUXDEVICE_H
 #include "core/lxString.h"
 #include "core/ReferenceCounted.h"
+#include "video/DriverConfig.h"
 
 namespace lux
 {
-
-namespace video
-{
-struct DriverConfig;
-}
 
 namespace scene
 {
@@ -39,7 +35,6 @@ public:
 	\param title The title of the window.
 	*/
 	virtual void BuildWindow(u32 Width, u32 height, const String& title) = 0;
-	virtual void SetOwnWindow(void* OwnWindow) = 0;
 
 	//! Create the input system of the engine.
 	/**
@@ -56,6 +51,8 @@ public:
 	The image module is fully usable.
 	*/
 	virtual void BuildVideoDriver(const video::DriverConfig& config) = 0;
+	virtual core::Array<video::EDriverType> GetDriverTypes() = 0;
+	virtual StrongRef<video::AdapterList> GetVideoAdapters(video::EDriverType driver) = 0;
 
 	//! Creates the scene manager component of the engine
 	/**
@@ -79,19 +76,12 @@ public:
 	*/
 	virtual void BuildAll(const video::DriverConfig& config) = 0;
 
-	//! Closes the associated window.
-	virtual void CloseDevice() = 0;
-
-	virtual bool HandleSystemMessages() = 0;
-
 	//! Runs all engine internal actions.
 	/**
 	\param [out] numSecsPassed The time in seconds since the last call to Run.
 	\return Returns true if the device is still running, returns false once when the device was closed.
 	*/
 	virtual bool Run(float& numSecsPassed) = 0;
-
-	virtual double GetTime() const = 0;
 
 	virtual StrongRef<scene::SceneManager> GetSceneManager() const = 0;
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;

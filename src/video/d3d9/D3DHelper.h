@@ -16,15 +16,55 @@ namespace lux
 namespace video
 {
 
-inline D3DFORMAT GetD3DFormat(ColorFormat Format, bool Alpha)
+inline D3DFORMAT GetD3DFormat(ZStencilFormat format)
+{
+	if(format.zBits == 32) {
+		if(format.sBits == 0 && format.stride == 32)
+			return D3DFMT_D32;
+	} else if(format.zBits == 24) {
+		if(format.sBits == 0 && format.stride == 32)
+			return D3DFMT_D24X8;
+		if(format.sBits == 4 && format.stride == 32)
+			return D3DFMT_D24X4S4;
+		if(format.sBits == 8 && format.stride == 32)
+			return D3DFMT_D24S8;
+	} else if(format.zBits == 16) {
+		if(format.sBits == 0 && format.stride == 16)
+			return D3DFMT_D16;
+	} else if(format.zBits == 15) {
+		if(format.sBits == 1 && format.stride == 16)
+			return D3DFMT_D15S1;
+	}
+
+	return D3DFMT_UNKNOWN;
+}
+
+inline ZStencilFormat GetZStencil(D3DFORMAT format)
+{
+	switch(format) {
+	case D3DFMT_D32: return ZStencilFormat(32, 0, 32);
+	case D3DFMT_D24X8: return ZStencilFormat(24, 0, 32);
+	case D3DFMT_D24X4S4: return ZStencilFormat(24, 4, 32);
+	case D3DFMT_D24S8: return ZStencilFormat(24, 8, 32);
+	case D3DFMT_D16: return ZStencilFormat(16, 0, 16);
+	case D3DFMT_D15S1: return ZStencilFormat(15, 1, 16);
+	default: return ZStencilFormat(0, 0, 0);
+	}
+}
+
+inline D3DFORMAT GetD3DFormat(ColorFormat Format)
 {
 	switch((u32)Format) {
 	case ColorFormat::R8G8B8:
 		return D3DFMT_R8G8B8;
+	case ColorFormat::X8R8G8B8:
+		return D3DFMT_X8R8G8B8;
 	case ColorFormat::A8R8G8B8:
-		return Alpha ? D3DFMT_A8R8G8B8 : D3DFMT_X8B8G8R8;
+		return D3DFMT_A8R8G8B8;
+	case ColorFormat::X1R5G5B5:
+		return D3DFMT_X1R5G5B5;
 	case ColorFormat::A1R5G5B5:
-		return Alpha ? D3DFMT_A1R5G5B5 : D3DFMT_X1R5G5B5;
+		return D3DFMT_A1R5G5B5;
 	case ColorFormat::R5G6B5:
 		return D3DFMT_R5G6B5;
 
@@ -97,8 +137,12 @@ inline ColorFormat GetLuxFormat(D3DFORMAT Format)
 	switch(Format) {
 	case D3DFMT_R8G8B8:
 		return ColorFormat::R8G8B8;
+	case D3DFMT_X8R8G8B8:
+		return ColorFormat::X8R8G8B8;
 	case D3DFMT_A8R8G8B8:
 		return ColorFormat::A8R8G8B8;
+	case D3DFMT_X1R5G5B5:
+		return ColorFormat::X1R5G5B5;
 	case D3DFMT_A1R5G5B5:
 		return ColorFormat::A1R5G5B5;
 	case D3DFMT_R5G6B5:

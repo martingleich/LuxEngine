@@ -63,6 +63,7 @@ static FileDescription::EType GetFileTypeFromAttributes(DWORD attrib)
 
 FileSystemWin32::FileSystemWin32()
 {
+	// Get the path of the executable which loaded the engine.
 	Win32Path path;
 	DWORD ret;
 	path.Resize(MAX_PATH);
@@ -79,7 +80,7 @@ FileSystemWin32::FileSystemWin32()
 			path.Resize(ret);
 			break;
 		}
-	};
+	}
 
 	io::Path p = core::UTF16ToString(path.Data_c());
 	if(p.StartsWith("\\\\?\\"))

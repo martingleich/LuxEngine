@@ -8,6 +8,7 @@
 #include "StrippedD3D9.h"
 #include "video/d3d9/RenderTargetD3D9.h"
 #include "video/d3d9/UnknownRefCounted.h"
+#include "video/d3d9/AdapterInformationD3D9.h"
 
 #include "RendererD3D9.h"
 
@@ -21,12 +22,10 @@ class TextureD3D9;
 class VideoDriverD3D9 : public VideoDriverNull
 {
 public:
-	VideoDriverD3D9();
+	VideoDriverD3D9(const DriverConfig& config, gui::Window* window);
 	~VideoDriverD3D9();
 
 	void CleanUp();
-
-	void Init(const DriverConfig& config, gui::Window* Window);
 
 	//------------------------------------------------------------------
 	virtual StrongRef<Geometry> CreateEmptyGeometry(EPrimitiveType primitiveType = EPrimitiveType::Triangles);
@@ -150,7 +149,7 @@ private:
 
 	bool m_HasStencilBuffer;
 	D3DCAPS9 m_Caps;
-	int m_Adapter;
+	StrongRef<AdapterD3D9> m_Adapter;
 	D3DPRESENT_PARAMETERS m_PresentParams;
 };
 

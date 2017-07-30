@@ -173,6 +173,33 @@ enum class EIndexFormat
 	Bit32, //!< 32 Bit per index
 };
 
+struct ZStencilFormat
+{
+	ZStencilFormat(u8 z, u8 s, u8 str) :
+		zBits(z),
+		sBits(s),
+		stride(str)
+	{
+	}
+	ZStencilFormat() :
+		zBits(0), sBits(0), stride(0)
+	{
+	}
+	u8 zBits;
+	u8 sBits;
+	u8 stride;
+
+	bool operator==(const ZStencilFormat& other) const
+	{
+		return zBits == other.zBits && sBits == other.sBits && stride == other.stride;
+	}
+
+	bool operator!=(const ZStencilFormat& other) const
+	{
+		return !(*this == other);
+	}
+};
+
 } // namespace video
 } // namespace lux
 

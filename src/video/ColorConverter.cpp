@@ -118,16 +118,6 @@ bool ColorConverter::ConvertByFormat(
 	if(srcFormat.IsFloatingPoint() || dstFormat.IsFloatingPoint())
 		return false;
 
-	static void(*Convert[6][6])(const void*, void*, u32, u32, u32, u32) = {
-		// R8G8B8                    A8R8G8B8                    A1R5G5B5                    R5G6B5                        X8                X16
-		/*R8G8B8*/      nullptr, Convert_R8G8B8toA8R8G8B8, Convert_R8G8B8toA1R5G5B5, nullptr, nullptr, nullptr,
-		/*A8R8G8B8*/    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-		/*A1R5G5B5*/    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-		/*R5G6B5*/      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-		/*X8*/          nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-		/*X16*/         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-	};
-
 	if(srcPitch < width * srcFormat.GetBytePerPixel())
 		srcPitch = width * srcFormat.GetBytePerPixel();
 	if(dstPitch == width * dstFormat.GetBytePerPixel())
@@ -135,8 +125,10 @@ bool ColorConverter::ConvertByFormat(
 
 	if(srcFormat == dstFormat)
 		CopyImage(src, dst, srcFormat, width, height, srcPitch);
-	else if(Convert[(u32)srcFormat][(u32)dstFormat] != nullptr)
-		Convert[(u32)srcFormat][(u32)dstFormat](src, dst, width, height, srcPitch, dstPitch);
+	else if(srcFormat == ColorFormat::R8G8B8 && dstFormat == ColorFormat::A8R8G8B8)
+		Convert_R8G8B8toA8R8G8B8(src, dst, width, height, srcPitch, dstPitch);
+	else if(srcFormat == ColorFormat::R8G8B8 && dstFormat == ColorFormat::A1R5G5B5)
+		Convert_R8G8B8toA1R5G5B5(src, dst, width, height, srcPitch, dstPitch);
 	else
 		Convert_Trivial(src, dst, width, height, srcPitch, dstPitch, srcFormat, dstFormat);
 

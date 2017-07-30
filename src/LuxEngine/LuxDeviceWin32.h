@@ -1,5 +1,6 @@
 #ifndef INCLUDED_LUXDEVICE_WIN32_H
 #define INCLUDED_LUXDEVICE_WIN32_H
+#ifdef LUX_WINDOWS
 #include "LuxEngine/LuxDevice.h"
 
 #include "math/Dimension2.h"
@@ -8,17 +9,11 @@
 #include "core/lxArray.h"
 #include "core/lxMemory.h"
 
-#include "gui/Window.h"
-
-#ifdef LUX_WINDOWS
 #include "StrippedWindows.h"
+#include "gui/WindowWin32.h"
 
 namespace lux
 {
-namespace gui
-{
-class GUIEnvironment;
-}
 
 namespace input
 {
@@ -27,87 +22,61 @@ class RawInputReceiver;
 #endif
 }
 
-class LuxDeviceWin32 : public LuxDevice
+class LuxDeviceWin32 : public LuxDevice, public gui::WindowWin32MsgCallback
 {
 public:
 	LuxDeviceWin32();
 	~LuxDeviceWin32();
 
-	void BuildWindow(u32 Width, u32 height, const String& stitle);
-	void SetOwnWindow(void* hOwnWindow);
-
+	void BuildWindow(u32 width, u32 height, const String& title);
 	void BuildInputSystem(bool isForeground = true);
 
 	void BuildVideoDriver(const video::DriverConfig& config);
+
+	core::Array<video::EDriverType> GetDriverTypes();
+	StrongRef<video::AdapterList> GetVideoAdapters(video::EDriverType driver);
+
 	void BuildImageSystem();
 	void BuildSceneManager();
 	void BuildGUIEnvironment();
 	void BuildAll(const video::DriverConfig& config);
 
-	HWND CreateNewWindow(u32 width, u32 height, const String& title);
-	void CloseDevice();
-	bool HandleSystemMessages();
 	bool Run(float& fNumSecsPassed);
 
-	double GetTime() const;
-	StrongRef<gui::Window> GetWindow() const;
-
-	StrongRef<scene::SceneManager> GetSceneManager() const;
-	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const;
-
-	LRESULT WinProc(HWND window,
+	bool OnMsg(
 		UINT uiMessage,
 		WPARAM WParam,
-		LPARAM LParam);
+		LPARAM LParam,
+		LRESULT& result);
 
-private:
-	static LRESULT WINAPI WindowProc(HWND window,
-		UINT uiMessage,
-		WPARAM WParam,
-		LPARAM LParam);
-
-private:
-	struct WindowCallback : public gui::WindowEventCallback
+	StrongRef<gui::Window> GetWindow() const
 	{
-	public:
-		WindowCallback(LuxDeviceWin32* dev) :
-			device(dev)
-		{
-		}
+		return m_Window;
+	}
 
-		void OnClose(gui::Window& window)
-		{
-			LUX_UNUSED(window);
+	StrongRef<scene::SceneManager> GetSceneManager() const
+	{
+		return m_SceneManager;
+	}
 
-			if(device)
-				device->CloseDevice();
-		}
+	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const
+	{
+		return m_GUIEnv;
+	}
 
-	private:
-		LuxDeviceWin32* device;
-	};
 
-	WindowCallback m_WindowCallback;
-
-	bool m_OwnWindow;
+private:
 	StrongRef<gui::Window> m_Window;
-
-	bool m_IsAppActive;
-	bool m_Quit;
-
-	double m_Time;
 
 	StrongRef<scene::SceneManager> m_SceneManager;
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;
-
-	const wchar_t* const m_LuxWindowClassName;
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 	StrongRef<input::RawInputReceiver> m_RawInputReceiver;
 #endif
 };
 
-}    //namespace lux
+} // namespace lux
 
 #endif // LUX_WINDOWS
 #endif

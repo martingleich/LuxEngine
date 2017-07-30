@@ -9,7 +9,7 @@
 #include "video/VertexFormats.h"
 
 #include "video/VideoEnums.h"
-#include "video/DriverConfig.h"
+#include "video/EDriverType.h"
 #include "video/EDriverCaps.h"
 
 #include "video/HardwareBufferManager.h"
@@ -31,6 +31,7 @@ class BaseTexture;
 class Geometry;
 
 class Renderer;
+class DriverConfig;
 
 class VideoDriver : public ReferenceCounted
 {

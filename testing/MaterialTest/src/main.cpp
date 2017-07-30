@@ -16,8 +16,15 @@ public:
 		log::EngineLog.SetNewPrinter(log::ConsolePrinter);
 
 		m_Device = CreateDevice();
-		auto config = video::DriverConfig::WindowedDefault(800, 600);
-		config.multiSampling = 10;
+		auto adapter = m_Device->GetVideoAdapters(video::EDriverType::Direct3D9)->GetAdapter(0);
+		video::DriverConfig config;
+		adapter->GenerateConfig(config,
+			math::Dimension2U(800, 600),
+			true, true,
+			false,
+			0,
+			0,
+			true);
 		m_Device->BuildAll(config);
 
 		Context = AppContext(m_Device);
@@ -46,7 +53,7 @@ public:
 			}
 
 			if(Context.Input->GetKeyboard()->GetButton(input::KEY_ESCAPE)->state)
-				Context.Device->CloseDevice();
+				Context.Device->GetWindow()->Close();
 		}
 	}
 

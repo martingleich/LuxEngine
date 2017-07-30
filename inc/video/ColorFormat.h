@@ -19,7 +19,11 @@ public:
 	enum EColorFormat : u32
 	{
 		R8G8B8 = 0,    // 24 Bit
+
+		X8R8G8B8,
 		A8R8G8B8,    // 32 Bit
+
+		X1R5G5B5,
 		A1R5G5B5,    // 16 Bit
 		R5G6B5,        // 16 Bit
 
@@ -38,7 +42,7 @@ public:
 	};
 
 	//! The number of available formats
-	static const u32 FORMAT_COUNT = 12;
+	static const u32 FORMAT_COUNT = 14;
 
 public:
 	//! Constructor from format
@@ -81,7 +85,9 @@ public:
 	{
 		static const char* STRINGS[] = {
 			"R8G8B8",
+			"X8R8G8B8"
 			"A8R8G8B8",
+			"X1R5G5B5",
 			"A1R5G5B5",
 			"R5G6B5",
 			"X8",
@@ -101,7 +107,7 @@ public:
 	//! The number of bits in a pixel for this format
 	inline u8 GetBitsPerPixel() const
 	{
-		static const u8 BitPerPixel[FORMAT_COUNT] = {24, 32, 16, 16, 8, 16, 16, 32, 64, 32, 64, 128};
+		static const u8 BitPerPixel[FORMAT_COUNT] = {24, 32, 32, 16, 16, 16, 8, 16, 16, 32, 64, 32, 64, 128};
 		if(m_Format >= FORMAT_COUNT)
 			return 0;
 
@@ -121,7 +127,7 @@ public:
 	*/
 	inline u32 GetRedMask() const
 	{
-		static const u32 Mask[6] = {0xff0000, 0xff0000, 0x7c00, 0xf800, 0xff, 0xffff};
+		static const u32 Mask[8] = {0xff0000, 0xff0000, 0xff0000, 0x7c00, 0x7c00, 0xf800, 0xff, 0xffff};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];
@@ -134,7 +140,7 @@ public:
 	*/
 	inline u32 GetGreenMask() const
 	{
-		static const u32 Mask[6] = {0xff00, 0xff00, 0x3e0, 0x7e0, 0xff, 0xffff};
+		static const u32 Mask[8] = {0xff00, 0xff00, 0xff00, 0x3e0, 0x3e0, 0x7e0, 0xff, 0xffff};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];
@@ -147,7 +153,7 @@ public:
 	*/
 	inline u32 GetBlueMask() const
 	{
-		static const u32 Mask[6] = {0xff, 0xff, 0x1f, 0x1f, 0xff, 0xffff};
+		static const u32 Mask[8] = {0xff, 0xff, 0xff, 0x1f, 0x1f, 0x1f, 0xff, 0xffff};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];
@@ -160,7 +166,7 @@ public:
 	*/
 	inline u32 GetAlphaMask() const
 	{
-		static const u32 Mask[6] = {0x0, 0xff000000, 0x8000, 0x0, 0x0, 0x0};
+		static const u32 Mask[8] = {0x0, 0x0, 0xff000000, 0x0, 0x8000, 0x0, 0x0, 0x0};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];
@@ -201,9 +207,11 @@ public:
 		case R8G8B8:
 			out = 0xFF000000 | (in[0] << 16) | (in[1] << 8) | (in[2] << 0);
 			break;
+		case X8R8G8B8:
 		case A8R8G8B8:
 			out = *((u32*)(in));
 			break;
+		case X1R5G5B5:
 		case A1R5G5B5:
 			in16 = *((u16*)in);
 			out = ((((u32)in16 & 0x8000) >> 31) & 0xFF00) |
@@ -245,6 +253,7 @@ public:
 			*(out + 0) = (u8)((in & 0x00FF0000) >> 16);
 			*(out + 2) = (u8)(in & 0x000000FF);
 			break;
+		case X8R8G8B8:
 		case A8R8G8B8:
 			*(u32*)out = in;
 			break;
@@ -254,6 +263,7 @@ public:
 		case X16:
 			*(u16*)out = static_cast<u16>((((in >> 16) & 0xFF) * 19595 + ((in >> 8) & 0xFF) * 38469 + (in & 0xFF) * 7471) / 255);
 			break;
+		case X1R5G5B5:
 		case A1R5G5B5:
 			*(u16*)out = static_cast<u16>(
 				((in & 0x80000000) >> 16) |
@@ -292,12 +302,14 @@ struct ColorFormatException : Exception
 	explicit ColorFormatException(video::ColorFormat _format) :
 		Exception("Invalid or unsupported color format"),
 		format(_format)
-	{}
+	{
+	}
 
 	ColorFormatException(const char* msg, video::ColorFormat _format) :
 		Exception(msg),
 		format(_format)
-	{}
+	{
+	}
 
 	video::ColorFormat format;
 };

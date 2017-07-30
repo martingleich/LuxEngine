@@ -1,16 +1,66 @@
 #ifdef LUX_WINDOWS
 #include "WindowWin32.h"
+
 #include "video/images/Image.h"
 #include "video/ColorConverter.h"
 #include "core/Logger.h"
 
-#include "CursorControlWin32.h"
 #include "core/lxUnicodeConversion.h"
+#include "LuxEngine/DllMainWin32.h"
+#include "CursorControlWin32.h"
+#include "Win32Exception.h"
 
 namespace lux
 {
 namespace gui
 {
+
+static LRESULT WINAPI WindowProc(HWND windowHandle,
+	UINT msg,
+	WPARAM wParam,
+	LPARAM lParam)
+{
+	WindowWin32* window = nullptr;
+	if(msg == WM_NCCREATE) {
+		CREATESTRUCTW* createStruct = reinterpret_cast<CREATESTRUCTW*>(lParam);
+		SetWindowLongPtrW(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG>(createStruct->lpCreateParams));
+		window = reinterpret_cast<WindowWin32*>(createStruct->lpCreateParams);
+	} else {
+		LONG_PTR userData = GetWindowLongPtrW(windowHandle, GWLP_USERDATA);
+		window = reinterpret_cast<WindowWin32*>(userData);
+	}
+
+	LRESULT result;
+	if(!window || !window->HandleMessages(msg, wParam, lParam, result))
+		result = DefWindowProcW(windowHandle, msg, wParam, lParam);
+	return result;
+}
+
+struct Win32WindowClass
+{
+public:
+	HINSTANCE instance;
+	const wchar_t* className;
+
+	Win32WindowClass()
+	{
+		instance = lux::GetLuxModule();
+		className = L"Lux Window Class";
+		WNDCLASSEXW wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WindowProc, 0, 0,
+			instance, nullptr, LoadCursorW(NULL, IDC_ARROW), nullptr, nullptr,
+			className, nullptr};
+
+		if(!RegisterClassExW(&wc))
+			throw core::Win32Exception(GetLastError());
+	}
+
+	~Win32WindowClass()
+	{
+		UnregisterClassW(className, instance);
+	}
+};
+
+static Win32WindowClass g_WindowClass;
 
 bool WindowWin32::SwitchFullscreen(bool Fullscreen)
 {
@@ -125,28 +175,57 @@ bool WindowWin32::SwitchFullscreen(bool Fullscreen)
 	return true;
 }
 
-WindowWin32::WindowWin32() : m_Window(0)
+WindowWin32::WindowWin32(HWND window, WindowWin32MsgCallback* msgCallback) :
+	m_MsgCallback(msgCallback)
 {
-	m_CursorControl = LUX_NEW(CursorControlWin32)(this);
+	Init(window);
 }
 
-WindowWin32::~WindowWin32()
+WindowWin32::WindowWin32(const math::Dimension2U& size, const String& title, WindowWin32MsgCallback* msgCallback) :
+	m_MsgCallback(msgCallback)
 {
-	if(m_Window)
-		Close();
+	Init(CreateNewWindow(size, title));
 }
 
-bool WindowWin32::Init(HWND Window)
+HWND WindowWin32::CreateNewWindow(const math::Dimension2U& size, const String& title)
 {
-	m_Window = Window;
+	math::Dimension2U realSize = size;
+	if(realSize.width > (u32)GetSystemMetrics(SM_CXSCREEN))
+		realSize.width = (u32)GetSystemMetrics(SM_CXSCREEN);
+	if(realSize.height > (u32)GetSystemMetrics(SM_CYSCREEN))
+		realSize.height = (u32)GetSystemMetrics(SM_CYSCREEN);
+
+	RECT rect;
+	SetRect(&rect, 0, 0, realSize.width, realSize.height);
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, false);
+	realSize.width = rect.right - rect.left;
+	realSize.height = rect.bottom - rect.top;
+
+	HWND handle = CreateWindowExW(0,
+		g_WindowClass.className,
+		core::StringToUTF16W(title),
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		GetSystemMetrics(SM_CXSCREEN) / 2 - realSize.width / 2,
+		GetSystemMetrics(SM_CYSCREEN) / 2 - realSize.height / 2,
+		realSize.width,
+		realSize.height,
+		nullptr,
+		nullptr,
+		g_WindowClass.instance,
+		this);
+
+	if(!handle)
+		throw core::Win32Exception(GetLastError());
+
+	return handle;
+}
+
+void WindowWin32::Init(HWND window)
+{
+	m_Window = window;
 	m_IsFullscreen = false;
 
-#if 0
-	memset(&m_DesktopMode, 0, sizeof(DEVMODE));
-	m_DesktopMode.dmSize = sizeof(DEVMODE);
-
-	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &m_DesktopMode);
-#endif
+	m_CursorControl = LUX_NEW(CursorControlWin32)(this);
 
 	RECT r;
 	if(GetWindowRect(m_Window, &r)) {
@@ -173,8 +252,12 @@ bool WindowWin32::Init(HWND Window)
 	String newTitle = core::UTF16ToString(text);
 
 	OnTitleChange(newTitle);
+}
 
-	return true;
+WindowWin32::~WindowWin32()
+{
+	if(m_Window)
+		Close();
 }
 
 void WindowWin32::SetTitle(const String& title)
@@ -262,13 +345,12 @@ bool WindowWin32::SetResizable(bool resize)
 
 bool WindowWin32::Close()
 {
-	DWORD_PTR result;
-	SendMessageTimeoutA(m_Window, WM_CLOSE,
-		0, 0,
-		SMTO_ABORTIFHUNG, 2000,
-		&result);
-	m_Window = NULL;
-	return true;
+	if(OnClosing()) {
+		DestroyWindow(m_Window);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 bool WindowWin32::Present(video::Image* image, const math::RectI& SourceRect, const math::RectI& DestRect)
@@ -378,9 +460,18 @@ WeakRef<CursorControl> WindowWin32::GetCursorControl()
 	return m_CursorControl.GetWeak();
 }
 
-void WindowWin32::Tick()
+bool WindowWin32::RunMessageQueue()
 {
-	//static_cast<CursorControlWin32*>(*m_CursorControl)->Tick();
+	MSG Message = {0};
+	while(PeekMessageW(&Message, m_Window, 0, 0, PM_REMOVE)) {
+		if(Message.message == WM_QUIT)
+			return true;
+		// No use for TranslateMessage since WM_CHAR is not used
+		//TranslateMessage(&Message); 
+		DispatchMessageW(&Message);
+	}
+
+	return false;
 }
 
 bool WindowWin32::HandleMessages(UINT Message,
@@ -404,6 +495,8 @@ bool WindowWin32::HandleMessages(UINT Message,
 		break;
 	case WM_DESTROY:
 		OnClose();
+		m_Window = NULL;
+		PostQuitMessage(0);
 		break;
 	case WM_CLOSE:
 		if(OnClosing())
@@ -452,12 +545,12 @@ bool WindowWin32::HandleMessages(UINT Message,
 		break;
 	}
 
+	if(m_MsgCallback && m_MsgCallback->OnMsg(Message, WParam, LParam, result))
+		return true;
 	return false;
 }
 
 }
-
 }
-
 
 #endif // LUX_WINDOWS
