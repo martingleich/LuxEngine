@@ -53,12 +53,6 @@ public:
 	\return The total number of types
 	*/
 	virtual size_t GetTypeCount() const = 0;
-
-	//! Get a new id
-	virtual lxID MakeId(Referable* r) = 0; 
-
-	//! Mark a id as unused
-	virtual void FreeId(lxID id) = 0; 
 };
 
 }

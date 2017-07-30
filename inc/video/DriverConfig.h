@@ -64,19 +64,10 @@ public:
 	virtual u32 GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 level) = 0;
 
 	LUX_API virtual u32 GetMaxMultisampleLevel(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat);
-
 	LUX_API virtual bool GetMatchingMode(DisplayMode& outMode, const math::Dimension2U& minRes, bool windowed, u32 minRefresh = 0);
-
 	LUX_API virtual bool GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, bool use16Bit = false);
-
 	LUX_API virtual bool GetMatchingZStencil(ZStencilFormat& outFormat, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, u32 minDepth = 0, u32 minStencil = 0);
-
 	LUX_API virtual bool GetMatchingMultisample(u32& outLevel, u32& outQuality, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 minSamples, u32 minQuality);
-
-	LUX_API virtual bool IsValid(const DriverConfig& config);
-
-	//! Selects the first possible option for all invalid fields of the config
-	LUX_API virtual bool FixConfig(DriverConfig& config);
 
 	//! Generate a simple config file for the given settings
 	LUX_API virtual bool GenerateConfig(

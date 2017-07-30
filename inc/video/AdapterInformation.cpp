@@ -90,18 +90,6 @@ bool Adapter::GetMatchingMultisample(u32& outLevel, u32& outQuality, const Displ
 	return false;
 }
 
-bool Adapter::IsValid(const DriverConfig& config)
-{
-	return false;
-}
-
-//! Selects the first possible option for all invalid fields of the config
-bool Adapter::FixConfig(DriverConfig& config)
-{
-	return false;
-}
-
-//! Generate a simple config file for the given settings
 bool Adapter::GenerateConfig(
 	video::DriverConfig& outConfig,
 	const math::Dimension2U& minRes,

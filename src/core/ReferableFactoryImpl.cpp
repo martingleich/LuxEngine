@@ -26,8 +26,7 @@ void RunAllRegisterReferableFunctions()
 }
 }
 
-ReferableFactoryImpl::ReferableFactoryImpl() :
-	m_NextID(1)
+ReferableFactoryImpl::ReferableFactoryImpl()
 {
 }
 
@@ -59,32 +58,12 @@ StrongRef<Referable> ReferableFactoryImpl::Create(Name type, const void* data)
 	if(!r)
 		throw Exception("Can't create new instance of given type.");
 
-	r->SetID(MakeId(r));
-
 	return r;
 }
 
 size_t ReferableFactoryImpl::GetTypeCount() const
 {
 	return m_Types.Size();
-}
-
-lxID ReferableFactoryImpl::MakeId(Referable* r)
-{
-	LUX_UNUSED(r);
-
-	if(m_NextID == 0)
-		throw RuntimeException("Out of unique referable id's");
-
-	lxID id;
-	id.value = m_NextID;
-	++m_NextID;
-	return id;
-}
-
-void ReferableFactoryImpl::FreeId(lxID id)
-{
-	LUX_UNUSED(id);
 }
 
 }

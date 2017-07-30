@@ -2,7 +2,6 @@
 #define INCLUDED_REFERABLE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
-#include "core/lxID.h"
 
 namespace lux
 {
@@ -15,9 +14,7 @@ They also can be used with the \ref ReferableFactory and created there my name o
 class Referable : public ReferenceCounted
 {
 public:
-	LUX_API Referable();
-	LUX_API Referable(const Referable& other);
-	LUX_API virtual ~Referable();
+	virtual ~Referable() {}
 
 	//! Get the name of the referable type
 	/**
@@ -25,23 +22,6 @@ public:
 	\return The name of the referable type
 	*/
 	virtual core::Name GetReferableType() const = 0;
-
-	//! Returns the id of the object
-	virtual core::lxID GetID() const
-	{
-		return m_ID;
-	}
-
-	//! Set's the id of the object
-	/**
-	This method is for internal use.
-	The user should never call it.
-	\param newID The new id of the object.
-	*/
-	virtual void SetID(core::lxID id)
-	{
-		m_ID = id;
-	}
 
 	//! Clones the referable object
 	/**
@@ -53,9 +33,6 @@ public:
 	{
 		throw core::NotImplementedException();
 	}
-
-private:
-	core::lxID m_ID;
 };
 
 }

@@ -60,7 +60,7 @@ struct LogWin32Error
 	}
 };
 
-String GetWin32ErrorString(DWORD error)
+inline String GetWin32ErrorString(DWORD error)
 {
 	String out;
 	if(NOERROR != error) {
@@ -88,7 +88,7 @@ String GetWin32ErrorString(DWORD error)
 	return out;
 }
 
-void conv_data(format::Context& ctx, const LogWin32Error& v, format::Placeholder& placeholder)
+inline void conv_data(format::Context& ctx, const LogWin32Error& v, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
 

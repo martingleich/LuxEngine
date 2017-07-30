@@ -22,9 +22,6 @@ public:
 
 	size_t GetTypeCount() const;
 
-	lxID MakeId(Referable* r);
-	void FreeId(lxID id);
-
 private:
 	struct ReferableType
 	{
@@ -40,7 +37,6 @@ private:
 
 private:
 	core::OrderedMap<Name, ReferableType> m_Types;
-	u32 m_NextID;
 };
 
 }

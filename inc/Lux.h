@@ -157,7 +157,6 @@ namespace input
 #include "gui/CursorControl.h"
 #include "gui/FontCreator.h"
 
-#include "core/lxID.h"
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"
 
