@@ -7,6 +7,20 @@ namespace lux
 namespace video
 {
 
+enum class ELighting : u8
+{
+	Disabled = 0,
+	Ambient = 1,
+	Emissive = 2,
+	Diffuse = 4,
+	Specular = 8,
+	AmbientEmit = Ambient | Emissive,
+	DiffSpec = Diffuse | Specular,
+
+	Enabled = Ambient | Emissive | Diffuse | Specular,
+};
+
+
 // Blendfaktor für Alphablending
 enum class EBlendFactor : u8
 {
@@ -201,6 +215,7 @@ struct ZStencilFormat
 };
 
 } // namespace video
+DECLARE_FLAG_CLASS(video::ELighting);
 } // namespace lux
 
 #endif // #ifndef INCLUDED_ALPHA_SETTINGS_H

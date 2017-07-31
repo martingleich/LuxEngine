@@ -28,7 +28,7 @@ SkyBox::SkyBox() :
 		renderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("skyBox", "solid");
 		auto& pass = renderer->GetPass(0);
 		pass.fogEnabled = false;
-		pass.lighting = false;
+		pass.lighting = video::ELighting::Disabled;
 		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
 

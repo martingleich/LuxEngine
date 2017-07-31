@@ -84,7 +84,7 @@ void FontImpl::Init(const FontCreationData& data)
 		pass.zWriteEnabled = false;
 		pass.zBufferFunc = video::EComparisonFunc::Always;
 		pass.backfaceCulling = false;
-		pass.lighting = false;
+		pass.lighting = video::ELighting::Disabled;
 		pass.fogEnabled = false;
 		pass.useVertexColor = true;
 		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;

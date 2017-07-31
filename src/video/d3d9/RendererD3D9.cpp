@@ -387,13 +387,18 @@ void RendererD3D9::SetupRendering(size_t passId)
 		m_UseShader = (pass.shader != nullptr);
 	}
 
+	if(pass.lighting != m_PrevLighting) {
+		SetDirty(Dirty_Lights);
+		m_PrevLighting = pass.lighting;
+	}
+
 	if(pass.polygonOffset != m_PrePolyOffset) {
 		SetDirty(Dirty_PolygonOffset);
 		m_PrePolyOffset = pass.polygonOffset;
 	}
 
 	// Enable pass settings
-	m_DeviceState.SetD3DColors(GetParam(m_ParamId.ambient), settings.material);
+	m_DeviceState.SetD3DColors(GetParam(m_ParamId.ambient), settings.material, pass.lighting);
 	m_DeviceState.EnablePass(pass);
 
 	// Generate data for transforms, fog and light
@@ -537,7 +542,7 @@ void RendererD3D9::LoadLightSettings(const Pass& pass, const RenderSettings& set
 {
 	LUX_UNUSED(settings);
 
-	bool useLights = pass.lighting;
+	bool useLights = (pass.lighting != ELighting::Disabled);
 	if(m_RenderMode == ERenderMode::Mode2D)
 		useLights = false;
 
@@ -549,12 +554,12 @@ void RendererD3D9::LoadLightSettings(const Pass& pass, const RenderSettings& set
 
 	if(IsDirty(Dirty_Lights)) {
 		m_DeviceState.ClearLights();
-		GetParam(m_ParamId.lighting) = pass.lighting ? 1.0f : 0.0f;
+		GetParam(m_ParamId.lighting) = (float)((u32)pass.lighting);
 		// Only use the fixed pipeline if there is no shader
 		if(!pass.shader) {
 			// Enable fixed pipeline lights
 			for(auto it = m_Lights.First(); it != m_Lights.End(); ++it)
-				m_DeviceState.AddLight(*it);
+				m_DeviceState.AddLight(*it, pass.lighting);
 		} else {
 			// Generate light matrices and set as param.
 			for(size_t i = 0; i < m_Lights.Size(); ++i)

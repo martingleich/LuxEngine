@@ -31,7 +31,6 @@ public:
 	bool Present();
 
 	void SetRenderTarget(const RenderTarget& target);
-
 	const RenderTarget& GetRenderTarget();
 
 	void SetScissorRect(const math::RectU& rect, ScissorRectToken* token=nullptr);
@@ -120,6 +119,7 @@ private:
 	VertexFormat m_VertexFormat;
 	bool m_UseShader=false;
 	float m_PrePolyOffset=0.0f;
+	ELighting m_PrevLighting = ELighting::Disabled;
 };
 
 } // namespace video

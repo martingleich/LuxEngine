@@ -27,15 +27,16 @@ DeviceStateD3D9::DeviceStateD3D9(IDirect3DDevice9* device) :
 {
 }
 
-void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material& m)
+void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting)
 {
+	D3DCOLORVALUE black = {0};
 	// Enable d3d material
 	D3DMATERIAL9 D3DMaterial = {
-		SColorToD3DColor(m.GetDiffuse()),
-		SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()),
-		SColorToD3DColor(m.GetSpecular()*m.GetPower()),
-		SColorToD3DColor(m.GetEmissive()),
-		m.GetShininess()
+		TestFlag(lighting, ELighting::Diffuse) ? SColorToD3DColor(m.GetDiffuse()) : black,
+		TestFlag(lighting, ELighting::Ambient) ? SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()) : black,
+		TestFlag(lighting, ELighting::Specular) ? SColorToD3DColor(m.GetSpecular()*m.GetPower()) : black,
+		TestFlag(lighting, ELighting::Emissive) ? SColorToD3DColor(m.GetEmissive()) : black,
+		TestFlag(lighting, ELighting::Specular) ? m.GetShininess() : 0.0f
 	};
 
 	m_D3DMaterial = D3DMaterial;
@@ -47,7 +48,7 @@ void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material&
 
 void DeviceStateD3D9::EnablePass(const Pass& p)
 {
-	m_UseLighting = p.lighting;
+	m_UseLighting = (p.lighting != ELighting::Disabled);
 
 	EnableShader(p.shader);
 
@@ -85,11 +86,13 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 
 	m_UsedTextureLayers = math::Max(p.layers.Size(), p.layerSettings.Size());
 
-
 	// Set Material parameters
-	if(p.lighting)
+	if(p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::Ambient))
 		SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
-	if(p.lighting && !math::IsZero(m_D3DMaterial.Power))
+	else
+		SetRenderState(D3DRS_AMBIENT, 0);
+
+	if((p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::Specular)) && !math::IsZero(m_D3DMaterial.Power))
 		SetRenderState(D3DRS_SPECULARENABLE, 1);
 	else
 		SetRenderState(D3DRS_SPECULARENABLE, 0);
@@ -146,11 +149,11 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 			if(ani > maxAni)
 				ani = maxAni;
 			m_Device->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, ani);
-		}
+	}
 #endif
 		m_Device->SetSamplerState(stage, D3DSAMP_MINFILTER, filterMin);
 		m_Device->SetSamplerState(stage, D3DSAMP_MAGFILTER, filterMag);
-	}
+}
 }
 
 void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
@@ -327,7 +330,7 @@ u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
 
 void DeviceStateD3D9::EnableFog(bool enable)
 {
-	SetRenderState(D3DRS_FOGENABLE, enable?TRUE:FALSE);
+	SetRenderState(D3DRS_FOGENABLE, enable ? TRUE : FALSE);
 }
 
 void DeviceStateD3D9::SetFog(const FogData& fog)
@@ -346,7 +349,7 @@ void DeviceStateD3D9::SetFog(const FogData& fog)
 
 void DeviceStateD3D9::EnableLight(bool enable)
 {
-	SetRenderState(D3DRS_LIGHTING, enable?TRUE:FALSE);
+	SetRenderState(D3DRS_LIGHTING, enable ? TRUE : FALSE);
 	m_UseLighting = enable;
 }
 
@@ -357,7 +360,7 @@ void DeviceStateD3D9::ClearLights()
 	m_LightCount = 0;
 }
 
-void DeviceStateD3D9::AddLight(const LightData& light)
+void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 {
 	DWORD lightId = (DWORD)m_LightCount;
 
@@ -381,11 +384,12 @@ void DeviceStateD3D9::AddLight(const LightData& light)
 	D3DLight.Range = math::Max(0.0f, light.range);
 	D3DLight.Falloff = light.falloff;
 
-	D3DCOLORVALUE Specular = {1.0f, 1.0f, 1.0f, 1.0f};
-	D3DCOLORVALUE Ambient = {0.0f, 0.0f, 0.0f, 0.0f};
-	D3DLight.Diffuse = SColorToD3DColor(light.color);
-	D3DLight.Specular = SColorToD3DColor(light.color);
-	D3DLight.Ambient = Ambient;
+	D3DCOLORVALUE specular = {1.0f, 1.0f, 1.0f, 1.0f};
+	D3DCOLORVALUE ambient = {0.0f, 0.0f, 0.0f, 0.0f};
+	D3DCOLORVALUE black = {0.0f, 0.0f, 0.0f, 0.0f};
+	D3DLight.Diffuse = TestFlag(lighting, ELighting::Diffuse) ? SColorToD3DColor(light.color) : black;
+	D3DLight.Specular = TestFlag(lighting, ELighting::Specular) ? SColorToD3DColor(light.color) : black;
+	D3DLight.Ambient = TestFlag(lighting, ELighting::Ambient) ? ambient : black;
 
 	D3DLight.Attenuation0 = 0.0f;
 	D3DLight.Attenuation1 = 0.0f;

@@ -68,7 +68,7 @@ MaterialLibrary::MaterialLibrary()
 		auto debug = AddMaterialRenderer("debugOverlay");
 		auto& pass = debug->GetPass(0);
 		pass.fogEnabled = false;
-		pass.lighting = false;
+		pass.lighting = video::ELighting::Disabled;
 
 		TextureStageSettings tss0;
 		tss0.colorOperator = ETextureOperator::SelectArg1;
@@ -119,7 +119,7 @@ MaterialLibrary::MaterialLibrary()
 	{
 		auto particleTransp = CloneMaterialRenderer("particleTransparent", "transparent");
 		auto& ps = particleTransp->GetPass(0);
-		ps.lighting = false;
+		ps.lighting = video::ELighting::Disabled;
 		ps.fogEnabled = false;
 		ps.zWriteEnabled = false;
 		ps.useVertexColor = true;
@@ -131,7 +131,7 @@ MaterialLibrary::MaterialLibrary()
 	{
 		auto particleEmit = CloneMaterialRenderer("particleEmit", "transparent");
 		auto& ps = particleEmit->GetPass(0);
-		ps.lighting = false;
+		ps.lighting = video::ELighting::Disabled;
 		ps.fogEnabled = false;
 		ps.zWriteEnabled = false;
 		ps.useVertexColor = true;

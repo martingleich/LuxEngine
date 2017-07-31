@@ -1,3 +1,4 @@
+#ifdef LUX_COMPILE_WITH_D3D9
 #include "AdapterInformationD3D9.h"
 
 #include "video/DriverConfig.h"
@@ -293,3 +294,5 @@ StrongRef<Adapter> AdapterListD3D9::GetAdapter(u32 idx) const
 
 } // namespace video
 } // namespace lux
+
+#endif

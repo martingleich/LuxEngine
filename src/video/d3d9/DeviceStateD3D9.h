@@ -25,7 +25,7 @@ class DeviceStateD3D9 : public DeviceState
 public:
 	DeviceStateD3D9(IDirect3DDevice9* device);
 
-	void SetD3DColors(const video::Colorf& ambient, const Material& m);
+	void SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting);
 	void EnablePass(const Pass& p);
 
 	void EnableTextureLayer(u32 stage, const TextureLayer& layer);
@@ -49,7 +49,7 @@ public:
 
 	void EnableLight(bool enable);
 	void ClearLights();
-	void AddLight(const LightData& light);
+	void AddLight(const LightData& light, ELighting lighting);
 
 	void SetRenderTargetTexture(video::BaseTexture* t);
 

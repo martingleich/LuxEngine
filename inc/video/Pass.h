@@ -33,7 +33,6 @@ public:
 	Pass() :
 		isTransparent(false),
 		fogEnabled(true),
-		lighting(true),
 		zWriteEnabled(true),
 		normalizeNormals(true),
 		gouraudShading(true),
@@ -57,10 +56,10 @@ public:
 	EComparisonFunc zBufferFunc = EComparisonFunc::LessEqual;
 	EColorPlane colorPlane = EColorPlane::All;
 	EDrawMode drawMode = EDrawMode::Fill;
+	ELighting lighting = ELighting::Enabled;
 
 	bool isTransparent : 1;
 	bool fogEnabled : 1;
-	bool lighting : 1;
 	bool zWriteEnabled : 1;
 	bool normalizeNormals : 1;
 	bool gouraudShading : 1;
@@ -118,7 +117,7 @@ public:
 	EDrawMode drawMode;
 	EColorPlane colorPlane;
 
-	bool disableLighting:1;
+	ELighting lighting;
 	bool disableFog:1;
 
 	bool disableZWrite:1;
@@ -132,7 +131,6 @@ public:
 		polygonOffset(0.0f),
 		drawMode(EDrawMode::Fill),
 		colorPlane(EColorPlane::All),
-		disableLighting(false),
 		disableFog(false),
 		disableZWrite(false),
 		disableZCmp(false),
@@ -145,8 +143,8 @@ public:
 	void Append(const PipelineOverwrite& next)
 	{
 		polygonOffset += next.polygonOffset;
-		if(next.disableLighting)
-			disableLighting = true;
+		if(next.lighting != ELighting::Enabled)
+			lighting = next.lighting;
 		if(next.disableFog)
 			disableFog = true;
 		if(next.drawMode == EDrawMode::Wire)
@@ -169,8 +167,8 @@ public:
 	void Apply(Pass& pass)
 	{
 		pass.polygonOffset += polygonOffset;
-		if(disableLighting)
-			pass.lighting = false;
+		if(lighting != ELighting::Enabled)
+			pass.lighting = lighting;
 		if(disableFog)
 			pass.fogEnabled = false;
 		if(drawMode == EDrawMode::Wire)
@@ -193,7 +191,7 @@ public:
 	bool operator==(const PipelineOverwrite& other) const
 	{
 		return polygonOffset == other.polygonOffset &&
-			disableLighting == other.disableLighting &&
+			lighting == other.lighting &&
 			disableFog == other.disableFog &&
 			drawMode == other.drawMode &&
 			disableZWrite == other.disableZWrite &&
