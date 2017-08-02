@@ -8,6 +8,8 @@ namespace video
 {
 
 static VertexDeclaration VertexDeclaration_STANDARD;
+static VertexDeclaration VertexDeclaration_POS_ONLY;
+static VertexDeclaration VertexDeclaration_POSW_ONLY;
 static VertexDeclaration VertexDeclaration_TRANSFORMED;
 static VertexDeclaration VertexDeclaration_TWO_TEXTURE;
 static VertexDeclaration VertexDeclaration_TANGENTS;
@@ -28,6 +30,17 @@ struct VertexDeclInitType
 		static_assert(offsetof(video::Vertex3D, color) == 24, "Bad offset");
 		static_assert(offsetof(video::Vertex3D, texture) == 28, "Bad offset");
 		static_assert(sizeof(video::Vertex3D) == 36, "Bad size");
+
+		VertexDeclaration_POS_ONLY.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
+		lxAssert(VertexDeclaration_POS_ONLY.IsValid());
+		static_assert(offsetof(video::VertexPosOnly, position) == 0, "Bad offset");
+		static_assert(sizeof(video::VertexPosOnly) == 12, "Bad size");
+
+		VertexDeclaration_POSW_ONLY.AddElement(VertexElement::EUsage::PositionNT, VertexElement::EType::Float4);
+		lxAssert(VertexDeclaration_POSW_ONLY.IsValid());
+		static_assert(offsetof(video::VertexPosWOnly, position) == 0, "Bad offset");
+		static_assert(offsetof(video::VertexPosWOnly, rhw) == 12, "Bad offset");
+		static_assert(sizeof(video::VertexPosWOnly) == 16, "Bad size");
 
 		VertexDeclaration_TRANSFORMED.AddElement(VertexElement::EUsage::PositionNT, VertexElement::EType::Float4);
 		VertexDeclaration_TRANSFORMED.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
@@ -88,6 +101,8 @@ struct VertexDeclInitType
 static VertexDeclInitType VertexDeclInitInstance;
 
 const VertexFormat VertexFormat::STANDARD("Standard", VertexDeclaration_STANDARD);
+const VertexFormat VertexFormat::POS_ONLY("PosOnly", VertexDeclaration_POS_ONLY);
+const VertexFormat VertexFormat::POSW_ONLY("PosWOnly", VertexDeclaration_POSW_ONLY);
 const VertexFormat VertexFormat::TRANSFORMED("Transformed", VertexDeclaration_TRANSFORMED);
 const VertexFormat VertexFormat::TWO_TEXTURE("Two_Texture", VertexDeclaration_TWO_TEXTURE);
 const VertexFormat VertexFormat::TANGENTS("Tangents", VertexDeclaration_TANGENTS);

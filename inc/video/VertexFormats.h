@@ -402,6 +402,8 @@ class VertexFormat
 public:
 	LUX_API static const VertexFormat STANDARD;
 	LUX_API static const VertexFormat TRANSFORMED;
+	LUX_API static const VertexFormat POS_ONLY;
+	LUX_API static const VertexFormat POSW_ONLY;
 	LUX_API static const VertexFormat TWO_TEXTURE;
 	LUX_API static const VertexFormat TANGENTS;
 	LUX_API static const VertexFormat TEXTURE_3D;

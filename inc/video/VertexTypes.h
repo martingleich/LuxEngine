@@ -72,9 +72,99 @@ struct Vertex3D
 	}
 };
 
+//! The vertex with position only
+/**
+\ref VertexFormat::POS_ONLY
+*/
+struct VertexPosOnly
+{
+	math::Vector3F position; //!< The vertex position
+
+	//! Default constructor
+	VertexPosOnly()
+	{
+	}
+
+	//! Construct from single values
+	VertexPosOnly(float Px, float Py, float Pz) :
+		position(Px, Py, Pz)
+	{
+	}
+
+	//! Construct from combined values
+	VertexPosOnly(const math::Vector3F& _Pos)
+		: position(_Pos)
+	{
+	}
+
+	//! Equality
+	bool operator==(const VertexPosOnly& other) const
+	{
+		return ((position == other.position));
+	}
+
+	//! Unequality
+	bool operator!=(const VertexPosOnly& other) const
+	{
+		return ((position != other.position));
+	}
+
+	//! Smaller
+	bool operator<(const VertexPosOnly& other) const
+	{
+		return ((position < other.position));
+	}
+};
+
+//! The vertex with transformed position only 
+/**
+\ref VertexFormat::POSW_ONLY
+*/
+struct VertexPosWOnly
+{
+	math::Vector3F position; //!< The vertex position
+	float rhw;
+
+	//! Default constructor
+	VertexPosWOnly()
+	{
+	}
+
+	//! Construct from single values
+	VertexPosWOnly(float Px, float Py, float Pz, float _rhw) :
+		position(Px, Py, Pz), rhw(_rhw)
+	{
+	}
+
+	//! Construct from combined values
+	VertexPosWOnly(const math::Vector3F& _Pos, float _rhw) :
+		position(_Pos), rhw(_rhw)
+	{
+	}
+
+	//! Equality
+	bool operator==(const VertexPosWOnly& other) const
+	{
+		return ((position == other.position) && rhw == other.rhw);
+	}
+
+	//! Unequality
+	bool operator!=(const VertexPosWOnly& other) const
+	{
+		return ((position != other.position) && rhw != other.rhw);
+	}
+
+	//! Smaller
+	bool operator<(const VertexPosWOnly& other) const
+	{
+		return ((position < other.position) ||
+			(position == other.position) && (rhw < other.rhw));
+	}
+};
+
 //! A simple 2d vertex
 /**
-\ref EVT_2DVERTEX
+\ref VertexFormat::STANDARD_2D
 */
 struct Vertex2D
 {
@@ -129,7 +219,7 @@ struct Vertex2D
 
 //! Transformed vertex
 /**
-\ref EVT_TRANSFORMED
+\ref VertexFormat::TRANSFORMED
 */
 struct VertexTransformed
 {
@@ -185,7 +275,7 @@ struct VertexTransformed
 
 //! Vertex with two texture coordinates
 /**
-\ref EVT_2TCOORDS
+\ref VertexFormat::TWO_TEXTURE
 */
 struct Vertex2TCoords
 {
@@ -271,7 +361,7 @@ struct Vertex2TCoords
 
 //! Vertex with binormal and tangent vector
 /**
-\ref EVT_TANGENTS
+\ref VertexFormat::TANGENTS
 */
 struct VertexTangents
 {
@@ -339,7 +429,7 @@ struct VertexTangents
 
 //! Vertex with 3D texturecoordinate
 /**
-\ref EVT_3DTEXCOORD
+\ref VertexFormat::TEXTURE_3D
 */
 struct Vertex3DTCoord
 {
