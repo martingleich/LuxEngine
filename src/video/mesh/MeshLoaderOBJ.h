@@ -3,7 +3,7 @@
 #include "StaticMesh.h"
 #include "video/VertexTypes.h"
 #include "video/mesh/GeometryImpl.h"
-#include "io/path.h"
+#include "io/Path.h"
 #include "video/MaterialLibrary.h"
 #include "resources/ResourceLoader.h"
 #include "resources/ResourceSystem.h"

@@ -88,6 +88,7 @@ size_t RawKeyboardDevice::GetElementCount(EEventType type) const
 RawInputDevice::ElemDesc RawKeyboardDevice::GetElementDesc(EEventType type, u32 code) const
 {
 	LUX_UNUSED(code);
+	LUX_UNUSED(type);
 	static const String name = "(unknown)";
 
 	return ElemDesc(name, 0, 0, EElementType::Other);

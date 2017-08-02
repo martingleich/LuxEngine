@@ -2,7 +2,7 @@
 #define INCLUDED_ARCHIVE_H
 #include "core/ReferenceCounted.h"
 #include "io/ioConstants.h"
-#include "io/path.h"
+#include "io/Path.h"
 #include "core/lxIterator.h"
 
 namespace lux

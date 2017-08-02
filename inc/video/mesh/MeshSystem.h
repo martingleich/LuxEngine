@@ -2,7 +2,7 @@
 #define INCLUDED_MESH_SYSTEM_H
 #include "video/mesh/GeometryCreator.h"
 #include "core/lxHashMap.h"
-#include "io/path.h"
+#include "io/Path.h"
 
 namespace lux
 {

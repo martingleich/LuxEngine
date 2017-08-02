@@ -2,7 +2,7 @@
 #define INCLUDED_FILE_H
 #include "core/ReferenceCounted.h"
 #include "math/lxMath.h"
-#include "io/path.h"
+#include "io/Path.h"
 #include "ioConstants.h"
 
 namespace lux

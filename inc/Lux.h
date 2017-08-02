@@ -84,7 +84,7 @@ namespace input
 
 #include "io/FileSystem.h"
 #include "io/File.h"
-#include "io/path.h"
+#include "io/Path.h"
 #include "io/INIFile.h"
 #include "io/Archive.h"
 

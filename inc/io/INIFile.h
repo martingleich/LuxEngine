@@ -3,7 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
-#include "io/path.h"
+#include "io/Path.h"
 
 namespace lux
 {

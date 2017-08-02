@@ -1,6 +1,6 @@
 #ifndef INCLUDED_GUIENVIRONMENT_H
 #define INCLUDED_GUIENVIRONMENT_H
-#include "io/path.h"
+#include "io/Path.h"
 #include "core/ReferenceCounted.h"
 
 namespace lux

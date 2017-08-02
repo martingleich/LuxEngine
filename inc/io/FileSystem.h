@@ -4,7 +4,7 @@
 
 #include "core/DateAndTime.h"
 #include "ioConstants.h"
-#include "io/path.h"
+#include "io/Path.h"
 
 namespace lux
 {
