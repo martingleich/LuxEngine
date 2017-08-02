@@ -111,6 +111,8 @@ public:
 	And you don't set a bounding box via SetBoundingBoxS
 	*/
 	virtual void RecalculateBoundingBox() = 0;
+
+	virtual u32 GetChangeId() const = 0;
 };
 
 } // namespace video

@@ -43,6 +43,8 @@ void IndexBufferImpl::SetType(EIndexFormat type, bool moveOld, void* init)
 		return;
 	}
 
+	m_ChangeId++;
+
 	if(type == m_Type) {
 		if(moveOld)
 			return;

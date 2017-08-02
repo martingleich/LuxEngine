@@ -48,6 +48,8 @@ void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, void* i
 	m_Format = format;
 	m_Stream = stream;
 	m_Stride = stride;
+
+	m_ChangeId++;
 }
 
 u32 VertexBufferImpl::AddVertex(void* vertex)

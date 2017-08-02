@@ -20,6 +20,7 @@ public:
 	inline EHardwareBufferType GetBufferType() const;
 	inline void Clear();
 	inline void ResetDirty();
+	inline u32 GetChangeId() const;
 	inline void* Pointer(u32 n, u32 count);
 	inline const void* Pointer(u32 n, u32 count) const;
 	inline const void* Pointer_c(u32 n, u32 count) const;
@@ -51,10 +52,16 @@ protected:
 
 	u32 m_BeginDirty;
 	u32 m_EndDirty;
+	u32 m_ChangeId;
 
 	EHardwareBufferMapping m_Mapping;
 	EHardwareBufferType m_BufferType;
 };
+
+inline u32 HardwareBuffer::GetChangeId() const
+{
+	return m_ChangeId;
+}
 
 inline EHardwareBufferType HardwareBuffer::GetBufferType() const
 {
@@ -64,6 +71,7 @@ inline EHardwareBufferType HardwareBuffer::GetBufferType() const
 inline HardwareBuffer::HardwareBuffer(EHardwareBufferType type) :
 	m_BufferType(type)
 {
+	m_ChangeId = 0;
 	m_Data = nullptr;
 	m_Size = 0;
 	m_Cursor = 0;
@@ -100,6 +108,7 @@ inline void* HardwareBuffer::Pointer(u32 n, u32 count)
 	lxAssert(n + count <= m_Size);
 	m_BeginDirty = math::Min(m_BeginDirty, n);
 	m_EndDirty = math::Max(m_EndDirty, n + count - 1);
+	m_ChangeId++;
 	return m_Data + n*m_Stride;
 }
 
@@ -213,6 +222,7 @@ inline void HardwareBuffer::SetSize(u32 size, void* init)
 	}
 
 	m_Size = size;
+	++m_ChangeId;
 }
 
 }
