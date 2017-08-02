@@ -28,6 +28,8 @@
 
 #include "core/Logger.h"
 
+#include "video/VertexTypes.h"
+
 namespace lux
 {
 namespace scene
@@ -38,8 +40,6 @@ SceneManagerImpl::SceneManagerImpl() :
 {
 	m_RootSceneNode = LUX_NEW(Node)(this, true);
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
-
-	m_Overwrites.Resize((size_t)ERenderPass::COUNT);
 
 	m_Fog.isActive = false;
 }
@@ -75,7 +75,7 @@ StrongRef<Node> SceneManagerImpl::AddNode(Component* baseComp, Node* parent)
 
 StrongRef<Node> SceneManagerImpl::AddMesh(const io::Path& path)
 {
-	 return AddNode(CreateMesh(path));
+	return AddNode(CreateMesh(path));
 }
 
 StrongRef<Node> SceneManagerImpl::AddMesh(video::Mesh* mesh)
@@ -363,21 +363,14 @@ const video::FogData& SceneManagerImpl::GetFog() const
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-void SceneManagerImpl::AddPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over)
+void SceneManagerImpl::PushPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over)
 {
-	size_t id = GetPassId(pass);
-	m_Overwrites[id].PushBack(over);
+	m_Overwrites[pass].PushBack(over);
 }
 
-void SceneManagerImpl::RemovePipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over)
+void SceneManagerImpl::PopPipelineOverwrite(ERenderPass pass)
 {
-	size_t id = GetPassId(pass);
-	for(auto it = m_Overwrites[id].First(); it != m_Overwrites[id].End(); ++it) {
-		if(*it == over) {
-			m_Overwrites[id].Erase(it);
-			return;
-		}
-	}
+	m_Overwrites[pass].PopBack();
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -386,23 +379,16 @@ void SceneManagerImpl::RemovePipelineOverwrite(ERenderPass pass, const video::Pi
 
 void SceneManagerImpl::EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
-	size_t id = GetPassId(pass);
-	for(auto& over : m_Overwrites[id])
+	for(auto& over : m_Overwrites[pass])
 		m_Renderer->PushPipelineOverwrite(over, &token);
 }
 
 void SceneManagerImpl::DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
-	size_t id = GetPassId(pass);
-	for(auto& over : m_Overwrites[id]) {
+	for(auto& over : m_Overwrites[pass]) {
 		LUX_UNUSED(over);
 		m_Renderer->PopPipelineOverwrite(&token);
 	}
-}
-
-size_t SceneManagerImpl::GetPassId(ERenderPass pass) const
-{
-	return (size_t)pass;
 }
 
 class SceneManagerImpl::RenderableCollector : public RenderableVisitor
@@ -443,26 +429,37 @@ void SceneManagerImpl::CollectRenderablesRec(Node* node, RenderableCollector* co
 
 void SceneManagerImpl::AddRenderEntry(Node* n, Renderable* r)
 {
-	auto pass = r->GetRenderPass();
-	if(pass == ERenderPass::SkyBox) {
+	switch(r->GetRenderPass()) {
+	case ERenderPass::SkyBox:
 		m_SkyBoxList.PushBack(RenderEntry(n, r));
-	} else if(pass == ERenderPass::Solid) {
+		break;
+	case ERenderPass::Solid:
 		m_SolidNodeList.PushBack(RenderEntry(n, r));
-	} else if(pass == ERenderPass::Transparent) {
+		break;
+	case ERenderPass::Transparent:
 		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r));
-	} else if(pass == ERenderPass::SolidAndTransparent) {
+		break;
+	case ERenderPass::SolidAndTransparent:
 		m_SolidNodeList.PushBack(RenderEntry(n, r));
 		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r));
-	} else if(pass == ERenderPass::None) {
-		(void)0;
-	} else {
-		throw core::Exception("Unknown render pass used");
+		break;
+	default:
+		break;
 	}
+}
+
+bool SceneManagerImpl::IsCulled(Node* n, Renderable* r)
+{
+	return false;
 }
 
 void SceneManagerImpl::DrawScene()
 {
 	m_Renderer->SetFog(m_Fog);
+
+	core::Array<SceneData::LightEntry> illuminating;
+	core::Array<SceneData::LightEntry> shadowCasting;
+	SceneData sceneData(illuminating, shadowCasting);
 
 	//-------------------------------------------------------------------------
 	// The lights
@@ -476,6 +473,8 @@ void SceneManagerImpl::DrawScene()
 	size_t count = 0;
 	for(auto& e : m_LightList) {
 		if(e.node->IsTrulyVisible()) {
+			illuminating.PushBack(SceneData::LightEntry(e.light, e.node));
+			shadowCasting.PushBack(SceneData::LightEntry(e.light, e.node));
 			e.light->Render(m_Renderer, e.node);
 			++count;
 			if(count == maxLightCount)
@@ -487,11 +486,12 @@ void SceneManagerImpl::DrawScene()
 
 	//-------------------------------------------------------------------------
 	// Skyboxes
+	sceneData.pass = ERenderPass::SkyBox;
 	EnableOverwrite(ERenderPass::SkyBox, pot);
 
 	for(auto& e : m_SkyBoxList) {
 		if(e.node->IsTrulyVisible())
-			e.renderable->Render(e.node, m_Renderer, ERenderPass::SkyBox);
+			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 
 	DisableOverwrite(ERenderPass::SkyBox, pot);
@@ -501,9 +501,10 @@ void SceneManagerImpl::DrawScene()
 	EnableOverwrite(ERenderPass::SolidAndTransparent, pot);
 	EnableOverwrite(ERenderPass::Solid, pot);
 
+	sceneData.pass = ERenderPass::Solid;
 	for(auto& e : m_SolidNodeList) {
-		if(e.node->IsTrulyVisible())
-			e.renderable->Render(e.node, m_Renderer, ERenderPass::Solid);
+		if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
+			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 
 	DisableOverwrite(ERenderPass::Solid, pot);
@@ -512,6 +513,7 @@ void SceneManagerImpl::DrawScene()
 	// Transparent objects
 	EnableOverwrite(ERenderPass::Transparent, pot);
 
+	sceneData.pass = ERenderPass::Transparent;
 	// Update the distances in the transparent nodes
 	for(auto& e : m_TransparentNodeList) {
 		e.UpdateDistance(m_AbsoluteCamPos);
@@ -521,8 +523,8 @@ void SceneManagerImpl::DrawScene()
 	m_TransparentNodeList.Sort();
 
 	for(auto& e : m_TransparentNodeList) {
-		if(e.node->IsTrulyVisible())
-			e.renderable->Render(e.node, m_Renderer, ERenderPass::Transparent);
+		if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
+			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 
 	DisableOverwrite(ERenderPass::Transparent, pot);

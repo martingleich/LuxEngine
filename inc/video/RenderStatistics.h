@@ -29,35 +29,35 @@ public:
 	{
 		return m_PrimitivesDrawn;
 	}
-	inline u32 GetPrimtiveAverage() const
+	inline u32 GetPrimitiveAverage() const
 	{
 		return m_PrimitiveAverage;
 	}
 
-	void AddPrimitves(u32 Count)
+	void AddPrimitives(u32 count)
 	{
-		m_PrimitivesDrawn += Count;
+		m_PrimitivesDrawn += count;
 	}
 
 	void RegisterFrame()
 	{
-		const auto ActualTime = core::Clock::GetTicks();
-		const auto Milliseconds = ActualTime - m_StartTime;
+		const auto actualTime = core::Clock::GetTicks();
+		const auto milliseconds = actualTime - m_StartTime;
 
 		++m_FramesCounted;
 
 		m_PrimitivesCounted += m_PrimitivesDrawn;
 		m_PrimitivesDrawn = 0;
 
-		if(Milliseconds >= 1500) {
-			const float InvMilli = 1000.0f / (float)Milliseconds;
+		if(milliseconds >= 1500) {
+			const float InvMilli = 1000.0f / (float)milliseconds;
 
 			m_FPS = (u32)(m_FramesCounted * InvMilli);
 			m_PrimitiveAverage = (u32)(m_PrimitivesCounted * InvMilli);
 
 			m_FramesCounted = 0;
 			m_PrimitivesCounted = 0;
-			m_StartTime = ActualTime;
+			m_StartTime = actualTime;
 		}
 	}
 

@@ -24,6 +24,7 @@ class LightData;
 class FogData;
 class RenderTarget;
 class Material;
+class Pass;
 class PipelineSettings;
 class PipelineOverwrite;
 class VertexFormat;
@@ -40,43 +41,6 @@ enum class ETransform
 
 struct PipelineOverwriteToken;
 struct ScissorRectToken;
-struct StencilModeToken;
-
-struct StencilMode
-{
-	u32 ref = 0;
-
-	u32 readMask = 0xFFFFFFFF;
-	u32 writeMask = 0xFFFFFFFF;
-
-	EComparisonFunc test = EComparisonFunc::Always;
-
-	EStencilOperator pass = EStencilOperator::Keep;
-	EStencilOperator fail = EStencilOperator::Keep;
-	EStencilOperator zFail = EStencilOperator::Keep;
-
-	EStencilOperator passCCW = EStencilOperator::Keep;
-	EStencilOperator failCCW = EStencilOperator::Keep;
-	EStencilOperator zFailCCW = EStencilOperator::Keep;
-
-	bool IsTwoSided() const
-	{
-		return pass != EStencilOperator::Keep ||
-			fail != EStencilOperator::Keep ||
-			zFail != EStencilOperator::Keep;
-	}
-
-	bool IsEnabled() const
-	{
-		return !(test == EComparisonFunc::Always &&
-			pass == EStencilOperator::Keep &&
-			fail == EStencilOperator::Keep &&
-			zFail == EStencilOperator::Keep &&
-			passCCW == EStencilOperator::Keep &&
-			failCCW == EStencilOperator::Keep &&
-			zFailCCW == EStencilOperator::Keep);
-	}
-};
 
 /**
 Rendering 2d or 3d data:
@@ -152,11 +116,9 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
+	virtual void SetPass(const Pass& pass) = 0;
 	//! Set the active material
 	virtual void SetMaterial(const Material* material) = 0;
-
-	//! Get the active matrial
-	virtual const Material* GetMaterial() const = 0;
 
 	//! Set the invalid material
 	/**
@@ -187,9 +149,6 @@ public:
 
 	virtual void SetScissorRect(const math::RectU& rect, ScissorRectToken* token = nullptr) = 0;
 	virtual const math::RectU& GetScissorRect() const = 0;
-
-	virtual void SetStencilMode(const StencilMode& mode, StencilModeToken*token = nullptr) = 0;
-	virtual const StencilMode& GetStencilMode() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -341,17 +300,6 @@ struct PipelineOverwriteToken : VideoRendererToken
 	}
 
 	u32 count = 0;
-};
-
-struct StencilModeToken : VideoRendererToken
-{
-	~StencilModeToken()
-	{
-		if(renderer)
-			renderer->SetStencilMode(prevMode);
-	}
-
-	StencilMode prevMode;
 };
 
 struct ScissorRectToken : VideoRendererToken

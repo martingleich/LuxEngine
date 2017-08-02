@@ -16,7 +16,6 @@ namespace video
 class VideoDriver;
 class RenderSettings;
 class Shader;
-class DeviceState;
 
 class ParamSetCallback : public ReferenceCounted
 {

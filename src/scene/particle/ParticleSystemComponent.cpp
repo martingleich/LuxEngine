@@ -102,11 +102,11 @@ void ParticleSystem::Animate(Node* node, float time)
 		it->lastTransform = it->transform;
 }
 
-void ParticleSystem::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
+void ParticleSystem::Render(Node* node, video::Renderer* renderer, const SceneData& sceneData)
 {
 	UpdateGroupData(node);
 
-	if(pass != ERenderPass::Transparent)
+	if(sceneData.pass != ERenderPass::Transparent)
 		return;
 
 	if(m_IsGlobal) {

@@ -46,12 +46,12 @@ void Mesh::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 		visitor->Visit(this);
 }
 
-void Mesh::Render(Node* node, video::Renderer* renderer, ERenderPass pass)
+void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneData)
 {
 	const auto worldMat = node->GetAbsoluteTransform().ToMatrix();
 	renderer->SetTransform(video::ETransform::World, worldMat);
 
-	const bool isTransparentPass = (pass == ERenderPass::Transparent);
+	const bool isTransparentPass = (sceneData.pass == ERenderPass::Transparent);
 	for(size_t i = 0; i < m_Mesh->GetSubMeshCount(); ++i) {
 		video::Geometry* geo = m_Mesh->GetGeometry(i);
 		const video::Material* material = m_OnlyReadMaterials ? m_Mesh->GetMaterial(i) : (const video::Material*)m_Materials[i];

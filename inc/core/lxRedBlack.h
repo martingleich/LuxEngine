@@ -445,17 +445,19 @@ public:
 				return n;
 			} else if(m_Compare.Smaller(v, n->GetValue())) {
 				if(n->GetLeft() == nullptr) {
-					n->SetLeft(CreateEntry(v));
-					AdjustInsertion(n->GetLeft());
-					n = n->GetLeft();
+					Node* newNode = CreateEntry(v);
+					n->SetLeft(newNode);
+					AdjustInsertion(newNode);
+					n = newNode;
 					break;
 				}
 				n = n->GetLeft();
 			} else {
 				if(n->GetRight() == nullptr) {
-					n->SetRight(CreateEntry(v));
-					AdjustInsertion(n->GetRight());
-					n = n->GetRight();
+					Node* newNode = CreateEntry(v);
+					n->SetRight(newNode);
+					AdjustInsertion(newNode);
+					n = newNode;
 					break;
 				}
 				n = n->GetRight();

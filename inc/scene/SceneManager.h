@@ -126,8 +126,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	virtual void AddPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over) = 0;
-	virtual void RemovePipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over) = 0;
+	virtual void PushPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over) = 0;
+	virtual void PopPipelineOverwrite(ERenderPass pass) = 0;
 };
 
 } // namespace scene

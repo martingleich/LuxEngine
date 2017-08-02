@@ -59,7 +59,7 @@ public:
 	LUX_API virtual bool GetReadMaterialsOnly() const;
 
 	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
-	LUX_API virtual void Render(Node* node, video::Renderer* renderer, ERenderPass pass);
+	LUX_API virtual void Render(Node* node, video::Renderer* renderer, const SceneData& sceneData);
 	LUX_API virtual ERenderPass GetRenderPass() const;
 
 	LUX_API virtual video::Material* GetMaterial(size_t index);

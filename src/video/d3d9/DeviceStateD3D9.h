@@ -1,8 +1,6 @@
 #ifndef INCLUDED_DEVICE_STATE_D3D9_H
 #define INCLUDED_DEVICE_STATE_D3D9_H
 #ifdef LUX_COMPILE_WITH_D3D9
-#include "video/DeviceState.h"
-
 #include "math/Matrix4.h"
 
 #include "video/Color.h"
@@ -19,8 +17,10 @@ class Material;
 class FogData;
 class LightData;
 class BaseTexture;
+class Pass;
+class StencilMode;
 
-class DeviceStateD3D9 : public DeviceState
+class DeviceStateD3D9
 {
 public:
 	DeviceStateD3D9(IDirect3DDevice9* device);
@@ -41,12 +41,14 @@ public:
 	void SetRenderState(D3DRENDERSTATETYPE state, DWORD value);
 	void SetRenderStateF(D3DRENDERSTATETYPE state, float value);
 	void SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value);
+	void SetSamplerState(u32 stage, D3DSAMPLERSTATETYPE state, DWORD value);
 	void SetTexture(u32 stage, IDirect3DBaseTexture9* tex);
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matrix4& m);
 
 	void EnableFog(bool enable);
 	void SetFog(const FogData& fog);
 
+	void SetStencilMode(const StencilMode& mode);
 	void EnableLight(bool enable);
 	void ClearLights();
 	void AddLight(const LightData& light, ELighting lighting);
@@ -93,6 +95,14 @@ private:
 	bool m_UseVertexData;
 
 	bool m_ResetAll;
+
+	static const u32 CACHED_TEXTURES = 8;
+	static const u32 RENDERSTATE_COUNT = 210;
+	static const u32 SAMPLER_STATE_COUNT = 14;
+	static const u32 TEXTURE_STAGE_STATE_COUNT = 33;
+	DWORD m_RenderStates[210];
+	DWORD m_SamplerStates[CACHED_TEXTURES][14];
+	DWORD m_TextureStageStates[CACHED_TEXTURES][33];
 };
 
 } // namespace video

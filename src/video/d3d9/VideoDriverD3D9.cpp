@@ -116,8 +116,6 @@ VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window
 	// Init rendertarget data
 	InitRendertargetData();
 
-	m_D3DDevice->SetRenderState(D3DRS_AMBIENT, 0xFFFFFFFF);
-
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
 	m_Renderer = new RendererD3D9(this);
 

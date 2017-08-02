@@ -24,7 +24,7 @@ public:
 	LUX_API const ParticleSystemTemplate* GetTemplate(size_t i) const;
 	LUX_API void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
 	LUX_API void Animate(Node* node, float time);
-	LUX_API void Render(Node* node, video::Renderer* renderer, ERenderPass pass);
+	LUX_API void Render(Node* node, video::Renderer* renderer, const SceneData& sceneData);
 	LUX_API ERenderPass GetRenderPass() const;
 	LUX_API const math::AABBoxF& GetBoundingBox() const;
 	LUX_API void UpdateGroups();

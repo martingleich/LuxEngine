@@ -110,7 +110,7 @@ void MaterialTest::Render()
 		m_Font->Draw("Blinking Text",
 			math::Vector2F(0.0f, 50.0f),
 			gui::Font::EAlign::BottomLeft,
-			video::Color::Green);
+			video::Color::Red);
 	}
 }
 
@@ -130,7 +130,7 @@ void MaterialTest::Load()
 	LoadBase();
 
 	m_Font = Context.GUI->GetFontCreator()->CreateFont(
-		gui::FontDescription("Times New Roman", 40),
+		gui::FontDescription("Comic Sans MS", 40),
 		Context.GUI->GetFontCreator()->GetDefaultCharset("german"));
 
 	auto materials = GenMaterialList();

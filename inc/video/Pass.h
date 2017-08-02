@@ -27,6 +27,44 @@ enum class EOptionId
 
 #define EOptionId_Layer(n) EOptionId((int)EOptionId::Layer0+n)
 
+class StencilMode
+{
+public:
+	u32 ref = 0;
+
+	u32 readMask = 0xFFFFFFFF;
+	u32 writeMask = 0xFFFFFFFF;
+
+	EComparisonFunc test = EComparisonFunc::Always;
+
+	EStencilOperator pass = EStencilOperator::Keep;
+	EStencilOperator fail = EStencilOperator::Keep;
+	EStencilOperator zFail = EStencilOperator::Keep;
+
+	EStencilOperator passCCW = EStencilOperator::Keep;
+	EStencilOperator failCCW = EStencilOperator::Keep;
+	EStencilOperator zFailCCW = EStencilOperator::Keep;
+
+	bool IsTwoSided() const
+	{
+		return 
+			pass != passCCW ||
+			fail != failCCW ||
+			zFail != zFailCCW;
+	}
+
+	bool IsEnabled() const
+	{
+		return !(test == EComparisonFunc::Always &&
+			pass == EStencilOperator::Keep &&
+			fail == EStencilOperator::Keep &&
+			zFail == EStencilOperator::Keep &&
+			passCCW == EStencilOperator::Keep &&
+			failCCW == EStencilOperator::Keep &&
+			zFailCCW == EStencilOperator::Keep);
+	}
+};
+
 class Pass
 {
 public:
@@ -42,6 +80,8 @@ public:
 	{
 	}
 
+	StencilMode stencil;
+
 	core::Array<TextureLayer> layers;
 	core::Array<TextureStageSettings> layerSettings;
 
@@ -54,7 +94,7 @@ public:
 	EBlendOperator alphaOperator =  EBlendOperator::None;
 
 	EComparisonFunc zBufferFunc = EComparisonFunc::LessEqual;
-	EColorPlane colorPlane = EColorPlane::All;
+	u32 colorMask = 0xFFFFFFFF;
 	EDrawMode drawMode = EDrawMode::Fill;
 	ELighting lighting = ELighting::Enabled;
 
@@ -113,11 +153,15 @@ public:
 class PipelineOverwrite
 {
 public:
+	StencilMode stencil;
+
 	float polygonOffset;
 	EDrawMode drawMode;
-	EColorPlane colorPlane;
+	u32 colorMask = 0xFFFFFFFF;
 
 	ELighting lighting;
+
+	bool useStencilOverwrite:1;
 	bool disableFog:1;
 
 	bool disableZWrite:1;
@@ -130,7 +174,8 @@ public:
 	PipelineOverwrite() :
 		polygonOffset(0.0f),
 		drawMode(EDrawMode::Fill),
-		colorPlane(EColorPlane::All),
+		lighting(ELighting::Enabled),
+		useStencilOverwrite(false),
 		disableFog(false),
 		disableZWrite(false),
 		disableZCmp(false),
@@ -142,6 +187,10 @@ public:
 
 	void Append(const PipelineOverwrite& next)
 	{
+		if(next.useStencilOverwrite) {
+			useStencilOverwrite = true;
+			stencil = next.stencil;
+		}
 		polygonOffset += next.polygonOffset;
 		if(next.lighting != ELighting::Enabled)
 			lighting = next.lighting;
@@ -151,6 +200,8 @@ public:
 			drawMode = EDrawMode::Wire;
 		if(next.drawMode == EDrawMode::Point)
 			drawMode = EDrawMode::Point;
+
+		colorMask &= next.colorMask;
 
 		if(next.disableZCmp)
 			disableZCmp = true;
@@ -166,6 +217,8 @@ public:
 
 	void Apply(Pass& pass)
 	{
+		if(useStencilOverwrite)
+			pass.stencil = stencil; 
 		pass.polygonOffset += polygonOffset;
 		if(lighting != ELighting::Enabled)
 			pass.lighting = lighting;
@@ -175,6 +228,8 @@ public:
 			pass.drawMode = EDrawMode::Wire;
 		if(drawMode == EDrawMode::Point)
 			pass.drawMode = EDrawMode::Point;
+
+		pass.colorMask &= colorMask;
 
 		if(disableZCmp)
 			pass.zBufferFunc = EComparisonFunc::Always;

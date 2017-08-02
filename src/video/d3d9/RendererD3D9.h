@@ -36,9 +36,6 @@ public:
 	void SetScissorRect(const math::RectU& rect, ScissorRectToken* token=nullptr);
 	const math::RectU& GetScissorRect() const;
 
-	void SetStencilMode(const StencilMode& mode, StencilModeToken*token=nullptr);
-	const StencilMode& GetStencilMode() const;
-
 	///////////////////////////////////////////////////////////////////////////
 
 	size_t GetMaxLightCount() const;
@@ -96,9 +93,9 @@ private:
 	void EnterRenderMode2D();
 	void LeaveRenderMode2D();
 
-	void LoadTransforms(const Pass& pass, const RenderSettings& settings);
-	void LoadFogSettings(const Pass& pass, const RenderSettings& settings);
-	void LoadLightSettings(const Pass& pass, const RenderSettings& settings);
+	void LoadTransforms(const Pass& pass);
+	void LoadFogSettings(const Pass& pass);
+	void LoadLightSettings(const Pass& pass);
 
 	void SetVertexFormat(const VertexFormat& format);
 
@@ -109,7 +106,6 @@ private:
 	RendertargetD3D9 m_CurrentRendertarget;
 	RendertargetD3D9 m_BackbufferTarget;
 
-	StencilMode m_StencilMode;
 	math::RectU m_ScissorRect;
 
 	VideoDriverD3D9* m_Driver;

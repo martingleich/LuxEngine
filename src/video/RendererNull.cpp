@@ -8,8 +8,7 @@ namespace lux
 namespace video
 {
 
-RendererNull::RendererNull(VideoDriver* driver, DeviceState& deviceState) :
-	m_DeviceState(deviceState),
+RendererNull::RendererNull(VideoDriver* driver) :
 	m_RenderMode(ERenderMode::None),
 	m_DirtyFlags(0xFFFFFFFF), // Set all dirty flags at start
 	m_Driver(driver)
@@ -36,21 +35,34 @@ RendererNull::RendererNull(VideoDriver* driver, DeviceState& deviceState) :
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::SetMaterial(const Material* material)
+void RendererNull::SetPass(const Pass& pass)
 {
 	SetDirty(Dirty_Material);
-	if(m_Material->GetRenderer() != material->GetRenderer())
-		SetDirty(Dirty_MaterialRenderer);
+	SetDirty(Dirty_MaterialRenderer);
 
-	if(material->GetRenderer())
-		m_Material->CopyFrom(material);
-	else
-		m_Material->CopyFrom(m_InvalidMaterial);
+	m_Pass = pass;
+	m_UseMaterial = false;
 }
 
-const Material* RendererNull::GetMaterial() const
+void RendererNull::SetMaterial(const Material* material)
 {
-	return m_Material;
+	if(material) {
+		SetDirty(Dirty_Material);
+		if(m_Material->GetRenderer() != material->GetRenderer())
+			SetDirty(Dirty_MaterialRenderer);
+
+		if(material->GetRenderer())
+			m_Material->CopyFrom(material);
+		else
+			m_Material->CopyFrom(m_InvalidMaterial);
+	} else {
+		m_Material->CopyFrom(m_InvalidMaterial);
+	}
+
+	m_UseMaterial = true;
+
+	m_Pass.layers.Clear();
+	m_Pass.layerSettings.Clear();
 }
 
 void RendererNull::SetInvalidMaterial(const Material* material)
@@ -141,18 +153,19 @@ void RendererNull::SetTransform(ETransform transform, const math::Matrix4& matri
 	case ETransform::World:
 		m_TransformWorld = matrix;
 		m_MatrixTable.SetMatrix(MatrixTable::MAT_WORLD, matrix);
+		SetDirty(Dirty_World);
 		break;
 	case ETransform::View:
 		m_TransformView = matrix;
 		m_MatrixTable.SetMatrix(MatrixTable::MAT_VIEW, matrix);
+		SetDirty(Dirty_ViewProj);
 		break;
 	case ETransform::Projection:
 		m_TransformProj = matrix;
 		m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, matrix);
+		SetDirty(Dirty_ViewProj);
 		break;
 	}
-
-	SetDirty(Dirty_Transform);
 }
 
 const math::Matrix4& RendererNull::GetTransform(ETransform transform) const

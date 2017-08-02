@@ -33,7 +33,8 @@ protected:
 	{
 		Dirty_Material,
 		Dirty_MaterialRenderer,
-		Dirty_Transform,
+		Dirty_World,
+		Dirty_ViewProj,
 		Dirty_Lights,
 		Dirty_Rendertarget,
 		Dirty_RenderMode,
@@ -55,13 +56,13 @@ protected:
 	};
 
 public:
-	RendererNull(VideoDriver* driver, DeviceState& deviceState);
+	RendererNull(VideoDriver* driver);
 	virtual ~RendererNull() {}
 
 	///////////////////////////////////////////////////////////////////////////
 
+	void SetPass(const Pass& pass);
 	void SetMaterial(const Material* material);
-	const Material* GetMaterial() const;
 
 	void SetInvalidMaterial(const Material* material);
 	const Material* GetInvalidMaterial();
@@ -133,11 +134,11 @@ private:
 	bool GetLightId(const StringType& string, u32& outId);
 
 protected:
-	DeviceState& m_DeviceState;
-
 	ERenderMode m_RenderMode; //!< Active rendermode
 
 	// The userset parameters are only rememberd they don't have to be activated immediatly
+	bool m_UseMaterial;
+	Pass m_Pass;
 	StrongRef<Material> m_Material; //!< User set material
 	StrongRef<Material> m_InvalidMaterial; //!< The material used to render invalid materials
 

@@ -51,9 +51,6 @@ typedef std::int32_t s32;   //!< A type for signed 32 bit integers
 typedef std::int64_t s64;   //!< A type for unsigned 64 bit integers
 }
 
-#define LX_MAKE_FOURCC(c0, c1, c2, c3) ((u32)(c0) | (u32)(c1 << 8) | (u32)(c2 << 16) | (u32)(c3 << 24))
-#define LUX_UNUSED(var) ((void)(var))
-
 #ifdef _MSC_VER
 #define ifconst(cond) \
 __pragma(warning(suppress: 4127)) \
@@ -62,6 +59,7 @@ if(cond)
 #define ifconst(cond) if(cond)
 #endif
 
+#include "core/HelperMacros.h"
 #include "core/EnumClassFlags.h"
 #include "core/lxMemoryAlloc.h"
 

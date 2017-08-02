@@ -36,7 +36,7 @@ private:
 };
 
 RendererD3D9::RendererD3D9(VideoDriverD3D9* driver) :
-	RendererNull(driver, m_DeviceState),
+	RendererNull(driver),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
 	m_DeviceState((IDirect3DDevice9*)driver->GetLowLevelDevice()),
 	m_Driver(driver),
@@ -197,44 +197,6 @@ const math::RectU& RendererD3D9::GetScissorRect() const
 	return m_ScissorRect;
 }
 
-void RendererD3D9::SetStencilMode(const StencilMode& mode, StencilModeToken*token)
-{
-	bool isEnabled = mode.IsEnabled();
-	m_DeviceState.SetRenderState(D3DRS_STENCILENABLE, isEnabled ? TRUE : FALSE);
-	if(isEnabled) {
-		m_DeviceState.SetRenderState(D3DRS_STENCILREF, mode.ref);
-		m_DeviceState.SetRenderState(D3DRS_STENCILMASK, mode.readMask);
-		m_DeviceState.SetRenderState(D3DRS_STENCILWRITEMASK, mode.writeMask);
-
-		m_DeviceState.SetRenderState(D3DRS_STENCILPASS, GetD3DStencilOperator(mode.pass));
-		m_DeviceState.SetRenderState(D3DRS_STENCILFAIL, GetD3DStencilOperator(mode.fail));
-		m_DeviceState.SetRenderState(D3DRS_STENCILZFAIL, GetD3DStencilOperator(mode.zFail));
-
-		bool isTwosided = mode.IsTwoSided();
-		m_DeviceState.SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, isTwosided ? TRUE : FALSE);
-		if(isTwosided) {
-			m_DeviceState.SetRenderState(D3DRS_CCW_STENCILPASS, GetD3DStencilOperator(mode.passCCW));
-			m_DeviceState.SetRenderState(D3DRS_CCW_STENCILFAIL, GetD3DStencilOperator(mode.failCCW));
-			m_DeviceState.SetRenderState(D3DRS_CCW_STENCILZFAIL, GetD3DStencilOperator(mode.zFailCCW));
-		}
-	}
-
-	if(token) {
-		lxAssert(token->renderer == nullptr || token->renderer == this);
-		if(token->renderer == nullptr) { // If the token was already used don't change it's values
-			token->renderer = this;
-			token->prevMode = m_StencilMode;
-		}
-	}
-
-	m_StencilMode = mode;
-}
-
-const StencilMode& RendererD3D9::GetStencilMode() const
-{
-	return m_StencilMode;
-}
-
 ///////////////////////////////////////////////////////////////////////////
 
 size_t RendererD3D9::GetMaxLightCount() const
@@ -307,7 +269,7 @@ void RendererD3D9::DrawPrimitiveList(
 		}
 	}
 
-	m_RenderStatistics->AddPrimitves(primitiveCount);
+	m_RenderStatistics->AddPrimitives(primitiveCount);
 }
 
 void RendererD3D9::DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is3D)
@@ -366,19 +328,20 @@ void RendererD3D9::SetupRendering(size_t passId)
 {
 	ParamListAccessNull listAccess(this);
 	RenderSettings settings(
-		*m_Material->GetRenderer(),
 		m_FinalOverwrite,
 		**m_Material,
 		listAccess);
 
-	if(m_MaterialRenderer != &settings.renderer) {
+	auto newRenderer = m_UseMaterial ? m_Material->GetRenderer() : nullptr;
+
+	if(m_MaterialRenderer != newRenderer) {
 		// Force update all.
 		SetDirty(Dirty_MaterialRenderer);
-		m_MaterialRenderer = m_Material->GetRenderer();
+		m_MaterialRenderer = newRenderer;
 	}
 
 	// Get current pass, with applied options and overwrites
-	Pass pass = settings.renderer.GeneratePassData(passId, settings);
+	Pass pass = m_MaterialRenderer ? m_MaterialRenderer->GeneratePassData(passId, settings) : m_Pass;
 	m_FinalOverwrite.Apply(pass);
 
 	if((pass.shader != nullptr) != m_UseShader) {
@@ -398,16 +361,18 @@ void RendererD3D9::SetupRendering(size_t passId)
 	}
 
 	// Enable pass settings
-	m_DeviceState.SetD3DColors(GetParam(m_ParamId.ambient), settings.material, pass.lighting);
+	if(m_MaterialRenderer)
+		m_DeviceState.SetD3DColors(GetParam(m_ParamId.ambient), settings.material, pass.lighting);
 	m_DeviceState.EnablePass(pass);
 
 	// Generate data for transforms, fog and light
-	LoadTransforms(pass, settings);
-	LoadFogSettings(pass, settings);
-	LoadLightSettings(pass, settings);
+	LoadTransforms(pass);
+	LoadFogSettings(pass);
+	LoadLightSettings(pass);
 
 	// Send the generated data to the shader
-	settings.renderer.SendShaderSettings(passId, pass, settings);
+	if(m_MaterialRenderer)
+		m_MaterialRenderer->SendShaderSettings(passId, pass, settings);
 
 	ClearAllDirty();
 }
@@ -450,13 +415,10 @@ void RendererD3D9::LeaveRenderMode2D()
 {
 }
 
-void RendererD3D9::LoadTransforms(const Pass& pass, const RenderSettings& settings)
+void RendererD3D9::LoadTransforms(const Pass& pass)
 {
-	LUX_UNUSED(settings);
-
-	// Load transforms
 	if(m_RenderMode == ERenderMode::Mode3D) {
-		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode)) {
+		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode) || IsDirty(Dirty_ViewProj)) {
 			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
 			if(pass.polygonOffset) {
 				const u32 zBits = m_Driver->GetConfig().zsFormat.zBits;
@@ -465,10 +427,10 @@ void RendererD3D9::LoadTransforms(const Pass& pass, const RenderSettings& settin
 				projCopy.AddTranslation(math::Vector3F(0.0f, 0.0f, -min * pass.polygonOffset));
 			}
 			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, projCopy);
-			SetDirty(Dirty_Transform);
+			SetDirty(Dirty_ViewProj);
 		}
 	} else if(m_RenderMode == ERenderMode::Mode2D) {
-		if(IsDirty(Dirty_Rendertarget) || IsDirty(Dirty_RenderMode)) {
+		if(IsDirty(Dirty_Rendertarget) || IsDirty(Dirty_RenderMode) || IsDirty(Dirty_ViewProj)) {
 			auto ssize = GetRenderTarget().GetSize();
 			math::Matrix4 view = math::Matrix4(
 				1.0f, 0.0f, 0.0f, 0.0f,
@@ -485,27 +447,27 @@ void RendererD3D9::LoadTransforms(const Pass& pass, const RenderSettings& settin
 			m_MatrixTable.SetMatrix(MatrixTable::MAT_VIEW, view);
 			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, proj);
 
-			SetDirty(Dirty_Transform);
+			SetDirty(Dirty_ViewProj);
 		}
 	}
 
-	if(IsDirty(Dirty_Transform)) {
-		if(!pass.shader) {
+	if(!pass.shader) {
+		if(IsDirty(Dirty_ViewProj)) {
 			m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
-			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
 			m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
+			ClearDirty(Dirty_ViewProj);
 		}
-
-		ClearDirty(Dirty_Transform);
+		if(IsDirty(Dirty_World)) {
+			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
+			ClearDirty(Dirty_World);
+		}
 	}
 
 	ClearDirty(Dirty_PolygonOffset);
 }
 
-void RendererD3D9::LoadFogSettings(const Pass& pass, const RenderSettings& settings)
+void RendererD3D9::LoadFogSettings(const Pass& pass)
 {
-	LUX_UNUSED(settings);
-
 	bool useFog = pass.fogEnabled && m_Fog.isActive;
 	if(m_RenderMode == ERenderMode::Mode2D)
 		useFog = false;
@@ -538,10 +500,8 @@ void RendererD3D9::LoadFogSettings(const Pass& pass, const RenderSettings& setti
 	}
 }
 
-void RendererD3D9::LoadLightSettings(const Pass& pass, const RenderSettings& settings)
+void RendererD3D9::LoadLightSettings(const Pass& pass)
 {
-	LUX_UNUSED(settings);
-
 	bool useLights = (pass.lighting != ELighting::Disabled);
 	if(m_RenderMode == ERenderMode::Mode2D)
 		useLights = false;

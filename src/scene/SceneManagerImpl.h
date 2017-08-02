@@ -5,6 +5,7 @@
 #include "scene/components/Camera.h"
 #include "scene/Node.h"
 #include "core/lxOrderedSet.h"
+#include "core/lxOrderedMap.h"
 #include "video/Renderer.h"
 
 namespace lux
@@ -90,8 +91,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	void AddPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over);
-	void RemovePipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over);
+	void PushPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over);
+	void PopPipelineOverwrite(ERenderPass pass);
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -99,13 +100,13 @@ private:
 	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
 	void DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
 
-	size_t GetPassId(ERenderPass pass) const;
-
 	class RenderableCollector;
 	void CollectRenderables(Node* root);
 	void CollectRenderablesRec(Node* node, RenderableCollector* collector, bool noDebug);
 	void AddRenderEntry(Node* n, Renderable* r);
 	void DrawScene();
+
+	bool IsCulled(Node* n, Renderable* r);
 
 private:
 	struct RenderEntry
@@ -210,9 +211,11 @@ private:
 	// The used renderqueues
 	core::Array<CameraEntry> m_CameraList;
 	core::Array<LightEntry> m_LightList;
+
 	core::Array<RenderEntry> m_SkyBoxList;
 	core::Array<RenderEntry> m_SolidNodeList;
 	core::Array<DistanceRenderEntry> m_TransparentNodeList;
+
 	Node* m_CollectedRoot;
 
 	// Information about the current camera
@@ -232,7 +235,7 @@ private:
 	video::Colorf m_AmbientColor;
 	video::FogData m_Fog;
 
-	core::Array<core::Array<video::PipelineOverwrite>> m_Overwrites; //!< User-set pipeline overwrites
+	core::OrderedMap<ERenderPass, core::Array<video::PipelineOverwrite>> m_Overwrites; //!< User-set pipeline overwrites
 
 	StrongRef<Node> m_RootSceneNode; //!< The root of the scenegraph
 

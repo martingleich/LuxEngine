@@ -25,18 +25,15 @@ public:
 	};
 
 	RenderSettings(
-		const MaterialRenderer& ren,
 		const PipelineOverwrite& o,
 		const Material& m,
 		const ParamListAccess& pa) :
-		renderer(ren),
 		overwrite(o),
 		material(m),
 		params(pa)
 	{
 	}
 
-	const MaterialRenderer& renderer;
 	const PipelineOverwrite& overwrite;
 	const Material& material;
 	const ParamListAccess& params;

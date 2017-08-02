@@ -264,11 +264,7 @@ namespace core
 {
 namespace Types
 {
-inline Type Colorf()
-{
-	static const Type t(new core::TypeInfoTemplate<video::Colorf>("colorF"));
-	return t;
-}
+LUX_API Type Colorf();
 }
 template<> inline Type GetTypeInfo<video::Colorf>() { return Types::Colorf(); }
 } // namespace core

@@ -25,6 +25,16 @@ DeviceStateD3D9::DeviceStateD3D9(IDirect3DDevice9* device) :
 	m_UseVertexData(true),
 	m_ResetAll(true)
 {
+	for(auto i = 0; i < RENDERSTATE_COUNT; ++i)
+		m_Device->GetRenderState((D3DRENDERSTATETYPE)i, m_RenderStates + i);
+
+	for(auto layer = 0; layer < CACHED_TEXTURES; ++layer) {
+		for(auto i = 0; i < TEXTURE_STAGE_STATE_COUNT; ++i)
+			m_Device->GetTextureStageState(layer, (D3DTEXTURESTAGESTATETYPE)i, m_TextureStageStates[layer] + i);
+
+		for(auto i = 0; i < SAMPLER_STATE_COUNT; ++i)
+			m_Device->GetSamplerState(layer, (D3DSAMPLERSTATETYPE)i, m_SamplerStates[layer] + i);
+	}
 }
 
 void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting)
@@ -55,6 +65,8 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 	// Apply overwrite and enable pipeline settings.
 	EnableAlpha(p.alphaSrcBlend, p.alphaDstBlend, p.alphaOperator);
 	EnableVertexData(p.useVertexColor);
+
+	SetStencilMode(p.stencil);
 
 	// Enable layers
 	static const TextureStageSettings DEFAULT_STAGE;
@@ -97,12 +109,14 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 	else
 		SetRenderState(D3DRS_SPECULARENABLE, 0);
 
-	m_Device->SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(p.zBufferFunc));
-	m_Device->SetRenderState(D3DRS_ZWRITEENABLE, p.zWriteEnabled ? TRUE : FALSE);
-	m_Device->SetRenderState(D3DRS_NORMALIZENORMALS, p.normalizeNormals ? TRUE : FALSE);
-	m_Device->SetRenderState(D3DRS_FILLMODE, GetFillMode(p));
-	m_Device->SetRenderState(D3DRS_SHADEMODE, p.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
-	m_Device->SetRenderState(D3DRS_CULLMODE, GetCullMode(p));
+	SetRenderState(D3DRS_COLORWRITEENABLE, p.colorMask);
+
+	SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(p.zBufferFunc));
+	SetRenderState(D3DRS_ZWRITEENABLE, p.zWriteEnabled ? TRUE : FALSE);
+	SetRenderState(D3DRS_NORMALIZENORMALS, p.normalizeNormals ? TRUE : FALSE);
+	SetRenderState(D3DRS_FILLMODE, GetFillMode(p));
+	SetRenderState(D3DRS_SHADEMODE, p.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
+	SetRenderState(D3DRS_CULLMODE, GetCullMode(p));
 
 	m_ResetAll = false;
 }
@@ -122,8 +136,8 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 	}
 
 	if(m_Textures[stage]) {
-		m_Device->SetSamplerState(stage, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
-		m_Device->SetSamplerState(stage, D3DSAMP_ADDRESSV, GetD3DRepeatMode(layer.repeat.v));
+		SetSamplerState(stage, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
+		SetSamplerState(stage, D3DSAMP_ADDRESSV, GetD3DRepeatMode(layer.repeat.v));
 
 		BaseTexture::Filter filter = layer.texture->GetFiltering();
 
@@ -139,7 +153,7 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 		u32 filterMin = GetD3DTextureFilter(filter.minFilter);
 		u32 filterMip = filter.mipFilter == BaseTexture::Filter::Linear ? D3DTEXF_LINEAR : D3DTEXF_POINT;
 
-		m_Device->SetSamplerState(stage, D3DSAMP_MIPFILTER, filterMip);
+		SetSamplerState(stage, D3DSAMP_MIPFILTER, filterMip);
 #if 0
 		if(filterMag == D3DTEXF_ANISOTROPIC || filterMin == D3DTEXF_ANISOTROPIC) {
 			u16 ani = settings.pipeline.Anisotropic;
@@ -148,11 +162,11 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 				ani = maxAni;
 			if(ani > maxAni)
 				ani = maxAni;
-			m_Device->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, ani);
+			SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, ani);
 	}
 #endif
-		m_Device->SetSamplerState(stage, D3DSAMP_MINFILTER, filterMin);
-		m_Device->SetSamplerState(stage, D3DSAMP_MAGFILTER, filterMag);
+		SetSamplerState(stage, D3DSAMP_MINFILTER, filterMin);
+		SetSamplerState(stage, D3DSAMP_MAGFILTER, filterMag);
 }
 }
 
@@ -191,12 +205,12 @@ void DeviceStateD3D9::EnableAlpha(EBlendFactor src, EBlendFactor dst, EBlendOper
 		return;
 
 	if(op == EBlendOperator::None) {
-		m_Device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 	} else {
-		m_Device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		m_Device->SetRenderState(D3DRS_DESTBLEND, GetD3DBlend(dst));
-		m_Device->SetRenderState(D3DRS_SRCBLEND, GetD3DBlend(src));
-		m_Device->SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(op));
+		SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		SetRenderState(D3DRS_DESTBLEND, GetD3DBlend(dst));
+		SetRenderState(D3DRS_SRCBLEND, GetD3DBlend(src));
+		SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(op));
 	}
 
 	m_SrcBlendFactor = src;
@@ -220,7 +234,10 @@ void* DeviceStateD3D9::GetLowLevelDevice()
 
 void DeviceStateD3D9::SetRenderState(D3DRENDERSTATETYPE state, DWORD value)
 {
-	m_Device->SetRenderState(state, value);
+	if(m_RenderStates[(int)state] != value) {
+		m_RenderStates[(int)state] = value;
+		m_Device->SetRenderState(state, value);
+	}
 }
 
 void DeviceStateD3D9::SetRenderStateF(D3DRENDERSTATETYPE state, float value)
@@ -232,7 +249,18 @@ void DeviceStateD3D9::SetRenderStateF(D3DRENDERSTATETYPE state, float value)
 
 void DeviceStateD3D9::SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value)
 {
-	m_Device->SetTextureStageState(stage, state, value);
+	if(stage >= CACHED_TEXTURES || m_TextureStageStates[stage][(int)state] != value) {
+		m_TextureStageStates[stage][(int)state] = value;
+		m_Device->SetTextureStageState(stage, state, value);
+	}
+}
+
+void DeviceStateD3D9::SetSamplerState(u32 stage, D3DSAMPLERSTATETYPE state, DWORD value)
+{
+	if(stage >= CACHED_TEXTURES || m_SamplerStates[stage][(int)state] != value) {
+		m_SamplerStates[stage][(int)state] = value;
+		m_Device->SetSamplerState(stage, state, value);
+	}
 }
 
 void DeviceStateD3D9::SetTexture(u32 stage, IDirect3DBaseTexture9* tex)
@@ -358,6 +386,31 @@ void DeviceStateD3D9::ClearLights()
 	for(size_t i = 0; i < m_LightCount; ++i)
 		m_Device->LightEnable((DWORD)i, FALSE);
 	m_LightCount = 0;
+}
+
+void DeviceStateD3D9::SetStencilMode(const StencilMode& mode)
+{
+	bool isEnabled = mode.IsEnabled();
+	SetRenderState(D3DRS_STENCILENABLE, isEnabled ? TRUE : FALSE);
+	if(isEnabled) {
+		SetRenderState(D3DRS_STENCILFUNC, GetD3DComparisonFunc(mode.test));
+
+		SetRenderState(D3DRS_STENCILREF, mode.ref);
+		SetRenderState(D3DRS_STENCILMASK, mode.readMask);
+		SetRenderState(D3DRS_STENCILWRITEMASK, mode.writeMask);
+
+		SetRenderState(D3DRS_STENCILPASS, GetD3DStencilOperator(mode.pass));
+		SetRenderState(D3DRS_STENCILFAIL, GetD3DStencilOperator(mode.fail));
+		SetRenderState(D3DRS_STENCILZFAIL, GetD3DStencilOperator(mode.zFail));
+
+		bool isTwosided = mode.IsTwoSided();
+		SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, isTwosided ? TRUE : FALSE);
+		if(isTwosided) {
+			SetRenderState(D3DRS_CCW_STENCILPASS, GetD3DStencilOperator(mode.passCCW));
+			SetRenderState(D3DRS_CCW_STENCILFAIL, GetD3DStencilOperator(mode.failCCW));
+			SetRenderState(D3DRS_CCW_STENCILZFAIL, GetD3DStencilOperator(mode.zFailCCW));
+		}
+	}
 }
 
 void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
