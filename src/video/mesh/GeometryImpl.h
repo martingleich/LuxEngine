@@ -30,11 +30,7 @@ public:
 	const math::AABBoxF& GetBoundingBox() const;
 	void SetBoundingBox(const math::AABBoxF& box);
 	void RecalculateBoundingBox();
-
-	u32 GetChangeId() const
-	{
-		return m_Vertices ? m_Vertices->GetChangeId() : 0 + m_Indices ? m_Indices->GetChangeId() : 0;
-	}
+	u32 GetChangeId() const;
 	
 private:
 	StrongRef<VertexBuffer> m_Vertices;

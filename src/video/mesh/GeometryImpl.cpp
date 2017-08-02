@@ -150,5 +150,9 @@ void GeometryImpl::RecalculateBoundingBox()
 	}
 }
 
+u32 GeometryImpl::GetChangeId() const
+{
+	return m_Vertices ? m_Vertices->GetChangeId() : 0 + m_Indices ? m_Indices->GetChangeId() : 0;
+}
 }
 }
