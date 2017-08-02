@@ -202,7 +202,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	vertexBuffer->Update();
 
 	videoRenderer->SetMaterial(mat);
-	videoRenderer->DrawGeometry(m_Buffer, pool.GetActiveCount() * 2);
+	videoRenderer->DrawGeometry(m_Buffer, (u32)(pool.GetActiveCount() * 2));
 }
 
 void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Particle& particle)
