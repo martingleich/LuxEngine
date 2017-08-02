@@ -15,9 +15,7 @@ namespace input
 {
 
 RawMouseDevice::RawMouseDevice(InputSystem* system, HANDLE rawHandle) :
-	RawInputDevice(system),
-	m_ButtonCount(8),
-	m_HasHWheel(false)
+	RawInputDevice(system)
 {
 	m_Name = "GenericMouse";
 	m_GUID = GetDeviceGUID(rawHandle);
@@ -29,8 +27,11 @@ RawMouseDevice::RawMouseDevice(InputSystem* system, HANDLE rawHandle) :
 	m_ButtonCount = info.mouse.dwNumberOfButtons;
 	m_HasHWheel = (info.mouse.fHasHorizontalWheel == TRUE);
 
-	for(int i = 0; i < ARRAYSIZE(m_ButtonState); ++i)
-		m_ButtonState[i] = false;
+	if(m_ButtonCount > MAX_MOUSE_BUTTONS)
+		m_ButtonCount = MAX_MOUSE_BUTTONS;
+
+	for(int i = 0; i < ARRAYSIZE(m_ButtonStates); ++i)
+		m_ButtonStates[i] = false;
 }
 
 void RawMouseDevice::HandleInput(RAWINPUT* input)
@@ -42,14 +43,14 @@ void RawMouseDevice::HandleInput(RAWINPUT* input)
 	else if(mouse.usFlags == 0)
 		SendPosEvent(true, mouse.lLastX, mouse.lLastY);
 
-	for(int i = 0; i < 5; ++i) {
+	for(int i = 0; i < MAX_MOUSE_BUTTONS; ++i) {
 		int down_flag = (1 << (2 * i));
 		int up_flag = (1 << (2 * i + 1));
 
-		if((mouse.usButtonFlags & down_flag) && !m_ButtonState[i])
+		if((mouse.usButtonFlags & down_flag) && !m_ButtonStates[i])
 			SendButtonEvent(i, true);
 
-		if((mouse.usButtonFlags & up_flag) && m_ButtonState[i])
+		if((mouse.usButtonFlags & up_flag) && m_ButtonStates[i])
 			SendButtonEvent(i, false);
 	}
 
@@ -112,6 +113,8 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 cod
 
 void RawMouseDevice::SendButtonEvent(u32 button, bool state)
 {
+	lxAssert(button < MAX_MOUSE_BUTTONS);
+
 	Event event;
 	event.source = EEventSource::Mouse;
 	event.type = EEventType::Button;
@@ -122,7 +125,7 @@ void RawMouseDevice::SendButtonEvent(u32 button, bool state)
 	event.button.pressedDown = state;
 	event.button.state = event.button.pressedDown;
 
-	m_ButtonState[button] = state;
+	m_ButtonStates[button] = state;
 
 	SendInputEvent(event);
 }

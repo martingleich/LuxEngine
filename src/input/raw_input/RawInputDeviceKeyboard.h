@@ -23,8 +23,9 @@ private:
 	void GetKeyCharacter(RAWKEYBOARD& input, wchar_t* character, u32 maxSize);
 	void TranslateCharacter(wchar_t c1, wchar_t c2, wchar_t* out, u32 maxSize);
 
+	static const size_t MAX_KEY_COUNT = 256; //!< There are only 256 virtual keys.
 private:
-	BYTE m_Win32KeyStates[256];
+	BYTE m_Win32KeyStates[MAX_KEY_COUNT];
 	wchar_t m_DeadKey;
 };
 

@@ -80,7 +80,7 @@ EEventSource RawKeyboardDevice::GetType() const
 size_t RawKeyboardDevice::GetElementCount(EEventType type) const
 {
 	if(type == EEventType::Button)
-		return 256;
+		return MAX_KEY_COUNT;
 	else
 		return 0;
 }
@@ -88,7 +88,6 @@ size_t RawKeyboardDevice::GetElementCount(EEventType type) const
 RawInputDevice::ElemDesc RawKeyboardDevice::GetElementDesc(EEventType type, u32 code) const
 {
 	LUX_UNUSED(code);
-	LUX_UNUSED(type);
 	static const String name = "(unknown)";
 
 	return ElemDesc(name, 0, 0, EElementType::Other);
