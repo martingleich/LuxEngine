@@ -76,6 +76,7 @@ public:
 
 	DrawingCanvasAuto(DrawingCanvasAuto&& old)
 	{
+		(DrawingCanvas&)*this = std::move(old);
 		texture = old.texture;
 		regenMipMaps = old.regenMipMaps;
 		old.texture = nullptr;
@@ -101,6 +102,7 @@ public:
 	DrawingCanvasAuto& operator=(DrawingCanvasAuto&& old)
 	{
 		Unlock();
+		(DrawingCanvas&)*this = std::move(old);
 		texture = old.texture;
 		regenMipMaps = old.regenMipMaps;
 		old.texture = nullptr;

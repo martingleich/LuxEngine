@@ -50,6 +50,14 @@ public:
 		{
 		}
 
+		Filter(EFilter filter) :
+			minFilter(filter),
+			magFilter(filter),
+			mipFilter(filter)
+		{
+
+		}
+
 		EFilter minFilter; //!< The filtering used if the texture is zoomed out
 		EFilter magFilter; //!< The filtering used if the texture is zoomed in
 		EFilter mipFilter; //!< The filtering used for mip mapping

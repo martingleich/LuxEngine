@@ -113,6 +113,7 @@ public:
 
 	DrawingCanvasAuto(DrawingCanvasAuto&& old)
 	{
+		(DrawingCanvas&)*this = std::move(old);
 		img = old.img;
 		old.img = nullptr;
 	}
@@ -134,6 +135,7 @@ public:
 	DrawingCanvasAuto& operator=(DrawingCanvasAuto&& old)
 	{
 		Unlock();
+		(DrawingCanvas&)*this = std::move(old);
 		img = old.img;
 		old.img = nullptr;
 		return *this;

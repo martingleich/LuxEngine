@@ -63,10 +63,10 @@ void FontImpl::Init(const FontCreationData& data)
 				u8 value = srcPixel->intensity;
 				srcPixel++;
 
-				*dstPixel++ = value;        // Alpha
 				*dstPixel++ = value;        // Red
 				*dstPixel++ = value;        // Green
 				*dstPixel++ = value;        // Blue
+				*dstPixel++ = value;        // Alpha
 			}
 
 			dstRow += lock.pitch;
@@ -80,13 +80,14 @@ void FontImpl::Init(const FontCreationData& data)
 	video::MaterialRenderer* renderer;
 	if(!video::MaterialLibrary::Instance()->ExistsMaterialRenderer("font", &renderer)) {
 		renderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
-		video::Pass pass = renderer->GetPass(0);
+		video::Pass& pass = renderer->GetPass(0);
 		pass.zWriteEnabled = false;
 		pass.zBufferFunc = video::EComparisonFunc::Always;
 		pass.backfaceCulling = false;
 		pass.lighting = video::ELighting::Disabled;
 		pass.fogEnabled = false;
 		pass.useVertexColor = true;
+		pass.isTransparent = true;
 		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		pass.alphaOperator = video::EBlendOperator::Add;
