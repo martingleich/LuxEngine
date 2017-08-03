@@ -2,8 +2,12 @@
 #include "video/mesh/StaticMesh.h"
 
 #include "core/ReferableFactory.h"
+#include "resources/ResourceSystem.h"
 
+#include "video/MaterialLibrary.h"
 #include "video/VideoDriver.h"
+#include "video/mesh/Geometry.h"
+
 #include "video/mesh/MeshLoaderOBJ.h"
 
 #include "video/mesh/GeometryCreatorPlane.h"
@@ -44,7 +48,7 @@ MeshSystem::MeshSystem()
 {
 	m_MatLib = MaterialLibrary::Instance();
 
-	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderOBJ)(VideoDriver::Instance(), m_MatLib));
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderOBJ));
 
 	m_PlaneCreator = AddCreator(LUX_NEW(GeometryCreatorPlane));
 	m_SphereUVCreator = AddCreator(LUX_NEW(GeometryCreatorSphereUV));
@@ -61,6 +65,14 @@ MeshSystem::~MeshSystem()
 StrongRef<Mesh> MeshSystem::CreateMesh()
 {
 	return core::ReferableFactory::Instance()->Create(core::ResourceType::Mesh);
+}
+
+StrongRef<Mesh> MeshSystem::CreateMesh(Geometry* geo)
+{
+	auto out = CreateMesh();
+	out->SetGeometry(geo);
+	out->RecalculateBoundingBox();
+	return out;
 }
 
 StrongRef<GeometryCreator> MeshSystem::GetCreatorByName(const String& name) const
@@ -121,10 +133,8 @@ StrongRef<Geometry> MeshSystem::CreateGeometry(const String& name, const core::P
 StrongRef<Mesh> MeshSystem::CreateMesh(const String& name, const core::PackagePuffer& params)
 {
 	StrongRef<Geometry> sub = GetCreatorByName(name)->CreateGeometry(params);
-	StrongRef<Mesh> out = CreateMesh();
-	out->AddGeometry(sub);
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
-	out->RecalculateBoundingBox();
+	StrongRef<Mesh> out = CreateMesh(sub);
+	out->SetMaterial(m_MatLib->CreateMaterial());
 
 	return out;
 }
@@ -139,10 +149,8 @@ StrongRef<Mesh> MeshSystem::CreatePlaneMesh(
 	StrongRef<GeometryCreatorPlane> creator = m_PlaneCreator;
 
 	StrongRef<Geometry> sub = creator->CreateGeometry(sizeX, sizeY, tesX, tesY, texX, texY, function, context);
-	StrongRef<Mesh> out = CreateMesh();
-	out->AddGeometry(sub);
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
-	out->RecalculateBoundingBox();
+	StrongRef<Mesh> out = CreateMesh(sub);
+	out->SetMaterial(m_MatLib->CreateMaterial());
 
 	return out;
 }
@@ -155,10 +163,8 @@ StrongRef<Mesh> MeshSystem::CreateSphereMesh(
 {
 	StrongRef<GeometryCreatorSphereUV> creator = m_SphereUVCreator;
 	StrongRef<Geometry> sub = creator->CreateGeometry(radius, rings, sectors, texX, texY, inside);
-	StrongRef<Mesh> out = CreateMesh();
-	out->AddGeometry(sub);
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
-	out->RecalculateBoundingBox();
+	StrongRef<Mesh> out = CreateMesh(sub);
+	out->SetMaterial(m_MatLib->CreateMaterial());
 
 	return out;
 }
@@ -175,10 +181,8 @@ StrongRef<Mesh> MeshSystem::CreateCubeMesh(
 		tesX, tesY, tesZ,
 		texX, texY, texZ,
 		inside);
-	StrongRef<Mesh> out = CreateMesh();
-	out->AddGeometry(sub);
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
-	out->RecalculateBoundingBox();
+	StrongRef<Mesh> out = CreateMesh(sub);
+	out->SetMaterial(m_MatLib->CreateMaterial());
 
 	return out;
 }
@@ -193,10 +197,8 @@ StrongRef<Mesh> MeshSystem::CreateArrowMesh(
 		shaft_height, head_height,
 		shaft_radius, head_radius,
 		sectors);
-	StrongRef<Mesh> out = CreateMesh();
-	out->AddGeometry(sub);
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
-	out->RecalculateBoundingBox();
+	StrongRef<Mesh> out = CreateMesh(sub);
+	out->SetMaterial(m_MatLib->CreateMaterial());
 
 	return out;
 }
@@ -209,10 +211,8 @@ StrongRef<Mesh> MeshSystem::CreateCylinderMesh(float radius, float height, s32 s
 		sectors, planes,
 		texX, texY,
 		inside);
-	StrongRef<Mesh> out = CreateMesh();
-	out->AddGeometry(sub);
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
-	out->RecalculateBoundingBox();
+	StrongRef<Mesh> out = CreateMesh(sub);
+	out->SetMaterial(m_MatLib->CreateMaterial());
 
 	return out;
 }
@@ -225,10 +225,8 @@ StrongRef<Mesh> MeshSystem::CreateTorusMesh(float radiusMajor, float radiusMinor
 		sectorsMajor, sectorsMinor,
 		texX, texY,
 		inside);
-	StrongRef<Mesh> out = CreateMesh();
-	out->AddGeometry(sub);
-	out->SetMaterial(0, m_MatLib->CreateMaterial());
-	out->RecalculateBoundingBox();
+	StrongRef<Mesh> out = CreateMesh(sub);
+	out->SetMaterial(m_MatLib->CreateMaterial());
 
 	return out;
 }

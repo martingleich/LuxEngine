@@ -9,7 +9,7 @@
 #include "video/d3d9/ShaderD3D9.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
 
-#include "video/mesh/GeometryImpl.h"
+#include "video/mesh/Geometry.h"
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
 
@@ -212,7 +212,7 @@ UnknownRefCounted<IDirect3DSurface9> VideoDriverD3D9::GetD3D9MatchingDepthBuffer
 
 StrongRef<Geometry> VideoDriverD3D9::CreateEmptyGeometry(EPrimitiveType primitiveType)
 {
-	StrongRef<Geometry> out = LUX_NEW(GeometryImpl);
+	StrongRef<Geometry> out = LUX_NEW(Geometry);
 	out->SetPrimitiveType(primitiveType);
 
 	return out;

@@ -29,6 +29,7 @@ add_subdirectory(external/libpng)
 add_subdirectory(external/libtga)
 add_subdirectory(external/zlib)
 add_subdirectory(external/utf8proc)
+add_subdirectory(external/tinyobjloader)
 
 add_subdirectory(testing/UnitTest)
 add_subdirectory(testing/MaterialTest)
@@ -50,7 +51,7 @@ file(GLOB_RECURSE INCS "inc/*.h")
 
 # Create the Porject and set link files
 add_library(LuxEngine SHARED ${SRCS} ${INCS} )
-target_link_libraries(LuxEngine format zlib libtga libpng utf8proc)
+target_link_libraries(LuxEngine format zlib libtga libpng utf8proc tinyobjloader)
 
 # Create and add the .def file for the linker
 # TODO Create def file for diffrent windows compilers(mingw etc.)

@@ -112,6 +112,7 @@ MaterialLibrary::MaterialLibrary()
 		pass.alphaOperator = video::EBlendOperator::Add;
 		pass.zWriteEnabled = false;
 		pass.fogEnabled = false;
+		pass.isTransparent = true;
 		pass.AddTexture();
 
 		transparent->AddParam("diffMap", 0, EOptionId::Layer0);
@@ -126,6 +127,7 @@ MaterialLibrary::MaterialLibrary()
 		ps.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		ps.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		ps.alphaOperator = video::EBlendOperator::Add;
+		ps.isTransparent = true;
 		particleTransp->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
 	{
@@ -138,6 +140,7 @@ MaterialLibrary::MaterialLibrary()
 		ps.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		ps.alphaDstBlend = video::EBlendFactor::One;
 		ps.alphaOperator = video::EBlendOperator::Add;
+		ps.isTransparent = true;
 		particleEmit->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
 }

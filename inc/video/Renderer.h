@@ -243,7 +243,7 @@ public:
 	\param primitiveCount The number of primitives to draw
 	\param is3D Is the 3d or the 2d pipeline used
 	*/
-	virtual void DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is3D = true) = 0;
+	virtual void DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D = true) = 0;
 
 	//! Draw some geometry
 	/**

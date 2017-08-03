@@ -43,7 +43,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	void DrawPrimitiveList(
-		EPrimitiveType primitiveType, u32 primitiveCount,
+		EPrimitiveType primitiveType, u32 firstPrimitive, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
 		bool is3D, bool user);
@@ -57,7 +57,7 @@ public:
 		LX_CHECK_NULL_ARG(vertexData);
 		LX_CHECK_NULL_ARG(indexData);
 
-		return DrawPrimitiveList(primitiveType, primitiveCount,
+		return DrawPrimitiveList(primitiveType, 0, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			indexData, indexType,
 			is3D, true);
@@ -70,7 +70,7 @@ public:
 	{
 		LX_CHECK_NULL_ARG(vertexData);
 
-		return DrawPrimitiveList(primitiveType, primitiveCount,
+		return DrawPrimitiveList(primitiveType, 0, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			nullptr, EIndexFormat::Bit16,
 			is3D, true);
@@ -81,7 +81,7 @@ public:
 		RendererD3D9::DrawGeometry(geo, 0xFFFFFFFF, is3D);
 	}
 
-	void DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is3D = true);
+	void DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D = true);
 
 	///////////////////////////////////////////////////////////////////////////
 private:

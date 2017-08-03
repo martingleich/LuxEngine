@@ -92,6 +92,44 @@ enum class EPrimitiveType
 	Triangles,
 };
 
+inline u32 GetPrimitiveCount(EPrimitiveType type, u32 pointCount)
+{
+	switch(type) {
+	case video::EPrimitiveType::Lines:
+		return pointCount / 2;
+	case video::EPrimitiveType::LineStrip:
+		return pointCount > 0 ? pointCount - 1 : 0;
+	case video::EPrimitiveType::Points:
+		return pointCount;
+	case video::EPrimitiveType::Triangles:
+		return pointCount / 3;
+	case video::EPrimitiveType::TriangleFan:
+	case video::EPrimitiveType::TriangleStrip:
+		return pointCount > 2 ? pointCount - 2 : 0;
+	};
+
+	return 0;
+}
+
+inline u32 GetPointCount(EPrimitiveType type, u32 primitiveCount)
+{
+	switch(type) {
+	case video::EPrimitiveType::Lines:
+		return primitiveCount * 2;
+	case video::EPrimitiveType::LineStrip:
+		return primitiveCount < 2 ? primitiveCount * 2 : primitiveCount + 1;
+	case video::EPrimitiveType::Points:
+		return primitiveCount;
+	case video::EPrimitiveType::Triangles:
+		return primitiveCount * 3;
+	case video::EPrimitiveType::TriangleFan:
+	case video::EPrimitiveType::TriangleStrip:
+		return primitiveCount < 2 ? primitiveCount * 3 : primitiveCount + 2;
+	};
+
+	return 0;
+}
+
 enum class EShaderLanguage
 {
 	HLSL,

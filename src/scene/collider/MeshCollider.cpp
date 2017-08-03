@@ -26,32 +26,27 @@ namespace scene
 MeshCollider::MeshCollider(video::Mesh* mesh)
 {
 	m_BoundingBox = mesh->GetBoundingBox();
-	size_t bufferCount = mesh->GetSubMeshCount();
-	size_t faceCount = 0;
-	for(size_t i = 0; i < bufferCount; ++i)
-		faceCount += mesh->GetGeometry(i)->GetPrimitiveCount();
+	size_t faceCount = mesh->GetGeometry()->GetPrimitiveCount();
 
 	m_Triangles.Clear();
 	m_Triangles.Reserve(faceCount);
 
-	for(size_t i = 0; i < bufferCount; ++i) {
-		auto sub = mesh->GetGeometry(i);
-		auto indices = sub->GetIndices();
-		auto vertices = sub->GetVertices();
-		u32 offset = sub->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;
-		u32 stride = sub->GetVertexFormat().GetStride();
-		const u8* data = (const u8*)vertices->Pointer_c(0, vertices->GetSize());
-		for(u32 j = 0; j < indices->GetSize(); j += 3) {
-			u32 i0 = indices->GetIndex(j + 0);
-			u32 i1 = indices->GetIndex(j + 1);
-			u32 i2 = indices->GetIndex(j + 2);
-			math::Triangle3F tri(
-				*(const math::Vector3F*)(data + stride*i0 + offset),
-				*(const math::Vector3F*)(data + stride*i1 + offset),
-				*(const math::Vector3F*)(data + stride*i2 + offset));
+	auto sub = mesh->GetGeometry();
+	auto indices = sub->GetIndices();
+	auto vertices = sub->GetVertices();
+	u32 offset = sub->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;
+	u32 stride = sub->GetVertexFormat().GetStride();
+	const u8* data = (const u8*)vertices->Pointer_c(0, vertices->GetSize());
+	for(u32 j = 0; j < indices->GetSize(); j += 3) {
+		u32 i0 = indices->GetIndex(j + 0);
+		u32 i1 = indices->GetIndex(j + 1);
+		u32 i2 = indices->GetIndex(j + 2);
+		math::Triangle3F tri(
+			*(const math::Vector3F*)(data + stride*i0 + offset),
+			*(const math::Vector3F*)(data + stride*i1 + offset),
+			*(const math::Vector3F*)(data + stride*i2 + offset));
 
-			m_Triangles.PushBack(tri);
-		}
+		m_Triangles.PushBack(tri);
 	}
 }
 

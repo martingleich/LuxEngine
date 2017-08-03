@@ -14,85 +14,62 @@ namespace video
 {
 class Geometry;
 class Material;
+class Renderer;
 
 //! A complex mesh composed of simple Sub-Meshs
 class Mesh : public core::Resource
 {
 public:
-	Mesh(const core::ResourceOrigin& origin) :
-		Resource(origin)
-	{}
+	LUX_API Mesh(const core::ResourceOrigin& origin);
+	LUX_API virtual ~Mesh();
 
-	virtual ~Mesh() {}
+	//! Get the geometry of the mesh
+	virtual const Geometry* GetGeometry() const = 0;
 
-	//! Removes all Submeshes
-	virtual void Clear() = 0;
+	//! Get the geometry of the mesh
+	virtual StrongRef<Geometry> GetGeometry() = 0;
 
-	//! Return the number of Submeshs
-	virtual size_t GetSubMeshCount() const = 0;
+	virtual void SetGeometry(Geometry* geo) = 0;
 
-	//! Retrieve a sub mesh by index
-	/**
-	\param i The index of the sub mesh to return
-	\return The submesh
-	*/
-	virtual const Geometry* GetGeometry(size_t i) const = 0;
-
-	//! Retrieve a sub mesh by index
-	/**
-	\param i The index of the sub mesh to return
-	\return The submesh
-	*/
-	virtual StrongRef<Geometry> GetGeometry(size_t i) = 0;
-
-	//! Returns the Bounding-box of the whole mesh
+	//! Returns the bounding box of the mesh
 	virtual const math::AABBoxF& GetBoundingBox() const = 0;
 
-	//! Add a new geometry to the mesh
-	/**
-	The bounding box isn´t recalculated automaticly
-	\param geo The geometry to add
-	*/
-	virtual StrongRef<Geometry> AddGeometry(Geometry* geo) = 0;
-
-	//! Create a new submesh and add it to the mesh
-	virtual StrongRef<Geometry> AddGeometry(const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
-		EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
-		EPrimitiveType primitiveType) = 0;
-
-	//! Create a new submesh and add it to the mesh
-	virtual StrongRef<Geometry> AddGeometry(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
-		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
-		u32 primitiveCount = 0,
-		bool dynamic = false) = 0;
-
-	//! Removes a Submesh by index
-	virtual void RemoveGeometry(size_t index) = 0;
-
-	//! Removes a submesh by pointer
-	virtual void RemoveGeometry(Geometry* subMesh) = 0;
-
-	//! Recalculates the bounding box
+	//! Recalculates the bounding box based on the geometry
 	/**
 	If a user-defined bounding box is set, it will be deleted
 	*/
-	virtual void RecalculateBoundingBox() = 0;
+	LUX_API virtual void RecalculateBoundingBox();
 
 	//! Set a user-defined bounding box
 	virtual void SetBoundingBox(const math::AABBoxF& box) = 0;
 
-	//! Get a submesh material by index.
-	virtual Material* GetMaterial(size_t index) = 0;
+	LUX_API virtual void SetMaterial(Material* m);
+	LUX_API virtual void SetMaterial(size_t index, Material* m);
+	LUX_API virtual const Material* GetMaterial(size_t index) const;
+	LUX_API virtual Material* GetMaterial(size_t index);
+	LUX_API virtual size_t GetMaterialCount() const;
 
-	//! Get a submesh material by index.
-	virtual const Material* GetMaterial(size_t index) const = 0;
+	LUX_API virtual void SetMaterialRange(Material* m, size_t firstPrimitive, size_t lastPrimitive);
+	LUX_API virtual void SetMaterialRange(size_t materialIndex, size_t firstPrimitive, size_t lastPrimitive);
+	LUX_API virtual void GetMaterialRange(size_t rangeIndex, size_t& materialIndex, size_t& firstPrimitive, size_t& lastPrimitive);
+	LUX_API virtual size_t GetRangeCount() const;
 
-	virtual void SetMaterial(size_t index, Material* m) = 0;
+	LUX_API core::Name GetReferableType() const;
 
-	virtual core::Name GetResourceType() const
+private:
+	struct MaterialRange
 	{
-		return core::ResourceType::Mesh;
-	}
+		size_t material;
+		size_t begin;
+
+		MaterialRange(size_t m, size_t b) :
+			material(m),
+			begin(b)
+		{}
+	};
+
+	core::Array<StrongRef<Material>> m_Materials;
+	core::Array<MaterialRange> m_Ranges;
 };
 
 } // namespace video

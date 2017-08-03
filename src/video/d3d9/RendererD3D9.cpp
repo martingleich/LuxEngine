@@ -207,7 +207,7 @@ size_t RendererD3D9::GetMaxLightCount() const
 ///////////////////////////////////////////////////////////////////////////
 
 void RendererD3D9::DrawPrimitiveList(
-	EPrimitiveType primitiveType, u32 primitiveCount,
+	EPrimitiveType primitiveType, u32 firstPrimitive, u32 primitiveCount,
 	const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 	const void* indexData, EIndexFormat indexType,
 	bool is3D, bool user)
@@ -219,48 +219,53 @@ void RendererD3D9::DrawPrimitiveList(
 	SetVertexFormat(vertexFormat);
 	u32 stride = vertexFormat.GetStride(0);
 
+	D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
+	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(primitiveType);
+
+	u32 vertexOffset = 0;
+	u32 indexOffset = 0;
+	if(!user) {
+		if(indexData) {
+			// Indexed from stream
+			StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
+
+			BufferManagerD3D9::VertexStream vs;
+			BufferManagerD3D9::IndexStream is;
+
+			if(d3d9Manager->GetVertexStream(0, vs))
+				vertexOffset = vs.offset;
+
+			if(d3d9Manager->GetIndexStream(is))
+				indexOffset = is.offset;
+		} else {
+			// Not indexed from stream
+			StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
+
+			BufferManagerD3D9::VertexStream vs;
+			if(d3d9Manager->GetVertexStream(0, vs))
+				vertexOffset = vs.offset;
+		}
+	}
+
+	if(indexData)
+		indexOffset += video::GetPointCount(primitiveType, firstPrimitive);
+	else
+		vertexOffset += video::GetPointCount(primitiveType, firstPrimitive);
+
 	for(size_t i = 0; i < m_Material->GetRenderer()->GetPassCount(); ++i) {
 		SetupRendering(i);
 
-		D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(primitiveType);
-
 		HRESULT hr = E_FAIL;
 		if(!user) {
-			if(indexData) {
-				// Indexed from stream
-				StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
-
-				BufferManagerD3D9::VertexStream vs;
-				BufferManagerD3D9::IndexStream is;
-
-				u32 vertexOffset = 0;
-				u32 indexOffset = 0;
-				if(d3d9Manager->GetVertexStream(0, vs))
-					vertexOffset = vs.offset;
-
-				if(d3d9Manager->GetIndexStream(is))
-					indexOffset = is.offset;
-
+			if(indexData)
 				hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
-			} else {
-				// Not indexed from stream
-				StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
-
-				BufferManagerD3D9::VertexStream vs;
-				u32 vertexOffset = 0;
-				if(d3d9Manager->GetVertexStream(0, vs))
-					vertexOffset = vs.offset;
-
+			else
 				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
-			}
 		} else {
-			if(indexData) {
-				// Indexed from memory
-				D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
+			if(indexData) // Indexed from memory
 				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
 					indexData, d3dIndexFormat, vertexData, stride);
-			} else
-				// Not indexed from memory
+			else // Not indexed from memory
 				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
 		}
 		if(FAILED(hr)) {
@@ -272,7 +277,7 @@ void RendererD3D9::DrawPrimitiveList(
 	m_RenderStatistics->AddPrimitives(primitiveCount);
 }
 
-void RendererD3D9::DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is3D)
+void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D)
 {
 	LX_CHECK_NULL_ARG(geo);
 
@@ -302,7 +307,9 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is
 		EIndexFormat::Bit16;
 
 	if(vs.data) {
-		DrawPrimitiveList(pt,
+		DrawPrimitiveList(
+			pt,
+			firstPrimitive,
 			primitiveCount,
 			vs.data,
 			vertexCount,
@@ -311,7 +318,9 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 primitiveCount, bool is
 			indexType,
 			is3D, true);
 	} else {
-		DrawPrimitiveList(pt,
+		DrawPrimitiveList(
+			pt,
+			firstPrimitive,
 			primitiveCount,
 			geo->GetVertices(),
 			vertexCount,
@@ -451,16 +460,14 @@ void RendererD3D9::LoadTransforms(const Pass& pass)
 		}
 	}
 
-	if(!pass.shader) {
-		if(IsDirty(Dirty_ViewProj)) {
-			m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
-			m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
-			ClearDirty(Dirty_ViewProj);
-		}
-		if(IsDirty(Dirty_World)) {
-			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
-			ClearDirty(Dirty_World);
-		}
+	if(IsDirty(Dirty_ViewProj)) {
+		m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
+		m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
+		ClearDirty(Dirty_ViewProj);
+	}
+	if(IsDirty(Dirty_World)) {
+		m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
+		ClearDirty(Dirty_World);
 	}
 
 	ClearDirty(Dirty_PolygonOffset);

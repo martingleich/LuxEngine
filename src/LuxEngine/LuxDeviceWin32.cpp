@@ -101,13 +101,14 @@ LuxDeviceWin32::~LuxDeviceWin32()
 		driver->CleanUp();
 #endif
 
+	core::ReferableFactory::Destroy();
+	core::ResourceSystem::Destroy();
+
 	video::MeshSystem::Destroy();
 	video::ImageSystem::Destroy();
 	video::MaterialLibrary::Destroy();
 	video::VideoDriver::Destroy();
 
-	core::ResourceSystem::Destroy();
-	core::ReferableFactory::Destroy();
 	io::FileSystem::Destroy();
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT

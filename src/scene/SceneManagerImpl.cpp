@@ -450,6 +450,9 @@ void SceneManagerImpl::AddRenderEntry(Node* n, Renderable* r)
 
 bool SceneManagerImpl::IsCulled(Node* n, Renderable* r)
 {
+	LUX_UNUSED(n);
+	LUX_UNUSED(r);
+
 	return false;
 }
 
@@ -529,6 +532,41 @@ void SceneManagerImpl::DrawScene()
 
 	DisableOverwrite(ERenderPass::Transparent, pot);
 	DisableOverwrite(ERenderPass::SolidAndTransparent, pot);
+
+	/*
+	sceneData.pass = ERenderPass::StencilShadow;
+	for(auto& e : m_ShadowCaster) {
+		if(e.node->IsTrulyVisible())
+			e.renderable->Render(e.node, m_Renderer, sceneData);
+	}
+
+	if(!m_ShadowCaster.IsEmpty()) {
+		auto size = m_Renderer->GetRenderTarget().GetSize();
+		video::Color shadowColor(255, 0, 0, 100);
+		const video::Vertex2D points[4] =
+		{
+			video::Vertex2D(0.0f, 0.0f, shadowColor),
+			video::Vertex2D((float)size.width, 0.0f, shadowColor),
+			video::Vertex2D(0.0f, (float)size.height, shadowColor),
+			video::Vertex2D((float)size.width, (float)size.height, shadowColor)
+		};
+
+		video::Pass p;
+		p.stencil.test = video::EComparisonFunc::Less;
+		p.stencil.ref = 0;
+		p.zBufferFunc = video::EComparisonFunc::Always;
+		p.zWriteEnabled = false;
+		p.lighting = video::ELighting::Disabled;
+		p.isTransparent = true;
+		p.fogEnabled = false;
+		p.useVertexColor = true;
+		p.alphaOperator = video::EBlendOperator::Add;
+		p.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+		p.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+		m_Renderer->SetPass(p);
+		m_Renderer->DrawPrimitiveList(video::EPrimitiveType::TriangleStrip, 2, &points, 4, video::VertexFormat::STANDARD_2D, false);
+	}
+	*/
 }
 
 } // namespace scene

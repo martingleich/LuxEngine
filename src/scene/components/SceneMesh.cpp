@@ -52,9 +52,11 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 	renderer->SetTransform(video::ETransform::World, worldMat);
 
 	const bool isTransparentPass = (sceneData.pass == ERenderPass::Transparent);
-	for(size_t i = 0; i < m_Mesh->GetSubMeshCount(); ++i) {
-		video::Geometry* geo = m_Mesh->GetGeometry(i);
-		const video::Material* material = m_OnlyReadMaterials ? m_Mesh->GetMaterial(i) : (const video::Material*)m_Materials[i];
+	video::Geometry* geo = m_Mesh->GetGeometry();
+	for(size_t i = 0; i < m_Mesh->GetRangeCount(); ++i) {
+		size_t matId, firstPrimitive, lastPrimitive;
+		m_Mesh->GetMaterialRange(i, matId, firstPrimitive, lastPrimitive);
+		const video::Material* material = m_OnlyReadMaterials ? m_Mesh->GetMaterial(matId) : (const video::Material*)m_Materials[matId];
 
 		video::MaterialRenderer* matRenderer = nullptr;
 		if(material)
@@ -66,9 +68,9 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 			isTransparent = TestFlag(matRenderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent);
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
-		if(isTransparent == isTransparentPass) {
+		if(isTransparent == isTransparentPass && firstPrimitive < lastPrimitive) {
 			renderer->SetMaterial(material);
-			renderer->DrawGeometry(geo);
+			renderer->DrawGeometry(geo, firstPrimitive, lastPrimitive - firstPrimitive + 1);
 		}
 	}
 }
@@ -116,7 +118,7 @@ const math::AABBoxF& Mesh::GetBoundingBox() const
 
 video::Material* Mesh::GetMaterial(size_t index)
 {
-	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
+	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
 		return m_Mesh->GetMaterial(index);
 	else
 		return m_Materials.At(index);
@@ -124,7 +126,7 @@ video::Material* Mesh::GetMaterial(size_t index)
 
 const video::Material* Mesh::GetMaterial(size_t index) const
 {
-	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
+	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
 		return m_Mesh->GetMaterial(index);
 	else
 		return m_Materials.At(index);
@@ -132,7 +134,7 @@ const video::Material* Mesh::GetMaterial(size_t index) const
 
 void Mesh::SetMaterial(size_t index, video::Material* m)
 {
-	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetSubMeshCount())
+	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
 		m_Mesh->SetMaterial(index, m);
 	else
 		m_Materials.At(index) = m;
@@ -143,7 +145,7 @@ void Mesh::SetMaterial(size_t index, video::Material* m)
 size_t Mesh::GetMaterialCount() const
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr)
-		return m_Mesh->GetSubMeshCount();
+		return m_Mesh->GetMaterialCount();
 	else
 		return m_Materials.Size();
 }
@@ -184,7 +186,7 @@ void Mesh::CopyMaterials()
 	if(m_OnlyReadMaterials || !m_Mesh)
 		return;
 
-	size_t materialCount = m_Mesh->GetSubMeshCount();
+	size_t materialCount = m_Mesh->GetMaterialCount();
 	m_Materials.Reserve(materialCount);
 	for(size_t i = 0; i < materialCount; ++i) {
 		auto material = m_Mesh->GetMaterial(i)->Clone();

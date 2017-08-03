@@ -3,6 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "math/AABBox.h"
 #include "video/VideoEnums.h"
+#include "video/Material.h"
 
 namespace lux
 {
@@ -17,9 +18,9 @@ class VertexFormat;
 class Geometry : public ReferenceCounted
 {
 public:
-	virtual ~Geometry()
-	{
-	}
+	LUX_API Geometry();
+
+	LUX_API virtual ~Geometry();
 
 	//! Set a new vertex and index buffer
 	/**
@@ -27,92 +28,100 @@ public:
 	\param indices The new indexbuffer, can be null
 	\param primitveType The primitve type in which way the data is interpreted
 	*/
-	virtual void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
+	LUX_API virtual void SetBuffer(VertexBuffer* vertices, IndexBuffer* indices, EPrimitiveType primitiveType = EPrimitiveType::Triangles);
 
 	//! Get the primitive type used by this mesh
 	/**
 	\return primitive type
 	*/
-	virtual EPrimitiveType GetPrimitiveType() const = 0;
+	LUX_API virtual EPrimitiveType GetPrimitiveType() const;
 
 	//! Set a new primitive type
 	/**
 	\param type The new primitive type
 	*/
-	virtual void SetPrimitiveType(EPrimitiveType type) = 0;
+	LUX_API virtual void SetPrimitiveType(EPrimitiveType type);
 
 	//! Get the total number of primitves in this mesh
 	/**
 	Degenerated primitves are also counted.
 	\return The number of primitives
 	*/
-	virtual u32 GetPrimitiveCount() const = 0;
+	LUX_API virtual u32 GetPrimitiveCount() const;
 
 	//! Set new vertices for the submesh
 	/**
 	\param vertices The vertices must not be zero
 	*/
-	virtual void SetVertices(VertexBuffer* vertices) = 0;
+	LUX_API virtual void SetVertices(VertexBuffer* vertices);
 
 	//! Get the vertices used by the submesh
 	/**
 	\return The vertices
 	*/
-	virtual const VertexBuffer* GetVertices() const = 0;
+	LUX_API virtual const VertexBuffer* GetVertices() const;
 
 	//! Get the vertices used by the submesh
 	/**
 	\return The vertices
 	*/
-	virtual StrongRef<VertexBuffer> GetVertices() = 0;
+	LUX_API virtual StrongRef<VertexBuffer> GetVertices();
 
 	//! The total number of vertices in the submesh
-	virtual u32 GetVertexCount() const = 0;
+	LUX_API virtual u32 GetVertexCount() const;
 
 	//! The vertextype used by the submesh
-	virtual const VertexFormat& GetVertexFormat() const = 0;
+	LUX_API virtual const VertexFormat& GetVertexFormat() const;
 
 	//! Set a new indexbuffer
 	/**
 	\param indices The new indices, can be null
 	*/
-	virtual void SetIndices(IndexBuffer* indices) = 0;
+	LUX_API virtual void SetIndices(IndexBuffer* indices) ;
+	//! Get the indices used by the submesh
+	/**
+	\return The indices
+	*/
+	LUX_API virtual const IndexBuffer* GetIndices() const;
 
 	//! Get the indices used by the submesh
 	/**
 	\return The indices
 	*/
-	virtual const IndexBuffer* GetIndices() const = 0;
-
-	//! Get the indices used by the submesh
-	/**
-	\return The indices
-	*/
-	virtual StrongRef<IndexBuffer> GetIndices() = 0;
+	LUX_API virtual StrongRef<IndexBuffer> GetIndices();
 
 	//! The total number of indices in the submesh
-	virtual u32 GetIndexCount() const = 0;
+	LUX_API virtual u32 GetIndexCount() const;
 
 	//! The indexformat used by the submesh
-	virtual video::EIndexFormat GetIndexType() const = 0;
+	LUX_API virtual video::EIndexFormat GetIndexType() const;
 
 	//! The bounding box of the submesh data
-	virtual const math::AABBoxF& GetBoundingBox() const = 0;
+	LUX_API virtual const math::AABBoxF& GetBoundingBox() const;
 
 	//! Set a user defined bounding box for the data
 	/**
 	\param box The user's bounding box
 	*/
-	virtual void SetBoundingBox(const math::AABBoxF& box) = 0;
+	LUX_API virtual void SetBoundingBox(const math::AABBoxF& box);
 
 	//! Recalculate the bounding box from the vertex data
 	/**
 	Should be called after changing the vertexbuffer.
-	And you don't set a bounding box via SetBoundingBoxS
+	And you didn't set a bounding box via SetBoundingBox
 	*/
-	virtual void RecalculateBoundingBox() = 0;
+	LUX_API virtual void RecalculateBoundingBox();
 
-	virtual u32 GetChangeId() const = 0;
+	//! Get the change id of the geometry
+	LUX_API virtual u32 GetChangeId() const;
+
+protected:
+	StrongRef<VertexBuffer> m_Vertices;
+	StrongRef<IndexBuffer> m_Indices;
+
+	EPrimitiveType m_PrimitiveType;
+
+	math::AABBoxF m_BoundingBox;
 };
 
 } // namespace video

@@ -392,7 +392,7 @@ public:
 	void Resize(size_t newLength, const StringType& filler = " ");
 
 	//! Clear the string contents, making the string empty.
-	void Clear();
+	String& Clear();
 
 	//! The number of bytes contained in the string, without NUL.
 	size_t Size() const;

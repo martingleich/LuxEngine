@@ -28,6 +28,8 @@ public:
 	*/
 	LUX_API StrongRef<Mesh> CreateMesh();
 
+	LUX_API StrongRef<Mesh> CreateMesh(Geometry* geo);
+
 	//! Add a new geometry creator to the library.
 	/**
 	The library takes ownege of the creator.

@@ -140,7 +140,7 @@ private:
 		DistanceRenderEntry(Node* n, Renderable* r) :
 			RenderEntry(n, r)
 		{
-			pos = node->GetAbsolutePosition();
+			pos = node->GetAbsoluteTransform().TransformPoint(r->GetBoundingBox().GetCenter());
 		}
 
 		void UpdateDistance(const math::Vector3F& camera)

@@ -414,11 +414,12 @@ void String::Resize(size_t newLength, const StringType& filler)
 	Data()[m_Size] = 0;
 }
 
-void String::Clear()
+String& String::Clear()
 {
 	Data()[0] = 0;
 	m_Length = 0;
 	m_Size = 0;
+	return *this;
 }
 
 size_t String::Size() const
