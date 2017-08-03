@@ -68,6 +68,7 @@ public:
 	void    GetTransposed(Matrix4& out) const;
 	//! Invert this matrix
 	/**
+	This method assumes the right most collum is (0,0,0,1).
 	\param [out] out Here the inverted matrix is written
 	\return false if the inversion is imposible
 	*/
