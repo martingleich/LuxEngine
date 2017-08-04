@@ -76,11 +76,11 @@ class QuadRenderer : public ParticleRenderer
 public:
 	QuadRenderer(RendererMachine* m) :
 		ParticleRenderer(m),
-		ScaleLengthSpeedSq(0.0f),
-		Scaling(1.0f, 1.0f),
 		LookOrient(ELookOrientation::CameraPlane),
 		UpOrient(EUpOrientation::Direction),
 		LockedAxis(ELockedAxis::Look),
+		Scaling(1.0f, 1.0f),
+		ScaleLengthSpeedSq(0.0f),
 		EmitLight(false)
 	{
 	}

@@ -294,7 +294,7 @@ public:
 	\param b The vector to which the angle is calculated
 	\return The Angle between this vector an another
 	*/
-	Angle<T> Angle(const Vector2<T>& b) const
+	math::Angle<T> Angle(const Vector2<T>& b) const
 	{
 		return math::ArcCos<T>(Dot(b) / (T)sqrt(GetLengthSq()*b.GetLengthSq()));
 	}

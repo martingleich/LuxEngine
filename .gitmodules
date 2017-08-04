@@ -1,4 +1,1 @@
 
-[submodule "external/format"]
-	path = external/format
-	url = https://github.com/martingleich/format

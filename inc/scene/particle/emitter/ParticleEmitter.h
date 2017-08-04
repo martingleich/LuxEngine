@@ -18,22 +18,22 @@ class ParticleEmitter : public Component
 {
 public:
 	ParticleEmitter() :
+		m_IsGlobal(false),
 		m_IsActive(true),
 		m_Flow(0.0f),
 		m_ForceMin(0.0f),
 		m_ForceMax(0.0f),
-		m_IsGlobal(false),
 		m_Count(0.0f)
 	{
 
 	}
 
 	ParticleEmitter(const ParticleEmitter& other) :
+		m_IsGlobal(other.m_IsGlobal),
 		m_IsActive(other.m_IsActive),
 		m_Flow(other.m_Flow),
 		m_ForceMin(other.m_ForceMin),
 		m_ForceMax(other.m_ForceMax),
-		m_IsGlobal(other.m_IsGlobal),
 		m_Count(0),
 		m_Model(other.m_Model)
 	{

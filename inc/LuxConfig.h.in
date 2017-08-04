@@ -14,6 +14,8 @@
 	#define LUX_LINUX @LuxEngine_OS_LINUX@
 #endif
 
+#define FORMAT_STRING_TYPE @FormatStringType@
+
 #define LUX_ON 1
 #define LUX_OFF 0
 

@@ -1,9 +1,9 @@
 #ifndef INCLUDED_LX_FORMAT_H
 #define INCLUDED_LX_FORMAT_H
-#include "../external/format/src/ConvInternal.h"
-#include "../external/format/src/Format.h"
-#include "../external/format/src/Sink.h"
-#include "../external/format/src/Converters.h"
+#include "format/ConvInternal.h"
+#include "format/Format.h"
+#include "format/Sink.h"
+#include "format/Converters.h"
 #include "core/lxString.h"
 
 namespace lux

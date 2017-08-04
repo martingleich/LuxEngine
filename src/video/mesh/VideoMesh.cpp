@@ -82,7 +82,7 @@ void Mesh::SetMaterialRange(size_t mid, size_t firstPrimitive, size_t lastPrimit
 	bool inside = false;
 	size_t insertAt = 0;
 	size_t begin1 = 0;
-	u32 mid1, mid2;
+	u32 mid1 = 0, mid2 = 0;
 	for(size_t i = 0; i < m_Ranges.Size(); ++i) {
 		if(!inside && m_Ranges[i].begin <= firstPrimitive) {
 			insertAt = i;

@@ -284,7 +284,7 @@ public:
 		return m_Object == v;
 	}
 
-	bool operator==(nullptr_t) const
+	bool operator==(std::nullptr_t) const
 	{
 		return m_Object == nullptr;
 	}
@@ -299,7 +299,7 @@ public:
 		return m_Object != v;
 	}
 
-	bool operator!=(nullptr_t) const
+	bool operator!=(std::nullptr_t) const
 	{
 		return m_Object != nullptr;
 	}
@@ -411,7 +411,7 @@ public:
 		return m_Object == v;
 	}
 
-	bool operator==(nullptr_t) const
+	bool operator==(std::nullptr_t) const
 	{
 		return m_Object == nullptr;
 	}
@@ -421,7 +421,7 @@ public:
 		return m_Object != v;
 	}
 
-	bool operator!=(nullptr_t) const
+	bool operator!=(std::nullptr_t) const
 	{
 		return m_Object != nullptr;
 	}

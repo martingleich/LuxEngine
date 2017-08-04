@@ -5,6 +5,10 @@ project(LuxEngine)
 set(LuxEngine_VERSION_MAJOR 0)
 set(LuxEngine_VERSION_MINOR 1)
 
+option(FORMAT_EXCEPTIONS "Throw exceptions on invalid format" ON)
+option(FORMAT_ERROR_TEXT "Write error string if single placeholder fails" OFF)
+option(FORMAT_USE_ASCII "Compile with ascii instead of unicode" OFF)
+
 if(WIN32)
 	set(LuxEngine_OS_WINDOWS true)
 	set(LuxEngine_OS_LINUX false)
@@ -19,12 +23,17 @@ elseif(UNIX AND NOT APPLE)
 	option(LUX_COMPILE_WITH_RAW_INPUT "" OFF)
 endif()
 
+if(FORMAT_USE_ASCII)
+	set(FormatStringType Ascii)
+else()
+	set(FormatStringType Unicode)
+endif()
+
 configure_file(
 	"${PROJECT_SOURCE_DIR}/inc/LuxConfig.h.in"
 	"${PROJECT_SOURCE_DIR}/inc/LuxConfig.h"
 	)
 
-add_subdirectory(external/format)
 add_subdirectory(external/libpng)
 add_subdirectory(external/libtga)
 add_subdirectory(external/zlib)
@@ -35,7 +44,7 @@ add_subdirectory(testing/UnitTest)
 add_subdirectory(testing/MaterialTest)
 
 if(WIN32)
-	add_subdirectory(external/FilterExportFiles)
+	#add_subdirectory(external/FilterExportFiles)
 	add_subdirectory(external/dxerr)
 endif()
 
@@ -51,28 +60,15 @@ file(GLOB_RECURSE INCS "inc/*.h")
 
 # Create the Porject and set link files
 add_library(LuxEngine SHARED ${SRCS} ${INCS} )
-target_link_libraries(LuxEngine format zlib libtga libpng utf8proc tinyobjloader)
+target_link_libraries(LuxEngine zlib libtga libpng utf8proc tinyobjloader)
 
-# Create and add the .def file for the linker
-# TODO Create def file for diffrent windows compilers(mingw etc.)
-if(MSVC)
-	get_filename_component(MSVC_PATH ${CMAKE_CXX_COMPILER} DIRECTORY)
-	
-	set(def_file "${CMAKE_BINARY_DIR}/defFile.def")
-	add_custom_command(
-		TARGET LuxEngine
-		PRE_LINK
-		COMMAND "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" ${MSVC_PATH} $<TARGET_FILE:FilterExportFiles> $<TARGET_FILE_DIR:format> "${PROJECT_SOURCE_DIR}/export.txt" "${def_file}"
-		DEPENDS "${PROJECT_SOURCE_DIR}/scripts/GenerateDef.bat" ${MSVC_PATH} $<TARGET_FILE:FilterExportFiles> $<TARGET_FILE_DIR:format> "${PROJECT_SOURCE_DIR}/export.txt"
-		COMMENT "Build .def file"
-		VERBATIM
-	)
-	
-	set_target_properties(LuxEngine
-		PROPERTIES 
-		LINK_FLAGS ${CMAKE_LINK_DEF_FILE_FLAG}"${def_file}") 
+if(NOT FORMAT_EXCEPTIONS)
+	add_definitions(-DFORMAT_NO_EXCEPTIONS)
 endif()
 
+if(FORMAT_ERROR_TEXT)
+	add_definitions(-DFORMAT_ERROR_TEXT)
+endif()
 
 # Add plattform dependend libs and compiler-flags
 if(MSVC)

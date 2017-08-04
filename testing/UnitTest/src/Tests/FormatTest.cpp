@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "../external/format/src/sinks/SinkStdString.h"
+#include "format/sinks/SinkStdString.h"
 
 UNIT_SUITE(format)
 {
