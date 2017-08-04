@@ -60,6 +60,7 @@ if(cond)
 #endif
 
 #include "core/HelperMacros.h"
+#include "core/HelperTemplates.h"
 #include "core/EnumClassFlags.h"
 #include "core/lxMemoryAlloc.h"
 
