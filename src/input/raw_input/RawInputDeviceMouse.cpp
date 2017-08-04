@@ -25,7 +25,8 @@ RawMouseDevice::RawMouseDevice(InputSystem* system, HANDLE rawHandle) :
 		throw core::InvalidArgumentException("rawHandle", "Is not a mouse");
 
 	m_ButtonCount = info.mouse.dwNumberOfButtons;
-	m_HasHWheel = (info.mouse.fHasHorizontalWheel == TRUE);
+	//m_HasHWheel = (info.mouse.fHasHorizontalWheel == TRUE); // Windows does report this wrong sometimes
+	m_HasHWheel = true;
 
 	if(m_ButtonCount > MAX_MOUSE_BUTTONS)
 		m_ButtonCount = MAX_MOUSE_BUTTONS;
