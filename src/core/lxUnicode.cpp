@@ -3,7 +3,7 @@
 
 extern "C"
 {
-#include "../external/utf8proc/utf8proc.h"
+#include <utf8proc/utf8proc.h>
 }
 
 namespace lux

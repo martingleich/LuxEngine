@@ -24,7 +24,7 @@
 
 #include <sstream>
 #include <vector>
-#include "../external/tinyobjloader/tiny_obj_loader.h"
+#include <tinyobjloader/tiny_obj_loader.h>
 
 namespace lux
 {

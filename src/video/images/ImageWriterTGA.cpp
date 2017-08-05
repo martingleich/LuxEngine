@@ -3,7 +3,7 @@
 #include "video/ColorConverter.h"
 #include "core/lxMemory.h"
 
-#include "../external/libtga/src/tga.h"
+#include <libtga/src/tga.h>
 
 namespace lux
 {

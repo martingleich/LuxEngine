@@ -4,7 +4,7 @@
 #ifndef __D3DX9_H__
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
-#include "..\external\d3d9\inc\d3dx9.h"
+#include <d3d9\inc\d3dx9.h>
 #endif
 
 #undef CreateFile

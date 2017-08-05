@@ -51,6 +51,7 @@ endif()
 # Always include inc!
 include_directories("${PROJECT_SOURCE_DIR}/inc")
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/external")
 
 # I'm not going to list all cpp files manually ...
 file(GLOB_RECURSE SRCS_CPP "src/*.cpp")

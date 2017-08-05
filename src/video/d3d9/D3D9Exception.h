@@ -3,7 +3,7 @@
 
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "Win32Exception.h"
-#include "../external/dxerr/dxerr.h"
+#include <dxerr/dxerr.h>
 #include "core/lxUnicodeConversion.h"
 
 namespace lux

@@ -1,6 +1,5 @@
 #ifndef INCLUDED_FORMAT_STRING_TYPE_H
 #define INCLUDED_FORMAT_STRING_TYPE_H
-
 #include <stddef.h>
 
 namespace format

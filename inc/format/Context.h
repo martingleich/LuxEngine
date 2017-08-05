@@ -1,10 +1,10 @@
 #ifndef INCLUDED_FORMAT_CONTEXT_H
 #define INCLUDED_FORMAT_CONTEXT_H
 #include "core/LuxBase.h"
-#include "Slice.h"
-#include "FormatMemory.h"
-#include "StringType.h"
-#include "StringBasics.h"
+#include "format/Slice.h"
+#include "format/FormatMemory.h"
+#include "format/StringType.h"
+#include "format/StringBasics.h"
 #include <limits.h>
 
 namespace format

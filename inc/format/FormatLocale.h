@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FORMAT_FORMAT_LOCALE_H
 #define INCLUDED_FORMAT_FORMAT_LOCALE_H
 #include "core/LuxBase.h"
-#include "Exception.h"
+#include "format/Exception.h"
 
 namespace format
 {

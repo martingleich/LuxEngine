@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FORMAT_STRING_BASICS_H
 #define INCLUDED_FORMAT_STRING_BASICS_H
-#include "StringType.h"
-#include "Exception.h"
+#include "format/StringType.h"
+#include "format/Exception.h"
 #include <inttypes.h>
 
 namespace format

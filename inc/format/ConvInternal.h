@@ -1,10 +1,10 @@
 #ifndef INCLUDED_FORMAT_CONV_INTERNAL_H
 #define INCLUDED_FORMAT_CONV_INTERNAL_H
 #include "core/LuxBase.h"
-#include "StringBasics.h"
-#include "Context.h"
-#include "FormatLocale.h"
-#include "Placeholder.h"
+#include "format/StringBasics.h"
+#include "format/Context.h"
+#include "format/FormatLocale.h"
+#include "format/Placeholder.h"
 
 namespace format
 {

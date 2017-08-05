@@ -1,12 +1,12 @@
 #ifndef INCLUDED_FORMAT_FORMAT_H
 #define INCLUDED_FORMAT_FORMAT_H
 #include "core/LuxBase.h"
-#include "FormatLocale.h"
-#include "StringType.h"
-#include "Placeholder.h"
-#include "Slice.h"
-#include "Context.h"
-#include "Sink.h"
+#include "format/FormatLocale.h"
+#include "format/StringType.h"
+#include "format/Placeholder.h"
+#include "format/Slice.h"
+#include "format/Context.h"
+#include "format/Sink.h"
 
 //! Contains all format functionality
 namespace format

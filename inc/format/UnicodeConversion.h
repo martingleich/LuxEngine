@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FORMAT_UNICODE_CONVERSION_H
 #define INCLUDED_FORMAT_UNICODE_CONVERSION_H
-#include "StringBasics.h"
+#include "format/StringBasics.h"
 #include <vector>
 
 namespace format

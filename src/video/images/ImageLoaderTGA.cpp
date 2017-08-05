@@ -4,7 +4,7 @@
 #include "math/Dimension2.h"
 #include "video/Color.h"
 
-#include "../external/libtga/src/tga.h"
+#include <libtga/src/tga.h>
 
 namespace lux
 {

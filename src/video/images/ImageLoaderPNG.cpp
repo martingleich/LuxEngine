@@ -3,7 +3,7 @@
 #include "io/File.h"
 #include "math/Dimension2.h"
 #include "video/Color.h"
-#include "../external/libpng/src/png.h"
+#include <libpng/src/png.h>
 
 namespace lux
 {
