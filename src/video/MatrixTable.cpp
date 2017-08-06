@@ -44,17 +44,10 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 	}
 }
 
-core::PackageParam MatrixTable::GetParamById(u32 id) const
+core::VariableAccess MatrixTable::GetParamById(u32 id) const
 {
 	const math::Matrix4& m = GetMatrix((EMatrixType)id);
-
-	core::ParamDesc desc;
-	desc.id = id;
-	desc.name = GetMatrixName((EMatrixType)id);
-	desc.type = core::Types::Matrix();
-	desc.type = desc.type.GetConstantType();
-	desc.size = (u8)desc.type.GetSize();
-	return core::PackageParam(desc, (u8*)&m);
+	return core::VariableAccess(core::Types::Matrix().GetConstantType(), GetMatrixName((EMatrixType)id), const_cast<float*>(m.DataRowMajor()));
 }
 
 bool MatrixTable::GetParamIdByName(const char* name, u32& id)

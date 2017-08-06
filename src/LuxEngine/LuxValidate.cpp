@@ -32,5 +32,5 @@ static_assert(sizeof(video::Colorf) == 16, "Bad size");
 static_assert(sizeof(math::Matrix4) == 4 * 4 * 4, "Bad size");
 static_assert(sizeof(video::Color) == 4, "Bad size");
 static_assert(sizeof(math::Vector2I) == 8, "Bad size");
-static_assert(sizeof(math::vector3i) == 12, "Bad size");
+static_assert(sizeof(math::Vector3I) == 12, "Bad size");
 }

@@ -61,7 +61,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void SetPass(const Pass& pass);
+	void SetPass(const Pass& pass, bool useOverwrite = false, ParamSetCallback* paramSetCallback = nullptr);
 	void SetMaterial(const Material* material);
 
 	void SetInvalidMaterial(const Material* material);
@@ -96,10 +96,10 @@ public:
 	u32 AddParam(const StringType& name, core::Type type);
 	u32 AddInternalParam(const StringType& name, core::Type type);
 	u32 AddParamEx(const StringType& name, core::Type type, bool isInternal);
-	core::PackageParam GetParamEx(u32 id, bool internal);
-	core::PackageParam GetParam(u32 id);
-	core::PackageParam GetParamInternal(u32 id);
-	core::PackageParam GetParam(const StringType& string);
+	core::VariableAccess GetParamEx(u32 id, bool internal);
+	core::VariableAccess GetParam(u32 id);
+	core::VariableAccess GetParamInternal(u32 id);
+	core::VariableAccess GetParam(const StringType& string, u32* id);
 	u32 GetParamCount() const;
 
 	///////////////////////////////////////////////////////////////////////////
@@ -138,6 +138,8 @@ protected:
 
 	// The userset parameters are only rememberd they don't have to be activated immediatly
 	bool m_UseMaterial;
+	bool m_UseOverwrite;
+	ParamSetCallback* m_ParamSetCallback;
 	Pass m_Pass;
 	StrongRef<Material> m_Material; //!< User set material
 	StrongRef<Material> m_InvalidMaterial; //!< The material used to render invalid materials

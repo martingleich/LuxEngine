@@ -58,13 +58,13 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	virtual core::PackageParam Param(const StringType& name) = 0;
-	virtual core::PackageParam Param(const StringType& name) const = 0;
-	virtual core::PackageParam Param(u32 id) = 0;
-	virtual core::PackageParam Param(u32 id) const = 0;
+	virtual core::VariableAccess Param(const StringType& name) = 0;
+	virtual core::VariableAccess Param(const StringType& name) const = 0;
+	virtual core::VariableAccess Param(u32 id) = 0;
+	virtual core::VariableAccess Param(u32 id) const = 0;
 
-	virtual core::PackageParam Layer(u32 layer) = 0;
-	virtual core::PackageParam Layer(u32 layer) const = 0;
+	virtual core::VariableAccess Layer(u32 layer) = 0;
+	virtual core::VariableAccess Layer(u32 layer) const = 0;
 
 	////////////////////////////////////////////////////////////////////
 

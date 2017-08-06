@@ -6,7 +6,7 @@ namespace lux
 {
 namespace core
 {
-class PackageParam;
+class VariableAccess;
 }
 namespace video
 {
@@ -21,7 +21,7 @@ public:
 	class ParamListAccess
 	{
 	public:
-		virtual core::PackageParam operator[](u32 id) const = 0;
+		virtual core::VariableAccess operator[](u32 id) const = 0;
 	};
 
 	RenderSettings(

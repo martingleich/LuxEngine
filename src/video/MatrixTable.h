@@ -41,7 +41,7 @@ public:
 public:
 	MatrixTable();
 	void SetMatrix(EMatrixType type, const math::Matrix4& matrix);
-	core::PackageParam GetParamById(u32 id) const;
+	core::VariableAccess GetParamById(u32 id) const;
 	bool GetParamIdByName(const char* name, u32& id);
 	const math::Matrix4& GetMatrix(EMatrixType type) const;
 	bool IsDirty(EMatrixType type) const;

@@ -12,37 +12,31 @@ namespace lux
 namespace core
 {
 
-//! The description of a single parameter
-struct ParamDesc
-{
-	const char* name; //!< The name of the parameter
-	u8 size; //!< The size of the parameter in bytes
-	core::Type type; //!< The type of the parameter
-	u32 id; //!< The id of the parameter
-
-	void* defaultValue; //!< Pointer to the default data of the parameter
-};
-
-//! Represents a single parameter in a parameter package
-class PackageParam
+//! Represents access to some type of variable
+/**
+This could be an attribute, a normal c++ variable, or a value inside a param package.
+*/
+class VariableAccess
 {
 public:
 	//! Construct a package param to some data
 	/**
-	\param size The size of parameter in byte
 	\param type The type of the parameter
-	\param data A pointer to the data of the param, must be valid for the lifetime of this object
 	\param name The name of parameter, must be valid for the lifetime of this object(i.e. Is not copied)
+	\param data A pointer to the data of the param, must be valid for the lifetime of this object
 	*/
-	PackageParam(const ParamDesc& desc, void* data) :
+	VariableAccess(core::Type type, const char* name, void* data) :
 		m_Data(data),
-		m_Desc(desc)
+		m_Type(type),
+		m_Name(name)
 	{
 	}
 
 	//! Construct an empty invalid parameter package
-	PackageParam() :
-		m_Data(nullptr)
+	VariableAccess() :
+		m_Data(nullptr),
+		m_Type(core::Type::Unknown),
+		m_Name(nullptr)
 	{
 	}
 
@@ -51,11 +45,11 @@ public:
 	operator T() const
 	{
 		if(IsValid()) {
-			if(!IsConvertible(m_Desc.type, core::GetTypeInfo<T>()))
-				throw TypeException("Incompatible types used", m_Desc.type, core::GetTypeInfo<T>());
+			if(!IsConvertible(m_Type, core::GetTypeInfo<T>()))
+				throw TypeException("Incompatible types used", m_Type, core::GetTypeInfo<T>());
 
 			T out;
-			ConvertBaseType(m_Desc.type, m_Data, core::GetTypeInfo<T>(), &out);
+			ConvertBaseType(m_Type, m_Data, core::GetTypeInfo<T>(), &out);
 			return out;
 		}
 
@@ -65,7 +59,7 @@ public:
 	template <typename T>
 	T Default(const T& defaultValue)
 	{
-		if(!IsConvertible(m_Desc.type, core::GetTypeInfo<T>()) || !IsValid())
+		if(!IsConvertible(m_Type, core::GetTypeInfo<T>()) || !IsValid())
 			return defaultValue;
 		else
 			return (T)(*this);
@@ -73,8 +67,8 @@ public:
 
 	operator const char*() const
 	{
-		if(m_Desc.type != core::Types::String())
-			throw TypeException("Incompatible types used", m_Desc.type, core::Types::String());
+		if(m_Type != core::Types::String())
+			throw TypeException("Incompatible types used", m_Type, core::Types::String());
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
@@ -111,20 +105,20 @@ public:
 
 	//! Access as any type
 	template <typename T>
-	PackageParam& operator=(const T& varVal)
+	VariableAccess& operator=(const T& varVal)
 	{
-		if(!core::IsConvertible(core::GetTypeInfo<T>(), m_Desc.type))
-			throw TypeException("Incompatible types used", core::GetTypeInfo<T>(), m_Desc.type);
+		if(!core::IsConvertible(core::GetTypeInfo<T>(), m_Type))
+			throw TypeException("Incompatible types used", core::GetTypeInfo<T>(), m_Type);
 		if(IsValid())
-			core::ConvertBaseType(core::GetTypeInfo<T>(), &varVal, m_Desc.type, m_Data);
+			core::ConvertBaseType(core::GetTypeInfo<T>(), &varVal, m_Type, m_Data);
 
 		return *this;
 	}
 
-	PackageParam& operator=(const char* string)
+	VariableAccess& operator=(const char* string)
 	{
-		if(m_Desc.type != core::Types::String())
-			throw TypeException("Incompatible types used", m_Desc.type, core::Types::String());
+		if(m_Type != core::Types::String())
+			throw TypeException("Incompatible types used", m_Type, core::Types::String());
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
@@ -135,10 +129,10 @@ public:
 	}
 
 	//! Access as texture
-	PackageParam& operator=(video::BaseTexture* texture)
+	VariableAccess& operator=(video::BaseTexture* texture)
 	{
-		if(m_Desc.type != core::Types::Texture())
-			throw TypeException("Incompatible types used", m_Desc.type, core::Types::Texture());
+		if(m_Type != core::Types::Texture())
+			throw TypeException("Incompatible types used", m_Type, core::Types::Texture());
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
@@ -149,31 +143,31 @@ public:
 	}
 
 	//! Access as texture
-	PackageParam& operator=(video::Texture* texture)
+	VariableAccess& operator=(video::Texture* texture)
 	{
 		return (*this = (video::BaseTexture*)texture);
 	}
 
 	//! Access as texture
-	PackageParam& operator=(video::CubeTexture* texture)
+	VariableAccess& operator=(video::CubeTexture* texture)
 	{
 		return (*this = (video::BaseTexture*)texture);
 	}
 
 	//! Access as texture
-	PackageParam& operator=(StrongRef<video::BaseTexture> texture)
+	VariableAccess& operator=(StrongRef<video::BaseTexture> texture)
 	{
 		return (*this = (video::BaseTexture*)texture);
 	}
 
 	//! Access as texture
-	PackageParam& operator=(StrongRef<video::Texture> texture)
+	VariableAccess& operator=(StrongRef<video::Texture> texture)
 	{
 		return (*this = (video::BaseTexture*)texture);
 	}
 
 	//! Access as texture
-	PackageParam& operator=(StrongRef<video::CubeTexture> texture)
+	VariableAccess& operator=(StrongRef<video::CubeTexture> texture)
 	{
 		return (*this = (video::BaseTexture*)texture);
 	}
@@ -183,15 +177,15 @@ public:
 	Deep Copy
 	\param varVal The other packge param
 	*/
-	PackageParam& operator=(const PackageParam& varVal)
+	VariableAccess& operator=(const VariableAccess& varVal)
 	{
-		if(IsConvertible(m_Desc.type, varVal.m_Desc.type))
-			throw TypeException("Incompatible types used", m_Desc.type, varVal.m_Desc.type);
+		if(IsConvertible(m_Type, varVal.m_Type))
+			throw TypeException("Incompatible types used", m_Type, varVal.m_Type);
 
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		ConvertBaseType(varVal.m_Desc.type, varVal.m_Data, m_Desc.type, m_Data);
+		ConvertBaseType(varVal.m_Type, varVal.m_Data, m_Type, m_Data);
 
 		return *this;
 	}
@@ -201,10 +195,11 @@ public:
 	Swallow copy
 	\param otherParam The other package param
 	*/
-	PackageParam& Set(const PackageParam& otherParam)
+	VariableAccess& Set(const VariableAccess& otherParam)
 	{
 		m_Data = otherParam.m_Data;
-		m_Desc = otherParam.m_Desc;
+		m_Name = otherParam.m_Name;
+		m_Type = otherParam.m_Type;
 
 		return *this;
 	}
@@ -231,7 +226,7 @@ public:
 	const char* GetName() const
 	{
 		if(IsValid())
-			return m_Desc.name;
+			return m_Name;
 		else
 			return "";
 	}
@@ -239,18 +234,13 @@ public:
 	//! The size of the param in bytes
 	u32 GetSize() const
 	{
-		return m_Desc.size;
-	}
-
-	const ParamDesc& GetDesc() const
-	{
-		return m_Desc;
+		return m_Type.GetSize();
 	}
 
 	//! The type of the param
 	core::Type GetType() const
 	{
-		return m_Desc.type.GetBaseType();
+		return m_Type;
 	}
 
 	//! A pointer to the raw param data
@@ -261,7 +251,16 @@ public:
 
 private:
 	void* m_Data;
-	ParamDesc m_Desc;
+	Type m_Type;
+	const char* m_Name;
+};
+
+//! The description of a single parameter
+struct ParamDesc
+{
+	const char* name; //!< The name of the parameter
+	core::Type type; //!< The type of the parameter
+	u32 id; //!< The id of the parameter
 };
 
 //! A collection of named variable.
@@ -365,7 +364,7 @@ public:
 	\return The found param
 	\exception OutOfRange param is out of range
 	*/
-	LUX_API PackageParam GetParam(u32 param, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParam(u32 param, void* baseData, bool isConst) const;
 
 	//! Get a param from a name
 	/**
@@ -375,7 +374,7 @@ public:
 	\return The found param
 	\exception Exception name does not exist
 	*/
-	LUX_API PackageParam GetParamFromName(const StringType& name, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParamFromName(const StringType& name, void* baseData, bool isConst) const;
 
 	//! Get the n-th Param of a specific type
 	/**
@@ -386,13 +385,14 @@ public:
 	\param isConst Should the package param be constant, i.e. can't be changed
 	\return The index of the found param, if no param could be found the invalid param is returned
 	*/
-	LUX_API PackageParam GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const;
 
 	//! Access the default value of a param
 	/**
 	\param param The id of the Param, which default value should be changed
 	*/
-	LUX_API PackageParam DefaultValue(u32 param);
+	LUX_API VariableAccess DefaultValue(u32 param);
+	LUX_API VariableAccess DefaultValue(u32 param) const;
 
 	//! Set a new default value for a param
 	/**
@@ -400,7 +400,7 @@ public:
 	\param defaultValue A pointer to the new default value
 	\exception Exception name does not exist
 	*/
-	LUX_API PackageParam DefaultValue(const StringType& param);
+	LUX_API VariableAccess DefaultValue(const StringType& param);
 
 	//! Get the id of a parameter by it's name.
 	/**
@@ -524,7 +524,7 @@ public:
 	\param name The name of the param
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromName(const StringType& name, bool isConst) const
+	VariableAccess FromName(const StringType& name, bool isConst) const
 	{
 		if(!m_Pack)
 			throw Exception("No param pack set");
@@ -538,7 +538,7 @@ public:
 	\param index Which param of this type
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromType(core::Type type, u32 index, bool isConst) const
+	VariableAccess FromType(core::Type type, u32 index, bool isConst) const
 	{
 		if(!m_Pack)
 			throw Exception("No param pack set");
@@ -551,7 +551,7 @@ public:
 	\param id The index of the param
 	\param isConst Should the param be constant
 	*/
-	PackageParam FromID(u32 id, bool isConst) const
+	VariableAccess FromID(u32 id, bool isConst) const
 	{
 		if(m_Pack)
 			return m_Pack->GetParam(id, m_Data, isConst);
@@ -577,22 +577,22 @@ public:
 			return 0;
 	}
 
-	core::PackageParam Param(const StringType& name)
+	core::VariableAccess Param(const StringType& name)
 	{
 		return FromName(name, false);
 	}
 
-	core::PackageParam Param(const StringType& name) const
+	core::VariableAccess Param(const StringType& name) const
 	{
 		return FromName(name, true);
 	}
 
-	core::PackageParam Param(u32 id)
+	core::VariableAccess Param(u32 id)
 	{
 		return FromID(id, false);
 	}
 
-	core::PackageParam Param(u32 id) const
+	core::VariableAccess Param(u32 id) const
 	{
 		return FromID(id, true);
 	}
@@ -687,17 +687,20 @@ public:
 		return id;
 	}
 
-	core::PackageParam operator[](u32 id) const
+	core::VariableAccess operator[](u32 id) const
 	{
 		const auto& p = m_Params.At(id);
+		return core::VariableAccess(p.type, p.name.Data(), p.data);
+	}
 
+	core::ParamDesc GetDesc(u32 id) const
+	{
 		core::ParamDesc desc;
+		auto& param = m_Params.At(id);
+		desc.name = param.name.Data();
 		desc.id = id;
-		desc.name = p.name.Data();
-		desc.type = p.type;
-		desc.size = (u8)p.type.GetSize();
-
-		return core::PackageParam(desc, p.data);
+		desc.type = param.type;
+		return desc;
 	}
 
 	u32 Size() const
@@ -723,30 +726,30 @@ private:
 
 //! Casting from color to colorf
 template <>
-inline PackageParam& PackageParam::operator=(const video::Color& color)
+inline VariableAccess& VariableAccess::operator=(const video::Color& color)
 {
-	if(m_Desc.type != core::Types::Color() && m_Desc.type != core::Types::Colorf())
-		throw TypeException("Incompatible types used", m_Desc.type, core::Types::Color());
+	if(m_Type != core::Types::Color() && m_Type != core::Types::Colorf())
+		throw TypeException("Incompatible types used", m_Type, core::Types::Color());
 
-	if(m_Desc.type == core::Types::Color())
+	if(m_Type == core::Types::Color())
 		*((video::Color*)m_Data) = color;
 
-	if(m_Desc.type == core::Types::Colorf())
+	if(m_Type == core::Types::Colorf())
 		*((video::Colorf*)m_Data) = video::Colorf(color);
 
 	return *this;
 }
 
 template <>
-inline PackageParam& PackageParam::operator=(const video::Color::EPredefinedColors& color)
+inline VariableAccess& VariableAccess::operator=(const video::Color::EPredefinedColors& color)
 {
-	if(m_Desc.type != core::Types::Color() && m_Desc.type != core::Types::Colorf())
-		throw TypeException("Incompatible types used", m_Desc.type, core::Types::Color());
+	if(m_Type != core::Types::Color() && m_Type != core::Types::Colorf())
+		throw TypeException("Incompatible types used", m_Type, core::Types::Color());
 
-	if(m_Desc.type == core::Types::Color())
+	if(m_Type == core::Types::Color())
 		*((video::Color*)m_Data) = color;
 
-	if(m_Desc.type == core::Types::Colorf())
+	if(m_Type == core::Types::Colorf())
 		*((video::Colorf*)m_Data) = video::Colorf(color);
 
 	return *this;

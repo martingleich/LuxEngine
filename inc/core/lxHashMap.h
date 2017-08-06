@@ -277,6 +277,18 @@ public:
 			return &(m_Entry->key);
 		}
 
+		const V& value()
+		{
+			lxAssert(IsValidIterator());
+			return m_Entry->value;
+		}
+
+		const K& key()
+		{
+			lxAssert(IsValidIterator());
+			return m_Entry->key;
+		}
+
 	private:
 		bool IsValidIterator() const
 		{
@@ -363,6 +375,18 @@ public:
 			m_Bucket = iter.m_Bucket;
 			m_Entry = iter.m_Entry;
 			return *this;
+		}
+
+		const V& value()
+		{
+			lxAssert(IsValidIterator());
+			return m_Entry->value;
+		}
+
+		const K& key()
+		{
+			lxAssert(IsValidIterator());
+			return m_Entry->key;
 		}
 
 	private:

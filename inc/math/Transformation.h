@@ -2,6 +2,7 @@
 #define INCLUDED_TRANSFORMATION_H
 #include "math/Matrix4.h"
 #include "math/Triangle3.h"
+#include "core/lxFormat.h"
 
 namespace lux
 {
@@ -404,6 +405,20 @@ inline math::Triangle3F& Transformation::TransformObject(const math::Triangle3F&
 	out.Set(TransformPoint(in.A), TransformPoint(in.B), TransformPoint(in.C));
 	return out;
 }
+
+inline void conv_data(format::Context& ctx, const Transformation& t, format::Placeholder& placeholder)
+{
+	using namespace format;
+	ConvertAddString(ctx, format::StringType::Ascii, "[transl=", 8);
+	conv_data(ctx, t.translation, placeholder);
+	ConvertAddString(ctx, format::StringType::Ascii, " orient=", 8);
+	conv_data(ctx, t.orientation, placeholder);
+	ConvertAddString(ctx, format::StringType::Ascii, " scale=", 7);
+	conv_data(ctx, t.scale, placeholder);
+
+	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
+}
+
 } // !namespace math
 } // !namespace lux
 

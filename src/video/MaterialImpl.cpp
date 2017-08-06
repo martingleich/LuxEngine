@@ -153,30 +153,30 @@ float MaterialImpl::GetPower() const
 
 ////////////////////////////////////////////////////////////////////
 
-core::PackageParam MaterialImpl::Param(const StringType& name)
+core::VariableAccess MaterialImpl::Param(const StringType& name)
 {
 	return m_RenderData.puffer.FromName(name, false);
 }
 
-core::PackageParam MaterialImpl::Param(const StringType& name) const
+core::VariableAccess MaterialImpl::Param(const StringType& name) const
 {
 	return m_RenderData.puffer.FromName(name, true);
 }
 
-core::PackageParam MaterialImpl::Param(u32 id)
+core::VariableAccess MaterialImpl::Param(u32 id)
 {
 	return m_RenderData.puffer.FromID(id, false);
 }
-core::PackageParam MaterialImpl::Param(u32 id) const
+core::VariableAccess MaterialImpl::Param(u32 id) const
 {
 	return m_RenderData.puffer.FromID(id, true);
 }
 
-core::PackageParam MaterialImpl::Layer(u32 layer)
+core::VariableAccess MaterialImpl::Layer(u32 layer)
 {
 	return m_RenderData.puffer.FromType(core::Types::Texture(), layer, false);
 }
-core::PackageParam MaterialImpl::Layer(u32 layer) const
+core::VariableAccess MaterialImpl::Layer(u32 layer) const
 {
 	return m_RenderData.puffer.FromType(core::Types::Texture(), layer, true);
 }

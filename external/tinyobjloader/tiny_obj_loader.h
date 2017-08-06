@@ -874,7 +874,7 @@ static void InitMaterial(material_t *material) {
   }
   material->illum = 0;
   material->dissolve = 1.f;
-  material->shininess = 1.f;
+  material->shininess = 0.f; // Changed by Martin Gleich, 0 is a more sensible default value
   material->ior = 1.f;
 
   material->roughness = 0.f;

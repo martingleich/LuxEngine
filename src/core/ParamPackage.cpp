@@ -92,11 +92,12 @@ void ParamPackage::MergePackage(const ParamPackage& other)
 			continue;
 		}
 
+		auto default = other.DefaultValue(i);
 		Entry entry;
 		entry.name = desc.name;
 		entry.type = desc.type;
 		entry.size = (u8)entry.type.GetSize();
-		AddEntry(entry, desc.defaultValue);
+		AddEntry(entry, default.Data());
 	}
 }
 
@@ -144,10 +145,8 @@ ParamDesc ParamPackage::GetParamDesc(u32 param) const
 	auto& p = self->Params.At(param);
 	ParamDesc desc;
 	desc.name = p.name.Data();
-	desc.size = p.size;
 	desc.type = p.type;
 	desc.id = param;
-	desc.defaultValue = (u8*)self->DefaultPackage + p.offset;
 
 	return desc;
 }
@@ -157,26 +156,21 @@ const String& ParamPackage::GetParamName(u32 param) const
 	return self->Params.At(param).name;
 }
 
-PackageParam ParamPackage::GetParam(u32 param, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParam(u32 param, void* baseData, bool isConst) const
 {
 	auto& p = self->Params.At(param);
 
 	core::Type type = isConst ? p.type.GetConstantType() : p.type;
 
-	ParamDesc desc;
-	desc.name = p.name.Data();
-	desc.size = p.size;
-	desc.type = type;
-	desc.id = param;
-	return PackageParam(desc, (u8*)baseData + p.offset);
+	return VariableAccess(type, p.name.Data(), (u8*)baseData + p.offset);
 }
 
-PackageParam ParamPackage::GetParamFromName(const StringType& name, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParamFromName(const StringType& name, void* baseData, bool isConst) const
 {
 	return GetParam(GetParamId(name), baseData, isConst);
 }
 
-PackageParam ParamPackage::GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const
 {
 	u32 id = 0;
 	for(u32 i = 0; i < self->Params.Size(); ++i) {
@@ -190,19 +184,19 @@ PackageParam ParamPackage::GetParamFromType(core::Type type, u32 index, void* ba
 	throw core::ObjectNotFoundException("param_by_type");
 }
 
-PackageParam ParamPackage::DefaultValue(u32 param)
+VariableAccess ParamPackage::DefaultValue(u32 param)
 {
 	auto& p = self->Params.At(param);
-
-	ParamDesc desc;
-	desc.name = p.name.Data();
-	desc.size = p.size;
-	desc.type = p.type;
-	desc.id = param;
-	return PackageParam(desc, (u8*)self->DefaultPackage + p.offset);
+	return VariableAccess(p.type, p.name.Data(), (u8*)self->DefaultPackage + p.offset);
 }
 
-PackageParam ParamPackage::DefaultValue(const StringType& param)
+VariableAccess ParamPackage::DefaultValue(u32 param) const
+{
+	auto& p = self->Params.At(param);
+	return VariableAccess(p.type.GetConstantType(), p.name.Data(), (u8*)self->DefaultPackage + p.offset);
+}
+
+VariableAccess ParamPackage::DefaultValue(const StringType& param)
 {
 	return DefaultValue(GetParamId(param));
 }

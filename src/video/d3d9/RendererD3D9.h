@@ -27,6 +27,8 @@ public:
 		bool clearColor, bool clearZBuffer, bool clearStencil,
 		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil=0);
 
+	void ClearStencil(u32 value = 0);
+
 	void EndScene();
 	bool Present();
 

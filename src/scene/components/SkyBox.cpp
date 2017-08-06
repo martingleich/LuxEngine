@@ -54,6 +54,85 @@ void SkyBox::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 	visitor->Visit(this);
 }
 
+static const video::Vertex3DTCoord g_Vertices3D[8] =
+{
+	video::Vertex3DTCoord(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f),
+	video::Vertex3DTCoord(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+	video::Vertex3DTCoord(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f),
+	video::Vertex3DTCoord(-1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f),
+	video::Vertex3DTCoord(-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f),
+	video::Vertex3DTCoord(1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f),
+	video::Vertex3DTCoord(1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
+	video::Vertex3DTCoord(-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f)
+};
+
+static const video::Vertex3D g_Vertices2D[] =
+{
+	// create front side
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, 1, 1, 1),
+	video::Vertex3D(1, -1, -1, video::Color::Black, 0, 0, 1, 0, 1),
+	video::Vertex3D(1, 1, -1, video::Color::Black, 0, 0, 1, 0, 0),
+
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, 1, 1, 1),
+	video::Vertex3D(1, 1, -1, video::Color::Black, 0, 0, 1, 0, 0),
+	video::Vertex3D(-1, 1, -1, video::Color::Black, 0, 0, 1, 1, 0),
+
+	// create left side
+	video::Vertex3D(1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
+	video::Vertex3D(1, -1, 1, video::Color::Black, -1, 0, 0, 0, 1),
+	video::Vertex3D(1, 1, 1, video::Color::Black, -1, 0, 0, 0, 0),
+
+	video::Vertex3D(1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
+	video::Vertex3D(1, 1, 1, video::Color::Black, -1, 0, 0, 0, 0),
+	video::Vertex3D(1, 1, -1, video::Color::Black, -1, 0, 0, 1, 0),
+
+	// create back side
+	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 0, -1, 1, 1),
+	video::Vertex3D(-1, -1, 1, video::Color::Black, 0, 0, -1, 0, 1),
+	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, 0, -1, 0, 0),
+
+	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 0, -1, 1, 1),
+	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, 0, -1, 0, 0),
+	video::Vertex3D(1, 1, 1, video::Color::Black, 0, 0, -1, 1, 0),
+
+	// create right side
+	video::Vertex3D(-1, -1, 1, video::Color::Black, 1, 0, 0, 1, 1),
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 1, 0, 0, 0, 1),
+	video::Vertex3D(-1, 1, -1, video::Color::Black, 1, 0, 0, 0, 0),
+
+	video::Vertex3D(-1, -1, 1, video::Color::Black, 1, 0, 0, 1, 1),
+	video::Vertex3D(-1, 1, -1, video::Color::Black, 1, 0, 0, 0, 0),
+	video::Vertex3D(-1, 1, 1, video::Color::Black, 1, 0, 0, 1, 0),
+
+	// create top side
+	video::Vertex3D(1, 1, -1, video::Color::Black, 0, -1, 0, 1, 1),
+	video::Vertex3D(1, 1, 1, video::Color::Black, 0, -1, 0, 0, 1),
+	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, -1, 0, 0, 0),
+
+	video::Vertex3D(1, 1, -1, video::Color::Black, 0, -1, 0, 1, 1),
+	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, -1, 0, 0, 0),
+	video::Vertex3D(-1, 1, -1, video::Color::Black, 0, -1, 0, 1, 0),
+
+	// create bottom side
+	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 1, 0, 0, 0),
+	video::Vertex3D(1, -1, -1, video::Color::Black, 0, 1, 0, 1, 0),
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 1, 0, 1, 1),
+
+	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 1, 0, 0, 0),
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 1, 0, 1, 1),
+	video::Vertex3D(-1, -1, 1, video::Color::Black, 0, 1, 0, 0, 1),
+};
+
+static const u16 g_Indices[36] =
+{
+	7, 3, 0, 4, 7, 0,    // Front
+	5, 1, 2, 6, 5, 2,    // Back
+	4, 0, 1, 5, 4, 1,    // Left
+	6, 2, 3, 7, 6, 3,    // Right
+	2, 1, 0, 3, 2, 0,    // Top
+	4, 5, 6, 7, 4, 6     // Down
+};
+
 void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data)
 {
 	if(data.pass != ERenderPass::SkyBox)
@@ -62,97 +141,17 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 	if(!m_Material)
 		return;
 
-	const Node* camNode = node->GetSceneManager()->GetActiveCameraNode();
-	const Camera* camera = node->GetSceneManager()->GetActiveCamera();
 
 	math::Transformation t = node->GetAbsoluteTransform();
-	t.translation = camNode->GetAbsolutePosition();
+	t.translation = data.activeCameraNode->GetAbsolutePosition();
 
-	// Die Sky-box genau zwischen die Clipping-Ebenen legen
+	// Place the skybox right between the clipping planes
+	const Camera* camera = data.activeCamera;
 	t.scale = 0.5f * (camera->GetNearPlane() + camera->GetFarPlane());
 
 	math::Matrix4 m;
 	t.ToMatrix(m);
 	renderer->SetTransform(video::ETransform::World, m);
-
-	static const video::Vertex3DTCoord Vertices3D[8] =
-	{
-		video::Vertex3DTCoord(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f),
-		video::Vertex3DTCoord(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-		video::Vertex3DTCoord(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f),
-		video::Vertex3DTCoord(-1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f),
-		video::Vertex3DTCoord(-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f),
-		video::Vertex3DTCoord(1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f),
-		video::Vertex3DTCoord(1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
-		video::Vertex3DTCoord(-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f)
-	};
-
-	static const video::Vertex3D Vertices2D[] =
-	{
-		// create front side
-		video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, 1, 1, 1),
-		video::Vertex3D(1, -1, -1, video::Color::Black, 0, 0, 1, 0, 1),
-		video::Vertex3D(1, 1, -1, video::Color::Black, 0, 0, 1, 0, 0),
-
-		video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, 1, 1, 1),
-		video::Vertex3D(1, 1, -1, video::Color::Black, 0, 0, 1, 0, 0),
-		video::Vertex3D(-1, 1, -1, video::Color::Black, 0, 0, 1, 1, 0),
-
-		// create left side
-		video::Vertex3D(1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
-		video::Vertex3D(1, -1, 1, video::Color::Black, -1, 0, 0, 0, 1),
-		video::Vertex3D(1, 1, 1, video::Color::Black, -1, 0, 0, 0, 0),
-
-		video::Vertex3D(1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
-		video::Vertex3D(1, 1, 1, video::Color::Black, -1, 0, 0, 0, 0),
-		video::Vertex3D(1, 1, -1, video::Color::Black, -1, 0, 0, 1, 0),
-
-		// create back side
-		video::Vertex3D(1, -1, 1, video::Color::Black, 0, 0, -1, 1, 1),
-		video::Vertex3D(-1, -1, 1, video::Color::Black, 0, 0, -1, 0, 1),
-		video::Vertex3D(-1, 1, 1, video::Color::Black, 0, 0, -1, 0, 0),
-
-		video::Vertex3D(1, -1, 1, video::Color::Black, 0, 0, -1, 1, 1),
-		video::Vertex3D(-1, 1, 1, video::Color::Black, 0, 0, -1, 0, 0),
-		video::Vertex3D(1, 1, 1, video::Color::Black, 0, 0, -1, 1, 0),
-
-		// create right side
-		video::Vertex3D(-1, -1, 1, video::Color::Black, 1, 0, 0, 1, 1),
-		video::Vertex3D(-1, -1, -1, video::Color::Black, 1, 0, 0, 0, 1),
-		video::Vertex3D(-1, 1, -1, video::Color::Black, 1, 0, 0, 0, 0),
-
-		video::Vertex3D(-1, -1, 1, video::Color::Black, 1, 0, 0, 1, 1),
-		video::Vertex3D(-1, 1, -1, video::Color::Black, 1, 0, 0, 0, 0),
-		video::Vertex3D(-1, 1, 1, video::Color::Black, 1, 0, 0, 1, 0),
-
-		// create top side
-		video::Vertex3D(1, 1, -1, video::Color::Black, 0, -1, 0, 1, 1),
-		video::Vertex3D(1, 1, 1, video::Color::Black, 0, -1, 0, 0, 1),
-		video::Vertex3D(-1, 1, 1, video::Color::Black, 0, -1, 0, 0, 0),
-
-		video::Vertex3D(1, 1, -1, video::Color::Black, 0, -1, 0, 1, 1),
-		video::Vertex3D(-1, 1, 1, video::Color::Black, 0, -1, 0, 0, 0),
-		video::Vertex3D(-1, 1, -1, video::Color::Black, 0, -1, 0, 1, 0),
-
-		// create bottom side
-		video::Vertex3D(1, -1, 1, video::Color::Black, 0, 1, 0, 0, 0),
-		video::Vertex3D(1, -1, -1, video::Color::Black, 0, 1, 0, 1, 0),
-		video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 1, 0, 1, 1),
-
-		video::Vertex3D(1, -1, 1, video::Color::Black, 0, 1, 0, 0, 0),
-		video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 1, 0, 1, 1),
-		video::Vertex3D(-1, -1, 1, video::Color::Black, 0, 1, 0, 0, 1),
-	};
-
-	static const u16 Indices[36] =
-	{
-		7, 3, 0, 4, 7, 0,    // Front
-		5, 1, 2, 6, 5, 2,    // Back
-		4, 0, 1, 5, 4, 1,    // Left
-		6, 2, 3, 7, 6, 3,    // Right
-		2, 1, 0, 3, 2, 0,    // Top
-		4, 5, 6, 7, 4, 6     // Down
-	};
 
 	// Disable z comparison for sky box renderering
 	video::PipelineOverwrite over;
@@ -168,17 +167,17 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 		renderer->DrawIndexedPrimitiveList(
 			video::EPrimitiveType::Triangles,
 			12,
-			Vertices3D,
+			g_Vertices3D,
 			8,
 			video::VertexFormat::TEXTURE_3D,
-			Indices,
+			g_Indices,
 			video::EIndexFormat::Bit16,
 			true);
 	} else {
 		renderer->DrawPrimitiveList(
 			video::EPrimitiveType::Triangles,
 			12,
-			Vertices2D,
+			g_Vertices2D,
 			36,
 			video::VertexFormat::STANDARD,
 			true);

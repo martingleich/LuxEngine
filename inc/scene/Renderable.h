@@ -23,9 +23,13 @@ enum class ERenderPass
 };
 
 class Light;
+class Camera;
 class SceneData
 {
 public:
+	Node* activeCameraNode;
+	Camera* activeCamera;
+
 	ERenderPass pass;
 
 	struct LightEntry

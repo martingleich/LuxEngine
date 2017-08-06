@@ -45,12 +45,12 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	core::PackageParam Param(const StringType& name);
-	core::PackageParam Param(const StringType& name) const;
-	core::PackageParam Param(u32 id);
-	core::PackageParam Param(u32 id) const;
-	core::PackageParam Layer(u32 layer);
-	core::PackageParam Layer(u32 layer) const;
+	core::VariableAccess Param(const StringType& name);
+	core::VariableAccess Param(const StringType& name) const;
+	core::VariableAccess Param(u32 id);
+	core::VariableAccess Param(u32 id) const;
+	core::VariableAccess Layer(u32 layer);
+	core::VariableAccess Layer(u32 layer) const;
 
 	////////////////////////////////////////////////////////////////////
 

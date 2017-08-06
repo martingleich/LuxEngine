@@ -1,4 +1,6 @@
 #include "scene/SceneManagerImpl.h"
+
+#include "video/DriverConfig.h"
 #include "video/VideoDriver.h"
 #include "video/RenderTarget.h"
 
@@ -36,12 +38,16 @@ namespace scene
 {
 
 SceneManagerImpl::SceneManagerImpl() :
-	m_CollectedRoot(nullptr)
+	m_CollectedRoot(nullptr),
+	m_StencilShadowRenderer(video::VideoDriver::Instance()->GetRenderer(), 0xFFFFFFFF)
 {
 	m_RootSceneNode = LUX_NEW(Node)(this, true);
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
 
 	m_Fog.isActive = false;
+
+	m_Attributes.AddAttribute("drawStencilShadows", true);
+	m_Attributes.AddAttribute("maxShadowCasters", 1);
 }
 
 SceneManagerImpl::~SceneManagerImpl()
@@ -88,9 +94,9 @@ StrongRef<Node> SceneManagerImpl::AddSkyBox(video::CubeTexture* skyTexture)
 	return AddNode(CreateSkyBox(skyTexture));
 }
 
-StrongRef<Node> SceneManagerImpl::AddLight()
+StrongRef<Node> SceneManagerImpl::AddLight(video::ELightType lightType, video::Color color)
 {
-	return AddNode(CreateLight());
+	return AddNode(CreateLight(lightType, color));
 }
 
 StrongRef<Node> SceneManagerImpl::AddCamera()
@@ -124,9 +130,12 @@ StrongRef<SkyBox> SceneManagerImpl::CreateSkyBox(video::CubeTexture* skyTexture)
 	return out;
 }
 
-StrongRef<Light> SceneManagerImpl::CreateLight()
+StrongRef<Light> SceneManagerImpl::CreateLight(video::ELightType lightType, video::Color color)
 {
-	return CreateComponent(SceneComponentType::Light);
+	StrongRef<Light> light = CreateComponent(SceneComponentType::Light);
+	light->SetLightType(lightType);
+	light->SetColor(color);
+	return light;
 }
 
 StrongRef<RotationAnimator> SceneManagerImpl::CreateRotator(const math::Vector3F& axis, math::AngleF rotSpeed)
@@ -195,16 +204,6 @@ Node* SceneManagerImpl::GetRoot()
 	return m_RootSceneNode;
 }
 
-StrongRef<Node> SceneManagerImpl::GetActiveCameraNode()
-{
-	return m_ActiveCameraNode;
-}
-
-StrongRef<Camera> SceneManagerImpl::GetActiveCamera()
-{
-	return m_ActiveCamera;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 void SceneManagerImpl::AnimateAll(float secsPassed)
@@ -254,11 +253,13 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 			m_Renderer->SetRenderTarget(m_ActiveCamera->GetRenderTarget());
 			bool clearColor = true;
 			bool clearZ = true;
+			bool clearStencil = true;
 			if(!m_SkyBoxList.IsEmpty()) {
 				clearZ = true;
 				clearColor = true;
 			}
-			m_Renderer->BeginScene(clearColor, clearZ, true);
+			m_Renderer->BeginScene(clearColor, clearZ, clearStencil,
+				video::Color::Black, 1.0f, 0);
 		}
 
 		m_ActiveCamera->PreRender(m_Renderer, m_ActiveCameraNode);
@@ -460,9 +461,22 @@ void SceneManagerImpl::DrawScene()
 {
 	m_Renderer->SetFog(m_Fog);
 
+	// Check if a stencil buffer is available for shadow rendering
+	bool drawStencilShadows = m_Attributes["drawStencilShadows"];
+	if(drawStencilShadows) {
+		if(m_Renderer->GetDriver()->GetConfig().zsFormat.sBits == 0) {
+			log::Warning("Scene: Can't draw stencil shadows without stencilbuffer(Disabled shadow rendering).");
+			drawStencilShadows = false;
+			m_Attributes["drawStencilShadows"] = false;
+		}
+	}
+
 	core::Array<SceneData::LightEntry> illuminating;
 	core::Array<SceneData::LightEntry> shadowCasting;
+	core::Array<SceneData::LightEntry> nonShadowCasting;
 	SceneData sceneData(illuminating, shadowCasting);
+	sceneData.activeCamera = m_ActiveCamera;
+	sceneData.activeCameraNode = m_ActiveCameraNode;
 
 	//-------------------------------------------------------------------------
 	// The lights
@@ -471,16 +485,21 @@ void SceneManagerImpl::DrawScene()
 	m_Renderer->ClearLights();
 
 	size_t maxLightCount = m_Renderer->GetMaxLightCount();
-	maxLightCount = math::Min(maxLightCount, m_LightList.Size());
+	size_t maxShadowCastingCount = drawStencilShadows ? m_Attributes["maxShadowCasters"] : 0;
 
 	size_t count = 0;
+	size_t shadowCount = 0;
 	for(auto& e : m_LightList) {
 		if(e.node->IsTrulyVisible()) {
 			illuminating.PushBack(SceneData::LightEntry(e.light, e.node));
-			shadowCasting.PushBack(SceneData::LightEntry(e.light, e.node));
-			e.light->Render(m_Renderer, e.node);
+			if(e.light->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
+				shadowCasting.PushBack(SceneData::LightEntry(e.light, e.node));
+				++shadowCount;
+			} else {
+				nonShadowCasting.PushBack(SceneData::LightEntry(e.light, e.node));
+			}
 			++count;
-			if(count == maxLightCount)
+			if(count >= maxLightCount)
 				break;
 		}
 	}
@@ -501,9 +520,17 @@ void SceneManagerImpl::DrawScene()
 
 	//-------------------------------------------------------------------------
 	// Solid objects
+
 	EnableOverwrite(ERenderPass::SolidAndTransparent, pot);
 	EnableOverwrite(ERenderPass::Solid, pot);
 
+	if(drawStencilShadows) {
+		video::PipelineOverwrite illumOver;
+		illumOver.lighting = video::ELighting::AmbientEmit;
+		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
+	}
+
+	// Ambient pass
 	sceneData.pass = ERenderPass::Solid;
 	for(auto& e : m_SolidNodeList) {
 		if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
@@ -511,6 +538,90 @@ void SceneManagerImpl::DrawScene()
 	}
 
 	DisableOverwrite(ERenderPass::Solid, pot);
+	if(drawStencilShadows)
+		m_Renderer->PopPipelineOverwrite(&pot);
+
+	// Shadow pass for each shadow casting light
+	if(drawStencilShadows) {
+		for(auto shadowLight : shadowCasting) {
+			m_Renderer->ClearLights();
+			AddDriverLight(shadowLight.node, shadowLight.light);
+
+			m_StencilShadowRenderer.Begin(m_ActiveCameraNode->GetAbsolutePosition(), m_ActiveCameraNode->GetAbsoluteTransform().TransformDir(math::Vector3F::UNIT_Y));
+			for(auto& e : m_SolidNodeList) {
+				if(e.node->IsTrulyVisible()) {
+					auto mesh = dynamic_cast<Mesh*>(e.renderable);
+					if(mesh && mesh->GetMesh()) {
+						bool isInfinite;
+						math::Vector3F lightPos;
+						if(shadowLight.light->GetLightType() == video::ELightType::Directional) {
+							isInfinite = true;
+							lightPos = e.node->ToRelativeDir(shadowLight.node->FromRelativeDir(math::Vector3F::UNIT_Z));
+						} else {
+							isInfinite = false;
+							lightPos = e.node->ToRelativePos(shadowLight.node->GetAbsolutePosition());
+						}
+						m_StencilShadowRenderer.AddSilhouette(e.node->GetAbsoluteTransform(), mesh->GetMesh(), lightPos, isInfinite);
+					}
+				}
+			}
+
+			m_StencilShadowRenderer.End();
+
+			video::PipelineOverwrite illumOver;
+			illumOver.disableZWrite = true;
+			illumOver.lighting = video::ELighting::DiffSpec;
+			illumOver.useAlphaOverwrite = true;
+			illumOver.alphaOperator = video::EBlendOperator::Add;
+			illumOver.alphaSrcBlend = video::EBlendFactor::One;
+			illumOver.alphaDstBlend = video::EBlendFactor::One;
+			illumOver.useStencilOverwrite = true;
+			illumOver.stencil = m_StencilShadowRenderer.GetIllumniatedStencilMode();
+
+			EnableOverwrite(ERenderPass::Solid, pot);
+			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
+
+			for(auto& e : m_SolidNodeList) {
+				if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
+					e.renderable->Render(e.node, m_Renderer, sceneData);
+			}
+
+			m_Renderer->PopPipelineOverwrite(&pot);
+			DisableOverwrite(ERenderPass::Solid, pot);
+
+			m_Renderer->ClearStencil();
+		}
+	}
+
+	if(!nonShadowCasting.IsEmpty()) {
+		m_Renderer->ClearLights();
+		// Draw with remaining non shadow casting lights
+		for(auto illum : nonShadowCasting)
+			AddDriverLight(illum.node, illum.light);
+
+		video::PipelineOverwrite illumOver;
+		illumOver.disableZWrite = true;
+		illumOver.lighting = video::ELighting::DiffSpec;
+		illumOver.useAlphaOverwrite = true;
+		illumOver.alphaOperator = video::EBlendOperator::Add;
+		illumOver.alphaSrcBlend = video::EBlendFactor::One;
+		illumOver.alphaDstBlend = video::EBlendFactor::One;
+		EnableOverwrite(ERenderPass::Solid, pot);
+		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
+
+		sceneData.pass = ERenderPass::Solid;
+		for(auto& e : m_SolidNodeList) {
+			if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
+				e.renderable->Render(e.node, m_Renderer, sceneData);
+		}
+
+		m_Renderer->PopPipelineOverwrite(&pot);
+		DisableOverwrite(ERenderPass::Solid, pot);
+	}
+
+	// Add shadow casting light for remaining render jobs
+	for(auto illum : shadowCasting)
+		AddDriverLight(illum.node, illum.light);
 
 	//-------------------------------------------------------------------------
 	// Transparent objects
@@ -532,41 +643,22 @@ void SceneManagerImpl::DrawScene()
 
 	DisableOverwrite(ERenderPass::Transparent, pot);
 	DisableOverwrite(ERenderPass::SolidAndTransparent, pot);
+}
 
-	/*
-	sceneData.pass = ERenderPass::StencilShadow;
-	for(auto& e : m_ShadowCaster) {
-		if(e.node->IsTrulyVisible())
-			e.renderable->Render(e.node, m_Renderer, sceneData);
+void SceneManagerImpl::AddDriverLight(Node* n, Light* l)
+{
+	auto data = l->GetLightData();
+	if(data.type == video::ELightType::Spot ||
+		data.type == video::ELightType::Directional) {
+		data.direction = n->FromRelativeDir(math::Vector3F::UNIT_Z);
 	}
 
-	if(!m_ShadowCaster.IsEmpty()) {
-		auto size = m_Renderer->GetRenderTarget().GetSize();
-		video::Color shadowColor(255, 0, 0, 100);
-		const video::Vertex2D points[4] =
-		{
-			video::Vertex2D(0.0f, 0.0f, shadowColor),
-			video::Vertex2D((float)size.width, 0.0f, shadowColor),
-			video::Vertex2D(0.0f, (float)size.height, shadowColor),
-			video::Vertex2D((float)size.width, (float)size.height, shadowColor)
-		};
-
-		video::Pass p;
-		p.stencil.test = video::EComparisonFunc::Less;
-		p.stencil.ref = 0;
-		p.zBufferFunc = video::EComparisonFunc::Always;
-		p.zWriteEnabled = false;
-		p.lighting = video::ELighting::Disabled;
-		p.isTransparent = true;
-		p.fogEnabled = false;
-		p.useVertexColor = true;
-		p.alphaOperator = video::EBlendOperator::Add;
-		p.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-		p.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-		m_Renderer->SetPass(p);
-		m_Renderer->DrawPrimitiveList(video::EPrimitiveType::TriangleStrip, 2, &points, 4, video::VertexFormat::STANDARD_2D, false);
+	if(data.type == video::ELightType::Spot ||
+		data.type == video::ELightType::Point) {
+		data.position = n->GetAbsolutePosition();
 	}
-	*/
+
+	m_Renderer->AddLight(data);
 }
 
 } // namespace scene

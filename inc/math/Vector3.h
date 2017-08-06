@@ -536,7 +536,7 @@ inline Vector3<T> operator/ (const T f, const Vector3<T>& v)
 //! A 3d vector with float precision
 typedef Vector3<float> Vector3F;
 //! A 3d vector with integer precision
-typedef Vector3<s32>   vector3i;
+typedef Vector3<s32> Vector3I;
 
 template <typename T>
 const Vector3<T> Vector3<T>::UNIT_X = math::Vector3<T>(1, 0, 0);

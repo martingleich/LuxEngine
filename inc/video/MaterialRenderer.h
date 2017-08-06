@@ -17,25 +17,6 @@ class VideoDriver;
 class RenderSettings;
 class Shader;
 
-class ParamSetCallback : public ReferenceCounted
-{
-public:
-	virtual ~ParamSetCallback() {}
-
-	virtual void GeneratePass(u32 passId, const RenderSettings& settings, Pass& outPass)
-	{
-		LUX_UNUSED(passId);	
-		LUX_UNUSED(settings);	
-		LUX_UNUSED(outPass);	
-	}
-	virtual void SendShaderSettings(u32 passId, const Pass& pass, const RenderSettings& settings)
-	{
-		LUX_UNUSED(passId);	
-		LUX_UNUSED(pass);
-		LUX_UNUSED(settings);	
-	}
-};
-
 //! A Materialrenderer
 /**
 Material rendered communicate the data inside a material to the driver.
@@ -75,13 +56,13 @@ public:
 	LUX_API Pass& GetPass(size_t passId);
 	LUX_API size_t GetPassCount();
 
-	LUX_API core::PackageParam AddParam(const String& paramName, const core::Type& type);
+	LUX_API core::VariableAccess AddParam(const String& paramName, const core::Type& type);
 
-	LUX_API core::PackageParam SetShaderValue(u32 passId, const String& name);
-	LUX_API core::PackageParam AddShaderParam(const String& paramName, u32 passId, const String& name);
-	LUX_API core::PackageParam AddShaderParam(const String& paramName, u32 passId, u32 paramId);
+	LUX_API core::VariableAccess SetShaderValue(u32 passId, const String& name);
+	LUX_API core::VariableAccess AddShaderParam(const String& paramName, u32 passId, const String& name);
+	LUX_API core::VariableAccess AddShaderParam(const String& paramName, u32 passId, u32 paramId);
 
-	LUX_API core::PackageParam AddParam(const String& paramName, u32 passId, EOptionId optionId);
+	LUX_API core::VariableAccess AddParam(const String& paramName, u32 passId, EOptionId optionId);
 
 private:
 	struct ParamMapping
@@ -106,7 +87,7 @@ private:
 		{}
 	};
 
-	core::PackageParam AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader);
+	core::VariableAccess AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader);
 
 private:
 	core::ParamPackage m_Params;

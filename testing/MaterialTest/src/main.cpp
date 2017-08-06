@@ -23,7 +23,7 @@ public:
 			true, true,
 			false,
 			0,
-			0,
+			8,
 			true);
 		m_Device->BuildAll(config);
 
@@ -160,6 +160,10 @@ void MaterialTest::Load()
 {
 	LoadBase();
 
+	StrongRef<scene::Node> node;
+
+	m_CameraNode->AddComponent(Context.Smgr->CreateCameraControl());
+
 	m_Font = Context.GUI->GetFontCreator()->CreateFont(
 		gui::FontDescription("Comic Sans MS", 40),
 		Context.GUI->GetFontCreator()->GetDefaultCharset("german"));
@@ -178,7 +182,7 @@ void MaterialTest::Load()
 		comp->SetReadMaterialsOnly(false);
 		comp->SetMaterial(0, *it);
 
-		auto node = Context.Smgr->AddNode(comp);
+		node = Context.Smgr->AddNode(comp);
 
 		math::Vector3F pos(
 			startPoint.x + col*delta,
@@ -196,6 +200,7 @@ void MaterialTest::Load()
 
 void MaterialTest::OnEvent(const input::Event& e)
 {
+	scene::CameraControl::DefaultEventToCameraAction(e);
 }
 
 int main(int arg, char **argv)

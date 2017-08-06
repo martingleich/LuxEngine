@@ -26,7 +26,7 @@ public:
 	{
 	}
 
-	core::PackageParam operator[](u32 id) const
+	core::VariableAccess operator[](u32 id) const
 	{
 		return m_Renderer->GetParam(id);
 	}
@@ -87,6 +87,20 @@ void RendererD3D9::BeginScene(
 			throw core::Exception("Scene was already started");
 		else
 			throw core::D3D9Exception(hr);
+	}
+}
+
+void RendererD3D9::ClearStencil(u32 value)
+{
+	u32 flags = 0;
+	if(m_Driver->GetConfig().zsFormat.sBits != 0)
+		flags |= D3DCLEAR_STENCIL;
+	HRESULT hr;
+	if(FAILED(hr = m_Device->Clear(
+		0, nullptr,
+		flags,
+		0, 1.0f, value))) {
+		throw core::D3D9Exception(hr);
 	}
 }
 
@@ -351,7 +365,8 @@ void RendererD3D9::SetupRendering(size_t passId)
 
 	// Get current pass, with applied options and overwrites
 	Pass pass = m_MaterialRenderer ? m_MaterialRenderer->GeneratePassData(passId, settings) : m_Pass;
-	m_FinalOverwrite.Apply(pass);
+	if(m_UseOverwrite)
+		m_FinalOverwrite.Apply(pass);
 
 	if((pass.shader != nullptr) != m_UseShader) {
 		SetDirty(Dirty_Fog);
@@ -382,6 +397,8 @@ void RendererD3D9::SetupRendering(size_t passId)
 	// Send the generated data to the shader
 	if(m_MaterialRenderer)
 		m_MaterialRenderer->SendShaderSettings(passId, pass, settings);
+	else if(m_ParamSetCallback)
+		m_ParamSetCallback->SendShaderSettings(passId, pass, settings);
 
 	ClearAllDirty();
 }

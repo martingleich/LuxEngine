@@ -14,7 +14,7 @@ Type Vector3f()
 }
 Type Vector3i()
 {
-	static const Type t(new core::TypeInfoTemplate<math::vector3i>("vector3i"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector3I>("Vector3I"));
 	return t;
 }
 }

@@ -35,13 +35,15 @@ RendererNull::RendererNull(VideoDriver* driver) :
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::SetPass(const Pass& pass)
+void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ParamSetCallback* paramSetCallback)
 {
 	SetDirty(Dirty_Material);
 	SetDirty(Dirty_MaterialRenderer);
 
 	m_Pass = pass;
 	m_UseMaterial = false;
+	m_UseOverwrite = useOverwrite;
+	m_ParamSetCallback = paramSetCallback;
 }
 
 void RendererNull::SetMaterial(const Material* material)
@@ -60,6 +62,8 @@ void RendererNull::SetMaterial(const Material* material)
 	}
 
 	m_UseMaterial = true;
+	m_UseOverwrite = true;
+	m_ParamSetCallback = nullptr;
 
 	m_Pass.layers.Clear();
 	m_Pass.layerSettings.Clear();
@@ -202,42 +206,46 @@ u32 RendererNull::AddParamEx(const StringType& name, core::Type type, bool isInt
 	return m_ParamList.AddParam(name, type) + offset;
 }
 
-core::PackageParam RendererNull::GetParamEx(u32 id, bool internal)
+core::VariableAccess RendererNull::GetParamEx(u32 id, bool internal)
 {
 	if(id < m_MatrixTable.GetCount()) {
 		return m_MatrixTable.GetParamById(id);
 	} else if(id < m_MatrixTable.GetCount() + m_ParamList.Size()) {
 		u32 real_id = id - m_MatrixTable.GetCount();
-		core::PackageParam p = m_ParamList[real_id];
-		core::ParamDesc desc = p.GetDesc();
+		core::VariableAccess p = m_ParamList[real_id];
+		core::ParamDesc desc = m_ParamList.GetDesc(real_id);
 		if(m_InternalTable[desc.id] && !internal)
 			desc.type = desc.type.GetConstantType();
 		desc.id = id;
-		return core::PackageParam(desc, (u8*)p.Pointer());
+		return core::VariableAccess(desc.type, desc.name, (u8*)p.Pointer());
 	} else {
 		throw core::OutOfRangeException();
 	}
 }
 
-core::PackageParam RendererNull::GetParam(u32 id)
+core::VariableAccess RendererNull::GetParam(u32 id)
 {
 	return GetParamEx(id, false);
 }
 
-core::PackageParam RendererNull::GetParamInternal(u32 id)
+core::VariableAccess RendererNull::GetParamInternal(u32 id)
 {
 	return GetParamEx(id, true);
 }
 
-core::PackageParam RendererNull::GetParam(const StringType& string)
+core::VariableAccess RendererNull::GetParam(const StringType& string, u32* id)
 {
-	u32 id;
-	if(m_MatrixTable.GetParamIdByName(string.data, id))
-		return GetParam(id);
-	else if(GetLightId(string, id))
-		return GetParam(id);
-	else
-		return GetParam(m_ParamList.GetId(string) + m_MatrixTable.GetCount());
+	u32 tmp;
+	if(!id)
+		id = &tmp;
+	if(m_MatrixTable.GetParamIdByName(string.data, *id))
+		return GetParam(*id);
+	else if(GetLightId(string, *id))
+		return GetParam(*id);
+	else {
+		*id = m_ParamList.GetId(string) + m_MatrixTable.GetCount();
+		return GetParam(*id);
+	}
 }
 
 u32 RendererNull::GetParamCount() const

@@ -274,6 +274,11 @@ template <> inline Type GetTypeInfo<bool>() { return Types::Boolean(); }
 class AnyObject
 {
 public:
+	AnyObject() :
+		m_Type(Types::Unknown()),
+		m_Data(nullptr)
+	{}
+
 	AnyObject(const Type& type, const void* data = nullptr) :
 		m_Type(type.GetBaseType())
 	{
@@ -321,7 +326,7 @@ public:
 		return m_Data;
 	}
 
-	void Assign(void* data)
+	void Assign(const void* data)
 	{
 		m_Type.Assign(m_Data, data);
 	}

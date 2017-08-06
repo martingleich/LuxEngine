@@ -13,6 +13,27 @@ namespace lux
 namespace video
 {
 
+class Pass;
+class RenderSettings;
+class ParamSetCallback : public ReferenceCounted
+{
+public:
+	virtual ~ParamSetCallback() {}
+
+	virtual void GeneratePass(u32 passId, const RenderSettings& settings, Pass& outPass)
+	{
+		LUX_UNUSED(passId);	
+		LUX_UNUSED(settings);	
+		LUX_UNUSED(outPass);	
+	}
+	virtual void SendShaderSettings(u32 passId, const Pass& pass, const RenderSettings& settings)
+	{
+		LUX_UNUSED(passId);	
+		LUX_UNUSED(pass);
+		LUX_UNUSED(settings);	
+	}
+};
+
 enum class EOptionId
 {
 	Layer0,
@@ -161,6 +182,11 @@ public:
 
 	ELighting lighting;
 
+	EBlendFactor alphaSrcBlend = EBlendFactor::One;
+	EBlendFactor alphaDstBlend = EBlendFactor::Zero;
+	EBlendOperator alphaOperator =  EBlendOperator::None;
+
+	bool useAlphaOverwrite:1;
 	bool useStencilOverwrite:1;
 	bool disableFog:1;
 
@@ -175,6 +201,7 @@ public:
 		polygonOffset(0.0f),
 		drawMode(EDrawMode::Fill),
 		lighting(ELighting::Enabled),
+		useAlphaOverwrite(false),
 		useStencilOverwrite(false),
 		disableFog(false),
 		disableZWrite(false),
@@ -190,6 +217,12 @@ public:
 		if(next.useStencilOverwrite) {
 			useStencilOverwrite = true;
 			stencil = next.stencil;
+		}
+		if(next.useAlphaOverwrite) {
+			useAlphaOverwrite = true;
+			alphaDstBlend = next.alphaDstBlend;
+			alphaSrcBlend = next.alphaSrcBlend;
+			alphaOperator = next.alphaOperator;
 		}
 		polygonOffset += next.polygonOffset;
 		if(next.lighting != ELighting::Enabled)
@@ -219,6 +252,12 @@ public:
 	{
 		if(useStencilOverwrite)
 			pass.stencil = stencil; 
+
+		if(useAlphaOverwrite) {
+			pass.alphaDstBlend = alphaDstBlend;
+			pass.alphaSrcBlend = alphaSrcBlend;
+			pass.alphaOperator = alphaOperator;
+		}
 		pass.polygonOffset += polygonOffset;
 		if(lighting != ELighting::Enabled)
 			pass.lighting = lighting;

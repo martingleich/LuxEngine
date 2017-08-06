@@ -8,6 +8,8 @@
 #include "core/lxOrderedMap.h"
 #include "video/Renderer.h"
 
+#include "StencilShadowRenderer.h"
+
 namespace lux
 {
 namespace scene
@@ -17,7 +19,6 @@ class SceneManagerImpl : public SceneManager
 {
 public:
 	SceneManagerImpl();
-
 	~SceneManagerImpl();
 
 	void Clear();
@@ -28,7 +29,7 @@ public:
 	StrongRef<Node> AddMesh(const io::Path& path);
 	StrongRef<Node> AddMesh(video::Mesh* mesh);
 	StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr);
-	StrongRef<Node> AddLight();
+	StrongRef<Node> AddLight(video::ELightType lightType=video::ELightType::Point, video::Color color = video::Color::White);
 	StrongRef<Node> AddCamera();
 
 	// Object components
@@ -36,7 +37,7 @@ public:
 	StrongRef<Mesh> CreateMesh(const io::Path& path);
 	StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr);
 	StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture = nullptr);
-	StrongRef<Light> CreateLight();
+	StrongRef<Light> CreateLight(video::ELightType lightType=video::ELightType::Point, video::Color color = video::Color::White);
 
 	// Animatoren
 	StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f));
@@ -56,9 +57,6 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	Node* GetRoot();
-
-	StrongRef<Node> GetActiveCameraNode();
-	StrongRef<Camera> GetActiveCamera();
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -96,6 +94,16 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
+	core::VariableAccess Attribute(const String& str)
+	{
+		return m_Attributes[str];
+	}
+
+	const core::Attributes& Attributes() const
+	{
+		return m_Attributes;
+	}
+
 private:
 	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
 	void DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
@@ -107,6 +115,8 @@ private:
 	void DrawScene();
 
 	bool IsCulled(Node* n, Renderable* r);
+
+	void AddDriverLight(Node* n, Light* l);
 
 private:
 	struct RenderEntry
@@ -231,6 +241,8 @@ private:
 	// Settings and parameters
 	/////////////////////////////////////////////////////////////////////////
 
+	core::Attributes m_Attributes;
+
 	// Scene values
 	video::Colorf m_AmbientColor;
 	video::FogData m_Fog;
@@ -244,6 +256,7 @@ private:
 	/////////////////////////////////////////////////////////////////////////
 
 	video::Renderer* m_Renderer;
+	StencilShadowRenderer m_StencilShadowRenderer;
 };
 
 } // namespace scene

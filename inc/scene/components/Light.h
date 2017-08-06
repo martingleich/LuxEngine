@@ -16,6 +16,9 @@ namespace scene
 class Light : public Component
 {
 public:
+	LUX_API Light();
+	LUX_API virtual ~Light();
+
 	//! Set the light parameters
 	/**
 	\param light The new light settings
@@ -88,13 +91,15 @@ public:
 	*/
 	LUX_API virtual video::ELightType GetLightType() const;
 
-	LUX_API virtual void Render(video::Renderer* r, const Node* n);
+	LUX_API virtual bool IsShadowCasting() const;
+	LUX_API virtual void SetShadowCasting(bool b);
 
 	LUX_API virtual core::Name GetReferableType() const;
 	LUX_API virtual StrongRef<Referable> Clone() const;
 
 protected:
 	video::LightData m_LightData;
+	bool m_IsShadowCasting;
 };
 
 } // namespace scene

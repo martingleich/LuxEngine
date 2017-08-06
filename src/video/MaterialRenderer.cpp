@@ -168,13 +168,13 @@ size_t MaterialRenderer::GetPassCount()
 	return m_Passes.Size();
 }
 
-core::PackageParam MaterialRenderer::AddParam(const String& paramName, const core::Type& type)
+core::VariableAccess MaterialRenderer::AddParam(const String& paramName, const core::Type& type)
 {
 	u32 id = m_Params.AddParam(type, paramName);
 	return m_Params.DefaultValue(id);
 }
 
-core::PackageParam MaterialRenderer::SetShaderValue(u32 passId, const String& name)
+core::VariableAccess MaterialRenderer::SetShaderValue(u32 passId, const String& name)
 {
 	auto& pass = m_Passes.At(passId);
 	auto shader = pass.shader;
@@ -186,14 +186,14 @@ core::PackageParam MaterialRenderer::SetShaderValue(u32 passId, const String& na
 
 	for(auto& v : m_ShaderValues) {
 		if(v.pass == passId && v.id == id)
-			return core::PackageParam(desc, v.obj.Data());
+			return core::VariableAccess(desc.type, desc.name, v.obj.Data());
 	}
 
 	m_ShaderValues.PushBack(ShaderValue(passId, id, desc.type));
-	return core::PackageParam(desc, m_ShaderValues.Back().obj.Data());
+	return core::VariableAccess(desc.type, desc.name, m_ShaderValues.Back().obj.Data());
 }
 
-core::PackageParam MaterialRenderer::AddShaderParam(const String& paramName, u32 passId, const String& name)
+core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u32 passId, const String& name)
 {
 	auto& pass = m_Passes.At(passId);
 	if(!pass.shader)
@@ -203,7 +203,7 @@ core::PackageParam MaterialRenderer::AddShaderParam(const String& paramName, u32
 	return AddShaderParam(paramName, passId, id);
 }
 
-core::PackageParam MaterialRenderer::AddShaderParam(const String& paramName, u32 passId, u32 paramId)
+core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u32 passId, u32 paramId)
 {
 	auto& pass = m_Passes.At(passId);
 
@@ -218,7 +218,7 @@ core::PackageParam MaterialRenderer::AddShaderParam(const String& paramName, u32
 	return AddParamMapping(desc.type, name, passId, paramId, true);
 }
 
-core::PackageParam MaterialRenderer::AddParam(const String& paramName, u32 passId, EOptionId optionId)
+core::VariableAccess MaterialRenderer::AddParam(const String& paramName, u32 passId, EOptionId optionId)
 {
 	auto& pass = m_Passes.At(passId);
 	auto optionType = pass.GetOptionType((u32)optionId);
@@ -226,7 +226,7 @@ core::PackageParam MaterialRenderer::AddParam(const String& paramName, u32 passI
 	return AddParamMapping(optionType, name, passId, (u32)optionId, false);
 }
 
-core::PackageParam MaterialRenderer::AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader)
+core::VariableAccess MaterialRenderer::AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader)
 {
 	u32 id = m_Params.AddParam(type, paramName);
 

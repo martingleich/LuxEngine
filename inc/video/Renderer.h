@@ -14,7 +14,7 @@ namespace lux
 namespace core
 {
 class ParamPackage;
-class PackageParam;
+class VariableAccess;
 }
 
 namespace video
@@ -25,6 +25,7 @@ class FogData;
 class RenderTarget;
 class Material;
 class Pass;
+class ParamSetCallback;
 class PipelineSettings;
 class PipelineOverwrite;
 class VertexFormat;
@@ -89,7 +90,9 @@ public:
 	*/
 	virtual void BeginScene(
 		bool clearColor, bool clearZBuffer, bool clearStencil,
-		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil=0) = 0;
+		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil = 0) = 0;
+
+	virtual void ClearStencil(u32 value = 0) = 0;
 
 	//! Finishes a scene
 	/**
@@ -116,7 +119,8 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	virtual void SetPass(const Pass& pass) = 0;
+	virtual void SetPass(const Pass& pass, bool useOverwrite = false, ParamSetCallback* paramSetCallback = nullptr) = 0;
+
 	//! Set the active material
 	virtual void SetMaterial(const Material* material) = 0;
 
@@ -190,13 +194,13 @@ public:
 	virtual u32 AddParam(const StringType& name, core::Type type) = 0;
 
 	//! Retrieve a scene parameter by it's id
-	virtual core::PackageParam GetParam(u32 id) = 0;
+	virtual core::VariableAccess GetParam(u32 id) = 0;
 
 	//! Retrieve a scene parameter by it's name
 	/**
 	\throws ObjectNotFoundException If the parameter can not be found
 	*/
-	virtual core::PackageParam GetParam(const StringType& string) = 0;
+	virtual core::VariableAccess GetParam(const StringType& string, u32* id = nullptr) = 0;
 
 	//! Get the total number of parameters
 	/**

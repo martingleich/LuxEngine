@@ -10,6 +10,15 @@ namespace lux
 namespace scene
 {
 
+Light::Light() :
+	m_IsShadowCasting(true)
+{
+}
+
+Light::~Light()
+{
+}
+
 void Light::SetLightData(const video::LightData& light)
 {
 	m_LightData = light;
@@ -80,19 +89,14 @@ video::ELightType Light::GetLightType() const
 	return m_LightData.type;
 }
 
-void Light::Render(video::Renderer* r, const Node* n)
+bool Light::IsShadowCasting() const
 {
-	if(m_LightData.type == video::ELightType::Spot ||
-		m_LightData.type == video::ELightType::Directional) {
-		m_LightData.direction = n->FromRelativeDir(math::Vector3F::UNIT_Z);
-	}
+	return m_IsShadowCasting;
+}
 
-	if(m_LightData.type == video::ELightType::Spot ||
-		m_LightData.type == video::ELightType::Point) {
-		m_LightData.position = n->GetAbsolutePosition();
-	}
-
-	r->AddLight(m_LightData);
+void Light::SetShadowCasting(bool b)
+{
+	m_IsShadowCasting = b;
 }
 
 core::Name Light::GetReferableType() const

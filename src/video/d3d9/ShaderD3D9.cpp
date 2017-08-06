@@ -97,10 +97,11 @@ void ShaderD3D9::Init(
 		break;
 		case ParamType_Scene:
 		{
-			core::PackageParam param;
+			u32 sceneParamId = 0;
+			core::VariableAccess param;
 			bool jumpToNext = false;
 			try {
-				param.Set(m_Renderer->GetParam(h.name));
+				param.Set(m_Renderer->GetParam(h.name, &sceneParamId));
 			} catch(core::ObjectNotFoundException&) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Warning: Unknown scene value in shader: ~s.", h.name));
@@ -116,7 +117,7 @@ void ShaderD3D9::Init(
 				continue;
 			}
 
-			entry.index = param.GetDesc().id;
+			entry.index = sceneParamId;
 			entry.paramType = ParamType_Scene;
 			if(entry.type == EType::Texture)
 				m_HasTextureSceneParam = true;

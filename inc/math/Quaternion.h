@@ -1,6 +1,7 @@
 #ifndef INCLUDED_QUATERNION_H
 #define INCLUDED_QUATERNION_H
 #include "math/vector3.h"
+#include "core/lxFormat.h"
 
 namespace lux
 {
@@ -587,6 +588,26 @@ bool IsZero(const Quaternion<T>& v, const T tolerance = math::Constants<T>::roun
 		math::IsZero(v.z, tolerance) &&
 		math::IsZero(v.w, tolerance);
 }
+
+template <typename T>
+void conv_data(format::Context& ctx, const Quaternion<T>& v, format::Placeholder& placeholder)
+{
+	using namespace format;
+	placeholder.type = 'a';
+	placeholder.hash.Disable();
+
+	ConvertAddString(ctx, format::StringType::Ascii, "[x=", 3);
+	conv_data(ctx, v.x, placeholder);
+	ConvertAddString(ctx, format::StringType::Ascii, " y=", 3);
+	conv_data(ctx, v.y, placeholder);
+	ConvertAddString(ctx, format::StringType::Ascii, " z=", 3);
+	conv_data(ctx, v.z, placeholder);
+	ConvertAddString(ctx, format::StringType::Ascii, " w=", 3);
+	conv_data(ctx, v.w, placeholder);
+
+	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
+}
+
 } // !namespace math
 } // !namespace lux
 

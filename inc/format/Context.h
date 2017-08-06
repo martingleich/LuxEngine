@@ -79,7 +79,7 @@ public:
 		return m_CharacterCount;
 	}
 
-	size_t GetCollumn() const;
+	LUX_API size_t GetCollumn() const;
 
 	char* AllocByte(size_t len)
 	{

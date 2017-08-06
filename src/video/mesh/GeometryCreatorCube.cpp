@@ -20,7 +20,7 @@ static void Swap(u16& a, u16& b)
 GeometryCreatorCube::GeometryCreatorCube()
 {
 	m_Package.AddParam("size", math::Vector3F(1.0f, 1.0f, 1.0f));
-	m_Package.AddParam("tes", math::vector3i(2, 2, 2));
+	m_Package.AddParam("tes", math::Vector3I(2, 2, 2));
 	m_Package.AddParam("tex", math::Vector3F(1.0f, 1.0f, 1.0f));
 	m_Package.AddParam("inside", false);
 }
@@ -39,7 +39,7 @@ const core::ParamPackage& GeometryCreatorCube::GetParams() const
 StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(const core::PackagePuffer& params)
 {
 	const math::Vector3F size = params.FromID(0, true);
-	const math::vector3i tes = params.FromID(1, true);
+	const math::Vector3I tes = params.FromID(1, true);
 	const math::Vector3F tex = params.FromID(2, true);
 	const bool inside = params.FromID(3, true);
 
@@ -72,7 +72,7 @@ StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(
 		(tesY - 1)*(tesZ - 1) * 2);
 
 	const math::Vector3F tex(texX, texY, texZ);
-	const math::vector3i tes(tesX, tesY, tesZ);
+	const math::Vector3I tes(tesX, tesY, tesZ);
 	const math::Vector3F size(sizeX, sizeY, sizeZ);
 
 	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
