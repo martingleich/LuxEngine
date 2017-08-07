@@ -27,7 +27,6 @@ enum class ERenderMode
 
 class RendererNull : public Renderer
 {
-	friend class ParamListAccessNull;
 protected:
 	enum EDirtyFlags
 	{
@@ -40,19 +39,6 @@ protected:
 		Dirty_RenderMode,
 		Dirty_Fog,
 		Dirty_PolygonOffset,
-	};
-
-	struct ParamIdCollection
-	{
-		u32 lighting;
-		u32 ambient;
-		u32 time;
-
-		u32 fogRange;
-		u32 fogColor;
-		u32 fogInfo;
-
-		core::Array<u32> lights;
 	};
 
 public:
@@ -93,6 +79,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
+	/*
 	u32 AddParam(const StringType& name, core::Type type);
 	u32 AddInternalParam(const StringType& name, core::Type type);
 	u32 AddParamEx(const StringType& name, core::Type type, bool isInternal);
@@ -101,6 +88,11 @@ public:
 	core::VariableAccess GetParamInternal(u32 id);
 	core::VariableAccess GetParam(const StringType& string, u32* id);
 	u32 GetParamCount() const;
+	*/
+	void AddParam(const String& name, core::Type type, const void* value);
+
+	core::AttributePtr GetParam(const String& name) const;
+	const core::Attributes& GetParams() const;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -130,8 +122,19 @@ protected:
 
 	math::Matrix4 GenerateLightMatrix(const LightData& data, bool active);
 
-private:
-	bool GetLightId(const StringType& string, u32& outId);
+protected:
+	struct ParamIdCollection
+	{
+		core::AttributePtr lighting;
+		core::AttributePtr ambient;
+		core::AttributePtr time;
+
+		core::AttributePtr fogColor;
+		core::AttributePtr fogRange;
+		core::AttributePtr fogInfo;
+
+		core::Array<core::AttributePtr> lights;
+	};
 
 protected:
 	ERenderMode m_RenderMode; //!< Active rendermode
@@ -156,10 +159,8 @@ protected:
 	math::Matrix4 m_TransformProj;
 
 	MatrixTable m_MatrixTable; //! The currently set matrices, these are used as arguments for shaders and other rendercomponents
-
-	core::Array<bool> m_InternalTable; //! Saves if a parameter is internal
-	core::ParamList m_ParamList; //!< User set parameters
-	ParamIdCollection m_ParamId; //!< Collection of default param id's
+	core::Attributes m_Params;
+	ParamIdCollection m_ParamId;
 
 	u32 m_DirtyFlags; //!< The flag list of changed user parameters, see \ref EDirtyFlags
 

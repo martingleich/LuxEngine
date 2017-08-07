@@ -2,7 +2,7 @@
 #define INCLUDED_SHADER_H
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
-#include "core/ParamPackage.h"
+#include "core/Attributes.h"
 
 namespace lux
 {
@@ -42,7 +42,7 @@ public:
 	virtual const core::ParamPackage& GetParamPackage() const = 0;
 
 	virtual size_t GetSceneParamCount() const = 0;
-	virtual u32 GetSceneParam(size_t id) const = 0;
+	virtual core::AttributePtr GetSceneParam(size_t id) const = 0;
 	virtual bool HasTextureSceneParam() const = 0;
 };
 

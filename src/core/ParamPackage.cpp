@@ -212,7 +212,7 @@ u32 ParamPackage::GetParamId(const StringType& name, core::Type type) const
 
 u32 ParamPackage::GetParamCount() const
 {
-	return (u32)self->Params.Size();
+	return (size_t)self->Params.Size();
 }
 
 u32 ParamPackage::GetTextureCount() const
@@ -254,7 +254,7 @@ u32 ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	self->Params.PushBack(entry);
 	self->DefaultPackage = std::move(newBlock);
 
-	return (u32)(self->Params.Size() - 1);
+	return (size_t)(self->Params.Size() - 1);
 }
 
 bool ParamPackage::GetId(StringType name, core::Type t, u32& outId) const

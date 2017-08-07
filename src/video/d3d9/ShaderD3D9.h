@@ -33,8 +33,9 @@ public:
 	void Disable();
 
 	size_t GetSceneParamCount() const;
-	u32 GetSceneParam(size_t id) const;
+	core::AttributePtr GetSceneParam(size_t id) const;
 	bool HasTextureSceneParam() const;
+
 	const core::ParamPackage& GetParamPackage() const;
 
 private:
@@ -123,6 +124,7 @@ private:
 
 		EParamType paramType;
 		u32 index;
+		core::AttributePtr sceneValue;
 	};
 
 private:

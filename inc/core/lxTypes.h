@@ -176,12 +176,12 @@ public:
 		return m_Info->Compare(a, b);
 	}
 
-	void Destruct(void* ptr)
+	void Destruct(void* ptr) const
 	{
 		m_Info->Destruct(ptr);
 	}
 
-	void Assign(void* ptr, const void* other)
+	void Assign(void* ptr, const void* other) const
 	{
 		m_Info->Assign(ptr, other);
 	}
@@ -277,7 +277,8 @@ public:
 	AnyObject() :
 		m_Type(Types::Unknown()),
 		m_Data(nullptr)
-	{}
+	{
+	}
 
 	AnyObject(const Type& type, const void* data = nullptr) :
 		m_Type(type.GetBaseType())
@@ -299,7 +300,7 @@ public:
 	~AnyObject()
 	{
 		m_Type.Destruct(m_Data);
-		delete[] (u8*)m_Data;
+		delete[](u8*)m_Data;
 	}
 
 	AnyObject& operator=(const AnyObject& other)
@@ -309,7 +310,7 @@ public:
 		} else {
 			m_Type.Destruct(m_Data);
 			m_Type = other.m_Type;
-			delete[] (u8*)m_Data;
+			delete[](u8*)m_Data;
 			m_Data = new u8[m_Type.GetSize()];
 			m_Type.CopyConstruct(m_Data, other.m_Data);
 		}
@@ -410,7 +411,7 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 			return true;
 		}
 		if(toType == Types::U32()) {
-			*((u32*)toData) = (u32)*((float*)fromData);
+			*((u32*)toData) = (size_t)*((float*)fromData);
 			return true;
 		}
 		return false;

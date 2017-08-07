@@ -9,6 +9,8 @@
 #include "math/Rect.h"
 #include "math/Matrix4.h"
 
+#include "core/Attributes.h"
+
 namespace lux
 {
 namespace core
@@ -188,25 +190,18 @@ public:
 	Scene parameters can be accessed from shaders of material renderers.
 	\param name The name of the new parameter
 	\param type The type of the new parameter
-	\return The id which was assign to this scene parameter
 	\throws InvalidArgumentException If the name is already in use
 	*/
-	virtual u32 AddParam(const StringType& name, core::Type type) = 0;
+	virtual void AddParam(const String& name, core::Type type, const void* value=nullptr) = 0;
 
-	//! Retrieve a scene parameter by it's id
-	virtual core::VariableAccess GetParam(u32 id) = 0;
+	template <typename T>
+	void AddParam(const String& name, const T& value)
+	{
+		AddParam(name, core::GetTypeInfo<T>(), &value);
+	}
 
-	//! Retrieve a scene parameter by it's name
-	/**
-	\throws ObjectNotFoundException If the parameter can not be found
-	*/
-	virtual core::VariableAccess GetParam(const StringType& string, u32* id = nullptr) = 0;
-
-	//! Get the total number of parameters
-	/**
-	The number from 0 to count can be used as parameter id's.
-	*/
-	virtual u32 GetParamCount() const = 0;
+	virtual core::AttributePtr GetParam(const String& name) const = 0;
+	virtual const core::Attributes& GetParams() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

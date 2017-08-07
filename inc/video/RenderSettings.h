@@ -4,39 +4,24 @@
 
 namespace lux
 {
-namespace core
-{
-class VariableAccess;
-}
 namespace video
 {
 class Material;
-class MaterialRenderer;
 class PipelineOverwrite;
-class RenderTarget;
 
 class RenderSettings
 {
 public:
-	class ParamListAccess
-	{
-	public:
-		virtual core::VariableAccess operator[](u32 id) const = 0;
-	};
-
 	RenderSettings(
 		const PipelineOverwrite& o,
-		const Material& m,
-		const ParamListAccess& pa) :
+		const Material& m) :
 		overwrite(o),
-		material(m),
-		params(pa)
+		material(m)
 	{
 	}
 
 	const PipelineOverwrite& overwrite;
 	const Material& material;
-	const ParamListAccess& params;
 };
 
 } // namespace video

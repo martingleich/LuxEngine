@@ -97,12 +97,10 @@ void ShaderD3D9::Init(
 		break;
 		case ParamType_Scene:
 		{
-			u32 sceneParamId = 0;
-			core::VariableAccess param;
+			core::AttributePtr ptr;
 			bool jumpToNext = false;
-			try {
-				param.Set(m_Renderer->GetParam(h.name, &sceneParamId));
-			} catch(core::ObjectNotFoundException&) {
+			ptr = m_Renderer->GetParam(h.name);
+			if(!ptr) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Warning: Unknown scene value in shader: ~s.", h.name));
 				jumpToNext = true;
@@ -111,13 +109,13 @@ void ShaderD3D9::Init(
 			if(jumpToNext)
 				continue;
 
-			if(GetCoreType(h.type) != param.GetType()) {
+			if(GetCoreType(h.type) != ptr->GetType()) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Warning: Incompatible scene value type in shader: ~s.", h.name));
 				continue;
 			}
 
-			entry.index = sceneParamId;
+			entry.sceneValue = ptr;
 			entry.paramType = ParamType_Scene;
 			if(entry.type == EType::Texture)
 				m_HasTextureSceneParam = true;
@@ -320,9 +318,9 @@ size_t ShaderD3D9::GetSceneParamCount() const
 	return m_SceneValues.Size();
 }
 
-u32 ShaderD3D9::GetSceneParam(size_t id) const
+core::AttributePtr ShaderD3D9::GetSceneParam(size_t id) const
 {
-	return m_SceneValues.At(id).index;
+	return m_SceneValues.At(id).sceneValue;
 }
 
 bool ShaderD3D9::HasTextureSceneParam() const
@@ -364,11 +362,13 @@ void ShaderD3D9::LoadSceneParams(const RenderSettings& settings, u32 baseLayer)
 	u32 layerId = baseLayer;
 
 	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
-		if(it->type == EType::Texture) {
-			SetShaderValue(*it, &layerId);
-			++layerId;
-		} else {
-			SetShaderValue(*it, m_Renderer->GetParam(it->index).Pointer());
+		if(it->sceneValue) {
+			if(it->type == EType::Texture) {
+				SetShaderValue(*it, &layerId);
+				++layerId;
+			} else {
+				SetShaderValue(*it, (*it->sceneValue).Data());
+			}
 		}
 	}
 
@@ -594,7 +594,7 @@ int ShaderD3D9::GetDefaultId(const char* name)
 		"power",
 	};
 
-	for(u32 i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
+	for(size_t i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
 		if(strcmp(NAMES[i], name) == 0)
 			return (int)i;
 	}

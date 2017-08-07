@@ -32,6 +32,14 @@ public:
 	{
 	}
 
+	VariableAccess(const char* name, const AnyObject& any, bool isConst = false) :
+		m_Data(const_cast<void*>(any.Data())),
+		m_Type(isConst ? any.GetType().GetConstantType() : any.GetType()),
+		m_Name(name)
+	{
+
+	}
+
 	//! Construct an empty invalid parameter package
 	VariableAccess() :
 		m_Data(nullptr),
@@ -74,6 +82,16 @@ public:
 			throw Exception("Accessed invalid package parameter");
 
 		return ((String*)m_Data)->Data_c();
+	}
+
+	void AssignData(const void* data)
+	{
+		m_Type.Assign(m_Data, data);
+	}
+
+	void CopyData(void* copyTo) const
+	{
+		m_Type.Assign(copyTo, m_Data);
 	}
 
 	//! Access as texture
@@ -316,7 +334,7 @@ public:
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	\param reserved Reserved for internal use, dont use this param
 	*/
-	LUX_API u32 AddParam(core::Type type, const StringType& name, const void* defaultValue=nullptr);
+	LUX_API u32 AddParam(core::Type type, const StringType& name, const void* defaultValue = nullptr);
 
 	//! Merges two packages
 	/**
@@ -600,128 +618,6 @@ public:
 private:
 	const ParamPackage* m_Pack;
 	void* m_Data;
-};
-
-class ParamList
-{
-public:
-	struct Param
-	{
-		String name;
-		u8* data;
-		core::Type type;
-
-		Param() :
-			data(nullptr)
-		{
-		}
-
-		Param(const Param& other) :
-			name(other.name),
-			type(other.type)
-		{
-			data = LUX_NEW_ARRAY(u8, type.GetSize());
-			type.CopyConstruct(data, other.data);
-		}
-
-		Param(Param&& old) :
-			name(std::move(old.name)),
-			data(old.data),
-			type(std::move(old.type))
-		{
-			old.data = nullptr;
-		}
-
-		Param& operator=(const Param& other)
-		{
-			this->~Param();
-			data = LUX_NEW_ARRAY(u8, type.GetSize());
-			type.CopyConstruct(data, other.data);
-
-			return *this;
-		}
-
-		Param& operator=(Param&& old)
-		{
-			this->~Param();
-			name = std::move(old.name);
-			type = std::move(old.type);
-			data = old.data;
-
-			old.data = nullptr;
-
-			return *this;
-		}
-
-		Param(const StringType& n, core::Type t) :
-			name(n.data),
-			type(t)
-		{
-			data = LUX_NEW_ARRAY(u8, type.GetSize());
-			type.Construct(data);
-		}
-
-		~Param()
-		{
-			type.Destruct(data);
-			LUX_FREE_ARRAY(data);
-		}
-	};
-
-public:
-	u32 AddParam(const StringType& name, core::Type type)
-	{
-		u32 id;
-		if(GetId(name, id))
-			throw core::InvalidArgumentException("name", "Name already used");
-
-		m_Params.PushBack(std::move(Param(name, type)));
-		return (m_Params.Size() - 1);
-	}
-
-	u32 GetId(const StringType& name) const
-	{
-		u32 id;
-		if(!GetId(name, id))
-			throw core::ObjectNotFoundException(name.data);
-		return id;
-	}
-
-	core::VariableAccess operator[](u32 id) const
-	{
-		const auto& p = m_Params.At(id);
-		return core::VariableAccess(p.type, p.name.Data(), p.data);
-	}
-
-	core::ParamDesc GetDesc(u32 id) const
-	{
-		core::ParamDesc desc;
-		auto& param = m_Params.At(id);
-		desc.name = param.name.Data();
-		desc.id = id;
-		desc.type = param.type;
-		return desc;
-	}
-
-	u32 Size() const
-	{
-		return m_Params.Size();
-	}
-
-private:
-	bool GetId(const StringType& name, u32& outId) const
-	{
-		for(size_t i = 0; i < m_Params.Size(); ++i) {
-			if(m_Params[i].name == name) {
-				outId = i;
-				return true;
-			}
-		}
-		return false;
-	}
-
-private:
-	core::Array<Param> m_Params;
 };
 
 //! Casting from color to colorf

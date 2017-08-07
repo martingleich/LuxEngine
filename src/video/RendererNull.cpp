@@ -15,17 +15,19 @@ RendererNull::RendererNull(VideoDriver* driver) :
 {
 	m_Fog.isActive = false;
 
-	m_ParamId.lighting = AddParam("lighting", core::Types::Float());
-	GetParam(m_ParamId.lighting) = 1.0f;
-	m_ParamId.ambient = AddParam("ambient", core::Types::Colorf());
-	GetParam(m_ParamId.ambient) = video::Colorf(0.0f, 0.0f, 0.0f);
-	m_ParamId.time = AddParam("time", core::Types::Float());
-	GetParam(m_ParamId.time) = 0.0f;
+	m_ParamId.lighting = m_Params.AddAttribute("lighting", 1.0f);
+	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::Colorf(0, 0, 0));
+	m_ParamId.time = m_Params.AddAttribute("time", 0.0f);
 
-	m_ParamId.fogColor = AddInternalParam("fogColor", core::Types::Colorf());
+	m_ParamId.fogColor = m_Params.AddAttribute("fogColor", video::Colorf(1, 1, 1));
+	m_ParamId.fogRange = m_Params.AddAttribute("fogRange", math::Vector3F(0,0,0));
+	m_ParamId.fogInfo = m_Params.AddAttribute("fogInfo", math::Vector3F(0,0,0));
 
-	m_ParamId.fogRange = AddInternalParam("fogRange", core::Types::Vector3f());
-	m_ParamId.fogInfo = AddInternalParam("fogInfo", core::Types::Vector3f());
+	for(size_t i = 0; i < m_MatrixTable.GetCount(); ++i)
+		m_Params.AddAttribute(m_MatrixTable.CreateAttribute(i));
+
+	for(size_t i = 0; i < 16; ++i)
+		m_ParamId.lights.PushBack(m_Params.AddAttribute("light" + core::StringConverter::ToString(i), math::Matrix4::ZERO));
 
 	m_RenderStatistics = LUX_NEW(RenderStatistics);
 
@@ -122,12 +124,6 @@ void RendererNull::AddLight(const LightData& light)
 	if(m_Lights.Size() == GetMaxLightCount())
 		throw core::ErrorException("Too many lights");
 
-	// Fill remaining light objects
-	for(size_t i = m_ParamId.lights.Size(); i < m_Lights.Size() + 1; ++i) {
-		m_ParamId.lights.PushBack(
-			AddInternalParam("light" + core::StringConverter::ToString(i), core::Types::Matrix()));
-	}
-
 	m_Lights.PushBack(light);
 	SetDirty(Dirty_Lights);
 }
@@ -151,6 +147,7 @@ const FogData& RendererNull::GetFog() const
 }
 
 ///////////////////////////////////////////////////////////////////////////
+
 void RendererNull::SetTransform(ETransform transform, const math::Matrix4& matrix)
 {
 	switch(transform) {
@@ -184,73 +181,19 @@ const math::Matrix4& RendererNull::GetTransform(ETransform transform) const
 
 ///////////////////////////////////////////////////////////////////////////
 
-u32 RendererNull::AddParam(const StringType& name, core::Type type)
+void RendererNull::AddParam(const String& name, core::Type type, const void* value)
 {
-	return AddParamEx(name, type, false);
+	m_Params.AddAttribute(name, type, value);
 }
 
-u32 RendererNull::AddInternalParam(const StringType& name, core::Type type)
+core::AttributePtr RendererNull::GetParam(const String& name) const
 {
-	return AddParamEx(name, type, true);
+	return m_Params.Pointer(name);
 }
 
-u32 RendererNull::AddParamEx(const StringType& name, core::Type type, bool isInternal)
+const core::Attributes& RendererNull::GetParams() const
 {
-	// Check for name in matrices
-	u32 id;
-	if(m_MatrixTable.GetParamIdByName(name.data, id))
-		throw core::InvalidArgumentException("name", "Name already used");
-
-	m_InternalTable.PushBack(isInternal);
-	u32 offset = m_MatrixTable.GetCount();
-	return m_ParamList.AddParam(name, type) + offset;
-}
-
-core::VariableAccess RendererNull::GetParamEx(u32 id, bool internal)
-{
-	if(id < m_MatrixTable.GetCount()) {
-		return m_MatrixTable.GetParamById(id);
-	} else if(id < m_MatrixTable.GetCount() + m_ParamList.Size()) {
-		u32 real_id = id - m_MatrixTable.GetCount();
-		core::VariableAccess p = m_ParamList[real_id];
-		core::ParamDesc desc = m_ParamList.GetDesc(real_id);
-		if(m_InternalTable[desc.id] && !internal)
-			desc.type = desc.type.GetConstantType();
-		desc.id = id;
-		return core::VariableAccess(desc.type, desc.name, (u8*)p.Pointer());
-	} else {
-		throw core::OutOfRangeException();
-	}
-}
-
-core::VariableAccess RendererNull::GetParam(u32 id)
-{
-	return GetParamEx(id, false);
-}
-
-core::VariableAccess RendererNull::GetParamInternal(u32 id)
-{
-	return GetParamEx(id, true);
-}
-
-core::VariableAccess RendererNull::GetParam(const StringType& string, u32* id)
-{
-	u32 tmp;
-	if(!id)
-		id = &tmp;
-	if(m_MatrixTable.GetParamIdByName(string.data, *id))
-		return GetParam(*id);
-	else if(GetLightId(string, *id))
-		return GetParam(*id);
-	else {
-		*id = m_ParamList.GetId(string) + m_MatrixTable.GetCount();
-		return GetParam(*id);
-	}
-}
-
-u32 RendererNull::GetParamCount() const
-{
-	return m_ParamList.Size() + m_MatrixTable.GetCount();
+	return m_Params;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -319,34 +262,6 @@ math::Matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool acti
 	matrix(2, 3) = 0.0f;
 
 	return matrix;
-}
-
-bool RendererNull::GetLightId(const StringType& string, u32& outId)
-{
-	if(strncmp(string.data, "light", 5) != 0)
-		return false;
-
-	const char* num = string.data + 5;
-	const char* end;
-	int id = core::StringConverter::ParseInt(num, -1, &end);
-	if(id < 0)
-		return false;
-	if(*end != 0)
-		return false;
-
-	if((size_t)id >= GetMaxLightCount())
-		return false;
-
-	// Fill remaining light objects
-	for(size_t i = m_ParamId.lights.Size(); i < (size_t)id + 1; ++i) {
-		m_ParamId.lights.PushBack(
-			AddInternalParam("light" + core::StringConverter::ToString(i), core::Types::Matrix()));
-	}
-
-	// Use the param id as id
-	outId = m_ParamId.lights[id];
-
-	return true;
 }
 
 } // namespace video

@@ -576,7 +576,10 @@ public:
 
 	Iterator Erase(const K& key)
 	{
-		return Erase(Find(key));
+		auto it = Find(key);
+		if(it == End())
+			return it;
+		return Erase(it);
 	}
 
 	Iterator Erase(const Iterator& it)
@@ -862,7 +865,7 @@ public:
 			return ref.end();
 		}
 	};
-	
+
 	ValueAccess Values()
 	{
 		return ValueAccess(*this);
@@ -926,7 +929,7 @@ public:
 			return ref.EndKey();
 		}
 	};
-	
+
 	KeyAccess Keys()
 	{
 		return KeyAccess(*this);
@@ -964,6 +967,14 @@ private:
 				m_Allocator.Destruct(m_Nodes + i);
 		}
 		m_Allocator.Deallocate(m_Nodes);
+
+		m_Buckets = nullptr;
+		m_BucketCount = 0;
+		m_FirstBucket = 0;
+		m_Nodes = nullptr;
+		m_FirstUnusedNode = nullptr;
+		m_Allocated = 0;
+		m_Entries = 0;
 	}
 
 	// IDEA: Improve this function, by keeping the old node list if possible
@@ -998,6 +1009,7 @@ private:
 			HashMap newMap(newBucketCount, newSize, this->m_MaxLoad);
 			for(auto it = this->First(); it != this->End(); ++it)
 				newMap.Set(it.key(), it.value());
+			this->Destroy();
 			this->m_Allocated = newMap.m_Allocated;
 			this->m_BucketCount = newMap.m_BucketCount;
 			this->m_Buckets = newMap.m_Buckets;

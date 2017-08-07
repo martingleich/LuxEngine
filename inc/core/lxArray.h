@@ -233,7 +233,7 @@ public:
 		lxAssert(this != &old);
 
 		if(m_Entries) {
-			for(u32 i = 0; i < old.m_Used; ++i)
+			for(size_t i = 0; i < old.m_Used; ++i)
 				m_Entries[i].~T();
 			Free(m_Entries);
 		}
@@ -537,7 +537,7 @@ public:
 	void Clear()
 	{
 		if(m_Entries) {
-			for(u32 i = 0; i < m_Used; ++i)
+			for(size_t i = 0; i < m_Used; ++i)
 				m_Entries[i].~T();
 			Free(m_Entries);
 

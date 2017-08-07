@@ -493,6 +493,7 @@ inline  bool ReferenceCounted::Drop() const
 inline ReferenceCounted::~ReferenceCounted()
 {
 }
+
 }
 
 #endif

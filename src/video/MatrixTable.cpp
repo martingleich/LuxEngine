@@ -44,20 +44,10 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 	}
 }
 
-core::VariableAccess MatrixTable::GetParamById(u32 id) const
+core::VariableAccess MatrixTable::GetParamById(size_t id) const
 {
 	const math::Matrix4& m = GetMatrix((EMatrixType)id);
-	return core::VariableAccess(core::Types::Matrix().GetConstantType(), GetMatrixName((EMatrixType)id), const_cast<float*>(m.DataRowMajor()));
-}
-
-bool MatrixTable::GetParamIdByName(const char* name, u32& id)
-{
-	for(id = 0; id < GetCount(); ++id) {
-		if(strcmp(GetMatrixName(id), name) == 0)
-			return true;
-	}
-
-	return false;
+	return core::VariableAccess(core::Types::Matrix().GetConstantType(), GetMatrixName((EMatrixType)id).Data_c(), const_cast<float*>(m.DataRowMajor()));
 }
 
 const math::Matrix4& MatrixTable::GetMatrix(EMatrixType type) const
@@ -159,9 +149,9 @@ void MatrixTable::UpdateMatrix(EMatrixType type) const
 	m_UpToDate |= (1 << type);
 }
 
-const char* MatrixTable::GetMatrixName(u32 id) const
+const String& MatrixTable::GetMatrixName(size_t id) const
 {
-	static const char* MATRIX_NAMES[16] = {
+	static const String MATRIX_NAMES[16] = {
 		"world",
 		"view",
 		"proj",
@@ -181,6 +171,11 @@ const char* MatrixTable::GetMatrixName(u32 id) const
 	};
 
 	return MATRIX_NAMES[id];
+}
+
+StrongRef<core::Attribute> MatrixTable::CreateAttribute(size_t id)
+{
+	return LUX_NEW(MatrixAttribute)(this, id);
 }
 
 } // namespace video

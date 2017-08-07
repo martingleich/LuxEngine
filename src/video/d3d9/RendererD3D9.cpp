@@ -18,23 +18,6 @@ namespace lux
 namespace video
 {
 
-class ParamListAccessNull : public RenderSettings::ParamListAccess
-{
-public:
-	ParamListAccessNull(RendererNull* r) :
-		m_Renderer(r)
-	{
-	}
-
-	core::VariableAccess operator[](u32 id) const
-	{
-		return m_Renderer->GetParam(id);
-	}
-
-private:
-	RendererNull* m_Renderer;
-};
-
 RendererD3D9::RendererD3D9(VideoDriverD3D9* driver) :
 	RendererNull(driver),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
@@ -349,11 +332,9 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 
 void RendererD3D9::SetupRendering(size_t passId)
 {
-	ParamListAccessNull listAccess(this);
 	RenderSettings settings(
 		m_FinalOverwrite,
-		**m_Material,
-		listAccess);
+		**m_Material);
 
 	auto newRenderer = m_UseMaterial ? m_Material->GetRenderer() : nullptr;
 
@@ -386,7 +367,7 @@ void RendererD3D9::SetupRendering(size_t passId)
 
 	// Enable pass settings
 	if(m_MaterialRenderer)
-		m_DeviceState.SetD3DColors(GetParam(m_ParamId.ambient), settings.material, pass.lighting);
+		m_DeviceState.SetD3DColors(*m_ParamId.ambient, settings.material, pass.lighting);
 	m_DeviceState.EnablePass(pass);
 
 	// Generate data for transforms, fog and light
@@ -510,10 +491,10 @@ void RendererD3D9::LoadFogSettings(const Pass& pass)
 			m_Fog.type == EFogType::Exp ? 2.0f :
 			m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
 		fogInfo.z = 0;
-		GetParamInternal(m_ParamId.fogInfo) = fogInfo;
+		*m_ParamId.fogInfo = fogInfo;
 
-		GetParamInternal(m_ParamId.fogColor) = m_Fog.color;
-		GetParamInternal(m_ParamId.fogRange) = math::Vector3F(
+		*m_ParamId.fogColor = m_Fog.color;
+		*m_ParamId.fogRange = math::Vector3F(
 			m_Fog.start,
 			m_Fog.end,
 			m_Fog.density);
@@ -538,7 +519,7 @@ void RendererD3D9::LoadLightSettings(const Pass& pass)
 
 	if(IsDirty(Dirty_Lights)) {
 		m_DeviceState.ClearLights();
-		GetParam(m_ParamId.lighting) = (float)((u32)pass.lighting);
+		*m_ParamId.lighting = (float)((u32)pass.lighting);
 		// Only use the fixed pipeline if there is no shader
 		if(!pass.shader) {
 			// Enable fixed pipeline lights
@@ -547,7 +528,7 @@ void RendererD3D9::LoadLightSettings(const Pass& pass)
 		} else {
 			// Generate light matrices and set as param.
 			for(size_t i = 0; i < m_Lights.Size(); ++i)
-				GetParamInternal(m_ParamId.lights[i]) = GenerateLightMatrix(m_Lights[i], true);
+				*m_ParamId.lights[i] = GenerateLightMatrix(m_Lights[i], true);
 		}
 		ClearDirty(Dirty_Lights);
 	}

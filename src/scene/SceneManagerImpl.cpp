@@ -46,7 +46,7 @@ SceneManagerImpl::SceneManagerImpl() :
 
 	m_Fog.isActive = false;
 
-	m_Attributes.AddAttribute("drawStencilShadows", true);
+	m_Attributes.AddAttribute("drawStencilShadows", false);
 	m_Attributes.AddAttribute("maxShadowCasters", 1);
 }
 
@@ -480,7 +480,7 @@ void SceneManagerImpl::DrawScene()
 
 	//-------------------------------------------------------------------------
 	// The lights
-	m_Renderer->GetParam("ambient") = m_AmbientColor;
+	*m_Renderer->GetParam("ambient") = m_AmbientColor;
 
 	m_Renderer->ClearLights();
 

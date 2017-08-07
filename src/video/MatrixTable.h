@@ -1,7 +1,7 @@
 #ifndef INCLUDED_MATRIX_TABLE_H
 #define INCLUDED_MATRIX_TABLE_H
 #include "math/Matrix4.h"
-#include "core/ParamPackage.h"
+#include "core/Attributes.h"
 
 namespace lux
 {
@@ -10,6 +10,7 @@ namespace video
 
 class MatrixTable
 {
+	friend class MatrixAttribute;
 public:
 	enum EMatrixType
 	{
@@ -38,20 +39,51 @@ public:
 		MAT_COUNT,
 	};
 
+	class MatrixAttribute : public core::Attribute
+	{
+	public:
+		MatrixAttribute(MatrixTable* _table, u32 _id) :
+			table(_table),
+			id(_id)
+		{
+		}
+
+		core::VariableAccess GetAccess(bool)
+		{
+			return table->GetParamById(id);
+		}
+
+		const String& GetName() const
+		{
+			return table->GetMatrixName(id);
+		}
+
+		core::Type GetType() const
+		{
+			return core::Types::Matrix();
+		}
+
+	private:
+		MatrixTable* table;
+		u32 id;
+	};
+
 public:
 	MatrixTable();
+
 	void SetMatrix(EMatrixType type, const math::Matrix4& matrix);
-	core::VariableAccess GetParamById(u32 id) const;
-	bool GetParamIdByName(const char* name, u32& id);
+	core::VariableAccess GetParamById(size_t id) const;
 	const math::Matrix4& GetMatrix(EMatrixType type) const;
 	bool IsDirty(EMatrixType type) const;
 	void ClearDirty(EMatrixType type) const;
-	u32 GetCount() const;
+
+	size_t GetCount() const;
+	const String& GetMatrixName(size_t id) const;
+	StrongRef<core::Attribute> CreateAttribute(size_t id);
 
 private:
 	bool IsUpToDate(EMatrixType type) const;
 	void UpdateMatrix(EMatrixType type) const;
-	const char* GetMatrixName(u32 id) const;
 
 private:
 	mutable math::Matrix4 m_Matrices[MAT_COUNT];

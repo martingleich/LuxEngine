@@ -35,7 +35,7 @@ public:
 	void Move(float secsPassed)
 	{
 		m_Time += secsPassed;
-		Context.Renderer->GetParam("time") = m_Time;
+		*Context.Renderer->GetParam("time") = m_Time;
 	}
 
 	void Render();

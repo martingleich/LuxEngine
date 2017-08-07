@@ -344,14 +344,14 @@ public:
 			return !(*this == other);
 		}
 
-		const V* operator->()
+		const K* operator->()
 		{
-			return &(m_Iter->value);
+			return &(m_Iter->key);
 		}
 
-		const V& operator*()
+		const K& operator*()
 		{
-			return m_Iter->value;
+			return m_Iter->key;
 		}
 
 		const V& value()

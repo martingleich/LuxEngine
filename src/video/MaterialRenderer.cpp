@@ -60,11 +60,11 @@ Pass MaterialRenderer::GeneratePassData(size_t passId, const RenderSettings& set
 
 	if(out.shader && out.shader->HasTextureSceneParam()) {
 		for(size_t i = 0; i < out.shader->GetSceneParamCount(); ++i) {
-			u32 id = out.shader->GetSceneParam(i);
-			if(settings.params[id].GetType() == core::Types::Texture()) {
+			auto param = out.shader->GetSceneParam(i);
+			if(param && param->GetType() == core::Types::Texture()) {
 				if(layerId >= out.layers.Size())
 					out.layers.Resize(layerId + 1);
-				out.layers[layerId] = settings.params[id];
+				out.layers[layerId] = *param;
 				++layerId;
 			}
 		}
