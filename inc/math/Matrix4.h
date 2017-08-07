@@ -12,37 +12,21 @@ namespace math
 //! Represent a 4x4 matrix
 class LUX_API Matrix4
 {
-public:
-	//! How should a matrix be created
-	enum EMatrix4Constructor
-	{
-		M4C_NOTHING,    //!< Do nothing at creation
-		M4C_IDENT,        //!< Set to identiy
-		M4C_COPY,        //!< Copy another matrix
-		M4C_INV,        //!< Set to inversion of another matrix
-		M4C_TRANSP,        //!< Set to transposion of another matrix
-		M4C_INV_TRANSP    //!< Set to transposed inversion of another matrix
-	};
-
 private:
 	float m[4][4];
 
 public:
-	static const Matrix4 IDENTITY;    //!< The identity matrix
-	static const Matrix4 ZERO;    //!< The null matrix
+	static const Matrix4 IDENTITY; //!< The identity matrix
+	static const Matrix4 ZERO; //!< The null matrix
 
-	//! Constructor for a new matrix
-	/**
-	\param Constructor How should the new matrix created, only M4C_NOTHING and M4C_IDENT
-	*/
-	Matrix4(EMatrix4Constructor Constructor = M4C_IDENT);
+	//! Constructor for a identity matrix
+	Matrix4();
 
 	//! Copyconstructor
 	/**
 	\param m The other matrix
-	\param Constructor How should the new matrix created
 	*/
-	Matrix4(const Matrix4& m, EMatrix4Constructor Constructor = M4C_COPY);
+	Matrix4(const Matrix4& m);
 
 	//! Full constructor
 	Matrix4(float c11, float c12, float c13, float c14,
@@ -60,42 +44,49 @@ public:
 	/**
 	\return True if this matrix is ident
 	*/
-	bool    IsIdent() const;
-	//! Transpose this matrix
-	/**
-	\param [out] out Here the transposed matrix is written
-	*/
-	void    GetTransposed(Matrix4& out) const;
-	//! Invert this matrix
+	bool IsIdent() const;
+
+	//! Get the transposed of this matrix
+	Matrix4 GetTransposed() const;
+
+	//! Get the inverted of a transformation matrix.
 	/**
 	This method assumes the right most collum is (0,0,0,1).
-	\param [out] out Here the inverted matrix is written
-	\return false if the inversion is imposible
+	\param [out] result If not null, true if the matrix was succesfully inverted otherwise false
+	\return The inverted matrix, or identity if not possible
 	*/
-	bool    GetInverted(Matrix4& out) const;
-	//! transform this matrix to a 3x3 matrix(the last row and collum are empty)
+	Matrix4 GetTransformInverted(bool* result = nullptr) const;
+
+	//! Transform this matrix to a 3x3 matrix
 	/**
+	The 3x3 matrix is located in the upper left corner of the 4x4
 	For transfomations of twodimension objects
 	\param [out] out Here the 3x3 matrix is written
 	*/
-	void    Get3x3(Matrix4& out) const;
-	//! Returns the determinant of the matrix
+	Matrix4 Get3x3() const;
+
+	//! Returns the determinant of a transformation matrix
 	/**
-	Calculates only the determinant of the 3x4 matrix
+	This method assumes the right most collum is (0,0,0,1).
 	\return The determinat of the matrix
 	*/
-	float   GetDet() const;
+	float GetTransformDet() const;
 
 	//! Make this matrix to a identity matrix
 	/**
 	\return Selfreference
 	*/
 	Matrix4& MakeIdent();
-	//! Invert this matrix
+
+	//! Invert this transformation matrix
 	/**
+	If the inversion failed, the matrix is set to identity
+	\param [out] result If not null, true if the matrix was succesfully inverted otherwise false
 	\return Selfreference
 	*/
-	Matrix4& Invert();
+	Matrix4& InvertTransform(bool* result=nullptr);
+	bool SetByInvertTransform(const Matrix4& m);
+
 	//! Transpose this matrix
 	/**
 	\return Selfreference
@@ -204,7 +195,8 @@ public:
 
 	//! Set the scaling done by this matrix
 	/**
-	The scalation is set in the order Scalation->Rotation->Translation
+	The scalation is set in the order Scalation->Rotation->Translation.
+	Don't use this method if already a rotation is contained in the matrix
 	\param scale The new used scale
 	\return Selfreference
 	*/
@@ -432,19 +424,19 @@ public:
 	}
 
 	//! Addition
-	Matrix4  operator+ (const Matrix4& other) const;
+	Matrix4 operator+ (const Matrix4& other) const;
 	//! Short addition
 	Matrix4& operator+=(const Matrix4& other);
 	//! Subtraction
-	Matrix4  operator- (const Matrix4& other) const;
+	Matrix4 operator- (const Matrix4& other) const;
 	//! Short subtraction
 	Matrix4& operator-=(const Matrix4& other);
 	//! Scalar multiplication
-	Matrix4  operator* (float f) const;
+	Matrix4 operator* (float f) const;
 	//! Short scalar multiplication
 	Matrix4& operator*=(float f);
 	//! Multiplication
-	Matrix4  operator* (const Matrix4& other) const;
+	Matrix4 operator* (const Matrix4& other) const;
 	//! Shortmuliplication
 	Matrix4& operator*=(const Matrix4& other);
 

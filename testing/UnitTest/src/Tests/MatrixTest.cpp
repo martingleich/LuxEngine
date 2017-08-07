@@ -211,11 +211,11 @@ UNIT_SUITE(MatrixTest)
 		math::Matrix4 b;
 
 		// Check GetInverted()
-		UNIT_ASSERT(a.GetInverted(b) == false);
-		a(2, 1) = 20;
-		// TODO This should not work!!!
-		UNIT_ASSERT(a.GetInverted(b));
+		bool result;
+		b = a.GetTransformInverted(&result);
+		UNIT_ASSERT(result == false);
 		compare = true;
+
 		// TODO Get a working 4x4 matrix ...
 //		for(int r = 0; r < 4; ++r) {
 //			for(int c = 0; c < 4; ++c) {
@@ -226,7 +226,7 @@ UNIT_SUITE(MatrixTest)
 //		UNIT_ASSERT(compare);
 
 		// Check GetTransposed()
-		a.GetTransposed(b);
+		b = a.GetTransposed();
 		compare = true;
 		for(int r = 0; r < 4; ++r) {
 			for(int c = 0; c < 4; ++c) {
@@ -248,7 +248,7 @@ UNIT_SUITE(MatrixTest)
 		UNIT_ASSERT_APPROX(b, math::Matrix4::IDENTITY);
 
 		// Check the 3x3
-		a.Get3x3(b);
+		b = a.Get3x3();
 		compare = true;
 		{
 			// Check the top left 2x2
@@ -278,65 +278,5 @@ UNIT_SUITE(MatrixTest)
 				compare = false;
 		}
 		UNIT_ASSERT(compare);
-	}
-
-	UNIT_TEST(AdvancedConstructor)
-	{
-		bool compare = true;
-		math::Matrix4 a(
-			1, 2, 3, 4,
-			5, 6, 7, 8,
-			9, 10, 11, 12,
-			13, 14, 15, 16);
-
-		math::Matrix4 b(a, lux::math::Matrix4::EMatrix4Constructor::M4C_NOTHING);
-		compare = true;
-		for(int r = 0; r < 3; ++r) {
-			for(int c = 0; c < 3; ++c)
-				if(b(r, c) != 0.0f)
-					compare = false;
-		}
-		// TODO How to check this ...
-		//UNIT_ASSERT(compare);
-
-		math::Matrix4 d(a, lux::math::Matrix4::EMatrix4Constructor::M4C_IDENT);
-		UNIT_ASSERT(d.IsIdent());
-
-		compare = true;
-		for(int r = 0; r < 3; ++r) {
-			for(int c = 0; c < 3; ++c) {
-				if(r != c) {
-					if(d(r, c) != 0.0f)
-						compare = false;
-				} else {
-					if(d(r, c) != 1.0f)
-						compare = false;
-				}
-			}
-		}
-		UNIT_ASSERT(compare);
-
-		math::Matrix4 e(a, lux::math::Matrix4::EMatrix4Constructor::M4C_COPY);
-		compare = true;
-		for(int r = 0; r < 3; ++r) {
-			for(int c = 0; c < 3; ++c)
-				if(a(r, c) != e(r, c))
-					compare = false;
-		}
-		UNIT_ASSERT(compare);
-
-		a(2, 1) = 20;
-		math::Matrix4 f(a, lux::math::Matrix4::EMatrix4Constructor::M4C_INV);
-		UNIT_ASSERT(a.GetInverted(b));
-		UNIT_ASSERT_APPROX(f, b);
-
-		math::Matrix4 g(a, lux::math::Matrix4::EMatrix4Constructor::M4C_TRANSP);
-		a.GetTransposed(b);
-		UNIT_ASSERT_APPROX(g, b);
-
-		math::Matrix4 h(a, lux::math::Matrix4::EMatrix4Constructor::M4C_INV_TRANSP);
-		UNIT_ASSERT(a.GetInverted(b));
-		b.GetTransposed(d);
-		UNIT_ASSERT_APPROX(h, d);
 	}
 }

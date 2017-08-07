@@ -93,19 +93,19 @@ void MatrixTable::UpdateMatrix(EMatrixType type) const
 	switch(type) {
 	case MAT_WORLD:
 		lxAssert(IsUpToDate(MAT_WORLD_INV));
-		m_Matrices[MAT_WORLD_INV].GetInverted(m_Matrices[MAT_WORLD]);
+		m_Matrices[MAT_WORLD] = m_Matrices[MAT_WORLD_INV].GetTransformInverted();
 		break;
 	case MAT_VIEW:
 		lxAssert(IsUpToDate(MAT_VIEW_INV));
-		m_Matrices[MAT_VIEW_INV].GetInverted(m_Matrices[MAT_VIEW]);
+		m_Matrices[MAT_VIEW] = m_Matrices[MAT_VIEW_INV].GetTransformInverted();
 		break;
 	case MAT_WORLD_INV:
 		lxAssert(IsUpToDate(MAT_WORLD));
-		m_Matrices[MAT_WORLD].GetInverted(m_Matrices[MAT_WORLD_INV]);
+		m_Matrices[MAT_WORLD_INV] = m_Matrices[MAT_WORLD].GetTransformInverted();
 		break;
 	case MAT_VIEW_INV:
 		lxAssert(IsUpToDate(MAT_VIEW));
-		m_Matrices[MAT_VIEW].GetInverted(m_Matrices[MAT_VIEW_INV]);
+		m_Matrices[MAT_VIEW_INV] = m_Matrices[MAT_VIEW].GetTransformInverted();
 		break;
 	case MAT_WORLD_VIEW:
 		m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_WORLD), GetMatrix(MAT_WORLD));
@@ -132,25 +132,25 @@ void MatrixTable::UpdateMatrix(EMatrixType type) const
 			m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_WORLD), GetMatrix(MAT_VIEW));
 			m_UpToDate |= 1 << MAT_WORLD_VIEW;
 		}
-		GetMatrix(MAT_WORLD_VIEW).GetInverted(m_Matrices[MAT_WORLD_VIEW_INV]);
+		m_Matrices[MAT_WORLD_VIEW_INV] = GetMatrix(MAT_WORLD_VIEW).GetTransformInverted();
 		break;
 	case MAT_WORLD_TRANS:
-		GetMatrix(MAT_WORLD).GetTransposed(m_Matrices[MAT_WORLD_TRANS]);
+		m_Matrices[MAT_WORLD_TRANS] = GetMatrix(MAT_WORLD).GetTransposed();
 		break;
 	case MAT_VIEW_TRANS:
-		GetMatrix(MAT_VIEW).GetTransposed(m_Matrices[MAT_VIEW_TRANS]);
+		m_Matrices[MAT_VIEW_TRANS] = GetMatrix(MAT_VIEW).GetTransposed();
 		break;
 	case MAT_WORLD_INV_TRANS:
-		GetMatrix(MAT_WORLD_INV).GetTransposed(m_Matrices[MAT_WORLD_INV_TRANS]);
+		m_Matrices[MAT_WORLD_INV_TRANS] = GetMatrix(MAT_WORLD_INV).GetTransposed();
 		break;
 	case MAT_VIEW_INV_TRANS:
-		GetMatrix(MAT_VIEW_INV).GetTransposed(m_Matrices[MAT_VIEW_INV_TRANS]);
+		m_Matrices[MAT_VIEW_INV_TRANS] = GetMatrix(MAT_VIEW_INV).GetTransposed();
 		break;
 	case MAT_WORLD_VIEW_TRANS:
-		GetMatrix(MAT_WORLD_VIEW).GetTransposed(m_Matrices[MAT_WORLD_VIEW_TRANS]);
+		m_Matrices[MAT_WORLD_VIEW_TRANS] = GetMatrix(MAT_WORLD_VIEW).GetTransposed();
 		break;
 	case MAT_WORLD_VIEW_INV_TRANS:
-		GetMatrix(MAT_WORLD_VIEW_INV).GetTransposed(m_Matrices[MAT_WORLD_VIEW_INV_TRANS]);
+		m_Matrices[MAT_WORLD_VIEW_INV_TRANS] = GetMatrix(MAT_WORLD_VIEW_INV).GetTransposed();
 		break;
 	default:
 		lxAssertNeverReach("Can't generate matrix");

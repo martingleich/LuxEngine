@@ -22,6 +22,21 @@ public:
 	struct ShadowVolume
 	{
 		core::Array<math::Vector3F> points;
+
+		void AddQuad(
+			const math::Vector3F& v1,
+			const math::Vector3F& v2,
+			const math::Vector3F& v1e,
+			const math::Vector3F& v2e)
+		{
+			points.PushBack(v1);
+			points.PushBack(v2);
+			points.PushBack(v1e);
+
+			points.PushBack(v2);
+			points.PushBack(v2e);
+			points.PushBack(v1e);
+		}
 	};
 
 	//! Contains adjacence information for a mesh
@@ -112,10 +127,18 @@ public:
 		const u32 faceCount = (u32)adjInfo.faces.Size();
 		m_FacingData.Resize(faceCount);
 		for(u32 i = 0; i < faceCount; ++i) {
-			m_FacingData[i] = (adjInfo.faces[i].normal.Dot(lightPos) < 0);
+			if(isInfiniteLight)
+				m_FacingData[i] = (adjInfo.faces[i].normal.Dot(lightPos) < 0);
+			else
+				m_FacingData[i] = (adjInfo.faces[i].normal.Dot(lightPos - adjInfo.points[adjInfo.faces[i].points[0]]) < 0);
 		}
 
-		auto extend = lightPos*100.0f;
+		auto extend = [&](const math::Vector3F& v) {
+			if(isInfiniteLight)
+				return v + lightPos*100.0f;
+			else
+				return v + (v - lightPos).Normal()*100.0f;
+		};
 
 		// Foreach forward facing face, check if adjacent face is backward facing, then add edge to contour
 		for(u32 i = 0; i < faceCount; ++i) {
@@ -127,48 +150,35 @@ public:
 			u32 adj1 = face.adj[1];
 			u32 adj2 = face.adj[2];
 
-			if(m_UseZFail) {
-				auto v1 = adjInfo.points[face.points[0]];
-				auto v2 = adjInfo.points[face.points[1]];
-				auto v3 = adjInfo.points[face.points[2]];
+			math::Vector3F v1, v2, v3;
+			math::Vector3F v1e, v2e, v3e;
 
+			v1 = adjInfo.points[face.points[0]];
+			v2 = adjInfo.points[face.points[1]];
+			v3 = adjInfo.points[face.points[2]];
+
+			if(m_UseZFail) {
 				outVolume.points.PushBack(v2);
 				outVolume.points.PushBack(v1);
 				outVolume.points.PushBack(v3);
 
-				outVolume.points.PushBack(v3 + extend);
-				outVolume.points.PushBack(v1 + extend);
-				outVolume.points.PushBack(v2 + extend);
+				outVolume.points.PushBack(extend(v3));
+				outVolume.points.PushBack(extend(v1));
+				outVolume.points.PushBack(extend(v2));
 			}
 
 			if(m_FacingData[i] != m_FacingData[adj0] || i == adj0) {
-				AddEdge(extend, adjInfo, face.points[0], face.points[1], outVolume);
+				outVolume.AddQuad(v1, v2, extend(v1), extend(v2));
 			}
 
 			if(m_FacingData[i] != m_FacingData[adj1] || i == adj1) {
-				AddEdge(extend, adjInfo, face.points[1], face.points[2], outVolume);
+				outVolume.AddQuad(v2, v3, extend(v2), extend(v3));
 			}
 
 			if(m_FacingData[i] != m_FacingData[adj2] || i == adj2) {
-				AddEdge(extend, adjInfo, face.points[2], face.points[0], outVolume);
+				outVolume.AddQuad(v3, v1, extend(v3), extend(v1));
 			}
 		}
-	}
-
-	void AddEdge(const math::Vector3F& extend, const AdjacenceInfo& adjInfo, u16 a, u16 b, ShadowVolume& volume)
-	{
-		auto v1 = adjInfo.points[a];
-		auto v2 = adjInfo.points[b];
-		auto v3 = v1 + extend;;
-		auto v4 = v2 + extend;;
-
-		volume.points.PushBack(v1);
-		volume.points.PushBack(v2);
-		volume.points.PushBack(v3);
-
-		volume.points.PushBack(v2);
-		volume.points.PushBack(v4);
-		volume.points.PushBack(v3);
 	}
 
 	// After this call the shadow areas are marked in the stencil buffer

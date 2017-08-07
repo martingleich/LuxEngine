@@ -28,58 +28,19 @@ const Matrix4 Matrix4::ZERO = math::Matrix4(
 	0.0f, 0.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 0.0f);
 
-//******************************************************************
-// Konstruktor
-Matrix4::Matrix4(EMatrix4Constructor Constructor)
+Matrix4::Matrix4()
 {
-	switch(Constructor) {
-	case M4C_NOTHING:
-	case M4C_COPY:
-		break;
-	default:
-		MakeIdent();
-	};
+	MakeIdent();
 }
 
-//******************************************************************
-// Kopierkonstruktor
-Matrix4::Matrix4(const Matrix4& other, EMatrix4Constructor Constructor)
+Matrix4::Matrix4(const Matrix4& other)
 {
-	switch(Constructor) {
-	case M4C_NOTHING:
-		break;
-	case M4C_IDENT:
-		MakeIdent();
-		break;
-	case M4C_COPY:
-		*this = other;
-		break;
-	case M4C_INV:
-		if(!other.GetInverted(*this)) {
-			// Bei Fehler 0-Matrix
-			MakeIdent();
-			m[0][0] = m[1][1] = m[2][2] = m[3][3] = 0.0f;
-		}
-		break;
-	case M4C_TRANSP:
-		other.GetTransposed(*this);
-		break;
-	case M4C_INV_TRANSP:
-		if(!other.GetInverted(*this)) {
-			// Bei Fehler 0-Matrix
-			MakeIdent();
-			m[0][0] = m[1][1] = m[2][2] = m[3][3] = 0.0f;
-		} else
-			this->Transpose();
-		break;
-	};
+	*this = other;
 }
 
-//******************************************************************
-// Prüft ob die Matrix die Identitätsmatrix ist
 bool Matrix4::IsIdent() const
 {
-	// Zuerst die letzte Zeile überprüfen, da Matrizen meist mindesten Translationen enthalten
+	// Start with last row, since most matrices contain translations
 	if(!IsZero(m[3][0]) || !IsZero(m[3][1]) || !IsZero(m[3][2]) || !IsEqual(m[3][3], 1.0f))
 		return false;
 
@@ -95,8 +56,6 @@ bool Matrix4::IsIdent() const
 	return true;
 }
 
-//******************************************************************
-// Macht die Matrix zur Identiätsmatrix
 Matrix4& Matrix4::MakeIdent()
 {
 	*this = IDENTITY;
@@ -104,106 +63,93 @@ Matrix4& Matrix4::MakeIdent()
 	return *this;
 }
 
-//******************************************************************
-//Wandelt eine 4x4 Matrix in eine 3x3 Matrix um,zur Transformation von Texturkoordinaten
-void Matrix4::Get3x3(Matrix4& out) const
+Matrix4 Matrix4::Get3x3() const
 {
-	out = Matrix4(m[0][0], m[0][1], m[0][3], 0.0f,
+	return Matrix4(
+		m[0][0], m[0][1], m[0][3], 0.0f,
 		m[1][0], m[1][1], m[1][3], 0.0f,
 		m[3][0], m[3][1], m[3][3], 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-//******************************************************************
-//Gibt die Determinante der Matrix aus
-float Matrix4::GetDet() const
+float Matrix4::GetTransformDet() const
 {
-	//Die linke obere 3x3 Matrix reicht für unsere Zwecke aus
-	return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
+	return
+		m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
 		m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
 		m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 }
 
-//******************************************************************
-// Transpondiert diese Matrix
 Matrix4& Matrix4::Transpose()
 {
-	(*this) = Matrix4(m[0][0], m[1][0], m[2][0], m[3][0],
+	(*this) = Matrix4(
+		m[0][0], m[1][0], m[2][0], m[3][0],
 		m[0][1], m[1][1], m[2][1], m[3][1],
 		m[0][2], m[1][2], m[2][2], m[3][2],
 		m[0][3], m[1][3], m[2][3], m[3][3]);
 	return *this;
 }
 
-//******************************************************************
-// Gib die transpondierte Matrix aus
-void Matrix4::GetTransposed(Matrix4& out) const
+Matrix4 Matrix4::GetTransposed() const
 {
-	out = Matrix4(m[0][0], m[1][0], m[2][0], m[3][0],
+	return Matrix4(
+		m[0][0], m[1][0], m[2][0], m[3][0],
 		m[0][1], m[1][1], m[2][1], m[3][1],
 		m[0][2], m[1][2], m[2][2], m[3][2],
 		m[0][3], m[1][3], m[2][3], m[3][3]);
 }
 
-//******************************************************************
-// Invertiert diese Matrix
-// Bei Fehler keine Auswirkung
-Matrix4& Matrix4::Invert()
+Matrix4& Matrix4::InvertTransform(bool* result)
 {
-	//Kehrwert der Determinante vorberechnen
-	float fInvDet = GetDet();
-	if(fInvDet == 0) return *this;
-	fInvDet = 1.0f / fInvDet;
+	float invDet = GetTransformDet();
+	if(IsZero(invDet))
+		return MakeIdent();
+	invDet = 1.0f / invDet;
 
-	// Invertierte Matrix berechnen
-	Matrix4 Temp(M4C_NOTHING);
-	this->GetInverted(Temp);
-
-	*this = Temp;
+	*this = this->GetTransformInverted(result);
 	return *this;
 }
 
-//******************************************************************
-// Liefert die Invertierte Matrix
-// False wenn sich Matrix nicht invertieren lässt
-bool Matrix4::GetInverted(Matrix4& out) const
+Matrix4 Matrix4::GetTransformInverted(bool* result) const
 {
-	//Kehrwert der Determinante vorberechnen
-	float fInvDet = GetDet();
-	if(IsZero(fInvDet)) return false;
-	fInvDet = 1.0f / fInvDet;
+	float invDet = GetTransformDet();
+	if(IsZero(invDet)) {
+		if(result)
+			*result = false;
+		return IDENTITY;
+	} else {
+		if(result)
+			*result = true;
+	}
+	invDet = 1.0f / invDet;
 
-	// Invertierte Matrix berechnen
-	out.m[0][0] = fInvDet * (m[1][1] * m[2][2] - m[1][2] * m[2][1]);
-	out.m[0][1] = -fInvDet * (m[0][1] * m[2][2] - m[0][2] * m[2][1]);
-	out.m[0][2] = fInvDet * (m[0][1] * m[1][2] - m[0][2] * m[1][1]);
+	Matrix4 out;
+	out.m[0][0] = invDet * (m[1][1] * m[2][2] - m[1][2] * m[2][1]);
+	out.m[0][1] = -invDet * (m[0][1] * m[2][2] - m[0][2] * m[2][1]);
+	out.m[0][2] = invDet * (m[0][1] * m[1][2] - m[0][2] * m[1][1]);
 	out.m[0][3] = 0.0f;
-	out.m[1][0] = -fInvDet * (m[1][0] * m[2][2] - m[1][2] * m[2][0]);
-	out.m[1][1] = fInvDet * (m[0][0] * m[2][2] - m[0][2] * m[2][0]);
-	out.m[1][2] = -fInvDet * (m[0][0] * m[1][2] - m[0][2] * m[1][0]);
+	out.m[1][0] = -invDet * (m[1][0] * m[2][2] - m[1][2] * m[2][0]);
+	out.m[1][1] = invDet * (m[0][0] * m[2][2] - m[0][2] * m[2][0]);
+	out.m[1][2] = -invDet * (m[0][0] * m[1][2] - m[0][2] * m[1][0]);
 	out.m[1][3] = 0.0f;
-	out.m[2][0] = fInvDet * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
-	out.m[2][1] = -fInvDet * (m[0][0] * m[2][1] - m[0][1] * m[2][0]);
-	out.m[2][2] = fInvDet * (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
+	out.m[2][0] = invDet * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+	out.m[2][1] = -invDet * (m[0][0] * m[2][1] - m[0][1] * m[2][0]);
+	out.m[2][2] = invDet * (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
 	out.m[2][3] = 0.0f;
 	out.m[3][0] = -(m[3][0] * out.m[0][0] + m[3][1] * out.m[1][0] + m[3][2] * out.m[2][0]);
 	out.m[3][1] = -(m[3][0] * out.m[0][1] + m[3][1] * out.m[1][1] + m[3][2] * out.m[2][1]);
 	out.m[3][2] = -(m[3][0] * out.m[0][2] + m[3][1] * out.m[1][2] + m[3][2] * out.m[2][2]);
 	out.m[3][3] = 1.0f;
 
-	return true;
+	return out;
 }
 
-//******************************************************************
-// Setzt die Verschiebung dieser Matrix
 Matrix4& Matrix4::SetTranslation(const Vector3F& vTrans)
 {
 	m[3][0] = vTrans.x; m[3][1] = vTrans.y; m[3][2] = vTrans.z;
 	return *this;
 }
 
-//******************************************************************
-// Adds a Translation to this Matrix
 Matrix4& Matrix4::AddTranslation(const Vector3F& vTrans)
 {
 	m[0][0] += m[0][3] * vTrans.x;    m[0][1] += m[0][3] * vTrans.y;    m[0][2] += m[0][3] * vTrans.z;
@@ -214,17 +160,11 @@ Matrix4& Matrix4::AddTranslation(const Vector3F& vTrans)
 	return *this;
 }
 
-//******************************************************************
-// Fragt die Verschiebung durch diese Matrix ab
 Vector3F Matrix4::GetTranslation() const
 {
 	return Vector3F(m[3][0], m[3][1], m[3][2]);
 }
 
-//******************************************************************
-// Setzt die Skalierung dieser Matrix
-// Sollte nicht benutzt werden, wenn bereits eine Rotation in der Matrix enthalten ist
-// in diesem Fall per Matrixmultiplikation hinzufügen
 Matrix4& Matrix4::SetScale(const Vector3F& vScale)
 {
 	m[0][0] = vScale.x;
@@ -243,8 +183,6 @@ Matrix4& Matrix4::AddScale(const Vector3F& vScale)
 	return *this;
 }
 
-//******************************************************************
-// Fragt die Skalierung durch diese Matrix ab
 Vector3F Matrix4::GetScale() const
 {
 	// 0 Rotationsfall abfangen
@@ -255,13 +193,12 @@ Vector3F Matrix4::GetScale() const
 
 	// Volle Berechnung nötig
 	float XScaling = sqrtf(m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2]);
-	return Vector3F(GetDet() > 0 ? XScaling : -XScaling,
+	return Vector3F(
+		GetTransformDet() > 0 ? XScaling : -XScaling,
 		sqrtf(m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2]),
 		sqrtf(m[2][0] * m[0][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2]));
 }
 
-//******************************************************************
-// Setzt die Rotation dieser Matrix
 Matrix4& Matrix4::SetRotationEuler(AngleF x, AngleF y, AngleF z)
 {
 	const float cX = Cos(x);
@@ -391,7 +328,6 @@ Matrix4& Matrix4::AddRotationZ(AngleF f)
 	return *this;
 }
 
-
 Matrix4& Matrix4::AddRotation(AngleF x, AngleF y, AngleF z)
 {
 	const float cX = Cos(x);
@@ -438,8 +374,6 @@ Matrix4& Matrix4::AddRotation(AngleF x, AngleF y, AngleF z)
 	return *this;
 }
 
-//******************************************************************
-// Fragt die Rotation durch diese Matrix ab
 Vector3F Matrix4::GetRotationDeg() const
 {
 	const Matrix4& tmp = *this;
@@ -478,7 +412,6 @@ Matrix4& Matrix4::BuildWorld(const Vector3F& vScale,
 	const Vector3F& vRot,
 	const Vector3F& vTrans)
 {
-
 	const float cX = vRot.x != 0.0f ? cosf(vRot.x) : 1.0f;
 	const float sX = vRot.x != 0.0f ? sinf(vRot.x) : 0.0f;
 
@@ -514,108 +447,101 @@ Matrix4& Matrix4::BuildWorld(const Vector3F& vScale,
 	return *this;
 }
 
-Matrix4& Matrix4::BuildWorld(const Vector3F& Scale,
-	const QuaternionF& Orient,
-	const Vector3F& Trans)
+Matrix4& Matrix4::BuildWorld(const Vector3F& scale,
+	const QuaternionF& orient,
+	const Vector3F& trans)
 {
 	/*
 	// 57 Aktionen
-	m[0][0] = Scale.x*(1.0f - 2.0f*Orient.y*Orient.y - 2.0f*Orient.z*Orient.z);
-	m[0][1] = Scale.x*(2.0f*Orient.x*Orient.y + 2.0f*Orient.z*Orient.w);
-	m[0][2] = Scale.x*(2.0f*Orient.x*Orient.z - 2.0f*Orient.y*Orient.w);
+	m[0][0] = scale.x*(1.0f - 2.0f*orient.y*orient.y - 2.0f*orient.z*orient.z);
+	m[0][1] = scale.x*(2.0f*orient.x*orient.y + 2.0f*orient.z*orient.w);
+	m[0][2] = scale.x*(2.0f*orient.x*orient.z - 2.0f*orient.y*orient.w);
 	m[0][3] = 0.0f;
 
-	m[1][0] = Scale.y*(2.0f*Orient.x*Orient.y - 2.0f*Orient.z*Orient.w);
-	m[1][1] = Scale.y*(1.0f - 2.0f*Orient.x*Orient.x - 2.0f*Orient.z*Orient.z);
-	m[1][2] = Scale.y*(2.0f*Orient.z*Orient.y + 2.0f*Orient.x*Orient.w);
+	m[1][0] = scale.y*(2.0f*orient.x*orient.y - 2.0f*orient.z*orient.w);
+	m[1][1] = scale.y*(1.0f - 2.0f*orient.x*orient.x - 2.0f*orient.z*orient.z);
+	m[1][2] = scale.y*(2.0f*orient.z*orient.y + 2.0f*orient.x*orient.w);
 	m[1][3] = 0.0f;
 
-	m[2][0] = Scale.z*(2.0f*Orient.x*Orient.z + 2.0f*Orient.y*Orient.w);
-	m[2][1] = Scale.z*(2.0f*Orient.z*Orient.y - 2.0f*Orient.x*Orient.w);
-	m[2][2] = Scale.z*(1.0f - 2.0f*Orient.x*Orient.x - 2.0f*Orient.y*Orient.y);
+	m[2][0] = scale.z*(2.0f*orient.x*orient.z + 2.0f*orient.y*orient.w);
+	m[2][1] = scale.z*(2.0f*orient.z*orient.y - 2.0f*orient.x*orient.w);
+	m[2][2] = scale.z*(1.0f - 2.0f*orient.x*orient.x - 2.0f*orient.y*orient.y);
 	m[2][3] = 0.0f;
 
-	m[3][0] = Trans.x;
-	m[3][1] = Trans.y;
-	m[3][2] = Trans.z;
+	m[3][0] = trans.x;
+	m[3][1] = trans.y;
+	m[3][2] = trans.z;
 	m[3][3] = 1.0f;
 	*/
 
 	// 36 Aktionen
-	const float xy = Orient.x * Orient.y;
-	const float yy = Orient.y * Orient.y;
-	const float xx = Orient.x * Orient.x;
-	const float zw = Orient.z * Orient.w;
-	const float zz = Orient.z * Orient.z;
-	const float xz = Orient.x * Orient.z;
-	const float yw = Orient.y * Orient.w;
-	const float zy = Orient.z * Orient.y;
-	const float xw = Orient.x * Orient.w;
+	const float xy = orient.x * orient.y;
+	const float yy = orient.y * orient.y;
+	const float xx = orient.x * orient.x;
+	const float zw = orient.z * orient.w;
+	const float zz = orient.z * orient.z;
+	const float xz = orient.x * orient.z;
+	const float yw = orient.y * orient.w;
+	const float zy = orient.z * orient.y;
+	const float xw = orient.x * orient.w;
 
-	const float ScaleX2 = 2.0f * Scale.x;
-	const float ScaleY2 = 2.0f * Scale.y;
-	const float ScaleZ2 = 2.0f * Scale.z;
+	const float ScaleX2 = 2.0f * scale.x;
+	const float ScaleY2 = 2.0f * scale.y;
+	const float ScaleZ2 = 2.0f * scale.z;
 
-	m[0][0] = Scale.x * (1.0f - 2.0f * (yy + zz));
+	m[0][0] = scale.x * (1.0f - 2.0f * (yy + zz));
 	m[0][1] = ScaleX2 * (xy + zw);
 	m[0][2] = ScaleX2 * (xz - yw);
 	m[0][3] = 0.0f;
 
 	m[1][0] = ScaleY2 * (xy - zw);
-	m[1][1] = Scale.y * (1.0f - 2.0f * (xx + zz));
+	m[1][1] = scale.y * (1.0f - 2.0f * (xx + zz));
 	m[1][2] = ScaleY2 * (zy + xw);
 	m[1][3] = 0.0f;
 
 	m[2][0] = ScaleZ2 * (xz + yw);
 	m[2][1] = ScaleZ2 * (zy - xw);
-	m[2][2] = Scale.z * (1.0f - 2.0f * (xx + yy));
+	m[2][2] = scale.z * (1.0f - 2.0f * (xx + yy));
 	m[2][3] = 0.0f;
 
-	m[3][0] = Trans.x;
-	m[3][1] = Trans.y;
-	m[3][2] = Trans.z;
+	m[3][0] = trans.x;
+	m[3][1] = trans.y;
+	m[3][2] = trans.z;
 	m[3][3] = 1.0f;
 
 	return *this;
 }
 
-//******************************************************************
-//Perspektivische Projektionsmatrix (Hyperbolische Z-Transformation)
 Matrix4& Matrix4::BuildProjection_Persp(float fieldOfVison,
 	float aspect,
-	float fNearPlane,
-	float fFarPlane)
+	float nearPlane,
+	float farPlane)
 {
-	//Kotangens von 1/2 FOV
 	float Cot = 1.0f / tanf(fieldOfVison*0.5f);
-	float Q = fFarPlane / (fFarPlane - fNearPlane);
+	float Q = farPlane / (farPlane - nearPlane);
 
 	m[0][0] = Cot / aspect;    m[0][1] = 0.0f; m[0][2] = 0.0f;             m[0][3] = 0.0f;
 	m[1][0] = 0.0f;            m[1][1] = Cot;  m[1][2] = 0.0f;             m[1][3] = 0.0f;
 	m[2][0] = 0.0f;            m[2][1] = 0.0f; m[2][2] = Q;             m[2][3] = 1.0f;
-	m[3][0] = 0.0f;            m[3][1] = 0.0f; m[3][2] = -fNearPlane*Q; m[3][3] = 0.0f;
+	m[3][0] = 0.0f;            m[3][1] = 0.0f; m[3][2] = -nearPlane*Q; m[3][3] = 0.0f;
 
 	return *this;
 }
 
-//******************************************************************
-//Orthogonale Projektionsmatrix
-Matrix4& Matrix4::BuildProjection_Ortho(float XMax,
+Matrix4& Matrix4::BuildProjection_Ortho(float xMax,
 	float aspect,
-	float fNearPlane,
-	float fFarPlane)
+	float nearPlane,
+	float farPlane)
 {
-	float Q = 1.0f / (fFarPlane - fNearPlane);
-	m[0][0] = 1.0f / XMax;    m[0][1] = 0.0f;         m[0][2] = 0.0f;             m[0][3] = 0.0f;
-	m[1][0] = 0.0f;            m[1][1] = 1.0f / (XMax / aspect);    m[1][2] = 0.0f;             m[1][3] = 0.0f;
+	float Q = 1.0f / (farPlane - nearPlane);
+	m[0][0] = 1.0f / xMax;    m[0][1] = 0.0f;         m[0][2] = 0.0f;             m[0][3] = 0.0f;
+	m[1][0] = 0.0f;            m[1][1] = 1.0f / (xMax / aspect);    m[1][2] = 0.0f;             m[1][3] = 0.0f;
 	m[2][0] = 0.0f;            m[2][1] = 0.0f;         m[2][2] = Q;             m[2][3] = 0.0f;
-	m[3][0] = 0.0f;            m[3][1] = 0.0f;         m[3][2] = -fNearPlane*Q; m[3][3] = 1.0f;
+	m[3][0] = 0.0f;            m[3][1] = 0.0f;         m[3][2] = -nearPlane*Q; m[3][3] = 1.0f;
 
 	return *this;
 }
 
-//******************************************************************
-//Kameramatrix mit Blickrichtung
 Matrix4& Matrix4::BuildCamera(const Vector3F& vPos,
 	const Vector3F& vDir,
 	const Vector3F& upVector) //=Vector3(0.0f,1.0f,0.0f)
@@ -632,8 +558,6 @@ Matrix4& Matrix4::BuildCamera(const Vector3F& vPos,
 	return *this;
 }
 
-//******************************************************************
-//Kameramatrix mit Blickpunkt
 Matrix4& Matrix4::BuildCameraLookAt(const Vector3F& vPos,
 	const Vector3F& vLookAt,
 	const Vector3F& upVector) //=Vector3(0.0f,1.0f,0.0f)
@@ -641,9 +565,6 @@ Matrix4& Matrix4::BuildCameraLookAt(const Vector3F& vPos,
 	return BuildCamera(vPos, vLookAt - vPos, upVector);
 }
 
-//******************************************************************
-//Operatoren
-//Addition
 Matrix4 Matrix4::operator+(const Matrix4& other) const
 {
 	return Matrix4(m[0][0] + other.m[0][0], m[0][1] + other.m[0][1], m[0][2] + other.m[0][2], m[0][3] + other.m[0][3],
@@ -674,7 +595,6 @@ Matrix4& Matrix4::operator+=(const Matrix4& other)
 	return *this;
 }
 
-// Subtraktion
 Matrix4 Matrix4::operator-(const Matrix4& other) const
 {
 	return Matrix4(m[0][0] - other.m[0][0], m[0][1] - other.m[0][1], m[0][2] - other.m[0][2], m[0][3] - other.m[0][3],
@@ -705,7 +625,6 @@ Matrix4& Matrix4::operator-=(const Matrix4& other)
 	return *this;
 }
 
-// Multiplikation mit Skalar
 Matrix4 Matrix4::operator*(float f) const
 {
 	return Matrix4(m[0][0] * f, m[0][1] * f, m[0][2] * f, m[0][3] * f,
@@ -724,14 +643,14 @@ Matrix4& Matrix4::operator*=(float f)
 	return *this;
 }
 
-// Multiplikation mit einer anderen Matrix
 Matrix4 Matrix4::operator* (const Matrix4& other) const
 {
 	// Multiplikationen sind sehr langsam
 	if(this->IsIdent()) return other;
 	if(other.IsIdent()) return *this;
 
-	return Matrix4(m[0][0] * other.m[0][0] + m[0][1] * other.m[1][0] + m[0][2] * other.m[2][0] + m[0][3] * other.m[3][0],
+	return Matrix4(
+		m[0][0] * other.m[0][0] + m[0][1] * other.m[1][0] + m[0][2] * other.m[2][0] + m[0][3] * other.m[3][0],
 		m[0][0] * other.m[0][1] + m[0][1] * other.m[1][1] + m[0][2] * other.m[2][1] + m[0][3] * other.m[3][1],
 		m[0][0] * other.m[0][2] + m[0][1] * other.m[1][2] + m[0][2] * other.m[2][2] + m[0][3] * other.m[3][2],
 		m[0][0] * other.m[0][3] + m[0][1] * other.m[1][3] + m[0][2] * other.m[2][3] + m[0][3] * other.m[3][3],
@@ -784,22 +703,16 @@ Matrix4& Matrix4::operator*=(const Matrix4& other)
 	return SetByProduct(*this, other);
 }
 
-// Zweisungsoperator
 Matrix4& Matrix4::operator=(const Matrix4& other)
 {
-	// Schleife ist sicherer als memcpy
 	if(*this == other) return *this;
-	for(int i = 0; i < 16; ++i) {
+	for(int i = 0; i < 16; ++i)
 		(*this)[i] = other[i];
-	}
 	return *this;
 }
 
-// Gleichheitsoperator
 bool Matrix4::operator==(const Matrix4& other) const
 {
-	// Schleife ist sicherer als memcmp()
-	// Wegen z.B. -0.0f und +0.0f
 	for(int i = 0; i < 16; ++i) {
 		if((*this)[i] != other[i])
 			return false;
@@ -807,7 +720,6 @@ bool Matrix4::operator==(const Matrix4& other) const
 	return true;
 }
 
-// Ungleichheitsoperator
 bool Matrix4::operator!=(const Matrix4& other) const
 {
 	return !(*this == other);
@@ -815,4 +727,3 @@ bool Matrix4::operator!=(const Matrix4& other) const
 
 }
 }
-

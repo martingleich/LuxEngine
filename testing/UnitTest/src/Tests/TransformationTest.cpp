@@ -36,7 +36,7 @@ UNIT_SUITE(TransformationTest)
 	UNIT_TEST(ToInvMatrix)
 	{
 		math::Matrix4 m1, m2;
-		m1.BuildWorld(math::Vector3F(t1.scale), t1.orientation, t1.translation).Invert();
+		m1.BuildWorld(math::Vector3F(t1.scale), t1.orientation, t1.translation).InvertTransform();
 		t1.ToMatrixInv(m2);
 
 		UNIT_ASSERT_APPROX(m1, m2);
