@@ -549,7 +549,7 @@ void SceneManagerImpl::DrawScene()
 
 			m_StencilShadowRenderer.Begin(m_ActiveCameraNode->GetAbsolutePosition(), m_ActiveCameraNode->GetAbsoluteTransform().TransformDir(math::Vector3F::UNIT_Y));
 			for(auto& e : m_SolidNodeList) {
-				if(e.node->IsTrulyVisible()) {
+				if(e.node->IsTrulyVisible() && e.node->IsShadowCasting()) {
 					auto mesh = dynamic_cast<Mesh*>(e.renderable);
 					if(mesh && mesh->GetMesh()) {
 						bool isInfinite;

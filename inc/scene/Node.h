@@ -546,6 +546,9 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
+	LUX_API bool IsShadowCasting() const;
+	LUX_API void SetShadowCasting(bool cast);
+
 protected:
 	LUX_API Node(const Node& other);
 
@@ -583,6 +586,7 @@ private:
 	bool m_IsVisible;
 	bool m_HasUserBoundingBox;
 	bool m_IsRoot;
+	bool m_CastShadow;
 };
 
 } // namespace scene

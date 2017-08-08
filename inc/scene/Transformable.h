@@ -177,6 +177,14 @@ public:
 		SetDirty();
 	}
 
+	void LookAt(const math::Vector3F& pos,
+		const math::Vector3F& up = math::Vector3F::UNIT_Y,
+		const math::Vector3F& local_dir = math::Vector3F::UNIT_Z,
+		const math::Vector3F& local_up = math::Vector3F::UNIT_Y)
+	{
+		SetDirectionUp(pos-GetPosition(), up, local_dir, local_up);
+	}
+
 protected:
 	bool IsDirty() const
 	{

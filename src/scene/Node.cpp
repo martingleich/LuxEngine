@@ -472,8 +472,10 @@ void Node::OnAddComponent(Component* c)
 			m_SceneManager->RegisterCamera(this, camera);
 
 		auto light = dynamic_cast<Light*>(c);
-		if(light)
+		if(light) {
 			m_SceneManager->RegisterLight(this, light);
+			SetShadowCasting(false);
+		}
 
 		if(c->IsAnimated()) {
 			if(m_AnimatedCount == 0)
@@ -521,6 +523,16 @@ void Node::SetDirty() const
 	// Set all children dirty to
 	for(auto child : Children())
 		child->SetDirty();
+}
+
+bool Node::IsShadowCasting() const
+{
+	return m_CastShadow;
+}
+
+void Node::SetShadowCasting(bool cast)
+{
+	m_CastShadow = cast;
 }
 
 } // namespace scene

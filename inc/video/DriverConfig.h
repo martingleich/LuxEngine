@@ -70,6 +70,19 @@ public:
 	LUX_API virtual bool GetMatchingMultisample(u32& outLevel, u32& outQuality, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 minSamples, u32 minQuality);
 
 	//! Generate a simple config file for the given settings
+	/**
+	\param [out] outConfig the generated config data.
+	\param minRes The minimal resolution of the backbuffer, the resulting
+		resolution will be bigger or equal on all axes.
+	\param windowed Windowed or fullscreen
+	\param vSync Is vSync enabled
+	\param backBuffer16Bit Should the backbuffer use 16 bit colors
+	\param minDepth The minimal number of depth bits
+	\param minStencil The minimal number of stencil bits
+	\param multiSample The level of multisampling with 0 meaning no multisampling
+		and 10 meaning as much multisampling as possible
+	\return Was the config generated successfully.
+	*/
 	LUX_API virtual bool GenerateConfig(
 		video::DriverConfig& outConfig,
 		const math::Dimension2U& minRes,
@@ -77,7 +90,7 @@ public:
 		bool backBuffer16Bit,
 		u32 minDepth,
 		u32 minStencil,
-		bool multiSample);
+		int multiSample);
 };
 
 class AdapterList : public ReferenceCounted

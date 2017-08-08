@@ -26,8 +26,8 @@ namespace gui
 namespace core
 {
 }
-//! Containes physics
-namespace physics
+//! Containes logic functions
+namespace logic
 {
 }
 //! Contains the logging functions

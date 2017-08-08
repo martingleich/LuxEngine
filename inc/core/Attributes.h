@@ -117,7 +117,6 @@ private:
 class Attributes
 {
 	typedef core::HashMap<String, StrongRef<Attribute>>::ConstKeyIterator ConstIterator;
-
 public:
 	template <typename T>
 	AttributePtr AddAttribute(const String& name, const T& value)
@@ -127,7 +126,19 @@ public:
 
 	AttributePtr AddAttribute(Attribute* attrb)
 	{
-		m_ObjectMap[attrb->GetName()] = attrb;
+		LX_CHECK_NULL_ARG(attrb);
+
+		auto name = attrb->GetName();
+		auto type = attrb->GetType();
+		auto it = m_ObjectMap.Find(name);
+		if(it != m_ObjectMap.End()) {
+			if((*it)->GetType() != type)
+				throw core::Exception("Attribute is already defined with diffrent type");
+			*it = attrb;
+		} else {
+			m_ObjectMap[name] = attrb;
+		}
+
 		return attrb;
 	}
 

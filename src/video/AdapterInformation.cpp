@@ -97,7 +97,7 @@ bool Adapter::GenerateConfig(
 	bool backBuffer16Bit,
 	u32 minDepth,
 	u32 minStencil,
-	bool multiSample)
+	int multiSample)
 {
 	outConfig.adapter = this;
 
@@ -113,8 +113,10 @@ bool Adapter::GenerateConfig(
 	if(!GetMatchingZStencil(outConfig.zsFormat, outConfig.display, outConfig.windowed, outConfig.backBufferFormat, minDepth, minStencil))
 		return false;
 
+	multiSample = math::Clamp(multiSample, 0, 10);
 	u32 maxMultisample = GetMaxMultisampleLevel(outConfig.display, outConfig.windowed, outConfig.backBufferFormat, outConfig.zsFormat);
-	if(!GetMatchingMultisample(outConfig.multiSamples, outConfig.multiQuality, outConfig.display, outConfig.windowed, outConfig.backBufferFormat, outConfig.zsFormat, multiSample ? maxMultisample/2 : 0, 0))
+	u32 realMultisample = math::Lerp<u32>(0, maxMultisample, multiSample*0.1f);
+	if(!GetMatchingMultisample(outConfig.multiSamples, outConfig.multiQuality, outConfig.display, outConfig.windowed, outConfig.backBufferFormat, outConfig.zsFormat, realMultisample, 0))
 		return false;
 
 	return true;
