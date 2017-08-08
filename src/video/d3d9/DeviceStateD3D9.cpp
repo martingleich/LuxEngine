@@ -434,7 +434,7 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 	D3DLight.Position = *((D3DVECTOR*)(&light.position));
 	D3DLight.Direction = *((D3DVECTOR*)(&light.direction));
 
-	D3DLight.Range = math::Max(0.0f, light.range);
+	D3DLight.Range = sqrtf(FLT_MAX);
 	D3DLight.Falloff = light.falloff;
 
 	D3DCOLORVALUE specular = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -445,8 +445,8 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 	D3DLight.Ambient = TestFlag(lighting, ELighting::Ambient) ? ambient : black;
 
 	D3DLight.Attenuation0 = 0.0f;
-	D3DLight.Attenuation1 = 0.0f;
-	D3DLight.Attenuation2 = 1.0f / light.range;
+	D3DLight.Attenuation1 = 1.0f;
+	D3DLight.Attenuation2 = 0.0f;
 
 	D3DLight.Theta = light.innerCone * 2.0f;
 	D3DLight.Phi = light.outerCone * 2.0f;

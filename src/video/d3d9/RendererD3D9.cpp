@@ -519,7 +519,8 @@ void RendererD3D9::LoadLightSettings(const Pass& pass)
 
 	if(IsDirty(Dirty_Lights)) {
 		m_DeviceState.ClearLights();
-		*m_ParamId.lighting = (float)((u32)pass.lighting);
+		*m_ParamId.lighting = (float)pass.lighting;
+
 		// Only use the fixed pipeline if there is no shader
 		if(!pass.shader) {
 			// Enable fixed pipeline lights

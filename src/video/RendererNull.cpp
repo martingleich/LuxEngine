@@ -15,7 +15,7 @@ RendererNull::RendererNull(VideoDriver* driver) :
 {
 	m_Fog.isActive = false;
 
-	m_ParamId.lighting = m_Params.AddAttribute("lighting", 1.0f);
+	m_ParamId.lighting = m_Params.AddAttribute("lighting", (float)video::ELighting::Enabled);
 	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::Colorf(0, 0, 0));
 	m_ParamId.time = m_Params.AddAttribute("time", 0.0f);
 
@@ -210,18 +210,24 @@ VideoDriver* RendererNull::GetDriver() const
 
 ///////////////////////////////////////////////////////////////////////////
 /*
+Lux illumination matrix.
+Only the location of the t value is fixed, all other values depend on the light
+type, for built-in point/directonal and spot light the matrix is build as
+following:
+
  r  g  b t
-px py pz
-dx dy dz
-ra fa ic oc
+px py pz 0
+dx dy dz 0
+ra ic oc 0
+
+t = Type of light (0 = Disabled, 1 = Directional, 2 = Point, 3 = Spot)
 
 (r,g,b) = Diffuse color of light
-t = Type of light (0 = Disabled, 1 = Directional, 2 = Point, 3 = Spot)
 (px,py,pz) = Position of light
-ra = Range
+
 fa = Falloff for spotlight
-ic = Cosine of half outer cone for spotlight
-oc = Cosine of half inner - Cosine of half outer for spotlight
+ic = Cosine of half inner cone for spotlight
+oc = Cosine of half outer cone for spotlight
 */
 math::Matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool active)
 {
@@ -253,10 +259,10 @@ math::Matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool acti
 	matrix(2, 1) = data.direction.y;
 	matrix(2, 2) = data.direction.z;
 
-	matrix(3, 0) = data.range;
-	matrix(3, 1) = data.falloff;
+	matrix(3, 0) = data.falloff;
+	matrix(3, 1) = cos(data.innerCone);
 	matrix(3, 2) = cos(data.outerCone);
-	matrix(3, 3) = cos(data.innerCone) - cos(data.outerCone);
+	matrix(3, 3) = 0.0f;
 
 	matrix(1, 3) = 0.0f;
 	matrix(2, 3) = 0.0f;

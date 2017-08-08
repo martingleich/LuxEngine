@@ -28,8 +28,6 @@ void MaterialLibrary::Initialize(MaterialLibrary* matLib)
 
 MaterialLibrary::~MaterialLibrary()
 {
-	m_Solid.Reset();
-
 	// At this point there shouldn't be any references to renderers
 	for(auto& x : m_Renderers) {
 		if(x->GetReferenceCount() != 1)
@@ -59,9 +57,9 @@ MaterialLibrary::MaterialLibrary()
 	}
 
 	{
-		m_Solid = AddMaterialRenderer("solid");
-		m_Solid->GetPass(0).AddTexture();
-		m_Solid->AddParam("diffMap", 0, EOptionId::Layer0);
+		auto solid = AddMaterialRenderer("solid");
+		solid->GetPass(0).AddTexture();
+		solid->AddParam("diffMap", 0, EOptionId::Layer0);
 	}
 
 	{
@@ -152,9 +150,8 @@ StrongRef<Material> MaterialLibrary::CreateMaterial(const String& name)
 
 StrongRef<Material> MaterialLibrary::CreateMaterial(MaterialRenderer* renderer)
 {
-	if(renderer == nullptr)
-		renderer = m_Solid;
-
+	if(!renderer)
+		return CreateMaterial("solid");
 	return renderer->CreateMaterial();
 }
 
@@ -178,6 +175,15 @@ StrongRef<MaterialRenderer> MaterialLibrary::AddMaterialRenderer(const String& n
 {
 	StrongRef<MaterialRenderer> r = LUX_NEW(MaterialRenderer)(newName);
 	return AddMaterialRenderer(r);
+}
+
+StrongRef<MaterialRenderer> MaterialLibrary::ReplaceMaterialRenderer(const String& name)
+{
+	size_t id;
+	if(!FindRenderer(name, id))
+		return AddMaterialRenderer(name);
+	m_Renderers[id] = LUX_NEW(MaterialRenderer)(name);
+	return m_Renderers[id];
 }
 
 StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const String& name, const String& oldName)

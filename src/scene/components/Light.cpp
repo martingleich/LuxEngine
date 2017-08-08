@@ -11,6 +11,8 @@ namespace scene
 {
 
 Light::Light() :
+	m_Power(1.0f),
+	m_Range(FLT_MAX),
 	m_IsShadowCasting(true)
 {
 }
@@ -19,24 +21,21 @@ Light::~Light()
 {
 }
 
-void Light::SetLightData(const video::LightData& light)
+video::LightData Light::GetLightData() const
 {
-	m_LightData = light;
-}
-
-const video::LightData& Light::GetLightData() const
-{
-	return m_LightData;
+	auto data = m_LightData;
+	data.color *= m_Power;
+	return data;;
 }
 
 void Light::SetRange(float range)
 {
-	m_LightData.range = range;
+	m_Range = range;
 }
 
 float Light::GetRange() const
 {
-	return m_LightData.range;
+	return m_Range;
 }
 
 void Light::SetInnerCone(math::AngleF angle)
@@ -77,6 +76,16 @@ void Light::SetColor(const video::Colorf& color)
 const video::Colorf& Light::GetColor() const
 {
 	return m_LightData.color;
+}
+
+void Light::SetPower(float power)
+{
+	m_Power = power;
+}
+
+float Light::GetPower() const
+{
+	return m_Power;
 }
 
 void Light::SetLightType(video::ELightType type)

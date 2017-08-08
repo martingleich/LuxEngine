@@ -450,9 +450,13 @@ void ShaderD3D9::CastTypeToShader(EType type, const void* in, void* out)
 {
 	switch(type) {
 	case EType::Boolean:
+		*(u32*)out = *(bool*)in;
 		break;
 	case EType::Texture:
+		*(u32*)out = *(u32*)in;
+		break;
 	case EType::Integer:
+		*(u32*)out = *(int*)in;
 		break;
 	case EType::Colorf:    ((float*)out)[3] = ((float*)in)[3];
 	case EType::Vector3:      ((float*)out)[2] = ((float*)in)[2];

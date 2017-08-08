@@ -19,31 +19,31 @@ public:
 	LUX_API Light();
 	LUX_API virtual ~Light();
 
-	//! Set the light parameters
-	/**
-	\param light The new light settings
-	*/
-	LUX_API virtual void SetLightData(const video::LightData& light);
-
 	//! Get the current light parameters
 	/**
 	\return The current light data
 	*/
-	LUX_API virtual const video::LightData& GetLightData() const;
+	LUX_API virtual video::LightData GetLightData() const;
 
 	//! Set the range of the light
 	/**
-	See \ref video::LightData::range
+	Point farther away than don't have to be illuminated
 	\param range The range of the light
 	*/
 	LUX_API virtual void SetRange(float range);
 
 	//! Get the range of the light
 	/**
-	See \ref video::LightData::range
+	Point farther away than don't have to be illuminated
 	\return The range of the light
 	*/
 	LUX_API virtual float GetRange() const;
+
+	//! Set the power of the light
+	LUX_API virtual void SetPower(float power);
+	
+	//! Get the power of the light
+	LUX_API virtual float GetPower() const;
 
 	//! Set the inner cone of a spotlight
 	LUX_API virtual void SetInnerCone(math::AngleF angle);
@@ -99,6 +99,8 @@ public:
 
 protected:
 	video::LightData m_LightData;
+	float m_Power;
+	float m_Range;
 	bool m_IsShadowCasting;
 };
 

@@ -35,7 +35,6 @@ public:
 		type(ELightType::Point),
 		color(1.0f, 1.0f, 1.0f),
 		position(0.0f, 0.0f, 0.0f),
-		range(100.0f),
 		direction(0.0f, 0.0f, 1.0f),
 		innerCone(math::DegToRad(10.0f)),
 		outerCone(math::DegToRad(45.0f)),
@@ -54,13 +53,6 @@ public:
 
 	//! The lightposition in world coordinates
 	math::Vector3F position;
-
-	//! The light range
-	/**
-	Points after this range are not illuminated.
-	Only for point and spotlights.
-	*/
-	float range;
 
 	//! The lightdirection in world coordinates
 	math::Vector3F direction;

@@ -45,6 +45,7 @@ public:
 	\param name The name of the material renderer
 	*/
 	LUX_API StrongRef<MaterialRenderer> AddMaterialRenderer(MaterialRenderer* renderer);
+	LUX_API StrongRef<MaterialRenderer> ReplaceMaterialRenderer(const String& newName);
 
 	//! Add a new material renderer
 	/**
@@ -121,7 +122,6 @@ private:
 
 private:
 	core::Array<StrongRef<MaterialRenderer>> m_Renderers;
-	StrongRef<MaterialRenderer> m_Solid;
 };
 
 } // namespace video
