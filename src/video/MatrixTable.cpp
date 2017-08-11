@@ -68,7 +68,7 @@ void MatrixTable::ClearDirty(EMatrixType type) const
 	m_Dirty &= ~(1 << type);
 }
 
-u32 MatrixTable::GetCount() const
+size_t MatrixTable::GetCount() const
 {
 	return MAT_COUNT;
 }
