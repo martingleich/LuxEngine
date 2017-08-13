@@ -49,7 +49,7 @@ void FontImpl::Init(const FontCreationData& data)
 
 	if(data.image) {
 		m_Image = video::ImageSystem::Instance()->CreateImage(data.imageSize, video::ColorFormat::X8, data.image, true, true);
-		m_Texture = video::VideoDriver::Instance()->CreateTexture(data.imageSize, video::ColorFormat::A8R8G8B8, 0, false);
+		m_Texture = video::VideoDriver::Instance()->CreateTexture(data.imageSize, video::ColorFormat::A8R8G8B8, 1, false);
 
 		video::TextureLock lock(m_Texture, video::BaseTexture::ELockMode::Overwrite);
 		video::ImageLock imgLock(m_Image);

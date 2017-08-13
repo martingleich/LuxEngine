@@ -39,18 +39,20 @@ DeviceStateD3D9::DeviceStateD3D9(IDirect3DDevice9* device) :
 
 void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting)
 {
-	D3DCOLORVALUE black = {0};
-	// Enable d3d material
-	D3DMATERIAL9 D3DMaterial = {
-		TestFlag(lighting, ELighting::Diffuse) ? SColorToD3DColor(m.GetDiffuse()) : black,
-		TestFlag(lighting, ELighting::Ambient) ? SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()) : black,
-		TestFlag(lighting, ELighting::Specular) ? SColorToD3DColor(m.GetSpecular()*m.GetPower()) : black,
-		TestFlag(lighting, ELighting::Emissive) ? SColorToD3DColor(m.GetEmissive()) : black,
-		TestFlag(lighting, ELighting::Specular) ? m.GetShininess() : 0.0f
-	};
+	if(lighting != ELighting::Disabled) {
+		D3DCOLORVALUE black = {0};
+		// Enable d3d material
+		D3DMATERIAL9 D3DMaterial = {
+			TestFlag(lighting, ELighting::Diffuse) ? SColorToD3DColor(m.GetDiffuse()) : black,
+			TestFlag(lighting, ELighting::Ambient) ? SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()) : black,
+			TestFlag(lighting, ELighting::Specular) ? SColorToD3DColor(m.GetSpecular()*m.GetPower()) : black,
+			TestFlag(lighting, ELighting::Emissive) ? SColorToD3DColor(m.GetEmissive()) : black,
+			TestFlag(lighting, ELighting::Specular) ? m.GetShininess() : 0.0f
+		};
 
-	m_D3DMaterial = D3DMaterial;
-	m_Device->SetMaterial(&m_D3DMaterial);
+		m_D3DMaterial = D3DMaterial;
+		m_Device->SetMaterial(&m_D3DMaterial);
+	}
 	m_Ambient = ambient;
 
 	SetRenderState(D3DRS_TEXTUREFACTOR, m.GetDiffuse().ToHex());
