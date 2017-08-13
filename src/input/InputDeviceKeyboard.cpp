@@ -46,18 +46,18 @@ EEventSource KeyboardDevice::GetType() const
 	return EEventSource::Keyboard;
 }
 
-const Button* KeyboardDevice::GetButton(u32 buttonCode) const
+const event::Button* KeyboardDevice::GetButton(u32 buttonCode) const
 {
 	return &m_Buttons.At(buttonCode);
 }
 
-const Axis* KeyboardDevice::GetAxis(u32 axisCode) const
+const event::Axis* KeyboardDevice::GetAxis(u32 axisCode) const
 {
 	LUX_UNUSED(axisCode);
 	throw core::OutOfRangeException();
 }
 
-const Area* KeyboardDevice::GetArea(u32 areaCode) const
+const event::Area* KeyboardDevice::GetArea(u32 areaCode) const
 {
 	LUX_UNUSED(areaCode);
 	throw core::OutOfRangeException();

@@ -22,7 +22,7 @@ class RawInputReceiver;
 #endif
 }
 
-class LuxDeviceWin32 : public LuxDevice, public gui::WindowWin32MsgCallback
+class LuxDeviceWin32 : public LuxDevice
 {
 public:
 	LuxDeviceWin32();
@@ -43,12 +43,6 @@ public:
 
 	bool Run(float& fNumSecsPassed);
 
-	bool OnMsg(
-		UINT uiMessage,
-		WPARAM WParam,
-		LPARAM LParam,
-		LRESULT& result);
-
 	StrongRef<gui::Window> GetWindow() const
 	{
 		return m_Window;
@@ -64,9 +58,16 @@ public:
 		return m_GUIEnv;
 	}
 
+	bool RunMessageQueue();
+	bool HandleMessages(
+		HWND wnd,
+		UINT Message,
+		WPARAM WParam,
+		LPARAM LParam,
+		LRESULT& result);
 
 private:
-	StrongRef<gui::Window> m_Window;
+	StrongRef<gui::WindowWin32> m_Window;
 
 	StrongRef<scene::SceneManager> m_SceneManager;
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;

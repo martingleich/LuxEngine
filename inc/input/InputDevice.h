@@ -1,9 +1,8 @@
 #ifndef INCLUDED_INPUT_DEVICE_H
 #define INCLUDED_INPUT_DEVICE_H
 #include "core/ReferenceCounted.h"
-#include "input/InputReceiver.h"
-#include "core/lxString.h"
-#include "math/Vector2.h"
+#include "input/InputEvent.h"
+#include "events/lxActions.h"
 
 namespace lux
 {
@@ -39,21 +38,6 @@ public:
 	virtual const String& GetGUID() const = 0;
 	virtual size_t GetElementCount(EEventType type) const = 0;
 	virtual ElemDesc GetElementDesc(EEventType type, u32 id) const = 0;
-};
-
-struct Button
-{
-	bool state;
-};
-
-struct Axis
-{
-	float state;
-};
-
-struct Area
-{
-	math::Vector2F state;
 };
 
 //! Class for a single input device.
@@ -98,21 +82,21 @@ public:
 	/**
 	\param buttonCode The id of the button.
 	*/
-	virtual const Button* GetButton(u32 buttonCode) const = 0;
+	virtual const event::Button* GetButton(u32 buttonCode) const = 0;
 
 	//! Get the state of an axis.
 	/**
 	\param axisCode The id of the axis.
 	\return The value of the axis in device units.
 	*/
-	virtual const Axis* GetAxis(u32 axisCode) const = 0;
+	virtual const event::Axis* GetAxis(u32 axisCode) const = 0;
 
 	//! Get the state of an area.
 	/**
 	\param areaCode The id of the area.
 	\return The value of the area in device units.
 	*/
-	virtual const Area* GetArea(u32 areaCode) const = 0;
+	virtual const event::Area* GetArea(u32 areaCode) const = 0;
 
 	//! Update the device with this event.
 	/**

@@ -151,6 +151,7 @@ private:
 	D3DCAPS9 m_Caps;
 	StrongRef<AdapterD3D9> m_Adapter;
 	D3DPRESENT_PARAMETERS m_PresentParams;
+	D3DFORMAT m_AdapterFormat;
 };
 
 }

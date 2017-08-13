@@ -160,7 +160,7 @@ private:
 	core::Array<Param> m_SceneValues;
 	bool m_HasTextureSceneParam;
 
-	core::mem::RawMemory m_Names;
+	core::RawMemory m_Names;
 	core::ParamPackage m_ParamPackage;
 };
 

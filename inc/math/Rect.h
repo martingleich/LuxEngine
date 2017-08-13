@@ -194,6 +194,20 @@ public:
 			top = other.top;
 		return *this;
 	}
+
+	//! Check if a point is inside the rect, including the edge
+	bool IsInside(const Vector2<T>& point) const
+	{
+		if(point.x < left)
+			return false;
+		if(point.x > right)
+			return false;
+		if(point.y < top)
+			return false;
+		if(point.y > bottom)
+			return false;
+		return true;
+	}
 };
 
 template <typename T>

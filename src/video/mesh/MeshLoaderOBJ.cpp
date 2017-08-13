@@ -87,7 +87,7 @@ public:
 		if(!filesize)
 			throw core::FileFormatException("Can't load streaming file", "obj");
 
-		core::mem::RawMemory memory(filesize);
+		core::RawMemory memory(filesize);
 		if(mtlFile->ReadBinary(filesize, memory) != filesize)
 			throw core::RuntimeException("Can't read input file.");
 		std::stringstream fileStream;
@@ -123,7 +123,7 @@ public:
 		if(!filesize)
 			throw core::FileFormatException("Can't load streaming file", "obj");
 
-		core::mem::RawMemory memory(filesize);
+		core::RawMemory memory(filesize);
 		if(file->ReadBinary(filesize, memory) != filesize)
 			throw core::RuntimeException("Can't read input file.");
 		std::stringstream fileStream;

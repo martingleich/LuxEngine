@@ -90,7 +90,6 @@ namespace input
 
 #include "input/InputSystem.h"
 #include "input/InputDevice.h"
-#include "input/InputReceiver.h"
 #include "input/Keycodes.h"
 
 #include "video/Color.h"
@@ -154,7 +153,7 @@ namespace input
 #include "gui/GUIEnvironment.h"
 #include "gui/Font.h"
 #include "gui/Window.h"
-#include "gui/CursorControl.h"
+#include "gui/Cursor.h"
 #include "gui/FontCreator.h"
 
 #include "core/Referable.h"

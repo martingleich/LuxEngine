@@ -141,6 +141,52 @@ MaterialLibrary::MaterialLibrary()
 		ps.isTransparent = true;
 		particleEmit->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
+
+	{
+		const char* luxHLSLInclude =
+			R"(
+float4 lxIlluminate(float3 pos, float3 normal, float4 ambient, float4 emissive, float4 diffuse, float lighting, float4x4 light)
+{
+	float4 color = float4(0,0,0,0);
+	int iLighting = (int)lighting;
+
+	if(iLighting % 2 != 0) { // Ambient
+		color += ambient;
+	}
+	if((iLighting / 2) % 2 != 0) { // Emissive
+		color += emissive;
+	}
+	if((iLighting / 4) % 2 != 0) { // Diffuse
+		float4 lightDiffuse = float4(light._m00_m01_m02, 1);
+		float3 lightDir = -light._m20_m21_m22;
+		float3 lightPos = light._m10_m11_m12;
+		float3 lightVector = lightPos - pos;
+		float lightDistance = length(lightVector);
+		lightVector /= lightDistance;
+		if(light._m03 == 1) { // Directonal
+			color += dot(normal, lightDir) * diffuse * lightDiffuse;
+		} else { // Spot/Point light
+			float spotFactor = 1;
+			if(light._m03 == 3) { // Spot
+				float falloff = light._m30;
+				float ci = light._m31;
+				float co = light._m32;
+				float rho = dot(lightDir, lightVector);
+				if(rho <= co)
+					spotFactor = 0;
+				else if(rho <= ci)
+					spotFactor = pow((rho - co) / (ci - co), falloff);
+			}
+			float atten = 1 / lightDistance;
+			color += spotFactor * atten * dot(normal, lightVector) * diffuse * lightDiffuse;
+		}
+	}
+
+	return color;
+}
+)";
+		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude, strlen(luxHLSLInclude));
+	}
 }
 
 StrongRef<Material> MaterialLibrary::CreateMaterial(const String& name)
@@ -227,7 +273,7 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 		VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
 	}
 
-	core::mem::RawMemory vsCodeBuffer;
+	core::RawMemory vsCodeBuffer;
 	char* vsCode = (char*)VSFile->GetBuffer();
 	if(!vsCode) {
 		vsCodeBuffer.SetSize(VSFile->GetSize() + 1);
@@ -236,7 +282,7 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 		vsCode[VSFile->GetSize()] = 0;
 	}
 
-	core::mem::RawMemory psCodeBuffer;
+	core::RawMemory psCodeBuffer;
 	char* psCode = (char*)PSFile->GetBuffer();
 	if(!psCode) {
 		if(PSFile == VSFile) {
@@ -306,6 +352,25 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
 		VSCode.Data_c(), VSEntryPoint, VSCode.Size(), VSmajorVersion, VSminorVersion,
 		PSCode.Data_c(), PSEntryPoint, PSCode.Size(), PSmajorVersion, PSminorVersion,
 		errorList);
+}
+
+bool MaterialLibrary::GetShaderInclude(EShaderLanguage language, const String& name, const void*& outData, size_t& outBytes)
+{
+	ShaderInclude search(language, name);
+	auto it = m_ShaderIncludes.Find(search);
+	if(it == m_ShaderIncludes.End())
+		return false;
+	outData = it->PointerC();
+	outBytes = it->GetSize();
+	return true;
+}
+
+void MaterialLibrary::SetShaderInclude(EShaderLanguage language, const String& name, const void* data, size_t bytes)
+{
+	ShaderInclude search(language, name);
+	auto& mem = m_ShaderIncludes.At(search);
+	mem.SetMinSize(bytes);
+	memcpy(mem, data, bytes);
 }
 
 } // namespace video

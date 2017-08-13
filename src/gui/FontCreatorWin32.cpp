@@ -255,6 +255,10 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 
 			auto& px = ctx->image[(height - y - 1)*width + x];
 			px.intensity = (u8)(255 - r);
+			// Convert to linear color space
+			float value = pow(px.intensity / 255.0f, 1 / 2.2f) * 255;
+			value = math::Clamp<float>(value, 0.0f, 255.0f);
+			px.intensity = (u8)value;
 		}
 	}
 
@@ -305,7 +309,7 @@ static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const Strin
 
 static bool RegisterFileFont(io::File* file, HANDLE& outHandle, String& outFontFamily)
 {
-	core::mem::RawMemory data(file->GetSize());
+	core::RawMemory data(file->GetSize());
 
 	u32 count = file->ReadBinary(file->GetSize(), data);
 	if(count != file->GetSize())

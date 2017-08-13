@@ -15,7 +15,7 @@ class InputSystemImpl : public InputSystem
 public:
 	InputSystemImpl();
 
-	events::Signal<const Event&>& GetEventSignal();
+	event::Signal<const Event&>& GetEventSignal();
 
 	void Update(Event& event);
 	void SendUserEvent(const Event& event);
@@ -34,7 +34,7 @@ private:
 	core::HashMap<String, StrongRef<InputDevice>> m_GUIDMap;
 	WeakRef<InputDevice> m_KeyboardDevice;
 
-	events::Signal<const input::Event&> m_EventSignal;
+	event::Signal<const input::Event&> m_EventSignal;
 
 	bool m_IsForeground;
 	bool m_DefaultForegroundHandling;

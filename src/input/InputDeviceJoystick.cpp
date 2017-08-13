@@ -79,17 +79,17 @@ EEventSource JoystickDevice::GetType() const
 	return EEventSource::Joystick;
 }
 
-const Button* JoystickDevice::GetButton(u32 buttonCode) const
+const event::Button* JoystickDevice::GetButton(u32 buttonCode) const
 {
 	return &m_Buttons.At(buttonCode);
 }
 
-const Axis* JoystickDevice::GetAxis(u32 axisCode) const
+const event::Axis* JoystickDevice::GetAxis(u32 axisCode) const
 {
 	return &m_Axes.At(axisCode);
 }
 
-const Area* JoystickDevice::GetArea(u32 areaCode) const
+const event::Area* JoystickDevice::GetArea(u32 areaCode) const
 {
 	LUX_UNUSED(areaCode);
 	throw core::OutOfRangeException();

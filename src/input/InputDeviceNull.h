@@ -31,11 +31,11 @@ protected:
 		EElementType type;
 	};
 
-	struct ButtonElement : Button, ElementData {};
+	struct ButtonElement : event::Button, ElementData {};
 
-	struct AxisElement : Axis, ElementData {};
+	struct AxisElement : event::Axis, ElementData {};
 
-	struct AreaElement : Area, ElementData {};
+	struct AreaElement : event::Area, ElementData {};
 
 private:
 	String m_Name;

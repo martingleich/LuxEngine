@@ -249,7 +249,8 @@ void RendererD3D9::DrawPrimitiveList(
 	else
 		vertexOffset += video::GetPointCount(primitiveType, firstPrimitive);
 
-	for(size_t i = 0; i < m_Material->GetRenderer()->GetPassCount(); ++i) {
+	size_t passCount = m_UseMaterial ? m_Material->GetRenderer()->GetPassCount() : 1;
+	for(size_t i = 0; i < passCount; ++i) {
 		SetupRendering(i);
 
 		HRESULT hr = E_FAIL;

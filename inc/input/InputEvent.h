@@ -1,6 +1,7 @@
 #ifndef INCLUDED_INPUT_EVENT_H
 #define INCLUDED_INPUT_EVENT_H
-#include "Keycodes.h"
+#include "input/Keycodes.h"
+#include "events/lxEvent.h"
 
 namespace lux
 {
@@ -55,7 +56,7 @@ enum class EElementType // Flag class
 };
 
 //! An single event for the user
-class Event
+class Event : public event::Event
 {
 public:
 	//! General data about input events, available for all input events

@@ -92,6 +92,14 @@ void FontImpl::Init(const FontCreationData& data)
 		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		pass.alphaOperator = video::EBlendOperator::Add;
 		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
+		video::TextureStageSettings tss;
+		tss.alphaArg1 = video::ETextureArgument::Texture;
+		tss.alphaArg2 = video::ETextureArgument::Diffuse;
+		tss.alphaOperator = video::ETextureOperator::Modulate;
+		tss.colorArg1 = video::ETextureArgument::Texture;
+		tss.colorArg2 = video::ETextureArgument::Diffuse;
+		tss.colorOperator = video::ETextureOperator::Modulate;
+		pass.layerSettings.PushBack(tss);
 	}
 
 	m_Material = renderer->CreateMaterial();
@@ -118,6 +126,8 @@ void FontImpl::SetBaseLine(float base)
 void FontImpl::Draw(const String& text, const math::Vector2F& position, EAlign align, video::Color color, const math::RectF* clip)
 {
 	LUX_UNUSED(clip);
+	if(text.IsEmpty())
+		return;
 
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
 	renderer->SetMaterial(m_Material);

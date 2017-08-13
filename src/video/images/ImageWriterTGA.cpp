@@ -60,7 +60,7 @@ void ImageWriterTGA::WriteFile(io::File* file, void* data, video::ColorFormat fo
 	void* writeData = data;
 	u32 writePitch = pitch;
 	video::ColorFormat writeFormat = format;
-	core::mem::RawMemory buffer;
+	core::RawMemory buffer;
 	bool result;
 	if(format != video::ColorFormat::A8R8G8B8 && format != video::ColorFormat::R8G8B8) {
 		video::ColorFormat newFormat = format.HasAlpha() ? video::ColorFormat::A8R8G8B8 : video::ColorFormat::R8G8B8;

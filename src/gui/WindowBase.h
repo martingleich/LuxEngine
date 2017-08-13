@@ -9,23 +9,8 @@ namespace gui
 
 class WindowBase : public Window
 {
-private:
-	WindowEventCallback* m_FirstCallback;
-
-	bool m_IsFullscreen;    // The current fullscreen state of the window, changed by system
-	bool m_ShouldFullscreen; // Should the window if possible be in fullscreen mode, changed by user
-
-	bool m_IsMinimized;
-	bool m_IsActive;
-	bool m_IsFocused;
-	bool m_IsMaximized;
-	math::Dimension2U m_Size;
-	math::Vector2I m_Position;
-	String m_Title;
-
 public:
 	WindowBase() :
-		m_FirstCallback(nullptr),
 		m_ShouldFullscreen(false)
 	{
 	}
@@ -36,50 +21,39 @@ public:
 
 	virtual bool SwitchFullscreen(bool fullscreen) = 0;
 
-	void OnResize(u32 x, u32 y)
+	bool SetFullscreen(bool fullscreen)
 	{
-		m_Size.Set(x, y);
-		WindowEventCallback* callback = m_FirstCallback;
-		while(callback) {
-			callback->OnResize(*this, m_Size);
-			callback = callback->m_Next;
-		}
+		m_ShouldFullscreen = fullscreen;
+		return SwitchFullscreen(m_ShouldFullscreen);
 	}
 
-	void OnMove(u32 x, u32 y)
+	bool IsMinimized() const
 	{
-		m_Position.Set(x, y);
-		WindowEventCallback* callback = m_FirstCallback;
-		while(callback) {
-			callback->OnMove(*this, m_Position);
-			callback = callback->m_Next;
-		}
+		return m_IsMinimized;
+	}
+	bool IsMaximized() const
+	{
+		return m_IsMaximized;
+	}
+	bool IsFocused() const
+	{
+		return m_IsFocused;
+	}
+	bool IsActive() const
+	{
+		return m_IsActivated;
+	}
+	bool IsFullscreen() const
+	{
+		return m_ShouldFullscreen;
 	}
 
-	bool OnClosing()
+	bool IsVisible() const
 	{
-		if(!m_FirstCallback)
-			return true;
-
-		bool ret = false;
-		WindowEventCallback* callback = m_FirstCallback;
-		while(callback) {
-			ret |= callback->OnClosing(*this);
-			callback = callback->m_Next;
-		}
-
-		return ret;
+		return !IsMinimized();
 	}
 
-	void OnClose()
-	{
-		WindowEventCallback* callback = m_FirstCallback;
-		while(callback) {
-			callback->OnClose(*this);
-			callback = callback->m_Next;
-		}
-	}
-
+protected:
 	void OnStateChange(Window::EStateChange newState)
 	{
 		switch(newState) {
@@ -105,109 +79,58 @@ public:
 			m_IsMaximized = false;
 			break;
 		case EStateChange::Activated:
-			m_IsActive = true;
+			m_IsActivated = true;
 			break;
 		case EStateChange::Deactivated:
-			m_IsActive = false;
+			m_IsActivated = false;
 			break;
 		}
 
-		WindowEventCallback* callback = m_FirstCallback;
-		while(callback) {
-			callback->OnStateChanged(*this, newState);
-			callback = callback->m_Next;
-		}
+		if(m_IsActivated && !m_IsMinimized)
+			m_IsEnabled = true;
+		else
+			m_IsEnabled = false;
+
+		onStateChange.Broadcast(this, newState);
+	}
+
+	void OnMove(float x, float y)
+	{
+		float w = m_FinalRect.GetWidth();
+		float h = m_FinalRect.GetHeight();
+		m_FinalRect.left = x;
+		m_FinalRect.top = y;
+		m_FinalRect.right = x + w;
+		m_FinalRect.bottom = y + h;
+		UpdateInnerRect();
+		onMove.Broadcast(this, math::Vector2F(x, y));
+	}
+
+	void OnResize(float w, float h)
+	{
+		m_FinalRect.right = m_FinalRect.left + w;
+		m_FinalRect.bottom = m_FinalRect.right + h;
+		UpdateInnerRect();
+		onResize.Broadcast(this, math::Dimension2F(w, h));
 	}
 
 	void OnTitleChange(const String& title)
 	{
-		m_Title = title;
+		m_Text = title;
 	}
 
-	void RegisterCallback(WindowEventCallback* call)
-	{
-		if(call->m_Window) {
-			if(call->m_Window == this)
-				return;
-			else
-				call->m_Window->UnregisterCallback(call);
-		}
+private:
+	bool m_ShouldFullscreen; // Should the window if possible be in fullscreen mode, changed by user
 
-		call->m_Prev = nullptr;
-		if(m_FirstCallback) {
-			call->m_Next = m_FirstCallback;
-			m_FirstCallback->m_Prev = call;
-			m_FirstCallback = call;
-		} else {
-			call->m_Next = nullptr;
-			m_FirstCallback = call;
-		}
+	bool m_IsFullscreen;    // The current fullscreen state of the window, changed by system
+	bool m_IsMinimized;
+	bool m_IsMaximized;
 
-		call->m_Window = this;
-	}
-
-	void UnregisterCallback(WindowEventCallback* call)
-	{
-		if(call->m_Window != this)
-			return;
-
-		if(call->m_Next)
-			call->m_Next->m_Prev = call->m_Prev;
-		if(call->m_Prev)
-			call->m_Prev->m_Next = call->m_Next;
-
-		if(call == m_FirstCallback)
-			m_FirstCallback = call->m_Next;
-
-		call->m_Next = nullptr;
-		call->m_Prev = nullptr;
-		call->m_Window = nullptr;
-	}
-
-	const String& GetTitle() const
-	{
-		return m_Title;
-	}
-
-	const math::Dimension2U& GetSize() const
-	{
-		return m_Size;
-	}
-
-	const math::Vector2I& GetPosition() const
-	{
-		return m_Position;
-	}
-
-	bool SetFullscreen(bool Fullscreen)
-	{
-		m_ShouldFullscreen = Fullscreen;
-		return SwitchFullscreen(m_ShouldFullscreen);
-	}
-
-	bool IsMinimized() const
-	{
-		return m_IsMinimized;
-	}
-	bool IsMaximized() const
-	{
-		return m_IsMaximized;
-	}
-	bool IsFocused() const
-	{
-		return m_IsFocused;
-	}
-	bool IsActive() const
-	{
-		return m_IsActive;
-	}
-	bool IsFullscreen() const
-	{
-		return m_ShouldFullscreen;
-	}
+	bool m_IsActivated;
+	bool m_IsFocused;
 };
 
-}
-}
+} // namespace gui
+} // namespace lux
 
-#endif // !INCLUDED_CWINDOWWIN32_H
+#endif // !INCLUDED_WINDOWBASE_H

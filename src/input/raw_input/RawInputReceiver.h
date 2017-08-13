@@ -69,7 +69,7 @@ public:
 	u32 DiscoverDevices(EEventSource deviceType);
 
 private:
-	core::mem::RawMemory m_RawData;
+	core::RawMemory m_RawData;
 	HWND m_Window;
 	StrongRef<InputSystem> m_InputSystem;
 

@@ -3,6 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
+#include "core/lxOrderedMap.h"
 
 #include "video/MaterialRenderer.h"
 #include "video/Shader.h"
@@ -117,11 +118,40 @@ public:
 		const String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
 		core::Array<String>* errorList=nullptr);
 
+	LUX_API bool GetShaderInclude(EShaderLanguage language, const String& name, const void*& outData, size_t& outBytes);
+	LUX_API void SetShaderInclude(EShaderLanguage language, const String& name, const void* data, size_t bytes);
+
 private:
 	bool FindRenderer(const String& name, size_t& id) const;
 
 private:
 	core::Array<StrongRef<MaterialRenderer>> m_Renderers;
+
+	struct ShaderInclude
+	{
+		EShaderLanguage language;
+		String name;
+
+		ShaderInclude(EShaderLanguage& lang, const String& n) :
+			language(lang),
+			name(n)
+		{}
+
+		bool operator<(const ShaderInclude& other) const
+		{
+			if(language != other.language)
+				return language < other.language;
+			else
+				return name < other.name;
+		}
+
+		bool operator==(const ShaderInclude& other) const
+		{
+			return language == other.language && name == other.name;
+		}
+	};
+
+	core::OrderedMap<ShaderInclude, core::RawMemory> m_ShaderIncludes;
 };
 
 } // namespace video

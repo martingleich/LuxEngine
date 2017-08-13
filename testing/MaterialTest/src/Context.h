@@ -30,7 +30,7 @@ struct AppContext
 		FileSys = io::FileSystem::Instance();
 
 		Window = Device->GetWindow();
-		CursorCtrl = Window->GetCursorControl();
+		Cursor = GUI->GetCursor();
 
 		ResourceSystem = core::ResourceSystem::Instance();
 		RefFactory = core::ReferableFactory::Instance();
@@ -67,7 +67,7 @@ struct AppContext
 	core::ResourceSystem* ResourceSystem;
 	video::MeshSystem* MeshSystem;
 	video::DriverConfig Config;
-	gui::CursorControl* CursorCtrl;
+	gui::Cursor* Cursor;
 	core::ReferableFactory* RefFactory;
 
 	video::MaterialRenderer* SolidRenderer;

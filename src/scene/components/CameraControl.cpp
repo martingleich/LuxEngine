@@ -30,14 +30,14 @@ CameraControl::~CameraControl()
 void CameraControl::Animate(Node* node, float time)
 {
 	if(!m_Forward) {
-		m_Forward = events::ActionList::Instance()->GetAxisAction("cam_forward");
-		m_Flank = events::ActionList::Instance()->GetAxisAction("cam_stride");
-		m_Up = events::ActionList::Instance()->GetAxisAction("cam_up");
+		m_Forward = event::ActionList::Instance()->GetAxisAction("cam_forward");
+		m_Flank = event::ActionList::Instance()->GetAxisAction("cam_stride");
+		m_Up = event::ActionList::Instance()->GetAxisAction("cam_up");
 
-		auto lookX = events::ActionList::Instance()->GetAxisAction("cam_look_x");
+		auto lookX = event::ActionList::Instance()->GetAxisAction("cam_look_x");
 		if(lookX)
 			lookX->signal.Connect(this, &CameraControl::MouseMoveX);
-		auto lookY = events::ActionList::Instance()->GetAxisAction("cam_look_y");
+		auto lookY = event::ActionList::Instance()->GetAxisAction("cam_look_y");
 		if(lookY)
 			lookY->signal.Connect(this, &CameraControl::MouseMoveY);
 	}
@@ -136,17 +136,17 @@ StrongRef<Referable> CameraControl::Clone() const
 
 void CameraControl::DefaultEventToCameraAction(const input::Event& event)
 {
-	static WeakRef<events::AxisAction> lookX = events::ActionList::Instance()->GetAxisAction("cam_look_x");
-	static WeakRef<events::AxisAction> lookY = events::ActionList::Instance()->GetAxisAction("cam_look_y");
+	static WeakRef<event::AxisAction> lookX = event::ActionList::Instance()->GetAxisAction("cam_look_x");
+	static WeakRef<event::AxisAction> lookY = event::ActionList::Instance()->GetAxisAction("cam_look_y");
 
 	static struct
 	{
 		input::EKeyCode a, b;
-		WeakRef<events::AxisAction> action;
+		WeakRef<event::AxisAction> action;
 	} ENTRIES[] = {
-		{input::KEY_KEY_W, input::KEY_KEY_S, events::ActionList::Instance()->GetAxisAction("cam_forward")},
-		{input::KEY_KEY_D, input::KEY_KEY_A, events::ActionList::Instance()->GetAxisAction("cam_stride")},
-		{input::KEY_KEY_Q, input::KEY_KEY_E, events::ActionList::Instance()->GetAxisAction("cam_up")},
+		{input::KEY_KEY_W, input::KEY_KEY_S, event::ActionList::Instance()->GetAxisAction("cam_forward")},
+		{input::KEY_KEY_D, input::KEY_KEY_A, event::ActionList::Instance()->GetAxisAction("cam_stride")},
+		{input::KEY_KEY_Q, input::KEY_KEY_E, event::ActionList::Instance()->GetAxisAction("cam_up")},
 	};
 
 	if(event.type == input::EEventType::Button && event.source == input::EEventSource::Keyboard) {

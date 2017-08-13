@@ -1,14 +1,13 @@
 #ifndef INCLUDED_ACTION_MAPPER_H
 #define INCLUDED_ACTION_MAPPER_H
 #include "events/lxSignal.h"
-#include "input/InputReceiver.h"
-#include "input/InputDevice.h"
+#include "events/lxEvent.h"
 #include "core/lxString.h"
 #include "core/lxHashMap.h"
 
 namespace lux
 {
-namespace events
+namespace event
 {
 
 class Action : public ReferenceCounted
@@ -58,7 +57,7 @@ public:
 		FireButton(v >= 0.5f);
 	}
 
-	const input::Button* GetButton() const
+	const event::Button* GetButton() const
 	{
 		return &state;
 	}
@@ -69,7 +68,7 @@ public:
 	}
 
 private:
-	input::Button state;
+	event::Button state;
 };
 
 class AxisAction : public Action
@@ -96,7 +95,7 @@ public:
 		state.state = v;
 	}
 
-	const input::Axis* GetAxis() const
+	const event::Axis* GetAxis() const
 	{
 		return &state;
 	}
@@ -107,7 +106,7 @@ public:
 	}
 
 private:
-	input::Axis state;
+	event::Axis state;
 };
 
 /**
@@ -152,7 +151,7 @@ private:
 	core::HashMap<String, StrongRef<Action>> m_Actions;
 };
 
-}
-}
+} // namespace event
+} // namespace lux
 
 #endif // #ifndef INCLUDED_ACTION_MAPPER_H

@@ -7,11 +7,13 @@ namespace lux
 namespace gui
 {
 class Font;
+class Cursor;
+class Window;
 
 class GUIEnvironmentImpl : public GUIEnvironment
 {
 public:
-	GUIEnvironmentImpl();
+	GUIEnvironmentImpl(Window* osWindow, Cursor* osCursor);
 	~GUIEnvironmentImpl();
 
 	StrongRef<FontCreator> GetFontCreator();

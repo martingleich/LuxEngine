@@ -14,7 +14,7 @@ struct ParamPackage::SelfData
 	u32 TotalSize;
 	u32 TextureCount;
 
-	core::mem::RawMemory DefaultPackage;
+	core::RawMemory DefaultPackage;
 };
 
 ParamPackage::ParamPackage() :
@@ -240,7 +240,7 @@ u32 ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	if(entry.type == core::Types::Texture())
 		self->TextureCount++;
 
-	core::mem::RawMemory newBlock(entry.offset + entry.size);
+	core::RawMemory newBlock(entry.offset + entry.size);
 	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
 		it->type.CopyConstruct((u8*)newBlock + it->offset, (u8*)self->DefaultPackage + it->offset);
 		it->type.Destruct((u8*)self->DefaultPackage + it->offset);

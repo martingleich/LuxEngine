@@ -24,7 +24,7 @@ public:
 			false,
 			0,
 			8,
-			true);
+			5);
 		m_Device->BuildAll(config);
 
 		Context = AppContext(m_Device);
@@ -42,7 +42,7 @@ public:
 
 	void DoFrame(float secsPassed)
 	{
-		if(Context.Window->IsActive()) {
+		if(Context.Window->IsEnabled()) {
 			Context.Smgr->AnimateAll(secsPassed);
 			Move(secsPassed);
 
@@ -61,7 +61,7 @@ public:
 	{
 		scene::Node* node;
 
-		Context.CursorCtrl->Disable();
+		Context.Cursor->Disable();
 
 		m_Camera = Context.Smgr->CreateCamera();
 		m_CameraNode = Context.Smgr->AddNode(m_Camera);
@@ -98,7 +98,8 @@ public:
 		node = Context.Smgr->AddSkyBox();
 		auto skyBox = node->GetComponent<scene::SkyBox>();
 		skyBox->UseCubeTexture(false);
-		skyBox->SetSkyTexture(m_CheckerTexture);
+		//skyBox->SetSkyTexture(m_CheckerTexture);
+		skyBox->GetMaterial(0)->SetDiffuse(video::Color::White);
 	}
 
 	void Run()
@@ -135,7 +136,7 @@ void MaterialTest::Render()
 		m_Font->Draw("Blinking Text",
 			math::Vector2F(0.0f, 50.0f),
 			gui::Font::EAlign::BottomLeft,
-			video::Color::Red);
+			video::Color::Black);
 	}
 }
 
@@ -165,7 +166,7 @@ void MaterialTest::Load()
 	m_CameraNode->AddComponent(Context.Smgr->CreateCameraControl());
 
 	m_Font = Context.GUI->GetFontCreator()->CreateFont(
-		gui::FontDescription("Comic Sans MS", 40),
+		gui::FontDescription("Times New Roman", 20),
 		Context.GUI->GetFontCreator()->GetDefaultCharset("german"));
 
 	auto materials = GenMaterialList();

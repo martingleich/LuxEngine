@@ -8,6 +8,10 @@
 #include "video/RenderSettings.h"
 #include "video/MaterialRenderer.h"
 
+#include "io/FileSystem.h"
+#include "io/File.h"
+#include "video/MaterialLibrary.h"
+
 #include "video/d3d9/D3DHelper.h"
 #include "video/d3d9/D3D9Exception.h"
 
@@ -15,6 +19,80 @@ namespace lux
 {
 namespace video
 {
+
+class luxD3DXShaderIncludes : public ID3DXInclude
+{
+public:
+	luxD3DXShaderIncludes()
+	{
+	}
+
+	virtual ~luxD3DXShaderIncludes()
+	{
+	}
+
+	STDMETHOD(Open)(THIS_ D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
+	{
+		if(!ppData || !pBytes)
+			return E_FAIL;
+
+		if(IncludeType == D3DXINC_LOCAL) {
+			if(io::FileSystem::Instance()->ExistFile(pFileName)) {
+				auto file = io::FileSystem::Instance()->OpenFile(pFileName);
+				*pBytes = file->GetSize();
+				void* data = new u8[*pBytes];
+				m_Allocated.PushBack(data);
+				if(file->ReadBinary(*pBytes, data) != *pBytes)
+					return E_FAIL;
+				*ppData = data;
+				return S_OK;
+			} else {
+				return Open(D3DXINC_SYSTEM, pFileName, pParentData, ppData, pBytes);
+			}
+		} else if(IncludeType == D3DXINC_SYSTEM) {
+			const void* data;
+			size_t bytes;
+			if(MaterialLibrary::Instance()->GetShaderInclude(EShaderLanguage::HLSL, pFileName, data, bytes)) {
+				*ppData = data;
+				*pBytes = (UINT)bytes;
+				return S_OK;
+			} else {
+				return E_FAIL;
+			}
+		} else {
+			return E_FAIL;
+		}
+	}
+
+	STDMETHOD(Close)(THIS_ LPCVOID pData)
+	{
+		auto it = core::LinearSearch(pData, m_Allocated);
+		if(it != m_Allocated.End()) {
+			delete[] * it;
+			m_Allocated.Erase(it);
+		}
+
+		return S_OK;
+	}
+private:
+	core::Array<const void*> m_Allocated;
+};
+
+static luxD3DXShaderIncludes g_luxD3DXShaderIncludes;
+
+static String FormatD3DXShaderError(const String& input)
+{
+	// File(line, col): error number: error-string
+	auto colon = input.FindReverse(":");
+	colon = input.FindReverse(":", input.First(), colon);
+	auto base_name = input.FindReverse("\\", input.First(), colon);
+	if(base_name == colon)
+		base_name = input.First();
+	else
+		base_name++;
+
+	return input.SubString(base_name, input.End());
+}
 
 ShaderD3D9::ShaderD3D9(VideoDriver* driver) :
 	m_D3DDevice((IDirect3DDevice9*)driver->GetLowLevelDevice()),
@@ -239,7 +317,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	UnknownRefCounted<IDirect3DVertexShader9> shader = nullptr;
 
 	HRESULT hr = D3DXCompileShader(code, (UINT)length,
-		NULL, NULL, entryPoint,
+		NULL, &g_luxD3DXShaderIncludes, entryPoint,
 		profile,
 		0, output.Access(), errors.Access(),
 		outTable.Access());
@@ -247,8 +325,8 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 		if(errors) {
 			if(errorList) {
 				String err = (const char*)errors->GetBufferPointer();
-				auto err2 = err.Split('\n');
-				errorList->PushBackm(err2.Data(), err2.Size());
+				for(auto& str : err.Split('\n'))
+					errorList->PushBack(FormatD3DXShaderError(str));
 			}
 		}
 		throw ShaderCompileException();
@@ -258,8 +336,8 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	if(errors) {
 		if(errorList) {
 			String err = (const char*)errors->GetBufferPointer();
-			auto err2 = err.Split('\n');
-			errorList->PushBackm(err2.Data(), err2.Size());
+			for(auto& str : err.Split('\n'))
+				errorList->PushBack(FormatD3DXShaderError(str));
 		}
 	}
 
@@ -281,7 +359,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 
 	HRESULT hr;
 	hr = D3DXCompileShader(code, (UINT)length,
-		NULL, NULL, entryPoint,
+		NULL, &g_luxD3DXShaderIncludes, entryPoint,
 		profile,
 		0, output.Access(), errors.Access(),
 		outTable.Access());
@@ -289,8 +367,8 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 		if(errors) {
 			if(errorList) {
 				String err = (const char*)errors->GetBufferPointer();
-				auto err2 = err.Split('\n');
-				errorList->PushBackm(err2.Data(), err2.Size());
+				for(auto& str : err.Split('\n'))
+					errorList->PushBack(FormatD3DXShaderError(str));
 			}
 		}
 		throw ShaderCompileException();
@@ -300,8 +378,8 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	if(errors) {
 		if(errorList) {
 			String err = (const char*)errors->GetBufferPointer();
-			auto err2 = err.Split('\n');
-			errorList->PushBackm(err2.Data(), err2.Size());
+			for(auto& str : err.Split('\n'))
+				errorList->PushBack(FormatD3DXShaderError(str));
 		}
 	}
 

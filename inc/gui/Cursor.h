@@ -1,7 +1,8 @@
-#ifndef INCLUDED_CURSORCONTROL_H
-#define INCLUDED_CURSORCONTROL_H
+#ifndef INCLUDED_CURSOR_H
+#define INCLUDED_CURSOR_H
 #include "core/ReferenceCounted.h"
 #include "math/Dimension2.h"
+#include "events/lxSignal.h"
 
 namespace lux
 {
@@ -12,12 +13,10 @@ namespace gui
 /**
 Usable for both Lux GUI Cursors and OS Cursors
 */
-class CursorControl : public ReferenceCounted
+class Cursor : public ReferenceCounted
 {
 public:
-	virtual ~CursorControl()
-	{
-	}
+	virtual ~Cursor() { }
 
 	//! Set the absolute positon of the cursor
 	/**
@@ -27,7 +26,7 @@ public:
 
 	\ref GetPosition
 	*/
-	virtual void SetPosition(int x, int y) = 0;
+	virtual void SetPosition(float x, float y) = 0;
 
 	//! Set the relative positon of the mouse
 	/**
@@ -48,7 +47,7 @@ public:
 
 	\ref SetPosition
 	*/
-	virtual math::Vector2I GetPosition() const = 0;
+	virtual math::Vector2F GetPosition() const = 0;
 
 	//! Retrieve the relative Positon of the mouse
 	/**
@@ -66,7 +65,7 @@ public:
 	This is mostly the size of the active window
 	\return The size of the screen used by the cursor
 	*/
-	virtual const math::Dimension2U& GetScreenSize() const = 0;
+	virtual const math::Dimension2F& GetScreenSize() const = 0;
 
 	//! Set the cursor visibility
 	/**
@@ -104,7 +103,7 @@ public:
 	virtual void SetGrabbing(bool grab) = 0;
 
 	//! Get the current grabbing position
-	virtual const math::Vector2I& GetGrabbingPosition() const = 0;
+	virtual const math::Vector2F& GetGrabbingPosition() const = 0;
 
 	//! Disables the cursor.
 	/**
@@ -126,9 +125,11 @@ public:
 		this->SetVisible(true);
 		this->SetGrabbing(false);
 	}
+
+	event::Signal<const math::Vector2F&> onCursorMove;
 };
 
-}
-}
+} // namespace gui
+} // namespace lux
 
-#endif // !INCLUDED_CURSORCONTROL_H
+#endif // !INCLUDED_CURSOR_H

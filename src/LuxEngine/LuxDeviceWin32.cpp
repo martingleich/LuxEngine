@@ -14,8 +14,7 @@
 
 #include "io/FileSystem.h"
 
-#include "gui/CursorControlWin32.h"
-#include "gui/GUIEnvironmentImpl.h"
+#include "gui/GUIEnvironment.h"
 
 #include "core/lxUnicodeConversion.h"
 
@@ -46,6 +45,53 @@
 namespace lux
 {
 
+static LRESULT WINAPI WindowProc(HWND wnd,
+	UINT msg,
+	WPARAM wParam,
+	LPARAM lParam)
+{
+	LuxDeviceWin32* device = nullptr;
+	if(msg == WM_NCCREATE) {
+		CREATESTRUCTW* createStruct = reinterpret_cast<CREATESTRUCTW*>(lParam);
+		SetWindowLongPtrW(wnd, GWLP_USERDATA, reinterpret_cast<LONG>(createStruct->lpCreateParams));
+		device = reinterpret_cast<LuxDeviceWin32*>(createStruct->lpCreateParams);
+	} else {
+		LONG_PTR userData = GetWindowLongPtrW(wnd, GWLP_USERDATA);
+		device = reinterpret_cast<LuxDeviceWin32*>(userData);
+	}
+
+	LRESULT result;
+	if(!device || !device->HandleMessages(wnd, msg, wParam, lParam, result))
+		result = DefWindowProcW(wnd, msg, wParam, lParam);
+	return result;
+}
+
+struct Win32WindowClass
+{
+public:
+	HINSTANCE instance;
+	const wchar_t* className;
+
+	Win32WindowClass()
+	{
+		instance = lux::GetLuxModule();
+		className = L"Lux Window Class";
+		WNDCLASSEXW wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WindowProc, 0, 0,
+			instance, nullptr, LoadCursorW(NULL, IDC_ARROW), nullptr, nullptr,
+			className, nullptr};
+
+		if(!RegisterClassExW(&wc))
+			throw core::Win32Exception(GetLastError());
+	}
+
+	~Win32WindowClass()
+	{
+		UnregisterClassW(className, instance);
+	}
+};
+
+Win32WindowClass* g_WindowClass;
+
 LUX_API StrongRef<LuxDevice> CreateDevice()
 {
 	return LUX_NEW(LuxDeviceWin32);
@@ -53,6 +99,8 @@ LUX_API StrongRef<LuxDevice> CreateDevice()
 
 LuxDeviceWin32::LuxDeviceWin32()
 {
+	g_WindowClass = new Win32WindowClass;
+
 	// If there are logs which aren't written, write them to the default file.
 	if(log::EngineLog.HasUnsetLogs())
 		log::EngineLog.SetNewPrinter(log::FilePrinter, true);
@@ -119,6 +167,8 @@ LuxDeviceWin32::~LuxDeviceWin32()
 
 	m_Window.Reset();
 
+	delete g_WindowClass;
+
 	log::Info("Shutdown complete.");
 }
 
@@ -131,7 +181,37 @@ void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const String& title)
 
 	log::Info("Create new Lux window \"~s\".", title);
 
-	m_Window = LUX_NEW(gui::WindowWin32)(math::Dimension2U(width, height), title, this);
+	math::Dimension2U realSize(width, height);
+	if(realSize.width > (u32)GetSystemMetrics(SM_CXSCREEN))
+		realSize.width = (u32)GetSystemMetrics(SM_CXSCREEN);
+	if(realSize.height > (u32)GetSystemMetrics(SM_CYSCREEN))
+		realSize.height = (u32)GetSystemMetrics(SM_CYSCREEN);
+
+	RECT rect;
+	SetRect(&rect, 0, 0, realSize.width, realSize.height);
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, FALSE);
+	realSize.width = rect.right - rect.left;
+	realSize.height = rect.bottom - rect.top;
+
+	HWND handle = CreateWindowExW(0,
+		g_WindowClass->className,
+		core::StringToUTF16W(title),
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		0/*GetSystemMetrics(SM_CXSCREEN) / 2 - realSize.width / 2,*/,
+		0/*GetSystemMetrics(SM_CYSCREEN) / 2 - realSize.height / 2,*/,
+		realSize.width,
+		realSize.height,
+		nullptr,
+		nullptr,
+		g_WindowClass->instance,
+		this);
+
+	ShowWindow(handle, SW_SHOW);
+	UpdateWindow(handle);
+
+
+	if(!handle)
+		throw core::Win32Exception(GetLastError());
 }
 
 void LuxDeviceWin32::BuildInputSystem(bool isForeground)
@@ -248,7 +328,7 @@ void LuxDeviceWin32::BuildGUIEnvironment()
 	}
 
 	log::Info("Build GUI Environment.");
-	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl);
+	m_GUIEnv = LUX_NEW(gui::GUIEnvironment)(m_Window, m_Window->GetCursor());
 }
 
 void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
@@ -258,6 +338,20 @@ void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
 	BuildVideoDriver(config);
 	BuildSceneManager();
 	BuildGUIEnvironment();
+}
+
+bool LuxDeviceWin32::RunMessageQueue()
+{
+	MSG Message = {0};
+	while(PeekMessageW(&Message, (HWND)m_Window->GetDeviceWindow(), 0, 0, PM_REMOVE)) {
+		if(Message.message == WM_QUIT)
+			return true;
+		// No use for TranslateMessage since WM_CHAR is not used
+		//TranslateMessage(&Message); 
+		DispatchMessageW(&Message);
+	}
+
+	return false;
 }
 
 bool LuxDeviceWin32::Run(float& numSecsPassed)
@@ -277,8 +371,7 @@ bool LuxDeviceWin32::Run(float& numSecsPassed)
 
 	bool wasQuit = false;
 	if(m_Window) {
-		auto windowWin32 = m_Window.As<gui::WindowWin32>();
-		if(windowWin32->RunMessageQueue()) {
+		if(RunMessageQueue()) {
 			m_Window->Close();
 			wasQuit = true;
 			m_Window = nullptr;
@@ -288,25 +381,32 @@ bool LuxDeviceWin32::Run(float& numSecsPassed)
 	return !wasQuit;
 }
 
-bool LuxDeviceWin32::OnMsg(
-	UINT uiMessage,
-	WPARAM WParam,
-	LPARAM LParam,
+bool LuxDeviceWin32::HandleMessages(
+	HWND wnd,
+	UINT message,
+	WPARAM wParam,
+	LPARAM lParam,
 	LRESULT& result)
 {
+	if(message == WM_NCCREATE)
+		m_Window = LUX_NEW(gui::WindowWin32)(wnd);
+
 	result = 0;
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
-	if(m_RawInputReceiver && m_RawInputReceiver->HandleMessage(uiMessage, WParam, LParam, result))
+	if(m_RawInputReceiver && m_RawInputReceiver->HandleMessage(message, wParam, lParam, result))
 		return true;
 #endif
+	
+	if(m_Window && m_Window->GetDeviceWindow() == wnd && m_Window->HandleMessages(message, wParam, lParam, result))
+		return true;
 
-	switch(uiMessage) {
+	switch(message) {
 	case WM_ERASEBKGND:
 		return true;
 
 	case WM_SYSCOMMAND:
-		if((WParam & 0xFFF0) == SC_SCREENSAVE ||
-			(WParam & 0xFFF0) == SC_MONITORPOWER)
+		if((wParam & 0xFFF0) == SC_SCREENSAVE ||
+			(lParam & 0xFFF0) == SC_MONITORPOWER)
 			return true;
 		break;
 	}

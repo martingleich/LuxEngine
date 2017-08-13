@@ -5,6 +5,7 @@
 #include "math/Vector2.h"
 
 #include "events/lxActions.h"
+#include "input/InputEvent.h"
 
 namespace lux
 {
@@ -53,9 +54,9 @@ private:
 	math::AngleF m_MaxVerticalAngle;
 	bool m_NoVerticalMovement;
 
-	WeakRef<events::AxisAction> m_Forward;
-	WeakRef<events::AxisAction> m_Flank;
-	WeakRef<events::AxisAction> m_Up;
+	WeakRef<event::AxisAction> m_Forward;
+	WeakRef<event::AxisAction> m_Flank;
+	WeakRef<event::AxisAction> m_Up;
 
 	math::Vector2F m_MouseMove;
 };

@@ -8,8 +8,6 @@ namespace lux
 {
 namespace core
 {
-namespace mem
-{
 
 class RawMemory
 {
@@ -174,7 +172,6 @@ private:
 	size_t m_Size;
 };
 
-} 
 } 
 } 
 

@@ -14,7 +14,7 @@ InputSystemImpl::InputSystemImpl() :
 {
 }
 
-events::Signal<const Event&>& InputSystemImpl::GetEventSignal()
+event::Signal<const Event&>& InputSystemImpl::GetEventSignal()
 {
 	return m_EventSignal;
 }

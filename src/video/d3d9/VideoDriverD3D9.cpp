@@ -62,10 +62,11 @@ VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window
 	m_D3D = m_Adapter->GetD3D9();
 
 	// Fill presentation params
+	m_AdapterFormat = GetD3DFormat(config.display.format);
 	D3DPRESENT_PARAMETERS presentParams = {0};
 	presentParams.BackBufferWidth = config.display.width;
 	presentParams.BackBufferHeight = config.display.height;
-	presentParams.BackBufferFormat = GetD3DFormat(config.display.format);
+	presentParams.BackBufferFormat = GetD3DFormat(config.backBufferFormat);
 	presentParams.FullScreen_RefreshRateInHz = config.windowed ? 0 : config.display.refreshRate;
 	presentParams.BackBufferCount = 1;
 	presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
@@ -268,7 +269,7 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube, bool ren
 
 	HRESULT hr = m_D3D->CheckDeviceFormat(m_Adapter->GetAdapter(),
 		D3DDEVTYPE_HAL,
-		m_PresentParams.BackBufferFormat,
+		m_AdapterFormat,
 		usage,
 		rType,
 		d3dFormat);

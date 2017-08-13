@@ -73,7 +73,7 @@ void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Fo
 	u32 Len = 3 * Size.width;
 	if(Len % 4 != 0)
 		Len += 4 - (Len % 4);
-	core::mem::RawMemory lineMem(Len);
+	core::RawMemory lineMem(Len);
 	u8* line = lineMem;
 	*((u32*)(line + Len - 4)) = 0;
 	u8* LineCursor = line;

@@ -6,8 +6,6 @@
 #include "core/Logger.h"
 
 #include "core/lxUnicodeConversion.h"
-#include "LuxEngine/DllMainWin32.h"
-#include "CursorControlWin32.h"
 #include "Win32Exception.h"
 
 namespace lux
@@ -15,222 +13,19 @@ namespace lux
 namespace gui
 {
 
-static LRESULT WINAPI WindowProc(HWND windowHandle,
-	UINT msg,
-	WPARAM wParam,
-	LPARAM lParam)
+WindowWin32::WindowWin32(HWND window)
 {
-	WindowWin32* window = nullptr;
-	if(msg == WM_NCCREATE) {
-		CREATESTRUCTW* createStruct = reinterpret_cast<CREATESTRUCTW*>(lParam);
-		SetWindowLongPtrW(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG>(createStruct->lpCreateParams));
-		window = reinterpret_cast<WindowWin32*>(createStruct->lpCreateParams);
-	} else {
-		LONG_PTR userData = GetWindowLongPtrW(windowHandle, GWLP_USERDATA);
-		window = reinterpret_cast<WindowWin32*>(userData);
-	}
+	m_DirtyRect = false; // Clean initial dirty flag of element, to circumvent caching of resize changes
 
-	LRESULT result;
-	if(!window || !window->HandleMessages(msg, wParam, lParam, result))
-		result = DefWindowProcW(windowHandle, msg, wParam, lParam);
-	return result;
-}
-
-struct Win32WindowClass
-{
-public:
-	HINSTANCE instance;
-	const wchar_t* className;
-
-	Win32WindowClass()
-	{
-		instance = lux::GetLuxModule();
-		className = L"Lux Window Class";
-		WNDCLASSEXW wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WindowProc, 0, 0,
-			instance, nullptr, LoadCursorW(NULL, IDC_ARROW), nullptr, nullptr,
-			className, nullptr};
-
-		if(!RegisterClassExW(&wc))
-			throw core::Win32Exception(GetLastError());
-	}
-
-	~Win32WindowClass()
-	{
-		UnregisterClassW(className, instance);
-	}
-};
-
-static Win32WindowClass g_WindowClass;
-
-bool WindowWin32::SwitchFullscreen(bool Fullscreen)
-{
-#if 0
-	/*
-	if(m_ShouldFullscreen == false)
-		return true;
-*/
-	math::Dimension2U FullscreenSize = GetSize();
-	u32 FullscreenBits = 32;
-
-	if(Fullscreen == false) {
-		if(m_IsFullscreen) {
-			return (ChangeDisplaySettings(&m_DesktopMode, 0) == DISP_CHANGE_SUCCESSFUL);
-		} else {
-			return true;
-		}
-	}
-
-	DEVMODE dm;
-	memset(&dm, 0, sizeof(DEVMODE));
-	dm.dmSize = sizeof(DEVMODE);
-
-	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm);
-	dm.dmPelsWidth = FullscreenSize.width;
-	dm.dmPelsHeight = FullscreenSize.Height;
-	dm.dmBitsPerPel = FullscreenBits;
-	dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
-
-	LONG result = ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
-	if(result != DISP_CHANGE_SUCCESSFUL) {
-		dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-		result = ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
-	}
-
-	bool ret = false;
-	switch(result) {
-	case DISP_CHANGE_SUCCESSFUL:
-		m_IsFullscreen = true;
-		ret = true;
-		break;
-	case DISP_CHANGE_RESTART:
-		log::Error("Switch to fullscreen: The computer must be restarted in order for the graphics mode to work.");
-		break;
-	case DISP_CHANGE_BADFLAGS:
-		log::Error("Switch to fullscreen: An invalid set of flags was passed in.");
-		break;
-	case DISP_CHANGE_BADPARAM:
-		log::Error("Switch to fullscreen: An invalid parameter was passed in. This can include an invalid flag or combination of flags.");
-		break;
-	case DISP_CHANGE_FAILED:
-		log::Error("Switch to fullscreen: The display driver failed the specified graphics mode.");
-		break;
-	case DISP_CHANGE_BADMODE:
-		log::Error("Switch to fullscreen: The graphics mode is not supported.");
-		break;
-	default:
-		log::Error("An unknown error occured while changing to fullscreen.");
-		break;
-	}
-
-	return ret;
-#endif
-
-	if(Fullscreen == m_IsFullscreen)
-		return true;
-
-	if(m_IsFullscreen == false) {
-		m_SavedWindow.IsMaxed = IsMaximized();
-		if(m_SavedWindow.IsMaxed)
-			SendMessage(m_Window, WM_SYSCOMMAND, SC_RESTORE, 0);
-		m_SavedWindow.Style = GetWindowLong(m_Window, GWL_STYLE);
-		m_SavedWindow.ExStyle = GetWindowLong(m_Window, GWL_EXSTYLE);
-		GetWindowRect(m_Window, &m_SavedWindow.WinRect);
-	}
-
-	m_IsFullscreen = Fullscreen;
-	if(m_IsFullscreen)
-		this->OnStateChange(Window::EStateChange::Fullscreen);
-	else
-		if(m_SavedWindow.IsMaxed)
-			this->OnStateChange(Window::EStateChange::Maximize);
-		else
-			this->OnStateChange(Window::EStateChange::Normal);
-
-	if(Fullscreen) {
-		SetWindowLong(m_Window, GWL_STYLE, m_SavedWindow.Style & ~(WS_CAPTION | WS_THICKFRAME));
-		SetWindowLong(m_Window, GWL_EXSTYLE, m_SavedWindow.ExStyle & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
-
-		MONITORINFO MonitorInfo;
-		MonitorInfo.cbSize = sizeof(MONITORINFO);
-		GetMonitorInfo(MonitorFromWindow(m_Window, MONITOR_DEFAULTTONEAREST), &MonitorInfo);
-
-		SetWindowPos(m_Window, NULL,
-			MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
-			MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left,
-			MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
-			SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-	} else {
-		SetWindowLong(m_Window, GWL_STYLE, m_SavedWindow.Style);
-		SetWindowLong(m_Window, GWL_EXSTYLE, m_SavedWindow.ExStyle);
-
-		SetWindowPos(m_Window, NULL, m_SavedWindow.WinRect.left, m_SavedWindow.WinRect.top,
-			m_SavedWindow.WinRect.right - m_SavedWindow.WinRect.left,
-			m_SavedWindow.WinRect.bottom - m_SavedWindow.WinRect.top,
-			SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-
-		if(m_SavedWindow.IsMaxed)
-			SendMessage(m_Window, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-	}
-
-	return true;
-}
-
-WindowWin32::WindowWin32(HWND window, WindowWin32MsgCallback* msgCallback) :
-	m_MsgCallback(msgCallback)
-{
-	Init(window);
-}
-
-WindowWin32::WindowWin32(const math::Dimension2U& size, const String& title, WindowWin32MsgCallback* msgCallback) :
-	m_MsgCallback(msgCallback)
-{
-	Init(CreateNewWindow(size, title));
-}
-
-HWND WindowWin32::CreateNewWindow(const math::Dimension2U& size, const String& title)
-{
-	math::Dimension2U realSize = size;
-	if(realSize.width > (u32)GetSystemMetrics(SM_CXSCREEN))
-		realSize.width = (u32)GetSystemMetrics(SM_CXSCREEN);
-	if(realSize.height > (u32)GetSystemMetrics(SM_CYSCREEN))
-		realSize.height = (u32)GetSystemMetrics(SM_CYSCREEN);
-
-	RECT rect;
-	SetRect(&rect, 0, 0, realSize.width, realSize.height);
-	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, false);
-	realSize.width = rect.right - rect.left;
-	realSize.height = rect.bottom - rect.top;
-
-	HWND handle = CreateWindowExW(0,
-		g_WindowClass.className,
-		core::StringToUTF16W(title),
-		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-		GetSystemMetrics(SM_CXSCREEN) / 2 - realSize.width / 2,
-		GetSystemMetrics(SM_CYSCREEN) / 2 - realSize.height / 2,
-		realSize.width,
-		realSize.height,
-		nullptr,
-		nullptr,
-		g_WindowClass.instance,
-		this);
-
-	if(!handle)
-		throw core::Win32Exception(GetLastError());
-
-	return handle;
-}
-
-void WindowWin32::Init(HWND window)
-{
 	m_Window = window;
 	m_IsFullscreen = false;
 
-	m_CursorControl = LUX_NEW(CursorControlWin32)(this);
+	m_Cursor = LUX_NEW(CursorWin32)(this);
 
 	RECT r;
 	if(GetWindowRect(m_Window, &r)) {
-		this->OnResize(r.right - r.left, r.bottom - r.top);
-		this->OnMove(r.left, r.top);
+		OnResize((float)(r.right - r.left), (float)(r.bottom - r.top));
+		OnMove((float)r.left, (float)r.top);
 	}
 
 	BOOL isIconic = IsIconic(m_Window);
@@ -260,45 +55,132 @@ WindowWin32::~WindowWin32()
 		Close();
 }
 
-void WindowWin32::SetTitle(const String& title)
+bool WindowWin32::SwitchFullscreen(bool fullscreen)
 {
-	auto data = core::UTF8ToUTF16(title.Data());
+	if(fullscreen == m_IsFullscreen)
+		return true;
+
+	if(m_IsFullscreen == false) {
+		m_SavedWindow.IsMaxed = IsMaximized();
+		if(m_SavedWindow.IsMaxed)
+			SendMessage(m_Window, WM_SYSCOMMAND, SC_RESTORE, 0);
+		m_SavedWindow.Style = GetWindowLong(m_Window, GWL_STYLE);
+		m_SavedWindow.ExStyle = GetWindowLong(m_Window, GWL_EXSTYLE);
+		GetWindowRect(m_Window, &m_SavedWindow.WinRect);
+	}
+
+	m_IsFullscreen = fullscreen;
+	if(m_IsFullscreen)
+		this->OnStateChange(Window::EStateChange::Fullscreen);
+	else
+		if(m_SavedWindow.IsMaxed)
+			this->OnStateChange(Window::EStateChange::Maximize);
+		else
+			this->OnStateChange(Window::EStateChange::Normal);
+
+	if(fullscreen) {
+		SetWindowLong(m_Window, GWL_STYLE, m_SavedWindow.Style & ~(WS_CAPTION | WS_THICKFRAME));
+		SetWindowLong(m_Window, GWL_EXSTYLE, m_SavedWindow.ExStyle & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+		MONITORINFO MonitorInfo;
+		MonitorInfo.cbSize = sizeof(MONITORINFO);
+		GetMonitorInfo(MonitorFromWindow(m_Window, MONITOR_DEFAULTTONEAREST), &MonitorInfo);
+
+		SetWindowPos(m_Window, NULL,
+			MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+			MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left,
+			MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
+			SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+	} else {
+		SetWindowLong(m_Window, GWL_STYLE, m_SavedWindow.Style);
+		SetWindowLong(m_Window, GWL_EXSTYLE, m_SavedWindow.ExStyle);
+
+		SetWindowPos(m_Window, NULL, m_SavedWindow.WinRect.left, m_SavedWindow.WinRect.top,
+			m_SavedWindow.WinRect.right - m_SavedWindow.WinRect.left,
+			m_SavedWindow.WinRect.bottom - m_SavedWindow.WinRect.top,
+			SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+
+		if(m_SavedWindow.IsMaxed)
+			SendMessage(m_Window, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+	}
+
+	return true;
+}
+
+void WindowWin32::SetText(const String& text)
+{
+	auto data = core::UTF8ToUTF16(text.Data());
 	DWORD_PTR result;
-	SendMessageTimeoutW(m_Window, WM_SETTEXT, 0,
+	LRESULT r = SendMessageTimeoutW(m_Window, WM_SETTEXT, 0,
 		reinterpret_cast<LPARAM>(data.Data_c()),
-		SMTO_ABORTIFHUNG, 2000, &result);
+		SMTO_ABORTIFHUNG, 500, &result);
+
+	if(r == 0)
+		WindowBase::SetText(text);
 }
 
-void WindowWin32::SetSize(const math::Dimension2U& Size)
+void WindowWin32::SetInnerSize(const math::Dimension2<ScalarDistanceF>& size)
 {
+	u32 realWidth = (u32)size.width.GetRealValue((float)GetSystemMetrics(SM_CXSCREEN));
+	u32 realHeight = (u32)size.height.GetRealValue((float)GetSystemMetrics(SM_CYSCREEN));
+
 	RECT rect;
-	SetRect(&rect, 0, 0, Size.width, Size.height);
-	// TODO: Get Correct flags from window
-	// TODO: Einheitliches verhalten bei fenstergröße
+	SetRect(&rect, 0, 0, realWidth, realHeight);
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, false);
-	u32 width = rect.right - rect.left;
-	u32 height = rect.bottom - rect.top;
+	realWidth = rect.right - rect.left;
+	realHeight = rect.bottom - rect.top;
 
-	WINDOWPLACEMENT plc;
-	plc.length = sizeof(WINDOWPLACEMENT);
-	GetWindowPlacement(m_Window, &plc);
-	plc.rcNormalPosition.right = plc.rcNormalPosition.left + width;
-	plc.rcNormalPosition.bottom = plc.rcNormalPosition.top + height;
-	SetWindowPlacement(m_Window, &plc);
+	SetSize(Pixel(realWidth), Pixel(realHeight));
 }
 
-void WindowWin32::SetPosition(const math::Vector2I& Position)
+void WindowWin32::SetDirtyRect()
 {
+	UpdateFinalRect();
+	UpdateInnerRect();
+}
+
+math::RectF WindowWin32::GetParentInnerRect() const
+{
+	return math::RectF(0, 0,
+		(float)GetSystemMetrics(SM_CXSCREEN),
+		(float)GetSystemMetrics(SM_CYSCREEN));
+}
+
+void WindowWin32::UpdateFinalRect() const
+{
+	auto oldSize = m_FinalRect.GetSize();
+	auto oldPos = m_FinalRect.Min();
+	WindowBase::UpdateFinalRect();
 	WINDOWPLACEMENT plc;
 	plc.length = sizeof(WINDOWPLACEMENT);
 	GetWindowPlacement(m_Window, &plc);
-	int width = plc.rcNormalPosition.right - plc.rcNormalPosition.left;
-	int height = plc.rcNormalPosition.bottom - plc.rcNormalPosition.top;
-	plc.rcNormalPosition.left = Position.x;
-	plc.rcNormalPosition.right = Position.x + width;
-	plc.rcNormalPosition.top = Position.y;
-	plc.rcNormalPosition.bottom = Position.y + height;
+	plc.rcNormalPosition.left = (LONG)m_FinalRect.left;
+	plc.rcNormalPosition.top = (LONG)m_FinalRect.top;
+	plc.rcNormalPosition.right = (LONG)m_FinalRect.right;
+	plc.rcNormalPosition.bottom = (LONG)m_FinalRect.bottom;
 	SetWindowPlacement(m_Window, &plc);
+	GetWindowPlacement(m_Window, &plc);
+	m_FinalRect.left = (float)plc.rcNormalPosition.left;
+	m_FinalRect.top = (float)plc.rcNormalPosition.top;
+	m_FinalRect.right = (float)plc.rcNormalPosition.right;
+	m_FinalRect.bottom = (float)plc.rcNormalPosition.bottom;
+
+	auto newSize = m_FinalRect.GetSize();
+	auto newPos = m_FinalRect.Min();
+	if(oldSize != newSize)
+		onResize.Broadcast(const_cast<WindowWin32*>(this), newSize);
+	if(oldPos != newPos)
+		onMove.Broadcast(const_cast<WindowWin32*>(this), newPos);
+}
+
+void WindowWin32::UpdateInnerRect() const
+{
+	RECT r;
+	GetClientRect(m_Window, &r);
+	m_InnerRect.left = (float)r.left;
+	m_InnerRect.top = (float)r.top;
+	m_InnerRect.right = (float)r.right;
+	m_InnerRect.bottom = (float)r.bottom;
 }
 
 bool WindowWin32::Maximize()
@@ -343,14 +225,9 @@ bool WindowWin32::SetResizable(bool resize)
 	return true;
 }
 
-bool WindowWin32::Close()
+void WindowWin32::Close()
 {
-	if(OnClosing()) {
-		DestroyWindow(m_Window);
-		return true;
-	} else {
-		return false;
-	}
+	DestroyWindow(m_Window);
 }
 
 bool WindowWin32::Present(video::Image* image, const math::RectI& SourceRect, const math::RectI& DestRect)
@@ -436,18 +313,16 @@ bool WindowWin32::Present(video::Image* image, const math::RectI& SourceRect, co
 	return true;
 }
 
-bool WindowWin32::Restore()
+void WindowWin32::Restore()
 {
 	WINDOWPLACEMENT plc;
 	plc.length = sizeof(WINDOWPLACEMENT);
 	if(!GetWindowPlacement(m_Window, &plc))
-		return false;
+		return;
 
 	plc.showCmd = SW_SHOWNORMAL;
 	if(!SetWindowPlacement(m_Window, &plc))
-		return false;
-
-	return true;
+		return;
 }
 
 void* WindowWin32::GetDeviceWindow() const
@@ -455,23 +330,15 @@ void* WindowWin32::GetDeviceWindow() const
 	return m_Window;
 }
 
-WeakRef<CursorControl> WindowWin32::GetCursorControl()
+Cursor* WindowWin32::GetCursor() const
 {
-	return m_CursorControl.GetWeak();
+	return m_Cursor;
 }
 
-bool WindowWin32::RunMessageQueue()
+core::Name WindowWin32::GetReferableType() const
 {
-	MSG Message = {0};
-	while(PeekMessageW(&Message, m_Window, 0, 0, PM_REMOVE)) {
-		if(Message.message == WM_QUIT)
-			return true;
-		// No use for TranslateMessage since WM_CHAR is not used
-		//TranslateMessage(&Message); 
-		DispatchMessageW(&Message);
-	}
-
-	return false;
+	static const core::Name name = "lux.gui.SystemWindow";
+	return name;
 }
 
 bool WindowWin32::HandleMessages(UINT Message,
@@ -483,24 +350,25 @@ bool WindowWin32::HandleMessages(UINT Message,
 
 	switch(Message) {
 	case WM_MOUSEMOVE:
-		if(m_CursorControl->IsGrabbing()) {
+		if(m_Cursor->IsGrabbing()) {
 			POINTS p = MAKEPOINTS(LParam);
-			math::Vector2I pos = m_CursorControl->GetGrabbingPosition();
+			math::Vector2F pos = m_Cursor->GetGrabbingPosition();
 			if(p.x != pos.x || p.y != pos.y)
-				m_CursorControl->SetPosition(pos.x, pos.y);
+				m_Cursor->SetPosition(pos.x, pos.y);
 
 			result = 0;
 			return true;
+		} else {
+			m_Cursor->Tick();
 		}
 		break;
 	case WM_DESTROY:
-		OnClose();
+		onClose.Broadcast(this);
 		m_Window = NULL;
 		PostQuitMessage(0);
 		break;
 	case WM_CLOSE:
-		if(OnClosing())
-			DestroyWindow(m_Window);
+		Close();
 		break;
 	case WM_MOVE:
 		OnMove(LOWORD(LParam), HIWORD(LParam));
@@ -545,8 +413,6 @@ bool WindowWin32::HandleMessages(UINT Message,
 		break;
 	}
 
-	if(m_MsgCallback && m_MsgCallback->OnMsg(Message, WParam, LParam, result))
-		return true;
 	return false;
 }
 

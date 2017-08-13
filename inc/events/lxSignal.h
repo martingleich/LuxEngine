@@ -7,7 +7,7 @@
 
 namespace lux
 {
-namespace events
+namespace event
 {
 template <typename... Args>
 struct SignalFunc
