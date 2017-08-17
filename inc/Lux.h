@@ -150,11 +150,15 @@ namespace input
 #include "video/mesh/VideoMesh.h"
 #include "video/mesh/MeshSystem.h"
 
+#include "gui/GUISkin.h"
 #include "gui/GUIEnvironment.h"
 #include "gui/Font.h"
 #include "gui/Window.h"
 #include "gui/Cursor.h"
 #include "gui/FontCreator.h"
+
+#include "gui/elements/GUIStaticText.h"
+#include "gui/elements/GUIButton.h"
 
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"

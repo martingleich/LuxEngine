@@ -255,6 +255,7 @@ public:
 	\param length The number of character to copy from the string if SIZE_T_MAX all characters a copied.
 	*/
 	String(const char* data, size_t length = std::numeric_limits<size_t>::max());
+	String(ConstIterator first, ConstIterator end);
 
 	//! Copyconstructor
 	String(const String& other);

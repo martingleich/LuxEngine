@@ -31,24 +31,26 @@ BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 
 void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handle)
 {
+	ULONG remaining=0;
 	switch(buffer->GetBufferType()) {
 	case EHardwareBufferType::Index:
 	{
 		IDirect3DIndexBuffer9* d3dBuffer = (IDirect3DIndexBuffer9*)handle;
 		if(d3dBuffer)
-			d3dBuffer->Release();
+			remaining = d3dBuffer->Release();
 	}
 	break;
 	case EHardwareBufferType::Vertex:
 	{
 		IDirect3DVertexBuffer9* d3dBuffer = (IDirect3DVertexBuffer9*)handle;
 		if(d3dBuffer)
-			d3dBuffer->Release();
+			remaining = d3dBuffer->Release();
 	}
 	break;
 	default:
 		throw core::Exception("Unsupported hardwarebuffer type.");
 	}
+	lxAssert(remaining == 0);
 }
 
 void* BufferManagerD3D9::UpdateVertexBuffer(VertexBuffer* buffer, void* handle)

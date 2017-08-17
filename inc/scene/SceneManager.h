@@ -64,6 +64,7 @@ public:
 	virtual StrongRef<Node> AddNode(Component* baseComp = nullptr, Node* parent = nullptr) = 0;
 	virtual StrongRef<Node> AddMesh(const io::Path& path) = 0;
 	virtual StrongRef<Node> AddMesh(video::Mesh* mesh) = 0;
+	virtual StrongRef<Node> AddSkyBox(const video::Colorf& color) = 0;
 	virtual StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr) = 0;
 	virtual StrongRef<Node> AddLight(video::ELightType lightType = video::ELightType::Point, video::Color color = video::Color::White) = 0;
 	virtual StrongRef<Node> AddCamera() = 0;

@@ -148,6 +148,38 @@ struct SignalStaticFunc : SignalFunc<Args...>
 	}
 };
 
+template <typename FunctorT, typename... Args>
+struct SignalFunctor : SignalFunc<Args...>
+{
+	FunctorT proc;
+
+	SignalFunctor(FunctorT p) :
+		proc(p)
+	{
+	}
+
+	void Call(Args... args) const
+	{
+		proc(args...);
+	}
+
+	bool Equal(const SignalFunc<Args...>& other) const
+	{
+		// Can't compare functors
+		return false;
+	}
+
+	const void* GetOwner() const
+	{
+		return nullptr;
+	}
+
+	bool IsDestroyed() const
+	{
+		return false;
+	}
+};
+
 template <typename... Args>
 class SignalRef;
 
@@ -205,6 +237,13 @@ public:
 		if(proc)
 			m_Callfuncs.PushBack(std::unique_ptr<SignalStaticFunc<Args...>>(
 				new SignalStaticFunc<Args...>(proc)));
+	}
+
+	template <typename FunctorT>
+	void Connect(const FunctorT& functor)
+	{
+		m_Callfuncs.PushBack(std::unique_ptr<SignalFunctor<FunctorT, Args...>>(
+			new SignalFunctor<FunctorT, Args...>(functor)));
 	}
 
 	template <typename Class>

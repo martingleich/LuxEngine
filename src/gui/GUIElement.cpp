@@ -12,6 +12,26 @@ const u32 Element::NO_TAB_STOP(0xFFFFFFFF);
 const ScalarDistanceF Element::AUTO_SIZE(INFINITY);
 const ScalarDistanceF Element::AUTO_MARGIN(INFINITY);
 
+Element::Element() :
+	m_Parent(nullptr),
+	m_Window(nullptr),
+	m_Margin(0, 0, 0, 0),
+	m_Size(10, 10),
+	m_MinSize(1, 1),
+	m_MaxSize(65536, 65536),
+	m_TabId(NO_TAB_STOP),
+	m_CanFocus(true),
+	m_IsVisible(true),
+	m_IsEnabled(true),
+	m_NoClip(false)
+{
+	UpdateRect();
+}
+
+Element::~Element()
+{
+}
+
 Element* Element::GetParent() const
 {
 	return m_Parent;
@@ -57,7 +77,7 @@ void Element::SetFocusable(bool focus)
 
 bool Element::IsFocused() const
 {
-	return false;
+	return (m_Environment->GetFocused() == this);
 }
 bool Element::IsTrulyVisible() const
 {
@@ -113,7 +133,7 @@ void Element::SetToolTip(const String& tip)
 	m_ToolTip = tip;
 }
 
-const math::Dimension2<ScalarDistanceF> Element::GetSize() const
+const ScalarDimensionF Element::GetSize() const
 {
 	return m_Size;
 }
@@ -125,22 +145,22 @@ ScalarDistanceF Element::GetHeight() const
 {
 	return GetSize().height;
 }
-void Element::SetSize(const math::Dimension2<ScalarDistanceF>& size)
+void Element::SetSize(const ScalarDimensionF& size)
 {
 	m_Size = size;
-	SetDirtyRect();
+	UpdateRect();
 }
 void Element::SetSize(ScalarDistanceF width, ScalarDistanceF height)
 {
-	SetSize(math::Dimension2<ScalarDistanceF>(width, height));
+	SetSize(ScalarDimensionF(width, height));
 }
 void Element::SetWidth(ScalarDistanceF width)
 {
-	SetSize(math::Dimension2<ScalarDistanceF>(width, GetHeight()));
+	SetSize(ScalarDimensionF(width, GetHeight()));
 }
 void Element::SetHeight(ScalarDistanceF height)
 {
-	SetSize(math::Dimension2<ScalarDistanceF>(GetWidth(), height));
+	SetSize(ScalarDimensionF(GetWidth(), height));
 }
 
 const math::Rect<ScalarDistanceF>& Element::GetMargin() const
@@ -150,7 +170,7 @@ const math::Rect<ScalarDistanceF>& Element::GetMargin() const
 void Element::SetMargin(const math::Rect<ScalarDistanceF>& rect)
 {
 	m_Margin = rect;
-	SetDirtyRect();
+	UpdateRect();
 }
 void Element::SetMargin(ScalarDistanceF left,
 	ScalarDistanceF top,
@@ -158,6 +178,13 @@ void Element::SetMargin(ScalarDistanceF left,
 	ScalarDistanceF bottom)
 {
 	SetMargin(math::Rect<ScalarDistanceF>(left, top, right, bottom));
+}
+
+void Element::SetPlacement(const math::Rect<ScalarDistanceF>& margin, const ScalarDimensionF& size)
+{
+	m_Margin = margin;
+	m_Size = size;
+	UpdateRect();
 }
 
 const math::Rect<ScalarDistanceF>& Element::GetBorder() const
@@ -168,12 +195,17 @@ const math::Rect<ScalarDistanceF>& Element::GetBorder() const
 void Element::SetBorder(const math::Rect<ScalarDistanceF>& border)
 {
 	m_Border = border;
-	SetDirtyRect();
+	UpdateRect();
 }
 
-void Element::SetPosition(const math::Vector2<ScalarDistanceF>& pos)
+void Element::SetPosition(const ScalarVectorF& pos)
 {
-	SetMargin(pos.x, pos.y, AUTO_MARGIN, AUTO_MARGIN);
+	SetPosition(pos.x, pos.y);
+}
+
+void Element::SetPosition(ScalarDistanceF x, ScalarDistanceF y)
+{
+	SetMargin(x, y, AUTO_MARGIN, AUTO_MARGIN);
 }
 
 math::Vector2F Element::GetPosition() const
@@ -229,8 +261,6 @@ StrongRef<Element> Element::AddElement(Element* elem, ElementIterator before)
 
 const math::RectF& Element::GetFinalInnerRect() const
 {
-	if(m_DirtyRect)
-		UpdateFinalRect();
 	return m_InnerRect;
 }
 
@@ -251,8 +281,6 @@ float Element::GetFinalInnerHeight() const
 
 const math::RectF& Element::GetFinalRect() const
 {
-	if(m_DirtyRect)
-		UpdateFinalRect();
 	return m_FinalRect;
 }
 
@@ -273,6 +301,8 @@ float Element::GetFinalHeight() const
 
 void Element::Render(Renderer* renderer)
 {
+	Paint(renderer);
+
 	for(auto e : m_Elements) {
 		if(e->IsVisible())
 			e->Render(renderer);
@@ -281,7 +311,13 @@ void Element::Render(Renderer* renderer)
 
 bool Element::OnEvent(const Event& e)
 {
-	LUX_UNUSED(e);
+	auto mouseE = dynamic_cast<const gui::MouseEvent*>(&e);
+	if(mouseE)
+		return OnMouseEvent(*mouseE);
+	auto elementE = dynamic_cast<const gui::ElementEvent*>(&e);
+	if(elementE)
+		return OnElementEvent(*elementE);
+
 	return true;
 }
 
@@ -298,16 +334,19 @@ void Element::OnAdd(Element* p)
 	m_Window = p->GetWindow();
 	m_Environment = p->GetEnvironment();
 	m_Parent = p;
-	SetDirtyRect();
+
+	UpdateRect();
 }
 
 void Element::OnRemove(Element* p)
 {
 	LUX_UNUSED(p);
+
+	m_Environment->OnElementRemoved(this);
+
 	m_Window = nullptr;
 	m_Environment = nullptr;
 	m_Parent = nullptr;
-	SetDirtyRect();
 }
 
 static void CalculateAxis(
@@ -348,14 +387,11 @@ static void CalculateAxis(
 	}
 }
 
-void Element::UpdateRect() const
+void Element::UpdateRect()
 {
-	if(!m_DirtyRect)
-		return;
-	m_DirtyRect = false;
-
-	UpdateFinalRect();
-	UpdateInnerRect();
+	if(UpdateFinalRect()) {
+		OnFinalRectChange();
+	}
 }
 
 math::RectF Element::GetParentInnerRect() const
@@ -366,7 +402,7 @@ math::RectF Element::GetParentInnerRect() const
 	return m_Parent->GetFinalInnerRect();
 }
 
-void Element::UpdateFinalRect() const
+bool Element::UpdateFinalRect()
 {
 	auto parentRect = GetParentInnerRect();
 	auto parentWidth = parentRect.GetWidth();
@@ -382,37 +418,57 @@ void Element::UpdateFinalRect() const
 	size.width = m_Size.width != AUTO_SIZE ? m_Size.width.GetRealValue(parentWidth) : m_Size.width;
 	size.height = m_Size.height != AUTO_SIZE ? m_Size.height.GetRealValue(parentHeight) : m_Size.height;
 
+	math::RectF newRect;
 	CalculateAxis(
-		m_FinalRect.left, m_FinalRect.right,
+		newRect.left, newRect.right,
 		margin.left, margin.right,
 		size.width,
 		parentRect.left, parentRect.right);
 
 	CalculateAxis(
-		m_FinalRect.top, m_FinalRect.bottom,
+		newRect.top, newRect.bottom,
 		margin.top, margin.bottom,
 		size.height,
 		parentRect.top, parentRect.bottom);
+
+	bool changed = (newRect != m_FinalRect);
+	m_FinalRect = newRect;
+	return changed;
 }
 
-void Element::UpdateInnerRect() const
+bool Element::UpdateInnerRect()
 {
-	m_InnerRect.left = m_FinalRect.left + m_Border.left;
-	m_InnerRect.top = m_FinalRect.top + m_Border.top;
-	m_InnerRect.right = m_FinalRect.right - m_Border.right;
-	m_InnerRect.bottom = m_FinalRect.bottom - m_Border.bottom;
+	math::RectF newRect;
+	newRect.left = m_FinalRect.left + m_Border.left;
+	newRect.top = m_FinalRect.top + m_Border.top;
+	newRect.right = m_FinalRect.right - m_Border.right;
+	newRect.bottom = m_FinalRect.bottom - m_Border.bottom;
 
-	if(!m_InnerRect.IsValid()) {
-		m_InnerRect.right = m_InnerRect.left = (m_InnerRect.left + m_InnerRect.right) / 2;
-		m_InnerRect.top = m_InnerRect.bottom = (m_InnerRect.top + m_InnerRect.bottom) / 2;
+	if(!newRect.IsValid()) {
+		newRect.right = newRect.left = (newRect.left + newRect.right) / 2;
+		newRect.top = newRect.bottom = (newRect.top + newRect.bottom) / 2;
 	}
+
+	bool changed = (newRect != m_InnerRect);
+	m_InnerRect = newRect;
+	return changed;
 }
 
-void Element::SetDirtyRect()
+void Element::UpdateChildrenRects() const
 {
-	m_DirtyRect = true;
 	for(auto e : m_Elements)
-		e->SetDirtyRect();
+		e->UpdateRect();
+}
+
+void Element::OnFinalRectChange()
+{
+	if(UpdateInnerRect())
+		OnInnerRectChange();
+}
+
+void Element::OnInnerRectChange()
+{
+	UpdateChildrenRects();
 }
 
 } // namespace gui

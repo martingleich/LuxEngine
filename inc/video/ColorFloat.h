@@ -143,6 +143,24 @@ public:
 		return out;
 	}
 
+	Colorf operator*(const Colorf& other) const
+	{
+		return Colorf(
+			r*other.r,
+			g*other.g,
+			b*other.b,
+			a*other.a);
+	}
+
+	Colorf& operator*=(const Colorf& other)
+	{
+		r *= other.r;
+		g *= other.g;
+		b *= other.b;
+		a *= other.a;
+		return *this;
+	}
+
 	//! Equality with other color.
 	/**
 		Is true, if the colors are the same, including alpha.
@@ -207,6 +225,13 @@ public:
 	float GetBlue() const { return b; }
 	float GetGreen() const { return g; }
 	float GetAlpha() const { return a; }
+
+	void Clamp()
+	{
+		r = math::Clamp<float>(r, 0, 1);
+		g = math::Clamp<float>(g, 0, 1);
+		b = math::Clamp<float>(b, 0, 1);
+	}
 
 	//! Get the negated color
 	inline Colorf GetNegative() const

@@ -28,6 +28,7 @@ public:
 	StrongRef<Node> AddNode(Component* baseComp = nullptr, Node* parent = nullptr);
 	StrongRef<Node> AddMesh(const io::Path& path);
 	StrongRef<Node> AddMesh(video::Mesh* mesh);
+	StrongRef<Node> AddSkyBox(const video::Colorf& color);
 	StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr);
 	StrongRef<Node> AddLight(video::ELightType lightType=video::ELightType::Point, video::Color color = video::Color::White);
 	StrongRef<Node> AddCamera();

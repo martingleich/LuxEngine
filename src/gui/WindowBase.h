@@ -11,7 +11,8 @@ class WindowBase : public Window
 {
 public:
 	WindowBase() :
-		m_ShouldFullscreen(false)
+		m_ShouldFullscreen(false),
+		m_ClearBackground(true)
 	{
 	}
 
@@ -51,6 +52,16 @@ public:
 	bool IsVisible() const
 	{
 		return !IsMinimized();
+	}
+
+	void SetClearBackground(bool clear)
+	{
+		m_ClearBackground = clear;
+	}
+
+	bool ClearBackground() const
+	{
+		return m_ClearBackground;
 	}
 
 protected:
@@ -102,7 +113,7 @@ protected:
 		m_FinalRect.top = y;
 		m_FinalRect.right = x + w;
 		m_FinalRect.bottom = y + h;
-		UpdateInnerRect();
+		OnFinalRectChange();
 		onMove.Broadcast(this, math::Vector2F(x, y));
 	}
 
@@ -110,7 +121,8 @@ protected:
 	{
 		m_FinalRect.right = m_FinalRect.left + w;
 		m_FinalRect.bottom = m_FinalRect.right + h;
-		UpdateInnerRect();
+		OnFinalRectChange();
+		OnInnerRectChange();
 		onResize.Broadcast(this, math::Dimension2F(w, h));
 	}
 
@@ -128,6 +140,7 @@ private:
 
 	bool m_IsActivated;
 	bool m_IsFocused;
+	bool m_ClearBackground;
 };
 
 } // namespace gui

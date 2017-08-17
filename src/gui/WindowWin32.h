@@ -29,7 +29,7 @@ public:
 	bool SwitchFullscreen(bool fullscreen);
 	void SetText(const String& text);
 
-	void SetInnerSize(const math::Dimension2<ScalarDistanceF>& size);
+	void SetInnerSize(const ScalarDimensionF& size);
 
 	bool Maximize();
 	bool Minimize();
@@ -48,10 +48,11 @@ public:
 		LPARAM LParam,
 		LRESULT& result);
 
-	void SetDirtyRect();
+	void Paint(Renderer* r);
+
 	math::RectF GetParentInnerRect() const;
-	void UpdateFinalRect() const;
-	void UpdateInnerRect() const;
+	bool UpdateFinalRect();
+	bool UpdateInnerRect();
 
 	core::Name GetReferableType() const;
 

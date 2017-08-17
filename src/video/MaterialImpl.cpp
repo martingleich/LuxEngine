@@ -36,6 +36,11 @@ MaterialImpl::~MaterialImpl()
 {
 }
 
+void MaterialImpl::RenderData::Destroy()
+{
+	puffer.SetType(nullptr);
+	renderer = nullptr;
+}
 ////////////////////////////////////////////////////////////////////
 
 void MaterialImpl::SetRenderer(MaterialRenderer* renderer)

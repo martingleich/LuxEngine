@@ -1,7 +1,6 @@
 #ifndef INCLUDED_GUI_SKIN_H
 #define INCLUDED_GUI_SKIN_H
 #include "GUIRenderer.h"
-#include "video/SpriteBank.h"
 #include "gui/Font.h"
 
 namespace lux
@@ -9,141 +8,167 @@ namespace lux
 namespace gui
 {
 
-enum class EGUIColor
+enum class EGUIState
 {
-	Bright,
-	Foreground,
-	Mid,
-	Background,
-	Dark,
-	Shadow,
+	Enabled,
+	Disabled,
+	Highlighted,
+};
 
-	Base,
-	BaseDisabled,
-	AlternateBase,
+enum class EGUIPrimitive
+{
+	Pane,
 
 	Button,
 	ButtonPressed,
-	ButtonDisabled,
 
-	ToolTipBase,
-	ToolTipText,
+	Window,
+	WindowBase,
 
-	Text,
-	DisabledText,
-	BrightText,
+	Frame,
 
-	Highlight,
-	HighlightText,
-};
+	CheckBoxEmpty,
+	CheckBoxChecked,
 
-enum class EGUISize
-{};
+	RadioButtonEmpty,
+	RadioButtonChecked,
 
-enum class EGUISprite
-{};
+	TextArea,
+	StaticText,
 
-struct GUISprite
-{
-	video::SpriteBank::Sprite sprite;
-	video::Color color;
-	bool loop;
+	Tooltip,
 };
 
 class Element;
 class Renderer;
+
 class Skin : public ReferenceCounted
 {
 public:
+	Skin()
+	{
+		enabledColor = video::Colorf(1, 1, 1, 1);
+		disabledColor = video::Colorf(0.75f, 0.75f, 0.75f, 1.0f);
+		textColor = video::Colorf(0, 0, 0);
+	}
+
 	virtual ~Skin() {}
 
-	void SetColor(EGUIColor color, video::Color value)
+	virtual void DrawPrimitive(
+		Renderer* r,
+		EGUIState state,
+		EGUIPrimitive prim,
+		const math::RectF& rect,
+		const video::Colorf& color,
+		const math::RectF* clip = nullptr) = 0;
+
+	StrongRef<Font> defaultFont;
+	video::Colorf enabledColor;
+	video::Colorf disabledColor;
+	video::Colorf textColor;
+	video::Colorf disabledTextColor;
+
+	math::Vector2F buttonPressedTextOffset;
+};
+
+class Skin3D : public Skin
+{
+public:
+	Skin3D()
 	{
-		m_Colors[color] = value;
+		window = video::Color(180, 180, 180);
+		face = video::Color(210,210,210);
+		darkShadow = 0.2f;
+		shadow = 0.6f;
+		light = 1.4f;
+		highLight = 1.7f;
+
+		buttonPressedTextOffset = math::Vector2F(1,1);
 	}
 
-	video::Color GetColor(EGUIColor color) const
+	void DrawPrimitive(
+		Renderer* r,
+		EGUIState state,
+		EGUIPrimitive prim,
+		const math::RectF& rect,
+		const video::Colorf& color,
+		const math::RectF* clip = nullptr)
 	{
-		auto it = m_Colors.Find(color);
-		if(it == m_Colors.End())
-			return video::Color(255, 64, 255); // TODO: Approximate color
-		return *it;
+		auto realColor = color;
+		if(state == EGUIState::Enabled)
+			realColor *= enabledColor;
+		if(state == EGUIState::Disabled)
+			realColor *= disabledColor;
+
+		switch(prim) {
+		case EGUIPrimitive::Button:
+			Draw3DButtonPane(r, false, rect, realColor, clip);
+			break;
+		case EGUIPrimitive::ButtonPressed:
+			Draw3DButtonPane(r, true, rect, realColor, clip);
+			break;
+		case EGUIPrimitive::WindowBase:
+			DrawWindowBase(r, rect, realColor, clip);
+			break;
+		default:
+			r->DrawRectangle(rect, (realColor*face).ToHex(), clip);
+			break;
+		}
 	}
 
-	void SetSize(EGUISize size, float value)
+private:
+	void DrawWindowBase(
+		Renderer* r,
+		const math::RectF& rect,
+		const video::Colorf& color,
+		const math::RectF* clip)
 	{
-		m_Sizes[size] = value;
-	}
-	float GetSize(EGUISize size) const
-	{
-		auto it = m_Sizes.Find(size);
-		if(it == m_Sizes.End())
-			return 0;
-		return *it;
+		r->DrawRectangle(rect, (color*window).ToHex(), clip);
 	}
 
-	void SetSprite(EGUISprite sprite, const GUISprite& guiSprite)
+	void Draw3DButtonPane(
+		Renderer* r,
+		bool pressed,
+		const math::RectF& rect,
+		const video::Colorf& color,
+		const math::RectF* clip)
 	{
-		m_Sprites[sprite] = guiSprite;
-	}
-	bool GetSprite(EGUISprite sprite, GUISprite& outSprite) const
-	{
-		auto it = m_Sprites.Find(sprite);
-		if(it == m_Sprites.End())
-			return false;
-		outSprite = *it;
-		return true;
-	}
-
-	virtual void DrawButtonPaneNormal(Renderer* r, Element* element, const math::RectF& rect, const math::RectF* clip = nullptr)
-	{
-		DrawPane(r, element, rect, GetColor(EGUIColor::Button), clip);
-	}
-
-	virtual void DrawButtonPanePressed(Renderer* r, Element* element, const math::RectF& rect, const math::RectF* clip = nullptr)
-	{
-		DrawPane(r, element, rect, GetColor(EGUIColor::ButtonPressed), clip);
-	}
-	virtual void DrawWindowBackground(Renderer* r, Element* element, const math::RectF& rect, const math::RectF* clip = nullptr)
-	{
-		DrawPane(r, element, rect, GetColor(EGUIColor::Background), clip);
-	}
-
-	virtual void DrawPane(Renderer* r, Element* element, const math::RectF& rect, video::Color color, const math::RectF* clip = nullptr)
-	{
-		LUX_UNUSED(element);
-		auto realRect = rect;
-		if(clip)
-			realRect.FitInto(*clip);
-		r->DrawRectangle(realRect, color);
+		auto rct = rect;
+		auto baseColor = face * color;
+		if(pressed) {
+			r->DrawRectangle(rct, (baseColor*highLight).ToHex(), clip);
+			rct.right -= 1;
+			rct.bottom -= 1;
+			r->DrawRectangle(rct, (baseColor*darkShadow).ToHex(), clip);
+			rct.left += 1;
+			rct.top += 1;
+			r->DrawRectangle(rct, (baseColor*shadow).ToHex(), clip);
+			rct.left += 1;
+			rct.top += 1;
+			r->DrawRectangle(rct, (baseColor).ToHex(), clip);
+		} else {
+			r->DrawRectangle(rct, (baseColor*darkShadow).ToHex(), clip);
+			rct.right -= 1;
+			rct.bottom -= 1;
+			r->DrawRectangle(rct, (baseColor*highLight).ToHex(), clip);
+			rct.left += 1;
+			rct.top += 1;
+			r->DrawRectangle(rct, (baseColor*shadow).ToHex(), clip);
+			rct.right -= 1;
+			rct.bottom -= 1;
+			r->DrawRectangle(rct, (baseColor).ToHex(), clip);
+		}
 	}
 
-	virtual video::SpriteBank* GetSpriteBank() const
-	{
-		return m_Bank;
-	}
+public:
+	float darkShadow;
+	float shadow;
+	video::Colorf face;
+	float light;
+	float highLight;
 
-	virtual void SetSpriteBank(video::SpriteBank* bank)
-	{
-		m_Bank = bank;
-	}
-
-	virtual void SetDefaultFont(gui::Font* font)
-	{
-		m_Font = font;
-	}
-
-	virtual gui::Font* GetDefaultFont()
-	{
-		return m_Font;
-	}
-
-protected:
-	StrongRef<gui::Font> m_Font;
-	StrongRef<video::SpriteBank> m_Bank;
-	core::HashMap<EGUISize, float> m_Sizes;
-	core::HashMap<EGUISprite, GUISprite> m_Sprites;
-	core::HashMap<EGUIColor, video::Color> m_Colors;
+	video::Colorf window;
+	video::Colorf baseEditable;
 };
 
 } // namespace gui

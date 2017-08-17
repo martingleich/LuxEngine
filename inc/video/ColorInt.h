@@ -119,12 +119,31 @@ public:
 	}
 
 	//! Change Intensity
-	Color& operator *= (const float f)
+	Color& operator*=(float f)
 	{
 		*this = Color(math::Min((u32)(GetRed() * f), 255u),
 			math::Min((u32)(GetGreen() * f), 255u),
 			math::Min((u32)(GetBlue() * f), 255u),
 			math::Min((u32)(GetAlpha() * f), 255u));
+		return *this;
+	}
+
+	Color operator*(Color other) const
+	{
+		return Color(
+			(GetRed() * other.GetRed()) / 255,
+			(GetGreen() * other.GetGreen()) / 255,
+			(GetBlue() * other.GetBlue()) / 255,
+			(GetAlpha() * other.GetAlpha()) / 255);
+	}
+
+	Color& operator*=(Color other)
+	{
+		*this = Color(
+			(GetRed() * other.GetRed()) / 255,
+			(GetGreen() * other.GetGreen()) / 255,
+			(GetBlue() * other.GetBlue()) / 255,
+			(GetAlpha() * other.GetAlpha()) / 255);
 		return *this;
 	}
 

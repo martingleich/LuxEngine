@@ -13,6 +13,8 @@ namespace gui
 {
 
 class Event;
+class MouseEvent;
+class ElementEvent;
 class Window;
 class Renderer;
 class Skin;
@@ -31,25 +33,8 @@ public:
 	LUX_API static const ScalarDistanceF AUTO_MARGIN;
 
 public:
-	Element() :
-		m_Parent(nullptr),
-		m_Window(nullptr),
-		m_Margin(0, 0, 0, 0),
-		m_Size(10, 10),
-		m_MinSize(1, 1),
-		m_MaxSize(65536, 65536),
-		m_TabId(NO_TAB_STOP),
-		m_DirtyRect(true),
-		m_CanFocus(true),
-		m_IsVisible(true),
-		m_IsEnabled(true),
-		m_NoClip(false)
-	{
-	}
-
-	virtual ~Element()
-	{
-	}
+	LUX_API Element();
+	LUX_API virtual ~Element();
 
 	LUX_API Element* GetParent() const;
 
@@ -84,10 +69,10 @@ public:
 	LUX_API virtual void SetBorder(const math::Rect<ScalarDistanceF>& border);
 	LUX_API virtual const math::Rect<ScalarDistanceF>& GetBorder() const;
 
-	LUX_API virtual const math::Dimension2<ScalarDistanceF> GetSize() const;
+	LUX_API virtual const ScalarDimensionF GetSize() const;
 	LUX_API ScalarDistanceF GetWidth() const;
 	LUX_API ScalarDistanceF GetHeight() const;
-	LUX_API virtual void SetSize(const math::Dimension2<ScalarDistanceF>& size);
+	LUX_API virtual void SetSize(const ScalarDimensionF& size);
 	LUX_API void SetSize(ScalarDistanceF width, ScalarDistanceF heigth);
 	LUX_API void SetWidth(ScalarDistanceF width);
 	LUX_API void SetHeight(ScalarDistanceF width);
@@ -97,7 +82,10 @@ public:
 	LUX_API void SetMargin(ScalarDistanceF left, ScalarDistanceF top,
 		ScalarDistanceF right, ScalarDistanceF bottom);
 
-	LUX_API void SetPosition(const math::Vector2<ScalarDistanceF> & pos);
+	LUX_API virtual void SetPlacement(const math::Rect<ScalarDistanceF>& margin, const ScalarDimensionF& size);
+
+	LUX_API void SetPosition(const ScalarVectorF & pos);
+	LUX_API void SetPosition(ScalarDistanceF x, ScalarDistanceF y);
 	LUX_API math::Vector2F GetPosition() const;
 
 	LUX_API virtual core::Range<ElementIterator> Elements();
@@ -121,7 +109,11 @@ public:
 	LUX_API float GetFinalHeight() const;
 
 	LUX_API virtual bool OnEvent(const Event& e);
+	virtual bool OnMouseEvent(const gui::MouseEvent& e) { LUX_UNUSED(e); return false; }
+	virtual bool OnElementEvent(const gui::ElementEvent& e) { LUX_UNUSED(e); return false; }
+
 	LUX_API virtual void Render(Renderer* renderer);
+	virtual void Paint(Renderer* renderer) { LUX_UNUSED(renderer); }
 
 	LUX_API virtual Skin* GetSkin() const;
 
@@ -129,12 +121,16 @@ protected:
 	LUX_API virtual void OnAdd(Element* p);
 	LUX_API virtual void OnRemove(Element* p);
 
-	LUX_API virtual void UpdateRect() const;
+	LUX_API virtual void UpdateRect();
 
 	LUX_API virtual math::RectF GetParentInnerRect() const;
-	LUX_API virtual void UpdateFinalRect() const;
-	LUX_API virtual void UpdateInnerRect() const;
-	LUX_API virtual void SetDirtyRect();
+	LUX_API virtual bool UpdateFinalRect();
+	LUX_API virtual bool UpdateInnerRect();
+
+	LUX_API void UpdateChildrenRects() const;
+
+	LUX_API void OnFinalRectChange();
+	LUX_API void OnInnerRectChange();
 
 protected:
 	ElementList m_Elements;
@@ -151,13 +147,12 @@ protected:
 
 	math::Rect<ScalarDistanceF> m_Border;
 	math::Rect<ScalarDistanceF> m_Margin;
-	math::Dimension2<ScalarDistanceF> m_Size;
+	ScalarDimensionF m_Size;
 	math::Dimension2F m_MinSize;
 	math::Dimension2F m_MaxSize;
 
 	u32 m_TabId;
 
-	mutable bool m_DirtyRect;
 	bool m_CanFocus;
 	bool m_IsVisible;
 	bool m_IsEnabled;

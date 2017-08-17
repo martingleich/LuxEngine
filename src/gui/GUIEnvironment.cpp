@@ -5,10 +5,15 @@
 
 #include "video/VideoDriver.h"
 
+#include "core/ReferableFactory.h"
+
 #include "gui/Cursor.h"
 #include "gui/Window.h"
 #include "gui/GUISkin.h"
 #include "gui/GUIElement.h"
+
+#include "gui/elements/GUIButton.h"
+#include "gui/elements/GUIStaticText.h"
 
 #include "gui/FontLoader.h"
 #include "gui/FontCreator.h"
@@ -31,7 +36,6 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_Root = m_OSWindow;
 	m_Cursor = m_OSCursor;
 
-	SetSkin(LUX_NEW(Skin));
 
 #ifdef LUX_WINDOWS
 	m_FontCreator = LUX_NEW(FontCreatorWin32);
@@ -39,30 +43,10 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_FontCreator = nullptr;
 #endif
 
-	// Generate a simple skin
-	m_Skin->SetColor(EGUIColor::Bright, video::Color(210, 210, 210));
-	m_Skin->SetColor(EGUIColor::Foreground, video::Color(190, 190, 190));
-	m_Skin->SetColor(EGUIColor::Mid, video::Color(140, 140, 140));
-	m_Skin->SetColor(EGUIColor::Background, video::Color(110, 110, 110));
-	m_Skin->SetColor(EGUIColor::Dark, video::Color(80, 80, 80));
-	m_Skin->SetColor(EGUIColor::Shadow, video::Color(50, 50, 50));
-
-	m_Skin->SetColor(EGUIColor::Base, video::Color(255, 255, 255));
-	m_Skin->SetColor(EGUIColor::BaseDisabled, video::Color(200, 200, 200));
-
-	m_Skin->SetColor(EGUIColor::Button, m_Skin->GetColor(EGUIColor::Foreground));
-	m_Skin->SetColor(EGUIColor::ButtonPressed, m_Skin->GetColor(EGUIColor::Dark));
-
-	m_Skin->SetColor(EGUIColor::Text, video::Color(0, 0, 0));
-	m_Skin->SetColor(EGUIColor::DisabledText, video::Color(100, 100, 100));
-	m_Skin->SetColor(EGUIColor::BrightText, video::Color(180, 180, 180));
-
-	m_Skin->SetColor(EGUIColor::Highlight, video::Color(20, 20, 255));
-	m_Skin->SetColor(EGUIColor::HighlightText, video::Color(255, 255, 255));
-
+	SetSkin(LUX_NEW(Skin3D));
 	if(m_FontCreator) {
-		m_Skin->SetDefaultFont(m_FontCreator->CreateFont(
-			FontDescription(15, EFontWeight::Bolt), m_FontCreator->GetDefaultCharset("german")));
+		m_Skin->defaultFont = m_FontCreator->CreateFont(
+			FontDescription(15, EFontWeight::Bolt), m_FontCreator->GetDefaultCharset("german"));
 	}
 
 	SetRenderer(LUX_NEW(Renderer)(video::VideoDriver::Instance()->GetRenderer()));
@@ -90,8 +74,31 @@ StrongRef<Cursor> GUIEnvironment::GetCursor()
 
 void GUIEnvironment::Render()
 {
+	m_Renderer->Begin();
 	m_Root->Render(m_Renderer);
 	m_Renderer->Flush();
+}
+
+void GUIEnvironment::Update(float secsPassed)
+{
+	LUX_UNUSED(secsPassed);
+
+	auto newHovered = GetElementByPos(m_CursorPos).GetWeak();
+	if(m_Hovered != newHovered) {
+		ElementEvent e;
+		if(m_Hovered) {
+			e.elem = m_Hovered;
+			e.type = ElementEvent::MouseLeave;
+			SendEvent(e.elem, e);
+		}
+		if(newHovered) {
+			e.elem = newHovered;
+			e.type = ElementEvent::MouseEnter;
+			SendEvent(e.elem, e);
+		}
+		//onHoverChange.Broadcast(newHovered);
+		m_Hovered = newHovered;
+	}
 }
 
 StrongRef<Skin> GUIEnvironment::GetSkin() const
@@ -118,8 +125,11 @@ static Element* GetElementByPosRec(Element* e, const math::Vector2F& pos)
 	Element* out = nullptr;
 	if(e->GetFinalRect().IsInside(pos))
 		out = e;
-	for(auto x : e->Elements())
-		out = GetElementByPosRec(x, pos);
+	for(auto x : e->Elements()) {
+		auto childOut = GetElementByPosRec(x, pos);
+		if(childOut)
+			return childOut;
+	}
 
 	return out;
 }
@@ -131,8 +141,7 @@ StrongRef<Element> GUIEnvironment::GetElementByPos(const math::Vector2F& pos)
 
 void GUIEnvironment::SendEvent(Element* elem, const Event& event)
 {
-	while(elem && !elem->OnEvent(event))
-		elem = elem->GetParent();
+	elem->OnEvent(event);
 }
 
 void GUIEnvironment::SendMouseEvent(MouseEvent& e)
@@ -143,32 +152,15 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 	e.rightState = m_RightState;
 	e.pos = m_CursorPos;
 
-	if(!m_Hovered)
-		m_Hovered = GetElementByPos(e.pos).GetWeak();
 	e.elem = m_Hovered;
-	SendEvent(e.elem, e);
+	if(e.elem)
+		SendEvent(e.elem, e);
 }
 
 void GUIEnvironment::OnCursorMove(const math::Vector2F& newPos)
 {
 	if(m_CursorPos != newPos) {
 		m_CursorPos = newPos;
-		auto newHovered = GetElementByPos(m_CursorPos).GetWeak();
-		if(m_Hovered != newHovered) {
-			ElementEvent e;
-			if(m_Hovered) {
-				e.elem = m_Hovered;
-				e.type = ElementEvent::MouseLeave;
-				SendEvent(e.elem, e);
-			}
-			if(newHovered) {
-				e.elem = newHovered;
-				e.type = ElementEvent::MouseEnter;
-				SendEvent(e.elem, e);
-			}
-			m_Hovered = newHovered;
-		}
-
 		MouseEvent e;
 		e.type = MouseEvent::Move;
 		SendMouseEvent(e);
@@ -210,6 +202,56 @@ StrongRef<FontCreator> GUIEnvironment::GetFontCreator()
 Element* GUIEnvironment::GetHovered()
 {
 	return m_Hovered;
+}
+
+Element* GUIEnvironment::GetFocused()
+{
+	return m_Focused;
+}
+
+///////////////////////////////////////////////////////////////////////////
+StrongRef<Element> GUIEnvironment::AddElement(core::Name name, Element* parent)
+{
+	if(!parent)
+		parent = m_Root;
+
+	return parent->AddElement(core::ReferableFactory::Instance()->Create(name).As<Element>());
+}
+
+StrongRef<StaticText> GUIEnvironment::AddStaticText(const ScalarVectorF& position, const String& text, Element* parent)
+{
+	StrongRef<StaticText> st = AddElement("lux.gui.StaticText", parent);
+	st->SetPosition(position);
+	st->SetText(text);
+	return st;
+}
+
+StrongRef<Button> GUIEnvironment::AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent)
+{
+	StrongRef<Button> button = AddElement("lux.gui.Button", parent);
+	button->SetPosition(pos);
+	button->SetSize(size);
+	button->SetText(text);
+	return button;
+}
+
+void GUIEnvironment::OnElementRemoved(Element* elem)
+{
+	if(elem == GetHovered()) {
+		ElementEvent e;
+		e.elem = elem;
+		e.type = ElementEvent::MouseLeave;
+		SendEvent(e.elem, e);
+	}
+	if(elem == GetFocused()) {
+		ElementEvent e;
+		e.elem = elem;
+		e.type = ElementEvent::FocusLost;
+		SendEvent(e.elem, e);
+	}
+
+	for(auto e : elem->Elements())
+		OnElementRemoved(e);
 }
 
 } // namespace gui

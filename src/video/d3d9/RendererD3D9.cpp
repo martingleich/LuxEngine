@@ -347,18 +347,21 @@ void RendererD3D9::SetupRendering(size_t passId)
 
 	// Get current pass, with applied options and overwrites
 	Pass pass = m_MaterialRenderer ? m_MaterialRenderer->GeneratePassData(passId, settings) : m_Pass;
-	if(m_UseOverwrite)
+	if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty())
 		m_FinalOverwrite.Apply(pass);
+	if(m_RenderMode == ERenderMode::Mode2D) {
+		pass.lighting = ELighting::Disabled;
+		pass.fogEnabled = false;
+	}
 
 	if((pass.shader != nullptr) != m_UseShader) {
-		SetDirty(Dirty_Fog);
-		SetDirty(Dirty_Lights);
+		m_ChangedShaderFixed = true;
 		m_UseShader = (pass.shader != nullptr);
 	}
 
 	if(pass.lighting != m_PrevLighting) {
-		SetDirty(Dirty_Lights);
 		m_PrevLighting = pass.lighting;
+		m_ChangedLighting = true;
 	}
 
 	if(pass.polygonOffset != m_PrePolyOffset) {
@@ -382,7 +385,11 @@ void RendererD3D9::SetupRendering(size_t passId)
 	else if(m_ParamSetCallback)
 		m_ParamSetCallback->SendShaderSettings(passId, pass, settings);
 
-	ClearAllDirty();
+	ClearDirty(Dirty_Rendertarget);
+	ClearDirty(Dirty_MaterialRenderer);
+	ClearDirty(Dirty_RenderMode);
+	m_ChangedLighting = false;
+	m_ChangedShaderFixed = false;
 }
 
 void RendererD3D9::SwitchRenderMode(ERenderMode mode)
@@ -482,18 +489,18 @@ void RendererD3D9::LoadFogSettings(const Pass& pass)
 	if(pass.shader)
 		useFixedFog = false;
 
+	// Enable or disable the fog, for fixed and shader
 	m_DeviceState.EnableFog(useFixedFog);
+	math::Vector3F fogInfo;
+	fogInfo.x = useFog;
+	fogInfo.y =
+		m_Fog.type == EFogType::Linear ? 1.0f :
+		m_Fog.type == EFogType::Exp ? 2.0f :
+		m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
+	fogInfo.z = 0;
+	*m_ParamId.fogInfo = fogInfo;
 
 	if(IsDirty(Dirty_Fog)) {
-		math::Vector3F fogInfo;
-		fogInfo.x = useFog;
-		fogInfo.y =
-			m_Fog.type == EFogType::Linear ? 1.0f :
-			m_Fog.type == EFogType::Exp ? 2.0f :
-			m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
-		fogInfo.z = 0;
-		*m_ParamId.fogInfo = fogInfo;
-
 		*m_ParamId.fogColor = m_Fog.color;
 		*m_ParamId.fogRange = math::Vector3F(
 			m_Fog.start,
@@ -517,13 +524,12 @@ void RendererD3D9::LoadLightSettings(const Pass& pass)
 		useFixedLights = false;
 
 	m_DeviceState.EnableLight(useFixedLights);
+	*m_ParamId.lighting = (float)pass.lighting;
 
-	if(IsDirty(Dirty_Lights)) {
-		m_DeviceState.ClearLights();
-		*m_ParamId.lighting = (float)pass.lighting;
-
+	if(IsDirty(Dirty_Lights) || (useFixedLights && m_ChangedLighting) || m_ChangedShaderFixed) {
 		// Only use the fixed pipeline if there is no shader
 		if(!pass.shader) {
+			m_DeviceState.ClearLights();
 			// Enable fixed pipeline lights
 			for(auto it = m_Lights.First(); it != m_Lights.End(); ++it)
 				m_DeviceState.AddLight(*it, pass.lighting);

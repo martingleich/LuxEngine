@@ -61,6 +61,15 @@ String::String(const char* data, size_t length) :
 	m_Size = size;
 }
 
+String::String(ConstIterator first, ConstIterator end) :
+	m_Data(nullptr),
+	m_Allocated(0),
+	m_Size(0),
+	m_Length(0)
+{
+	Append(first, end);
+}
+
 String::String(const String& other) :
 	m_Data(nullptr),
 	m_Allocated(0),
@@ -809,6 +818,8 @@ core::Array<String> String::Split(u32 ch) const
 			buffer.Append(*it);
 		}
 	}
+
+	out.PushBack(std::move(buffer));
 
 	return out;
 }

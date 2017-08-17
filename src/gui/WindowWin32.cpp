@@ -1,6 +1,9 @@
 #ifdef LUX_WINDOWS
 #include "WindowWin32.h"
 
+#include "gui/GUISkin.h"
+#include "gui/GUIRenderer.h"
+
 #include "video/images/Image.h"
 #include "video/ColorConverter.h"
 #include "core/Logger.h"
@@ -15,10 +18,9 @@ namespace gui
 
 WindowWin32::WindowWin32(HWND window)
 {
-	m_DirtyRect = false; // Clean initial dirty flag of element, to circumvent caching of resize changes
-
 	m_Window = window;
 	m_IsFullscreen = false;
+	SetClearBackground(false);
 
 	m_Cursor = LUX_NEW(CursorWin32)(this);
 
@@ -107,6 +109,12 @@ bool WindowWin32::SwitchFullscreen(bool fullscreen)
 	return true;
 }
 
+void WindowWin32::Paint(Renderer* r)
+{
+	if(ClearBackground())
+		GetSkin()->DrawPrimitive(r, EGUIState::Enabled, EGUIPrimitive::WindowBase, GetFinalInnerRect(), video::Colorf(1,1,1,1));
+}
+
 void WindowWin32::SetText(const String& text)
 {
 	auto data = core::UTF8ToUTF16(text.Data());
@@ -119,7 +127,7 @@ void WindowWin32::SetText(const String& text)
 		WindowBase::SetText(text);
 }
 
-void WindowWin32::SetInnerSize(const math::Dimension2<ScalarDistanceF>& size)
+void WindowWin32::SetInnerSize(const ScalarDimensionF& size)
 {
 	u32 realWidth = (u32)size.width.GetRealValue((float)GetSystemMetrics(SM_CXSCREEN));
 	u32 realHeight = (u32)size.height.GetRealValue((float)GetSystemMetrics(SM_CYSCREEN));
@@ -133,12 +141,6 @@ void WindowWin32::SetInnerSize(const math::Dimension2<ScalarDistanceF>& size)
 	SetSize(Pixel(realWidth), Pixel(realHeight));
 }
 
-void WindowWin32::SetDirtyRect()
-{
-	UpdateFinalRect();
-	UpdateInnerRect();
-}
-
 math::RectF WindowWin32::GetParentInnerRect() const
 {
 	return math::RectF(0, 0,
@@ -146,7 +148,7 @@ math::RectF WindowWin32::GetParentInnerRect() const
 		(float)GetSystemMetrics(SM_CYSCREEN));
 }
 
-void WindowWin32::UpdateFinalRect() const
+bool WindowWin32::UpdateFinalRect()
 {
 	auto oldSize = m_FinalRect.GetSize();
 	auto oldPos = m_FinalRect.Min();
@@ -167,13 +169,20 @@ void WindowWin32::UpdateFinalRect() const
 
 	auto newSize = m_FinalRect.GetSize();
 	auto newPos = m_FinalRect.Min();
-	if(oldSize != newSize)
+	bool change = false;
+	if(oldSize != newSize) {
+		change = true;
 		onResize.Broadcast(const_cast<WindowWin32*>(this), newSize);
-	if(oldPos != newPos)
+	}
+	if(oldPos != newPos) {
+		change = true;
 		onMove.Broadcast(const_cast<WindowWin32*>(this), newPos);
+	}
+
+	return change;
 }
 
-void WindowWin32::UpdateInnerRect() const
+bool WindowWin32::UpdateInnerRect()
 {
 	RECT r;
 	GetClientRect(m_Window, &r);
@@ -181,6 +190,8 @@ void WindowWin32::UpdateInnerRect() const
 	m_InnerRect.top = (float)r.top;
 	m_InnerRect.right = (float)r.right;
 	m_InnerRect.bottom = (float)r.bottom;
+
+	return true;
 }
 
 bool WindowWin32::Maximize()

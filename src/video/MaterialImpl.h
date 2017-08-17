@@ -97,11 +97,7 @@ private:
 			return *this;
 		}
 
-		void Destroy()
-		{
-			puffer.SetType(nullptr);
-			renderer = nullptr;
-		}
+		void Destroy();
 
 		void Set(MaterialRenderer* r)
 		{

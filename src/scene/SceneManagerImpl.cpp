@@ -89,6 +89,13 @@ StrongRef<Node> SceneManagerImpl::AddMesh(video::Mesh* mesh)
 	return AddNode(CreateMesh(mesh));
 }
 
+StrongRef<Node> SceneManagerImpl::AddSkyBox(const video::Colorf& color)
+{
+	auto box = CreateSkyBox();
+	box->GetMaterial(0)->SetDiffuse(color);
+	return AddNode(box);
+}
+
 StrongRef<Node> SceneManagerImpl::AddSkyBox(video::CubeTexture* skyTexture)
 {
 	return AddNode(CreateSkyBox(skyTexture));
@@ -222,8 +229,10 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 
 	// Collect "real" camera nodes
 	auto camList = m_CameraList;
-	if(camList.Size() == 0)
+	if(camList.Size() == 0) {
+		log::Warning("No camera in scenegraph.");
 		return false;
+	}
 
 	auto newEnd = core::RemoveIf(camList,
 		[](const CameraEntry& e) -> bool {

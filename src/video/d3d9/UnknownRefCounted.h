@@ -30,8 +30,9 @@ public:
 
 	~UnknownRefCounted()
 	{
+		ULONG released=0;
 		if(m_Pointer)
-			m_Pointer->Release();
+			released = m_Pointer->Release();
 	}
 
 	UnknownRefCounted& operator=(T* ptr)
@@ -45,12 +46,12 @@ public:
 
 	UnknownRefCounted& operator=(const UnknownRefCounted& other)
 	{
+		if(other.m_Pointer)
+			other.m_Pointer->AddRef();
 		if(m_Pointer)
 			m_Pointer->Release();
-		m_Pointer = other.m_Pointer;
-		if(m_Pointer)
-			m_Pointer->AddRef();
 
+		m_Pointer = other.m_Pointer;
 		return *this;
 	}
 

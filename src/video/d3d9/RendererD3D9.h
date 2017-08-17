@@ -115,6 +115,8 @@ private:
 	// The current state of rendersettings, for optimization purposes
 	MaterialRenderer* m_MaterialRenderer;
 	VertexFormat m_VertexFormat;
+	bool m_ChangedShaderFixed = false;
+	bool m_ChangedLighting=false;
 	bool m_UseShader=false;
 	float m_PrePolyOffset=0.0f;
 	ELighting m_PrevLighting = ELighting::Disabled;

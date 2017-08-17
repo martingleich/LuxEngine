@@ -93,7 +93,7 @@ public:
 		isTransparent(false),
 		fogEnabled(true),
 		zWriteEnabled(true),
-		normalizeNormals(true),
+		normalizeNormals(false),
 		gouraudShading(true),
 		backfaceCulling(true),
 		frontfaceCulling(false),

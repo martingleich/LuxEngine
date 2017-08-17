@@ -1,6 +1,7 @@
 #ifndef INCLUDED_GUI_SCALAR_DISTANCE_H
 #define INCLUDED_GUI_SCALAR_DISTANCE_H
 #include "core/LuxBase.h"
+#include "math/Dimension2.h"
 
 namespace lux
 {
@@ -103,6 +104,8 @@ inline ScalarDistance<T> operator*(T x, ScalarDistance<T>& sd)
 }
 
 using ScalarDistanceF = ScalarDistance<float>;
+using ScalarVectorF = math::Vector2<ScalarDistanceF>;
+using ScalarDimensionF = math::Dimension2<ScalarDistanceF>;
 
 template <typename T>
 inline ScalarDistanceF Pixel(T value)
@@ -110,10 +113,18 @@ inline ScalarDistanceF Pixel(T value)
 	return ScalarDistanceF((float)value, ScalarDistanceF::Pixel);
 }
 
-inline math::Dimension2<ScalarDistanceF> Pixel(const math::Dimension2F& f)
+template <typename T>
+inline ScalarVectorF PixelVector(T x, T y)
 {
-	return math::Dimension2<ScalarDistanceF>(Pixel(f.width), Pixel(f.height));
+	return ScalarVectorF(Pixel(x), Pixel(y));
 }
+
+template <typename T>
+inline ScalarDimensionF PixelDimension(T x, T y)
+{
+	return ScalarDimensionF(Pixel(x), Pixel(y));
+}
+
 inline ScalarDistanceF Fraction(float value)
 {
 	return ScalarDistanceF(value, ScalarDistanceF::Fraction);

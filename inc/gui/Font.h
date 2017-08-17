@@ -122,7 +122,6 @@ public:
 		EAlign align = EAlign::BottomLeft,
 		video::Color color = video::Color::Black,
 		const math::RectF* clip = nullptr) = 0;
-
 	//! Get the width of some text
 	/**
 	\param text The width of this text is calculated

@@ -125,13 +125,23 @@ void FontImpl::SetBaseLine(float base)
 
 void FontImpl::Draw(const String& text, const math::Vector2F& position, EAlign align, video::Color color, const math::RectF* clip)
 {
-	LUX_UNUSED(clip);
 	if(text.IsEmpty())
 		return;
 
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
 	renderer->SetMaterial(m_Material);
 	renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
+
+	video::ScissorRectToken tok;
+	if(clip) {
+		math::RectU scissorRect;
+		scissorRect.left = (u32)clip->left;
+		scissorRect.right = (u32)ceil(clip->right);
+		scissorRect.top = (u32)clip->top;
+		scissorRect.bottom = (u32)ceil(clip->bottom);
+		scissorRect.FitInto(renderer->GetScissorRect());
+		renderer->SetScissorRect(scissorRect, &tok);
+	}
 
 	const float italic = 0.0f * m_Scale;
 	const float charHeight = m_CharHeight * m_Scale;
@@ -202,7 +212,9 @@ void FontImpl::Draw(const String& text, const math::Vector2F& position, EAlign a
 		vertices[vertexCursor + 5].texture.x = info.left;
 		vertices[vertexCursor + 5].texture.y = info.bottom;
 
-		vertexCursor += 6;
+		// Precheck clipping, width a little bit of extra space to be shure
+		if(!clip || vertices[vertexCursor+1].position.x <= clip->right+1 && vertices[vertexCursor+5].position.x >= clip->left-1)
+			vertexCursor += 6;
 
 		cursor.x += CharWidth + info.C * m_Scale;
 
@@ -300,7 +312,7 @@ void FontImpl::GetTextCarets(const String& text, core::Array<float>& carets, siz
 	float width = 0.0f;
 	size_t counter = 0;
 	auto it = text.First();
-	while(counter < charCount && it != text.Last()) {
+	while(counter < charCount && it != text.End()) {
 		++counter;
 		carets.PushBack(width*m_Scale);
 		const u32 c = *it;
@@ -314,6 +326,7 @@ void FontImpl::GetTextCarets(const String& text, core::Array<float>& carets, siz
 			width += charSpace*m_Scale;
 
 		++counter;
+		++it;
 	}
 
 	carets.PushBack(width);
