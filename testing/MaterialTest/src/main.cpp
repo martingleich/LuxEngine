@@ -98,8 +98,7 @@ public:
 		node = Context.Smgr->AddSkyBox();
 		auto skyBox = node->GetComponent<scene::SkyBox>();
 		skyBox->UseCubeTexture(false);
-		//skyBox->SetSkyTexture(m_CheckerTexture);
-		skyBox->GetMaterial(0)->SetDiffuse(video::Color::White);
+		skyBox->SetSkyTexture(m_CheckerTexture);
 	}
 
 	void Run()
@@ -136,7 +135,7 @@ void MaterialTest::Render()
 		m_Font->Draw("Blinking Text",
 			math::Vector2F(0.0f, 50.0f),
 			gui::Font::EAlign::BottomLeft,
-			video::Color::Black);
+			video::Color::Green);
 	}
 }
 
@@ -166,7 +165,7 @@ void MaterialTest::Load()
 	m_CameraNode->AddComponent(Context.Smgr->CreateCameraControl());
 
 	m_Font = Context.GUI->GetFontCreator()->CreateFont(
-		gui::FontDescription("Times New Roman", 20),
+		gui::FontDescription("Comic Sans MS", 40, gui::EFontWeight::Bolt),
 		Context.GUI->GetFontCreator()->GetDefaultCharset("german"));
 
 	auto materials = GenMaterialList();

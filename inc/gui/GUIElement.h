@@ -5,6 +5,7 @@
 #include "core/lxArray.h"
 #include "events/lxSignal.h"
 
+#include "gui/GUISkin.h"
 #include "gui/GUIScalarDistance.h"
 
 namespace lux
@@ -116,6 +117,7 @@ public:
 	virtual void Paint(Renderer* renderer) { LUX_UNUSED(renderer); }
 
 	LUX_API virtual Skin* GetSkin() const;
+	LUX_API EGUIState GetState() const;
 
 protected:
 	LUX_API virtual void OnAdd(Element* p);

@@ -17,7 +17,7 @@ namespace gui
 class Window;
 class GUIEnvironment;
 }
-
+class LuxSystemInfo;
 
 //! The main class for the engine
 class LuxDevice : public ReferenceCounted
@@ -87,6 +87,8 @@ public:
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;
 
 	virtual StrongRef<gui::Window> GetWindow() const = 0;
+
+	virtual StrongRef<LuxSystemInfo> GetSystemInfo() const = 0;
 };
 
 //! Create a new lux device.

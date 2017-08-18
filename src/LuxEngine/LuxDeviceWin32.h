@@ -11,6 +11,7 @@
 
 #include "StrippedWindows.h"
 #include "gui/WindowWin32.h"
+#include "LuxSystemInfoWin32.h"
 
 namespace lux
 {
@@ -58,6 +59,11 @@ public:
 		return m_GUIEnv;
 	}
 
+	StrongRef<LuxSystemInfo> GetSystemInfo() const
+	{
+		return m_SystemInfo;
+	}
+
 	bool RunMessageQueue();
 	bool HandleMessages(
 		HWND wnd,
@@ -75,6 +81,8 @@ private:
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 	StrongRef<input::RawInputReceiver> m_RawInputReceiver;
 #endif
+
+	StrongRef<LuxSystemInfo> m_SystemInfo;
 };
 
 } // namespace lux

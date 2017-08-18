@@ -329,6 +329,18 @@ Skin* Element::GetSkin() const
 		return nullptr;
 }
 
+EGUIState Element::GetState() const
+{
+	if(IsEnabled()) {
+		if(IsFocused())
+			return EGUIState::Highlighted;
+		else
+			return EGUIState::Enabled;
+	}
+
+	return EGUIState::Disabled;
+}
+
 void Element::OnAdd(Element* p)
 {
 	m_Window = p->GetWindow();

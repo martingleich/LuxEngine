@@ -167,6 +167,7 @@ namespace input
 #include "resources/ResourceLoader.h"
 #include "resources/ResourceSystem.h"
 
+#include "LuxEngine/LuxSystemInfo.h"
 #include "LuxEngine/LuxDevice.h"
 
 #endif // !INCLUDED_LUX_H

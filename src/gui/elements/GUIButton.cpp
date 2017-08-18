@@ -24,13 +24,13 @@ void Button::Paint(Renderer* r)
 		return;
 	video::Color textColor;
 	math::Vector2F textOffset;
-	EGUIState state = IsEnabled() ? EGUIState::Enabled : EGUIState::Disabled;
+
 	if(m_IsPressed) {
-		skin->DrawPrimitive(r, state, EGUIPrimitive::ButtonPressed, this->GetFinalRect(), m_Color);
+		skin->DrawPrimitive(r, this->GetState(), EGUIPrimitive::ButtonPressed, this->GetFinalRect(), m_Color);
 		textColor = video::Color::Black;
 		textOffset = skin->buttonPressedTextOffset;
 	} else {
-		skin->DrawPrimitive(r, state, EGUIPrimitive::Button, this->GetFinalRect(), m_Color);
+		skin->DrawPrimitive(r, this->GetState(), EGUIPrimitive::Button, this->GetFinalRect(), m_Color);
 		textColor = video::Color::Black;
 	}
 	r->DrawText(skin->defaultFont, m_Text, GetFinalRect().GetCenter() + textOffset, gui::Font::EAlign::Centered, textColor, nullptr);

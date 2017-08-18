@@ -33,9 +33,8 @@ void StaticText::Paint(Renderer* r)
 		return;
 
 	auto skin = GetSkin();
-	EGUIState state = IsEnabled() ? EGUIState::Enabled : EGUIState::Disabled;
 	if(m_DrawBackground)
-		skin->DrawPrimitive(r, state, EGUIPrimitive::StaticText, GetFinalRect(), m_Background);
+		skin->DrawPrimitive(r, GetState(), EGUIPrimitive::StaticText, GetFinalRect(), m_Background);
 
 	EnsureBrokenText();
 

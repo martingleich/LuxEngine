@@ -107,6 +107,8 @@ LuxDeviceWin32::LuxDeviceWin32()
 	if(!log::FilePrinter->IsInit())
 		log::FilePrinter->Init();
 
+	m_SystemInfo = LUX_NEW(LuxSystemInfoWin32);
+
 	// Create the singleton classes
 	io::FileSystem::Initialize();
 	core::ReferableFactory::Initialize();
