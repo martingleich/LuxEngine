@@ -25,7 +25,7 @@ public:
 
 	void BeginScene(
 		bool clearColor, bool clearZBuffer, bool clearStencil,
-		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil=0);
+		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil = 0);
 
 	void ClearStencil(u32 value = 0);
 
@@ -35,7 +35,7 @@ public:
 	void SetRenderTarget(const RenderTarget& target);
 	const RenderTarget& GetRenderTarget();
 
-	void SetScissorRect(const math::RectU& rect, ScissorRectToken* token=nullptr);
+	void SetScissorRect(const math::RectU& rect, ScissorRectToken* token = nullptr);
 	const math::RectU& GetScissorRect() const;
 
 	///////////////////////////////////////////////////////////////////////////
@@ -86,6 +86,9 @@ public:
 	void DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D = true);
 
 	///////////////////////////////////////////////////////////////////////////
+	void ReleaseUnmanaged();
+	void Reset();
+
 private:
 	void SetupRendering(size_t passId);
 
@@ -102,7 +105,7 @@ private:
 	void SetVertexFormat(const VertexFormat& format);
 
 private:
-	IDirect3DDevice9* m_Device;
+	UnknownRefCounted<IDirect3DDevice9> m_Device;
 	DeviceStateD3D9 m_DeviceState;
 
 	RendertargetD3D9 m_CurrentRendertarget;
@@ -116,9 +119,9 @@ private:
 	MaterialRenderer* m_MaterialRenderer;
 	VertexFormat m_VertexFormat;
 	bool m_ChangedShaderFixed = false;
-	bool m_ChangedLighting=false;
-	bool m_UseShader=false;
-	float m_PrePolyOffset=0.0f;
+	bool m_ChangedLighting = false;
+	bool m_UseShader = false;
+	float m_PrePolyOffset = 0.0f;
 	ELighting m_PrevLighting = ELighting::Disabled;
 };
 

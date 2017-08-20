@@ -38,12 +38,16 @@ public:
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
 
+	void ReleaseUnmanaged();
+	void RestoreUnmanaged();
+
 protected:
-	IDirect3DDevice9* m_Device;
+	UnknownRefCounted<IDirect3DDevice9> m_Device;
 	UnknownRefCounted<IDirect3DTexture9> m_Texture;
 	D3DSURFACE_DESC m_Desc;
 	ColorFormat m_Format;
 	Filter m_Filtering;
+	UINT m_Levels;
 
 	math::Dimension2U m_Dimension;
 

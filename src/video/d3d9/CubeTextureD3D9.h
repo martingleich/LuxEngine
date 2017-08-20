@@ -32,7 +32,11 @@ public:
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
 
+	void ReleaseUnmanaged();
+	void RestoreUnmanaged();
+
 private:
+	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
 	UnknownRefCounted<IDirect3DCubeTexture9> m_Texture;
 
 	u32 m_LockedLevel;
@@ -44,8 +48,6 @@ private:
 	Filter m_Filtering;
 
 	math::Dimension2U m_Dimension;
-
-	IDirect3DDevice9* m_D3DDevice;
 };
 
 }

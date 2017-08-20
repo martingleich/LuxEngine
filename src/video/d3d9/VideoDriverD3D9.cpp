@@ -7,7 +7,6 @@
 #include "video/d3d9/TextureD3D9.h"
 #include "video/d3d9/CubeTextureD3D9.h"
 #include "video/d3d9/ShaderD3D9.h"
-#include "video/d3d9/HardwareBufferManagerD3D9.h"
 
 #include "video/mesh/Geometry.h"
 #include "video/IndexBuffer.h"
@@ -38,23 +37,69 @@ VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(UnknownRefCounted<IDirect3DS
 //////////////////////////////////////////////////////////////////////
 
 static IDirect3DDevice9* g_D3DDevice9 = nullptr;
+static VideoDriverD3D9* g_Driver = nullptr;
 
 Referable* CreateTexture(const void* origin)
 {
-	return LUX_NEW(TextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
+	auto out = LUX_NEW(TextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
+	g_Driver->AddTextureToList(out);
+	return out;
 }
 
 Referable* CreateCubeTexture(const void* origin)
 {
-	return LUX_NEW(CubeTextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
+	auto out = LUX_NEW(CubeTextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
+	g_Driver->AddTextureToList(out);
+	return out;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window) :
-	VideoDriverNull(config, window)
+	VideoDriverNull(config, window),
+	m_ReleasedUnmanagedData(false)
 {
-	HWND windowHandle = (HWND)window->GetDeviceWindow();
+	CreateDevice(config, window);
+
+	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
+	m_Renderer = new RendererD3D9(this);
+
+	g_D3DDevice9 = m_D3DDevice;
+	g_Driver = this;
+
+	AuxiliaryTextureManagerD3D9::Initialize(m_D3DDevice);
+
+	auto refFactory = core::ReferableFactory::Instance();
+	refFactory->RegisterType(core::ResourceType::Texture, &lux::video::CreateTexture);
+	refFactory->RegisterType(core::ResourceType::CubeTexture, &lux::video::CreateCubeTexture);
+}
+
+void VideoDriverD3D9::CleanUp()
+{
+	m_Renderer->CleanUp();
+}
+
+VideoDriverD3D9::~VideoDriverD3D9()
+{
+	m_D3DDevice->SetVertexShader(nullptr);
+	m_D3DDevice->SetPixelShader(nullptr);
+
+	AuxiliaryTextureManagerD3D9::Destroy();
+	
+	// Destroy buffer manager before the device is destroyed
+	m_BufferManager.Reset();
+
+	m_VertexFormats.Clear();
+	m_D3DDevice->SetVertexDeclaration(nullptr);
+
+	m_DepthBuffers.Clear();
+}
+
+void VideoDriverD3D9::CreateDevice(const DriverConfig& config, gui::Window* window)
+{
+	m_Window = window;
+
+	HWND windowHandle = (HWND)m_Window->GetDeviceWindow();
 	m_Adapter = config.adapter.As<AdapterD3D9>();
 	if(!m_Adapter)
 		throw core::InvalidArgumentException("config", "Contains invalid adapter");
@@ -63,21 +108,7 @@ VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window
 
 	// Fill presentation params
 	m_AdapterFormat = GetD3DFormat(config.display.format);
-	D3DPRESENT_PARAMETERS presentParams = {0};
-	presentParams.BackBufferWidth = config.display.width;
-	presentParams.BackBufferHeight = config.display.height;
-	presentParams.BackBufferFormat = GetD3DFormat(config.backBufferFormat);
-	presentParams.FullScreen_RefreshRateInHz = config.windowed ? 0 : config.display.refreshRate;
-	presentParams.BackBufferCount = 1;
-	presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	presentParams.hDeviceWindow = windowHandle;
-	presentParams.Windowed = m_Config.windowed;
-	presentParams.EnableAutoDepthStencil = TRUE;
-	presentParams.Flags = 0;
-	presentParams.PresentationInterval = m_Config.vSync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-	presentParams.AutoDepthStencilFormat = GetD3DFormat(config.zsFormat);
-	presentParams.MultiSampleType = static_cast<D3DMULTISAMPLE_TYPE>(m_Config.multiSamples);
-	presentParams.MultiSampleQuality = m_Config.multiQuality;
+	D3DPRESENT_PARAMETERS presentParams = GeneratePresentParams(config);
 
 	UINT adapterId = m_Adapter->GetAdapter();
 	HRESULT hr;
@@ -116,33 +147,86 @@ VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window
 
 	// Init rendertarget data
 	InitRendertargetData();
-
-	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
-	m_Renderer = new RendererD3D9(this);
-
-	g_D3DDevice9 = m_D3DDevice;
-
-	AuxiliaryTextureManagerD3D9::Initialize(m_D3DDevice);
-
-	auto refFactory = core::ReferableFactory::Instance();
-	refFactory->RegisterType(core::ResourceType::Texture, &lux::video::CreateTexture);
-	refFactory->RegisterType(core::ResourceType::CubeTexture, &lux::video::CreateCubeTexture);
 }
 
-void VideoDriverD3D9::CleanUp()
+D3DPRESENT_PARAMETERS VideoDriverD3D9::GeneratePresentParams(const DriverConfig& config)
 {
-	m_Renderer->CleanUp();
+	D3DPRESENT_PARAMETERS presentParams = {0};
+	presentParams.BackBufferWidth = config.display.width;
+	presentParams.BackBufferHeight = config.display.height;
+	presentParams.BackBufferFormat = GetD3DFormat(config.backBufferFormat);
+	presentParams.FullScreen_RefreshRateInHz = config.windowed ? 0 : config.display.refreshRate;
+	presentParams.BackBufferCount = 1;
+	presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	presentParams.hDeviceWindow = (HWND)m_Window->GetDeviceWindow();
+	presentParams.Windowed = m_Config.windowed;
+	presentParams.EnableAutoDepthStencil = TRUE;
+	presentParams.Flags = 0;
+	presentParams.PresentationInterval = m_Config.vSync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	presentParams.AutoDepthStencilFormat = GetD3DFormat(config.zsFormat);
+	presentParams.MultiSampleType = static_cast<D3DMULTISAMPLE_TYPE>(m_Config.multiSamples);
+	presentParams.MultiSampleQuality = m_Config.multiQuality;
+
+	return presentParams;
 }
 
-VideoDriverD3D9::~VideoDriverD3D9()
+bool VideoDriverD3D9::Reset(const DriverConfig& config)
 {
-	AuxiliaryTextureManagerD3D9::Destroy();
+	auto newAdapter = config.adapter.As<AdapterD3D9>();
+	if(newAdapter != nullptr && newAdapter->GetAdapter() != m_Adapter->GetAdapter())
+		throw core::RuntimeException("Driverreset must use same adapter.");
 
-	// Destroy buffer manager before the device is destroyed
-	m_BufferManager.Reset();
+	// Release all data
+	if(!m_ReleasedUnmanagedData) {
+		m_Renderer->ReleaseUnmanaged();
 
-	m_VertexFormats.Clear();
-	m_DepthBuffers.Clear();
+		m_BackBufferTarget = video::RendertargetD3D9(nullptr);
+		m_DepthBuffers.Clear();
+
+		m_BufferManager->ReleaseHardwareBuffers();
+
+		for(auto& tex : m_Textures) {
+			auto normalTexD3D = tex.As<TextureD3D9>();
+			if(normalTexD3D)
+				normalTexD3D->ReleaseUnmanaged();
+			else {
+				auto cubeTexD3D = tex.As<CubeTextureD3D9>();
+				if(cubeTexD3D)
+					cubeTexD3D->ReleaseUnmanaged();
+			}
+		}
+
+		m_ReleasedUnmanagedData = true;
+	}
+
+	// Reset device and save new configuration
+	auto presentParams = GeneratePresentParams(config);
+	HRESULT hr = m_D3DDevice->Reset(&presentParams);
+	if(FAILED(hr))
+		return false;
+
+	m_HasStencilBuffer = (config.zsFormat.sBits != 0);
+	m_Config = config;
+	m_PresentParams = presentParams;
+
+	// Restore data
+	InitRendertargetData();
+	m_Renderer->Reset();
+	m_BufferManager->RestoreHardwareBuffers();
+
+	for(auto& tex : m_Textures) {
+		auto normalTexD3D = tex.As<TextureD3D9>();
+		if(normalTexD3D)
+			normalTexD3D->RestoreUnmanaged();
+		else {
+			auto cubeTexD3D = tex.As<CubeTextureD3D9>();
+			if(cubeTexD3D)
+				cubeTexD3D->RestoreUnmanaged();
+		}
+	}
+
+	m_ReleasedUnmanagedData = false;
+	return true;
 }
 
 void VideoDriverD3D9::FillCaps()
@@ -311,6 +395,8 @@ StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2U& size,
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, mipCount, false, isDynamic);
+	AddTextureToList(out);
+
 	return out;
 }
 
@@ -318,8 +404,8 @@ StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimens
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, 1, true, false);
+	AddTextureToList(out);
 
-	m_RenderTargets.PushBack(out);
 	return out;
 }
 
@@ -327,7 +413,23 @@ StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat 
 {
 	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, isDynamic);
+	AddTextureToList(out);
+
 	return out;
+}
+
+void VideoDriverD3D9::AddTextureToList(BaseTexture* tex)
+{
+	bool found = false;
+	for(auto& t : m_Textures) {
+		if(!t) {
+			t = tex;
+			found = true;
+			break;
+		}
+	}
+	if(!found)
+		m_Textures.PushBack(tex);
 }
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
@@ -359,19 +461,28 @@ const RendertargetD3D9& VideoDriverD3D9::GetBackbufferTarget()
 	return m_BackBufferTarget;
 }
 
+EDeviceState VideoDriverD3D9::GetDeviceState() const
+{
+	HRESULT hr = m_D3DDevice->TestCooperativeLevel();
+	if(SUCCEEDED(hr))
+		return EDeviceState::OK;
+	if(hr == D3DERR_DEVICELOST)
+		return EDeviceState::DeviceLost;
+	if(hr == D3DERR_DEVICENOTRESET)
+		return EDeviceState::NotReset;
+	return EDeviceState::Error;
+}
+
 UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::GetD3D9VertexDeclaration(const VertexFormat& format)
 {
-	VertexFormat_d3d9 vf;
 	auto it = m_VertexFormats.Find(format);
 	if(it == m_VertexFormats.End()) {
 		auto d3d = CreateVertexFormat(format);
-		vf = VertexFormat_d3d9(d3d);
-		m_VertexFormats[format] = vf;
+		m_VertexFormats[format] = d3d;
+		return d3d;
 	} else {
-		vf = *it;
+		return *it;
 	}
-
-	return vf.GetD3D();
 }
 
 UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::CreateVertexFormat(const VertexFormat& format)

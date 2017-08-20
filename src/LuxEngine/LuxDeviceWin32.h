@@ -13,6 +13,12 @@
 #include "gui/WindowWin32.h"
 #include "LuxSystemInfoWin32.h"
 
+#ifdef LUX_COMPILE_WITH_D3D9
+#include "video/d3d9/VideoDriverD3D9.h"
+#include "video/d3d9/RendererD3D9.h"
+#include "video/d3d9/AdapterInformationD3D9.h"
+#endif
+
 namespace lux
 {
 
@@ -42,7 +48,12 @@ public:
 	void BuildGUIEnvironment();
 	void BuildAll(const video::DriverConfig& config);
 
-	bool Run(float& fNumSecsPassed);
+	bool WaitForWindowChange();
+	bool Run();
+
+	void RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop);
+
+	void Sleep(u32 millis);
 
 	StrongRef<gui::Window> GetWindow() const
 	{
@@ -83,6 +94,10 @@ private:
 #endif
 
 	StrongRef<LuxSystemInfo> m_SystemInfo;
+
+#ifdef LUX_COMPILE_WITH_D3D9
+	UnknownRefCounted<IDirect3D9> m_D3D9;
+#endif
 };
 
 } // namespace lux

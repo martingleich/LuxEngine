@@ -97,11 +97,6 @@ protected:
 			break;
 		}
 
-		if(m_IsActivated && !m_IsMinimized)
-			m_IsEnabled = true;
-		else
-			m_IsEnabled = false;
-
 		onStateChange.Broadcast(this, newState);
 	}
 

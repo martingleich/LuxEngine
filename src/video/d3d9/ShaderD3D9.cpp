@@ -100,6 +100,10 @@ ShaderD3D9::ShaderD3D9(VideoDriver* driver) :
 {
 }
 
+ShaderD3D9::~ShaderD3D9()
+{
+}
+
 void ShaderD3D9::Init(
 	const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 	const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
@@ -314,7 +318,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 {
 	UnknownRefCounted<ID3DXBuffer> output;
 	UnknownRefCounted<ID3DXBuffer> errors;
-	UnknownRefCounted<IDirect3DVertexShader9> shader = nullptr;
+	UnknownRefCounted<IDirect3DVertexShader9> shader;
 
 	HRESULT hr = D3DXCompileShader(code, (UINT)length,
 		NULL, &g_luxD3DXShaderIncludes, entryPoint,
@@ -355,7 +359,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 {
 	UnknownRefCounted<ID3DXBuffer> output;
 	UnknownRefCounted<ID3DXBuffer> errors;
-	UnknownRefCounted<IDirect3DPixelShader9> shader = nullptr;
+	UnknownRefCounted<IDirect3DPixelShader9> shader;
 
 	HRESULT hr;
 	hr = D3DXCompileShader(code, (UINT)length,

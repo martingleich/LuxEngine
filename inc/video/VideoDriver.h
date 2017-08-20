@@ -33,6 +33,14 @@ class Geometry;
 class Renderer;
 class DriverConfig;
 
+enum class EDeviceState
+{
+	OK,
+	DeviceLost,
+	NotReset,
+	Error,
+};
+
 class VideoDriver : public ReferenceCounted
 {
 public:
@@ -46,6 +54,7 @@ public:
 	//! Destroys the global driver
 	LUX_API static void Destroy();
 
+	virtual bool Reset(const DriverConfig& config) = 0;
 	//////////////////////////////////////////////////////////////////////////////
 
 	virtual StrongRef<Geometry> CreateEmptyGeometry(
@@ -97,6 +106,8 @@ public:
 
 	virtual StrongRef<BufferManager> GetBufferManager() const = 0;
 	virtual StrongRef<Renderer> GetRenderer() const = 0;
+
+	virtual EDeviceState GetDeviceState() const = 0;
 
 	virtual u32 GetDeviceCapability(EDriverCaps capability) const = 0;
 	virtual EDriverType GetVideoDriverType() const = 0;

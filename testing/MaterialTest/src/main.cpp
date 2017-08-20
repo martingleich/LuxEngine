@@ -4,7 +4,7 @@ using namespace lux;
 
 AppContext Context;
 
-class MaterialTest
+class MaterialTest : public input::EventHandler
 {
 private:
 	StrongRef<LuxDevice> m_Device;
@@ -32,36 +32,11 @@ public:
 		Context.Input->GetEventSignal().Connect(this, &MaterialTest::OnEvent);
 	}
 
-	void Move(float secsPassed)
-	{
-		m_Time += secsPassed;
-		*Context.Renderer->GetParam("time") = m_Time;
-	}
-
-	void Render();
-
-	void DoFrame(float secsPassed)
-	{
-		if(Context.Window->IsEnabled()) {
-			Context.Smgr->AnimateAll(secsPassed);
-			Move(secsPassed);
-
-			if(Context.Smgr->DrawAll(true, false)) {
-				Render();
-				Context.Renderer->EndScene();
-				Context.Renderer->Present();
-			}
-
-			if(Context.Input->GetKeyboard()->GetButton(input::KEY_ESCAPE)->state)
-				Context.Device->GetWindow()->Close();
-		}
-	}
+	void Render(float secsPassed);
 
 	void LoadBase()
 	{
 		scene::Node* node;
-
-		Context.Cursor->Disable();
 
 		m_Camera = Context.Smgr->CreateCamera();
 		m_CameraNode = Context.Smgr->AddNode(m_Camera);
@@ -84,7 +59,7 @@ public:
 				for(size_t c = 0; c < canvas.GetWidth(); ++c) {
 					black = ((r + c) % 2 == 0);
 					if(rand.GetBool(0.1f)) {
-						canvas.SetPixel(c, r, video::HSVToColorf(rand.GetFloat(0,1), 1.0f, 1.0f).ToHex());
+						canvas.SetPixel(c, r, video::HSVToColorf(rand.GetFloat(0, 1), 1.0f, 1.0f).ToHex());
 					} else {
 						if(black)
 							canvas.SetPixel(c, r, video::Color::Black);
@@ -105,18 +80,47 @@ public:
 	{
 		Load();
 
-		float secsPassed;
-		while(Context.Device->Run(secsPassed))
-			DoFrame(secsPassed);
+		LuxDevice::SimpleFrameLoop floop;
+		floop.userData = this;
+		floop.postRenderProc = [](float secsPassed, void* user) {
+			reinterpret_cast<MaterialTest*>(user)->Render(secsPassed);
+		};
+		Context.Device->RunSimpleFrameLoop(floop);
 	}
 
 	void Load();
 
-	void OnEvent(const input::Event& e);
+	void OnEvent(const input::Event& e)
+	{
+		if(m_RButton || e.source == input::EEventSource::Keyboard)
+			scene::CameraControl::DefaultEventToCameraAction(e);
+		EventHandler::OnEvent(e);
+	}
+
+	void OnKey(bool isDown, input::EKeyCode key, const input::Event& event)
+	{
+		if(isDown) {
+			switch(key) {
+			case input::EKeyCode::KEY_ESCAPE:
+				Context.Window->Close();
+				break;
+			}
+		}
+	}
+	void OnRButton(bool isDown, const input::Event& event)
+	{
+		m_RButton = isDown;
+		if(isDown)
+			Context.Cursor->Disable();
+		else
+			Context.Cursor->Enable();
+	}
 
 	core::Array<StrongRef<video::Material>> GenMaterialList();
 
 private:
+	bool m_RButton = false;
+
 	StrongRef<scene::Node> m_CameraNode;
 	StrongRef<scene::Camera> m_Camera;
 	StrongRef<scene::Light> m_Light;
@@ -129,8 +133,9 @@ private:
 	float m_Time = 0.0f;
 };
 
-void MaterialTest::Render()
+void MaterialTest::Render(float secsPassed)
 {
+	m_Time += secsPassed;
 	if(fmodf(m_Time, 2.0f) < 1.0f) {
 		m_Font->Draw("Blinking Text",
 			math::Vector2F(0.0f, 50.0f),
@@ -198,11 +203,6 @@ void MaterialTest::Load()
 	}
 }
 
-void MaterialTest::OnEvent(const input::Event& e)
-{
-	scene::CameraControl::DefaultEventToCameraAction(e);
-}
-
 int main(int arg, char **argv)
 {
 	{
@@ -213,4 +213,3 @@ int main(int arg, char **argv)
 	getchar();
 	return 0;
 }
-

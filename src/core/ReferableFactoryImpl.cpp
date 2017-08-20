@@ -42,7 +42,7 @@ void ReferableFactoryImpl::RegisterType(Name type, CreationFunc create)
 
 	m_Types.Set(type, ReferableType(create));
 
-	log::Debug("Registerd type ~s.", type);
+	log::Debug("Registered type ~s.", type);
 }
 
 void ReferableFactoryImpl::UnregisterType(Name type)

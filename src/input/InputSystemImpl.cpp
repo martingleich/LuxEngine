@@ -127,5 +127,27 @@ StrongRef<InputDevice> InputSystemImpl::GetKeyboard()
 	return m_KeyboardDevice;
 }
 
+StrongRef<InputDevice> InputSystemImpl::GetMouse()
+{
+	if(m_MouseDevice)
+		return m_MouseDevice;
+
+	InputDevice* firstNotConnected = nullptr;
+	for(auto it = m_GUIDMap.First(); it != m_GUIDMap.End(); ++it) {
+		if((*it)->GetType() == EEventSource::Mouse) {
+			firstNotConnected = *it;
+			if((*it)->IsConnected()) {
+				m_MouseDevice = it->GetWeak();
+				break;
+			}
+		}
+	}
+
+	if(!m_MouseDevice)
+		m_MouseDevice = firstNotConnected;
+
+	return m_MouseDevice;
 }
-}
+
+} // namespace input
+} // namespace lux

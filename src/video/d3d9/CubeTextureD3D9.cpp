@@ -11,8 +11,8 @@ namespace video
 
 CubeTextureD3D9::CubeTextureD3D9(IDirect3DDevice9* dev, const core::ResourceOrigin& origin) :
 	CubeTexture(origin),
-	m_LockedLevel(0xFFFFFFFF),
-	m_D3DDevice(dev)
+	m_D3DDevice(dev),
+	m_LockedLevel(0xFFFFFFFF)
 {
 }
 
@@ -109,12 +109,10 @@ void CubeTextureD3D9::Unlock()
 	if(m_TempSurface) {
 		m_TempSurface->UnlockRect();
 		if(m_Desc.Usage == 0) {
-			IDirect3DDevice9* device;
-			IDirect3DSurface9* surface;
-			m_Texture->GetDevice(&device);
-			m_Texture->GetCubeMapSurface(m_LockedFace, m_LockedLevel, &surface);
-
-			hr = device->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
+			UnknownRefCounted<IDirect3DSurface9> surface;
+			hr = m_Texture->GetCubeMapSurface(m_LockedFace, m_LockedLevel, surface.Access());
+			if(SUCCEEDED(hr))
+				hr = m_D3DDevice->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
 			if(FAILED(hr))
 				throw core::D3D9Exception(hr);
 		}
@@ -157,6 +155,25 @@ ColorFormat CubeTextureD3D9::GetColorFormat() const
 	return m_Format;
 }
 
+void CubeTextureD3D9::ReleaseUnmanaged()
+{
+	if(m_LockedLevel != 0xFFFFFFFF)
+		Unlock();
+	if(m_Desc.Pool == D3DPOOL_DEFAULT || m_Desc.Usage == D3DUSAGE_RENDERTARGET)
+		m_Texture = nullptr;
+}
+
+void CubeTextureD3D9::RestoreUnmanaged()
+{
+	if(m_Desc.Pool == D3DPOOL_DEFAULT) {
+		if(GetOrigin().IsAvailable())
+			GetOrigin().Load(this);
+		else
+			Init(m_Desc.Width, m_Format, (m_Desc.Usage & D3DUSAGE_DYNAMIC) != 0);
+	} else {
+		(void)0; // Is a managed texture
+	}
+}
 }
 }
 

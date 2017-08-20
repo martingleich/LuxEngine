@@ -2,6 +2,7 @@
 #define INCLUDED_VIDEO_DRIVER_NULL_H
 #include "video/VideoDriver.h"
 #include "video/DriverConfig.h"
+#include "gui/Window.h"
 
 namespace lux
 {
@@ -19,6 +20,7 @@ public:
 	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
 
 protected:
+	WeakRef<gui::Window> m_Window;
 	DriverConfig m_Config;
 	u32 m_DriverCaps[(u32)EDriverCaps::EDriverCaps_Count];
 };

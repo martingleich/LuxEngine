@@ -20,6 +20,7 @@ public:
 	inline EHardwareBufferType GetBufferType() const;
 	inline void Clear();
 	inline void ResetDirty();
+	inline void SetDirty(u32 begin, u32 end);
 	inline u32 GetChangeId() const;
 	inline void* Pointer(u32 n, u32 count);
 	inline const void* Pointer(u32 n, u32 count) const;
@@ -50,8 +51,8 @@ protected:
 
 	u32 m_Stride;
 
-	u32 m_BeginDirty;
-	u32 m_EndDirty;
+	u32 m_BeginDirty; // First dirty element
+	u32 m_EndDirty; // Last dirty element
 	u32 m_ChangeId;
 
 	EHardwareBufferMapping m_Mapping;
@@ -101,6 +102,12 @@ inline void HardwareBuffer::ResetDirty()
 {
 	m_BeginDirty = 0xFFFFFFFF;
 	m_EndDirty = 0;
+}
+
+inline void HardwareBuffer::SetDirty(u32 begin, u32 end)
+{
+	m_BeginDirty = math::Min(m_Size-1, begin);
+	m_EndDirty = math::Min(m_Size-1, end);
 }
 
 inline void* HardwareBuffer::Pointer(u32 n, u32 count)

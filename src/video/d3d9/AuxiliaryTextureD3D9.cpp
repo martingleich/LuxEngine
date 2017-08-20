@@ -45,26 +45,36 @@ UnknownRefCounted<IDirect3DSurface9> AuxiliaryTextureManagerD3D9::GetSurface(DWO
 
 	UnknownRefCounted<IDirect3DSurface9> surface;
 	hr = m_Device->CreateOffscreenPlainSurface(width, height, format, D3DPOOL_SYSTEMMEM, surface.Access(), nullptr);
-
 	if(FAILED(hr))
-		return nullptr;
-	if(m_Surfaces.Size() > MAX_TEXTURES) {
-		for(auto it = m_Surfaces.First(); it != m_Surfaces.End();) {
-			if(it->surface->Release() == 0) {
-				it = m_Surfaces.Erase(it);
-			} else {
-				it->surface->AddRef();
-				++it;
+		surface = nullptr;
+	else {
+		if(m_Surfaces.Size() > MAX_TEXTURES) {
+			for(auto it = m_Surfaces.First(); it != m_Surfaces.End();) {
+				if(it->surface->Release() == 0) {
+					it = m_Surfaces.Erase(it);
+				} else {
+					it->surface->AddRef();
+					++it;
+				}
 			}
 		}
-	}
 
-	m_Surfaces.PushBack(surface);
+		m_Surfaces.PushBack(surface);
+	}
 
 	return surface;
 }
 
+void AuxiliaryTextureManagerD3D9::ReleaseUnmanaged()
+{
+	m_Surfaces.Clear();
 }
+
+void AuxiliaryTextureManagerD3D9::RestoreUnmanaged()
+{
 }
+
+} // namespace video
+} // namespace lux
 
 #endif

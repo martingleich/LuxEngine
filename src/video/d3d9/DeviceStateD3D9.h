@@ -8,6 +8,7 @@
 #include "video/Shader.h"
 
 #include "StrippedD3D9.h"
+#include "UnknownRefCounted.h"
 
 namespace lux
 {
@@ -23,7 +24,7 @@ class StencilMode;
 class DeviceStateD3D9
 {
 public:
-	DeviceStateD3D9(IDirect3DDevice9* device);
+	DeviceStateD3D9(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
 	void SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting);
 	void EnablePass(const Pass& p);
@@ -65,6 +66,9 @@ public:
 		m_Shader = s;
 	}
 
+	void ReleaseUnmanaged();
+	void Reset();
+
 private:
 	static u32 GetFillMode(const Pass& p);
 	static u32 GetCullMode(const Pass& p);
@@ -74,11 +78,12 @@ private:
 	static u32 GetTextureArgument(ETextureArgument arg);
 
 private:
+	const D3DCAPS9* m_Caps;
 	D3DMATERIAL9 m_D3DMaterial;
 	video::Colorf m_Ambient;
 
-	IDirect3DDevice9* m_Device;
-	video::BaseTexture* m_RenderTargetTexture;
+	UnknownRefCounted<IDirect3DDevice9> m_Device;
+	WeakRef<video::BaseTexture> m_RenderTargetTexture;
 
 	size_t m_LightCount;
 	bool m_UseLighting;

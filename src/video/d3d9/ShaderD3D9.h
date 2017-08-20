@@ -21,6 +21,7 @@ class ShaderD3D9 : public Shader
 {
 public:
 	ShaderD3D9(VideoDriver* driver);
+	~ShaderD3D9();
 
 	void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,

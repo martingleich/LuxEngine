@@ -27,11 +27,6 @@
 
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
-#ifdef LUX_COMPILE_WITH_D3D9
-#include "video/d3d9/VideoDriverD3D9.h"
-#include "video/d3d9/RendererD3D9.h"
-#include "video/d3d9/AdapterInformationD3D9.h"
-#endif
 
 #include "input/InputSystem.h"
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
@@ -290,8 +285,17 @@ core::Array<video::EDriverType> LuxDeviceWin32::GetDriverTypes()
 StrongRef<video::AdapterList> LuxDeviceWin32::GetVideoAdapters(video::EDriverType driver)
 {
 #ifdef LUX_COMPILE_WITH_D3D9
-	if(driver == video::EDriverType::Direct3D9)
-		return LUX_NEW(video::AdapterListD3D9);
+	if(driver == video::EDriverType::Direct3D9) {
+		if(!m_D3D9) {
+			m_D3D9.TakeOwnership(Direct3DCreate9(D3D_SDK_VERSION));
+			if(!m_D3D9)
+				throw core::RuntimeException("Couldn't create the Direct3D9 interface.");
+		}
+		return LUX_NEW(video::AdapterListD3D9)(m_D3D9);
+	} else {
+		// Release interface if another driver is queried
+		m_D3D9 = nullptr;
+	}
 #endif
 	throw core::NotImplementedException();
 }
@@ -356,21 +360,38 @@ bool LuxDeviceWin32::RunMessageQueue()
 	return false;
 }
 
-bool LuxDeviceWin32::Run(float& numSecsPassed)
+bool LuxDeviceWin32::WaitForWindowChange()
 {
-	static auto startTime = core::Clock::GetTicks();
-	double time;
+	MSG Message = {0};
+	while(true) {
+		bool active = m_Window->IsActive();
+		bool minimized = m_Window->IsMinimized();
+		bool maximized = m_Window->IsMaximized();
+		bool fullscreen = m_Window->IsFullscreen();
+		bool focused = m_Window->IsFocused();
 
-	auto endTime = core::Clock::GetTicks();
-	if(endTime == startTime)
-		time = 0.000001;
-	else
-		time = (double)(endTime - startTime) * 0.001;
+		BOOL result = GetMessageW(&Message, (HWND)m_Window->GetDeviceWindow(), 0, 0);
+		if(result == -1)
+			return false;
+		if(Message.message == WM_QUIT) {
+			// Put the quit message back into the queue
+			PostQuitMessage(0);
+			return false;
+		}
+		// No use for TranslateMessage since WM_CHAR is not used
+		//TranslateMessage(&Message); 
+		DispatchMessageW(&Message);
+		if(active != m_Window->IsActive() ||
+			minimized != m_Window->IsMinimized() ||
+			maximized != m_Window->IsMaximized() ||
+			fullscreen != m_Window->IsFullscreen() ||
+			focused != m_Window->IsFocused())
+			return true;
+	}
+}
 
-	numSecsPassed = (float)time;
-
-	startTime = endTime;
-
+bool LuxDeviceWin32::Run()
+{
 	bool wasQuit = false;
 	if(m_Window) {
 		if(RunMessageQueue()) {
@@ -381,6 +402,212 @@ bool LuxDeviceWin32::Run(float& numSecsPassed)
 	}
 
 	return !wasQuit;
+}
+
+class DefaultSimpleFrameLoop
+{
+public:
+	DefaultSimpleFrameLoop(LuxDevice* device) :
+		m_Device(device)
+	{
+		m_Window = m_Device->GetWindow();
+		m_GUIEnv = m_Device->GetGUIEnvironment();
+		m_Smgr = m_Device->GetSceneManager();
+		m_Driver = video::VideoDriver::Instance();
+		m_Renderer = m_Driver->GetRenderer();
+
+		m_PerformDriverReset = false;
+	}
+
+	bool CallPreFrame(const LuxDevice::SimpleFrameLoop& user)
+	{
+		if(user.preFrameProc)
+			return user.preFrameProc(user.userData);
+		else
+			return DefaultPreFrame(user);
+	}
+
+	void CallDoFrame(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	{
+		if(user.frameProc)
+			user.frameProc(secsPassed, user.userData);
+		else
+			DefaultDoFrame(secsPassed, user);
+	}
+
+	void CallPostMove(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	{
+		if(user.postMoveProc)
+			user.postMoveProc(secsPassed, user.userData);
+		else
+			DefaultPostMove(secsPassed, user);
+	}
+
+	void CallPostRender(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	{
+		if(user.postRenderProc)
+			user.postRenderProc(secsPassed, user.userData);
+		else
+			DefaultPostRender(secsPassed, user);
+	}
+
+private:
+	bool DefaultPreFrame(const LuxDevice::SimpleFrameLoop& user)
+	{
+		if(!m_Window || !m_Renderer || !m_Driver)
+			return false;
+
+		if(m_PerformDriverReset) {
+			m_PerformDriverReset = !ResetDriver();
+			// Always abort the frame, event if the reset was successfull
+			// Since the frame took much more time than secsPassed.
+			return false;
+		}
+
+		// Wait unti we are allowed to do something
+		bool wait;
+		bool pausing = false;
+		do {
+			wait = false;
+			if(user.pauseOnLostFocus && !m_Window->IsActive())
+				wait = true;
+			if(user.pauseOnMinimize && m_Window->IsMinimized())
+				wait = true;
+
+			if(wait) {
+				log::Debug("Pause frame loop");
+				pausing = true;
+			}
+
+			// Wait for change, abort if quit
+			if(wait && !m_Device->WaitForWindowChange())
+				return false;
+		} while(wait);
+
+		if(pausing) {
+			log::Debug("Resume frame loop");
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	void DefaultDoFrame(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	{
+		secsPassed *= user.timeScale;
+
+		if(m_Smgr)
+			m_Smgr->AnimateAll(secsPassed);
+		if(m_GUIEnv)
+			m_GUIEnv->Update(secsPassed);
+
+		CallPostMove(secsPassed, user);
+
+		if(m_Smgr)
+			m_Smgr->DrawAll(true, false);
+		else
+			m_Renderer->BeginScene(true, true, true);
+		if(m_GUIEnv)
+			m_GUIEnv->Render();
+
+		CallPostRender(secsPassed, user);
+
+		m_Renderer->EndScene();
+		if(!m_Renderer->Present()) {
+			log::Error("Present failed");
+			auto state = m_Driver->GetDeviceState();
+			if(state != video::EDeviceState::OK) {
+				log::Debug("Trying to reset driver.");
+				m_PerformDriverReset = true;
+			}
+		}
+	}
+
+	void DefaultPostMove(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	{
+		LUX_UNUSED(secsPassed);
+		LUX_UNUSED(user);
+	}
+
+	void DefaultPostRender(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	{
+		LUX_UNUSED(secsPassed);
+		LUX_UNUSED(user);
+	}
+
+	bool ResetDriver()
+	{
+		auto state = m_Driver->GetDeviceState();
+		if(state == video::EDeviceState::Error) {
+			log::Error("Internal driver error");
+			m_Window->Close();
+			return false;
+		}
+
+		// Wait until the window is active
+		while(!m_Window->IsActive() && m_Device->WaitForWindowChange());
+
+		state = m_Driver->GetDeviceState();
+		if(state == video::EDeviceState::Error) {
+			log::Error("Internal driver error");
+			m_Window->Close();
+			return false;
+		} else if(state == video::EDeviceState::OK) {
+			return true;
+		} else if(state == video::EDeviceState::NotReset) {
+			if(!m_Driver->Reset(m_Driver->GetConfig())) {
+				log::Error("Can't restore driver");
+				m_Window->Close();
+				return false;
+			} else {
+				log::Info("Performed driver reset");
+				return true;
+			}
+		} else {
+			m_Device->Sleep(100);
+		}
+
+		return false;
+	}
+
+private:
+	bool m_PerformDriverReset;
+
+	LuxDevice* m_Device;
+	gui::Window* m_Window;
+	gui::GUIEnvironment* m_GUIEnv;
+	scene::SceneManager* m_Smgr;
+	video::VideoDriver* m_Driver;
+	video::Renderer* m_Renderer;
+};
+
+void LuxDeviceWin32::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
+{
+	DefaultSimpleFrameLoop defLoop(this);
+
+	u64 startTime;
+	u64 endTime;
+	startTime = core::Clock::GetTicks();
+	float secsPassed = 0.0f;
+	while(Run()) {
+		if(!defLoop.CallPreFrame(frameLoop)) {
+			startTime = core::Clock::GetTicks();
+			continue;
+		}
+
+		if(secsPassed != 0)
+			defLoop.CallDoFrame(secsPassed, frameLoop);
+
+		endTime = core::Clock::GetTicks();
+		secsPassed = (endTime - startTime)*0.001f;
+		if(secsPassed != 0)
+			startTime = endTime;
+	}
+}
+
+void LuxDeviceWin32::Sleep(u32 millis)
+{
+	::Sleep(millis);
 }
 
 bool LuxDeviceWin32::HandleMessages(
@@ -398,7 +625,7 @@ bool LuxDeviceWin32::HandleMessages(
 	if(m_RawInputReceiver && m_RawInputReceiver->HandleMessage(message, wParam, lParam, result))
 		return true;
 #endif
-	
+
 	if(m_Window && m_Window->GetDeviceWindow() == wnd && m_Window->HandleMessages(message, wParam, lParam, result))
 		return true;
 

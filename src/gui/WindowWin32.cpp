@@ -416,6 +416,14 @@ bool WindowWin32::HandleMessages(UINT Message,
 		OnStateChange(EStateChange::FocusLost);
 		break;
 
+	case WM_ENABLE:
+		OnStateChange(EStateChange::Activated);
+		break;
+
+	case WM_CANCELMODE:
+		OnStateChange(EStateChange::Deactivated);
+		break;
+
 	case WM_ACTIVATE:
 		if(WParam == WA_ACTIVE || WParam == WA_CLICKACTIVE)
 			OnStateChange(EStateChange::Activated);

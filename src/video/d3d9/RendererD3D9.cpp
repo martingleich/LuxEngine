@@ -21,7 +21,7 @@ namespace video
 RendererD3D9::RendererD3D9(VideoDriverD3D9* driver) :
 	RendererNull(driver),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
-	m_DeviceState((IDirect3DDevice9*)driver->GetLowLevelDevice()),
+	m_DeviceState(&driver->GetCaps(), (IDirect3DDevice9*)driver->GetLowLevelDevice()),
 	m_Driver(driver),
 	m_MaterialRenderer(nullptr)
 {
@@ -331,6 +331,25 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 
 ///////////////////////////////////////////////////////////////////////////
 
+void RendererD3D9::ReleaseUnmanaged()
+{
+	m_CurrentRendertarget = RendertargetD3D9(nullptr);
+	m_BackbufferTarget = RendertargetD3D9(nullptr);
+
+	m_DeviceState.ReleaseUnmanaged();
+}
+
+void RendererD3D9::Reset()
+{
+	m_DirtyFlags = 0xFFFFFFFF;
+	m_DeviceState.Reset();
+
+	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
+	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
+	m_CurrentRendertarget = m_BackbufferTarget;
+}
+
+///////////////////////////////////////////////////////////////////////////
 void RendererD3D9::SetupRendering(size_t passId)
 {
 	RenderSettings settings(

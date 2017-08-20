@@ -29,9 +29,19 @@ BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 	m_VStreams.Resize(m_MaxStreamCount);
 }
 
+BufferManagerD3D9::~BufferManagerD3D9()
+{
+	for(u32 i = 0; i < m_MaxStreamCount; ++i)
+		m_D3DDevice->SetStreamSource(i, nullptr, 0, 0);
+	m_D3DDevice->SetIndices(nullptr);
+}
+
 void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handle)
 {
-	ULONG remaining=0;
+	auto it = core::LinearSearch(buffer, m_HardwareBuffers);
+	m_HardwareBuffers.Erase(it);
+
+	ULONG remaining = 0;
 	switch(buffer->GetBufferType()) {
 	case EHardwareBufferType::Index:
 	{
@@ -186,6 +196,10 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 
 void* BufferManagerD3D9::UpdateInternalBuffer(HardwareBuffer* buffer, void* handle)
 {
+	// Is the buffer a new one
+	if(handle == nullptr)
+		m_HardwareBuffers.PushBack(buffer);
+
 	switch(buffer->GetBufferType()) {
 	case EHardwareBufferType::Index:
 		return UpdateIndexBuffer(
@@ -279,6 +293,31 @@ void BufferManagerD3D9::ResetStreams()
 
 	m_UsedStreams = 0;
 }
+
+void BufferManagerD3D9::ReleaseHardwareBuffers()
+{
+	for(u32 i = 0; i < m_MaxStreamCount; ++i)
+		m_D3DDevice->SetStreamSource(i, nullptr, 0, 0);
+	m_D3DDevice->SetIndices(nullptr);
+
+	for(auto hb : m_HardwareBuffers) {
+		auto unknown = reinterpret_cast<IUnknown*>(hb->GetHandle());
+		unknown->Release();
+		hb->SetHandle(nullptr);
+	}
 }
+
+void BufferManagerD3D9::RestoreHardwareBuffers()
+{
+	auto oldBuffers = m_HardwareBuffers;
+	m_HardwareBuffers.Clear();
+	for(auto hb : oldBuffers) {
+		hb->SetDirty(0, hb->GetSize() - 1);
+		hb->Update(0);
+	}
 }
+
+} // namespace video
+} // namespace lux
+
 #endif // LUX_COMPILE_WITH_D3D9

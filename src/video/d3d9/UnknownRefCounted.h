@@ -12,13 +12,20 @@ class UnknownRefCounted
 public:
 	UnknownRefCounted() :
 		m_Pointer(nullptr)
-	{}
+	{
+	}
 
 	UnknownRefCounted(T* ptr) :
 		m_Pointer(ptr)
 	{
-		if(ptr)
-			ptr->AddRef();
+		if(m_Pointer)
+			m_Pointer->AddRef();
+	}
+
+	void TakeOwnership(T* ptr)
+	{
+		*this = nullptr;
+		m_Pointer = ptr;
 	}
 
 	UnknownRefCounted(const UnknownRefCounted& other)
@@ -30,17 +37,16 @@ public:
 
 	~UnknownRefCounted()
 	{
-		ULONG released=0;
+		ULONG released = 0;
 		if(m_Pointer)
 			released = m_Pointer->Release();
 	}
 
-	UnknownRefCounted& operator=(T* ptr)
+	UnknownRefCounted& operator=(std::nullptr_t)
 	{
 		if(m_Pointer)
 			m_Pointer->Release();
-		m_Pointer = ptr;
-
+		m_Pointer = nullptr;
 		return *this;
 	}
 
@@ -55,7 +61,8 @@ public:
 		return *this;
 	}
 
-	operator T*() const
+	template <typename T2 = T>
+	operator T2*() const
 	{
 		return m_Pointer;
 	}
@@ -71,6 +78,25 @@ public:
 		return &m_Pointer;
 	}
 
+	operator bool()
+	{
+		return (m_Pointer != nullptr);
+	}
+
+	bool operator!() const
+	{
+		return (m_Pointer == nullptr);
+	}
+
+	bool operator==(UnknownRefCounted other) const
+	{
+		return m_Pointer == other.m_Pointer;
+	}
+
+	bool operator!=(UnknownRefCounted other) const
+	{
+		return !(*this == other);
+	}
 private:
 	T* m_Pointer;
 };

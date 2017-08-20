@@ -44,7 +44,7 @@ private:
 class AdapterListD3D9 : public AdapterList
 {
 public:
-	AdapterListD3D9();
+	AdapterListD3D9(IDirect3D9* d3d9);
 	u32 GetAdapterCount() const;
 	StrongRef<Adapter> GetAdapter(u32 idx) const;
 

@@ -211,6 +211,11 @@ Node* SceneManagerImpl::GetRoot()
 	return m_RootSceneNode;
 }
 
+bool SceneManagerImpl::IsEmpty()
+{
+	return !m_RootSceneNode->HasChildren();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 void SceneManagerImpl::AnimateAll(float secsPassed)
@@ -220,7 +225,7 @@ void SceneManagerImpl::AnimateAll(float secsPassed)
 	}
 }
 
-bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
+void SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 {
 	auto oldActiveCamNode = m_ActiveCameraNode;
 	auto oldActiveCam = m_ActiveCamera;
@@ -229,11 +234,6 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 
 	// Collect "real" camera nodes
 	auto camList = m_CameraList;
-	if(camList.Size() == 0) {
-		log::Warning("No camera in scenegraph.");
-		return false;
-	}
-
 	auto newEnd = core::RemoveIf(camList,
 		[](const CameraEntry& e) -> bool {
 		return !e.node->IsTrulyVisible();
@@ -242,8 +242,15 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 
 	camList.Sort();
 
-	if(camList.IsEmpty())
-		throw core::ErrorException("Scene contains no visible camera.");
+	if(camList.Size() == 0) {
+		if(!IsEmpty())
+			log::Warning("No camera in scenegraph.");
+		if(beginScene == true)
+			m_Renderer->BeginScene(true, true, true, video::Color::Black, 1.0f, 0);
+		if(endScene)
+			m_Renderer->EndScene();
+		return;
+	}
 
 	if(!beginScene) {
 		if(m_Renderer->GetRenderTarget() != camList[0].camera->GetRenderTarget())
@@ -291,8 +298,6 @@ bool SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 
 	m_ActiveCameraNode = oldActiveCamNode;
 	m_ActiveCamera = oldActiveCam;
-
-	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

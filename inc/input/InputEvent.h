@@ -125,6 +125,37 @@ public:
 	};
 };
 
+class EventHandler
+{
+public:
+	virtual ~EventHandler() {}
+	virtual void OnEvent(const input::Event& e)
+	{
+		if(e.source == input::EEventSource::Keyboard && e.type == input::EEventType::Button)
+			OnKey(e.button.pressedDown, e.button.code, e);
+		if(e.source == input::EEventSource::Mouse && e.type == input::EEventType::Button) {
+			if(e.button.code == input::EKeyCode::KEY_LBUTTON)
+				OnLButton(e.button.pressedDown, e);
+			if(e.button.code == input::EKeyCode::KEY_RBUTTON)
+				OnRButton(e.button.pressedDown, e);
+		}
+		if(e.source == input::EEventSource::Mouse && e.type == input::EEventType::Area) {
+			OnMouseMove(math::Vector2F(e.area.relX, e.area.relY), e);
+		}
+		if(e.source == input::EEventSource::Mouse && e.type == input::EEventType::Axis) {
+			if(e.axis.code == input::EAxisCode::AXIS_MOUSE_WHEEL)
+				OnMouseWheel(e.axis.rel, e);
+		}
+	}
+
+	virtual void OnLButton(bool isDown, const input::Event& event) { LUX_UNUSED(isDown); LUX_UNUSED(event); }
+	virtual void OnRButton(bool isDown, const input::Event& event) { LUX_UNUSED(isDown); LUX_UNUSED(event); }
+	virtual void OnMouseMove(const math::Vector2F& move, const input::Event& event) { LUX_UNUSED(move); LUX_UNUSED(event); }
+	virtual void OnMouseWheel(float move, const input::Event& event) { LUX_UNUSED(move); LUX_UNUSED(event); }
+
+	virtual void OnKey(bool isDown, input::EKeyCode key, const input::Event& event) { LUX_UNUSED(isDown); LUX_UNUSED(key); LUX_UNUSED(event); }
+};
+
 } // namespace input
 DECLARE_FLAG_CLASS(input::EElementType);
 } // namespace lux

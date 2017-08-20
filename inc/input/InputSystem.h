@@ -70,6 +70,9 @@ public:
 
 	//! Get the primary keyboard
 	virtual StrongRef<InputDevice> GetKeyboard() = 0;
+
+	//! Get the primary mouse
+	virtual StrongRef<InputDevice> GetMouse() = 0;
 };
 
 } // namespace input

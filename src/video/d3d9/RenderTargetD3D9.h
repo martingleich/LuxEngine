@@ -20,8 +20,7 @@ public:
 	}
 
 	RendertargetD3D9(Texture* texture) :
-		RenderTarget(texture),
-		m_Surface(nullptr)
+		RenderTarget(texture)
 	{
 		if(m_Texture) {
 			lxAssert(m_Texture->IsRendertarget());

@@ -7,7 +7,7 @@ namespace video
 
 VideoDriverNull::VideoDriverNull(const DriverConfig& config, gui::Window* window)
 {
-	LUX_UNUSED(window);
+	m_Window = window;
 	m_Config = config;
 }
 

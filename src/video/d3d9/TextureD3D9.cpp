@@ -44,13 +44,13 @@ void TextureD3D9::Init(
 	if(format == D3DFMT_UNKNOWN)
 		throw core::ColorFormatException(lxFormat);
 
-	UINT Levels = MipCount;
+	m_Levels = MipCount;
 	if(MipCount == 0)
-		Levels = 0;
+		m_Levels = 0;
 
 	DWORD usage = 0;
 	// Put in managed pool if there no origin loader
-	D3DPOOL pool = GetOrigin().loader ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
+	D3DPOOL pool = GetOrigin().IsAvailable() ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
 	if(isDynamic) {
 		usage = D3DUSAGE_DYNAMIC;
 		pool = D3DPOOL_DEFAULT;
@@ -59,7 +59,7 @@ void TextureD3D9::Init(
 		pool = D3DPOOL_DEFAULT;
 	}
 
-	HRESULT hr = m_Device->CreateTexture(Size.width, Size.height, Levels,
+	HRESULT hr = m_Device->CreateTexture(Size.width, Size.height, m_Levels,
 		usage, format,
 		pool, m_Texture.Access(), nullptr);
 
@@ -111,12 +111,12 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode Mode, u32 MipLevel)
 		} else if(Mode == ELockMode::ReadOnly && m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
 			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface) {
-				IDirect3DDevice9* device;
-				IDirect3DSurface9* surface;
-				m_Texture->GetDevice(&device);
-				m_Texture->GetSurfaceLevel(m_LockedLevel, &surface);
-				device->GetRenderTargetData(surface, m_TempSurface);
-				hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_READONLY);
+				UnknownRefCounted<IDirect3DSurface9> surface;
+				hr = m_Texture->GetSurfaceLevel(m_LockedLevel, surface.Access());
+				if(SUCCEEDED(hr))
+					hr = m_Device->GetRenderTargetData(surface, m_TempSurface);
+				if(SUCCEEDED(hr))
+					hr = m_TempSurface->LockRect(&Locked, nullptr, D3DLOCK_READONLY);
 			}
 			if(FAILED(hr)) {
 				m_TempSurface = nullptr;
@@ -142,12 +142,10 @@ void TextureD3D9::Unlock()
 	if(m_TempSurface) {
 		m_TempSurface->UnlockRect();
 		if(m_Desc.Usage == 0) {
-			IDirect3DDevice9* device;
-			IDirect3DSurface9* surface;
-			m_Texture->GetDevice(&device);
-			m_Texture->GetSurfaceLevel(m_LockedLevel, &surface);
-
-			hr = device->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
+			UnknownRefCounted<IDirect3DSurface9> surface;
+			hr = m_Texture->GetSurfaceLevel(m_LockedLevel, surface.Access());
+			if(SUCCEEDED(hr))
+				hr = m_Device->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
 			if(FAILED(hr))
 				throw core::D3D9Exception(hr);
 		}
@@ -192,6 +190,29 @@ const BaseTexture::Filter& TextureD3D9::GetFiltering() const
 void TextureD3D9::SetFiltering(const Filter& f)
 {
 	m_Filtering = f;
+}
+
+void TextureD3D9::ReleaseUnmanaged()
+{
+	if(m_IsLocked)
+		Unlock();
+	if(m_Desc.Pool == D3DPOOL_DEFAULT || m_Desc.Usage == D3DUSAGE_RENDERTARGET)
+		m_Texture = nullptr;
+}
+
+void TextureD3D9::RestoreUnmanaged()
+{
+	if(m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
+		Init(m_Dimension, m_Format, m_Levels, true, false);
+	} else if(m_Desc.Pool == D3DPOOL_DEFAULT) {
+		if(GetOrigin().IsAvailable())
+			GetOrigin().Load(this);
+		else
+			Init(m_Dimension, m_Format, m_Levels, false, (m_Desc.Usage & D3DUSAGE_DYNAMIC) != 0);
+	} else {
+		// Is a managed texture
+		(void)0;
+	}
 }
 
 }

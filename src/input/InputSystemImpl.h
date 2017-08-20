@@ -29,10 +29,12 @@ public:
 	bool GetDefaultForegroundHandling() const;
 
 	StrongRef<InputDevice> GetKeyboard();
+	StrongRef<InputDevice> GetMouse();
 
 private:
 	core::HashMap<String, StrongRef<InputDevice>> m_GUIDMap;
 	WeakRef<InputDevice> m_KeyboardDevice;
+	WeakRef<InputDevice> m_MouseDevice;
 
 	event::Signal<const input::Event&> m_EventSignal;
 

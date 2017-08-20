@@ -226,6 +226,7 @@ public:
 	{
 		if(m_Object)
 			m_Object->Drop();
+		m_Object = nullptr;
 	}
 
 	template <typename T2>
@@ -444,6 +445,12 @@ public:
 	bool operator!() const
 	{
 		return !m_Object;
+	}
+
+	template <typename T2>
+	T2* As() const
+	{
+		return dynamic_cast<T2*>(m_Object);
 	}
 };
 

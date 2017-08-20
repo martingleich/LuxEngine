@@ -25,6 +25,9 @@ public:
 
 	UnknownRefCounted<IDirect3DSurface9> GetSurface(DWORD width, DWORD height, D3DFORMAT format);
 
+	void ReleaseUnmanaged();
+	void RestoreUnmanaged();
+
 private:
 	struct Entry
 	{
@@ -40,7 +43,7 @@ private:
 	};
 
 	core::Array<Entry> m_Surfaces;
-	IDirect3DDevice9* m_Device;
+	UnknownRefCounted<IDirect3DDevice9> m_Device;
 	static const u32 MAX_TEXTURES=5;
 };
 

@@ -43,7 +43,11 @@ struct ResourceOrigin
 	String str;
 	OriginResourceLoader* loader;
 
-	inline void Load(Resource* dst);
+	inline void Load(Resource* dst) const;
+	inline bool IsAvailable() const
+	{
+		return loader != nullptr;
+	}
 };
 
 class OriginResourceLoader
@@ -52,7 +56,7 @@ public:
 	virtual void LoadResource(const ResourceOrigin& origin, Resource* dst) const = 0;
 };
 
-void ResourceOrigin::Load(Resource* dst)
+void ResourceOrigin::Load(Resource* dst) const
 {
 	if(loader)
 		loader->LoadResource(*this, dst);

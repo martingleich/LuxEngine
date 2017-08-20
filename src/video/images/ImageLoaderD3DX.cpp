@@ -69,63 +69,57 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	switch(imageInfo.ResourceType) {
 	case D3DRTYPE_TEXTURE:
 	{
-		IDirect3DTexture9* Tex;
+		UnknownRefCounted<IDirect3DTexture9> out;
 		hr = D3DXCreateTextureFromFileInMemoryEx(device,
 			buffer, (UINT)bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT, 0,
-			nullptr, nullptr, &Tex);
+			nullptr, nullptr, out.Access());
 		if(FAILED(hr))
 			return nullptr;
 
-		Tex->GetLevelDesc(0, &outDesc);
+		out->GetLevelDesc(0, &outDesc);
 
-		UnknownRefCounted<IDirect3DBaseTexture9> out = Tex;
-		Tex->Release();
-		return out;
+		return (IDirect3DBaseTexture9*)out;
 	}
 	break;
 	case D3DRTYPE_CUBETEXTURE:
 	{
-		IDirect3DCubeTexture9* Tex;
+		UnknownRefCounted<IDirect3DCubeTexture9> out;
 		hr = D3DXCreateCubeTextureFromFileInMemoryEx(device,
 			buffer, (UINT)bufferSize,
 			D3DX_DEFAULT, 1, 0,
 			format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT,
-			0, nullptr, nullptr, &Tex);
+			0, nullptr, nullptr, out.Access());
 		if(FAILED(hr))
 			return nullptr;
-		Tex->GetLevelDesc(0, &outDesc);
-		UnknownRefCounted<IDirect3DBaseTexture9> out = Tex;
-		Tex->Release();
-		return out;
+		out->GetLevelDesc(0, &outDesc);
+		return (IDirect3DBaseTexture9*)out;
 	}
 	break;
 	case D3DRTYPE_VOLUMETEXTURE:
 	{
-		IDirect3DVolumeTexture9* tex;
+		UnknownRefCounted<IDirect3DVolumeTexture9> out;
 		hr = D3DXCreateVolumeTextureFromFileInMemoryEx(device,
 			buffer, (UINT)bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT,
-			0, nullptr, nullptr, &tex);
+			0, nullptr, nullptr, out.Access());
 
 		if(FAILED(hr))
 			return nullptr;
 		D3DVOLUME_DESC desc;
-		tex->GetLevelDesc(0, &desc);
+		out->GetLevelDesc(0, &desc);
 		outDesc.Format = desc.Format;
 		outDesc.Height = desc.Height;
 		outDesc.Pool = desc.Pool;
 		outDesc.Type = desc.Type;
 		outDesc.Usage = desc.Usage;
 		outDesc.Width = desc.Width;
-		UnknownRefCounted<IDirect3DBaseTexture9> out = tex;
-		tex->Release();
-		return out;
+		return (IDirect3DBaseTexture9*)out;
 	}
 	break;
 	default:

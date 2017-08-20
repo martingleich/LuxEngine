@@ -16,25 +16,11 @@ namespace lux
 namespace video
 {
 
-DeviceStateD3D9::DeviceStateD3D9(IDirect3DDevice9* device) :
-	m_Device(device),
-	m_RenderTargetTexture(nullptr),
-	m_Shader(nullptr),
-	m_LightCount(0),
-	m_UsedTextureLayers(0),
-	m_UseVertexData(true),
-	m_ResetAll(true)
+DeviceStateD3D9::DeviceStateD3D9(const D3DCAPS9* caps, IDirect3DDevice9* device) :
+	m_Caps(caps),
+	m_Device(device)
 {
-	for(auto i = 0; i < RENDERSTATE_COUNT; ++i)
-		m_Device->GetRenderState((D3DRENDERSTATETYPE)i, m_RenderStates + i);
-
-	for(auto layer = 0; layer < CACHED_TEXTURES; ++layer) {
-		for(auto i = 0; i < TEXTURE_STAGE_STATE_COUNT; ++i)
-			m_Device->GetTextureStageState(layer, (D3DTEXTURESTAGESTATETYPE)i, m_TextureStageStates[layer] + i);
-
-		for(auto i = 0; i < SAMPLER_STATE_COUNT; ++i)
-			m_Device->GetSamplerState(layer, (D3DSAMPLERSTATETYPE)i, m_SamplerStates[layer] + i);
-	}
+	Reset();
 }
 
 void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting)
@@ -128,7 +114,7 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 	if(layer.texture) {
 		// The current rendertarget can't be used as texture -> set texture channel to black
 		// But tell all people asking that the correct texture was set.
-		if(layer.texture == m_RenderTargetTexture) {
+		if((BaseTexture*)layer.texture == (BaseTexture*)m_RenderTargetTexture) {
 			SetTexture(stage, nullptr);
 		} else {
 			SetTexture(stage, (IDirect3DBaseTexture9*)(layer.texture->GetRealTexture()));
@@ -165,11 +151,11 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 			if(ani > maxAni)
 				ani = maxAni;
 			SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, ani);
-	}
+		}
 #endif
 		SetSamplerState(stage, D3DSAMP_MINFILTER, filterMin);
 		SetSamplerState(stage, D3DSAMP_MAGFILTER, filterMag);
-}
+	}
 }
 
 void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
@@ -466,6 +452,36 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 void DeviceStateD3D9::SetRenderTargetTexture(video::BaseTexture* t)
 {
 	m_RenderTargetTexture = t;
+}
+
+void DeviceStateD3D9::ReleaseUnmanaged()
+{
+	m_Textures.Clear();
+	m_RenderTargetTexture = nullptr;
+
+	for(u32 i = 0; i < m_Caps->MaxSimultaneousTextures; ++i)
+		m_Device->SetTexture(i, nullptr);
+}
+
+void DeviceStateD3D9::Reset()
+{
+	m_RenderTargetTexture = nullptr;
+	m_Shader = nullptr;
+	m_LightCount = 0;
+	m_UsedTextureLayers = 0;
+	m_UseVertexData = true;
+	m_ResetAll = true;
+
+	for(auto i = 0; i < RENDERSTATE_COUNT; ++i)
+		m_Device->GetRenderState((D3DRENDERSTATETYPE)i, m_RenderStates + i);
+
+	for(auto layer = 0; layer < CACHED_TEXTURES; ++layer) {
+		for(auto i = 0; i < TEXTURE_STAGE_STATE_COUNT; ++i)
+			m_Device->GetTextureStageState(layer, (D3DTEXTURESTAGESTATETYPE)i, m_TextureStageStates[layer] + i);
+
+		for(auto i = 0; i < SAMPLER_STATE_COUNT; ++i)
+			m_Device->GetSamplerState(layer, (D3DSAMPLERSTATETYPE)i, m_SamplerStates[layer] + i);
+	}
 }
 
 } // namespace video

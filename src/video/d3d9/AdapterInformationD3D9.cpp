@@ -270,14 +270,10 @@ u32 AdapterD3D9::GetNumMultisampleQualities(const DisplayMode& mode, bool window
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AdapterListD3D9::AdapterListD3D9()
+AdapterListD3D9::AdapterListD3D9(IDirect3D9* d3d9) :
+	m_D3D9(d3d9)
 {
-	m_D3D9 = Direct3DCreate9(D3D_SDK_VERSION);
-	if(!m_D3D9)
-		throw core::RuntimeException("Couldn't create the Direct3D9 interface.");
-
 	UINT count = m_D3D9->GetAdapterCount();
-
 	for(UINT i = 0; i < count; ++i)
 		m_Adapters.PushBack(LUX_NEW(AdapterD3D9)(m_D3D9, i));
 }

@@ -10,7 +10,8 @@
 #include "video/d3d9/UnknownRefCounted.h"
 #include "video/d3d9/AdapterInformationD3D9.h"
 
-#include "RendererD3D9.h"
+#include "video/d3d9/RendererD3D9.h"
+#include "video/d3d9/HardwareBufferManagerD3D9.h"
 
 namespace lux
 {
@@ -26,6 +27,10 @@ public:
 	~VideoDriverD3D9();
 
 	void CleanUp();
+
+	void CreateDevice(const DriverConfig& config, gui::Window* window);
+	D3DPRESENT_PARAMETERS GeneratePresentParams(const DriverConfig& config);
+	bool Reset(const DriverConfig& config);
 
 	//------------------------------------------------------------------
 	virtual StrongRef<Geometry> CreateEmptyGeometry(EPrimitiveType primitiveType = EPrimitiveType::Triangles);
@@ -47,6 +52,7 @@ public:
 	StrongRef<Texture> CreateTexture(const math::Dimension2U& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
 	StrongRef<Texture> CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
 	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool isDynamic);
+	void AddTextureToList(BaseTexture* tex);
 
 	// Cache for auxalarity textures
 	/*
@@ -62,6 +68,7 @@ public:
 	const RendertargetD3D9& GetBackbufferTarget();
 
 	//------------------------------------------------------------------
+	EDeviceState GetDeviceState() const;
 	EDriverType GetVideoDriverType() const
 	{
 		return EDriverType::Direct3D9;
@@ -99,21 +106,6 @@ public:
 	UnknownRefCounted<IDirect3DVertexDeclaration9> GetD3D9VertexDeclaration(const VertexFormat& format);
 
 private:
-	class VertexFormat_d3d9
-	{
-	public:
-		VertexFormat_d3d9() {}
-		VertexFormat_d3d9(UnknownRefCounted<IDirect3DVertexDeclaration9> d3dDecl) :
-			m_D3DDeclaration(d3dDecl)
-		{
-		}
-
-		IDirect3DVertexDeclaration9* GetD3D() const { return m_D3DDeclaration; }
-
-	private:
-		UnknownRefCounted<IDirect3DVertexDeclaration9> m_D3DDeclaration;
-	};
-
 	class DepthBuffer_d3d9
 	{
 	public:
@@ -137,21 +129,23 @@ private:
 	RendertargetD3D9 m_BackBufferTarget;
 	core::Array<DepthBuffer_d3d9> m_DepthBuffers;
 
-	core::Array<WeakRef<TextureD3D9>> m_RenderTargets;
+	core::Array<WeakRef<BaseTexture>> m_Textures;
 
-	StrongRef<BufferManager> m_BufferManager;
+	StrongRef<BufferManagerD3D9> m_BufferManager;
 	StrongRef<RendererD3D9> m_Renderer;
 
 	UnknownRefCounted<IDirect3D9> m_D3D;
 	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
 
-	core::HashMap<VertexFormat, VertexFormat_d3d9> m_VertexFormats;
+	core::HashMap<VertexFormat, UnknownRefCounted<IDirect3DVertexDeclaration9>> m_VertexFormats;
 
 	bool m_HasStencilBuffer;
 	D3DCAPS9 m_Caps;
 	StrongRef<AdapterD3D9> m_Adapter;
 	D3DPRESENT_PARAMETERS m_PresentParams;
 	D3DFORMAT m_AdapterFormat;
+
+	bool m_ReleasedUnmanagedData;
 };
 
 }
