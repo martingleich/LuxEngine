@@ -67,7 +67,8 @@ public:
 	\return The newly created file.
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop) = 0;
+	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop, bool isReadOnly) = 0;
+	virtual StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const String& name, bool deleteOnDrop) = 0;
 
 	//! Create a limited file
 	/**

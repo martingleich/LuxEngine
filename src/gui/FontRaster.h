@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CFONT_H
-#define INCLUDED_CFONT_H
+#ifndef INCLUDED_FONT_RASTER_H
+#define INCLUDED_FONT_RASTER_H
 #include "gui/Font.h"
 #include "video/Material.h"
 #include "core/lxHashMap.h"
@@ -60,11 +60,11 @@ struct FontCreationData
 	}
 };
 
-class FontImpl : public Font
+class FontRaster : public Font
 {
 public:
-	FontImpl(const core::ResourceOrigin& origin);
-	~FontImpl();
+	FontRaster(const core::ResourceOrigin& origin);
+	~FontRaster();
 
 	void Init(const FontCreationData& data);
 
@@ -92,6 +92,9 @@ public:
 
 	core::Name GetReferableType() const;
 	StrongRef<Referable> Clone() const;
+
+	const core::HashMap<u32, CharInfo>& GetCharMap() const;
+	video::Image* GetImage() const;
 
 private:
 	const CharInfo& GetCharInfo(u32 c);

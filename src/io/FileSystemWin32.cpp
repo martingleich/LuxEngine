@@ -130,10 +130,10 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 		if(!createIfNotExist) {
 			throw core::FileNotFoundException(filename.Data());
 		} else {
-			log::Info("The file \"~s\" was created.", absPath);
 			file = core::FOpenUTF8(absPath.Data(), GetFileOpenString(mode).Data());
 			if(!file)
 				throw core::FileNotFoundException(filename.Data());
+			log::Info("The file \"~s\" was created.", absPath);
 			try {
 				desc = GetFileDescription(absPath);
 				return LUX_NEW(StreamFile)(file, desc, absPath);
@@ -158,7 +158,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 	}
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop, bool isReadOnly)
 {
 	if(!memory || size == 0)
 		throw core::FileNotFoundException("[Empty Memory file]");
@@ -171,7 +171,13 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const S
 		core::DateAndTime(),
 		true);
 
-	return LUX_NEW(MemoryFile)(memory, desc, name, deleteOnDrop, false);
+	return LUX_NEW(MemoryFile)(memory, desc, name, deleteOnDrop, false, isReadOnly);
+}
+
+StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, u32 size, const String& name, bool deleteOnDrop)
+{
+	// File is set to read only in last parameter
+	return OpenVirtualFile(const_cast<void*>(memory), size, name, deleteOnDrop, true);
 }
 
 Path FileSystemWin32::GetAbsoluteFilename(const Path& filename) const
@@ -223,7 +229,7 @@ File* FileSystemWin32::CreateTemporaryFile(u32 Size)
 {
 	void* ptr = LUX_NEW_ARRAY(u8, Size);
 
-	return OpenVirtualFile(ptr, Size, String::EMPTY, true);
+	return OpenVirtualFile(ptr, Size, String::EMPTY, true, false);
 }
 
 FileDescription FileSystemWin32::GetFileDescription(const Path& name)

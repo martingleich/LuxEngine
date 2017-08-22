@@ -15,7 +15,8 @@ public:
 		const FileDescription& desc,
 		String name,
 		bool DeleteBufferOnDrop,
-		bool Expandable);
+		bool Expandable,
+		bool readOnly);
 	~MemoryFile();
 	u32 ReadBinary(u32 dwNumBytes, void* out);
 	u32 WriteBinary(const void* data, u32 dwLength);
@@ -31,9 +32,9 @@ private:
 	u32 m_Cursor;
 	bool m_IsEOF;
 
-	bool m_DeleteBufferOnDrop;
-	bool m_IsExpandable;
-
+	const bool m_DeleteBufferOnDrop;
+	const bool m_IsExpandable;
+	const bool m_IsReadOnly;
 };
 
 } //namespace io

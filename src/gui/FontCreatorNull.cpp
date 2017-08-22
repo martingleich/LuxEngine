@@ -9,7 +9,7 @@
 #include "video/Texture.h"
 #include "video/MaterialLibrary.h"
 
-#include "gui/FontImpl.h"
+#include "gui/FontRaster.h"
 
 
 namespace lux
@@ -118,7 +118,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	data.scale = 1.0f;
 	data.baseLine = 0.0f;
 
-	StrongRef<FontImpl> font = LUX_NEW(FontImpl)(core::ResourceOrigin());
+	StrongRef<FontRaster> font = LUX_NEW(FontRaster)(core::ResourceOrigin());
 	font->Init(data);
 
 	return font;

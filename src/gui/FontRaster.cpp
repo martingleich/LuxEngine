@@ -1,4 +1,4 @@
-#include "FontImpl.h"
+#include "FontRaster.h"
 
 #include "core/ReferableRegister.h"
 
@@ -9,23 +9,23 @@
 #include "video/MaterialLibrary.h"
 #include "video/images/ImageSystem.h"
 
-LUX_REGISTER_RESOURCE_CLASS("lux.resource.Font", lux::gui::FontImpl);
+LUX_REGISTER_RESOURCE_CLASS("lux.resource.Font", lux::gui::FontRaster);
 
 namespace lux
 {
 namespace gui
 {
 
-FontImpl::FontImpl(const core::ResourceOrigin& origin) :
+FontRaster::FontRaster(const core::ResourceOrigin& origin) :
 	Font(origin)
 {
 }
 
-FontImpl::~FontImpl()
+FontRaster::~FontRaster()
 {
 }
 
-void FontImpl::Init(const FontCreationData& data)
+void FontRaster::Init(const FontCreationData& data)
 {
 	m_Desc = data.desc;
 
@@ -50,6 +50,7 @@ void FontImpl::Init(const FontCreationData& data)
 	if(data.image) {
 		m_Image = video::ImageSystem::Instance()->CreateImage(data.imageSize, video::ColorFormat::X8, data.image, true, true);
 		m_Texture = video::VideoDriver::Instance()->CreateTexture(data.imageSize, video::ColorFormat::A8R8G8B8, 1, false);
+		m_Texture->SetFiltering(video::BaseTexture::Filter::Point);
 
 		video::TextureLock lock(m_Texture, video::BaseTexture::ELockMode::Overwrite);
 		video::ImageLock imgLock(m_Image);
@@ -108,22 +109,22 @@ void FontImpl::Init(const FontCreationData& data)
 		m_Material->Layer(0) = m_Texture;
 }
 
-const video::Material* FontImpl::GetMaterial() const
+const video::Material* FontRaster::GetMaterial() const
 {
 	return m_Material;
 }
 
-float FontImpl::GetBaseLine() const
+float FontRaster::GetBaseLine() const
 {
 	return m_BaseLine;
 }
 
-void FontImpl::SetBaseLine(float base)
+void FontRaster::SetBaseLine(float base)
 {
 	m_BaseLine = base;
 }
 
-void FontImpl::Draw(const String& text, const math::Vector2F& position, EAlign align, video::Color color, const math::RectF* clip)
+void FontRaster::Draw(const String& text, const math::Vector2F& position, EAlign align, video::Color color, const math::RectF* clip)
 {
 	if(text.IsEmpty())
 		return;
@@ -239,7 +240,7 @@ void FontImpl::Draw(const String& text, const math::Vector2F& position, EAlign a
 	}
 }
 
-float FontImpl::GetTextWidth(const String& text, size_t charCount)
+float FontRaster::GetTextWidth(const String& text, size_t charCount)
 {
 	const float charSpace = m_CharHeight * m_CharDistance * m_Scale;
 
@@ -265,7 +266,7 @@ float FontImpl::GetTextWidth(const String& text, size_t charCount)
 	return width;
 }
 
-size_t FontImpl::GetCaretFromOffset(const String& text, float XPosition)
+size_t FontRaster::GetCaretFromOffset(const String& text, float XPosition)
 {
 	if(XPosition < 0.0f)
 		return 0;
@@ -302,7 +303,7 @@ size_t FontImpl::GetCaretFromOffset(const String& text, float XPosition)
 	return counter;
 }
 
-void FontImpl::GetTextCarets(const String& text, core::Array<float>& carets, size_t charCount)
+void FontRaster::GetTextCarets(const String& text, core::Array<float>& carets, size_t charCount)
 {
 	const float charSpace = m_CharHeight * m_CharDistance;
 
@@ -332,72 +333,80 @@ void FontImpl::GetTextCarets(const String& text, core::Array<float>& carets, siz
 	carets.PushBack(width);
 }
 
-float FontImpl::GetCharDistance() const
+float FontRaster::GetCharDistance() const
 {
 	return m_CharDistance;
 }
 
-float FontImpl::GetFontHeight() const
+float FontRaster::GetFontHeight() const
 {
 	return m_CharHeight;
 }
 
-float FontImpl::GetWordDistance() const
+float FontRaster::GetWordDistance() const
 {
 	return m_WordDistance;
 }
 
-float FontImpl::GetLineDistance() const
+float FontRaster::GetLineDistance() const
 {
 	return m_LineDistance;
 }
 
-void FontImpl::SetLineDistance(float Space)
+void FontRaster::SetLineDistance(float Space)
 {
 	m_LineDistance = Space;
 }
 
-float FontImpl::GetScaling() const
+float FontRaster::GetScaling() const
 {
 	return m_Scale;
 }
 
-void FontImpl::SetCharDistance(float width)
+void FontRaster::SetCharDistance(float width)
 {
 	m_CharDistance = width;
 }
 
-void FontImpl::SetWordDistance(float Space)
+void FontRaster::SetWordDistance(float Space)
 {
 	m_WordDistance = Space;
 }
 
-void FontImpl::SetScaling(float Scale)
+void FontRaster::SetScaling(float Scale)
 {
 	m_Scale = Scale;
 }
 
-const CharInfo& FontImpl::GetCharInfo(u32 c)
+const CharInfo& FontRaster::GetCharInfo(u32 c)
 {
 	auto it = m_CharMap.Find(c);
 	return (it != m_CharMap.End()) ? *it : m_ErrorChar;
 }
 
-core::Name FontImpl::GetReferableType() const
+core::Name FontRaster::GetReferableType() const
 {
 	return core::ResourceType::Font;
 }
 
-StrongRef<Referable> FontImpl::Clone() const
+StrongRef<Referable> FontRaster::Clone() const
 {
-	return LUX_NEW(FontImpl)(*this);
+	return LUX_NEW(FontRaster)(*this);
 }
 
-const FontDescription& FontImpl::GetDescription() const
+const FontDescription& FontRaster::GetDescription() const
 {
 	return m_Desc;
 }
 
+const core::HashMap<u32, CharInfo>& FontRaster::GetCharMap() const
+{
+	return m_CharMap;
+}
+video::Image* FontRaster::GetImage() const
+{
+	return m_Image;
+}
 } // namespace gui
 } // namespace lux
 

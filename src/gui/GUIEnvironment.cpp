@@ -15,12 +15,17 @@
 #include "gui/elements/GUIButton.h"
 #include "gui/elements/GUIStaticText.h"
 
-#include "gui/FontLoader.h"
+#include "gui/FontFormat.h"
 #include "gui/FontCreator.h"
+
+#include "io/FileSystem.h"
+#include "io/File.h"
 
 #ifdef LUX_WINDOWS
 #include "gui/FontCreatorWin32.h"
 #endif
+
+#include "gui/BuiltInFont.h"
 
 namespace lux
 {
@@ -43,19 +48,21 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_FontCreator = nullptr;
 #endif
 
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader));
+	core::ResourceSystem::Instance()->AddResourceWriter(LUX_NEW(FontWriter));
+
+	auto file = io::FileSystem::Instance()->OpenVirtualFile(
+		g_BuiltinFontData, g_BuiltinFontData_Size, "[builtin_font_file]", false);
+	if(file)
+		m_BuiltInFont = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Font, file).As<Font>();
+
 	SetSkin(LUX_NEW(Skin3D));
-	if(m_FontCreator) {
-		m_Skin->defaultFont = m_FontCreator->CreateFont(
-			FontDescription(15, EFontWeight::Bolt), m_FontCreator->GetDefaultCharset("german"));
-	}
+	m_Skin->defaultFont = m_BuiltInFont;
 
 	SetRenderer(LUX_NEW(Renderer)(video::VideoDriver::Instance()->GetRenderer()));
 
-	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader));
-
 	input::InputSystem::Instance()->GetEventSignal().Connect(this, &GUIEnvironment::OnEvent);
 	m_Cursor->onCursorMove.Connect(this, &GUIEnvironment::OnCursorMove);
-
 }
 
 GUIEnvironment::~GUIEnvironment()
@@ -197,6 +204,11 @@ void GUIEnvironment::OnEvent(const input::Event& event)
 StrongRef<FontCreator> GUIEnvironment::GetFontCreator()
 {
 	return m_FontCreator;
+}
+
+StrongRef<Font> GUIEnvironment::GetBuiltInFont()
+{
+	return m_BuiltInFont;
 }
 
 Element* GUIEnvironment::GetHovered()

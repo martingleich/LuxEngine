@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FONTCREATOR_NULL_H
 #define INCLUDED_FONTCREATOR_NULL_H
 #include "gui/FontCreator.h"
-#include "gui/FontImpl.h"
+#include "gui/FontRaster.h"
 
 namespace lux
 {

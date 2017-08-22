@@ -11,14 +11,16 @@ MemoryFile::MemoryFile(void* Buffer,
 	const FileDescription& desc,
 	String name,
 	bool DeleteBufferOnDrop,
-	bool Expandable) :
+	bool Expandable,
+	bool readOnly) :
 	File(name, desc),
 	m_Buffer((u8*)Buffer),
 	m_Size(desc.GetSize()),
 	m_Cursor(0),
 	m_IsEOF(false),
 	m_DeleteBufferOnDrop(DeleteBufferOnDrop),
-	m_IsExpandable(Expandable)
+	m_IsExpandable(Expandable),
+	m_IsReadOnly(readOnly)
 {
 }
 
@@ -46,6 +48,9 @@ u32 MemoryFile::ReadBinary(u32 numBytes, void* out)
 
 u32 MemoryFile::WriteBinary(const void* data, u32 numBytes)
 {
+	if(m_IsReadOnly)
+		throw core::FileException(core::FileException::WriteError);
+
 	if(numBytes == 0 || !data)
 		return 0;
 
@@ -107,7 +112,10 @@ bool MemoryFile::Seek(s32 offset, ESeekOrigin origin)
 
 void* MemoryFile::GetBuffer()
 {
-	return m_Buffer;
+	if(m_IsReadOnly)
+		return nullptr;
+	else
+		return m_Buffer;
 }
 
 const void* MemoryFile::GetBuffer() const

@@ -111,6 +111,7 @@ public:
 
 	//! Retrieve the font creator.
 	LUX_API StrongRef<FontCreator> GetFontCreator();
+	LUX_API StrongRef<Font> GetBuiltInFont();
 
 	/**
 	Funktions to perform gui actions.
@@ -142,6 +143,7 @@ private:
 
 private:
 	StrongRef<FontCreator> m_FontCreator;
+	StrongRef<Font> m_BuiltInFont;
 
 	StrongRef<Window> m_Root;
 	StrongRef<Renderer> m_Renderer;
