@@ -132,7 +132,6 @@ public:
 	math::Vector3F& TransformDir(const math::Vector3F& in,
 		math::Vector3F& out) const
 	{
-
 		out = orientation.Transform(in * scale);
 		return out;
 	}
@@ -393,7 +392,7 @@ inline math::Line3F& Transformation::TransformObject(const math::Line3F& in, mat
 template <>
 inline math::PlaneF& Transformation::TransformObject(const math::PlaneF& in, math::PlaneF& out) const
 {
-	this->TransformDir(in.normal, out.normal);
+	out.normal = orientation.Transform(in.normal);
 	out.RecalculateD(this->TransformPoint(in.GetMemberPoint()));
 
 	return out;

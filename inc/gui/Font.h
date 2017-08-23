@@ -132,8 +132,8 @@ public:
 
 	//! The text caret from a x position
 	/**
-	in a text are len(Text)+1 Carrets
-	|H|a|l|l|o| |W|o|r|l|d|
+	in a text are len(Text)+1 Carets
+	|H|e|l|l|o| |W|o|r|l|d|
 	each | is a caret, this method returns the id of the nearest caret in the text
 	The first caret is the left edge of the text box, the last carret the right edge
 	\param text The used text
@@ -144,8 +144,8 @@ public:
 
 	//! All text carets in a given text
 	/**
-	in a text are len(Text)+1 Carrets
-	|H|a|l|l|o| |W|o|r|l|d|
+	in a text are len(Text)+1 Carets
+	|H|e|l|l|o| |W|o|r|l|d|
 	each | is a caret, this method returns the position of all carets in the text
 	The first caret is the left edge of the text box, the last carret the right edge
 	\param text The used text

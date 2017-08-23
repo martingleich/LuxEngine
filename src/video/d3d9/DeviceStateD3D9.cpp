@@ -81,10 +81,11 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 		EnableTextureStage(i, p.layerSettings[i]);
 
 	// Disable old layers
-	for(size_t i = p.layers.Size(); i < m_UsedTextureLayers; ++i)
+	u32 newUsed = math::Max(p.layers.Size(), p.layerSettings.Size());
+	for(size_t i = newUsed; i < m_UsedTextureLayers; ++i)
 		DisableTexture(i);
 
-	m_UsedTextureLayers = math::Max(p.layers.Size(), p.layerSettings.Size());
+	m_UsedTextureLayers = newUsed;
 
 	// Set Material parameters
 	if(p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::Ambient))

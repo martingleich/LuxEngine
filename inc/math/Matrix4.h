@@ -318,13 +318,13 @@ public:
 
 	//! Make a perspective projection matrix(hyperbolic Z-transform)
 	/**
-	\param FOV The field of vision in rad
+	\param FOVY The vertical field of vision in rad
 	\param Aspect screenwidth/screenheight
 	\param NearPlane The near clipping plane
 	\param FarPlane The far clipping plane
 	\return Selfreference
 	*/
-	Matrix4& BuildProjection_Persp(float FOV,
+	Matrix4& BuildProjection_Persp(float FOVY,
 		float Aspect,
 		float NearPlane,
 		float FarPlane);
