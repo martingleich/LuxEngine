@@ -29,7 +29,7 @@ RendererNull::RendererNull(VideoDriver* driver) :
 	for(size_t i = 0; i < 16; ++i)
 		m_ParamId.lights.PushBack(m_Params.AddAttribute("light" + core::StringConverter::ToString(i), math::Matrix4::ZERO));
 
-	m_RenderStatistics = LUX_NEW(RenderStatistics);
+	m_RenderStatistics = RenderStatistics::Instance();
 
 	m_Material = LUX_NEW(MaterialImpl)(nullptr);
 	m_InvalidMaterial = LUX_NEW(MaterialImpl)(nullptr);
@@ -197,11 +197,6 @@ const core::Attributes& RendererNull::GetParams() const
 }
 
 ///////////////////////////////////////////////////////////////////////////
-
-StrongRef<RenderStatistics> RendererNull::GetRenderStatistics() const
-{
-	return m_RenderStatistics;
-}
 
 VideoDriver* RendererNull::GetDriver() const
 {

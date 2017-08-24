@@ -96,7 +96,6 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	StrongRef<RenderStatistics> GetRenderStatistics() const;
 	VideoDriver* GetDriver() const;
 
 protected:
@@ -165,8 +164,7 @@ protected:
 	u32 m_DirtyFlags; //!< The flag list of changed user parameters, see \ref EDirtyFlags
 
 	VideoDriver* m_Driver; //!< The driver owning this renderer
-
-	StrongRef<RenderStatistics> m_RenderStatistics;
+	RenderStatistics* m_RenderStatistics;
 };
 
 } // namespace video

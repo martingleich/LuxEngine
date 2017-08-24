@@ -16,6 +16,8 @@ namespace Clock
 
 	//! Retrieve the current tick count.
 	LUX_API u64 GetTicks();
+
+	LUX_API u64 TicksPerSecond();
 };
 
 }

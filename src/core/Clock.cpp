@@ -46,5 +46,10 @@ u64 Clock::GetTicks()
 	return (time.time_since_epoch() / 1000000).count();
 }
 
+u64 Clock::TicksPerSecond()
+{
+	return 1000;
+}
+
 }
 }

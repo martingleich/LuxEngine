@@ -81,6 +81,7 @@ StrongRef<Cursor> GUIEnvironment::GetCursor()
 
 void GUIEnvironment::Render()
 {
+	video::RenderStatistics::GroupScope grpScope("gui");
 	m_Renderer->Begin();
 	m_Root->Render(m_Renderer);
 	m_Renderer->Flush();

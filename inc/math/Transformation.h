@@ -33,9 +33,9 @@ public:
 	}
 
 	//! Constructor
-	Transformation(const math::Vector3F& Trans,
-		const math::QuaternionF& Orient = math::QuaternionF(0.0f, 0.0f, 0.0f, 1.0f),
-		float _Scale = 1.0f) : scale(_Scale), orientation(Orient), translation(Trans)
+	explicit Transformation(const math::Vector3F& _trans,
+		const math::QuaternionF& _orient = math::QuaternionF(0.0f, 0.0f, 0.0f, 1.0f),
+		float _scale = 1.0f) : scale(_scale), orientation(_orient), translation(_trans)
 	{
 	}
 

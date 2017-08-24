@@ -11,6 +11,8 @@
 
 #include "core/Attributes.h"
 
+#include "video/RenderStatistics.h"
+
 namespace lux
 {
 namespace core
@@ -31,7 +33,6 @@ class ParamSetCallback;
 class PipelineSettings;
 class PipelineOverwrite;
 class VertexFormat;
-class RenderStatistics;
 class VideoDriver;
 
 //! The diffrent transforms which can be set in the renderer
@@ -253,8 +254,6 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	//! Access information about rendering statistics
-	virtual StrongRef<RenderStatistics> GetRenderStatistics() const = 0;
 
 	//! Retrieve the driver owning this renderer
 	virtual VideoDriver* GetDriver() const = 0;

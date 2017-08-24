@@ -48,6 +48,7 @@ SceneManagerImpl::SceneManagerImpl() :
 
 	m_Attributes.AddAttribute("drawStencilShadows", false);
 	m_Attributes.AddAttribute("maxShadowCasters", 1);
+	m_Attributes.AddAttribute("culling", true);
 }
 
 SceneManagerImpl::~SceneManagerImpl()
@@ -227,6 +228,8 @@ void SceneManagerImpl::AnimateAll(float secsPassed)
 
 void SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 {
+	video::RenderStatistics::GroupScope grpScope("scene");
+
 	auto oldActiveCamNode = m_ActiveCameraNode;
 	auto oldActiveCam = m_ActiveCamera;
 
@@ -258,8 +261,6 @@ void SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 	}
 
 	for(auto it = camList.First(); it != camList.End(); ++it) {
-		CollectRenderables(m_RootSceneNode);
-
 		m_ActiveCamera = it->camera;
 		m_ActiveCameraNode = it->node;
 		m_AbsoluteCamPos = m_ActiveCameraNode->GetAbsolutePosition();
@@ -282,6 +283,7 @@ void SceneManagerImpl::DrawAll(bool beginScene, bool endScene)
 
 		m_ActiveCamera->Render(m_Renderer, m_ActiveCameraNode);
 
+		CollectRenderables(m_RootSceneNode);
 		DrawScene();
 
 		m_ActiveCamera->PostRender(m_Renderer, m_ActiveCameraNode);
@@ -444,31 +446,46 @@ void SceneManagerImpl::CollectRenderablesRec(Node* node, RenderableCollector* co
 
 void SceneManagerImpl::AddRenderEntry(Node* n, Renderable* r)
 {
+	if(!n->IsTrulyVisible())
+		return;
+
+	bool isCulled = false;
+
 	switch(r->GetRenderPass()) {
 	case ERenderPass::SkyBox:
 		m_SkyBoxList.PushBack(RenderEntry(n, r));
 		break;
 	case ERenderPass::Solid:
-		m_SolidNodeList.PushBack(RenderEntry(n, r));
+		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
+		m_SolidNodeList.PushBack(RenderEntry(n, r, isCulled));
 		break;
 	case ERenderPass::Transparent:
-		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r));
+		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
+		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r, isCulled));
 		break;
 	case ERenderPass::SolidAndTransparent:
-		m_SolidNodeList.PushBack(RenderEntry(n, r));
-		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r));
+		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
+		m_SolidNodeList.PushBack(RenderEntry(n, r, isCulled));
+		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r, isCulled));
 		break;
 	default:
 		break;
 	}
 }
 
-bool SceneManagerImpl::IsCulled(Node* n, Renderable* r)
+bool SceneManagerImpl::IsCulled(const RenderEntry& e)
 {
-	LUX_UNUSED(n);
-	LUX_UNUSED(r);
+	return e.isCulled;
+}
 
-	return false;
+bool SceneManagerImpl::IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum)
+{
+	LUX_UNUSED(r);
+	if(!m_Culling)
+		return false;
+	if(node->GetBoundingBox().IsEmpty())
+		return false;
+	return !frustum.IsBoxVisible(node->GetBoundingBox(), node->GetAbsoluteTransform());
 }
 
 void SceneManagerImpl::DrawScene()
@@ -484,6 +501,8 @@ void SceneManagerImpl::DrawScene()
 			m_Attributes["drawStencilShadows"] = false;
 		}
 	}
+
+	m_Culling = m_Attributes["culling"];
 
 	core::Array<SceneData::LightEntry> illuminating;
 	core::Array<SceneData::LightEntry> shadowCasting;
@@ -526,8 +545,7 @@ void SceneManagerImpl::DrawScene()
 	EnableOverwrite(ERenderPass::SkyBox, pot);
 
 	for(auto& e : m_SkyBoxList) {
-		if(e.node->IsTrulyVisible())
-			e.renderable->Render(e.node, m_Renderer, sceneData);
+		e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 
 	DisableOverwrite(ERenderPass::SkyBox, pot);
@@ -542,28 +560,31 @@ void SceneManagerImpl::DrawScene()
 		video::PipelineOverwrite illumOver;
 		illumOver.lighting = video::ELighting::AmbientEmit;
 		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
+	} else {
+		for(auto& e : illuminating)
+			AddDriverLight(e.node, e.light);
 	}
 
-	// Ambient pass
+	// Ambient pass for shadows, otherwise the normal renderpass
 	sceneData.pass = ERenderPass::Solid;
 	for(auto& e : m_SolidNodeList) {
-		if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
+		if(!IsCulled(e))
 			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
-
 	DisableOverwrite(ERenderPass::Solid, pot);
-	if(drawStencilShadows)
+
+	// Stencil shadow rendering
+	if(drawStencilShadows) {
 		m_Renderer->PopPipelineOverwrite(&pot);
 
-	// Shadow pass for each shadow casting light
-	if(drawStencilShadows) {
+		// Shadow pass for each shadow casting light
 		for(auto shadowLight : shadowCasting) {
 			m_Renderer->ClearLights();
 			AddDriverLight(shadowLight.node, shadowLight.light);
 
 			m_StencilShadowRenderer.Begin(m_ActiveCameraNode->GetAbsolutePosition(), m_ActiveCameraNode->GetAbsoluteTransform().TransformDir(math::Vector3F::UNIT_Y));
 			for(auto& e : m_SolidNodeList) {
-				if(e.node->IsTrulyVisible() && e.node->IsShadowCasting()) {
+				if(e.node->IsShadowCasting()) {
 					auto mesh = dynamic_cast<Mesh*>(e.renderable);
 					if(mesh && mesh->GetMesh()) {
 						bool isInfinite;
@@ -596,7 +617,7 @@ void SceneManagerImpl::DrawScene()
 			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 
 			for(auto& e : m_SolidNodeList) {
-				if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
+				if(!IsCulled(e))
 					e.renderable->Render(e.node, m_Renderer, sceneData);
 			}
 
@@ -605,37 +626,36 @@ void SceneManagerImpl::DrawScene()
 
 			m_Renderer->ClearStencil();
 		}
-	}
 
-	if(!nonShadowCasting.IsEmpty()) {
-		m_Renderer->ClearLights();
-		// Draw with remaining non shadow casting lights
-		for(auto illum : nonShadowCasting)
-			AddDriverLight(illum.node, illum.light);
+		if(!nonShadowCasting.IsEmpty()) {
+			m_Renderer->ClearLights();
+			// Draw with remaining non shadow casting lights
+			for(auto illum : nonShadowCasting)
+				AddDriverLight(illum.node, illum.light);
 
-		video::PipelineOverwrite illumOver;
-		illumOver.disableZWrite = true;
-		illumOver.lighting = video::ELighting::DiffSpec;
-		illumOver.useAlphaOverwrite = true;
-		illumOver.alphaOperator = video::EBlendOperator::Add;
-		illumOver.alphaSrcBlend = video::EBlendFactor::One;
-		illumOver.alphaDstBlend = video::EBlendFactor::One;
-		EnableOverwrite(ERenderPass::Solid, pot);
-		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
+			video::PipelineOverwrite illumOver;
+			illumOver.disableZWrite = true;
+			illumOver.lighting = video::ELighting::DiffSpec;
+			illumOver.useAlphaOverwrite = true;
+			illumOver.alphaOperator = video::EBlendOperator::Add;
+			illumOver.alphaSrcBlend = video::EBlendFactor::One;
+			illumOver.alphaDstBlend = video::EBlendFactor::One;
+			EnableOverwrite(ERenderPass::Solid, pot);
+			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 
-		sceneData.pass = ERenderPass::Solid;
-		for(auto& e : m_SolidNodeList) {
-			if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
-				e.renderable->Render(e.node, m_Renderer, sceneData);
+			sceneData.pass = ERenderPass::Solid;
+			for(auto& e : m_SolidNodeList) {
+				if(!IsCulled(e))
+					e.renderable->Render(e.node, m_Renderer, sceneData);
+			}
+
+			m_Renderer->PopPipelineOverwrite(&pot);
+			DisableOverwrite(ERenderPass::Solid, pot);
 		}
-
-		m_Renderer->PopPipelineOverwrite(&pot);
-		DisableOverwrite(ERenderPass::Solid, pot);
+		// Add shadow casting light for remaining render jobs
+		for(auto illum : shadowCasting)
+			AddDriverLight(illum.node, illum.light);
 	}
-
-	// Add shadow casting light for remaining render jobs
-	for(auto illum : shadowCasting)
-		AddDriverLight(illum.node, illum.light);
 
 	//-------------------------------------------------------------------------
 	// Transparent objects
@@ -651,7 +671,7 @@ void SceneManagerImpl::DrawScene()
 	m_TransparentNodeList.Sort();
 
 	for(auto& e : m_TransparentNodeList) {
-		if(e.node->IsTrulyVisible() && !IsCulled(e.node, e.renderable))
+		if(!IsCulled(e))
 			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 

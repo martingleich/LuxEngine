@@ -116,7 +116,9 @@ private:
 	void AddRenderEntry(Node* n, Renderable* r);
 	void DrawScene();
 
-	bool IsCulled(Node* n, Renderable* r);
+	struct RenderEntry;
+	bool IsCulled(const RenderEntry& e);
+	bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
 
 	void AddDriverLight(Node* n, Light* l);
 
@@ -126,16 +128,19 @@ private:
 	public:
 		Node* node;
 		Renderable* renderable;
+		bool isCulled;
 
 		RenderEntry() :
 			node(nullptr),
-			renderable(nullptr)
+			renderable(nullptr),
+			isCulled(false)
 		{
 		}
 
-		RenderEntry(Node* n, Renderable* r) :
+		RenderEntry(Node* n, Renderable* r, bool c=false) :
 			node(n),
-			renderable(r)
+			renderable(r),
+			isCulled(c)
 		{
 		}
 	};
@@ -149,8 +154,8 @@ private:
 		{
 		}
 
-		DistanceRenderEntry(Node* n, Renderable* r) :
-			RenderEntry(n, r)
+		DistanceRenderEntry(Node* n, Renderable* r, bool c) :
+			RenderEntry(n, r, c)
 		{
 			pos = node->GetAbsoluteTransform().TransformPoint(r->GetBoundingBox().GetCenter());
 		}
@@ -244,6 +249,7 @@ private:
 	/////////////////////////////////////////////////////////////////////////
 
 	core::Attributes m_Attributes;
+	bool m_Culling; // Read from m_Attributes
 
 	// Scene values
 	video::Colorf m_AmbientColor;

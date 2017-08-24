@@ -494,6 +494,9 @@ private:
 
 	void DefaultDoFrame(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
 	{
+		video::RenderStatistics::Instance()->EndFrame();
+		video::RenderStatistics::Instance()->BeginFrame();
+
 		secsPassed *= user.timeScale;
 
 		if(m_Smgr)
@@ -513,6 +516,7 @@ private:
 		CallPostRender(secsPassed, user);
 
 		m_Renderer->EndScene();
+
 		if(!m_Renderer->Present()) {
 			log::Error("Present failed");
 			auto state = m_Driver->GetDeviceState();

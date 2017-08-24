@@ -3,6 +3,7 @@
 #include "scene/Component.h"
 #include "video/RenderTarget.h"
 #include "math/Matrix4.h"
+#include "math/ViewFrustum.h"
 
 namespace lux
 {
@@ -37,6 +38,8 @@ public:
 	virtual void SetRenderPriority(s32 p) = 0;
 	virtual s32 GetRenderPriority() const = 0;
 
+	virtual const math::ViewFrustum& GetActiveFrustum() const = 0;
+
 	virtual void SetCameraListener(Listener* l) = 0;
 	virtual Listener* GetCameraListener() const = 0;
 };
@@ -48,21 +51,24 @@ public:
 	LUX_API Camera();
 	LUX_API ~Camera();
 
-	LUX_API void SetCustomProjection(const math::Matrix4& proj);
+	LUX_API void SetCustomProjection(const math::Matrix4& proj, const math::ViewFrustum& frustum);
 	LUX_API const math::Matrix4& GetCustomProjection();
 	LUX_API void ClearCustomProjection();
 
 	LUX_API void SetViewModification(const math::Matrix4& mod);
 	LUX_API const math::Matrix4& GetViewModification();
 
+	//! Screen width divided by Screen height
 	LUX_API void SetAspect(float aspect);
 	LUX_API float GetAspect() const;
 
 	LUX_API void SetXMax(float xmax);
 	LUX_API float GetXMax() const;
 
-	LUX_API void SetFOV(float fov);
-	LUX_API float GetFOV() const;
+	//! Set vertical field of vision in rad
+	LUX_API void SetFOV(math::AngleF fovY);
+	//! Get vertical field of vision in rad
+	LUX_API math::AngleF GetFOV() const;
 
 	LUX_API void SetNearPlane(float near);
 	LUX_API float GetNearPlane() const;
@@ -99,20 +105,26 @@ public:
 	LUX_API void Render(video::Renderer* r, const Node* n);
 	LUX_API void PostRender(video::Renderer* renderer, const Node* node);
 
+	LUX_API const math::ViewFrustum& GetActiveFrustum() const;
+	LUX_API const math::Matrix4& GetActiveView() const;
+	LUX_API const math::Matrix4& GetActiveProjection() const;
+
 	LUX_API core::Name GetReferableType() const;
 	LUX_API StrongRef<Referable> Clone() const;
 
 private:
 	math::Matrix4 CalculateProjectionMatrix(video::Renderer* r, const Node* n);
 	math::Matrix4 CalculateViewMatrix(video::Renderer* r, const Node* n);
+	math::ViewFrustum CalculateViewFrustum(video::Renderer* r, const Node* n, const math::Matrix4& view);
 
 private:
+	math::ViewFrustum m_CustomFrustum;
 	math::Matrix4 m_CustomProjection;
 	bool m_HasCustomProjection;
 
 	math::Matrix4 m_ViewModification;
 
-	float m_FOV;
+	math::AngleF m_FOV;
 	float m_XMax;
 	float m_Aspect;
 
@@ -125,6 +137,10 @@ private:
 	u32 m_RenderPriority;
 
 	Listener* m_Listener;
+
+	math::Matrix4 m_ActiveProjection;
+	math::Matrix4 m_ActiveView;
+	math::ViewFrustum m_ActiveViewFrustum;
 
 	bool m_AutoAspect;
 };

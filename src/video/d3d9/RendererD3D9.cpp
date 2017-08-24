@@ -96,8 +96,6 @@ void RendererD3D9::EndScene()
 		else
 			throw core::D3D9Exception(hr);
 	}
-
-	m_RenderStatistics->RegisterFrame();
 }
 
 bool RendererD3D9::Present()
@@ -272,7 +270,8 @@ void RendererD3D9::DrawPrimitiveList(
 		}
 	}
 
-	m_RenderStatistics->AddPrimitives(primitiveCount);
+	if(m_RenderStatistics)
+		m_RenderStatistics->AddPrimitives(primitiveCount);
 }
 
 void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D)
