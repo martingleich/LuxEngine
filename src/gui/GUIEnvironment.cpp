@@ -34,7 +34,9 @@ namespace gui
 
 GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_OSWindow(osWindow),
-	m_OSCursor(osCursor)
+	m_OSCursor(osCursor),
+	m_IgnoreMouse(false),
+	m_IgnoreKeyboard(false)
 {
 	m_OSWindow->SetEnvironment(this);
 
@@ -69,6 +71,8 @@ GUIEnvironment::~GUIEnvironment()
 {
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 StrongRef<Window> GUIEnvironment::GetRootElement()
 {
 	return m_Root;
@@ -79,13 +83,7 @@ StrongRef<Cursor> GUIEnvironment::GetCursor()
 	return m_Cursor;
 }
 
-void GUIEnvironment::Render()
-{
-	video::RenderStatistics::GroupScope grpScope("gui");
-	m_Renderer->Begin();
-	m_Root->Render(m_Renderer);
-	m_Renderer->Flush();
-}
+///////////////////////////////////////////////////////////////////////////
 
 void GUIEnvironment::Update(float secsPassed)
 {
@@ -97,17 +95,27 @@ void GUIEnvironment::Update(float secsPassed)
 		if(m_Hovered) {
 			e.elem = m_Hovered;
 			e.type = ElementEvent::MouseLeave;
-			SendEvent(e.elem, e);
+			SendElementEvent(e.elem, e);
 		}
 		if(newHovered) {
 			e.elem = newHovered;
 			e.type = ElementEvent::MouseEnter;
-			SendEvent(e.elem, e);
+			SendElementEvent(e.elem, e);
 		}
 		//onHoverChange.Broadcast(newHovered);
 		m_Hovered = newHovered;
 	}
 }
+
+void GUIEnvironment::Render()
+{
+	video::RenderStatistics::GroupScope grpScope("gui");
+	m_Renderer->Begin();
+	m_Root->Render(m_Renderer);
+	m_Renderer->Flush();
+}
+
+///////////////////////////////////////////////////////////////////////////
 
 StrongRef<Skin> GUIEnvironment::GetSkin() const
 {
@@ -123,59 +131,25 @@ StrongRef<Renderer> GUIEnvironment::GetRenderer() const
 {
 	return m_Renderer;
 }
+
 void GUIEnvironment::SetRenderer(Renderer* r)
 {
 	m_Renderer = r;
 }
 
-static Element* GetElementByPosRec(Element* e, const math::Vector2F& pos)
-{
-	Element* out = nullptr;
-	if(e->GetFinalRect().IsInside(pos))
-		out = e;
-	for(auto x : e->Elements()) {
-		auto childOut = GetElementByPosRec(x, pos);
-		if(childOut)
-			return childOut;
-	}
+///////////////////////////////////////////////////////////////////////////
 
-	return out;
+void GUIEnvironment::IgnoreKeyboard(bool b)
+{
+	m_IgnoreKeyboard = b;
 }
 
-StrongRef<Element> GUIEnvironment::GetElementByPos(const math::Vector2F& pos)
+void GUIEnvironment::IgnoreMouse(bool b)
 {
-	return GetElementByPosRec(m_Root, pos);
+	m_IgnoreMouse = b;
 }
 
-void GUIEnvironment::SendEvent(Element* elem, const Event& event)
-{
-	elem->OnEvent(event);
-}
-
-void GUIEnvironment::SendMouseEvent(MouseEvent& e)
-{
-	e.shift = m_ShiftState;
-	e.ctrl = m_ControlState;
-	e.leftState = m_LeftState;
-	e.rightState = m_RightState;
-	e.pos = m_CursorPos;
-
-	e.elem = m_Hovered;
-	if(e.elem)
-		SendEvent(e.elem, e);
-}
-
-void GUIEnvironment::OnCursorMove(const math::Vector2F& newPos)
-{
-	if(m_CursorPos != newPos) {
-		m_CursorPos = newPos;
-		MouseEvent e;
-		e.type = MouseEvent::Move;
-		SendMouseEvent(e);
-	}
-}
-
-void GUIEnvironment::OnEvent(const input::Event& event)
+void GUIEnvironment::SendUserInputEvent(const input::Event& event)
 {
 	if(event.source == input::EEventSource::Mouse) {
 		MouseEvent e;
@@ -199,22 +173,55 @@ void GUIEnvironment::OnEvent(const input::Event& event)
 	if(event.source == input::EEventSource::Keyboard) {
 		m_ControlState = event.control;
 		m_ShiftState = event.shift;
+		KeyboardEvent e;
+		e.autoRepeat = !event.button.pressedDown;
+		memcpy(e.character, event.keyInput.character, sizeof(e.character));
+		e.key = event.button.code;
+		e.down = event.button.state;
+		SendKeyboardEvent(e);
 	}
 }
 
-StrongRef<FontCreator> GUIEnvironment::GetFontCreator()
+static Element* GetElementByPosRec(Element* e, const math::Vector2F& pos)
 {
-	return m_FontCreator;
+	Element* out = nullptr;
+	if(e->IsPointInside(pos))
+		out = e;
+	for(auto x : e->Elements()) {
+		auto childOut = GetElementByPosRec(x, pos);
+		if(childOut)
+			return childOut;
+	}
+
+	return out;
 }
 
-StrongRef<Font> GUIEnvironment::GetBuiltInFont()
+StrongRef<Element> GUIEnvironment::GetElementByPos(const math::Vector2F& pos)
 {
-	return m_BuiltInFont;
+	return GetElementByPosRec(m_Root, pos);
+}
+
+void GUIEnvironment::SendElementEvent(Element* elem, const Event& event)
+{
+	elem->OnEvent(event);
 }
 
 Element* GUIEnvironment::GetHovered()
 {
 	return m_Hovered;
+}
+
+void GUIEnvironment::SetFocused(Element* elem)
+{
+	if(!elem)
+		m_Focused = nullptr;
+	if(m_Focused != elem && elem->IsFocusable()) {
+		m_Focused = elem;
+		ElementEvent e;
+		e.elem = elem;
+		e.type = ElementEvent::FocusGained;
+		SendElementEvent(e.elem, e);
+	}
 }
 
 Element* GUIEnvironment::GetFocused()
@@ -223,6 +230,7 @@ Element* GUIEnvironment::GetFocused()
 }
 
 ///////////////////////////////////////////////////////////////////////////
+
 StrongRef<Element> GUIEnvironment::AddElement(core::Name name, Element* parent)
 {
 	if(!parent)
@@ -248,23 +256,103 @@ StrongRef<Button> GUIEnvironment::AddButton(const ScalarVectorF& pos, const Scal
 	return button;
 }
 
+StrongRef<Button> GUIEnvironment::AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent)
+{
+	StrongRef<Button> button = AddElement("lux.gui.SwitchButton", parent);
+	button->SetPosition(pos);
+	button->SetSize(size);
+	button->SetText(text);
+	return button;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+StrongRef<FontCreator> GUIEnvironment::GetFontCreator()
+{
+	return m_FontCreator;
+}
+
+StrongRef<Font> GUIEnvironment::GetBuiltInFont()
+{
+	return m_BuiltInFont;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+WeakRef<Element> GUIEnvironment::GrabCursor(Element* elem)
+{
+	auto out = m_Grabbed;
+	m_Grabbed = elem;
+	return out;
+}
+
 void GUIEnvironment::OnElementRemoved(Element* elem)
 {
 	if(elem == GetHovered()) {
 		ElementEvent e;
 		e.elem = elem;
 		e.type = ElementEvent::MouseLeave;
-		SendEvent(e.elem, e);
+		SendElementEvent(e.elem, e);
 	}
 	if(elem == GetFocused()) {
 		ElementEvent e;
 		e.elem = elem;
 		e.type = ElementEvent::FocusLost;
-		SendEvent(e.elem, e);
+		SendElementEvent(e.elem, e);
+		m_Focused = nullptr;
 	}
 
 	for(auto e : elem->Elements())
 		OnElementRemoved(e);
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+void GUIEnvironment::OnCursorMove(const math::Vector2F& newPos)
+{
+	if(m_CursorPos != newPos) {
+		m_CursorPos = newPos;
+		MouseEvent e;
+		e.type = MouseEvent::Move;
+		SendMouseEvent(e);
+	}
+}
+
+void GUIEnvironment::OnEvent(const input::Event& event)
+{
+	if((event.source == input::EEventSource::Mouse && !m_IgnoreMouse) ||
+		(event.source == input::EEventSource::Keyboard && !m_IgnoreKeyboard))
+		SendUserInputEvent(event);
+}
+
+void GUIEnvironment::SendMouseEvent(MouseEvent& e)
+{
+	e.shift = m_ShiftState;
+	e.ctrl = m_ControlState;
+	e.leftState = m_LeftState;
+	e.rightState = m_RightState;
+	e.pos = m_CursorPos;
+
+	if(m_Grabbed) {
+		e.elem = m_Grabbed;
+		SendElementEvent(e.elem, e);
+	} else {
+		if(m_Hovered) {
+			e.elem = m_Hovered;
+			SendElementEvent(e.elem, e);
+		}
+	}
+}
+
+void GUIEnvironment::SendKeyboardEvent(KeyboardEvent& e)
+{
+	e.shift = m_ShiftState;
+	e.ctrl = m_ControlState;
+
+	if(m_Focused) {
+		e.elem = m_Focused;
+		SendElementEvent(e.elem, e);
+	}
 }
 
 } // namespace gui

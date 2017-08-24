@@ -10,28 +10,27 @@ namespace gui
 class AbstractButton : public Element
 {
 public:
-	LUX_API AbstractButton();
+	LUX_API AbstractButton(bool isSwitchButton=false);
 	LUX_API ~AbstractButton();
 
 	LUX_API bool OnMouseEvent(const gui::MouseEvent& e);
+	LUX_API bool OnKeyboardEvent(const gui::KeyboardEvent& e);
 	LUX_API bool OnElementEvent(const gui::ElementEvent& e);
 
 	bool IsPressed() const
 	{
 		return m_IsPressed;
 	}
-
+	bool IsPushButton() const
+	{
+		return m_IsPushButton;
+	}
+	
 	event::Signal<Element*> onClick;
 
 protected:
-	virtual bool IsRealClick(const math::Vector2F& pos)
-	{
-		LUX_UNUSED(pos);
-		return true;
-	}
-
-protected:
 	bool m_IsPressed;
+	bool m_IsPushButton;
 };
 
 } // namespace gui

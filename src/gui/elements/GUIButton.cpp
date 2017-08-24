@@ -2,13 +2,18 @@
 #include "gui/GUISkin.h"
 #include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.gui.Button", lux::gui::Button);
+static ::lux::Referable* PushButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(false); } \
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock PushButtonInternalReferableRegisterStaticObject("lux.gui.Button", &PushButtonInternalCreatorFunc);
+
+static ::lux::Referable* SwitchButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(true); } \
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock SwitchButtonInternalReferableRegisterStaticObject("lux.gui.SwitchButton", &SwitchButtonInternalCreatorFunc);
 
 namespace lux
 {
 namespace gui
 {
-Button::Button() :
+Button::Button(bool isSwitchButton) :
+	AbstractButton(isSwitchButton),
 	m_Color(video::Color::LightGray)
 {
 }

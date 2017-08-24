@@ -10,10 +10,16 @@ namespace gui
 
 enum class EGUIState
 {
-	Enabled,
-	Disabled,
-	Highlighted,
+	Enabled = 1,
+	Highlighted = 2,
+	Focused = 4,
+
+	Disabled = 0
 };
+}
+DECLARE_FLAG_CLASS(gui::EGUIState);
+namespace gui
+{
 
 enum class EGUIPrimitive
 {
@@ -48,7 +54,7 @@ public:
 	Skin()
 	{
 		enabledColor = video::Colorf(1, 1, 1, 1);
-		disabledColor = video::Colorf(0.75f, 0.75f, 0.75f, 1.0f);
+		disabledColor = video::Colorf(0.6f, 0.6f, 0.6f, 1.0f);
 		textColor = video::Colorf(0, 0, 0);
 	}
 
@@ -77,13 +83,13 @@ public:
 	Skin3D()
 	{
 		window = video::Color(180, 180, 180);
-		face = video::Color(210,210,210);
+		face = video::Color(210, 210, 210);
 		darkShadow = 0.2f;
 		shadow = 0.6f;
 		light = 1.4f;
 		highLight = 1.7f;
 
-		buttonPressedTextOffset = math::Vector2F(1,1);
+		buttonPressedTextOffset = math::Vector2F(1, 1);
 	}
 
 	void DrawPrimitive(
@@ -95,7 +101,7 @@ public:
 		const math::RectF* clip = nullptr)
 	{
 		auto realColor = color;
-		if(state == EGUIState::Enabled)
+		if(TestFlag(state, EGUIState::Enabled))
 			realColor *= enabledColor;
 		if(state == EGUIState::Disabled)
 			realColor *= disabledColor;
@@ -173,5 +179,6 @@ public:
 
 } // namespace gui
 } // namespace lux
+
 
 #endif // #ifndef INCLUDED_GUI_SKIN_H

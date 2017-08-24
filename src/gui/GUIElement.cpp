@@ -18,7 +18,6 @@ Element::Element() :
 	m_Margin(0, 0, 0, 0),
 	m_Size(10, 10),
 	m_MinSize(1, 1),
-	m_MaxSize(65536, 65536),
 	m_TabId(NO_TAB_STOP),
 	m_CanFocus(true),
 	m_IsVisible(true),
@@ -79,6 +78,12 @@ bool Element::IsFocused() const
 {
 	return (m_Environment->GetFocused() == this);
 }
+
+bool Element::IsHovered() const
+{
+	return (m_Environment->GetHovered() == this);
+}
+
 bool Element::IsTrulyVisible() const
 {
 	if(!IsVisible())
@@ -163,6 +168,18 @@ void Element::SetHeight(ScalarDistanceF height)
 	SetSize(ScalarDimensionF(GetWidth(), height));
 }
 
+void Element::SetInnerSize(const ScalarDimensionF& size)
+{
+	auto parent = GetParentInnerRect();
+	math::Dimension2F realSize(size.width.GetRealValue(parent.GetWidth()), size.height.GetRealValue(parent.GetHeight()));
+
+	auto& border = GetBorder();
+	realSize.width += border.left + border.right;
+	realSize.height += border.top + border.bottom;
+
+	SetSize(PixelDimension(realSize.width, realSize.height));
+}
+
 const math::Rect<ScalarDistanceF>& Element::GetMargin() const
 {
 	return m_Margin;
@@ -187,12 +204,22 @@ void Element::SetPlacement(const math::Rect<ScalarDistanceF>& margin, const Scal
 	UpdateRect();
 }
 
-const math::Rect<ScalarDistanceF>& Element::GetBorder() const
+void Element::SetMinSize(const math::Dimension2F& minSize)
+{
+	m_MinSize = minSize;
+}
+
+const math::Dimension2F& Element::GetMinSize() const
+{
+	return m_MinSize;
+}
+
+const math::RectF& Element::GetBorder() const
 {
 	return m_Border;
 }
 
-void Element::SetBorder(const math::Rect<ScalarDistanceF>& border)
+void Element::SetBorder(const math::RectF& border)
 {
 	m_Border = border;
 	UpdateRect();
@@ -314,6 +341,9 @@ bool Element::OnEvent(const Event& e)
 	auto mouseE = dynamic_cast<const gui::MouseEvent*>(&e);
 	if(mouseE)
 		return OnMouseEvent(*mouseE);
+	auto keyE = dynamic_cast<const gui::KeyboardEvent*>(&e);
+	if(keyE)
+		return OnKeyboardEvent(*keyE);
 	auto elementE = dynamic_cast<const gui::ElementEvent*>(&e);
 	if(elementE)
 		return OnElementEvent(*elementE);
@@ -329,16 +359,41 @@ Skin* Element::GetSkin() const
 		return nullptr;
 }
 
+void Element::SetFont(Font* f)
+{
+	m_OverwriteFont = f;
+}
+
+StrongRef<Font> Element::GetFont() const
+{
+	return m_OverwriteFont;
+}
+
+StrongRef<Font> Element::GetActiveFont() const
+{
+	if(m_OverwriteFont)
+		return m_OverwriteFont;
+	else
+		return GetSkin()->defaultFont;
+}
+
 EGUIState Element::GetState() const
 {
+	EGUIState state = EGUIState::Disabled;
 	if(IsEnabled()) {
+		state |= EGUIState::Enabled;
 		if(IsFocused())
-			return EGUIState::Highlighted;
-		else
-			return EGUIState::Enabled;
+			state |= EGUIState::Focused;
+		if(IsHovered())
+			state |= EGUIState::Highlighted;
 	}
 
-	return EGUIState::Disabled;
+	return state;
+}
+
+bool Element::IsPointInside(const math::Vector2F& point) const
+{
+	return GetFinalRect().IsInside(point);
 }
 
 void Element::OnAdd(Element* p)
@@ -364,12 +419,14 @@ void Element::OnRemove(Element* p)
 static void CalculateAxis(
 	float& finalLow, float& finalHigh,
 	float marginLow, float marginHigh,
-	float size,
+	float size, float minSize,
 	float parentLow, float parentHigh)
 {
-	const bool autoLow = marginLow == Element::AUTO_MARGIN;
-	const bool autoHigh = marginHigh == Element::AUTO_MARGIN;
-	const bool autoSize = size == Element::AUTO_SIZE;
+	bool autoLow = marginLow == Element::AUTO_MARGIN;
+	bool autoHigh = marginHigh == Element::AUTO_MARGIN;
+	bool autoSize = size == Element::AUTO_SIZE;
+	if(!autoSize && size < minSize)
+		size = minSize;
 
 	if(autoLow == autoHigh) {
 		finalLow = parentLow;
@@ -378,7 +435,10 @@ static void CalculateAxis(
 			finalLow += marginLow;
 			finalHigh -= marginHigh;
 		}
-
+		if(autoSize && finalHigh - finalLow < minSize) {
+			size = minSize;
+			autoSize = false;
+		}
 		if(!autoSize) {
 			const float center = (finalLow + finalHigh) / 2;
 			finalLow = center - size / 2;
@@ -386,16 +446,23 @@ static void CalculateAxis(
 		}
 	} else if(autoHigh) {
 		finalLow = parentLow + marginLow;
-		if(autoSize)
+		if(autoSize) {
 			finalHigh = parentHigh;
-		else
+			if(finalHigh - finalLow < minSize)
+				finalHigh = finalLow + minSize;
+		} else {
 			finalHigh = finalLow + size;
+		}
 	} else if(autoLow) {
 		finalHigh = parentHigh - marginHigh;
-		if(autoSize)
+		if(autoSize) {
 			finalLow = parentLow;
-		else
+			if(finalHigh - finalLow < minSize) {
+				finalLow = finalHigh - minSize;
+			}
+		} else {
 			finalLow = finalHigh - size;
+		}
 	}
 }
 
@@ -434,13 +501,13 @@ bool Element::UpdateFinalRect()
 	CalculateAxis(
 		newRect.left, newRect.right,
 		margin.left, margin.right,
-		size.width,
+		size.width, m_MinSize.width,
 		parentRect.left, parentRect.right);
 
 	CalculateAxis(
 		newRect.top, newRect.bottom,
 		margin.top, margin.bottom,
-		size.height,
+		size.height, m_MinSize.height,
 		parentRect.top, parentRect.bottom);
 
 	bool changed = (newRect != m_FinalRect);

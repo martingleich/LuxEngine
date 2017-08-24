@@ -61,7 +61,7 @@ class KeyboardEvent : public Event
 {
 public:
 	u32 character[4];
-	input::EKeyCode code;
+	input::EKeyCode key;
 	bool down:1;
 	bool autoRepeat:1;
 	bool ctrl:1;
@@ -95,11 +95,17 @@ public:
 	LUX_API GUIEnvironment(Window* osWindow, Cursor* osCursor);
 	LUX_API ~GUIEnvironment();
 
+	///////////////////////////////////////////////////////////////////////////
+
 	LUX_API StrongRef<Window> GetRootElement();
 	LUX_API StrongRef<Cursor> GetCursor();
 
+	///////////////////////////////////////////////////////////////////////////
+
 	LUX_API void Update(float secsPassed);
 	LUX_API void Render();
+
+	///////////////////////////////////////////////////////////////////////////
 
 	LUX_API StrongRef<Skin> GetSkin() const;
 	LUX_API void SetSkin(Skin* skin);
@@ -107,32 +113,41 @@ public:
 	LUX_API StrongRef<Renderer> GetRenderer() const;
 	LUX_API void SetRenderer(Renderer* r);
 
+	///////////////////////////////////////////////////////////////////////////
+
+	LUX_API void IgnoreKeyboard(bool b);
+	LUX_API void IgnoreMouse(bool b);
+	LUX_API void SendUserInputEvent(const input::Event& event);
+
 	LUX_API StrongRef<Element> GetElementByPos(const math::Vector2F& pos);
-
-	//! Retrieve the font creator.
-	LUX_API StrongRef<FontCreator> GetFontCreator();
-	LUX_API StrongRef<Font> GetBuiltInFont();
-
-	/**
-	Funktions to perform gui actions.
-	Like:
-	Change focus
-	Click focused element
-	Rightclick focused element
-	Send custom events into the environment
-	**/
-	LUX_API void SendEvent(Element* elem, const Event& event);
-
+	LUX_API void SendElementEvent(Element* elem, const Event& event);
 	LUX_API Element* GetHovered();
-	LUX_API Element* GetFocused();
 
-	LUX_API void OnElementRemoved(Element* elem);
+	LUX_API void SetFocused(Element* elem);
+	LUX_API Element* GetFocused();
 
 	///////////////////////////////////////////////////////////////////////////
 
 	LUX_API StrongRef<Element> AddElement(core::Name name, Element* parent);
 	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const String& text, Element* parent=nullptr);
 	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent=nullptr);
+	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent=nullptr);
+
+	///////////////////////////////////////////////////////////////////////////
+
+	//! Retrieve the font creator.
+	LUX_API StrongRef<FontCreator> GetFontCreator();
+
+	//! Get the built-in engine font.
+	/**
+	This font is always available, and is often used for default font values.
+	*/
+	LUX_API StrongRef<Font> GetBuiltInFont();
+	
+	///////////////////////////////////////////////////////////////////////////
+
+	LUX_API WeakRef<Element> GrabCursor(Element* elem);
+	LUX_API void OnElementRemoved(Element* elem);
 
 	///////////////////////////////////////////////////////////////////////////
 private:
@@ -140,6 +155,7 @@ private:
 	void OnEvent(const input::Event& event);
 
 	void SendMouseEvent(MouseEvent& e);
+	void SendKeyboardEvent(KeyboardEvent& e);
 
 private:
 	StrongRef<FontCreator> m_FontCreator;
@@ -157,11 +173,16 @@ private:
 	WeakRef<Element> m_Hovered;
 	WeakRef<Element> m_Focused;
 
+	WeakRef<Element> m_Grabbed;
+
 	math::Vector2F m_CursorPos;
 	bool m_LeftState;
 	bool m_RightState;
 	bool m_ControlState;
 	bool m_ShiftState;
+
+	bool m_IgnoreMouse;
+	bool m_IgnoreKeyboard;
 };
 
 } // namespace gui

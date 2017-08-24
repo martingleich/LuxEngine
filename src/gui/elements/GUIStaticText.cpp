@@ -86,23 +86,10 @@ core::Name StaticText::GetReferableType() const
 	return name;
 }
 
-void StaticText::SetOverwriteFont(Font* f)
+void StaticText::SetFont(Font* f)
 {
-	m_OverwriteFont = f;
+	Element::SetFont(f);
 	m_RebreakText = true;
-}
-
-StrongRef<Font> StaticText::GetOverwriteFont() const
-{
-	return m_OverwriteFont;
-}
-
-StrongRef<Font> StaticText::GetActiveFont() const
-{
-	if(m_OverwriteFont)
-		return m_OverwriteFont;
-	else
-		return GetSkin()->defaultFont;
 }
 
 void StaticText::SetColor(video::Color color)
@@ -138,6 +125,7 @@ bool StaticText::GetDrawBackground() const
 void StaticText::SetWordWrap(bool wrap)
 {
 	m_WordWrap = wrap;
+	m_RebreakText = true;
 }
 
 bool StaticText::GetWordWrap() const
@@ -177,10 +165,16 @@ void StaticText::EnsureBrokenText() const
 
 	auto width = GetFinalInnerWidth();
 	auto& brokenText = m_BrokenText;
+	auto& textWidth = m_TextWidth;
+	auto& textHeight = m_TextHeight;
+	textWidth = 0;
+	textHeight = 0;
 	core::Array<float> carets;
 	auto AddBrokenLine = [&](String&& line) {
-		if(!m_WordWrap || font->GetTextWidth(line) <= width) {
+		auto lineWidth = font->GetTextWidth(line);
+		if(!m_WordWrap || lineWidth <= width) {
 			m_BrokenText.PushBack(std::move(line));
+			textWidth = math::Max(textWidth, lineWidth);
 		} else {
 			String::ConstIterator prevBreakPoint = line.End();
 			carets.Clear();
@@ -194,6 +188,7 @@ void StaticText::EnsureBrokenText() const
 					prevBreakPoint = jt;
 				} else if(carets[id] - offset > width && prevBreakPoint != line.End()) {
 					brokenText.PushBack(std::move(String(lineFirst, prevBreakPoint)));
+					textWidth = math::Max(textWidth, carets[id] - offset);
 					offset += carets[id];
 					lineFirst = prevBreakPoint + 1;
 				}
@@ -201,6 +196,9 @@ void StaticText::EnsureBrokenText() const
 			if(lineFirst != line.End())
 				brokenText.PushBack(std::move(String(lineFirst, line.End())));
 		}
+
+		float lineHeight = font->GetLineDistance()*font->GetScaling()*font->GetFontHeight();
+		textHeight = lineHeight * m_BrokenText.Size();
 
 		line.Clear();
 	};
@@ -229,6 +227,17 @@ void StaticText::OnInnerRectChange()
 {
 	Element::OnInnerRectChange();
 	m_RebreakText = true;
+}
+
+void StaticText::FitSizeToText()
+{
+	m_WordWrap = false;
+	EnsureBrokenText();
+	math::Dimension2F size;
+	size.width = m_TextWidth;
+	size.height = m_TextHeight;
+
+	SetInnerSize(PixelDimension(size.width, size.height));
 }
 
 } // namespace gui

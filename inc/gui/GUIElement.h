@@ -15,6 +15,7 @@ namespace gui
 
 class Event;
 class MouseEvent;
+class KeyboardEvent;
 class ElementEvent;
 class Window;
 class Renderer;
@@ -51,6 +52,8 @@ public:
 	LUX_API virtual void SetFocusable(bool focus);
 	LUX_API virtual bool IsFocused() const;
 
+	LUX_API virtual bool IsHovered() const;
+
 	LUX_API virtual bool IsTrulyVisible() const;
 	LUX_API virtual bool IsVisible() const;
 	LUX_API virtual void SetVisible(bool visible);
@@ -67,8 +70,10 @@ public:
 	LUX_API virtual const String& GetToolTip() const;
 	LUX_API virtual void SetToolTip(const String& tip);
 
-	LUX_API virtual void SetBorder(const math::Rect<ScalarDistanceF>& border);
-	LUX_API virtual const math::Rect<ScalarDistanceF>& GetBorder() const;
+	LUX_API virtual void SetMinSize(const math::Dimension2F& minSize);
+	LUX_API virtual const math::Dimension2F& GetMinSize() const;
+	LUX_API virtual void SetBorder(const math::RectF& border);
+	LUX_API virtual const math::RectF& GetBorder() const;
 
 	LUX_API virtual const ScalarDimensionF GetSize() const;
 	LUX_API ScalarDistanceF GetWidth() const;
@@ -77,6 +82,7 @@ public:
 	LUX_API void SetSize(ScalarDistanceF width, ScalarDistanceF heigth);
 	LUX_API void SetWidth(ScalarDistanceF width);
 	LUX_API void SetHeight(ScalarDistanceF width);
+	LUX_API virtual void SetInnerSize(const ScalarDimensionF& size);
 
 	LUX_API virtual const math::Rect<ScalarDistanceF>& GetMargin() const;
 	LUX_API virtual void SetMargin(const math::Rect<ScalarDistanceF>& rect);
@@ -111,13 +117,20 @@ public:
 
 	LUX_API virtual bool OnEvent(const Event& e);
 	virtual bool OnMouseEvent(const gui::MouseEvent& e) { LUX_UNUSED(e); return false; }
+	virtual bool OnKeyboardEvent(const gui::KeyboardEvent& e) { LUX_UNUSED(e); return false; }
 	virtual bool OnElementEvent(const gui::ElementEvent& e) { LUX_UNUSED(e); return false; }
 
 	LUX_API virtual void Render(Renderer* renderer);
 	virtual void Paint(Renderer* renderer) { LUX_UNUSED(renderer); }
 
 	LUX_API virtual Skin* GetSkin() const;
+	LUX_API virtual void SetFont(Font* f);
+	LUX_API virtual StrongRef<Font> GetFont() const;
+	LUX_API virtual StrongRef<Font> GetActiveFont() const;
+
 	LUX_API EGUIState GetState() const;
+
+	LUX_API virtual bool IsPointInside(const math::Vector2F& point) const;
 
 protected:
 	LUX_API virtual void OnAdd(Element* p);
@@ -137,6 +150,7 @@ protected:
 protected:
 	ElementList m_Elements;
 
+	StrongRef<Font> m_OverwriteFont;
 	GUIEnvironment* m_Environment;
 	Element* m_Parent;
 	Window* m_Window;
@@ -147,11 +161,10 @@ protected:
 	mutable math::RectF m_FinalRect;
 	mutable math::RectF m_InnerRect;
 
-	math::Rect<ScalarDistanceF> m_Border;
+	math::Rect<float> m_Border;
 	math::Rect<ScalarDistanceF> m_Margin;
 	ScalarDimensionF m_Size;
 	math::Dimension2F m_MinSize;
-	math::Dimension2F m_MaxSize;
 
 	u32 m_TabId;
 
