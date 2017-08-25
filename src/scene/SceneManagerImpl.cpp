@@ -19,7 +19,7 @@
 
 #include "scene/components/RotationAnimator.h"
 #include "scene/components/LinearMoveAnimator.h"
-#include "scene/components/CameraControl.h"
+#include "scene/components/FirstPersonCameraControl.h"
 
 #include "scene/query/LineQuery.h"
 #include "scene/query/VolumeQuery.h"
@@ -163,9 +163,9 @@ StrongRef<LinearMoveAnimator> SceneManagerImpl::CreateLinearMover(const math::Li
 	return out;
 }
 
-StrongRef<CameraControl> SceneManagerImpl::CreateCameraControl(float moveSpeed, math::AngleF rotSpeed, bool noVerticalMovement)
+StrongRef<FirstPersonCameraControl> SceneManagerImpl::CreateFirstPersonCameraControl(float moveSpeed, math::AngleF rotSpeed, bool noVerticalMovement)
 {
-	StrongRef<CameraControl> out = CreateComponent(SceneComponentType::CameraControl);
+	StrongRef<FirstPersonCameraControl> out = CreateComponent(SceneComponentType::FirstPersonCameraControl);
 	out->SetMoveSpeed(moveSpeed);
 	out->SetRotationSpeed(rotSpeed);
 	out->AllowVerticalMovement(!noVerticalMovement);

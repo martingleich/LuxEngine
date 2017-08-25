@@ -225,6 +225,17 @@ public:
 	Signal& operator=(Signal&& old);
 
 	template <typename Class>
+	void Connect(StrongRef<Class>owner, void (Class::*proc)(Args...))
+	{
+		Connect((Class*)owner, proc);
+	}
+	template <typename Class>
+	void Connect(WeakRef<Class> owner, void (Class::*proc)(Args...))
+	{
+		Connect((Class*)owner, proc);
+	}
+
+	template <typename Class>
 	void Connect(Class* owner, void (Class::*proc)(Args...))
 	{
 		if(owner && proc)

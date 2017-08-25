@@ -139,7 +139,7 @@ namespace input
 #include "scene/components/SceneMesh.h"
 #include "scene/components/SkyBox.h"
 
-#include "scene/components/CameraControl.h"
+#include "scene/components/FirstPersonCameraControl.h"
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/RotationAnimator.h"
 

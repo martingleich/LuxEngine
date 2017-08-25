@@ -93,7 +93,7 @@ public:
 	void OnEvent(const input::Event& e)
 	{
 		if(m_RButton || e.source == input::EEventSource::Keyboard)
-			scene::CameraControl::DefaultEventToCameraAction(e);
+			m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->DefaultEventToCameraAction(e);
 		EventHandler::OnEvent(e);
 	}
 
@@ -167,7 +167,7 @@ void MaterialTest::Load()
 
 	StrongRef<scene::Node> node;
 
-	m_CameraNode->AddComponent(Context.Smgr->CreateCameraControl());
+	m_CameraNode->AddComponent(Context.Smgr->CreateFirstPersonCameraControl());
 
 	m_Font = Context.GUI->GetFontCreator()->CreateFont(
 		gui::FontDescription("Comic Sans MS", 40, gui::EFontWeight::Bolt),

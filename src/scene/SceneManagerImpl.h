@@ -43,7 +43,7 @@ public:
 	// Animatoren
 	StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f));
 	StrongRef<LinearMoveAnimator> CreateLinearMover(const math::Line3F& line, float duration);
-	StrongRef<CameraControl> CreateCameraControl(float moveSpeed = 4.0f, math::AngleF rotSpeed = math::AngleF::Degree(30.0f), bool noVerticalMovement = false);
+	StrongRef<FirstPersonCameraControl> CreateFirstPersonCameraControl(float moveSpeed = 4.0f, math::AngleF rotSpeed = math::AngleF::Degree(30.0f), bool noVerticalMovement = false);
 
 	StrongRef<Component> CreateComponent(core::Name type);
 

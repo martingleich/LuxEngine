@@ -44,7 +44,7 @@ class Light;
 class SkyBox;
 
 class Animator;
-class CameraControl;
+class FirstPersonCameraControl;
 class RotationAnimator;
 class LinearMoveAnimator;
 
@@ -79,7 +79,7 @@ public:
 	// Animatoren
 	virtual StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f)) = 0;
 	virtual StrongRef<LinearMoveAnimator> CreateLinearMover(const math::Line3F& line, float duration) = 0;
-	virtual StrongRef<CameraControl> CreateCameraControl(float moveSpeed = 4.0f, math::AngleF rotSpeed = math::AngleF::Degree(9.0f), bool noVerticalMovement = false) = 0;
+	virtual StrongRef<FirstPersonCameraControl> CreateFirstPersonCameraControl(float moveSpeed = 4.0f, math::AngleF rotSpeed = math::AngleF::Degree(9.0f), bool noVerticalMovement = false) = 0;
 
 	virtual StrongRef<Component> CreateComponent(core::Name type) = 0;
 

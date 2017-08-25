@@ -7,12 +7,6 @@ namespace event
 
 ActionList::ActionList()
 {
-	AddAxis("cam_forward");
-	AddAxis("cam_stride");
-	AddAxis("cam_up");
-
-	AddAxis("cam_look_x");
-	AddAxis("cam_look_y");
 }
 
 ActionList* ActionList::Instance()

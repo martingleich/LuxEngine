@@ -109,16 +109,6 @@ private:
 	event::Axis state;
 };
 
-/**
-The default actions are:
-Camera-Actions used by scene::CameraControl:
-axis cam_forward: Strength of the camera moving forward, negative to move backward
-axis cam_stride: Strength of the camera moving right, negative to move left
-axis cam_up: Strength of the camera moving up, negative to move down
-
-axis cam_look_x: Speed of the camera rotating around the y axis
-axis cam_look_y: Speed of the camera rotation around the x axis
-*/
 class ActionList : public ReferenceCounted
 {
 public:

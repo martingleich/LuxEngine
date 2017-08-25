@@ -7,7 +7,7 @@ namespace scene
 namespace SceneComponentType
 {
 const core::Name Rotation("lux.comp.Rotation");
-const core::Name CameraControl("lux.comp.CameraControl");
+const core::Name FirstPersonCameraControl("lux.comp.FirstPersonCameraControl");
 const core::Name LinearMove("lux.comp.LinearMove");
 
 const core::Name Camera("lux.comp.Camera");

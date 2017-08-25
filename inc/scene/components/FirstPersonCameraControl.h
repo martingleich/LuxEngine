@@ -1,10 +1,10 @@
-#ifndef INCLUDED_FPS_CONTROL_H
-#define INCLUDED_FPS_CONTROL_H
+#ifndef INCLUDED_FIRST_PERSON_CAMERA_CONTROL_H
+#define INCLUDED_FIRST_PERSON_CAMERA_CONTROL_H
 #include "scene/components/Animator.h"
 #include "math/Angle.h"
 #include "math/Vector2.h"
+#include "math/Vector3.h"
 
-#include "events/lxActions.h"
 #include "input/InputEvent.h"
 
 namespace lux
@@ -12,13 +12,13 @@ namespace lux
 namespace scene
 {
 
-class CameraControl : public Animator
+class FirstPersonCameraControl : public Animator
 {
 public:
-	LUX_API CameraControl();
-	LUX_API CameraControl(float moveSpeed, math::AngleF rotSpeed, math::AngleF maxVerticalAngle, bool noVerticalMovement);
+	LUX_API FirstPersonCameraControl();
+	LUX_API FirstPersonCameraControl(float moveSpeed, math::AngleF rotSpeed, math::AngleF maxVerticalAngle, bool noVerticalMovement);
 
-	LUX_API ~CameraControl();
+	LUX_API ~FirstPersonCameraControl();
 
 	LUX_API void Animate(Node* node, float time);
 
@@ -37,16 +37,19 @@ public:
 	LUX_API core::Name GetReferableType() const;
 	LUX_API StrongRef<Referable> Clone() const;
 
+	LUX_API void RotX(float x);
+	LUX_API void RotY(float y);
+	LUX_API void ForwardSpeed(float f);
+	LUX_API void FlankSpeed(float f);
+	LUX_API void UpSpeed(float f);
+	LUX_API void SetFast(bool fast);
+
 	//! Maps a event to the camera actions
 	/**
 	This mapping used WASD to move the camera, QE to move the camera up and down,
 	and the mouse to look around.
 	*/
-	LUX_API static void DefaultEventToCameraAction(const input::Event& event);
-
-private:
-	void MouseMoveX(float v);
-	void MouseMoveY(float v);
+	LUX_API void DefaultEventToCameraAction(const input::Event& event);
 
 private:
 	float m_MoveSpeed;
@@ -54,11 +57,9 @@ private:
 	math::AngleF m_MaxVerticalAngle;
 	bool m_NoVerticalMovement;
 
-	WeakRef<event::AxisAction> m_Forward;
-	WeakRef<event::AxisAction> m_Flank;
-	WeakRef<event::AxisAction> m_Up;
-
-	math::Vector2F m_MouseMove;
+	bool m_Fast;
+	math::Vector2F m_Rot;
+	math::Vector3F m_Move;
 };
 
 } // namespace scene
