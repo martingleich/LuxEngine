@@ -6,7 +6,7 @@ using namespace lux;
 
 struct AppContext
 {
-	AppContext() : Device(nullptr), Driver(nullptr), Smgr(nullptr), Input(nullptr)
+	AppContext() : Device(nullptr), Driver(nullptr), Scene(nullptr), Input(nullptr)
 	{
 	}
 
@@ -22,7 +22,8 @@ struct AppContext
 		MatLib = video::MaterialLibrary::Instance();
 		MeshSystem = video::MeshSystem::Instance();
 
-		Smgr = Device->GetSceneManager();
+		Scene = Device->GetScene();
+		SceneRenderer = Device->GetSceneRenderer();
 		GUI = Device->GetGUIEnvironment();
 
 		Input = input::InputSystem::Instance();
@@ -57,7 +58,8 @@ struct AppContext
 	LuxDevice* Device;
 	video::VideoDriver* Driver;
 	video::Renderer* Renderer;
-	scene::SceneManager* Smgr;
+	scene::Scene* Scene;
+	scene::SceneRenderer* SceneRenderer;
 	input::InputSystem* Input;
 	io::FileSystem* FileSys;
 	video::MaterialLibrary* MatLib;

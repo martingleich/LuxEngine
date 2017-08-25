@@ -9,7 +9,8 @@
 
 #include "resources/ResourceSystem.h"
 
-#include "scene/SceneManagerImpl.h"
+#include "scene/Scene.h"
+#include "scene/SceneRendererImpl.h"
 #include "scene/particle/ParticleSystemManager.h"
 
 #include "io/FileSystem.h"
@@ -134,7 +135,8 @@ LuxDeviceWin32::LuxDeviceWin32()
 LuxDeviceWin32::~LuxDeviceWin32()
 {
 	m_GUIEnv.Reset();
-	m_SceneManager.Reset();
+	m_Scene.Reset();
+	m_SceneRenderer.Reset();
 
 	scene::ParticleSystemManager::Destroy();
 
@@ -300,19 +302,25 @@ StrongRef<video::AdapterList> LuxDeviceWin32::GetVideoAdapters(video::EDriverTyp
 	throw core::NotImplementedException();
 }
 
-void LuxDeviceWin32::BuildSceneManager()
+void LuxDeviceWin32::BuildScene()
 {
 	// If system already build -> no op
-	if(m_SceneManager) {
-		log::Warning("Scene Manager already built.");
+	if(m_Scene) {
+		log::Warning("Scene already built.");
 		return;
 	}
 
 	if(!scene::ParticleSystemManager::Instance())
 		scene::ParticleSystemManager::Initialize();
 
-	log::Info("Build Scene Manager.");
-	m_SceneManager = LUX_NEW(scene::SceneManagerImpl);
+	log::Info("Build Scene.");
+	m_Scene = CreateScene();
+	m_SceneRenderer = LUX_NEW(scene::SceneRendererImpl);
+}
+
+StrongRef<scene::Scene> LuxDeviceWin32::CreateScene()
+{
+	return LUX_NEW(scene::Scene);
 }
 
 void LuxDeviceWin32::BuildImageSystem()
@@ -342,7 +350,7 @@ void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
 	BuildWindow(config.display.width, config.display.height, "Window");
 	BuildInputSystem();
 	BuildVideoDriver(config);
-	BuildSceneManager();
+	BuildScene();
 	BuildGUIEnvironment();
 }
 
@@ -412,7 +420,8 @@ public:
 	{
 		m_Window = m_Device->GetWindow();
 		m_GUIEnv = m_Device->GetGUIEnvironment();
-		m_Smgr = m_Device->GetSceneManager();
+		m_Scene = m_Device->GetScene();
+		m_SceneRenderer = m_Device->GetSceneRenderer();
 		m_Driver = video::VideoDriver::Instance();
 		m_Renderer = m_Driver->GetRenderer();
 
@@ -499,15 +508,15 @@ private:
 
 		secsPassed *= user.timeScale;
 
-		if(m_Smgr)
-			m_Smgr->AnimateAll(secsPassed);
+		if(m_Scene)
+			m_Scene->AnimateAll(secsPassed);
 		if(m_GUIEnv)
 			m_GUIEnv->Update(secsPassed);
 
 		CallPostMove(secsPassed, user);
 
-		if(m_Smgr)
-			m_Smgr->DrawAll(true, false);
+		if(m_SceneRenderer)
+			m_SceneRenderer->DrawScene(m_Scene, true, false);
 		else
 			m_Renderer->BeginScene(true, true, true);
 		if(m_GUIEnv)
@@ -580,7 +589,8 @@ private:
 	LuxDevice* m_Device;
 	gui::Window* m_Window;
 	gui::GUIEnvironment* m_GUIEnv;
-	scene::SceneManager* m_Smgr;
+	scene::Scene* m_Scene;
+	scene::SceneRenderer* m_SceneRenderer;
 	video::VideoDriver* m_Driver;
 	video::Renderer* m_Renderer;
 };

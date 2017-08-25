@@ -44,7 +44,8 @@ public:
 	StrongRef<video::AdapterList> GetVideoAdapters(video::EDriverType driver);
 
 	void BuildImageSystem();
-	void BuildSceneManager();
+	void BuildScene();
+	StrongRef<scene::Scene> CreateScene();
 	void BuildGUIEnvironment();
 	void BuildAll(const video::DriverConfig& config);
 
@@ -60,9 +61,14 @@ public:
 		return m_Window;
 	}
 
-	StrongRef<scene::SceneManager> GetSceneManager() const
+	StrongRef<scene::Scene> GetScene() const
 	{
-		return m_SceneManager;
+		return m_Scene;
+	}
+
+	StrongRef<scene::SceneRenderer> GetSceneRenderer() const
+	{
+		return m_SceneRenderer;
 	}
 
 	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const
@@ -86,7 +92,8 @@ public:
 private:
 	StrongRef<gui::WindowWin32> m_Window;
 
-	StrongRef<scene::SceneManager> m_SceneManager;
+	StrongRef<scene::Scene> m_Scene;
+	StrongRef<scene::SceneRenderer> m_SceneRenderer;
 	StrongRef<gui::GUIEnvironment> m_GUIEnv;
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT

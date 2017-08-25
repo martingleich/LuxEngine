@@ -1,5 +1,6 @@
-#include "scene/SceneManager.h"
+#include "scene/Scene.h"
 #include "scene/Node.h"
+#include "scene/Renderable.h"
 #include "scene/query/Query.h"
 #include "scene/query/QueryCallback.h"
 #include "scene/query/VolumeQuery.h"
@@ -15,14 +16,14 @@ namespace lux
 namespace scene
 {
 
-Node::Node(SceneManager* creator, bool isRoot) :
+Node::Node(Scene* scene, bool isRoot) :
 	m_Parent(nullptr),
 	m_Sibling(nullptr),
 	m_Child(nullptr),
 	m_Tags(0),
 	m_DebugFlags(EDD_NONE),
 	m_AnimatedCount(0),
-	m_SceneManager(creator),
+	m_Scene(scene),
 	m_IsVisible(true),
 	m_HasUserBoundingBox(false),
 	m_IsRoot(isRoot)
@@ -206,7 +207,7 @@ StrongRef<Node> Node::AddChild(Node* child)
 	if(child == this)
 		throw core::InvalidArgumentException("child", "Child may not be the same node");
 
-	if(m_SceneManager != child->m_SceneManager)
+	if(m_Scene != child->m_Scene)
 		throw core::InvalidArgumentException("child", "Child was created in diffrent scene manager");
 
 	child->Grab();
@@ -231,7 +232,7 @@ StrongRef<Node> Node::AddChild(Node* child)
 
 StrongRef<Node> Node::AddChild()
 {
-	return AddChild(LUX_NEW(Node(m_SceneManager)));
+	return AddChild(LUX_NEW(Node(m_Scene)));
 }
 
 bool Node::HasChildren() const
@@ -310,8 +311,8 @@ core::Range<Node::ConstChildIterator> Node::Children() const
 
 void Node::MarkForDelete()
 {
-	if(m_SceneManager)
-		m_SceneManager->AddToDeletionQueue(this);
+	if(m_Scene)
+		m_Scene->AddToDeletionQueue(this);
 }
 
 void Node::MarkForDelete(Component* comp)
@@ -339,15 +340,15 @@ Node* Node::GetParent() const
 	return m_Parent;
 }
 
-SceneManager* Node::GetSceneManager() const
+Scene* Node::GetScene() const
 {
-	return m_SceneManager;
+	return m_Scene;
 }
 
 Node* Node::GetRoot()
 {
-	if(m_SceneManager)
-		return m_SceneManager->GetRoot();
+	if(m_Scene)
+		return m_Scene->GetRoot();
 	return this;
 }
 
@@ -444,7 +445,7 @@ Node::Node(const Node& other) :
 	m_Tags(other.m_Tags),
 	m_DebugFlags(other.m_DebugFlags),
 	m_IsVisible(other.m_IsVisible),
-	m_SceneManager(other.m_SceneManager)
+	m_Scene(other.m_Scene)
 {
 	for(auto child : Children()) {
 		StrongRef<Node> node = child->Clone();
@@ -467,25 +468,25 @@ void Node::OnDettach()
 
 void Node::OnAddComponent(Component* c)
 {
-	if(m_SceneManager) {
+	if(m_Scene) {
 		auto camera = dynamic_cast<Camera*>(c);
 		if(camera)
-			m_SceneManager->RegisterCamera(this, camera);
+			m_Scene->RegisterCamera(this, camera);
 
 		auto light = dynamic_cast<Light*>(c);
 		if(light) {
-			m_SceneManager->RegisterLight(this, light);
+			m_Scene->RegisterLight(this, light);
 			SetShadowCasting(false);
 		}
 
 		auto fog = dynamic_cast<Fog*>(c);
 		if(fog) {
-			m_SceneManager->RegisterFog(this, fog);
+			m_Scene->RegisterFog(this, fog);
 		}
 
 		if(c->IsAnimated()) {
 			if(m_AnimatedCount == 0)
-				m_SceneManager->RegisterAnimated(this);
+				m_Scene->RegisterAnimated(this);
 			++m_AnimatedCount;
 		}
 	}
@@ -498,21 +499,21 @@ void Node::OnAddComponent(Component* c)
 
 void Node::OnRemoveComponent(Component* c)
 {
-	if(m_SceneManager) {
+	if(m_Scene) {
 		auto camera = dynamic_cast<Camera*>(c);
 		if(camera)
-			m_SceneManager->UnregisterCamera(this, camera);
+			m_Scene->UnregisterCamera(this, camera);
 
 		auto light = dynamic_cast<Light*>(c);
 		if(light)
-			m_SceneManager->UnregisterLight(this, light);
+			m_Scene->UnregisterLight(this, light);
 		auto fog = dynamic_cast<Fog*>(c);
 		if(fog)
-			m_SceneManager->UnregisterFog(this, fog);
+			m_Scene->UnregisterFog(this, fog);
 		if(c->IsAnimated()) {
 			--m_AnimatedCount;
 			if(m_AnimatedCount == 0)
-				m_SceneManager->UnregisterAnimated(this);
+				m_Scene->UnregisterAnimated(this);
 		}
 	}
 

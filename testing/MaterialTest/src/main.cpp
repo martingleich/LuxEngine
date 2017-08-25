@@ -38,15 +38,15 @@ public:
 	{
 		scene::Node* node;
 
-		m_Camera = Context.Smgr->CreateCamera();
-		m_CameraNode = Context.Smgr->AddNode(m_Camera);
+		m_Camera = Context.Scene->CreateCamera();
+		m_CameraNode = Context.Scene->AddNode(m_Camera);
 		m_CameraNode->SetPosition(0.0f, 0.0f, -15.0f);
 		m_CameraNode->SetDirectionUp(math::Vector3F(0.0f, 0.0f, 1.0f));
 
-		m_Light = Context.Smgr->CreateLight();
+		m_Light = Context.Scene->CreateLight();
 		m_Light->SetLightType(video::ELightType::Directional);
 		m_Light->SetColor(video::Color::White);
-		node = Context.Smgr->AddNode(m_Light);
+		node = Context.Scene->AddNode(m_Light);
 		node->SetDirection(math::Vector3F::UNIT_Z);
 
 		m_CheckerTexture = Context.ImgSys->CreateFittingTexture(math::Dimension2U(32, 32));
@@ -70,7 +70,7 @@ public:
 			}
 		}
 
-		node = Context.Smgr->AddSkyBox();
+		node = Context.Scene->AddSkyBox();
 		auto skyBox = node->GetComponent<scene::SkyBox>();
 		skyBox->UseCubeTexture(false);
 		skyBox->SetSkyTexture(m_CheckerTexture);
@@ -167,7 +167,7 @@ void MaterialTest::Load()
 
 	StrongRef<scene::Node> node;
 
-	m_CameraNode->AddComponent(Context.Smgr->CreateFirstPersonCameraControl());
+	m_CameraNode->AddComponent(Context.Scene->CreateFirstPersonCameraControl());
 
 	m_Font = Context.GUI->GetFontCreator()->CreateFont(
 		gui::FontDescription("Comic Sans MS", 40, gui::EFontWeight::Bolt),
@@ -183,11 +183,11 @@ void MaterialTest::Load()
 	size_t row = 0;
 	size_t col = 0;
 	for(auto it = materials.First(); it != materials.End(); ++it) {
-		auto comp = Context.Smgr->CreateMesh(geo);
+		auto comp = Context.Scene->CreateMesh(geo);
 		comp->SetReadMaterialsOnly(false);
 		comp->SetMaterial(0, *it);
 
-		node = Context.Smgr->AddNode(comp);
+		node = Context.Scene->AddNode(comp);
 
 		math::Vector3F pos(
 			startPoint.x + col*delta,

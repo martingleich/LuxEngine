@@ -17,7 +17,7 @@ class Component;
 class Collider;
 class Query;
 class QueryCallback;
-class SceneManager;
+class Scene;
 
 enum EDebugData : u32
 {
@@ -331,7 +331,7 @@ public:
 	};
 
 public:
-	LUX_API Node(SceneManager* creator, bool isRoot = false);
+	LUX_API Node(Scene* scene, bool isRoot = false);
 	LUX_API virtual ~Node();
 
 	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
@@ -508,7 +508,7 @@ public:
 	//! Delete this node from the scene
 	/**
 	Use this method only when currently not animating or rendering a scene.
-	To delete a node while doing this use SceneManager::AddToDeletionQueue or Node::MarkForDelete
+	To delete a node while doing this use Scene::AddToDeletionQueue or Node::MarkForDelete
 	*/
 	LUX_API virtual void Remove();
 	LUX_API core::Range<ChildIterator> Children();
@@ -518,7 +518,7 @@ public:
 
 	LUX_API virtual void SetParent(Node* newParent);
 	LUX_API Node* GetParent() const;
-	LUX_API SceneManager* GetSceneManager() const;
+	LUX_API Scene* GetScene() const;
 	LUX_API Node* GetRoot();
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -575,7 +575,7 @@ private:
 	u32 m_AnimatedCount;
 	SceneNodeComponentList m_Components;
 
-	SceneManager* m_SceneManager;
+	Scene* m_Scene;
 
 	mutable math::Transformation m_AbsoluteTrans;
 

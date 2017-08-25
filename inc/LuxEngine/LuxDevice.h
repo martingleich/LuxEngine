@@ -9,7 +9,8 @@ namespace lux
 
 namespace scene
 {
-class SceneManager;
+class Scene;
+class SceneRenderer;
 }
 
 namespace gui
@@ -54,12 +55,19 @@ public:
 	virtual core::Array<video::EDriverType> GetDriverTypes() = 0;
 	virtual StrongRef<video::AdapterList> GetVideoAdapters(video::EDriverType driver) = 0;
 
-	//! Creates the scene manager component of the engine
+	//! Creates the scene component of the engine
 	/**
 	Requires video driver and the input system.
-	After this call all scene modules are fully usable
+	After this call all scene modules are fully usable.
+	Creates a single scene object.
 	*/
-	virtual void BuildSceneManager() = 0;
+	virtual void BuildScene() = 0;
+	virtual StrongRef<scene::Scene> CreateScene() = 0;
+
+	//! Create the gui environment
+	/**
+	Requires a window, the video module and the input system
+	*/
 	virtual void BuildGUIEnvironment() = 0;
 
 	//! Build the image system of the engine.
@@ -112,7 +120,8 @@ public:
 
 	virtual void Sleep(u32 millis) = 0;
 
-	virtual StrongRef<scene::SceneManager> GetSceneManager() const = 0;
+	virtual StrongRef<scene::Scene> GetScene() const = 0;
+	virtual StrongRef<scene::SceneRenderer> GetSceneRenderer() const = 0;
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;
 
 	virtual StrongRef<gui::Window> GetWindow() const = 0;

@@ -125,7 +125,8 @@ namespace input
 
 #include "video/DrawingCanvas.h"
 
-#include "scene/SceneManager.h"
+#include "scene/Scene.h"
+#include "scene/SceneRenderer.h"
 #include "scene/Transformable.h"
 
 #include "scene/collider/Collider.h"

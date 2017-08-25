@@ -1,6 +1,5 @@
 #include "scene/components/SkyBox.h"
 
-#include "scene/SceneManager.h"
 #include "scene/components/Camera.h"
 #include "scene/Node.h"
 
