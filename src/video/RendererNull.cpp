@@ -11,17 +11,15 @@ namespace video
 RendererNull::RendererNull(VideoDriver* driver) :
 	m_RenderMode(ERenderMode::None),
 	m_DirtyFlags(0xFFFFFFFF), // Set all dirty flags at start
-	m_Driver(driver)
+	m_Driver(driver),
+	m_IsFogActive(false)
 {
-	m_Fog.isActive = false;
-
 	m_ParamId.lighting = m_Params.AddAttribute("lighting", (float)video::ELighting::Enabled);
 	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::Colorf(0, 0, 0));
 	m_ParamId.time = m_Params.AddAttribute("time", 0.0f);
 
-	m_ParamId.fogColor = m_Params.AddAttribute("fogColor", video::Colorf(1, 1, 1));
-	m_ParamId.fogRange = m_Params.AddAttribute("fogRange", math::Vector3F(0,0,0));
-	m_ParamId.fogInfo = m_Params.AddAttribute("fogInfo", math::Vector3F(0,0,0));
+	m_ParamId.fog1 = m_Params.AddAttribute("fog1", video::Colorf(1, 1, 1, 0));
+	m_ParamId.fog2 = m_Params.AddAttribute("fog2", video::Colorf(0, 0, 0, 0));
 
 	for(size_t i = 0; i < m_MatrixTable.GetCount(); ++i)
 		m_Params.AddAttribute(m_MatrixTable.CreateAttribute(i));
@@ -134,16 +132,17 @@ void RendererNull::ClearLights()
 	SetDirty(Dirty_Lights);
 }
 
-///////////////////////////////////////////////////////////////////////////
 void RendererNull::SetFog(const FogData& fog)
 {
+	m_IsFogActive = true;
 	m_Fog = fog;
 	SetDirty(Dirty_Fog);
 }
 
-const FogData& RendererNull::GetFog() const
+void RendererNull::ClearFog()
 {
-	return m_Fog;
+	m_IsFogActive = false;
+	SetDirty(Dirty_Fog);
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -31,6 +31,7 @@ public:
 	StrongRef<Node> AddSkyBox(const video::Colorf& color);
 	StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr);
 	StrongRef<Node> AddLight(video::ELightType lightType=video::ELightType::Point, video::Color color = video::Color::White);
+	StrongRef<Node> AddFog(const video::Colorf& color=video::Color::White, float start=10.0f, float end = 100.0f);
 	StrongRef<Node> AddCamera();
 
 	// Object components
@@ -39,6 +40,7 @@ public:
 	StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr);
 	StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture = nullptr);
 	StrongRef<Light> CreateLight(video::ELightType lightType=video::ELightType::Point, video::Color color = video::Color::White);
+	StrongRef<Fog> CreateFog(const video::Colorf& color=video::Color::White, float start=10.0f, float end = 100.0f);
 
 	// Animatoren
 	StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f));
@@ -73,6 +75,9 @@ public:
 	void RegisterLight(Node* node, Light* light);
 	void UnregisterLight(Node* node, Light* light);
 
+	void RegisterFog(Node* node, Fog* fog);
+	void UnregisterFog(Node* node, Fog* fog);
+
 	void RegisterAnimated(Node* node);
 	void UnregisterAnimated(Node* node);
 
@@ -85,9 +90,6 @@ public:
 
 	void SetAmbient(const video::Colorf& ambient);
 	const video::Colorf& GetAmbient() const;
-
-	void SetFog(const video::FogData& fog);
-	const video::FogData& GetFog() const;
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -221,6 +223,29 @@ private:
 		}
 	};
 
+	struct FogEntry
+	{
+		Node* node;
+		Fog* fog;
+
+		FogEntry() :
+			node(nullptr),
+			fog(nullptr)
+		{
+		}
+
+		FogEntry(Node* n, Fog* f) :
+			node(n),
+			fog(f)
+		{
+		}
+
+		bool operator==(const FogEntry& other) const
+		{
+			return node == other.node && fog == other.fog;
+		}
+	};
+
 private:
 	/////////////////////////////////////////////////////////////////////////
 	// Caches and temporary values
@@ -228,6 +253,7 @@ private:
 	// The used renderqueues
 	core::Array<CameraEntry> m_CameraList;
 	core::Array<LightEntry> m_LightList;
+	core::Array<FogEntry> m_FogList;
 
 	core::Array<RenderEntry> m_SkyBoxList;
 	core::Array<RenderEntry> m_SolidNodeList;
@@ -253,7 +279,6 @@ private:
 
 	// Scene values
 	video::Colorf m_AmbientColor;
-	video::FogData m_Fog;
 
 	core::OrderedMap<ERenderPass, core::Array<video::PipelineOverwrite>> m_Overwrites; //!< User-set pipeline overwrites
 

@@ -67,10 +67,8 @@ public:
 	void AddLight(const LightData& light);
 	void ClearLights();
 
-	///////////////////////////////////////////////////////////////////////////
-
 	void SetFog(const FogData& fog);
-	const FogData& GetFog() const;
+	void ClearFog();
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -128,9 +126,8 @@ protected:
 		core::AttributePtr ambient;
 		core::AttributePtr time;
 
-		core::AttributePtr fogColor;
-		core::AttributePtr fogRange;
-		core::AttributePtr fogInfo;
+		core::AttributePtr fog1;
+		core::AttributePtr fog2;
 
 		core::Array<core::AttributePtr> lights;
 	};
@@ -151,6 +148,7 @@ protected:
 
 	core::Array<LightData> m_Lights; //!< User set lights
 
+	bool m_IsFogActive;
 	FogData m_Fog; //!< User set fog data
 
 	math::Matrix4 m_TransformWorld;

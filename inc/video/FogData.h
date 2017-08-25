@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FOG_DATA_H
 #define INCLUDED_FOG_DATA_H
-#include "video/ColorFloat.h"
+#include "video/Color.h"
 
 namespace lux
 {
@@ -17,8 +17,6 @@ enum class EFogType
 class FogData
 {
 public:
-	bool isActive;
-
 	EFogType type;
 
 	float start;
@@ -29,7 +27,6 @@ public:
 	video::Colorf color;
 
 	FogData() :
-		isActive(true),
 		type(EFogType::Linear),
 		start(0.0f),
 		end(100.0f),

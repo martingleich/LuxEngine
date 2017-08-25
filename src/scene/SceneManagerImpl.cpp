@@ -15,6 +15,7 @@
 #include "scene/components/Camera.h"
 #include "scene/components/SceneMesh.h"
 #include "scene/components/Light.h"
+#include "scene/components/Fog.h"
 #include "scene/components/SkyBox.h"
 
 #include "scene/components/RotationAnimator.h"
@@ -43,8 +44,6 @@ SceneManagerImpl::SceneManagerImpl() :
 {
 	m_RootSceneNode = LUX_NEW(Node)(this, true);
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
-
-	m_Fog.isActive = false;
 
 	m_Attributes.AddAttribute("drawStencilShadows", false);
 	m_Attributes.AddAttribute("maxShadowCasters", 1);
@@ -107,6 +106,11 @@ StrongRef<Node> SceneManagerImpl::AddLight(video::ELightType lightType, video::C
 	return AddNode(CreateLight(lightType, color));
 }
 
+StrongRef<Node> SceneManagerImpl::AddFog(const video::Colorf& color, float start, float end)
+{
+	return AddNode(CreateFog(color, start, end));
+}
+
 StrongRef<Node> SceneManagerImpl::AddCamera()
 {
 	return AddNode(CreateCamera());
@@ -144,6 +148,17 @@ StrongRef<Light> SceneManagerImpl::CreateLight(video::ELightType lightType, vide
 	light->SetLightType(lightType);
 	light->SetColor(color);
 	return light;
+}
+
+StrongRef<Fog> SceneManagerImpl::CreateFog(const video::Colorf& color, float start, float end)
+{
+	StrongRef<Fog> fog = CreateComponent(SceneComponentType::Fog);
+	fog->SetFogType(video::EFogType::Linear);
+	fog->SetStart(start);
+	fog->SetEnd(end);
+	fog->SetColor(color);
+
+	return fog;
 }
 
 StrongRef<RotationAnimator> SceneManagerImpl::CreateRotator(const math::Vector3F& axis, math::AngleF rotSpeed)
@@ -330,6 +345,19 @@ void SceneManagerImpl::UnregisterLight(Node* node, Light* light)
 		m_LightList.Erase(it);
 }
 
+void SceneManagerImpl::RegisterFog(Node* node, Fog* fog)
+{
+	m_FogList.PushBack(FogEntry(node, fog));
+}
+
+void SceneManagerImpl::UnregisterFog(Node* node, Fog* fog)
+{
+	FogEntry entry(node, fog);
+	auto it = core::LinearSearch(entry, m_FogList);
+	if(it != m_FogList.End())
+		m_FogList.Erase(it);
+}
+
 void SceneManagerImpl::RegisterAnimated(Node* node)
 {
 	m_AnimatedNodes.Insert(node);
@@ -366,16 +394,6 @@ void SceneManagerImpl::SetAmbient(const video::Colorf& ambient)
 const video::Colorf& SceneManagerImpl::GetAmbient() const
 {
 	return m_AmbientColor;
-}
-
-void SceneManagerImpl::SetFog(const video::FogData& fog)
-{
-	m_Fog = fog;
-}
-
-const video::FogData& SceneManagerImpl::GetFog() const
-{
-	return m_Fog;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -490,8 +508,6 @@ bool SceneManagerImpl::IsCulled(Node* node, Renderable* r, const math::ViewFrust
 
 void SceneManagerImpl::DrawScene()
 {
-	m_Renderer->SetFog(m_Fog);
-
 	// Check if a stencil buffer is available for shadow rendering
 	bool drawStencilShadows = m_Attributes["drawStencilShadows"];
 	if(drawStencilShadows) {
@@ -510,6 +526,27 @@ void SceneManagerImpl::DrawScene()
 	SceneData sceneData(illuminating, shadowCasting);
 	sceneData.activeCamera = m_ActiveCamera;
 	sceneData.activeCameraNode = m_ActiveCameraNode;
+
+	//-------------------------------------------------------------------------
+	// The fog
+	m_Renderer->ClearFog();
+	bool foundFog = false;
+	for(auto& f : m_FogList) {
+		if(f.node->IsTrulyVisible()) {
+			if(!foundFog) {
+				if(drawStencilShadows) {
+					log::Warning("Scenerenderer can't draw fog while using stencil shadows.(fog disabled)");
+					break;
+				}
+				foundFog = true;
+				auto fog = f.fog->GetFogData();
+				m_Renderer->SetFog(fog);
+			} else {
+				log::Warning("Scenerenderer only supports one fog element per scene.(all but one fog disabled)");
+				break;
+			}
+		}
+	}
 
 	//-------------------------------------------------------------------------
 	// The lights

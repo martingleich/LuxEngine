@@ -499,7 +499,7 @@ void RendererD3D9::LoadTransforms(const Pass& pass)
 
 void RendererD3D9::LoadFogSettings(const Pass& pass)
 {
-	bool useFog = pass.fogEnabled && m_Fog.isActive;
+	bool useFog = pass.fogEnabled && m_IsFogActive;
 	if(m_RenderMode == ERenderMode::Mode2D)
 		useFog = false;
 
@@ -509,22 +509,24 @@ void RendererD3D9::LoadFogSettings(const Pass& pass)
 
 	// Enable or disable the fog, for fixed and shader
 	m_DeviceState.EnableFog(useFixedFog);
-	math::Vector3F fogInfo;
-	fogInfo.x = useFog;
-	fogInfo.y =
+
+	video::Colorf fog1;
+	fog1.r = m_Fog.color.r;
+	fog1.g = m_Fog.color.g;
+	fog1.b = m_Fog.color.b;
+	fog1.a = useFog ? 1.0f : 0.0f;
+	video::Colorf fog2;
+	fog2.r =
 		m_Fog.type == EFogType::Linear ? 1.0f :
 		m_Fog.type == EFogType::Exp ? 2.0f :
 		m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
-	fogInfo.z = 0;
-	*m_ParamId.fogInfo = fogInfo;
+	fog2.g = m_Fog.start;
+	fog2.b = m_Fog.end;
+	fog2.a = m_Fog.density;
+	*m_ParamId.fog1 = fog1;
+	*m_ParamId.fog2 = fog2;
 
 	if(IsDirty(Dirty_Fog)) {
-		*m_ParamId.fogColor = m_Fog.color;
-		*m_ParamId.fogRange = math::Vector3F(
-			m_Fog.start,
-			m_Fog.end,
-			m_Fog.density);
-
 		// Only use the fixed pipeline if there is no shader
 		m_DeviceState.SetFog(m_Fog);
 		ClearDirty(Dirty_Fog);

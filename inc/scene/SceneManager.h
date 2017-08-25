@@ -41,6 +41,7 @@ class Node;
 class Camera;
 class Mesh;
 class Light;
+class Fog;
 class SkyBox;
 
 class Animator;
@@ -67,6 +68,7 @@ public:
 	virtual StrongRef<Node> AddSkyBox(const video::Colorf& color) = 0;
 	virtual StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr) = 0;
 	virtual StrongRef<Node> AddLight(video::ELightType lightType = video::ELightType::Point, video::Color color = video::Color::White) = 0;
+	virtual StrongRef<Node> AddFog(const video::Colorf& color = video::Color::White, float start = 10.0f, float end = 100.0f) = 0;
 	virtual StrongRef<Node> AddCamera() = 0;
 
 	// Object components
@@ -75,6 +77,7 @@ public:
 	virtual StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr) = 0;
 	virtual StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture = nullptr) = 0;
 	virtual StrongRef<Light> CreateLight(video::ELightType lightType = video::ELightType::Point, video::Color color = video::Color::White) = 0;
+	virtual StrongRef<Fog> CreateFog(const video::Colorf& color = video::Color::White, float start = 10.0f, float end = 100.0f) = 0;
 
 	// Animatoren
 	virtual StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f)) = 0;
@@ -109,6 +112,9 @@ public:
 	virtual void RegisterLight(Node* node, Light* light) = 0;
 	virtual void UnregisterLight(Node* node, Light* light) = 0;
 
+	virtual void RegisterFog(Node* node, Fog* fog) = 0;
+	virtual void UnregisterFog(Node* node, Fog* fog) = 0;
+
 	virtual void RegisterAnimated(Node* node) = 0;
 	virtual void UnregisterAnimated(Node* node) = 0;
 
@@ -121,9 +127,6 @@ public:
 
 	virtual void SetAmbient(const video::Colorf& ambient) = 0;
 	virtual const video::Colorf& GetAmbient() const = 0;
-
-	virtual void SetFog(const video::FogData& fog) = 0;
-	virtual const video::FogData& GetFog() const = 0;
 
 	////////////////////////////////////////////////////////////////////////////////////
 

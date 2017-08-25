@@ -136,6 +136,7 @@ namespace input
 #include "scene/Node.h"
 #include "scene/components/Camera.h"
 #include "scene/components/Light.h"
+#include "scene/components/Fog.h"
 #include "scene/components/SceneMesh.h"
 #include "scene/components/SkyBox.h"
 

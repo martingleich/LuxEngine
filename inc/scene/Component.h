@@ -20,6 +20,7 @@ LUX_API extern const core::Name LinearMove;
 LUX_API extern const core::Name Camera;
 LUX_API extern const core::Name Mesh;
 LUX_API extern const core::Name Light;
+LUX_API extern const core::Name Fog;
 LUX_API extern const core::Name SkyBox;
 }
 

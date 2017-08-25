@@ -6,6 +6,7 @@
 #include "scene/collider/Collider.h"
 #include "scene/components/Camera.h"
 #include "scene/components/Light.h"
+#include "scene/components/Fog.h"
 #include "core/Logger.h"
 #include "core/ReferableRegister.h"
 
@@ -477,6 +478,11 @@ void Node::OnAddComponent(Component* c)
 			SetShadowCasting(false);
 		}
 
+		auto fog = dynamic_cast<Fog*>(c);
+		if(fog) {
+			m_SceneManager->RegisterFog(this, fog);
+		}
+
 		if(c->IsAnimated()) {
 			if(m_AnimatedCount == 0)
 				m_SceneManager->RegisterAnimated(this);
@@ -500,6 +506,9 @@ void Node::OnRemoveComponent(Component* c)
 		auto light = dynamic_cast<Light*>(c);
 		if(light)
 			m_SceneManager->UnregisterLight(this, light);
+		auto fog = dynamic_cast<Fog*>(c);
+		if(fog)
+			m_SceneManager->UnregisterFog(this, fog);
 		if(c->IsAnimated()) {
 			--m_AnimatedCount;
 			if(m_AnimatedCount == 0)

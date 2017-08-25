@@ -168,13 +168,11 @@ public:
 	//! The maximal number of lights which can be active at once
 	virtual size_t GetMaxLightCount() const = 0;
 
-	///////////////////////////////////////////////////////////////////////////
-
-	//! Set the active fog
+	//! Set and enable fog
 	virtual void SetFog(const FogData& fog) = 0;
 
-	//! Get the active fog
-	virtual const FogData& GetFog() const = 0;
+	//! Disable the fog
+	virtual void ClearFog() = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
