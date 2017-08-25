@@ -26,6 +26,33 @@ CursorWin32::~CursorWin32()
 		m_Window->onResize.DisconnectClass(this);
 }
 
+void CursorWin32::SetState(ECursorState state)
+{
+	if(state != m_State) {
+		HCURSOR cursor = NULL;
+		switch(state) {
+		case ECursorState::Normal:
+			cursor = LoadCursorW(NULL, IDC_ARROW);
+			break;
+		case ECursorState::Beam:
+			cursor = LoadCursorW(NULL, IDC_IBEAM);
+			break;
+		case ECursorState::Wait:
+			cursor = LoadCursorW(NULL, IDC_WAIT);
+			break;
+		}
+		if(cursor)
+			SetCursor(cursor);
+	}
+
+	m_State = state;
+}
+
+ECursorState CursorWin32::GetState() const
+{
+	return m_State;
+}
+
 void CursorWin32::SetPosition(float x, float y)
 {
 	// Nur wenn das Fenster aktiv ist

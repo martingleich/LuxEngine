@@ -115,7 +115,7 @@ protected:
 	void OnResize(float w, float h)
 	{
 		m_FinalRect.right = m_FinalRect.left + w;
-		m_FinalRect.bottom = m_FinalRect.right + h;
+		m_FinalRect.bottom = m_FinalRect.top + h;
 		OnFinalRectChange();
 		OnInnerRectChange();
 		onResize.Broadcast(this, math::Dimension2F(w, h));

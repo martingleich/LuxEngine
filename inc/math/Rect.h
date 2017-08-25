@@ -36,7 +36,7 @@ public:
 	}
 
 	//! Construct from two corners
-	Rect(const Vector2<T>& min, const Vector2<T>& max) : left(min.x), bottom(min.y), right(max.x), top(Max.y)
+	Rect(const Vector2<T>& min, const Vector2<T>& max) : left(min.x), bottom(min.y), right(max.x), top(max.y)
 	{
 	}
 
@@ -193,6 +193,17 @@ public:
 		if(top < other.top)
 			top = other.top;
 		return *this;
+	}
+
+	//! Clamp a point into the rectangle
+	/**
+	Including the edge
+	*/
+	math::Vector2<T> Clamp(const math::Vector2<T>& v) const 
+	{
+		return math::Vector2<T>(
+			math::Clamp(v.x, left, right),
+			math::Clamp(v.y, top, bottom));
 	}
 
 	//! Check if a point is inside the rect, including the edge

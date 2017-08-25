@@ -16,6 +16,8 @@ public:
 	CursorWin32(Window* window);
 	~CursorWin32();
 
+	void SetState(ECursorState state);
+	ECursorState GetState() const;
 	void SetPosition(float x, float y);
 	math::Vector2F GetPosition() const;
 
@@ -41,6 +43,8 @@ private:
 	WeakRef<Window> m_Window;
 	math::Dimension2F m_WindowSize;
 	math::Dimension2F m_InvWindowSize;
+
+	ECursorState m_State;
 
 	bool m_Grabbing;
 	math::Vector2F m_GrabbingPosition;

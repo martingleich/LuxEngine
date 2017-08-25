@@ -1,6 +1,7 @@
 #ifndef INCLUDED_GUI_SKIN_H
 #define INCLUDED_GUI_SKIN_H
-#include "GUIRenderer.h"
+#include "gui/GUIRenderer.h"
+#include "gui/Cursor.h"
 #include "gui/Font.h"
 
 namespace lux
@@ -68,6 +69,12 @@ public:
 		const video::Colorf& color,
 		const math::RectF* clip = nullptr) = 0;
 
+	virtual void DrawCursor(
+		Renderer* r,
+		ECursorState state,
+		bool pressed,
+		const math::Vector2F& position) = 0;
+
 	StrongRef<Font> defaultFont;
 	video::Colorf enabledColor;
 	video::Colorf disabledColor;
@@ -120,6 +127,22 @@ public:
 			r->DrawRectangle(rect, (realColor*face).ToHex(), clip);
 			break;
 		}
+	}
+
+	void DrawCursor(
+		Renderer* r,
+		ECursorState state,
+		bool pressed,
+		const math::Vector2F& position)
+	{
+		LUX_UNUSED(state);
+		video::Color color = video::Color(200, 0, 0);
+		if(pressed)
+			color = video::Color(255,10,10);
+		r->DrawTriangle(
+			position,
+			position + math::Vector2F(0.0f, 20.0f),
+			position + math::Vector2F(14.0f, 14.0f), color, nullptr);
 	}
 
 private:

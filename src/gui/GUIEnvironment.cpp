@@ -18,6 +18,8 @@
 #include "gui/FontFormat.h"
 #include "gui/FontCreator.h"
 
+#include "gui/CursorLux.h"
+
 #include "io/FileSystem.h"
 #include "io/File.h"
 
@@ -32,17 +34,72 @@ namespace lux
 namespace gui
 {
 
+class GUIEnvironment::CursorControl : public Cursor
+{
+public:
+	CursorControl(Cursor*& cursor) :
+		m_Cursor(cursor)
+	{
+		m_Visible = cursor->IsVisible();
+	}
+
+	void SetState(ECursorState state) { m_Cursor->SetState(state); }
+	ECursorState GetState() const { return m_Cursor->GetState(); }
+	void SetPosition(float x, float y) { m_Cursor->SetPosition(x, y); }
+	void SetRelPosition(float x, float y) { return m_Cursor->SetRelPosition(x, y); }
+	math::Vector2F GetPosition() const { return m_Cursor->GetPosition(); }
+	math::Vector2F GetRelPosition() const { return m_Cursor->GetRelPosition(); }
+	const math::Dimension2F& GetScreenSize() const { return m_Cursor->GetScreenSize(); }
+	void SetVisible(bool visible)
+	{
+		m_Visible = visible;
+		if(!m_VirtualVisible)
+			m_Cursor->SetVisible(visible);
+	}
+
+	bool IsVisible() const
+	{
+		return m_Visible;
+	}
+
+	bool IsGrabbing() const { return m_Cursor->IsGrabbing(); }
+	void SetGrabbing(bool grab) { m_Cursor->SetGrabbing(grab); }
+	const math::Vector2F& GetGrabbingPosition() const { return m_Cursor->GetGrabbingPosition(); }
+
+	void SetVirtualDraw(bool b)
+	{
+		m_VirtualVisible = b;
+		if(b)
+			m_Visible = m_Cursor->IsVisible();
+	}
+
+private:
+	Cursor*& m_Cursor;
+	bool m_Visible;
+	bool m_VirtualVisible;
+};
+
 GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_OSWindow(osWindow),
 	m_OSCursor(osCursor),
+	m_Cursor(nullptr),
+	m_LeftState(false),
+	m_RightState(false),
+	m_ControlState(false),
+	m_ShiftState(false),
 	m_IgnoreMouse(false),
-	m_IgnoreKeyboard(false)
+	m_IgnoreKeyboard(false),
+	m_UseVirtualCursor(true), // Is later in code set to false
+	m_DrawVirtualCursor(false)
 {
 	m_OSWindow->SetEnvironment(this);
 
 	m_Root = m_OSWindow;
-	m_Cursor = m_OSCursor;
+	m_LuxCursor = LUX_NEW(CursorLux)(m_Root);
+	UseVirtualCursor(false);
 
+	m_CursorCtrl = LUX_NEW(CursorControl)(m_Cursor);
+	m_CursorCtrl->SetVirtualDraw(false);
 
 #ifdef LUX_WINDOWS
 	m_FontCreator = LUX_NEW(FontCreatorWin32);
@@ -64,7 +121,6 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	SetRenderer(LUX_NEW(Renderer)(video::VideoDriver::Instance()->GetRenderer()));
 
 	input::InputSystem::Instance()->GetEventSignal().Connect(this, &GUIEnvironment::OnEvent);
-	m_Cursor->onCursorMove.Connect(this, &GUIEnvironment::OnCursorMove);
 }
 
 GUIEnvironment::~GUIEnvironment()
@@ -80,7 +136,62 @@ StrongRef<Window> GUIEnvironment::GetRootElement()
 
 StrongRef<Cursor> GUIEnvironment::GetCursor()
 {
-	return m_Cursor;
+	return m_CursorCtrl;
+}
+
+void GUIEnvironment::UseVirtualCursor(bool useVirtual)
+{
+	if(useVirtual == m_UseVirtualCursor)
+		return;
+
+	m_UseVirtualCursor = useVirtual;
+
+	if(m_Cursor)
+		m_Cursor->onCursorMove.DisconnectClass(this);
+	if(useVirtual) {
+		if(m_Cursor) {
+			m_LuxCursor->SetVisible(m_OSCursor->IsVisible());
+			m_LuxCursor->SetGrabbing(m_OSCursor->IsGrabbing());
+			m_LuxCursor->SetPosition(m_OSCursor->GetPosition());
+			if(!m_Root->GetFinalInnerRect().IsInside(m_LuxCursor->GetPosition())) {
+				m_LuxCursor->SetRelPosition(0.5f, 0.5f);
+			}
+		} else {
+			m_LuxCursor->SetVisible(true);
+			m_LuxCursor->SetGrabbing(false);
+		}
+		m_OSCursor->SetGrabbing(true);
+		m_OSCursor->SetVisible(false);
+		m_Cursor = m_LuxCursor;
+	} else {
+		if(m_Cursor) {
+			m_OSCursor->SetVisible(m_LuxCursor->IsVisible());
+			m_OSCursor->SetGrabbing(m_LuxCursor->IsGrabbing());
+			m_OSCursor->SetPosition(m_LuxCursor->GetPosition());
+		}
+		m_LuxCursor->SetGrabbing(true);
+		m_LuxCursor->SetVisible(false);
+		m_Cursor = m_OSCursor;
+	}
+
+	m_Cursor->onCursorMove.Connect(this, &GUIEnvironment::OnCursorMove);
+	OnCursorMove(m_Cursor->GetPosition());
+}
+
+void GUIEnvironment::SetDrawVirtualCursor(bool draw)
+{
+	if(m_DrawVirtualCursor == draw)
+		return;
+	m_DrawVirtualCursor = draw;
+
+	if(draw)
+		m_CursorCtrl->SetVirtualDraw(draw);
+	if(draw)
+		m_OSCursor->SetVisible(false);
+	else
+		m_OSCursor->SetVisible(m_CursorCtrl->IsVisible());
+	if(!draw)
+		m_CursorCtrl->SetVirtualDraw(draw);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -112,6 +223,10 @@ void GUIEnvironment::Render()
 	video::RenderStatistics::GroupScope grpScope("gui");
 	m_Renderer->Begin();
 	m_Root->Render(m_Renderer);
+
+	if((m_DrawVirtualCursor || m_UseVirtualCursor) && m_CursorCtrl->IsVisible())
+		m_Skin->DrawCursor(m_Renderer, m_CursorCtrl->GetState(), m_LeftState, m_CursorCtrl->GetPosition());
+
 	m_Renderer->Flush();
 }
 
@@ -168,6 +283,11 @@ void GUIEnvironment::SendUserInputEvent(const input::Event& event)
 					SendMouseEvent(e);
 				}
 			}
+		}
+
+		if(m_Cursor == m_LuxCursor) {
+			if(event.type == input::EEventType::Area)
+				m_LuxCursor.As<CursorLux>()->Move(math::Vector2F(event.area.relX, event.area.relY));
 		}
 	}
 	if(event.source == input::EEventSource::Keyboard) {
@@ -279,10 +399,10 @@ StrongRef<Font> GUIEnvironment::GetBuiltInFont()
 
 ///////////////////////////////////////////////////////////////////////////
 
-WeakRef<Element> GUIEnvironment::GrabCursor(Element* elem)
+WeakRef<Element> GUIEnvironment::CaptureCursor(Element* elem)
 {
-	auto out = m_Grabbed;
-	m_Grabbed = elem;
+	auto out = m_Captured;
+	m_Captured = elem;
 	return out;
 }
 
@@ -304,6 +424,11 @@ void GUIEnvironment::OnElementRemoved(Element* elem)
 
 	for(auto e : elem->Elements())
 		OnElementRemoved(e);
+}
+
+void GUIEnvironment::OnElementAdded(Element* elem)
+{
+	LUX_UNUSED(elem);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -333,8 +458,8 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 	e.rightState = m_RightState;
 	e.pos = m_CursorPos;
 
-	if(m_Grabbed) {
-		e.elem = m_Grabbed;
+	if(m_Captured) {
+		e.elem = m_Captured;
 		SendElementEvent(e.elem, e);
 	} else {
 		if(m_Hovered) {

@@ -91,6 +91,7 @@ class ControlEvent
 //! Represent all parts of the GUI
 class GUIEnvironment : public ReferenceCounted
 {
+	class CursorControl;
 public:
 	LUX_API GUIEnvironment(Window* osWindow, Cursor* osCursor);
 	LUX_API ~GUIEnvironment();
@@ -99,6 +100,8 @@ public:
 
 	LUX_API StrongRef<Window> GetRootElement();
 	LUX_API StrongRef<Cursor> GetCursor();
+	LUX_API void UseVirtualCursor(bool useVirtual);
+	LUX_API void SetDrawVirtualCursor(bool draw);
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -146,8 +149,9 @@ public:
 	
 	///////////////////////////////////////////////////////////////////////////
 
-	LUX_API WeakRef<Element> GrabCursor(Element* elem);
+	LUX_API WeakRef<Element> CaptureCursor(Element* elem);
 	LUX_API void OnElementRemoved(Element* elem);
+	LUX_API void OnElementAdded(Element* elem);
 
 	///////////////////////////////////////////////////////////////////////////
 private:
@@ -165,15 +169,17 @@ private:
 	StrongRef<Renderer> m_Renderer;
 	StrongRef<Skin> m_Skin;
 
+	StrongRef<Cursor> m_LuxCursor;
 	StrongRef<Cursor> m_OSCursor;
 	StrongRef<Window> m_OSWindow;
 
-	StrongRef<Cursor> m_Cursor;
+	StrongRef<CursorControl> m_CursorCtrl;
+	Cursor* m_Cursor;
 
 	WeakRef<Element> m_Hovered;
 	WeakRef<Element> m_Focused;
 
-	WeakRef<Element> m_Grabbed;
+	WeakRef<Element> m_Captured;
 
 	math::Vector2F m_CursorPos;
 	bool m_LeftState;
@@ -183,6 +189,9 @@ private:
 
 	bool m_IgnoreMouse;
 	bool m_IgnoreKeyboard;
+
+	bool m_UseVirtualCursor;
+	bool m_DrawVirtualCursor;
 };
 
 } // namespace gui

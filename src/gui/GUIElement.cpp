@@ -281,6 +281,8 @@ StrongRef<Element> Element::AddElement(Element* elem)
 StrongRef<Element> Element::AddElement(Element* elem, ElementIterator before)
 {
 	elem->Grab();
+	if(elem->GetParent())
+		elem->GetParent()->RemoveElement(elem);
 	m_Elements.Insert(elem, before);
 	elem->OnAdd(this);
 	return elem;
@@ -403,6 +405,8 @@ void Element::OnAdd(Element* p)
 	m_Parent = p;
 
 	UpdateRect();
+
+	m_Environment->OnElementAdded(this);
 }
 
 void Element::OnRemove(Element* p)

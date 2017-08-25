@@ -56,6 +56,29 @@ void Renderer::DrawRectangle(const math::RectF& rect, const video::Color& color,
 		2, quad, 4, video::VertexFormat::STANDARD_2D, false);
 }
 
+void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, const math::Vector2F& c, const video::Color& color, const math::RectF* clip)
+{
+	video::Pass p;
+	p.useVertexColor = true;
+	p.backfaceCulling = false;
+	p.zWriteEnabled = false;
+	p.zBufferFunc = video::EComparisonFunc::Always;
+	p.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+	p.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+	p.alphaOperator = video::EBlendOperator::Add;
+	p.isTransparent = true;
+	m_Renderer->SetPass(p);
+
+	video::Vertex2D quad[6] = {
+		video::Vertex2D(a.x, a.y, color),
+		video::Vertex2D(b.x, b.y, color),
+		video::Vertex2D(c.x, c.y, color),
+	};
+	m_Renderer->DrawPrimitiveList(
+		video::EPrimitiveType::Triangles,
+		1, quad, 3, video::VertexFormat::STANDARD_2D, false);
+}
+
 void Renderer::Flush()
 {
 }

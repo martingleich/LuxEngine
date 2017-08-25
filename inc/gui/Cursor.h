@@ -9,6 +9,13 @@ namespace lux
 namespace gui
 {
 
+enum class ECursorState
+{
+	Normal,
+	Beam,
+	Wait
+};
+
 //! Interface to control a cursor
 /**
 Usable for both Lux GUI Cursors and OS Cursors
@@ -16,7 +23,10 @@ Usable for both Lux GUI Cursors and OS Cursors
 class Cursor : public ReferenceCounted
 {
 public:
-	virtual ~Cursor() { }
+	virtual ~Cursor() {}
+
+	virtual void SetState(ECursorState state) = 0;
+	virtual ECursorState GetState() const = 0;
 
 	//! Set the absolute positon of the cursor
 	/**
@@ -27,6 +37,10 @@ public:
 	\ref GetPosition
 	*/
 	virtual void SetPosition(float x, float y) = 0;
+	void SetPosition(const math::Vector2F& v)
+	{
+		SetPosition(v.x, v.y);
+	}
 
 	//! Set the relative positon of the mouse
 	/**
@@ -39,6 +53,10 @@ public:
 	\ref GetRelPositon
 	*/
 	virtual void SetRelPosition(float x, float y) = 0;
+	void SetRelPosition(const math::Vector2F& v)
+	{
+		SetRelPosition(v.x, v.y);
+	}
 
 	//! Retrieve the absolute Positon of the mouse
 	/**
