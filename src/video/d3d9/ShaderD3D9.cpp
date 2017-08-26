@@ -469,8 +469,11 @@ void ShaderD3D9::LoadSceneParams(const RenderSettings& settings, u32 baseLayer)
 				c = settings.material.GetEmissive();
 				SetShaderValue(*it, &c); break;
 			case DefaultParam_Specular:
-				c = settings.material.GetSpecular();
+				c = settings.material.GetSpecular() * settings.material.GetPower();
 				SetShaderValue(*it, &c); break;
+			case DefaultParam_Power:
+				f = settings.material.GetPower();
+				SetShaderValue(*it, &f); break;
 			default: continue;
 			}
 		}
@@ -675,7 +678,7 @@ int ShaderD3D9::GetDefaultId(const char* name)
 		"shininess",
 		"diffuse",
 		"emissive",
-		"specular"
+		"specular",
 		"ambient",
 		"power",
 	};

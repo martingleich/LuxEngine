@@ -29,11 +29,11 @@ void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material&
 		D3DCOLORVALUE black = {0};
 		// Enable d3d material
 		D3DMATERIAL9 D3DMaterial = {
-			TestFlag(lighting, ELighting::Diffuse) ? SColorToD3DColor(m.GetDiffuse()) : black,
-			TestFlag(lighting, ELighting::Ambient) ? SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()) : black,
-			TestFlag(lighting, ELighting::Specular) ? SColorToD3DColor(m.GetSpecular()*m.GetPower()) : black,
-			TestFlag(lighting, ELighting::Emissive) ? SColorToD3DColor(m.GetEmissive()) : black,
-			TestFlag(lighting, ELighting::Specular) ? m.GetShininess() : 0.0f
+			TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(m.GetDiffuse()) : black,
+			TestFlag(lighting, ELighting::AmbientEmit) ? SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()) : black,
+			TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(m.GetSpecular()*m.GetPower()) : black,
+			TestFlag(lighting, ELighting::AmbientEmit) ? SColorToD3DColor(m.GetEmissive()) : black,
+			TestFlag(lighting, ELighting::DiffSpec) ? m.GetShininess() : 0.0f
 		};
 
 		m_D3DMaterial = D3DMaterial;
@@ -88,12 +88,12 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 	m_UsedTextureLayers = newUsed;
 
 	// Set Material parameters
-	if(p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::Ambient))
+	if(p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::AmbientEmit))
 		SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
 	else
 		SetRenderState(D3DRS_AMBIENT, 0);
 
-	if((p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::Specular)) && !math::IsZero(m_D3DMaterial.Power))
+	if((p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::DiffSpec)) && !math::IsZero(m_D3DMaterial.Power))
 		SetRenderState(D3DRS_SPECULARENABLE, 1);
 	else
 		SetRenderState(D3DRS_SPECULARENABLE, 0);
@@ -429,9 +429,9 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 	D3DCOLORVALUE specular = {1.0f, 1.0f, 1.0f, 1.0f};
 	D3DCOLORVALUE ambient = {0.0f, 0.0f, 0.0f, 0.0f};
 	D3DCOLORVALUE black = {0.0f, 0.0f, 0.0f, 0.0f};
-	D3DLight.Diffuse = TestFlag(lighting, ELighting::Diffuse) ? SColorToD3DColor(light.color) : black;
-	D3DLight.Specular = TestFlag(lighting, ELighting::Specular) ? SColorToD3DColor(light.color) : black;
-	D3DLight.Ambient = TestFlag(lighting, ELighting::Ambient) ? ambient : black;
+	D3DLight.Diffuse = TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(light.color) : black;
+	D3DLight.Specular = TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(light.color) : black;
+	D3DLight.Ambient = TestFlag(lighting, ELighting::AmbientEmit) ? ambient : black;
 
 	D3DLight.Attenuation0 = 0.0f;
 	D3DLight.Attenuation1 = 1.0f;

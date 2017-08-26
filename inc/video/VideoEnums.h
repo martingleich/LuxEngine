@@ -10,14 +10,10 @@ namespace video
 enum class ELighting : u8
 {
 	Disabled = 0,
-	Ambient = 1,
-	Emissive = 2,
-	Diffuse = 4,
-	Specular = 8,
-	AmbientEmit = Ambient | Emissive,
-	DiffSpec = Diffuse | Specular,
+	AmbientEmit = 1,
+	DiffSpec = 2,
 
-	Enabled = Ambient | Emissive | Diffuse | Specular,
+	Enabled = AmbientEmit | DiffSpec,
 };
 
 

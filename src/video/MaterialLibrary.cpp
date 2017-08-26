@@ -145,27 +145,45 @@ MaterialLibrary::MaterialLibrary()
 	{
 		const char* luxHLSLInclude =
 			R"(
-float4 lxIlluminate(float3 pos, float3 normal, float4 ambient, float4 emissive, float4 diffuse, float lighting, float4x4 light)
+// d is the distance from the geomtry to the camera.
+// Returns 0 for minimal fog effect, 1 for maximal effect
+float lxFog(float d, float4 fog1, float4 fog2) 
+{
+	float start = fog2.g;
+	float end = fog2.b;
+	float dens = fog2.a;
+	float enabled = fog1.a;
+	if(fog2.r == 1)
+		return clamp((d-start) / (end - start), 0, 1) * enabled;
+	else if(fog2.r == 2)
+		return clamp(1-exp(-d*dens), 0, 1) * enabled;
+	else if(fog2.r == 3)
+		return clamp(1-exp(-pow(d*dens,2)), 0, 1) * enabled;
+	else
+		return 0;
+}
+
+float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, float4 emissive, float4 diffuse, float4 specular, float shininess, float lighting, float4x4 light)
 {
 	float4 color = float4(0,0,0,0);
 	int iLighting = (int)lighting;
 
-	if(iLighting % 2 != 0) { // Ambient
-		color += ambient;
+	if(iLighting % 2 != 0) { // AmbientEmissive
+		color += ambient + emissive;
 	}
-	if((iLighting / 2) % 2 != 0) { // Emissive
-		color += emissive;
-	}
-	if((iLighting / 4) % 2 != 0) { // Diffuse
+	if((iLighting / 2) % 2 != 0) { // Diffuse Specular
 		float4 lightDiffuse = float4(light._m00_m01_m02, 1);
 		float3 lightDir = -light._m20_m21_m22;
 		float3 lightPos = light._m10_m11_m12;
-		float3 lightVector = lightPos - pos;
-		float lightDistance = length(lightVector);
-		lightVector /= lightDistance;
+		float3 lightVector = lightDir;
+		float illumFactor = 1;
+		float4 illumCol;
 		if(light._m03 == 1) { // Directonal
-			color += dot(normal, lightDir) * diffuse * lightDiffuse;
+			illumCol = dot(normal, lightDir) * diffuse * lightDiffuse;
 		} else { // Spot/Point light
+			lightVector = lightPos - pos;
+			float lightDistance = length(lightVector);
+			lightVector /= lightDistance;
 			float spotFactor = 1;
 			if(light._m03 == 3) { // Spot
 				float falloff = light._m30;
@@ -177,9 +195,15 @@ float4 lxIlluminate(float3 pos, float3 normal, float4 ambient, float4 emissive, 
 				else if(rho <= ci)
 					spotFactor = pow((rho - co) / (ci - co), falloff);
 			}
-			float atten = 1 / lightDistance;
-			color += spotFactor * atten * dot(normal, lightVector) * diffuse * lightDiffuse;
+			illumFactor = spotFactor / lightDistance;
+			illumCol = dot(normal, lightVector) * diffuse * lightDiffuse;
 		}
+		if(shininess > 0) {
+			float3 h = normalize(normalize(camPos - pos) + lightVector);
+			float sf = pow(dot(h, normal), shininess);
+			illumCol += lightDiffuse * specular * sf;
+		}
+		color += illumFactor * illumCol;
 	}
 
 	return color;
