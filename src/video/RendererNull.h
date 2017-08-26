@@ -77,16 +77,6 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	/*
-	u32 AddParam(const StringType& name, core::Type type);
-	u32 AddInternalParam(const StringType& name, core::Type type);
-	u32 AddParamEx(const StringType& name, core::Type type, bool isInternal);
-	core::VariableAccess GetParamEx(u32 id, bool internal);
-	core::VariableAccess GetParam(u32 id);
-	core::VariableAccess GetParamInternal(u32 id);
-	core::VariableAccess GetParam(const StringType& string, u32* id);
-	u32 GetParamCount() const;
-	*/
 	void AddParam(const String& name, core::Type type, const void* value);
 
 	core::AttributePtr GetParam(const String& name) const;

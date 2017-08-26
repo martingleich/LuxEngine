@@ -241,6 +241,8 @@ void SceneRendererImpl::DrawScene()
 	sceneData.activeCamera = m_ActiveCamera;
 	sceneData.activeCameraNode = m_ActiveCameraNode;
 
+	*m_Renderer->GetParam("camPos") = m_ActiveCameraNode->GetAbsolutePosition();
+
 	//-------------------------------------------------------------------------
 	// The fog
 	m_Renderer->ClearFog();
