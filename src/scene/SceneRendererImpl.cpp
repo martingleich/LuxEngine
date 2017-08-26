@@ -50,7 +50,7 @@ void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 	// Collect "real" camera nodes
 	auto camList = m_Scene->GetCameraList();
 	auto newEnd = core::RemoveIf(camList,
-		[](const Scene::CameraEntry& e){ return !e.node->IsTrulyVisible(); }
+		[](const Scene::CameraEntry& e) { return !e.node->IsTrulyVisible(); }
 	);
 	camList.Resize(core::IteratorDistance(camList.First(), newEnd));
 
@@ -244,27 +244,6 @@ void SceneRendererImpl::DrawScene()
 	*m_Renderer->GetParam("camPos") = m_ActiveCameraNode->GetAbsolutePosition();
 
 	//-------------------------------------------------------------------------
-	// The fog
-	m_Renderer->ClearFog();
-	bool foundFog = false;
-	for(auto& f : m_Scene->GetFogList()) {
-		if(f.node->IsTrulyVisible()) {
-			if(!foundFog) {
-				if(drawStencilShadows) {
-					log::Warning("Scenerenderer can't draw fog while using stencil shadows.(fog disabled)");
-					break;
-				}
-				foundFog = true;
-				auto fog = f.fog->GetFogData();
-				m_Renderer->SetFog(fog);
-			} else {
-				log::Warning("Scenerenderer only supports one fog element per scene.(all but one fog disabled)");
-				break;
-			}
-		}
-	}
-
-	//-------------------------------------------------------------------------
 	// The lights
 	*m_Renderer->GetParam("ambient") = m_Scene->GetAmbient();
 
@@ -287,6 +266,40 @@ void SceneRendererImpl::DrawScene()
 			++count;
 			if(count >= maxLightCount)
 				break;
+		}
+	}
+
+	size_t passCount;
+	if(drawStencilShadows) {
+		passCount = 1 + shadowCasting.Size();
+		if(!nonShadowCasting.IsEmpty())
+			++passCount;
+	} else {
+		passCount = 1;
+	}
+
+	//-------------------------------------------------------------------------
+	// The fog
+	m_Renderer->ClearFog();
+	bool foundFog = false;
+	for(auto& f : m_Scene->GetFogList()) {
+		if(f.node->IsTrulyVisible()) {
+			if(!foundFog) {
+				/*
+				if(drawStencilShadows) {
+					log::Warning("Scenerenderer can't draw fog while using stencil shadows.(fog disabled)");
+					break;
+				}
+				*/
+				foundFog = true;
+				auto fog = f.fog->GetFogData();
+				if(passCount > 1)
+					fog.color *= 1.0f / passCount;
+				m_Renderer->SetFog(fog);
+			} else {
+				log::Warning("Scenerenderer only supports one fog element per scene.(all but one fog disabled)");
+				break;
+			}
 		}
 	}
 
