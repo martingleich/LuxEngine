@@ -12,7 +12,6 @@ class ParamPackage;
 }
 namespace video
 {
-class RenderSettings;
 struct ShaderCompileException : public core::Exception
 {
 	explicit ShaderCompileException(const char* msg = "shader compile error") :
@@ -20,6 +19,7 @@ struct ShaderCompileException : public core::Exception
 	{}
 };
 
+class Pass;
 class Shader : public ReferenceCounted
 {
 public:
@@ -27,7 +27,7 @@ public:
 
 	virtual void Enable() = 0;
 	virtual void SetParam(const void* data, u32 paramId) = 0;
-	virtual void LoadSceneParams(const RenderSettings& settings, u32 baseLayer) = 0;
+	virtual void LoadSceneParams(const Pass& pass) = 0;
 	virtual void Disable() = 0;
 
 	//! Initializes the shader from code
@@ -43,7 +43,6 @@ public:
 
 	virtual size_t GetSceneParamCount() const = 0;
 	virtual core::AttributePtr GetSceneParam(size_t id) const = 0;
-	virtual bool HasTextureSceneParam() const = 0;
 };
 
 } // namespace video

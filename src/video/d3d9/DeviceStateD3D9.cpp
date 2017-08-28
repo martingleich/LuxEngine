@@ -16,24 +16,24 @@ namespace lux
 namespace video
 {
 
-DeviceStateD3D9::DeviceStateD3D9(const D3DCAPS9* caps, IDirect3DDevice9* device) :
-	m_Caps(caps),
-	m_Device(device)
+void DeviceStateD3D9::Init(const D3DCAPS9* caps, IDirect3DDevice9* device)
 {
+	m_Caps = caps;
+	m_Device = device;
 	Reset();
 }
 
-void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting)
+void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Pass& pass)
 {
-	if(lighting != ELighting::Disabled) {
+	if(pass.lighting != ELighting::Disabled) {
 		D3DCOLORVALUE black = {0};
 		// Enable d3d material
 		D3DMATERIAL9 D3DMaterial = {
-			TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(m.GetDiffuse()) : black,
-			TestFlag(lighting, ELighting::AmbientEmit) ? SColorToD3DColor(m.GetDiffuse()*m.GetAmbient()) : black,
-			TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(m.GetSpecular()*m.GetPower()) : black,
-			TestFlag(lighting, ELighting::AmbientEmit) ? SColorToD3DColor(m.GetEmissive()) : black,
-			TestFlag(lighting, ELighting::DiffSpec) ? m.GetShininess() : 0.0f
+			TestFlag(pass.lighting, ELighting::DiffSpec) ? SColorToD3DColor(pass.diffuse) : black,
+			TestFlag(pass.lighting, ELighting::AmbientEmit) ? SColorToD3DColor(ambient*pass.ambient) : black,
+			TestFlag(pass.lighting, ELighting::DiffSpec) ? SColorToD3DColor(pass.specular) : black,
+			TestFlag(pass.lighting, ELighting::AmbientEmit) ? SColorToD3DColor(pass.emissive) : black,
+			TestFlag(pass.lighting, ELighting::DiffSpec) ? pass.shininess : 0.0f
 		};
 
 		m_D3DMaterial = D3DMaterial;
@@ -41,7 +41,7 @@ void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Material&
 	}
 	m_Ambient = ambient;
 
-	SetRenderState(D3DRS_TEXTUREFACTOR, m.GetDiffuse().ToHex());
+	SetRenderState(D3DRS_TEXTUREFACTOR, pass.diffuse.ToHex());
 }
 
 void DeviceStateD3D9::EnablePass(const Pass& p)
@@ -88,12 +88,12 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 	m_UsedTextureLayers = newUsed;
 
 	// Set Material parameters
-	if(p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::AmbientEmit))
+	if(TestFlag(p.lighting, ELighting::AmbientEmit))
 		SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
 	else
 		SetRenderState(D3DRS_AMBIENT, 0);
 
-	if((p.lighting == ELighting::Enabled || TestFlag(p.lighting, ELighting::DiffSpec)) && !math::IsZero(m_D3DMaterial.Power))
+	if(TestFlag(p.lighting, ELighting::DiffSpec) && !math::IsZero(m_D3DMaterial.Power))
 		SetRenderState(D3DRS_SPECULARENABLE, 1);
 	else
 		SetRenderState(D3DRS_SPECULARENABLE, 0);

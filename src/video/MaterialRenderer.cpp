@@ -8,13 +8,13 @@ namespace video
 {
 
 MaterialRenderer::MaterialRenderer(const String& name, const MaterialRenderer* old) :
-	m_Name(name)
+	m_Name(name),
+	m_ParamCallback(nullptr)
 {
-	if(old) {
+	if(old)
 		m_Passes = old->m_Passes;
-	} else {
+	else
 		AddPass();
-	}
 }
 
 MaterialRenderer::~MaterialRenderer()
@@ -36,37 +36,16 @@ Pass MaterialRenderer::GeneratePassData(size_t passId, const RenderSettings& set
 	auto& pass = m_Passes.At(passId);
 
 	Pass out(pass);
+	out.ambient = settings.material.GetAmbient();
+	out.diffuse = settings.material.GetDiffuse();
+	out.emissive = settings.material.GetEmissive();
+	out.specular = settings.material.GetSpecular()* settings.material.GetPower();
+	out.shininess = settings.material.GetShininess();
+
 	for(auto& x : m_Options) {
-		if(x.pass == passId) {
+		if(x.pass == passId && !x.isShader) {
 			auto param = settings.material.Param(x.id);
 			out.SetOption(x.mappingId, param.Data());
-		}
-	}
-
-	u32 layerId = 0;
-	if(out.shader) {
-		for(const auto& v : m_ShaderValues) {
-			if(v.pass == passId) {
-				auto type = v.obj.GetType();
-				if(type == core::Types::Texture()) {
-					if(layerId >= out.layers.Size())
-						out.layers.Resize(layerId + 1);
-					out.layers[layerId] = v.obj.Get<TextureLayer>();
-					++layerId;
-				}
-			}
-		}
-	}
-
-	if(out.shader && out.shader->HasTextureSceneParam()) {
-		for(size_t i = 0; i < out.shader->GetSceneParamCount(); ++i) {
-			auto param = out.shader->GetSceneParam(i);
-			if(param && param->GetType() == core::Types::Texture()) {
-				if(layerId >= out.layers.Size())
-					out.layers.Resize(layerId + 1);
-				out.layers[layerId] = *param;
-				++layerId;
-			}
 		}
 	}
 
@@ -84,31 +63,21 @@ void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const
 	if(!pass.shader)
 		return;
 
-	u32 layerId = 0;
-	for(const auto& v : m_ShaderValues) {
-		if(v.pass == passId) {
-			auto type = pass.shader->GetParamPackage().GetParamDesc(v.id).type;
-			if(type == core::Types::Texture()) {
-				pass.shader->SetParam(&layerId, v.id);
-				++layerId;
-			} else {
-				pass.shader->SetParam(v.obj.Data(), v.id);
-			}
-		}
-	}
-
 	for(const auto& option : m_Options) {
 		if(option.isShader) {
 			auto param = settings.material.Param(option.id);
-			if(param.GetType() == core::Types::Texture()) {
-				pass.shader->SetParam(&layerId, option.mappingId);
-				++layerId;
-			} else {
-				pass.shader->SetParam(param.Data(), option.mappingId);
-			}
+			pass.shader->SetParam(param.Data(), option.mappingId);
 		}
 	}
-	pass.shader->LoadSceneParams(settings, layerId);
+
+	for(const auto& v : m_ShaderValues) {
+		if(v.pass == passId) {
+			auto type = pass.shader->GetParamPackage().GetParamDesc(v.id).type;
+			pass.shader->SetParam(v.obj.Data(), v.id);
+		}
+	}
+
+	pass.shader->LoadSceneParams(pass);
 
 	if(m_ParamCallback)
 		m_ParamCallback->SendShaderSettings(passId, pass, settings);
@@ -211,9 +180,6 @@ core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u
 		throw core::InvalidArgumentException("paramId", "Is not a valid shader parameter");
 
 	core::ParamDesc desc = pass.shader->GetParamPackage().GetParamDesc(paramId);
-	if(desc.type == core::Types::Texture())
-		pass.AddTexture();
-
 	const String& name = paramName.IsEmpty() ? desc.name : paramName;
 	return AddParamMapping(desc.type, name, passId, paramId, true);
 }

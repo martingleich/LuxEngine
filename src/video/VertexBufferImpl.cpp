@@ -38,6 +38,8 @@ u32 VertexBufferImpl::GetStream() const
 void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, void* init)
 {
 	u32 stride = format.GetStride(stream);
+	if(!format.IsValid() || stride == 0)
+		throw core::InvalidArgumentException("format", "Format is invalid");
 
 	if(m_Data) {
 		if(init)

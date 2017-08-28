@@ -70,7 +70,8 @@ private:
 		u32 id; // The id of the param in the package
 
 		u32 pass; // The corresponding pass-id
-		bool isShader; // Corressponds the mapping to a shader
+		bool isShader; // Corresponds the mapping to a shader
+
 		u32 mappingId; // The correspoding option or shaderparam id
 	};
 
@@ -96,7 +97,7 @@ private:
 	core::Array<ShaderValue> m_ShaderValues;
 
 	core::Array<ParamMapping> m_Options;
-	StrongRef<ParamSetCallback> m_ParamCallback;
+	ParamSetCallback* m_ParamCallback;
 
 	String m_Name;
 };

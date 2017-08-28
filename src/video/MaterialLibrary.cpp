@@ -144,7 +144,7 @@ MaterialLibrary::MaterialLibrary()
 
 	{
 		const char* luxHLSLInclude =
-			R"(
+R"(
 // d is the distance from the geomtry to the camera.
 // Returns 0 for minimal fog effect, 1 for maximal effect
 float lxFog(float d, float4 fog1, float4 fog2) 

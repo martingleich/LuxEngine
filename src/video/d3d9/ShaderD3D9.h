@@ -13,14 +13,14 @@ namespace lux
 {
 namespace video
 {
-class RenderSettings;
 class VideoDriver;
 class Renderer;
+class DeviceStateD3D9;
 
 class ShaderD3D9 : public Shader
 {
 public:
-	ShaderD3D9(VideoDriver* driver);
+	ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& deviceState);
 	~ShaderD3D9();
 
 	void Init(
@@ -30,12 +30,11 @@ public:
 
 	void Enable();
 	void SetParam(const void* data, u32 paramId);
-	void LoadSceneParams(const RenderSettings& settings, u32 baseLayer);
+	void LoadSceneParams(const Pass& pass);
 	void Disable();
 
 	size_t GetSceneParamCount() const;
 	core::AttributePtr GetSceneParam(size_t id) const;
-	bool HasTextureSceneParam() const;
 
 	const core::ParamPackage& GetParamPackage() const;
 
@@ -76,7 +75,6 @@ private:
 		DefaultParam_Emissive = 2,
 		DefaultParam_Specular = 3,
 		DefaultParam_Ambient = 4,
-		DefaultParam_Power = 5,
 		DefaultParam_COUNT
 	};
 
@@ -95,6 +93,7 @@ private:
 		const void* defaultValue;
 
 		EParamType paramType;
+		u32 samplerStage;
 
 		HelperEntry() :
 			registerVS(0xFFFFFFFF),
@@ -106,7 +105,8 @@ private:
 			name(nullptr),
 			nameLength(0),
 			defaultValue(nullptr),
-			paramType(ParamType_ParamMaterial)
+			paramType(ParamType_ParamMaterial),
+			samplerStage(0)
 		{
 		}
 	};
@@ -125,11 +125,12 @@ private:
 
 		EParamType paramType;
 		u32 index;
+		u32 samplerStage;
 		core::AttributePtr sceneValue;
 	};
 
 private:
-	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
+	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
 
 	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<String>* errorList);
 
@@ -152,14 +153,14 @@ private:
 
 private:
 	IDirect3DDevice9* m_D3DDevice;
-	video::Renderer* m_Renderer;
+	Renderer* m_Renderer;
+	DeviceStateD3D9& m_DeviceState;
 
 	UnknownRefCounted<IDirect3DVertexShader9> m_VertexShader;
 	UnknownRefCounted<IDirect3DPixelShader9> m_PixelShader;
 
 	core::Array<Param> m_Params;
 	core::Array<Param> m_SceneValues;
-	bool m_HasTextureSceneParam;
 
 	core::RawMemory m_Names;
 	core::ParamPackage m_ParamPackage;

@@ -9,6 +9,7 @@
 #include "video/d3d9/RenderTargetD3D9.h"
 #include "video/d3d9/UnknownRefCounted.h"
 #include "video/d3d9/AdapterInformationD3D9.h"
+#include "video/d3d9/DeviceStateD3D9.h"
 
 #include "video/d3d9/RendererD3D9.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
@@ -133,6 +134,7 @@ private:
 
 	StrongRef<BufferManagerD3D9> m_BufferManager;
 	StrongRef<RendererD3D9> m_Renderer;
+	DeviceStateD3D9 m_DeviceState;
 
 	UnknownRefCounted<IDirect3D9> m_D3D;
 	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;

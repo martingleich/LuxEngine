@@ -1,5 +1,6 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "ShaderD3D9.h"
+#include "video/d3d9/DeviceStateD3D9.h"
 
 #include "core/Logger.h"
 #include "video/VideoDriver.h"
@@ -94,9 +95,10 @@ static String FormatD3DXShaderError(const String& input)
 	return input.SubString(base_name, input.End());
 }
 
-ShaderD3D9::ShaderD3D9(VideoDriver* driver) :
+ShaderD3D9::ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& state) :
 	m_D3DDevice((IDirect3DDevice9*)driver->GetLowLevelDevice()),
-	m_Renderer(driver->GetRenderer())
+	m_Renderer(driver->GetRenderer()),
+	m_DeviceState(state)
 {
 }
 
@@ -127,7 +129,6 @@ void ShaderD3D9::Init(
 	UnknownRefCounted<ID3DXConstantTable> vertexShaderConstants;
 	UnknownRefCounted<ID3DXConstantTable> pixelShaderConstants;
 
-	m_HasTextureSceneParam = false;
 	m_VertexShader = CreateVertexShader(vsCode, vsEntryPoint, vsLength, vsProfile, errorList, vertexShaderConstants);
 
 	if(psCode)
@@ -199,8 +200,6 @@ void ShaderD3D9::Init(
 
 			entry.sceneValue = ptr;
 			entry.paramType = ParamType_Scene;
-			if(entry.type == EType::Texture)
-				m_HasTextureSceneParam = true;
 		}
 		break;
 		}
@@ -212,6 +211,7 @@ void ShaderD3D9::Init(
 		entry.registerPSCount = h.registerPSCount;
 		entry.registerVS = h.registerVS;
 		entry.registerVSCount = h.registerVSCount;
+		entry.samplerStage = h.samplerStage;
 		entry.type = h.type;
 		if(entry.paramType == ParamType_Scene)
 			m_SceneValues.PushBack(std::move(entry));
@@ -235,12 +235,12 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 		if(handle == NULL)
 			continue;
 
-		u32 size, regId, regCount;
+		u32 size, regId, regCount, samplerStage;
 		EType type;
 		const char* name;
 		const void* defaultValue;
 		bool isValidType;
-		if(!GetStructureElemType(handle, table, type, size, regId, regCount, name, defaultValue, isValidType))
+		if(!GetStructureElemType(handle, table, samplerStage, type, size, regId, regCount, name, defaultValue, isValidType))
 			continue;
 
 		bool isParam = false;
@@ -284,6 +284,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 				foundEntry->registerPS = regId;
 				foundEntry->registerPSCount = regCount;
 			}
+			foundEntry->samplerStage = samplerStage;
 			if(foundEntry->type != type) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Shader param in pixelshader and vertex shader has diffrent types. (param: ~s).", name));
@@ -297,6 +298,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 			HEntry.type = type;
 			HEntry.typeSize = (u8)size;
 			HEntry.defaultValue = defaultValue;
+			HEntry.samplerStage = samplerStage;
 			if(isVertex) {
 				HEntry.registerVS = regId;
 				HEntry.registerVSCount = regCount;
@@ -405,11 +407,6 @@ core::AttributePtr ShaderD3D9::GetSceneParam(size_t id) const
 	return m_SceneValues.At(id).sceneValue;
 }
 
-bool ShaderD3D9::HasTextureSceneParam() const
-{
-	return m_HasTextureSceneParam;
-}
-
 void ShaderD3D9::Enable()
 {
 	HRESULT hr;
@@ -439,19 +436,11 @@ void ShaderD3D9::SetParam(const void* data, u32 paramId)
 	SetShaderValue(m_Params[realId], data);
 }
 
-void ShaderD3D9::LoadSceneParams(const RenderSettings& settings, u32 baseLayer)
+void ShaderD3D9::LoadSceneParams(const Pass& pass)
 {
-	u32 layerId = baseLayer;
-
 	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
-		if(it->sceneValue) {
-			if(it->type == EType::Texture) {
-				SetShaderValue(*it, &layerId);
-				++layerId;
-			} else {
-				SetShaderValue(*it, (*it->sceneValue).Data());
-			}
-		}
+		if(it->sceneValue)
+			SetShaderValue(*it, (*it->sceneValue).Data());
 	}
 
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
@@ -460,20 +449,17 @@ void ShaderD3D9::LoadSceneParams(const RenderSettings& settings, u32 baseLayer)
 			video::Colorf c;
 			switch(it->index) {
 			case DefaultParam_Shininess:
-				f = settings.material.GetShininess();
+				f = pass.shininess;
 				SetShaderValue(*it, &f); break;
 			case DefaultParam_Diffuse:
-				c = settings.material.GetDiffuse();
+				c = pass.diffuse;
 				SetShaderValue(*it, &c); break;
 			case DefaultParam_Emissive:
-				c = settings.material.GetEmissive();
+				c = pass.emissive;
 				SetShaderValue(*it, &c); break;
 			case DefaultParam_Specular:
-				c = settings.material.GetSpecular() * settings.material.GetPower();
+				c = pass.specular;
 				SetShaderValue(*it, &c); break;
-			case DefaultParam_Power:
-				f = settings.material.GetPower();
-				SetShaderValue(*it, &f); break;
 			default: continue;
 			}
 		}
@@ -486,7 +472,7 @@ void ShaderD3D9::Disable()
 	m_D3DDevice->SetPixelShader(NULL);
 }
 
-bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid)
+bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid)
 {
 	D3DXCONSTANT_DESC desc;
 	UINT count = 1;
@@ -517,8 +503,10 @@ bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* tab
 		if(desc.Type == D3DXPT_FLOAT)
 			outType = EType::Matrix_ColMajor;
 	} else if(desc.Class == D3DXPC_OBJECT) {
-		if(desc.Type == D3DXPT_SAMPLER || desc.Type == D3DXPT_SAMPLER2D || desc.Type == D3DXPT_SAMPLER3D || desc.Type == D3DXPT_SAMPLERCUBE)
+		if(desc.Type == D3DXPT_SAMPLER || desc.Type == D3DXPT_SAMPLER2D || desc.Type == D3DXPT_SAMPLER3D || desc.Type == D3DXPT_SAMPLERCUBE) {
+			samplerStage = table->GetSamplerIndex(handle);
 			outType = EType::Texture;
+		}
 	}
 
 	outSize = desc.Bytes;
@@ -538,7 +526,6 @@ void ShaderD3D9::CastTypeToShader(EType type, const void* in, void* out)
 		*(u32*)out = *(bool*)in;
 		break;
 	case EType::Texture:
-		*(u32*)out = *(u32*)in;
 		break;
 	case EType::Integer:
 		*(u32*)out = *(int*)in;
@@ -572,7 +559,6 @@ void ShaderD3D9::CastShaderToType(EType type, const void* in, void* out)
 	case EType::Boolean:
 		((bool*)out)[0] = ((*(BOOL*)in) == TRUE);
 		break;
-	case EType::Texture:
 	case EType::Integer:
 		((int*)out)[0] = *(int*)in;
 		break;
@@ -598,6 +584,8 @@ void ShaderD3D9::CastShaderToType(EType type, const void* in, void* out)
 		f[12] = pf[3];    f[13] = pf[7];  f[14] = pf[11]; f[15] = pf[15];
 	}
 	break;
+	case EType::Texture:
+		break;
 	default:
 		lxAssertNeverReach("Unsupported shader variable type.");
 	}
@@ -610,7 +598,8 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 
 	static u32 v[16];
 
-	CastTypeToShader(param.type, data, v);
+	if(param.type != EType::Texture)
+		CastTypeToShader(param.type, data, v);
 
 	u32 regId;
 	HRESULT hr;
@@ -621,6 +610,8 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 			hr = m_D3DDevice->SetVertexShaderConstantB(regId, (BOOL*)v, 1);
 			break;
 		case EType::Texture:
+			m_DeviceState.EnableTextureLayer(param.samplerStage, *(const video::TextureLayer*)data);
+			break;
 		case EType::Integer:
 			hr = m_D3DDevice->SetVertexShaderConstantI(regId, (int*)v, 1);
 			break;
@@ -646,6 +637,8 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 			hr = m_D3DDevice->SetPixelShaderConstantB(regId, (BOOL*)v, 1);
 			break;
 		case EType::Texture:
+			m_DeviceState.EnableTextureLayer(param.samplerStage, *(const video::TextureLayer*)data);
+			break;
 		case EType::Integer:
 			hr = m_D3DDevice->SetPixelShaderConstantI(regId, (int*)v, 1);
 			break;
@@ -674,13 +667,12 @@ const core::ParamPackage& ShaderD3D9::GetParamPackage() const
 
 int ShaderD3D9::GetDefaultId(const char* name)
 {
-	static const char* NAMES[] = {
+	static const char* NAMES[DefaultParam_COUNT] = {
 		"shininess",
 		"diffuse",
 		"emissive",
 		"specular",
-		"ambient",
-		"power",
+		"ambient"
 	};
 
 	for(size_t i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
@@ -696,8 +688,6 @@ ShaderD3D9::EType ShaderD3D9::GetDefaultType(u32 id)
 	switch(id) {
 	case DefaultParam_Shininess:
 	case DefaultParam_Ambient:
-	case DefaultParam_Power:
-		return EType::Float;
 	case DefaultParam_Diffuse:
 	case DefaultParam_Emissive:
 	case DefaultParam_Specular:

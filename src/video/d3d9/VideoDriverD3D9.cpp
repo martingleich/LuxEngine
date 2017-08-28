@@ -62,7 +62,7 @@ VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window
 	CreateDevice(config, window);
 
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
-	m_Renderer = new RendererD3D9(this);
+	m_Renderer = new RendererD3D9(this, m_DeviceState);
 
 	g_D3DDevice9 = m_D3DDevice;
 	g_Driver = this;
@@ -147,6 +147,8 @@ void VideoDriverD3D9::CreateDevice(const DriverConfig& config, gui::Window* wind
 
 	// Init rendertarget data
 	InitRendertargetData();
+
+	m_DeviceState.Init(&m_Caps, m_D3DDevice);
 }
 
 D3DPRESENT_PARAMETERS VideoDriverD3D9::GeneratePresentParams(const DriverConfig& config)
@@ -178,6 +180,7 @@ bool VideoDriverD3D9::Reset(const DriverConfig& config)
 
 	// Release all data
 	if(!m_ReleasedUnmanagedData) {
+		m_DeviceState.ReleaseUnmanaged();
 		m_Renderer->ReleaseUnmanaged();
 
 		m_BackBufferTarget = video::RendertargetD3D9(nullptr);
@@ -212,6 +215,7 @@ bool VideoDriverD3D9::Reset(const DriverConfig& config)
 	// Restore data
 	InitRendertargetData();
 	m_Renderer->Reset();
+	m_DeviceState.Reset();
 	m_BufferManager->RestoreHardwareBuffers();
 
 	for(auto& tex : m_Textures) {
@@ -450,7 +454,7 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	if(!psProfile)
 		throw core::InvalidArgumentException("pixel shader profile", "Invalid pixel shader profile(~d.~d).");
 
-	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this);
+	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this, m_DeviceState);
 	out->Init(VSCode, VSEntryPoint, VSLength, vsProfile, PSCode, PSEntryPoint, PSLength, psProfile, errorList);
 
 	return out;

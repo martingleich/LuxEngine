@@ -7,20 +7,16 @@ namespace lux
 namespace video
 {
 class Material;
-class PipelineOverwrite;
 
 class RenderSettings
 {
 public:
 	RenderSettings(
-		const PipelineOverwrite& o,
 		const Material& m) :
-		overwrite(o),
 		material(m)
 	{
 	}
 
-	const PipelineOverwrite& overwrite;
 	const Material& material;
 };
 

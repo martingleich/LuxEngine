@@ -108,7 +108,7 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 					h1 = ((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x + 1, y), 1))->position;
 				else
 					h1 = c;
-				if(x - 1 > 0)
+				if(x > 1)
 					h2 = ((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x - 1, y), 1))->position;
 				else
 					h2 = c;
@@ -116,7 +116,7 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 					v1 = ((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x, y + 1), 1))->position;
 				else
 					v1 = c;
-				if(y - 1 > 0)
+				if(y > 1)
 					v2 = ((Vertex3D*)vertexBuffer->Pointer(GetVertexIndex(x, y - 1), 1))->position;
 				else
 					v2 = c;

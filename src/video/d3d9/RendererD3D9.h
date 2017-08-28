@@ -8,18 +8,18 @@
 #include "video/d3d9/D3DHelper.h"
 #include "video/d3d9/UnknownRefCounted.h"
 #include "video/d3d9/RenderTargetD3D9.h"
-#include "video/d3d9/DeviceStateD3D9.h"
 
 namespace lux
 {
 namespace video
 {
 class VideoDriverD3D9;
+class DeviceStateD3D9;
 
 class RendererD3D9 : public RendererNull
 {
 public:
-	RendererD3D9(VideoDriverD3D9* driver);
+	RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& d3d9);
 
 	void CleanUp();
 
@@ -80,7 +80,7 @@ public:
 
 	void DrawGeometry(const Geometry* geo, bool is3D = true)
 	{
-		RendererD3D9::DrawGeometry(geo, 0xFFFFFFFF, is3D);
+		RendererD3D9::DrawGeometry(geo, 0, 0xFFFFFFFF, is3D);
 	}
 
 	void DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D = true);
@@ -106,7 +106,7 @@ private:
 
 private:
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
-	DeviceStateD3D9 m_DeviceState;
+	DeviceStateD3D9& m_DeviceState;
 
 	RendertargetD3D9 m_CurrentRendertarget;
 	RendertargetD3D9 m_BackbufferTarget;

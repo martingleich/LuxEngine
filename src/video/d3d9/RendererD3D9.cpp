@@ -18,10 +18,10 @@ namespace lux
 namespace video
 {
 
-RendererD3D9::RendererD3D9(VideoDriverD3D9* driver) :
+RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState) :
 	RendererNull(driver),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
-	m_DeviceState(&driver->GetCaps(), (IDirect3DDevice9*)driver->GetLowLevelDevice()),
+	m_DeviceState(deviceState),
 	m_Driver(driver),
 	m_MaterialRenderer(nullptr)
 {
@@ -334,14 +334,11 @@ void RendererD3D9::ReleaseUnmanaged()
 {
 	m_CurrentRendertarget = RendertargetD3D9(nullptr);
 	m_BackbufferTarget = RendertargetD3D9(nullptr);
-
-	m_DeviceState.ReleaseUnmanaged();
 }
 
 void RendererD3D9::Reset()
 {
 	m_DirtyFlags = 0xFFFFFFFF;
-	m_DeviceState.Reset();
 
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
@@ -351,9 +348,7 @@ void RendererD3D9::Reset()
 ///////////////////////////////////////////////////////////////////////////
 void RendererD3D9::SetupRendering(size_t passId)
 {
-	RenderSettings settings(
-		m_FinalOverwrite,
-		**m_Material);
+	RenderSettings settings(**m_Material);
 
 	auto newRenderer = m_UseMaterial ? m_Material->GetRenderer() : nullptr;
 
@@ -388,8 +383,7 @@ void RendererD3D9::SetupRendering(size_t passId)
 	}
 
 	// Enable pass settings
-	if(m_MaterialRenderer)
-		m_DeviceState.SetD3DColors(*m_ParamId.ambient, settings.material, pass.lighting);
+	m_DeviceState.SetD3DColors(*m_ParamId.ambient, pass);
 	m_DeviceState.EnablePass(pass);
 
 	// Generate data for transforms, fog and light

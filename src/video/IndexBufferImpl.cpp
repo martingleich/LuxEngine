@@ -40,6 +40,7 @@ void IndexBufferImpl::SetType(EIndexFormat type, bool moveOld, void* init)
 
 	if(!m_Data) {
 		m_Type = type;
+		m_Stride = stride;
 		return;
 	}
 

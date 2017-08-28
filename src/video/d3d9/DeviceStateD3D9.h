@@ -24,9 +24,9 @@ class StencilMode;
 class DeviceStateD3D9
 {
 public:
-	DeviceStateD3D9(const D3DCAPS9* caps, IDirect3DDevice9* device);
+	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
-	void SetD3DColors(const video::Colorf& ambient, const Material& m, ELighting lighting);
+	void SetD3DColors(const video::Colorf& ambient, const Pass& pass);
 	void EnablePass(const Pass& p);
 
 	void EnableTextureLayer(u32 stage, const TextureLayer& layer);

@@ -15,22 +15,22 @@ namespace video
 
 class Pass;
 class RenderSettings;
-class ParamSetCallback : public ReferenceCounted
+class ParamSetCallback
 {
 public:
 	virtual ~ParamSetCallback() {}
 
 	virtual void GeneratePass(u32 passId, const RenderSettings& settings, Pass& outPass)
 	{
-		LUX_UNUSED(passId);	
-		LUX_UNUSED(settings);	
-		LUX_UNUSED(outPass);	
+		LUX_UNUSED(passId);
+		LUX_UNUSED(settings);
+		LUX_UNUSED(outPass);
 	}
 	virtual void SendShaderSettings(u32 passId, const Pass& pass, const RenderSettings& settings)
 	{
-		LUX_UNUSED(passId);	
+		LUX_UNUSED(passId);
 		LUX_UNUSED(pass);
-		LUX_UNUSED(settings);	
+		LUX_UNUSED(settings);
 	}
 };
 
@@ -68,7 +68,7 @@ public:
 
 	bool IsTwoSided() const
 	{
-		return 
+		return
 			pass != passCCW ||
 			fail != failCCW ||
 			zFail != zFailCCW;
@@ -101,6 +101,12 @@ public:
 	{
 	}
 
+	float ambient = 1.0f;
+	Colorf diffuse = video::Colorf(1, 1, 1, 1);
+	Colorf emissive = video::Colorf(0, 0, 0, 0);
+	Colorf specular = video::Colorf(1, 1, 1, 1);
+	float shininess = 0;
+
 	StencilMode stencil;
 
 	core::Array<TextureLayer> layers;
@@ -112,7 +118,7 @@ public:
 
 	EBlendFactor alphaSrcBlend = EBlendFactor::One;
 	EBlendFactor alphaDstBlend = EBlendFactor::Zero;
-	EBlendOperator alphaOperator =  EBlendOperator::None;
+	EBlendOperator alphaOperator = EBlendOperator::None;
 
 	EComparisonFunc zBufferFunc = EComparisonFunc::LessEqual;
 	u32 colorMask = 0xFFFFFFFF;
@@ -184,18 +190,18 @@ public:
 
 	EBlendFactor alphaSrcBlend = EBlendFactor::One;
 	EBlendFactor alphaDstBlend = EBlendFactor::Zero;
-	EBlendOperator alphaOperator =  EBlendOperator::None;
+	EBlendOperator alphaOperator = EBlendOperator::None;
 
-	bool useAlphaOverwrite:1;
-	bool useStencilOverwrite:1;
-	bool disableFog:1;
+	bool useAlphaOverwrite : 1;
+	bool useStencilOverwrite : 1;
+	bool disableFog : 1;
 
-	bool disableZWrite:1;
-	bool disableZCmp:1;
-	bool normalizeNormals:1;
+	bool disableZWrite : 1;
+	bool disableZCmp : 1;
+	bool normalizeNormals : 1;
 
-	bool disableBackfaceCulling:1;
-	bool enableFrontfaceCulling:1;
+	bool disableBackfaceCulling : 1;
+	bool enableFrontfaceCulling : 1;
 
 	PipelineOverwrite() :
 		polygonOffset(0.0f),
@@ -251,7 +257,7 @@ public:
 	void Apply(Pass& pass)
 	{
 		if(useStencilOverwrite)
-			pass.stencil = stencil; 
+			pass.stencil = stencil;
 
 		if(useAlphaOverwrite) {
 			pass.alphaDstBlend = alphaDstBlend;
