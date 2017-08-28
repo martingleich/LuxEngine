@@ -52,12 +52,12 @@ void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, void* i
 	m_ChangeId++;
 }
 
-u32 VertexBufferImpl::AddVertex(void* vertex)
+u32 VertexBufferImpl::AddVertex(const void* vertex)
 {
 	return AddVertices(vertex, 1);
 }
 
-u32 VertexBufferImpl::AddVertices(void* vertices, u32 count)
+u32 VertexBufferImpl::AddVertices(const void* vertices, u32 count)
 {
 	if(m_Cursor + count - 1>= m_Size) {
 		Reserve(m_Cursor + count);
@@ -71,11 +71,11 @@ u32 VertexBufferImpl::AddVertices(void* vertices, u32 count)
 	return ret;
 }
 
-void VertexBufferImpl::SetVertex(void* vertex, u32 n)
+void VertexBufferImpl::SetVertex(const void* vertex, u32 n)
 {
 	SetVertices(vertex, 1, n);
 }
-void VertexBufferImpl::SetVertices(void* vertices, u32 count, u32 n)
+void VertexBufferImpl::SetVertices(const void* vertices, u32 count, u32 n)
 {
 	memcpy(Pointer(n, count), vertices, count*m_Stride);
 }

@@ -83,7 +83,7 @@ void IndexBufferImpl::SetType(EIndexFormat type, bool moveOld, void* init)
 					memcpy(m_Data + i*stride, init, stride);
 			}
 		}
-		
+
 		LUX_FREE_ARRAY(old);
 	}
 
@@ -91,11 +91,11 @@ void IndexBufferImpl::SetType(EIndexFormat type, bool moveOld, void* init)
 	m_Stride = stride;
 }
 
-u32 IndexBufferImpl::AddIndex(void* index)
+u32 IndexBufferImpl::AddIndex(const void* index)
 {
 	return AddIndices(index, 1);
 }
-u32 IndexBufferImpl::AddIndices(void* indices, u32 count)
+u32 IndexBufferImpl::AddIndices(const void* indices, u32 count)
 {
 	if(m_Cursor + count - 1 >= m_Size) {
 		Reserve(m_Cursor + count);
@@ -107,14 +107,40 @@ u32 IndexBufferImpl::AddIndices(void* indices, u32 count)
 	m_Cursor += count;
 	return ret;
 }
-void IndexBufferImpl::SetIndex(void* index, u32 n)
+u32 IndexBufferImpl::AddIndices32(const u32* indices, u32 count)
+{
+	if(m_Cursor + count - 1 >= m_Size) {
+		Reserve(m_Cursor + count);
+		m_Size += count;
+	}
+
+	SetIndices32(indices, count, m_Cursor);
+	u32 ret = m_Cursor;
+	m_Cursor += count;
+	return ret;
+}
+
+void IndexBufferImpl::SetIndex(const void* index, u32 n)
 {
 	SetIndices(index, 1, n);
 }
-void IndexBufferImpl::SetIndices(void* indices, u32 count, u32 n)
+void IndexBufferImpl::SetIndices(const void* indices, u32 count, u32 n)
 {
 	memcpy(Pointer(n, count), indices, count*m_Stride);
 }
+void IndexBufferImpl::SetIndices32(const u32* indices, u32 count, u32 n)
+{
+	if(m_Type == EIndexFormat::Bit16) {
+		u16* ptr = (u16*)Pointer(n, count);
+		for(u32 i = 0; i < count; ++i)
+			*ptr++ = (u16)*indices++;
+	} else if(m_Type == EIndexFormat::Bit32) {
+		memcpy(Pointer(n, count), indices, count*m_Stride);
+	} else {
+		lxAssertNeverReach("Unknown index format.");
+	}
+}
+
 void IndexBufferImpl::GetIndex(void* ptr, u32 n) const
 {
 	GetIndices(ptr, 1, n);
@@ -124,7 +150,7 @@ void IndexBufferImpl::GetIndices(void* ptr, u32 count, u32 n) const
 	memcpy(ptr, Pointer(n, count), count*m_Stride);
 }
 
-}    
+}
 
-}    
+}
 

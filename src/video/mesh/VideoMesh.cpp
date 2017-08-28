@@ -1,4 +1,5 @@
 #include "video/mesh/VideoMesh.h"
+#include "video/Material.h"
 #include "video/mesh/Geometry.h"
 
 namespace lux

@@ -35,7 +35,7 @@ public:
 	inline EHardwareBufferMapping GetHWMapping() const;
 	inline bool GetDirty(u32& begin, u32& end) const;
 	inline void Reserve(u32 size, bool moveOld = true, void* init = nullptr);
-	inline void SetSize(u32 size, void* init = nullptr);
+	inline void SetSize(u32 size, bool moveOld = true, void* init = nullptr);
 
 	virtual void SetHandle(void* handle) = 0;
 	virtual void* GetHandle() const = 0;
@@ -212,10 +212,10 @@ inline void HardwareBuffer::Reserve(u32 size, bool moveOld, void* init)
 	m_Allocated = size;
 }
 
-inline void HardwareBuffer::SetSize(u32 size, void* init)
+inline void HardwareBuffer::SetSize(u32 size, bool moveOld, void* init)
 {
 	if(size > m_Allocated)
-		Reserve(size, true, init);
+		Reserve(size, moveOld, init);
 
 	if(size < m_Size) {
 		if(m_Cursor >= size)

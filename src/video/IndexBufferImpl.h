@@ -16,10 +16,12 @@ public:
 
 	EIndexFormat GetType() const;
 	void SetType(EIndexFormat type, bool moveOld = true, void* init = nullptr);
-	u32 AddIndex(void* index);
-	u32 AddIndices(void* indices, u32 count);
-	void SetIndex(void* index, u32 n);
-	void SetIndices(void* indices, u32 count, u32 n);
+	u32 AddIndex(const void* index);
+	u32 AddIndices(const void* indices, u32 count);
+	u32 AddIndices32(const u32* indices, u32 count);
+	void SetIndex(const void* index, u32 n);
+	void SetIndices(const void* indices, u32 count, u32 n);
+	void SetIndices32(const u32* indices, u32 count, u32 n);
 	void GetIndex(void* ptr, u32 n) const;
 	void GetIndices(void* ptr, u32 count, u32 n) const;
 

@@ -3,18 +3,16 @@
 #include "core/ReferenceCounted.h"
 #include "math/AABBox.h"
 #include "video/VideoEnums.h"
-#include "video/Material.h"
 
 namespace lux
 {
 namespace video
 {
-class Material;
 class VertexBuffer;
 class IndexBuffer;
 class VertexFormat;
 
-//! The most simple mesh, contains a index- and vertexbuffer and a single material
+//! The most simple mesh, contains a index- and vertexbuffer
 class Geometry : public ReferenceCounted
 {
 public:

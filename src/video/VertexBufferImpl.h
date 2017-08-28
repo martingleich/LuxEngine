@@ -18,10 +18,10 @@ public:
 	void SetFormat(const VertexFormat& format, void* init = nullptr);
 	u32 GetStream() const;
 	void SetFormat(const VertexFormat& format, u32 stream, void* init = nullptr);
-	u32 AddVertex(void* vertex);
-	u32 AddVertices(void* vertices, u32 count);
-	void SetVertex(void* vertex, u32 n);
-	void SetVertices(void* vertices, u32 count, u32 n);
+	u32 AddVertex(const void* vertex);
+	u32 AddVertices(const void* vertices, u32 count);
+	void SetVertex(const void* vertex, u32 n);
+	void SetVertices(const void* vertices, u32 count, u32 n);
 	void GetVertex(void* ptr, u32 n) const;
 	void GetVertices(void* ptr, u32 count, u32 n) const;
 
