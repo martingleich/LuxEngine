@@ -326,15 +326,15 @@ inline const char* GetD3DXShaderProfile(
 				return "vs_2_a";
 		} else if(major == 3) {
 			if(minor == 0)
-				return "ps_3_0";
+				return "vs_3_0";
 		} else if(major == 4) {
 			if(minor == 0)
-				return "ps_4_0";
+				return "vs_4_0";
 			if(minor == 1)
-				return "ps_4_1";
+				return "vs_4_1";
 		} else if(major == 5) {
 			if(minor == 0)
-				return "ps_5_0";
+				return "vs_5_0";
 		}
 	}
 

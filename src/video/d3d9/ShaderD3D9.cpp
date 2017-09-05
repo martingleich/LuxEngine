@@ -162,7 +162,6 @@ void ShaderD3D9::Init(
 						errorList->PushBack(core::StringConverter::Format("Warning: Wrong type for default material param in shader: ~s.", h.name));
 					continue;
 				}
-
 				entry.index = (u32)defId;
 				entry.paramType = ParamType_DefaultMaterial;
 			} else {
@@ -610,8 +609,11 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 			hr = m_D3DDevice->SetVertexShaderConstantB(regId, (BOOL*)v, 1);
 			break;
 		case EType::Texture:
-			m_DeviceState.EnableTextureLayer(param.samplerStage, *(const video::TextureLayer*)data);
-			break;
+		{
+			u32 sampler = D3DVERTEXTEXTURESAMPLER0 + param.samplerStage;
+			m_DeviceState.EnableTextureLayer(sampler, *(const video::TextureLayer*)data);
+		}
+		break;
 		case EType::Integer:
 			hr = m_D3DDevice->SetVertexShaderConstantI(regId, (int*)v, 1);
 			break;

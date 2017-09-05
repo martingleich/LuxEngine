@@ -154,7 +154,7 @@ inline void HardwareBuffer::Update(u32 group)
 
 inline void HardwareBuffer::SetCursor(u32 c)
 {
-	lxAssert(c < m_Size);
+	lxAssert(c <= m_Size);
 	m_Cursor = c;
 }
 

@@ -21,6 +21,7 @@ All normals are pointing inwards.
 */
 class ViewFrustum
 {
+public:
 	enum EPlane
 	{
 		Near = 0,

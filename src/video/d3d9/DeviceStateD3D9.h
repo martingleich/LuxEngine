@@ -33,7 +33,6 @@ public:
 	void EnableTextureStage(u32 stage, const TextureStageSettings& settings);
 
 	void DisableTexture(u32 stage);
-
 	void EnableVertexData(bool useColor);
 
 	void EnableAlpha(EBlendFactor src, EBlendFactor dst, EBlendOperator op);
@@ -91,7 +90,6 @@ private:
 	WeakRef<video::Shader> m_Shader;
 
 	size_t m_UsedTextureLayers;
-	core::Array<void*> m_Textures;
 
 	EBlendFactor m_SrcBlendFactor;
 	EBlendFactor m_DstBlendFactor;
@@ -108,6 +106,7 @@ private:
 	DWORD m_RenderStates[210];
 	DWORD m_SamplerStates[CACHED_TEXTURES][14];
 	DWORD m_TextureStageStates[CACHED_TEXTURES][33];
+	void* m_Textures[CACHED_TEXTURES];
 };
 
 } // namespace video

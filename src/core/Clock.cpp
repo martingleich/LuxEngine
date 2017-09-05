@@ -43,12 +43,12 @@ DateAndTime Clock::GetDateAndTime()
 u64 Clock::GetTicks()
 {
 	auto time = std::chrono::high_resolution_clock::now();
-	return (time.time_since_epoch() / 1000000).count();
+	return (time.time_since_epoch() / 10000).count();
 }
 
 u64 Clock::TicksPerSecond()
 {
-	return 1000;
+	return 100000;
 }
 
 }

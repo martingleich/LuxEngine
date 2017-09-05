@@ -72,6 +72,9 @@ void BufferManagerNull::RemoveBuffer(HardwareBuffer* buffer)
 
 void BufferManagerNull::UpdateBuffer(HardwareBuffer* buffer, u32 group)
 {
+	if(buffer->GetSize() == 0)
+		return;
+
 	if(group != 0) {
 		m_Updates.PushBack(UpdateEntry(group, buffer));
 		buffer->SetHandle(m_Updates.Data() + m_Updates.Size() - 1);
@@ -103,6 +106,8 @@ StrongRef<VertexBuffer> BufferManagerNull::CreateVertexBuffer()
 
 void BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer, u32 streamID)
 {
+	if(!buffer)
+		return;
 	void* handle = buffer->GetHandle();
 	if(m_Updates.Size() > 0 && handle > m_Updates.Data() && handle < m_Updates.Data() + m_Updates.Size() - 1)
 		EnableHardwareBuffer(streamID, buffer, nullptr);

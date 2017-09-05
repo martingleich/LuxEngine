@@ -101,9 +101,10 @@ struct Context
 
 	u32 ReadHeader()
 	{
-		char versionStr[4];
+		char versionStr[5];
 		u32 magic = ReadU32();
 		ReadBytes(4, versionStr);
+		versionStr[4] = 0;
 		if(magic != LX_MAKE_FOURCC('F', 'O', 'N', 'T'))
 			throw core::FileFormatException("Invalid magic number", "lxf");
 

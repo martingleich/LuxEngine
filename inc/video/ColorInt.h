@@ -22,6 +22,10 @@ public:
 	{
 	}
 
+	static Color Uniform(u32 f, u32 alpha = 255)
+	{
+		return Color(f,f,f,alpha);
+	}
 	//! Construct from other color.
 	Color(const Color& _c) : c(_c.c)
 	{

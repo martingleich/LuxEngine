@@ -29,6 +29,11 @@ public:
 	{
 	}
 
+	static Colorf Uniform(float f, float alpha = 1.0f)
+	{
+		return Colorf(f,f,f,alpha);
+	}
+
 	//! Construct from single values.
 	/**
 		Alpha is set to 1.

@@ -577,14 +577,13 @@ public:
 	//! Set the number of used elements aka the size of the array
 	/**
 	Only used elements can be accessed via [] operator
-	\param Used The new size of the list
+	\param used The new size of the list
+	\param defaultValue The value of new elements.
 	*/
-	void Resize(size_t used, const T& defaultValue = T())
+	void Resize(size_t used, const T& defaultValue)
 	{
 		if(m_Alloc < used) {
 			Reserve(used);
-			for(size_t i = m_Used; i < used; ++i)
-				new ((void*)&m_Entries[i]) T();
 		} else {
 			for(size_t i = used; i < m_Used; ++i)
 				m_Entries[i].~T();
@@ -596,6 +595,28 @@ public:
 		m_Used = used;
 	}
 
+	//! Set the number of used elements aka the size of the array
+	/**
+	Only used elements can be accessed via [] operator.
+	New elements are default constructed
+	\param used The new size of the list
+	*/
+	void Resize(size_t used)
+	{
+		if(m_Alloc < used) {
+			Reserve(used);
+			for(size_t i = m_Used; i < used; ++i)
+				new ((void*)&m_Entries[i]) T();
+		} else {
+			for(size_t i = used; i < m_Used; ++i)
+				m_Entries[i].~T();
+		}
+
+		for(size_t i = m_Used; i < used; ++i)
+			new ((void*)&m_Entries[i]) T();
+
+		m_Used = used;
+	}
 	//! Iterator to the first element in the array
 	/**
 	\return The first element in the array

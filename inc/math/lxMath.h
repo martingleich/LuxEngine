@@ -272,7 +272,7 @@ inline bool AddInsideBounds(u32 value, s32 offset, u32 upper_limit, u32& new_val
 template <typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, T>::type Abs(T x)
 {
-	if(x > (T)0)
+	if(x >= (T)0)
 		return x;
 	return -x;
 }
@@ -437,12 +437,17 @@ inline float SCurve3(float x)
 }
 
 //! Checks if the given number is prime.
-inline bool IsPrime(size_t x)
+/**
+T must be an unsigned integral type.
+*/
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, bool>::type
+IsPrime(T x)
 {
-	size_t o = 4;
-	size_t i = 5;
+	T o = 4;
+	T i = 5;
 	while(true) {
-		size_t q = x / i;
+		T q = x / i;
 		if(q < i)
 			return true;
 		if(x == q * i)
@@ -455,7 +460,12 @@ inline bool IsPrime(size_t x)
 }
 
 //! Find the next prime after the given number.
-inline size_t NextPrime(size_t x)
+/**
+T must be an unsigned integral type.
+*/
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+NextPrime(T x)
 {
 	switch(x) {
 	case 0:
@@ -469,9 +479,9 @@ inline size_t NextPrime(size_t x)
 		return 5;
 	}
 
-	size_t k = x / 6;
-	size_t i = x - 6 * k;
-	size_t o = i < 2 ? 1 : 5;
+	T k = x / 6;
+	T i = x - 6 * k;
+	T o = i < 2 ? 1 : 5;
 	x = 6 * k + o;
 
 	for(i = (3 + o) / 2; !IsPrime(x); x += i)
@@ -480,7 +490,19 @@ inline size_t NextPrime(size_t x)
 	return x;
 }
 
-}    
-}    
+//! Check if the given number is a power of two
+/**
+T must be an unsigned integral type.
+Zero is considered a power of two.
+*/
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, bool>::type
+IsPowerOfTwo(T x)
+{
+	return ((x - 1)&x) == 0;
+}
+
+} // namespace math
+} // namespace lux
 
 #endif

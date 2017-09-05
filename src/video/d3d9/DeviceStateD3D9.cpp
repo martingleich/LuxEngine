@@ -112,6 +112,7 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 
 void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 {
+	bool textureSet = false;
 	if(layer.texture) {
 		// The current rendertarget can't be used as texture -> set texture channel to black
 		// But tell all people asking that the correct texture was set.
@@ -119,12 +120,13 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 			SetTexture(stage, nullptr);
 		} else {
 			SetTexture(stage, (IDirect3DBaseTexture9*)(layer.texture->GetRealTexture()));
+			textureSet = true;
 		}
 	} else {
 		SetTexture(stage, nullptr);
 	}
 
-	if(m_Textures[stage]) {
+	if(textureSet) {
 		SetSamplerState(stage, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
 		SetSamplerState(stage, D3DSAMP_ADDRESSV, GetD3DRepeatMode(layer.repeat.v));
 
@@ -239,30 +241,34 @@ void DeviceStateD3D9::SetRenderStateF(D3DRENDERSTATETYPE state, float value)
 void DeviceStateD3D9::SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value)
 {
 	if(stage >= CACHED_TEXTURES || m_TextureStageStates[stage][(int)state] != value) {
-		m_TextureStageStates[stage][(int)state] = value;
-		m_Device->SetTextureStageState(stage, state, value);
+		HRESULT hr = m_Device->SetTextureStageState(stage, state, value);
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
+		if(stage < CACHED_TEXTURES)
+			m_TextureStageStates[stage][(int)state] = value;
 	}
 }
 
 void DeviceStateD3D9::SetSamplerState(u32 stage, D3DSAMPLERSTATETYPE state, DWORD value)
 {
 	if(stage >= CACHED_TEXTURES || m_SamplerStates[stage][(int)state] != value) {
-		m_SamplerStates[stage][(int)state] = value;
-		m_Device->SetSamplerState(stage, state, value);
+		HRESULT hr = m_Device->SetSamplerState(stage, state, value);
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
+		if(stage < CACHED_TEXTURES)
+			m_SamplerStates[stage][(int)state] = value;
 	}
 }
 
 void DeviceStateD3D9::SetTexture(u32 stage, IDirect3DBaseTexture9* tex)
 {
-	if(stage >= m_Textures.Size())
-		m_Textures.Resize(stage + 1, nullptr);
-
-	if(tex != m_Textures[stage] || m_ResetAll) {
+	if(stage >= CACHED_TEXTURES || tex != m_Textures[stage] || m_ResetAll) {
 		HRESULT hr = m_Device->SetTexture(stage, tex);
 		if(FAILED(hr))
 			throw core::D3D9Exception(hr);
 
-		m_Textures[stage] = tex;
+		if(stage < CACHED_TEXTURES)
+			m_Textures[stage] = tex;
 	}
 }
 
@@ -457,7 +463,6 @@ void DeviceStateD3D9::SetRenderTargetTexture(video::BaseTexture* t)
 
 void DeviceStateD3D9::ReleaseUnmanaged()
 {
-	m_Textures.Clear();
 	m_RenderTargetTexture = nullptr;
 
 	for(u32 i = 0; i < m_Caps->MaxSimultaneousTextures; ++i)
@@ -477,6 +482,7 @@ void DeviceStateD3D9::Reset()
 		m_Device->GetRenderState((D3DRENDERSTATETYPE)i, m_RenderStates + i);
 
 	for(auto layer = 0; layer < CACHED_TEXTURES; ++layer) {
+		m_Textures[layer] = nullptr;
 		for(auto i = 0; i < TEXTURE_STAGE_STATE_COUNT; ++i)
 			m_Device->GetTextureStageState(layer, (D3DTEXTURESTAGESTATETYPE)i, m_TextureStageStates[layer] + i);
 

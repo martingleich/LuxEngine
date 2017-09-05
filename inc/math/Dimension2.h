@@ -30,6 +30,11 @@ public:
 	{
 	}
 
+	static Dimension2 Square(T size)
+	{
+		return Dimension2(size, size);
+	}
+
 	template <typename UType>
 	explicit Dimension2(const Dimension2<UType>& other) : width((T)other.width), height((T)other.height)
 	{
@@ -108,7 +113,7 @@ public:
 	//! Get a vector to the center of the area.
 	Vector2<T> GetCenter() const
 	{
-		return Vector2<T>(width/2, height/2);
+		return Vector2<T>(width / 2, height / 2);
 	}
 
 	//! Linear interpolation betwenn this dimension and another
@@ -138,7 +143,7 @@ public:
 	*/
 	T GetAvgEdge() const
 	{
-		return (width+height)/2;
+		return (width + height) / 2;
 	}
 
 	//! Is the dimension empty

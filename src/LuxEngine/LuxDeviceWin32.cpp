@@ -602,6 +602,7 @@ void LuxDeviceWin32::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 	u64 startTime;
 	u64 endTime;
 	startTime = core::Clock::GetTicks();
+	float invTicksPerSecond = 1.0f/core::Clock::TicksPerSecond();
 	float secsPassed = 0.0f;
 	while(Run()) {
 		if(!defLoop.CallPreFrame(frameLoop)) {
@@ -613,7 +614,7 @@ void LuxDeviceWin32::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 			defLoop.CallDoFrame(secsPassed, frameLoop);
 
 		endTime = core::Clock::GetTicks();
-		secsPassed = (endTime - startTime)*0.001f;
+		secsPassed = (endTime - startTime)*invTicksPerSecond;
 		if(secsPassed != 0)
 			startTime = endTime;
 	}
