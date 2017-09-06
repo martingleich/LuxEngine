@@ -14,7 +14,7 @@ public:
 	LUX_API RotationAnimator();
 	LUX_API RotationAnimator(const math::Vector3F& axis, math::AngleF RotSpeed);
 
-	LUX_API void Animate(Node* node, float time);
+	LUX_API void Animate(float time);
 
 	LUX_API void SetAxis(const math::Vector3F& axis);
 	LUX_API void SetRotationSpeed(const math::AngleF& speed);

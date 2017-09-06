@@ -57,8 +57,11 @@ void ParticleSystem::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 	visitor->Visit(this);
 }
 
-void ParticleSystem::Animate(Node* node, float time)
+void ParticleSystem::Animate(float time)
 {
+	auto node = GetParent();
+	if(!node)
+		return;
 	UpdateGroupData(node);
 
 	ParticleGroupData::SystemData data;

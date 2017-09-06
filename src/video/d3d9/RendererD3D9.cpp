@@ -382,6 +382,8 @@ void RendererD3D9::SetupRendering(size_t passId)
 		m_PrePolyOffset = pass.polygonOffset;
 	}
 
+	pass.normalizeNormals |= m_NormalizeNormals;
+
 	// Enable pass settings
 	m_DeviceState.SetD3DColors(*m_ParamId.ambient, pass);
 	m_DeviceState.EnablePass(pass);

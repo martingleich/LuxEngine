@@ -21,16 +21,16 @@ public:
 	{
 	public:
 		//! Called before rendering the camera, after beginning the scene.
-		virtual void PreRender(const CameraBase* cam, const Node* n) { LUX_UNUSED(cam); LUX_UNUSED(n); }
+		virtual void PreRender(const CameraBase* cam) { LUX_UNUSED(cam); }
 
 		//! Called after rendering all nodes, before ending the scene.
-		virtual void PostRender(const CameraBase* cam, const Node* n) { LUX_UNUSED(cam); LUX_UNUSED(n); }
+		virtual void PostRender(const CameraBase* cam) { LUX_UNUSED(cam); }
 	};
 
 public:
-	virtual void PreRender(video::Renderer* renderer, const Node* node) = 0;
-	virtual void Render(video::Renderer* renderer, const Node* node) = 0;
-	virtual void PostRender(video::Renderer* renderer, const Node* node) = 0;
+	virtual void PreRender(video::Renderer* renderer) = 0;
+	virtual void Render(video::Renderer* renderer) = 0;
+	virtual void PostRender(video::Renderer* renderer) = 0;
 
 	virtual void SetRenderTarget(const video::RenderTarget& target) = 0;
 	virtual const video::RenderTarget& GetRenderTarget() const = 0;
@@ -101,9 +101,9 @@ public:
 	LUX_API void SetCameraListener(Listener* l);
 	LUX_API Listener* GetCameraListener() const;
 
-	LUX_API void PreRender(video::Renderer* renderer, const Node* node);
-	LUX_API void Render(video::Renderer* r, const Node* n);
-	LUX_API void PostRender(video::Renderer* renderer, const Node* node);
+	LUX_API void PreRender(video::Renderer* renderer);
+	LUX_API void Render(video::Renderer* r);
+	LUX_API void PostRender(video::Renderer* renderer);
 
 	LUX_API const math::ViewFrustum& GetActiveFrustum() const;
 	LUX_API const math::Matrix4& GetActiveView() const;
@@ -113,9 +113,9 @@ public:
 	LUX_API StrongRef<Referable> Clone() const;
 
 private:
-	math::Matrix4 CalculateProjectionMatrix(video::Renderer* r, const Node* n);
-	math::Matrix4 CalculateViewMatrix(video::Renderer* r, const Node* n);
-	math::ViewFrustum CalculateViewFrustum(video::Renderer* r, const Node* n, const math::Matrix4& view);
+	math::Matrix4 CalculateProjectionMatrix(video::Renderer* r);
+	math::Matrix4 CalculateViewMatrix(video::Renderer* r);
+	math::ViewFrustum CalculateViewFrustum(video::Renderer* r, const math::Matrix4& view);
 
 private:
 	math::ViewFrustum m_CustomFrustum;

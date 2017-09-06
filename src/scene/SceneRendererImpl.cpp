@@ -42,6 +42,13 @@ SceneRendererImpl::~SceneRendererImpl()
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+struct CameraSortT
+{
+	bool Smaller(const Camera* a, const Camera* b) const
+	{
+		return a->GetRenderPriority() < b->GetRenderPriority();
+	}
+};
 void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 {
 	video::RenderStatistics::GroupScope grpScope("scene");
@@ -50,11 +57,11 @@ void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 	// Collect "real" camera nodes
 	auto camList = m_Scene->GetCameraList();
 	auto newEnd = core::RemoveIf(camList,
-		[](const Scene::CameraEntry& e) { return !e.node->IsTrulyVisible(); }
+		[](const Camera* c) { return !c->GetParent()->IsTrulyVisible(); }
 	);
 	camList.Resize(core::IteratorDistance(camList.First(), newEnd));
 
-	camList.Sort();
+	camList.Sort(CameraSortT());
 
 	if(camList.Size() == 0) {
 		if(!m_Scene->IsEmpty())
@@ -67,13 +74,13 @@ void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 	}
 
 	if(!beginScene) {
-		if(m_Renderer->GetRenderTarget() != camList[0].camera->GetRenderTarget())
+		if(m_Renderer->GetRenderTarget() != camList[0]->GetRenderTarget())
 			throw core::ErrorException("Already started scene uses diffrent rendertarget than first camera.");
 	}
 
 	for(auto it = camList.First(); it != camList.End(); ++it) {
-		m_ActiveCamera = it->camera;
-		m_ActiveCameraNode = it->node;
+		m_ActiveCamera = *it;
+		m_ActiveCameraNode = m_ActiveCamera->GetParent();
 		m_AbsoluteCamPos = m_ActiveCameraNode->GetAbsolutePosition();
 
 		if(it != camList.First() || beginScene) {
@@ -90,14 +97,14 @@ void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 				video::Color::Black, 1.0f, 0);
 		}
 
-		m_ActiveCamera->PreRender(m_Renderer, m_ActiveCameraNode);
+		m_ActiveCamera->PreRender(m_Renderer);
 
-		m_ActiveCamera->Render(m_Renderer, m_ActiveCameraNode);
+		m_ActiveCamera->Render(m_Renderer);
 
 		CollectRenderables(m_Scene->GetRoot());
 		DrawScene();
 
-		m_ActiveCamera->PostRender(m_Renderer, m_ActiveCameraNode);
+		m_ActiveCamera->PostRender(m_Renderer);
 
 		if(it != camList.Last() || endScene)
 			m_Renderer->EndScene();
@@ -255,13 +262,14 @@ void SceneRendererImpl::DrawScene()
 	size_t count = 0;
 	size_t shadowCount = 0;
 	for(auto& e : m_Scene->GetLightList()) {
-		if(e.node->IsTrulyVisible()) {
-			illuminating.PushBack(SceneData::LightEntry(e.light, e.node));
-			if(e.light->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
-				shadowCasting.PushBack(SceneData::LightEntry(e.light, e.node));
+		auto node = e->GetParent();
+		if(node->IsTrulyVisible()) {
+			illuminating.PushBack(SceneData::LightEntry(e, node));
+			if(e->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
+				shadowCasting.PushBack(SceneData::LightEntry(e, node));
 				++shadowCount;
 			} else {
-				nonShadowCasting.PushBack(SceneData::LightEntry(e.light, e.node));
+				nonShadowCasting.PushBack(SceneData::LightEntry(e, node));
 			}
 			++count;
 			if(count >= maxLightCount)
@@ -283,7 +291,8 @@ void SceneRendererImpl::DrawScene()
 	m_Renderer->ClearFog();
 	bool foundFog = false;
 	for(auto& f : m_Scene->GetFogList()) {
-		if(f.node->IsTrulyVisible()) {
+		auto node = f->GetParent();
+		if(node->IsTrulyVisible()) {
 			if(!foundFog) {
 				/*
 				if(drawStencilShadows) {
@@ -292,7 +301,7 @@ void SceneRendererImpl::DrawScene()
 				}
 				*/
 				foundFog = true;
-				auto fog = f.fog->GetFogData();
+				auto fog = f->GetFogData();
 				if(passCount > 1)
 					fog.color *= 1.0f / passCount;
 				m_Renderer->SetFog(fog);

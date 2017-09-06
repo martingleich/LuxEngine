@@ -62,79 +62,6 @@ class LineQuery;
 class Scene : public ReferenceCounted
 {
 public:
-	struct CameraEntry
-	{
-		Node* node;
-		Camera* camera;
-
-		CameraEntry() :
-			node(nullptr),
-			camera(nullptr)
-		{
-		}
-		CameraEntry(Node* n, Camera* c) :
-			node(n),
-			camera(c)
-		{
-		}
-
-		bool operator<(const CameraEntry& other) const
-		{
-			return camera->GetRenderPriority() > other.camera->GetRenderPriority();
-		}
-		bool operator==(const CameraEntry& other) const
-		{
-			return (node == other.node && camera == other.camera);
-		}
-	};
-
-	struct LightEntry
-	{
-		Node* node;
-		Light* light;
-
-		LightEntry() :
-			node(nullptr),
-			light(nullptr)
-		{
-		}
-
-		LightEntry(Node* n, Light* l) :
-			node(n),
-			light(l)
-		{
-		}
-
-		bool operator==(const LightEntry& other) const
-		{
-			return node == other.node && light == other.light;
-		}
-	};
-
-	struct FogEntry
-	{
-		Node* node;
-		Fog* fog;
-
-		FogEntry() :
-			node(nullptr),
-			fog(nullptr)
-		{
-		}
-
-		FogEntry(Node* n, Fog* f) :
-			node(n),
-			fog(f)
-		{
-		}
-
-		bool operator==(const FogEntry& other) const
-		{
-			return node == other.node && fog == other.fog;
-		}
-	};
-
-public:
 	LUX_API Scene();
 	LUX_API virtual ~Scene();
 
@@ -183,21 +110,21 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API virtual void RegisterCamera(Node* node, Camera* camera);
-	LUX_API virtual void UnregisterCamera(Node* node, Camera* camera);
+	LUX_API virtual void RegisterCamera(Camera* camera);
+	LUX_API virtual void UnregisterCamera(Camera* camera);
 
-	LUX_API virtual void RegisterLight(Node* node, Light* light);
-	LUX_API virtual void UnregisterLight(Node* node, Light* light);
+	LUX_API virtual void RegisterLight(Light* light);
+	LUX_API virtual void UnregisterLight(Light* light);
 
-	LUX_API virtual void RegisterFog(Node* node, Fog* fog);
-	LUX_API virtual void UnregisterFog(Node* node, Fog* fog);
+	LUX_API virtual void RegisterFog(Fog* fog);
+	LUX_API virtual void UnregisterFog(Fog* fog);
 
 	LUX_API virtual void RegisterAnimated(Node* node);
 	LUX_API virtual void UnregisterAnimated(Node* node);
 
-	LUX_API virtual const core::Array<CameraEntry>& GetCameraList() const;
-	LUX_API virtual const core::Array<LightEntry>& GetLightList() const;
-	LUX_API virtual const core::Array<FogEntry>& GetFogList() const;
+	LUX_API virtual const core::Array<Camera*>& GetCameraList() const;
+	LUX_API virtual const core::Array<Light*>& GetLightList() const;
+	LUX_API virtual const core::Array<Fog*>& GetFogList() const;
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -216,9 +143,9 @@ private:
 	core::Array<StrongRef<Node>> m_DeletionQueue; //!< Nodes to delete on next deletion run
 
 	core::OrderedSet<Node*> m_AnimatedNodes; //!< The animated nodes of the graph
-	core::Array<CameraEntry> m_CameraList; //!< The cameras of the graph
-	core::Array<LightEntry> m_LightList; //!< The lights of the graph
-	core::Array<FogEntry> m_FogList; //!< The fogs of the graph
+	core::Array<Camera*> m_CameraList; //!< The cameras of the graph
+	core::Array<Light*> m_LightList; //!< The lights of the graph
+	core::Array<Fog*> m_FogList; //!< The fogs of the graph
 };
 
 } // namespace scene

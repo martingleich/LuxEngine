@@ -52,7 +52,7 @@ void Node::Animate(float time)
 		Component* component = it->comp;
 		if(!it->markForDelete) {
 			if(component->IsAnimated())
-				component->Animate(this, time);
+				component->Animate(time);
 		}
 	}
 }
@@ -471,17 +471,17 @@ void Node::OnAddComponent(Component* c)
 	if(m_Scene) {
 		auto camera = dynamic_cast<Camera*>(c);
 		if(camera)
-			m_Scene->RegisterCamera(this, camera);
+			m_Scene->RegisterCamera(camera);
 
 		auto light = dynamic_cast<Light*>(c);
 		if(light) {
-			m_Scene->RegisterLight(this, light);
+			m_Scene->RegisterLight(light);
 			SetShadowCasting(false);
 		}
 
 		auto fog = dynamic_cast<Fog*>(c);
 		if(fog) {
-			m_Scene->RegisterFog(this, fog);
+			m_Scene->RegisterFog(fog);
 		}
 
 		if(c->IsAnimated()) {
@@ -502,14 +502,14 @@ void Node::OnRemoveComponent(Component* c)
 	if(m_Scene) {
 		auto camera = dynamic_cast<Camera*>(c);
 		if(camera)
-			m_Scene->UnregisterCamera(this, camera);
+			m_Scene->UnregisterCamera(camera);
 
 		auto light = dynamic_cast<Light*>(c);
 		if(light)
-			m_Scene->UnregisterLight(this, light);
+			m_Scene->UnregisterLight(light);
 		auto fog = dynamic_cast<Fog*>(c);
 		if(fog)
-			m_Scene->UnregisterFog(this, fog);
+			m_Scene->UnregisterFog(fog);
 		if(c->IsAnimated()) {
 			--m_AnimatedCount;
 			if(m_AnimatedCount == 0)

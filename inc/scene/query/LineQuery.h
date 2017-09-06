@@ -16,6 +16,7 @@ Returns all objects intersecting a given line.
 class LineQuery : public Query
 {
 public:
+	LineQuery() {}
 	LineQuery(Node* rootNode, const math::Line3F& line = math::Line3F()) :
 		Query(rootNode),
 		m_Line(line)

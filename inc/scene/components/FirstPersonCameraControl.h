@@ -20,7 +20,7 @@ public:
 
 	LUX_API ~FirstPersonCameraControl();
 
-	LUX_API void Animate(Node* node, float time);
+	LUX_API void Animate(float time);
 
 	LUX_API float GetMoveSpeed() const;
 	LUX_API void SetMoveSpeed(float fSpeed);

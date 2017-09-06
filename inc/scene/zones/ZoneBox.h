@@ -77,7 +77,7 @@ public:
 		return LUX_NEW(BoxZone)(*this);
 	}
 
-	static const core::Name TypeName;
+	LUX_API static const core::Name TypeName;
 
 private:
 	math::Vector3F m_HalfSize;

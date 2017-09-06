@@ -18,7 +18,7 @@ public:
 		bool jumpBack = false,
 		u32 count = std::numeric_limits<u32>::max());
 
-	void Animate(Node* node, float secsPassed);
+	void Animate(float secsPassed);
 
 	StrongRef<Referable> Clone() const;
 	core::Name GetReferableType() const;

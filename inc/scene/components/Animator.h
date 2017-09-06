@@ -15,7 +15,7 @@ public:
 		m_IsAnimated = true;
 	}
 
-	virtual void Animate(Node* node, float secsPassed) = 0;
+	virtual void Animate(float secsPassed) = 0;
 };
 
 class FinishingAnimator : public Animator
@@ -34,17 +34,14 @@ public:
 		m_IsAnimated = other.m_IsAnimated;
 	}
 
-	virtual void Animate(Node* node, float secsPassed)
+	virtual void Animate(float secsPassed)
 	{
 		m_RemainingTime -= secsPassed;
 		if(IsFinished())
-			OnFinish(node);
+			OnFinish();
 	}
 
-	virtual void OnFinish(Node* node)
-	{
-		LUX_UNUSED(node);
-	}
+	virtual void OnFinish() {}
 
 	bool IsFinished() const
 	{

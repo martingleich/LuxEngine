@@ -40,6 +40,7 @@ public:
 
 public:
 	Component() :
+		m_Node(nullptr),
 		m_IsAnimated(false),
 		m_Listener(nullptr)
 	{
@@ -58,9 +59,8 @@ public:
 	This is called only if the component is animated
 	\param time The time since the last frame in seconds
 	*/
-	virtual void Animate(Node* node, float time)
+	virtual void Animate(float time)
 	{
-		LUX_UNUSED(node);
 		LUX_UNUSED(time);
 	}
 
@@ -84,20 +84,31 @@ public:
 		return m_IsAnimated;
 	}
 
+	Node* GetParent()
+	{
+		return m_Node;
+	}
+	const Node* GetParent() const
+	{
+		return m_Node;
+	}
+
 protected:
 	virtual void OnAttach(Node* n)
 	{
 		if(m_Listener)
 			m_Listener->Attach(n);
+		m_Node = n;
 	}
-
 	virtual void OnDettach(Node* n)
 	{
 		if(m_Listener)
 			m_Listener->Dettach(n);
+		m_Node = nullptr;
 	}
 
 protected:
+	Node* m_Node;
 	bool m_IsAnimated;
 	Listener* m_Listener;
 };

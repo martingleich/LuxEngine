@@ -86,7 +86,7 @@ public:
 		return LUX_NEW(CylinderZone)(*this);
 	}
 
-	static const core::Name TypeName;
+	LUX_API static const core::Name TypeName;
 
 private:
 	float m_Radius;

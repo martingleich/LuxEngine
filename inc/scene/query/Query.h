@@ -17,7 +17,7 @@ A collision query finds all scene-nodes colliding with some kind of object.
 The type of objects depends on the query.
 All queries are posed in global coordinates.
 */
-class Query : public ReferenceCounted
+class Query
 {
 public:
 	//! The kind of data to retrieve from the collision.
@@ -38,7 +38,9 @@ public:
 	};
 
 public:
+	Query() {}
 	LUX_API Query(Node* rootNode);
+	virtual ~Query() {}
 
 	//! Execute the query.
 	/**

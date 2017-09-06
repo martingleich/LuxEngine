@@ -240,41 +240,38 @@ bool Scene::IsEmpty() const
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-void Scene::RegisterCamera(Node* node, Camera* camera)
+void Scene::RegisterCamera(Camera* camera)
 {
-	m_CameraList.PushBack(CameraEntry(node, camera));
+	m_CameraList.PushBack(camera);
 }
 
-void Scene::UnregisterCamera(Node* node, Camera* camera)
+void Scene::UnregisterCamera(Camera* camera)
 {
-	CameraEntry entry(node, camera);
-	auto it = core::LinearSearch(entry, m_CameraList);
+	auto it = core::LinearSearch(camera, m_CameraList);
 	if(it != m_CameraList.End())
 		m_CameraList.Erase(it);
 }
 
-void Scene::RegisterLight(Node* node, Light* light)
+void Scene::RegisterLight(Light* light)
 {
-	m_LightList.PushBack(LightEntry(node, light));
+	m_LightList.PushBack(light);
 }
 
-void Scene::UnregisterLight(Node* node, Light* light)
+void Scene::UnregisterLight(Light* light)
 {
-	LightEntry entry(node, light);
-	auto it = core::LinearSearch(entry, m_LightList);
+	auto it = core::LinearSearch(light, m_LightList);
 	if(it != m_LightList.End())
 		m_LightList.Erase(it);
 }
 
-void Scene::RegisterFog(Node* node, Fog* fog)
+void Scene::RegisterFog(Fog* fog)
 {
-	m_FogList.PushBack(FogEntry(node, fog));
+	m_FogList.PushBack(fog);
 }
 
-void Scene::UnregisterFog(Node* node, Fog* fog)
+void Scene::UnregisterFog(Fog* fog)
 {
-	FogEntry entry(node, fog);
-	auto it = core::LinearSearch(entry, m_FogList);
+	auto it = core::LinearSearch(fog, m_FogList);
 	if(it != m_FogList.End())
 		m_FogList.Erase(it);
 }
@@ -289,17 +286,17 @@ void Scene::UnregisterAnimated(Node* node)
 	m_AnimatedNodes.Erase(node);
 }
 
-const core::Array<Scene::CameraEntry>& Scene::GetCameraList() const
+const core::Array<Camera*>& Scene::GetCameraList() const
 {
 	return m_CameraList;
 }
 
-const core::Array<Scene::LightEntry>& Scene::GetLightList() const
+const core::Array<Light*>& Scene::GetLightList() const
 {
 	return m_LightList;
 }
 
-const core::Array<Scene::FogEntry>& Scene::GetFogList() const
+const core::Array<Fog*>& Scene::GetFogList() const
 {
 	return m_FogList;
 }

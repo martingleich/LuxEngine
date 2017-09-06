@@ -16,14 +16,12 @@ namespace scene
 {
 
 Mesh::Mesh() :
-	m_DirtyMaterials(true),
 	m_OnlyReadMaterials(true)
 {
 }
 
 Mesh::Mesh(const Mesh& other) :
 	m_Mesh(other.m_Mesh),
-	m_DirtyMaterials(true),
 	m_OnlyReadMaterials(other.m_OnlyReadMaterials),
 	m_BoundingBox(other.m_BoundingBox)
 {
@@ -77,11 +75,6 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 
 ERenderPass Mesh::GetRenderPass() const
 {
-	if(!m_DirtyMaterials)
-		return m_RenderPass;
-
-	m_DirtyMaterials = false;
-
 	bool transparent = false;
 	bool solid = false;
 	for(size_t i = 0; i < GetMaterialCount(); ++i) {
@@ -138,8 +131,6 @@ void Mesh::SetMaterial(size_t index, video::Material* m)
 		m_Mesh->SetMaterial(index, m);
 	else
 		m_Materials.At(index) = m;
-
-	m_DirtyMaterials = true;
 }
 
 size_t Mesh::GetMaterialCount() const
@@ -180,8 +171,6 @@ bool Mesh::GetReadMaterialsOnly() const
 
 void Mesh::CopyMaterials()
 {
-	m_DirtyMaterials = true;
-
 	m_Materials.Clear();
 	if(m_OnlyReadMaterials || !m_Mesh)
 		return;

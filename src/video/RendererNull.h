@@ -74,6 +74,8 @@ public:
 
 	void SetTransform(ETransform transform, const math::Matrix4& matrix);
 	const math::Matrix4& GetTransform(ETransform transform) const;
+	void SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token);
+	bool GetNormalizeNormals() const;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -141,6 +143,7 @@ protected:
 	bool m_IsFogActive;
 	FogData m_Fog; //!< User set fog data
 
+	bool m_NormalizeNormals;
 	math::Matrix4 m_TransformWorld;
 	math::Matrix4 m_TransformView;
 	math::Matrix4 m_TransformProj;

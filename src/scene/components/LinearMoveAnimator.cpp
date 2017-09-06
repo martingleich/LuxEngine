@@ -31,8 +31,11 @@ void LinearMoveAnimator::SetData(
 		m_Count++;
 }
 
-void LinearMoveAnimator::Animate(Node* node, float secsPassed)
+void LinearMoveAnimator::Animate(float secsPassed)
 {
+	auto node = GetParent();
+	if(!node)
+		return;
 	if(m_Count == 0) {
 		node->MarkForDelete(this);
 		return;

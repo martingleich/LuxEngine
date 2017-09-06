@@ -79,8 +79,6 @@ private:
 protected:
 	StrongRef<video::Mesh> m_Mesh;
 
-	mutable bool m_DirtyMaterials;
-
 	bool m_OnlyReadMaterials;
 	core::Array<StrongRef<video::Material>> m_Materials;
 

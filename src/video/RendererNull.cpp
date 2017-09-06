@@ -14,6 +14,8 @@ RendererNull::RendererNull(VideoDriver* driver) :
 	m_Driver(driver),
 	m_IsFogActive(false)
 {
+	m_NormalizeNormals = true;
+
 	m_Params.AddAttribute("camPos", math::Vector3F(0,0,0));
 	m_ParamId.lighting = m_Params.AddAttribute("lighting", (float)video::ELighting::Enabled);
 	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::Colorf(0, 0, 0));
@@ -177,6 +179,20 @@ const math::Matrix4& RendererNull::GetTransform(ETransform transform) const
 	case ETransform::Projection: return m_TransformProj;
 	default: throw core::InvalidArgumentException("transform");
 	}
+}
+
+void RendererNull::SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token)
+{
+	if(!token->renderer) {
+		token->renderer = this;
+		token->prev = m_NormalizeNormals;
+	}
+	m_NormalizeNormals = normalize;
+}
+
+bool RendererNull::GetNormalizeNormals() const
+{
+	return m_NormalizeNormals;
 }
 
 ///////////////////////////////////////////////////////////////////////////

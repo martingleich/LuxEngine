@@ -32,9 +32,9 @@ bool SphereCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* resu
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);
 
 	core::Name zoneType = vquery->GetZone()->GetReferableType();
-	if(zoneType == "sphere")
+	if(zoneType == SphereZone::TypeName)
 		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
-	else if(zoneType == "box")
+	else if(zoneType == BoxZone::TypeName)
 		return ExecuteBoxQuery(owner, vquery, vquery->GetZone().As<BoxZone>(), dynamic_cast<VolumeQueryCallback*>(result));
 	else
 		throw core::NotImplementedException();

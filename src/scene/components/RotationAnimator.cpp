@@ -20,11 +20,11 @@ RotationAnimator::RotationAnimator(const math::Vector3F& axis, math::AngleF RotS
 {
 }
 
-void RotationAnimator::Animate(Node* node, float time)
+void RotationAnimator::Animate(float time)
 {
+	auto node = GetParent();
 	if(!node)
 		return;
-
 	math::QuaternionF quat = node->GetOrientation();
 	quat *= math::QuaternionF(m_Axis, time*m_RotSpeed);
 	quat.Normalize();

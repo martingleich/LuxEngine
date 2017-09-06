@@ -45,6 +45,7 @@ enum class ETransform
 
 struct PipelineOverwriteToken;
 struct ScissorRectToken;
+struct NormalizeNormalsToken;
 
 /**
 Rendering 2d or 3d data:
@@ -182,6 +183,10 @@ public:
 	//! Get a active transform matrix
 	virtual const math::Matrix4& GetTransform(ETransform transform) const = 0;
 
+	//! Renormalize normals after transformation(default = true)
+	virtual void SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token=nullptr) = 0;
+	virtual bool GetNormalizeNormals() const = 0;
+
 	///////////////////////////////////////////////////////////////////////////
 
 	//! Add a new scene parameter
@@ -309,6 +314,16 @@ struct ScissorRectToken : VideoRendererToken
 	math::RectU prevRect;
 };
 
+struct NormalizeNormalsToken : public VideoRendererToken
+{
+	~NormalizeNormalsToken()
+	{
+		if(renderer)
+			renderer->SetNormalizeNormals(prev);
+	}
+
+	bool prev;
+};
 
 } // namespace video
 } // namespace lux

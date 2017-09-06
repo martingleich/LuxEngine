@@ -17,6 +17,10 @@ WARNING: Not all zones are supported, watch out for NotImplemented results.
 class VolumeQuery : public Query
 {
 public:
+	VolumeQuery() :
+		m_Zone(nullptr)
+	{}
+
 	VolumeQuery(Node* rootNode, Zone* zone = nullptr) :
 		Query(rootNode),
 		m_Zone(zone)

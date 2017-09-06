@@ -28,8 +28,12 @@ FirstPersonCameraControl::~FirstPersonCameraControl()
 {
 }
 
-void FirstPersonCameraControl::Animate(Node* node, float time)
+void FirstPersonCameraControl::Animate(float time)
 {
+	auto node = GetParent();
+	if(!node)
+		return;
+
 	math::Vector3F pos = node->GetAbsolutePosition();
 	math::Vector3F flank = node->FromRelativeDir(math::Vector3F::UNIT_X);
 	math::Vector3F up = node->FromRelativeDir(math::Vector3F::UNIT_Y);
