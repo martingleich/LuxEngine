@@ -198,6 +198,7 @@ enum class ETextureRepeat : u8
 	Mirror,
 	Clamp,
 	MirrorOnce,
+	Border,
 };
 
 //! The type of the hardware buffer

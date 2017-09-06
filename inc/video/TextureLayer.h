@@ -15,6 +15,7 @@ class TextureLayer
 public:
 	struct RepeatMode
 	{
+		video::Color border;
 		ETextureRepeat u;
 		ETextureRepeat v;
 		RepeatMode& operator=(ETextureRepeat r)

@@ -129,6 +129,7 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 	if(textureSet) {
 		SetSamplerState(stage, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
 		SetSamplerState(stage, D3DSAMP_ADDRESSV, GetD3DRepeatMode(layer.repeat.v));
+		SetSamplerState(stage, D3DSAMP_BORDERCOLOR, (u32)layer.repeat.border);
 
 		BaseTexture::Filter filter = layer.texture->GetFiltering();
 

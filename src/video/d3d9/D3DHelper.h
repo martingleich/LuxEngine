@@ -222,6 +222,8 @@ inline DWORD GetD3DRepeatMode(ETextureRepeat repeat)
 		return D3DTADDRESS_CLAMP;
 	case ETextureRepeat::MirrorOnce:
 		return D3DTADDRESS_MIRRORONCE;
+	case ETextureRepeat::Border:
+		return D3DTADDRESS_BORDER;
 	}
 
 	return 0;
