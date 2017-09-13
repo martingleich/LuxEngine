@@ -1,6 +1,7 @@
 #ifndef INCLUDED_QUATERNION_H
 #define INCLUDED_QUATERNION_H
 #include "math/vector3.h"
+#include "core/lxTypes.h"
 #include "core/lxFormat.h"
 
 namespace lux
@@ -609,6 +610,15 @@ void conv_data(format::Context& ctx, const Quaternion<T>& v, format::Placeholder
 }
 
 } // !namespace math
+namespace core
+{
+namespace Types
+{
+LUX_API Type QuaternionF();
+}
+
+template<> inline Type GetTypeInfo<math::Quaternion<float>>() { return Types::QuaternionF(); };
+}
 } // !namespace lux
 
 #endif // !INCLUDED_QUATERNION_H

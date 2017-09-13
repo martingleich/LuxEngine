@@ -29,9 +29,11 @@ struct QueryResult
 };
 
 //! The query result callback interface.
-class QueryCallback : public ReferenceCounted
+class QueryCallback
 {
 public:
+	virtual ~ QueryCallback() {}
+
 	//! This method is called for each colliding object in the query.
 	/**
 	Will be called for all result objects in the query.

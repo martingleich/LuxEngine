@@ -155,11 +155,11 @@ core::VariableAccess MaterialRenderer::SetShaderValue(u32 passId, const String& 
 
 	for(auto& v : m_ShaderValues) {
 		if(v.pass == passId && v.id == id)
-			return core::VariableAccess(desc.type, desc.name, v.obj.Data());
+			return core::VariableAccess(desc.type, v.obj.Data());
 	}
 
 	m_ShaderValues.PushBack(ShaderValue(passId, id, desc.type));
-	return core::VariableAccess(desc.type, desc.name, m_ShaderValues.Back().obj.Data());
+	return core::VariableAccess(desc.type, m_ShaderValues.Back().obj.Data());
 }
 
 core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u32 passId, const String& name)

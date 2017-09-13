@@ -162,7 +162,7 @@ VariableAccess ParamPackage::GetParam(u32 param, void* baseData, bool isConst) c
 
 	core::Type type = isConst ? p.type.GetConstantType() : p.type;
 
-	return VariableAccess(type, p.name.Data(), (u8*)baseData + p.offset);
+	return VariableAccess(type, (u8*)baseData + p.offset);
 }
 
 VariableAccess ParamPackage::GetParamFromName(const StringType& name, void* baseData, bool isConst) const
@@ -187,13 +187,13 @@ VariableAccess ParamPackage::GetParamFromType(core::Type type, u32 index, void* 
 VariableAccess ParamPackage::DefaultValue(u32 param)
 {
 	auto& p = self->Params.At(param);
-	return VariableAccess(p.type, p.name.Data(), (u8*)self->DefaultPackage + p.offset);
+	return VariableAccess(p.type, (u8*)self->DefaultPackage + p.offset);
 }
 
 VariableAccess ParamPackage::DefaultValue(u32 param) const
 {
 	auto& p = self->Params.At(param);
-	return VariableAccess(p.type.GetConstantType(), p.name.Data(), (u8*)self->DefaultPackage + p.offset);
+	return VariableAccess(p.type.GetConstantType(), (u8*)self->DefaultPackage + p.offset);
 }
 
 VariableAccess ParamPackage::DefaultValue(const StringType& param)

@@ -65,7 +65,6 @@ namespace input
 #include "math/Triangle3.h"
 #include "math/Vector2.h"
 #include "math/vector3.h"
-#include "math/Curve.h"
 
 #include "core/ReferenceCounted.h"
 #include "core/Logger.h"
@@ -125,6 +124,8 @@ namespace input
 
 #include "video/DrawingCanvas.h"
 
+#include "logic/Logic.h"
+
 #include "scene/Scene.h"
 #include "scene/SceneRenderer.h"
 #include "scene/Transformable.h"
@@ -144,6 +145,8 @@ namespace input
 #include "scene/components/FirstPersonCameraControl.h"
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/RotationAnimator.h"
+
+#include "scene/animation/Curve.h"
 
 #include "events/lxSignal.h"
 #include "events/lxActions.h"

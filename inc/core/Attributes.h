@@ -38,7 +38,7 @@ public:
 
 	virtual VariableAccess GetAccess(bool isConst = false)
 	{
-		return VariableAccess(m_Name.Data(), m_Any, isConst);
+		return VariableAccess(m_Any, isConst);
 	}
 
 private:

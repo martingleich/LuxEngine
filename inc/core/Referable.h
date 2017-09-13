@@ -11,7 +11,7 @@ namespace lux
 Referable objects can be cloned from older instances.
 They also can be used with the \ref ReferableFactory and created there my name or id
 */
-class Referable : public ReferenceCounted
+class Referable : public virtual ReferenceCounted
 {
 public:
 	virtual ~Referable() {}

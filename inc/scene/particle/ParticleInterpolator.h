@@ -4,7 +4,7 @@
 
 #include "core/lxArray.h"
 #include "core/lxAlgorithm.h"
-#include "math/Curve.h"
+#include "scene/animation/Curve.h"
 
 #include "Particle.h"
 
@@ -31,12 +31,11 @@ public:
 	{
 	}
 
-	math::Curve<float>& GetCurve()
+	void SetCurve(Curve* c)
 	{
-		return m_Curve;
+		m_Curve = c;
 	}
-
-	const math::Curve<float>& GetCurve() const
+	Curve* GetCurve() const
 	{
 		return m_Curve;
 	}
@@ -79,7 +78,7 @@ public:
 		if(std::isnan(t))
 			return t;
 
-		return m_Curve.GetValue(t);
+		return m_Curve->Evaluate<float>(t);
 	}
 
 private:
@@ -100,7 +99,7 @@ private:
 	}
 
 private:
-	math::Curve<float> m_Curve;
+	StrongRef<Curve> m_Curve;
 	EVariable m_Variable;
 	float m_TimeScaleVar;
 	bool m_UseAbsTime;
