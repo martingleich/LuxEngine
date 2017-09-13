@@ -21,10 +21,10 @@ public:
 	{
 	public:
 		//! Called before rendering the camera, after beginning the scene.
-		virtual void PreRender(const CameraBase* cam) { LUX_UNUSED(cam); }
+		virtual void PreRender(CameraBase* cam) { LUX_UNUSED(cam); }
 
 		//! Called after rendering all nodes, before ending the scene.
-		virtual void PostRender(const CameraBase* cam) { LUX_UNUSED(cam); }
+		virtual void PostRender(CameraBase* cam) { LUX_UNUSED(cam); }
 	};
 
 public:

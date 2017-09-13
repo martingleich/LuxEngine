@@ -15,11 +15,10 @@ namespace lux
 namespace scene
 {
 
-class SceneRendererImpl : public SceneRenderer
+class SceneRendererSimpleForward : public SceneRenderer
 {
 public:
-	SceneRendererImpl();
-	~SceneRendererImpl();
+	SceneRendererSimpleForward();
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -27,37 +26,13 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	void PushPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over);
-	void PopPipelineOverwrite(ERenderPass pass);
-
-	////////////////////////////////////////////////////////////////////////////////////
-
-	core::VariableAccess Attribute(const String& str)
-	{
-		return m_Attributes[str];
-	}
-
-	const core::Attributes& Attributes() const
-	{
-		return m_Attributes;
-	}
-
-private:
 	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
 	void DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
 
-	class RenderableCollector;
-	void CollectRenderables(Node* root);
-	void CollectRenderablesRec(Node* node, RenderableCollector* collector, bool noDebug);
 	void AddRenderEntry(Node* n, Renderable* r);
 
 	void DrawScene();
-
-	struct RenderEntry;
-	bool IsCulled(const RenderEntry& e);
 	bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
-
-	void AddDriverLight(Node* n, Light* l);
 
 private:
 	struct RenderEntry
@@ -74,11 +49,16 @@ private:
 		{
 		}
 
-		RenderEntry(Node* n, Renderable* r, bool c=false) :
+		RenderEntry(Node* n, Renderable* r, bool c = false) :
 			node(n),
 			renderable(r),
 			isCulled(c)
 		{
+		}
+
+		bool IsCulled() const
+		{
+			return isCulled;
 		}
 	};
 
@@ -129,10 +109,7 @@ private:
 	/////////////////////////////////////////////////////////////////////////
 	// Settings and parameters
 	/////////////////////////////////////////////////////////////////////////
-	core::Attributes m_Attributes;
 	bool m_Culling; // Read from m_Attributes
-
-	core::OrderedMap<ERenderPass, core::Array<video::PipelineOverwrite>> m_Overwrites; //!< User-set pipeline overwrites
 
 	/////////////////////////////////////////////////////////////////////////
 	// References to other classes

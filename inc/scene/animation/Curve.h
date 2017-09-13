@@ -17,7 +17,7 @@ public:
 	T Evaluate(float time) const
 	{
 		T var;
-		GetValue(time, core::VariableAccess(core::GetTypeInfo<T>(), &var));
+		Evaluate(time, core::VariableAccess(core::GetTypeInfo<T>(), &var));
 		return var;
 	}
 	virtual void Evaluate(float time, core::VariableAccess access) const = 0;

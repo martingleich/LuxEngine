@@ -10,7 +10,7 @@
 #include "resources/ResourceSystem.h"
 
 #include "scene/Scene.h"
-#include "scene/SceneRendererImpl.h"
+#include "scene/SceneRendererSimpleForward.h"
 #include "scene/particle/ParticleSystemManager.h"
 
 #include "io/FileSystem.h"
@@ -302,25 +302,36 @@ StrongRef<video::AdapterList> LuxDeviceWin32::GetVideoAdapters(video::EDriverTyp
 	throw core::NotImplementedException();
 }
 
-void LuxDeviceWin32::BuildScene()
+void LuxDeviceWin32::BuildScene(scene::SceneRenderer* renderer)
 {
 	// If system already build -> no op
 	if(m_Scene) {
 		log::Warning("Scene already built.");
 		return;
 	}
+	StrongRef<scene::SceneRenderer> srenderer = renderer;
+	if(!srenderer)
+		srenderer = CreateSceneRenderer("SimpleForward");
 
 	if(!scene::ParticleSystemManager::Instance())
 		scene::ParticleSystemManager::Initialize();
 
 	log::Info("Build Scene.");
 	m_Scene = CreateScene();
-	m_SceneRenderer = LUX_NEW(scene::SceneRendererImpl);
+	m_SceneRenderer = srenderer;
 }
 
 StrongRef<scene::Scene> LuxDeviceWin32::CreateScene()
 {
 	return LUX_NEW(scene::Scene);
+}
+
+StrongRef<scene::SceneRenderer> LuxDeviceWin32::CreateSceneRenderer(const String& name)
+{
+	if(name == "SimpleForward")
+		return LUX_NEW(scene::SceneRendererSimpleForward);
+	else
+		throw core::ObjectNotFoundException(name.Data());
 }
 
 void LuxDeviceWin32::BuildImageSystem()
@@ -517,8 +528,10 @@ private:
 
 		if(m_SceneRenderer)
 			m_SceneRenderer->DrawScene(m_Scene, true, false);
-		else
-			m_Renderer->BeginScene(true, true, true);
+		else {
+			m_Renderer->Clear(true, true, true);
+			m_Renderer->BeginScene();
+		}
 		if(m_GUIEnv)
 			m_GUIEnv->Render();
 
@@ -602,7 +615,7 @@ void LuxDeviceWin32::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 	u64 startTime;
 	u64 endTime;
 	startTime = core::Clock::GetTicks();
-	float invTicksPerSecond = 1.0f/core::Clock::TicksPerSecond();
+	float invTicksPerSecond = 1.0f / core::Clock::TicksPerSecond();
 	float secsPassed = 0.0f;
 	while(Run()) {
 		if(!defLoop.CallPreFrame(frameLoop)) {

@@ -84,6 +84,7 @@ public:
 	LUX_API virtual StrongRef<Camera> CreateCamera() const;
 	LUX_API virtual StrongRef<Mesh> CreateMesh(const io::Path& path) const;
 	LUX_API virtual StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr) const;
+	LUX_API virtual StrongRef<SkyBox> CreateSkyBox(const video::Colorf& color) const;
 	LUX_API virtual StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture = nullptr) const;
 	LUX_API virtual StrongRef<Light> CreateLight(video::ELightType lightType = video::ELightType::Point, video::Color color = video::Color::White) const;
 	LUX_API virtual StrongRef<Fog> CreateFog(const video::Colorf& color = video::Color::White, float start = 10.0f, float end = 100.0f) const;
@@ -134,6 +135,8 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API virtual void AnimateAll(float secsPassed);
+
+	LUX_API void VisitRenderables(RenderableVisitor* visitor, bool noDebug, Node* root=nullptr);
 
 private:
 	StrongRef<Node> m_Root; //!< The root of the scenegraph

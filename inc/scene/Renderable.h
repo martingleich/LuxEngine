@@ -16,10 +16,13 @@ class Node;
 enum class ERenderPass
 {
 	None,
+
 	SkyBox,
+
 	Transparent,
 	Solid,
-	SolidAndTransparent,
+	DeferredEffect,
+	Any,
 };
 
 class Light;
@@ -32,19 +35,10 @@ public:
 
 	ERenderPass pass;
 
-	struct LightEntry
-	{
-		LightEntry(Light* l, Node* n) :
-			light(l),
-			node(n)
-		{}
-		Light* light;
-		Node* node;
-	};
-	const core::Array<LightEntry>& illuminatingLights;
-	const core::Array<LightEntry>& shadowCastingLights;
+	const core::Array<Light*> illuminatingLights;
+	const core::Array<Light*> shadowCastingLights;
 
-	SceneData(const core::Array<LightEntry>& ill, const core::Array<LightEntry>& shadowing) :
+	SceneData(const core::Array<Light*>& ill, const core::Array<Light*>& shadowing) :
 		illuminatingLights(ill),
 		shadowCastingLights(shadowing)
 	{}
@@ -64,7 +58,7 @@ class RenderableVisitor
 public:
 	virtual ~RenderableVisitor() {}
 
-	virtual void Visit(Renderable* r) = 0;
+	virtual void Visit(Node* node, Renderable* r) = 0;
 };
 
 } // namespace scene

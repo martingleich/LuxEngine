@@ -29,13 +29,11 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	virtual void PushPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over) = 0;
-	virtual void PopPipelineOverwrite(ERenderPass pass) = 0;
+	LUX_API core::VariableAccess Attribute(const String& str);
+	LUX_API const core::Attributes& Attributes() const;
 
-	////////////////////////////////////////////////////////////////////////////////////
-
-	virtual core::VariableAccess Attribute(const String& str) = 0;
-	virtual const core::Attributes& Attributes() const = 0;
+protected:
+	core::Attributes m_Attributes;
 };
 
 } // namespace scene

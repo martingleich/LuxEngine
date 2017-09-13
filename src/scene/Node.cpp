@@ -407,7 +407,7 @@ void Node::RecalculateBoundingBox()
 	class BoxVisitor : public RenderableVisitor
 	{
 	public:
-		void Visit(Renderable* r)
+		void Visit(Node*, Renderable* r)
 		{
 			if(!r->GetBoundingBox().IsEmpty()) {
 				if(box.IsEmpty())

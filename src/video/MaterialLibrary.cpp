@@ -53,7 +53,7 @@ MaterialLibrary::MaterialLibrary()
 
 	{
 		auto transparentBase = AddMaterialRenderer("transparentBase");
-		transparentBase->GetPass(0).isTransparent = true;
+		transparentBase->GetPass(0).requirements = EMaterialRequirement::Transparent;
 	}
 
 	{
@@ -110,7 +110,7 @@ MaterialLibrary::MaterialLibrary()
 		pass.alphaOperator = video::EBlendOperator::Add;
 		pass.zWriteEnabled = false;
 		pass.fogEnabled = false;
-		pass.isTransparent = true;
+		pass.requirements = video::EMaterialRequirement::Transparent;
 		pass.AddTexture();
 
 		transparent->AddParam("diffMap", 0, EOptionId::Layer0);
@@ -125,7 +125,7 @@ MaterialLibrary::MaterialLibrary()
 		ps.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		ps.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		ps.alphaOperator = video::EBlendOperator::Add;
-		ps.isTransparent = true;
+		ps.requirements = video::EMaterialRequirement::Transparent;
 		particleTransp->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
 	{
@@ -138,7 +138,7 @@ MaterialLibrary::MaterialLibrary()
 		ps.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		ps.alphaDstBlend = video::EBlendFactor::One;
 		ps.alphaOperator = video::EBlendOperator::Add;
-		ps.isTransparent = true;
+		ps.requirements = video::EMaterialRequirement::Transparent;
 		particleEmit->AddParam("texture", 0, video::EOptionId::Layer0);
 	}
 

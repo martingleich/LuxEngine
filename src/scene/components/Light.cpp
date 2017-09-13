@@ -23,8 +23,20 @@ Light::~Light()
 
 video::LightData Light::GetLightData() const
 {
+	auto node = GetParent();
+
 	auto data = m_LightData;
 	data.color *= m_Power;
+	if(data.type == video::ELightType::Spot ||
+		data.type == video::ELightType::Directional) {
+		data.direction = node->FromRelativeDir(math::Vector3F::UNIT_Z);
+	}
+
+	if(data.type == video::ELightType::Spot ||
+		data.type == video::ELightType::Point) {
+		data.position = node->GetAbsolutePosition();
+	}
+
 	return data;;
 }
 

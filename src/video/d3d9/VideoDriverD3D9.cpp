@@ -244,6 +244,7 @@ void VideoDriverD3D9::FillCaps()
 	m_DriverCaps[(u32)EDriverCaps::MaxSimultaneousTextures] = m_Caps.MaxSimultaneousTextures;
 	m_DriverCaps[(u32)EDriverCaps::MaxLights] = m_Caps.MaxActiveLights;
 	m_DriverCaps[(u32)EDriverCaps::MaxAnisotropy] = m_Caps.MaxAnisotropy;
+	m_DriverCaps[(u32)EDriverCaps::MaxSimultaneousRT] = m_Caps.NumSimultaneousRTs;
 }
 
 void VideoDriverD3D9::InitRendertargetData()

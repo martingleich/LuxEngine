@@ -23,17 +23,18 @@ public:
 
 	void CleanUp();
 
-	void BeginScene(
+	void BeginScene();
+	void Clear(
 		bool clearColor, bool clearZBuffer, bool clearStencil,
 		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil = 0);
-
-	void ClearStencil(u32 value = 0);
-
 	void EndScene();
 	bool Present();
 
 	void SetRenderTarget(const RenderTarget& target);
+	void SetRenderTarget(const core::Array<RenderTarget>& targets);
+	void SetRenderTarget(const RenderTarget* targets, size_t count, bool restore);
 	const RenderTarget& GetRenderTarget();
+	const math::Dimension2U& GetRenderTargetSize();
 
 	void SetScissorRect(const math::RectU& rect, ScissorRectToken* token = nullptr);
 	const math::RectU& GetScissorRect() const;
@@ -108,7 +109,7 @@ private:
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
 	DeviceStateD3D9& m_DeviceState;
 
-	RendertargetD3D9 m_CurrentRendertarget;
+	core::Array<RendertargetD3D9> m_CurrentRendertargets;
 	RendertargetD3D9 m_BackbufferTarget;
 
 	math::RectU m_ScissorRect;

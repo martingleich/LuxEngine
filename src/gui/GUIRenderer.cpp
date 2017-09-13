@@ -39,7 +39,7 @@ void Renderer::DrawRectangle(const math::RectF& rect, const video::Color& color,
 	p.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 	p.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 	p.alphaOperator = video::EBlendOperator::Add;
-	p.isTransparent = true;
+	p.requirements = video::EMaterialRequirement::Transparent;
 	m_Renderer->SetPass(p);
 
 	auto realRect = rect;
@@ -66,7 +66,7 @@ void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, co
 	p.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 	p.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 	p.alphaOperator = video::EBlendOperator::Add;
-	p.isTransparent = true;
+	p.requirements = video::EMaterialRequirement::Transparent;
 	m_Renderer->SetPass(p);
 
 	video::Vertex2D quad[6] = {

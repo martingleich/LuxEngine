@@ -27,7 +27,7 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState
 {
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
-	m_CurrentRendertarget = m_BackbufferTarget;
+	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
 }
 
 void RendererD3D9::CleanUp()
@@ -36,19 +36,25 @@ void RendererD3D9::CleanUp()
 	m_Material.Reset();
 }
 
-void RendererD3D9::BeginScene(
-	bool clearColor, bool clearZ, bool clearStencil,
+void RendererD3D9::BeginScene()
+{
+	HRESULT hr = m_Device->BeginScene();
+	if(FAILED(hr)) {
+		if(hr == D3DERR_INVALIDCALL)
+			throw core::Exception("Scene was already started");
+		else
+			throw core::D3D9Exception(hr);
+	}
+}
+
+void RendererD3D9::Clear(
+	bool clearColor, bool clearZBuffer, bool clearStencil,
 	video::Color color, float z, u32 stencil)
 {
-	if((m_CurrentRendertarget.GetTexture() == nullptr) && m_CurrentRendertarget != m_BackbufferTarget) {
-		log::Warning("The current rendertarget texture was destroyed, fallback to normal backbuffer.");
-		SetRenderTarget(nullptr);
-	}
-
 	u32 flags = 0;
 	if(clearColor)
 		flags = D3DCLEAR_TARGET;
-	if(clearZ)
+	if(clearZBuffer)
 		flags |= D3DCLEAR_ZBUFFER;
 	if(clearStencil && m_Driver->GetConfig().zsFormat.sBits != 0)
 		flags |= D3DCLEAR_STENCIL;
@@ -63,27 +69,6 @@ void RendererD3D9::BeginScene(
 			d3dClear, z, stencil))) {
 			throw core::D3D9Exception(hr);
 		}
-	}
-
-	if(FAILED(hr) || FAILED(hr = m_Device->BeginScene())) {
-		if(hr == D3DERR_INVALIDCALL)
-			throw core::Exception("Scene was already started");
-		else
-			throw core::D3D9Exception(hr);
-	}
-}
-
-void RendererD3D9::ClearStencil(u32 value)
-{
-	u32 flags = 0;
-	if(m_Driver->GetConfig().zsFormat.sBits != 0)
-		flags |= D3DCLEAR_STENCIL;
-	HRESULT hr;
-	if(FAILED(hr = m_Device->Clear(
-		0, nullptr,
-		flags,
-		0, 1.0f, value))) {
-		throw core::D3D9Exception(hr);
 	}
 }
 
@@ -107,51 +92,94 @@ bool RendererD3D9::Present()
 
 void RendererD3D9::SetRenderTarget(const RenderTarget& target)
 {
-	if(!target.IsBackbuffer()) {
-		if(!target.GetTexture()->IsRendertarget())
-			throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
+	SetRenderTarget(&target, 1, false);
+}
 
-		// Same texture as current target -> Abort
-		if(target.GetTexture() == m_CurrentRendertarget.GetTexture())
-			return;
-	} else {
-		// Tries to set to back buffer and backbuffer already loaded -> Abort
-		if(m_CurrentRendertarget == m_BackbufferTarget)
-			return;
+void RendererD3D9::SetRenderTarget(const core::Array<RenderTarget>& targets)
+{
+	SetRenderTarget(targets.Data(), targets.Size(), false);
+}
+
+void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bool restore)
+{
+	if(count == 0)
+		throw core::InvalidArgumentException("count", "There must be at least one rendertarget.");
+	if(count > m_Driver->GetDeviceCapability(EDriverCaps::MaxSimultaneousRT))
+		throw core::InvalidArgumentException("count", "To many rendertargets.");
+
+	// Check if textures are valid
+	math::Dimension2U dim;
+	if(!targets[0].IsBackbuffer())
+		dim = targets[0].GetSize();
+	for(auto& t : core::MakeRange(targets, targets + count)) {
+		if(!t.IsBackbuffer()) {
+			if(t.GetSize() != dim)
+				throw core::InvalidArgumentException("target", "All rendertargets must have the same size");
+			if(!t.GetTexture()->IsRendertarget())
+				throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
+		}
 	}
 
 	RendertargetD3D9 newRendertarget;
-	if(target.IsBackbuffer())
+	if(targets[0].IsBackbuffer())
 		newRendertarget = m_BackbufferTarget;
 	else
-		newRendertarget = target;
+		newRendertarget = targets[0];
 
 	// Generate depth buffer via video driver
 	IDirect3DSurface9* depthStencil = m_Driver->GetD3D9MatchingDepthBuffer(newRendertarget.GetSurface());
 	if(depthStencil == nullptr)
 		throw core::Exception("Can't find matching depth buffer for rendertarget.");
 
-	HRESULT  hr;
-	if(FAILED(hr = m_Device->SetRenderTarget(0, newRendertarget.GetSurface())))
-		throw core::D3D9Exception(hr);
+	HRESULT hr = S_OK;
+	for(size_t i = 0; i < count && !FAILED(hr); ++i) {
+		if(targets[i].IsBackbuffer())
+			newRendertarget = m_BackbufferTarget;
+		else
+			newRendertarget = targets[i];
 
-	if(FAILED(hr = m_Device->SetDepthStencilSurface(depthStencil))) {
-		// Restore old target and fail
-		m_Device->SetRenderTarget(0, m_CurrentRendertarget.GetSurface());
+		hr = m_Device->SetRenderTarget(i, newRendertarget.GetSurface());
+	}
+
+	if(!FAILED(hr)) {
+		for(size_t i = count; i < m_CurrentRendertargets.Size() && !FAILED(hr); ++i) {
+			hr = m_Device->SetRenderTarget(i, nullptr);
+		}
+	}
+
+	if(!FAILED(hr)) {
+		hr = m_Device->SetDepthStencilSurface(depthStencil);
+	}
+
+	if(FAILED(hr)) {
+		if(!restore) {
+			// Restore backbuffer as rendertarget.
+			SetRenderTarget(nullptr, 1, true);
+		}
 		throw core::D3D9Exception(hr);
 	}
 
+	m_CurrentRendertargets.Clear();
+	for(size_t i = 0; i < count; ++i) {
+		if(targets[i].IsBackbuffer())
+			newRendertarget = m_BackbufferTarget;
+		else
+			newRendertarget = targets[i];
+		m_CurrentRendertargets.PushBack(newRendertarget);
+	}
+
 	// Reset scissor rectangle
-	SetScissorRect(math::RectU(0, 0, target.GetSize().width, target.GetSize().height));
-
-	m_DeviceState.SetRenderTargetTexture(target.GetTexture());
-
-	m_CurrentRendertarget = newRendertarget;
+	SetScissorRect(math::RectU(0, 0, dim.width, dim.height));
 }
 
 const RenderTarget& RendererD3D9::GetRenderTarget()
 {
-	return m_CurrentRendertarget;
+	return m_CurrentRendertargets[0];
+}
+
+const math::Dimension2U& RendererD3D9::GetRenderTargetSize()
+{
+	return m_CurrentRendertargets[0].GetSize();
 }
 
 void RendererD3D9::SetScissorRect(const math::RectU& rect, ScissorRectToken* token)
@@ -332,7 +360,7 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 
 void RendererD3D9::ReleaseUnmanaged()
 {
-	m_CurrentRendertarget = RendertargetD3D9(nullptr);
+	m_CurrentRendertargets.Clear();
 	m_BackbufferTarget = RendertargetD3D9(nullptr);
 }
 
@@ -342,7 +370,7 @@ void RendererD3D9::Reset()
 
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
-	m_CurrentRendertarget = m_BackbufferTarget;
+	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
 }
 
 ///////////////////////////////////////////////////////////////////////////

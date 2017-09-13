@@ -98,15 +98,11 @@ const String& MaterialRenderer::GetName() const
 	return m_Name;
 }
 
-MaterialRenderer::ERequirement MaterialRenderer::GetRequirements() const
+EMaterialRequirement MaterialRenderer::GetRequirements() const
 {
-	ERequirement r = ERequirement::None;
-	for(auto& pass : m_Passes) {
-		if(pass.isTransparent) {
-			r |= ERequirement::Transparent;
-			break;
-		}
-	}
+	EMaterialRequirement r = EMaterialRequirement::None;
+	for(auto& pass : m_Passes)
+		r |= pass.requirements;
 
 	return r;
 }

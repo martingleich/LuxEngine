@@ -61,7 +61,8 @@ public:
 	After this call all scene modules are fully usable.
 	Creates a single scene object.
 	*/
-	virtual void BuildScene() = 0;
+	virtual void BuildScene(scene::SceneRenderer* renderer=nullptr) = 0;
+	virtual StrongRef<scene::SceneRenderer> CreateSceneRenderer(const String& name) = 0;
 	virtual StrongRef<scene::Scene> CreateScene() = 0;
 
 	//! Create the gui environment

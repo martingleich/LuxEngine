@@ -82,9 +82,13 @@ public:
 
 	//! Begin a new scene
 	/**
-	Clears the current rendertarget and starts an new scene.
 	Draw commands can only be used, with a started scene
 	Each begun scene must be finished with EndScene.
+	*/
+	virtual void BeginScene() = 0;
+
+	//! Clear all currently set rendertargets
+	/*
 	\param clearColor Shall the color of the rendertarget be cleared
 	\param clearZBuffer Shall the z buffer be cleared
 	\param clearStencil Shall the stencil buffer be cleared
@@ -92,11 +96,9 @@ public:
 	\param z The value to which the zBuffer is set
 	\param stencil The value to which the stencil buffer is cleared
 	*/
-	virtual void BeginScene(
+	virtual void Clear(
 		bool clearColor, bool clearZBuffer, bool clearStencil,
 		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil = 0) = 0;
-
-	virtual void ClearStencil(u32 value = 0) = 0;
 
 	//! Finishes a scene
 	/**
@@ -117,8 +119,10 @@ public:
 	Must be called before calling BeginScene.
 	*/
 	virtual void SetRenderTarget(const RenderTarget& target) = 0;
+	virtual void SetRenderTarget(const core::Array<RenderTarget>& targets) = 0;
+	virtual const math::Dimension2U& GetRenderTargetSize() = 0;
 
-	//! Get the current rendertarget
+	//! Get the current major rendertarget
 	virtual const RenderTarget& GetRenderTarget() = 0;
 
 	///////////////////////////////////////////////////////////////////////////

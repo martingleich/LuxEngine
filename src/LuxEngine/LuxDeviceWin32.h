@@ -44,8 +44,9 @@ public:
 	StrongRef<video::AdapterList> GetVideoAdapters(video::EDriverType driver);
 
 	void BuildImageSystem();
-	void BuildScene();
+	void BuildScene(scene::SceneRenderer* renderer=nullptr);
 	StrongRef<scene::Scene> CreateScene();
+	StrongRef<scene::SceneRenderer> CreateSceneRenderer(const String& name);
 	void BuildGUIEnvironment();
 	void BuildAll(const video::DriverConfig& config);
 

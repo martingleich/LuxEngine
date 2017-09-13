@@ -69,7 +69,7 @@ public:
 	}
 
 protected:
-	WeakRef<Texture> m_Texture;
+	StrongRef<Texture> m_Texture;
 	math::Dimension2U m_Size;
 };
 

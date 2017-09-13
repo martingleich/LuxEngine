@@ -46,11 +46,12 @@ public:
 	operator T() const
 	{
 		if(IsValid()) {
-			if(!IsConvertible(m_Type, core::GetTypeInfo<T>()))
-				throw TypeException("Incompatible types used", m_Type, core::GetTypeInfo<T>());
+			auto type = core::GetTypeInfo<T>();
+			if(!IsConvertible(m_Type, type))
+				throw TypeException("Incompatible types used", m_Type, type);
 
 			T out;
-			ConvertBaseType(m_Type, m_Data, core::GetTypeInfo<T>(), &out);
+			ConvertBaseType(m_Type, m_Data, type, &out);
 			return out;
 		}
 
@@ -92,6 +93,7 @@ public:
 	{
 		return ((video::TextureLayer)*this).texture;
 	}
+
 	//! Access as texture
 	operator video::Texture*() const
 	{

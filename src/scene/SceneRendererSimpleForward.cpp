@@ -1,31 +1,25 @@
-#include "scene/SceneRendererImpl.h"
+#include "scene/SceneRendererSimpleForward.h"
+#include "core/Logger.h"
 
 #include "video/DriverConfig.h"
 #include "video/VideoDriver.h"
 #include "video/RenderTarget.h"
 
-//#include "video/MaterialLibrary.h"
-//#include "video/images/ImageSystem.h"
-#include "video/mesh/MeshSystem.h"
 #include "video/mesh/VideoMesh.h"
 
 #include "core/lxAlgorithm.h"
-
-#include "core/Logger.h"
 
 #include "scene/Scene.h"
 #include "scene/components/Fog.h"
 #include "scene/components/Light.h"
 #include "scene/components/SceneMesh.h"
 
-//#include "video/VertexTypes.h"
-
 namespace lux
 {
 namespace scene
 {
 
-SceneRendererImpl::SceneRendererImpl() :
+SceneRendererSimpleForward::SceneRendererSimpleForward() :
 	m_CollectedRoot(nullptr),
 	m_StencilShadowRenderer(video::VideoDriver::Instance()->GetRenderer(), 0xFFFFFFFF)
 {
@@ -36,11 +30,24 @@ SceneRendererImpl::SceneRendererImpl() :
 	m_Attributes.AddAttribute("culling", true);
 }
 
-SceneRendererImpl::~SceneRendererImpl()
-{
-}
-
 ////////////////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+class RenderableCollector : public RenderableVisitor
+{
+public:
+	RenderableCollector(SceneRendererSimpleForward* _sr) :
+		sr(_sr)
+	{}
+
+	void Visit(Node* node, Renderable* r)
+	{
+		sr->AddRenderEntry(node, r);
+	}
+
+	SceneRendererSimpleForward* sr;
+};
 
 struct CameraSortT
 {
@@ -49,7 +56,9 @@ struct CameraSortT
 		return a->GetRenderPriority() < b->GetRenderPriority();
 	}
 };
-void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
+}
+
+void SceneRendererSimpleForward::DrawScene(Scene* scene, bool beginScene, bool endScene)
 {
 	video::RenderStatistics::GroupScope grpScope("scene");
 	m_Scene = scene;
@@ -66,9 +75,10 @@ void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 	if(camList.Size() == 0) {
 		if(!m_Scene->IsEmpty())
 			log::Warning("No camera in scenegraph.");
-		if(beginScene == true)
-			m_Renderer->BeginScene(true, true, true, video::Color::Black, 1.0f, 0);
-		if(endScene)
+		if(beginScene == true) {
+			m_Renderer->Clear(true, true, true);
+			m_Renderer->BeginScene();
+		} if(endScene)
 			m_Renderer->EndScene();
 		return;
 	}
@@ -93,15 +103,19 @@ void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 				clearZ = true;
 				clearColor = true;
 			}
-			m_Renderer->BeginScene(clearColor, clearZ, clearStencil,
-				video::Color::Black, 1.0f, 0);
+			m_Renderer->Clear(clearColor, clearZ, clearStencil);
+			m_Renderer->BeginScene();
 		}
 
 		m_ActiveCamera->PreRender(m_Renderer);
 
 		m_ActiveCamera->Render(m_Renderer);
 
-		CollectRenderables(m_Scene->GetRoot());
+		m_SkyBoxList.Clear();
+		m_SolidNodeList.Clear();
+		m_TransparentNodeList.Clear();
+		RenderableCollector collector(this);
+		m_Scene->VisitRenderables(&collector, true);
 		DrawScene();
 
 		m_ActiveCamera->PostRender(m_Renderer);
@@ -117,73 +131,25 @@ void SceneRendererImpl::DrawScene(Scene* scene, bool beginScene, bool endScene)
 	m_CollectedRoot = nullptr;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-
-void SceneRendererImpl::PushPipelineOverwrite(ERenderPass pass, const video::PipelineOverwrite& over)
-{
-	m_Overwrites[pass].PushBack(over);
-}
-
-void SceneRendererImpl::PopPipelineOverwrite(ERenderPass pass)
-{
-	m_Overwrites[pass].PopBack();
-}
-
 ////////////////////////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////////////////////////
 
-void SceneRendererImpl::EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
+void SceneRendererSimpleForward::EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
-	for(auto& over : m_Overwrites[pass])
-		m_Renderer->PushPipelineOverwrite(over, &token);
+	// Enable debug things like wire frame
+	LUX_UNUSED(pass);
+	LUX_UNUSED(token);
 }
 
-void SceneRendererImpl::DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
+void SceneRendererSimpleForward::DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
-	for(auto& over : m_Overwrites[pass]) {
-		LUX_UNUSED(over);
-		m_Renderer->PopPipelineOverwrite(&token);
-	}
+	// Disable debug things like wire frame
+	LUX_UNUSED(pass);
+	LUX_UNUSED(token);
 }
 
-class SceneRendererImpl::RenderableCollector : public RenderableVisitor
-{
-public:
-	void Visit(Renderable* r)
-	{
-		smgr->AddRenderEntry(curNode, r);
-	}
-
-	Node* curNode;
-	SceneRendererImpl* smgr;
-};
-
-void SceneRendererImpl::CollectRenderables(Node* root)
-{
-	if(root == m_CollectedRoot)
-		return;
-
-	m_SkyBoxList.Clear();
-	m_SolidNodeList.Clear();
-	m_TransparentNodeList.Clear();
-
-	RenderableCollector collector;
-	collector.smgr = this;
-	CollectRenderablesRec(root, &collector, true);
-	m_CollectedRoot = root;
-}
-
-void SceneRendererImpl::CollectRenderablesRec(Node* node, RenderableCollector* collector, bool noDebug)
-{
-	collector->curNode = node;
-	node->VisitRenderables(collector, noDebug);
-
-	for(auto child : node->Children())
-		CollectRenderablesRec(child, collector, noDebug);
-}
-
-void SceneRendererImpl::AddRenderEntry(Node* n, Renderable* r)
+void SceneRendererSimpleForward::AddRenderEntry(Node* n, Renderable* r)
 {
 	if(!n->IsTrulyVisible())
 		return;
@@ -202,7 +168,7 @@ void SceneRendererImpl::AddRenderEntry(Node* n, Renderable* r)
 		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
 		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r, isCulled));
 		break;
-	case ERenderPass::SolidAndTransparent:
+	case ERenderPass::Any:
 		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
 		m_SolidNodeList.PushBack(RenderEntry(n, r, isCulled));
 		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r, isCulled));
@@ -212,12 +178,7 @@ void SceneRendererImpl::AddRenderEntry(Node* n, Renderable* r)
 	}
 }
 
-bool SceneRendererImpl::IsCulled(const RenderEntry& e)
-{
-	return e.isCulled;
-}
-
-bool SceneRendererImpl::IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum)
+bool SceneRendererSimpleForward::IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum)
 {
 	LUX_UNUSED(r);
 	if(!m_Culling)
@@ -227,7 +188,7 @@ bool SceneRendererImpl::IsCulled(Node* node, Renderable* r, const math::ViewFrus
 	return !frustum.IsBoxVisible(node->GetBoundingBox(), node->GetAbsoluteTransform());
 }
 
-void SceneRendererImpl::DrawScene()
+void SceneRendererSimpleForward::DrawScene()
 {
 	// Check if a stencil buffer is available for shadow rendering
 	bool drawStencilShadows = m_Attributes["drawStencilShadows"];
@@ -241,9 +202,9 @@ void SceneRendererImpl::DrawScene()
 
 	m_Culling = m_Attributes["culling"];
 
-	core::Array<SceneData::LightEntry> illuminating;
-	core::Array<SceneData::LightEntry> shadowCasting;
-	core::Array<SceneData::LightEntry> nonShadowCasting;
+	core::Array<Light*> illuminating;
+	core::Array<Light*> shadowCasting;
+	core::Array<Light*> nonShadowCasting;
 	SceneData sceneData(illuminating, shadowCasting);
 	sceneData.activeCamera = m_ActiveCamera;
 	sceneData.activeCameraNode = m_ActiveCameraNode;
@@ -264,12 +225,12 @@ void SceneRendererImpl::DrawScene()
 	for(auto& e : m_Scene->GetLightList()) {
 		auto node = e->GetParent();
 		if(node->IsTrulyVisible()) {
-			illuminating.PushBack(SceneData::LightEntry(e, node));
+			illuminating.PushBack(e);
 			if(e->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
-				shadowCasting.PushBack(SceneData::LightEntry(e, node));
+				shadowCasting.PushBack(e);
 				++shadowCount;
 			} else {
-				nonShadowCasting.PushBack(SceneData::LightEntry(e, node));
+				nonShadowCasting.PushBack(e);
 			}
 			++count;
 			if(count >= maxLightCount)
@@ -328,7 +289,7 @@ void SceneRendererImpl::DrawScene()
 	//-------------------------------------------------------------------------
 	// Solid objects
 
-	EnableOverwrite(ERenderPass::SolidAndTransparent, pot);
+	EnableOverwrite(ERenderPass::Any, pot);
 	EnableOverwrite(ERenderPass::Solid, pot);
 
 	if(drawStencilShadows) {
@@ -337,13 +298,13 @@ void SceneRendererImpl::DrawScene()
 		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 	} else {
 		for(auto& e : illuminating)
-			AddDriverLight(e.node, e.light);
+			m_Renderer->AddLight(e->GetLightData());
 	}
 
 	// Ambient pass for shadows, otherwise the normal renderpass
 	sceneData.pass = ERenderPass::Solid;
 	for(auto& e : m_SolidNodeList) {
-		if(!IsCulled(e))
+		if(!e.IsCulled())
 			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 	DisableOverwrite(ERenderPass::Solid, pot);
@@ -354,8 +315,9 @@ void SceneRendererImpl::DrawScene()
 
 		// Shadow pass for each shadow casting light
 		for(auto shadowLight : shadowCasting) {
+			auto shadowNode = shadowLight->GetParent();
 			m_Renderer->ClearLights();
-			AddDriverLight(shadowLight.node, shadowLight.light);
+			m_Renderer->AddLight(shadowLight->GetLightData());
 
 			m_StencilShadowRenderer.Begin(m_ActiveCameraNode->GetAbsolutePosition(), m_ActiveCameraNode->GetAbsoluteTransform().TransformDir(math::Vector3F::UNIT_Y));
 			for(auto& e : m_SolidNodeList) {
@@ -364,12 +326,12 @@ void SceneRendererImpl::DrawScene()
 					if(mesh && mesh->GetMesh()) {
 						bool isInfinite;
 						math::Vector3F lightPos;
-						if(shadowLight.light->GetLightType() == video::ELightType::Directional) {
+						if(shadowLight->GetLightType() == video::ELightType::Directional) {
 							isInfinite = true;
-							lightPos = e.node->ToRelativeDir(shadowLight.node->FromRelativeDir(math::Vector3F::UNIT_Z));
+							lightPos = e.node->ToRelativeDir(shadowNode->FromRelativeDir(math::Vector3F::UNIT_Z));
 						} else {
 							isInfinite = false;
-							lightPos = e.node->ToRelativePos(shadowLight.node->GetAbsolutePosition());
+							lightPos = e.node->ToRelativePos(shadowNode->GetAbsolutePosition());
 						}
 						m_StencilShadowRenderer.AddSilhouette(e.node->GetAbsoluteTransform(), mesh->GetMesh(), lightPos, isInfinite);
 					}
@@ -392,21 +354,21 @@ void SceneRendererImpl::DrawScene()
 			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 
 			for(auto& e : m_SolidNodeList) {
-				if(!IsCulled(e))
+				if(!e.IsCulled())
 					e.renderable->Render(e.node, m_Renderer, sceneData);
 			}
 
 			m_Renderer->PopPipelineOverwrite(&pot);
 			DisableOverwrite(ERenderPass::Solid, pot);
 
-			m_Renderer->ClearStencil();
+			m_Renderer->Clear(false, false, true);
 		}
 
 		if(!nonShadowCasting.IsEmpty()) {
 			m_Renderer->ClearLights();
 			// Draw with remaining non shadow casting lights
 			for(auto illum : nonShadowCasting)
-				AddDriverLight(illum.node, illum.light);
+				m_Renderer->AddLight(illum->GetLightData());
 
 			video::PipelineOverwrite illumOver;
 			illumOver.disableZWrite = true;
@@ -420,7 +382,7 @@ void SceneRendererImpl::DrawScene()
 
 			sceneData.pass = ERenderPass::Solid;
 			for(auto& e : m_SolidNodeList) {
-				if(!IsCulled(e))
+				if(!e.IsCulled())
 					e.renderable->Render(e.node, m_Renderer, sceneData);
 			}
 
@@ -429,7 +391,7 @@ void SceneRendererImpl::DrawScene()
 		}
 		// Add shadow casting light for remaining render jobs
 		for(auto illum : shadowCasting)
-			AddDriverLight(illum.node, illum.light);
+			m_Renderer->AddLight(illum->GetLightData());
 	}
 
 	//-------------------------------------------------------------------------
@@ -446,28 +408,12 @@ void SceneRendererImpl::DrawScene()
 	m_TransparentNodeList.Sort();
 
 	for(auto& e : m_TransparentNodeList) {
-		if(!IsCulled(e))
+		if(!e.IsCulled())
 			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 
 	DisableOverwrite(ERenderPass::Transparent, pot);
-	DisableOverwrite(ERenderPass::SolidAndTransparent, pot);
-}
-
-void SceneRendererImpl::AddDriverLight(Node* n, Light* l)
-{
-	auto data = l->GetLightData();
-	if(data.type == video::ELightType::Spot ||
-		data.type == video::ELightType::Directional) {
-		data.direction = n->FromRelativeDir(math::Vector3F::UNIT_Z);
-	}
-
-	if(data.type == video::ELightType::Spot ||
-		data.type == video::ELightType::Point) {
-		data.position = n->GetAbsolutePosition();
-	}
-
-	m_Renderer->AddLight(data);
+	DisableOverwrite(ERenderPass::Any, pot);
 }
 
 } // namespace scene

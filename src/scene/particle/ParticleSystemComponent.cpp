@@ -54,7 +54,7 @@ void ParticleSystem::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 {
 	LUX_UNUSED(noDebug);
 
-	visitor->Visit(this);
+	visitor->Visit(GetParent(), this);
 }
 
 void ParticleSystem::Animate(float time)

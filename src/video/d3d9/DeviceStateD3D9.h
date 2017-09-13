@@ -82,7 +82,6 @@ private:
 	video::Colorf m_Ambient;
 
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
-	WeakRef<video::BaseTexture> m_RenderTargetTexture;
 
 	size_t m_LightCount;
 	bool m_UseLighting;

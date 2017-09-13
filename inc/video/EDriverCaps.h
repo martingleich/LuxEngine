@@ -26,6 +26,8 @@ enum class EDriverCaps
 	MaxLights,
 	//! The maximum anisotropic filter value.
 	MaxAnisotropy,
+	//! The maximal number of simultaniousRenderTargets
+	MaxSimultaneousRT,
 
 	EDriverCaps_Count
 };

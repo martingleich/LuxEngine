@@ -24,13 +24,6 @@ Material rendered communicate the data inside a material to the driver.
 class MaterialRenderer : public ReferenceCounted
 {
 public:
-	//! Requierments of a material renderer(flag class)
-	enum class ERequirement
-	{
-		None = 0,
-		Transparent = 1,
-	};
-
 public:
 	LUX_API MaterialRenderer(const String& name, const MaterialRenderer* old = nullptr);
 	MaterialRenderer(const MaterialRenderer&) = delete;
@@ -49,7 +42,7 @@ public:
 
 	LUX_API const String& GetName() const;
 
-	LUX_API ERequirement GetRequirements() const;
+	LUX_API EMaterialRequirement GetRequirements() const;
 	LUX_API size_t AddPass(const Pass& pass = Pass());
 	LUX_API void SetPass(size_t passId, const Pass& pass);
 	LUX_API const Pass& GetPass(size_t passId) const;
@@ -103,9 +96,6 @@ private:
 };
 
 } // namespace video
-
-DECLARE_FLAG_CLASS(video::MaterialRenderer::ERequirement);
-
 } // namespace lux
 
 #endif

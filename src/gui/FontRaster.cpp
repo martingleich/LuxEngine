@@ -88,7 +88,7 @@ void FontRaster::Init(const FontCreationData& data)
 		pass.lighting = video::ELighting::Disabled;
 		pass.fogEnabled = false;
 		pass.useVertexColor = true;
-		pass.isTransparent = true;
+		pass.requirements = video::EMaterialRequirement::Transparent;
 		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		pass.alphaOperator = video::EBlendOperator::Add;

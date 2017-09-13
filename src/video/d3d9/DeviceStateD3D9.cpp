@@ -114,14 +114,8 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 {
 	bool textureSet = false;
 	if(layer.texture) {
-		// The current rendertarget can't be used as texture -> set texture channel to black
-		// But tell all people asking that the correct texture was set.
-		if((BaseTexture*)layer.texture == (BaseTexture*)m_RenderTargetTexture) {
-			SetTexture(stage, nullptr);
-		} else {
-			SetTexture(stage, (IDirect3DBaseTexture9*)(layer.texture->GetRealTexture()));
-			textureSet = true;
-		}
+		SetTexture(stage, (IDirect3DBaseTexture9*)(layer.texture->GetRealTexture()));
+		textureSet = true;
 	} else {
 		SetTexture(stage, nullptr);
 	}
@@ -457,22 +451,14 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 	++m_LightCount;
 }
 
-void DeviceStateD3D9::SetRenderTargetTexture(video::BaseTexture* t)
-{
-	m_RenderTargetTexture = t;
-}
-
 void DeviceStateD3D9::ReleaseUnmanaged()
 {
-	m_RenderTargetTexture = nullptr;
-
-	for(u32 i = 0; i < m_Caps->MaxSimultaneousTextures; ++i)
+	for(u32 i = 0; i < m_UsedTextureLayers; ++i)
 		m_Device->SetTexture(i, nullptr);
 }
 
 void DeviceStateD3D9::Reset()
 {
-	m_RenderTargetTexture = nullptr;
 	m_Shader = nullptr;
 	m_LightCount = 0;
 	m_UsedTextureLayers = 0;
@@ -492,7 +478,7 @@ void DeviceStateD3D9::Reset()
 	}
 }
 
-} // namespace video
-} // namespace lux
+		} // namespace video
+	} // namespace lux
 
 #endif // LUX_COMPILE_WITH_D3D9

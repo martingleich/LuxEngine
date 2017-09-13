@@ -15,6 +15,16 @@ namespace lux
 namespace scene
 {
 
+static ERenderPass GetPassFromReq(video::EMaterialRequirement req)
+{
+	if(TestFlag(req, video::EMaterialRequirement::DeferredEffect))
+		return ERenderPass::DeferredEffect;
+	else if(TestFlag(req, video::EMaterialRequirement::Transparent))
+		return ERenderPass::Transparent;
+	else
+		return ERenderPass::Solid;
+}
+
 Mesh::Mesh() :
 	m_OnlyReadMaterials(true)
 {
@@ -41,7 +51,7 @@ void Mesh::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 	LUX_UNUSED(noDebug);
 
 	if(m_Mesh)
-		visitor->Visit(this);
+		visitor->Visit(GetParent(), this);
 }
 
 void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneData)
@@ -49,7 +59,6 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 	const auto worldMat = node->GetAbsoluteTransform().ToMatrix();
 	renderer->SetTransform(video::ETransform::World, worldMat);
 
-	const bool isTransparentPass = (sceneData.pass == ERenderPass::Transparent);
 	video::Geometry* geo = m_Mesh->GetGeometry();
 	for(size_t i = 0; i < m_Mesh->GetRangeCount(); ++i) {
 		size_t matId, firstPrimitive, lastPrimitive;
@@ -60,13 +69,12 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 		if(material)
 			matRenderer = material->GetRenderer();
 
-		// Default to solid if not more information
-		bool isTransparent = false;
+		auto pass = ERenderPass::Solid;
 		if(matRenderer)
-			isTransparent = TestFlag(matRenderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent);
+			pass = GetPassFromReq(matRenderer->GetRequirements());
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
-		if(isTransparent == isTransparentPass && firstPrimitive < lastPrimitive) {
+		if(pass == sceneData.pass && firstPrimitive < lastPrimitive) {
 			renderer->SetMaterial(material);
 			renderer->DrawGeometry(geo, firstPrimitive, lastPrimitive - firstPrimitive + 1);
 		}
@@ -75,32 +83,26 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 
 ERenderPass Mesh::GetRenderPass() const
 {
-	bool transparent = false;
-	bool solid = false;
+	ERenderPass pass = ERenderPass::None;
 	for(size_t i = 0; i < GetMaterialCount(); ++i) {
 		const video::Material* Mat = GetMaterial(i);
 
 		// Determine the type of renderer used
 		video::MaterialRenderer* renderer = Mat ? Mat->GetRenderer() : nullptr;
-		if(renderer && TestFlag(renderer->GetRequirements(), video::MaterialRenderer::ERequirement::Transparent))
-			transparent = true;
-		else
-			solid = true;
+		ERenderPass nextPass;
+		if(!renderer) {
+			nextPass = ERenderPass::Solid;
+		} else {
+			auto req = renderer->GetRequirements();
+			nextPass = GetPassFromReq(req);
+		}
 
-		// More than both can never be set
-		if(solid && transparent)
-			break;
+		if(pass != ERenderPass::None && pass != nextPass)
+			return ERenderPass::Any;
+		pass = nextPass;
 	}
 
-	if(solid && transparent)
-		m_RenderPass = ERenderPass::SolidAndTransparent;
-	else if(solid)
-		m_RenderPass = ERenderPass::Solid;
-	else if(transparent)
-		m_RenderPass = ERenderPass::Transparent;
-	else
-		m_RenderPass = ERenderPass::None;
-
+	m_RenderPass = pass;
 	return m_RenderPass;
 }
 

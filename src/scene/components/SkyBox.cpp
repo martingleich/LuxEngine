@@ -50,7 +50,7 @@ void SkyBox::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 {
 	LUX_UNUSED(noDebug);
 
-	visitor->Visit(this);
+	visitor->Visit(GetParent(), this);
 }
 
 static const video::Vertex3DTCoord g_Vertices3D[8] =

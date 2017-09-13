@@ -12,6 +12,13 @@ namespace lux
 {
 namespace video
 {
+//! Requierments of a material renderer(flag class)
+enum class EMaterialRequirement
+{
+	None = 0,
+	Transparent = 1,
+	DeferredEffect = 2,
+};
 
 class Pass;
 class RenderSettings;
@@ -90,7 +97,7 @@ class Pass
 {
 public:
 	Pass() :
-		isTransparent(false),
+		requirements(EMaterialRequirement::None),
 		fogEnabled(true),
 		zWriteEnabled(true),
 		normalizeNormals(false),
@@ -125,7 +132,7 @@ public:
 	EDrawMode drawMode = EDrawMode::Fill;
 	ELighting lighting = ELighting::Enabled;
 
-	bool isTransparent : 1;
+	EMaterialRequirement requirements;
 	bool fogEnabled : 1;
 	bool zWriteEnabled : 1;
 	bool normalizeNormals : 1;
@@ -309,6 +316,7 @@ public:
 } // namespace video
 
 DECLARE_FLAG_CLASS(lux::video::EColorPlane);
+DECLARE_FLAG_CLASS(lux::video::EMaterialRequirement);
 
 } // namespace lux
 

@@ -97,9 +97,7 @@ StrongRef<Node> Scene::AddMesh(video::Mesh* mesh)
 
 StrongRef<Node> Scene::AddSkyBox(const video::Colorf& color)
 {
-	auto box = CreateSkyBox();
-	box->GetMaterial(0)->SetDiffuse(color);
-	return AddNode(box);
+	return AddNode(CreateSkyBox(color));
 }
 
 StrongRef<Node> Scene::AddSkyBox(video::CubeTexture* skyTexture)
@@ -137,6 +135,13 @@ StrongRef<Mesh> Scene::CreateMesh(video::Mesh* mesh) const
 	StrongRef<Mesh> out = CreateComponent(SceneComponentType::Mesh);
 	out->SetMesh(mesh);
 
+	return out;
+}
+
+StrongRef<SkyBox> Scene::CreateSkyBox(const video::Colorf& color) const
+{
+	StrongRef<SkyBox> out = CreateComponent(SceneComponentType::SkyBox);
+	out->GetMaterial(0)->SetDiffuse(color);
 	return out;
 }
 
@@ -323,6 +328,21 @@ void Scene::AnimateAll(float secsPassed)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+
+static void VisitRenderablesRec(Node* node, RenderableVisitor* visitor, bool noDebug)
+{
+	node->VisitRenderables(visitor, noDebug);
+
+	for(auto child : node->Children())
+		VisitRenderablesRec(child, visitor, noDebug);
+}
+
+void Scene::VisitRenderables(RenderableVisitor* visitor, bool noDebug, Node* root)
+{
+	if(!root)
+		root = m_Root;
+	VisitRenderablesRec(root, visitor, noDebug);
+}
 
 } // namespace scene
 } // namespace lux
