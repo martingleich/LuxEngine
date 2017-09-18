@@ -327,8 +327,8 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 	const EPrimitiveType pt = geo->GetPrimitiveType();
 	const u32 vertexCount = geo->GetVertexCount();
 	const VertexFormat& vertexFormat = geo->GetVertexFormat();
-	const EIndexFormat indexType = geo->GetIndices() ?
-		geo->GetIndexType() :
+	const EIndexFormat indexFormat = geo->GetIndices() ?
+		geo->GetIndexFormat() :
 		EIndexFormat::Bit16;
 
 	if(vs.data) {
@@ -340,7 +340,7 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 			vertexCount,
 			vertexFormat,
 			is.data,
-			indexType,
+			indexFormat,
 			is3D, true);
 	} else {
 		DrawPrimitiveList(
@@ -351,7 +351,7 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 			vertexCount,
 			vertexFormat,
 			geo->GetIndices(),
-			indexType,
+			indexFormat,
 			is3D, false);
 	}
 }

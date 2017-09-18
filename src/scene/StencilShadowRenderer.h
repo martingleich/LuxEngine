@@ -261,7 +261,7 @@ private:
 
 		// TEMP: Assume triangle list
 		lxAssert(info.geo->GetPrimitiveType() == video::EPrimitiveType::Triangles);
-		lxAssert(info.geo->GetIndexType() == video::EIndexFormat::Bit16);
+		lxAssert(info.geo->GetIndexFormat() == video::EIndexFormat::Bit16);
 
 		auto ib = info.geo->GetIndices();
 		auto faceCount = info.geo->GetPrimitiveCount();

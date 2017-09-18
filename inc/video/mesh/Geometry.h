@@ -92,7 +92,7 @@ public:
 	LUX_API virtual u32 GetIndexCount() const;
 
 	//! The indexformat used by the submesh
-	LUX_API virtual video::EIndexFormat GetIndexType() const;
+	LUX_API virtual video::EIndexFormat GetIndexFormat() const;
 
 	//! The bounding box of the submesh data
 	LUX_API virtual const math::AABBoxF& GetBoundingBox() const;

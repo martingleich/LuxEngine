@@ -321,7 +321,7 @@ StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(
 {
 	StrongRef<Geometry> out = CreateEmptyGeometry(primitiveType);
 	StrongRef<IndexBuffer> ib = m_BufferManager->CreateIndexBuffer();
-	ib->SetType(indexType);
+	ib->SetFormat(indexType);
 	ib->SetHWMapping(IndexHWMapping);
 	ib->SetSize(IndexCount);
 

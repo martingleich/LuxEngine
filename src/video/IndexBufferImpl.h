@@ -14,8 +14,9 @@ public:
 	IndexBufferImpl(BufferManager* mgr);
 	~IndexBufferImpl();
 
-	EIndexFormat GetType() const;
-	void SetType(EIndexFormat type, bool moveOld = true, void* init = nullptr);
+	void SetFormat(EIndexFormat type, bool moveOld = true, void* init = nullptr);
+	EIndexFormat GetFormat() const;
+
 	u32 AddIndex(const void* index);
 	u32 AddIndices(const void* indices, u32 count);
 	u32 AddIndices32(const u32* indices, u32 count);
@@ -27,11 +28,11 @@ public:
 
 	u32 GetIndex(u32 n) const
 	{
-		if(GetType() == EIndexFormat::Bit32) {
+		if(GetFormat() == EIndexFormat::Bit32) {
 			u32 data;
 			GetIndex(&data, n);
 			return data;
-		} else if(GetType() == EIndexFormat::Bit16) {
+		} else if(GetFormat() == EIndexFormat::Bit16) {
 			u16 data;
 			GetIndex(&data, n);
 			return data;
@@ -46,11 +47,8 @@ public:
 	void UpdateByManager(u32 group) { m_Manager->UpdateBuffer(this, group); }
 
 private:
-	static u32 CalcStride(EIndexFormat type);
-
-private:
 	BufferManager* m_Manager;
-	EIndexFormat m_Type;
+	EIndexFormat m_Format;
 	void* m_Handle;
 };
 

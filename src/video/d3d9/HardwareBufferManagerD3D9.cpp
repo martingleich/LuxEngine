@@ -140,7 +140,7 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 
 	u32 size = buffer->GetSize();
 	u32 stride = buffer->GetStride();
-	D3DFORMAT format = buffer->GetType() == EIndexFormat::Bit16 ? D3DFMT_INDEX16 : D3DFMT_INDEX32;
+	D3DFORMAT format = buffer->GetFormat() == EIndexFormat::Bit16 ? D3DFMT_INDEX16 : D3DFMT_INDEX32;
 	u32 mapping = (HWMapping == EHardwareBufferMapping::Dynamic ? D3DUSAGE_DYNAMIC : 0);
 	mapping |= D3DUSAGE_WRITEONLY;
 

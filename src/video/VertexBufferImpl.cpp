@@ -20,22 +20,7 @@ VertexBufferImpl::~VertexBufferImpl()
 	m_Manager->RemoveBuffer(this);
 }
 
-const VertexFormat& VertexBufferImpl::GetFormat() const
-{
-	return m_Format;
-}
-
-void VertexBufferImpl::SetFormat(const VertexFormat& format, void* init)
-{
-	SetFormat(format, 0, init);
-}
-
-u32 VertexBufferImpl::GetStream() const
-{
-	return m_Stream;
-}
-
-void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, void* init)
+void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, const void* init)
 {
 	u32 stride = format.GetStride(stream);
 	if(!format.IsValid() || stride == 0)
@@ -52,6 +37,16 @@ void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, void* i
 	m_Stride = stride;
 
 	m_ChangeId++;
+}
+
+const VertexFormat& VertexBufferImpl::GetFormat() const
+{
+	return m_Format;
+}
+
+u32 VertexBufferImpl::GetStream() const
+{
+	return m_Stream;
 }
 
 u32 VertexBufferImpl::AddVertex(const void* vertex)

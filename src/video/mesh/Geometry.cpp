@@ -99,12 +99,12 @@ u32 Geometry::GetIndexCount() const
 		return m_Indices->GetSize();
 }
 
-video::EIndexFormat Geometry::GetIndexType() const
+video::EIndexFormat Geometry::GetIndexFormat() const
 {
 	if(!m_Indices)
 		return video::EIndexFormat::Bit16;
 	else
-		return m_Indices->GetType();
+		return m_Indices->GetFormat();
 }
 const math::AABBoxF& Geometry::GetBoundingBox() const
 {

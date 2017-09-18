@@ -8,16 +8,18 @@ namespace lux
 {
 namespace video
 {
+
 class VertexBufferImpl : public VertexBuffer
 {
 public:
 	VertexBufferImpl(BufferManager* mgr);
 	~VertexBufferImpl();
 
+	void SetFormat(const VertexFormat& format, u32 stream, const void* init = nullptr);
+
 	const VertexFormat& GetFormat() const;
-	void SetFormat(const VertexFormat& format, void* init = nullptr);
 	u32 GetStream() const;
-	void SetFormat(const VertexFormat& format, u32 stream, void* init = nullptr);
+
 	u32 AddVertex(const void* vertex);
 	u32 AddVertices(const void* vertices, u32 count);
 	void SetVertex(const void* vertex, u32 n);

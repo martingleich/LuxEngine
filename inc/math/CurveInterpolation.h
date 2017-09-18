@@ -506,7 +506,6 @@ T GetTangent(const Sample<T>* samples, size_t count, u32 idx, EEdgeHandling edge
 	}
 
 	T p = samples[idx].value;
-	float width = da + db;
 	float invda = 0.5f*((da+db) / da);
 	float invdb = 0.5f*((da+db) / db);
 	return (p - a) * invda + (b - p) * invdb;

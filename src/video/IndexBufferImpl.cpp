@@ -5,7 +5,7 @@ namespace lux
 namespace video
 {
 
-u32 IndexBufferImpl::CalcStride(EIndexFormat type)
+static u32 CalcStride(EIndexFormat type)
 {
 	if(type == EIndexFormat::Bit16)
 		return 2;
@@ -17,9 +17,9 @@ u32 IndexBufferImpl::CalcStride(EIndexFormat type)
 
 IndexBufferImpl::IndexBufferImpl(BufferManager* mgr) :
 	m_Manager(mgr),
-	m_Type(EIndexFormat::Bit16)
+	m_Format(EIndexFormat::Bit16)
 {
-	m_Stride = CalcStride(m_Type);
+	m_Stride = CalcStride(m_Format);
 
 	m_Manager->AddBuffer(this);
 }
@@ -29,24 +29,24 @@ IndexBufferImpl::~IndexBufferImpl()
 	m_Manager->RemoveBuffer(this);
 }
 
-EIndexFormat IndexBufferImpl::GetType() const
+EIndexFormat IndexBufferImpl::GetFormat() const
 {
-	return m_Type;
+	return m_Format;
 }
 
-void IndexBufferImpl::SetType(EIndexFormat type, bool moveOld, void* init)
+void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 {
 	u32 stride = CalcStride(type);
 
 	if(!m_Data) {
-		m_Type = type;
+		m_Format = type;
 		m_Stride = stride;
 		return;
 	}
 
 	m_ChangeId++;
 
-	if(type == m_Type) {
+	if(type == m_Format) {
 		if(moveOld)
 			return;
 
@@ -56,7 +56,7 @@ void IndexBufferImpl::SetType(EIndexFormat type, bool moveOld, void* init)
 		return;
 	}
 
-	if(m_Type == EIndexFormat::Bit16 && type == EIndexFormat::Bit32) {
+	if(m_Format == EIndexFormat::Bit16 && type == EIndexFormat::Bit32) {
 		u8* old = m_Data;
 		m_Data = LUX_NEW_ARRAY(u8, stride*m_Allocated);
 
@@ -88,7 +88,7 @@ void IndexBufferImpl::SetType(EIndexFormat type, bool moveOld, void* init)
 		LUX_FREE_ARRAY(old);
 	}
 
-	m_Type = type;
+	m_Format = type;
 	m_Stride = stride;
 }
 
@@ -131,11 +131,11 @@ void IndexBufferImpl::SetIndices(const void* indices, u32 count, u32 n)
 }
 void IndexBufferImpl::SetIndices32(const u32* indices, u32 count, u32 n)
 {
-	if(m_Type == EIndexFormat::Bit16) {
+	if(m_Format == EIndexFormat::Bit16) {
 		u16* ptr = (u16*)Pointer(n, count);
 		for(u32 i = 0; i < count; ++i)
 			*ptr++ = (u16)*indices++;
-	} else if(m_Type == EIndexFormat::Bit32) {
+	} else if(m_Format == EIndexFormat::Bit32) {
 		memcpy(Pointer(n, count), indices, count*m_Stride);
 	} else {
 		lxAssertNeverReach("Unknown index format.");
@@ -152,6 +152,4 @@ void IndexBufferImpl::GetIndices(void* ptr, u32 count, u32 n) const
 }
 
 }
-
 }
-

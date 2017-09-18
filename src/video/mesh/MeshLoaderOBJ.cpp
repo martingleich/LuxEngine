@@ -152,9 +152,9 @@ public:
 		vertexBuffer = geo->GetVertices();
 		indexBuffer = geo->GetIndices();
 		if(use32BitIndices)
-			indexBuffer->SetType(video::EIndexFormat::Bit32);
+			indexBuffer->SetFormat(video::EIndexFormat::Bit32);
 		else
-			indexBuffer->SetType(video::EIndexFormat::Bit16);
+			indexBuffer->SetFormat(video::EIndexFormat::Bit16);
 		indexBuffer->Reserve(indexCount);
 
 		u32 realFaceId = 0;

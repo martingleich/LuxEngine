@@ -12,8 +12,9 @@ class IndexBuffer : public HardwareBuffer
 public:
 	IndexBuffer() : HardwareBuffer(EHardwareBufferType::Index) {}
 
-	virtual EIndexFormat GetType() const = 0;
-	virtual void SetType(EIndexFormat type, bool moveOld = true, void* init = nullptr) = 0;
+	virtual void SetFormat(EIndexFormat format, bool moveOld = true, void* init = nullptr) = 0;
+	virtual EIndexFormat GetFormat() const = 0;
+
 	virtual u32 AddIndex(const void* index) = 0;
 	virtual u32 AddIndices(const void* indices, u32 count) = 0;
 	virtual u32 AddIndices32(const u32* indices, u32 count) = 0;
