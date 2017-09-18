@@ -402,6 +402,10 @@ inline T CubicInterpolation(const T& n0, const T& n1, const T& n2, const T& n3, 
 
 //! Interpolate hermite between two values.
 /**
+Requierments for T:
+Copy constructable.
+Addition, Subtraction, Postmultiplication with float.
+
 If the value is outside the range [0;1] the result is undefined.
 \param v1 The value for t=0
 \param t1 The tangent for t=0
@@ -418,8 +422,8 @@ T InterpolateHermite(
 	const T& t2,
 	const float x)
 {
-	const T A(2.0f * v1 - 2.0f * v2 + t1 + t2);
-	const T B(3.0f * v2 - 3.0f * v1 - 2.0f * t1 - t2);
+	const T A(v1*2.0f - v2*2.0f + t1 + t2);
+	const T B(v2*3.0f - v1*3.0f - t1*2.0f - t2);
 
 	return A * (x * x * x) + B * (x * x) + t1 * (x)+v1;
 }

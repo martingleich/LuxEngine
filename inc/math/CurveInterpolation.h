@@ -506,12 +506,26 @@ T GetTangent(const Sample<T>* samples, size_t count, u32 idx, EEdgeHandling edge
 	}
 
 	T p = samples[idx].value;
-	float invda = 1.0f / da;
-	float invdb = 1.0f / db;
-	return 0.5f * ((p - a) * invda + (b - p) * invdb);
+	float width = da + db;
+	float invda = 0.5f*((da+db) / da);
+	float invdb = 0.5f*((da+db) / db);
+	return (p - a) * invda + (b - p) * invdb;
 }
 }
 
+//! Interpolate a curve for an array of samples
+/**
+Requierments for T:
+Default and copy constructable.
+Assignment operator.
+Addition, Subtraction, Postmultiplication with float.
+
+\param samples The sample points, must be sorted by x value.
+\param count The number of samples.
+\param x The x value to interpolate.
+\param edgeHandling How are x values outside of the valid range handled(extrapolation).
+\param interpolate The used interpolation technique
+*/
 template <typename T>
 T CurveInterpolation(
 	const Sample<T>* samples, size_t count,
@@ -531,7 +545,7 @@ T CurveInterpolation(
 	const T vl = samples[lower].value;
 	const float xu = samples[upper].x;
 	const T vu = samples[upper].value;
-	const float t = (x - xl) / (xu - xl);
+	const float t = (x - xl) / (xu-xl);
 
 	if(interpolate == EInterpolation::Const) {
 		return t < 0.5f ? vl : vu;
