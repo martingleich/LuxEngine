@@ -16,7 +16,7 @@ public:
 		log::EngineLog.SetNewPrinter(log::ConsolePrinter);
 
 		m_Device = CreateDevice();
-		auto adapter = m_Device->GetVideoAdapters(video::EDriverType::Direct3D9)->GetAdapter(0);
+		auto adapter = m_Device->GetVideoAdapters(video::DriverType::Direct3D9)->GetAdapter(0);
 		video::DriverConfig config;
 		adapter->GenerateConfig(config,
 			math::Dimension2U(800, 600),

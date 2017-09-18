@@ -1,6 +1,7 @@
 #ifndef INCLUDED_VIDEODRIVER_H
 #define INCLUDED_VIDEODRIVER_H
 #include "core/ReferenceCounted.h"
+#include "core/ModuleFactory.h"
 
 #include "math/Rect.h"
 #include "math/AABBox.h"
@@ -9,8 +10,9 @@
 #include "video/VertexFormats.h"
 
 #include "video/VideoEnums.h"
-#include "video/EDriverType.h"
+#include "video/DriverType.h"
 #include "video/EDriverCaps.h"
+#include "video/DriverConfig.h"
 
 #include "video/HardwareBufferManager.h"
 
@@ -31,7 +33,6 @@ class BaseTexture;
 class Geometry;
 
 class Renderer;
-class DriverConfig;
 
 enum class EDeviceState
 {
@@ -39,6 +40,12 @@ enum class EDeviceState
 	DeviceLost,
 	NotReset,
 	Error,
+};
+
+struct VideoDriverInitData : public core::ModuleInitData
+{
+	DriverConfig config;
+	gui::Window* window;
 };
 
 class VideoDriver : public ReferenceCounted
@@ -55,6 +62,9 @@ public:
 	LUX_API static void Destroy();
 
 	virtual bool Reset(const DriverConfig& config) = 0;
+
+	virtual void ReleaseSharedData() = 0;
+
 	//////////////////////////////////////////////////////////////////////////////
 
 	virtual StrongRef<Geometry> CreateEmptyGeometry(
@@ -110,7 +120,7 @@ public:
 	virtual EDeviceState GetDeviceState() const = 0;
 
 	virtual u32 GetDeviceCapability(EDriverCaps capability) const = 0;
-	virtual EDriverType GetVideoDriverType() const = 0;
+	virtual const String& GetVideoDriverType() const = 0;
 	virtual void* GetLowLevelDevice() const = 0;
 };
 

@@ -18,6 +18,10 @@
 #include "D3D9Exception.h"
 #include "AuxiliaryTextureD3D9.h"
 
+#include "core/ModuleFactoryRegister.h"
+
+LUX_REGISTER_MODULE("VideoDriver", "Direct3D9", lux::video::VideoDriverD3D9);
+
 namespace lux
 {
 namespace video
@@ -55,11 +59,13 @@ Referable* CreateCubeTexture(const void* origin)
 
 //////////////////////////////////////////////////////////////////////
 
-VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window) :
-	VideoDriverNull(config, window),
+VideoDriverD3D9::VideoDriverD3D9(const core::ModuleInitData& data) :
+	VideoDriverNull(dynamic_cast<const VideoDriverInitData&>(data)),
 	m_ReleasedUnmanagedData(false)
 {
-	CreateDevice(config, window);
+
+	auto initData = dynamic_cast<const VideoDriverInitData&>(data);
+	CreateDevice(initData.config, initData.window);
 
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
 	m_Renderer = new RendererD3D9(this, m_DeviceState);
@@ -74,7 +80,7 @@ VideoDriverD3D9::VideoDriverD3D9(const DriverConfig& config, gui::Window* window
 	refFactory->RegisterType(core::ResourceType::CubeTexture, &lux::video::CreateCubeTexture);
 }
 
-void VideoDriverD3D9::CleanUp()
+void VideoDriverD3D9::ReleaseSharedData()
 {
 	m_Renderer->CleanUp();
 }

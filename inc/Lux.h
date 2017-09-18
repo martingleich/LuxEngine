@@ -168,6 +168,8 @@ namespace input
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"
 
+#include "core/ModuleFactory.h"
+
 #include "resources/Resource.h"
 #include "resources/ResourceLoader.h"
 #include "resources/ResourceSystem.h"

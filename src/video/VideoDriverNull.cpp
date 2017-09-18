@@ -5,15 +5,10 @@ namespace lux
 namespace video
 {
 
-VideoDriverNull::VideoDriverNull(const DriverConfig& config, gui::Window* window)
+VideoDriverNull::VideoDriverNull(const VideoDriverInitData& data)
 {
-	m_Window = window;
-	m_Config = config;
-}
-
-EDriverType VideoDriverNull::GetVideoDriverType() const
-{
-	return EDriverType::Null;
+	m_Window = data.window;
+	m_Config = data.config;
 }
 
 const DriverConfig& VideoDriverNull::GetConfig() const

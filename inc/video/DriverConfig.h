@@ -3,10 +3,11 @@
 #include "core/LuxBase.h"
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
+#include "core/ModuleFactory.h"
 
 #include "math/Dimension2.h"
 
-#include "video/EDriverType.h"
+#include "video/DriverType.h"
 #include "video/VideoEnums.h"
 #include "video/ColorFormat.h"
 
@@ -55,7 +56,7 @@ public:
 	virtual const String& GetName() const = 0;
 	virtual u32 GetVendor() const = 0;
 	virtual u32 GetDevice() const = 0;
-	virtual EDriverType GetDriverType() const = 0;
+	virtual const String& GetDriverType() const = 0;
 
 	virtual core::Array<DisplayMode> GenerateDisplayModes(bool windowed) = 0;
 	virtual core::Array<ColorFormat> GenerateBackbufferFormats(const DisplayMode& mode, bool windowed) = 0;
@@ -91,6 +92,10 @@ public:
 		u32 minDepth,
 		u32 minStencil,
 		int multiSample);
+};
+
+struct AdapterListInitData : public core::ModuleInitData
+{
 };
 
 class AdapterList : public ReferenceCounted

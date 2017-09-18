@@ -7,37 +7,34 @@ namespace lux
 
 class LuxDeviceNull : public LuxDevice
 {
-void LuxDeviceWin32::BuildImageSystem()
-{
-	if(video::ImageSystem::Instance()) {
-		log::Warning("Image system already built.");
-		return;
-	}
+public:
+	LuxDeviceNull();
+	~LuxDeviceNull();
 
-	log::Info("Build Image System.");
-	video::ImageSystem::Initialize();
-}
+	void ReleaseModules();
 
-void LuxDeviceWin32::BuildGUIEnvironment()
-{
-	if(m_GUIEnv != nullptr) {
-		log::Warning("Gui environment already built.");
-		return;
-	}
+	void BuildVideoDriver(const video::DriverConfig& config, void* user=nullptr);
 
-	log::Info("Build GUI Environment.");
-	m_GUIEnv = LUX_NEW(gui::GUIEnvironmentImpl);
-}
+	core::Array<String> GetDriverTypes();
+	StrongRef<video::AdapterList> GetVideoAdapters(const String& driver);
 
-void LuxDeviceWin32::BuildAll(const video::DriverConfig& config)
-{
-	BuildWindow(config.width, config.height, "Window");
-	BuildInputSystem();
-	BuildVideoDriver(config);
-	BuildSceneManager();
-	BuildGUIEnvironment();
-}
+	void BuildImageSystem();
+	void BuildScene(const String& renderer, void* user=nullptr);
+	StrongRef<scene::Scene> CreateScene();
+	StrongRef<scene::SceneRenderer> CreateSceneRenderer(const String& name, void* user=nullptr);
+	void BuildGUIEnvironment();
+	void BuildAll(const video::DriverConfig& config);
 
+	StrongRef<scene::Scene> GetScene() const;
+	StrongRef<scene::SceneRenderer> GetSceneRenderer() const;
+	StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const;
+
+	void RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop);
+
+protected:
+	StrongRef<scene::Scene> m_Scene;
+	StrongRef<scene::SceneRenderer> m_SceneRenderer;
+	StrongRef<gui::GUIEnvironment> m_GUIEnv;
 };
 
 } // namespace lux

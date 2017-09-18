@@ -16,6 +16,7 @@ class SceneRenderer;
 namespace gui
 {
 class Window;
+class Cursor;
 class GUIEnvironment;
 }
 class LuxSystemInfo;
@@ -50,19 +51,24 @@ public:
 	Requires associated window.
 	After this call all video modules are fully usable.
 	The image module is fully usable.
+	\param config The config data for the video driver.
+	\param user User parameter to be passed to the module factory
 	*/
-	virtual void BuildVideoDriver(const video::DriverConfig& config) = 0;
-	virtual core::Array<video::EDriverType> GetDriverTypes() = 0;
-	virtual StrongRef<video::AdapterList> GetVideoAdapters(video::EDriverType driver) = 0;
+	virtual void BuildVideoDriver(const video::DriverConfig& config, void* user=nullptr) = 0;
+	//! Get available driver types.
+	virtual core::Array<String> GetDriverTypes() = 0;
+	//! Get available adapters for a driver type.
+	virtual StrongRef<video::AdapterList> GetVideoAdapters(const String& driver) = 0;
 
 	//! Creates the scene component of the engine
 	/**
 	Requires video driver and the input system.
 	After this call all scene modules are fully usable.
 	Creates a single scene object.
+	\param renderer The name of the renderer to use(pass empty string to use default renderer).
+	\param user User parameter to be passed to the module factory.
 	*/
-	virtual void BuildScene(scene::SceneRenderer* renderer=nullptr) = 0;
-	virtual StrongRef<scene::SceneRenderer> CreateSceneRenderer(const String& name) = 0;
+	virtual void BuildScene(const String& renderer=nullptr, void* user=nullptr) = 0;
 	virtual StrongRef<scene::Scene> CreateScene() = 0;
 
 	//! Create the gui environment
@@ -91,6 +97,12 @@ public:
 	\return Returns true if the device is still running, returns false once when the device was closed.
 	*/
 	virtual bool Run() = 0;
+
+	//! Wait until the window changed.
+	/**
+	May return at any time.
+	Returns false if window change can't be detected, otherwise true.
+	*/
 	virtual bool WaitForWindowChange() = 0;
 
 	struct SimpleFrameLoop
@@ -117,16 +129,31 @@ public:
 		// Return false to cancel frame
 		bool(*preFrameProc)(void*) = nullptr;
 	};
+	
+	//! Runs a simple frame loop.
+	/**
+	Performs a frame loop, call LuxDevice::Run, Renders and animates the gui and the scene, reset driver on failure.
+	Pause the engine if the window is minimized and so on.
+	\param loop Data for the frame loop.
+	*/
 	virtual void RunSimpleFrameLoop(const SimpleFrameLoop& loop) = 0;
 
+	//! Pauses the calling process for some time
 	virtual void Sleep(u32 millis) = 0;
 
+	//! Get the main scene of the engine.
 	virtual StrongRef<scene::Scene> GetScene() const = 0;
+	//! Get the main scene renderer of the engine.
 	virtual StrongRef<scene::SceneRenderer> GetSceneRenderer() const = 0;
+	//! Get the main gui environment of the engine.
 	virtual StrongRef<gui::GUIEnvironment> GetGUIEnvironment() const = 0;
 
+	//! Get the os window of the engine.
 	virtual StrongRef<gui::Window> GetWindow() const = 0;
+	//! Get the os cursor of the engine.
+	virtual StrongRef<gui::Cursor> GetCursor() const = 0;
 
+	//! Retrieve system information.
 	virtual StrongRef<LuxSystemInfo> GetSystemInfo() const = 0;
 };
 

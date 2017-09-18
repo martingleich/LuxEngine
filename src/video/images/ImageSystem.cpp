@@ -293,7 +293,7 @@ ImageSystem::ImageSystem()
 
 #ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 	auto driver = VideoDriver::Instance();
-	if(driver && driver->GetVideoDriverType() == EDriverType::Direct3D9) {
+	if(driver && driver->GetVideoDriverType() == video::DriverType::Direct3D9) {
 		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(driver->GetLowLevelDevice());
 		resSys->AddResourceLoader(LUX_NEW(ImageLoaderD3DX)(d3dDevice));
 	}

@@ -24,10 +24,10 @@ class TextureD3D9;
 class VideoDriverD3D9 : public VideoDriverNull
 {
 public:
-	VideoDriverD3D9(const DriverConfig& config, gui::Window* window);
+	VideoDriverD3D9(const core::ModuleInitData& data);
 	~VideoDriverD3D9();
 
-	void CleanUp();
+	void ReleaseSharedData();
 
 	void CreateDevice(const DriverConfig& config, gui::Window* window);
 	D3DPRESENT_PARAMETERS GeneratePresentParams(const DriverConfig& config);
@@ -70,9 +70,9 @@ public:
 
 	//------------------------------------------------------------------
 	EDeviceState GetDeviceState() const;
-	EDriverType GetVideoDriverType() const
+	const String& GetVideoDriverType() const
 	{
-		return EDriverType::Direct3D9;
+		return m_Config.adapter->GetDriverType();
 	}
 
 	bool HasStencil() const

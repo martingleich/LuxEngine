@@ -20,7 +20,7 @@ public:
 	const String& GetName() const;
 	u32 GetVendor() const;
 	u32 GetDevice() const;
-	EDriverType GetDriverType() const;
+	const String& GetDriverType() const;
 	UINT GetAdapter() const;
 	UnknownRefCounted<IDirect3D9> GetD3D9() const;
 	core::Array<DisplayMode> GenerateDisplayModes(bool windowed);
@@ -44,7 +44,7 @@ private:
 class AdapterListD3D9 : public AdapterList
 {
 public:
-	AdapterListD3D9(IDirect3D9* d3d9);
+	AdapterListD3D9(const core::ModuleInitData& data);
 	u32 GetAdapterCount() const;
 	StrongRef<Adapter> GetAdapter(u32 idx) const;
 

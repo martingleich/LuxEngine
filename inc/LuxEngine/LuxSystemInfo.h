@@ -7,6 +7,7 @@
 namespace lux
 {
 
+//! Class to query information about the system.
 class LuxSystemInfo : public ReferenceCounted
 {
 public:

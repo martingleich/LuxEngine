@@ -12,11 +12,9 @@ namespace video
 class VideoDriverNull : public VideoDriver
 {
 public:
-	VideoDriverNull(const DriverConfig& config, gui::Window* window);
+	VideoDriverNull(const VideoDriverInitData& data);
 
-	virtual EDriverType GetVideoDriverType() const;
 	virtual const DriverConfig& GetConfig() const;
-	
 	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
 
 protected:

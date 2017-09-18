@@ -18,7 +18,7 @@ namespace scene
 class SceneRendererSimpleForward : public SceneRenderer
 {
 public:
-	SceneRendererSimpleForward();
+	SceneRendererSimpleForward(const core::ModuleInitData& data);
 
 	////////////////////////////////////////////////////////////////////////////////////
 

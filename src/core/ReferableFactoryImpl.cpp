@@ -13,9 +13,7 @@ namespace impl_referableRegister
 static ReferableRegisterBlock* g_FirstReferableBlock = nullptr;
 void RegisterReferableBlock(ReferableRegisterBlock* block)
 {
-	if(g_FirstReferableBlock)
-		block->nextBlock = g_FirstReferableBlock;
-
+	block->nextBlock = g_FirstReferableBlock;
 	g_FirstReferableBlock = block;
 }
 

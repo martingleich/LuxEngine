@@ -14,15 +14,21 @@
 #include "scene/components/Light.h"
 #include "scene/components/SceneMesh.h"
 
+#include "core/ModuleFactoryRegister.h"
+
+LUX_REGISTER_MODULE("SceneRenderer", "SimpleForward", lux::scene::SceneRendererSimpleForward)
+
 namespace lux
 {
 namespace scene
 {
 
-SceneRendererSimpleForward::SceneRendererSimpleForward() :
+SceneRendererSimpleForward::SceneRendererSimpleForward(const core::ModuleInitData& data) :
 	m_CollectedRoot(nullptr),
 	m_StencilShadowRenderer(video::VideoDriver::Instance()->GetRenderer(), 0xFFFFFFFF)
 {
+	LUX_UNUSED(data);
+
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
 
 	m_Attributes.AddAttribute("drawStencilShadows", false);
