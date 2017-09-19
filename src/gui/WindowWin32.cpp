@@ -151,7 +151,7 @@ math::RectF WindowWin32::GetParentInnerRect() const
 bool WindowWin32::UpdateFinalRect()
 {
 	auto oldSize = m_FinalRect.GetSize();
-	auto oldPos = m_FinalRect.Min();
+	auto oldPos = m_FinalRect.LeftTop();
 	WindowBase::UpdateFinalRect();
 	WINDOWPLACEMENT plc;
 	plc.length = sizeof(WINDOWPLACEMENT);
@@ -168,7 +168,7 @@ bool WindowWin32::UpdateFinalRect()
 	m_FinalRect.bottom = (float)plc.rcNormalPosition.bottom;
 
 	auto newSize = m_FinalRect.GetSize();
-	auto newPos = m_FinalRect.Min();
+	auto newPos = m_FinalRect.LeftTop();
 	bool change = false;
 	if(oldSize != newSize) {
 		change = true;

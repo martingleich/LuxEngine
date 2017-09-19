@@ -237,7 +237,7 @@ void Element::SetPosition(ScalarDistanceF x, ScalarDistanceF y)
 
 math::Vector2F Element::GetPosition() const
 {
-	return GetFinalRect().Min() - GetParentInnerRect().Min();
+	return GetFinalRect().LeftTop() - GetParentInnerRect().LeftTop();
 }
 
 core::Range<Element::ElementIterator> Element::Elements()

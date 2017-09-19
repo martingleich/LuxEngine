@@ -221,9 +221,13 @@ inline void HardwareBuffer::SetSize(u32 size, bool moveOld, void* init)
 		if(m_Cursor >= size)
 			m_Cursor = size - 1;
 
+		if(m_BeginDirty > m_EndDirty)
+			m_BeginDirty = 0;
 		if(m_EndDirty >= size)
 			m_EndDirty = size - 1;
 	} else {
+		if(m_BeginDirty > m_EndDirty)
+			m_BeginDirty = 0;
 		m_BeginDirty = math::Min(m_BeginDirty, m_Size - 1);
 		m_EndDirty = size - 1;
 	}

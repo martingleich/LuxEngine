@@ -10,7 +10,7 @@ namespace math
 //! A two-dimensional rectangle    
 /**
 The x axis runs from left to right
-The y axis runs from bottom to top
+The y axis runs from top to bottom
 */
 template <typename T>
 class Rect
@@ -19,7 +19,7 @@ public:
 	T left;    //!< The left edge of the rect
 	T bottom; //!< The bottom edge of the rect
 
-	T right; //!< The right edge of the rect            
+	T right; //!< The right edge of the rect
 	T top; //!< The top edge of the rect
 
 	//! The empty rect located at 0, 0
@@ -36,7 +36,7 @@ public:
 	}
 
 	//! Construct from two corners
-	Rect(const Vector2<T>& min, const Vector2<T>& max) : left(min.x), bottom(min.y), right(max.x), top(max.y)
+	Rect(const Vector2<T>& topLeft, const Vector2<T>& bottomRight) : left(topLeft.x), bottom(bottomRight.y), right(bottomRight.x), top(topLeft.y)
 	{
 	}
 
@@ -155,16 +155,23 @@ public:
 		return left <= right && top <= bottom;
 	}
 
-	//! The lower left corner.
-	Vector2<T> Min() const
+	Vector2<T> LeftBottom() const
 	{
 		return Vector2<T>(left, bottom);
 	}
 
-	//! The upper right corner
-	Vector2<T> Max() const
+	Vector2<T> RightTop() const
 	{
 		return Vector2<T>(right, top);
+	}
+	Vector2<T> LeftTop() const
+	{
+		return Vector2<T>(left, top);
+	}
+
+	Vector2<T> RightBottom() const
+	{
+		return Vector2<T>(right, bottom);
 	}
 
 	//! Get center point of rect
@@ -173,7 +180,7 @@ public:
 	*/
 	Vector2<T> GetCenter() const
 	{
-		return (Min() + Max()) / (T)2;
+		return (LeftTop() + RightBottom()) / (T)2;
 	}
 
 	//! Fits this rect into another
