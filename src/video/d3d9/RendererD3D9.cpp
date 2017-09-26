@@ -22,8 +22,7 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState
 	RendererNull(driver),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
 	m_DeviceState(deviceState),
-	m_Driver(driver),
-	m_MaterialRenderer(nullptr)
+	m_Driver(driver)
 {
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
@@ -32,8 +31,6 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState
 
 void RendererD3D9::CleanUp()
 {
-	m_InvalidMaterial.Reset();
-	m_Material.Reset();
 }
 
 void RendererD3D9::BeginScene()
@@ -92,6 +89,9 @@ bool RendererD3D9::Present()
 
 void RendererD3D9::SetRenderTarget(const RenderTarget& target)
 {
+	if(m_CurrentRendertargets.Size() == 1 && target.GetTexture() == m_CurrentRendertargets[0].GetTexture())
+		return;
+
 	SetRenderTarget(&target, 1, false);
 }
 
@@ -111,13 +111,26 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 	math::Dimension2U dim;
 	if(!targets[0].IsBackbuffer())
 		dim = targets[0].GetSize();
-	for(auto& t : core::MakeRange(targets, targets + count)) {
-		if(!t.IsBackbuffer()) {
-			if(t.GetSize() != dim)
-				throw core::InvalidArgumentException("target", "All rendertargets must have the same size");
-			if(!t.GetTexture()->IsRendertarget())
-				throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
+	{
+		bool isSet = true;
+		size_t i = 0;
+		for(auto& t : core::MakeRange(targets, targets + count)) {
+			if(!t.IsBackbuffer()) {
+				if(t.GetSize() != dim)
+					throw core::InvalidArgumentException("target", "All rendertargets must have the same size");
+				if(!t.GetTexture()->IsRendertarget())
+					throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
+			}
+			if(t.GetTexture() != m_CurrentRendertargets[i].GetTexture()) {
+				isSet = false;
+				continue;
+			}
+			++i;
 		}
+
+		// Early out if everything is already set.
+		if(isSet)
+			return;
 	}
 
 	RendertargetD3D9 newRendertarget;
@@ -127,7 +140,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 		newRendertarget = targets[0];
 
 	// Generate depth buffer via video driver
-	IDirect3DSurface9* depthStencil = m_Driver->GetD3D9MatchingDepthBuffer(newRendertarget.GetSurface());
+	auto depthStencil = m_Driver->GetD3D9MatchingDepthBuffer(newRendertarget.GetSurface());
 	if(depthStencil == nullptr)
 		throw core::Exception("Can't find matching depth buffer for rendertarget.");
 
@@ -240,6 +253,8 @@ void RendererD3D9::DrawPrimitiveList(
 
 	SwitchRenderMode(is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 	SetVertexFormat(vertexFormat);
+	SetupRendering();
+
 	u32 stride = vertexFormat.GetStride(0);
 
 	D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
@@ -275,27 +290,22 @@ void RendererD3D9::DrawPrimitiveList(
 	else
 		vertexOffset += video::GetPointCount(primitiveType, firstPrimitive);
 
-	size_t passCount = m_UseMaterial ? m_Material->GetRenderer()->GetPassCount() : 1;
-	for(size_t i = 0; i < passCount; ++i) {
-		SetupRendering(i);
-
-		HRESULT hr = E_FAIL;
-		if(!user) {
-			if(indexData)
-				hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
-			else
-				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
-		} else {
-			if(indexData) // Indexed from memory
-				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
-					indexData, d3dIndexFormat, vertexData, stride);
-			else // Not indexed from memory
-				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
-		}
-		if(FAILED(hr)) {
-			log::Error("Error while drawing.");
-			return;
-		}
+	HRESULT hr = E_FAIL;
+	if(!user) {
+		if(indexData)
+			hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
+		else
+			hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
+	} else {
+		if(indexData) // Indexed from memory
+			hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
+				indexData, d3dIndexFormat, vertexData, stride);
+		else // Not indexed from memory
+			hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
+	}
+	if(FAILED(hr)) {
+		log::Error("Error while drawing.");
+		return;
 	}
 
 	if(m_RenderStatistics)
@@ -374,25 +384,21 @@ void RendererD3D9::Reset()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void RendererD3D9::SetupRendering(size_t passId)
+void RendererD3D9::SetupRendering()
 {
-	RenderSettings settings(**m_Material);
+	bool dirtyPass = false;
 
-	auto newRenderer = m_UseMaterial ? m_Material->GetRenderer() : nullptr;
-
-	if(m_MaterialRenderer != newRenderer) {
-		// Force update all.
-		SetDirty(Dirty_MaterialRenderer);
-		m_MaterialRenderer = newRenderer;
-	}
-
-	// Get current pass, with applied options and overwrites
-	Pass pass = m_MaterialRenderer ? m_MaterialRenderer->GeneratePassData(passId, settings) : m_Pass;
-	if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty())
-		m_FinalOverwrite.Apply(pass);
-	if(m_RenderMode == ERenderMode::Mode2D) {
-		pass.lighting = ELighting::Disabled;
-		pass.fogEnabled = false;
+	const auto& pass = m_OverwritePass;
+	if(IsDirty(Dirty_Overwrites) || IsDirty(Dirty_Material)) {
+		m_OverwritePass = m_Pass;
+		if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty())
+			m_FinalOverwrite.Apply(m_OverwritePass);
+		if(m_RenderMode == ERenderMode::Mode2D) {
+			m_OverwritePass.lighting = ELighting::Disabled;
+			m_OverwritePass.fogEnabled = false;
+		}
+		m_OverwritePass.normalizeNormals |= m_NormalizeNormals;
+		dirtyPass = true;
 	}
 
 	if((pass.shader != nullptr) != m_UseShader) {
@@ -405,16 +411,21 @@ void RendererD3D9::SetupRendering(size_t passId)
 		m_ChangedLighting = true;
 	}
 
+	if(pass.fogEnabled != m_PrevFog) {
+		m_PrevFog = pass.fogEnabled;
+		m_ChangedFog = true;
+	}
+
 	if(pass.polygonOffset != m_PrePolyOffset) {
 		SetDirty(Dirty_PolygonOffset);
 		m_PrePolyOffset = pass.polygonOffset;
 	}
 
-	pass.normalizeNormals |= m_NormalizeNormals;
-
 	// Enable pass settings
-	m_DeviceState.SetD3DColors(*m_ParamId.ambient, pass);
-	m_DeviceState.EnablePass(pass);
+	if(dirtyPass) {
+		m_DeviceState.SetD3DColors(*m_ParamId.ambient, pass);
+		m_DeviceState.EnablePass(pass);
+	}
 
 	// Generate data for transforms, fog and light
 	LoadTransforms(pass);
@@ -422,20 +433,22 @@ void RendererD3D9::SetupRendering(size_t passId)
 	LoadLightSettings(pass);
 
 	// Send the generated data to the shader
-	if(m_MaterialRenderer)
-		m_MaterialRenderer->SendShaderSettings(passId, pass, settings);
-	else if(m_ParamSetCallback)
-		m_ParamSetCallback->SendShaderSettings(passId, pass, settings);
+	if(m_ParamSetCallback)
+		m_ParamSetCallback->SendShaderSettings(m_PassId, pass, m_Material);
 
 	ClearDirty(Dirty_Rendertarget);
-	ClearDirty(Dirty_MaterialRenderer);
+	ClearDirty(Dirty_Material);
 	ClearDirty(Dirty_RenderMode);
+	ClearDirty(Dirty_Overwrites);
 	m_ChangedLighting = false;
 	m_ChangedShaderFixed = false;
 }
 
 void RendererD3D9::SwitchRenderMode(ERenderMode mode)
 {
+	if(m_RenderMode != mode)
+		SetDirty(Dirty_Overwrites);
+
 	// Leave the old mode
 	switch(m_RenderMode) {
 	case ERenderMode::None: /*nothing to do*/break;
@@ -524,35 +537,31 @@ void RendererD3D9::LoadTransforms(const Pass& pass)
 void RendererD3D9::LoadFogSettings(const Pass& pass)
 {
 	bool useFog = pass.fogEnabled && m_IsFogActive;
-	if(m_RenderMode == ERenderMode::Mode2D)
-		useFog = false;
-
-	bool useFixedFog = useFog;
-	if(pass.shader)
-		useFixedFog = false;
+	bool useFixedFog = pass.shader ? false : useFog;
 
 	// Enable or disable the fog, for fixed and shader
 	m_DeviceState.EnableFog(useFixedFog);
 
+	// Update always since it enables or disables fog for the shader
 	video::Colorf fog1;
 	fog1.r = m_Fog.color.r;
 	fog1.g = m_Fog.color.g;
 	fog1.b = m_Fog.color.b;
 	fog1.a = useFog ? 1.0f : 0.0f;
-	video::Colorf fog2;
-	fog2.r =
-		m_Fog.type == EFogType::Linear ? 1.0f :
-		m_Fog.type == EFogType::Exp ? 2.0f :
-		m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
-	fog2.g = m_Fog.start;
-	fog2.b = m_Fog.end;
-	fog2.a = m_Fog.density;
 	*m_ParamId.fog1 = fog1;
-	*m_ParamId.fog2 = fog2;
 
-	if(IsDirty(Dirty_Fog)) {
-		// Only use the fixed pipeline if there is no shader
-		m_DeviceState.SetFog(m_Fog);
+	if(IsDirty(Dirty_Fog) || (useFixedFog && m_ChangedFog) || m_ChangedShaderFixed) {
+		if(useFixedFog)
+			m_DeviceState.SetFog(m_Fog);
+		video::Colorf fog2;
+		fog2.r =
+			m_Fog.type == EFogType::Linear ? 1.0f :
+			m_Fog.type == EFogType::Exp ? 2.0f :
+			m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
+		fog2.g = m_Fog.start;
+		fog2.b = m_Fog.end;
+		fog2.a = m_Fog.density;
+		*m_ParamId.fog2 = fog2;
 		ClearDirty(Dirty_Fog);
 	}
 }
@@ -560,12 +569,7 @@ void RendererD3D9::LoadFogSettings(const Pass& pass)
 void RendererD3D9::LoadLightSettings(const Pass& pass)
 {
 	bool useLights = (pass.lighting != ELighting::Disabled);
-	if(m_RenderMode == ERenderMode::Mode2D)
-		useLights = false;
-
-	bool useFixedLights = useLights;
-	if(pass.shader)
-		useFixedLights = false;
+	bool useFixedLights = pass.shader ? false : useLights;
 
 	m_DeviceState.EnableLight(useFixedLights);
 	*m_ParamId.lighting = (float)pass.lighting;

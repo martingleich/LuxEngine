@@ -33,6 +33,13 @@ public:
 		Count = 6,
 	};
 
+	enum ERelation
+	{
+		Outside,
+		Clipped,
+		Inside,
+	};
+
 public:
 	//! Create invalid view frustum
 	ViewFrustum()
@@ -229,19 +236,43 @@ public:
 		return true;
 	}
 
+	ERelation ClassifyBox(const math::AABBoxF& box) const
+	{
+		bool fullyInside = true;
+		for(auto& p : m_Planes) {
+			auto cls = p.ClassifyBox(box.minCorner, box.maxCorner);
+			if(cls == math::PlaneF::ERelation::Back)
+				return ERelation::Outside;
+			if(cls == math::PlaneF::ERelation::Clipped)
+				fullyInside = false;
+		}
+
+		return fullyInside ? ERelation::Inside : ERelation::Clipped;
+	}
+
 	//! Check if a axis-aligned box is visible in the frustum
 	/**
 	Including the edge
 	*/
 	bool IsBoxVisible(const math::AABBoxF& box) const
 	{
+		return ClassifyBox(box) != ERelation::Outside;
+	}
+
+	ERelation ClassifyBox(const math::AABBoxF& box, const math::Transformation& boxTransform) const
+	{
+		bool fullyInside = true;
+		auto invTransform = boxTransform.GetInverted();
 		for(auto& p : m_Planes) {
-			auto cls = p.ClassifyBox(box.minCorner, box.maxCorner);
+			auto transPlane = invTransform.TransformObject(p);
+			auto cls = transPlane.ClassifyBox(box.minCorner, box.maxCorner);
 			if(cls == math::PlaneF::ERelation::Back)
-				return false;
+				return ERelation::Outside;
+			if(cls == math::PlaneF::ERelation::Clipped)
+				fullyInside = false;
 		}
 
-		return true;
+		return fullyInside ? ERelation::Inside : ERelation::Clipped;
 	}
 
 	//! Check if a object-oriented box is visible in the frustum
@@ -250,15 +281,7 @@ public:
 	*/
 	bool IsBoxVisible(const math::AABBoxF& box, const math::Transformation& boxTransform) const
 	{
-		auto invTransform = boxTransform.GetInverted();
-		for(auto& p : m_Planes) {
-			auto transPlane = invTransform.TransformObject(p);
-			auto cls = transPlane.ClassifyBox(box.minCorner, box.maxCorner);
-			if(cls == math::PlaneF::ERelation::Back)
-				return false;
-		}
-
-		return true;
+		return ClassifyBox(box, boxTransform) != ERelation::Outside;
 	}
 
 	//! Transform the box with a matrix

@@ -31,7 +31,6 @@ protected:
 	enum EDirtyFlags
 	{
 		Dirty_Material,
-		Dirty_MaterialRenderer,
 		Dirty_World,
 		Dirty_ViewProj,
 		Dirty_Lights,
@@ -39,6 +38,7 @@ protected:
 		Dirty_RenderMode,
 		Dirty_Fog,
 		Dirty_PolygonOffset,
+		Dirty_Overwrites,
 	};
 
 public:
@@ -48,10 +48,12 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	void SetPass(const Pass& pass, bool useOverwrite = false, ParamSetCallback* paramSetCallback = nullptr);
-	void SetMaterial(const Material* material);
+	void SetMaterial(const Material* material, size_t passId=0);
 
+	/*
 	void SetInvalidMaterial(const Material* material);
 	const Material* GetInvalidMaterial();
+	*/
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -128,12 +130,15 @@ protected:
 	ERenderMode m_RenderMode; //!< Active rendermode
 
 	// The userset parameters are only rememberd they don't have to be activated immediatly
-	bool m_UseMaterial;
+	//bool m_UseMaterial;
 	bool m_UseOverwrite;
 	ParamSetCallback* m_ParamSetCallback;
 	Pass m_Pass;
-	StrongRef<Material> m_Material; //!< User set material
-	StrongRef<Material> m_InvalidMaterial; //!< The material used to render invalid materials
+	const Material* m_Material;
+	size_t m_PassId;
+
+	//StrongRef<Material> m_Material; //!< User set material
+	//StrongRef<Material> m_InvalidMaterial; //!< The material used to render invalid materials
 
 	core::Array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
 	PipelineOverwrite m_FinalOverwrite;

@@ -16,7 +16,7 @@ RendererNull::RendererNull(VideoDriver* driver) :
 {
 	m_NormalizeNormals = true;
 
-	m_Params.AddAttribute("camPos", math::Vector3F(0,0,0));
+	m_Params.AddAttribute("camPos", math::Vector3F(0, 0, 0));
 	m_ParamId.lighting = m_Params.AddAttribute("lighting", (float)video::ELighting::Enabled);
 	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::Colorf(0, 0, 0));
 	m_ParamId.time = m_Params.AddAttribute("time", 0.0f);
@@ -31,9 +31,6 @@ RendererNull::RendererNull(VideoDriver* driver) :
 		m_ParamId.lights.PushBack(m_Params.AddAttribute("light" + core::StringConverter::ToString(i), math::Matrix4::ZERO));
 
 	m_RenderStatistics = RenderStatistics::Instance();
-
-	m_Material = LUX_NEW(MaterialImpl)(nullptr);
-	m_InvalidMaterial = LUX_NEW(MaterialImpl)(nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -41,45 +38,24 @@ RendererNull::RendererNull(VideoDriver* driver) :
 void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ParamSetCallback* paramSetCallback)
 {
 	SetDirty(Dirty_Material);
-	SetDirty(Dirty_MaterialRenderer);
 
+	m_Material = nullptr;
+	m_PassId = 0;
 	m_Pass = pass;
-	m_UseMaterial = false;
-	m_UseOverwrite = useOverwrite;
 	m_ParamSetCallback = paramSetCallback;
+	m_UseOverwrite = useOverwrite;
 }
 
-void RendererNull::SetMaterial(const Material* material)
+void RendererNull::SetMaterial(const Material* material, size_t passId)
 {
-	if(material) {
-		SetDirty(Dirty_Material);
-		if(m_Material->GetRenderer() != material->GetRenderer())
-			SetDirty(Dirty_MaterialRenderer);
+	SetDirty(Dirty_Material);
+	m_Material = material;
+	m_PassId = passId;
 
-		if(material->GetRenderer())
-			m_Material->CopyFrom(material);
-		else
-			m_Material->CopyFrom(m_InvalidMaterial);
-	} else {
-		m_Material->CopyFrom(m_InvalidMaterial);
-	}
+	m_Pass = m_Material->GeneratePass(m_PassId);
+	m_ParamSetCallback = m_Material->GetRenderer();
 
-	m_UseMaterial = true;
 	m_UseOverwrite = true;
-	m_ParamSetCallback = nullptr;
-
-	m_Pass.layers.Clear();
-	m_Pass.layerSettings.Clear();
-}
-
-void RendererNull::SetInvalidMaterial(const Material* material)
-{
-	m_InvalidMaterial->CopyFrom(material);
-}
-
-const Material* RendererNull::GetInvalidMaterial()
-{
-	return m_InvalidMaterial;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -108,6 +84,7 @@ void RendererNull::PopPipelineOverwrite(PipelineOverwriteToken* token)
 
 void RendererNull::UpdatePipelineOverwrite()
 {
+	SetDirty(Dirty_Overwrites);
 	if(m_PipelineOverwrites.IsEmpty()) {
 		m_FinalOverwrite = PipelineOverwrite();
 		return;
@@ -188,6 +165,7 @@ void RendererNull::SetNormalizeNormals(bool normalize, NormalizeNormalsToken* to
 		token->prev = m_NormalizeNormals;
 	}
 	m_NormalizeNormals = normalize;
+	SetDirty(Dirty_Overwrites);
 }
 
 bool RendererNull::GetNormalizeNormals() const

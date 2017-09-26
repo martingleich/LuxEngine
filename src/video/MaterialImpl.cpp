@@ -53,6 +53,16 @@ MaterialRenderer* MaterialImpl::GetRenderer() const
 	return m_RenderData.renderer;
 }
 
+size_t MaterialImpl::GetPassCount() const
+{
+	return m_RenderData.renderer->GetPassCount();
+}
+
+Pass MaterialImpl::GeneratePass(size_t pass) const
+{
+	return m_RenderData.renderer->GeneratePassData(pass, this);
+}
+
 ////////////////////////////////////////////////////////////////////
 
 void MaterialImpl::CopyFrom(const Material* _other)
@@ -196,6 +206,11 @@ u32 MaterialImpl::GetTextureCount() const
 u32 MaterialImpl::GetParamCount() const
 {
 	return m_RenderData.puffer.GetParamCount();
+}
+
+u32 MaterialImpl::GetParamId(const StringType& name) const
+{
+	return m_RenderData.renderer->GetParams().GetParamId(name);
 }
 
 ////////////////////////////////////////////////////////////////////

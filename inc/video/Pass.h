@@ -22,22 +22,17 @@ enum class EMaterialRequirement
 
 class Pass;
 class RenderSettings;
+class Material;
 class ParamSetCallback
 {
 public:
 	virtual ~ParamSetCallback() {}
 
-	virtual void GeneratePass(u32 passId, const RenderSettings& settings, Pass& outPass)
-	{
-		LUX_UNUSED(passId);
-		LUX_UNUSED(settings);
-		LUX_UNUSED(outPass);
-	}
-	virtual void SendShaderSettings(u32 passId, const Pass& pass, const RenderSettings& settings)
+	virtual void SendShaderSettings(size_t passId, const Pass& pass, const Material* material) const
 	{
 		LUX_UNUSED(passId);
 		LUX_UNUSED(pass);
-		LUX_UNUSED(settings);
+		LUX_UNUSED(material);
 	}
 };
 

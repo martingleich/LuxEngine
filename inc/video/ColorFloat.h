@@ -264,6 +264,15 @@ public:
 	{
 		return Colorf(r*c.r, g*c.g, b*c.b, a*c.a);
 	}
+
+	float* Data()
+	{
+		return &r;
+	}
+	const float* Data() const
+	{
+		return &r;
+	}
 };
 
 inline Colorf operator*(const float f, const Colorf& a)

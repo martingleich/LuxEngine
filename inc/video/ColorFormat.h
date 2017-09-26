@@ -22,6 +22,7 @@ public:
 
 		X8R8G8B8,
 		A8R8G8B8,    // 32 Bit
+		G16R16,
 
 		X1R5G5B5,
 		A1R5G5B5,    // 16 Bit
@@ -42,7 +43,7 @@ public:
 	};
 
 	//! The number of available formats
-	static const u32 FORMAT_COUNT = 14;
+	static const u32 FORMAT_COUNT = 15;
 
 public:
 	//! Constructor from format
@@ -87,6 +88,7 @@ public:
 			"R8G8B8",
 			"X8R8G8B8"
 			"A8R8G8B8",
+			"G16R16"
 			"X1R5G5B5",
 			"A1R5G5B5",
 			"R5G6B5",
@@ -107,7 +109,7 @@ public:
 	//! The number of bits in a pixel for this format
 	inline u8 GetBitsPerPixel() const
 	{
-		static const u8 BitPerPixel[FORMAT_COUNT] = {24, 32, 32, 16, 16, 16, 8, 16, 16, 32, 64, 32, 64, 128};
+		static const u8 BitPerPixel[FORMAT_COUNT] = {24, 32, 32, 32, 16, 16, 16, 8, 16, 16, 32, 64, 32, 64, 128};
 		if(m_Format >= FORMAT_COUNT)
 			return 0;
 
@@ -127,7 +129,7 @@ public:
 	*/
 	inline u32 GetRedMask() const
 	{
-		static const u32 Mask[8] = {0xff0000, 0xff0000, 0xff0000, 0x7c00, 0x7c00, 0xf800, 0xff, 0xffff};
+		static const u32 Mask[9] = {0xff0000, 0xff0000, 0xff0000, 0xffff0000, 0x7c00, 0x7c00, 0xf800, 0xff, 0xffff};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];
@@ -140,7 +142,7 @@ public:
 	*/
 	inline u32 GetGreenMask() const
 	{
-		static const u32 Mask[8] = {0xff00, 0xff00, 0xff00, 0x3e0, 0x3e0, 0x7e0, 0xff, 0xffff};
+		static const u32 Mask[9] = {0xff00, 0xff00, 0xff00, 0xffff0000, 0x3e0, 0x3e0, 0x7e0, 0xff, 0xffff};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];
@@ -153,7 +155,7 @@ public:
 	*/
 	inline u32 GetBlueMask() const
 	{
-		static const u32 Mask[8] = {0xff, 0xff, 0xff, 0x1f, 0x1f, 0x1f, 0xff, 0xffff};
+		static const u32 Mask[9] = {0xff, 0xff, 0xff, 0, 0x1f, 0x1f, 0x1f, 0xff, 0xffff};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];
@@ -166,7 +168,7 @@ public:
 	*/
 	inline u32 GetAlphaMask() const
 	{
-		static const u32 Mask[8] = {0x0, 0x0, 0xff000000, 0x0, 0x8000, 0x0, 0x0, 0x0};
+		static const u32 Mask[9] = {0x0, 0x0, 0xff000000, 0x0, 0x0, 0x8000, 0x0, 0x0, 0x0};
 		if(IsFloatingPoint())
 			return 0;
 		return Mask[(u32)m_Format];

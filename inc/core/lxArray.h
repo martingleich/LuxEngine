@@ -4,6 +4,7 @@
 #include "core/lxSort.h"
 #include "core/lxMemory.h"
 #include "core/lxIterator.h"
+#include <initializer_list>
 
 namespace lux
 {
@@ -206,10 +207,21 @@ public:
 	/**
 	Create an empty array
 	*/
-	Array() : m_Entries(nullptr),
+	Array() :
+		m_Entries(nullptr),
 		m_Used(0),
 		m_Alloc(0)
 	{
+	}
+
+	Array(std::initializer_list<T> init) :
+		m_Entries(nullptr),
+		m_Used(0),
+		m_Alloc(0)
+	{
+		Reserve(init.size());
+		for(auto& e : init)
+			PushBack(std::move(e));
 	}
 
 	//! Destruktor
@@ -233,7 +245,7 @@ public:
 		lxAssert(this != &old);
 
 		if(m_Entries) {
-			for(size_t i = 0; i < old.m_Used; ++i)
+			for(size_t i = 0; i < m_Used; ++i)
 				m_Entries[i].~T();
 			Free(m_Entries);
 		}

@@ -91,7 +91,7 @@ public:
 	void Reset();
 
 private:
-	void SetupRendering(size_t passId);
+	void SetupRendering();
 
 	void SwitchRenderMode(ERenderMode mode);
 	void EnterRenderMode3D();
@@ -117,13 +117,16 @@ private:
 	VideoDriverD3D9* m_Driver;
 
 	// The current state of rendersettings, for optimization purposes
-	MaterialRenderer* m_MaterialRenderer;
+	Pass m_OverwritePass;
+
 	VertexFormat m_VertexFormat;
 	bool m_ChangedShaderFixed = false;
 	bool m_ChangedLighting = false;
+	bool m_ChangedFog = false;
 	bool m_UseShader = false;
 	float m_PrePolyOffset = 0.0f;
 	ELighting m_PrevLighting = ELighting::Disabled;
+	bool m_PrevFog = false;
 };
 
 } // namespace video

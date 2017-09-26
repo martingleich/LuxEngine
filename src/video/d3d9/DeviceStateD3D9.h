@@ -53,8 +53,6 @@ public:
 	void ClearLights();
 	void AddLight(const LightData& light, ELighting lighting);
 
-	void SetRenderTargetTexture(video::BaseTexture* t);
-
 	void EnableShader(Shader* s)
 	{
 		if(s == nullptr && m_Shader)

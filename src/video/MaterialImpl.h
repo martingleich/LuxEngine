@@ -20,6 +20,8 @@ public:
 
 	void SetRenderer(MaterialRenderer* renderer);
 	MaterialRenderer* GetRenderer() const;
+	size_t GetPassCount() const;
+	Pass GeneratePass(size_t pass) const;
 
 	////////////////////////////////////////////////////////////////////
 
@@ -56,6 +58,7 @@ public:
 
 	u32 GetTextureCount() const;
 	u32 GetParamCount() const;
+	u32 GetParamId(const StringType& name) const;
 
 	////////////////////////////////////////////////////////////////////
 

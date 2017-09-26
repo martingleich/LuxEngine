@@ -1,15 +1,12 @@
 #ifndef INCLUDED_MATERIAL_H
 #define INCLUDED_MATERIAL_H
 #include "resources/Resource.h"
-#include "core/ParamPackage.h"
-
-#include "video/Color.h"
+#include "video/Pass.h"
 
 namespace lux
 {
 namespace video
 {
-class TextureLayer;
 class MaterialRenderer;
 
 class Material : public core::Resource
@@ -27,6 +24,9 @@ public:
 
 	virtual void SetRenderer(MaterialRenderer* renderer) = 0;
 	virtual MaterialRenderer* GetRenderer() const = 0;
+
+	virtual size_t GetPassCount() const = 0;
+	virtual Pass GeneratePass(size_t pass) const = 0;
 
 	////////////////////////////////////////////////////////////////////
 
@@ -70,6 +70,7 @@ public:
 
 	virtual u32 GetTextureCount() const = 0;
 	virtual u32 GetParamCount() const = 0;
+	virtual u32 GetParamId(const StringType& name) const = 0;
 
 	////////////////////////////////////////////////////////////////////
 

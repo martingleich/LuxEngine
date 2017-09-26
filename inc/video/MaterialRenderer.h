@@ -21,7 +21,7 @@ class Shader;
 /**
 Material rendered communicate the data inside a material to the driver.
 */
-class MaterialRenderer : public ReferenceCounted
+class MaterialRenderer : public ReferenceCounted, public ParamSetCallback
 {
 public:
 public:
@@ -33,8 +33,8 @@ public:
 	LUX_API void SetParamSetCallback(ParamSetCallback* callback);
 	LUX_API ParamSetCallback* GetParamSetCallback() const;
 	
-	LUX_API Pass GeneratePassData(size_t passId, const RenderSettings& settings) const;
-	LUX_API void SendShaderSettings(size_t passId, const Pass& pass, const RenderSettings& settings) const;
+	LUX_API Pass GeneratePassData(size_t passId, const Material* material) const;
+	LUX_API void SendShaderSettings(size_t passId, const Pass& pass, const Material* material) const;
 
 	LUX_API const core::ParamPackage& GetParams() const;
 

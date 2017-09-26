@@ -31,31 +31,28 @@ ParamSetCallback* MaterialRenderer::GetParamSetCallback() const
 	return m_ParamCallback;
 }
 
-Pass MaterialRenderer::GeneratePassData(size_t passId, const RenderSettings& settings) const
+Pass MaterialRenderer::GeneratePassData(size_t passId, const Material* material) const
 {
 	auto& pass = m_Passes.At(passId);
 
 	Pass out(pass);
-	out.ambient = settings.material.GetAmbient();
-	out.diffuse = settings.material.GetDiffuse();
-	out.emissive = settings.material.GetEmissive();
-	out.specular = settings.material.GetSpecular()* settings.material.GetPower();
-	out.shininess = settings.material.GetShininess();
+	out.ambient = material->GetAmbient();
+	out.diffuse = material->GetDiffuse();
+	out.emissive = material->GetEmissive();
+	out.specular = material->GetSpecular()* material->GetPower();
+	out.shininess = material->GetShininess();
 
 	for(auto& x : m_Options) {
 		if(x.pass == passId && !x.isShader) {
-			auto param = settings.material.Param(x.id);
+			auto param = material->Param(x.id);
 			out.SetOption(x.mappingId, param.Data());
 		}
 	}
 
-	if(m_ParamCallback)
-		m_ParamCallback->GeneratePass(passId, settings, out);
-
 	return out;
 }
 
-void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const RenderSettings& settings) const
+void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const Material* material) const
 {
 	if(passId >= m_Passes.Size())
 		throw core::InvalidArgumentException("passId");
@@ -65,7 +62,7 @@ void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const
 
 	for(const auto& option : m_Options) {
 		if(option.isShader) {
-			auto param = settings.material.Param(option.id);
+			auto param = material->Param(option.id);
 			pass.shader->SetParam(param.Data(), option.mappingId);
 		}
 	}
@@ -80,7 +77,7 @@ void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const
 	pass.shader->LoadSceneParams(pass);
 
 	if(m_ParamCallback)
-		m_ParamCallback->SendShaderSettings(passId, pass, settings);
+		m_ParamCallback->SendShaderSettings(passId, pass, material);
 }
 
 const core::ParamPackage& MaterialRenderer::GetParams() const

@@ -146,6 +146,12 @@ public:
 		return (width + height) / 2;
 	}
 
+	//! Get the length of the diagonal
+	T GetDiagonal() const
+	{
+		return sqrt(width*width+height*height);
+	}
+
 	//! Is the dimension empty
 	/**
 	\return True if the dimension is empty
