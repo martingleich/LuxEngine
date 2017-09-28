@@ -25,8 +25,10 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::Rect<
 		return 0;
 
 	auto it = core::LinearSearch(texture, m_Textures);
-	if(it == m_Textures.End())
-		it = m_Textures.PushBack(texture);
+	if(it == m_Textures.End()) {
+		m_Textures.PushBack(texture);
+		it = m_Textures.Last();
+	}
 
 	math::Dimension2U dim = texture->GetSize();
 	Sprite sprite;
@@ -36,7 +38,8 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::Rect<
 	sprite.rect.left = rect.left / (float)dim.width;
 	sprite.rect.right = rect.right / (float)dim.width;
 
-	return SpriteBank::Sprite((s32)core::IteratorDistance(m_Sprites.First(), m_Sprites.PushBack(sprite)) + 1);
+	m_Sprites.PushBack(sprite);
+	return SpriteBank::Sprite((s32)m_Sprites.Size());
 }
 
 SpriteBank::Sprite SpriteBankImpl::AddTextureAsSprite(Texture* texture)
@@ -45,14 +48,17 @@ SpriteBank::Sprite SpriteBankImpl::AddTextureAsSprite(Texture* texture)
 		return 0;
 
 	auto it = core::LinearSearch(texture, m_Textures);
-	if(it == m_Textures.End())
-		it = m_Textures.PushBack(texture);
+	if(it == m_Textures.End()) {
+		m_Textures.PushBack(texture);
+		it = m_Textures.Last();
+	}
 
 	Sprite sprite;
 	sprite.textureID = (u16)core::IteratorDistance(m_Textures.First(), it);
 	sprite.rect = math::RectF(0.0f, 0.0f, 1.0f, 1.0f);
 
-	return SpriteBank::Sprite((u16)core::IteratorDistance(m_Sprites.First(), m_Sprites.PushBack(sprite)) + 1);
+	m_Sprites.PushBack(sprite);
+	return SpriteBank::Sprite(m_Sprites.Size());
 }
 
 SpriteBank::Sprite SpriteBankImpl::AddAnimatedSprite(SpriteBank::Sprite first, SpriteBank::Sprite last, u32 frameTime)
@@ -73,7 +79,8 @@ SpriteBank::Sprite SpriteBankImpl::AddAnimatedSprite(SpriteBank::Sprite first, S
 	sprite.lastSprite = last.id;
 	sprite.frameTime = frameTime;
 
-	return SpriteBank::Sprite(-1 * ((s32)core::IteratorDistance(m_AnimatedSprites.First(), m_AnimatedSprites.PushBack(sprite)) + 1));
+	m_AnimatedSprites.PushBack(sprite);
+	return SpriteBank::Sprite(-1 * m_Sprites.Size());
 }
 
 void SpriteBankImpl::Clear()

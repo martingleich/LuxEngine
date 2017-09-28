@@ -164,20 +164,20 @@ void SceneRendererSimpleForward::AddRenderEntry(Node* n, Renderable* r)
 
 	switch(r->GetRenderPass()) {
 	case ERenderPass::SkyBox:
-		m_SkyBoxList.PushBack(RenderEntry(n, r));
+		m_SkyBoxList.EmplaceBack(n, r);
 		break;
 	case ERenderPass::Solid:
 		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
-		m_SolidNodeList.PushBack(RenderEntry(n, r, isCulled));
+		m_SolidNodeList.EmplaceBack(n, r, isCulled);
 		break;
 	case ERenderPass::Transparent:
 		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
-		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r, isCulled));
+		m_TransparentNodeList.EmplaceBack(n, r, isCulled);
 		break;
 	case ERenderPass::Any:
 		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
-		m_SolidNodeList.PushBack(RenderEntry(n, r, isCulled));
-		m_TransparentNodeList.PushBack(DistanceRenderEntry(n, r, isCulled));
+		m_SolidNodeList.EmplaceBack(n, r, isCulled);
+		m_TransparentNodeList.EmplaceBack(n, r, isCulled);
 		break;
 	default:
 		break;

@@ -313,6 +313,7 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 			psCode = vsCode;
 		} else {
 			psCodeBuffer.SetSize(PSFile->GetSize() + 1);
+			psCode = psCodeBuffer;
 			PSFile->ReadBinary(PSFile->GetSize(), psCode);
 			psCode[PSFile->GetSize()] = 0;
 		}

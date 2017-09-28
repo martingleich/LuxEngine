@@ -5,6 +5,7 @@
 #include "core/lxMemory.h"
 #include "core/lxIterator.h"
 #include <initializer_list>
+#include <type_traits>
 
 namespace lux
 {
@@ -15,192 +16,116 @@ namespace core
 template <typename T>
 class Array
 {
-public:
-	class ConstIterator;
-	class Iterator : public BaseIterator<RandomAccessIteratorTag, T>
+private:
+	template <bool isConst>
+	class ArrayIterator : public BaseIterator<RandomAccessIteratorTag, T>
 	{
 		friend class Array<T>;
-		friend class ConstIterator;
-	private:
-		T* m_Current;
-	private:
-		explicit Iterator(T* First) : m_Current(First)
-		{
-		}
+		using PtrT = typename core::Choose<isConst, const T*, T*>::type;
+		static const bool IS_CONST = isConst;
 	public:
-		Iterator() : m_Current(nullptr)
+		ArrayIterator() : m_Current(nullptr)
 		{
 		}
-		Iterator(const Iterator& iter) : m_Current(iter.m_Current)
+		explicit ArrayIterator(PtrT ptr) : m_Current(ptr)
+		{
+		}
+		ArrayIterator(const ArrayIterator<isConst>& iter) :
+			m_Current(iter.m_Current)
+		{
+		}
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
+		ArrayIterator(const ArrayIterator<!U>& iter) :
+			m_Current(iter.m_Current)
 		{
 		}
 
-		Iterator& operator++()
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
+		ArrayIterator& operator=(const ArrayIterator<!U>& iter)
 		{
-			++m_Current; return *this;
+			m_Current = iter.m_Current;
+			return *this;
 		}
-		Iterator& operator--()
+		ArrayIterator& operator=(const ArrayIterator<isConst>& iter)
 		{
-			--m_Current; return *this;
-		}
-		Iterator operator++(int)
-		{
-			Iterator Temp = *this; ++m_Current; return Temp;
-		}
-		Iterator operator--(int)
-		{
-			Iterator Temp = *this; --m_Current; return Temp;
+			m_Current = iter.m_Current;
+			return *this;
 		}
 
-		Iterator& operator+=(intptr_t num)
+		ArrayIterator& operator++() { ++m_Current; return *this; }
+		ArrayIterator& operator--() { --m_Current; return *this; }
+		ArrayIterator operator++(int)
+		{
+			ArrayIterator tmp(*this); ++m_Current; return tmp;
+		}
+		ArrayIterator operator--(int)
+		{
+			ArrayIterator tmp = *this; --m_Current; return tmp;
+		}
+
+		ArrayIterator& operator+=(intptr_t num)
 		{
 			m_Current += num;
 			return *this;
 		}
 
-		Iterator operator+ (intptr_t num) const
+		ArrayIterator operator+(intptr_t num) const
 		{
-			Iterator temp = *this; return temp += num;
+			ArrayIterator temp = *this; return temp += num;
 		}
-		Iterator& operator-=(intptr_t num)
+		ArrayIterator& operator-=(intptr_t num)
 		{
 			return (*this) += (-num);
 		}
-		Iterator operator- (intptr_t num) const
+		ArrayIterator operator-(intptr_t num) const
 		{
 			return (*this) + (-num);
 		}
 
-		intptr_t operator-(Iterator other) const
+		intptr_t operator-(ArrayIterator other) const
 		{
 			return m_Current - other.m_Current;
 		}
 
-		bool operator==(const Iterator& other) const
+		template <bool isConst2>
+		bool operator==(const ArrayIterator<isConst2>& other) const
 		{
 			return m_Current == other.m_Current;
 		}
-		bool operator!=(const Iterator& other) const
+		template <bool isConst2>
+		bool operator!=(const ArrayIterator<isConst2>& other) const
 		{
 			return m_Current != other.m_Current;
 		}
-		bool operator==(const ConstIterator& other) const;
-		bool operator!=(const ConstIterator& other) const;
 
+		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
 		T& operator*()
 		{
 			return *m_Current;
 		}
+		
+		const T& operator*() const
+		{
+			return *m_Current;
+		}
+
+		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
 		T* operator->()
 		{
 			return m_Current;
 		}
 
-		Iterator& operator=(const Iterator& iter)
-		{
-			m_Current = iter.m_Current; return *this;
-		}
-	};
-
-	class ConstIterator : public BaseIterator<RandomAccessIteratorTag, T>
-	{
-		friend class Iterator;
-		friend class Array<T>;
-	public:
-		typedef RandomAccessIteratorTag IteratorCategory;
-	private:
-		T* m_Current;
-	private:
-		explicit ConstIterator(T* pFirst) : m_Current(pFirst)
-		{
-		}
-	public:
-		ConstIterator() : m_Current(nullptr)
-		{
-		}
-		ConstIterator(const ConstIterator& iter) : m_Current(iter.m_Current)
-		{
-		}
-		ConstIterator(const Iterator& iter) : m_Current(iter.m_Current)
-		{
-		}
-
-		ConstIterator& operator++()
-		{
-			++m_Current; return *this;
-		}
-		ConstIterator& operator--()
-		{
-			--m_Current; return *this;
-		}
-		ConstIterator operator++(int)
-		{
-			ConstIterator Temp = *this; ++m_Current; return Temp;
-		}
-		ConstIterator operator--(int)
-		{
-			ConstIterator Temp = *this; --m_Current; return Temp;
-		}
-
-		ConstIterator& operator+=(intptr_t num)
-		{
-			m_Current += num;
-			return *this;
-		}
-
-		ConstIterator operator+ (intptr_t num) const
-		{
-			ConstIterator temp = *this; return temp += num;
-		}
-		ConstIterator& operator-=(intptr_t num)
-		{
-			return (*this) += (-num);
-		}
-		ConstIterator operator- (intptr_t num) const
-		{
-			return (*this) + (-num);
-		}
-
-		intptr_t operator-(ConstIterator other) const
-		{
-			return m_Current - other.m_Current;
-		}
-
-		bool operator==(const ConstIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ConstIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-		bool operator==(const Iterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const Iterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-
-		const T& operator*()
-		{
-			return *m_Current;
-		}
-		const T* operator->()
+		const T* operator->() const
 		{
 			return m_Current;
 		}
-
-		ConstIterator& operator=(const Iterator& iter)
-		{
-			m_Current = iter.m_Current; return *this;
-		}
-		ConstIterator& operator=(const ConstIterator& iter)
-		{
-			m_Current = iter.m_Current; return *this;
-		}
+	private:
+		PtrT m_Current;
 	};
+
+public:
+	using Iterator = ArrayIterator<false>;
+	using ConstIterator = ArrayIterator<true>;
 
 public:
 	//! Constructor
@@ -303,31 +228,11 @@ public:
 	*/
 	void Insert(const T& entry, Iterator before)
 	{
-		lxAssert(before.m_Current - m_Entries <= (int)m_Used);
-
-		T element(entry); // Safe the elements, if it's part of the old list
-		const size_t pos = before.m_Current - m_Entries;
-
-		if(m_Used == m_Alloc)
-			Reserve((m_Used * 3) / 2 + 1);
-
-		// Shift each element, after the insert one back
-		// Starting at the last element.
-		if(m_Used != pos) {
-			// Construct the last element
-			new ((void*)(&m_Entries[m_Used])) T(std::move(m_Entries[m_Used - 1]));
-
-			// Move the remaining
-			for(size_t i = m_Used - 1; i > pos; --i)
-				m_Entries[i] = std::move(m_Entries[i - 1]);
-		}
-
-		if(m_Used != pos)
-			m_Entries[pos] = std::move(element);
+		auto ptr = GetInsertPointer(before);
+		if(ptr == m_Entries + m_Used - 1)
+			new (ptr) T(entry);
 		else
-			new ((void*)(&m_Entries[pos])) T(std::move(element));
-
-		++m_Used;
+			*ptr = entry;
 	}
 
 	//! Add a new entry at any position to the array(move version)
@@ -337,53 +242,43 @@ public:
 	*/
 	void Insert(T&& entry, Iterator before)
 	{
-		lxAssert(before.m_Current - m_Entries <= (int)m_Used);
-
-		T element(std::move(entry)); // Safe the elements, if it's part of the old list
-		const size_t pos = before.m_Current - m_Entries;
-
-		if(m_Used == m_Alloc)
-			Reserve((m_Used * 3) / 2 + 1);
-
-		// Shift each element, after the insert one back
-		// Starting at the last element.
-		if(m_Used != pos) {
-			// Construct the last element
-			new ((void*)(&m_Entries[m_Used])) T(std::move(m_Entries[m_Used - 1]));
-
-			// Move the remaining
-			for(size_t i = m_Used - 1; i > pos; --i)
-				m_Entries[i] = std::move(m_Entries[i - 1]);
-		}
-
-		if(m_Used != pos)
-			m_Entries[pos] = std::move(element);
+		auto ptr = GetInsertPointer(before);
+		if(ptr == m_Entries + m_Used - 1)
+			new (ptr) T(std::move(entry));
 		else
-			new ((void*)(&m_Entries[pos])) T(std::move(element));
+			*ptr = std::move(entry);
+	}
 
-		++m_Used;
+	template <typename... Ts>
+	void Emplace(Iterator before, Ts&&... args)
+	{
+		auto ptr = GetInsertPointer(before, true);
+		new (ptr) T(std::forward<Ts>(args)...);
 	}
 
 	//! Add a new entry to the end of the array
 	/**
 	\param entry The entry to add
-	\return An iterator to the newly created entry
 	*/
-	Iterator PushBack(const T& entry)
+	void PushBack(const T& entry)
 	{
 		Insert(entry, End());
-		return Last();
 	}
 
 	//! Add a new entry to the end of the array(move version)
 	/**
 	\param entry The entry to add
-	\return An iterator to the newly created entry
 	*/
-	Iterator PushBack(T&& entry)
+	void PushBack(T&& entry)
 	{
 		Insert((T&&)entry, End());
-		return Last();
+	}
+
+	template <typename... Ts>
+	void EmplaceBack(Ts&&... args)
+	{
+		auto ptr = GetInsertPointer(End());
+		new (ptr) T(std::forward<Ts>(args)...);
 	}
 
 	//! Insert a new entry a the beginning of the array
@@ -404,6 +299,13 @@ public:
 	void PushFront(T&& entry)
 	{
 		Insert(entry, First());
+	}
+
+	template <typename... Ts>
+	void EmplaceFront(Ts&&... args)
+	{
+		auto ptr = GetInsertPointer(First(), true);
+		new (ptr) T(std::forward<Ts>(args)...);
 	}
 
 	void PushBack(const core::Array<T>& entries)
@@ -434,7 +336,7 @@ public:
 	\param entries A pointer to then entries to add
 	\param numEntries The number of entries to add
 	*/
-	void PushBackm(T* entries, size_t numEntries)
+	void PushBack(T* entries, size_t numEntries)
 	{
 		// Wenn kein Platz mehr ist welchen machen
 		if(m_Used + numEntries > m_Alloc) {
@@ -869,22 +771,38 @@ private:
 		return ::operator delete(ptr);
 	}
 
+	T* GetInsertPointer(Iterator before, bool destroy = false)
+	{
+		lxAssert(before.m_Current - m_Entries <= (int)m_Used);
+
+		const size_t pos = before.m_Current - m_Entries;
+
+		if(m_Used == m_Alloc)
+			Reserve((m_Used * 3) / 2 + 1);
+
+		// Shift each element, after the insert one back
+		// Starting at the last element.
+		if(m_Used != pos) {
+			// Construct the last element
+			new ((void*)(&m_Entries[m_Used])) T(std::move(m_Entries[m_Used - 1]));
+
+			// Move the remaining
+			for(size_t i = m_Used - 1; i > pos; --i)
+				m_Entries[i] = std::move(m_Entries[i - 1]);
+		}
+
+		T* ptr = m_Entries + pos;
+		if(destroy && pos < m_Used)
+			ptr->~T();
+		++m_Used;
+		return ptr;
+	}
+
 private:
 	T* m_Entries;
 	size_t m_Used;
 	size_t m_Alloc;
 };
-
-template <typename T>
-bool Array<T>::Iterator::operator==(const ConstIterator& other) const
-{
-	return m_Current == other.m_Current;
-}
-template <typename T>
-bool Array<T>::Iterator::operator!=(const ConstIterator& other) const
-{
-	return m_Current != other.m_Current;
-}
 
 template <typename T>
 struct HashType<Array<T>>

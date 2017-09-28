@@ -112,7 +112,8 @@ bool INIFile::ReadSections()
 					m_Sections[sectionID].comment.Append(m_LastComment);
 					section = &m_Sections[sectionID];
 				} else {
-					section = &*m_Sections.PushBack(SINISection());
+					m_Sections.PushBack(SINISection());
+					section = &*m_Sections.Last();
 					section->name = sectionName;
 					section->sorted = false;
 					section->elemCount = 0;
@@ -139,7 +140,8 @@ bool INIFile::ReadSections()
 					m_Elements[elemID].value = element.value;
 				} else {
 					element.comment = m_LastComment;
-					elemID = core::IteratorDistance(m_Elements.First(), m_Elements.PushBack(element));
+					m_Elements.PushBack(element);
+					elemID = m_Elements.Size()-1;
 				}
 
 				m_LastComment.Clear();
