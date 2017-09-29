@@ -41,10 +41,12 @@ public:
 		m_Size(0)
 	{
 		SetMinSize(other.m_Size, NOOP);
-		if(action == COPY)
-			memcpy(m_Data, other.m_Data, other.m_Size);
-		if(action == ZERO)
-			memset(m_Data, 0, other.m_Size);
+		if(other.m_Size) {
+			if(action == COPY)
+				memcpy(m_Data, other.m_Data, other.m_Size);
+			if(action == ZERO)
+				memset(m_Data, 0, other.m_Size);
+		}
 	}
 
 	RawMemory(RawMemory&& old) :
@@ -156,7 +158,7 @@ public:
 		return (const T*)Pointer();
 	}
 
-	template <typename T=void>
+	template <typename T = void>
 	T* GetChangable() const
 	{
 		return (T*)m_Data;
@@ -172,7 +174,7 @@ private:
 	size_t m_Size;
 };
 
-} 
-} 
+}
+}
 
 #endif

@@ -1,6 +1,5 @@
 #ifndef INCLUDED_LXLIST_H
 #define INCLUDED_LXLIST_H
-
 #include "LuxBase.h"
 #include "lxMemory.h"
 #include "lxIterator.h"
@@ -12,225 +11,157 @@ namespace core
 
 //! A double-linked list
 template <typename T>
-class list
+class List
 {
 private:
-	struct ListEntry
+	struct Entry
 	{
-		ListEntry(const T& _data) : Next(nullptr), Prev(nullptr), data(_data)
-		{
-		}
-
-		ListEntry* Next;
-		ListEntry* Prev;
+		Entry* next;
+		Entry* prev;
 		T data;
+
+		static Entry* Alloc()
+		{
+			return (Entry*)::operator new(sizeof(Entry));
+		}
+		static void Free(Entry* e)
+		{
+			::operator delete(e);
+		}
 	};
 
-public:
-	class ConstIterator;
-
-	class Iterator : BaseIterator<BidirectionalIteratorTag, T>
+	template <bool isConst>
+	class BaseIterator : public core::BaseIterator<core::BidirectionalIteratorTag, T>
 	{
+		friend class BaseIterator<!isConst>;
+		friend class List;
+
 	public:
-		Iterator() : m_Current(nullptr)
+		using EntryPtr = typename core::Choose<isConst, const Entry*, Entry*>::type;
+		BaseIterator() :
+			m_Current(nullptr)
+		{
+		}
+		explicit BaseIterator(EntryPtr cur) :
+			m_Current(cur)
 		{
 		}
 
-		Iterator& operator++()
+		BaseIterator(const BaseIterator& other) :
+			m_Current(other.m_Current)
 		{
-			m_Current = m_Current->Next;
-			return *this;
-		}
-		Iterator& operator--()
-		{
-			m_Current = m_Current->Prev;
-			return *this;
-		}
-		Iterator  operator++(int)
-		{
-			Iterator tmp(*this);
-			m_Current = m_Current->Next;
-			return tmp;
-		}
-		Iterator  operator--(int)
-		{
-			Iterator tmp(*this);
-			m_Current = m_Current->Prev;
-			return tmp;
 		}
 
-		Iterator& operator+=(int num)
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
+		BaseIterator(const BaseIterator<!U>& other) :
+			m_Current(other.m_Current)
 		{
-			if(num > 0)
-				while(num-- && this->m_Current != 0) ++(*this);
-			else
-				while(num++ && this->m_Current != 0) --(*this);
+		}
 
+		BaseIterator& operator=(const BaseIterator& other)
+		{
+			m_Current = other.m_Current;
 			return *this;
 		}
 
-		Iterator  operator+ (int num) const
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
+		BaseIterator& operator=(const BaseIterator<!U>& other)
 		{
-			Iterator temp = *this; return temp += num;
-		}
-		Iterator& operator-=(int num)
-		{
-			return (*this) += (-num);
-		}
-		Iterator  operator- (int num) const
-		{
-			return (*this) + (-num);
-		}
-
-		bool operator==(const Iterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const Iterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-		bool operator==(const ConstIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ConstIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-
-		T& operator*()
-		{
-			return m_Current->data;
-		}
-		T* operator->()
-		{
-			return &(m_Current->data);
-		}
-
-	private:
-		explicit Iterator(ListEntry* pBegin) : m_Current(pBegin)
-		{
-		}
-		friend class list<T>;
-		friend class ConstIterator;
-
-	private:
-		ListEntry* m_Current;
-	};
-
-	class ConstIterator : BaseIterator<BidirectionalIteratorTag, T>
-	{
-	public:
-		ConstIterator() : m_Current(nullptr)
-		{
-		}
-		ConstIterator(const Iterator& iter) : m_Current(iter.m_Current)
-		{
-		}
-
-		ConstIterator& operator++()
-		{
-			m_Current = m_Current->Next; return *this;
-		}
-		ConstIterator& operator--()
-		{
-			m_Current = m_Current->Prev; return *this;
-		}
-		ConstIterator  operator++(int)
-		{
-			ConstIterator tmp(*this);
-			m_Current = m_Current->Next;
-			return tmp;
-		}
-		ConstIterator  operator--(int)
-		{
-			ConstIterator tmp(*this);
-			m_Current = m_Current->Prev;
-			return tmp;
-		}
-
-		ConstIterator& operator+=(int num)
-		{
-			if(num > 0)
-				while(num-- && this->m_Current != nullptr) ++(*this);
-			else
-				while(num++ && this->m_Current != nullptr) --(*this);
-
+			m_Current = other.m_Current;
 			return *this;
 		}
 
-		ConstIterator  operator+ (int num) const
+		BaseIterator& operator++()
 		{
-			ConstIterator temp = *this; return temp += num;
-		}
-		ConstIterator& operator-=(int num)
-		{
-			return (*this) += (-num);
-		}
-		ConstIterator  operator- (int num) const
-		{
-			return (*this) + (-num);
+			m_Current = m_Current->next;
+			return *this;
 		}
 
-		bool operator==(const Iterator& other) const
+		BaseIterator operator++(int)
+		{
+			auto out(*this);
+			this->operator++();
+			return out;
+		}
+
+		BaseIterator& operator--()
+		{
+			m_Current = m_Current->prev;
+			return *this;
+		}
+
+		BaseIterator operator--(int)
+		{
+			auto out(*this);
+			this->operator--();
+			return out;
+		}
+
+		template <bool isConst2>
+		bool operator==(const BaseIterator<isConst2>& other) const
 		{
 			return m_Current == other.m_Current;
 		}
-		bool operator!=(const Iterator& other) const
+
+		template <bool isConst2>
+		bool operator!=(const BaseIterator<isConst2>& other) const
 		{
-			return m_Current != other.m_Current;
-		}
-		bool operator==(const ConstIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ConstIterator& other) const
-		{
-			return m_Current != other.m_Current;
+			return !(*this == other);
 		}
 
-		const T& operator*()
+		const T& operator*() const
 		{
 			return m_Current->data;
 		}
 		const T* operator->()
 		{
-			return &(m_Current->data);
+			return &m_Current->data;
 		}
 
-		ConstIterator& operator=(const Iterator& iter)
+		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
+		T& operator*()
 		{
-			m_Current = iter.m_Current; return *this;
+			return m_Current->data;
+		}
+		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
+		T* operator->()
+		{
+			return &m_Current->data;
 		}
 
 	private:
-		explicit ConstIterator(ListEntry* pBegin) : m_Current(pBegin)
-		{
-		}
-
-		friend class Iterator;
-		friend class list<T>;
-	private:
-		ListEntry* m_Current;
+		EntryPtr m_Current;
 	};
+
+public:
+	using Iterator = BaseIterator<false>;
+	using ConstIterator = BaseIterator<true>;
 
 	//! default constructor
 	/**
 	Create an empty list
 	*/
-	list() : m_First(nullptr), m_Last(nullptr), m_Size(0)
+	List() :
+		m_First(nullptr),
+		m_Last(nullptr),
+		m_Size(0)
 	{
 	}
 
 	//! Copyconstructor
-	list(const list<T>& other) : m_First(nullptr), m_Last(nullptr), m_Size(0)
+	List(const List& other) :
+		m_First(nullptr),
+		m_Last(nullptr),
+		m_Size(0)
 	{
 		*this = other;
 	}
 
 	//! Move constructor
-	list(list<T>&& old) : m_First(old.m_Frist), m_Last(old.m_Last), m_Size(old.m_Size)
+	List(List&& old) :
+		m_First(old.m_Frist),
+		m_Last(old.m_Last),
+		m_Size(old.m_Size)
 	{
 		old.m_First = nullptr;
 		old.m_Last = nullptr;
@@ -238,30 +169,27 @@ public:
 	}
 
 	//! Destructor
-	~list()
+	~List()
 	{
 		Clear();
 	}
 
 	//! Assignment
-	list<T>& operator=(const list<T>& other)
+	List& operator=(const List& other)
 	{
 		if(&other == this)
 			return *this;
 
 		Clear();
 
-		ListEntry* entry = other.m_First;
-		while(entry) {
-			Push_back(entry->data);
-			entry = entry->Next;
-		}
+		for(Entry* it = other.m_First; it; it = it->next)
+			PushBack(it->data);
 
 		return *this;
 	}
 
 	//! Move assignment
-	list<T>& operator=(list<T>&& old)
+	List& operator=(List&& old)
 	{
 		Clear();
 		m_First = old.m_First;
@@ -270,6 +198,95 @@ public:
 		old.m_First = nullptr;
 		old.m_Last = nullptr;
 		old.m_Size = 0;
+		return *this;
+	}
+
+	//! Remove all elements from the list
+	void Clear()
+	{
+		while(m_First) {
+			Entry* next = m_First->next;
+			m_First->data.~T();
+			Entry::Free(m_First);
+			m_First = next;
+		}
+
+		m_First = nullptr;
+		m_Last = nullptr;
+		m_Size = 0;
+	}
+
+	void PushBack(const T& element)
+	{
+		new (GetInsertPointer(End())) T(element);
+	}
+	void PushBack(T&& element)
+	{
+		new (GetInsertPointer(End())) T(std::move(element));
+	}
+	template <typename... Ar>
+	void EmplaceBack(Ar&&... args)
+	{
+		new (GetInsertPointer(End())) T(std::forward<Ar>(args)...);
+	}
+
+	void PushFront(const T& element)
+	{
+		new (GetInsertPointer(First())) T(element);
+	}
+	void PushFront(T&& element)
+	{
+		new (GetInsertPointer(First())) T(std::move(element));
+	}
+	template <typename... Ar>
+	void EmplaceFront(Ar&&... args)
+	{
+		new (GetInsertPointer(First())) T(std::forward<Ar>(args)...);
+	}
+
+	void Insert(Iterator pos, const T& element)
+	{
+		new (GetInsertPointer(pos)) T(element);
+	}
+	void Insert(Iterator pos, T&& element)
+	{
+		new (GetInsertPointer(pos)) T(std::move(element));
+	}
+	template <typename... Ar>
+	void Emplace(Iterator pos, Ar&&... args)
+	{
+		new (GetInsertPointer(pos)) T(std::forward(args)...);
+	}
+
+	//! Remove an element from the list.
+	/**
+	\param it The element to remove.
+	\return The next element after the deleted one.
+	*/
+	Iterator Erase(Iterator it)
+	{
+		lxAssert(Size() > 0);
+
+		Iterator out(it);
+		++out;
+
+		auto ptr = it.m_Current;
+		if(ptr == m_First)
+			m_First = ptr->next;
+		else
+			ptr->prev->next = ptr->next;
+
+		if(ptr == m_Last)
+			m_Last = ptr->prev;
+		else
+			ptr->next->prev = ptr->prev;
+
+		--m_Size;
+
+		ptr->data.~T();
+		Entry::Free(ptr);
+
+		return out;
 	}
 
 	//! The size of the list
@@ -281,187 +298,64 @@ public:
 		return m_Size;
 	}
 
-	//! Remove all elements from the list
-	void Clear()
-	{
-		while(m_First) {
-			ListEntry* Next = m_First->Next;
-			delete m_First;
-			m_First = Next;
-		}
-
-		m_First = nullptr;
-		m_Last = nullptr;
-		m_Size = 0;
-	}
-
 	//! Is the list empty
 	/**
 	\return True if no element are in the list, otherwise false
 	*/
-	bool Empty() const
+	bool IsEmpty() const
 	{
-		return (m_First == nullptr);
+		return (Size() == 0);
 	}
 
-	//! Add an element to the end of the list
-	/**
-	\param element The element to add to the list
-	*/
-	void Push_back(const T& element)
+	Iterator First() { return Iterator(m_First); }
+	ConstIterator First() const { return ConstIterator(m_First); }
+	Iterator End() { return Iterator(nullptr); }
+	ConstIterator End() const { return ConstIterator(nullptr); }
+	Iterator Last() { return Iterator(m_Last); }
+	ConstIterator Last() const { return ConstIterator(m_Last); }
+	Iterator Begin() { return Iterator(nullptr); }
+	ConstIterator Begin() const { return ConstIterator(nullptr); }
+
+	Iterator begin() { return Iterator(m_First); }
+	ConstIterator begin() const { return ConstIterator(m_First); }
+	Iterator end() { return Iterator(nullptr); }
+	ConstIterator end() const { return ConstIterator(nullptr); }
+
+private:
+	T* GetInsertPointer(Iterator pos)
 	{
-		ListEntry* entry = new ListEntry(element);
+		Entry* entry = Entry::Alloc();
+		auto ptr = pos.m_Current;
+		if(ptr == nullptr) { // Push back
+			entry->next = nullptr;
+			entry->prev = m_Last;
+			if(m_Last)
+				m_Last->next = entry;
+			m_Last = entry;
+		} else {
+			entry->prev = ptr->prev;
+			entry->next = ptr;
+			if(ptr->prev)
+				ptr->prev->next = entry;
+			ptr->prev = entry;
+		}
+
+		if(!m_First || !entry->prev)
+			m_First = entry;
+		if(!m_Last || !entry->next)
+			m_Last = entry;
 
 		++m_Size;
-
-		// Ist es der erste Eintrag
-		if(m_First == nullptr)
-			m_First = entry;
-
-		entry->Prev = m_Last;
-
-		if(m_Last != nullptr)
-			m_Last->Next = entry;
-
-		m_Last = entry;
-	}
-
-
-	//! Iterator to the first element in the list
-	/**
-	\return The first element in the list
-	*/
-	Iterator First()
-	{
-		return Iterator(m_First);
-	}
-
-	//! ConstIterator to the first element in the list
-	/**
-	\return The first element in the list
-	*/
-	ConstIterator First() const
-	{
-		return ConstIterator(m_First);
-	}
-
-	//! Iterator to the element after the last in the list
-	/**
-	\return The element after the last
-	*/
-	Iterator End()
-	{
-		return Iterator(nullptr);
-	}
-
-	//! ConstIterator to the element after the last in the list
-	/**
-	\return The element after the last
-	*/
-	ConstIterator End() const
-	{
-		return ConstIterator(nullptr);
-	}
-
-	//! Iterator to the last element in the list
-	/**
-	\return The last element in the list
-	*/
-	Iterator Last()
-	{
-		return Iterator(m_Last);
-	}
-
-	//! ConstIterator to the last element in the list
-	/**
-	\return The last element in the list
-	*/
-	ConstIterator Last() const
-	{
-		return ConstIterator(m_Last);
-	}
-
-	//! Iterator to the element before the first in the list
-	/**
-	\return The element before the first
-	*/
-	Iterator Begin()
-	{
-		return Iterator(nullptr);
-	}
-
-	//! ConstIterator to the element before the first in the list
-	/**
-	\return The element before the first
-	*/
-	ConstIterator Begin() const
-	{
-		return ConstIterator(nullptr);
-	}
-
-	//! Erase an element from the list
-	/**
-	\param it The element to remove
-	\return An iterator to the next element in the list
-	*/
-	Iterator Erase(Iterator it)
-	{
-		Iterator ReturnIter(it);
-		++ReturnIter;
-
-		if(it.m_Current == m_First) {
-			m_First = it.m_Current->Next;
-		} else {
-			it.m_Current->Prev->Next = it.m_Current->Next;
-		}
-
-		if(it.m_Current == m_Last) {
-			m_Last = it.m_Current->Prev;
-		} else {
-			it.m_Current->Next->Prev = it.m_Current->Prev;
-		}
-
-		delete it.m_Current;
-		it.m_Current = nullptr;
-		--m_Size;
-
-		return ReturnIter;
-	}
-
-	//! Support for foreach loop
-	Iterator begin()
-	{
-		return Iterator(m_First);
-	}
-
-	//! Support for foreach loop
-	ConstIterator begin() const
-	{
-		return ConstIterator(m_First);
-	}
-
-	//! Support for foreach loop
-	Iterator end()
-	{
-		return Iterator(nullptr);
-	}
-
-	//! Support for foreach loop
-	ConstIterator end() const
-	{
-		return ConstIterator(nullptr);
+		return &entry->data;
 	}
 
 private:
-	ListEntry*    m_First;
-	ListEntry*    m_Last;
-	u32           m_Size;
+	Entry* m_First;
+	Entry* m_Last;
+	u32 m_Size;
 };
 
-
-} 
-
-} 
-
+} // namespace core
+} // namespace lux
 
 #endif
