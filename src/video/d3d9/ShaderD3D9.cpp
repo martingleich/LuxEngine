@@ -81,7 +81,7 @@ private:
 
 static luxD3DXShaderIncludes g_luxD3DXShaderIncludes;
 
-static String FormatD3DXShaderError(const String& input)
+static String FormatD3DXShaderError(const String& input, bool isVertex)
 {
 	// File(line, col): error number: error-string
 	auto colon = input.FindReverse(":");
@@ -92,7 +92,7 @@ static String FormatD3DXShaderError(const String& input)
 	else
 		base_name++;
 
-	return input.SubString(base_name, input.End());
+	return (isVertex ? "vs: " : "ps: ") + input.SubString(base_name, input.End());
 }
 
 ShaderD3D9::ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& state) :
@@ -129,10 +129,19 @@ void ShaderD3D9::Init(
 	UnknownRefCounted<ID3DXConstantTable> vertexShaderConstants;
 	UnknownRefCounted<ID3DXConstantTable> pixelShaderConstants;
 
+	bool compileError = false;
 	m_VertexShader = CreateVertexShader(vsCode, vsEntryPoint, vsLength, vsProfile, errorList, vertexShaderConstants);
+	if(!m_VertexShader)
+		compileError = true;
 
-	if(psCode)
+	if(psCode) {
 		m_PixelShader = CreatePixelShader(psCode, psEntryPoint, psLength, psProfile, errorList, pixelShaderConstants);
+		if(!m_PixelShader)
+			compileError = true;
+	}
+
+	if(compileError)
+		throw video::ShaderCompileException();
 
 	// Load all shader parameters.
 	core::Array<HelperEntry> helper;
@@ -331,10 +340,9 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 			if(errorList) {
 				String err = (const char*)errors->GetBufferPointer();
 				for(auto& str : err.Split('\n'))
-					errorList->PushBack(FormatD3DXShaderError(str));
+					errorList->PushBack(FormatD3DXShaderError(str, true));
 			}
 		}
-		throw ShaderCompileException();
 	}
 
 	// Warnings.
@@ -342,13 +350,15 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 		if(errorList) {
 			String err = (const char*)errors->GetBufferPointer();
 			for(auto& str : err.Split('\n'))
-				errorList->PushBack(FormatD3DXShaderError(str));
+				errorList->PushBack(FormatD3DXShaderError(str, true));
 		}
 	}
 
-	hr = m_D3DDevice->CreateVertexShader((DWORD*)output->GetBufferPointer(), shader.Access());
-	if(FAILED(hr))
-		throw core::D3D9Exception(hr);
+	if(SUCCEEDED(hr)) {
+		hr = m_D3DDevice->CreateVertexShader((DWORD*)output->GetBufferPointer(), shader.Access());
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
+	}
 
 	return shader;
 }
@@ -373,10 +383,9 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 			if(errorList) {
 				String err = (const char*)errors->GetBufferPointer();
 				for(auto& str : err.Split('\n'))
-					errorList->PushBack(FormatD3DXShaderError(str));
+					errorList->PushBack(FormatD3DXShaderError(str, false));
 			}
 		}
-		throw ShaderCompileException();
 	}
 
 	// Warnings.
@@ -384,14 +393,16 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 		if(errorList) {
 			String err = (const char*)errors->GetBufferPointer();
 			for(auto& str : err.Split('\n'))
-				errorList->PushBack(FormatD3DXShaderError(str));
+				errorList->PushBack(FormatD3DXShaderError(str, false));
 		}
 	}
 
-	DWORD* data = (DWORD*)output->GetBufferPointer();
-	hr = m_D3DDevice->CreatePixelShader(data, shader.Access());
-	if(FAILED(hr))
-		throw core::D3D9Exception(hr);
+	if(SUCCEEDED(hr)) {
+		DWORD* data = (DWORD*)output->GetBufferPointer();
+		hr = m_D3DDevice->CreatePixelShader(data, shader.Access());
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
+	}
 
 	return shader;
 }

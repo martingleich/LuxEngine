@@ -63,8 +63,6 @@ public:
 
 	virtual bool Reset(const DriverConfig& config) = 0;
 
-	virtual void ReleaseSharedData() = 0;
-
 	//////////////////////////////////////////////////////////////////////////////
 
 	virtual StrongRef<Geometry> CreateEmptyGeometry(

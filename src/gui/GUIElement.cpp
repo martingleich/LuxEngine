@@ -29,6 +29,7 @@ Element::Element() :
 
 Element::~Element()
 {
+	RemoveAllElements();
 }
 
 Element* Element::GetParent() const
@@ -253,7 +254,6 @@ core::Range<Element::ConstElementIterator> Element::Elements() const
 void Element::RemoveElement(ElementIterator it)
 {
 	(*it)->OnRemove(this);
-	(*it)->Drop();
 	m_Elements.Erase(it);
 }
 
@@ -268,7 +268,6 @@ void Element::RemoveAllElements()
 {
 	for(auto e : m_Elements) {
 		e->OnRemove(this);
-		e->Drop();
 	}
 	m_Elements.Clear();
 }
@@ -280,7 +279,7 @@ StrongRef<Element> Element::AddElement(Element* elem)
 
 StrongRef<Element> Element::AddElement(Element* elem, ElementIterator before)
 {
-	elem->Grab();
+	StrongRef<Element> elemPtr = elem;
 	if(elem->GetParent())
 		elem->GetParent()->RemoveElement(elem);
 	m_Elements.Insert(elem, before);

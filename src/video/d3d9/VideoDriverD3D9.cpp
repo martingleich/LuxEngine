@@ -80,11 +80,6 @@ VideoDriverD3D9::VideoDriverD3D9(const core::ModuleInitData& data) :
 	refFactory->RegisterType(core::ResourceType::CubeTexture, &lux::video::CreateCubeTexture);
 }
 
-void VideoDriverD3D9::ReleaseSharedData()
-{
-	m_Renderer->CleanUp();
-}
-
 VideoDriverD3D9::~VideoDriverD3D9()
 {
 	m_D3DDevice->SetVertexShader(nullptr);

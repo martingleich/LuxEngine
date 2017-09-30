@@ -24,6 +24,8 @@ class StencilMode;
 class DeviceStateD3D9
 {
 public:
+	~DeviceStateD3D9();
+
 	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
 	void SetD3DColors(const video::Colorf& ambient, const Pass& pass);
@@ -91,6 +93,9 @@ private:
 	EBlendFactor m_SrcBlendFactor;
 	EBlendFactor m_DstBlendFactor;
 	EBlendOperator m_BlendOperator;
+
+	u32 m_MaxTextureCount;
+	u32 m_MaxVSTextureCount;
 
 	bool m_UseVertexData;
 

@@ -21,8 +21,6 @@ class RendererD3D9 : public RendererNull
 public:
 	RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& d3d9);
 
-	void CleanUp();
-
 	void BeginScene();
 	void Clear(
 		bool clearColor, bool clearZBuffer, bool clearStencil,

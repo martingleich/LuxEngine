@@ -25,7 +25,7 @@ class GUIEnvironment;
 class Element : public Referable
 {
 public:
-	using ElementList = core::Array<Element*>;
+	using ElementList = core::Array<StrongRef<Element>>;
 	using ElementIterator = ElementList::Iterator;
 	using ConstElementIterator = ElementList::ConstIterator;
 

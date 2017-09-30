@@ -74,10 +74,6 @@ void LuxDeviceNull::ReleaseModules()
 	m_SceneRenderer.Reset();
 	scene::ParticleSystemManager::Destroy();
 
-	auto driver = video::VideoDriver::Instance();
-	if(driver)
-		driver->ReleaseSharedData();
-
 	video::MeshSystem::Destroy();
 	video::ImageSystem::Destroy();
 	video::MaterialLibrary::Destroy();

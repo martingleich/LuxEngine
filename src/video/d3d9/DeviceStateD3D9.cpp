@@ -20,7 +20,14 @@ void DeviceStateD3D9::Init(const D3DCAPS9* caps, IDirect3DDevice9* device)
 {
 	m_Caps = caps;
 	m_Device = device;
+	m_MaxTextureCount = 0;
+	m_MaxVSTextureCount = 0;
 	Reset();
+}
+
+DeviceStateD3D9::~DeviceStateD3D9()
+{
+	ReleaseUnmanaged();
 }
 
 void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Pass& pass)
@@ -119,6 +126,10 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 	} else {
 		SetTexture(stage, nullptr);
 	}
+	if(stage >= D3DVERTEXTEXTURESAMPLER0)
+		m_MaxVSTextureCount = math::Max(stage - D3DVERTEXTEXTURESAMPLER0 + 1, m_MaxVSTextureCount);
+	else
+		m_MaxTextureCount = math::Max(stage + 1, m_MaxTextureCount);
 
 	if(textureSet) {
 		SetSamplerState(stage, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
@@ -149,11 +160,11 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 			if(ani > maxAni)
 				ani = maxAni;
 			SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, ani);
-		}
+	}
 #endif
 		SetSamplerState(stage, D3DSAMP_MINFILTER, filterMin);
 		SetSamplerState(stage, D3DSAMP_MAGFILTER, filterMag);
-	}
+}
 }
 
 void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
@@ -453,8 +464,10 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 
 void DeviceStateD3D9::ReleaseUnmanaged()
 {
-	for(u32 i = 0; i < m_UsedTextureLayers; ++i)
+	for(u32 i = 0; i < m_MaxTextureCount; ++i)
 		m_Device->SetTexture(i, nullptr);
+	for(u32 i = 0; i < m_MaxVSTextureCount; ++i)
+		m_Device->SetTexture(D3DVERTEXTEXTURESAMPLER0 + i, nullptr);
 }
 
 void DeviceStateD3D9::Reset()
@@ -478,7 +491,7 @@ void DeviceStateD3D9::Reset()
 	}
 }
 
-		} // namespace video
+} // namespace video
 	} // namespace lux
 
 #endif // LUX_COMPILE_WITH_D3D9

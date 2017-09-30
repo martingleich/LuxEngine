@@ -193,7 +193,7 @@ public:
 	}
 
 	//! Set from channels(Float)
-	void Set(float a, float r, float g, float b)
+	void SetF(float a, float r, float g, float b)
 	{
 		a = math::Clamp(a, 0.0f, 1.0f);
 		r = math::Clamp(r, 0.0f, 1.0f);

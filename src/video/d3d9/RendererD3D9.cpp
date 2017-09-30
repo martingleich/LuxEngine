@@ -29,10 +29,6 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState
 	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
 }
 
-void RendererD3D9::CleanUp()
-{
-}
-
 void RendererD3D9::BeginScene()
 {
 	HRESULT hr = m_Device->BeginScene();

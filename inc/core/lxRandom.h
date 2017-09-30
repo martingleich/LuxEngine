@@ -92,10 +92,11 @@ public:
 	*/
 	inline bool GetBool(float probability = 0.5f) const
 	{
-		if(probability < 0.0f || probability > 1.0f)
+		if(probability <= 0.0f || probability > 1.0f)
 			return false;
 
-		if(GetBits() < (u32)(probability * 0xFFFFFFFF))
+		float max = probability*0xFFFFFFFF;
+		if((float)GetBits() <= max)
 			return true;
 		else
 			return false;
