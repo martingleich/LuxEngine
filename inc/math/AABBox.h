@@ -163,21 +163,26 @@ public:
 
 	//! Gives the eight corners of the box
 	/**
-	\param out A array were the corners of the box are saved
+	\param out A array were the corners of the box are saved in the following order
+	   3------7
+	  /|     /|
+	 / |    / |
+	2--+---6  |
+	|  1---+--5
+	| /    | /
+	|/     |/
+	0------4
 	*/
 	void GetCorners(Vector3<type> out[8]) const
 	{
-		const Vector3<type> Center = GetCenter();
-		const Vector3<type> Diag = Center - maxCorner;
-
-		out[0] = Vector3<type>(Center.x + Diag.x, Center.y + Diag.y, Center.z + Diag.z);
-		out[1] = Vector3<type>(Center.x + Diag.x, Center.y - Diag.y, Center.z + Diag.z);
-		out[2] = Vector3<type>(Center.x + Diag.x, Center.y + Diag.y, Center.z - Diag.z);
-		out[3] = Vector3<type>(Center.x + Diag.x, Center.y - Diag.y, Center.z - Diag.z);
-		out[4] = Vector3<type>(Center.x - Diag.x, Center.y + Diag.y, Center.z + Diag.z);
-		out[5] = Vector3<type>(Center.x - Diag.x, Center.y - Diag.y, Center.z + Diag.z);
-		out[6] = Vector3<type>(Center.x - Diag.x, Center.y + Diag.y, Center.z - Diag.z);
-		out[7] = Vector3<type>(Center.x - Diag.x, Center.y - Diag.y, Center.z - Diag.z);
+		out[0] = Vector3<type>(minCorner.x, minCorner.y, minCorner.z);
+		out[1] = Vector3<type>(minCorner.x, minCorner.y, maxCorner.z);
+		out[2] = Vector3<type>(minCorner.x, maxCorner.y, minCorner.z);
+		out[3] = Vector3<type>(minCorner.x, maxCorner.y, maxCorner.z);
+		out[4] = Vector3<type>(maxCorner.x, minCorner.y, minCorner.z);
+		out[5] = Vector3<type>(maxCorner.x, minCorner.y, maxCorner.z);
+		out[6] = Vector3<type>(maxCorner.x, maxCorner.y, minCorner.z);
+		out[7] = Vector3<type>(maxCorner.x, maxCorner.y, maxCorner.z);
 	}
 
 	//! Gives the six planes of the box

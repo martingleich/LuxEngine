@@ -58,6 +58,17 @@ UNIT_SUITE(String)
 		for(auto it = str.First(); it != str.End(); ++it, ++i)
 			UNIT_ASSERT_EQUAL(chars[i], *it);
 	}
+	UNIT_TEST(long_String)
+	{
+		const char* chars ="abcdefghijklmnopqr"; 
+		String str(chars);
+		UNIT_ASSERT_EQUAL(str.Length(), 18);
+		UNIT_ASSERT_EQUAL(str.Size(), 18);
+
+		int i = 0;
+		for(auto it = str.First(); it != str.End(); ++it, ++i)
+			UNIT_ASSERT_EQUAL((u32)chars[i], *it);
+	}
 
 	UNIT_TEST(assign_String)
 	{

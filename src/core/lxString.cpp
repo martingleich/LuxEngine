@@ -84,11 +84,11 @@ String::String(const String& other) :
 }
 
 String::String(String&& old) :
-	m_Data(old.m_Data),
 	m_Allocated(old.m_Allocated),
 	m_Size(old.m_Size),
 	m_Length(old.m_Length)
 {
+	memcpy(m_ShortData, old.m_ShortData, SHORT_STR_SIZE);
 	old.m_Data = nullptr;
 	old.m_Allocated = 0;
 	old.m_Size = 0;
@@ -115,9 +115,9 @@ void String::Reserve(size_t size)
 		return;
 
 	char* newData;
-	bool isShort = (newAlloc <= MaxShortStringBytes());
-	if(isShort)
-		newData = (char*)&m_Data;
+	bool willBeShort = (newAlloc <= MaxShortStringBytes());
+	if(willBeShort)
+		newData = m_ShortData;
 	else
 		newData = new char[newAlloc];
 
@@ -125,7 +125,7 @@ void String::Reserve(size_t size)
 
 	if(!IsShortString())
 		delete[] m_Data;
-	if(!isShort)
+	if(!willBeShort)
 		m_Data = newData;
 
 	SetAllocated(newAlloc);
@@ -165,7 +165,7 @@ String& String::operator=(const char* other)
 String& String::operator=(String&& old)
 {
 	this->~String();
-	m_Data = old.m_Data;
+	memcpy(m_ShortData, old.m_ShortData, SHORT_STR_SIZE);
 	m_Allocated = old.m_Allocated;
 	m_Size = old.m_Size;
 	m_Length = old.m_Length;
@@ -454,15 +454,17 @@ const char* String::Data_c() const
 const char* String::Data() const
 {
 	if(IsShortString() || !m_Data)
-		return (const char*)&m_Data;
-	return m_Data;
+		return m_ShortData;
+	else
+		return m_Data;
 }
 
 char* String::Data()
 {
 	if(IsShortString() || !m_Data)
-		return (char*)&m_Data;
-	return m_Data;
+		return m_ShortData;
+	else
+		return m_Data;
 }
 
 void String::PushByte(u8 byte)
@@ -719,7 +721,7 @@ String::ConstIterator String::Remove(ConstIterator pos, size_t count)
 	m_Size = newSize;
 	m_Length = m_Length - count;
 
-	return ConstIterator(data + removeOffset, m_Data);
+	return ConstIterator(data + removeOffset, Data());
 }
 
 String::ConstIterator String::Remove(ConstIterator from, ConstIterator to)
@@ -910,7 +912,7 @@ void String::SetAllocated(size_t a)
 
 size_t String::MaxShortStringBytes() const
 {
-	return sizeof(m_Data);
+	return SHORT_STR_SIZE;
 }
 
 void String::PushCharacter(const char* ptr)

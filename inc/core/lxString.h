@@ -636,7 +636,12 @@ private:
 	Can be null to represent the empty string.
 	Can contain the content of a short string direclty.
 	*/
-	char* m_Data;
+	static const size_t SHORT_STR_SIZE = sizeof(char*) > 16 ? sizeof(char*) : 16;
+	union
+	{
+		char* m_Data;
+		char m_ShortData[SHORT_STR_SIZE];
+	};
 
 	// The size of the array pointed to by m_Data, if m_Data is a pointer.
 	// If smaller than MaxShortCharacters(), m_Data contains the string-data itself
