@@ -284,6 +284,13 @@ public:
 	*/
 	Vector3F GetRotationDeg() const;
 
+	//! Get the transformed x axis of the matrix
+	Vector3F GetAxisX() const;
+	//! Get the transformed y axis of the matrix
+	Vector3F GetAxisY() const;
+	//! Get the transformed z axis of the matrix
+	Vector3F GetAxisZ() const;
+
 	//! Set this matrix to the product of two other matrices
 	/**
 	\param a The first factor

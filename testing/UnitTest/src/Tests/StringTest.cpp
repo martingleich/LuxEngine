@@ -60,7 +60,7 @@ UNIT_SUITE(String)
 	}
 	UNIT_TEST(long_String)
 	{
-		const char* chars ="abcdefghijklmnopqr"; 
+		const char* chars ="abcdefghijklmnopqr";
 		String str(chars);
 		UNIT_ASSERT_EQUAL(str.Length(), 18);
 		UNIT_ASSERT_EQUAL(str.Size(), 18);

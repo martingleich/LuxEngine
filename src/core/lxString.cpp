@@ -20,7 +20,7 @@ Type String()
 const String String::EMPTY = String();
 
 String::String() :
-	m_Data(nullptr),
+	m_Data({nullptr}),
 	m_Allocated(0),
 	m_Size(0),
 	m_Length(0)
@@ -28,7 +28,7 @@ String::String() :
 }
 
 String::String(const char* data, size_t length) :
-	m_Data(nullptr),
+	m_Data({nullptr}),
 	m_Allocated(0),
 	m_Size(0),
 	m_Length(0)
@@ -41,8 +41,7 @@ String::String(const char* data, size_t length) :
 
 	size_t size;
 	if(length == std::numeric_limits<size_t>::max()) {
-		length = core::StringLengthUTF8(data);
-		size = strlen(data);
+		length = core::StringLengthUTF8(data, &size);
 	} else {
 		const char* cur = data;
 		size_t count = 0;
@@ -62,7 +61,7 @@ String::String(const char* data, size_t length) :
 }
 
 String::String(ConstIterator first, ConstIterator end) :
-	m_Data(nullptr),
+	m_Data({nullptr}),
 	m_Allocated(0),
 	m_Size(0),
 	m_Length(0)
@@ -71,7 +70,7 @@ String::String(ConstIterator first, ConstIterator end) :
 }
 
 String::String(const String& other) :
-	m_Data(nullptr),
+	m_Data({nullptr}),
 	m_Allocated(0),
 	m_Size(0),
 	m_Length(0)
@@ -84,12 +83,12 @@ String::String(const String& other) :
 }
 
 String::String(String&& old) :
+	m_Data(old.m_Data),
 	m_Allocated(old.m_Allocated),
 	m_Size(old.m_Size),
 	m_Length(old.m_Length)
 {
-	memcpy(m_ShortData, old.m_ShortData, SHORT_STR_SIZE);
-	old.m_Data = nullptr;
+	old.m_Data.ptr = nullptr;
 	old.m_Allocated = 0;
 	old.m_Size = 0;
 	old.m_Length = 0;
@@ -98,9 +97,8 @@ String::String(String&& old) :
 String::~String()
 {
 	if(!IsShortString())
-		delete[] m_Data;
+		delete[] m_Data.ptr;
 }
-
 
 String String::Copy()
 {
@@ -115,18 +113,18 @@ void String::Reserve(size_t size)
 		return;
 
 	char* newData;
-	bool willBeShort = (newAlloc <= MaxShortStringBytes());
+	bool willBeShort = (newAlloc <= MAX_SHORT_BYTES);
 	if(willBeShort)
-		newData = m_ShortData;
+		newData = m_Data.raw;
 	else
 		newData = new char[newAlloc];
 
 	memcpy(newData, Data_c(), m_Size + 1);
 
 	if(!IsShortString())
-		delete[] m_Data;
+		delete[] m_Data.ptr;
 	if(!willBeShort)
-		m_Data = newData;
+		m_Data.ptr = newData;
 
 	SetAllocated(newAlloc);
 }
@@ -153,11 +151,12 @@ String& String::operator=(const char* other)
 		return *this;
 	}
 
-	const size_t size = strlen(other);
+	size_t size;
+	size_t length = core::StringLengthUTF8(other, &size);
 	Reserve(size);
 	memcpy(Data(), other, size + 1);
 	m_Size = size;
-	m_Length = core::StringLengthUTF8(other);
+	m_Length = length;
 
 	return *this;
 }
@@ -165,11 +164,11 @@ String& String::operator=(const char* other)
 String& String::operator=(String&& old)
 {
 	this->~String();
-	memcpy(m_ShortData, old.m_ShortData, SHORT_STR_SIZE);
+	m_Data = old.m_Data;
 	m_Allocated = old.m_Allocated;
 	m_Size = old.m_Size;
 	m_Length = old.m_Length;
-	old.m_Data = nullptr;
+	old.m_Data.ptr = nullptr;
 	old.m_Allocated = 0;
 	old.m_Length = 0;
 	old.m_Size = 0;
@@ -321,7 +320,7 @@ String::ConstIterator String::Insert(ConstIterator pos, ConstIterator first, Con
 
 String& String::AppendRaw(const char* data, size_t bytes)
 {
-	Reserve(bytes);
+	Reserve(m_Size + bytes);
 	memcpy(Data() + m_Size, data, bytes);
 	m_Length += core::StringLengthUTF8(data);
 	m_Size += bytes;
@@ -453,18 +452,18 @@ const char* String::Data_c() const
 
 const char* String::Data() const
 {
-	if(IsShortString() || !m_Data)
-		return m_ShortData;
+	if(IsShortString() || !m_Data.ptr)
+		return m_Data.raw;
 	else
-		return m_Data;
+		return m_Data.ptr;
 }
 
 char* String::Data()
 {
-	if(IsShortString() || !m_Data)
-		return m_ShortData;
+	if(IsShortString() || !m_Data.ptr)
+		return m_Data.raw;
 	else
-		return m_Data;
+		return m_Data.ptr;
 }
 
 void String::PushByte(u8 byte)
@@ -479,7 +478,7 @@ void String::PushByte(u8 byte)
 	Data()[m_Size + 1] = 0;
 
 	++m_Size;
-	if((byte & 0xC0) != 0x80) // Bytes starting with 10 are continuation bytes.
+	if((byte & 0xC0) != 0x80) // Bytes starting with b10 are continuation bytes.
 		++m_Length;
 }
 
@@ -897,7 +896,7 @@ String String::GetUpper() const
 
 bool String::IsShortString() const
 {
-	return m_Allocated <= MaxShortStringBytes();
+	return m_Allocated <= MAX_SHORT_BYTES;
 }
 
 size_t String::GetAllocated() const
@@ -908,11 +907,6 @@ size_t String::GetAllocated() const
 void String::SetAllocated(size_t a)
 {
 	m_Allocated = a;
-}
-
-size_t String::MaxShortStringBytes() const
-{
-	return SHORT_STR_SIZE;
 }
 
 void String::PushCharacter(const char* ptr)

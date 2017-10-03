@@ -5,6 +5,8 @@ UNIT_SUITE(ConvertTest)
 
 UNIT_SUITE(ParseTest)
 {
+	UNIT_SUITE_DEPEND_ON(String);
+
 	UNIT_TEST(Integer)
 	{
 		int value;

@@ -223,7 +223,7 @@ void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Par
 	float red = m_Model->ReadValue(particle, Particle::EParameter::Red);
 	float green = m_Model->ReadValue(particle, Particle::EParameter::Green);
 	float blue = m_Model->ReadValue(particle, Particle::EParameter::Blue);
-	vertices[0].color.Set(alpha, red, green, blue);
+	vertices[0].color.SetF(alpha, red, green, blue);
 	vertices[1].color = vertices[2].color = vertices[3].color = vertices[0].color;
 
 	int offset = m_Model->GetOffset(Particle::EParameter::Sprite);
@@ -268,7 +268,7 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 	float red = m_Model->ReadValue(particle, Particle::EParameter::Red);
 	float green = m_Model->ReadValue(particle, Particle::EParameter::Green);
 	float blue = m_Model->ReadValue(particle, Particle::EParameter::Blue);
-	vertices[0].color.Set(alpha, red, green, blue);
+	vertices[0].color.SetF(alpha, red, green, blue);
 	vertices[1].color = vertices[2].color = vertices[3].color = vertices[0].color;
 
 	int offset = m_Model->GetOffset(Particle::EParameter::Sprite);

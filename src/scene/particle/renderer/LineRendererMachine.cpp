@@ -50,7 +50,7 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		float blue = model->ReadValue(p, Particle::EParameter::Blue);
 
 		video::Color color;
-		color.Set(alpha, red, green, blue);
+		color.SetF(alpha, red, green, blue);
 
 		float lSq = p.velocity.GetLengthSq();
 		auto delta = p.velocity;

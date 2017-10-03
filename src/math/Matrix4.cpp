@@ -408,6 +408,20 @@ Vector3F Matrix4::GetRotationDeg() const
 	return Vector3F(X, Y, Z);
 }
 
+Vector3F Matrix4::GetAxisX() const
+{
+	return Vector3F(m[0][0], m[1][0], m[2][0]);
+}
+
+Vector3F Matrix4::GetAxisY() const
+{
+	return Vector3F(m[0][1], m[1][1], m[2][1]);
+}
+Vector3F Matrix4::GetAxisZ() const
+{
+	return Vector3F(m[0][2], m[1][2], m[2][2]);
+}
+
 Matrix4& Matrix4::BuildWorld(const Vector3F& vScale,
 	const Vector3F& vRot,
 	const Vector3F& vTrans)

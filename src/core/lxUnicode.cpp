@@ -11,7 +11,7 @@ namespace lux
 namespace core
 {
 
-size_t StringLengthUTF8(const char* str)
+size_t StringLengthUTF8(const char* str, size_t* outBytes)
 {
 	size_t len = 0;
 	const u8* s = (const u8*)str;
@@ -20,6 +20,8 @@ size_t StringLengthUTF8(const char* str)
 			++len;
 		++s;
 	}
+	if(outBytes)
+		*outBytes = s - (const u8*)str;
 
 	return len;
 }
@@ -91,11 +93,14 @@ u32 GetCharacterUTF8(const char* ptr)
 	throw UnicodeException("Invalid utf8 codepoint");
 }
 
-size_t StringLengthUTF16(const char* str)
+size_t StringLengthUTF16(const char* str, size_t* outBytes)
 {
 	size_t length = 0;
+	const char* base = str;
 	while(AdvanceCursorUTF16(str))
 		++length;
+	if(outBytes)
+		*outBytes = str - (const char*)base;
 	return length;
 }
 

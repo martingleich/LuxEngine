@@ -609,21 +609,13 @@ public:
 
 private:
 	//! Is the string saved in short format.
-	/**
-	i.e. As bytes in the value of m_Data
-	*/
 	bool IsShortString() const;
+
 	//! Returns the number of allocated bytes, including NUL.
 	size_t GetAllocated() const;
-	//! Set the number of allocated bytes, including NUL.
-	/**
-	\param a The number of allocated bytes, including NUL.
-	\param short_string Is the string a short string.
-	*/
-	void SetAllocated(size_t a);
 
-	//! The maximum number of bytes contained in a short-string.
-	size_t MaxShortStringBytes() const;
+	//! Set the number of allocated bytes, including NUL.
+	void SetAllocated(size_t a);
 
 	//! Push a single character to string, it's data is read from ptr.
 	void PushCharacter(const char* ptr);
@@ -633,18 +625,18 @@ private:
 	/**
 	Never access this member always used the Data() function.
 	The string is saved in utf-8 format and is null-terminated.
-	Can be null to represent the empty string.
-	Can contain the content of a short string direclty.
+	Will be null if the string is empty.
 	*/
-	static const size_t SHORT_STR_SIZE = sizeof(char*) > 16 ? sizeof(char*) : 16;
-	union
+	union DataUnion
 	{
-		char* m_Data;
-		char m_ShortData[SHORT_STR_SIZE];
-	};
+		char* ptr;
+		char raw[16];
+	} m_Data;
 
-	// The size of the array pointed to by m_Data, if m_Data is a pointer.
-	// If smaller than MaxShortCharacters(), m_Data contains the string-data itself
+	static const size_t MAX_SHORT_BYTES = sizeof(DataUnion);
+
+	// The number of bytes allocated for the string, including the terminating NULL character.
+	// If this is smaller than MAX_SHORT_BYTES the string is saved in m_Data.raw otherwise in m_Data.ptr;
 	size_t m_Allocated;
 
 	/*

@@ -4,6 +4,8 @@
 
 UNIT_SUITE(FileSystem)
 {
+	UNIT_SUITE_DEPEND_ON(String);
+
 	io::FileSystem* g_FileSys;
 	io::Path m_WorkingDir;
 

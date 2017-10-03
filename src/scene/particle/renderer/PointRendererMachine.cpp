@@ -49,7 +49,7 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 		float red = model->ReadValue(p, Particle::EParameter::Red);
 		float green = model->ReadValue(p, Particle::EParameter::Green);
 		float blue = model->ReadValue(p, Particle::EParameter::Blue);
-		color.Set(alpha, red, green, blue);
+		color.SetF(alpha, red, green, blue);
 
 		m_Vertices[cursor].position = p.position;
 		m_Vertices[cursor].color = color;

@@ -11,9 +11,10 @@ namespace core
 /**
 The passed string must be nul-terminated.
 \param str The string data.
+\param [out] outBytes If not null the number of bytes in the string is written here
 \return The number of characters in the string without NUL.
 */
-LUX_API size_t StringLengthUTF8(const char* str);
+LUX_API size_t StringLengthUTF8(const char* str, size_t* outBytes=nullptr);
 
 //! Moves the passed utf8 cursor onto the character before the current one
 LUX_API void RetractCursorUTF8(const char*& ptr);
@@ -36,9 +37,10 @@ LUX_API u32 GetCharacterUTF8(const char* ptr);
 /**
 The passed string must be nul-terminated.
 \param str The string data.
+\param [out] outBytes If not null the number of bytes in the string is written here
 \return The number of characters in the string without NUL.
 */
-LUX_API size_t StringLengthUTF16(const char* str);
+LUX_API size_t StringLengthUTF16(const char* str, size_t* outBytes=nullptr);
 
 //! Moves the passed utf16 cursor onto the character after the current one
 /**
