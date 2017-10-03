@@ -123,6 +123,7 @@ namespace input
 #include "video/images/ImageWriter.h"
 
 #include "video/DrawingCanvas.h"
+#include "video/Canvas3D.h"
 
 #include "logic/Logic.h"
 

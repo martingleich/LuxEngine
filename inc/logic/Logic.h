@@ -32,10 +32,11 @@ public:
 		m_Time = 0.0f;
 	}
 
-	void SetPeriod(float f)
+	void SetPeriod(float period)
 	{
-		lxAssert(f > 0.0f);
-		m_Period = f;
+		if(period < 0)
+			throw core::InvalidArgumentException("period", "Period mustn't be smaller than 0");
+		m_Period = period;
 	}
 
 	float GetPeriod() const
