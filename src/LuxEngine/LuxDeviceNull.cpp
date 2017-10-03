@@ -205,7 +205,8 @@ StrongRef<gui::GUIEnvironment> LuxDeviceNull::GetGUIEnvironment() const
 class DefaultSimpleFrameLoop
 {
 public:
-	DefaultSimpleFrameLoop(LuxDevice* device) :
+	DefaultSimpleFrameLoop(LuxDevice* device, const LuxDevice::SimpleFrameLoop& loop) :
+		m_FrameLoop(loop),
 		m_Device(device)
 	{
 		m_Window = m_Device->GetWindow();
@@ -218,46 +219,31 @@ public:
 		m_PerformDriverReset = false;
 	}
 
-	bool CallPreFrame(const LuxDevice::SimpleFrameLoop& user)
+	bool CallPreFrame()
 	{
-		if(user.preFrameProc)
-			return user.preFrameProc(user.userData);
+		bool ret = m_FrameLoop.useDefaultPreFrame ? DefaultPreFrame() : true;
+		if(ret && m_FrameLoop.callback)
+			return m_FrameLoop.callback->PreFrame();
 		else
-			return DefaultPreFrame(user);
+			return ret;
 	}
 
-	void CallDoFrame(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	void CallDoFrame(float secsPassed)
 	{
-		if(user.frameProc)
-			user.frameProc(secsPassed, user.userData);
-		else
-			DefaultDoFrame(secsPassed, user);
-	}
-
-	void CallPostMove(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
-	{
-		if(user.postMoveProc)
-			user.postMoveProc(secsPassed, user.userData);
-		else
-			DefaultPostMove(secsPassed, user);
-	}
-
-	void CallPostRender(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
-	{
-		if(user.postRenderProc)
-			user.postRenderProc(secsPassed, user.userData);
-		else
-			DefaultPostRender(secsPassed, user);
+		DefaultDoFrame(secsPassed);
 	}
 
 private:
-	bool DefaultPreFrame(const LuxDevice::SimpleFrameLoop& user)
+	bool DefaultPreFrame()
 	{
 		if(!m_Window || !m_Renderer || !m_Driver)
 			return false;
 
 		if(m_PerformDriverReset) {
 			m_PerformDriverReset = !ResetDriver();
+			if(m_FrameLoop.callback)
+				m_FrameLoop.callback->DriverReset(!m_PerformDriverReset);
+
 			// Always abort the frame, event if the reset was successfull
 			// Since the frame took much more time than secsPassed.
 			return false;
@@ -268,9 +254,9 @@ private:
 		bool pausing = false;
 		do {
 			wait = false;
-			if(user.pauseOnLostFocus && !m_Window->IsActive())
+			if(m_FrameLoop.pauseOnLostFocus && !m_Window->IsActive())
 				wait = true;
-			if(user.pauseOnMinimize && m_Window->IsMinimized())
+			if(m_FrameLoop.pauseOnMinimize && m_Window->IsMinimized())
 				wait = true;
 
 			if(wait) {
@@ -291,19 +277,20 @@ private:
 		}
 	}
 
-	void DefaultDoFrame(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
+	void DefaultDoFrame(float secsPassed)
 	{
 		video::RenderStatistics::Instance()->EndFrame();
 		video::RenderStatistics::Instance()->BeginFrame();
 
-		secsPassed *= user.timeScale;
+		secsPassed *= m_FrameLoop.timeScale;
 
 		if(m_Scene)
 			m_Scene->AnimateAll(secsPassed);
 		if(m_GUIEnv)
 			m_GUIEnv->Update(secsPassed);
 
-		CallPostMove(secsPassed, user);
+		if(m_FrameLoop.callback)
+			m_FrameLoop.callback->PostMove(secsPassed);
 
 		if(m_SceneRenderer)
 			m_SceneRenderer->DrawScene(m_Scene, true, false);
@@ -311,10 +298,16 @@ private:
 			m_Renderer->Clear(true, true, true);
 			m_Renderer->BeginScene();
 		}
+		if(m_FrameLoop.callback)
+			m_FrameLoop.callback->PostSceneRender(secsPassed);
+
 		if(m_GUIEnv)
 			m_GUIEnv->Render();
 
-		CallPostRender(secsPassed, user);
+		if(m_FrameLoop.callback) {
+			m_FrameLoop.callback->PostGUIRender(secsPassed);
+			m_FrameLoop.callback->PostFrameRender(secsPassed);
+		}
 
 		m_Renderer->EndScene();
 
@@ -326,18 +319,9 @@ private:
 				m_PerformDriverReset = true;
 			}
 		}
-	}
-
-	void DefaultPostMove(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
-	{
-		LUX_UNUSED(secsPassed);
-		LUX_UNUSED(user);
-	}
-
-	void DefaultPostRender(float secsPassed, const LuxDevice::SimpleFrameLoop& user)
-	{
-		LUX_UNUSED(secsPassed);
-		LUX_UNUSED(user);
+		if(m_FrameLoop.callback) {
+			m_FrameLoop.callback->PostFrame(secsPassed);
+		}
 	}
 
 	bool ResetDriver()
@@ -376,6 +360,7 @@ private:
 	}
 
 private:
+	LuxDevice::SimpleFrameLoop m_FrameLoop;
 	bool m_PerformDriverReset;
 
 	LuxDevice* m_Device;
@@ -389,7 +374,7 @@ private:
 
 void LuxDeviceNull::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 {
-	DefaultSimpleFrameLoop defLoop(this);
+	DefaultSimpleFrameLoop defLoop(this, frameLoop);
 
 	u64 startTime;
 	u64 endTime;
@@ -397,13 +382,13 @@ void LuxDeviceNull::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 	float invTicksPerSecond = 1.0f / core::Clock::TicksPerSecond();
 	float secsPassed = 0.0f;
 	while(Run()) {
-		if(!defLoop.CallPreFrame(frameLoop)) {
+		if(!defLoop.CallPreFrame()) {
 			startTime = core::Clock::GetTicks();
 			continue;
 		}
 
 		if(secsPassed != 0)
-			defLoop.CallDoFrame(secsPassed, frameLoop);
+			defLoop.CallDoFrame(secsPassed);
 
 		endTime = core::Clock::GetTicks();
 		secsPassed = (endTime - startTime)*invTicksPerSecond;

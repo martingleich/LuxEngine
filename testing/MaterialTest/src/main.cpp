@@ -4,7 +4,7 @@ using namespace lux;
 
 AppContext Context;
 
-class MaterialTest : public input::EventHandler
+class MaterialTest : public input::EventHandler, public LuxDevice::SimpleFrameLoopCallback
 {
 private:
 	StrongRef<LuxDevice> m_Device;
@@ -32,7 +32,7 @@ public:
 		Context.Input->GetEventSignal().Connect(this, &MaterialTest::OnEvent);
 	}
 
-	void Render(float secsPassed);
+	void PostGUIRender(float secsPassed);
 
 	void LoadBase()
 	{
@@ -81,10 +81,7 @@ public:
 		Load();
 
 		LuxDevice::SimpleFrameLoop floop;
-		floop.userData = this;
-		floop.postRenderProc = [](float secsPassed, void* user) {
-			reinterpret_cast<MaterialTest*>(user)->Render(secsPassed);
-		};
+		floop.callback = this;
 		Context.Device->RunSimpleFrameLoop(floop);
 	}
 
@@ -133,7 +130,7 @@ private:
 	float m_Time = 0.0f;
 };
 
-void MaterialTest::Render(float secsPassed)
+void MaterialTest::PostGUIRender(float secsPassed)
 {
 	m_Time += secsPassed;
 	if(fmodf(m_Time, 2.0f) < 1.0f) {

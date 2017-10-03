@@ -54,7 +54,7 @@ public:
 	\param config The config data for the video driver.
 	\param user User parameter to be passed to the module factory
 	*/
-	virtual void BuildVideoDriver(const video::DriverConfig& config, void* user=nullptr) = 0;
+	virtual void BuildVideoDriver(const video::DriverConfig& config, void* user = nullptr) = 0;
 	//! Get available driver types.
 	virtual core::Array<String> GetDriverTypes() = 0;
 	//! Get available adapters for a driver type.
@@ -68,7 +68,7 @@ public:
 	\param renderer The name of the renderer to use(pass empty string to use default renderer).
 	\param user User parameter to be passed to the module factory.
 	*/
-	virtual void BuildScene(const String& renderer=nullptr, void* user=nullptr) = 0;
+	virtual void BuildScene(const String& renderer = nullptr, void* user = nullptr) = 0;
 	virtual StrongRef<scene::Scene> CreateScene() = 0;
 
 	//! Create the gui environment
@@ -105,31 +105,30 @@ public:
 	*/
 	virtual bool WaitForWindowChange() = 0;
 
+	class SimpleFrameLoopCallback
+	{
+	public:
+		virtual ~SimpleFrameLoopCallback() {}
+
+		virtual bool PreFrame() { return true; }
+		virtual void PostMove(float secsPassed) { LUX_UNUSED(secsPassed); }
+		virtual void PostSceneRender(float secsPassed) { LUX_UNUSED(secsPassed); }
+		virtual void PostGUIRender(float secsPassed) { LUX_UNUSED(secsPassed); }
+		virtual void PostFrameRender(float secsPassed) { LUX_UNUSED(secsPassed); }
+		virtual void PostFrame(float secsPassed) { LUX_UNUSED(secsPassed); }
+
+		virtual void DriverReset(bool succeded) { LUX_UNUSED(succeded); }
+	};
+
 	struct SimpleFrameLoop
 	{
 		float timeScale = 1.0f;
 		bool pauseOnLostFocus = false;
 		bool pauseOnMinimize = true;
-
-		// Passed to postMoveProc, postRenderProc, preFrameProc
-		void* userData = nullptr;
-		// Run each frame
-		// Default:
-		//  Animates Scenemanager then GUI then postMoveProc
-		//  Renderes Scenemanager then GUI then postRenderProc
-		void(*frameProc)(float, void*) = nullptr;
-		// Default empty
-		void(*postMoveProc)(float, void*) = nullptr;
-		// Default empty
-		void(*postRenderProc)(float, void*) = nullptr;
-
-		// Default handles:
-		// Pause on minimize, lost focus
-		// Driver restore on device loss
-		// Return false to cancel frame
-		bool(*preFrameProc)(void*) = nullptr;
+		bool useDefaultPreFrame = true;
+		SimpleFrameLoopCallback* callback = nullptr;
 	};
-	
+
 	//! Runs a simple frame loop.
 	/**
 	Performs a frame loop, call LuxDevice::Run, Renders and animates the gui and the scene, reset driver on failure.
