@@ -16,6 +16,7 @@
 
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
+#include "video/Canvas3D.h"
 
 #include "scene/Scene.h"
 #include "scene/SceneRenderer.h"
@@ -79,6 +80,7 @@ void LuxDeviceNull::ReleaseModules()
 	video::MaterialLibrary::Destroy();
 	core::ResourceSystem::Destroy();
 
+	video::Canvas3DSystem::Destroy();
 	video::VideoDriver::Destroy();
 
 	io::FileSystem::Destroy();
@@ -118,6 +120,7 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 	BuildImageSystem();
 
 	video::MeshSystem::Initialize();
+	video::Canvas3DSystem::Initialize();
 }
 
 core::Array<String> LuxDeviceNull::GetDriverTypes()

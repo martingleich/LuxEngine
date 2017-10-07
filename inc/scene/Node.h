@@ -183,7 +183,7 @@ public:
 	};
 	class ConstChildIterator;
 
-	class ChildIterator : core::BaseIterator<core::BidirectionalIteratorTag, Node*>
+	class ChildIterator : public core::BaseIterator<core::BidirectionalIteratorTag, Node*>
 	{
 	public:
 		ChildIterator() : m_Current(nullptr)
