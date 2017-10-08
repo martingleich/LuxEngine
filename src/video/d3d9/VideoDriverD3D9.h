@@ -51,6 +51,8 @@ public:
 	StrongRef<Texture> CreateTexture(const math::Dimension2U& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
 	StrongRef<Texture> CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
 	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool isDynamic);
+	StrongRef<CubeTexture> CreateRendertargetCubeTexture(u32 size, ColorFormat format);
+
 	void AddTextureToList(BaseTexture* tex);
 
 	// Cache for auxalarity textures

@@ -250,7 +250,7 @@ private:
 		if(!VideoDriver::Instance()->GetFittingTextureFormat(format, ds, true, false))
 			throw core::ColorFormatException(format);
 
-		tex->Init(size, format, false);
+		tex->Init(size, format, false, false);
 		for(u32 i = 0; i < 6; ++i) {
 			CubeTextureLock lock(tex, BaseTexture::ELockMode::Overwrite, (CubeTexture::EFace)i);
 			ImageLock imgLock(images[i]);

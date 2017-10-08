@@ -1,6 +1,7 @@
 #ifndef INCLUDED_RENDER_TARGET_H
 #define INCLUDED_RENDER_TARGET_H
 #include "video/Texture.h"
+#include "video/CubeTexture.h"
 
 namespace lux
 {
@@ -35,6 +36,18 @@ public:
 			if(!m_Texture->IsRendertarget())
 				throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
 		}
+		m_IsCube = false;
+	}
+	RenderTarget(CubeTexture* t, CubeTexture::EFace face) :
+		m_Texture(t),
+		m_CubeFace(face)
+	{
+		m_IsCube = true;
+		if(m_Texture) {
+			m_Size = m_Texture->GetSize();
+			if(!m_Texture->IsRendertarget())
+				throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
+		}
 	}
 
 	bool operator==(const RenderTarget& other) const
@@ -51,7 +64,7 @@ public:
 	/**
 	May be null, to represent the backbuffer
 	*/
-	Texture* GetTexture() const
+	BaseTexture* GetTexture() const
 	{
 		return m_Texture;
 	}
@@ -68,8 +81,19 @@ public:
 		return (m_Texture == nullptr);
 	}
 
+	bool IsCubeTarget() const
+	{
+		return m_IsCube;
+	}
+	CubeTexture::EFace GetCubeFace() const
+	{
+		return m_CubeFace;
+	}
+
 protected:
-	StrongRef<Texture> m_Texture;
+	StrongRef<BaseTexture> m_Texture;
+	CubeTexture::EFace m_CubeFace;
+	bool m_IsCube;
 	math::Dimension2U m_Size;
 };
 

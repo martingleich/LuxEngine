@@ -17,17 +17,19 @@ public:
 	CubeTextureD3D9(IDirect3DDevice9* d3dDevice, const core::ResourceOrigin& origin);
 	virtual ~CubeTextureD3D9();
 
-	void Init(u32 Size, ColorFormat lxFormat, bool isDynamic);
+	void Init(u32 size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic);
 
 	void RegenerateMIPMaps();
 
-	LockedRect Lock(ELockMode Mode, EFace Face, u32 MipLevel = 0);
-	void Unlock();
+	LockedRect Lock(ELockMode mode, EFace face, u32 mipLevel = 0);
+	void Unlock(bool regenMipMaps);
 
 	ColorFormat GetColorFormat() const;
 	void* GetRealTexture();
 	u32 GetLevelCount() const;
 	const math::Dimension2U& GetSize() const;
+	bool IsRendertarget() const;
+	bool IsDynamic() const;
 
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);

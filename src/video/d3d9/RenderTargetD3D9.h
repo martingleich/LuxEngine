@@ -4,7 +4,7 @@
 
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "StrippedD3D9.h"
-
+#include "D3DHelper.h"
 #include "UnknownRefCounted.h"
 
 namespace lux
@@ -32,10 +32,29 @@ public:
 			}
 		}
 	}
-
-	RendertargetD3D9(const RenderTarget& target) :
-		RendertargetD3D9(target.GetTexture())
+	RendertargetD3D9(CubeTexture* texture, CubeTexture::EFace face) :
+		RenderTarget(texture, face)
 	{
+		if(m_Texture) {
+			lxAssert(m_Texture->IsRendertarget());
+			IDirect3DCubeTexture9* d3dTexture = (IDirect3DCubeTexture9*)texture->GetRealTexture();
+			if(FAILED(d3dTexture->GetCubeMapSurface(GetD3DCubeMapFace(face), 0, m_Surface.Access()))) {
+				m_Texture = nullptr;
+				m_Surface = nullptr;
+				m_Size.Set(0, 0);
+			}
+		}
+	}
+
+	RendertargetD3D9(const RenderTarget& target)
+	{
+		auto tex = target.GetTexture();
+		auto cubeTex = dynamic_cast<CubeTexture*>(tex);
+		if(cubeTex && target.IsCubeTarget())
+			*this = RendertargetD3D9(cubeTex, target.GetCubeFace());
+		auto flatTex = dynamic_cast<Texture*>(tex);
+		if(flatTex && !target.IsCubeTarget())
+			*this = RendertargetD3D9(flatTex);
 	}
 
 	RendertargetD3D9(UnknownRefCounted<IDirect3DSurface9> surface) :

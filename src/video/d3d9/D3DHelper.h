@@ -10,6 +10,7 @@
 #include "video/TextureLayer.h"
 #include "video/FogData.h"
 #include "video/Pass.h"
+#include "video/CubeTexture.h"
 
 namespace lux
 {
@@ -425,6 +426,13 @@ inline DWORD GetD3DFogType(EFogType type)
 	}
 }
 
+inline D3DCUBEMAP_FACES GetD3DCubeMapFace(CubeTexture::EFace face)
+{
+	static const D3DCUBEMAP_FACES CONV[6] = {D3DCUBEMAP_FACE_POSITIVE_X, D3DCUBEMAP_FACE_NEGATIVE_X,
+		D3DCUBEMAP_FACE_POSITIVE_Y, D3DCUBEMAP_FACE_NEGATIVE_Y,
+		D3DCUBEMAP_FACE_POSITIVE_Z, D3DCUBEMAP_FACE_NEGATIVE_Z};
+	return CONV[(u32)face];
+}
 } // namespace video
 } // namesapce lux
 

@@ -25,10 +25,11 @@ public:
 		u32 MipCount, bool isRendertarget, bool isDynamic);
 
 	LockedRect Lock(ELockMode Mode, u32 MipLevel);
-	void Unlock();
+	void Unlock(bool regenMipMaps);
 	void RegenerateMIPMaps();
 
 	bool IsRendertarget() const;
+	bool IsDynamic() const;
 
 	ColorFormat GetColorFormat() const;
 	void* GetRealTexture();

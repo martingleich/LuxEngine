@@ -71,9 +71,6 @@ public:
 	//! The number of mip-maps, these texture contains, 0 for none
 	virtual u32 GetLevelCount() const = 0;
 
-	//! Call these to regenerate the mipmaps, after a change of texturedata
-	virtual void  RegenerateMIPMaps() = 0;
-
 	//! A pointer to the device depending texture
 	virtual void* GetRealTexture() = 0;
 
@@ -82,6 +79,12 @@ public:
 
 	//! Returns the resolution of a texture surface in pixel
 	virtual const math::Dimension2U& GetSize() const = 0;
+
+	//! Is the texture a rendertarget.
+	virtual bool IsRendertarget() const = 0;
+
+	//! Is the texture dynamic.
+	virtual bool IsDynamic() const = 0;
 
 	//! Get the filtering method used for this texture.
 	virtual const Filter& GetFiltering() const = 0;
@@ -93,7 +96,7 @@ public:
 	/**
 	No effect if texture is not locked
 	*/
-	virtual void Unlock() = 0;
+	virtual void Unlock(bool regenMipMaps=true) = 0;
 };
 
 } // namespace video

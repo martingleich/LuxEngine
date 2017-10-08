@@ -96,6 +96,9 @@ public:
 	virtual StrongRef<Texture> CreateRendertargetTexture(
 		const math::Dimension2U& size,
 		ColorFormat format) = 0;
+	virtual StrongRef<CubeTexture> CreateRendertargetCubeTexture(
+		u32 size,
+		ColorFormat format) = 0;
 
 	//////////////////////////////////////////////////////////////////////////////
 	//! Creates a new shader from code

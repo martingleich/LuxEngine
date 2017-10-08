@@ -28,12 +28,9 @@ public:
 	};
 
 	CubeTexture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
+	virtual ~CubeTexture() {}
 
-	virtual ~CubeTexture()
-	{
-	}
-
-	virtual void Init(u32 Size, ColorFormat lxFormat, bool isDynamic) = 0;
+	virtual void Init(u32 size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic) = 0;
 
 	//! Retrieve access to the texturedata
 	/**
@@ -46,14 +43,14 @@ public:
 	*/
 	virtual LockedRect Lock(ELockMode mode, EFace face, u32 mipLevel = 0) = 0;
 
-	virtual void Unlock() = 0;
+	virtual void Unlock(bool regenMipMaps) = 0;
 
 	core::Name GetReferableType() const
 	{
 		return core::ResourceType::CubeTexture;
 	}
 
-	inline DrawingCanvasAuto<CubeTexture> GetCanvas(ELockMode mode, EFace face, u32 mipLevel = 0, bool regenMipMaps=false);
+	inline DrawingCanvasAuto<CubeTexture> GetCanvas(ELockMode mode, EFace face, u32 mipLevel = 0, bool regenMipMaps = false);
 };
 
 template <>
@@ -90,9 +87,7 @@ public:
 	void Unlock()
 	{
 		if(texture) {
-			texture->Unlock();
-			if(regenMipMaps)
-				texture->RegenerateMIPMaps();
+			texture->Unlock(regenMipMaps);
 			texture = nullptr;
 		}
 	}
@@ -120,8 +115,9 @@ inline DrawingCanvasAuto<CubeTexture> CubeTexture::GetCanvas(ELockMode mode, EFa
 
 struct CubeTextureLock
 {
-	CubeTextureLock(CubeTexture* t, BaseTexture::ELockMode mode, CubeTexture::EFace face, u32 mipLevel = 0) :
-		base(t)
+	CubeTextureLock(CubeTexture* t, BaseTexture::ELockMode mode, CubeTexture::EFace face, u32 mipLevel = 0, bool _regenMipMaps = true) :
+		base(t),
+		regenMipsMaps(_regenMipMaps)
 	{
 		auto rect = base->Lock(mode, face, mipLevel);
 		data = rect.bits;
@@ -155,18 +151,19 @@ struct CubeTextureLock
 	}
 	void Unlock()
 	{
-		if(base)
-			base->Unlock();
-		base = nullptr;
+		if(base) {
+			base->Unlock(regenMipsMaps);
+			base = nullptr;
+		}
 	}
 
 	CubeTexture* base;
 	void* data;
 	u32 pitch;
+	bool regenMipsMaps;
 };
 
-
-}
-}
+} // namespace video
+} // namespace lux
 
 #endif

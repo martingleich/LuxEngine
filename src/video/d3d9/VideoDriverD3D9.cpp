@@ -418,7 +418,15 @@ StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimens
 StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic)
 {
 	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
-	out->Init(size, format, isDynamic);
+	out->Init(size, format, false, isDynamic);
+	AddTextureToList(out);
+
+	return out;
+}
+StrongRef<CubeTexture> VideoDriverD3D9::CreateRendertargetCubeTexture(u32 size, ColorFormat format)
+{
+	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
+	out->Init(size, format, true, false);
 	AddTextureToList(out);
 
 	return out;

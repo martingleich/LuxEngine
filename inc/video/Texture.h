@@ -16,26 +16,22 @@ class Texture : public BaseTexture
 {
 public:
 	Texture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
-
-	virtual ~Texture()
-	{
-	}
+	virtual ~Texture() {}
 
 	virtual void Init(
-		const math::Dimension2U& Size,
+		const math::Dimension2U& size,
 		ColorFormat format,
-		u32 MipCount, bool isRendertarget, bool isDynamic) = 0;
+		u32 mipCount, bool isRendertarget, bool isDynamic) = 0;
 
 	virtual LockedRect Lock(ELockMode mode, u32 mipLevel = 0) = 0;
-	virtual void Unlock() = 0;
-	virtual bool IsRendertarget() const = 0;
+	virtual void Unlock(bool regenMipMaps) = 0;
 
 	core::Name GetReferableType() const
 	{
 		return core::ResourceType::Texture;
 	}
 
-	inline DrawingCanvasAuto<Texture> GetCanvas(ELockMode mode, u32 mipLevel = 0, bool regenMipMaps=true);
+	inline DrawingCanvasAuto<Texture> GetCanvas(ELockMode mode, u32 mipLevel = 0, bool regenMipMaps = true);
 };
 
 template <>
@@ -73,9 +69,7 @@ public:
 	void Unlock()
 	{
 		if(texture) {
-			texture->Unlock();
-			if(regenMipMaps)
-				texture->RegenerateMIPMaps();
+			texture->Unlock(regenMipMaps);
 			texture = nullptr;
 		}
 	}
@@ -105,7 +99,7 @@ struct TextureLock
 {
 	TextureLock(Texture* t, BaseTexture::ELockMode mode, bool regMips = true, u32 mipLevel = 0) :
 		base(t),
-		regenerateMips(regMips)
+		regenMipMaps(regMips)
 	{
 		auto rect = base->Lock(mode, mipLevel);
 		data = rect.bits;
@@ -140,18 +134,16 @@ struct TextureLock
 	void Unlock()
 	{
 		if(base) {
-			base->Unlock();
-			if(regenerateMips)
-				base->RegenerateMIPMaps();
+			base->Unlock(regenMipMaps);
+			base = nullptr;
 		}
-		base = nullptr;
 	}
 
 	Texture* base;
 	u8* data;
 	u32 pitch;
 
-	bool regenerateMips;
+	bool regenMipMaps;
 };
 
 }
