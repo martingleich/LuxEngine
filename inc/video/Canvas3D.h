@@ -5,7 +5,7 @@
 #include "video/Pass.h"
 #include "video/VertexFormats.h"
 #include "video/VertexTypes.h"
-#include "math/Vector3.h"
+#include "math/vector3.h"
 #include "math/Matrix4.h"
 #include "math/Transformation.h"
 #include "math/CurveInterpolation.h"

@@ -2,8 +2,8 @@
 #define INCLUDED_FIRST_PERSON_CAMERA_CONTROL_H
 #include "scene/components/Animator.h"
 #include "math/Angle.h"
-#include "math/Vector2.h"
-#include "math/Vector3.h"
+#include "math/vector2.h"
+#include "math/vector3.h"
 
 #include "input/InputEvent.h"
 

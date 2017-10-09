@@ -94,7 +94,7 @@ else()
 	if(NOT WIN32)
 		add_definitions(-fPIC)
 	endif()
-	add_definitions(-std=c++11 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -include "LuxConfig.h")
+	add_definitions(-std=c++14 -Wall -DLUX_EXPORT -DUNICODE -D_UNICODE -DNDEBUG -include "LuxConfig.h")
 endif()
 
 # Add tests

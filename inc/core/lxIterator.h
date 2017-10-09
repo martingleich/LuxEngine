@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <utility>
 #include <tuple>
+#include <limits>
 
 namespace lux
 {

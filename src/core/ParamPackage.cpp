@@ -92,12 +92,12 @@ void ParamPackage::MergePackage(const ParamPackage& other)
 			continue;
 		}
 
-		auto default = other.DefaultValue(i);
+		auto defaultValue = other.DefaultValue(i);
 		Entry entry;
 		entry.name = desc.name;
 		entry.type = desc.type;
 		entry.size = (u8)entry.type.GetSize();
-		AddEntry(entry, default.Data());
+		AddEntry(entry, defaultValue.Data());
 	}
 }
 

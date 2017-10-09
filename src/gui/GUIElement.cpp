@@ -491,14 +491,14 @@ bool Element::UpdateFinalRect()
 	auto parentHeight = parentRect.GetHeight();
 
 	math::RectF margin;
-	margin.left = m_Margin.left != AUTO_MARGIN ? m_Margin.left.GetRealValue(parentWidth) : m_Margin.left;
-	margin.top = m_Margin.top != AUTO_MARGIN ? m_Margin.top.GetRealValue(parentHeight) : m_Margin.top;
-	margin.right = m_Margin.right != AUTO_MARGIN ? m_Margin.right.GetRealValue(parentWidth) : m_Margin.right;
-	margin.bottom = m_Margin.bottom != AUTO_MARGIN ? m_Margin.bottom.GetRealValue(parentHeight) : m_Margin.bottom;
+	margin.left = m_Margin.left != AUTO_MARGIN ? m_Margin.left.GetRealValue(parentWidth) : (float)m_Margin.left;
+	margin.top = m_Margin.top != AUTO_MARGIN ? m_Margin.top.GetRealValue(parentHeight) : (float)m_Margin.top;
+	margin.right = m_Margin.right != AUTO_MARGIN ? m_Margin.right.GetRealValue(parentWidth) : (float)m_Margin.right;
+	margin.bottom = m_Margin.bottom != AUTO_MARGIN ? m_Margin.bottom.GetRealValue(parentHeight) : (float)m_Margin.bottom;
 
 	math::Dimension2F size;
-	size.width = m_Size.width != AUTO_SIZE ? m_Size.width.GetRealValue(parentWidth) : m_Size.width;
-	size.height = m_Size.height != AUTO_SIZE ? m_Size.height.GetRealValue(parentHeight) : m_Size.height;
+	size.width = m_Size.width != AUTO_SIZE ? m_Size.width.GetRealValue(parentWidth) : (float)m_Size.width;
+	size.height = m_Size.height != AUTO_SIZE ? m_Size.height.GetRealValue(parentHeight) : (float)m_Size.height;
 
 	math::RectF newRect;
 	CalculateAxis(

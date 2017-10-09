@@ -16,6 +16,11 @@ else()
   set(LIBRARY_NAME ${PROJECT_NAME})
 endif()
 
+if(NOT MSVC)
+  if(NOT WIN32)
+    add_definitions(-fPIC)
+  endif()
+endif()
 
 #Folder Shortcuts
 set(TINYOBJLOADEREXAMPLES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples)

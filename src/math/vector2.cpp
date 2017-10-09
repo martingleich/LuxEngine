@@ -1,4 +1,4 @@
-#include "math/Vector2.h"
+#include "math/vector2.h"
 
 namespace lux
 {

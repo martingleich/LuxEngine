@@ -7,7 +7,7 @@
 
 #include "core/lxName.h"
 
-#include "math/Vector3.h"
+#include "math/vector3.h"
 #include "math/Quaternion.h"
 #include "math/Line3.h"
 

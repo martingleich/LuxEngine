@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LX_MATH_PRINTER_H
 #define INCLUDED_LX_MATH_PRINTER_H
 #include "core/StringConverter.h"
-#include "math/Vector2.h"
+#include "math/vector2.h"
 #include "math/vector3.h"
 #include "math/Matrix4.h"
 
