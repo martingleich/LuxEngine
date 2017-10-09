@@ -29,10 +29,10 @@ ParticleModel::ParticleModel() :
 	m_LifeTimeMin(0.0f),
 	m_LifeTimeMax(0.0f),
 	m_IsImmortal(false),
+	m_ParamCount(0),
 	m_StaticCount(0),
 	m_ChangingCount(0),
 	m_InterpolatedCount(0),
-	m_ParamCount(0),
 	m_ParticleDataSize(0),
 	m_Capacity(0)
 {

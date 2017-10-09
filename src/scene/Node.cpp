@@ -444,8 +444,12 @@ Node::Node(const Node& other) :
 	m_Child(nullptr),
 	m_Tags(other.m_Tags),
 	m_DebugFlags(other.m_DebugFlags),
+	m_AnimatedCount(0),
+	m_Scene(other.m_Scene),
 	m_IsVisible(other.m_IsVisible),
-	m_Scene(other.m_Scene)
+	m_HasUserBoundingBox(false),
+	m_IsRoot(true),
+	m_CastShadow(true)
 {
 	for(auto child : Children()) {
 		StrongRef<Node> node = child->Clone();

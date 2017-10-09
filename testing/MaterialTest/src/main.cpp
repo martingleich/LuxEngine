@@ -101,6 +101,8 @@ public:
 			case input::EKeyCode::KEY_ESCAPE:
 				Context.Window->Close();
 				break;
+			default:
+				break;
 			}
 		}
 	}

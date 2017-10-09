@@ -89,7 +89,7 @@ void ParticleSystem::Animate(float time)
 	size_t ai = 0;
 	for(size_t i = 0; i < m_GroupData.Size(); ++i) {
 		size_t ac = 0;
-		for(ai; ai < m_Affectors.Size(); ++ai) {
+		for(; ai < m_Affectors.Size(); ++ai) {
 			if(m_Affectors[ai]->GetModel() != m_GroupData[i]->GetModel())
 				break;
 			++ac;

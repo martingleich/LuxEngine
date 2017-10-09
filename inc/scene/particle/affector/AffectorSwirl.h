@@ -18,8 +18,8 @@ public:
 		m_FixedAngularSpeed(true),
 		m_AngularSpeed(1.0f),
 		m_EyeRadius(1.0f),
-		m_ParticleKilling(true),
-		m_KillRadius(-1.0f)
+		m_KillRadius(-1.0f),
+		m_ParticleKilling(true)
 	{
 	}
 

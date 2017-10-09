@@ -8,8 +8,8 @@ namespace video
 {
 
 MaterialRenderer::MaterialRenderer(const String& name, const MaterialRenderer* old) :
-	m_Name(name),
-	m_ParamCallback(nullptr)
+	m_ParamCallback(nullptr),
+	m_Name(name)
 {
 	if(old)
 		m_Passes = old->m_Passes;
@@ -68,10 +68,8 @@ void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const
 	}
 
 	for(const auto& v : m_ShaderValues) {
-		if(v.pass == passId) {
-			auto type = pass.shader->GetParamPackage().GetParamDesc(v.id).type;
+		if(v.pass == passId)
 			pass.shader->SetParam(v.obj.Data(), v.id);
-		}
 	}
 
 	pass.shader->LoadSceneParams(pass);

@@ -100,19 +100,19 @@ struct VertexPosOnly
 	//! Equality
 	bool operator==(const VertexPosOnly& other) const
 	{
-		return ((position == other.position));
+		return (position == other.position);
 	}
 
 	//! Unequality
 	bool operator!=(const VertexPosOnly& other) const
 	{
-		return ((position != other.position));
+		return (position != other.position);
 	}
 
 	//! Smaller
 	bool operator<(const VertexPosOnly& other) const
 	{
-		return ((position < other.position));
+		return (position < other.position);
 	}
 };
 
@@ -158,7 +158,7 @@ struct VertexPosWOnly
 	bool operator<(const VertexPosWOnly& other) const
 	{
 		return ((position < other.position) ||
-			(position == other.position) && (rhw < other.rhw));
+			(position == other.position && rhw < other.rhw));
 	}
 };
 

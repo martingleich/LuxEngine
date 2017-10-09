@@ -80,8 +80,8 @@ private:
 };
 
 GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
-	m_OSWindow(osWindow),
 	m_OSCursor(osCursor),
+	m_OSWindow(osWindow),
 	m_Cursor(nullptr),
 	m_LeftState(false),
 	m_RightState(false),
