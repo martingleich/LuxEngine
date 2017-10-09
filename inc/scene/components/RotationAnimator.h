@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SCENE_ANIMATOR_ROTATION_H
 #define INCLUDED_SCENE_ANIMATOR_ROTATION_H
 #include "scene/components/Animator.h"
-#include "math/vector3.h"
+#include "math/Vector3.h"
 
 namespace lux
 {

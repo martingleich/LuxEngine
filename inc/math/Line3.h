@@ -1,6 +1,6 @@
 #ifndef INCLUDED_LINE3D_H
 #define INCLUDED_LINE3D_H
-#include "math/vector3.h"
+#include "math/Vector3.h"
 
 namespace lux
 {

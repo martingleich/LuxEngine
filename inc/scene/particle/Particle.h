@@ -1,6 +1,6 @@
 #ifndef INCLUDED_PARTICLE_H
 #define INCLUDED_PARTICLE_H
-#include "math/vector3.h"
+#include "math/Vector3.h"
 
 namespace lux
 {

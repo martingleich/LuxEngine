@@ -1,6 +1,6 @@
 #ifndef INCLUDED_MATRIX4_H
 #define INCLUDED_MATRIX4_H
-#include "math/vector2.h"
+#include "math/Vector2.h"
 #include "Plane.h"
 #include "math/Quaternion.h"
 

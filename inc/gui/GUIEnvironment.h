@@ -2,7 +2,7 @@
 #define INCLUDED_GUIENVIRONMENT_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
-#include "math/vector2.h"
+#include "math/Vector2.h"
 #include "events/lxEvent.h"
 #include "events/lxSignal.h"
 #include "input/Keycodes.h"

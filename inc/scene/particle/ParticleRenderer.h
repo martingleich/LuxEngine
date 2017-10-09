@@ -1,7 +1,7 @@
 #ifndef INCLUDED_PARTICLERENDERER_H
 #define INCLUDED_PARTICLERENDERER_H
 #include "video/SpriteBank.h"
-#include "math/vector3.h"
+#include "math/Vector3.h"
 #include "core/lxName.h"
 
 namespace lux

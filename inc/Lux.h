@@ -63,8 +63,8 @@ namespace input
 #include "math/Rect.h"
 #include "math/Transformation.h"
 #include "math/Triangle3.h"
-#include "math/vector2.h"
-#include "math/vector3.h"
+#include "math/Vector2.h"
+#include "math/Vector3.h"
 
 #include "core/ReferenceCounted.h"
 #include "core/Logger.h"

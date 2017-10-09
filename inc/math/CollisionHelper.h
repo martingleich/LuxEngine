@@ -1,6 +1,6 @@
 #ifndef INCLUDED_COLLISION_HELPER_H
 #define INCLUDED_COLLISION_HELPER_H
-#include "math/vector3.h"
+#include "math/Vector3.h"
 #include "math/Line3.h"
 #include "math/Transformation.h"
 

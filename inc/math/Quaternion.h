@@ -1,6 +1,6 @@
 #ifndef INCLUDED_QUATERNION_H
 #define INCLUDED_QUATERNION_H
-#include "math/vector3.h"
+#include "math/Vector3.h"
 #include "core/lxTypes.h"
 #include "core/lxFormat.h"
 

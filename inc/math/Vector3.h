@@ -1,6 +1,6 @@
 #ifndef INCLUDED_VECTOR3_H
 #define INCLUDED_VECTOR3_H
-#include "math/vector2.h"
+#include "math/Vector2.h"
 #include "math/Angle.h"
 
 namespace lux

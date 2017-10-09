@@ -1,6 +1,6 @@
 #ifndef INCLUDED_DIMENSION2D_H
 #define INCLUDED_DIMENSION2D_H
-#include "math/vector2.h"
+#include "math/Vector2.h"
 
 namespace lux
 {

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_LX_EVENTS_H
 #define INCLUDED_LX_EVENTS_H
-#include "math/vector2.h"
+#include "math/Vector2.h"
 
 namespace lux
 {

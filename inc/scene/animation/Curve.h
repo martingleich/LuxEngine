@@ -2,7 +2,7 @@
 #define INCLUDED_SCENE_ANIMATION_CURVE_H
 #include "core/ReferenceCounted.h"
 #include "math/CurveInterpolation.h"
-#include "math/vector3.h"
+#include "math/Vector3.h"
 #include "core/VariableAccess.h"
 
 namespace lux

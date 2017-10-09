@@ -1,7 +1,7 @@
 #ifndef INCLUDED_ZONE_H
 #define INCLUDED_ZONE_H
 #include "core/Referable.h"
-#include "math/vector3.h"
+#include "math/Vector3.h"
 
 namespace lux
 {
