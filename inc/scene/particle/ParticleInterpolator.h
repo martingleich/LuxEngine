@@ -8,6 +8,8 @@
 
 #include "Particle.h"
 
+#include <cmath>
+
 namespace lux
 {
 namespace scene

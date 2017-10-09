@@ -3,7 +3,7 @@
 #include "core/Clock.h"
 
 #include "video/Color.h"
-#include "math/Vector2.h"
+#include "math/vector2.h"
 #include "math/vector3.h"
 #include "math/Angle.h"
 #include "math/AABBox.h"

@@ -1,3 +1,4 @@
+#ifdef LUX_WINDOWS
 #include "DllMainWin32.h"
 
 static HINSTANCE g_Instance;
@@ -23,3 +24,5 @@ HINSTANCE GetLuxModule()
 }
 
 }
+#endif // LUX_WINDOWS
+

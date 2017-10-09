@@ -75,7 +75,7 @@ Canvas3D::Canvas3D(const math::Matrix4& transform, video::Renderer* renderer) :
 	m_Transform(transform),
 	m_LineBufferCursor(0),
 	m_TriBufferCursor(0),
-	m_Renderer(renderer ? renderer : video::VideoDriver::Instance()->GetRenderer()),
+	m_Renderer(renderer ? renderer : (video::Renderer*)video::VideoDriver::Instance()->GetRenderer()),
 	m_LastPass(NonePass)
 {
 }

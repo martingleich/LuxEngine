@@ -14,7 +14,7 @@ if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	
 else()
-	add_definitions(-std=c++11 -Wall -DUNICODE -D_UNICODE -DNDEBUG)
+	add_definitions(-std=c++14 -Wall -DUNICODE -D_UNICODE -DNDEBUG)
 endif()
 
 add_executable(MaterialTest ${SRCS} ${INCS})
