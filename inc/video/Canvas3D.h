@@ -139,15 +139,18 @@ public:
 
 private:
 	void DrawPartialLine(
+		const Pen3D& pen,
 		const math::Vector3F& start, float segStart,
 		const math::Vector3F& end, float segEnd);
 
 	void DrawPartialTri(
+		const Brush3D& brush,
 		const math::Vector3F& a,
 		const math::Vector3F& b,
 		const math::Vector3F& c);
 
 	void DrawPartialTri(
+		const Brush3D& brush,
 		const math::Vector3F& a,
 		const math::Vector3F& b,
 		const math::Vector3F& c,

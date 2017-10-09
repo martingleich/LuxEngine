@@ -88,7 +88,7 @@ Canvas3D::~Canvas3D()
 
 void Canvas3D::DrawLine(const math::Vector3F& start, const math::Vector3F& end)
 {
-	DrawPartialLine(start, 0, end, start.GetDistanceTo(end));
+	DrawPartialLine(m_Pen, start, 0, end, start.GetDistanceTo(end));
 }
 
 void Canvas3D::DrawBox(const math::AABBoxF& box, const math::Matrix4& transform)
@@ -127,20 +127,20 @@ void Canvas3D::DrawBox(const math::AABBoxF& box, const math::Matrix4& transform)
 		auto norX = (corners[4] - corners[0]).Normal();
 		auto norY = (corners[2] - corners[0]).Normal();
 		auto norZ = (corners[1] - corners[0]).Normal();
-		DrawPartialTri(corners[0], corners[1], corners[2], -norX);
-		DrawPartialTri(corners[1], corners[2], corners[3], -norX);
-		DrawPartialTri(corners[4], corners[5], corners[6], norX);
-		DrawPartialTri(corners[5], corners[6], corners[7], norX);
+		DrawPartialTri(m_Brush, corners[0], corners[1], corners[2], -norX);
+		DrawPartialTri(m_Brush, corners[1], corners[2], corners[3], -norX);
+		DrawPartialTri(m_Brush, corners[4], corners[5], corners[6], norX);
+		DrawPartialTri(m_Brush, corners[5], corners[6], corners[7], norX);
 
-		DrawPartialTri(corners[0], corners[4], corners[2], -norZ);
-		DrawPartialTri(corners[4], corners[2], corners[6], -norZ);
-		DrawPartialTri(corners[1], corners[5], corners[3], norZ);
-		DrawPartialTri(corners[5], corners[3], corners[7], -norZ);
+		DrawPartialTri(m_Brush, corners[0], corners[4], corners[2], -norZ);
+		DrawPartialTri(m_Brush, corners[4], corners[2], corners[6], -norZ);
+		DrawPartialTri(m_Brush, corners[1], corners[5], corners[3], norZ);
+		DrawPartialTri(m_Brush, corners[5], corners[3], corners[7], -norZ);
 
-		DrawPartialTri(corners[0], corners[1], corners[4], -norY);
-		DrawPartialTri(corners[1], corners[4], corners[5], -norY);
-		DrawPartialTri(corners[2], corners[6], corners[3], norY);
-		DrawPartialTri(corners[3], corners[6], corners[7], norY);
+		DrawPartialTri(m_Brush, corners[0], corners[1], corners[4], -norY);
+		DrawPartialTri(m_Brush, corners[1], corners[4], corners[5], -norY);
+		DrawPartialTri(m_Brush, corners[2], corners[6], corners[3], norY);
+		DrawPartialTri(m_Brush, corners[3], corners[6], corners[7], norY);
 	}
 }
 
@@ -168,15 +168,15 @@ void Canvas3D::DrawMarker(const math::Vector3F& pos, float size)
 	}
 
 	if(m_Brush.GetColor().GetAlpha()) {
-		DrawPartialTri(pos + up, pos + sidez, pos + sidex);
-		DrawPartialTri(pos + up, pos + sidez, pos - sidex);
-		DrawPartialTri(pos + up, pos - sidez, pos + sidex);
-		DrawPartialTri(pos + up, pos - sidez, pos - sidex);
+		DrawPartialTri(m_Brush, pos + up, pos + sidez, pos + sidex);
+		DrawPartialTri(m_Brush, pos + up, pos + sidez, pos - sidex);
+		DrawPartialTri(m_Brush, pos + up, pos - sidez, pos + sidex);
+		DrawPartialTri(m_Brush, pos + up, pos - sidez, pos - sidex);
 
-		DrawPartialTri(pos - up, pos + sidez, pos + sidex);
-		DrawPartialTri(pos - up, pos + sidez, pos - sidex);
-		DrawPartialTri(pos - up, pos - sidez, pos + sidex);
-		DrawPartialTri(pos - up, pos - sidez, pos - sidex);
+		DrawPartialTri(m_Brush, pos - up, pos + sidez, pos + sidex);
+		DrawPartialTri(m_Brush, pos - up, pos + sidez, pos - sidex);
+		DrawPartialTri(m_Brush, pos - up, pos - sidez, pos + sidex);
+		DrawPartialTri(m_Brush, pos - up, pos - sidez, pos - sidex);
 	}
 }
 
@@ -192,13 +192,13 @@ void Canvas3D::DrawCircle(const math::Vector3F& pos, const math::Vector3F& nor, 
 		float t = (i*math::Constants<float>::two_pi()) / res;
 		math::Vector3F v = pos + radius*cosf(t)*ux + radius*sinf(t)*uy;
 		float seg = lastSeg + last.GetDistanceTo(v);
-		DrawPartialLine(last, lastSeg,
+		DrawPartialLine(m_Pen, last, lastSeg,
 			v, seg);
 		last = v;
 		lastSeg = seg;
 	}
 	float seg = lastSeg + last.GetDistanceTo(start);
-	DrawPartialLine(last, lastSeg, start, seg);
+	DrawPartialLine(m_Pen, last, lastSeg, start, seg);
 }
 
 void Canvas3D::DrawAxes(const math::Matrix4& m, float scale)
@@ -227,13 +227,12 @@ void Canvas3D::DrawAxes(const math::Vector3F& pos,
 	const math::Vector3F& z,
 	float scale)
 {
-	auto oldPen = GetPen();
-	m_Pen.SetColor(video::Color::Red);
-	DrawPartialLine(pos, 0, pos + scale*x, scale*x.GetLength());
-	m_Pen.SetColor(video::Color::Blue);
-	DrawPartialLine(pos, 0, pos + scale*z, scale*z.GetLength());
-	m_Pen.SetColor(video::Color::Green);
-	DrawPartialLine(pos, 0, pos + scale*y, scale*y.GetLength());
+	Pen3D redPen(video::Color::Red);
+	Pen3D bluePen(video::Color::Blue);
+	Pen3D greenPen(video::Color::Green);
+	DrawPartialLine(redPen, pos, 0, pos + scale*x, scale*x.GetLength());
+	DrawPartialLine(bluePen, pos, 0, pos + scale*z, scale*z.GetLength());
+	DrawPartialLine(greenPen, pos, 0, pos + scale*y, scale*y.GetLength());
 }
 
 void Canvas3D::DrawTri(
@@ -242,7 +241,7 @@ void Canvas3D::DrawTri(
 	const math::Vector3F& c)
 {
 	if(m_Brush.GetColor().GetAlpha())
-		DrawPartialTri(a, b, c);
+		DrawPartialTri(m_Brush, a, b, c);
 
 	if(m_Pen.GetColor().GetAlpha()) {
 		DrawLine(a, b);
@@ -269,7 +268,7 @@ void Canvas3D::DrawCurve(
 	for(u32 i = 1; i < samples; ++i) {
 		math::Vector3F v = getSample((float)i / (samples - 1));
 		float seg = lastSeg + last.GetDistanceTo(v);
-		DrawPartialLine(last, lastSeg,
+		DrawPartialLine(m_Pen, last, lastSeg,
 			v, seg);
 		last = v;
 		lastSeg = seg;
@@ -277,6 +276,7 @@ void Canvas3D::DrawCurve(
 }
 
 void Canvas3D::DrawPartialLine(
+	const Pen3D& pen,
 	const math::Vector3F& start, float segStart,
 	const math::Vector3F& end, float segEnd)
 {
@@ -286,19 +286,21 @@ void Canvas3D::DrawPartialLine(
 	if(m_LineBufferCursor == LINE_BUFFER_SIZE)
 		FlushLineBuffer();
 
-	m_LineBuffer[m_LineBufferCursor++] = Canvas3DSystem::PenVertex(start, m_Pen.GetColor());
-	m_LineBuffer[m_LineBufferCursor++] = Canvas3DSystem::PenVertex(end, m_Pen.GetColor());
+	m_LineBuffer[m_LineBufferCursor++] = Canvas3DSystem::PenVertex(start, pen.GetColor());
+	m_LineBuffer[m_LineBufferCursor++] = Canvas3DSystem::PenVertex(end, pen.GetColor());
 }
 
 void Canvas3D::DrawPartialTri(
+	const Brush3D& brush,
 	const math::Vector3F& a,
 	const math::Vector3F& b,
 	const math::Vector3F& c)
 {
-	DrawPartialTri(a, b, c, ((b - a).Cross(c - a)).Normal());
+	DrawPartialTri(brush, a, b, c, ((b - a).Cross(c - a)).Normal());
 }
 
 void Canvas3D::DrawPartialTri(
+	const Brush3D& brush,
 	const math::Vector3F& a,
 	const math::Vector3F& b,
 	const math::Vector3F& c,
@@ -307,9 +309,9 @@ void Canvas3D::DrawPartialTri(
 	if(m_TriBufferCursor == TRI_BUFFER_SIZE)
 		FlushTriBuffer();
 
-	m_TriBuffer[m_TriBufferCursor++] = video::Vertex3D(a, m_Brush.GetColor(), normal, math::Vector2F(0, 0));
-	m_TriBuffer[m_TriBufferCursor++] = video::Vertex3D(b, m_Brush.GetColor(), normal, math::Vector2F(0, 0));
-	m_TriBuffer[m_TriBufferCursor++] = video::Vertex3D(c, m_Brush.GetColor(), normal, math::Vector2F(0, 0));
+	m_TriBuffer[m_TriBufferCursor++] = video::Vertex3D(a, brush.GetColor(), normal, math::Vector2F(0, 0));
+	m_TriBuffer[m_TriBufferCursor++] = video::Vertex3D(b, brush.GetColor(), normal, math::Vector2F(0, 0));
+	m_TriBuffer[m_TriBufferCursor++] = video::Vertex3D(c, brush.GetColor(), normal, math::Vector2F(0, 0));
 }
 
 void Canvas3D::FlushLineBuffer()
