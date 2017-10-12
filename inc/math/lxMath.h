@@ -506,6 +506,19 @@ IsPowerOfTwo(T x)
 	return ((x - 1)&x) == 0;
 }
 
+
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+HighestBitPos(T value)
+{
+	T bit = 0;
+	while(value) {
+		value >>= 1;
+		++bit;
+	}
+	return bit;
+}
+
 } // namespace math
 } // namespace lux
 

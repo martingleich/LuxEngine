@@ -206,7 +206,7 @@ public:
 	/**
 	Including the edge
 	*/
-	math::Vector2<T> Clamp(const math::Vector2<T>& v) const 
+	math::Vector2<T> Clamp(const math::Vector2<T>& v) const
 	{
 		return math::Vector2<T>(
 			math::Clamp(v.x, left, right),
@@ -227,6 +227,35 @@ public:
 		return true;
 	}
 };
+
+template <typename T>
+Rect<T> operator+(const Rect<T>& r, const Vector2<T>& v)
+{
+	return Rect<T>(r.left + v.x, r.top + v.y, r.right + v.x, r.bottom + v.y);
+}
+template <typename T>
+Rect<T> operator-(const Rect<T>& r, const Vector2<T>& v)
+{
+	return Rect<T>(r.left - v.x, r.top - v.y, r.right - v.x, r.bottom - v.y);
+}
+template <typename T>
+Rect<T>& operator+=(const Rect<T>& r, const Vector2<T>& v)
+{
+	r.left += v.x;
+	r.top += v.y;
+	r.right += v.x;
+	r.bottom += v.y;
+	return r;
+}
+template <typename T>
+Rect<T>& operator-=(const Rect<T>& r, const Vector2<T>& v)
+{
+	r.left -= v.x;
+	r.top -= v.y;
+	r.right -= v.x;
+	r.bottom -= v.y;
+	return r;
+}
 
 template <typename T>
 const Rect<T> Rect<T>::EMPTY = Rect<T>(0, 0, 0, 0);

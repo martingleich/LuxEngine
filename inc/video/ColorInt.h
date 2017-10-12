@@ -24,7 +24,7 @@ public:
 
 	static Color Uniform(u32 f, u32 alpha = 255)
 	{
-		return Color(f,f,f,alpha);
+		return Color(f, f, f, alpha);
 	}
 	//! Construct from other color.
 	Color(const Color& _c) : c(_c.c)
@@ -219,6 +219,21 @@ public:
 		o &= 0x00FFFFFF;
 		o |= GetAlpha() << 24;
 		return o;
+	}
+
+	Color Scaled(float f) const
+	{
+		Color out(*this);
+		out *= f;
+		out.SetAlpha(GetAlpha());
+		return out;
+	}
+
+	Color ScaledA(float f) const
+	{
+		Color out(*this);
+		out *= f;
+		return out;
 	}
 
 	//! Predefined Colors(Alpha = 255)
