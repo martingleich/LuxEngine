@@ -112,7 +112,7 @@ bool WindowWin32::SwitchFullscreen(bool fullscreen)
 void WindowWin32::Paint(Renderer* r)
 {
 	if(ClearBackground())
-		GetSkin()->DrawPrimitive(r, EGUIState::Enabled, EGUIPrimitive::WindowBase, GetFinalInnerRect(), video::Colorf(1,1,1,1));
+		r->DrawRectangle(GetFinalInnerRect(), GetFinalPalette().GetWindow());
 }
 
 void WindowWin32::SetText(const String& text)

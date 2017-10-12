@@ -25,6 +25,25 @@ enum class EFontWeight
 	ExtraBolt
 };
 
+//! Enumeration giving the alignment of text or object.
+enum class EAlign
+{
+	HLeft = 1,          //!< Align to the left
+	HCenter = 2,        //!< Align to the horicontal center
+	HRight = 4,         //!< Align to the right
+
+	VBottom = 8,        //!< Align to the bottom
+	VCenter = 16,       //!< Align to the vertical center
+	VTop = 32,          //!< Align to the top
+
+	Centered = VCenter | HCenter,        //!< Align text in the center
+	BottomLeft = VBottom | HLeft,       //!< Align to the bottom left
+	TopLeft = VTop | HLeft, //!< Align to the top left
+	BottomRight = VBottom | HRight,       //!< Align to the bottom right
+	TopRight = VTop | HRight, //!< Align to the top right
+};
+
+
 //! Contains information about a font.
 struct FontDescription
 {
@@ -73,25 +92,6 @@ textsizes and positioning values
 class Font : public core::Resource
 {
 public:
-	//! Enumeration giving the alignment of text
-	enum class EAlign
-	{
-		HLeft = 1,          //!< Align to the left
-		HCenter = 2,        //!< Align to the horicontal center
-		HRight = 4,         //!< Align to the right
-
-		VBottom = 8,        //!< Align to the bottom
-		VCenter = 16,       //!< Align to the vertical center
-		VTop = 32,          //!< Align to the top
-
-		Centered = VCenter | HCenter,        //!< Align text in the center
-		BottomLeft = VBottom | HLeft,       //!< Align to the bottom left
-		TopLeft = VTop | HLeft, //!< Align to the top left
-		BottomRight = VBottom | HRight,       //!< Align to the bottom right
-		TopRight = VTop | HRight, //!< Align to the top right
-	};
-
-public:
 	Font() {}
 	Font(const core::ResourceOrigin& origin) :
 		Resource(origin)
@@ -122,6 +122,7 @@ public:
 		EAlign align = EAlign::BottomLeft,
 		video::Color color = video::Color::Black,
 		const math::RectF* clip = nullptr) = 0;
+
 	//! Get the width of some text
 	/**
 	\param text The width of this text is calculated
@@ -233,7 +234,7 @@ public:
 
 } // namespace gui
 
-DECLARE_FLAG_CLASS(lux::gui::Font::EAlign);
+DECLARE_FLAG_CLASS(lux::gui::EAlign);
 
 } // namespace lux
 

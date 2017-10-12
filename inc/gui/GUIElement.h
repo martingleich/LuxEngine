@@ -42,11 +42,11 @@ public:
 
 	LUX_API Window* GetWindow() const;
 	LUX_API GUIEnvironment* GetEnvironment() const;
-	LUX_API void SetEnvironment(GUIEnvironment* env);
+	LUX_API virtual void SetEnvironment(GUIEnvironment* env);
 
 	LUX_API virtual void SetTabId(u32 tabId);
 	LUX_API virtual u32 GetTabId() const;
-	LUX_API virtual bool IsTabStop() const;
+	LUX_API bool IsTabStop() const;
 
 	LUX_API virtual bool IsFocusable() const;
 	LUX_API virtual void SetFocusable(bool focus);
@@ -95,8 +95,8 @@ public:
 	LUX_API void SetPosition(ScalarDistanceF x, ScalarDistanceF y);
 	LUX_API math::Vector2F GetPosition() const;
 
-	LUX_API virtual core::Range<ElementIterator> Elements();
-	LUX_API virtual core::Range<ConstElementIterator> Elements() const;
+	LUX_API core::Range<ElementIterator> Elements();
+	LUX_API core::Range<ConstElementIterator> Elements() const;
 
 	LUX_API virtual void RemoveElement(ElementIterator it);
 	LUX_API void RemoveElement(Element* elem);
@@ -120,19 +120,29 @@ public:
 	virtual bool OnKeyboardEvent(const gui::KeyboardEvent& e) { LUX_UNUSED(e); return false; }
 	virtual bool OnElementEvent(const gui::ElementEvent& e) { LUX_UNUSED(e); return false; }
 
-	LUX_API virtual void Render(Renderer* renderer);
 	virtual void Paint(Renderer* renderer) { LUX_UNUSED(renderer); }
 
+	LUX_API virtual void SetOverwriteSkin(Skin* s);
+	LUX_API virtual Skin* GetOverwriteSkin() const;
 	LUX_API virtual Skin* GetSkin() const;
-	LUX_API virtual void SetFont(Font* f);
-	LUX_API virtual StrongRef<Font> GetFont() const;
-	LUX_API virtual StrongRef<Font> GetActiveFont() const;
 
-	LUX_API EGUIState GetState() const;
+	LUX_API virtual void SetFont(Font* f);
+	LUX_API virtual Font* GetFont() const;
+
+	LUX_API void SetAlignment(EAlign align);
+	LUX_API EAlign GetAlignment() const;
+
+	LUX_API virtual void SetPalette(const Palette& palette);
+	LUX_API virtual const Palette& GetPalette() const;
+	LUX_API virtual Palette GetFinalPalette() const;
+
+	LUX_API virtual EGUIState GetState() const;
 
 	LUX_API virtual bool IsPointInside(const math::Vector2F& point) const;
 
 protected:
+	LUX_API virtual void SetSkin(Skin* s);
+
 	LUX_API virtual void OnAdd(Element* p);
 	LUX_API virtual void OnRemove(Element* p);
 
@@ -150,7 +160,13 @@ protected:
 protected:
 	ElementList m_Elements;
 
+	EAlign m_Align;
+	StrongRef<Skin> m_OverwriteSkin;
+	StrongRef<Skin> m_Skin;
+
 	StrongRef<Font> m_OverwriteFont;
+	Palette m_Palette;
+
 	GUIEnvironment* m_Environment;
 	Element* m_Parent;
 	Window* m_Window;
@@ -168,10 +184,10 @@ protected:
 
 	u32 m_TabId;
 
-	bool m_CanFocus;
-	bool m_IsVisible;
-	bool m_IsEnabled;
-	bool m_NoClip;
+	bool m_CanFocus:1;
+	bool m_IsVisible:1;
+	bool m_IsEnabled:1;
+	bool m_NoClip:1;
 };
 
 } // namespace gui

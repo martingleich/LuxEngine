@@ -103,7 +103,7 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 
 	video::VideoDriverInitData init;
 	init.config = config;
-	init.window = GetWindow();
+	init.destHandle = GetWindow()->GetDeviceWindow();
 	init.user = user;
 	StrongRef<video::VideoDriver> driver = core::ModuleFactory::Instance()->CreateModule(
 		"VideoDriver", config.adapter->GetDriverType(), init);

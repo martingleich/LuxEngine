@@ -13,9 +13,9 @@ namespace lux
 namespace gui
 {
 Button::Button(bool isSwitchButton) :
-	AbstractButton(isSwitchButton),
-	m_Color(video::Color::LightGray)
+	AbstractButton(isSwitchButton)
 {
+	SetAlignment(EAlign::Centered);
 }
 
 Button::~Button()
@@ -27,28 +27,22 @@ void Button::Paint(Renderer* r)
 	auto skin = GetSkin();
 	if(!skin)
 		return;
-	video::Color textColor;
+	auto palette = GetFinalPalette();
 	math::Vector2F textOffset;
 
-	if(m_IsPressed) {
-		skin->DrawPrimitive(r, this->GetState(), EGUIPrimitive::ButtonPressed, this->GetFinalRect(), m_Color);
-		textColor = video::Color::Black;
-		textOffset = skin->buttonPressedTextOffset;
-	} else {
-		skin->DrawPrimitive(r, this->GetState(), EGUIPrimitive::Button, this->GetFinalRect(), m_Color);
-		textColor = video::Color::Black;
-	}
-	r->DrawText(skin->defaultFont, m_Text, GetFinalRect().GetCenter() + textOffset, gui::Font::EAlign::Centered, textColor, nullptr);
-}
+	if(m_IsPressed)
+		textOffset = skin->GetSunkenOffset();
 
-void Button::SetColor(video::Color c)
-{
-	m_Color = c;
-}
+	auto state = GetState();
+	PaintOptions options;
+	options.palette = palette;
+	skin->DrawControl(r, this, GetFinalRect(), EGUIControl::Button, state, options);
 
-video::Color Button::GetColor() const
-{
-	return m_Color;
+	r->DrawText(GetFont(),
+		m_Text,
+		GetFinalInnerRect() + textOffset,
+		GetAlignment(),
+		palette.GetWindowText(state));
 }
 
 core::Name Button::GetReferableType() const

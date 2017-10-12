@@ -9,15 +9,13 @@ namespace lux
 namespace gui
 {
 StaticText::StaticText() :
-	m_Align(Font::EAlign::TopLeft),
-	m_Color(0, 0, 0),
-	m_Background(255, 255, 255),
 	m_RebreakText(true),
 	m_WordWrap(false),
 	m_DrawBackground(false),
 	m_OverwriteColor(true),
 	m_ClipTextInside(false)
 {
+	SetAlignment(EAlign::TopLeft);
 }
 
 StaticText::~StaticText()
@@ -28,13 +26,18 @@ void StaticText::Paint(Renderer* r)
 {
 	if(m_Text.IsEmpty())
 		return;
-	auto font = GetActiveFont();
+	auto font = GetFont();
 	if(!font)
 		return;
 
 	auto skin = GetSkin();
+	auto palette = GetFinalPalette();
+	auto state = GetState();
+	auto align = GetAlignment();
+	PaintOptions po;
+	po.palette = palette;
 	if(m_DrawBackground)
-		skin->DrawPrimitive(r, GetState(), EGUIPrimitive::StaticText, GetFinalRect(), m_Background);
+		skin->DrawControl(r, this, GetFinalRect(), EGUIControl::StaticText, state, po);
 
 	EnsureBrokenText();
 
@@ -43,37 +46,28 @@ void StaticText::Paint(Renderer* r)
 
 	auto area = GetFinalInnerRect();
 	math::Vector2F cursor;
-	if(TestFlag(m_Align, Font::EAlign::VTop))
+	if(TestFlag(align, EAlign::VTop))
 		cursor.y = area.top;
-	else if(TestFlag(m_Align, Font::EAlign::VCenter))
+	else if(TestFlag(align, EAlign::VCenter))
 		cursor.y = (area.top + area.bottom) / 2 - totalHeight / 2;
-	else if(TestFlag(m_Align, Font::EAlign::VBottom))
+	else if(TestFlag(align, EAlign::VBottom))
 		cursor.y = area.bottom - totalHeight;
 
-	if(TestFlag(m_Align, Font::EAlign::HLeft))
+	if(TestFlag(align, EAlign::HLeft))
 		cursor.x = area.left;
-	else if(TestFlag(m_Align, Font::EAlign::HCenter))
+	else if(TestFlag(align, EAlign::HCenter))
 		cursor.x = (area.left + area.right) / 2;
-	else if(TestFlag(m_Align, Font::EAlign::HRight))
+	else if(TestFlag(align, EAlign::HRight))
 		cursor.x = area.right;
 
 	// Each drawn line is align to the given horizontal alignment and vTop
-	Font::EAlign lineAlign = Font::EAlign::VTop | (m_Align & ~(Font::EAlign::VCenter | Font::EAlign::VBottom | Font::EAlign::VTop));
+	EAlign lineAlign = EAlign::VTop | (align & ~(EAlign::VCenter | EAlign::VBottom | EAlign::VTop));
 	auto clip = m_ClipTextInside ? &m_InnerRect : nullptr;
 
-	video::Colorf color;
-	if(!m_OverwriteColor) {
-		if(IsEnabled())
-			color = skin->textColor;
-		else
-			color *= skin->disabledTextColor;
-	} else {
-		color = m_Color;
-	}
-
+	video::Color color = palette.GetWindowText(state);
 	for(auto& line : m_BrokenText) {
 		if(!clip || cursor.y + lineHeight >= clip->top)
-			r->DrawText(font, line, cursor, lineAlign, color.ToHex(), clip);
+			r->DrawText(font, line, cursor, lineAlign, color, clip);
 		cursor.y += lineHeight;
 		if(clip && cursor.y > clip->bottom)
 			break;
@@ -84,32 +78,6 @@ core::Name StaticText::GetReferableType() const
 {
 	static const core::Name name = "lug.gui.StaticText";
 	return name;
-}
-
-void StaticText::SetFont(Font* f)
-{
-	Element::SetFont(f);
-	m_RebreakText = true;
-}
-
-void StaticText::SetColor(video::Color color)
-{
-	m_Color = color;
-}
-
-video::Color StaticText::GetColor() const
-{
-	return m_Color;
-}
-
-void StaticText::SetAlignment(Font::EAlign align)
-{
-	m_Align = align;
-}
-
-Font::EAlign StaticText::GetAlignment() const
-{
-	return m_Align;
 }
 
 void StaticText::SetDrawBackground(bool draw)
@@ -149,12 +117,12 @@ void StaticText::SetText(const String& text)
 	m_RebreakText = true;
 }
 
-void StaticText::EnsureBrokenText() const
+void StaticText::EnsureBrokenText()
 {
-	auto font = GetActiveFont();
+	auto font = GetFont();
 	if((Font*)font != (Font*)m_LastBrokenFont)
 		m_RebreakText = true;
-	m_LastBrokenFont = font.GetWeak();
+	m_LastBrokenFont = font;
 	if(!m_RebreakText)
 		return;
 	m_RebreakText = false;
@@ -167,12 +135,13 @@ void StaticText::EnsureBrokenText() const
 	auto& brokenText = m_BrokenText;
 	auto& textWidth = m_TextWidth;
 	auto& textHeight = m_TextHeight;
+	bool wordWrap = m_FitSizeToText ? false : m_WordWrap;
 	textWidth = 0;
 	textHeight = 0;
 	core::Array<float> carets;
 	auto AddBrokenLine = [&](String&& line) {
 		auto lineWidth = font->GetTextWidth(line);
-		if(!m_WordWrap || lineWidth <= width) {
+		if(!wordWrap || lineWidth <= width) {
 			m_BrokenText.PushBack(std::move(line));
 			textWidth = math::Max(textWidth, lineWidth);
 		} else {
@@ -221,12 +190,30 @@ void StaticText::EnsureBrokenText() const
 
 	line.Append(first, end);
 	AddBrokenLine(std::move(line));
+
+	if(m_FitSizeToText) {
+		math::Dimension2F size;
+		size.width = m_TextWidth;
+		size.height = m_TextHeight;
+
+		SetInnerSize(PixelDimension(size.width, size.height));
+	}
 }
 
 void StaticText::OnInnerRectChange()
 {
 	Element::OnInnerRectChange();
 	m_RebreakText = true;
+}
+
+void StaticText::SetFitSizeToText(bool fit)
+{
+	m_FitSizeToText = fit;
+}
+
+bool StaticText::GetFitSizeToText() const
+{
+	return m_FitSizeToText;
 }
 
 void StaticText::FitSizeToText()

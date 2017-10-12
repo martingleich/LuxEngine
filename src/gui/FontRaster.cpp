@@ -149,16 +149,16 @@ void FontRaster::Draw(const String& text, const math::Vector2F& position, EAlign
 	const float charSpace = m_CharHeight * m_CharDistance * m_Scale;
 
 	math::Vector2F cursor;
-	if(TestFlag(align, Font::EAlign::HCenter))
+	if(TestFlag(align, EAlign::HCenter))
 		cursor.x = position.x - 0.5f * (GetTextWidth(text) + italic);
-	else if(TestFlag(align, Font::EAlign::HRight))
+	else if(TestFlag(align, EAlign::HRight))
 		cursor.x = position.x - (GetTextWidth(text) + italic);
 	else
 		cursor.x = position.x;
 
-	if(TestFlag(align, Font::EAlign::VCenter))
+	if(TestFlag(align, EAlign::VCenter))
 		cursor.y = position.y - 0.5f * charHeight;
-	else if(TestFlag(align, Font::EAlign::VBottom))
+	else if(TestFlag(align, EAlign::VBottom))
 		cursor.y = position.y - charHeight;
 	else
 		cursor.y = position.y;

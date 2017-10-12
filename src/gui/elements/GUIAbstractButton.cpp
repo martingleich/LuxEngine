@@ -69,5 +69,13 @@ bool AbstractButton::OnElementEvent(const gui::ElementEvent& e)
 	return false;
 }
 
+EGUIState AbstractButton::GetState() const
+{
+	EGUIState state = Element::GetState();
+	if(m_IsPressed)
+		state |= EGUIState::Sunken;
+	return state;
+}
+
 } // namespace gui
 } // namespace lux

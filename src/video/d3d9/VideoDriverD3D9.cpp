@@ -12,8 +12,6 @@
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
 
-#include "gui/Window.h"
-
 #include "D3DHelper.h"
 #include "D3D9Exception.h"
 #include "AuxiliaryTextureD3D9.h"
@@ -63,9 +61,9 @@ VideoDriverD3D9::VideoDriverD3D9(const core::ModuleInitData& data) :
 	VideoDriverNull(dynamic_cast<const VideoDriverInitData&>(data)),
 	m_ReleasedUnmanagedData(false)
 {
-
 	auto initData = dynamic_cast<const VideoDriverInitData&>(data);
-	CreateDevice(initData.config, initData.window);
+	m_Window = (HWND)initData.destHandle;
+	CreateDevice(initData.config, m_Window);
 
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
 	m_Renderer = new RendererD3D9(this, m_DeviceState);
@@ -96,11 +94,8 @@ VideoDriverD3D9::~VideoDriverD3D9()
 	m_DepthBuffers.Clear();
 }
 
-void VideoDriverD3D9::CreateDevice(const DriverConfig& config, gui::Window* window)
+void VideoDriverD3D9::CreateDevice(const DriverConfig& config, HWND windowHandle)
 {
-	m_Window = window;
-
-	HWND windowHandle = (HWND)m_Window->GetDeviceWindow();
 	m_Adapter = config.adapter.As<AdapterD3D9>();
 	if(!m_Adapter)
 		throw core::InvalidArgumentException("config", "Contains invalid adapter");
@@ -161,7 +156,7 @@ D3DPRESENT_PARAMETERS VideoDriverD3D9::GeneratePresentParams(const DriverConfig&
 	presentParams.FullScreen_RefreshRateInHz = config.windowed ? 0 : config.display.refreshRate;
 	presentParams.BackBufferCount = 1;
 	presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	presentParams.hDeviceWindow = (HWND)m_Window->GetDeviceWindow();
+	presentParams.hDeviceWindow = m_Window;
 	presentParams.Windowed = m_Config.windowed;
 	presentParams.EnableAutoDepthStencil = TRUE;
 	presentParams.Flags = 0;

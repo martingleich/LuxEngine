@@ -116,7 +116,7 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 		m_BuiltInFont = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Font, file).As<Font>();
 
 	SetSkin(LUX_NEW(Skin3D));
-	m_Skin->defaultFont = m_BuiltInFont;
+	m_Skin->SetDefaultFont(m_BuiltInFont);
 
 	SetRenderer(LUX_NEW(Renderer)(video::VideoDriver::Instance()->GetRenderer()));
 
@@ -218,11 +218,19 @@ void GUIEnvironment::Update(float secsPassed)
 	}
 }
 
+static void RecursiveRender(gui::Element* elem, gui::Renderer* renderer)
+{
+	elem->Paint(renderer);
+	for(auto& e : elem->Elements())
+		if(e->IsVisible())
+			RecursiveRender(e, renderer);
+}
+
 void GUIEnvironment::Render()
 {
 	video::RenderStatistics::GroupScope grpScope("gui");
 	m_Renderer->Begin();
-	m_Root->Render(m_Renderer);
+	RecursiveRender(m_Root, m_Renderer);
 
 	if((m_DrawVirtualCursor || m_UseVirtualCursor) && m_CursorCtrl->IsVisible())
 		m_Skin->DrawCursor(m_Renderer, m_CursorCtrl->GetState(), m_LeftState, m_CursorCtrl->GetPosition());
@@ -240,6 +248,7 @@ StrongRef<Skin> GUIEnvironment::GetSkin() const
 void GUIEnvironment::SetSkin(Skin* skin)
 {
 	m_Skin = skin;
+	m_Root->SetOverwriteSkin(m_Skin);
 }
 
 StrongRef<Renderer> GUIEnvironment::GetRenderer() const

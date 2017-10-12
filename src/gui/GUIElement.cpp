@@ -1,6 +1,7 @@
 #include "gui/GUIElement.h"
 #include "gui/GUIEnvironment.h"
 #include "gui/GUISkin.h"
+#include "gui/Window.h"
 #include "core/lxAlgorithm.h"
 
 namespace lux
@@ -13,6 +14,7 @@ const ScalarDistanceF Element::AUTO_SIZE(INFINITY);
 const ScalarDistanceF Element::AUTO_MARGIN(INFINITY);
 
 Element::Element() :
+	m_Align(EAlign::Centered),
 	m_Parent(nullptr),
 	m_Window(nullptr),
 	m_Margin(0, 0, 0, 0),
@@ -223,7 +225,7 @@ const math::RectF& Element::GetBorder() const
 void Element::SetBorder(const math::RectF& border)
 {
 	m_Border = border;
-	UpdateRect();
+	UpdateInnerRect();
 }
 
 void Element::SetPosition(const ScalarVectorF& pos)
@@ -327,16 +329,6 @@ float Element::GetFinalHeight() const
 	return GetFinalSize().height;
 }
 
-void Element::Render(Renderer* renderer)
-{
-	Paint(renderer);
-
-	for(auto e : m_Elements) {
-		if(e->IsVisible())
-			e->Render(renderer);
-	}
-}
-
 bool Element::OnEvent(const Event& e)
 {
 	auto mouseE = dynamic_cast<const gui::MouseEvent*>(&e);
@@ -352,12 +344,19 @@ bool Element::OnEvent(const Event& e)
 	return true;
 }
 
+void Element::SetOverwriteSkin(Skin* s)
+{
+	m_OverwriteSkin = s;
+	SetSkin(s);
+}
+Skin* Element::GetOverwriteSkin() const
+{
+	return m_OverwriteSkin;
+}
+
 Skin* Element::GetSkin() const
 {
-	if(m_Environment)
-		return m_Environment->GetSkin();
-	else
-		return nullptr;
+	return m_Skin;
 }
 
 void Element::SetFont(Font* f)
@@ -365,28 +364,45 @@ void Element::SetFont(Font* f)
 	m_OverwriteFont = f;
 }
 
-StrongRef<Font> Element::GetFont() const
+Font* Element::GetFont() const
 {
-	return m_OverwriteFont;
+	return m_OverwriteFont ? m_OverwriteFont : GetSkin()->GetDefaultFont();
 }
 
-StrongRef<Font> Element::GetActiveFont() const
+void Element::SetAlignment(EAlign align)
 {
-	if(m_OverwriteFont)
-		return m_OverwriteFont;
-	else
-		return GetSkin()->defaultFont;
+	m_Align = align;
+}
+
+EAlign Element::GetAlignment() const
+{
+	return m_Align;
+}
+
+void Element::SetPalette(const Palette& palette)
+{
+	m_Palette = palette;
+}
+
+const Palette& Element::GetPalette() const
+{
+	return m_Palette;
+}
+
+Palette Element::GetFinalPalette() const
+{
+	return Palette(m_Palette, m_Skin->GetDefaultPalette());
 }
 
 EGUIState Element::GetState() const
 {
-	EGUIState state = EGUIState::Disabled;
+	EGUIState state = EGUIState::None;
 	if(IsEnabled()) {
 		state |= EGUIState::Enabled;
 		if(IsFocused())
 			state |= EGUIState::Focused;
 		if(IsHovered())
-			state |= EGUIState::Highlighted;
+			state |= EGUIState::Hovered;
 	}
 
 	return state;
@@ -397,6 +413,20 @@ bool Element::IsPointInside(const math::Vector2F& point) const
 	return GetFinalRect().IsInside(point);
 }
 
+void Element::SetSkin(Skin* s)
+{
+	if(!s) {
+		if(!m_Parent)
+			s = m_Environment->GetSkin();
+		else
+			s = m_Parent->GetSkin();
+	}
+
+	m_Skin = s;
+	for(auto& e : Elements())
+		e->SetSkin(s);
+}
+
 void Element::OnAdd(Element* p)
 {
 	m_Window = p->GetWindow();
@@ -404,6 +434,7 @@ void Element::OnAdd(Element* p)
 	m_Parent = p;
 
 	UpdateRect();
+	SetSkin(m_OverwriteSkin);
 
 	m_Environment->OnElementAdded(this);
 }
@@ -471,9 +502,8 @@ static void CalculateAxis(
 
 void Element::UpdateRect()
 {
-	if(UpdateFinalRect()) {
+	if(UpdateFinalRect())
 		OnFinalRectChange();
-	}
 }
 
 math::RectF Element::GetParentInnerRect() const

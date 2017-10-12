@@ -18,9 +18,10 @@ class Renderer : public ReferenceCounted
 public:
 	LUX_API Renderer(video::Renderer* r);
 	LUX_API void Begin();
-	LUX_API void DrawText(gui::Font* font, const String& text, const math::Vector2F& position, gui::Font::EAlign align, video::Color color, const math::RectF* clip);
-	LUX_API void DrawRectangle(const math::RectF& rect, const video::Color& color, const math::RectF* clip);
-	LUX_API void DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, const math::Vector2F& c, const video::Color& color, const math::RectF* clip);
+	LUX_API void DrawText(gui::Font* font, const String& text, const math::Vector2F& position, gui::EAlign align, video::Color color, const math::RectF* clip=nullptr);
+	LUX_API void DrawText(gui::Font* font, const String& text, const math::RectF& rect, gui::EAlign align, video::Color color, const math::RectF* clip=nullptr);
+	LUX_API void DrawRectangle(const math::RectF& rect, const video::Color& color, const math::RectF* clip=nullptr);
+	LUX_API void DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, const math::Vector2F& c, const video::Color& color, const math::RectF* clip=nullptr);
 	LUX_API void Flush();
 
 private:

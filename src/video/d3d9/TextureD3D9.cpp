@@ -46,7 +46,7 @@ void TextureD3D9::Init(
 
 	m_Levels = mipCount;
 	if(mipCount == 0)
-		m_Levels = 0;
+		m_Levels = math::HighestBitPos(math::Max(size.width, size.height));
 
 	DWORD usage = 0;
 	// Put in managed pool if there no origin loader

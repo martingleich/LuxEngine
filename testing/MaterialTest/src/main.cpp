@@ -138,7 +138,7 @@ void MaterialTest::PostGUIRender(float secsPassed)
 	if(fmodf(m_Time, 2.0f) < 1.0f) {
 		m_Font->Draw("Blinking Text",
 			math::Vector2F(0.0f, 50.0f),
-			gui::Font::EAlign::BottomLeft,
+			gui::EAlign::BottomLeft,
 			video::Color::Green);
 	}
 }

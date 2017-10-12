@@ -17,6 +17,8 @@ public:
 	LUX_API bool OnKeyboardEvent(const gui::KeyboardEvent& e);
 	LUX_API bool OnElementEvent(const gui::ElementEvent& e);
 
+	LUX_API virtual EGUIState GetState() const;
+
 	bool IsPressed() const
 	{
 		return m_IsPressed;

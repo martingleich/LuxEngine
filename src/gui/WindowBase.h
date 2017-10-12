@@ -1,6 +1,7 @@
 #ifndef INCLUDED_CWINDOWBASE_H
 #define INCLUDED_CWINDOWBASE_H
 #include "gui/Window.h"
+#include "gui/GUIEnvironment.h"
 
 namespace lux
 {
@@ -125,7 +126,6 @@ protected:
 	{
 		m_Text = title;
 	}
-
 private:
 	bool m_ShouldFullscreen; // Should the window if possible be in fullscreen mode, changed by user
 

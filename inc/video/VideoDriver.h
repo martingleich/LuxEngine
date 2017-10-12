@@ -18,11 +18,6 @@
 
 namespace lux
 {
-namespace gui
-{
-class Window;
-}
-
 namespace video
 {
 class Shader;
@@ -45,7 +40,7 @@ enum class EDeviceState
 struct VideoDriverInitData : public core::ModuleInitData
 {
 	DriverConfig config;
-	gui::Window* window;
+	void* destHandle;
 };
 
 class VideoDriver : public ReferenceCounted

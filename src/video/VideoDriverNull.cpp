@@ -7,7 +7,6 @@ namespace video
 
 VideoDriverNull::VideoDriverNull(const VideoDriverInitData& data)
 {
-	m_Window = data.window;
 	m_Config = data.config;
 }
 

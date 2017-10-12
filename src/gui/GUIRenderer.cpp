@@ -18,7 +18,7 @@ void Renderer::Begin()
 	m_Renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 }
 
-void Renderer::DrawText(gui::Font* font, const String& text, const math::Vector2F& position, gui::Font::EAlign align, video::Color color, const math::RectF* clip)
+void Renderer::DrawText(gui::Font* font, const String& text, const math::Vector2F& position, gui::EAlign align, video::Color color, const math::RectF* clip)
 {
 	if(font && !text.IsEmpty()) {
 		font->Draw(
@@ -27,6 +27,29 @@ void Renderer::DrawText(gui::Font* font, const String& text, const math::Vector2
 			align, color,
 			clip);
 	}
+}
+void Renderer::DrawText(gui::Font* font, const String& text, const math::RectF& rect, gui::EAlign align, video::Color color, const math::RectF* clip)
+{
+	if(!font)
+		return;
+
+	float lineHeight = font->GetLineDistance()*font->GetScaling()*font->GetFontHeight();
+	math::Vector2F cursor;
+	if(TestFlag(align, EAlign::VTop))
+		cursor.y = rect.top;
+	else if(TestFlag(align, EAlign::VCenter))
+		cursor.y = (rect.top + rect.bottom) / 2 - lineHeight / 2;
+	else if(TestFlag(align, EAlign::VBottom))
+		cursor.y = rect.bottom - lineHeight;
+
+	if(TestFlag(align, EAlign::HLeft))
+		cursor.x = rect.left;
+	else if(TestFlag(align, EAlign::HCenter))
+		cursor.x = (rect.left + rect.right) / 2;
+	else if(TestFlag(align, EAlign::HRight))
+		cursor.x = rect.right;
+	EAlign lineAlign = EAlign::VTop | (align & ~(EAlign::VCenter | EAlign::VBottom | EAlign::VTop));
+	DrawText(font, text, cursor, lineAlign, color, clip);
 }
 
 void Renderer::DrawRectangle(const math::RectF& rect, const video::Color& color, const math::RectF* clip)

@@ -27,7 +27,7 @@ public:
 	VideoDriverD3D9(const core::ModuleInitData& data);
 	~VideoDriverD3D9();
 
-	void CreateDevice(const DriverConfig& config, gui::Window* window);
+	void CreateDevice(const DriverConfig& config, HWND window);
 	D3DPRESENT_PARAMETERS GeneratePresentParams(const DriverConfig& config);
 	bool Reset(const DriverConfig& config);
 
@@ -129,6 +129,7 @@ private:
 private:
 	UnknownRefCounted<IDirect3D9> m_D3D;
 	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
+	HWND m_Window;
 
 	RendertargetD3D9 m_BackBufferTarget;
 	core::Array<DepthBuffer_d3d9> m_DepthBuffers;

@@ -14,12 +14,7 @@ public:
 	LUX_API Button(bool isSwitchButton);
 	LUX_API ~Button();
 	LUX_API void Paint(Renderer* r);
-	LUX_API void SetColor(video::Color c);
-	LUX_API video::Color GetColor() const;
 	LUX_API core::Name GetReferableType() const;
-
-protected:
-	video::Color m_Color;
 };
 } // namespace gui
 } // namespace lux

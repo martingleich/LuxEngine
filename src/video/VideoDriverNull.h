@@ -18,7 +18,6 @@ public:
 	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
 
 protected:
-	WeakRef<gui::Window> m_Window;
 	DriverConfig m_Config;
 	u32 m_DriverCaps[(u32)EDriverCaps::EDriverCaps_Count];
 };
