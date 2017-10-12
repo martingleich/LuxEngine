@@ -718,6 +718,10 @@ public:
 	{
 		return At(key);
 	}
+	const V& operator[](const K& key) const
+	{
+		return At(key);
+	}
 
 	V& At(const K& key)
 	{
@@ -725,6 +729,10 @@ public:
 		if(FindOrAddEntry(key, it))
 			new ((void*)&it.m_Entry->value) V();
 		return it.m_Entry->value;
+	}
+	const V& At(const K& key) const
+	{
+		return FindEntry(key).m_Entry->value;
 	}
 
 	V& At(const K& key, const V& defaultValue)
