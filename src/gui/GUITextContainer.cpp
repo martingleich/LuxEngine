@@ -47,8 +47,8 @@ void TextContainer::Ensure(
 		m_FontSettings.scale != settings.scale ||
 		m_FontSettings.wordDistance != settings.wordDistance) {
 		rebreakText = true;
-		m_FontSettings = settings;
 	}
+	m_FontSettings = settings; // Copy outside of it, to get non-geometric member(for example color)
 
 	if(!rebreakText)
 		return;
