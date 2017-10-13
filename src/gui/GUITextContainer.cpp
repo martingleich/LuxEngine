@@ -38,7 +38,7 @@ void TextContainer::Ensure(
 		rebreakText = true;
 		m_Wrap = wordWrap;
 	}
-	if(rect.GetSize() == m_TextBoxSize) {
+	if(rect.GetSize() != m_TextBoxSize) {
 		rebreakText = true;
 		m_TextBoxSize = rect.GetSize();
 	}
@@ -84,8 +84,9 @@ void TextContainer::Ensure(
 					prevBreakPoint = jt;
 				} else if(carets[id] - offset > width && prevBreakPoint != line.End()) {
 					AddBrokenLine(core::MakeRange(lineFirst, prevBreakPoint), carets[id] - offset);
-					offset += carets[id];
+					offset = carets[id];
 					lineFirst = prevBreakPoint + 1;
+					prevBreakPoint = line.End();
 				}
 			}
 			if(lineFirst != line.End())

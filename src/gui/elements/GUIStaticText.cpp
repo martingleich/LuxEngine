@@ -9,10 +9,11 @@ namespace lux
 namespace gui
 {
 StaticText::StaticText() :
-	m_WordWrap(false),
 	m_DrawBackground(false),
 	m_OverwriteColor(true),
-	m_ClipTextInside(false)
+	m_ClipTextInside(false),
+	m_FitSizeToText(false),
+	m_WordWrap(true)
 {
 	SetAlignment(EAlign::TopLeft);
 }
@@ -69,48 +70,6 @@ core::Name StaticText::GetReferableType() const
 	static const core::Name name = "lug.gui.StaticText";
 	return name;
 }
-
-/*
-void StaticText::SetDrawBackground(bool draw)
-{
-	m_DrawBackground = draw;
-}
-
-bool StaticText::GetDrawBackground() const
-{
-	return m_DrawBackground;
-}
-
-void StaticText::SetWordWrap(bool wrap)
-{
-	m_WordWrap = wrap;
-}
-
-bool StaticText::GetWordWrap() const
-{
-	return m_WordWrap;
-}
-
-void StaticText::SetClipTextInside(bool clip)
-{
-	m_ClipTextInside = clip;
-}
-
-bool StaticText::GetClipTextInside() const
-{
-	return m_ClipTextInside;
-}
-
-void StaticText::SetFitSizeToText(bool fit)
-{
-	m_FitSizeToText = fit;
-}
-
-bool StaticText::GetFitSizeToText() const
-{
-	return m_FitSizeToText;
-}
-*/
 
 } // namespace gui
 } // namespace lux

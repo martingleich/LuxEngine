@@ -177,7 +177,7 @@ void FontRaster::Draw(const FontRenderSettings& settings, core::Range<String::Co
 		vertices[vertexCursor + 5].texture.y = info.bottom;
 
 		// Precheck clipping, width a little bit of extra space to be shure
-		if(!clip || (vertices[vertexCursor + 1].position.x <= clip->right + 1 && vertices[vertexCursor + 5].position.x >= clip->left - 1))
+		if(!clip || !(vertices[vertexCursor + 1].position.x <= clip->left - 1 || vertices[vertexCursor + 5].position.x >= clip->right + 1))
 			vertexCursor += 6;
 
 		cursor.x += CharWidth + info.C * settings.scale + charSpace;
