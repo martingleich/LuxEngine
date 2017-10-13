@@ -126,7 +126,6 @@ struct Context
 		FontInfoV1 info;
 		ReadV1Info(info);
 		outData.baseLine = info.baseLine;
-		outData.charDistance = info.charDistance;
 		outData.charHeight = info.charHeight;
 		outData.desc.antialiased = info.antialiased;
 		outData.desc.italic = info.italic;
@@ -135,9 +134,6 @@ struct Context
 		outData.desc.weight = ConvertV1Weight(info.weight);
 		outData.imageSize.width = info.imageWidth;
 		outData.imageSize.height = info.imageHeight;
-		outData.lineDistance = info.lineDistance;
-		outData.scale = info.scale;
-		outData.wordDistance = info.wordDistance;
 
 		// Read char settings
 		float invHeight = 1.0f/info.imageHeight;
@@ -188,7 +184,7 @@ struct Context
 		info.antialiased = font->GetDescription().antialiased;
 		info.baseLine = font->GetBaseLine();
 		info.charCount = (u32)font->GetCharMap().Size();
-		info.charDistance = font->GetCharDistance();
+		info.charDistance = 0;
 		info.charHeight = font->GetFontHeight();
 		info.fontSize = font->GetDescription().size;
 #ifdef FONT_NO_COMPRESS
@@ -199,11 +195,11 @@ struct Context
 		info.imageHeight = font->GetImage()->GetSize().height;
 		info.imageWidth = font->GetImage()->GetSize().width;
 		info.italic = font->GetDescription().italic;
-		info.lineDistance = font->GetLineDistance();
+		info.lineDistance = 1;
 		info.name = font->GetDescription().name;
-		info.scale = font->GetScaling();
+		info.scale = 1;
 		info.weight = ConvertWeightToV1(font->GetDescription().weight);
-		info.wordDistance = font->GetWordDistance();
+		info.wordDistance = 1;
 
 		WriteV1Info(info);
 

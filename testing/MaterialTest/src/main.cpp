@@ -32,8 +32,6 @@ public:
 		Context.Input->GetEventSignal().Connect(this, &MaterialTest::OnEvent);
 	}
 
-	void PostGUIRender(float secsPassed);
-
 	void LoadBase()
 	{
 		scene::Node* node;
@@ -125,23 +123,8 @@ private:
 	StrongRef<scene::Light> m_Light;
 	StrongRef<scene::SkyBox> m_SkyBox;
 
-	StrongRef<gui::Font> m_Font;
-
 	StrongRef<video::Texture> m_CheckerTexture;
-
-	float m_Time = 0.0f;
 };
-
-void MaterialTest::PostGUIRender(float secsPassed)
-{
-	m_Time += secsPassed;
-	if(fmodf(m_Time, 2.0f) < 1.0f) {
-		m_Font->Draw("Blinking Text",
-			math::Vector2F(0.0f, 50.0f),
-			gui::EAlign::BottomLeft,
-			video::Color::Green);
-	}
-}
 
 core::Array<StrongRef<video::Material>> MaterialTest::GenMaterialList()
 {
@@ -168,9 +151,12 @@ void MaterialTest::Load()
 
 	m_CameraNode->AddComponent(Context.Scene->CreateFirstPersonCameraControl());
 
-	m_Font = Context.GUI->GetFontCreator()->CreateFont(
+	auto font = Context.GUI->GetFontCreator()->CreateFont(
 		gui::FontDescription("Comic Sans MS", 40, gui::EFontWeight::Bolt),
 		Context.GUI->GetFontCreator()->GetDefaultCharset("german"));
+	auto text = Context.GUI->AddStaticText(gui::PixelVector(0, 50), "Test Text");
+	text->SetTextColor(video::Color::Green);
+	text->SetFont(font);
 
 	auto materials = GenMaterialList();
 

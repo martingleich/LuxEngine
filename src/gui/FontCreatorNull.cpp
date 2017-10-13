@@ -112,10 +112,6 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	data.charHeight = (float)fontHeight;
 	data.image = image;
 	data.imageSize = imageSize;
-	data.charDistance = 0.0f;
-	data.wordDistance = 1.0f;
-	data.lineDistance = 1.0f;
-	data.scale = 1.0f;
 	data.baseLine = 0.0f;
 
 	StrongRef<FontRaster> font = LUX_NEW(FontRaster)(core::ResourceOrigin());

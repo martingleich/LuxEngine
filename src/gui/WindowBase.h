@@ -103,22 +103,20 @@ protected:
 
 	void OnMove(float x, float y)
 	{
-		float w = m_FinalRect.GetWidth();
-		float h = m_FinalRect.GetHeight();
-		m_FinalRect.left = x;
-		m_FinalRect.top = y;
-		m_FinalRect.right = x + w;
-		m_FinalRect.bottom = y + h;
-		OnFinalRectChange();
+		float w = GetFinalWidth();
+		float h = GetFinalHeight();
+		math::RectF final(
+			x, y, x+w, y + h);
+		m_FinalRect = final;
 		onMove.Broadcast(this, math::Vector2F(x, y));
 	}
 
 	void OnResize(float w, float h)
 	{
-		m_FinalRect.right = m_FinalRect.left + w;
-		m_FinalRect.bottom = m_FinalRect.top + h;
-		OnFinalRectChange();
-		OnInnerRectChange();
+		auto final = GetFinalRect();
+		final.right = final.left + w;
+		final.bottom = final.top + w;
+		m_FinalRect = final;
 		onResize.Broadcast(this, math::Dimension2F(w, h));
 	}
 
@@ -126,6 +124,7 @@ protected:
 	{
 		m_Text = title;
 	}
+
 private:
 	bool m_ShouldFullscreen; // Should the window if possible be in fullscreen mode, changed by user
 

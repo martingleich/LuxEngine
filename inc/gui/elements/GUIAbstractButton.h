@@ -19,14 +19,8 @@ public:
 
 	LUX_API virtual EGUIState GetState() const;
 
-	bool IsPressed() const
-	{
-		return m_IsPressed;
-	}
-	bool IsPushButton() const
-	{
-		return m_IsPushButton;
-	}
+	bool IsPressed() const { return m_IsPressed; }
+	bool IsPushButton() const { return m_IsPushButton; }
 	
 	event::Signal<Element*> onClick;
 

@@ -117,8 +117,17 @@ public:
 
 	video::Color GetColor(EColorGroup state, EColorRole role) const
 	{
-		if(!IsSet(state, role) && state == EColorGroup::Disabled && IsSet(EColorGroup::Enabled, role)) {
-			return 0.5f*GetColor(state, role);
+		if(!IsSet(state, role)) {
+			if(state == EColorGroup::Disabled && IsSet(EColorGroup::Enabled, role))
+				return 0.5f*GetColor(state, role);
+			if(role == EColorRole::BaseText)
+				return GetColor(state, EColorRole::WindowText);
+			if(role == EColorRole::BaseHightlight)
+				return GetColor(state, EColorRole::Base).GetInverted();
+			if(role == EColorRole::BaseHightlightText)
+				return GetColor(state, EColorRole::BaseText).GetInverted();
+			lxAssertNeverReach("Can't get not set color");
+			return video::Color::Black;
 		} else {
 			return m_Data->colors[GetId(state, role)];
 		}
@@ -166,14 +175,16 @@ public:
 			*this = base;
 			return;
 		}
-		static const u32 BIT_MASK = (((1 << COLOR_COUNT)-1)<<1)+1;
+		static const u32 BIT_MASK = (((1 << COLOR_COUNT) - 1) << 1) + 1;
 		if((m_Data->colorFlags & BIT_MASK) == BIT_MASK)
 			return;
 
 		EnsureDataCopy();
 		for(u32 i = 0; i < COLOR_COUNT; ++i) {
-			if((m_Data->colorFlags & (1 << i)) == 0)
+			if((m_Data->colorFlags & (1 << i)) == 0) {
 				m_Data->colors[i] = base.m_Data->colors[i];
+				m_Data->colorFlags |= (1 << i);
+			}
 		}
 	}
 
@@ -218,7 +229,6 @@ public:
 		m_SunkenOffset = math::Vector2F(1, 1);
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Enabled, Palette::EColorRole::WindowText, video::Color::Black);
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Disabled, Palette::EColorRole::WindowText, video::Color::LightGray);
-		m_DefaultPalette.SetColor(Palette::EColorRole::BaseText, video::Color::Black);
 		m_DefaultPalette.SetColor(Palette::EColorRole::Base, video::Color::White);
 		m_DefaultPalette.SetColor(Palette::EColorRole::Window, video::Color::DarkGray);
 		m_DefaultPalette.SetColor(Palette::EColorRole::BaseHightlightText, video::Color::White);

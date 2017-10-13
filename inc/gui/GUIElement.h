@@ -135,6 +135,8 @@ public:
 	LUX_API virtual void SetPalette(const Palette& palette);
 	LUX_API virtual const Palette& GetPalette() const;
 	LUX_API virtual Palette GetFinalPalette() const;
+	LUX_API virtual void SetTextColor(video::Color c);
+	LUX_API virtual void SetBackgroundColor(video::Color c);
 
 	LUX_API virtual EGUIState GetState() const;
 

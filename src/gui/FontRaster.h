@@ -40,20 +40,11 @@ struct FontCreationData
 
 	core::HashMap<u32, CharInfo> charMap;
 	float charHeight;
-
-	float scale;
-	float charDistance;
-	float wordDistance;
-	float lineDistance;
 	float baseLine;
 
 	FontCreationData() :
 		image(nullptr),
 		charHeight(0.0f),
-		scale(1.0f),
-		charDistance(0.0f),
-		wordDistance(1.0f),
-		lineDistance(1.0f),
 		baseLine(0.0f)
 	{
 		
@@ -68,27 +59,16 @@ public:
 
 	void Init(const FontCreationData& data);
 
+	void Draw(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, const math::Vector2F& Position, const math::RectF* clip);
+	float GetTextWidth(const FontRenderSettings& settings, core::Range<String::ConstIterator> text);
+	size_t GetCaretFromOffset(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, float XPosition);
+	void GetTextCarets(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, core::Array<float>& carets);
+
 	const video::Material* GetMaterial() const;
-	float GetBaseLine() const;
-	void SetBaseLine(float base);
-	void Draw(const String& Text, const math::Vector2F& Position, EAlign Align, video::Color color, const math::RectF* clip);
-	float GetTextWidth(const String& Text, size_t charCount = std::numeric_limits<size_t>::max());
-	size_t GetCaretFromOffset(const String& Text, float XPosition);
-	void GetTextCarets(const String& Text, core::Array<float>& carets, size_t charCount = std::numeric_limits<size_t>::max());
-
-	float GetFontHeight() const;
-
-	float GetCharDistance() const;
-	float GetWordDistance() const;
-	float GetLineDistance() const;
-	float GetScaling() const;
-
-	void SetLineDistance(float Space);
-	void SetCharDistance(float width);
-	void SetWordDistance(float Space);
-	void SetScaling(float Scale);
 
 	const FontDescription& GetDescription() const;
+	float GetBaseLine() const;
+	float GetFontHeight() const;
 
 	core::Name GetReferableType() const;
 	StrongRef<Referable> Clone() const;
@@ -102,11 +82,6 @@ private:
 private:
 	core::HashMap<u32, CharInfo> m_CharMap;
 	float m_CharHeight;
-
-	float m_CharDistance;
-	float m_WordDistance;
-	float m_LineDistance;
-	float m_Scale;
 	float m_BaseLine;
 
 	StrongRef<video::Material> m_Material;

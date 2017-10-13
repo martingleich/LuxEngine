@@ -394,6 +394,20 @@ Palette Element::GetFinalPalette() const
 	return Palette(m_Palette, m_Skin->GetDefaultPalette());
 }
 
+void Element::SetTextColor(video::Color c)
+{
+	auto p = GetPalette();
+	p.SetColor(gui::Palette::EColorRole::WindowText, c);
+	SetPalette(p);
+}
+
+void Element::SetBackgroundColor(video::Color c)
+{
+	auto p = GetPalette();
+	p.SetColor(gui::Palette::EColorRole::Window, c);
+	SetPalette(p);
+}
+
 EGUIState Element::GetState() const
 {
 	EGUIState state = EGUIState::None;

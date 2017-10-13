@@ -236,6 +236,15 @@ public:
 		return out;
 	}
 
+	Color GetInverted() const
+	{
+		return Color(255-GetRed(), 255-GetGreen(), 255-GetBlue(), GetAlpha());
+	}
+	Color GetInvertedA() const
+	{
+		return Color(255-GetRed(), 255-GetGreen(), 255-GetBlue(), 255-GetAlpha());
+	}
+
 	//! Predefined Colors(Alpha = 255)
 	enum EPredefinedColors : u32
 	{

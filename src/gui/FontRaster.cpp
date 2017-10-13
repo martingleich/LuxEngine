@@ -29,13 +29,9 @@ void FontRaster::Init(const FontCreationData& data)
 {
 	m_Desc = data.desc;
 
-	m_CharDistance = data.charDistance;
-	m_WordDistance = data.wordDistance;
-	m_LineDistance = data.lineDistance;
-	m_Scale = data.scale;
 	m_CharHeight = data.charHeight;
-	m_BaseLine = data.baseLine;
 	m_CharMap = data.charMap;
+	m_BaseLine = data.baseLine;
 
 	String errorChars = "? ";
 
@@ -109,24 +105,9 @@ void FontRaster::Init(const FontCreationData& data)
 		m_Material->Layer(0) = m_Texture;
 }
 
-const video::Material* FontRaster::GetMaterial() const
+void FontRaster::Draw(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, const math::Vector2F& position, const math::RectF* clip)
 {
-	return m_Material;
-}
-
-float FontRaster::GetBaseLine() const
-{
-	return m_BaseLine;
-}
-
-void FontRaster::SetBaseLine(float base)
-{
-	m_BaseLine = base;
-}
-
-void FontRaster::Draw(const String& text, const math::Vector2F& position, EAlign align, video::Color color, const math::RectF* clip)
-{
-	if(text.IsEmpty())
+	if(text.begin() == text.end())
 		return;
 
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
@@ -144,62 +125,44 @@ void FontRaster::Draw(const String& text, const math::Vector2F& position, EAlign
 		renderer->SetScissorRect(scissorRect, &tok);
 	}
 
-	const float italic = 0.0f * m_Scale;
-	const float charHeight = m_CharHeight * m_Scale;
-	const float charSpace = m_CharHeight * m_CharDistance * m_Scale;
+	const float italic = 0.0f * settings.scale;
+	const float charHeight = m_CharHeight * settings.scale;
+	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
 
-	math::Vector2F cursor;
-	if(TestFlag(align, EAlign::HCenter))
-		cursor.x = position.x - 0.5f * (GetTextWidth(text) + italic);
-	else if(TestFlag(align, EAlign::HRight))
-		cursor.x = position.x - (GetTextWidth(text) + italic);
-	else
-		cursor.x = position.x;
-
-	if(TestFlag(align, EAlign::VCenter))
-		cursor.y = position.y - 0.5f * charHeight;
-	else if(TestFlag(align, EAlign::VBottom))
-		cursor.y = position.y - charHeight;
-	else
-		cursor.y = position.y;
-
+	math::Vector2F cursor = position;
 	video::Vertex2D vertices[600];
 	u32 vertexCursor = 0;
-
-	for(auto it = text.First(); it != text.End(); ++it) {
-		const u32 character = *it;
-		const bool isLast = (it == text.Last());
+	for(u32 character : text) {
 		const CharInfo& info = GetCharInfo(character);
 
 		if(character == ' ') {
-			cursor.x += (info.A + info.B + info.C) * m_Scale * m_WordDistance;
-			if(!isLast)
-				cursor.x += charSpace;
+			cursor.x += (info.A + info.B + info.C) * settings.scale * settings.wordDistance;
+			cursor.x += charSpace;
 			continue;
 		}
 
-		const float CharWidth = info.B * m_Scale;
+		const float CharWidth = info.B * settings.scale;
 
-		cursor.x += info.A * m_Scale;
+		cursor.x += info.A * settings.scale;
 
 		// Top-Left
 		vertices[vertexCursor].position.x = floorf(cursor.x + italic);
 		vertices[vertexCursor].position.y = floorf(cursor.y);
-		vertices[vertexCursor].color = color;
+		vertices[vertexCursor].color = settings.color;
 		vertices[vertexCursor].texture.x = info.left;
 		vertices[vertexCursor].texture.y = info.top;
 
 		// Top-Right
 		vertices[vertexCursor + 1].position.x = floorf(cursor.x + CharWidth + italic);
 		vertices[vertexCursor + 1].position.y = floorf(cursor.y);
-		vertices[vertexCursor + 1].color = color;
+		vertices[vertexCursor + 1].color = settings.color;
 		vertices[vertexCursor + 1].texture.x = info.right;
 		vertices[vertexCursor + 1].texture.y = info.top;
 
 		// Lower-Right
 		vertices[vertexCursor + 2].position.x = floorf(cursor.x + CharWidth);
 		vertices[vertexCursor + 2].position.y = floorf(cursor.y + charHeight);
-		vertices[vertexCursor + 2].color = color;
+		vertices[vertexCursor + 2].color = settings.color;
 		vertices[vertexCursor + 2].texture.x = info.right;
 		vertices[vertexCursor + 2].texture.y = info.bottom;
 
@@ -209,18 +172,15 @@ void FontRaster::Draw(const String& text, const math::Vector2F& position, EAlign
 		// Lower-Left
 		vertices[vertexCursor + 5].position.x = floorf(cursor.x);
 		vertices[vertexCursor + 5].position.y = floorf(cursor.y + charHeight);
-		vertices[vertexCursor + 5].color = color;
+		vertices[vertexCursor + 5].color = settings.color;
 		vertices[vertexCursor + 5].texture.x = info.left;
 		vertices[vertexCursor + 5].texture.y = info.bottom;
 
 		// Precheck clipping, width a little bit of extra space to be shure
-		if(!clip || (vertices[vertexCursor+1].position.x <= clip->right+1 && vertices[vertexCursor+5].position.x >= clip->left-1))
+		if(!clip || (vertices[vertexCursor + 1].position.x <= clip->right + 1 && vertices[vertexCursor + 5].position.x >= clip->left - 1))
 			vertexCursor += 6;
 
-		cursor.x += CharWidth + info.C * m_Scale;
-
-		if(!isLast)
-			cursor.x += charSpace;
+		cursor.x += CharWidth + info.C * settings.scale + charSpace;
 
 		if(vertexCursor >= 600) {
 			renderer->DrawPrimitiveList(video::EPrimitiveType::Triangles,
@@ -240,50 +200,45 @@ void FontRaster::Draw(const String& text, const math::Vector2F& position, EAlign
 	}
 }
 
-float FontRaster::GetTextWidth(const String& text, size_t charCount)
+float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<String::ConstIterator> text)
 {
-	const float charSpace = m_CharHeight * m_CharDistance * m_Scale;
+	if(text.begin() == text.end())
+		return 0.0f;
+	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
 
-	size_t counter = 0;
-	float width = 0.0f;
-	auto it = text.First();
-	while(counter < charCount && it != text.End()) {
-		++counter;
-		const u32 c = *it;
+	float width = -charSpace;
+	for(u32 c : text) {
 		const CharInfo& info = GetCharInfo(c);
-		if(c == ' ') {
-			width += (info.A + info.B + info.C) * m_WordDistance * m_Scale;
-		} else {
-			width += (info.A + info.B + info.C) * m_Scale;
-		}
+		if(c == ' ')
+			width += (info.A + info.B + info.C) * settings.wordDistance * settings.scale;
+		else
+			width += (info.A + info.B + info.C) * settings.scale;
 
-		if(counter != charCount - 1 && it != text.Last())
-			width += charSpace;
-
-		++it;
+		width += charSpace;
 	}
 
 	return width;
 }
 
-size_t FontRaster::GetCaretFromOffset(const String& text, float XPosition)
+size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, float XPosition)
 {
+	if(text.begin() == text.end())
+		return 0;
 	if(XPosition < 0.0f)
 		return 0;
 
-	const float charSpace = m_CharHeight * m_CharDistance * m_Scale;
+	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
 
 	float caret = 0.0f;
 	float lastCaret;
 	size_t counter = 0;
-	for(auto it = text.First(); it != text.End(); ++it) {
+	for(auto c : text) {
 		lastCaret = caret;
-		const u32 c = *it;
 		const CharInfo& info = GetCharInfo(c);
 		if(c == ' ')
-			caret += (info.A + info.B + info.C)*m_Scale*m_WordDistance;
+			caret += (info.A + info.B + info.C)*settings.scale*settings.wordDistance;
 		else
-			caret += (info.B + info.A + info.C)*m_Scale;
+			caret += (info.B + info.A + info.C)*settings.scale;
 
 		if(XPosition >= lastCaret && XPosition <= caret) {
 			const float d1 = XPosition - lastCaret;
@@ -294,8 +249,7 @@ size_t FontRaster::GetCaretFromOffset(const String& text, float XPosition)
 				return counter + 1;
 		}
 
-		if(it != text.Last())
-			caret += charSpace;
+		caret += charSpace;
 		++counter;
 	}
 
@@ -303,79 +257,26 @@ size_t FontRaster::GetCaretFromOffset(const String& text, float XPosition)
 	return counter;
 }
 
-void FontRaster::GetTextCarets(const String& text, core::Array<float>& carets, size_t charCount)
+void FontRaster::GetTextCarets(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, core::Array<float>& carets)
 {
-	const float charSpace = m_CharHeight * m_CharDistance;
+	const float charSpace = m_CharHeight * settings.charDistance;
 
-	if(text.IsEmpty())
+	if(text.begin() == text.end())
 		return;
 
 	float width = 0.0f;
-	size_t counter = 0;
-	auto it = text.First();
-	while(counter < charCount && it != text.End()) {
-		++counter;
-		carets.PushBack(width*m_Scale);
-		const u32 c = *it;
+	for(u32 c : text) {
+		carets.PushBack(width*settings.scale);
 		const CharInfo& info = GetCharInfo(c);
 		if(c == ' ')
-			width += (info.A + info.B + info.C)*m_WordDistance * m_Scale;
+			width += (info.A + info.B + info.C)*settings.wordDistance * settings.scale;
 		else
-			width += (info.A + info.B + info.C)*m_Scale;
+			width += (info.A + info.B + info.C)*settings.scale;
 
-		if(counter != charCount - 1 && it != text.Last())
-			width += charSpace*m_Scale;
-
-		++counter;
-		++it;
+		width += charSpace*settings.scale;
 	}
 
 	carets.PushBack(width);
-}
-
-float FontRaster::GetCharDistance() const
-{
-	return m_CharDistance;
-}
-
-float FontRaster::GetFontHeight() const
-{
-	return m_CharHeight;
-}
-
-float FontRaster::GetWordDistance() const
-{
-	return m_WordDistance;
-}
-
-float FontRaster::GetLineDistance() const
-{
-	return m_LineDistance;
-}
-
-void FontRaster::SetLineDistance(float Space)
-{
-	m_LineDistance = Space;
-}
-
-float FontRaster::GetScaling() const
-{
-	return m_Scale;
-}
-
-void FontRaster::SetCharDistance(float width)
-{
-	m_CharDistance = width;
-}
-
-void FontRaster::SetWordDistance(float Space)
-{
-	m_WordDistance = Space;
-}
-
-void FontRaster::SetScaling(float Scale)
-{
-	m_Scale = Scale;
 }
 
 const CharInfo& FontRaster::GetCharInfo(u32 c)
@@ -407,6 +308,22 @@ video::Image* FontRaster::GetImage() const
 {
 	return m_Image;
 }
+
+const video::Material* FontRaster::GetMaterial() const
+{
+	return m_Material;
+}
+
+float FontRaster::GetBaseLine() const
+{
+	return m_BaseLine;
+}
+
+float FontRaster::GetFontHeight() const
+{
+	return m_CharHeight;
+}
+
 } // namespace gui
 } // namespace lux
 

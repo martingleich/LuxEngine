@@ -2,6 +2,7 @@
 #define INCLUDED_GUI_STATIC_TEXT_H
 #include "gui/GUIElement.h"
 #include "gui/Font.h"
+#include "gui/GUITextContainer.h"
 
 namespace lux
 {
@@ -16,38 +17,30 @@ public:
 
 	LUX_API void Paint(Renderer* r);
 
-	LUX_API void SetDrawBackground(bool draw);
-	LUX_API bool GetDrawBackground() const;
+	void SetDrawBackground(bool draw) { m_DrawBackground = draw; }
+	bool GetDrawBackground() const { return m_DrawBackground; }
 
-	LUX_API void SetWordWrap(bool wrap);
-	LUX_API bool GetWordWrap() const;
+	void SetWordWrap(bool wrap) { m_WordWrap = wrap; }
+	bool GetWordWrap() const { return m_WordWrap; }
 
 	LUX_API void FitSizeToText();
-	LUX_API void SetFitSizeToText(bool fit);
-	LUX_API bool GetFitSizeToText() const;
+	void SetFitSizeToText(bool fit) { m_FitSizeToText = fit; }
+	bool GetFitSizeToText() const { return m_FitSizeToText; }
 
-	LUX_API void SetClipTextInside(bool clip);
-	LUX_API bool GetClipTextInside() const;
+	void SetClipTextInside(bool clip) { m_ClipTextInside = clip; }
+	bool GetClipTextInside() const { return m_ClipTextInside; }
 
 	LUX_API void SetText(const String& text);
 	LUX_API core::Name GetReferableType() const;
 
 protected:
-	void EnsureBrokenText();
-	void OnInnerRectChange();
+	TextContainer m_TextContainer;
 
-protected:
-	WeakRef<Font> m_LastBrokenFont;
-	core::Array<String> m_BrokenText;
-	float m_TextHeight;
-	float m_TextWidth;
-
-	bool m_RebreakText;
-	bool m_WordWrap;
 	bool m_DrawBackground;
 	bool m_OverwriteColor;
 	bool m_ClipTextInside;
 	bool m_FitSizeToText;
+	bool m_WordWrap;
 };
 
 } // namespace gui
