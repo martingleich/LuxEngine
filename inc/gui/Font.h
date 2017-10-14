@@ -54,7 +54,11 @@ struct FontDescription
 	bool italic; //!< Is the font italic, false if not available
 	bool antialiased; //!< Is the font antialiased, false if not available
 
-	FontDescription()
+	FontDescription() :
+		size(0),
+		weight(EFontWeight::Normal),
+		italic(false),
+		antialiased(false)
 	{
 	}
 
@@ -110,6 +114,8 @@ struct FontRenderSettings
 	unsharp fonts.
 	*/
 	float scale = 1.0f;
+
+	float italic = 0.0f;
 
 	video::Color color = video::Color::Black;
 };
@@ -187,7 +193,7 @@ public:
 
 	//! Retrieve the material used for rendering the font
 	/**
-	\return The new material used for rendering the font
+	\return The material used for rendering the font
 	*/
 	virtual const video::Material* GetMaterial() const = 0;
 

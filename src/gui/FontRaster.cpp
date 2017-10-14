@@ -105,29 +105,47 @@ void FontRaster::Init(const FontCreationData& data)
 		m_Material->Layer(0) = m_Texture;
 }
 
-void FontRaster::Draw(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, const math::Vector2F& position, const math::RectF* clip)
+void FontRaster::Draw(
+	const FontRenderSettings& settings,
+	core::Range<String::ConstIterator> text,
+	const math::Vector2F& position,
+	const math::RectF* userClip)
 {
 	if(text.begin() == text.end())
 		return;
 
+	const float italic = m_CharHeight * settings.italic * settings.scale;
+	const float charHeight = m_CharHeight * settings.scale;
+	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
+
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
-	renderer->SetMaterial(m_Material);
-	renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
+
+	math::RectU clipRect = renderer->GetScissorRect();
+	if(userClip) {
+		clipRect.FitInto(math::RectU(
+			(u32)math::Max(0.0f, userClip->left),
+			(u32)math::Max(0.0f, userClip->top),
+			(u32)math::Max(0.0f, ceil(userClip->right)),
+			(u32)math::Max(0.0f, ceil(userClip->bottom))));
+	}
+
+	if(position.y + charHeight + 1 < (float)clipRect.top)
+		return;
+	if(position.y - 1 > (float)clipRect.bottom)
+		return;
 
 	video::ScissorRectToken tok;
-	if(clip) {
+	if(userClip) {
 		math::RectU scissorRect;
-		scissorRect.left = (u32)clip->left;
-		scissorRect.right = (u32)ceil(clip->right);
-		scissorRect.top = (u32)clip->top;
-		scissorRect.bottom = (u32)ceil(clip->bottom);
-		scissorRect.FitInto(renderer->GetScissorRect());
+		scissorRect.left = (u32)clipRect.left;
+		scissorRect.right = (u32)ceil(clipRect.right);
+		scissorRect.top = (u32)clipRect.top;
+		scissorRect.bottom = (u32)ceil(clipRect.bottom);
 		renderer->SetScissorRect(scissorRect, &tok);
 	}
 
-	const float italic = 0.0f * settings.scale;
-	const float charHeight = m_CharHeight * settings.scale;
-	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
+	renderer->SetMaterial(m_Material);
+	renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 
 	math::Vector2F cursor = position;
 	video::Vertex2D vertices[600];
@@ -141,7 +159,7 @@ void FontRaster::Draw(const FontRenderSettings& settings, core::Range<String::Co
 			continue;
 		}
 
-		const float CharWidth = info.B * settings.scale;
+		const float charWidth = info.B * settings.scale;
 
 		cursor.x += info.A * settings.scale;
 
@@ -153,14 +171,14 @@ void FontRaster::Draw(const FontRenderSettings& settings, core::Range<String::Co
 		vertices[vertexCursor].texture.y = info.top;
 
 		// Top-Right
-		vertices[vertexCursor + 1].position.x = floorf(cursor.x + CharWidth + italic);
+		vertices[vertexCursor + 1].position.x = floorf(cursor.x + charWidth + italic);
 		vertices[vertexCursor + 1].position.y = floorf(cursor.y);
 		vertices[vertexCursor + 1].color = settings.color;
 		vertices[vertexCursor + 1].texture.x = info.right;
 		vertices[vertexCursor + 1].texture.y = info.top;
 
 		// Lower-Right
-		vertices[vertexCursor + 2].position.x = floorf(cursor.x + CharWidth);
+		vertices[vertexCursor + 2].position.x = floorf(cursor.x + charWidth);
 		vertices[vertexCursor + 2].position.y = floorf(cursor.y + charHeight);
 		vertices[vertexCursor + 2].color = settings.color;
 		vertices[vertexCursor + 2].texture.x = info.right;
@@ -176,11 +194,22 @@ void FontRaster::Draw(const FontRenderSettings& settings, core::Range<String::Co
 		vertices[vertexCursor + 5].texture.x = info.left;
 		vertices[vertexCursor + 5].texture.y = info.bottom;
 
-		// Precheck clipping, width a little bit of extra space to be shure
-		if(!clip || !(vertices[vertexCursor + 1].position.x <= clip->left - 1 || vertices[vertexCursor + 5].position.x >= clip->right + 1))
-			vertexCursor += 6;
+		cursor.x += charWidth + info.C * settings.scale + charSpace;
 
-		cursor.x += CharWidth + info.C * settings.scale + charSpace;
+		float maxX = math::Max(
+			vertices[vertexCursor + 1].position.x,
+			vertices[vertexCursor + 2].position.x) + 1;
+		float minX = math::Min(
+			vertices[vertexCursor].position.x,
+			vertices[vertexCursor + 5].position.x) - 1;
+		if(minX < 0 || (u32)minX > clipRect.right)
+			break; // Abort rendering loop
+
+		if(maxX < 0 || (u32)maxX < clipRect.left)
+			continue; // Abort this character
+
+		// Add this character to the chunk
+		vertexCursor += 6;
 
 		if(vertexCursor >= 600) {
 			renderer->DrawPrimitiveList(video::EPrimitiveType::Triangles,
