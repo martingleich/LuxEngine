@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FORMAT_FORMAT_LOCALE_H
 #define INCLUDED_FORMAT_FORMAT_LOCALE_H
-#include "core/LuxBase.h"
+#include "format/FormatConfig.h"
 #include "format/Exception.h"
 
 namespace format
@@ -25,8 +25,8 @@ public:
 	FacetType& operator=(const FacetType&) = delete;
 };
 
-extern LUX_API FacetType NumericalFormat; //!< The marker of the numerical facet
-extern LUX_API FacetType BooleanFormat; //!< The marker of the boolean facet
+extern FORMAT_API FacetType NumericalFormat; //!< The marker of the numerical facet
+extern FORMAT_API FacetType BooleanFormat; //!< The marker of the boolean facet
 
 //! A facet represents an aspect of localication
 /**
@@ -124,8 +124,8 @@ public:
 	int DefaultDigitCount; //! Number of after-comma digit, if nothing is specified
 };
 
-extern LUX_API Facet_NumericalFormat NumericalFormat_English; //!< Numerical format for english language
-extern LUX_API Facet_NumericalFormat NumericalFormat_German; //!< Numerical format for german language
+extern FORMAT_API Facet_NumericalFormat NumericalFormat_English; //!< Numerical format for english language
+extern FORMAT_API Facet_NumericalFormat NumericalFormat_German; //!< Numerical format for german language
 
 //! The facet describing the boolean format
 /**
@@ -158,36 +158,36 @@ public:
 	const char* False; //!< Null-terminated utf8-string to represent <false>
 };
 
-extern LUX_API Facet_BooleanFormat BooleanFormat_English; //!< Boolean format for english language
-extern LUX_API Facet_BooleanFormat BooleanFormat_German; //!< Boolean format for german language
-extern LUX_API Facet_BooleanFormat BooleanFormat_Digit; //!< Boolean format to write boolean values as digits 0 and 1
+extern FORMAT_API Facet_BooleanFormat BooleanFormat_English; //!< Boolean format for english language
+extern FORMAT_API Facet_BooleanFormat BooleanFormat_German; //!< Boolean format for german language
+extern FORMAT_API Facet_BooleanFormat BooleanFormat_Digit; //!< Boolean format to write boolean values as digits 0 and 1
 
 //! A locale is a collection of facets, describing a whole language
 class Locale
 {
 public:
-	LUX_API Locale(
+	FORMAT_API Locale(
 		const Facet_NumericalFormat& num = NumericalFormat_English,
 		const Facet_BooleanFormat& boolean = BooleanFormat_English);
 
-	LUX_API Locale(const Locale& other);
-	LUX_API ~Locale();
+	FORMAT_API Locale(const Locale& other);
+	FORMAT_API ~Locale();
 
-	LUX_API Locale& operator=(const Locale& other);
-	LUX_API const Facet& GetFacet(const FacetType& type) const;
-	LUX_API Facet& GetFacet(const FacetType& type);
+	FORMAT_API Locale& operator=(const Locale& other);
+	FORMAT_API const Facet& GetFacet(const FacetType& type) const;
+	FORMAT_API Facet& GetFacet(const FacetType& type);
 
 	//! Change the value of an existing facet, or add a new facet type to the locale
 	/**
 	The value of the facet is copied from the passed facet
 	*/
-	LUX_API void SetFacet(const FacetType& type, const Facet& f);
+	FORMAT_API void SetFacet(const FacetType& type, const Facet& f);
 
-	LUX_API const Facet_NumericalFormat& GetNumericalFacet() const;
-	LUX_API const Facet_BooleanFormat& GetBooleanFacet() const;
+	FORMAT_API const Facet_NumericalFormat& GetNumericalFacet() const;
+	FORMAT_API const Facet_BooleanFormat& GetBooleanFacet() const;
 
-	LUX_API Facet_NumericalFormat& GetNumericalFacet();
-	LUX_API Facet_BooleanFormat& GetBooleanFacet();
+	FORMAT_API Facet_NumericalFormat& GetNumericalFacet();
+	FORMAT_API Facet_BooleanFormat& GetBooleanFacet();
 
 private:
 	struct SelfData;
@@ -201,10 +201,10 @@ extern Locale German; //!< Default locale for german language
 /**
 The locale is not copied and must exist until another locale is set
 */
-LUX_API void SetLocale(Locale* l);
+FORMAT_API void SetLocale(Locale* l);
 
 //! Get the current default locale
-LUX_API Locale* GetLocale();
+FORMAT_API Locale* GetLocale();
 
 /** @}*/
 }

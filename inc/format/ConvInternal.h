@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FORMAT_CONV_INTERNAL_H
 #define INCLUDED_FORMAT_CONV_INTERNAL_H
-#include "core/LuxBase.h"
+
 #include "format/StringBasics.h"
 #include "format/Context.h"
 #include "format/FormatLocale.h"
@@ -13,20 +13,20 @@ namespace format
 /**
 Warning: Maybe the new slice points to the same data which was passed.
 */
-LUX_API Slice ConvertString(Context& dst, StringType srcType, const char* srcData, size_t srcSize);
+FORMAT_API Slice ConvertString(Context& dst, StringType srcType, const char* srcData, size_t srcSize);
 //! Convert a given string to a format compatible with a context and add it to the context
 /**
 Warning: Maybe the new slice points to the same data which was passed.
 \return A pointer to the newly created string
 */
-LUX_API Slice* ConvertAddString(Context& dst, StringType srcType, const char* srcData, size_t srcSize);
+FORMAT_API Slice* ConvertAddString(Context& dst, StringType srcType, const char* srcData, size_t srcSize);
 
 //! Convert a given string to a format compatible with a context and add it to the context
 /**
 Forces the creation of a newly created string, srcData can be changed after the call without effect
 \return A pointer to the newly created string
 */
-LUX_API Slice* CopyConvertAddString(Context& dst, StringType srcType, const char* srcData, size_t srcSize);
+FORMAT_API Slice* CopyConvertAddString(Context& dst, StringType srcType, const char* srcData, size_t srcSize);
 
 //! Convert a given string to a format compatible with a context and add it to the context
 /**
@@ -34,7 +34,7 @@ Warning: Maybe the new slice points to the same data which was passed.
 \param curDiff The amount the cursor changes, when adding the slice, is automaticly updated in the other versions
 \return A pointer to the newly created string
 */
-LUX_API Slice* ConvertAddString(Context& dst, StringType srcType, const char* srcData, size_t srcSize, const Cursor& curDiff);
+FORMAT_API Slice* ConvertAddString(Context& dst, StringType srcType, const char* srcData, size_t srcSize, const Cursor& curDiff);
 
 namespace internal
 {

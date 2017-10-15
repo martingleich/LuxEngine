@@ -18,13 +18,13 @@ The passed FormatOptions can be changed to change the behavior of the align oper
 following the conv_data call.
 */
 
-LUX_API void conv_data(Context& ctx, const char* data, Placeholder& placeholder);
-LUX_API void conv_data(Context& ctx, intmax_t data, Placeholder& placeholder);
-LUX_API void conv_data(Context& ctx, uintmax_t data, Placeholder& placeholder);
-LUX_API void conv_data(Context& ctx, const void* data, Placeholder& placeholder);
-LUX_API void conv_data(Context& ctx, double data, Placeholder& placeholder);
-LUX_API void conv_data(Context& ctx, bool data, Placeholder& placeholder);
-LUX_API void conv_data(Context& ctx, Cursor* ptr, Placeholder& placeholder);
+FORMAT_API void conv_data(Context& ctx, const char* data, Placeholder& placeholder);
+FORMAT_API void conv_data(Context& ctx, intmax_t data, Placeholder& placeholder);
+FORMAT_API void conv_data(Context& ctx, uintmax_t data, Placeholder& placeholder);
+FORMAT_API void conv_data(Context& ctx, const void* data, Placeholder& placeholder);
+FORMAT_API void conv_data(Context& ctx, double data, Placeholder& placeholder);
+FORMAT_API void conv_data(Context& ctx, bool data, Placeholder& placeholder);
+FORMAT_API void conv_data(Context& ctx, Cursor* ptr, Placeholder& placeholder);
 
 //! Convert a signed integer to a string
 /**
@@ -35,7 +35,7 @@ This is _not_ checked inside the function
 \param base The base to convert into
 \return The number of bytes written, without the terminating null
 */
-LUX_API size_t IntToString(intmax_t data, char* str, int base = 10);
+FORMAT_API size_t IntToString(intmax_t data, char* str, int base = 10);
 
 //! Convert a unsigned integer to a string
 /**
@@ -46,7 +46,7 @@ This is _not_ checked inside the function
 \param base The base to convert into
 \return The number of bytes written, without the terminating null
 */
-LUX_API size_t UIntToString(uintmax_t data, char* str, int base = 10);
+FORMAT_API size_t UIntToString(uintmax_t data, char* str, int base = 10);
 
 //! Convert a floating point number to a string
 /**
@@ -61,7 +61,7 @@ This is _not_ checked inside the function
 \param precision The requested number of digits behind the comma, must be between 1 and 10, numbers outside are clamped
 \return The number of bytes written, without the terminating null
 */
-LUX_API size_t FloatToString(double data, char* str, int precision = 3);
+FORMAT_API size_t FloatToString(double data, char* str, int precision = 3);
 
 }
 #endif // #ifndef INCLUDED_FORMAT_CONVERTERS_H

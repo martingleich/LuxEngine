@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FORMAT_CONTEXT_H
 #define INCLUDED_FORMAT_CONTEXT_H
-#include "core/LuxBase.h"
+#include "format/FormatConfig.h"
 #include "format/Slice.h"
 #include "format/FormatMemory.h"
 #include "format/StringType.h"
@@ -44,10 +44,10 @@ public:
 	const char* fstr;
 
 public:
-	LUX_API Context();
+	FORMAT_API Context();
 
-	LUX_API Slice* AddSlice(size_t size, const char* data, bool forceCopy = false, const Cursor* curDiff = nullptr);
-	LUX_API Slice* InsertSlice(Slice* prev, Slice sl);
+	FORMAT_API Slice* AddSlice(size_t size, const char* data, bool forceCopy = false, const Cursor* curDiff = nullptr);
+	FORMAT_API Slice* InsertSlice(Slice* prev, Slice sl);
 
 	void SetLocale(const Locale* loc)
 	{
@@ -79,7 +79,7 @@ public:
 		return m_CharacterCount;
 	}
 
-	LUX_API size_t GetCollumn() const;
+	FORMAT_API size_t GetCollumn() const;
 
 	char* AllocByte(size_t len)
 	{
@@ -123,8 +123,8 @@ public:
 		m_SliceMemory.Clear();
 	}
 
-	LUX_API SubContext SaveSubContext() const;
-	LUX_API void RestoreSubContext(const SubContext& ctx);
+	FORMAT_API SubContext SaveSubContext() const;
+	FORMAT_API void RestoreSubContext(const SubContext& ctx);
 
 private:
 	Slice* AddSlice();

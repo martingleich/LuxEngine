@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FORMAT_SINK_H
 #define INCLUDED_FORMAT_SINK_H
-#include "core/LuxBase.h"
+
 #include "format/Context.h"
 
 namespace format

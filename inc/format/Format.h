@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FORMAT_FORMAT_H
 #define INCLUDED_FORMAT_FORMAT_H
-#include "core/LuxBase.h"
+
 #include "format/FormatLocale.h"
 #include "format/StringType.h"
 #include "format/Placeholder.h"

@@ -19,7 +19,7 @@ public:
 	{
 	}
 
-	LUX_API virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags);
+	FORMAT_API virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags);
 
 private:
 	std::ostream& m_Stream;

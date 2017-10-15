@@ -149,7 +149,8 @@ public:
 	
 	///////////////////////////////////////////////////////////////////////////
 
-	LUX_API WeakRef<Element> CaptureCursor(Element* elem);
+	LUX_API void CaptureCursor(Element* elem);
+	LUX_API void ReleaseCursor();
 	LUX_API void OnElementRemoved(Element* elem);
 	LUX_API void OnElementAdded(Element* elem);
 

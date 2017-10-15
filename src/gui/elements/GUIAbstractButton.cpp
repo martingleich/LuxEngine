@@ -25,14 +25,14 @@ bool AbstractButton::OnMouseEvent(const gui::MouseEvent& e)
 			m_IsPressed = true;
 		else {
 			m_IsPressed = !m_IsPressed;
-			onClick.Broadcast(this);
+			onClick.Broadcast();
 		}
 		return true;
 	}
 	if(e.type == gui::MouseEvent::LUp) {
 		if(m_IsPushButton) {
 			m_IsPressed = false;
-			onClick.Broadcast(this);
+			onClick.Broadcast();
 		}
 		return true;
 	}
@@ -48,7 +48,7 @@ bool AbstractButton::OnKeyboardEvent(const gui::KeyboardEvent& e)
 			} else {
 				m_IsPressed = !m_IsPressed;
 			}
-			onClick.Broadcast(this);
+			onClick.Broadcast();
 		} else {
 			if(m_IsPushButton)
 				m_IsPressed = false;

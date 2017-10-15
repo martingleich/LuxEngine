@@ -168,6 +168,10 @@ namespace internal
 			ConvertAddString(ctx, StringType::Ascii, locale.Inf, strlen(locale.Inf));
 		} else if(n == 0) {
 			ConvertAddString(ctx, StringType::Ascii, "0", 1);
+			if(forcePrecision && digits > 0) {
+				ConvertAddString(ctx, StringType::Ascii, ".", 1);
+				PutCount(ctx, digits, StringType::Ascii, "0000000000", 10);
+			}
 		} else {
 			int m;
 			size_t len;

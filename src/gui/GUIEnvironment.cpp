@@ -408,11 +408,14 @@ StrongRef<Font> GUIEnvironment::GetBuiltInFont()
 
 ///////////////////////////////////////////////////////////////////////////
 
-WeakRef<Element> GUIEnvironment::CaptureCursor(Element* elem)
+void GUIEnvironment::CaptureCursor(Element* elem)
 {
-	auto out = m_Captured;
 	m_Captured = elem;
-	return out;
+}
+
+void GUIEnvironment::ReleaseCursor()
+{
+	m_Captured = nullptr;
 }
 
 void GUIEnvironment::OnElementRemoved(Element* elem)

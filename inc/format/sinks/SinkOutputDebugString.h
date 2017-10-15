@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FORMAT_SINK_OUTPUTDEBUGSTRING_H
 #define INCLUDED_FORMAT_SINK_OUTPUTDEBUGSTRING_H
 #include "../Sink.h"
-#ifdef LUX_WINDOWS
+#ifdef FORMAT_WINDOWS
 
 namespace format
 {
@@ -21,7 +21,7 @@ public:
 		Sink(collumn)
 	{
 	}
-	LUX_API virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags);
+	FORMAT_API virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags);
 };
 
 //! Helper function to create a debug writer
@@ -33,5 +33,5 @@ inline OutputDebugString_sink OutputDebugString(size_t collumn = 0)
 /** @}*/
 }
 
-#endif // #ifndef LUX_WINDOWS
+#endif // #ifndef FORMAT_WINDOWS
 #endif // #ifndef INCLUDED_FORMAT_SINK_OUTPUTDEBUGSTRING_H

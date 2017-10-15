@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FORMAT_SINK_MSGBOX_H
 #define INCLUDED_FORMAT_SINK_MSGBOX_H
 #include "../Sink.h"
-#ifdef LUX_WINDOWS
+#ifdef FORMAT_WINDOWS
 
 namespace format
 {
@@ -62,7 +62,7 @@ public:
 		m_PressedButton(EButton::Invalid)
 	{
 	}
-	LUX_API size_t Write(Context& ctx, const Slice* firstSlice, int flags);
+	FORMAT_API size_t Write(Context& ctx, const Slice* firstSlice, int flags);
 
 	//! Get the pressed button of the message, only available after showing it to the user
 	EButton GetPressedButton() const;
@@ -83,5 +83,5 @@ inline MsgBox_sink MsgBox(EIcon icon = EIcon::None, const char* Utf8Caption = nu
 /** @}*/
 }
 
-#endif // #ifndef LUX_WINDOWS
+#endif // #ifndef FORMAT_WINDOWS
 #endif // #ifndef INCLUDED_FORMAT_SINK_MSGBOX_H

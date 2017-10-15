@@ -1,4 +1,4 @@
-#ifdef LUX_WINDOWS
+#ifdef FORMAT_WINDOWS
 #include "format/sinks/SinkMsgBox.h"
 #include "format/UnicodeConversion.h"
 #include <string>

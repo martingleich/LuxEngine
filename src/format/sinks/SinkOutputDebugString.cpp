@@ -1,4 +1,4 @@
-#ifdef LUX_WINDOWS
+#ifdef FORMAT_WINDOWS
 #include "format/sinks/SinkOutputDebugString.h"
 #include "format/UnicodeConversion.h"
 #include <Windows.h>

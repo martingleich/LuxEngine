@@ -22,7 +22,7 @@ public:
 	bool IsPressed() const { return m_IsPressed; }
 	bool IsPushButton() const { return m_IsPushButton; }
 	
-	event::Signal<Element*> onClick;
+	event::Signal<> onClick;
 
 protected:
 	bool m_IsPressed;

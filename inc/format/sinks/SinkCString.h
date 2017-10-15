@@ -36,7 +36,7 @@ public:
 	{
 	}
 
-	LUX_API size_t Write(Context& ctx, const Slice* firstSlice, int flags);
+	FORMAT_API size_t Write(Context& ctx, const Slice* firstSlice, int flags);
 
 private:
 	SafeCString m_Str;
