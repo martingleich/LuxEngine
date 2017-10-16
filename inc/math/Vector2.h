@@ -175,7 +175,7 @@ public:
 	*/
 	T GetLength() const
 	{
-		return (T)(sqrt((double)(x*x + y*y)));
+		return (T)(std::sqrt((double)(x*x + y*y)));
 	}
 
 	//! The squared length of the vector
@@ -231,12 +231,12 @@ public:
 	*/
 	Vector2<T>& SetLength(T newLength)
 	{
-		if(isinf(x) || isinf(y)) {
-			if(isinf(x))
+		if(std::isinf(x) || std::isinf(y)) {
+			if(std::isinf(x))
 				x = (T)(x < 0 ? -1 : 1);
 			else
 				x = 0;
-			if(isinf(y))
+			if(std::isinf(y))
 				y = (T)(y < 0 ? -1 : 1);
 			else
 				y = 0;
@@ -296,7 +296,7 @@ public:
 	*/
 	math::Angle<T> Angle(const Vector2<T>& b) const
 	{
-		return math::ArcCos<T>(Dot(b) / (T)sqrt(GetLengthSq()*b.GetLengthSq()));
+		return math::ArcCos<T>(Dot(b) / (T)std::sqrt(GetLengthSq()*b.GetLengthSq()));
 	}
 
 	//! Convert this vector to polar(rad) coordinates
@@ -307,7 +307,7 @@ public:
 	{
 		double length = x*x + y*y;
 		if(length > 0) {
-			return Vector2<T>(atan2(y, x), sqrt(length));
+			return Vector2<T>(std::atan2(y, x), std::sqrt(length));
 		}
 
 		return Vector2<T>(0.0, 0.0);

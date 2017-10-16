@@ -90,7 +90,7 @@ bool LineHitSphere(
 		// const float s2 = (-temp + glm::sqrt(disc)) / lenSq;
 
 		// Take the point nearer to the start.
-		const T s = (-temp - sqrtf(disc)) / lenSq;
+		const T s = (-temp - (T)std::sqrt(disc)) / lenSq;
 		if(s < 0 || s > 1)
 			return false;
 
@@ -132,7 +132,7 @@ bool SphereHitSphere(
 	const T distanceSq = delta.GetLengthSq();
 	if(distanceSq <= r*r) {
 		if(out) {
-			T distance = sqrt(distanceSq);
+			T distance = std::sqrt(distanceSq);
 			out->seperation = delta / distance;
 			out->penetration = r - distance;
 			out->position = 0.5f*out->seperation + centerB;
@@ -163,7 +163,7 @@ bool SphereHitBox(
 	T distanceSq = nearest.GetDistanceToSq(relCenter);
 	if(distanceSq <= relRadius*relRadius) {
 		if(out) {
-			T f = sqrt(distanceSq);
+			T f = std::sqrt(distanceSq);
 			if(nearest == relCenter) {
 				out->seperation = relCenter.GetUnitCubeVector();
 				if(out->seperation == math::Vector3<T>::ZERO)

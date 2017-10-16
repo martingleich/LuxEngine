@@ -4,9 +4,9 @@
 #include "core/lxTypes.h"
 #include "core/lxFormat.h"
 
-#include <math.h>
-#include <float.h>
-#include <limits.h>
+#include <cmath>
+#include <cfloat>
+#include <climits>
 
 namespace lux
 {

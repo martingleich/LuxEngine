@@ -435,7 +435,7 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 	D3DLight.Position = *((D3DVECTOR*)(&light.position));
 	D3DLight.Direction = *((D3DVECTOR*)(&light.direction));
 
-	D3DLight.Range = sqrtf(FLT_MAX);
+	D3DLight.Range = std::sqrt(FLT_MAX);
 	D3DLight.Falloff = light.falloff;
 
 	D3DCOLORVALUE specular = {1.0f, 1.0f, 1.0f, 1.0f};

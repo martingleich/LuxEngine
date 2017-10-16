@@ -251,8 +251,8 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 	float Size = m_Model->ReadValue(particle, Particle::EParameter::Size);
 	float angle = m_Model->ReadValue(particle, Particle::EParameter::Angle);
 
-	float sa = sinf(angle);
-	float ca = cosf(angle);
+	float sa = std::sin(angle);
+	float ca = std::cos(angle);
 
 	math::Vector3F Side = (ca*m_Side - sa*m_Up)* m_Data->Scaling.x * Size;
 	math::Vector3F Up = (sa*m_Side + ca*m_Up) * m_Data->Scaling.y * Size;

@@ -162,7 +162,7 @@ public:
 		else if(IsZero(d))
 			outLineSegment = -x * DirSq;
 		else
-			outLineSegment = (-x - sqrt(d)) * DirSq;
+			outLineSegment = (-x - std::sqrt(d)) * DirSq;
 
 		if(outLineSegment < (T)0 || outLineSegment >(T)1)
 			return false;

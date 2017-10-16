@@ -49,7 +49,7 @@ public:
 			return math::Vector3F::NEGATIVE_UNIT_Y;
 		float x = point.x;
 		float z = point.z;
-		float len = sqrt(x*x + z*z);
+		float len = std::sqrt(x*x + z*z);
 		if(math::IsZero(len))
 			return math::Vector3F::ZERO;
 		else

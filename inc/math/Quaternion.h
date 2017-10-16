@@ -201,7 +201,7 @@ public:
 		if(IsZero(l))
 			return *this;
 
-		l = 1 / (T)sqrt(l);
+		l = 1 / (T)std::sqrt(l);
 		*this *= l;
 		return *this;
 	}
@@ -244,7 +244,7 @@ public:
 	*/
 	T GetLength() const
 	{
-		return sqrt(x*x + y*y + z*z + w*w);
+		return std::sqrt(x*x + y*y + z*z + w*w);
 	}
 
 	//! Get the squared length of this quaternion
@@ -504,7 +504,7 @@ public:
 		*/
 
 		math::Quaternion<T> quat;
-		quat.w = sqrt(1.0f + wr.Dot(lr) + wu.Dot(lu) + wf.Dot(lf)) / 2;
+		quat.w = std::sqrt(1.0f + wr.Dot(lr) + wu.Dot(lu) + wf.Dot(lf)) / 2;
 		const T w4recip = 1 / (4 * quat.w);
 
 		quat.x = (
@@ -552,7 +552,7 @@ public:
 			return Quaternion(axis.x, axis.y, axis.z, 0).Normal();
 		}
 
-		const T s = (T)sqrt((1 + d) * 2);
+		const T s = (T)std::sqrt((1 + d) * 2);
 		const T InvS = 1 / s;
 		const Vector3<T> c = v0.Cross(v1) * InvS;
 		return Quaternion(c.x, c.y, c.z, s / 2).Normal();

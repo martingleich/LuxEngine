@@ -125,8 +125,8 @@ void FontRaster::Draw(
 		clipRect.FitInto(math::RectU(
 			(u32)math::Max(0.0f, userClip->left),
 			(u32)math::Max(0.0f, userClip->top),
-			(u32)math::Max(0.0f, ceilf(userClip->right)),
-			(u32)math::Max(0.0f, ceilf(userClip->bottom))));
+			(u32)math::Max(0.0f, std::ceil(userClip->right)),
+			(u32)math::Max(0.0f, std::ceil(userClip->bottom))));
 	}
 
 	if(position.y + charHeight + 1 < (float)clipRect.top)
@@ -135,14 +135,8 @@ void FontRaster::Draw(
 		return;
 
 	video::ScissorRectToken tok;
-	if(userClip) {
-		math::RectU scissorRect;
-		scissorRect.left = (u32)clipRect.left;
-		scissorRect.right = (u32)ceil(clipRect.right);
-		scissorRect.top = (u32)clipRect.top;
-		scissorRect.bottom = (u32)ceil(clipRect.bottom);
-		renderer->SetScissorRect(scissorRect, &tok);
-	}
+	if(userClip)
+		renderer->SetScissorRect(clipRect, &tok);
 
 	renderer->SetMaterial(m_Material);
 	renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
@@ -164,22 +158,22 @@ void FontRaster::Draw(
 		cursor.x += info.A * settings.scale;
 
 		// Top-Left
-		vertices[vertexCursor].position.x = floorf(cursor.x + italic);
-		vertices[vertexCursor].position.y = floorf(cursor.y);
+		vertices[vertexCursor].position.x = std::floor(cursor.x + italic);
+		vertices[vertexCursor].position.y = std::floor(cursor.y);
 		vertices[vertexCursor].color = settings.color;
 		vertices[vertexCursor].texture.x = info.left;
 		vertices[vertexCursor].texture.y = info.top;
 
 		// Top-Right
-		vertices[vertexCursor + 1].position.x = floorf(cursor.x + charWidth + italic);
-		vertices[vertexCursor + 1].position.y = floorf(cursor.y);
+		vertices[vertexCursor + 1].position.x = std::floor(cursor.x + charWidth + italic);
+		vertices[vertexCursor + 1].position.y = std::floor(cursor.y);
 		vertices[vertexCursor + 1].color = settings.color;
 		vertices[vertexCursor + 1].texture.x = info.right;
 		vertices[vertexCursor + 1].texture.y = info.top;
 
 		// Lower-Right
-		vertices[vertexCursor + 2].position.x = floorf(cursor.x + charWidth);
-		vertices[vertexCursor + 2].position.y = floorf(cursor.y + charHeight);
+		vertices[vertexCursor + 2].position.x = std::floor(cursor.x + charWidth);
+		vertices[vertexCursor + 2].position.y = std::floor(cursor.y + charHeight);
 		vertices[vertexCursor + 2].color = settings.color;
 		vertices[vertexCursor + 2].texture.x = info.right;
 		vertices[vertexCursor + 2].texture.y = info.bottom;
@@ -188,8 +182,8 @@ void FontRaster::Draw(
 		vertices[vertexCursor + 4] = vertices[vertexCursor + 2];
 
 		// Lower-Left
-		vertices[vertexCursor + 5].position.x = floorf(cursor.x);
-		vertices[vertexCursor + 5].position.y = floorf(cursor.y + charHeight);
+		vertices[vertexCursor + 5].position.x = std::floor(cursor.x);
+		vertices[vertexCursor + 5].position.y = std::floor(cursor.y + charHeight);
 		vertices[vertexCursor + 5].color = settings.color;
 		vertices[vertexCursor + 5].texture.x = info.left;
 		vertices[vertexCursor + 5].texture.y = info.bottom;

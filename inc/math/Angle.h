@@ -206,43 +206,43 @@ inline Angle<T>& operator%=(Angle<T>& a, Angle<T> b)
 template <typename T>
 inline T Cos(Angle<T> a)
 {
-	return cosf(a.Radian());
+	return std::cos(a.Radian());
 }
 
 template <typename T>
 inline T Sin(Angle<T> a)
 {
-	return sinf(a.Radian());
+	return std::sin(a.Radian());
 }
 
 template <typename T>
 inline T Tan(Angle<T> a)
 {
-	return tanf(a.Radian());
+	return std::tan(a.Radian());
 }
 
 template <typename T>
 inline Angle<T> ArcCos(T f)
 {
-	return Angle<T>::Radian(acosf(f));
+	return Angle<T>::Radian(std::acos(f));
 }
 
 template <typename T>
 inline Angle<T> ArcSin(T f)
 {
-	return Angle<T>::Radian(asinf(f));
+	return Angle<T>::Radian(std::asin(f));
 }
 
 template <typename T>
 inline Angle<T> ArcTan(T f)
 {
-	return Angle<T>::Radian(atanf(f));
+	return Angle<T>::Radian(std::atan(f));
 }
 
 template <typename T>
 inline Angle<T> ArcTan2(T y, T x)
 {
-	return Angle<T>::Radian(atan2f(y, x));
+	return Angle<T>::Radian(std::atan2(y, x));
 }
 
 typedef Angle<float> AngleF;

@@ -98,7 +98,7 @@ namespace internal
 			// 64-Bit since we need enough room for at least 13 digits.
 			// otherwise we use exponential notation.
 			uint64_t pre = (uint64_t)n;
-			uint64_t post = (uint64_t)((n - floor(n)) * getPow10(digits + 1));
+			uint64_t post = (uint64_t)((n - std::floor(n)) * getPow10(digits + 1));
 
 			size_t len = 0;
 			do {
@@ -192,7 +192,7 @@ namespace internal
 			// 64-Bit since we need enough room for at least 13 digits.
 			// otherwise we use exponential notation.
 			uint64_t pre = (uint64_t)n;
-			uint64_t post = (uint64_t)((n - floor(n)) * getPow10(digits + 1));
+			uint64_t post = (uint64_t)((n - std::floor(n)) * getPow10(digits + 1));
 
 			// Round the number
 			size_t post_digits = digits;

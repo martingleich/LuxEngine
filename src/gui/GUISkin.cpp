@@ -30,11 +30,11 @@ void Skin3D::DrawCursor(
 	float s2 = 20.0f;
 	math::Vector2F p1(0, 0);
 	math::Vector2F p2 = math::Vector2F::BuildFromPolar(rot, s1);
-	p2.x = floor(p2.x); p2.y = floor(p2.y);
+	p2.x = std::floor(p2.x); p2.y = std::floor(p2.y);
 	math::Vector2F p3 = math::Vector2F::BuildFromPolar(rot + a / 2, s2);
-	p3.x = floor(p3.x); p3.y = floor(p3.y);
+	p3.x = std::floor(p3.x); p3.y = std::floor(p3.y);
 	math::Vector2F p4 = math::Vector2F::BuildFromPolar(rot + a, s1);
-	p4.x = floor(p4.x); p4.y = floor(p4.y);
+	p4.x = std::floor(p4.x); p4.y = std::floor(p4.y);
 	r->DrawTriangle(
 		position + p1,
 		position + p2,

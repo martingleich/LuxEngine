@@ -188,7 +188,7 @@ public:
 	inline math::Vector2F GetVector2Circle(float radius = 1.0f) const
 	{
 		const float baseLine = GetFloat(-1.0f, 1.0f);
-		const float s = sqrt(1 - baseLine*baseLine);
+		const float s = std::sqrt(1 - baseLine*baseLine);
 		const float height = GetFloat(-s, s);
 
 		return radius * math::Vector2F(baseLine, height);

@@ -39,7 +39,7 @@ public:
 	math::Vector3F GetPointInside(const core::Randomizer& rand) const
 	{
 		// The squareroot of the distributions ensures a uniform disribution.
-		const math::Vector2F base = rand.GetVector2Circle().Normal() * sqrtf(rand.GetFloat(m_MinRadius*m_MinRadius, m_MaxRadius*m_MaxRadius));
+		const math::Vector2F base = rand.GetVector2Circle().Normal() * std::sqrt(rand.GetFloat(m_MinRadius*m_MinRadius, m_MaxRadius*m_MaxRadius));
 		
 		const float y = rand.GetFloat(-m_HalfHeight, m_HalfHeight);
 
@@ -54,7 +54,7 @@ public:
 			return math::Vector3F::NEGATIVE_UNIT_Y;
 		float x = point.x;
 		float z = point.z;
-		float len = sqrt(x*x + z*z);
+		float len = std::sqrt(x*x + z*z);
 		if(math::IsZero(len))
 			return math::Vector3F::ZERO;
 		else if(len < m_MinRadius)

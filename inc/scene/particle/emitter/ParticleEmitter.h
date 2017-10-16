@@ -99,7 +99,7 @@ public:
 		m_Count += m_Flow * secsPassed;
 		if(m_Count > 0.0f) {
 			u32 out = (u32)m_Count;
-			m_Count -= floor(m_Count);
+			m_Count -= std::floor(m_Count);
 			return out;
 		} else {
 			return 0;

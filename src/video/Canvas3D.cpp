@@ -190,7 +190,7 @@ void Canvas3D::DrawCircle(const math::Vector3F& pos, const math::Vector3F& nor, 
 	float lastSeg = 0;
 	for(u32 i = 1; i < res; ++i) {
 		float t = (i*math::Constants<float>::two_pi()) / res;
-		math::Vector3F v = pos + radius*cosf(t)*ux + radius*sinf(t)*uy;
+		math::Vector3F v = pos + radius*std::cos(t)*ux + radius*std::sin(t)*uy;
 		float seg = lastSeg + last.GetDistanceTo(v);
 		DrawPartialLine(m_Pen, last, lastSeg,
 			v, seg);

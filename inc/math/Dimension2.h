@@ -149,7 +149,7 @@ public:
 	//! Get the length of the diagonal
 	T GetDiagonal() const
 	{
-		return sqrt(width*width+height*height);
+		return std::sqrt(width*width+height*height);
 	}
 
 	//! Is the dimension empty

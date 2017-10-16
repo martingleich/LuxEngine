@@ -69,7 +69,7 @@ public:
 		const math::Vector3F normal = (particle.position - rotCenter) / dist;
 		const math::Vector3F tangent = normal.Cross(m_TransAxis);
 
-		const math::Vector3F newPos = rotCenter + newRadius * (normal*cosf(deltaAngle) + tangent*sinf(deltaAngle));
+		const math::Vector3F newPos = rotCenter + newRadius * (normal*std::cos(deltaAngle) + tangent*std::sin(deltaAngle));
 
 		// The velocity is calculated to transport it directly to the correct position
 		math::Vector3F newVelocity = (newPos - particle.position) / secsPassed;

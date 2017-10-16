@@ -57,7 +57,7 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		if(math::IsZero(lSq))
 			delta = m_Data->DefaultDir;
 		else if(!m_Data->ScaleSpeed)
-			delta /= sqrtf(lSq);
+			delta /= std::sqrt(lSq);
 		delta *= m_Data->Length * model->ReadValue(p, Particle::EParameter::Size);
 
 		m_Vertices[cursor].position = p.position;

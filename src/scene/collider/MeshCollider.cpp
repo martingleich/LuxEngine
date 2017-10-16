@@ -165,7 +165,7 @@ bool MeshCollider::SelectFirstTriangle(const math::Line3F& line, math::Vector3F&
 		m_Temp.Sort();
 		out_pos = m_Temp[0].pos;
 		triId = m_Temp[0].id;
-		distance = sqrt(m_Temp[0].distanceSq);
+		distance = std::sqrt(m_Temp[0].distanceSq);
 		m_Temp.Clear();
 		return true;
 	}

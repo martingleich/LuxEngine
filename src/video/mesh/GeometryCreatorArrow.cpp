@@ -204,7 +204,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 	// Cone
 	baseIndex = vertexBuffer->GetCursor();
 
-	const float head_s = sqrt(head_radius*head_radius + head_height*head_height);
+	const float head_s = std::sqrt(head_radius*head_radius + head_height*head_height);
 	const math::AngleF unroll_sector_angle = (head_radius / head_s) * math::AngleF::FULL;
 	for(s32 i = 0; i <= sectors; ++i) {
 		Vertex3D v;
@@ -219,7 +219,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 		v.normal.x = s;
 		v.normal.y = c;
 		v.normal.z = head_radius / head_height;
-		v.normal /= sqrt(1 + v.normal.z*v.normal.z);
+		v.normal /= std::sqrt(1 + v.normal.z*v.normal.z);
 
 		const math::AngleF sector_angle = unroll_sector_angle * ((float)i / sectors);
 		v.texture.x = (head_s / shaft_circum) * math::Sin(sector_angle) + 0.5f;
@@ -241,7 +241,7 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 		v.texture.x = 0.5f;
 		v.texture.y = 0.5f;
 
-		v.normal /= sqrt(1 + v.normal.z*v.normal.z);
+		v.normal /= std::sqrt(1 + v.normal.z*v.normal.z);
 
 		vertexBuffer->AddVertex(&v);
 	}

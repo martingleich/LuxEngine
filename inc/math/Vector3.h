@@ -226,7 +226,7 @@ public:
 	*/
 	T GetLength() const
 	{
-		return (T)(sqrt((double)(x*x + y*y + z*z)));
+		return (T)(std::sqrt((double)(x*x + y*y + z*z)));
 	}
 
 	//! The squared length of the vector
@@ -285,16 +285,16 @@ public:
 	*/
 	Vector3<T>& SetLength(T newLength)
 	{
-		if(isinf(x) || isinf(y) || isinf(z)) {
-			if(isinf(x))
+		if(std::isinf(x) || std::isinf(y) || std::isinf(z)) {
+			if(std::isinf(x))
 				x = (T)(x < 0 ? -1 : 1);
 			else
 				x = 0;
-			if(isinf(y))
+			if(std::isinf(y))
 				y = (T)(y < 0 ? -1 : 1);
 			else
 				y = 0;
-			if(isinf(z))
+			if(std::isinf(z))
 				z = (T)(z < 0 ? -1 : 1);
 			else
 				z = 0;
@@ -356,7 +356,7 @@ public:
 	*/
 	Angle<T> AngleTo(const Vector3<T>& b) const
 	{
-		return math::ArcCos<T>(Dot(b)) / (T)sqrt(double(GetLengthSq()*b.GetLengthSq()));
+		return math::ArcCos<T>(Dot(b)) / (T)std::sqrt(double(GetLengthSq()*b.GetLengthSq()));
 	}
 
 	//! Rotate another vector with this one
@@ -405,11 +405,11 @@ public:
 
 		double length = x*x + y*y + z*z;
 		if(length > 0) {
-			length = sqrt(length);
+			length = std::sqrt(length);
 			vOut.z = (T)length;
 
 			if(x != 0) {
-				vOut.x = (T)(atan2(z, x));
+				vOut.x = (T)(std::atan2(z, x));
 			}
 			// x == 0
 			else if(z < 0) {
@@ -442,7 +442,7 @@ public:
 			if(vOut.y >= math::Constants<T>::two_pi())
 				vOut.y -= math::Constants<T>::two_pi();
 
-			const double tmp = (double)(sqrt(x*x + z*z));
+			const double tmp = (double)(std::sqrt(x*x + z*z));
 			vOut.x = (T)(atan2(tmp, double(y)) - math::Constants<T>::half_pi());
 
 			if(vOut.x < 0)
@@ -511,9 +511,9 @@ public:
 	Vector3 GetOrthoNormal() const
 	{
 		if(x == 0)
-			return Vector3(0, z, -y) / sqrt(z*z + y*y);
+			return Vector3(0, z, -y) / std::sqrt(z*z + y*y);
 		else if(z != 0 && x != 0)
-			return Vector3(z, 0, -x) / sqrt(z*z + x*x);
+			return Vector3(z, 0, -x) / std::sqrt(z*z + x*x);
 		else
 			return Vector3(1, 0, 0);
 	}

@@ -192,11 +192,11 @@ Vector3F Matrix4::GetScale() const
 		return Vector3F(m[0][0], m[1][1], m[2][2]);
 
 	// Volle Berechnung nötig
-	float XScaling = sqrtf(m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2]);
+	float XScaling = std::sqrt(m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2]);
 	return Vector3F(
 		GetTransformDet() > 0 ? XScaling : -XScaling,
-		sqrtf(m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2]),
-		sqrtf(m[2][0] * m[0][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2]));
+		std::sqrt(m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2]),
+		std::sqrt(m[2][0] * m[0][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2]));
 }
 
 Matrix4& Matrix4::SetRotationEuler(AngleF x, AngleF y, AngleF z)
@@ -426,14 +426,14 @@ Matrix4& Matrix4::BuildWorld(const Vector3F& vScale,
 	const Vector3F& vRot,
 	const Vector3F& vTrans)
 {
-	const float cX = vRot.x != 0.0f ? cosf(vRot.x) : 1.0f;
-	const float sX = vRot.x != 0.0f ? sinf(vRot.x) : 0.0f;
+	const float cX = vRot.x != 0.0f ? std::cos(vRot.x) : 1.0f;
+	const float sX = vRot.x != 0.0f ? std::sin(vRot.x) : 0.0f;
 
-	const float cY = vRot.y != 0.0f ? cosf(vRot.y) : 1.0f;
-	const float sY = vRot.y != 0.0f ? sinf(vRot.y) : 0.0f;
+	const float cY = vRot.y != 0.0f ? std::cos(vRot.y) : 1.0f;
+	const float sY = vRot.y != 0.0f ? std::sin(vRot.y) : 0.0f;
 
-	const float cZ = vRot.z != 0.0f ? cosf(vRot.z) : 1.0f;
-	const float sZ = vRot.z != 0.0f ? sinf(vRot.z) : 0.0f;
+	const float cZ = vRot.z != 0.0f ? std::cos(vRot.z) : 1.0f;
+	const float sZ = vRot.z != 0.0f ? std::sin(vRot.z) : 0.0f;
 
 	const float sXsY = sX*sY;
 	const float cXsY = cX*sY;
