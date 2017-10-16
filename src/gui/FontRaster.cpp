@@ -125,8 +125,8 @@ void FontRaster::Draw(
 		clipRect.FitInto(math::RectU(
 			(u32)math::Max(0.0f, userClip->left),
 			(u32)math::Max(0.0f, userClip->top),
-			(u32)math::Max(0.0f, ceil(userClip->right)),
-			(u32)math::Max(0.0f, ceil(userClip->bottom))));
+			(u32)math::Max(0.0f, ceilf(userClip->right)),
+			(u32)math::Max(0.0f, ceilf(userClip->bottom))));
 	}
 
 	if(position.y + charHeight + 1 < (float)clipRect.top)

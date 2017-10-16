@@ -366,7 +366,7 @@ void Element::SetFont(Font* f)
 
 Font* Element::GetFont() const
 {
-	return m_OverwriteFont ? m_OverwriteFont : GetSkin()->GetDefaultFont();
+	return m_OverwriteFont ? (Font*)m_OverwriteFont : GetSkin()->GetDefaultFont();
 }
 
 void Element::SetAlignment(EAlign align)
