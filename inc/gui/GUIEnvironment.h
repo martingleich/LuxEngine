@@ -51,10 +51,10 @@ public:
 
 	EType type;
 	math::Vector2F pos;
-	bool leftState:1;
-	bool rightState:1;
-	bool ctrl:1;
-	bool shift:1;
+	bool leftState : 1;
+	bool rightState : 1;
+	bool ctrl : 1;
+	bool shift : 1;
 };
 
 class KeyboardEvent : public Event
@@ -62,10 +62,10 @@ class KeyboardEvent : public Event
 public:
 	u32 character[4];
 	input::EKeyCode key;
-	bool down:1;
-	bool autoRepeat:1;
-	bool ctrl:1;
-	bool shift:1;
+	bool down : 1;
+	bool autoRepeat : 1;
+	bool ctrl : 1;
+	bool shift : 1;
 };
 
 class ElementEvent : public Event
@@ -118,6 +118,9 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
+	LUX_API void SetKeyRepeat(float timeToStart, float timeToRepeat);
+	LUX_API void GetKeyRepeat(float& timeToStart, float& timeToRepeat);
+
 	LUX_API void IgnoreKeyboard(bool b);
 	LUX_API void IgnoreMouse(bool b);
 	LUX_API void SendUserInputEvent(const input::Event& event);
@@ -132,9 +135,9 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	LUX_API StrongRef<Element> AddElement(core::Name name, Element* parent);
-	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const String& text, Element* parent=nullptr);
-	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent=nullptr);
-	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent=nullptr);
+	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const String& text = String::EMPTY, Element* parent = nullptr);
+	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text = String::EMPTY, Element* parent = nullptr);
+	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text = String::EMPTY, Element* parent = nullptr);
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -146,7 +149,7 @@ public:
 	This font is always available, and is often used for default font values.
 	*/
 	LUX_API StrongRef<Font> GetBuiltInFont();
-	
+
 	///////////////////////////////////////////////////////////////////////////
 
 	LUX_API void CaptureCursor(Element* elem);
@@ -181,6 +184,18 @@ private:
 	WeakRef<Element> m_Focused;
 
 	WeakRef<Element> m_Captured;
+
+	class KeyRepeatContext
+	{
+	public:
+		bool isActive;
+		float keyRepeatTime;
+		float keyRepeatStartTime;
+		float timeToStart;
+		float timeToRepeat;
+		KeyboardEvent event;
+	};
+	KeyRepeatContext m_KeyRepeatContext;
 
 	math::Vector2F m_CursorPos;
 	bool m_LeftState;

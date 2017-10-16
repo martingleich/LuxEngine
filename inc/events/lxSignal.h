@@ -238,16 +238,22 @@ public:
 	template <typename Class>
 	void Connect(Class* owner, void (Class::*proc)(Args...))
 	{
-		if(owner && proc)
+		if(owner && proc) {
 			m_Callfuncs.PushBack(std::unique_ptr<SignalMemberFuncAuto<Class, Args...>>(
 				new SignalMemberFuncAuto<Class, Args...>(owner, proc)));
+			if(m_ConnectEvent)
+				m_ConnectEvent->Call(*(m_Callfuncs.Back()));
+		}
 	}
 
 	void Connect(void(*proc)(Args...))
 	{
-		if(proc)
+		if(proc) {
 			m_Callfuncs.PushBack(std::unique_ptr<SignalStaticFunc<Args...>>(
 				new SignalStaticFunc<Args...>(proc)));
+			if(m_ConnectEvent)
+				m_ConnectEvent->Call(*(m_Callfuncs.Back()));
+		}
 	}
 
 	template <typename FunctorT>
@@ -255,6 +261,8 @@ public:
 	{
 		m_Callfuncs.PushBack(std::unique_ptr<SignalFunctor<FunctorT, Args...>>(
 			new SignalFunctor<FunctorT, Args...>(functor)));
+		if(m_ConnectEvent)
+			m_ConnectEvent->Call(*(m_Callfuncs.Back()));
 	}
 
 	template <typename Class>
@@ -314,8 +322,42 @@ public:
 		return !m_Callfuncs.IsEmpty();
 	}
 
+	template <typename Class>
+	void SetCallbackEvent(StrongRef<Class>owner, void (Class::*proc)(const SignalFunc<Args...>&))
+	{
+		SetCallbackEvent((Class*)owner, proc);
+	}
+	template <typename Class>
+	void SetCallbackEvent(WeakRef<Class> owner, void (Class::*proc)(const SignalFunc<Args...>&))
+	{
+		SetCallbackEvent((Class*)owner, proc);
+	}
+
+	template <typename Class>
+	void SetCallbackEvent(Class* owner, void (Class::*proc)(const SignalFunc<Args...>&))
+	{
+		if(owner && proc)
+			m_ConnectEvent = std::unique_ptr<SignalMemberFuncAuto<Class, const SignalFunc<Args...>&>>(
+				new SignalMemberFuncAuto<Class, const SignalFunc<Args...>&>(owner, proc));
+	}
+
+	void SetCallbackEvent(void(*proc)(const SignalFunc<Args...>&))
+	{
+		if(proc)
+			m_ConnectEvent = std::unique_ptr<SignalStaticFunc<const SignalFunc<Args...>&>>(
+				new SignalStaticFunc<const SignalFunc<Args...>&>(proc));
+	}
+
+	template <typename FunctorT>
+	void SetCallbackEvent(const FunctorT& functor)
+	{
+		m_ConnectEvent = std::unique_ptr<SignalFunctor<FunctorT, const SignalFunc<Args...>&>>(
+			new SignalFunctor<FunctorT, const SignalFunc<Args...>&>(functor));
+	}
+
 private:
 	SignalRef<Args...>* m_FirstRef;
+	std::unique_ptr<SignalFunc<const SignalFunc<Args...>&>> m_ConnectEvent;
 	mutable core::Array<std::unique_ptr<SignalFunc<Args...>>> m_Callfuncs;
 };
 

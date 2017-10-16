@@ -92,6 +92,10 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_UseVirtualCursor(true), // Is later in code set to false
 	m_DrawVirtualCursor(false)
 {
+	m_KeyRepeatContext.isActive = false;
+	m_KeyRepeatContext.keyRepeatTime = 0.1f;
+	m_KeyRepeatContext.keyRepeatStartTime = 0.3f;
+
 	m_OSWindow->SetEnvironment(this);
 
 	m_Root = m_OSWindow;
@@ -198,8 +202,6 @@ void GUIEnvironment::SetDrawVirtualCursor(bool draw)
 
 void GUIEnvironment::Update(float secsPassed)
 {
-	LUX_UNUSED(secsPassed);
-
 	auto newHovered = GetElementByPos(m_CursorPos).GetWeak();
 	if(m_Hovered != newHovered) {
 		ElementEvent e;
@@ -215,6 +217,19 @@ void GUIEnvironment::Update(float secsPassed)
 		}
 		//onHoverChange.Broadcast(newHovered);
 		m_Hovered = newHovered;
+	}
+	
+	if(m_KeyRepeatContext.isActive) {
+		if(m_KeyRepeatContext.timeToStart <= 0) {
+			if(m_KeyRepeatContext.timeToRepeat <= 0) {
+				SendKeyboardEvent(m_KeyRepeatContext.event);
+				m_KeyRepeatContext.timeToRepeat = m_KeyRepeatContext.keyRepeatTime;
+			} else {
+				m_KeyRepeatContext.timeToRepeat -= secsPassed;
+			}
+		} else {
+			m_KeyRepeatContext.timeToStart -= secsPassed;
+		}
 	}
 }
 
@@ -263,6 +278,23 @@ void GUIEnvironment::SetRenderer(Renderer* r)
 
 ///////////////////////////////////////////////////////////////////////////
 
+void GUIEnvironment::SetKeyRepeat(float timeToStart, float timeToRepeat)
+{
+	if(timeToStart < 0)
+		throw core::InvalidArgumentException("timeToStart", "Must be non-negative");
+	if(timeToRepeat < 0)
+		throw core::InvalidArgumentException("timeToRepeat", "Must be non-negative");
+
+	m_KeyRepeatContext.keyRepeatStartTime = timeToStart;
+	m_KeyRepeatContext.keyRepeatTime = timeToRepeat;
+}
+
+void GUIEnvironment::GetKeyRepeat(float& timeToStart, float& timeToRepeat)
+{
+	timeToStart = m_KeyRepeatContext.keyRepeatStartTime;
+	timeToRepeat = m_KeyRepeatContext.keyRepeatStartTime;
+}
+
 void GUIEnvironment::IgnoreKeyboard(bool b)
 {
 	m_IgnoreKeyboard = b;
@@ -303,11 +335,21 @@ void GUIEnvironment::SendUserInputEvent(const input::Event& event)
 		m_ControlState = event.control;
 		m_ShiftState = event.shift;
 		KeyboardEvent e;
-		e.autoRepeat = !event.button.pressedDown;
+		e.autoRepeat = false;
 		memcpy(e.character, event.keyInput.character, sizeof(e.character));
 		e.key = event.button.code;
 		e.down = event.button.state;
 		SendKeyboardEvent(e);
+		
+		if(e.down) {
+			m_KeyRepeatContext.event = e;
+			m_KeyRepeatContext.event.autoRepeat = true;
+			m_KeyRepeatContext.isActive = true;
+			m_KeyRepeatContext.timeToStart = m_KeyRepeatContext.keyRepeatStartTime;
+			m_KeyRepeatContext.timeToRepeat = 0;
+		} else {
+			m_KeyRepeatContext.isActive = false;
+		}
 	}
 }
 

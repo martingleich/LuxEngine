@@ -194,6 +194,21 @@ namespace internal
 			uint64_t pre = (uint64_t)n;
 			uint64_t post = (uint64_t)((n - floor(n)) * getPow10(digits + 1));
 
+			// Round the number
+			size_t post_digits = digits;
+			if(post > 0) {
+				if(post % 10 >= 5)
+					post += 5;
+				post /= 10;
+				while(post % 10 == 0 && post) {
+					post /= 10;
+					--post_digits;
+				}
+				if(post_digits == 0) {
+					pre++;
+					post = 0;
+				}
+			}
 
 			len = 0;
 			do {
@@ -208,14 +223,6 @@ namespace internal
 			bool hasPost = (post > 0);
 			len = 0;
 			if(hasPost) {
-				size_t post_digits = digits;
-				if(post % 10 >= 5)
-					post += 5;
-				post /= 10;
-				while(post % 10 == 0 && post) {
-					post /= 10;
-					--post_digits;
-				}
 				ConvertAddString(ctx, StringType::Unicode, locale.Comma, strlen(locale.Comma));
 
 				while(post > 0) {
@@ -415,7 +422,7 @@ namespace internal
 			if(p%tab_stop == 0)
 				return;
 
-			size_t count = ((p / tab_stop+1)*tab_stop - p);
+			size_t count = ((p / tab_stop + 1)*tab_stop - p);
 
 			PutSpaces(ctx, count);
 		}
