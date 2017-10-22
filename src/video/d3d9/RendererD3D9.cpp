@@ -3,15 +3,16 @@
 
 #include "video/TextureLayer.h"
 #include "video/BaseTexture.h"
-#include "video/d3d9/VideoDriverD3D9.h"
-#include "video/d3d9/D3D9Exception.h"
-#include "video/d3d9/HardwareBufferManagerD3D9.h"
 #include "video/mesh/Geometry.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 #include "video/VertexTypes.h"
 #include "video/Shader.h"
 #include "core/Logger.h"
+
+#include "video/d3d9/VideoDriverD3D9.h"
+#include "video/d3d9/HardwareBufferManagerD3D9.h"
+#include "platform/D3D9Exception.h"
 
 namespace lux
 {
@@ -502,7 +503,7 @@ void RendererD3D9::LoadTransforms(const Pass& pass)
 				1.0f, 0.0f, 0.0f, 0.0f,
 				0.0f, -1.0f, 0.0f, 0.0f,
 				0.0f, 0.0f, 1.0f, 0.0f,
-				-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 - 0.5f, 0.0f, 1.0f);
+				-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 + 0.5f, 0.0f, 1.0f);
 
 			math::Matrix4 proj = math::Matrix4(
 				2.0f / ssize.width, 0.0f, 0.0f, 0.0f,

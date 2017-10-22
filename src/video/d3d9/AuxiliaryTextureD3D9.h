@@ -3,10 +3,10 @@
 
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "core/ReferenceCounted.h"
-#include "UnknownRefCounted.h"
+#include "platform/UnknownRefCounted.h"
 #include "core/lxArray.h"
 
-#include "StrippedD3D9.h"
+#include "platform/StrippedD3D9.h"
 
 namespace lux
 {

@@ -2,7 +2,7 @@
 #define INCLUDED_DLL_MAIN_WIN32_H
 #ifdef LUX_WINDOWS
 #include "core/LuxBase.h"
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 
 namespace lux
 {

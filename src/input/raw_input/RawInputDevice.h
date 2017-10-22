@@ -4,7 +4,7 @@
 #include "input/InputDevice.h"
 #include "input/InputSystem.h"
 
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 
 namespace lux
 {

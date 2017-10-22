@@ -3,10 +3,10 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/RendererNull.h"
 
-#include "StrippedD3D9.h"
+#include "platform/StrippedD3D9.h"
 
 #include "video/d3d9/D3DHelper.h"
-#include "video/d3d9/UnknownRefCounted.h"
+#include "platform/UnknownRefCounted.h"
 #include "video/d3d9/RenderTargetD3D9.h"
 
 namespace lux

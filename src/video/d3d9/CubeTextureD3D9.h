@@ -3,7 +3,7 @@
 #include "video/CubeTexture.h"
 
 #ifdef LUX_COMPILE_WITH_D3D9
-#include "StrippedD3D9.h"
+#include "platform/StrippedD3D9.h"
 #include "AuxiliaryTextureD3D9.h"
 
 namespace lux

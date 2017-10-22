@@ -7,8 +7,8 @@
 #include "video/TextureStageSettings.h"
 #include "video/Shader.h"
 
-#include "StrippedD3D9.h"
-#include "UnknownRefCounted.h"
+#include "platform/StrippedD3D9.h"
+#include "platform/UnknownRefCounted.h"
 
 namespace lux
 {

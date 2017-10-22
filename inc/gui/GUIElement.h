@@ -105,12 +105,12 @@ public:
 	LUX_API StrongRef<Element> AddElement(Element* elem);
 	LUX_API virtual StrongRef<Element> AddElement(Element* elem, ElementIterator where);
 
-	LUX_API virtual const math::RectF& GetFinalInnerRect() const;
+	LUX_API virtual math::RectF GetFinalInnerRect() const;
 	LUX_API math::Dimension2F GetFinalInnerSize() const;
 	LUX_API float GetFinalInnerWidth() const;
 	LUX_API float GetFinalInnerHeight() const;
 
-	LUX_API virtual const math::RectF& GetFinalRect() const;
+	LUX_API virtual math::RectF GetFinalRect() const;
 	LUX_API math::Dimension2F GetFinalSize() const;
 	LUX_API float GetFinalWidth() const;
 	LUX_API float GetFinalHeight() const;

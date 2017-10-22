@@ -6,8 +6,8 @@
 #include "core/lxMemory.h"
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
-#include "RawInputDevice.h"
-#include "StrippedWindows.h"
+#include "input/raw_input/RawInputDevice.h"
+#include "platform/StrippedWindows.h"
 
 namespace lux
 {

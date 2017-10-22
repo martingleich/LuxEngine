@@ -15,7 +15,7 @@
 #include "LuxSystemInfoWin32.h"
 
 #include <WinUser.h>
-#include "Win32Exception.h"
+#include "platform/Win32Exception.h"
 
 namespace lux
 {

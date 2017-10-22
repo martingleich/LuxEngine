@@ -12,9 +12,9 @@
 #include "video/IndexBuffer.h"
 #include "video/VertexBuffer.h"
 
-#include "D3DHelper.h"
-#include "D3D9Exception.h"
-#include "AuxiliaryTextureD3D9.h"
+#include "video/d3d9/D3DHelper.h"
+#include "platform/D3D9Exception.h"
+#include "video/d3d9/AuxiliaryTextureD3D9.h"
 
 #include "core/ModuleFactoryRegister.h"
 

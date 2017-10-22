@@ -3,9 +3,9 @@
 #include "video/RenderTarget.h"
 
 #ifdef LUX_COMPILE_WITH_D3D9
-#include "StrippedD3D9.h"
+#include "platform/StrippedD3D9.h"
 #include "D3DHelper.h"
-#include "UnknownRefCounted.h"
+#include "platform/UnknownRefCounted.h"
 
 namespace lux
 {

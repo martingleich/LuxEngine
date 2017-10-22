@@ -2,7 +2,7 @@
 #define INCLUDED_LUX_SYSTEM_INFO_WIN32_H
 #ifdef LUX_WINDOWS
 #include "LuxEngine/LuxSystemInfo.h"
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 #include "core/lxUnicodeConversion.h"
 
 namespace lux

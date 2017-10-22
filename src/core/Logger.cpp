@@ -4,7 +4,7 @@
 #include "core/Clock.h"
 #include "core/StringConverter.h"
 #ifdef LUX_WINDOWS
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 #endif
 
 #ifdef LUX_WINDOWS

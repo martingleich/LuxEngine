@@ -5,9 +5,9 @@
 #include "core/lxMemory.h"
 #include "core/ParamPackage.h"
 
-#include "StrippedD3D9.h"
-#include "StrippedD3D9X.h"
-#include "video/d3d9/UnknownRefCounted.h"
+#include "platform/StrippedD3D9.h"
+#include "platform/StrippedD3D9X.h"
+#include "platform/UnknownRefCounted.h"
 
 namespace lux
 {

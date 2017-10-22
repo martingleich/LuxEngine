@@ -3,7 +3,7 @@
 #include "io/FileSystem.h"
 #include "io/File.h"
 #include "core/lxUnicodeConversion.h"
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 
 namespace lux
 {

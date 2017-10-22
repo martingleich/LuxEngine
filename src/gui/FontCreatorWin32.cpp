@@ -5,7 +5,7 @@
 #include "TTFParser.h"
 #include "core/lxMemory.h"
 #include "core/Logger.h"
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 
 namespace lux
 {

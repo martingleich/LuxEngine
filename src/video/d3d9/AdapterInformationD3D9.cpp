@@ -2,7 +2,7 @@
 #include "AdapterInformationD3D9.h"
 
 #include "video/DriverConfig.h"
-#include "D3D9Exception.h"
+#include "platform/D3D9Exception.h"
 #include "D3DHelper.h"
 
 #include "core/ModuleFactoryRegister.h"

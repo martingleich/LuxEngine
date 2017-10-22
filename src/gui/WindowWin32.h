@@ -1,10 +1,10 @@
 #ifndef INCLUDED_WINDOW_WIN32_H
 #define INCLUDED_WINDOW_WIN32_H
-#include "WindowBase.h"
+#include "gui/WindowBase.h"
 #include "gui/CursorWin32.h"
 
 #ifdef LUX_WINDOWS
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 
 namespace lux
 {
@@ -51,12 +51,47 @@ public:
 	void Paint(Renderer* r);
 
 	math::RectF GetParentInnerRect() const;
+
 	bool UpdateFinalRect();
 	bool UpdateInnerRect();
 
 	core::Name GetReferableType() const;
 
 private:
+	void RectChange()
+	{
+		RECT winRect, clientRect;
+		GetWindowRect(m_Window, &winRect);
+		GetClientRect(m_Window, &clientRect);
+		POINT p = {0, 0};
+		ClientToScreen(m_Window, &p);
+		clientRect.left += p.x;
+		clientRect.right += p.x;
+		clientRect.top += p.y;
+		clientRect.bottom += p.y;
+		auto oldSize = m_Size;
+		auto oldPos = m_FinalRect.LeftTop();
+		m_WindowScreenRect = winRect;
+		m_FinalRect.left = (float)(m_WindowScreenRect.left - clientRect.left);
+		m_FinalRect.top = (float)(m_WindowScreenRect.top - clientRect.top);
+		m_FinalRect.right = (float)(m_WindowScreenRect.right - clientRect.left);
+		m_FinalRect.bottom = (float)(m_WindowScreenRect.bottom - clientRect.top);
+		m_InnerRect.left = 0;
+		m_InnerRect.top = 0;
+		m_InnerRect.right = (float)clientRect.right;
+		m_InnerRect.bottom = (float)clientRect.bottom;
+		m_Size.width = m_FinalRect.GetWidth();
+		m_Size.height = m_FinalRect.GetHeight();
+
+		if(oldSize != m_Size)
+			onResize.Broadcast(this, m_FinalRect.GetSize());
+		if(oldPos != m_FinalRect.LeftTop())
+			onMove.Broadcast(this, m_FinalRect.LeftTop());
+	}
+
+private:
+	RECT m_WindowScreenRect;
+
 	HWND m_Window;
 	bool m_IsFullscreen;
 

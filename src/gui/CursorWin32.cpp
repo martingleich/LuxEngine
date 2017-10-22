@@ -1,6 +1,6 @@
 #ifdef LUX_WINDOWS
 #include "CursorWin32.h"
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 
 namespace lux
 {

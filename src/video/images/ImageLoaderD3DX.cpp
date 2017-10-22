@@ -5,8 +5,8 @@
 #include "video/ColorConverter.h"
 #include "video/images/Image.h"
 #include "core/lxMemory.h"
-#include "StrippedD3D9X.h"
-#include "video/d3d9/UnknownRefCounted.h"
+#include "platform/StrippedD3D9X.h"
+#include "platform/UnknownRefCounted.h"
 
 namespace lux
 {

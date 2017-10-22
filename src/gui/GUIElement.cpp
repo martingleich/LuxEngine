@@ -289,7 +289,7 @@ StrongRef<Element> Element::AddElement(Element* elem, ElementIterator before)
 	return elem;
 }
 
-const math::RectF& Element::GetFinalInnerRect() const
+math::RectF Element::GetFinalInnerRect() const
 {
 	return m_InnerRect;
 }
@@ -309,7 +309,7 @@ float Element::GetFinalInnerHeight() const
 	return GetFinalInnerSize().height;
 }
 
-const math::RectF& Element::GetFinalRect() const
+math::RectF Element::GetFinalRect() const
 {
 	return m_FinalRect;
 }
@@ -564,11 +564,12 @@ bool Element::UpdateFinalRect()
 
 bool Element::UpdateInnerRect()
 {
+	auto finalRect = GetFinalRect();
 	math::RectF newRect;
-	newRect.left = m_FinalRect.left + m_Border.left;
-	newRect.top = m_FinalRect.top + m_Border.top;
-	newRect.right = m_FinalRect.right - m_Border.right;
-	newRect.bottom = m_FinalRect.bottom - m_Border.bottom;
+	newRect.left = finalRect.left + m_Border.left;
+	newRect.top = finalRect.top + m_Border.top;
+	newRect.right = finalRect.right - m_Border.right;
+	newRect.bottom = finalRect.bottom - m_Border.bottom;
 
 	if(!newRect.IsValid()) {
 		newRect.right = newRect.left = (newRect.left + newRect.right) / 2;

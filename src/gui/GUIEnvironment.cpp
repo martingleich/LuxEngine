@@ -210,15 +210,14 @@ void GUIEnvironment::Update(float secsPassed)
 			e.type = ElementEvent::MouseLeave;
 			SendElementEvent(e.elem, e);
 		}
+		m_Hovered = newHovered;
 		if(newHovered) {
 			e.elem = newHovered;
 			e.type = ElementEvent::MouseEnter;
 			SendElementEvent(e.elem, e);
 		}
-		//onHoverChange.Broadcast(newHovered);
-		m_Hovered = newHovered;
 	}
-	
+
 	if(m_KeyRepeatContext.isActive) {
 		if(m_KeyRepeatContext.timeToStart <= 0) {
 			if(m_KeyRepeatContext.timeToRepeat <= 0) {
@@ -340,7 +339,7 @@ void GUIEnvironment::SendUserInputEvent(const input::Event& event)
 		e.key = event.button.code;
 		e.down = event.button.state;
 		SendKeyboardEvent(e);
-		
+
 		if(e.down) {
 			m_KeyRepeatContext.event = e;
 			m_KeyRepeatContext.event.autoRepeat = true;
@@ -511,6 +510,7 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 	e.leftState = m_LeftState;
 	e.rightState = m_RightState;
 	e.pos = m_CursorPos;
+	e.elem = nullptr;
 
 	if(m_Captured) {
 		e.elem = m_Captured;
@@ -519,6 +519,12 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 		if(m_Hovered) {
 			e.elem = m_Hovered;
 			SendElementEvent(e.elem, e);
+		}
+	}
+	if(e.elem) {
+		if(e.type == MouseEvent::LDown) {
+			if(e.elem->IsFocusable())
+				SetFocused(e.elem);
 		}
 	}
 }

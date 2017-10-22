@@ -2,8 +2,6 @@
 #define INCLUDED_D3DHELPER_H
 
 #ifdef LUX_COMPILE_WITH_D3D9
-#include "StrippedD3D9.h"
-
 #include "video/Color.h"
 #include "video/VertexFormats.h"
 #include "video/VideoEnums.h"
@@ -11,6 +9,8 @@
 #include "video/FogData.h"
 #include "video/Pass.h"
 #include "video/CubeTexture.h"
+
+#include "platform/StrippedD3D9.h"
 
 namespace lux
 {

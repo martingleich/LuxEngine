@@ -15,8 +15,8 @@
 
 #ifdef LUX_WINDOWS
 #include <direct.h>
-#include "StrippedWindows.h"
-#include "Win32Exception.h"
+#include "platform/StrippedWindows.h"
+#include "platform/Win32Exception.h"
 #endif
 
 #include <stdlib.h>

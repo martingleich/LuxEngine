@@ -3,8 +3,8 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/DriverConfig.h"
 
-#include "UnknownRefCounted.h"
-#include "StrippedD3D9.h"
+#include "platform/UnknownRefCounted.h"
+#include "platform/StrippedD3D9.h"
 
 namespace lux
 {

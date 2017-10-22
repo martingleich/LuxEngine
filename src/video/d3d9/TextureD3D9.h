@@ -5,8 +5,8 @@
 
 #ifdef LUX_COMPILE_WITH_D3D9
 
-#include "StrippedD3D9.h"
-#include "UnknownRefCounted.h"
+#include "platform/StrippedD3D9.h"
+#include "platform/UnknownRefCounted.h"
 
 namespace lux
 {

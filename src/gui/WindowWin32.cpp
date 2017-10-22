@@ -9,26 +9,20 @@
 #include "core/Logger.h"
 
 #include "core/lxUnicodeConversion.h"
-#include "Win32Exception.h"
+#include "platform/Win32Exception.h"
 
 namespace lux
 {
 namespace gui
 {
 
-WindowWin32::WindowWin32(HWND window)
+WindowWin32::WindowWin32(HWND window) :
+	m_Window(window),
+	m_IsFullscreen(false)
 {
-	m_Window = window;
-	m_IsFullscreen = false;
 	SetClearBackground(false);
 
 	m_Cursor = LUX_NEW(CursorWin32)(this);
-
-	RECT r;
-	if(GetWindowRect(m_Window, &r)) {
-		OnResize((float)(r.right - r.left), (float)(r.bottom - r.top));
-		OnMove((float)r.left, (float)r.top);
-	}
 
 	BOOL isIconic = IsIconic(m_Window);
 	BOOL isZoomed = IsZoomed(m_Window);
@@ -129,68 +123,52 @@ void WindowWin32::SetText(const String& text)
 
 void WindowWin32::SetInnerSize(const ScalarDimensionF& size)
 {
-	u32 realWidth = (u32)size.width.GetRealValue((float)GetSystemMetrics(SM_CXSCREEN));
-	u32 realHeight = (u32)size.height.GetRealValue((float)GetSystemMetrics(SM_CYSCREEN));
+	auto screen = GetParentInnerRect();
+	math::Dimension2U real(
+		(u32)size.width.GetRealValue(screen.GetWidth()),
+		(u32)size.height.GetRealValue(screen.GetHeight()));
 
 	RECT rect;
-	SetRect(&rect, 0, 0, realWidth, realHeight);
+	SetRect(&rect, 0, 0, real.width, real.height);
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, false);
-	realWidth = rect.right - rect.left;
-	realHeight = rect.bottom - rect.top;
+	real.width = rect.right - rect.left;
+	real.width = rect.bottom - rect.top;
 
-	SetSize(Pixel(realWidth), Pixel(realHeight));
+	SetSize(Pixel(real.width), Pixel(real.width));
 }
 
 math::RectF WindowWin32::GetParentInnerRect() const
 {
-	return math::RectF(0, 0,
-		(float)GetSystemMetrics(SM_CXSCREEN),
-		(float)GetSystemMetrics(SM_CYSCREEN));
+	POINT p;
+	p.x = p.y = 0;
+	ClientToScreen(m_Window, &p);
+	return math::RectF(
+		-(float)p.x, -(float)p.y,
+		(float)(GetSystemMetrics(SM_CXSCREEN) - p.x),
+		(float)(GetSystemMetrics(SM_CYSCREEN) - p.y));
 }
 
 bool WindowWin32::UpdateFinalRect()
 {
-	auto oldSize = m_FinalRect.GetSize();
-	auto oldPos = m_FinalRect.LeftTop();
+	POINT p;
+	p.x = p.y = 0;
+	ClientToScreen(m_Window, &p);
+
+	auto oldRect = m_WindowScreenRect;
 	WindowBase::UpdateFinalRect();
 	WINDOWPLACEMENT plc;
 	plc.length = sizeof(WINDOWPLACEMENT);
 	GetWindowPlacement(m_Window, &plc);
-	plc.rcNormalPosition.left = (LONG)m_FinalRect.left;
-	plc.rcNormalPosition.top = (LONG)m_FinalRect.top;
-	plc.rcNormalPosition.right = (LONG)m_FinalRect.right;
-	plc.rcNormalPosition.bottom = (LONG)m_FinalRect.bottom;
+	plc.rcNormalPosition.left = (LONG)m_FinalRect.left + p.x;
+	plc.rcNormalPosition.top = (LONG)m_FinalRect.top + p.y;
+	plc.rcNormalPosition.right = plc.rcNormalPosition.left + (LONG)m_FinalRect.GetWidth();
+	plc.rcNormalPosition.bottom = plc.rcNormalPosition.top + (LONG)m_FinalRect.GetHeight();
 	SetWindowPlacement(m_Window, &plc);
-	GetWindowPlacement(m_Window, &plc);
-	m_FinalRect.left = (float)plc.rcNormalPosition.left;
-	m_FinalRect.top = (float)plc.rcNormalPosition.top;
-	m_FinalRect.right = (float)plc.rcNormalPosition.right;
-	m_FinalRect.bottom = (float)plc.rcNormalPosition.bottom;
-
-	auto newSize = m_FinalRect.GetSize();
-	auto newPos = m_FinalRect.LeftTop();
-	bool change = false;
-	if(oldSize != newSize) {
-		change = true;
-		onResize.Broadcast(const_cast<WindowWin32*>(this), newSize);
-	}
-	if(oldPos != newPos) {
-		change = true;
-		onMove.Broadcast(const_cast<WindowWin32*>(this), newPos);
-	}
-
-	return change;
+	return memcmp(&m_WindowScreenRect, &oldRect, sizeof(RECT)) != 0;
 }
 
 bool WindowWin32::UpdateInnerRect()
 {
-	RECT r;
-	GetClientRect(m_Window, &r);
-	m_InnerRect.left = (float)r.left;
-	m_InnerRect.top = (float)r.top;
-	m_InnerRect.right = (float)r.right;
-	m_InnerRect.bottom = (float)r.bottom;
-
 	return true;
 }
 
@@ -241,85 +219,98 @@ void WindowWin32::Close()
 	DestroyWindow(m_Window);
 }
 
-bool WindowWin32::Present(video::Image* image, const math::RectI& SourceRect, const math::RectI& DestRect)
+bool WindowWin32::Present(
+	video::Image* image,
+	const math::RectI& _sourceRect,
+	const math::RectI& _destRect)
 {
 	if(!image)
 		return true;
 
-	HDC DC = GetDC(m_Window);
+	HDC dc = GetDC(m_Window);
 	RECT rect;
 	GetClientRect(m_Window, &rect);
-	const void* mem = (const void*)image->Lock();
+	video::ImageLock lock(image);
+	const void* mem = lock.data;
 	if(!mem)
 		return false;
-	video::ColorFormat Format = image->GetColorFormat();
+	video::ColorFormat format = image->GetColorFormat();
 
-	math::RectI DstRect = DestRect;
-	math::RectI WinRect = math::RectI(rect.left, rect.top, rect.right, rect.bottom);
-	if(DestRect.IsEmpty())
-		DstRect = WinRect;
+	math::RectI dstRect = _destRect;
+	math::RectI winRect = math::RectI(
+		rect.left, rect.top,
+		rect.right, rect.bottom);
+	if(dstRect.IsEmpty())
+		dstRect = winRect;
 	else
-		DstRect.FitInto(WinRect);
+		dstRect.FitInto(winRect);
 
-	math::RectI SrcRect = SourceRect;
-	math::RectI ImageRect = math::RectI(0, 0, image->GetSize().width, image->GetSize().height);
-	if(SrcRect.IsEmpty())
-		SrcRect = ImageRect;
+	math::RectI srcRect = _sourceRect;
+	math::RectI imageRect = math::RectI(
+		0, 0,
+		image->GetSize().width, image->GetSize().height);
+	if(srcRect.IsEmpty())
+		srcRect = imageRect;
 	else
-		SrcRect.FitInto(ImageRect);
+		srcRect.FitInto(imageRect);
 
-	math::Dimension2<int> ImageDim = ImageRect.GetSize();
+	math::Dimension2<int> imageDim = imageRect.GetSize();
 	void* data = nullptr;
 	if(image->GetBitsPerPixel() == 8) {
 		// Immer nach ARGB
-		data = LUX_NEW_ARRAY(u8, 4 * image->GetBytesPerPixel()*SrcRect.GetArea());
-		video::ColorConverter::ConvertByFormat(mem, image->GetColorFormat(), data, video::ColorFormat::A8R8G8B8, SrcRect.GetWidth(), SrcRect.GetHeight(),
-			image->GetPitch(), SrcRect.GetWidth() * 4);
+		data = LUX_NEW_ARRAY(u8, 4 * image->GetBytesPerPixel()*srcRect.GetArea());
+		video::ColorConverter::ConvertByFormat(
+			mem, image->GetColorFormat(),
+			data, video::ColorFormat::A8R8G8B8,
+			srcRect.GetWidth(), srcRect.GetHeight(),
+			image->GetPitch(), srcRect.GetWidth() * 4);
 		mem = data;
-		Format = video::ColorFormat::A8R8G8B8;
-		ImageDim.width = SrcRect.GetWidth();
-		ImageDim.height = SrcRect.GetHeight();
+		format = video::ColorFormat::A8R8G8B8;
+		imageDim.width = srcRect.GetWidth();
+		imageDim.height = srcRect.GetHeight();
 	} else if(image->GetBitsPerPixel() == 24) {
 		// Immer nach ARGB
-		data = LUX_NEW_ARRAY(u8, 4 * image->GetBytesPerPixel()*SrcRect.GetArea());
-		video::ColorConverter::ConvertByFormat(mem, image->GetColorFormat(), data, video::ColorFormat::A8R8G8B8, SrcRect.GetWidth(), SrcRect.GetHeight(),
-			image->GetPitch(), SrcRect.GetWidth() * 4);
+		data = LUX_NEW_ARRAY(u8, 4 * image->GetBytesPerPixel()*srcRect.GetArea());
+		video::ColorConverter::ConvertByFormat(
+			mem, image->GetColorFormat(),
+			data, video::ColorFormat::A8R8G8B8,
+			srcRect.GetWidth(), srcRect.GetHeight(),
+			image->GetPitch(), srcRect.GetWidth() * 4);
 		mem = data;
-		Format = video::ColorFormat::A8R8G8B8;
-		ImageDim.width = SrcRect.GetWidth();
-		ImageDim.height = SrcRect.GetHeight();
+		format = video::ColorFormat::A8R8G8B8;
+		imageDim.width = srcRect.GetWidth();
+		imageDim.height = srcRect.GetHeight();
 	} else if(image->GetBitsPerPixel() == 16 || image->GetBitsPerPixel() == 32) {
 		/*
 		NO OP
 		*/
 	} else {
-		log::Error("Can't display image in this format.(~a)", Format);
+		log::Error("Can't display image in this format.(~a)", format);
 		return false;
 	}
 
 	BITMAPV4HEADER bi;
 	ZeroMemory(&bi, sizeof(bi));
 	bi.bV4Size = sizeof(BITMAPV4HEADER);
-	bi.bV4BitCount = (WORD)Format.GetBitsPerPixel();
+	bi.bV4BitCount = (WORD)format.GetBitsPerPixel();
 	bi.bV4Planes = 1;
-	bi.bV4Width = ImageDim.width;
-	bi.bV4Height = -((int)ImageDim.height);
+	bi.bV4Width = imageDim.width;
+	bi.bV4Height = -((int)imageDim.height);
 	bi.bV4V4Compression = BI_BITFIELDS;
-	bi.bV4AlphaMask = Format.GetAlphaMask();
-	bi.bV4RedMask = Format.GetRedMask();
-	bi.bV4GreenMask = Format.GetGreenMask();
-	bi.bV4BlueMask = Format.GetBlueMask();
+	bi.bV4AlphaMask = format.GetAlphaMask();
+	bi.bV4RedMask = format.GetRedMask();
+	bi.bV4GreenMask = format.GetGreenMask();
+	bi.bV4BlueMask = format.GetBlueMask();
 
-	StretchDIBits(DC,
-		DstRect.left, DstRect.top, DstRect.GetWidth(), DstRect.GetHeight(),
-		SrcRect.left, SrcRect.top, SrcRect.GetWidth(), SrcRect.GetHeight(),
+	StretchDIBits(dc,
+		dstRect.left, dstRect.top, dstRect.GetWidth(), dstRect.GetHeight(),
+		srcRect.left, srcRect.top, srcRect.GetWidth(), srcRect.GetHeight(),
 		mem,
 		(const BITMAPINFO*)&bi, DIB_RGB_COLORS, SRCCOPY);
 
 	LUX_FREE_ARRAY(data);
 
-	image->Unlock();
-	ReleaseDC(m_Window, DC);
+	ReleaseDC(m_Window, dc);
 
 	return true;
 }
@@ -382,13 +373,20 @@ bool WindowWin32::HandleMessages(UINT Message,
 		Close();
 		break;
 	case WM_MOVE:
-		OnMove(LOWORD(LParam), HIWORD(LParam));
+		// Perform the resize
+		result = DefWindowProcW(m_Window, Message, WParam, LParam);
+
+		RectChange();
+		return true;
 		break;
 	case WM_SETTEXT:
 		OnTitleChange(core::UTF16ToString((void*)LParam));
 		break;
 	case WM_SIZE:
 	{
+		// Perform the resize
+		result = DefWindowProcW(m_Window, Message, WParam, LParam);
+
 		EStateChange state;
 		switch(WParam) {
 		case SIZE_MAXIMIZED:
@@ -405,7 +403,9 @@ bool WindowWin32::HandleMessages(UINT Message,
 			break;
 		}
 		OnStateChange(state);
-		OnResize(LOWORD(LParam), HIWORD(LParam));
+		RectChange();
+
+		return true;
 	}
 	break;
 	case WM_SETFOCUS:

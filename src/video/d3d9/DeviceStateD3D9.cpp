@@ -2,7 +2,7 @@
 #include "DeviceStateD3D9.h"
 
 #include "video/d3d9/D3DHelper.h"
-#include "video/d3d9/D3D9Exception.h"
+#include "platform/D3D9Exception.h"
 
 #include "video/FogData.h"
 #include "video/LightData.h"

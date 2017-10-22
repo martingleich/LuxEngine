@@ -1,9 +1,9 @@
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "TextureD3D9.h"
 
-#include "StrippedD3D9X.h"
+#include "platform/StrippedD3D9X.h"
 #include "D3DHelper.h"
-#include "D3D9Exception.h"
+#include "platform/D3D9Exception.h"
 #include "AuxiliaryTextureD3D9.h"
 
 namespace lux

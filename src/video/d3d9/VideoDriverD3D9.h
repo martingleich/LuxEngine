@@ -5,9 +5,9 @@
 
 #include "core/lxHashMap.h"
 
-#include "StrippedD3D9.h"
+#include "platform/StrippedD3D9.h"
+#include "platform/UnknownRefCounted.h"
 #include "video/d3d9/RenderTargetD3D9.h"
-#include "video/d3d9/UnknownRefCounted.h"
 #include "video/d3d9/AdapterInformationD3D9.h"
 #include "video/d3d9/DeviceStateD3D9.h"
 

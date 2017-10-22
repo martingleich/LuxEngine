@@ -32,7 +32,7 @@ void RawKeyboardDevice::HandleInput(RAWINPUT* input)
 	event.internal_rel_only = false;
 
 	if(event.button.code == -1)
-		throw core::RuntimeException("Unknown key code");
+		return;
 
 	bool isControl = false;
 	if(event.button.code == 143) {

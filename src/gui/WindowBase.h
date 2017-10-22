@@ -115,7 +115,7 @@ protected:
 	{
 		auto final = GetFinalRect();
 		final.right = final.left + w;
-		final.bottom = final.top + w;
+		final.bottom = final.top + h;
 		m_FinalRect = final;
 		onResize.Broadcast(this, math::Dimension2F(w, h));
 	}

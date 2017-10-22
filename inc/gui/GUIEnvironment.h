@@ -158,6 +158,7 @@ public:
 	LUX_API void OnElementAdded(Element* elem);
 
 	///////////////////////////////////////////////////////////////////////////
+
 private:
 	void OnCursorMove(const math::Vector2F& newPos);
 	void OnEvent(const input::Event& event);
