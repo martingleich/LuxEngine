@@ -16,6 +16,7 @@ StaticText::StaticText() :
 	m_WordWrap(true)
 {
 	SetAlignment(EAlign::TopLeft);
+	SetFocusable(false);
 }
 
 StaticText::~StaticText()

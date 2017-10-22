@@ -49,6 +49,10 @@ public:
 		RUp,
 	};
 
+	bool IsClick() const {
+		return type == LDown || type == RDown;
+	}
+
 	EType type;
 	math::Vector2F pos;
 	bool leftState : 1;

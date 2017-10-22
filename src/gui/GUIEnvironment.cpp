@@ -512,20 +512,24 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 	e.pos = m_CursorPos;
 	e.elem = nullptr;
 
+	bool wasSent = false;
+
 	if(m_Captured) {
 		e.elem = m_Captured;
 		SendElementEvent(e.elem, e);
+		wasSent = true;
 	} else {
 		if(m_Hovered) {
 			e.elem = m_Hovered;
 			SendElementEvent(e.elem, e);
+			wasSent = true;
 		}
 	}
-	if(e.elem) {
-		if(e.type == MouseEvent::LDown) {
-			if(e.elem->IsFocusable())
-				SetFocused(e.elem);
-		}
+	if(e.elem && e.IsClick()) {
+		if(e.elem->IsFocusable())
+			SetFocused(e.elem);
+		else
+			SetFocused(nullptr);
 	}
 }
 

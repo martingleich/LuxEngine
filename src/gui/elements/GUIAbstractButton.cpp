@@ -19,8 +19,6 @@ AbstractButton::~AbstractButton()
 bool AbstractButton::OnMouseEvent(const gui::MouseEvent& e)
 {
 	if(e.type == gui::MouseEvent::LDown && IsPointInside(e.pos)) {
-		if(IsFocusable())
-			m_Environment->SetFocused(this);
 		if(m_IsPushButton)
 			m_IsPressed = true;
 		else {
@@ -41,7 +39,7 @@ bool AbstractButton::OnMouseEvent(const gui::MouseEvent& e)
 
 bool AbstractButton::OnKeyboardEvent(const gui::KeyboardEvent& e)
 {
-	if(e.key == input::KEY_RETURN && IsFocused()) {
+	if(e.key == input::KEY_RETURN) {
 		if(e.down) {
 			if(m_IsPushButton) {
 				m_IsPressed = true;

@@ -31,17 +31,17 @@ public:
 		return Angle<T>((f / 200.0f) * math::Constants<T>::pi());
 	}
 
-	T Radian()
+	T Radian() const
 	{
 		return value;
 	}
 
-	T Degree()
+	T Degree() const
 	{
 		return ((value / math::Constants<T>::pi()) * 180.0f);
 	}
 
-	T Gon()
+	T Gon() const
 	{
 		return ((value / math::Constants<T>::pi()) * 200.0f);
 	}
