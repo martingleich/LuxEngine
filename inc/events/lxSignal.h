@@ -370,10 +370,10 @@ public:
 		return !m_Callfuncs.IsEmpty();
 	}
 
-	template <typename... Args>
-	void SetCallbackEvent(Args&&... args)
+	template <typename... ConnectArgs>
+	void SetCallbackEvent(ConnectArgs&&... args)
 	{
-		m_ConnectEvent.Connect(std::forward<Args>(args)...);
+		m_ConnectEvent.Connect(std::forward<ConnectArgs>(args)...);
 	}
 
 private:

@@ -293,11 +293,11 @@ public:
 
 	virtual const math::Vector2F& GetSunkenOffset() const { return m_SunkenOffset; }
 
-	float GetPropertyF(const String& prop, float default=0.0f)
+	float GetPropertyF(const String& prop, float defaultValue=0.0f)
 	{
 		auto it = m_PropsF.Find(prop);
 		if(it == m_PropsF.End())
-			return default;
+			return defaultValue;
 		return *it;
 	}
 	void SetPropertyF(const String& prop, float v)
@@ -305,11 +305,11 @@ public:
 		m_PropsF[prop] = v;
 	}
 
-	math::Vector2F GetPropertyV(const String& prop, math::Vector2F default=math::Vector2F(0))
+	math::Vector2F GetPropertyV(const String& prop, math::Vector2F defaultValue=math::Vector2F(0))
 	{
 		auto it = m_PropsV.Find(prop);
 		if(it == m_PropsV.End())
-			return default;
+			return defaultValue;
 		return *it;
 	}
 	void SetPropertyV(const String& prop, math::Vector2F v)
