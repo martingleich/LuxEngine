@@ -273,6 +273,12 @@ class Signal
 {
 	friend class SignalRef<Args...>;
 
+	template <typename Class, typename... Args2>
+	using SignalMemberFuncAuto = typename core::Choose<
+		std::is_base_of<ReferenceCounted, Class>::value,
+		SignalMemberFuncSafe<Class, Args2...>,
+		SignalMemberFuncUnsafe<Class, Args2...>>::type;
+
 public:
 	Signal() :
 		m_FirstRef(nullptr)
