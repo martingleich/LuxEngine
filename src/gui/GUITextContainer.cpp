@@ -24,10 +24,9 @@ void TextContainer::Ensure(
 	Font* font,
 	const FontRenderSettings& settings,
 	bool wordWrap,
-	const math::RectF& rect,
-	const String& text)
+	const math::RectF& rect)
 {
-	if(!font || text.IsEmpty())
+	if(!font || m_Text.IsEmpty())
 		return;
 	bool rebreakText = m_Rebreak;
 	if(font != m_Font) {
@@ -55,6 +54,7 @@ void TextContainer::Ensure(
 
 	m_Rebreak = false;
 	m_BrokenText.Clear();
+	m_LineSizes.Clear();
 
 	auto width = m_TextBoxSize.width;
 	auto& textDim = m_TextDim;
@@ -97,10 +97,10 @@ void TextContainer::Ensure(
 		textDim.height = lineHeight * m_BrokenText.Size();
 	};
 
-	String::ConstIterator first = text.First();
+	String::ConstIterator first = m_Text.First();
 	String::ConstIterator end = first;
 	String line;
-	for(auto it = text.First(); it != text.End();) {
+	for(auto it = m_Text.First(); it != m_Text.End();) {
 		if(*it == '\n') {
 			AddLine(core::MakeRange(first, end));
 			++it;
@@ -120,6 +120,8 @@ void TextContainer::Render(
 	bool clipTextInside,
 	const math::RectF& rect)
 {
+	if(m_Text.IsEmpty())
+		return;
 	float lineHeight = m_FontSettings.lineDistance*m_FontSettings.scale*m_Font->GetFontHeight();
 	float totalHeight = lineHeight * m_BrokenText.Size();
 
@@ -157,10 +159,9 @@ void TextContainer::Render(
 	bool wordWrap,
 	bool clipTextInside,
 	EAlign align,
-	const math::RectF& rect,
-	const String& text)
+	const math::RectF& rect)
 {
-	Ensure(font, settings, wordWrap, rect, text);
+	Ensure(font, settings, wordWrap, rect);
 	Render(r, align, clipTextInside, rect);
 }
 
@@ -182,6 +183,21 @@ float TextContainer::GetLineWidth(size_t i) const
 math::Dimension2F TextContainer::GetDimension() const
 {
 	return m_TextDim;
+}
+
+void TextContainer::SetText(const String& str)
+{
+	m_Text = str;
+	Rebreak();
+}
+const String& TextContainer::GetText() const
+{
+	return m_Text;
+}
+
+String& TextContainer::Text()
+{
+	return m_Text;
 }
 
 } // namespace gui

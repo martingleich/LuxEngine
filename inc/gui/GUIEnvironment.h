@@ -27,6 +27,7 @@ class Window;
 
 class StaticText;
 class Button;
+class Slider;
 
 class Event : public event::Event
 {
@@ -142,6 +143,8 @@ public:
 	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const String& text = String::EMPTY, Element* parent = nullptr);
 	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text = String::EMPTY, Element* parent = nullptr);
 	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text = String::EMPTY, Element* parent = nullptr);
+	LUX_API StrongRef<Slider> AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min=0, int max=100, Element* parent = nullptr);
+	LUX_API StrongRef<Slider> AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min=0, int max=100, Element* parent = nullptr);
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -189,6 +192,8 @@ private:
 	WeakRef<Element> m_Focused;
 
 	WeakRef<Element> m_Captured;
+
+	float m_SecsPassed;
 
 	class KeyRepeatContext
 	{

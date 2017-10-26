@@ -35,14 +35,15 @@ class Palette
 public:
 	enum class EColorRole
 	{
-		Window = 0,
-		WindowText = 1,
+		WindowBackground,
+		Window,
+		WindowText,
 
-		Base = 2,
-		BaseText = 3,
+		Base,
+		BaseText,
 
-		BaseHightlight = 4,
-		BaseHightlightText = 5,
+		BaseHightlight,
+		BaseHightlightText,
 	};
 
 	enum class EColorGroup
@@ -51,7 +52,7 @@ public:
 		Disabled = 1,
 	};
 
-	static const u32 COLOR_COUNT = 12;
+	static const u32 COLOR_COUNT = 14;
 
 private:
 	struct Data
@@ -213,12 +214,21 @@ enum class EGUIControl
 	TextArea,
 	StaticText,
 
+	SliderBase,
+	SliderThumb,
+
 	Tooltip,
 };
 
 struct PaintOptions
 {
 	Palette palette;
+};
+
+struct SliderPaintOptions : PaintOptions
+{
+	bool isHorizontal;
+	math::RectF thumbRect;
 };
 
 class Skin : public ReferenceCounted
@@ -230,6 +240,7 @@ public:
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Enabled, Palette::EColorRole::WindowText, video::Color::Black);
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Disabled, Palette::EColorRole::WindowText, video::Color::LightGray);
 		m_DefaultPalette.SetColor(Palette::EColorRole::Base, video::Color::White);
+		m_DefaultPalette.SetColor(Palette::EColorRole::WindowBackground, video::Color(0xA0, 0xA0, 0xA0));
 		m_DefaultPalette.SetColor(Palette::EColorRole::Window, video::Color::DarkGray);
 		m_DefaultPalette.SetColor(Palette::EColorRole::BaseHightlightText, video::Color::White);
 		m_DefaultPalette.SetColor(Palette::EColorRole::BaseHightlight, video::Color::Blue);
@@ -264,17 +275,54 @@ public:
 	{
 		m_DefaultPalette = palette;
 	}
-
-	virtual const Palette& GetDefaultPalette() const
+	virtual void SetDefaultPalette(core::Name name, const Palette& palette)
 	{
-		return m_DefaultPalette;
+		auto copy = palette;
+		copy.Merge(m_DefaultPalette);
+		m_DefaultPalettes[name] = copy;
+	}
+
+	virtual const Palette& GetDefaultPalette(core::Name name) const
+	{
+		auto it = m_DefaultPalettes.Find(name);
+		if(it == m_DefaultPalettes.End())
+			return m_DefaultPalette;
+		else
+			return *it;
 	}
 
 	virtual const math::Vector2F& GetSunkenOffset() const { return m_SunkenOffset; }
 
+	float GetPropertyF(const String& prop, float default=0.0f)
+	{
+		auto it = m_PropsF.Find(prop);
+		if(it == m_PropsF.End())
+			return default;
+		return *it;
+	}
+	void SetPropertyF(const String& prop, float v)
+	{
+		m_PropsF[prop] = v;
+	}
+
+	math::Vector2F GetPropertyV(const String& prop, math::Vector2F default=math::Vector2F(0))
+	{
+		auto it = m_PropsV.Find(prop);
+		if(it == m_PropsV.End())
+			return default;
+		return *it;
+	}
+	void SetPropertyV(const String& prop, math::Vector2F v)
+	{
+		m_PropsV[prop] = v;
+	}
+
 private:
 	StrongRef<Font> m_DefaultFont;
 	Palette m_DefaultPalette;
+	core::HashMap<core::Name, Palette> m_DefaultPalettes;
+	core::HashMap<String, float> m_PropsF;
+	core::HashMap<String, math::Vector2F> m_PropsV;
 	math::Vector2F m_SunkenOffset;
 };
 
@@ -302,9 +350,14 @@ public:
 		const PaintOptions& data);
 
 private:
-	void Draw3DButtonPane(
+	void DrawSliderBase(
 		Renderer* r,
-		bool pressed,
+		const math::RectF& rect,
+		const SliderPaintOptions& data,
+		const video::Color& color);
+	void DrawPane(
+		Renderer* r,
+		bool sunken,
 		const math::RectF& rect,
 		const video::Color& color);
 };

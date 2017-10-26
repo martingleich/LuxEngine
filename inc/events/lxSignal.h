@@ -9,6 +9,7 @@ namespace lux
 {
 namespace event
 {
+
 template <typename... Args>
 struct SignalFunc
 {
@@ -163,7 +164,7 @@ struct SignalFunctor : SignalFunc<Args...>
 		proc(args...);
 	}
 
-	bool Equal(const SignalFunc<Args...>& other) const
+	bool Equal(const SignalFunc<Args...>&) const
 	{
 		// Can't compare functors
 		return false;
@@ -184,15 +185,93 @@ template <typename... Args>
 class SignalRef;
 
 template <typename... Args>
-class Signal
+class SingleSignal
 {
-	friend class SignalRef<Args...>;
-
 	template <typename Class, typename... Args2>
 	using SignalMemberFuncAuto = typename core::Choose<
 		std::is_base_of<ReferenceCounted, Class>::value,
 		SignalMemberFuncSafe<Class, Args2...>,
 		SignalMemberFuncUnsafe<Class, Args2...>>::type;
+public:
+	SingleSignal() {}
+	SingleSignal(const SingleSignal&)
+	{
+	}
+	SingleSignal(SingleSignal&& old) :
+		m_Event(std::move(old.m_Event))
+	{
+	}
+
+	SingleSignal& operator=(const SingleSignal&)
+	{
+		m_Event = nullptr;
+		return *this;
+	}
+	SingleSignal& operator=(SingleSignal&& old)
+	{
+		m_Event = std::move(old.m_Event);
+		return *this;
+	}
+
+	template <typename Class>
+	void Connect(StrongRef<Class>owner, void (Class::*proc)(Args...))
+	{
+		Connect((Class*)owner, proc);
+	}
+
+	template <typename Class>
+	void Connect(WeakRef<Class> owner, void (Class::*proc)(Args...))
+	{
+		Connect((Class*)owner, proc);
+	}
+
+	template <typename Class>
+	void Connect(Class* owner, void (Class::*proc)(Args...))
+	{
+		if(owner && proc)
+			m_Event = std::unique_ptr<SignalMemberFuncAuto<Class, Args...>>(
+				new SignalMemberFuncAuto<Class, Args...>(owner, proc));
+	}
+
+	void Connect(void(*proc)(Args...))
+	{
+		if(proc)
+			m_Event = std::unique_ptr<SignalStaticFunc<Args...>>(
+				new SignalStaticFunc<Args...>(proc));
+	}
+
+	template <typename FunctorT>
+	void Connect(const FunctorT& functor)
+	{
+		m_Event = std::unique_ptr<SignalFunctor<FunctorT, Args...>>(
+			new SignalFunctor<FunctorT, Args...>(functor));
+	}
+
+	void Disconnect()
+	{
+		m_Event = nullptr;
+	}
+
+	void Call(Args... args) const
+	{
+		m_Event->Call(args...);
+	}
+
+	bool IsBound() const
+	{
+		return m_Event != nullptr;
+	}
+
+	const SignalFunc<Args...>* GetFunc() const { return m_Event.get(); }
+	SignalFunc<Args...>* GetFunc() { return m_Event.get(); }
+private:
+	std::unique_ptr<SignalFunc<Args...>> m_Event;
+};
+
+template <typename... Args>
+class Signal
+{
+	friend class SignalRef<Args...>;
 
 public:
 	Signal() :
@@ -203,13 +282,13 @@ public:
 	~Signal();
 
 	// Signals can be copied but will lose all their listeners on the way.
-	Signal(const Signal& other) :
+	Signal(const Signal&) :
 		m_FirstRef(nullptr)
 	{
 	}
 
 	// Signals can be copied but will lose all their listeners on the way.
-	Signal& operator=(const Signal& other)
+	Signal& operator=(const Signal&)
 	{
 		~Signal();
 		m_FirstRef = nullptr;
@@ -224,45 +303,14 @@ public:
 
 	Signal& operator=(Signal&& old);
 
-	template <typename Class>
-	void Connect(StrongRef<Class>owner, void (Class::*proc)(Args...))
+	template <typename... Args2>
+	void Connect(Args2... args)
 	{
-		Connect((Class*)owner, proc);
-	}
-	template <typename Class>
-	void Connect(WeakRef<Class> owner, void (Class::*proc)(Args...))
-	{
-		Connect((Class*)owner, proc);
-	}
-
-	template <typename Class>
-	void Connect(Class* owner, void (Class::*proc)(Args...))
-	{
-		if(owner && proc) {
-			m_Callfuncs.PushBack(std::unique_ptr<SignalMemberFuncAuto<Class, Args...>>(
-				new SignalMemberFuncAuto<Class, Args...>(owner, proc)));
-			if(m_ConnectEvent)
-				m_ConnectEvent->Call(*(m_Callfuncs.Back()));
-		}
-	}
-
-	void Connect(void(*proc)(Args...))
-	{
-		if(proc) {
-			m_Callfuncs.PushBack(std::unique_ptr<SignalStaticFunc<Args...>>(
-				new SignalStaticFunc<Args...>(proc)));
-			if(m_ConnectEvent)
-				m_ConnectEvent->Call(*(m_Callfuncs.Back()));
-		}
-	}
-
-	template <typename FunctorT>
-	void Connect(const FunctorT& functor)
-	{
-		m_Callfuncs.PushBack(std::unique_ptr<SignalFunctor<FunctorT, Args...>>(
-			new SignalFunctor<FunctorT, Args...>(functor)));
-		if(m_ConnectEvent)
-			m_ConnectEvent->Call(*(m_Callfuncs.Back()));
+		SingleSignal<Args...> signal;
+		signal.Connect(args...);
+		m_Callfuncs.PushBack(std::move(signal));
+		if(m_ConnectEvent.IsBound())
+			m_ConnectEvent.Call(*m_Callfuncs.Back().GetFunc());
 	}
 
 	template <typename Class>
@@ -270,7 +318,7 @@ public:
 	{
 		SignalMemberFuncAuto<Class, Args...> compare_dummy(owner, proc);
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End(); ++it) {
-			if((*it)->Equal(compare_dummy)) {
+			if(it->GetFunc()->Equal(compare_dummy)) {
 				it = m_Callfuncs.Erase(it);
 				break;
 			}
@@ -281,7 +329,7 @@ public:
 	{
 		SignalStaticFunc<Args...> compare_dummy(proc);
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End(); ++it) {
-			if((*it)->Equal(compare_dummy)) {
+			if(it->GetFunc()->Equal(compare_dummy)) {
 				it = m_Callfuncs.Erase(it);
 				break;
 			}
@@ -291,7 +339,7 @@ public:
 	void DisconnectClass(const void* owner)
 	{
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End();) {
-			if((*it)->GetOwner() == owner)
+			if(it->GetFunc()->GetOwner() == owner)
 				it = m_Callfuncs.Erase(it, true);
 			else
 				++it;
@@ -307,12 +355,12 @@ public:
 	void Broadcast(Args2... args) const
 	{
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End();) {
-			if((*it)->IsDestroyed()) {
+			if(it->GetFunc()->IsDestroyed()) {
 				it = m_Callfuncs.Erase(it, true);
 				continue;
 			}
 
-			(*it)->Call(args...);
+			it->Call(args...);
 			++it;
 		}
 	}
@@ -322,43 +370,16 @@ public:
 		return !m_Callfuncs.IsEmpty();
 	}
 
-	template <typename Class>
-	void SetCallbackEvent(StrongRef<Class>owner, void (Class::*proc)(const SignalFunc<Args...>&))
+	template <typename... Args>
+	void SetCallbackEvent(Args&&... args)
 	{
-		SetCallbackEvent((Class*)owner, proc);
-	}
-	template <typename Class>
-	void SetCallbackEvent(WeakRef<Class> owner, void (Class::*proc)(const SignalFunc<Args...>&))
-	{
-		SetCallbackEvent((Class*)owner, proc);
-	}
-
-	template <typename Class>
-	void SetCallbackEvent(Class* owner, void (Class::*proc)(const SignalFunc<Args...>&))
-	{
-		if(owner && proc)
-			m_ConnectEvent = std::unique_ptr<SignalMemberFuncAuto<Class, const SignalFunc<Args...>&>>(
-				new SignalMemberFuncAuto<Class, const SignalFunc<Args...>&>(owner, proc));
-	}
-
-	void SetCallbackEvent(void(*proc)(const SignalFunc<Args...>&))
-	{
-		if(proc)
-			m_ConnectEvent = std::unique_ptr<SignalStaticFunc<const SignalFunc<Args...>&>>(
-				new SignalStaticFunc<const SignalFunc<Args...>&>(proc));
-	}
-
-	template <typename FunctorT>
-	void SetCallbackEvent(const FunctorT& functor)
-	{
-		m_ConnectEvent = std::unique_ptr<SignalFunctor<FunctorT, const SignalFunc<Args...>&>>(
-			new SignalFunctor<FunctorT, const SignalFunc<Args...>&>(functor));
+		m_ConnectEvent.Connect(std::forward<Args>(args)...);
 	}
 
 private:
 	SignalRef<Args...>* m_FirstRef;
-	std::unique_ptr<SignalFunc<const SignalFunc<Args...>&>> m_ConnectEvent;
-	mutable core::Array<std::unique_ptr<SignalFunc<Args...>>> m_Callfuncs;
+	SingleSignal<const SignalFunc<Args...>&> m_ConnectEvent;
+	mutable core::Array<SingleSignal<Args...>> m_Callfuncs;
 };
 
 template <typename... Args>

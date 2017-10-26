@@ -64,8 +64,8 @@ public:
 	LUX_API virtual bool IsClipped() const;
 	LUX_API virtual void SetClipping(bool clip);
 
-	LUX_API virtual const String& GetText() const;
-	LUX_API virtual void SetText(const String& text);
+	virtual const String& GetText() const { return String::EMPTY; }
+	virtual void SetText(const String& text) { LUX_UNUSED(text); }
 
 	LUX_API virtual const String& GetToolTip() const;
 	LUX_API virtual void SetToolTip(const String& tip);
@@ -121,6 +121,7 @@ public:
 	virtual bool OnElementEvent(const gui::ElementEvent& e) { LUX_UNUSED(e); return false; }
 
 	virtual void Paint(Renderer* renderer) { LUX_UNUSED(renderer); }
+	virtual void Paint(Renderer* renderer, float secsPassed) { LUX_UNUSED(secsPassed); Paint(renderer); }
 
 	LUX_API virtual void SetOverwriteSkin(Skin* s);
 	LUX_API virtual Skin* GetOverwriteSkin() const;
@@ -173,7 +174,6 @@ protected:
 	Element* m_Parent;
 	Window* m_Window;
 
-	String m_Text;
 	String m_ToolTip;
 
 	mutable math::RectF m_FinalRect;
@@ -186,10 +186,10 @@ protected:
 
 	u32 m_TabId;
 
-	bool m_CanFocus:1;
-	bool m_IsVisible:1;
-	bool m_IsEnabled:1;
-	bool m_NoClip:1;
+	bool m_CanFocus : 1;
+	bool m_IsVisible : 1;
+	bool m_IsEnabled : 1;
+	bool m_NoClip : 1;
 };
 
 } // namespace gui

@@ -113,12 +113,10 @@ void WindowWin32::SetText(const String& text)
 {
 	auto data = core::UTF8ToUTF16(text.Data());
 	DWORD_PTR result;
-	LRESULT r = SendMessageTimeoutW(m_Window, WM_SETTEXT, 0,
+	SendMessageTimeoutW(m_Window, WM_SETTEXT, 0,
 		reinterpret_cast<LPARAM>(data.Data_c()),
 		SMTO_ABORTIFHUNG, 500, &result);
-
-	if(r == 0)
-		WindowBase::SetText(text);
+	LUX_UNUSED(result);
 }
 
 void WindowWin32::SetInnerSize(const ScalarDimensionF& size)

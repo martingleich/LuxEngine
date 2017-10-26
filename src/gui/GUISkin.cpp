@@ -12,6 +12,7 @@ Skin3D::Skin3D() :
 	shadow(0.2f),
 	light(1.2f)
 {
+	SetPropertyV("lux.gui.Slider.thumbSize", math::Vector2F(10, 30));
 }
 
 void Skin3D::DrawCursor(
@@ -57,23 +58,57 @@ void Skin3D::DrawControl(
 	Palette::EColorGroup paletteState = TestFlag(state, EGUIState::Enabled) ? Palette::EColorGroup::Enabled : Palette::EColorGroup::Disabled;
 	switch(control) {
 	case EGUIControl::Button:
-		Draw3DButtonPane(r, TestFlag(state, EGUIState::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
+		DrawPane(r, TestFlag(state, EGUIState::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
+		break;
+	case EGUIControl::SliderBase:
+		DrawSliderBase(
+			r,
+			rect,
+			(const SliderPaintOptions&)data,
+			data.palette.GetColor(paletteState, Palette::EColorRole::WindowBackground));
+		break;
+	case EGUIControl::SliderThumb:
+		DrawPane(r, TestFlag(state, EGUIState::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
 		break;
 	default:
 		r->DrawRectangle(rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
 	}
 }
 
-void Skin3D::Draw3DButtonPane(
+void Skin3D::DrawSliderBase(
 	Renderer* r,
-	bool pressed,
+	const math::RectF& rect,
+	const SliderPaintOptions& data,
+	const video::Color& color)
+{
+	float lineWidth = 3.0f;
+	if(data.isHorizontal) {
+		float thumbWidth = data.thumbRect.GetWidth();
+		float linePos = rect.GetCenter().y;
+		math::RectF line(
+			rect.left + thumbWidth / 2, linePos - lineWidth / 2,
+			rect.right - thumbWidth / 2, linePos + lineWidth / 2);
+		DrawPane(r, false, line, color);
+	} else {
+		float thumbHeight = data.thumbRect.GetHeight();
+		float linePos = rect.GetCenter().x;
+		math::RectF line(
+			linePos + lineWidth / 2, rect.top + thumbHeight / 2,
+			linePos - lineWidth / 2, rect.bottom - thumbHeight / 2);
+		DrawPane(r, false, line, color);
+	}
+}
+
+void Skin3D::DrawPane(
+	Renderer* r,
+	bool sunken,
 	const math::RectF& rect,
 	const video::Color& color)
 {
 	auto rct = rect;
 	auto baseColor = color;
 	float medShadow = math::Lerp(shadow, light, 0.25f);
-	if(pressed) {
+	if(sunken) {
 		r->DrawRectangle(rct, baseColor.Scaled(light));
 		rct.right -= 1;
 		rct.bottom -= 1;
@@ -99,5 +134,6 @@ void Skin3D::Draw3DButtonPane(
 		r->DrawRectangle(rct, baseColor);
 	}
 }
+
 } // namespace gui
 } // namespace lux

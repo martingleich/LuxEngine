@@ -14,6 +14,7 @@
 
 #include "gui/elements/GUIButton.h"
 #include "gui/elements/GUIStaticText.h"
+#include "gui/elements/GUISlider.h"
 
 #include "gui/FontFormat.h"
 #include "gui/FontCreator.h"
@@ -202,6 +203,8 @@ void GUIEnvironment::SetDrawVirtualCursor(bool draw)
 
 void GUIEnvironment::Update(float secsPassed)
 {
+	m_SecsPassed = secsPassed;
+
 	auto newHovered = GetElementByPos(m_CursorPos).GetWeak();
 	if(m_Hovered != newHovered) {
 		ElementEvent e;
@@ -232,24 +235,26 @@ void GUIEnvironment::Update(float secsPassed)
 	}
 }
 
-static void RecursiveRender(gui::Element* elem, gui::Renderer* renderer)
+static void RecursiveRender(gui::Element* elem, gui::Renderer* renderer, float secsPassed)
 {
-	elem->Paint(renderer);
+	elem->Paint(renderer, secsPassed);
 	for(auto& e : elem->Elements())
 		if(e->IsVisible())
-			RecursiveRender(e, renderer);
+			RecursiveRender(e, renderer, secsPassed);
 }
 
 void GUIEnvironment::Render()
 {
 	video::RenderStatistics::GroupScope grpScope("gui");
 	m_Renderer->Begin();
-	RecursiveRender(m_Root, m_Renderer);
+	RecursiveRender(m_Root, m_Renderer, m_SecsPassed);
 
 	if((m_DrawVirtualCursor || m_UseVirtualCursor) && m_CursorCtrl->IsVisible())
 		m_Skin->DrawCursor(m_Renderer, m_CursorCtrl->GetState(), m_LeftState, m_CursorCtrl->GetPosition());
 
 	m_Renderer->Flush();
+
+	m_SecsPassed = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -435,6 +440,27 @@ StrongRef<Button> GUIEnvironment::AddSwitchButton(const ScalarVectorF& pos, cons
 	return button;
 }
 
+StrongRef<Slider> GUIEnvironment::AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max, Element* parent)
+{
+	StrongRef<Slider> slider = AddElement("lux.gui.Slider", parent);
+	slider->SetPosition(pos);
+	slider->SetWidth(size);
+	slider->SetRange(min, max);
+	slider->SetThumbPos(min);
+	return slider;
+}
+
+StrongRef<Slider> GUIEnvironment::AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max, Element* parent)
+{
+	StrongRef<Slider> slider = AddElement("lux.gui.Slider", parent);
+	slider->SetHorizontal(false);
+	slider->SetPosition(pos);
+	slider->SetHeight(size);
+	slider->SetRange(min, max);
+	slider->SetThumbPos(min);
+	return slider;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 
 StrongRef<FontCreator> GUIEnvironment::GetFontCreator()
@@ -512,17 +538,13 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 	e.pos = m_CursorPos;
 	e.elem = nullptr;
 
-	bool wasSent = false;
-
 	if(m_Captured) {
 		e.elem = m_Captured;
 		SendElementEvent(e.elem, e);
-		wasSent = true;
 	} else {
 		if(m_Hovered) {
 			e.elem = m_Hovered;
 			SendElementEvent(e.elem, e);
-			wasSent = true;
 		}
 	}
 	if(e.elem && e.IsClick()) {

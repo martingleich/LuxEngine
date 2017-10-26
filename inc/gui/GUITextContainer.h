@@ -20,8 +20,7 @@ public:
 		Font* font,
 		const FontRenderSettings& settings,
 		bool wordWrap,
-		const math::RectF& rect,
-		const String& text);
+		const math::RectF& rect);
 
 	LUX_API void Render(
 		gui::Renderer* r,
@@ -36,8 +35,7 @@ public:
 		bool wordWrap,
 		bool clipTextInside,
 		EAlign align,
-		const math::RectF& rect,
-		const String& text);
+		const math::RectF& rect);
 
 	LUX_API size_t GetLineCount() const;
 	LUX_API core::Range<String::ConstIterator> GetLine(size_t i) const;
@@ -45,7 +43,12 @@ public:
 	LUX_API float GetLineWidth(size_t i) const;
 	LUX_API math::Dimension2F GetDimension() const;
 
+	LUX_API void SetText(const String& str);
+	LUX_API const String& GetText() const;
+	LUX_API String& Text();
+	
 private:
+	String m_Text;
 	bool m_Rebreak;
 
 	// Cached data

@@ -165,6 +165,7 @@ namespace input
 
 #include "gui/elements/GUIStaticText.h"
 #include "gui/elements/GUIButton.h"
+#include "gui/elements/GUISlider.h"
 
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"

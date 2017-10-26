@@ -122,10 +122,13 @@ protected:
 
 	void OnTitleChange(const String& title)
 	{
-		m_Text = title;
+		m_Title = title;
 	}
 
+	const String& GetText() const { return m_Title; }
+
 private:
+	String m_Title;
 	bool m_ShouldFullscreen; // Should the window if possible be in fullscreen mode, changed by user
 
 	bool m_IsFullscreen;    // The current fullscreen state of the window, changed by system

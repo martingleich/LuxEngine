@@ -123,15 +123,6 @@ void Element::SetClipping(bool clip)
 	m_NoClip = !clip;
 }
 
-const String& Element::GetText() const
-{
-	return m_Text;
-}
-void Element::SetText(const String& text)
-{
-	m_Text = text;
-}
-
 const String& Element::GetToolTip() const
 {
 	return m_ToolTip;
@@ -391,7 +382,7 @@ const Palette& Element::GetPalette() const
 
 Palette Element::GetFinalPalette() const
 {
-	return Palette(m_Palette, m_Skin->GetDefaultPalette());
+	return Palette(m_Palette, m_Skin->GetDefaultPalette(GetReferableType()));
 }
 
 void Element::SetTextColor(video::Color c)

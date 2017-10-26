@@ -1,6 +1,5 @@
 #include "gui/elements/GUIButton.h"
 #include "gui/GUISkin.h"
-#include "gui/GUITextContainer.h"
 #include "core/ReferableRegister.h"
 
 static ::lux::Referable* PushButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(false); } \
@@ -41,11 +40,20 @@ void Button::Paint(Renderer* r)
 
 	FontRenderSettings settings;
 	settings.color = palette.GetWindowText(GetState());
-	TextContainer textContainer;
-	textContainer.Render(
+	m_Text.Render(
 		r, GetFont(),
 		settings, false, false, GetAlignment(),
-		GetFinalInnerRect() + textOffset, GetText());
+		GetFinalInnerRect() + textOffset);
+}
+
+void Button::SetText(const String& text)
+{
+	m_Text.SetText(text);
+}
+
+const String& Button::GetText() const
+{
+	return m_Text.GetText();
 }
 
 core::Name Button::GetReferableType() const

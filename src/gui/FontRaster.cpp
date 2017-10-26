@@ -196,8 +196,10 @@ void FontRaster::Draw(
 		float minX = math::Min(
 			vertices[vertexCursor].position.x,
 			vertices[vertexCursor + 5].position.x) - 1;
-		if(minX < 0 || (u32)minX > clipRect.right)
-			break; // Abort rendering loop
+		if(minX > 0) {
+			if((u32)minX > clipRect.right)
+				break; // Abort rendering loop
+		}
 
 		if(maxX < 0 || (u32)maxX < clipRect.left)
 			continue; // Abort this character

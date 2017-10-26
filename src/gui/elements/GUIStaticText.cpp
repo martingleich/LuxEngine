@@ -12,8 +12,8 @@ StaticText::StaticText() :
 	m_DrawBackground(false),
 	m_OverwriteColor(true),
 	m_ClipTextInside(false),
-	m_FitSizeToText(false),
-	m_WordWrap(true)
+	m_FitSizeToText(true),
+	m_WordWrap(false)
 {
 	SetAlignment(EAlign::TopLeft);
 	SetFocusable(false);
@@ -25,7 +25,7 @@ StaticText::~StaticText()
 
 void StaticText::Paint(Renderer* r)
 {
-	if(m_Text.IsEmpty())
+	if(GetText().IsEmpty())
 		return;
 	auto font = GetFont();
 	if(!font)
@@ -37,7 +37,7 @@ void StaticText::Paint(Renderer* r)
 
 	FontRenderSettings settings;
 	settings.color = palette.GetWindowText(state);
-	m_TextContainer.Ensure(font, settings, m_FitSizeToText ? false : m_WordWrap, GetFinalInnerRect(), GetText());
+	m_TextContainer.Ensure(font, settings, m_FitSizeToText ? false : m_WordWrap, GetFinalInnerRect());
 
 	if(m_FitSizeToText) {
 		math::Dimension2F size = m_TextContainer.GetDimension();
@@ -55,15 +55,19 @@ void StaticText::Paint(Renderer* r)
 void StaticText::FitSizeToText()
 {
 	FontRenderSettings settings;
-	m_TextContainer.Ensure(GetFont(), settings, m_WordWrap, GetFinalInnerRect(), GetText());
+	m_TextContainer.Ensure(GetFont(), settings, m_WordWrap, GetFinalInnerRect());
 	math::Dimension2F size = m_TextContainer.GetDimension();
 	SetInnerSize(PixelDimension(size.width, size.height));
 }
 
 void StaticText::SetText(const String& text)
 {
-	Element::SetText(text);
-	m_TextContainer.Rebreak();
+	m_TextContainer.SetText(text);
+}
+
+const String& StaticText::GetText() const
+{
+	return m_TextContainer.GetText();
 }
 
 core::Name StaticText::GetReferableType() const

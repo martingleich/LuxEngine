@@ -31,6 +31,7 @@ public:
 	bool GetClipTextInside() const { return m_ClipTextInside; }
 
 	LUX_API void SetText(const String& text);
+	LUX_API const String& GetText() const;
 	LUX_API core::Name GetReferableType() const;
 
 protected:
