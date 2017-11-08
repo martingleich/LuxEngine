@@ -335,22 +335,12 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 		profile,
 		0, output.Access(), errors.Access(),
 		outTable.Access());
-	if(FAILED(hr)) {
-		if(errors) {
-			if(errorList) {
-				String err = (const char*)errors->GetBufferPointer();
-				for(auto& str : err.Split('\n'))
-					errorList->PushBack(FormatD3DXShaderError(str, true));
-			}
-		}
-	}
-
-	// Warnings.
 	if(errors) {
 		if(errorList) {
 			String err = (const char*)errors->GetBufferPointer();
-			for(auto& str : err.Split('\n'))
-				errorList->PushBack(FormatD3DXShaderError(str, true));
+			for(auto& str : err.Split('\n', true))
+				if(!str.IsWhitespace())
+					errorList->PushBack(FormatD3DXShaderError(str, true));
 		}
 	}
 
@@ -378,22 +368,13 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 		profile,
 		0, output.Access(), errors.Access(),
 		outTable.Access());
-	if(FAILED(hr)) {
-		if(errors) {
-			if(errorList) {
-				String err = (const char*)errors->GetBufferPointer();
-				for(auto& str : err.Split('\n'))
-					errorList->PushBack(FormatD3DXShaderError(str, false));
-			}
-		}
-	}
 
-	// Warnings.
 	if(errors) {
 		if(errorList) {
 			String err = (const char*)errors->GetBufferPointer();
-			for(auto& str : err.Split('\n'))
-				errorList->PushBack(FormatD3DXShaderError(str, false));
+			for(auto& str : err.Split('\n', true))
+				if(!str.IsWhitespace())
+					errorList->PushBack(FormatD3DXShaderError(str, false));
 		}
 	}
 

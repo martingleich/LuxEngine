@@ -784,7 +784,7 @@ String& String::LStrip(ConstIterator first)
 	return *this;
 }
 
-size_t String::Split(u32 ch, String* outArray, size_t maxCount) const
+size_t String::Split(u32 ch, String* outArray, size_t maxCount, bool ignoreEmpty) const
 {
 	if(maxCount == 0)
 		return 0;
@@ -794,10 +794,12 @@ size_t String::Split(u32 ch, String* outArray, size_t maxCount) const
 	cur->Clear();
 	for(auto it = First(); it != End(); ++it) {
 		if(*it == ch) {
-			if(count == maxCount)
-				return maxCount;
-			++cur;
-			++count;
+			if(!(ignoreEmpty && cur->IsEmpty())) {
+				if(count == maxCount)
+					return maxCount;
+				++cur;
+				++count;
+			}
 			cur->Clear();
 		} else {
 			cur->Append(*it);
@@ -807,20 +809,22 @@ size_t String::Split(u32 ch, String* outArray, size_t maxCount) const
 	return count;
 }
 
-core::Array<String> String::Split(u32 ch) const
+core::Array<String> String::Split(u32 ch, bool ignoreEmpty) const
 {
 	core::Array<String> out;
 	String buffer;
 	for(auto it = First(); it != End(); ++it) {
 		if(*it == ch) {
-			out.PushBack(std::move(buffer));
+			if(!(ignoreEmpty && buffer.IsEmpty()))
+				out.PushBack(std::move(buffer));
 			buffer.Clear();
 		} else {
 			buffer.Append(*it);
 		}
 	}
 
-	out.PushBack(std::move(buffer));
+	if(!(ignoreEmpty && buffer.IsEmpty()))
+		out.PushBack(std::move(buffer));
 
 	return out;
 }
@@ -866,6 +870,11 @@ EStringType String::Classify() const
 		out |= EStringType::Space;
 
 	return out;
+}
+
+bool String::IsWhitespace() const
+{
+	return IsEmpty() || Classify() == EStringType::Space;
 }
 
 String String::GetLower() const
