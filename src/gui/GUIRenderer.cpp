@@ -78,5 +78,10 @@ void Renderer::Flush()
 {
 }
 
+video::Renderer* Renderer::GetRenderer() const
+{
+	return m_Renderer;
+}
+
 } // namespace gui
 } // namespace lux

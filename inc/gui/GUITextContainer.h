@@ -1,6 +1,7 @@
 #ifndef INCLUDED_GUI_GUI_TEXT_CONTAINER_H
 #define INCLUDED_GUI_GUI_TEXT_CONTAINER_H
 #include "gui/Font.h"
+#include "gui/GUIAlign.h"
 
 namespace lux
 {

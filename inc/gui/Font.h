@@ -25,24 +25,6 @@ enum class EFontWeight
 	ExtraBolt
 };
 
-//! Enumeration giving the alignment of text or object.
-enum class EAlign
-{
-	HLeft = 1,          //!< Align to the left
-	HCenter = 2,        //!< Align to the horicontal center
-	HRight = 4,         //!< Align to the right
-
-	VBottom = 8,        //!< Align to the bottom
-	VCenter = 16,       //!< Align to the vertical center
-	VTop = 32,          //!< Align to the top
-
-	Centered = VCenter | HCenter,        //!< Align text in the center
-	BottomLeft = VBottom | HLeft,       //!< Align to the bottom left
-	TopLeft = VTop | HLeft, //!< Align to the top left
-	BottomRight = VBottom | HRight,       //!< Align to the bottom right
-	TopRight = VTop | HRight, //!< Align to the top right
-};
-
 
 //! Contains information about a font.
 struct FontDescription
@@ -204,8 +186,6 @@ public:
 };
 
 } // namespace gui
-
-DECLARE_FLAG_CLASS(lux::gui::EAlign);
 
 } // namespace lux
 

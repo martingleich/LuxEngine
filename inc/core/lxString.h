@@ -583,23 +583,28 @@ public:
 	\param ch The character were to split the string.
 	\param outArray Where to write the substrings.
 	\param maxCount The amount of strings available in the output array.
+	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The number of written output strings.
 	*/
-	size_t Split(u32 ch, String* outArray, size_t maxCount) const;
+	size_t Split(u32 ch, String* outArray, size_t maxCount, bool ignoreEmpty=false) const;
 
 	//! Split the string on a character.
 	/**
 	If the character isn't contained in the string, the original string is returned.
 	\param ch The character were to split the string.
+	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The array of substrings
 	*/
-	core::Array<String> Split(u32 ch) const;
+	core::Array<String> Split(u32 ch, bool ignoreEmpty=false) const;
 
 	//! Classify the content of the string
 	/**
 	See \ref{EStringType} for more information about string classification.
 	*/
 	EStringType Classify() const;
+
+	//! Contains the string only whitespace(or is empty)
+	bool IsWhitespace() const;
 
 	//! Get a string in lower case
 	String GetLower() const;

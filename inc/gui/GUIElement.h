@@ -7,6 +7,7 @@
 
 #include "gui/GUISkin.h"
 #include "gui/GUIScalarDistance.h"
+#include "gui/GUIAlign.h"
 
 namespace lux
 {

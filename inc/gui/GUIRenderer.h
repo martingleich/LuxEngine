@@ -22,6 +22,7 @@ public:
 	LUX_API void DrawRectangle(const math::RectF& rect, const video::Color& color, const math::RectF* clip = nullptr);
 	LUX_API void DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, const math::Vector2F& c, const video::Color& color, const math::RectF* clip = nullptr);
 	LUX_API void Flush();
+	LUX_API video::Renderer* GetRenderer() const;
 
 private:
 	video::Renderer* m_Renderer;
