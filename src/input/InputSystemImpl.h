@@ -32,7 +32,7 @@ public:
 	StrongRef<InputDevice> GetMouse();
 
 private:
-	core::HashMap<String, StrongRef<InputDevice>> m_GUIDMap;
+	core::HashMap<core::String, StrongRef<InputDevice>> m_GUIDMap;
 	WeakRef<InputDevice> m_KeyboardDevice;
 	WeakRef<InputDevice> m_MouseDevice;
 

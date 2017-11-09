@@ -33,7 +33,7 @@ void FontRaster::Init(const FontCreationData& data)
 	m_CharMap = data.charMap;
 	m_BaseLine = data.baseLine;
 
-	String errorChars = "? ";
+	core::String errorChars = "? ";
 
 	for(auto it = errorChars.First(); it != errorChars.End(); ++it) {
 		auto jt = m_CharMap.Find(*it);
@@ -107,7 +107,7 @@ void FontRaster::Init(const FontCreationData& data)
 
 void FontRaster::Draw(
 	const FontRenderSettings& settings,
-	core::Range<String::ConstIterator> text,
+	core::Range<core::String::ConstIterator> text,
 	const math::Vector2F& position,
 	const math::RectF* userClip)
 {
@@ -225,7 +225,7 @@ void FontRaster::Draw(
 	}
 }
 
-float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<String::ConstIterator> text)
+float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text)
 {
 	if(text.begin() == text.end())
 		return 0.0f;
@@ -245,7 +245,7 @@ float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<S
 	return width;
 }
 
-size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, float XPosition)
+size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition)
 {
 	if(text.begin() == text.end())
 		return 0;
@@ -282,7 +282,7 @@ size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::
 	return counter;
 }
 
-void FontRaster::GetTextCarets(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, core::Array<float>& carets)
+void FontRaster::GetTextCarets(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets)
 {
 	const float charSpace = m_CharHeight * settings.charDistance;
 

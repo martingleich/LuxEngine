@@ -33,9 +33,9 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(const core::PackageP
 
 }
 
-const String& GeometryCreatorCylinder::GetName() const
+const core::String& GeometryCreatorCylinder::GetName() const
 {
-	static String name = "cylinder";
+	static core::String name = "cylinder";
 	return name;
 }
 

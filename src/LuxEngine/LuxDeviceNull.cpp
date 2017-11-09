@@ -123,17 +123,17 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 	video::Canvas3DSystem::Initialize();
 }
 
-core::Array<String> LuxDeviceNull::GetDriverTypes()
+core::Array<core::String> LuxDeviceNull::GetDriverTypes()
 {
 	return core::ModuleFactory::Instance()->GetModuleFactories("VideoDriver");
 }
 
-StrongRef<video::AdapterList> LuxDeviceNull::GetVideoAdapters(const String& driver)
+StrongRef<video::AdapterList> LuxDeviceNull::GetVideoAdapters(const core::String& driver)
 {
 	return core::ModuleFactory::Instance()->CreateModule("AdapterList", driver, core::ModuleInitData());
 }
 
-void LuxDeviceNull::BuildScene(const String& name, void* user)
+void LuxDeviceNull::BuildScene(const core::String& name, void* user)
 {
 	// If system already build -> no op
 	if(m_Scene) {
@@ -154,7 +154,7 @@ StrongRef<scene::Scene> LuxDeviceNull::CreateScene()
 	return LUX_NEW(scene::Scene);
 }
 
-StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(const String& name, void* user)
+StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(const core::String& name, void* user)
 {
 	scene::SceneRendererInitData init;
 	init.user = user;
@@ -205,6 +205,8 @@ StrongRef<gui::GUIEnvironment> LuxDeviceNull::GetGUIEnvironment() const
 	return m_GUIEnv;
 }
 
+namespace
+{
 class DefaultSimpleFrameLoop
 {
 public:
@@ -374,6 +376,7 @@ private:
 	video::VideoDriver* m_Driver;
 	video::Renderer* m_Renderer;
 };
+}
 
 void LuxDeviceNull::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 {

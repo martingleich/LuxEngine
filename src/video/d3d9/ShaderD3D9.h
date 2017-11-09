@@ -26,7 +26,7 @@ public:
 	void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
-		core::Array<String>* errorList);
+		core::Array<core::String>* errorList);
 
 	void Enable();
 	void SetParam(const void* data, u32 paramId);
@@ -132,12 +132,12 @@ private:
 private:
 	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
 
-	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<String>* errorList);
+	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<core::String>* errorList);
 
 	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(const char* code, const char* entryPoint, size_t length, const char* profile,
-		core::Array<String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
+		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile,
-		core::Array<String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
+		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 
 	void SetShaderValue(const Param& p, const void* data);
 

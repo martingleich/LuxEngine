@@ -18,7 +18,7 @@ void Renderer::Begin()
 	m_Renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 }
 
-void Renderer::DrawText(gui::Font* font, const FontRenderSettings& settings, core::Range<String::ConstIterator> text, const math::Vector2F& position,  const math::RectF* clip)
+void Renderer::DrawText(gui::Font* font, const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, const math::Vector2F& position,  const math::RectF* clip)
 {
 	if(font && text.begin() != text.end())
 		font->Draw(settings, text, position, clip);

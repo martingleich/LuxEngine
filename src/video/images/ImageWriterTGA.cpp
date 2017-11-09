@@ -31,7 +31,7 @@ struct destroyer
 };
 }
 
-bool ImageWriterTGA::CanWriteFile(const String& ext)
+bool ImageWriterTGA::CanWriteFile(const core::String& ext)
 {
 	return ext.IsEmpty() || ext.EqualCaseInsensitive("tga");
 }

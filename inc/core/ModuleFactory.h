@@ -34,30 +34,30 @@ public:
 	/**
 	The combination of module and name must be unique.
 	*/
-	LUX_API void AddModuleFactory(const String& module, const String& name, CreatorT creator);
+	LUX_API void AddModuleFactory(const core::String& module, const core::String& name, CreatorT creator);
 
 	//! Get all types of a module type.
 	/**
 	Returns all name parameters of a module.
 	*/
-	LUX_API core::Array<String> GetModuleFactories(const String& module);
+	LUX_API core::Array<core::String> GetModuleFactories(const core::String& module);
 
 	//! Create a instance of a module.
 	/**
 	Data must be a type matching the module, i.e. VideoDriverInitData for a VideoDriver.
 	Return type is always non null.
 	*/
-	LUX_API StrongRef<ReferenceCounted> CreateModule(const String& module, const String& name, const ModuleInitData& data);
+	LUX_API StrongRef<ReferenceCounted> CreateModule(const core::String& module, const core::String& name, const ModuleInitData& data);
 
 private:
 	struct Entry
 	{
-		String module;
-		String name;
+		core::String module;
+		core::String name;
 		CreatorT creator;
 
-		Entry(const String& _module,
-			const String& _name,
+		Entry(const core::String& _module,
+			const core::String& _name,
 			CreatorT _creator) :
 			module(_module),
 			name(_name),

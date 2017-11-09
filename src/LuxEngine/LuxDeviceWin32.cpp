@@ -41,6 +41,8 @@ static LRESULT WINAPI WindowProc(HWND wnd,
 	return result;
 }
 
+namespace
+{
 struct Win32WindowClass
 {
 public:
@@ -64,6 +66,7 @@ public:
 		UnregisterClassW(className, instance);
 	}
 };
+}
 
 StrongRef<LuxSystemInfo> g_SystemInfo;
 Win32WindowClass* g_WindowClass;
@@ -96,7 +99,7 @@ LuxDeviceWin32::~LuxDeviceWin32()
 	log::Info("Shutdown complete.");
 }
 
-void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const String& title)
+void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const core::String& title)
 {
 	if(m_Window) {
 		log::Warning("Window already built.");

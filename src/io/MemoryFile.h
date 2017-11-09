@@ -13,7 +13,7 @@ public:
 	MemoryFile(
 		void* Buffer,
 		const FileDescription& desc,
-		String name,
+		core::String name,
 		bool DeleteBufferOnDrop,
 		bool Expandable,
 		bool readOnly);

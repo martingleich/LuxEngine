@@ -9,7 +9,7 @@ namespace lux
 namespace io
 {
 
-typedef String Path;
+typedef core::String Path;
 
 LUX_API Path GetFileExtension(const Path& p);
 LUX_API Path GetFileDir(const Path& p);
@@ -56,7 +56,7 @@ public:
 	}
 
 	FileDescription(const Path& path,
-		const String& name,
+		const core::String& name,
 		u32 size,
 		EType type,
 		const core::DateAndTime& creationDate,
@@ -86,7 +86,7 @@ public:
 		m_Path = NormalizePath(p, true);
 	}
 
-	void SetName(const String& n)
+	void SetName(const core::String& n)
 	{
 		m_Name = n;
 	}
@@ -96,7 +96,7 @@ public:
 		return m_Path;
 	}
 
-	const String& GetName() const
+	const core::String& GetName() const
 	{
 		return m_Name;
 	}
@@ -153,7 +153,7 @@ public:
 
 private:
 	Path m_Path;
-	String m_Name;
+	core::String m_Name;
 	Archive* m_Archive;
 
 	u32 m_Size;
@@ -165,7 +165,7 @@ private:
 inline FileDescription ConcatFileDesc(const FileDescription& base, const io::Path& relative)
 {
 	Path absPath = MakeAbsolutePath(base.GetPath(), GetFileDir(relative));
-	String fileName = GetFilenameOnly(relative);
+	core::String fileName = GetFilenameOnly(relative);
 
 	FileDescription out(absPath,
 		fileName,

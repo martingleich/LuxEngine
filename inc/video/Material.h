@@ -58,8 +58,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	virtual core::VariableAccess Param(const StringType& name) = 0;
-	virtual core::VariableAccess Param(const StringType& name) const = 0;
+	virtual core::VariableAccess Param(const core::StringType& name) = 0;
+	virtual core::VariableAccess Param(const core::StringType& name) const = 0;
 	virtual core::VariableAccess Param(u32 id) = 0;
 	virtual core::VariableAccess Param(u32 id) const = 0;
 
@@ -70,7 +70,7 @@ public:
 
 	virtual u32 GetTextureCount() const = 0;
 	virtual u32 GetParamCount() const = 0;
-	virtual u32 GetParamId(const StringType& name) const = 0;
+	virtual u32 GetParamId(const core::StringType& name) const = 0;
 
 	////////////////////////////////////////////////////////////////////
 

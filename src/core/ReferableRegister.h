@@ -36,14 +36,14 @@ struct ReferableRegisterBlock
 
 #define LUX_REGISTER_REFERABLE_CLASS(type, class) \
 static ::lux::Referable* InternalCreatorFunc(const void*) { return LUX_NEW(class); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(type, &InternalCreatorFunc);
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(::lux::core::Name(type), &InternalCreatorFunc);
 
 #define LUX_REGISTER_REFERABLE_CLASS_NAMED(name, type, class) \
 static ::lux::Referable* InternalCreatorFunc_##name(const void*) { return LUX_NEW(class); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject_##name(type, &InternalCreatorFunc_##name);
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject_##name(::lux::core::Name(type), &InternalCreatorFunc_##name);
 
 #define LUX_REGISTER_RESOURCE_CLASS(type, class) \
 static ::lux::Referable* InternalCreatorFunc(const void* origin) { return LUX_NEW(class)(origin?*(lux::core::ResourceOrigin*)origin:lux::core::ResourceOrigin()); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(type, &InternalCreatorFunc);
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(::lux::core::Name(type), &InternalCreatorFunc);
 
 #endif // #ifndef INCLUDED_REFERABLE_REGISTER_H

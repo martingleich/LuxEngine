@@ -39,10 +39,10 @@ Array<u8> UTF16ToUTF8(const void* _data)
 	return out;
 }
 
-String UTF16ToString(const void* _data)
+core::String UTF16ToString(const void* _data)
 {
 	const char* data = (const char*)_data;
-	String out;
+	core::String out;
 	while(u32 c = AdvanceCursorUTF16(data)) {
 		u8 buffer[6];
 		u8* cur = buffer;
@@ -76,7 +76,7 @@ WCharAlias UTF8ToUTF16W(const void* data)
 	return WCharAlias(UTF8ToUTF16(data));
 }
 
-WCharAlias StringToUTF16W(const String& data)
+WCharAlias StringToUTF16W(const core::String& data)
 {
 	return WCharAlias(UTF8ToUTF16(data.Data_c()));
 }

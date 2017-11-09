@@ -434,7 +434,7 @@ StrongRef<Referable> Node::Clone() const
 
 core::Name Node::GetReferableType() const
 {
-	static const core::Name name = "lux.node";
+	static const core::Name name("lux.node");
 	return name;
 }
 

@@ -39,17 +39,17 @@ public:
 		const math::RectF& rect);
 
 	LUX_API size_t GetLineCount() const;
-	LUX_API core::Range<String::ConstIterator> GetLine(size_t i) const;
+	LUX_API core::Range<core::String::ConstIterator> GetLine(size_t i) const;
 
 	LUX_API float GetLineWidth(size_t i) const;
 	LUX_API math::Dimension2F GetDimension() const;
 
-	LUX_API void SetText(const String& str);
-	LUX_API const String& GetText() const;
-	LUX_API String& Text();
+	LUX_API void SetText(const core::String& str);
+	LUX_API const core::String& GetText() const;
+	LUX_API core::String& Text();
 	
 private:
-	String m_Text;
+	core::String m_Text;
 	bool m_Rebreak;
 
 	// Cached data
@@ -59,7 +59,7 @@ private:
 	gui::FontRenderSettings m_FontSettings;
 
 	// Generated data
-	core::Array<core::Range<String::ConstIterator>> m_BrokenText;
+	core::Array<core::Range<core::String::ConstIterator>> m_BrokenText;
 	core::Array<float> m_LineSizes;
 	math::Dimension2F m_TextDim;
 };

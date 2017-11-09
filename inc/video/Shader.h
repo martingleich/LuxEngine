@@ -37,7 +37,7 @@ public:
 	virtual void Init(
 		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
-		core::Array<String>* errorList) = 0;
+		core::Array<core::String>* errorList) = 0;
 
 	virtual const core::ParamPackage& GetParamPackage() const = 0;
 

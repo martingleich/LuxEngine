@@ -218,9 +218,9 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 	return !ctx.m_Error;
 }
 
-const String& ImageLoaderPNM::GetName() const
+const core::String& ImageLoaderPNM::GetName() const
 {
-	static const String name = "Lux PNM Loader";
+	static const core::String name = "Lux PNM Loader";
 
 	return name;
 }

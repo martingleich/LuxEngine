@@ -414,26 +414,26 @@ StrongRef<Element> GUIEnvironment::AddElement(core::Name name, Element* parent)
 	return parent->AddElement(core::ReferableFactory::Instance()->Create(name).As<Element>());
 }
 
-StrongRef<StaticText> GUIEnvironment::AddStaticText(const ScalarVectorF& position, const String& text, Element* parent)
+StrongRef<StaticText> GUIEnvironment::AddStaticText(const ScalarVectorF& position, const core::String& text, Element* parent)
 {
-	StrongRef<StaticText> st = AddElement("lux.gui.StaticText", parent);
+	StrongRef<StaticText> st = AddElement(core::Name("lux.gui.StaticText"), parent);
 	st->SetPosition(position);
 	st->SetText(text);
 	return st;
 }
 
-StrongRef<Button> GUIEnvironment::AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent)
+StrongRef<Button> GUIEnvironment::AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text, Element* parent)
 {
-	StrongRef<Button> button = AddElement("lux.gui.Button", parent);
+	StrongRef<Button> button = AddElement(core::Name("lux.gui.Button"), parent);
 	button->SetPosition(pos);
 	button->SetSize(size);
 	button->SetText(text);
 	return button;
 }
 
-StrongRef<Button> GUIEnvironment::AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text, Element* parent)
+StrongRef<Button> GUIEnvironment::AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text, Element* parent)
 {
-	StrongRef<Button> button = AddElement("lux.gui.SwitchButton", parent);
+	StrongRef<Button> button = AddElement(core::Name("lux.gui.SwitchButton"), parent);
 	button->SetPosition(pos);
 	button->SetSize(size);
 	button->SetText(text);
@@ -442,7 +442,7 @@ StrongRef<Button> GUIEnvironment::AddSwitchButton(const ScalarVectorF& pos, cons
 
 StrongRef<Slider> GUIEnvironment::AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max, Element* parent)
 {
-	StrongRef<Slider> slider = AddElement("lux.gui.Slider", parent);
+	StrongRef<Slider> slider = AddElement(core::Name("lux.gui.Slider"), parent);
 	slider->SetPosition(pos);
 	slider->SetWidth(size);
 	slider->SetRange(min, max);
@@ -452,7 +452,7 @@ StrongRef<Slider> GUIEnvironment::AddSlider(const ScalarVectorF& pos, const Scal
 
 StrongRef<Slider> GUIEnvironment::AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max, Element* parent)
 {
-	StrongRef<Slider> slider = AddElement("lux.gui.Slider", parent);
+	StrongRef<Slider> slider = AddElement(core::Name("lux.gui.Slider"), parent);
 	slider->SetHorizontal(false);
 	slider->SetPosition(pos);
 	slider->SetHeight(size);

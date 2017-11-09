@@ -25,7 +25,7 @@ class MaterialRenderer : public ReferenceCounted, public ParamSetCallback
 {
 public:
 public:
-	LUX_API MaterialRenderer(const String& name, const MaterialRenderer* old = nullptr);
+	LUX_API MaterialRenderer(const core::String& name, const MaterialRenderer* old = nullptr);
 	MaterialRenderer(const MaterialRenderer&) = delete;
 	MaterialRenderer& operator=(const MaterialRenderer&) = delete;
 	LUX_API ~MaterialRenderer();
@@ -40,7 +40,7 @@ public:
 
 	LUX_API StrongRef<Material> CreateMaterial();
 
-	LUX_API const String& GetName() const;
+	LUX_API const core::String& GetName() const;
 
 	LUX_API EMaterialRequirement GetRequirements() const;
 	LUX_API size_t AddPass(const Pass& pass = Pass());
@@ -49,13 +49,13 @@ public:
 	LUX_API Pass& GetPass(size_t passId);
 	LUX_API size_t GetPassCount();
 
-	LUX_API core::VariableAccess AddParam(const String& paramName, const core::Type& type);
+	LUX_API core::VariableAccess AddParam(const core::String& paramName, const core::Type& type);
 
-	LUX_API core::VariableAccess SetShaderValue(u32 passId, const String& name);
-	LUX_API core::VariableAccess AddShaderParam(const String& paramName, u32 passId, const String& name);
-	LUX_API core::VariableAccess AddShaderParam(const String& paramName, u32 passId, u32 paramId);
+	LUX_API core::VariableAccess SetShaderValue(u32 passId, const core::String& name);
+	LUX_API core::VariableAccess AddShaderParam(const core::String& paramName, u32 passId, const core::String& name);
+	LUX_API core::VariableAccess AddShaderParam(const core::String& paramName, u32 passId, u32 paramId);
 
-	LUX_API core::VariableAccess AddParam(const String& paramName, u32 passId, EOptionId optionId);
+	LUX_API core::VariableAccess AddParam(const core::String& paramName, u32 passId, EOptionId optionId);
 
 private:
 	struct ParamMapping
@@ -81,7 +81,7 @@ private:
 		{}
 	};
 
-	core::VariableAccess AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader);
+	core::VariableAccess AddParamMapping(const core::Type& type, const core::String& paramName, u32 passId, u32 mappingId, bool isShader);
 
 private:
 	core::ParamPackage m_Params;
@@ -92,7 +92,7 @@ private:
 	core::Array<ParamMapping> m_Options;
 	ParamSetCallback* m_ParamCallback;
 
-	String m_Name;
+	core::String m_Name;
 };
 
 } // namespace video

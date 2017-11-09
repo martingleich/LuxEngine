@@ -64,13 +64,13 @@ public:
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
-		core::Array<String>* errorList);
+		core::Array<core::String>* errorList);
 
 	const RendertargetD3D9& GetBackbufferTarget();
 
 	//------------------------------------------------------------------
 	EDeviceState GetDeviceState() const;
-	const String& GetVideoDriverType() const
+	const core::String& GetVideoDriverType() const
 	{
 		return m_Config.adapter->GetDriverType();
 	}

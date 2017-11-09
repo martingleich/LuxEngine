@@ -40,7 +40,7 @@ WindowWin32::WindowWin32(HWND window) :
 	length = (size_t)SendMessageTimeoutW(m_Window, WM_GETTEXT,
 		200, reinterpret_cast<LPARAM>(text),
 		SMTO_ABORTIFHUNG, 2000, &result);
-	String newTitle = core::UTF16ToString(text);
+	core::String newTitle = core::UTF16ToString(text);
 
 	OnTitleChange(newTitle);
 }
@@ -109,7 +109,7 @@ void WindowWin32::Paint(Renderer* r)
 		r->DrawRectangle(GetFinalInnerRect(), GetFinalPalette().GetWindow());
 }
 
-void WindowWin32::SetText(const String& text)
+void WindowWin32::SetText(const core::String& text)
 {
 	auto data = core::UTF8ToUTF16(text.Data());
 	DWORD_PTR result;
@@ -337,7 +337,7 @@ Cursor* WindowWin32::GetCursor() const
 
 core::Name WindowWin32::GetReferableType() const
 {
-	static const core::Name name = "lux.gui.SystemWindow";
+	static const core::Name name("lux.gui.SystemWindow");
 	return name;
 }
 

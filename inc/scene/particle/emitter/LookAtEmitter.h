@@ -38,7 +38,7 @@ public:
 
 	core::Name GetReferableType() const
 	{
-		static const core::Name name = "lux.emitter.LookAt";
+		static const core::Name name("lux.emitter.LookAt");
 		return name;
 	}
 

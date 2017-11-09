@@ -21,18 +21,18 @@ public:
 	virtual void HandleInput(RAWINPUT* input) = 0;
 
 	StrongRef<InputDevice> GetDevice() const;
-	const String& GetName() const;
-	const String& GetGUID() const;
+	const core::String& GetName() const;
+	const core::String& GetGUID() const;
 
 protected:
 	void SendInputEvent(Event& event);
-	static String GetDevicePath(HANDLE raw_handle);
-	static String GetDeviceGUID(HANDLE raw_handle);
+	static core::String GetDevicePath(HANDLE raw_handle);
+	static core::String GetDeviceGUID(HANDLE raw_handle);
 	static RID_DEVICE_INFO GetDeviceInfo(HANDLE raw_handle);
 
 protected:
-	String m_Name;
-	String m_GUID;
+	core::String m_Name;
+	core::String m_GUID;
 
 private:
 	StrongRef<InputSystem> m_System;

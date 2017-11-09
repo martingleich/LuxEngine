@@ -76,12 +76,12 @@ bool KeyboardDevice::Update(Event& event)
 	return false;
 }
 
-const String& KeyboardDevice::GetElementName(EEventType type, u32 code) const
+const core::String& KeyboardDevice::GetElementName(EEventType type, u32 code) const
 {
 	LUX_UNUSED(type);
 	LUX_UNUSED(code);
 
-	static String unknown = "(unknown)";
+	static core::String unknown = "(unknown)";
 	return unknown;
 }
 

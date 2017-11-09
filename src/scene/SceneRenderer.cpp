@@ -5,7 +5,7 @@ namespace lux
 namespace scene
 {
 
-core::VariableAccess SceneRenderer::Attribute(const String& str)
+core::VariableAccess SceneRenderer::Attribute(const core::String& str)
 {
 	return m_Attributes[str];
 }

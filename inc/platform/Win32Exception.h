@@ -11,9 +11,9 @@
 
 namespace lux
 {
-inline lux::String GetWin32ErrorString(DWORD error)
+inline lux::core::String GetWin32ErrorString(DWORD error)
 {
-	lux::String out;
+	lux::core::String out;
 	if(NOERROR != error) {
 		const DWORD formatControl =
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -60,9 +60,9 @@ struct LogWin32Error
 	}
 };
 
-inline String GetWin32ErrorString(DWORD error)
+inline core::String GetWin32ErrorString(DWORD error)
 {
-	String out;
+	core::String out;
 	if(NOERROR != error) {
 		const DWORD formatControl =
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -93,7 +93,7 @@ inline void conv_data(format::Context& ctx, const LogWin32Error& v, format::Plac
 	LUX_UNUSED(placeholder);
 
 	using namespace format;
-	lux::String str = GetWin32ErrorString(v.error);
+	lux::core::String str = GetWin32ErrorString(v.error);
 	format::CopyConvertAddString(ctx, format::StringType::Unicode, str.Data_c(), str.Size());
 }
 

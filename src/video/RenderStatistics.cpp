@@ -20,7 +20,7 @@ struct RenderStatistics::SelfT
 {
 	Group empty;
 	Group total;
-	core::HashMap<String, Group*> groups;
+	core::HashMap<core::String, Group*> groups;
 	core::Array<Group*> groupStack;
 
 	u64 duration = 0;

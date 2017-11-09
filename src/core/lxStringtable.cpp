@@ -123,24 +123,14 @@ StringTable::~StringTable()
 	LUX_FREE(self);
 }
 
-StringTableHandle StringTable::FindString(const char* str)
+StringTableHandle StringTable::FindString(const core::StringType& str)
 {
-	return AddFindString(str, true);
+	return AddFindString(str.data, true);
 }
 
-StringTableHandle StringTable::FindString(const String& str)
+StringTableHandle StringTable::AddString(const core::StringType& str)
 {
-	return AddFindString(str.Data(), true);
-}
-
-StringTableHandle StringTable::AddString(const char* str)
-{
-	return AddFindString(str, false);
-}
-
-StringTableHandle StringTable::AddString(const String& str)
-{
-	return AddFindString(str.Data(), false);
+	return AddFindString(str.data, false);
 }
 
 StringTableHandle StringTable::AddFindString(const char* str, bool find)

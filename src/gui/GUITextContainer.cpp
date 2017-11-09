@@ -60,23 +60,23 @@ void TextContainer::Ensure(
 	auto& textDim = m_TextDim;
 	textDim = math::Dimension2F(0, 0);
 	core::Array<float> carets;
-	auto AddBrokenLine = [&](core::Range<String::ConstIterator> str, float width) {
+	auto AddBrokenLine = [&](core::Range<core::String::ConstIterator> str, float width) {
 		m_BrokenText.PushBack(str);
 		m_LineSizes.PushBack(width);
 		textDim.width = math::Max(textDim.width, width);
 	};
-	auto AddLine = [&](core::Range<String::ConstIterator> line) {
+	auto AddLine = [&](core::Range<core::String::ConstIterator> line) {
 		if(line.begin() == line.end())
 			return;
 		auto lineWidth = font->GetTextWidth(settings, line);
 		if(!wordWrap || lineWidth <= width) {
 			AddBrokenLine(line, lineWidth);
 		} else {
-			String::ConstIterator prevBreakPoint = line.End();
+			core::String::ConstIterator prevBreakPoint = line.End();
 			carets.Clear();
 			m_Font->GetTextCarets(settings, line, carets);
 			float offset = 0.0f;
-			String::ConstIterator lineFirst = line.First();
+			core::String::ConstIterator lineFirst = line.First();
 			size_t id = 0;
 			for(auto jt = line.First(); jt != line.End(); ++jt) {
 				++id;
@@ -97,9 +97,9 @@ void TextContainer::Ensure(
 		textDim.height = lineHeight * m_BrokenText.Size();
 	};
 
-	String::ConstIterator first = m_Text.First();
-	String::ConstIterator end = first;
-	String line;
+	core::String::ConstIterator first = m_Text.First();
+	core::String::ConstIterator end = first;
+	core::String line;
 	for(auto it = m_Text.First(); it != m_Text.End();) {
 		if(*it == '\n') {
 			AddLine(core::MakeRange(first, end));
@@ -170,7 +170,7 @@ size_t TextContainer::GetLineCount() const
 	return m_BrokenText.Size();
 }
 
-core::Range<String::ConstIterator> TextContainer::GetLine(size_t i) const
+core::Range<core::String::ConstIterator> TextContainer::GetLine(size_t i) const
 {
 	return m_BrokenText[i];
 }
@@ -185,17 +185,17 @@ math::Dimension2F TextContainer::GetDimension() const
 	return m_TextDim;
 }
 
-void TextContainer::SetText(const String& str)
+void TextContainer::SetText(const core::String& str)
 {
 	m_Text = str;
 	Rebreak();
 }
-const String& TextContainer::GetText() const
+const core::String& TextContainer::GetText() const
 {
 	return m_Text;
 }
 
-String& TextContainer::Text()
+core::String& TextContainer::Text()
 {
 	return m_Text;
 }

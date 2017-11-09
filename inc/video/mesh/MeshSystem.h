@@ -44,7 +44,7 @@ public:
 	LUX_API size_t GetCreatorCount() const;
 
 	//! Retrieve a geometry creator based on it's name.
-	LUX_API StrongRef<GeometryCreator> GetCreatorByName(const String& name) const;
+	LUX_API StrongRef<GeometryCreator> GetCreatorByName(const core::String& name) const;
 
 	//! Returns a creator by it's index.
 	LUX_API StrongRef<GeometryCreator> GetCreatorById(size_t id) const;
@@ -54,7 +54,7 @@ public:
 	\param name The name of the geometry creator.
 	\return A param package puffer matching the geometry creator
 	*/
-	LUX_API core::PackagePuffer GetCreatorParams(const String& name);
+	LUX_API core::PackagePuffer GetCreatorParams(const core::String& name);
 
 	//! Create a new mesh
 	/**
@@ -63,7 +63,7 @@ public:
 	\param params The parameter for the geometry creator, retrieved by \ref GetCreatorParams
 	\return A newly created mesh
 	*/
-	LUX_API StrongRef<Mesh> CreateMesh(const String& name, const core::PackagePuffer& params);
+	LUX_API StrongRef<Mesh> CreateMesh(const core::String& name, const core::PackagePuffer& params);
 
 	//! Create a new sub mesh.
 	/**
@@ -71,7 +71,7 @@ public:
 	\param params The parameter for the geometry creator, retrieved by \ref GetCreatorParams
 	\return A newly created sub mesh.
 	*/
-	LUX_API StrongRef<Geometry> CreateGeometry(const String& name, const core::PackagePuffer& params);
+	LUX_API StrongRef<Geometry> CreateGeometry(const core::String& name, const core::PackagePuffer& params);
 
 	//! Create a new plane mesh.
 	/**
@@ -151,7 +151,7 @@ private:
 private:
 	StrongRef<MaterialLibrary> m_MatLib;
 
-	core::HashMap<String, StrongRef<GeometryCreator>> m_Creators;
+	core::HashMap<core::String, StrongRef<GeometryCreator>> m_Creators;
 
 	StrongRef<GeometryCreator> m_PlaneCreator;
 	StrongRef<GeometryCreator> m_SphereUVCreator;

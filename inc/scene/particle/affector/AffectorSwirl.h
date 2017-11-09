@@ -25,7 +25,7 @@ public:
 
 	core::Name GetReferableType() const
 	{
-		static const core::Name name = "lux.affector.Swirl";
+		static const core::Name name("lux.affector.Swirl");
 		return name;
 	}
 

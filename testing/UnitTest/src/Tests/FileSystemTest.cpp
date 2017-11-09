@@ -14,7 +14,7 @@ UNIT_SUITE(FileSystem)
 #ifdef LUX_WINDOWS
 		io::Path testDir = m_WorkingDir + "FileSystemTestDir";
 		testDir.Replace("\\", "/");
-		String cmd = "if not exist \"" + testDir + "\" mkdir \"" + testDir + "\"";
+		core::String cmd = "if not exist \"" + testDir + "\" mkdir \"" + testDir + "\"";
 		system(cmd.Data());
 #else
 		throw "Not implemented";
@@ -26,7 +26,7 @@ UNIT_SUITE(FileSystem)
 #ifdef LUX_WINDOWS
 		io::Path testDir = m_WorkingDir + "FileSystemTestDir";
 		testDir.Replace("\\", "/");
-		String cmd = "if exist \"" + testDir + "\" rmdir \"" + testDir + "\" /s /q";
+		core::String cmd = "if exist \"" + testDir + "\" rmdir \"" + testDir + "\" /s /q";
 		system(cmd.Data());
 #else
 		throw "Not implemented";

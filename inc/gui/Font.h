@@ -29,7 +29,7 @@ enum class EFontWeight
 //! Contains information about a font.
 struct FontDescription
 {
-	String name; //!< The name of the font family, empty if not available
+	core::String name; //!< The name of the font family, empty if not available
 
 	u32 size; //!< The size of the base font in pixel, 0 if not available
 	EFontWeight weight; //!< The weight of the font
@@ -45,7 +45,7 @@ struct FontDescription
 	}
 
 	FontDescription(
-		const String& _name,
+		const core::String& _name,
 		u32 _size,
 		EFontWeight _weight = EFontWeight::Normal,
 		bool _italic = false,
@@ -131,7 +131,7 @@ public:
 	*/
 	virtual void Draw(
 		const FontRenderSettings& settings,
-		core::Range<String::ConstIterator> text,
+		core::Range<core::String::ConstIterator> text,
 		const math::Vector2F& position,
 		const math::RectF* clip = nullptr) = 0;
 
@@ -142,7 +142,7 @@ public:
 	\return The length of the text, ignores all boundaries like the end of screen
 	*/
 	virtual float GetTextWidth(const FontRenderSettings& settings,
-		core::Range<String::ConstIterator> text) = 0;
+		core::Range<core::String::ConstIterator> text) = 0;
 
 	//! The text caret from a x position
 	/**
@@ -156,7 +156,7 @@ public:
 	\return The hit caret
 	*/
 	virtual size_t GetCaretFromOffset(const FontRenderSettings& settings,
-		core::Range<String::ConstIterator> text,
+		core::Range<core::String::ConstIterator> text,
 		float xPosition) = 0;
 
 	//! All text carets in a given text
@@ -170,7 +170,7 @@ public:
 	\param [out] carets Here the caret positions are written, it always writes exactly CharCount+1 Charrets
 	*/
 	virtual void GetTextCarets(const FontRenderSettings& settings,
-		core::Range<String::ConstIterator> text,
+		core::Range<core::String::ConstIterator> text,
 		core::Array<float>& carets) = 0;
 
 	//! Retrieve the material used for rendering the font

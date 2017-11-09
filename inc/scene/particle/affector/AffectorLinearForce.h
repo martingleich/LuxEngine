@@ -21,7 +21,7 @@ public:
 
 	core::Name GetReferableType() const
 	{
-		static const core::Name name = "lux.affector.Linear";
+		static const core::Name name("lux.affector.Linear");
 		return name;
 	}
 

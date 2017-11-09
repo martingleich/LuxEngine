@@ -31,7 +31,7 @@ AdapterD3D9::AdapterD3D9(UnknownRefCounted<IDirect3D9> d3d9, UINT adapter) :
 	}
 }
 
-const String& AdapterD3D9::GetName() const
+const core::String& AdapterD3D9::GetName() const
 {
 	return m_Name;
 }
@@ -46,7 +46,7 @@ u32 AdapterD3D9::GetDevice() const
 	return m_Device;
 }
 
-const String& AdapterD3D9::GetDriverType() const
+const core::String& AdapterD3D9::GetDriverType() const
 {
 	return DriverType::Direct3D9;
 }

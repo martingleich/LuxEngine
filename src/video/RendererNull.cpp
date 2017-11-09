@@ -174,12 +174,12 @@ bool RendererNull::GetNormalizeNormals() const
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::AddParam(const String& name, core::Type type, const void* value)
+void RendererNull::AddParam(const core::String& name, core::Type type, const void* value)
 {
 	m_Params.AddAttribute(name, type, value);
 }
 
-core::AttributePtr RendererNull::GetParam(const String& name) const
+core::AttributePtr RendererNull::GetParam(const core::String& name) const
 {
 	return m_Params.Pointer(name);
 }

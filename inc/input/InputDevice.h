@@ -16,12 +16,12 @@ class DeviceCreationDesc : public ReferenceCounted
 public:
 	struct ElemDesc
 	{
-		ElemDesc(const String& _name, u16 _usagePage, u16 _usage, EElementType _type) :
+		ElemDesc(const core::String& _name, u16 _usagePage, u16 _usage, EElementType _type) :
 			name(_name), usagePage(_usagePage), usage(_usage), type(_type)
 		{
 		}
 
-		const String& name;
+		const core::String& name;
 
 		u16 usagePage;
 		u16 usage;
@@ -34,8 +34,8 @@ public:
 	virtual ~DeviceCreationDesc() {}
 
 	virtual EEventSource GetType() const = 0;
-	virtual const String& GetName() const = 0;
-	virtual const String& GetGUID() const = 0;
+	virtual const core::String& GetName() const = 0;
+	virtual const core::String& GetGUID() const = 0;
 	virtual size_t GetElementCount(EEventType type) const = 0;
 	virtual ElemDesc GetElementDesc(EEventType type, u32 id) const = 0;
 };
@@ -68,7 +68,7 @@ public:
 	\param id The id of the element
 	\return The name of the element.
 	*/
-	virtual const String& GetElementName(EEventType type, u32 id) const = 0;
+	virtual const core::String& GetElementName(EEventType type, u32 id) const = 0;
 
 	//! The exact type of the device element.
 	/**
@@ -122,7 +122,7 @@ public:
 	For user display.
 	\return The device name.
 	*/
-	virtual const String& GetName() const = 0;
+	virtual const core::String& GetName() const = 0;
 
 	//! Connect the device.
 	virtual bool Connect() = 0;

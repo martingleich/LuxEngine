@@ -87,7 +87,7 @@ bool INIFile::ReadSections()
 {
 	SINIElement element;
 	SINISection* section = nullptr;
-	String sectionName;
+	core::String sectionName;
 	SectionID sectionID = InvalidID;
 
 	bool readSection = true;
@@ -162,7 +162,7 @@ bool INIFile::ReadSections()
 	return !m_IsEOF;
 }
 
-bool INIFile::ReadElement(String& work, SINIElement& element)
+bool INIFile::ReadElement(core::String& work, SINIElement& element)
 {
 	/*
 	element: Ident [Whitespace] = [Whitespace] value
@@ -257,7 +257,7 @@ bool INIFile::LoadData()
 	return (m_Sections.Size() > 0);
 }
 
-bool INIFile::ParseSectionName(String& work, String& out)
+bool INIFile::ParseSectionName(core::String& work, core::String& out)
 {
 	out.Clear();
 	auto it = work.First();
@@ -273,7 +273,7 @@ bool INIFile::ParseSectionName(String& work, String& out)
 	return false;
 }
 
-bool INIFile::IsComment(const String& work, String::ConstIterator& commentBegin)
+bool INIFile::IsComment(const core::String& work, core::String::ConstIterator& commentBegin)
 {
 	if(work.IsEmpty())
 		return false;
@@ -299,7 +299,7 @@ bool INIFile::IsComment(const String& work, String::ConstIterator& commentBegin)
 	return false;
 }
 
-bool INIFile::ReadLine(String& out)
+bool INIFile::ReadLine(core::String& out)
 {
 	out.Clear();
 
@@ -340,7 +340,7 @@ bool INIFile::ReadLine(String& out)
 		// Strip whitespaces at lineend
 		out.RStrip();
 
-		String::ConstIterator commentBegin;
+		core::String::ConstIterator commentBegin;
 		if(IsComment(out, commentBegin)) {
 			if(m_LastComment.IsEmpty() == false)
 				m_LastComment.Append("\n");
@@ -438,7 +438,7 @@ void INIFile::Reload()
 	LoadData();
 }
 
-void INIFile::WriteComment(const String& comment, size_t identDepth, INIFile::ECommentPos pos)
+void INIFile::WriteComment(const core::String& comment, size_t identDepth, INIFile::ECommentPos pos)
 {
 	if(comment.IsEmpty())
 		return;
@@ -655,16 +655,16 @@ bool INIFile::SetSectionComment(const char* section, const char* comment)
 	return true;
 }
 
-const String& INIFile::GetSectionName(INIFile::SectionID id)
+const core::String& INIFile::GetSectionName(INIFile::SectionID id)
 {
 	return m_Sections[id].name;
 }
 
-const String& INIFile::GetSectionComment(const char* section)
+const core::String& INIFile::GetSectionComment(const char* section)
 {
 	SectionID sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
-		return String::EMPTY;
+		return core::String::EMPTY;
 	return m_Sections[sectionID].name;
 }
 
@@ -826,14 +826,14 @@ bool INIFile::SetElementValue(const char* section, const char* element, const ch
 	return true;
 }
 
-const String& INIFile::GetElementName(const char* section, INIFile::ElementID id)
+const core::String& INIFile::GetElementName(const char* section, INIFile::ElementID id)
 {
 	SectionID sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
-		return String::EMPTY;
+		return core::String::EMPTY;
 
 	if(id >= m_Sections[sectionID].elemCount)
-		return String::EMPTY;
+		return core::String::EMPTY;
 
 	m_CurrentSection = sectionID;
 	m_CurrentElement = id;
@@ -841,12 +841,12 @@ const String& INIFile::GetElementName(const char* section, INIFile::ElementID id
 	return m_Elements[m_Sections[sectionID].firstElem + id].name;
 }
 
-const String& INIFile::GetElementComment(const char* section, const char* element)
+const core::String& INIFile::GetElementComment(const char* section, const char* element)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
 	if(elementID == InvalidID)
-		return String::EMPTY;
+		return core::String::EMPTY;
 
 	m_CurrentElement = elementID;
 	m_CurrentSection = sectionID;
@@ -854,12 +854,12 @@ const String& INIFile::GetElementComment(const char* section, const char* elemen
 	return m_Elements[elementID].comment;
 }
 
-const String& INIFile::GetElementValue(const char* section, const char* element)
+const core::String& INIFile::GetElementValue(const char* section, const char* element)
 {
 	SectionID sectionID;
 	ElementID elementID = GetElemID(section, element, sectionID);
 	if(elementID == InvalidID)
-		return String::EMPTY;
+		return core::String::EMPTY;
 
 	m_CurrentElement = elementID;
 	m_CurrentSection = sectionID;
@@ -867,12 +867,12 @@ const String& INIFile::GetElementValue(const char* section, const char* element)
 	return m_Elements[elementID].value;
 }
 
-const String& INIFile::GetCommentChars() const
+const core::String& INIFile::GetCommentChars() const
 {
 	return m_CommentChars;
 }
 
-void INIFile::SetCommentChars(const String& chars)
+void INIFile::SetCommentChars(const core::String& chars)
 {
 	lxAssert(!chars.IsEmpty());
 

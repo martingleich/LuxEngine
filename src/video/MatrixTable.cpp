@@ -149,9 +149,9 @@ void MatrixTable::UpdateMatrix(EMatrixType type) const
 	m_UpToDate |= (1 << type);
 }
 
-const String& MatrixTable::GetMatrixName(size_t id) const
+const core::String& MatrixTable::GetMatrixName(size_t id) const
 {
-	static const String MATRIX_NAMES[16] = {
+	static const core::String MATRIX_NAMES[16] = {
 		"world",
 		"view",
 		"proj",

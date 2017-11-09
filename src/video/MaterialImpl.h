@@ -47,8 +47,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////
 
-	core::VariableAccess Param(const StringType& name);
-	core::VariableAccess Param(const StringType& name) const;
+	core::VariableAccess Param(const core::StringType& name);
+	core::VariableAccess Param(const core::StringType& name) const;
 	core::VariableAccess Param(u32 id);
 	core::VariableAccess Param(u32 id) const;
 	core::VariableAccess Layer(u32 layer);
@@ -58,7 +58,7 @@ public:
 
 	u32 GetTextureCount() const;
 	u32 GetParamCount() const;
-	u32 GetParamId(const StringType& name) const;
+	u32 GetParamId(const core::StringType& name) const;
 
 	////////////////////////////////////////////////////////////////////
 

@@ -81,9 +81,9 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void AddParam(const String& name, core::Type type, const void* value);
+	void AddParam(const core::String& name, core::Type type, const void* value);
 
-	core::AttributePtr GetParam(const String& name) const;
+	core::AttributePtr GetParam(const core::String& name) const;
 	const core::Attributes& GetParams() const;
 
 	///////////////////////////////////////////////////////////////////////////

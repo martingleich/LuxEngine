@@ -41,7 +41,7 @@ struct Context
 
 	u32 size;
 	bool italic;
-	String name;
+	core::String name;
 
 	EFontWeight weight;
 };
@@ -281,7 +281,7 @@ int CALLBACK EnumFontFamExProc(
 	return 1;
 }
 
-static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const String& name)
+static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const core::String& name)
 {
 	LOGFONTW logFont;
 	ZeroMemory(&logFont, sizeof(logFont));
@@ -307,7 +307,7 @@ static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const Strin
 		return false;
 }
 
-static bool RegisterFileFont(io::File* file, HANDLE& outHandle, String& outFontFamily)
+static bool RegisterFileFont(io::File* file, HANDLE& outHandle, core::String& outFontFamily)
 {
 	core::RawMemory data(file->GetSize());
 
@@ -344,7 +344,7 @@ void* FontCreatorWin32::BeginFontCreation(io::File* file,
 	const core::Array<u32>& charSet)
 {
 	HANDLE fontResource;
-	String fontFamily;
+	core::String fontFamily;
 	if(!RegisterFileFont(file, fontResource, fontFamily))
 		return nullptr;
 
@@ -355,7 +355,7 @@ void* FontCreatorWin32::BeginFontCreation(io::File* file,
 	return ctx;
 }
 
-void* FontCreatorWin32::BeginFontCreation(const String& name,
+void* FontCreatorWin32::BeginFontCreation(const core::String& name,
 	const FontDescription& desc,
 	const core::Array<u32>& charSet)
 {
@@ -380,7 +380,7 @@ static DWORD GetWin32FontWeight(EFontWeight weight)
 	}
 }
 
-void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const String& name,
+void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& name,
 	const FontDescription& desc,
 	const core::Array<u32>& charSet)
 {

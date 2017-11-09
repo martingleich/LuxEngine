@@ -10,10 +10,10 @@ namespace input
 class InputDeviceNull : public InputDevice
 {
 public:
-	InputDeviceNull(const String& name, InputSystem* sys);
+	InputDeviceNull(const core::String& name, InputSystem* sys);
 	virtual ~InputDeviceNull() {}
 
-	virtual const String& GetName() const;
+	virtual const core::String& GetName() const;
 
 	virtual bool Connect();
 	virtual void Disconnect();
@@ -27,7 +27,7 @@ public:
 protected:
 	struct ElementData
 	{
-		String name;
+		core::String name;
 		EElementType type;
 	};
 
@@ -38,7 +38,7 @@ protected:
 	struct AreaElement : event::Area, ElementData {};
 
 private:
-	String m_Name;
+	core::String m_Name;
 	bool m_Connected;
 	bool m_Aquired;
 

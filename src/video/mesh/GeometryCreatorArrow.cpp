@@ -21,9 +21,9 @@ GeometryCreatorArrow::GeometryCreatorArrow()
 	m_Package.AddParam("sectors", 8);
 }
 
-const String& GeometryCreatorArrow::GetName() const
+const core::String& GeometryCreatorArrow::GetName() const
 {
-	static const String name = "arrow";
+	static const core::String name = "arrow";
 	return name;
 }
 

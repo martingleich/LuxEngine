@@ -16,8 +16,8 @@ public:
 	FileSystemWin32();
 	StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const Path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop, bool isReadOnly);
-	StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const String& name, bool deleteOnDrop);
+	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, bool deleteOnDrop, bool isReadOnly);
+	StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, bool deleteOnDrop);
 	bool ExistFile(const Path& filename) const;
 	bool ExistDirectory(const Path& filename) const;
 	Path GetAbsoluteFilename(const Path& filename) const;
@@ -29,7 +29,7 @@ public:
 	StrongRef<INIFile> CreateINIFile(const Path& filename);
 	StrongRef<INIFile> CreateINIFile(File* file);
 
-	StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 Size, const String& name);
+	StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 Size, const core::String& name);
 
 	bool CreateFile(const Path& path, bool recursive = false);
 	/*
@@ -45,7 +45,7 @@ public:
 	void RemoveMountPoint(const Path& point, Archive* archive = nullptr);
 
 private:
-	String GetFileOpenString(EFileMode mode) const;
+	core::String GetFileOpenString(EFileMode mode) const;
 	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
 	u32 GetWin32FileAttributes(const Path& p) const;
 

@@ -27,16 +27,16 @@ core::Name ImageLoaderD3DX::GetResourceType(io::File* file, core::Name requested
 	if(requestedType && requestedType != core::ResourceType::Image)
 		return core::Name::INVALID;
 
-	String ext = io::GetFileExtension(file->GetName());
+	core::String ext = io::GetFileExtension(file->GetName());
 	if(ext.EqualCaseInsensitive("jpg"))
 		return core::ResourceType::Image;
 
 	return core::Name::INVALID;
 }
 
-const String& ImageLoaderD3DX::GetName() const
+const core::String& ImageLoaderD3DX::GetName() const
 {
-	static const String name = "Lux D3DX loader proxy";
+	static const core::String name = "Lux D3DX loader proxy";
 
 	return name;
 }

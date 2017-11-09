@@ -18,12 +18,12 @@ StrongRef<InputDevice> RawInputDevice::GetDevice() const
 	return m_Device;
 }
 
-const String& RawInputDevice::GetName() const
+const core::String& RawInputDevice::GetName() const
 {
 	return m_Name;
 }
 
-const String& RawInputDevice::GetGUID() const
+const core::String& RawInputDevice::GetGUID() const
 {
 	return m_GUID;
 }
@@ -42,7 +42,7 @@ void RawInputDevice::SendInputEvent(Event& event)
 	m_System->Update(event);
 }
 
-String RawInputDevice::GetDevicePath(HANDLE raw_handle)
+core::String RawInputDevice::GetDevicePath(HANDLE raw_handle)
 {
 	// Get Buffer Size
 	UINT bufferSize = 0;
@@ -55,15 +55,15 @@ String RawInputDevice::GetDevicePath(HANDLE raw_handle)
 	if(GetRawInputDeviceInfoW(raw_handle, RIDI_DEVICENAME, str.Data(), &bufferSize) == -1)
 		throw core::Win32Exception(GetLastError());
 
-	String path = core::UTF16ToString(str.Data_c());
+	core::String path = core::UTF16ToString(str.Data_c());
 	path.ReplaceRange("\\", path.First() + 1, 1); // Old windows bug, sometimes the second character is not a backslash.
 
 	return path;
 }
 
-String RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
+core::String RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
 {
-	String path = GetDevicePath(raw_handle);
+	core::String path = GetDevicePath(raw_handle);
 
 	// A guid is build like: random_characters{<guid>}
 	for(auto it = path.First(); it != path.End(); ++it) {

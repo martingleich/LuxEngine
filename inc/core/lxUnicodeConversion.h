@@ -26,7 +26,7 @@ struct WCharAlias
 Array<u8> UTF16ToUTF8(const void* data);
 
 //! Convert a nulterminated utf16-string to a string.
-String UTF16ToString(const void* data);
+core::String UTF16ToString(const void* data);
 
 //! Convert a nulterminated utf8-string to a array of utf16 elements(nulterminated)
 Array<u16> UTF8ToUTF16(const void* data);
@@ -43,7 +43,7 @@ WCharAlias UTF8ToUTF16W(const void* data);
 The return value of this method can be cast to const wchar_t*.
 It can be used inside a funktion call, receiving a wchar_t* pointer.
 */
-WCharAlias StringToUTF16W(const String& data);
+WCharAlias StringToUTF16W(const core::String& data);
 
 //! Convert a unicode codepoint to utf-8 data
 /*

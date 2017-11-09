@@ -84,7 +84,7 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 
 core::Name LineRendererMachine::GetType() const
 {
-	static const core::Name name = "line";
+	static const core::Name name("lux.particlerenderer.line");
 
 	return name;
 }

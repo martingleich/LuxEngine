@@ -16,7 +16,7 @@ namespace gui
 class FontCreatorNull : public FontCreator
 {
 private:
-	core::HashMap<String, core::Array<u32>> m_DefaultCharSets;
+	core::HashMap<core::String, core::Array<u32>> m_DefaultCharSets;
 
 public:
 	FontCreatorNull();
@@ -32,20 +32,20 @@ public:
 		const FontDescription& desc,
 		const core::Array<u32>& charSet);
 
-	const core::Array<u32>& GetDefaultCharset(const String& name) const;
+	const core::Array<u32>& GetDefaultCharset(const core::String& name) const;
 
 private:
 	StrongRef<Font> CreateFontFromContext(void* ctx, const core::Array<u32>& charSet);
 
 	core::Array<u32> CorrectCharSet(const core::Array<u32>& set);
 
-	void AddDefaultCharSet(const String& name, const String& data);
+	void AddDefaultCharSet(const core::String& name, const core::String& data);
 
 private:
 	virtual void* BeginFontCreation(io::File* file,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet) = 0;
-	virtual void* BeginFontCreation(const String& name,
+	virtual void* BeginFontCreation(const core::String& name,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet) = 0;
 	virtual void GetFontInfo(void*, u32& fontHeight, FontDescription& desc) = 0;

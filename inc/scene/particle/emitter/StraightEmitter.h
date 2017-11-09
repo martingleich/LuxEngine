@@ -40,7 +40,7 @@ public:
 
 	core::Name GetReferableType() const
 	{
-		static const core::Name name = "lux.emitter.Straight";
+		static const core::Name name("lux.emitter.Straight");
 		return name;
 	}
 

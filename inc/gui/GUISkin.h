@@ -293,26 +293,26 @@ public:
 
 	virtual const math::Vector2F& GetSunkenOffset() const { return m_SunkenOffset; }
 
-	float GetPropertyF(const String& prop, float defaultValue=0.0f)
+	float GetPropertyF(const core::String& prop, float defaultValue=0.0f)
 	{
 		auto it = m_PropsF.Find(prop);
 		if(it == m_PropsF.End())
 			return defaultValue;
 		return *it;
 	}
-	void SetPropertyF(const String& prop, float v)
+	void SetPropertyF(const core::String& prop, float v)
 	{
 		m_PropsF[prop] = v;
 	}
 
-	math::Vector2F GetPropertyV(const String& prop, math::Vector2F defaultValue=math::Vector2F(0))
+	math::Vector2F GetPropertyV(const core::String& prop, math::Vector2F defaultValue=math::Vector2F(0))
 	{
 		auto it = m_PropsV.Find(prop);
 		if(it == m_PropsV.End())
 			return defaultValue;
 		return *it;
 	}
-	void SetPropertyV(const String& prop, math::Vector2F v)
+	void SetPropertyV(const core::String& prop, math::Vector2F v)
 	{
 		m_PropsV[prop] = v;
 	}
@@ -321,8 +321,8 @@ private:
 	StrongRef<Font> m_DefaultFont;
 	Palette m_DefaultPalette;
 	core::HashMap<core::Name, Palette> m_DefaultPalettes;
-	core::HashMap<String, float> m_PropsF;
-	core::HashMap<String, math::Vector2F> m_PropsV;
+	core::HashMap<core::String, float> m_PropsF;
+	core::HashMap<core::String, math::Vector2F> m_PropsV;
 	math::Vector2F m_SunkenOffset;
 };
 

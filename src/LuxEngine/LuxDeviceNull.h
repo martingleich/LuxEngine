@@ -15,13 +15,13 @@ public:
 
 	void BuildVideoDriver(const video::DriverConfig& config, void* user=nullptr);
 
-	core::Array<String> GetDriverTypes();
-	StrongRef<video::AdapterList> GetVideoAdapters(const String& driver);
+	core::Array<core::String> GetDriverTypes();
+	StrongRef<video::AdapterList> GetVideoAdapters(const core::String& driver);
 
 	void BuildImageSystem();
-	void BuildScene(const String& renderer, void* user=nullptr);
+	void BuildScene(const core::String& renderer, void* user=nullptr);
 	StrongRef<scene::Scene> CreateScene();
-	StrongRef<scene::SceneRenderer> CreateSceneRenderer(const String& name, void* user=nullptr);
+	StrongRef<scene::SceneRenderer> CreateSceneRenderer(const core::String& name, void* user=nullptr);
 	void BuildGUIEnvironment();
 	void BuildAll(const video::DriverConfig& config);
 

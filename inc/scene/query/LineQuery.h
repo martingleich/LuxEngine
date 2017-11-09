@@ -25,7 +25,7 @@ public:
 
 	core::Name GetType() const
 	{
-		static const core::Name name = "line";
+		static const core::Name name("lux.query.line");
 		return name;
 	}
 

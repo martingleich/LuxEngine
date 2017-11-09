@@ -70,7 +70,7 @@ struct CharInfoV1
 static const u32 FontInfoV1SizeWithoutName = 52;
 struct FontInfoV1
 {
-	String name;
+	core::String name;
 	u32 fontSize;
 	EFontWeightsV1 weight;
 	bool italic;
@@ -463,15 +463,15 @@ void FontLoader::LoadResource(io::File* file, core::Resource* dst)
 	font->Init(createData);
 }
 
-const String& FontLoader::GetName() const
+const core::String& FontLoader::GetName() const
 {
-	static const String name = "Lux Font Loader";
+	static const core::String name = "Lux Font Loader";
 	return name;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool FontWriter::CanWriteType(const String& ext, core::Name requestedType)
+bool FontWriter::CanWriteType(const core::String& ext, core::Name requestedType)
 {
 	if(requestedType != core::ResourceType::Font)
 		return false;
@@ -490,9 +490,9 @@ void FontWriter::WriteResource(io::File* file, core::Resource* resource)
 	ctx.WriteV1(font);
 }
 
-const String& FontWriter::GetName() const
+const core::String& FontWriter::GetName() const
 {
-	static const String name = "Lux Font Writer";
+	static const core::String name = "Lux Font Writer";
 	return name;
 }
 

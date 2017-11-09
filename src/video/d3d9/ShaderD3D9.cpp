@@ -81,7 +81,7 @@ private:
 
 static luxD3DXShaderIncludes g_luxD3DXShaderIncludes;
 
-static String FormatD3DXShaderError(const String& input, bool isVertex)
+static core::String FormatD3DXShaderError(const core::String& input, bool isVertex)
 {
 	// File(line, col): error number: error-string
 	auto colon = input.FindReverse(":");
@@ -109,7 +109,7 @@ ShaderD3D9::~ShaderD3D9()
 void ShaderD3D9::Init(
 	const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
 	const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
-	core::Array<String>* errorList)
+	core::Array<core::String>* errorList)
 {
 	LX_CHECK_NULL_ARG(vsCode);
 	LX_CHECK_NULL_ARG(psCode);
@@ -230,7 +230,7 @@ void ShaderD3D9::Init(
 	}
 }
 
-void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<String>* errorList)
+void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<core::String>* errorList)
 {
 	D3DXCONSTANTTABLE_DESC tableDesc;
 	HRESULT hr;
@@ -323,7 +323,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 
 UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	const char* code, const char* entryPoint, size_t length, const char* profile,
-	core::Array<String>* errorList,
+	core::Array<core::String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
 	UnknownRefCounted<ID3DXBuffer> output;
@@ -337,7 +337,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 		outTable.Access());
 	if(errors) {
 		if(errorList) {
-			String err = (const char*)errors->GetBufferPointer();
+			core::String err = (const char*)errors->GetBufferPointer();
 			for(auto& str : err.Split('\n', true))
 				if(!str.IsWhitespace())
 					errorList->PushBack(FormatD3DXShaderError(str, true));
@@ -355,7 +355,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 
 UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	const char* code, const char* entryPoint, size_t length, const char* profile,
-	core::Array<String>* errorList,
+	core::Array<core::String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
 	UnknownRefCounted<ID3DXBuffer> output;
@@ -371,7 +371,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 
 	if(errors) {
 		if(errorList) {
-			String err = (const char*)errors->GetBufferPointer();
+			core::String err = (const char*)errors->GetBufferPointer();
 			for(auto& str : err.Split('\n', true))
 				if(!str.IsWhitespace())
 					errorList->PushBack(FormatD3DXShaderError(str, false));

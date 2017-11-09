@@ -35,7 +35,7 @@ Path GetFileDir(const Path& filename)
 		return NormalizePath(filename.SubString(filename.First(), lastSlash), true);
 }
 
-String GetFilenameOnly(const Path& filename, bool keepExtension)
+core::String GetFilenameOnly(const Path& filename, bool keepExtension)
 {
 	auto lastSlash = FindLastSlash(filename);
 	Path::ConstIterator cut;

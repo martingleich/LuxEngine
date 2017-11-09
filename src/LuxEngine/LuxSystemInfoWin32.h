@@ -16,7 +16,7 @@ public:
 		QueryProcInfo();
 	}
 
-	bool GetProcessorName(String& displayName)
+	bool GetProcessorName(core::String& displayName)
 	{
 		if(m_ProcessorName.IsEmpty())
 			return false;
@@ -109,7 +109,7 @@ private:
 	}
 
 private:
-	String m_ProcessorName;
+	core::String m_ProcessorName;
 	u32 m_ProcessorSpeed;
 	u32 m_ProcessorCount;
 };

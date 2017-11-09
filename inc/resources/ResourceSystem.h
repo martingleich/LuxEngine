@@ -50,7 +50,7 @@ public:
 		of the type.
 	\return The name of the resource.
 	*/
-	virtual const String& GetResourceName(Name type, u32 id) const = 0;
+	virtual const core::String& GetResourceName(Name type, u32 id) const = 0;
 
 	//! Query the index of a resource
 	/**
@@ -67,7 +67,7 @@ public:
 	\param name The name of the resource to query.
 	\return The index of the resource.
 	*/
-	virtual u32 GetResourceId(Name type, const String& name) const = 0;
+	virtual u32 GetResourceId(Name type, const core::String& name) const = 0;
 
 	//! Add a resource to the system
 	/**
@@ -75,7 +75,7 @@ public:
 	\param name The name of the resource.
 	\param resource The resource to add to the system.
 	*/
-	virtual void AddResource(const String& name, Resource* resource) = 0;
+	virtual void AddResource(const core::String& name, Resource* resource) = 0;
 
 	//! Remove a resource from the cache
 	/**
@@ -112,7 +112,7 @@ public:
 	\throws FileNotFoundException
 	\throws FileFormatException
 	*/
-	virtual StrongRef<Resource> GetResource(Name type, const String& name) = 0;
+	virtual StrongRef<Resource> GetResource(Name type, const core::String& name) = 0;
 
 	//! Get a resources based on a file.
 	/**
@@ -144,7 +144,7 @@ public:
 	\throws FileNotFoundException
 	\throws FileFormatException
 	*/
-	virtual StrongRef<Resource> CreateResource(Name type, const String& name) = 0;
+	virtual StrongRef<Resource> CreateResource(Name type, const core::String& name) = 0;
 #endif
 
 	//! Enabled or disables caching for a given resource type.
@@ -187,7 +187,7 @@ public:
 	/**
 	Returns null if the resource writer does not exist
 	*/
-	virtual StrongRef<ResourceWriter> GetResourceWriter(core::Name resourceType, const String& ext) const = 0;
+	virtual StrongRef<ResourceWriter> GetResourceWriter(core::Name resourceType, const core::String& ext) const = 0;
 
 	//! Write a resource to a file
 	/**
@@ -196,7 +196,7 @@ public:
 	\param ext The extension(i.e. filetype) of the resource
 	\throws FileFormatException
 	*/
-	virtual void WriteResource(Resource* resource,  io::File* file, const String& ext)  const = 0;
+	virtual void WriteResource(Resource* resource,  io::File* file, const core::String& ext)  const = 0;
 	//! Write a resource to a file
 	/**
 	\param resource The resource to write to the file.

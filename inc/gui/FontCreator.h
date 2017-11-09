@@ -23,7 +23,7 @@ public:
 	virtual StrongRef<Font> CreateFont(const FontDescription& desc,
 		const core::Array<u32>& charSet) = 0;
 
-	virtual const core::Array<u32>& GetDefaultCharset(const String& name) const = 0;
+	virtual const core::Array<u32>& GetDefaultCharset(const core::String& name) const = 0;
 };
 
 }

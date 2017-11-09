@@ -26,9 +26,9 @@ GeometryCreatorSphereUV::GeometryCreatorSphereUV()
 	m_Params.AddParam("inside", false);
 }
 
-const String& GeometryCreatorSphereUV::GetName() const
+const core::String& GeometryCreatorSphereUV::GetName() const
 {
-	static const String name = "sphereUV";
+	static const core::String name = "sphereUV";
 	return name;
 }
 

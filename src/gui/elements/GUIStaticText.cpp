@@ -60,19 +60,19 @@ void StaticText::FitSizeToText()
 	SetInnerSize(PixelDimension(size.width, size.height));
 }
 
-void StaticText::SetText(const String& text)
+void StaticText::SetText(const core::String& text)
 {
 	m_TextContainer.SetText(text);
 }
 
-const String& StaticText::GetText() const
+const core::String& StaticText::GetText() const
 {
 	return m_TextContainer.GetText();
 }
 
 core::Name StaticText::GetReferableType() const
 {
-	static const core::Name name = "lug.gui.StaticText";
+	static const core::Name name("lux.gui.StaticText");
 	return name;
 }
 

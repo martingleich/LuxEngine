@@ -22,10 +22,10 @@ Name::Name() :
 {
 }
 
-Name::Name(const char* str, int action, StringTable* table) :
+Name::Name(const StringType& str, int action, StringTable* table) :
 	m_Handle(StringTableHandle::INVALID)
 {
-	if(str)
+	if(str.data)
 		Set(str, action, table);
 }
 
@@ -40,9 +40,9 @@ Name& Name::operator=(const Name& other)
 	return *this;
 }
 
-void Name::Set(const char* str, int action, StringTable* table)
+void Name::Set(const StringType& str, int action, StringTable* table)
 {
-	lxAssert("Assign null to name string." && str);
+	lxAssert("Assign null to name string." && str.data);
 
 	if(!table)
 		table = &StringTable::GlobalInstance();
@@ -55,19 +55,9 @@ void Name::Set(const char* str, int action, StringTable* table)
 		(void)0;
 }
 
-void Name::Set(const String& str, int action, StringTable* table)
+Name& Name::operator=(const StringType& str)
 {
-	Set(str.Data(), action, table);
-}
-
-Name& Name::operator=(const String& str)
-{
-	return (*this = str.Data());
-}
-
-Name& Name::operator=(const char* str)
-{
-	Set(str, ADD, nullptr);
+	Set(str.data, ADD, nullptr);
 	return *this;
 }
 
@@ -76,9 +66,13 @@ const char* Name::c_str() const
 	return m_Handle.c_str();
 }
 
-bool Name::operator==(const String& other) const
+bool Name::operator==(const StringType& other) const
 {
-	return (*this == other.Data());
+	lxAssert("Compare null to name string." && other.data);
+	if(!other.data)
+		return false;
+
+	return (strcicmp(c_str(), other.data) == 0);
 }
 
 bool Name::operator==(const Name& other) const
@@ -86,27 +80,12 @@ bool Name::operator==(const Name& other) const
 	return (m_Handle == other.m_Handle);
 }
 
-bool Name::operator==(const char* str) const
-{
-	lxAssert("Compare null to name string." && str);
-	if(!str)
-		return false;
-
-	return (strcicmp(c_str(), str) == 0);
-}
-
-
-bool Name::operator!=(const String& other) const
-{
-	return !(*this == other.Data());
-}
-
 bool Name::operator!=(const Name& other) const
 {
 	return !(*this == other);
 }
 
-bool Name::operator!=(const char* str) const
+bool Name::operator!=(const StringType& str) const
 {
 	return !(*this == str);
 }

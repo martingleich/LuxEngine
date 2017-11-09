@@ -140,9 +140,9 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	LUX_API StrongRef<Element> AddElement(core::Name name, Element* parent);
-	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const String& text = String::EMPTY, Element* parent = nullptr);
-	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text = String::EMPTY, Element* parent = nullptr);
-	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const String& text = String::EMPTY, Element* parent = nullptr);
+	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
+	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
+	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
 	LUX_API StrongRef<Slider> AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min=0, int max=100, Element* parent = nullptr);
 	LUX_API StrongRef<Slider> AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min=0, int max=100, Element* parent = nullptr);
 

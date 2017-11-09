@@ -75,7 +75,7 @@ StrongRef<Mesh> MeshSystem::CreateMesh(Geometry* geo)
 	return out;
 }
 
-StrongRef<GeometryCreator> MeshSystem::GetCreatorByName(const String& name) const
+StrongRef<GeometryCreator> MeshSystem::GetCreatorByName(const core::String& name) const
 {
 	auto it = m_Creators.Find(name);
 	if(it == m_Creators.End())
@@ -116,7 +116,7 @@ StrongRef<GeometryCreator> MeshSystem::GetCreatorById(size_t id) const
 	return *core::AdvanceIterator(m_Creators.First(), id);
 }
 
-core::PackagePuffer MeshSystem::GetCreatorParams(const String& name)
+core::PackagePuffer MeshSystem::GetCreatorParams(const core::String& name)
 {
 	auto it = m_Creators.Find(name);
 	if(it == m_Creators.End())
@@ -125,12 +125,12 @@ core::PackagePuffer MeshSystem::GetCreatorParams(const String& name)
 	return core::PackagePuffer(&((*it)->GetParams()));
 }
 
-StrongRef<Geometry> MeshSystem::CreateGeometry(const String& name, const core::PackagePuffer& params)
+StrongRef<Geometry> MeshSystem::CreateGeometry(const core::String& name, const core::PackagePuffer& params)
 {
 	return GetCreatorByName(name)->CreateGeometry(params);
 }
 
-StrongRef<Mesh> MeshSystem::CreateMesh(const String& name, const core::PackagePuffer& params)
+StrongRef<Mesh> MeshSystem::CreateMesh(const core::String& name, const core::PackagePuffer& params)
 {
 	StrongRef<Geometry> sub = GetCreatorByName(name)->CreateGeometry(params);
 	StrongRef<Mesh> out = CreateMesh(sub);

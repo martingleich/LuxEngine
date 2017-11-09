@@ -170,7 +170,7 @@ StrongRef<Archive> ArchiveLoaderFolderWin32::LoadArchive(const Path& p)
 
 struct ArchiveFolderWin32::SelfData
 {
-	String name;
+	core::String name;
 	Path path;
 
 	Win32Path win32AbsPath;

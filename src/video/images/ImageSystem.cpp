@@ -94,9 +94,9 @@ public:
 			0, texLock.pitch);
 	}
 
-	const String& GetName() const
+	const core::String& GetName() const
 	{
-		static const String name = "Internal texture loader";
+		static const core::String name = "Internal texture loader";
 		return name;
 	}
 };
@@ -125,7 +125,7 @@ public:
 		return AXES[i];
 	}
 
-	String GetName(ENameScheme scheme, size_t id, const io::Path& basePath, const String& name, const String& ext)
+	core::String GetName(ENameScheme scheme, size_t id, const io::Path& basePath, const core::String& name, const core::String& ext)
 	{
 		switch(scheme) {
 		case ENameScheme::Numeric:
@@ -140,11 +140,11 @@ public:
 		}
 	}
 
-	ENameScheme GetNameSchema(const io::Path& path, String& outBaseName, size_t& outId)
+	ENameScheme GetNameSchema(const io::Path& path, core::String& outBaseName, size_t& outId)
 	{
 		io::Path basePath = io::GetFileDir(path);
-		String nameonly = io::GetFilenameOnly(path, false);
-		String ext = io::GetFileExtension(path);
+		core::String nameonly = io::GetFilenameOnly(path, false);
+		core::String ext = io::GetFileExtension(path);
 		if(*nameonly.Last() > '1' && *nameonly.Last() <= '6') {
 			outBaseName = nameonly.SubString(nameonly.First(), nameonly.Last());
 			outId = *nameonly.Last() - '1';
@@ -175,13 +175,13 @@ public:
 		auto fileSys = io::FileSystem::Instance();
 		auto filename = file->GetName();
 		if(fileSys->ExistFile(filename)) {
-			String baseName;
+			core::String baseName;
 			size_t id;
 			ENameScheme scheme = GetNameSchema(filename, baseName, id);
 			if(scheme == ENameScheme::Invalid)
 				return core::Name::INVALID;
 
-			String otherName = GetName(scheme, (id + 1) % 6, io::GetFileDir(filename), baseName, io::GetFileExtension(filename));
+			core::String otherName = GetName(scheme, (id + 1) % 6, io::GetFileDir(filename), baseName, io::GetFileExtension(filename));
 			if(!fileSys->ExistFile(otherName))
 				return core::Name::INVALID;
 
@@ -197,8 +197,8 @@ public:
 		auto filename = file->GetName();
 
 		io::Path basePath = io::GetFileDir(filename);
-		String ext = io::GetFileExtension(filename);
-		String baseName;
+		core::String ext = io::GetFileExtension(filename);
+		core::String baseName;
 		size_t id;
 		ENameScheme scheme = GetNameSchema(filename, baseName, id);
 
@@ -221,9 +221,9 @@ public:
 		InitCubeTexture(images, (CubeTexture*)dst);
 	}
 
-	const String& GetName() const
+	const core::String& GetName() const
 	{
-		static const String name = "Internal list to cube texture loader";
+		static const core::String name = "Internal list to cube texture loader";
 		return name;
 	}
 

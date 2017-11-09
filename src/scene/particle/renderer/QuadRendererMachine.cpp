@@ -329,7 +329,7 @@ void QuadRendererMachine::CreateBuffers(ParticleGroupData* group)
 
 core::Name QuadRendererMachine::GetType() const
 {
-	static const core::Name name = "quad";
+	static const core::Name name("lux.particlerenderer.quad");
 	return name;
 }
 

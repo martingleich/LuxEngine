@@ -12,7 +12,7 @@ namespace core
 class Attribute : public ReferenceCounted
 {
 public:
-	virtual const String& GetName() const = 0;
+	virtual const core::String& GetName() const = 0;
 	virtual core::Type GetType() const = 0;
 	virtual VariableAccess GetAccess(bool isConst = false) = 0;
 };
@@ -20,13 +20,13 @@ public:
 class AttributeAnyImpl : public Attribute
 {
 public:
-	AttributeAnyImpl(const String& name, core::Type type, const void* init = nullptr) :
+	AttributeAnyImpl(const core::String& name, core::Type type, const void* init = nullptr) :
 		m_Any(type, init),
 		m_Name(name)
 	{
 	}
 
-	virtual const String& GetName() const
+	virtual const core::String& GetName() const
 	{
 		return m_Name;
 	}
@@ -43,7 +43,7 @@ public:
 
 private:
 	AnyObject m_Any;
-	String m_Name;
+	core::String m_Name;
 };
 
 class AttributePtr
@@ -116,10 +116,10 @@ private:
 
 class Attributes
 {
-	typedef core::HashMap<String, StrongRef<Attribute>>::ConstKeyIterator ConstIterator;
+	typedef core::HashMap<core::String, StrongRef<Attribute>>::ConstKeyIterator ConstIterator;
 public:
 	template <typename T>
-	AttributePtr AddAttribute(const String& name, const T& value)
+	AttributePtr AddAttribute(const core::String& name, const T& value)
 	{
 		return AddAttribute(name, core::GetTypeInfo<T>(), &value);
 	}
@@ -142,7 +142,7 @@ public:
 		return attrb;
 	}
 
-	AttributePtr AddAttribute(const String& name, core::Type type, const void* value)
+	AttributePtr AddAttribute(const core::String& name, core::Type type, const void* value)
 	{
 		AttributePtr ptr;
 		auto it = m_ObjectMap.Find(name);
@@ -160,12 +160,12 @@ public:
 		return ptr;
 	}
 
-	void RemoveAttribute(const String& name)
+	void RemoveAttribute(const core::String& name)
 	{
 		m_ObjectMap.Erase(name);
 	}
 
-	core::VariableAccess operator[](const String& name)
+	core::VariableAccess operator[](const core::String& name)
 	{
 		auto it = m_ObjectMap.Find(name);
 		if(it == m_ObjectMap.End())
@@ -173,7 +173,7 @@ public:
 		return (*it)->GetAccess(false);
 	}
 
-	core::VariableAccess operator[](const String& name) const
+	core::VariableAccess operator[](const core::String& name) const
 	{
 		auto it = m_ObjectMap.Find(name);
 		if(it == m_ObjectMap.End())
@@ -201,7 +201,7 @@ public:
 		return End();
 	}
 
-	AttributePtr Pointer(const String& name) const
+	AttributePtr Pointer(const core::String& name) const
 	{
 		auto it = m_ObjectMap.Find(name);
 		if(it == m_ObjectMap.End())
@@ -210,7 +210,7 @@ public:
 	}
 
 private:
-	core::HashMap<String, StrongRef<Attribute>> m_ObjectMap;
+	core::HashMap<core::String, StrongRef<Attribute>> m_ObjectMap;
 };
 
 } // namespace core

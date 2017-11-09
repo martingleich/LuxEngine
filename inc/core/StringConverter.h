@@ -12,34 +12,34 @@ namespace core
 class StringConverter
 {
 private:
-	static String IntToString(intmax_t num)
+	static core::String IntToString(intmax_t num)
 	{
 		char buffer[22]; // See format::IntToString for size reasoning
 		format::IntToString(num, buffer);
 		return buffer;
 	}
 
-	static String UIntToString(uintmax_t num)
+	static core::String UIntToString(uintmax_t num)
 	{
 		char buffer[22]; // See format::UIntToString for size reasoning
 		format::UIntToString(num, buffer);
 		return buffer;
 	}
 public:
-	static String ToString(unsigned long long num) { return UIntToString(num); }
-	static String ToString(unsigned long num) { return UIntToString(num); }
-	static String ToString(unsigned int num) { return UIntToString(num); }
-	static String ToString(unsigned short num) { return UIntToString(num); }
-	static String ToString(unsigned char num) { return UIntToString(num); }
+	static core::String ToString(unsigned long long num) { return UIntToString(num); }
+	static core::String ToString(unsigned long num) { return UIntToString(num); }
+	static core::String ToString(unsigned int num) { return UIntToString(num); }
+	static core::String ToString(unsigned short num) { return UIntToString(num); }
+	static core::String ToString(unsigned char num) { return UIntToString(num); }
 
-	static String ToString(long long num) { return IntToString(num); }
-	static String ToString(long num) { return IntToString(num); }
-	static String ToString(int num) { return IntToString(num); }
-	static String ToString(short num) { return IntToString(num); }
-	static String ToString(char num) { return IntToString(num); }
+	static core::String ToString(long long num) { return IntToString(num); }
+	static core::String ToString(long num) { return IntToString(num); }
+	static core::String ToString(int num) { return IntToString(num); }
+	static core::String ToString(short num) { return IntToString(num); }
+	static core::String ToString(char num) { return IntToString(num); }
 
 	//! Convert a float to a string
-	static String ToString(float value)
+	static core::String ToString(float value)
 	{
 		char buffer[43]; // See format::FloatToString for size reasoning
 		format::FloatToString(value, buffer);
@@ -47,7 +47,7 @@ public:
 	}
 
 	//! Convert a float to a string
-	static String ToString(double value)
+	static core::String ToString(double value)
 	{
 		char buffer[43]; // See format::FloatToString for size reasoning
 		format::FloatToString(value, buffer);
@@ -55,34 +55,34 @@ public:
 	}
 
 	//! Convert a date to a string
-	static String ToString(const core::DateAndTime& value)
+	static core::String ToString(const core::DateAndTime& value)
 	{
 		return Format("~a", value);
 	}
 
 	//! Convert a string to a string.
-	static const String& ToString(const String& value)
+	static const core::String& ToString(const core::String& value)
 	{
 		return value;
 	}
 
 	//! Convert a string to a string.
-	static String ToString(const char* str)
+	static core::String ToString(const char* str)
 	{
 		return str;
 	}
 
 	template <typename... T>
-	static String Format(StringType format, T... args)
+	static core::String Format(core::StringType format, T... args)
 	{
-		String out;
+		core::String out;
 		AppendFormat(out, format, args...);
 
 		return std::move(out);
 	}
 	
 	template <typename... T>
-	static void AppendFormat(String& str, StringType format, T... args)
+	static void AppendFormat(core::String& str, core::StringType format, T... args)
 	{
 		core::StringSink sink(str);
 		format::format(sink, format.data, args...);
@@ -95,7 +95,7 @@ public:
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed float
 	*/
-	static float ParseFloat(const String& str, float errorValue = 0.0f, const char** nextChar = nullptr)
+	static float ParseFloat(const core::String& str, float errorValue = 0.0f, const char** nextChar = nullptr)
 	{
 		return ParseFloat(str.Data(), errorValue, nextChar);
 	}
@@ -181,7 +181,7 @@ public:
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed integer
 	*/
-	static int ParseInt(const String& str, int errorValue = 0, const char** nextChar = nullptr)
+	static int ParseInt(const core::String& str, int errorValue = 0, const char** nextChar = nullptr)
 	{
 		return ParseInt(str.Data(), errorValue, nextChar);
 	}

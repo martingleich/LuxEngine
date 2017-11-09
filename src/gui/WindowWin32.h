@@ -27,7 +27,7 @@ public:
 	~WindowWin32();
 
 	bool SwitchFullscreen(bool fullscreen);
-	void SetText(const String& text);
+	void SetText(const core::String& text);
 
 	void SetInnerSize(const ScalarDimensionF& size);
 

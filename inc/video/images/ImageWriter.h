@@ -13,7 +13,7 @@ namespace video
 class ImageWriter : public core::ResourceWriter
 {
 public:
-	bool CanWriteType(const String& ext, core::Name requestedType)
+	bool CanWriteType(const core::String& ext, core::Name requestedType)
 	{
 		if(requestedType == core::ResourceType::Image || requestedType == core::ResourceType::Texture)
 			return CanWriteFile(ext);
@@ -21,7 +21,7 @@ public:
 			return false;
 	}
 
-	virtual bool CanWriteFile(const String& ext) = 0;
+	virtual bool CanWriteFile(const core::String& ext) = 0;
 	
 	void WriteFile(io::File* file, Image* image, u32 writerParam = 0)
 	{

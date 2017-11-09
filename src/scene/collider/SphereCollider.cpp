@@ -9,8 +9,8 @@
 
 #include "core/ReferableRegister.h"
 
-const lux::core::Name lux::scene::SphereCollider::TypeName = "lux.collider.Sphere";
-const lux::core::Name lux::scene::BoundingSphereCollider::TypeName = "lux.collider.BSphere";
+const lux::core::Name lux::scene::SphereCollider::TypeName("lux.collider.Sphere");
+const lux::core::Name lux::scene::BoundingSphereCollider::TypeName("lux.collider.BSphere");
 
 LUX_REGISTER_REFERABLE_CLASS_NAMED(sphere, lux::scene::SphereCollider::TypeName, lux::scene::SphereCollider);
 LUX_REGISTER_REFERABLE_CLASS_NAMED(bounding_sphere, lux::scene::BoundingSphereCollider::TypeName, lux::scene::BoundingSphereCollider);

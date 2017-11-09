@@ -11,15 +11,13 @@
 
 namespace lux
 {
-
 namespace core
 {
 template <typename T>
 class Array;
 
-}
 //! The type of characters a string contains.
-enum class EStringType
+enum class EStringClass
 {
 	Digit = 1,      //!< The string only contains digits.
 	Alpha = 2,      //!< The string only contains letters.
@@ -29,8 +27,6 @@ enum class EStringType
 	Lower = 32,     //!< All the characters in the string are lower-case.
 	Empty = 64,     //!< The string was empty
 };
-
-DECLARE_FLAG_CLASS(EStringType);
 
 class String;
 
@@ -601,7 +597,7 @@ public:
 	/**
 	See \ref{EStringType} for more information about string classification.
 	*/
-	EStringType Classify() const;
+	EStringClass Classify() const;
 
 	//! Contains the string only whitespace(or is empty)
 	bool IsWhitespace() const;
@@ -658,7 +654,7 @@ private:
 
 inline String operator+(const char* str, const String& string)
 {
-	return lux::String(str) + string;
+	return String(str) + string;
 }
 
 inline bool operator==(const char* other, const String& string)
@@ -690,13 +686,6 @@ inline void StringType::EnsureSize() const
 		size = strlen(data);
 }
 
-namespace io
-{
-using Path = String;
-}
-
-namespace core
-{
 namespace Types
 {
 LUX_API Type String();
@@ -717,6 +706,13 @@ struct HashType<String>
 };
 
 } // namespace core
+namespace io
+{
+using Path = core::String;
+}
+
+DECLARE_FLAG_CLASS(core::EStringClass);
+
 } // namespace lux
 
 #endif

@@ -9,7 +9,7 @@ namespace io
 LimitedFile::LimitedFile(StrongRef<File> Master,
 	u32 offset,
 	const FileDescription& desc,
-	String name) :
+	core::String name) :
 	File(name, desc),
 	m_StartOffset(offset),
 	m_FileSize(desc.GetSize()),

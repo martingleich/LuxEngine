@@ -53,7 +53,7 @@ public:
 			return table->GetParamById(id);
 		}
 
-		const String& GetName() const
+		const core::String& GetName() const
 		{
 			return table->GetMatrixName(id);
 		}
@@ -78,7 +78,7 @@ public:
 	void ClearDirty(EMatrixType type) const;
 
 	size_t GetCount() const;
-	const String& GetMatrixName(size_t id) const;
+	const core::String& GetMatrixName(size_t id) const;
 	StrongRef<core::Attribute> CreateAttribute(size_t id);
 
 private:

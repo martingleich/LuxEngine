@@ -69,7 +69,7 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 
 core::Name PointRendererMachine::GetType() const
 {
-	static const core::Name name = "point";
+	static const core::Name name("lux.particlerenderer.point");
 	return name;
 }
 

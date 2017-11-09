@@ -189,15 +189,15 @@ public:
 	\param type The type of the new parameter
 	\throws InvalidArgumentException If the name is already in use
 	*/
-	virtual void AddParam(const String& name, core::Type type, const void* value=nullptr) = 0;
+	virtual void AddParam(const core::String& name, core::Type type, const void* value=nullptr) = 0;
 
 	template <typename T>
-	void AddParam(const String& name, const T& value)
+	void AddParam(const core::String& name, const T& value)
 	{
 		AddParam(name, core::GetTypeInfo<T>(), &value);
 	}
 
-	virtual core::AttributePtr GetParam(const String& name) const = 0;
+	virtual core::AttributePtr GetParam(const core::String& name) const = 0;
 	virtual const core::Attributes& GetParams() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////

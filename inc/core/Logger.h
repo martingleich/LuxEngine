@@ -87,9 +87,9 @@ public:
 		++m_RefCount;
 	}
 
-	virtual void Print(const String& s, ELogLevel ll) = 0;
+	virtual void Print(const core::String& s, ELogLevel ll) = 0;
 
-	void FinishEntry(const String& s, ELogLevel ll)
+	void FinishEntry(const core::String& s, ELogLevel ll)
 	{
 		m_PrinterLock.lock();
 		Print(s, ll);
@@ -191,7 +191,7 @@ public:
 
 		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel && m_LogSystem.GetLogLevel() != ELogLevel::None) {
 			ifconst(sizeof...(data)) {
-				String out;
+				core::String out;
 				core::StringSink sink(out);
 				format::format(sink, format, data...);
 
@@ -209,7 +209,7 @@ public:
 	}
 
 	template <typename... T>
-	void operator()(const String& format, T... data)
+	void operator()(const core::String& format, T... data)
 	{
 		Write(format.Data(), data...);
 	}

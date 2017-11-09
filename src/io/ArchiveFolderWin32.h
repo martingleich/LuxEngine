@@ -20,7 +20,7 @@ public:
 	StrongRef<File> OpenFile(const Path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	bool ExistFile(const Path& p);
-	StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = String::EMPTY);
+	StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = core::String::EMPTY);
 	EArchiveCapabilities GetCaps() const;
 	Path GetAbsolutePath(const Path& p);
 

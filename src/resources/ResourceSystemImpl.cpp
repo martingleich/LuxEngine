@@ -17,27 +17,27 @@ namespace core
 
 namespace ResourceType
 {
-const Name Image = "lux.resource.Image";
-const Name ImageList = "lux.resouce.Imagelist";
-const Name Texture = "lux.resource.Texture";
-const Name CubeTexture = "lux.resource.CubeTexture";
-const Name Mesh = "lux.resource.Mesh";
-const Name Font = "lux.resource.Font";
-const Name Sound = "lux.resource.Sound";
-const Name Material = "lux.resource.Material";
+const Name Image("lux.resource.Image");
+const Name ImageList("lux.resouce.Imagelist");
+const Name Texture("lux.resource.Texture");
+const Name CubeTexture("lux.resource.CubeTexture");
+const Name Mesh("lux.resource.Mesh");
+const Name Font("lux.resource.Font");
+const Name Sound("lux.resource.Sound");
+const Name Material("lux.resource.Material");
 }
 
 static u32 INVALID_ID = 0xFFFFFFFF;
 
 struct Entry
 {
-	String name;
+	core::String name;
 	StrongRef<Resource> resource;
 
 	Entry()
 	{
 	}
-	Entry(const String& n, Resource* r) : name(n), resource(r)
+	Entry(const core::String& n, Resource* r) : name(n), resource(r)
 	{
 	}
 
@@ -99,7 +99,7 @@ struct ResourceBlock
 		return resources.At(id).resource;
 	}
 
-	const String& GetName(u32 id) const
+	const core::String& GetName(u32 id) const
 	{
 		return resources.At(id).name;
 	}
@@ -114,7 +114,7 @@ struct ResourceBlock
 		return INVALID_ID;
 	}
 
-	u32 GetResourceId(const String& name) const
+	u32 GetResourceId(const core::String& name) const
 	{
 		if(name.IsEmpty())
 			return INVALID_ID;
@@ -127,7 +127,7 @@ struct ResourceBlock
 		return (u32)core::IteratorDistance(resources.First(), it);
 	}
 
-	void AddResource(const String& name, Resource* resource)
+	void AddResource(const core::String& name, Resource* resource)
 	{
 		lxAssert(resource);
 		if(!resource)
@@ -200,7 +200,7 @@ u32 ResourceSystemImpl::GetResourceCount(Name type) const
 	return (u32)self->resources[typeID].Size();
 }
 
-const String& ResourceSystemImpl::GetResourceName(Name type, u32 id) const
+const core::String& ResourceSystemImpl::GetResourceName(Name type, u32 id) const
 {
 	const u32 typeId = GetTypeID(type);
 	if(typeId > GetTypeCount())
@@ -223,7 +223,7 @@ u32 ResourceSystemImpl::GetResourceId(Resource* resource) const
 	return resId;
 }
 
-u32 ResourceSystemImpl::GetResourceId(Name type, const String& name) const
+u32 ResourceSystemImpl::GetResourceId(Name type, const core::String& name) const
 {
 	u32 id = GetResourceIdUnsafe(type, name);
 	if(id == INVALID_ID)
@@ -232,7 +232,7 @@ u32 ResourceSystemImpl::GetResourceId(Name type, const String& name) const
 	return id;
 }
 
-u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const String& name) const
+u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const core::String& name) const
 {
 	if(name.IsEmpty())
 		throw core::InvalidArgumentException("name", "Must not be empty");
@@ -243,14 +243,14 @@ u32 ResourceSystemImpl::GetResourceIdUnsafe(Name type, const String& name) const
 		return INVALID_ID;
 
 	if(self->fileSystem->ExistFile(name)) {
-		const String abs_path = self->fileSystem->GetAbsoluteFilename(name);
+		const core::String abs_path = self->fileSystem->GetAbsoluteFilename(name);
 		return self->resources[typeId].GetResourceId(abs_path);
 	} else {
 		return self->resources[typeId].GetResourceId(name);
 	}
 }
 
-void ResourceSystemImpl::AddResource(const String& name, Resource* resource)
+void ResourceSystemImpl::AddResource(const core::String& name, Resource* resource)
 {
 	if(!resource)
 		throw core::InvalidArgumentException("resource", "Must not be null");
@@ -291,7 +291,7 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, u32 id)
 	return self->resources[typeId].GetResource(id);
 }
 
-StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const String& name)
+StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const core::String& name)
 {
 	if(name.IsEmpty())
 		return nullptr;
@@ -320,7 +320,7 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, io::File* file)
 	return resource;
 }
 
-StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, const String& name)
+StrongRef<Resource> ResourceSystemImpl::CreateResource(Name type, const core::String& name)
 {
 	if(name.IsEmpty())
 		throw core::InvalidArgumentException("name", "Name may not be empty");
@@ -375,7 +375,7 @@ u32 ResourceSystemImpl::GetResourceWriterCount() const
 	return self->writers.Size();
 }
 
-StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(core::Name resourceType, const String& ext) const
+StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(core::Name resourceType, const core::String& ext) const
 {
 	for(auto it = self->writers.Last(); it != self->writers.Begin(); --it) {
 		bool canWrite = (*it)->CanWriteType(ext, resourceType);
@@ -391,7 +391,7 @@ StrongRef<ResourceWriter> ResourceSystemImpl::GetResourceWriter(u32 id) const
 	return self->writers.At(id);
 }
 
-void ResourceSystemImpl::WriteResource(Resource* resource, io::File* file, const String& ext)  const
+void ResourceSystemImpl::WriteResource(Resource* resource, io::File* file, const core::String& ext)  const
 {
 	auto writer = GetResourceWriter(resource->GetReferableType(), ext);
 	if(!writer)

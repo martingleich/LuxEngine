@@ -6,7 +6,7 @@ namespace lux
 namespace input
 {
 
-InputDeviceNull::InputDeviceNull(const String& name, InputSystem* sys) :
+InputDeviceNull::InputDeviceNull(const core::String& name, InputSystem* sys) :
 	m_Name(name),
 	m_Connected(false),
 	m_Aquired(false),
@@ -15,7 +15,7 @@ InputDeviceNull::InputDeviceNull(const String& name, InputSystem* sys) :
 {
 }
 
-const String& InputDeviceNull::GetName() const
+const core::String& InputDeviceNull::GetName() const
 {
 	return m_Name;
 }

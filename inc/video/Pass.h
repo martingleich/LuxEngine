@@ -150,9 +150,9 @@ public:
 		return layers.Size();
 	}
 
-	const String& GetOptionName(u32 id) const
+	const core::String& GetOptionName(u32 id) const
 	{
-		static core::Array<String> layerNames;
+		static core::Array<core::String> layerNames;
 		if(id >= layers.Size())
 			throw core::OutOfRangeException();
 		if(id >= layerNames.Size()) {

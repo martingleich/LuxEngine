@@ -67,8 +67,8 @@ public:
 	\return The newly created file.
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop, bool isReadOnly) = 0;
-	virtual StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const String& name, bool deleteOnDrop) = 0;
+	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, bool deleteOnDrop, bool isReadOnly) = 0;
+	virtual StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, bool deleteOnDrop) = 0;
 
 	//! Create a limited file
 	/**
@@ -80,7 +80,7 @@ public:
 	\return The new file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const String& name) = 0;
+	virtual StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const core::String& name) = 0;
 
 	//! Test if a file exist
 	/**

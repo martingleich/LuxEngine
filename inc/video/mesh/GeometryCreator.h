@@ -37,7 +37,7 @@ public:
 	Must be unique over all geometry creators.
 	\return The name of the creator.
 	*/
-	virtual const String& GetName() const = 0;
+	virtual const core::String& GetName() const = 0;
 
 	//! Get the param packge describing the parameters of the creator.
 	virtual const core::ParamPackage& GetParams() const = 0;

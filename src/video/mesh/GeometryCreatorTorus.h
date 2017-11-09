@@ -13,7 +13,7 @@ class GeometryCreatorTorus : public GeometryCreator
 public:
 	GeometryCreatorTorus();
 	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
-	const String& GetName() const;
+	const core::String& GetName() const;
 	const core::ParamPackage& GetParams() const;
 	StrongRef<Geometry> CreateGeometry(
 		float radiusMajor = 1.0f,

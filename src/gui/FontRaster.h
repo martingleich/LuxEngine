@@ -59,10 +59,10 @@ public:
 
 	void Init(const FontCreationData& data);
 
-	void Draw(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, const math::Vector2F& Position, const math::RectF* clip);
-	float GetTextWidth(const FontRenderSettings& settings, core::Range<String::ConstIterator> text);
-	size_t GetCaretFromOffset(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, float XPosition);
-	void GetTextCarets(const FontRenderSettings& settings, core::Range<String::ConstIterator> text, core::Array<float>& carets);
+	void Draw(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, const math::Vector2F& Position, const math::RectF* clip);
+	float GetTextWidth(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text);
+	size_t GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition);
+	void GetTextCarets(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets);
 
 	const video::Material* GetMaterial() const;
 

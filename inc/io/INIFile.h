@@ -43,8 +43,8 @@ public:
 	// Commit all changes to the file, automatic called on Close
 	LUX_API bool Commit();
 
-	LUX_API const String& GetCommentChars() const;
-	LUX_API void SetCommentChars(const String& chars);
+	LUX_API const core::String& GetCommentChars() const;
+	LUX_API void SetCommentChars(const core::String& chars);
 	LUX_API u32 GetCommentChar() const;
 
 	LUX_API size_t GetSectionCount();
@@ -53,8 +53,8 @@ public:
 	LUX_API bool RemoveSection(const char* section);
 	LUX_API bool SetSectionName(const char* section, const char* name);
 	LUX_API bool SetSectionComment(const char* section, const char* comment);
-	LUX_API const String& GetSectionName(SectionID id);
-	LUX_API const String& GetSectionComment(const char* section);
+	LUX_API const core::String& GetSectionName(SectionID id);
+	LUX_API const core::String& GetSectionComment(const char* section);
 
 	LUX_API size_t GetElementCount(const char* section);
 	LUX_API bool SortElements(const char* section, ESorting sorting);
@@ -63,9 +63,9 @@ public:
 	LUX_API bool SetElementName(const char* section, const char* element, const char* name);
 	LUX_API bool SetElementComment(const char* section, const char* element, const char* comment);
 	LUX_API bool SetElementValue(const char* section, const char* element, const char* value);
-	LUX_API const String& GetElementName(const char* section, ElementID id);
-	LUX_API const String& GetElementComment(const char* section, const char* element);
-	LUX_API const String& GetElementValue(const char* section, const char* element);
+	LUX_API const core::String& GetElementName(const char* section, ElementID id);
+	LUX_API const core::String& GetElementComment(const char* section, const char* element);
+	LUX_API const core::String& GetElementValue(const char* section, const char* element);
 	LUX_API void SetElementCommentPos(ECommentPos pos);
 	LUX_API ECommentPos GetElementCommentPos() const;
 	LUX_API bool IsEmpty();
@@ -73,16 +73,16 @@ public:
 private:
 	struct SINIElement
 	{
-		String name;
-		String comment;
-		String value;
+		core::String name;
+		core::String comment;
+		core::String value;
 		SectionID section;
 	};
 
 	struct SINISection
 	{
-		String name;
-		String comment;
+		core::String name;
+		core::String comment;
 		ElementID firstElem;
 		size_t elemCount;
 		bool sorted : 1;
@@ -106,9 +106,9 @@ private:
 	SectionID m_CurrentSection;
 	ElementID m_CurrentElement;
 
-	String m_LastComment;
-	String m_Work;
-	String m_CommentChars;
+	core::String m_LastComment;
+	core::String m_Work;
+	core::String m_CommentChars;
 
 	bool m_IsEOF;
 	bool m_SectionSorted;
@@ -118,13 +118,13 @@ private:
 
 private:
 	bool LoadData();
-	bool ReadLine(String& out);
-	bool ParseSectionName(String& work, String& out);
+	bool ReadLine(core::String& out);
+	bool ParseSectionName(core::String& work, core::String& out);
 	bool ReadSections();
-	bool ReadElement(String& work, SINIElement& element);
-	bool IsComment(const String& work, String::ConstIterator& CommentBegin);
+	bool ReadElement(core::String& work, SINIElement& element);
+	bool IsComment(const core::String& work, core::String::ConstIterator& CommentBegin);
 
-	void WriteComment(const String& comment, size_t identDepth, ECommentPos pos);
+	void WriteComment(const core::String& comment, size_t identDepth, ECommentPos pos);
 
 	SectionID GetSectionID(const char* Section);
 	ElementID GetElemID(const char* Section, const char* Element, SectionID& outSection);

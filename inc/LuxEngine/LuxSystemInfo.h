@@ -13,7 +13,7 @@ class LuxSystemInfo : public ReferenceCounted
 public:
 	virtual ~LuxSystemInfo() {}
 
-	virtual bool GetProcessorName(String& displayName) = 0;
+	virtual bool GetProcessorName(core::String& displayName) = 0;
 	virtual bool GetProcessorSpeed(u32& speedInMhz) = 0;
 
 	virtual bool GetTotalRAM(u32& ramInMB) = 0;

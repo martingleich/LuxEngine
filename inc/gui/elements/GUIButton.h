@@ -16,8 +16,8 @@ public:
 	LUX_API ~Button();
 	LUX_API void Paint(Renderer* r);
 	LUX_API core::Name GetReferableType() const;
-	LUX_API void SetText(const String& text);
-	LUX_API const String& GetText() const;
+	LUX_API void SetText(const core::String& text);
+	LUX_API const core::String& GetText() const;
 
 private:
 	TextContainer m_Text;

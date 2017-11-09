@@ -104,7 +104,7 @@ public:
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
-		core::Array<String>* errorList) = 0;
+		core::Array<core::String>* errorList) = 0;
 
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -116,7 +116,7 @@ public:
 	virtual EDeviceState GetDeviceState() const = 0;
 
 	virtual u32 GetDeviceCapability(EDriverCaps capability) const = 0;
-	virtual const String& GetVideoDriverType() const = 0;
+	virtual const core::String& GetVideoDriverType() const = 0;
 	virtual void* GetLowLevelDevice() const = 0;
 };
 

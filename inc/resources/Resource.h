@@ -34,13 +34,13 @@ struct ResourceOrigin
 	ResourceOrigin() :
 		loader(nullptr)
 	{}
-	ResourceOrigin(OriginResourceLoader* l, const String& s) :
+	ResourceOrigin(OriginResourceLoader* l, const core::String& s) :
 		str(s),
 		loader(l)
 	{
 	}
 
-	String str;
+	core::String str;
 	OriginResourceLoader* loader;
 
 	inline void Load(Resource* dst) const;

@@ -22,7 +22,7 @@ public:
 
 	core::Name GetReferableType() const
 	{
-		static const core::Name name = "lux.emitter.Normal";
+		static const core::Name name("lux.emitter.Normal");
 		return name;
 	}
 

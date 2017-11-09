@@ -30,7 +30,7 @@ public:
 	}
 
 	template <typename... Ts>
-	StringBuffer& AppendFormat(StringType format, Ts... values)
+	StringBuffer& AppendFormat(core::StringType format, Ts... values)
 	{
 		StringConverter::AppendFormat(m_String, format, values...);
 		return *this;
@@ -41,13 +41,13 @@ public:
 		m_String.Clear();
 	}
 
-	const String& GetString() const
+	const core::String& GetString() const
 	{
 		return m_String;
 	}
 
 private:
-	String m_String;
+	core::String m_String;
 };
 
 }

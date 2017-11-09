@@ -19,7 +19,7 @@ public:
 	LuxDeviceWin32();
 	~LuxDeviceWin32();
 
-	void BuildWindow(u32 width, u32 height, const String& title);
+	void BuildWindow(u32 width, u32 height, const core::String& title);
 	void BuildInputSystem(bool isForeground = true);
 	bool WaitForWindowChange();
 	bool Run();

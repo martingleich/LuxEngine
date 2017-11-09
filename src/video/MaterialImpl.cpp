@@ -168,12 +168,12 @@ float MaterialImpl::GetPower() const
 
 ////////////////////////////////////////////////////////////////////
 
-core::VariableAccess MaterialImpl::Param(const StringType& name)
+core::VariableAccess MaterialImpl::Param(const core::StringType& name)
 {
 	return m_RenderData.puffer.FromName(name, false);
 }
 
-core::VariableAccess MaterialImpl::Param(const StringType& name) const
+core::VariableAccess MaterialImpl::Param(const core::StringType& name) const
 {
 	return m_RenderData.puffer.FromName(name, true);
 }
@@ -208,7 +208,7 @@ u32 MaterialImpl::GetParamCount() const
 	return m_RenderData.puffer.GetParamCount();
 }
 
-u32 MaterialImpl::GetParamId(const StringType& name) const
+u32 MaterialImpl::GetParamId(const core::StringType& name) const
 {
 	return m_RenderData.renderer->GetParams().GetParamId(name);
 }

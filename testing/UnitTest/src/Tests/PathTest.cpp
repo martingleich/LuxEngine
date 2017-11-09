@@ -12,28 +12,28 @@ UNIT_SUITE(path)
 	UNIT_TEST(GetFileExtension)
 	{
 		io::Path p = "folder1/file.jpg";
-		String ext = io::GetFileExtension(p);
+		core::String ext = io::GetFileExtension(p);
 		UNIT_ASSERT_STR(ext, "jpg");
 	}
 
 	UNIT_TEST(GetFileName1)
 	{
 		io::Path p = "folder1/file.jpg";
-		String name = io::GetFilenameOnly(p);
+		core::String name = io::GetFilenameOnly(p);
 		UNIT_ASSERT_STR(name, "file.jpg");
 	}
 
 	UNIT_TEST(GetFileName2)
 	{
 		io::Path p = "folder1/file.jpg";
-		String name = io::GetFilenameOnly(p, false);
+		core::String name = io::GetFilenameOnly(p, false);
 		UNIT_ASSERT_STR(name, "file");
 	}
 
 	UNIT_TEST(GetFileName3)
 	{
 		io::Path p = "file.jpg";
-		String name = io::GetFilenameOnly(p, false);
+		core::String name = io::GetFilenameOnly(p, false);
 		UNIT_ASSERT_STR(name, "file");
 	}
 

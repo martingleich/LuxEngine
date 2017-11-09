@@ -36,7 +36,7 @@ public:
 	\param height The height of the window.
 	\param title The title of the window.
 	*/
-	virtual void BuildWindow(u32 Width, u32 height, const String& title) = 0;
+	virtual void BuildWindow(u32 Width, u32 height, const core::String& title) = 0;
 
 	//! Create the input system of the engine.
 	/**
@@ -56,9 +56,9 @@ public:
 	*/
 	virtual void BuildVideoDriver(const video::DriverConfig& config, void* user = nullptr) = 0;
 	//! Get available driver types.
-	virtual core::Array<String> GetDriverTypes() = 0;
+	virtual core::Array<core::String> GetDriverTypes() = 0;
 	//! Get available adapters for a driver type.
-	virtual StrongRef<video::AdapterList> GetVideoAdapters(const String& driver) = 0;
+	virtual StrongRef<video::AdapterList> GetVideoAdapters(const core::String& driver) = 0;
 
 	//! Creates the scene component of the engine
 	/**
@@ -68,7 +68,7 @@ public:
 	\param renderer The name of the renderer to use(pass empty string to use default renderer).
 	\param user User parameter to be passed to the module factory.
 	*/
-	virtual void BuildScene(const String& renderer = nullptr, void* user = nullptr) = 0;
+	virtual void BuildScene(const core::String& renderer = nullptr, void* user = nullptr) = 0;
 	virtual StrongRef<scene::Scene> CreateScene() = 0;
 
 	//! Create the gui environment

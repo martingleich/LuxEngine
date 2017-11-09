@@ -3,10 +3,10 @@
 #include "core/ReferableRegister.h"
 
 static ::lux::Referable* PushButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(false); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock PushButtonInternalReferableRegisterStaticObject("lux.gui.Button", &PushButtonInternalCreatorFunc);
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock PushButtonInternalReferableRegisterStaticObject(::lux::core::Name("lux.gui.Button"), &PushButtonInternalCreatorFunc);
 
 static ::lux::Referable* SwitchButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(true); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock SwitchButtonInternalReferableRegisterStaticObject("lux.gui.SwitchButton", &SwitchButtonInternalCreatorFunc);
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock SwitchButtonInternalReferableRegisterStaticObject(::lux::core::Name("lux.gui.SwitchButton"), &SwitchButtonInternalCreatorFunc);
 
 namespace lux
 {
@@ -46,19 +46,19 @@ void Button::Paint(Renderer* r)
 		GetFinalInnerRect() + textOffset);
 }
 
-void Button::SetText(const String& text)
+void Button::SetText(const core::String& text)
 {
 	m_Text.SetText(text);
 }
 
-const String& Button::GetText() const
+const core::String& Button::GetText() const
 {
 	return m_Text.GetText();
 }
 
 core::Name Button::GetReferableType() const
 {
-	static const core::Name name = "lux.gui.Button";
+	static const core::Name name("lux.gui.Button");
 	return name;
 }
 

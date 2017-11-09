@@ -38,7 +38,7 @@ public:
 	/**
 	\param rendererName The name of the material renderer
 	*/
-	LUX_API StrongRef<Material> CreateMaterial(const String& rendererName);
+	LUX_API StrongRef<Material> CreateMaterial(const core::String& rendererName);
 
 	//! Add a new material renderer
 	/**
@@ -46,13 +46,13 @@ public:
 	\param name The name of the material renderer
 	*/
 	LUX_API StrongRef<MaterialRenderer> AddMaterialRenderer(MaterialRenderer* renderer);
-	LUX_API StrongRef<MaterialRenderer> ReplaceMaterialRenderer(const String& newName);
+	LUX_API StrongRef<MaterialRenderer> ReplaceMaterialRenderer(const core::String& newName);
 
 	//! Add a new material renderer
 	/**
 	\param name The name of the material renderer
 	*/
-	LUX_API StrongRef<MaterialRenderer> AddMaterialRenderer(const String& newName);
+	LUX_API StrongRef<MaterialRenderer> AddMaterialRenderer(const core::String& newName);
 
 	//! Clone an old material renderer
 	/**
@@ -60,7 +60,7 @@ public:
 	\param baseName The name of the copied renderer
 	\return The new material renderer
 	*/
-	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const String& newName, const String& baseName);
+	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const core::String& newName, const core::String& baseName);
 
 	//! Clone an old material renderer
 	/**
@@ -68,7 +68,7 @@ public:
 	\param old The copied material renderer
 	\return The new material renderer
 	*/
-	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const String& name, const MaterialRenderer* old);
+	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const core::String& name, const MaterialRenderer* old);
 
 	//! Removes a material renderer from the scene graph
 	/**
@@ -81,10 +81,10 @@ public:
 	LUX_API StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const;
 
 	//! Returns a material renderer by its name
-	LUX_API StrongRef<MaterialRenderer> GetMaterialRenderer(const String& name) const;
+	LUX_API StrongRef<MaterialRenderer> GetMaterialRenderer(const core::String& name) const;
 
 	//! Check if a material renderer exists
-	LUX_API bool ExistsMaterialRenderer(const String& name, MaterialRenderer** outRenderer=nullptr) const;
+	LUX_API bool ExistsMaterialRenderer(const core::String& name, MaterialRenderer** outRenderer=nullptr) const;
 
 	//! Returns the total number of material renderers
 	LUX_API size_t GetMaterialRendererCount() const;
@@ -104,9 +104,9 @@ public:
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromFile(
 		video::EShaderLanguage language,
-		const io::Path& VSPath, const String& VSEntryPoint, int VSMajor, int VSMinor,
-		const io::Path& PSPath, const String& PSEntryPoint, int PSMajor, int PSMinor,
-		core::Array<String>* errorList = nullptr);
+		const io::Path& VSPath, const core::String& VSEntryPoint, int VSMajor, int VSMinor,
+		const io::Path& PSPath, const core::String& PSEntryPoint, int PSMajor, int PSMinor,
+		core::Array<core::String>* errorList = nullptr);
 
 	//! Creates a new shader from code
 	/**
@@ -114,15 +114,15 @@ public:
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromMemory(
 		EShaderLanguage language,
-		const String& VSCode, const char* VSEntryPoint, int VSmajorVersion, int VSminorVersion,
-		const String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
-		core::Array<String>* errorList=nullptr);
+		const core::String& VSCode, const char* VSEntryPoint, int VSmajorVersion, int VSminorVersion,
+		const core::String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
+		core::Array<core::String>* errorList=nullptr);
 
-	LUX_API bool GetShaderInclude(EShaderLanguage language, const String& name, const void*& outData, size_t& outBytes);
-	LUX_API void SetShaderInclude(EShaderLanguage language, const String& name, const void* data, size_t bytes);
+	LUX_API bool GetShaderInclude(EShaderLanguage language, const core::String& name, const void*& outData, size_t& outBytes);
+	LUX_API void SetShaderInclude(EShaderLanguage language, const core::String& name, const void* data, size_t bytes);
 
 private:
-	bool FindRenderer(const String& name, size_t& id) const;
+	bool FindRenderer(const core::String& name, size_t& id) const;
 
 private:
 	core::Array<StrongRef<MaterialRenderer>> m_Renderers;
@@ -130,9 +130,9 @@ private:
 	struct ShaderInclude
 	{
 		EShaderLanguage language;
-		String name;
+		core::String name;
 
-		ShaderInclude(EShaderLanguage& lang, const String& n) :
+		ShaderInclude(EShaderLanguage& lang, const core::String& n) :
 			language(lang),
 			name(n)
 		{}

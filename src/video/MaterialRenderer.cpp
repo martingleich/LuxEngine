@@ -7,7 +7,7 @@ namespace lux
 namespace video
 {
 
-MaterialRenderer::MaterialRenderer(const String& name, const MaterialRenderer* old) :
+MaterialRenderer::MaterialRenderer(const core::String& name, const MaterialRenderer* old) :
 	m_ParamCallback(nullptr),
 	m_Name(name)
 {
@@ -88,7 +88,7 @@ StrongRef<Material> MaterialRenderer::CreateMaterial()
 	return LUX_NEW(MaterialImpl)(this);
 }
 
-const String& MaterialRenderer::GetName() const
+const core::String& MaterialRenderer::GetName() const
 {
 	return m_Name;
 }
@@ -128,13 +128,13 @@ size_t MaterialRenderer::GetPassCount()
 	return m_Passes.Size();
 }
 
-core::VariableAccess MaterialRenderer::AddParam(const String& paramName, const core::Type& type)
+core::VariableAccess MaterialRenderer::AddParam(const core::String& paramName, const core::Type& type)
 {
 	u32 id = m_Params.AddParam(type, paramName);
 	return m_Params.DefaultValue(id);
 }
 
-core::VariableAccess MaterialRenderer::SetShaderValue(u32 passId, const String& name)
+core::VariableAccess MaterialRenderer::SetShaderValue(u32 passId, const core::String& name)
 {
 	auto& pass = m_Passes.At(passId);
 	auto shader = pass.shader;
@@ -153,7 +153,7 @@ core::VariableAccess MaterialRenderer::SetShaderValue(u32 passId, const String& 
 	return core::VariableAccess(desc.type, m_ShaderValues.Back().obj.Data());
 }
 
-core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u32 passId, const String& name)
+core::VariableAccess MaterialRenderer::AddShaderParam(const core::String& paramName, u32 passId, const core::String& name)
 {
 	auto& pass = m_Passes.At(passId);
 	if(!pass.shader)
@@ -163,7 +163,7 @@ core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u
 	return AddShaderParam(paramName, passId, id);
 }
 
-core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u32 passId, u32 paramId)
+core::VariableAccess MaterialRenderer::AddShaderParam(const core::String& paramName, u32 passId, u32 paramId)
 {
 	auto& pass = m_Passes.At(passId);
 
@@ -171,19 +171,19 @@ core::VariableAccess MaterialRenderer::AddShaderParam(const String& paramName, u
 		throw core::InvalidArgumentException("paramId", "Is not a valid shader parameter");
 
 	core::ParamDesc desc = pass.shader->GetParamPackage().GetParamDesc(paramId);
-	const String& name = paramName.IsEmpty() ? desc.name : paramName;
+	const core::String& name = paramName.IsEmpty() ? desc.name : paramName;
 	return AddParamMapping(desc.type, name, passId, paramId, true);
 }
 
-core::VariableAccess MaterialRenderer::AddParam(const String& paramName, u32 passId, EOptionId optionId)
+core::VariableAccess MaterialRenderer::AddParam(const core::String& paramName, u32 passId, EOptionId optionId)
 {
 	auto& pass = m_Passes.At(passId);
 	auto optionType = pass.GetOptionType((u32)optionId);
-	const String& name = paramName.IsEmpty() ? pass.GetOptionName((u32)optionId) : paramName;
+	const core::String& name = paramName.IsEmpty() ? pass.GetOptionName((u32)optionId) : paramName;
 	return AddParamMapping(optionType, name, passId, (u32)optionId, false);
 }
 
-core::VariableAccess MaterialRenderer::AddParamMapping(const core::Type& type, const String& paramName, u32 passId, u32 mappingId, bool isShader)
+core::VariableAccess MaterialRenderer::AddParamMapping(const core::Type& type, const core::String& paramName, u32 passId, u32 mappingId, bool isShader)
 {
 	u32 id = m_Params.AddParam(type, paramName);
 

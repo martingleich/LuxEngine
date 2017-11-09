@@ -120,7 +120,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	return font;
 }
 
-const core::Array<u32>& FontCreatorNull::GetDefaultCharset(const String& name) const
+const core::Array<u32>& FontCreatorNull::GetDefaultCharset(const core::String& name) const
 {
 	auto it = m_DefaultCharSets.Find(name);
 	if(it != m_DefaultCharSets.End())
@@ -128,7 +128,7 @@ const core::Array<u32>& FontCreatorNull::GetDefaultCharset(const String& name) c
 	return *m_DefaultCharSets.First();
 }
 
-void FontCreatorNull::AddDefaultCharSet(const String& name, const String& data)
+void FontCreatorNull::AddDefaultCharSet(const core::String& name, const core::String& data)
 {
 	core::Array<u32> a;
 	for(auto it = data.First(); it != data.End(); ++it)

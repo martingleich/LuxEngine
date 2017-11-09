@@ -20,7 +20,7 @@ public:
 	const event::Area* GetArea(u32 areaCode) const;
 	bool Update(Event& event);
 
-	const String& GetElementName(EEventType type, u32 code) const;
+	const core::String& GetElementName(EEventType type, u32 code) const;
 	EElementType GetElementType(EEventType type, u32 id) const;
 	size_t GetElementCount(EEventType type) const;
 

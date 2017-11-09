@@ -213,7 +213,7 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 	}
 }
 
-StrongRef<Material> MaterialLibrary::CreateMaterial(const String& name)
+StrongRef<Material> MaterialLibrary::CreateMaterial(const core::String& name)
 {
 	return CreateMaterial(GetMaterialRenderer(name));
 }
@@ -241,13 +241,13 @@ StrongRef<MaterialRenderer> MaterialLibrary::AddMaterialRenderer(MaterialRendere
 	return renderer;
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::AddMaterialRenderer(const String& newName)
+StrongRef<MaterialRenderer> MaterialLibrary::AddMaterialRenderer(const core::String& newName)
 {
 	StrongRef<MaterialRenderer> r = LUX_NEW(MaterialRenderer)(newName);
 	return AddMaterialRenderer(r);
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::ReplaceMaterialRenderer(const String& name)
+StrongRef<MaterialRenderer> MaterialLibrary::ReplaceMaterialRenderer(const core::String& name)
 {
 	size_t id;
 	if(!FindRenderer(name, id))
@@ -256,12 +256,12 @@ StrongRef<MaterialRenderer> MaterialLibrary::ReplaceMaterialRenderer(const Strin
 	return m_Renderers[id];
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const String& name, const String& oldName)
+StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const core::String& name, const core::String& oldName)
 {
 	return CloneMaterialRenderer(name, GetMaterialRenderer(oldName));
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const String& name, const MaterialRenderer* old)
+StrongRef<MaterialRenderer> MaterialLibrary::CloneMaterialRenderer(const core::String& name, const MaterialRenderer* old)
 {
 	LX_CHECK_NULL_ARG(old);
 
@@ -284,9 +284,9 @@ void MaterialLibrary::RemoveMaterialRenderer(MaterialRenderer* renderer)
 
 StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 	video::EShaderLanguage language,
-	const io::Path& VSPath, const String& VSEntryPoint, int VSMajor, int VSMinor,
-	const io::Path& PSPath, const String& PSEntryPoint, int PSMajor, int PSMinor,
-	core::Array<String>* errorList)
+	const io::Path& VSPath, const core::String& VSEntryPoint, int VSMajor, int VSMinor,
+	const io::Path& PSPath, const core::String& PSEntryPoint, int PSMajor, int PSMinor,
+	core::Array<core::String>* errorList)
 {
 	StrongRef<io::File> PSFile;
 	StrongRef<io::File> VSFile;
@@ -331,7 +331,7 @@ StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(size_t index) c
 	return m_Renderers.At(index);
 }
 
-StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(const String& name) const
+StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(const core::String& name) const
 {
 	size_t id;
 	if(!FindRenderer(name, id))
@@ -340,7 +340,7 @@ StrongRef<MaterialRenderer> MaterialLibrary::GetMaterialRenderer(const String& n
 	return m_Renderers[id];
 }
 
-bool MaterialLibrary::ExistsMaterialRenderer(const String& name, MaterialRenderer** outRenderer) const
+bool MaterialLibrary::ExistsMaterialRenderer(const core::String& name, MaterialRenderer** outRenderer) const
 {
 	size_t id;
 	if(!FindRenderer(name, id))
@@ -356,7 +356,7 @@ size_t MaterialLibrary::GetMaterialRendererCount() const
 	return m_Renderers.Size();
 }
 
-bool MaterialLibrary::FindRenderer(const String& name, size_t& id) const
+bool MaterialLibrary::FindRenderer(const core::String& name, size_t& id) const
 {
 	for(id = 0; id < m_Renderers.Size(); ++id) {
 		if(m_Renderers[id]->GetName() == name)
@@ -368,9 +368,9 @@ bool MaterialLibrary::FindRenderer(const String& name, size_t& id) const
 
 StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
 	EShaderLanguage language,
-	const String& VSCode, const char* VSEntryPoint, int VSmajorVersion, int VSminorVersion,
-	const String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
-	core::Array<String>* errorList)
+	const core::String& VSCode, const char* VSEntryPoint, int VSmajorVersion, int VSminorVersion,
+	const core::String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
+	core::Array<core::String>* errorList)
 {
 	return video::VideoDriver::Instance()->CreateShader(
 		language,
@@ -379,7 +379,7 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
 		errorList);
 }
 
-bool MaterialLibrary::GetShaderInclude(EShaderLanguage language, const String& name, const void*& outData, size_t& outBytes)
+bool MaterialLibrary::GetShaderInclude(EShaderLanguage language, const core::String& name, const void*& outData, size_t& outBytes)
 {
 	ShaderInclude search(language, name);
 	auto it = m_ShaderIncludes.Find(search);
@@ -390,7 +390,7 @@ bool MaterialLibrary::GetShaderInclude(EShaderLanguage language, const String& n
 	return true;
 }
 
-void MaterialLibrary::SetShaderInclude(EShaderLanguage language, const String& name, const void* data, size_t bytes)
+void MaterialLibrary::SetShaderInclude(EShaderLanguage language, const core::String& name, const void* data, size_t bytes)
 {
 	ShaderInclude search(language, name);
 	auto& mem = m_ShaderIncludes.At(search);

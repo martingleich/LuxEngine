@@ -53,10 +53,10 @@ class Adapter : public ReferenceCounted
 public:
 	virtual ~Adapter() {}
 
-	virtual const String& GetName() const = 0;
+	virtual const core::String& GetName() const = 0;
 	virtual u32 GetVendor() const = 0;
 	virtual u32 GetDevice() const = 0;
-	virtual const String& GetDriverType() const = 0;
+	virtual const core::String& GetDriverType() const = 0;
 
 	virtual core::Array<DisplayMode> GenerateDisplayModes(bool windowed) = 0;
 	virtual core::Array<ColorFormat> GenerateBackbufferFormats(const DisplayMode& mode, bool windowed) = 0;

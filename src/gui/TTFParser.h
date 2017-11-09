@@ -107,7 +107,7 @@ public:
 		return false;
 	}
 
-	const String& GetFontFamily() const
+	const core::String& GetFontFamily() const
 	{
 		return m_FontFamily;
 	}
@@ -202,7 +202,7 @@ public:
 	}
 
 private:
-	String m_FontFamily;
+	core::String m_FontFamily;
 
 	bool m_IsValid;
 

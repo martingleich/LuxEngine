@@ -9,8 +9,8 @@
 
 #include "core/ReferableRegister.h"
 
-const lux::core::Name lux::scene::BoxCollider::TypeName = "lux.collider.Box";
-const lux::core::Name lux::scene::BoundingBoxCollider::TypeName = "lux.collider.BBox";
+const lux::core::Name lux::scene::BoxCollider::TypeName("lux.collider.Box");
+const lux::core::Name lux::scene::BoundingBoxCollider::TypeName("lux.collider.BBox");
 
 LUX_REGISTER_REFERABLE_CLASS_NAMED(box, lux::scene::BoxCollider::TypeName, lux::scene::BoxCollider);
 LUX_REGISTER_REFERABLE_CLASS_NAMED(bounding_box, lux::scene::BoundingBoxCollider::TypeName, lux::scene::BoundingBoxCollider);

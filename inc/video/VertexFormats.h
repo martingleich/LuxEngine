@@ -417,7 +417,7 @@ public:
 	{
 	}
 
-	VertexFormat(const String& name, const VertexDeclaration& decl) :
+	VertexFormat(const core::String& name, const VertexDeclaration& decl) :
 		m_Name(name)
 	{
 		m_Declaration = std::make_shared<VertexDeclaration>(decl);
@@ -458,7 +458,7 @@ public:
 		return !(*this == other);
 	}
 
-	const String& GetName() const
+	const core::String& GetName() const
 	{
 		return m_Name;
 	}
@@ -568,7 +568,7 @@ private:
 	}
 
 private:
-	String m_Name;
+	core::String m_Name;
 	std::shared_ptr<VertexDeclaration> m_Declaration;
 	bool m_IsValid;
 

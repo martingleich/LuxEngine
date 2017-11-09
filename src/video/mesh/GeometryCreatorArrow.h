@@ -13,7 +13,7 @@ class GeometryCreatorArrow : public GeometryCreator
 public:
 	GeometryCreatorArrow();
 
-	const String& GetName() const;
+	const core::String& GetName() const;
 	const core::ParamPackage& GetParams() const;
 
 	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);

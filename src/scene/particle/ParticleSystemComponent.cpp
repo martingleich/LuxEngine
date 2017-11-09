@@ -179,7 +179,7 @@ bool ParticleSystem::GetSubtreeScanning() const
 
 core::Name ParticleSystem::GetReferableType() const
 {
-	static const core::Name name = "lux.comp.ParticleSystem";
+	static const core::Name name("lux.comp.ParticleSystem");
 	return name;
 }
 

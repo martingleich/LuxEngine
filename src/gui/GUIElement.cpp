@@ -123,11 +123,11 @@ void Element::SetClipping(bool clip)
 	m_NoClip = !clip;
 }
 
-const String& Element::GetToolTip() const
+const core::String& Element::GetToolTip() const
 {
 	return m_ToolTip;
 }
-void Element::SetToolTip(const String& tip)
+void Element::SetToolTip(const core::String& tip)
 {
 	m_ToolTip = tip;
 }

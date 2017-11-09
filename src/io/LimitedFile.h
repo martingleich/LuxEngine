@@ -14,7 +14,7 @@ public:
 		StrongRef<File> Master,
 		u32 offset,
 		const FileDescription& desc,
-		String name);
+		core::String name);
 
 	u32 ReadBinary(u32 numBytes, void* out);
 	u32 WriteBinary(const void* data, u32 length);

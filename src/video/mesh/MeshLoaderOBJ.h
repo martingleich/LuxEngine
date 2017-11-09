@@ -12,7 +12,7 @@ class MeshLoaderOBJ : public core::ResourceLoader
 public:
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
 	void LoadResource(io::File* file, core::Resource* dst);
-	const String& GetName() const;
+	const core::String& GetName() const;
 };
 
 }

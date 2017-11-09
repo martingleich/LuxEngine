@@ -45,7 +45,7 @@ public:
 	/**
 	Attributes are options to change the behaviour of the renderer, see the renderer documentaions for available options.
 	*/
-	LUX_API core::VariableAccess Attribute(const String& str);
+	LUX_API core::VariableAccess Attribute(const core::String& str);
 
 	//! Get the list of attributes of the scene renderer.
 	/**

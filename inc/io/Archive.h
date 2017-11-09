@@ -69,7 +69,7 @@ public:
 	virtual bool ExistFile(const Path& p) = 0;
 
 	//! Create a enumerator for a subdirecorty in the archive.
-	virtual StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = String::EMPTY) = 0;
+	virtual StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = core::String::EMPTY) = 0;
 
 	//! Get the capabilites of the archive
 	virtual EArchiveCapabilities GetCaps() const = 0;

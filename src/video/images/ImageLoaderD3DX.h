@@ -19,7 +19,7 @@ public:
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
 	void LoadResource(io::File* file, core::Resource* dst);
-	const String& GetName() const;
+	const core::String& GetName() const;
 
 private:
 	IDirect3DDevice9* m_Device;

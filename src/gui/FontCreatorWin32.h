@@ -14,11 +14,11 @@ public:
 	void* BeginFontCreation(io::File* file,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet);
-	void* BeginFontCreation(const String& name,
+	void* BeginFontCreation(const core::String& name,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet);
 
-	void* BeginFontCreation(bool isFileFont, const String& name,
+	void* BeginFontCreation(bool isFileFont, const core::String& name,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet);
 	bool GetFontImage(void* void_ctx, FontPixel*& image, math::Dimension2U& imageSize);

@@ -14,16 +14,16 @@ void RunAllModuleFactoryBlocks();
 
 struct ModuleFactoryRegisterBlock
 {
-	String module;
-	String name;
+	core::String module;
+	core::String name;
 
 	ModuleFactory::CreatorT creator;
 
 	ModuleFactoryRegisterBlock* next;
 
 	ModuleFactoryRegisterBlock(
-		const String& _module,
-		const String& _name,
+		const core::String& _module,
+		const core::String& _name,
 		ModuleFactory::CreatorT _creator) :
 		module(_module),
 		name(_name),

@@ -65,11 +65,11 @@ public:
 	LUX_API virtual bool IsClipped() const;
 	LUX_API virtual void SetClipping(bool clip);
 
-	virtual const String& GetText() const { return String::EMPTY; }
-	virtual void SetText(const String& text) { LUX_UNUSED(text); }
+	virtual const core::String& GetText() const { return core::String::EMPTY; }
+	virtual void SetText(const core::String& text) { LUX_UNUSED(text); }
 
-	LUX_API virtual const String& GetToolTip() const;
-	LUX_API virtual void SetToolTip(const String& tip);
+	LUX_API virtual const core::String& GetToolTip() const;
+	LUX_API virtual void SetToolTip(const core::String& tip);
 
 	LUX_API virtual void SetMinSize(const math::Dimension2F& minSize);
 	LUX_API virtual const math::Dimension2F& GetMinSize() const;
@@ -175,7 +175,7 @@ protected:
 	Element* m_Parent;
 	Window* m_Window;
 
-	String m_ToolTip;
+	core::String m_ToolTip;
 
 	mutable math::RectF m_FinalRect;
 	mutable math::RectF m_InnerRect;

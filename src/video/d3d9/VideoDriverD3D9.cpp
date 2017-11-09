@@ -445,7 +445,7 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
 	const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 	const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
-	core::Array<String>* errorList)
+	core::Array<core::String>* errorList)
 {
 	if(language != EShaderLanguage::HLSL)
 		throw core::InvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");

@@ -274,7 +274,7 @@ RawJoystickDevice::~RawJoystickDevice()
 
 HANDLE RawJoystickDevice::GetDeviceHandle()
 {
-	String path = GetDevicePath(m_RawInputHandle);
+	core::String path = GetDevicePath(m_RawInputHandle);
 
 	HANDLE ntHandle = CreateFileW(core::StringToUTF16W(path), 0,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -288,7 +288,7 @@ HANDLE RawJoystickDevice::GetDeviceHandle()
 	return ntHandle;
 }
 
-String RawJoystickDevice::GetDeviceName()
+core::String RawJoystickDevice::GetDeviceName()
 {
 	const size_t max_size = 127;
 
@@ -550,7 +550,7 @@ RawJoystickDevice::ElemDesc RawJoystickDevice::GetElementDesc(EEventType type, u
 			elem_type = EElementType::Input | EElementType::Axis | EElementType::POV;
 		return ElemDesc(axis.name, axis.usagePage, axis.usage, elem_type);
 	} else {
-		static const String name = "(unknown)";
+		static const core::String name = "(unknown)";
 		return ElemDesc(name, 0, 0, EElementType::Other);
 	}
 }

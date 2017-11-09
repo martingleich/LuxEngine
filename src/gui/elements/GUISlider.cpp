@@ -228,7 +228,7 @@ void Slider::SetHorizontal(bool isHorizontal)
 
 core::Name Slider::GetReferableType() const
 {
-	static const core::Name name = "lux.gui.Slider";
+	static const core::Name name("lux.gui.Slider");
 	return name;
 }
 

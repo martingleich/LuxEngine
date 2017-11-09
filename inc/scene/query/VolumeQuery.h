@@ -39,7 +39,7 @@ public:
 
 	core::Name GetType() const
 	{
-		static const core::Name n = "volume";
+		static const core::Name n("lux.query.volume");
 		return n;
 	}
 

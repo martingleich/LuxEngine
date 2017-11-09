@@ -37,7 +37,7 @@ private:
 
 		USHORT index;
 
-		String name;
+		core::String name;
 
 		u32 code;
 
@@ -79,7 +79,7 @@ public:
 	RawJoystickDevice(InputSystem* system, HANDLE rawHandle);
 	~RawJoystickDevice();
 	HANDLE GetDeviceHandle();
-	String GetDeviceName();
+	core::String GetDeviceName();
 	void GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount);
 	void GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount);
 	void LoadDirectInputMapping(bool isAxis, Mapping* mappings, size_t mappingCount, size_t offset, const HIDD_ATTRIBUTES& attribs);

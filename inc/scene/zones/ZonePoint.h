@@ -36,7 +36,7 @@ public:
 
 	core::Name GetReferableType() const
 	{
-		static const core::Name name = "pointZone";
+		static const core::Name name("pointZone");
 		return name;
 	}
 

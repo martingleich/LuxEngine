@@ -38,16 +38,16 @@ core::Name MeshLoaderOBJ::GetResourceType(io::File* file, core::Name requestedTy
 	if(requestedType && requestedType != core::ResourceType::Mesh)
 		return core::Name::INVALID;
 
-	String ext = io::GetFileExtension(file->GetDescription().GetName());
+	core::String ext = io::GetFileExtension(file->GetDescription().GetName());
 	if(ext.EqualCaseInsensitive("obj"))
 		return core::ResourceType::Mesh;
 	else
 		return core::Name::INVALID;
 }
 
-const String& MeshLoaderOBJ::GetName() const
+const core::String& MeshLoaderOBJ::GetName() const
 {
-	static const String name = "Lux OBJ-Loader";
+	static const core::String name = "Lux OBJ-Loader";
 	return name;
 }
 

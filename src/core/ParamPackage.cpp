@@ -55,7 +55,7 @@ void ParamPackage::Clear()
 	self->Params.Clear();
 }
 
-u32 ParamPackage::AddParam(core::Type type, const StringType& name, const void* defaultValue)
+u32 ParamPackage::AddParam(core::Type type, const core::StringType& name, const void* defaultValue)
 {
 	u32 id;
 	if(GetId(name, core::Type::Unknown, id)) {
@@ -151,7 +151,7 @@ ParamDesc ParamPackage::GetParamDesc(u32 param) const
 	return desc;
 }
 
-const String& ParamPackage::GetParamName(u32 param) const
+const core::String& ParamPackage::GetParamName(u32 param) const
 {
 	return self->Params.At(param).name;
 }
@@ -165,7 +165,7 @@ VariableAccess ParamPackage::GetParam(u32 param, void* baseData, bool isConst) c
 	return VariableAccess(type, (u8*)baseData + p.offset);
 }
 
-VariableAccess ParamPackage::GetParamFromName(const StringType& name, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParamFromName(const core::StringType& name, void* baseData, bool isConst) const
 {
 	return GetParam(GetParamId(name), baseData, isConst);
 }
@@ -196,12 +196,12 @@ VariableAccess ParamPackage::DefaultValue(u32 param) const
 	return VariableAccess(p.type.GetConstantType(), (u8*)self->DefaultPackage + p.offset);
 }
 
-VariableAccess ParamPackage::DefaultValue(const StringType& param)
+VariableAccess ParamPackage::DefaultValue(const core::StringType& param)
 {
 	return DefaultValue(GetParamId(param));
 }
 
-u32 ParamPackage::GetParamId(const StringType& name, core::Type type) const
+u32 ParamPackage::GetParamId(const core::StringType& name, core::Type type) const
 {
 	u32 out;
 	if(!GetId(name, type, out))
@@ -257,9 +257,9 @@ u32 ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	return (size_t)(self->Params.Size() - 1);
 }
 
-bool ParamPackage::GetId(StringType name, core::Type t, u32& outId) const
+bool ParamPackage::GetId(core::StringType name, core::Type t, u32& outId) const
 {
-	StringType cname = name;
+	core::StringType cname = name;
 	cname.EnsureSize();
 	for(outId = 0; outId < self->Params.Size(); ++outId) {
 		if(self->Params[outId].name == cname) {

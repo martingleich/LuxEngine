@@ -6,7 +6,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(empty_String)
 	{
-		String str;
+		core::String str;
 		UNIT_ASSERT_EQUAL(str.Length(), 0);
 		UNIT_ASSERT_EQUAL(str.Size(), 0);
 		UNIT_ASSERT_EQUAL(str.First(), str.End());
@@ -14,7 +14,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(from_cstr)
 	{
-		String str("Tes☠t");
+		core::String str("Tes☠t");
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
@@ -25,7 +25,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(from_cstr_partial)
 	{
-		String str("Tes☠ta☠", 5);
+		core::String str("Tes☠ta☠", 5);
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
@@ -36,8 +36,8 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(copy_String)
 	{
-		String base("Tes☠t");
-		String str(base);
+		core::String base("Tes☠t");
+		core::String str(base);
 
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
@@ -49,7 +49,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(short_String)
 	{
-		String str("ab");
+		core::String str("ab");
 		UNIT_ASSERT_EQUAL(str.Length(), 2);
 		UNIT_ASSERT_EQUAL(str.Size(), 2);
 
@@ -61,7 +61,7 @@ UNIT_SUITE(String)
 	UNIT_TEST(long_String)
 	{
 		const char* chars ="abcdefghijklmnopqr";
-		String str(chars);
+		core::String str(chars);
 		UNIT_ASSERT_EQUAL(str.Length(), 18);
 		UNIT_ASSERT_EQUAL(str.Size(), 18);
 
@@ -72,7 +72,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(assign_String)
 	{
-		String str = "abc";
+		core::String str = "abc";
 		str = "Tes☠t";
 
 		UNIT_ASSERT_EQUAL(str.Length(), 5);
@@ -85,11 +85,11 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(compare_String)
 	{
-		String a = "abc";
-		String b = "Tes☠t";
-		String c = "Tes☠t";
-		String d = "Tes☠a";
-		String e = "";
+		core::String a = "abc";
+		core::String b = "Tes☠t";
+		core::String c = "Tes☠t";
+		core::String d = "Tes☠a";
+		core::String e = "";
 
 		UNIT_ASSERT_TRUE(a != b);
 		UNIT_ASSERT_TRUE(b == c);
@@ -100,10 +100,10 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(compare_case_insensitive)
 	{
-		String a = "abc";
-		String b = "Tes☠t";
-		String d = "tes☠T";
-		String e = "";
+		core::String a = "abc";
+		core::String b = "Tes☠t";
+		core::String d = "tes☠T";
+		core::String e = "";
 
 		UNIT_ASSERT_TRUE(a.EqualCaseInsensitive(b) == false);
 		UNIT_ASSERT_TRUE(b.EqualCaseInsensitive(d) == true);
@@ -112,7 +112,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(sub_String_1)
 	{
-		String a = "Tes☠a";
+		core::String a = "Tes☠a";
 
 		UNIT_ASSERT_EQUAL(a.SubString(a.First() + 2, a.End()), "s☠a");
 		UNIT_ASSERT_EQUAL(a.SubString(a.First(), a.First()), "");
@@ -120,7 +120,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(sub_String_2)
 	{
-		String a = "Tes☠a";
+		core::String a = "Tes☠a";
 
 		UNIT_ASSERT_EQUAL(a.SubString(a.First() + 2, 2), "s☠");
 		UNIT_ASSERT_EQUAL(a.SubString(a.First(), 0), "");
@@ -128,7 +128,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(insert_middle)
 	{
-		String a = "FooBar";
+		core::String a = "FooBar";
 
 		a.Insert(a.First() + 3, "Bib");
 
@@ -137,7 +137,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(insert_begin)
 	{
-		String a = "FooBar";
+		core::String a = "FooBar";
 
 		a.Insert(a.First(), "Bib");
 
@@ -146,7 +146,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(insert_end)
 	{
-		String a = "FooBar";
+		core::String a = "FooBar";
 
 		a.Insert(a.End(), "Bib");
 
@@ -155,7 +155,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(insert_empty)
 	{
-		String a = "str";
+		core::String a = "str";
 
 		a.Insert(a.First(), "");
 		UNIT_ASSERT_EQUAL(a, "str");
@@ -166,7 +166,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(resize)
 	{
-		String a = "abc";
+		core::String a = "abc";
 		a.Resize(1);
 		UNIT_ASSERT_EQUAL(a, "a");
 
@@ -189,8 +189,8 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(start_width)
 	{
-		String str = "FooBarBib";
-		String e = "";
+		core::String str = "FooBarBib";
+		core::String e = "";
 
 		UNIT_ASSERT_TRUE(str.StartsWith(""));
 		UNIT_ASSERT_TRUE(str.StartsWith("Foo"));
@@ -201,8 +201,8 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(end_width)
 	{
-		String str = "FooBarBib";
-		String e = "";
+		core::String str = "FooBarBib";
+		core::String e = "";
 
 		UNIT_ASSERT_TRUE(str.EndsWith(""));
 		UNIT_ASSERT_TRUE(str.EndsWith("Bib"));
@@ -213,7 +213,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(find)
 	{
-		String str = "FooBarBib";
+		core::String str = "FooBarBib";
 
 		UNIT_ASSERT_EQUAL(str.Find("Bar"), str.First() + 3);
 		UNIT_ASSERT_EQUAL(str.Find("Bib"), str.First() + 6);
@@ -223,7 +223,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(find_reverse)
 	{
-		String str = "FooBarBib";
+		core::String str = "FooBarBib";
 
 		UNIT_ASSERT_EQUAL(str.FindReverse("Bar"), str.First() + 3);
 		UNIT_ASSERT_EQUAL(str.FindReverse("Bib"), str.First() + 6);
@@ -233,7 +233,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(replace_range)
 	{
-		String str = "Hallo Welt";
+		core::String str = "Hallo Welt";
 		str.ReplaceRange("Bye", str.First(), 5);
 		UNIT_ASSERT_EQUAL(str, "Bye Welt");
 		str = "Hallo Welt";
@@ -246,7 +246,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(rstrip)
 	{
-		String str = "Hallo";
+		core::String str = "Hallo";
 		UNIT_ASSERT_EQUAL(str.RStrip(), "Hallo");
 		str = "";
 		UNIT_ASSERT_EQUAL(str.RStrip(), "");
@@ -258,7 +258,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(lstrip)
 	{
-		String str = "Hallo";
+		core::String str = "Hallo";
 		UNIT_ASSERT_EQUAL(str.LStrip(), "Hallo");
 		str = "";
 		UNIT_ASSERT_EQUAL(str.LStrip(), "");
@@ -270,7 +270,7 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(pop)
 	{
-		String str = "abc";
+		core::String str = "abc";
 		UNIT_ASSERT_EQUAL(str.Pop(1), 1);
 		UNIT_ASSERT_EQUAL(str, "ab");
 		str = "ab☠c";
@@ -283,8 +283,8 @@ UNIT_SUITE(String)
 
 	UNIT_TEST(split)
 	{
-		String str = "ab,b,,c";
-		String out[5];
+		core::String str = "ab,b,,c";
+		core::String out[5];
 		size_t count = str.Split(',', out, 5);
 		UNIT_ASSERT_EQUAL(count, 4);
 		UNIT_ASSERT_EQUAL(out[0], "ab");

@@ -17,10 +17,10 @@ class AdapterD3D9 : public Adapter
 {
 public:
 	AdapterD3D9(UnknownRefCounted<IDirect3D9> d3d9, UINT adapter);
-	const String& GetName() const;
+	const core::String& GetName() const;
 	u32 GetVendor() const;
 	u32 GetDevice() const;
-	const String& GetDriverType() const;
+	const core::String& GetDriverType() const;
 	UINT GetAdapter() const;
 	UnknownRefCounted<IDirect3D9> GetD3D9() const;
 	core::Array<DisplayMode> GenerateDisplayModes(bool windowed);
@@ -34,7 +34,7 @@ private:
 
 	UINT m_Adapter;
 
-	String m_Name;
+	core::String m_Name;
 	u32 m_Vendor;
 	u32 m_Device;
 };

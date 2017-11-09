@@ -158,14 +158,14 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 	}
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const String& name, bool deleteOnDrop, bool isReadOnly)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const core::String& name, bool deleteOnDrop, bool isReadOnly)
 {
 	if(!memory || size == 0)
 		throw core::FileNotFoundException("[Empty Memory file]");
 
 	FileDescription desc(
 		Path::EMPTY,
-		String::EMPTY,
+		core::String::EMPTY,
 		size,
 		FileDescription::EType::Other,
 		core::DateAndTime(),
@@ -174,7 +174,7 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const S
 	return LUX_NEW(MemoryFile)(memory, desc, name, deleteOnDrop, false, isReadOnly);
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, u32 size, const String& name, bool deleteOnDrop)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, u32 size, const core::String& name, bool deleteOnDrop)
 {
 	// File is set to read only in last parameter
 	return OpenVirtualFile(const_cast<void*>(memory), size, name, deleteOnDrop, true);
@@ -229,7 +229,7 @@ File* FileSystemWin32::CreateTemporaryFile(u32 Size)
 {
 	void* ptr = LUX_NEW_ARRAY(u8, Size);
 
-	return OpenVirtualFile(ptr, Size, String::EMPTY, true, false);
+	return OpenVirtualFile(ptr, Size, core::String::EMPTY, true, false);
 }
 
 FileDescription FileSystemWin32::GetFileDescription(const Path& name)
@@ -264,7 +264,7 @@ StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 	return LUX_NEW(INIFile)(this, file);
 }
 
-StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const String& name)
+StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const core::String& name)
 {
 	if(!file)
 		throw core::FileNotFoundException("[Empty file]");
@@ -273,8 +273,8 @@ StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size
 		throw core::Exception("Limited file size is to big");
 
 	FileDescription desc(
-		String::EMPTY,
-		String::EMPTY,
+		core::String::EMPTY,
+		core::String::EMPTY,
 		size,
 		io::FileDescription::EType::Other,
 		core::DateAndTime(),
@@ -344,7 +344,7 @@ void FileSystemWin32::RemoveMountPoint(const Path& point, Archive* archive)
 	}
 }
 
-String FileSystemWin32::GetFileOpenString(EFileMode mode) const
+core::String FileSystemWin32::GetFileOpenString(EFileMode mode) const
 {
 	if(mode == EFileMode::ReadWrite)
 		return "r+b";
@@ -355,7 +355,7 @@ String FileSystemWin32::GetFileOpenString(EFileMode mode) const
 	if(TestFlag(mode, EFileMode::Write))
 		return "wb";
 
-	return String::EMPTY;
+	return core::String::EMPTY;
 }
 
 Win32Path FileSystemWin32::ConvertPathToWin32WidePath(const Path& p) const

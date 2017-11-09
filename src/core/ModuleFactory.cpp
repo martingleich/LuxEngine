@@ -21,7 +21,7 @@ void ModuleFactory::Destroy()
 	g_Factory = nullptr;
 }
 
-void ModuleFactory::AddModuleFactory(const String& module, const String& name, CreatorT creator)
+void ModuleFactory::AddModuleFactory(const core::String& module, const core::String& name, CreatorT creator)
 {
 	LX_CHECK_NULL_ARG(creator);
 
@@ -33,9 +33,9 @@ void ModuleFactory::AddModuleFactory(const String& module, const String& name, C
 	m_Entries.PushBack(Entry(module, name, creator));
 }
 
-core::Array<String> ModuleFactory::GetModuleFactories(const String& module)
+core::Array<core::String> ModuleFactory::GetModuleFactories(const core::String& module)
 {
-	core::Array<String> out;
+	core::Array<core::String> out;
 	for(auto& e : m_Entries) {
 		if(e.module == module)
 			out.PushBack(e.name);
@@ -44,7 +44,7 @@ core::Array<String> ModuleFactory::GetModuleFactories(const String& module)
 	return out;
 }
 
-StrongRef<ReferenceCounted> ModuleFactory::CreateModule(const String& module, const String& name, const ModuleInitData& data)
+StrongRef<ReferenceCounted> ModuleFactory::CreateModule(const core::String& module, const core::String& name, const ModuleInitData& data)
 {
 	for(auto& e : m_Entries) {
 		if(e.module == module && e.name == name) {

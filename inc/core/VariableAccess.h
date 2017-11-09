@@ -75,7 +75,7 @@ public:
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		return ((String*)m_Data)->Data_c();
+		return ((core::String*)m_Data)->Data_c();
 	}
 
 	void AssignData(const void* data) const
@@ -136,7 +136,7 @@ public:
 		if(!IsValid())
 			throw Exception("Accessed invalid package parameter");
 
-		(*(String*)m_Data) = string;
+		(*(core::String*)m_Data) = string;
 
 		return *this;
 	}

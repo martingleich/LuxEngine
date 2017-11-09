@@ -43,15 +43,7 @@ public:
 	\param str The string to check
 	\return The handle of the entry
 	*/
-	StringTableHandle FindString(const char* str);
-
-	//! Check if a string exist in the string table
-	/**
-	Returns invalid handle if the string does not exist.
-	\param str The string to check
-	\return The handle of the entry
-	*/
-	StringTableHandle FindString(const String& str);
+	StringTableHandle FindString(const core::StringType& str);
 
 	//! Add a string to the string table
 	/**
@@ -59,15 +51,7 @@ public:
 	\param str The string to add
 	\return The handle to the entry
 	*/
-	StringTableHandle AddString(const char* str);
-
-	//! Add a string to the string table
-	/**
-	If the string is already in the table, don't add it again.
-	\param str The string to add
-	\return The handle to the entry
-	*/
-	StringTableHandle AddString(const String& str);
+	StringTableHandle AddString(const core::StringType& str);
 
 private:
 	struct MemBlock;
