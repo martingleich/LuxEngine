@@ -44,22 +44,31 @@ public:
 	LUX_API void UpSpeed(float f);
 	LUX_API void SetFast(bool fast);
 
-	//! Maps a event to the camera actions
-	/**
-	This mapping used WASD to move the camera, QE to move the camera up and down,
-	and the mouse to look around.
-	*/
-	LUX_API void DefaultEventToCameraAction(const input::Event& event);
+	// Controller functions
+	LUX_API void DefaultEventHandler(const input::Event& event);
+	LUX_API void EnableInput();
+	LUX_API void DisableInput();
+	LUX_API bool IsInputActive();
 
 private:
 	float m_MoveSpeed;
 	math::AngleF m_RotSpeed;
 	math::AngleF m_MaxVerticalAngle;
-	bool m_NoVerticalMovement;
 
-	bool m_Fast;
 	math::Vector2F m_Rot;
 	math::Vector3F m_Move;
+
+	bool m_NoVerticalMovement;
+	bool m_Fast;
+
+	bool m_IsControlActive;
+	struct KeyboardMouseController
+	{
+		math::Vector3F m_Move;
+		input::EKeyCode forward[2];
+		input::EKeyCode flank[2];
+		input::EKeyCode up[2];
+	} m_KeyboardController;
 };
 
 } // namespace scene

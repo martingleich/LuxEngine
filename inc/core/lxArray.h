@@ -103,7 +103,7 @@ private:
 		{
 			return *m_Current;
 		}
-		
+
 		const T& operator*() const
 		{
 			return *m_Current;
@@ -387,6 +387,8 @@ public:
 	/**
 	\param it The element to remove
 	\param HoldOrder Should the elements in array be in the same order as before
+	\return The iterator of the element that took the place of the erased, if
+		the last element of the array was erased, returns the end iterator.
 	*/
 	Iterator Erase(Iterator it, bool holdOrder = false)
 	{
@@ -414,6 +416,8 @@ public:
 	\param from The first element to remove.
 	\param count The number of elements to remove.
 	\param HoldOrder Should the elements in array be in the same order as before
+	\return The iterator of the element that took the place of the first erased, if
+		the last element of the array was erased, returns the end iterator.
 	*/
 	Iterator Erase(Iterator from, size_t count, bool holdOrder)
 	{

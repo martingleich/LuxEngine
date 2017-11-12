@@ -37,7 +37,9 @@ public:
 	\param beginScene Should the renderer call video::Renderer::BeginScene, if not the scene must be already started with the correct rendertarget in place.
 	\param endScene Should the renderer call video::Renderer::EndScene
 	*/
-	virtual void DrawScene(Scene* scene, bool beginScene = true, bool endScene = true) = 0;
+	virtual void DrawScene(Scene* scene,
+		bool beginScene = true,
+		bool endScene = true) = 0;
 
 	////////////////////////////////////////////////////////////////////////////////////
 
