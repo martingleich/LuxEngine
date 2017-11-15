@@ -28,7 +28,7 @@ static LRESULT WINAPI WindowProc(HWND wnd,
 	LuxDeviceWin32* device = nullptr;
 	if(msg == WM_NCCREATE) {
 		CREATESTRUCTW* createStruct = reinterpret_cast<CREATESTRUCTW*>(lParam);
-		SetWindowLongPtrW(wnd, GWLP_USERDATA, reinterpret_cast<LONG>(createStruct->lpCreateParams));
+		SetWindowLongPtrW(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(createStruct->lpCreateParams));
 		device = reinterpret_cast<LuxDeviceWin32*>(createStruct->lpCreateParams);
 	} else {
 		LONG_PTR userData = GetWindowLongPtrW(wnd, GWLP_USERDATA);
