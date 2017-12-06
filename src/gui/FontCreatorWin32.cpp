@@ -311,10 +311,7 @@ static bool RegisterFileFont(io::File* file, HANDLE& outHandle, core::String& ou
 {
 	core::RawMemory data(file->GetSize());
 
-	u32 count = file->ReadBinary(file->GetSize(), data);
-	if(count != file->GetSize())
-		return false;
-
+	file->ReadBinary(file->GetSize(), data);
 	TTFParser ttfParser(data, data.GetSize());
 	if(!ttfParser.IsValid())
 		return false;

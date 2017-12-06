@@ -234,9 +234,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 		void* tmp = LUX_NEW_ARRAY(u8, buffer.size);
 		buffer.ptr = tmp;
 		buffer.drop = true;
-		size_t read = file->ReadBinary((u32)buffer.size, tmp);
-		if(read != buffer.size)
-			throw core::FileFormatException("Unexpected end of file");
+		file->ReadBinary((u32)buffer.size, tmp);
 	} else {
 		buffer.ptr = file->GetBuffer();
 		buffer.drop = false;

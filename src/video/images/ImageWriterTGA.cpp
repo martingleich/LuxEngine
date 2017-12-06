@@ -39,15 +39,20 @@ bool ImageWriterTGA::CanWriteFile(const core::String& ext)
 static uint32_t tga_proc_write(tga_struct* tga, uint32_t size, void* buffer)
 {
 	io::File* file = (io::File*)tga_get_io_data(tga);
-	return file->WriteBinary(buffer, size);
+	return file->WriteBinaryPart(buffer, size);
 }
 
 static uint32_t tga_proc_seek(tga_struct* tga, uint32_t offset)
 {
 	io::File* file = (io::File*)tga_get_io_data(tga);
-	bool success = file->Seek(offset, io::ESeekOrigin::Start);
+	try {
+		file->Seek(offset, io::ESeekOrigin::Start);
+	} catch(...) {
+		// Don't throw a exception while using longjumps
+		return 1;
+	}
 
-	return success ? 0 : 1;
+	return 0;
 }
 
 void ImageWriterTGA::WriteFile(io::File* file, void* data, video::ColorFormat format, math::Dimension2U size, u32 pitch, u32 writerParam)

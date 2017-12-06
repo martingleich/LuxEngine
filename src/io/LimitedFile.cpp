@@ -18,52 +18,34 @@ LimitedFile::LimitedFile(StrongRef<File> Master,
 {
 }
 
-u32 LimitedFile::ReadBinary(u32 numBytes, void* out)
+u32 LimitedFile::ReadBinaryPart(u32 numBytes, void* out)
 {
 	u32 avail = math::Min(m_FileSize - m_Cursor - 1, numBytes);
 	if(numBytes > avail)
 		numBytes = avail;
-	u32 readBytes = m_MasterFile->ReadBinary(numBytes, out);
+	u32 readBytes = m_MasterFile->ReadBinaryPart(numBytes, out);
 	m_Cursor += readBytes;
 	return readBytes;
 }
 
-u32 LimitedFile::WriteBinary(const void* data, u32 length)
+u32 LimitedFile::WriteBinaryPart(const void* data, u32 length)
 {
-	m_MasterFile->WriteBinary(data, length);
-	m_Cursor += length;
-	return length;
+	u32 written = m_MasterFile->WriteBinaryPart(data, length);
+	m_Cursor += written;
+	return written;
 }
 
-bool LimitedFile::Seek(s32 offset, ESeekOrigin orgin)
+void LimitedFile::Seek(u32 offset, ESeekOrigin origin)
 {
-	if(GetSize() == 0)
-		return false;
-
-	u32 cursor;
-	switch(orgin) {
-	case ESeekOrigin::Start:
-		cursor = 0;
-		break;
-	case ESeekOrigin::End:
-		cursor = GetSize();
-		break;
-	case ESeekOrigin::Cursor:
-		cursor = GetCursor();
-		break;
-	default:
-		cursor = 0;
-	}
+	u32 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
 
 	u32 newCursor;
 	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
 
-	if(success) {
-		return m_MasterFile->Seek(newCursor, ESeekOrigin::Start);
-	} else {
-		log::Error("Readcursor was moved outside of file.");
-		return false;
-	}
+	if(!success)
+		throw core::FileException(core::FileException::OutsideFile);
+
+	m_MasterFile->Seek(newCursor, ESeekOrigin::Start);
 }
 
 void* LimitedFile::GetBuffer()

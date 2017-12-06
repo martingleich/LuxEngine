@@ -181,7 +181,7 @@ struct InvalidArgumentException : ErrorException
 };
 
 //! Helper macro to check for not allowed NULL-Pointer arguments.
-#define LX_CHECK_NULL_ARG(arg) if((arg) == nullptr) throw lux::core::InvalidArgumentException(#arg, "Must not be null");
+#define LX_CHECK_NULL_ARG(arg) if(!(arg)) throw lux::core::InvalidArgumentException(#arg, "Must not be null");
 
 #define LX_CHECK_BOUNDS(arg, lo, hi) if(arg < lo || arg > hi) throw lux::core::InvalidArgumentException(#arg, "Is out of range.");
 
@@ -206,6 +206,8 @@ struct FileException : Exception
 {
 	//! An error while writing to the file.
 	static const int WriteError = 0;
+	static const int ReadError = 1;
+	static const int OutsideFile = 2;
 
 	explicit FileException(int _type) :
 		Exception("file error"),

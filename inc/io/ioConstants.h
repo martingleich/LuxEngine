@@ -19,7 +19,6 @@ enum class EFileMode
 enum class ESeekOrigin
 {
 	Start = 0, //!< from start of the file
-	End, //!< from the end of the file(offset negative)
 	Cursor, //!< from the current cursor
 };
 

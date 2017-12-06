@@ -18,9 +18,9 @@ public:
 		bool Expandable,
 		bool readOnly);
 	~MemoryFile();
-	u32 ReadBinary(u32 dwNumBytes, void* out);
-	u32 WriteBinary(const void* data, u32 dwLength);
-	bool Seek(s32 offset, ESeekOrigin Origin = ESeekOrigin::Cursor);
+	u32 ReadBinaryPart(u32 numBytes, void* out);
+	u32 WriteBinaryPart(const void* data, u32 length);
+	void Seek(u32 offset, ESeekOrigin origin = ESeekOrigin::Cursor);
 	void* GetBuffer();
 	const void* GetBuffer() const;
 	u32 GetSize() const;

@@ -16,9 +16,9 @@ public:
 		const FileDescription& desc,
 		core::String name);
 
-	u32 ReadBinary(u32 numBytes, void* out);
-	u32 WriteBinary(const void* data, u32 length);
-	bool Seek(s32 offset, ESeekOrigin orgin);
+	u32 ReadBinaryPart(u32 numBytes, void* out);
+	u32 WriteBinaryPart(const void* data, u32 length);
+	void Seek(u32 offset, ESeekOrigin origin);
 	void* GetBuffer();
 	const void* GetBuffer() const;
 	u32 GetSize() const;

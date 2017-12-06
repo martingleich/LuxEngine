@@ -327,8 +327,8 @@ private:
 		lxAssert(m_BufferCursor == m_BufferSize);
 
 		m_Buffer.SetMinSize(bytes);
-		if(bytes != m_File->ReadBinary(bytes, m_Buffer))
-			Error("Unexpected end of file.");
+		m_File->ReadBinary(bytes, m_Buffer);
+
 		m_BufferSize = bytes;
 		m_BufferCursor = 0;
 	}
@@ -371,8 +371,7 @@ private:
 	void ReadBytes(u32 count, void* dst)
 	{
 		if(m_BufferSize == m_BufferCursor) {
-			if(count != m_File->ReadBinary(count, dst))
-				Error("Unexpected end of file.");
+			m_File->ReadBinary(count, dst);
 		} else {
 			lxAssert(m_BufferCursor + count <= m_BufferSize);
 			memcpy(dst, (u8*)m_Buffer + m_BufferCursor, count);
@@ -393,8 +392,7 @@ private:
 
 	void WriteBytes(u32 count, const void* data)
 	{
-		if(count != m_File->WriteBinary(data, count))
-			Error("Can't write to file");
+		m_File->WriteBinary(data, count);
 	}
 
 	EFontWeight ConvertV1Weight(EFontWeightsV1 v1)
@@ -439,7 +437,7 @@ core::Name FontLoader::GetResourceType(io::File* file, core::Name requestedType)
 		return core::Name::INVALID;
 
 	u32 magic = 0;
-	const u32 bytes = file->ReadBinary(sizeof(u32), &magic);
+	const u32 bytes = file->ReadBinaryPart(sizeof(u32), &magic);
 	if(bytes != 4 || magic != LX_MAKE_FOURCC('F', 'O', 'N', 'T'))
 		return core::Name::INVALID;
 	else

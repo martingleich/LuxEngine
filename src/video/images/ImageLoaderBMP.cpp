@@ -330,7 +330,7 @@ core::Name ImageLoaderBMP::GetResourceType(io::File* file, core::Name requestedT
 		return core::Name::INVALID;
 
 	u16 data;
-	if(file->ReadBinary(sizeof(data), &data) != sizeof(data))
+	if(file->ReadBinaryPart(sizeof(data), &data) != sizeof(data))
 		return core::Name::INVALID;
 	if(data != 0x4D42)
 		return core::Name::INVALID;

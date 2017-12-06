@@ -43,7 +43,7 @@ public:
 				*pBytes = file->GetSize();
 				void* data = new u8[*pBytes];
 				m_Allocated.PushBack(data);
-				if(file->ReadBinary(*pBytes, data) != *pBytes)
+				if(file->ReadBinaryPart(*pBytes, data) != *pBytes)
 					return E_FAIL;
 				*ppData = data;
 				return S_OK;

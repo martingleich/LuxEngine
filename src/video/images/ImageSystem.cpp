@@ -49,8 +49,7 @@ public:
 			if(fileType != core::Name::INVALID)
 				return fileType;
 
-			if(!file->Seek(fileCursor, io::ESeekOrigin::Start))
-				break;
+			file->Seek(fileCursor, io::ESeekOrigin::Start);
 		}
 
 		return core::Name::INVALID;

@@ -43,7 +43,7 @@ static void png_read_function(png_structp png_ptr, png_bytep data, png_size_t co
 	if(!f)
 		png_error(png_ptr, "No read file defined");
 
-	if(count != (png_size_t)f->ReadBinary((u32)count, data))
+	if(count != (png_size_t)f->ReadBinaryPart((u32)count, data))
 		png_error(png_ptr, "Unexpected end of file");
 }
 
@@ -202,7 +202,7 @@ core::Name ImageLoaderPNG::GetResourceType(io::File* file, core::Name requestedT
 		return core::Name::INVALID;
 
 	u8 bytes[8];
-	u32 readBytes = file->ReadBinary(sizeof(bytes), bytes);
+	u32 readBytes = file->ReadBinaryPart(sizeof(bytes), bytes);
 	if(readBytes < 8 || !png_check_sig(bytes, sizeof(bytes)))
 		return core::Name::INVALID;
 

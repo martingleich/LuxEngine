@@ -23,10 +23,10 @@ StreamFile::~StreamFile()
 		fclose(m_File);
 }
 
-u32 StreamFile::ReadBinary(u32 numBytes, void* out)
+u32 StreamFile::ReadBinaryPart(u32 numBytes, void* out)
 {
-	if(numBytes == 0 || !out)
-		return 0;
+	LX_CHECK_NULL_ARG(out);
+	LX_CHECK_NULL_ARG(numBytes);
 
 	if((u32)ftell(m_File) + numBytes > m_FileSize)
 		numBytes = m_FileSize - ftell(m_File);
@@ -49,10 +49,10 @@ u32 StreamFile::ReadBinary(u32 numBytes, void* out)
 	return (u32)read;
 }
 
-u32 StreamFile::WriteBinary(const void* data, u32 numBytes)
+u32 StreamFile::WriteBinaryPart(const void* data, u32 numBytes)
 {
-	if(numBytes == 0 || !data)
-		return 0;
+	LX_CHECK_NULL_ARG(data);
+	LX_CHECK_NULL_ARG(numBytes);
 
 	if((u32)ftell(m_File) > m_FileSize - numBytes)
 		m_FileSize = ftell(m_File) + numBytes;
@@ -63,36 +63,18 @@ u32 StreamFile::WriteBinary(const void* data, u32 numBytes)
 	return numBytes;
 }
 
-bool StreamFile::Seek(s32 offset, ESeekOrigin orgin)
+void StreamFile::Seek(u32 offset, ESeekOrigin origin)
 {
-	if(GetSize() == 0)
-		return false;
-
-	u32 cursor;
-	switch(orgin) {
-	case ESeekOrigin::Start:
-		cursor = 0;
-		break;
-	case ESeekOrigin::End:
-		cursor = GetSize();
-		break;
-	case ESeekOrigin::Cursor:
-		cursor = GetCursor();
-		break;
-	default:
-		cursor = 0;
-	}
+	u32 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
 
 	u32 newCursor;
 	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
 
-	if(success) {
-		fseek(m_File, newCursor, 0);
-		return true;
-	} else {
-		log::Error("Readcursor was moved outside the file.");
-		return false;
-	}
+	if(!success)
+		throw core::FileException(core::FileException::OutsideFile);
+
+	if(fseek(m_File, newCursor, 0) != 0)
+		throw core::RuntimeException("fseek failed");
 }
 
 void* StreamFile::GetBuffer()

@@ -24,7 +24,8 @@ struct Context
 	Context() :
 		tga(nullptr),
 		info(nullptr)
-	{}
+	{
+	}
 
 	~Context()
 	{
@@ -37,15 +38,19 @@ struct Context
 static uint32_t tga_proc_read(tga_struct* tga, uint32_t size, void* buffer)
 {
 	io::File* file = (io::File*)tga_get_io_data(tga);
-	return file->ReadBinary(size, buffer);
+	return file->ReadBinaryPart(size, buffer);
 }
 
 static uint32_t tga_proc_seek(tga_struct* tga, uint32_t offset)
 {
 	io::File* file = (io::File*)tga_get_io_data(tga);
-	bool success = file->Seek(offset, io::ESeekOrigin::Start);
-
-	return success ? 0 : 1;
+	try {
+		file->Seek(offset, io::ESeekOrigin::Start);
+	} catch(...) {
+		// Don't throw a exception while using longjumps
+		return 1;
+	}
+	return 0;
 }
 
 static bool LoadTgaInfo(Context& ctx, io::File* file, bool silent)

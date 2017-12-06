@@ -13,17 +13,11 @@ namespace io
 //! A file usable for reading and writing
 class File : public ReferenceCounted
 {
-protected:
-	core::String m_Name;
-	FileDescription m_Desc;
-
 public:
 	File(const core::String& name, const FileDescription& desc) : m_Name(name), m_Desc(desc)
 	{
 	}
-	virtual ~File()
-	{
-	}
+	virtual ~File() {}
 
 	//! Get the name of the file
 	/**
@@ -45,7 +39,6 @@ public:
 		return m_Desc;
 	}
 
-
 	//! Is the filecursor at the end of the file
 	virtual bool IsEOF() const
 	{
@@ -55,109 +48,44 @@ public:
 	//! Write binary data to the file
 	/**
 	\param data The data to write to the file
-	\param Length The number of bytes to write
+	\param numBytes The number of bytes to write
 	*/
-	virtual u32 WriteBinary(const void* data, u32 length) = 0;
-
-	//! Write a string to the file
-	virtual u32 WriteString(const core::String& str)
+	void WriteBinary(const void* data, u32 numBytes)
 	{
-		lxAssert(str.Size() < std::numeric_limits<u32>::max());
-		return WriteBinary(str.Data(), (u32)str.Size());
+		u32 count = WriteBinaryPart(data, numBytes);
+		if(count != numBytes)
+			throw core::FileException(core::FileException::WriteError);
 	}
 
-	//! Write the content of a virtual file to this file
+	//! Write binary data to the file
 	/**
-	\param file The file to copy
-	\param bytes the number of bytes to copy, or 0 to copy bytes until end of file
-	\return The number of bytes written.
+	\param data The data to write to the file
+	\param numBytes The number of bytes to write
+	\return The number of bytes writtefn, may be smaller than numBytes
 	*/
-	u32 WriteToFile(File* file, u32 bytes = 0)
-	{
-		static u8 byteBuffer[1024];
-		u32 written = 0;
-		if(bytes > 0) {
-			if(file->GetBuffer() != nullptr) {
-				this->WriteBinary(file->GetBuffer(), file->GetSize());
-				written = file->GetSize();
-			} else {
-				while(written < bytes) {
-					u32 toMove = math::Min((u32)sizeof(byteBuffer), (u32)bytes);
-					u32 readBytes = file->ReadBinary(toMove, byteBuffer);
-					this->WriteBinary(byteBuffer, readBytes);
-					written += readBytes;
-					if(readBytes != toMove)
-						break;
-				}
-			}
-		} else {
-			while(!file->IsEOF()) {
-				u32 toMove = sizeof(byteBuffer);
-				u32 readBytes = file->ReadBinary(toMove, byteBuffer);
-				this->WriteBinary(byteBuffer, readBytes);
-				written += readBytes;
-				if(readBytes != toMove)
-					break;
-			}
-		}
+	virtual u32 WriteBinaryPart(const void* data, u32 numBytes) = 0;
 
-		return written;
+	//! Read binary data
+	/**
+	Read bytes from the cursor
+	\param numBytes The number of bytes to read
+	\param out Here the number of bytes are written
+	*/
+	void ReadBinary(u32 numBytes, void* out)
+	{
+		u32 count = ReadBinaryPart(numBytes, out);
+		if(count != numBytes)
+			throw core::FileException(core::FileException::ReadError);
 	}
 
 	//! Read binary data
 	/**
-	Read bytes from the cursor to the end of the file
+	Read bytes from the cursor
 	\param numBytes The number of bytes to read
 	\param out Here the number of bytes are written
-	\return The number of read bytes, in the case of an error 0
+	\return The number of bytes read, may be smaller than numBytes
 	*/
-	virtual u32 ReadBinary(u32 numBytes, void* out) = 0;
-
-	//! Read any type
-	/**
-	The type is read by its binary representation
-	should only be used for POD types, with fixes alignment
-	\return The read value, Binary 0 if it couldnt read
-	*/
-	template <typename type>
-	type Read()
-	{
-		type out(0);
-		ReadBinary(sizeof(type), &out);
-		return out;
-	}
-
-	// Liest einen str ein, hört auf wenn eine '\0' gelesen wird, oder die maximale Zeichenanzahl gelesen wurde
-	//! Read a string from the file
-	/**
-	Read single utf-8 bytes from file until 0 is encounterd
-	or the maximal number of bytes is reached
-	\param size The maximal number of bytes to read
-	\return The read string
-	*/
-	virtual core::String ReadString(u32 size = 0)
-	{
-		core::String str;
-		if(size != 0)
-			str.Reserve(size);
-		else
-			str.Reserve(256);
-
-		u32 bytesRead = 0;
-		while(true) {
-			u8 c = Read<u8>();
-			if(c == 0)
-				break;
-
-			str.PushByte(c);
-			++bytesRead;
-
-			if(bytesRead == size)
-				break;
-		}
-
-		return str;
-	}
+	virtual u32 ReadBinaryPart(u32 numBytes, void* out) = 0;
 
 	//! A binary buffer of the file data
 	/**
@@ -181,15 +109,18 @@ public:
 	it isn't moved at all
 	\param Origin The origin of the seek operation
 	\param offset The seek offset
-	\return Could the cursor moved to this position
 	*/
-	virtual bool Seek(s32 offset, ESeekOrigin orgin = ESeekOrigin::Cursor) = 0;
+	virtual void Seek(u32 offset, ESeekOrigin origin = ESeekOrigin::Cursor) = 0;
 
 	//! The size of the file in bytes
 	virtual u32 GetSize() const = 0;
 
 	//! The current cursor position in the file
 	virtual u32 GetCursor() const = 0;
+
+protected:
+	core::String m_Name;
+	FileDescription m_Desc;
 };
 
 }    //namespace io

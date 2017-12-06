@@ -470,11 +470,8 @@ StrongRef<ResourceLoader> ResourceSystemImpl::GetResourceLoader(core::Name& type
 			}
 		}
 
-		if(!file->Seek(fileCursor, io::ESeekOrigin::Start)) {
-			log::Error("Can't seek file for resource loader search.");
-			result = nullptr;
-			break;
-		}
+		// Reset file
+		file->Seek(fileCursor, io::ESeekOrigin::Start);
 
 		if(result != nullptr)
 			break;

@@ -37,7 +37,9 @@ struct Context
 			m_Error = true;
 			return 0;
 		} else {
-			return m_File->Read<char>();
+			char c;
+			m_File->ReadBinary(1, &c);
+			return c;
 		}
 	}
 
@@ -100,7 +102,7 @@ struct Context
 	static int ReadMagic(io::File* f)
 	{
 		char magic[2];
-		if(f->ReadBinary(2, magic) != 2)
+		if(f->ReadBinaryPart(2, magic) != 2)
 			return -1;
 		if(magic[0] != 'P')
 			return -1;

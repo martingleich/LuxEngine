@@ -318,7 +318,7 @@ bool INIFile::ReadLine(core::String& out)
 			spaceCount = 0;
 			while(!m_IsEOF) {
 				do {
-					readBytes = m_File->ReadBinary(1, &c);
+					readBytes = m_File->ReadBinaryPart(1, &c);
 				} while(readBytes == 1 && out.IsEmpty() && (c == ' ' || c == '\t'));
 
 				if(readBytes == 0) {

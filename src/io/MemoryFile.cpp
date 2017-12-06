@@ -30,10 +30,10 @@ MemoryFile::~MemoryFile()
 		LUX_FREE_ARRAY(m_Buffer);
 }
 
-u32 MemoryFile::ReadBinary(u32 numBytes, void* out)
+u32 MemoryFile::ReadBinaryPart(u32 numBytes, void* out)
 {
-	if(numBytes == 0 || !out)
-		return 0;
+	LX_CHECK_NULL_ARG(out);
+	LX_CHECK_NULL_ARG(numBytes);
 
 	if(m_Cursor + numBytes > m_Size) {
 		numBytes = m_Size - m_Cursor;
@@ -46,8 +46,11 @@ u32 MemoryFile::ReadBinary(u32 numBytes, void* out)
 	return numBytes;
 }
 
-u32 MemoryFile::WriteBinary(const void* data, u32 numBytes)
+u32 MemoryFile::WriteBinaryPart(const void* data, u32 numBytes)
 {
+	LX_CHECK_NULL_ARG(data);
+	LX_CHECK_NULL_ARG(numBytes);
+
 	if(m_IsReadOnly)
 		throw core::FileException(core::FileException::WriteError);
 
@@ -76,37 +79,18 @@ u32 MemoryFile::WriteBinary(const void* data, u32 numBytes)
 	return numBytes;
 }
 
-bool MemoryFile::Seek(s32 offset, ESeekOrigin origin)
+void MemoryFile::Seek(u32 offset, ESeekOrigin origin)
 {
-	if(GetSize() == 0)
-		return false;
-
-	u32 cursor;
-	switch(origin) {
-	case ESeekOrigin::Start:
-		cursor = 0;
-		break;
-	case ESeekOrigin::End:
-		cursor = GetSize();
-		break;
-	case ESeekOrigin::Cursor:
-		cursor = GetCursor();
-		break;
-	default:
-		cursor = 0;
-	}
+	u32 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
 
 	u32 newCursor;
 	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
 
-	if(success) {
-		m_Cursor = newCursor;
-		m_IsEOF = (m_Cursor == m_Size);
-		return true;
-	} else {
-		log::Error("Readcursor was moved outside the file.");
-		return false;
-	}
+	if(!success)
+		throw core::FileException(core::FileException::OutsideFile);
+
+	m_Cursor = newCursor;
+	m_IsEOF = (m_Cursor == m_Size);
 }
 
 
