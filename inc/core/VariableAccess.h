@@ -17,27 +17,49 @@ This could be an attribute, a normal c++ variable, or a value inside a param pac
 class VariableAccess
 {
 public:
+	//! Construct an empty invalid parameter package
+	VariableAccess() :
+		m_Data(nullptr),
+		m_Type(core::Type::Unknown)
+	{
+	}
+
 	//! Construct a package param to some data
 	/**
 	\param type The type of the parameter
 	\param data A pointer to the data of the param, must be valid for the lifetime of this object
 	*/
-	VariableAccess(core::Type type, void* data) :
-		m_Data(data),
+	VariableAccess(core::Type type, const void* data) :
+		m_Data(const_cast<void*>(data)),
 		m_Type(type)
 	{
 	}
 
+	//! Construct from any object
 	VariableAccess(const AnyObject& any, bool isConst = false) :
 		m_Data(const_cast<void*>(any.Data())),
 		m_Type(isConst ? any.GetType().GetConstantType() : any.GetType())
 	{
+		lxAssert(!m_Type.IsUnknown());
 	}
 
-	//! Construct an empty invalid parameter package
-	VariableAccess() :
-		m_Data(nullptr),
-		m_Type(core::Type::Unknown)
+	template <typename T>
+	VariableAccess(const T& value) :
+		m_Data(const_cast<void*>((const void*)&value)),
+		m_Type(core::GetTypeInfo<T>().GetConstantType())
+	{
+		lxAssert(!m_Type.IsUnknown());
+	}
+	template <typename T>
+	static VariableAccess Constant(const T& value)
+	{
+		return VariableAccess(value);
+	}
+
+	template <typename T>
+	VariableAccess(T& value) :
+		m_Data(&value),
+		m_Type(core::GetTypeInfo<T>())
 	{
 	}
 

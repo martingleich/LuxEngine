@@ -320,10 +320,16 @@ String::ConstIterator String::Insert(ConstIterator pos, ConstIterator first, Con
 String& String::AppendRaw(const char* data, size_t bytes)
 {
 	Reserve(m_Size + bytes);
-	memcpy(Data() + m_Size, data, bytes);
-	m_Length += StringLengthUTF8(data);
+	auto cur = Data() + m_Size;
+
+	// Copy and zero terminate string
+	memcpy(cur, data, bytes);
+	cur[bytes] = 0;
+
+	// Calculate length and size
+	m_Length += StringLengthUTF8(cur);
 	m_Size += bytes;
-	Data()[m_Size] = 0;
+
 	return *this;
 }
 

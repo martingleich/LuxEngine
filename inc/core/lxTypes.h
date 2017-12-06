@@ -201,6 +201,11 @@ public:
 		return m_IsConstant;
 	}
 
+	bool IsUnknown() const
+	{
+		return m_Info == Unknown.GetInfo();
+	}
+
 	bool IsTrivial() const
 	{
 		return m_Info->IsTrivial();
