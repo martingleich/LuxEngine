@@ -60,7 +60,7 @@ const math::Matrix4& MatrixTable::GetMatrix(EMatrixType type) const
 
 bool MatrixTable::IsDirty(EMatrixType type) const
 {
-	return (m_Dirty && (1 << type)) != 0;
+	return (m_Dirty & (1 << type)) != 0;
 }
 
 void MatrixTable::ClearDirty(EMatrixType type) const

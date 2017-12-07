@@ -10,6 +10,8 @@ namespace scene
 class LinearForceAffector : public ParticleAffector
 {
 public:
+	LX_REFERABLE_MEMBERS(LinearForceAffector, "lux.affector.Linear");
+
 	LinearForceAffector() :
 		m_Direction(math::Vector3F::UNIT_Y)
 	{}
@@ -17,12 +19,6 @@ public:
 	LinearForceAffector(const math::Vector3F& force) :
 		m_Direction(force)
 	{
-	}
-
-	core::Name GetReferableType() const
-	{
-		static const core::Name name("lux.affector.Linear");
-		return name;
 	}
 
 	void Begin(const math::Transformation& trans)
@@ -33,11 +29,6 @@ public:
 	void Apply(Particle& particle, float secsPassed)
 	{
 		particle.velocity += m_TransDirection*secsPassed;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(LinearForceAffector)(*this);
 	}
 
 private:

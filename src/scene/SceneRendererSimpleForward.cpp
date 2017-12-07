@@ -224,7 +224,9 @@ void SceneRendererSimpleForward::DrawScene()
 	m_Renderer->ClearLights();
 
 	size_t maxLightCount = m_Renderer->GetMaxLightCount();
-	size_t maxShadowCastingCount = drawStencilShadows ? m_Attributes["maxShadowCasters"] : 0;
+	size_t maxShadowCastingCount = m_Attributes["maxShadowCasters"];
+	if(!drawStencilShadows)
+		maxShadowCastingCount = 0;
 
 	size_t count = 0;
 	size_t shadowCount = 0;

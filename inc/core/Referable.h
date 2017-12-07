@@ -37,4 +37,8 @@ public:
 
 }
 
+#define LX_REFERABLE_MEMBERS(class, name) \
+::lux::core::Name GetReferableType() const { static ::lux::core::Name n(name); return n; } \
+::lux::StrongRef<::lux::Referable> Clone() const { return LUX_NEW(class)(*this); }
+
 #endif // INCLUDED_REFERABLE_H

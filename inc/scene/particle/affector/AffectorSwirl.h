@@ -11,6 +11,8 @@ class Node;
 class SwirlAffector : public ParticleAffector
 {
 public:
+	LX_REFERABLE_MEMBERS(SwirlAffector, "lux.affector.Swirl");
+
 	SwirlAffector() :
 		m_Axis(math::Vector3F::UNIT_Y),
 		m_FixedAttractionSpeed(true),
@@ -21,12 +23,6 @@ public:
 		m_KillRadius(-1.0f),
 		m_ParticleKilling(true)
 	{
-	}
-
-	core::Name GetReferableType() const
-	{
-		static const core::Name name("lux.affector.Swirl");
-		return name;
 	}
 
 	virtual void Begin(const math::Transformation& trans)
@@ -75,11 +71,6 @@ public:
 		math::Vector3F newVelocity = (newPos - particle.position) / secsPassed;
 		math::Vector3F orthoVelocity = m_TransAxis * particle.velocity.Dot(m_TransAxis);
 		particle.velocity = orthoVelocity + newVelocity;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(SwirlAffector)(*this);
 	}
 
 	void SetCenter(const math::Vector3F& v) { m_Center = v; }

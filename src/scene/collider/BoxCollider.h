@@ -58,7 +58,7 @@ public:
 
 	StrongRef<Referable> Clone() const
 	{
-		return new BoxCollider(*this);
+		return LUX_NEW(BoxCollider)(*this);
 	}
 
 	static const core::Name TypeName;

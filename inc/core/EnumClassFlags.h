@@ -9,7 +9,7 @@ namespace lux
 template <typename T>
 struct is_flag_enum
 {
-	static const bool value = false;
+	static const bool value = std::is_integral<T>::value || std::is_enum<T>::value;
 };
 
 #define DEFINE_FLAG_ENUM_CLASS(name) \
