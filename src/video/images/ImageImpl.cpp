@@ -1,6 +1,5 @@
 #include "ImageImpl.h"
 #include "core/lxMemory.h"
-#include "core/ReferableRegister.h"
 #include "video/DrawingCanvas.h"
 
 LUX_REGISTER_RESOURCE_CLASS("lux.resource.Image", lux::video::ImageImpl);

@@ -3,9 +3,8 @@
 
 #include "scene/Node.h"
 #include "video/Renderer.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.ParticleSystem", lux::scene::ParticleSystem);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::ParticleSystem, "lux.comp.ParticleSystem");
 
 namespace lux
 {
@@ -177,17 +176,8 @@ bool ParticleSystem::GetSubtreeScanning() const
 	return m_UseSubtree;
 }
 
-core::Name ParticleSystem::GetReferableType() const
+namespace
 {
-	static const core::Name name("lux.comp.ParticleSystem");
-	return name;
-}
-
-StrongRef<Referable> ParticleSystem::Clone() const
-{
-	return LUX_NEW(ParticleSystem)(*this);
-}
-
 template <typename T>
 struct ModelCompare
 {
@@ -196,6 +186,7 @@ struct ModelCompare
 		return a->GetModel() < b->GetModel();
 	}
 };
+}
 
 void ParticleSystem::CollectGroups(Node* n)
 {

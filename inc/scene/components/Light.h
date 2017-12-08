@@ -16,6 +16,8 @@ namespace scene
 class Light : public Component
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API Light();
 	LUX_API virtual ~Light();
 
@@ -93,9 +95,6 @@ public:
 
 	LUX_API virtual bool IsShadowCasting() const;
 	LUX_API virtual void SetShadowCasting(bool b);
-
-	LUX_API virtual core::Name GetReferableType() const;
-	LUX_API virtual StrongRef<Referable> Clone() const;
 
 protected:
 	video::LightData m_LightData;

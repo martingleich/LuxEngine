@@ -12,6 +12,8 @@ namespace gui
 class StaticText : public Element
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API StaticText();
 	LUX_API ~StaticText();
 
@@ -32,7 +34,6 @@ public:
 
 	LUX_API void SetText(const core::String& text);
 	LUX_API const core::String& GetText() const;
-	LUX_API core::Name GetReferableType() const;
 
 protected:
 	TextContainer m_TextContainer;

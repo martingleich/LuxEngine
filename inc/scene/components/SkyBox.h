@@ -15,6 +15,8 @@ namespace scene
 class SkyBox : public Component, public Renderable
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API SkyBox();
 	LUX_API SkyBox(const SkyBox& other);
 	LUX_API ~SkyBox();
@@ -35,9 +37,6 @@ public:
 	LUX_API virtual size_t GetMaterialCount() const;
 
 	LUX_API virtual const math::AABBoxF& GetBoundingBox() const;
-
-	LUX_API virtual core::Name GetReferableType() const;
-	LUX_API virtual StrongRef<Referable> Clone() const;
 
 protected:
 	StrongRef<video::BaseTexture> m_SkyTexture;

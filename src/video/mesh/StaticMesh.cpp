@@ -3,8 +3,6 @@
 
 #include "video/VideoDriver.h"
 
-#include "core/ReferableRegister.h"
-
 LUX_REGISTER_RESOURCE_CLASS("lux.resource.Mesh", lux::video::StaticMesh);
 
 namespace lux

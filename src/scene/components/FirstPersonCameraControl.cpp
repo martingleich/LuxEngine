@@ -1,9 +1,8 @@
 #include "scene/components/FirstPersonCameraControl.h"
 #include "scene/Node.h"
-#include "core/ReferableRegister.h"
 #include "core/Logger.h"
 
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::SceneComponentType::FirstPersonCameraControl, lux::scene::FirstPersonCameraControl)
+LX_REFERABLE_MEMBERS_SRC(lux::scene::FirstPersonCameraControl, lux::scene::SceneComponentType::FirstPersonCameraControl);
 
 namespace lux
 {
@@ -114,16 +113,6 @@ bool FirstPersonCameraControl::VerticalMovementAllowed() const
 void FirstPersonCameraControl::AllowVerticalMovement(bool Allow)
 {
 	m_NoVerticalMovement = !Allow;
-}
-
-core::Name FirstPersonCameraControl::GetReferableType() const
-{
-	return SceneComponentType::FirstPersonCameraControl;
-}
-
-StrongRef<Referable> FirstPersonCameraControl::Clone() const
-{
-	return LUX_NEW(FirstPersonCameraControl)(*this);
 }
 
 void FirstPersonCameraControl::RotX(float x)

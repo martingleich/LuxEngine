@@ -1,9 +1,8 @@
 #include "scene/components/Light.h"
 #include "scene/Node.h"
 #include "video/Renderer.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.Light", lux::scene::Light);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::Light, lux::scene::SceneComponentType::Light);
 
 namespace lux
 {
@@ -118,16 +117,6 @@ bool Light::IsShadowCasting() const
 void Light::SetShadowCasting(bool b)
 {
 	m_IsShadowCasting = b;
-}
-
-core::Name Light::GetReferableType() const
-{
-	return SceneComponentType::Light;
-}
-
-StrongRef<Referable> Light::Clone() const
-{
-	return LUX_NEW(Light)(*this);
 }
 
 }

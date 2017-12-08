@@ -11,6 +11,8 @@ namespace scene
 class Fog : public Component
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API Fog();
 	LUX_API virtual ~Fog();
 
@@ -30,9 +32,6 @@ public:
 	LUX_API virtual const video::Colorf& GetColor() const;
 
 	LUX_API virtual video::FogData GetFogData() const;
-
-	LUX_API virtual core::Name GetReferableType() const;
-	LUX_API virtual StrongRef<Referable> Clone() const;
 
 private:
 	video::FogData m_Data;

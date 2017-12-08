@@ -11,6 +11,8 @@ namespace scene
 class RingZone : public Zone
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	RingZone() :
 		m_MinRadius(1.0f),
 		m_MaxRadius(1.0f),
@@ -92,18 +94,6 @@ public:
 	{
 		m_HalfHeight = h / 2;
 	}
-
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(RingZone)(*this);
-	}
-
-	LUX_API static const core::Name TypeName;
 
 private:
 	float m_MinRadius;

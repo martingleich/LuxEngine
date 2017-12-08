@@ -11,6 +11,8 @@ namespace scene
 class RotationAnimator : public Animator
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API RotationAnimator();
 	LUX_API RotationAnimator(const math::Vector3F& axis, math::AngleF RotSpeed);
 
@@ -21,9 +23,6 @@ public:
 
 	LUX_API const math::Vector3F& GetAxis() const;
 	LUX_API const math::AngleF& GetRotationSpeed() const;
-
-	LUX_API StrongRef<Referable> Clone() const;
-	LUX_API core::Name GetReferableType() const;
 
 private:
 	math::Vector3F m_Axis;

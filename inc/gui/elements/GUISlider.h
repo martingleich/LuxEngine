@@ -20,6 +20,8 @@ public:
 	};
 
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API Slider();
 	LUX_API ~Slider();
 
@@ -47,9 +49,6 @@ public:
 	LUX_API void SetFlipped(bool isFlipped);
 	LUX_API bool IsHorizontal() const;
 	LUX_API void SetHorizontal(bool isHorizontal);
-	LUX_API core::Name GetReferableType() const;
-
-	LUX_API StrongRef<Referable> Clone() const;
 
 	event::Signal<int> onPosChange;
 

@@ -18,6 +18,8 @@ namespace scene
 class Mesh : public Component, public Renderable
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API Mesh();
 	LUX_API Mesh(const Mesh& other);
 	LUX_API ~Mesh();
@@ -69,9 +71,6 @@ public:
 	LUX_API virtual size_t GetMaterialCount() const;
 
 	LUX_API virtual const math::AABBoxF& GetBoundingBox() const;
-
-	LUX_API virtual core::Name GetReferableType() const;
-	LUX_API virtual StrongRef<Referable> Clone() const;
 
 private:
 	void CopyMaterials();

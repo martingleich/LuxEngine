@@ -1,8 +1,7 @@
 #include "gui/elements/GUISlider.h"
 #include "gui/GUIEnvironment.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.gui.Slider", lux::gui::Slider);
+LX_REFERABLE_MEMBERS_SRC(lux::gui::Slider, "lux.gui.Slider");
 
 namespace lux
 {
@@ -226,12 +225,6 @@ void Slider::SetHorizontal(bool isHorizontal)
 		RemoveSettings(Horizontal);
 }
 
-core::Name Slider::GetReferableType() const
-{
-	static const core::Name name("lux.gui.Slider");
-	return name;
-}
-
 int Slider::GetThumbPos(const math::Vector2F& curPos, int offset) const
 {
 	auto rect = GetFinalRect();
@@ -273,11 +266,6 @@ math::RectF Slider::GetThumbRect() const
 			linePos - thumbHeight / 2, thumbPos - thumbWidth / 2,
 			linePos + thumbHeight / 2, thumbPos + thumbWidth / 2);
 	}
-}
-
-StrongRef<Referable> Slider::Clone() const
-{
-	return LUX_NEW(Slider)(*this);
 }
 
 } // namespace gui

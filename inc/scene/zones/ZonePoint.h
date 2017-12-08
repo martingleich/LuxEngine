@@ -10,6 +10,8 @@ namespace scene
 class PointZone : public Zone
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	PointZone() {}
 
 	PointZone(const math::Vector3F& v) :
@@ -34,12 +36,6 @@ public:
 		return math::Vector3F::ZERO;
 	}
 
-	core::Name GetReferableType() const
-	{
-		static const core::Name name("pointZone");
-		return name;
-	}
-
 	void SetPoint(const math::Vector3F& point)
 	{
 		m_Point = point;
@@ -49,13 +45,6 @@ public:
 	{
 		return m_Point;
 	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(PointZone)(*this);
-	}
-	
-	LUX_API static const core::Name TypeName;
 
 private:
 	math::Vector3F m_Point;

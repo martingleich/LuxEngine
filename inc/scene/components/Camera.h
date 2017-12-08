@@ -48,6 +48,8 @@ public:
 class Camera : public CameraBase
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API Camera();
 	LUX_API ~Camera();
 
@@ -108,9 +110,6 @@ public:
 	LUX_API const math::ViewFrustum& GetActiveFrustum() const;
 	LUX_API const math::Matrix4& GetActiveView() const;
 	LUX_API const math::Matrix4& GetActiveProjection() const;
-
-	LUX_API core::Name GetReferableType() const;
-	LUX_API StrongRef<Referable> Clone() const;
 
 private:
 	math::Matrix4 CalculateProjectionMatrix(video::Renderer* r);

@@ -11,7 +11,7 @@ class Node;
 class SwirlAffector : public ParticleAffector
 {
 public:
-	LX_REFERABLE_MEMBERS(SwirlAffector, "lux.affector.Swirl");
+	LX_REFERABLE_MEMBERS_API(LUX_API);
 
 	SwirlAffector() :
 		m_Axis(math::Vector3F::UNIT_Y),

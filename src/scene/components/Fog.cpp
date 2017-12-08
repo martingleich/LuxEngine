@@ -1,7 +1,6 @@
 #include "scene/components/Fog.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.Fog", lux::scene::Fog);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::Fog, lux::scene::SceneComponentType::Fog);
 
 namespace lux
 {
@@ -70,16 +69,6 @@ const video::Colorf& Fog::GetColor() const
 video::FogData Fog::GetFogData() const
 {
 	return m_Data;
-}
-
-core::Name Fog::GetReferableType() const
-{
-	return scene::SceneComponentType::Fog;
-}
-
-StrongRef<Referable> Fog::Clone() const
-{
-	return LUX_NEW(Fog)(*this);
 }
 
 } // namespace scene

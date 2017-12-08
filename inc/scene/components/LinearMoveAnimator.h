@@ -11,6 +11,8 @@ namespace scene
 class LinearMoveAnimator : public Animator
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API LinearMoveAnimator();
 	LUX_API void SetData(
 		const math::Line3F& line,
@@ -19,9 +21,6 @@ public:
 		u32 count = std::numeric_limits<u32>::max());
 
 	void Animate(float secsPassed);
-
-	StrongRef<Referable> Clone() const;
-	core::Name GetReferableType() const;
 
 private:
 	math::Line3F m_Line;

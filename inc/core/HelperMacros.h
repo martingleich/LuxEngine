@@ -17,4 +17,7 @@
 #define LX_MAKE_FOURCC(c0, c1, c2, c3) ((u32)(c0) | (u32)(c1 << 8) | (u32)(c2 << 16) | (u32)(c3 << 24))
 #define LUX_UNUSED(...) ((void)(__VA_ARGS__))
 
+#define IMPL_LX_CONCAT(a, x) a##x
+#define LX_CONCAT(a, x) IMPL_LX_CONCAT(a, x)
+
 #endif // #ifndef INCLUDED_HELPER_MACROS_H

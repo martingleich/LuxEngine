@@ -10,7 +10,7 @@ namespace scene
 class LinearForceAffector : public ParticleAffector
 {
 public:
-	LX_REFERABLE_MEMBERS(LinearForceAffector, "lux.affector.Linear");
+	LX_REFERABLE_MEMBERS_API(LUX_API);
 
 	LinearForceAffector() :
 		m_Direction(math::Vector3F::UNIT_Y)

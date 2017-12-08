@@ -1,8 +1,6 @@
 #include "MaterialImpl.h"
 #include "video/MaterialRenderer.h"
 
-#include "core/ReferableRegister.h"
-
 LUX_REGISTER_RESOURCE_CLASS("lux.resource.Material", lux::video::MaterialImpl)
 
 namespace lux

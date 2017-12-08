@@ -15,6 +15,8 @@ namespace scene
 class FirstPersonCameraControl : public Animator
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API FirstPersonCameraControl();
 	LUX_API FirstPersonCameraControl(float moveSpeed, math::AngleF rotSpeed, math::AngleF maxVerticalAngle, bool noVerticalMovement);
 
@@ -33,9 +35,6 @@ public:
 
 	LUX_API bool VerticalMovementAllowed() const;
 	LUX_API void AllowVerticalMovement(bool Allow);
-
-	LUX_API core::Name GetReferableType() const;
-	LUX_API StrongRef<Referable> Clone() const;
 
 	LUX_API void RotX(float x);
 	LUX_API void RotY(float y);

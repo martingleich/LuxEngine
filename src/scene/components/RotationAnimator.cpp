@@ -1,9 +1,8 @@
 #include "scene/components/RotationAnimator.h"
 #include "scene/Node.h"
 #include "math/Quaternion.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.Rotation", lux::scene::RotationAnimator)
+LX_REFERABLE_MEMBERS_SRC(lux::scene::RotationAnimator, lux::scene::SceneComponentType::Rotation);
 
 namespace lux
 {
@@ -49,16 +48,6 @@ const math::Vector3F& RotationAnimator::GetAxis() const
 const math::AngleF& RotationAnimator::GetRotationSpeed() const
 {
 	return m_RotSpeed;
-}
-
-StrongRef<Referable> RotationAnimator::Clone() const
-{
-	return LUX_NEW(RotationAnimator)(m_Axis, m_RotSpeed);
-}
-
-core::Name RotationAnimator::GetReferableType() const
-{
-	return SceneComponentType::Rotation;
 }
 
 } // namespace scene

@@ -9,7 +9,6 @@
 #include "scene/components/Light.h"
 #include "scene/components/Fog.h"
 #include "core/Logger.h"
-#include "core/ReferableRegister.h"
 
 namespace lux
 {

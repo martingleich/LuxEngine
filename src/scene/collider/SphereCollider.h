@@ -17,6 +17,8 @@ class VolumeQueryCallback;
 class SphereCollider : public Collider
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	SphereCollider()
 	{
 		SetRadius(1.0f);
@@ -54,18 +56,6 @@ public:
 			m_Center + math::Vector3F(m_Radius, m_Radius, m_Radius));
 	}
 
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(SphereCollider)(*this);
-	}
-
-	static const core::Name TypeName;
-
 private:
 	float m_Radius;
 	math::Vector3F m_Center;
@@ -76,24 +66,14 @@ private:
 class BoundingSphereCollider : public SphereCollider
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	BoundingSphereCollider() :
 		SphereCollider(math::Vector3F::ZERO, 0.0f)
 	{
 	}
 
 	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result);
-
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(BoundingSphereCollider)(*this);
-	}
-
-	static const core::Name TypeName;
 };
 
 }

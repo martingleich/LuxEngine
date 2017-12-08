@@ -1,6 +1,5 @@
 #include "ReferableFactoryImpl.h"
 #include "core/Logger.h"
-#include "core/ReferableRegister.h"
 #include "core/lxException.h"
 
 namespace lux

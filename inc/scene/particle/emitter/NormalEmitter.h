@@ -10,6 +10,8 @@ namespace scene
 class NormalEmitter : public ParticleEmitter
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	NormalEmitter(float scatter=0.0f)
 	{
 		m_Scatter = scatter;
@@ -18,17 +20,6 @@ public:
 	void SetScattering(float scatter)
 	{
 		m_Scatter = scatter;
-	}
-
-	core::Name GetReferableType() const
-	{
-		static const core::Name name("lux.emitter.Normal");
-		return name;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(NormalEmitter)(*this);
 	}
 
 protected:

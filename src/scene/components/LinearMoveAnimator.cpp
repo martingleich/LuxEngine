@@ -1,8 +1,7 @@
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/Node.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.LinearMove", lux::scene::LinearMoveAnimator)
+LX_REFERABLE_MEMBERS_SRC(lux::scene::LinearMoveAnimator, lux::scene::SceneComponentType::LinearMove);
 
 namespace lux
 {
@@ -64,16 +63,6 @@ void LinearMoveAnimator::Animate(float secsPassed)
 	}
 
 	node->SetPosition(math::Lerp(m_Line.start, m_Line.end, t));
-}
-
-StrongRef<Referable> LinearMoveAnimator::Clone() const
-{
-	return LUX_NEW(LinearMoveAnimator)(*this);
-}
-
-core::Name LinearMoveAnimator::GetReferableType() const
-{
-	return SceneComponentType::LinearMove;
 }
 
 } // namespace scene

@@ -6,9 +6,7 @@
 #include "video/Renderer.h"
 #include "video/MaterialRenderer.h"
 
-#include "core/ReferableRegister.h"
-
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.Mesh", lux::scene::Mesh)
+LX_REFERABLE_MEMBERS_SRC(lux::scene::Mesh, lux::scene::SceneComponentType::Mesh);
 
 namespace lux
 {
@@ -183,16 +181,6 @@ void Mesh::CopyMaterials()
 		auto material = m_Mesh->GetMaterial(i)->Clone();
 		m_Materials.PushBack(material);
 	}
-}
-
-core::Name Mesh::GetReferableType() const
-{
-	return SceneComponentType::Mesh;
-}
-
-StrongRef<Referable> Mesh::Clone() const
-{
-	return LUX_NEW(Mesh(*this));
 }
 
 } // namespace scene

@@ -3,10 +3,9 @@
 #include "scene/particle/emitter/LookAtEmitter.h"
 #include "scene/particle/emitter/NormalEmitter.h"
 #include "scene/particle/emitter/StraightEmitter.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS_NAMED(linear, "lux.affector.Linear", lux::scene::LinearForceAffector);
-LUX_REGISTER_REFERABLE_CLASS_NAMED(swirl, "lux.affector.Swirl", lux::scene::SwirlAffector);
-LUX_REGISTER_REFERABLE_CLASS_NAMED(lookAt, "lux.emitter.LookAt", lux::scene::LookAtEmitter);
-LUX_REGISTER_REFERABLE_CLASS_NAMED(normal, "lux.emitter.Normal", lux::scene::NormalEmitter);
-LUX_REGISTER_REFERABLE_CLASS_NAMED(straight, "lux.emitter.Straight", lux::scene::StraightEmitter);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::LinearForceAffector, "lux.affector.Linear");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::SwirlAffector, "lux.affector.Swirl");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::LookAtEmitter, "lux.emitter.LookAt");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::NormalEmitter, "lux.emitter.Normal");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::StraightEmitter, "lux.emitter.Straight");

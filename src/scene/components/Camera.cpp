@@ -1,9 +1,8 @@
 #include "scene/components/Camera.h"
 #include "scene/Node.h"
 #include "video/Renderer.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.Camera", lux::scene::Camera);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::Camera, "lux.comp.Camera");
 
 namespace lux
 {
@@ -268,16 +267,6 @@ math::ViewFrustum Camera::CalculateViewFrustum(video::Renderer* r, const math::M
 	}
 
 	return out;
-}
-
-core::Name Camera::GetReferableType() const
-{
-	return SceneComponentType::Camera;
-}
-
-StrongRef<Referable> Camera::Clone() const
-{
-	return LUX_NEW(Camera)(*this);
 }
 
 } // namespace scene

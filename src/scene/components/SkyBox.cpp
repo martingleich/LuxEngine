@@ -10,9 +10,7 @@
 
 #include "math/Transformation.h"
 
-#include "core/ReferableRegister.h"
-
-LUX_REGISTER_REFERABLE_CLASS("lux.comp.Skybox", lux::scene::SkyBox)
+LX_REFERABLE_MEMBERS_SRC(lux::scene::SkyBox, lux::scene::SceneComponentType::SkyBox);
 
 namespace lux
 {
@@ -240,16 +238,6 @@ size_t SkyBox::GetMaterialCount() const
 const math::AABBoxF& SkyBox::GetBoundingBox() const
 {
 	return math::AABBoxF::EMPTY;
-}
-
-core::Name SkyBox::GetReferableType() const
-{
-	return SceneComponentType::SkyBox;
-}
-
-StrongRef<Referable> SkyBox::Clone() const
-{
-	return LUX_NEW(SkyBox)(*this);
 }
 
 } // namespace scene

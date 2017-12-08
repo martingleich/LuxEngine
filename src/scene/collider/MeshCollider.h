@@ -22,6 +22,8 @@ class VolumeQueryCallback;
 class MeshCollider : public TriangleCollider
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	MeshCollider()
 	{
 	}
@@ -40,18 +42,6 @@ public:
 	{
 		return m_Triangles[id];
 	}
-
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(MeshCollider)(*this);
-	}
-
-	static const core::Name TypeName;
 
 private:
 	struct FindEntry

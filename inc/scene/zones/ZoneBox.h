@@ -12,6 +12,8 @@ namespace scene
 class BoxZone : public Zone
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	BoxZone() :
 		m_HalfSize(0.5f, 0.5f, 0.5f)
 	{
@@ -66,18 +68,6 @@ public:
 	{
 		m_Transformation = transform;
 	}
-
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(BoxZone)(*this);
-	}
-
-	LUX_API static const core::Name TypeName;
 
 private:
 	math::Vector3F m_HalfSize;

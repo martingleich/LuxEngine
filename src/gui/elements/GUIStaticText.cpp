@@ -1,8 +1,7 @@
 #include "gui/elements/GUIStaticText.h"
 #include "gui/GUISkin.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.gui.StaticText", lux::gui::StaticText);
+LX_REFERABLE_MEMBERS_SRC(lux::gui::StaticText, "lux.gui.StaticText");
 
 namespace lux
 {
@@ -68,12 +67,6 @@ void StaticText::SetText(const core::String& text)
 const core::String& StaticText::GetText() const
 {
 	return m_TextContainer.GetText();
-}
-
-core::Name StaticText::GetReferableType() const
-{
-	static const core::Name name("lux.gui.StaticText");
-	return name;
 }
 
 } // namespace gui

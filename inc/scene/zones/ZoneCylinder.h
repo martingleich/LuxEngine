@@ -10,6 +10,8 @@ namespace scene
 class CylinderZone : public Zone
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	CylinderZone() :
 		m_Radius(1.0f),
 		m_HalfHeight(1.0f)
@@ -75,18 +77,6 @@ public:
 	{
 		m_HalfHeight = h / 2;
 	}
-
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(CylinderZone)(*this);
-	}
-
-	LUX_API static const core::Name TypeName;
 
 private:
 	float m_Radius;

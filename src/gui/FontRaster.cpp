@@ -1,7 +1,5 @@
 #include "FontRaster.h"
 
-#include "core/ReferableRegister.h"
-
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
 #include "video/Texture.h"

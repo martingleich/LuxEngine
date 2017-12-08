@@ -12,6 +12,8 @@ namespace video
 class ImageListImpl : public ImageList
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	size_t GetImageCount() const
 	{
 		return m_Images.Size();
@@ -40,16 +42,6 @@ public:
 	void Clear()
 	{
 		m_Images.Clear();
-	}
-
-	core::Name GetReferableType() const
-	{
-		return core::ResourceType::ImageList;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(ImageListImpl)(*this);
 	}
 
 private:

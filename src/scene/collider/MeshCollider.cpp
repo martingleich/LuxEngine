@@ -12,11 +12,7 @@
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 
-#include "core/ReferableRegister.h"
-
-const lux::core::Name lux::scene::MeshCollider::TypeName("lux.collider.Mesh");
-
-LUX_REGISTER_REFERABLE_CLASS(lux::scene::MeshCollider::TypeName, lux::scene::MeshCollider);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::MeshCollider, "lux.collider.Mesh");
 
 namespace lux
 {
@@ -61,7 +57,7 @@ bool MeshCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);
 
 	core::Name zoneType = vquery->GetZone()->GetReferableType();
-	if(zoneType == SphereZone::TypeName)
+	if(zoneType == "lux.zone.Sphere")
 		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
 	else
 		throw core::NotImplementedException();

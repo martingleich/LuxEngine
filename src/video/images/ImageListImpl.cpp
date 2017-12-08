@@ -1,4 +1,3 @@
 #include "ImageListImpl.h"
-#include "core/ReferableRegister.h"
 
-LUX_REGISTER_REFERABLE_CLASS("lux.resource.ImageList", lux::video::ImageListImpl)
+LX_REFERABLE_MEMBERS_SRC(lux::video::ImageListImpl, lux::core::ResourceType::ImageList);

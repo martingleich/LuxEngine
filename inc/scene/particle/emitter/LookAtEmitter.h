@@ -10,6 +10,8 @@ namespace scene
 class LookAtEmitter : public ParticleEmitter
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LookAtEmitter() :
 		m_Scatter(0.0f)
 	{
@@ -34,17 +36,6 @@ public:
 	const math::Vector3F& GetPoint() const
 	{
 		return m_Point;
-	}
-
-	core::Name GetReferableType() const
-	{
-		static const core::Name name("lux.emitter.LookAt");
-		return name;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(LookAtEmitter)(*this);
 	}
 
 	void Begin(const math::Transformation& trans) const

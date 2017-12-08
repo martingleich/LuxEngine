@@ -2,7 +2,6 @@
 #include "core/Clock.h"
 #include "core/Logger.h"
 
-#include "core/ReferableRegister.h"
 #include "core/ModuleFactoryRegister.h"
 #include "core/ReferableFactory.h"
 #include "resources/ResourceSystem.h"

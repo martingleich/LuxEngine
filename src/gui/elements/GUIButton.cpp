@@ -1,6 +1,5 @@
 #include "gui/elements/GUIButton.h"
 #include "gui/GUISkin.h"
-#include "core/ReferableRegister.h"
 
 static ::lux::Referable* PushButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(false); } \
 static ::lux::core::impl_referableRegister::ReferableRegisterBlock PushButtonInternalReferableRegisterStaticObject(::lux::core::Name("lux.gui.Button"), &PushButtonInternalCreatorFunc);
@@ -56,10 +55,16 @@ const core::String& Button::GetText() const
 	return m_Text.GetText();
 }
 
+StrongRef<Referable> Button::Clone() const
+{
+	return LUX_NEW(Button)(*this);
+}
+
 core::Name Button::GetReferableType() const
 {
-	static const core::Name name("lux.gui.Button");
-	return name;
+	static const core::Name name1("lux.gui.Button");
+	static const core::Name name2("lux.gui.SwitchButton");
+	return m_IsPushButton ? name1 : name2;
 }
 
 } // namespace gui

@@ -18,6 +18,8 @@ class VolumeQueryCallback;
 class BoxCollider : public Collider
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	BoxCollider()
 	{
 		SetHalfSize(math::Vector3F(1.0f, 1.0f, 1.0f));
@@ -51,18 +53,6 @@ public:
 		m_Box.AddPoint(m_Transform.TransformPoint(-m_HalfSize));
 	}
 
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(BoxCollider)(*this);
-	}
-
-	static const core::Name TypeName;
-
 protected:
 	math::Vector3F m_HalfSize;
 	math::Transformation m_Transform;
@@ -73,24 +63,14 @@ protected:
 class BoundingBoxCollider : public BoxCollider
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	BoundingBoxCollider() :
 		BoxCollider(math::Vector3F::ZERO, math::Transformation::DEFAULT)
 	{
 	}
 
 	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result);
-
-	core::Name GetReferableType() const
-	{
-		return TypeName;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return new BoundingBoxCollider(*this);
-	}
-
-	static const core::Name TypeName;
 };
 
 

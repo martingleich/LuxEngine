@@ -10,6 +10,8 @@ namespace scene
 class StraightEmitter : public ParticleEmitter
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	StraightEmitter() :
 		m_Direction(math::Vector3F::UNIT_X),
 		m_Scatter(0.0f)
@@ -36,17 +38,6 @@ public:
 	const math::Vector3F& GetDirection() const
 	{
 		return m_Direction;
-	}
-
-	core::Name GetReferableType() const
-	{
-		static const core::Name name("lux.emitter.Straight");
-		return name;
-	}
-
-	StrongRef<Referable> Clone() const
-	{
-		return LUX_NEW(StraightEmitter)(*this);
 	}
 
 	void Begin(const math::Transformation& trans) const

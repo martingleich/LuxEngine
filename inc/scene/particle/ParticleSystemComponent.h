@@ -14,6 +14,8 @@ class ParticleSystemTemplate;
 class ParticleSystem : public Animator, public Renderable
 {
 public:
+	LX_REFERABLE_MEMBERS_API(LUX_API);
+
 	LUX_API ParticleSystem();
 	LUX_API ~ParticleSystem();
 
@@ -33,8 +35,6 @@ public:
 	LUX_API bool IsGlobalParticles() const;
 	LUX_API void SetSubtreeScanning(bool scanning);
 	LUX_API bool GetSubtreeScanning() const;
-	LUX_API core::Name GetReferableType() const;
-	LUX_API StrongRef<Referable> Clone() const;
 
 private:
 	void CollectGroups(Node* n);

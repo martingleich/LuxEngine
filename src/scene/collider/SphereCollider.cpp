@@ -7,13 +7,8 @@
 #include "scene/zones/ZoneBox.h"
 #include "scene/Node.h"
 
-#include "core/ReferableRegister.h"
-
-const lux::core::Name lux::scene::SphereCollider::TypeName("lux.collider.Sphere");
-const lux::core::Name lux::scene::BoundingSphereCollider::TypeName("lux.collider.BSphere");
-
-LUX_REGISTER_REFERABLE_CLASS_NAMED(sphere, lux::scene::SphereCollider::TypeName, lux::scene::SphereCollider);
-LUX_REGISTER_REFERABLE_CLASS_NAMED(bounding_sphere, lux::scene::BoundingSphereCollider::TypeName, lux::scene::BoundingSphereCollider);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::SphereCollider, "lux.collider.Sphere");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::BoundingSphereCollider, "lux.collider.BSphere");
 
 namespace lux
 {
@@ -32,9 +27,9 @@ bool SphereCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* resu
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);
 
 	core::Name zoneType = vquery->GetZone()->GetReferableType();
-	if(zoneType == SphereZone::TypeName)
+	if(zoneType == "lux.zone.Sphere")
 		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
-	else if(zoneType == BoxZone::TypeName)
+	else if(zoneType == "lux.zone.Box")
 		return ExecuteBoxQuery(owner, vquery, vquery->GetZone().As<BoxZone>(), dynamic_cast<VolumeQueryCallback*>(result));
 	else
 		throw core::NotImplementedException();
