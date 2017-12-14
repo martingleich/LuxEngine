@@ -139,7 +139,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	LUX_API StrongRef<Element> AddElement(core::Name name, Element* parent);
+	LUX_API StrongRef<Element> AddElement(core::Name name, Element* parent=nullptr);
 	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
 	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
 	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text = core::String::EMPTY, Element* parent = nullptr);

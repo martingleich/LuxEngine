@@ -50,7 +50,7 @@ public:
 	virtual void Render(Node* node, video::Renderer* renderer, const SceneData& scene) = 0;
 	virtual ERenderPass GetRenderPass() const = 0;
 	
-	virtual const math::AABBoxF& GetBoundingBox() const = 0;
+	virtual const math::AABBoxF& GetBoundingBox() const { return math::AABBoxF::EMPTY; }
 };
 
 class RenderableVisitor

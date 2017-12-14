@@ -14,7 +14,8 @@ class Transformable
 public:
 	Transformable() :
 		m_IsDirty(true)
-	{}
+	{
+	}
 
 	//! Set a new uniform scalation
 	/**
@@ -182,7 +183,12 @@ public:
 		const math::Vector3F& local_dir = math::Vector3F::UNIT_Z,
 		const math::Vector3F& local_up = math::Vector3F::UNIT_Y)
 	{
-		SetDirectionUp(pos-GetPosition(), up, local_dir, local_up);
+		SetDirectionUp(pos - GetPosition(), up, local_dir, local_up);
+	}
+
+	const math::Transformation& GetTransform() const
+	{
+		return m_RelativeTrans;
 	}
 
 protected:

@@ -34,6 +34,7 @@ public:
 	LUX_API static const u32 NO_TAB_STOP;
 	LUX_API static const ScalarDistanceF AUTO_SIZE;
 	LUX_API static const ScalarDistanceF AUTO_MARGIN;
+	LUX_API static const ScalarDistanceF AUTO_OUT_MARGIN;
 
 public:
 	LUX_API Element();

@@ -52,15 +52,18 @@ bool MeshCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* result
 	LX_CHECK_NULL_ARG(query);
 	LX_CHECK_NULL_ARG(result);
 
-	if(query->GetType() == "line")
+	if(query->GetType() == "lux.query.line")
 		return ExecuteLineQuery(owner, dynamic_cast<LineQuery*>(query), dynamic_cast<LineQueryCallback*>(result));
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);
-
-	core::Name zoneType = vquery->GetZone()->GetReferableType();
-	if(zoneType == "lux.zone.Sphere")
-		return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
-	else
+	if(vquery) {
+		core::Name zoneType = vquery->GetZone()->GetReferableType();
+		if(zoneType == "lux.zone.Sphere")
+			return ExecuteSphereQuery(owner, vquery, vquery->GetZone().As<SphereZone>(), dynamic_cast<VolumeQueryCallback*>(result));
+		else
+			throw core::NotImplementedException();
+	} else {
 		throw core::NotImplementedException();
+	}
 }
 
 bool MeshCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallback* result)
@@ -140,8 +143,10 @@ bool MeshCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZon
 
 bool MeshCollider::SelectFirstTriangle(const math::Line3F& line, math::Vector3F& out_pos, size_t& triId, float& distance, bool testOnly)
 {
-	if(!m_BoundingBox.IntersectWithLine(line))
-		return false;
+	if(!m_BoundingBox.IsEmpty()) {
+		if(!m_BoundingBox.IntersectWithLine(line))
+			return false;
+	}
 
 	size_t i = 0;
 	for(auto it = m_Triangles.First(); it != m_Triangles.End(); ++it) {

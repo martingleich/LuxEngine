@@ -99,7 +99,7 @@ class Canvas3D
 	};
 
 public:
-	LUX_API Canvas3D(const math::Matrix4& transform = math::Matrix4::IDENTITY, video::Renderer* renderer = nullptr);
+	LUX_API Canvas3D(const math::Matrix4& transform = math::Matrix4::IDENTITY, float polyOffset = 0.0f, video::Renderer* renderer = nullptr);
 
 	Canvas3D(const Canvas3D& other) = delete;
 	Canvas3D& operator=(const Canvas3D& other) = delete;
@@ -126,6 +126,11 @@ public:
 		const math::Vector3F& y,
 		const math::Vector3F& z,
 		float scale);
+
+	void DrawTri( const math::Triangle3F& tri)
+	{
+		DrawTri(tri.A, tri.B, tri.C);
+	}
 
 	LUX_API void DrawTri(
 		const math::Vector3F& a,
@@ -161,6 +166,8 @@ private:
 
 private:
 	math::Matrix4 m_Transform;
+
+	float m_PolyOffset;
 
 	Brush3D m_Brush;
 	static const u32 TRI_BUFFER_SIZE = 128 * 3;

@@ -87,7 +87,7 @@ Use in global namespace in a source file.
 \param ref_name C-String or core::Name containing the name of the class
 \param class Fully classified name of the class
 */
-#define LX_REGISTER_REFERABLE_CLASS(ref_name, class) \
+#define LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
 static ::lux::Referable* LX_CONCAT(InternalCreatorFunc_, __LINE__)(const void*) { return LUX_NEW(class); } \
 static ::lux::core::impl_referableRegister::ReferableRegisterBlock LX_CONCAT(InternalReferableRegisterStaticObject_, __LINE__)(::lux::core::Name(ref_name), &LX_CONCAT(InternalCreatorFunc_, __LINE__));
 
@@ -97,9 +97,8 @@ Use in global namespace in a source file.
 \param ref_name C-String or core::Name containing the name of the class
 \param class Fully classified name of the class
 */
-#define LX_
 #define LX_REFERABLE_MEMBERS_SRC(class, ref_name) \
-LX_REGISTER_REFERABLE_CLASS(ref_name, class) \
+LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
 ::lux::core::Name class::GetReferableType() const { static ::lux::core::Name n(ref_name); return n; } \
 ::lux::StrongRef<::lux::Referable> class::Clone() const { return LUX_NEW(class)(*this); }
 

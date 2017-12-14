@@ -4,6 +4,8 @@
 #include "gui/Window.h"
 #include "core/lxAlgorithm.h"
 
+#define MARGIN_SIGN_FLIP
+
 namespace lux
 {
 namespace gui
@@ -12,6 +14,7 @@ namespace gui
 const u32 Element::NO_TAB_STOP(0xFFFFFFFF);
 const ScalarDistanceF Element::AUTO_SIZE(INFINITY);
 const ScalarDistanceF Element::AUTO_MARGIN(INFINITY);
+const ScalarDistanceF Element::AUTO_OUT_MARGIN(-INFINITY);
 
 Element::Element() :
 	m_Align(EAlign::Centered),
@@ -455,15 +458,22 @@ void Element::OnRemove(Element* p)
 	m_Parent = nullptr;
 }
 
+static bool IsAuto(ScalarDistanceF f)
+{
+	return std::isinf(f.value);
+}
+
 static void CalculateAxis(
 	float& finalLow, float& finalHigh,
 	float marginLow, float marginHigh,
 	float size, float minSize,
 	float parentLow, float parentHigh)
 {
-	bool autoLow = marginLow == Element::AUTO_MARGIN;
-	bool autoHigh = marginHigh == Element::AUTO_MARGIN;
-	bool autoSize = size == Element::AUTO_SIZE;
+	bool autoLow = IsAuto(marginLow);
+	bool outerLow = marginLow == Element::AUTO_OUT_MARGIN;
+	bool autoHigh = IsAuto(marginHigh);
+	bool outerHigh = marginHigh == Element::AUTO_OUT_MARGIN;
+	bool autoSize = IsAuto(size);
 	if(!autoSize && size < minSize)
 		size = minSize;
 
@@ -490,7 +500,12 @@ static void CalculateAxis(
 			if(finalHigh - finalLow < minSize)
 				finalHigh = finalLow + minSize;
 		} else {
-			finalHigh = finalLow + size;
+			if(outerHigh) {
+				finalHigh = parentLow + marginLow;
+				finalLow = finalHigh - size;
+			} else {
+				finalHigh = finalLow + size;
+			}
 		}
 	} else if(autoLow) {
 		finalHigh = parentHigh - marginHigh;
@@ -500,7 +515,12 @@ static void CalculateAxis(
 				finalLow = finalHigh - minSize;
 			}
 		} else {
-			finalLow = finalHigh - size;
+			if(outerLow) {
+				finalLow = parentHigh - marginHigh;
+				finalHigh = finalLow + size;
+			} else {
+				finalLow = finalHigh - size;
+			}
 		}
 	}
 }
@@ -526,14 +546,14 @@ bool Element::UpdateFinalRect()
 	auto parentHeight = parentRect.GetHeight();
 
 	math::RectF margin;
-	margin.left = m_Margin.left != AUTO_MARGIN ? m_Margin.left.GetRealValue(parentWidth) : (float)m_Margin.left;
-	margin.top = m_Margin.top != AUTO_MARGIN ? m_Margin.top.GetRealValue(parentHeight) : (float)m_Margin.top;
-	margin.right = m_Margin.right != AUTO_MARGIN ? m_Margin.right.GetRealValue(parentWidth) : (float)m_Margin.right;
-	margin.bottom = m_Margin.bottom != AUTO_MARGIN ? m_Margin.bottom.GetRealValue(parentHeight) : (float)m_Margin.bottom;
+	margin.left = !IsAuto(m_Margin.left) ? m_Margin.left.GetRealValue(parentWidth) : (float)m_Margin.left;
+	margin.top = !IsAuto(m_Margin.top) ? m_Margin.top.GetRealValue(parentHeight) : (float)m_Margin.top;
+	margin.right = !IsAuto(m_Margin.right) ? m_Margin.right.GetRealValue(parentWidth) : (float)m_Margin.right;
+	margin.bottom = !IsAuto(m_Margin.bottom) ? m_Margin.bottom.GetRealValue(parentHeight) : (float)m_Margin.bottom;
 
 	math::Dimension2F size;
-	size.width = m_Size.width != AUTO_SIZE ? m_Size.width.GetRealValue(parentWidth) : (float)m_Size.width;
-	size.height = m_Size.height != AUTO_SIZE ? m_Size.height.GetRealValue(parentHeight) : (float)m_Size.height;
+	size.width = !IsAuto(m_Size.width) ? m_Size.width.GetRealValue(parentWidth) : (float)m_Size.width;
+	size.height = !IsAuto(m_Size.height) ? m_Size.height.GetRealValue(parentHeight) : (float)m_Size.height;
 
 	math::RectF newRect;
 	CalculateAxis(

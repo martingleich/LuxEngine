@@ -238,14 +238,16 @@ void GUIEnvironment::Update(float secsPassed)
 static void RecursiveRender(gui::Element* elem, gui::Renderer* renderer, float secsPassed)
 {
 	elem->Paint(renderer, secsPassed);
-	for(auto& e : elem->Elements())
+	for(auto& e : elem->Elements()) {
 		if(e->IsVisible())
 			RecursiveRender(e, renderer, secsPassed);
+	}
 }
 
 void GUIEnvironment::Render()
 {
 	video::RenderStatistics::GroupScope grpScope("gui");
+
 	m_Renderer->Begin();
 	RecursiveRender(m_Root, m_Renderer, m_SecsPassed);
 

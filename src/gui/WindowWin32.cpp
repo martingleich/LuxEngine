@@ -356,7 +356,7 @@ bool WindowWin32::HandleMessages(UINT Message,
 			if(p.x != pos.x || p.y != pos.y)
 				m_Cursor->SetPosition(pos.x, pos.y);
 
-			result = 0;
+			result = 0
 			return true;
 		} else {
 			m_Cursor->Tick();

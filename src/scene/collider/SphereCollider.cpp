@@ -21,7 +21,7 @@ bool SphereCollider::ExecuteQuery(Node* owner, Query* query, QueryCallback* resu
 	LX_CHECK_NULL_ARG(query);
 	LX_CHECK_NULL_ARG(result);
 
-	if(query->GetType() == "line")
+	if(query->GetType() == "lux.query.line")
 		return ExecuteLineQuery(owner, dynamic_cast<LineQuery*>(query), dynamic_cast<LineQueryCallback*>(result));
 
 	VolumeQuery* vquery = dynamic_cast<VolumeQuery*>(query);

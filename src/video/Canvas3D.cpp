@@ -71,8 +71,9 @@ const VertexFormat& Canvas3DSystem::GetBrushVertexFormat() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Canvas3D::Canvas3D(const math::Matrix4& transform, video::Renderer* renderer) :
+Canvas3D::Canvas3D(const math::Matrix4& transform, float polyOffset, video::Renderer* renderer) :
 	m_Transform(transform),
+	m_PolyOffset(polyOffset),
 	m_TriBufferCursor(0),
 	m_LineBufferCursor(0),
 	m_Renderer(renderer ? renderer : (video::Renderer*)video::VideoDriver::Instance()->GetRenderer()),
@@ -343,7 +344,9 @@ void Canvas3D::FlushTriBuffer()
 	lxAssert(m_TriBufferCursor % 3 == 0);
 
 	if(m_LastPass != BrushPass) {
-		m_Renderer->SetPass(Canvas3DSystem::Instance()->GetBrushPass(), false, nullptr);
+		auto pass = Canvas3DSystem::Instance()->GetBrushPass();
+		pass.polygonOffset = m_PolyOffset;
+		m_Renderer->SetPass(pass, false, nullptr);
 		m_Renderer->SetTransform(video::ETransform::World, m_Transform);
 	}
 

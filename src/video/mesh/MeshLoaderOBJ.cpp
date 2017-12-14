@@ -197,6 +197,7 @@ public:
 		geo->RecalculateBoundingBox();
 		mesh->SetGeometry(geo);
 		mesh->SetMaterial(invalidMaterial);
+		mesh->RecalculateBoundingBox();
 
 		// Assign material groups
 		for(auto& matRange : materialRanges) {
