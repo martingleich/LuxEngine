@@ -20,6 +20,7 @@ enum class EGUIState
 	Hovered = 0x20,
 	Clicked = 0x40,
 	Editing = 0x80,
+
 	Sunken = 0x100,
 	Raised = 0x200,
 };
@@ -223,6 +224,7 @@ enum class EGUIControl
 struct PaintOptions
 {
 	Palette palette;
+	float animTime = 0;
 };
 
 struct SliderPaintOptions : PaintOptions
@@ -236,7 +238,6 @@ class Skin : public ReferenceCounted
 public:
 	Skin()
 	{
-		m_SunkenOffset = math::Vector2F(1, 1);
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Enabled, Palette::EColorRole::WindowText, video::Color::Black);
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Disabled, Palette::EColorRole::WindowText, video::Color::LightGray);
 		m_DefaultPalette.SetColor(Palette::EColorRole::Base, video::Color::White);
@@ -252,7 +253,8 @@ public:
 		Renderer* r,
 		ECursorState state,
 		bool pressed,
-		const math::Vector2F& position) = 0;
+		const math::Vector2F& position,
+		float animTime) = 0;
 
 	virtual void DrawControl(
 		Renderer* r,
@@ -291,30 +293,40 @@ public:
 			return *it;
 	}
 
-	virtual const math::Vector2F& GetSunkenOffset() const { return m_SunkenOffset; }
-
-	float GetPropertyF(const core::String& prop, float defaultValue=0.0f)
+	float GetPropertyFloat(const core::String& prop, float defaultValue = 0.0f)
 	{
 		auto it = m_PropsF.Find(prop);
 		if(it == m_PropsF.End())
 			return defaultValue;
 		return *it;
 	}
-	void SetPropertyF(const core::String& prop, float v)
+	void SetProperty(const core::String& prop, float v)
 	{
 		m_PropsF[prop] = v;
 	}
 
-	math::Vector2F GetPropertyV(const core::String& prop, math::Vector2F defaultValue=math::Vector2F(0))
+	math::Vector2F GetPropertyVector(const core::String& prop, math::Vector2F defaultValue = math::Vector2F(0, 0))
 	{
 		auto it = m_PropsV.Find(prop);
 		if(it == m_PropsV.End())
 			return defaultValue;
 		return *it;
 	}
-	void SetPropertyV(const core::String& prop, math::Vector2F v)
+	void SetProperty(const core::String& prop, math::Vector2F v)
 	{
 		m_PropsV[prop] = v;
+	}
+
+	math::Dimension2F GetPropertyDim(const core::String& prop, math::Dimension2F defaultValue = math::Dimension2F(0, 0))
+	{
+		auto it = m_PropsV.Find(prop);
+		if(it == m_PropsV.End())
+			return defaultValue;
+		return math::Dimension2F(it->x, it->y);
+	}
+	void SetProperty(const core::String& prop, math::Dimension2F v)
+	{
+		m_PropsV[prop].Set(v.width, v.height);
 	}
 
 private:
@@ -323,7 +335,6 @@ private:
 	core::HashMap<core::Name, Palette> m_DefaultPalettes;
 	core::HashMap<core::String, float> m_PropsF;
 	core::HashMap<core::String, math::Vector2F> m_PropsV;
-	math::Vector2F m_SunkenOffset;
 };
 
 class Skin3D : public Skin
@@ -339,7 +350,8 @@ public:
 		Renderer* r,
 		ECursorState state,
 		bool pressed,
-		const math::Vector2F& position);
+		const math::Vector2F& position,
+		float animTime);
 
 	LUX_API void DrawControl(
 		Renderer* r,
@@ -360,6 +372,21 @@ private:
 		bool sunken,
 		const math::RectF& rect,
 		const video::Color& color);
+	void DrawCheckBox(
+		Renderer* r,
+		bool checked,
+		const math::RectF& rect,
+		bool enabled);
+	void DrawNormalCursor(
+		Renderer* r,
+		bool pressed,
+		const math::Vector2F& position,
+		float animTime);
+	void DrawBeamCursor(
+		Renderer* r,
+		bool pressed,
+		const math::Vector2F& position,
+		float animTime);
 };
 
 } // namespace gui

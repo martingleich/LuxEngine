@@ -19,9 +19,9 @@ struct HashValue
 };
 
 template <typename K, typename V,
-	typename Hash = core::HashType<K>,
-	typename KeyCompare = core::CompareType<K>,
-	typename Alloc = core::Allocator<HashValue<K, V>>>
+	typename Hash = HashType<K>,
+	typename KeyCompare = CompareType<K>,
+	typename Alloc = Allocator<HashValue<K, V>>>
 	class HashMap
 {
 public:
@@ -730,16 +730,22 @@ public:
 			new ((void*)&it.m_Entry->value) V();
 		return it.m_Entry->value;
 	}
-	const V& At(const K& key) const
-	{
-		return FindEntry(key).m_Entry->value;
-	}
-
 	V& At(const K& key, const V& defaultValue)
 	{
 		Iterator it;
 		if(FindOrAddEntry(key, it))
 			new ((void*)&it.m_Entry->value) V(defaultValue);
+		return it.m_Entry->value;
+	}
+	const V& At(const K& key) const
+	{
+		return FindEntry(key).m_Entry->value;
+	}
+	const V& At(const K& key, const V& defaultValue) const
+	{
+		Iterator it = FindEntry(key);
+		if(it == End())
+			return defaultValue;
 		return it.m_Entry->value;
 	}
 

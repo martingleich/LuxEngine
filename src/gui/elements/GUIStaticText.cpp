@@ -36,7 +36,7 @@ void StaticText::Paint(Renderer* r)
 
 	FontRenderSettings settings;
 	settings.color = palette.GetWindowText(state);
-	m_TextContainer.Ensure(font, settings, m_FitSizeToText ? false : m_WordWrap, GetFinalInnerRect());
+	m_TextContainer.Ensure(font, settings, m_FitSizeToText ? false : m_WordWrap, GetFinalInnerRect().GetSize());
 
 	if(m_FitSizeToText) {
 		math::Dimension2F size = m_TextContainer.GetDimension();
@@ -54,7 +54,7 @@ void StaticText::Paint(Renderer* r)
 void StaticText::FitSizeToText()
 {
 	FontRenderSettings settings;
-	m_TextContainer.Ensure(GetFont(), settings, m_WordWrap, GetFinalInnerRect());
+	m_TextContainer.Ensure(GetFont(), settings, m_WordWrap, GetFinalInnerRect().GetSize());
 	math::Dimension2F size = m_TextContainer.GetDimension();
 	SetInnerSize(PixelDimension(size.width, size.height));
 }

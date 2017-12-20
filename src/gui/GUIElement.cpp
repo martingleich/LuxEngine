@@ -325,17 +325,14 @@ float Element::GetFinalHeight() const
 
 bool Element::OnEvent(const Event& e)
 {
-	auto mouseE = dynamic_cast<const gui::MouseEvent*>(&e);
-	if(mouseE)
-		return OnMouseEvent(*mouseE);
-	auto keyE = dynamic_cast<const gui::KeyboardEvent*>(&e);
-	if(keyE)
-		return OnKeyboardEvent(*keyE);
-	auto elementE = dynamic_cast<const gui::ElementEvent*>(&e);
-	if(elementE)
-		return OnElementEvent(*elementE);
+	if(e.Is<gui::MouseEvent>())
+		return OnMouseEvent(e.As<gui::MouseEvent>());
+	if(e.Is<gui::KeyboardEvent>())
+		return OnKeyboardEvent(e.As<gui::KeyboardEvent>());
+	if(e.Is<gui::ElementEvent>())
+		return OnElementEvent(e.As<gui::ElementEvent>());
 
-	return true;
+	return false;
 }
 
 void Element::SetOverwriteSkin(Skin* s)
@@ -371,6 +368,11 @@ void Element::SetAlignment(EAlign align)
 EAlign Element::GetAlignment() const
 {
 	return m_Align;
+}
+
+ECursorState Element::GetHoverCursor() const
+{
+	return ECursorState::Default;
 }
 
 void Element::SetPalette(const Palette& palette)

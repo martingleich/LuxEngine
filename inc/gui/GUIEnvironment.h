@@ -28,11 +28,37 @@ class Window;
 class StaticText;
 class Button;
 class Slider;
+class CheckBox;
 
 class Event : public event::Event
 {
 public:
 	Element* elem;
+
+	template <typename T>
+	bool Is() const
+	{
+		static_assert(std::is_base_of<Event, T>::value, "T must be derived of gui::Event");
+		return dynamic_cast<const T*>(this) != nullptr;
+	}
+	template <typename T>
+	T& As()
+	{
+		static_assert(std::is_base_of<Event, T>::value, "T must be derived of gui::Event");
+		auto ptr = dynamic_cast<T*>(this);
+		if(!ptr) 
+			throw core::InvalidCastException();
+		return *ptr;
+	}
+	template <typename T>
+	const T& As() const
+	{
+		static_assert(std::is_base_of<Event, T>::value, "T must be derived of gui::Event");
+		auto ptr = dynamic_cast<const T*>(this);
+		if(!ptr) 
+			throw core::InvalidCastException();
+		return *ptr;
+	}
 };
 
 class MouseEvent : public Event
@@ -50,7 +76,8 @@ public:
 		RUp,
 	};
 
-	bool IsClick() const {
+	bool IsClick() const
+	{
 		return type == LDown || type == RDown;
 	}
 
@@ -131,7 +158,7 @@ public:
 	LUX_API void SendUserInputEvent(const input::Event& event);
 
 	LUX_API StrongRef<Element> GetElementByPos(const math::Vector2F& pos);
-	LUX_API void SendElementEvent(Element* elem, const Event& event);
+	LUX_API bool SendElementEvent(Element* elem, const Event& event);
 	LUX_API Element* GetHovered();
 
 	LUX_API void SetFocused(Element* elem);
@@ -139,12 +166,12 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	LUX_API StrongRef<Element> AddElement(core::Name name, Element* parent=nullptr);
+	LUX_API StrongRef<Element> AddElement(core::Name name, Element* parent = nullptr);
 	LUX_API StrongRef<StaticText> AddStaticText(const ScalarVectorF& position, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
 	LUX_API StrongRef<Button> AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
-	LUX_API StrongRef<Button> AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text = core::String::EMPTY, Element* parent = nullptr);
-	LUX_API StrongRef<Slider> AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min=0, int max=100, Element* parent = nullptr);
-	LUX_API StrongRef<Slider> AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min=0, int max=100, Element* parent = nullptr);
+	LUX_API StrongRef<Slider> AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min = 0, int max = 100, Element* parent = nullptr);
+	LUX_API StrongRef<Slider> AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min = 0, int max = 100, Element* parent = nullptr);
+	LUX_API StrongRef<CheckBox> AddCheckBox(const ScalarVectorF& pos, const ScalarDimensionF& size, bool checked = false, Element* parent = nullptr);
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -194,6 +221,7 @@ private:
 	WeakRef<Element> m_Captured;
 
 	float m_SecsPassed;
+	float m_Time;
 
 	class KeyRepeatContext
 	{

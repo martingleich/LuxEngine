@@ -11,6 +11,8 @@ namespace gui
 
 enum class ECursorState
 {
+	Default,
+
 	Normal,
 	Beam,
 	Wait

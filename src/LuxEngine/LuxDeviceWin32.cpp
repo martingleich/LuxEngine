@@ -54,7 +54,7 @@ public:
 		instance = lux::GetLuxModule();
 		className = L"Lux Window Class";
 		WNDCLASSEXW wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WindowProc, 0, 0,
-			instance, nullptr, LoadCursorW(NULL, IDC_ARROW), nullptr, nullptr,
+			instance, nullptr, NULL, nullptr, nullptr,
 			className, nullptr};
 
 		if(!RegisterClassExW(&wc))
@@ -132,12 +132,13 @@ void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const core::String& titl
 		nullptr,
 		g_WindowClass->instance,
 		this);
+	if(!handle)
+		throw core::Win32Exception(GetLastError());
 
 	ShowWindow(handle, SW_SHOW);
 	UpdateWindow(handle);
 
-	if(!handle)
-		throw core::Win32Exception(GetLastError());
+	SetCursor(LoadCursorW(NULL, IDC_ARROW));
 }
 
 void LuxDeviceWin32::BuildInputSystem(bool isForeground)
@@ -237,7 +238,7 @@ StrongRef<LuxSystemInfo> LuxDeviceWin32::GetSystemInfo() const
 }
 StrongRef<gui::Cursor> LuxDeviceWin32::GetCursor() const
 {
-	return m_Window->GetCursor();
+	return m_Window->GetDeviceCursor();
 }
 
 bool LuxDeviceWin32::HandleMessages(

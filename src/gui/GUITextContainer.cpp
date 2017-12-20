@@ -8,61 +8,74 @@ namespace gui
 
 TextContainer::TextContainer()
 {
-	m_Rebreak = true;
+	m_Rebreak = 0;
 }
 
 TextContainer::~TextContainer()
 {
 }
 
-void TextContainer::Rebreak()
+void TextContainer::Rebreak(size_t firstLine)
 {
-	m_Rebreak = true;
+	m_Rebreak = firstLine;
 }
 
 void TextContainer::Ensure(
 	Font* font,
 	const FontRenderSettings& settings,
 	bool wordWrap,
-	const math::RectF& rect)
+	const math::Dimension2F& textBoxSize)
 {
-	if(!font || m_Text.IsEmpty())
+	if(!font || m_Text.IsEmpty()) {
+		m_BrokenText.Clear();
 		return;
-	bool rebreakText = m_Rebreak;
+	}
+	size_t rebreakText = m_Rebreak;
+	if(!m_BrokenText.IsEmpty() && m_Text.First() != m_BrokenText[0].line.First()) {
+		m_BrokenText.Clear();
+		rebreakText = 0;
+	}
+
 	if(font != m_Font) {
-		rebreakText = true;
+		rebreakText = 0;
 		m_Font = font;
 	}
 	if(wordWrap != m_Wrap) {
-		rebreakText = true;
+		rebreakText = 0;
 		m_Wrap = wordWrap;
 	}
-	if(rect.GetSize() != m_TextBoxSize) {
-		rebreakText = true;
-		m_TextBoxSize = rect.GetSize();
+	if(textBoxSize != m_TextBoxSize) {
+		rebreakText = 0;
+		m_TextBoxSize = textBoxSize;
 	}
 	if(m_FontSettings.charDistance != settings.charDistance ||
 		m_FontSettings.lineDistance != settings.lineDistance ||
 		m_FontSettings.scale != settings.scale ||
 		m_FontSettings.wordDistance != settings.wordDistance) {
-		rebreakText = true;
+		rebreakText = 0;
 	}
 	m_FontSettings = settings; // Copy outside of it, to get non-geometric member(for example color)
 
-	if(!rebreakText)
+	if(rebreakText == std::numeric_limits<size_t>::max())
 		return;
 
-	m_Rebreak = false;
-	m_BrokenText.Clear();
-	m_LineSizes.Clear();
+	m_Rebreak = std::numeric_limits<size_t>::max();
 
 	auto width = m_TextBoxSize.width;
 	auto& textDim = m_TextDim;
 	textDim = math::Dimension2F(0, 0);
 	core::Array<float> carets;
+	bool keepBreaking = true;
+	size_t lineId = rebreakText;
 	auto AddBrokenLine = [&](core::Range<core::String::ConstIterator> str, float width) {
-		m_BrokenText.PushBack(str);
-		m_LineSizes.PushBack(width);
+		if(m_BrokenText.Size() > lineId) {
+			if(m_BrokenText[lineId].line == str && m_BrokenText[lineId].width == width)
+				keepBreaking = false;
+			m_BrokenText[lineId] = Line(str, width);
+		} else {
+			m_BrokenText.EmplaceBack(str, width);
+		}
+		++lineId;
 		textDim.width = math::Max(textDim.width, width);
 	};
 	auto AddLine = [&](core::Range<core::String::ConstIterator> line) {
@@ -97,10 +110,11 @@ void TextContainer::Ensure(
 		textDim.height = lineHeight * m_BrokenText.Size();
 	};
 
-	core::String::ConstIterator first = m_Text.First();
-	core::String::ConstIterator end = first;
+	auto textFirst = m_BrokenText.IsEmpty() ? m_Text.First() : m_BrokenText[rebreakText].line.begin();
+	auto first = m_Text.First();
+	auto end = first;
 	core::String line;
-	for(auto it = m_Text.First(); it != m_Text.End();) {
+	for(auto it = textFirst; it != m_Text.End() && keepBreaking;) {
 		if(*it == '\n') {
 			AddLine(core::MakeRange(first, end));
 			++it;
@@ -111,14 +125,18 @@ void TextContainer::Ensure(
 		}
 	}
 
-	AddLine(core::MakeRange(first, end));
+	if(keepBreaking)
+		AddLine(core::MakeRange(first, end));
+
+	if(keepBreaking)
+		m_BrokenText.Resize(lineId);
 }
 
 void TextContainer::Render(
 	gui::Renderer* r,
 	EAlign align,
 	bool clipTextInside,
-	const math::RectF& rect)
+	const math::RectF& textBox)
 {
 	if(m_Text.IsEmpty())
 		return;
@@ -127,22 +145,22 @@ void TextContainer::Render(
 
 	math::Vector2F cursor;
 	if(TestFlag(align, EAlign::VTop))
-		cursor.y = rect.top;
+		cursor.y = textBox.top;
 	else if(TestFlag(align, EAlign::VCenter))
-		cursor.y = (rect.top + rect.bottom) / 2 - totalHeight / 2;
+		cursor.y = (textBox.top + textBox.bottom) / 2 - totalHeight / 2;
 	else if(TestFlag(align, EAlign::VBottom))
-		cursor.y = rect.bottom - totalHeight;
+		cursor.y = textBox.bottom - totalHeight;
 
-	auto clip = clipTextInside ? &rect : nullptr;
-	for(auto line : core::ZipRange(m_BrokenText, m_LineSizes)) {
-		auto lineRange = line.get<0>();
-		auto lineWidth = line.get<1>();
+	auto clip = clipTextInside ? &textBox : nullptr;
+	for(auto line : m_BrokenText) {
+		auto lineRange = line.line;
+		auto lineWidth = line.width;
 		if(TestFlag(align, EAlign::HLeft))
-			cursor.x = rect.left;
+			cursor.x = textBox.left;
 		else if(TestFlag(align, EAlign::HCenter))
-			cursor.x = (rect.left + rect.right) / 2 - 0.5f*lineWidth;
+			cursor.x = (textBox.left + textBox.right) / 2 - 0.5f*lineWidth;
 		else if(TestFlag(align, EAlign::HRight))
-			cursor.x = rect.right - lineWidth;
+			cursor.x = textBox.right - lineWidth;
 
 		if(!clip || cursor.y + lineHeight >= clip->top)
 			r->DrawText(m_Font, m_FontSettings, lineRange, cursor, clip);
@@ -159,10 +177,10 @@ void TextContainer::Render(
 	bool wordWrap,
 	bool clipTextInside,
 	EAlign align,
-	const math::RectF& rect)
+	const math::RectF& textBox)
 {
-	Ensure(font, settings, wordWrap, rect);
-	Render(r, align, clipTextInside, rect);
+	Ensure(font, settings, wordWrap, textBox.GetSize());
+	Render(r, align, clipTextInside, textBox);
 }
 
 size_t TextContainer::GetLineCount() const
@@ -172,12 +190,12 @@ size_t TextContainer::GetLineCount() const
 
 core::Range<core::String::ConstIterator> TextContainer::GetLine(size_t i) const
 {
-	return m_BrokenText[i];
+	return m_BrokenText[i].line;
 }
 
 float TextContainer::GetLineWidth(size_t i) const
 {
-	return m_LineSizes[i];
+	return m_BrokenText[i].width;
 }
 
 math::Dimension2F TextContainer::GetDimension() const

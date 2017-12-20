@@ -263,6 +263,7 @@ template <typename IterT>
 class Range
 {
 public:
+	Range() {}
 	Range(IterT f, IterT e) :
 		m_First(f),
 		m_End(e)
@@ -287,6 +288,15 @@ public:
 	IterT end() const
 	{
 		return m_End;
+	}
+
+	bool operator==(const Range& other) const
+	{
+		return m_First == other.m_First && m_End == other.m_End;
+	}
+	bool operator!=(const Range& other) const
+	{
+		return !(*this == other);
 	}
 
 private:

@@ -9,26 +9,66 @@ namespace gui
 {
 class Renderer;
 
+//! Text in a box
+/**
+Helper class for gui implementations. Makes it easy to render text with automatic
+clipping, wordwrapping, diffrent alignments and lazy updates.
+*/
 class TextContainer
 {
 public:
 	LUX_API TextContainer();
 	LUX_API ~TextContainer();
 
-	LUX_API void Rebreak();
+	//! Rebreak the text into lines.
+	/**
+	Must only be called when the text is changed via the Text() method,
+	in all other cases called automatically.
+	\param firstLine All lines before this one didn't change.
+	*/
+	LUX_API void Rebreak(size_t firstLine = 0);
 
+	//! Update all data for the text
+	/**
+	Updates lines, line-widths, total text box.
+	And set font for following render calls.
+	Should be called always before rendering.
+	\param font The font used to render the text.
+	\param settings The font render settings.
+	\param wordWrap Should automatic word wrapping be performed.
+	\param textBoxSize The size of the the textbox, only used if wordWrap is true
+	*/
 	LUX_API void Ensure(
 		Font* font,
 		const FontRenderSettings& settings,
 		bool wordWrap,
-		const math::RectF& rect);
+		const math::Dimension2F& textBoxSize);
 
+	//! Renders text after a call to Ensure
+	/**
+	Ensure must be called before this method.
+	Uses FontRenderSettings and Font set via Ensure.
+	\param r Renderer used to draw the text
+	\param align Alignment of the text inside the textbox
+	\param clipTextInside Text outside the textbox is clipped
+	\param textBox The textbox to draw the text in
+	*/
 	LUX_API void Render(
 		gui::Renderer* r,
 		EAlign align,
 		bool clipTextInside,
-		const math::RectF& rect);
+		const math::RectF& textBox);
 
+	//! Renders and Ensures text in one call
+	/**
+	\param r Renderer used to draw the text
+	\param font The font used to render the text.
+	\param settings The font render settings.
+	\param wordWrap Should automatic word wrapping be performed.
+	\param clipTextInside Text outside the textbox is clipped
+	\param align Alignment of the text inside the textbox
+	\param textBox The textbox to draw the text in
+	*/
 	LUX_API void Render(
 		gui::Renderer* r,
 		Font* font,
@@ -36,7 +76,7 @@ public:
 		bool wordWrap,
 		bool clipTextInside,
 		EAlign align,
-		const math::RectF& rect);
+		const math::RectF& textBox);
 
 	LUX_API size_t GetLineCount() const;
 	LUX_API core::Range<core::String::ConstIterator> GetLine(size_t i) const;
@@ -46,11 +86,27 @@ public:
 
 	LUX_API void SetText(const core::String& str);
 	LUX_API const core::String& GetText() const;
+
+	//! Allow mutable access to the text, without copieing.
+	/**
+	Rebreak should be called after changing the text.
+	*/
 	LUX_API core::String& Text();
-	
+
 private:
+	struct Line
+	{
+		Line() {}
+		Line(core::Range<core::String::ConstIterator> l, float w) :
+			line(l),
+			width(w)
+		{
+		}
+		core::Range<core::String::ConstIterator> line;
+		float width;
+	};
 	core::String m_Text;
-	bool m_Rebreak;
+	size_t m_Rebreak;
 
 	// Cached data
 	WeakRef<Font> m_Font;
@@ -59,8 +115,7 @@ private:
 	gui::FontRenderSettings m_FontSettings;
 
 	// Generated data
-	core::Array<core::Range<core::String::ConstIterator>> m_BrokenText;
-	core::Array<float> m_LineSizes;
+	core::Array<Line> m_BrokenText;
 	math::Dimension2F m_TextDim;
 };
 

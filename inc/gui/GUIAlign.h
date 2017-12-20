@@ -35,26 +35,26 @@ inline EAlign FlipAlign(EAlign in, bool flipH, bool flipV)
 	if(flipH) {
 		if(TestFlag(in, EAlign::HLeft)) {
 			in |= EAlign::HRight;
-			in &= EAlign::HLeft;
+			in &= ~EAlign::HLeft;
 		} else if(TestFlag(in, EAlign::HRight)) {
 			in |= EAlign::HLeft;
-			in &= EAlign::HRight;
+			in &= ~EAlign::HRight;
 		}
 	}
 	if(flipV) {
 		if(TestFlag(in, EAlign::VTop)) {
 			in |= EAlign::VBottom;
-			in &= EAlign::VTop;
+			in &= ~EAlign::VTop;
 		} else if(TestFlag(in, EAlign::VBottom)) {
 			in |= EAlign::VTop;
-			in &= EAlign::VBottom;
+			in &= ~EAlign::VBottom;
 		}
 	}
 	return in;
 }
 
 template <typename T>
-math::Rect<T> AlignRect(
+math::Rect<T> AlignInnerRect(
 	T w, T h,
 	const math::Rect<T>& base,
 	EAlign align)
@@ -74,9 +74,42 @@ math::Rect<T> AlignRect(
 	if(TestFlag(align, EAlign::VTop)) {
 		out.top = base.top;
 		out.bottom = out.top + h;
-	} else if(TestFlag(align, EAlign::HRight)) {
+	} else if(TestFlag(align, EAlign::VBottom)) {
 		out.bottom = base.bottom;
 		out.top = out.bottom - h;
+	} else {
+		auto c = (base.top + base.bottom) / 2;
+		out.top = c - h / 2;
+		out.bottom = out.top + h;
+	}
+
+	return out;
+}
+
+template <typename T>
+math::Rect<T> AlignOuterRect(
+	T w, T h,
+	const math::Rect<T>& base,
+	EAlign align)
+{
+	math::RectF out;
+	if(TestFlag(align, EAlign::HLeft)) {
+		out.right = base.left;
+		out.left = out.right - w;
+	} else if(TestFlag(align, EAlign::HRight)) {
+		out.left = base.right;
+		out.right = out.left + w;
+	} else {
+		auto c = (base.left + base.right) / 2;
+		out.left = c - w / 2;
+		out.right = out.left + w;
+	}
+	if(TestFlag(align, EAlign::VTop)) {
+		out.bottom = base.top;
+		out.top = out.bottom - h;
+	} else if(TestFlag(align, EAlign::VBottom)) {
+		out.top = base.bottom;
+		out.bottom = out.top + h;
 	} else {
 		auto c = (base.top + base.bottom) / 2;
 		out.top = c - h / 2;

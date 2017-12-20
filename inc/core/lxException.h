@@ -123,6 +123,13 @@ protected:
 	ExceptionSafeString m_What;
 };
 
+struct InvalidCastException : public Exception
+{
+	InvalidCastException() :
+		Exception("Invalid cast")
+	{}
+};
+
 //! Exception which occured beyond the programmers control and most of the time can't be handled by him
 /**
 Examples are OutOfMemory, Errors when creating hardware resources, errors from os calls, etc.

@@ -377,7 +377,7 @@ public:
 	}
 
 	template <typename... ConnectArgs>
-	void SetCallbackEvent(ConnectArgs&&... args)
+	void SetConnectEvent(ConnectArgs&&... args)
 	{
 		m_ConnectEvent.Connect(std::forward<ConnectArgs>(args)...);
 	}

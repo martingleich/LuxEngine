@@ -330,7 +330,7 @@ void* WindowWin32::GetDeviceWindow() const
 	return m_Window;
 }
 
-Cursor* WindowWin32::GetCursor() const
+Cursor* WindowWin32::GetDeviceCursor() const
 {
 	return m_Cursor;
 }
@@ -356,7 +356,7 @@ bool WindowWin32::HandleMessages(UINT Message,
 			if(p.x != pos.x || p.y != pos.y)
 				m_Cursor->SetPosition(pos.x, pos.y);
 
-			result = 0
+			result = 0;
 			return true;
 		} else {
 			m_Cursor->Tick();

@@ -8,21 +8,21 @@ namespace lux
 namespace gui
 {
 
+static const math::Dimension2F DEFAULT_THUMB_SIZE(10, 30);
+
 Slider::Slider()
 {
 	m_GrabOffset = 0;
-	// Set some "normal" value for the thumb size until the skin is loaded.
-	m_ThumbWidth = 10;
-	m_ThumbHeight = 30;
+	m_ThumbSize = DEFAULT_THUMB_SIZE;
 	auto minSize = GetMinSize();
-	minSize.height = math::Max(GetThumbHeight(), minSize.height);
+	minSize.height = math::Max(m_ThumbSize.height, minSize.height);
 	SetMinSize(minSize);
 	SetSettings(Horizontal | StepOnClick);
 	SetRange(0, 100);
 	SetStep(1, 10);
 	SetThumbPos(0);
 
-	onPosChange.SetCallbackEvent([this](const event::SignalFunc<int>& newSlot) {
+	onPosChange.SetConnectEvent([this](const event::SignalFunc<int>& newSlot) {
 		newSlot.Call(m_Pos);
 	});
 }
@@ -34,12 +34,10 @@ Slider::~Slider()
 void Slider::SetSkin(Skin* skin)
 {
 	Element::SetSkin(skin);
-	auto thumbSize = GetSkin()->GetPropertyV("lux.gui.Slider.thumbSize", math::Vector2F(10, 30));
-	m_ThumbWidth = thumbSize.x;
-	m_ThumbHeight = thumbSize.y;
+	m_ThumbSize = GetSkin()->GetPropertyDim("lux.gui.Slider.thumbSize", DEFAULT_THUMB_SIZE);
 
 	auto minSize = GetMinSize();
-	minSize.height = math::Max(GetThumbHeight(), minSize.height);
+	minSize.height = math::Max(m_ThumbSize.height, minSize.height);
 	SetMinSize(minSize);
 	SetSettings(GetSettings());
 	SetRange(m_MinValue, m_MaxValue);
@@ -73,8 +71,7 @@ void Slider::Paint(Renderer* renderer)
 		po);
 }
 
-float Slider::GetThumbWidth() const { return m_ThumbWidth; }
-float Slider::GetThumbHeight() const { return m_ThumbHeight; }
+math::Dimension2F Slider::GetThumbSize() const { return m_ThumbSize; }
 
 bool Slider::IsPointOnThumb(const math::Vector2F& point) const
 {
@@ -231,11 +228,11 @@ int Slider::GetThumbPos(const math::Vector2F& curPos, int offset) const
 	float relPos;
 	float relOffset = (float)offset / (m_MaxValue - m_MinValue);
 	if(IsHorizontal()) {
-		float thumb = GetThumbWidth();
+		float thumb = GetThumbSize().width;
 		relPos = math::Clamp(
 			(curPos.x - (rect.left + thumb / 2)) / (rect.GetWidth() - thumb) + relOffset, 0.0f, 1.0f);
 	} else {
-		float thumb = GetThumbHeight();
+		float thumb = GetThumbSize().height;
 		relPos = math::Clamp(
 			((rect.bottom - thumb / 2) - curPos.y) / (rect.GetHeight() - thumb) + relOffset, 0.0f, 1.0f);
 	}
@@ -247,24 +244,23 @@ int Slider::GetThumbPos(const math::Vector2F& curPos, int offset) const
 math::RectF Slider::GetThumbRect() const
 {
 	auto rect = GetFinalRect();
-	float thumbWidth = GetThumbWidth();
-	float thumbHeight = GetThumbHeight();
+	auto thumbSize = GetThumbSize();
 	float relThumbPos = GetRelThumbPos();
 	if(IsFlipped())
 		relThumbPos = 1 - relThumbPos;
 
 	if(IsHorizontal()) {
 		float linePos = rect.GetCenter().y;
-		float thumbPos = math::Lerp(rect.left + thumbWidth / 2, rect.right - thumbWidth / 2, relThumbPos);
+		float thumbPos = math::Lerp(rect.left + thumbSize.width / 2, rect.right - thumbSize.width / 2, relThumbPos);
 		return math::RectF(
-			thumbPos - thumbWidth / 2, linePos - thumbHeight / 2,
-			thumbPos + thumbWidth / 2, linePos + thumbHeight / 2);
+			thumbPos - thumbSize.width / 2, linePos - thumbSize.height / 2,
+			thumbPos + thumbSize.width / 2, linePos + thumbSize.height / 2);
 	} else {
 		float linePos = rect.GetCenter().x;
-		float thumbPos = math::Lerp(rect.bottom - thumbHeight / 2, rect.top + thumbHeight / 2, relThumbPos);
+		float thumbPos = math::Lerp(rect.bottom - thumbSize.height / 2, rect.top + thumbSize.height / 2, relThumbPos);
 		return math::RectF(
-			linePos - thumbHeight / 2, thumbPos - thumbWidth / 2,
-			linePos + thumbHeight / 2, thumbPos + thumbWidth / 2);
+			linePos - thumbSize.height / 2, thumbPos - thumbSize.width / 2,
+			linePos + thumbSize.height / 2, thumbPos + thumbSize.width / 2);
 	}
 }
 

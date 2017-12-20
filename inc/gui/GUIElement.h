@@ -117,6 +117,11 @@ public:
 	LUX_API float GetFinalWidth() const;
 	LUX_API float GetFinalHeight() const;
 
+	//! Handle a gui event
+	/**
+	\param e The event to handle
+	\return True if the event was handled otherwise false.
+	*/
 	LUX_API virtual bool OnEvent(const Event& e);
 	virtual bool OnMouseEvent(const gui::MouseEvent& e) { LUX_UNUSED(e); return false; }
 	virtual bool OnKeyboardEvent(const gui::KeyboardEvent& e) { LUX_UNUSED(e); return false; }
@@ -134,6 +139,8 @@ public:
 
 	LUX_API void SetAlignment(EAlign align);
 	LUX_API EAlign GetAlignment() const;
+
+	LUX_API virtual ECursorState GetHoverCursor() const;
 
 	LUX_API virtual void SetPalette(const Palette& palette);
 	LUX_API virtual const Palette& GetPalette() const;
@@ -181,7 +188,7 @@ protected:
 	mutable math::RectF m_FinalRect;
 	mutable math::RectF m_InnerRect;
 
-	math::Rect<float> m_Border;
+	math::RectF m_Border;
 	math::Rect<ScalarDistanceF> m_Margin;
 	ScalarDimensionF m_Size;
 	math::Dimension2F m_MinSize;

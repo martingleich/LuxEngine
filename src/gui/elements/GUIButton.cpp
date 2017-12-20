@@ -1,18 +1,14 @@
 #include "gui/elements/GUIButton.h"
 #include "gui/GUISkin.h"
 
-static ::lux::Referable* PushButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(false); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock PushButtonInternalReferableRegisterStaticObject(::lux::core::Name("lux.gui.Button"), &PushButtonInternalCreatorFunc);
-
-static ::lux::Referable* SwitchButtonInternalCreatorFunc(const void*) { return LUX_NEW(::lux::gui::Button)(true); } \
-static ::lux::core::impl_referableRegister::ReferableRegisterBlock SwitchButtonInternalReferableRegisterStaticObject(::lux::core::Name("lux.gui.SwitchButton"), &SwitchButtonInternalCreatorFunc);
+LX_REFERABLE_MEMBERS_SRC(lux::gui::Button, "lux.gui.Button");
 
 namespace lux
 {
 namespace gui
 {
-Button::Button(bool isSwitchButton) :
-	AbstractButton(isSwitchButton)
+Button::Button() :
+	AbstractButton(true)
 {
 	SetAlignment(EAlign::Centered);
 }
@@ -30,7 +26,7 @@ void Button::Paint(Renderer* r)
 	math::Vector2F textOffset;
 
 	if(m_IsPressed)
-		textOffset = skin->GetSunkenOffset();
+		textOffset = skin->GetPropertyVector("lux.gui.sunkenOffset");
 
 	auto state = GetState();
 	PaintOptions options;
@@ -55,16 +51,12 @@ const core::String& Button::GetText() const
 	return m_Text.GetText();
 }
 
-StrongRef<Referable> Button::Clone() const
+EGUIState Button::GetState() const
 {
-	return LUX_NEW(Button)(*this);
-}
-
-core::Name Button::GetReferableType() const
-{
-	static const core::Name name1("lux.gui.Button");
-	static const core::Name name2("lux.gui.SwitchButton");
-	return m_IsPushButton ? name1 : name2;
+	EGUIState state = Element::GetState();
+	if(m_IsPressed)
+		state |= EGUIState::Sunken;
+	return state;
 }
 
 } // namespace gui

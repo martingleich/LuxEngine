@@ -31,14 +31,17 @@ void CursorWin32::SetState(ECursorState state)
 	if(state != m_State) {
 		HCURSOR cursor = NULL;
 		switch(state) {
-		case ECursorState::Normal:
-			cursor = LoadCursorW(NULL, IDC_ARROW);
-			break;
 		case ECursorState::Beam:
 			cursor = LoadCursorW(NULL, IDC_IBEAM);
 			break;
 		case ECursorState::Wait:
 			cursor = LoadCursorW(NULL, IDC_WAIT);
+			break;
+		case ECursorState::Normal:
+			cursor = LoadCursorW(NULL, IDC_ARROW);
+			break;
+		default:
+			cursor = LoadCursorW(NULL, IDC_ARROW);
 			break;
 		}
 		if(cursor)

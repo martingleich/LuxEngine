@@ -12,38 +12,29 @@ Skin3D::Skin3D() :
 	shadow(0.2f),
 	light(1.2f)
 {
-	SetPropertyV("lux.gui.Slider.thumbSize", math::Vector2F(10, 30));
+	SetProperty("lux.gui.Slider.thumbSize", math::Dimension2F(10, 30));
+	SetProperty("lux.gui.CheckBox.size", math::Dimension2F(25, 25));
+	SetProperty("lux.gui.sunkenOffset", math::Vector2F(1, 1));
 }
 
 void Skin3D::DrawCursor(
 	Renderer* r,
 	ECursorState state,
 	bool pressed,
-	const math::Vector2F& position)
+	const math::Vector2F& position,
+	float animTime)
 {
-	LUX_UNUSED(state);
-	video::Color color = video::Color(200, 0, 0);
-	if(pressed)
-		color = video::Color(255, 10, 10);
-	math::AngleF rot = math::AngleF::Degree(5.0f);
-	math::AngleF a = math::AngleF::Degree(45.0f);
-	float s1 = 25.0f;
-	float s2 = 20.0f;
-	math::Vector2F p1(0, 0);
-	math::Vector2F p2 = math::Vector2F::BuildFromPolar(rot, s1);
-	p2.x = std::floor(p2.x); p2.y = std::floor(p2.y);
-	math::Vector2F p3 = math::Vector2F::BuildFromPolar(rot + a / 2, s2);
-	p3.x = std::floor(p3.x); p3.y = std::floor(p3.y);
-	math::Vector2F p4 = math::Vector2F::BuildFromPolar(rot + a, s1);
-	p4.x = std::floor(p4.x); p4.y = std::floor(p4.y);
-	r->DrawTriangle(
-		position + p1,
-		position + p2,
-		position + p3, color.Scaled(0.7f), nullptr);
-	r->DrawTriangle(
-		position + p1,
-		position + p3,
-		position + p4, color, nullptr);
+	switch(state) {
+	case ECursorState::Normal:
+		DrawNormalCursor(r, pressed, position, animTime);
+		break;
+	case ECursorState::Beam:
+		DrawBeamCursor(r, pressed, position, animTime);
+		break;
+	default:
+		DrawNormalCursor(r, pressed, position, animTime);
+		break;
+	}
 }
 
 void Skin3D::DrawControl(
@@ -69,6 +60,9 @@ void Skin3D::DrawControl(
 		break;
 	case EGUIControl::SliderThumb:
 		DrawPane(r, TestFlag(state, EGUIState::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
+		break;
+	case EGUIControl::CheckBox:
+		DrawCheckBox(r, TestFlag(state, EGUIState::Sunken), rect, TestFlag(state, EGUIState::Enabled));
 		break;
 	default:
 		r->DrawRectangle(rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
@@ -133,6 +127,103 @@ void Skin3D::DrawPane(
 		rct.bottom -= 1;
 		r->DrawRectangle(rct, baseColor);
 	}
+}
+
+void Skin3D::DrawCheckBox(
+	Renderer* r,
+	bool checked,
+	const math::RectF& rect,
+	bool enabled)
+{
+	video::Color back = enabled ? video::Color::White : video::Color::LightGray;
+	video::Color fore = enabled ? video::Color::Black : video::Color::DarkGray;
+	auto checkBox = rect;
+	checkBox.left += 4;
+	checkBox.right -= 4;
+	checkBox.top += 4;
+	checkBox.bottom -= 4;
+	r->DrawRectangle(checkBox, back);
+
+	if(checked) {
+		checkBox.left += 4;
+		checkBox.right -= 4;
+		checkBox.top += 4;
+		checkBox.bottom -= 4;
+		r->DrawRectangle(checkBox, fore);
+	}
+}
+
+void Skin3D::DrawNormalCursor(
+	Renderer* r,
+	bool pressed,
+	const math::Vector2F& position,
+	float animTime)
+{
+	LUX_UNUSED(animTime);
+	video::Color color = video::Color(200, 0, 0);
+	if(pressed)
+		color = video::Color(255, 10, 10);
+	math::AngleF rot = math::AngleF::Degree(5.0f);
+	math::AngleF a = math::AngleF::Degree(45.0f);
+	float s1 = 25.0f;
+	float s2 = 20.0f;
+	math::Vector2F p1(0, 0);
+	math::Vector2F p2 = math::Vector2F::BuildFromPolar(rot, s1);
+	p2.x = std::floor(p2.x); p2.y = std::floor(p2.y);
+	math::Vector2F p3 = math::Vector2F::BuildFromPolar(rot + a / 2, s2);
+	p3.x = std::floor(p3.x); p3.y = std::floor(p3.y);
+	math::Vector2F p4 = math::Vector2F::BuildFromPolar(rot + a, s1);
+	p4.x = std::floor(p4.x); p4.y = std::floor(p4.y);
+	r->DrawTriangle(
+		position + p1,
+		position + p2,
+		position + p3, color.Scaled(0.7f), nullptr);
+	r->DrawTriangle(
+		position + p1,
+		position + p3,
+		position + p4, color, nullptr);
+}
+
+void Skin3D::DrawBeamCursor(
+	Renderer* r,
+	bool pressed,
+	const math::Vector2F& position,
+	float animTime)
+{
+	LUX_UNUSED(animTime);
+	video::Color color = video::Color(0, 0, 0);
+	float s1 = 16.0f;
+	float s2 = 6.0f;
+	// Top bar
+	r->DrawRectangle(
+		math::RectF(
+			position.x - s2 / 2+1, position.y - s1 / 2 + 0,
+			position.x - 0, position.y - s1 / 2 + 1),
+		color);
+	r->DrawRectangle(
+		math::RectF(
+			position.x + 1, position.y - s1 / 2 + 0,
+			position.x + s2 / 2, position.y - s1 / 2 + 1),
+		color);
+
+	// Bottom bar
+	r->DrawRectangle(
+		math::RectF(
+			position.x - s2 / 2+1, position.y + s1 / 2 + 0,
+			position.x - 0, position.y + s1 / 2 + 1),
+		color);
+	r->DrawRectangle(
+		math::RectF(
+			position.x + 1, position.y + s1 / 2 + 0,
+			position.x + s2 / 2, position.y + s1 / 2 + 1),
+		color);
+
+	// Vertical bar
+	r->DrawRectangle(
+		math::RectF(
+			position.x + 0, position.y + s1 / 2,
+			position.x + 1, position.y - s1 / 2 + 1),
+		color);
 }
 
 } // namespace gui

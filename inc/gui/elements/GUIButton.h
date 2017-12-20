@@ -14,11 +14,12 @@ class Button : public AbstractButton
 public:
 	LX_REFERABLE_MEMBERS_API(LUX_API);
 
-	LUX_API Button(bool isSwitchButton);
+	LUX_API Button();
 	LUX_API ~Button();
 	LUX_API void Paint(Renderer* r);
 	LUX_API void SetText(const core::String& text);
 	LUX_API const core::String& GetText() const;
+	LUX_API EGUIState GetState() const;
 
 private:
 	TextContainer m_Text;

@@ -15,6 +15,7 @@
 #include "gui/elements/GUIButton.h"
 #include "gui/elements/GUIStaticText.h"
 #include "gui/elements/GUISlider.h"
+#include "gui/elements/GUICheckBox.h"
 
 #include "gui/FontFormat.h"
 #include "gui/FontCreator.h"
@@ -218,6 +219,14 @@ void GUIEnvironment::Update(float secsPassed)
 			e.elem = newHovered;
 			e.type = ElementEvent::MouseEnter;
 			SendElementEvent(e.elem, e);
+			auto newCur = newHovered->GetHoverCursor();
+			if(newCur != ECursorState::Default) {
+				if(m_CursorCtrl->GetState() != newCur)
+					m_CursorCtrl->SetState(newCur);
+			} else {
+				if(m_CursorCtrl->GetState() != newCur)
+					m_CursorCtrl->SetState(ECursorState::Normal);
+			}
 		}
 	}
 
@@ -246,13 +255,15 @@ static void RecursiveRender(gui::Element* elem, gui::Renderer* renderer, float s
 
 void GUIEnvironment::Render()
 {
+	m_Time += m_SecsPassed;
+
 	video::RenderStatistics::GroupScope grpScope("gui");
 
 	m_Renderer->Begin();
 	RecursiveRender(m_Root, m_Renderer, m_SecsPassed);
 
 	if((m_DrawVirtualCursor || m_UseVirtualCursor) && m_CursorCtrl->IsVisible())
-		m_Skin->DrawCursor(m_Renderer, m_CursorCtrl->GetState(), m_LeftState, m_CursorCtrl->GetPosition());
+		m_Skin->DrawCursor(m_Renderer, m_CursorCtrl->GetState(), m_LeftState, m_CursorCtrl->GetPosition(), m_Time);
 
 	m_Renderer->Flush();
 
@@ -378,9 +389,9 @@ StrongRef<Element> GUIEnvironment::GetElementByPos(const math::Vector2F& pos)
 	return GetElementByPosRec(m_Root, pos);
 }
 
-void GUIEnvironment::SendElementEvent(Element* elem, const Event& event)
+bool GUIEnvironment::SendElementEvent(Element* elem, const Event& event)
 {
-	elem->OnEvent(event);
+	return elem->OnEvent(event);
 }
 
 Element* GUIEnvironment::GetHovered()
@@ -433,15 +444,6 @@ StrongRef<Button> GUIEnvironment::AddButton(const ScalarVectorF& pos, const Scal
 	return button;
 }
 
-StrongRef<Button> GUIEnvironment::AddSwitchButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text, Element* parent)
-{
-	StrongRef<Button> button = AddElement(core::Name("lux.gui.SwitchButton"), parent);
-	button->SetPosition(pos);
-	button->SetSize(size);
-	button->SetText(text);
-	return button;
-}
-
 StrongRef<Slider> GUIEnvironment::AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max, Element* parent)
 {
 	StrongRef<Slider> slider = AddElement(core::Name("lux.gui.Slider"), parent);
@@ -461,6 +463,15 @@ StrongRef<Slider> GUIEnvironment::AddVerticalSlider(const ScalarVectorF& pos, co
 	slider->SetRange(min, max);
 	slider->SetThumbPos(min);
 	return slider;
+}
+
+StrongRef<CheckBox> GUIEnvironment::AddCheckBox(const ScalarVectorF& pos, const ScalarDimensionF& size, bool checked, Element* parent)
+{
+	StrongRef<CheckBox> box = AddElement(core::Name("lux.gui.CheckBox"), parent);
+	box->SetPosition(pos);
+	box->SetSize(size);
+	box->SetChecked(checked);
+	return box;
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -315,7 +315,7 @@ public:
 	{
 		T2* cast_out = dynamic_cast<T2*>(m_Object);
 		if(!cast_out)
-			throw core::Exception("Invalid cast");
+			throw core::InvalidCastException();
 		return StrongRef<T2>(cast_out);
 	}
 

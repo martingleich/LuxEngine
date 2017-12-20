@@ -42,7 +42,7 @@ public:
 	// Cast the return value the HWND to get the device window
 	void* GetDeviceWindow() const;
 
-	Cursor* GetCursor() const;
+	Cursor* GetDeviceCursor() const;
 	bool HandleMessages(UINT Message,
 		WPARAM WParam,
 		LPARAM LParam,
