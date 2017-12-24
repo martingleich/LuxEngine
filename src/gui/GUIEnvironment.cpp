@@ -16,6 +16,7 @@
 #include "gui/elements/GUIStaticText.h"
 #include "gui/elements/GUISlider.h"
 #include "gui/elements/GUICheckBox.h"
+#include "gui/elements/GUIRadioButton.h"
 
 #include "gui/FontFormat.h"
 #include "gui/FontCreator.h"
@@ -472,6 +473,16 @@ StrongRef<CheckBox> GUIEnvironment::AddCheckBox(const ScalarVectorF& pos, const 
 	box->SetSize(size);
 	box->SetChecked(checked);
 	return box;
+}
+
+StrongRef<RadioButton> GUIEnvironment::AddRadioButton(const ScalarVectorF& pos, const ScalarDimensionF& size, RadioButton* group, Element* parent)
+{
+	StrongRef<RadioButton> radio = AddElement(core::Name("lux.gui.RadioButton"), parent);
+	radio->SetPosition(pos);
+	radio->SetSize(size);
+	if(group)
+		radio->SetRadioGroup(group);
+	return radio;
 }
 
 ///////////////////////////////////////////////////////////////////////////

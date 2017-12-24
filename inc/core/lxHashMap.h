@@ -737,11 +737,13 @@ public:
 			new ((void*)&it.m_Entry->value) V(defaultValue);
 		return it.m_Entry->value;
 	}
-	const V& At(const K& key) const
+	template <typename T>
+	const V& At(const T& key) const
 	{
 		return FindEntry(key).m_Entry->value;
 	}
-	const V& At(const K& key, const V& defaultValue) const
+	template <typename T>
+	const V& At(const T& key, const V& defaultValue) const
 	{
 		Iterator it = FindEntry(key);
 		if(it == End())
@@ -1107,7 +1109,8 @@ private:
 		m_FirstUnusedNode = entry;
 	}
 
-	Iterator FindEntry(const K& key) const
+	template <typename T=K>
+	Iterator FindEntry(const T& key) const
 	{
 		if(m_Entries == 0)
 			return Iterator(m_Buckets + m_BucketCount);

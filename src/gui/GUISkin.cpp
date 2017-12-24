@@ -14,6 +14,7 @@ Skin3D::Skin3D() :
 {
 	SetProperty("lux.gui.Slider.thumbSize", math::Dimension2F(10, 30));
 	SetProperty("lux.gui.CheckBox.size", math::Dimension2F(25, 25));
+	SetProperty("lux.gui.RadioButton.size", math::Dimension2F(25, 25));
 	SetProperty("lux.gui.sunkenOffset", math::Vector2F(1, 1));
 }
 
@@ -62,6 +63,9 @@ void Skin3D::DrawControl(
 		DrawPane(r, TestFlag(state, EGUIState::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
 		break;
 	case EGUIControl::CheckBox:
+		DrawCheckBox(r, TestFlag(state, EGUIState::Sunken), rect, TestFlag(state, EGUIState::Enabled));
+		break;
+	case EGUIControl::RadioButton:
 		DrawCheckBox(r, TestFlag(state, EGUIState::Sunken), rect, TestFlag(state, EGUIState::Enabled));
 		break;
 	default:
@@ -153,6 +157,15 @@ void Skin3D::DrawCheckBox(
 	}
 }
 
+void Skin3D::DrawRadioButton(
+	Renderer* r,
+	bool checked,
+	const math::RectF& rect,
+	bool enabled)
+{
+	DrawCheckBox(r, checked, rect, enabled);
+}
+
 void Skin3D::DrawNormalCursor(
 	Renderer* r,
 	bool pressed,
@@ -190,14 +203,14 @@ void Skin3D::DrawBeamCursor(
 	const math::Vector2F& position,
 	float animTime)
 {
-	LUX_UNUSED(animTime);
+	LUX_UNUSED(animTime, pressed);
 	video::Color color = video::Color(0, 0, 0);
 	float s1 = 16.0f;
 	float s2 = 6.0f;
 	// Top bar
 	r->DrawRectangle(
 		math::RectF(
-			position.x - s2 / 2+1, position.y - s1 / 2 + 0,
+			position.x - s2 / 2 + 1, position.y - s1 / 2 + 0,
 			position.x - 0, position.y - s1 / 2 + 1),
 		color);
 	r->DrawRectangle(
@@ -209,7 +222,7 @@ void Skin3D::DrawBeamCursor(
 	// Bottom bar
 	r->DrawRectangle(
 		math::RectF(
-			position.x - s2 / 2+1, position.y + s1 / 2 + 0,
+			position.x - s2 / 2 + 1, position.y + s1 / 2 + 0,
 			position.x - 0, position.y + s1 / 2 + 1),
 		color);
 	r->DrawRectangle(

@@ -698,10 +698,18 @@ struct HashType<String>
 {
 	size_t operator()(const String& str) const
 	{
-		if(str.IsEmpty())
+		return (*this)(str.Data(), str.Size());
+	}
+	size_t operator()(const char* str, size_t size) const
+	{
+		if(size == 0)
 			return 0;
-
-		return HashSequence(reinterpret_cast<const u8*>(str.Data()), str.Size());
+		return HashSequence(reinterpret_cast<const u8*>(str), size);
+	}
+	size_t operator()(const char* str) const
+	{
+		size_t size = strlen(str);
+		return (*this)(str, size);
 	}
 };
 

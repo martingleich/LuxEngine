@@ -29,6 +29,7 @@ class StaticText;
 class Button;
 class Slider;
 class CheckBox;
+class RadioButton;
 
 class Event : public event::Event
 {
@@ -46,7 +47,7 @@ public:
 	{
 		static_assert(std::is_base_of<Event, T>::value, "T must be derived of gui::Event");
 		auto ptr = dynamic_cast<T*>(this);
-		if(!ptr) 
+		if(!ptr)
 			throw core::InvalidCastException();
 		return *ptr;
 	}
@@ -55,7 +56,7 @@ public:
 	{
 		static_assert(std::is_base_of<Event, T>::value, "T must be derived of gui::Event");
 		auto ptr = dynamic_cast<const T*>(this);
-		if(!ptr) 
+		if(!ptr)
 			throw core::InvalidCastException();
 		return *ptr;
 	}
@@ -172,6 +173,7 @@ public:
 	LUX_API StrongRef<Slider> AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min = 0, int max = 100, Element* parent = nullptr);
 	LUX_API StrongRef<Slider> AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min = 0, int max = 100, Element* parent = nullptr);
 	LUX_API StrongRef<CheckBox> AddCheckBox(const ScalarVectorF& pos, const ScalarDimensionF& size, bool checked = false, Element* parent = nullptr);
+	LUX_API StrongRef<RadioButton> AddRadioButton(const ScalarVectorF& pos, const ScalarDimensionF& size, RadioButton* group = nullptr, Element* parent = nullptr);
 
 	///////////////////////////////////////////////////////////////////////////
 

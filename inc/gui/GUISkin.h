@@ -377,6 +377,11 @@ private:
 		bool checked,
 		const math::RectF& rect,
 		bool enabled);
+	void DrawRadioButton(
+		Renderer* r,
+		bool checked,
+		const math::RectF& rect,
+		bool enabled);
 	void DrawNormalCursor(
 		Renderer* r,
 		bool pressed,
