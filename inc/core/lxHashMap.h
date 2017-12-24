@@ -723,26 +723,28 @@ public:
 		return At(key);
 	}
 
-	V& At(const K& key)
+	template <typename T=K>
+	V& At(const T& key)
 	{
 		Iterator it;
 		if(FindOrAddEntry(key, it))
 			new ((void*)&it.m_Entry->value) V();
 		return it.m_Entry->value;
 	}
-	V& At(const K& key, const V& defaultValue)
+	template <typename T=K>
+	V& At(const T& key, const V& defaultValue)
 	{
 		Iterator it;
 		if(FindOrAddEntry(key, it))
 			new ((void*)&it.m_Entry->value) V(defaultValue);
 		return it.m_Entry->value;
 	}
-	template <typename T>
+	template <typename T=K>
 	const V& At(const T& key) const
 	{
 		return FindEntry(key).m_Entry->value;
 	}
-	template <typename T>
+	template <typename T=K>
 	const V& At(const T& key, const V& defaultValue) const
 	{
 		Iterator it = FindEntry(key);
