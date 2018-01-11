@@ -412,8 +412,8 @@ LUX_API Type Vector2f();
 LUX_API Type Vector2i();
 }
 
-template<> inline Type GetTypeInfo<math::Vector2<float>>() { return Types::Vector2f(); };
-template<> inline Type GetTypeInfo<math::Vector2<int>>() { return Types::Vector2i(); };
+template<> struct TemplType<math::Vector2F> { static Type Get() { return Types::Vector2f(); } };
+template<> struct TemplType<math::Vector2I> { static Type Get() { return Types::Vector2i(); } };
 } // namespace core
 
 } // namespace lux

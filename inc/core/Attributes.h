@@ -121,7 +121,7 @@ public:
 	template <typename T>
 	AttributePtr AddAttribute(const core::String& name, const T& value)
 	{
-		return AddAttribute(name, core::GetTypeInfo<T>(), &value);
+		return AddAttribute(name, core::TemplType<T>::Get(), &value);
 	}
 
 	AttributePtr AddAttribute(Attribute* attrb)

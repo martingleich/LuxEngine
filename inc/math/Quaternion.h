@@ -617,7 +617,8 @@ namespace Types
 LUX_API Type QuaternionF();
 }
 
-template<> inline Type GetTypeInfo<math::Quaternion<float>>() { return Types::QuaternionF(); };
+template<> struct TemplType<math::QuaternionF> { static Type Get() { return Types::QuaternionF(); } };
+
 }
 } // !namespace lux
 

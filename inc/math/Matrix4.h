@@ -483,7 +483,7 @@ namespace Types
 LUX_API Type Matrix();
 }
 
-template<> inline Type GetTypeInfo<math::Matrix4>() { return Types::Matrix(); };
+template<> struct TemplType<math::Matrix4> { static Type Get() { return Types::Matrix(); } };
 } // namespace core
 
 } // namespace lux

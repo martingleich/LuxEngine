@@ -194,7 +194,7 @@ public:
 	template <typename T>
 	void AddParam(const core::String& name, const T& value)
 	{
-		AddParam(name, core::GetTypeInfo<T>(), &value);
+		AddParam(name, core::TemplType<T>::Get(), &value);
 	}
 
 	virtual core::AttributePtr GetParam(const core::String& name) const = 0;

@@ -69,7 +69,7 @@ namespace Types
 LUX_API Type Texture();
 }
 
-template<> inline Type GetTypeInfo<video::TextureLayer>() { return Types::Texture(); }
+template<> struct TemplType<video::TextureLayer> { static Type Get() { return Types::Texture(); } };
 } // namespace core
 } // namespace lux
 

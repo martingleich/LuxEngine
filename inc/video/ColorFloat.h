@@ -305,7 +305,7 @@ namespace Types
 {
 LUX_API Type Colorf();
 }
-template<> inline Type GetTypeInfo<video::Colorf>() { return Types::Colorf(); }
+template<> struct TemplType<video::Colorf> { static Type Get() { return Types::Colorf(); } };
 } // namespace core
 
 }

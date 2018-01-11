@@ -17,7 +17,7 @@ public:
 	T Evaluate(float time) const
 	{
 		T var;
-		Evaluate(time, core::VariableAccess(core::GetTypeInfo<T>(), &var));
+		Evaluate(time, core::VariableAccess(core::TemplType<T>::Get(), &var));
 		return var;
 	}
 	virtual void Evaluate(float time, core::VariableAccess access) const = 0;
@@ -60,17 +60,17 @@ public:
 	template <typename T>
 	core::Array<math::Sample<T>>& Samples()
 	{
-		if(core::GetTypeInfo<T>() == m_Type)
+		if(core::TemplType<T>::Get() == m_Type)
 			return *((core::Array<math::Sample<T>>*)SamplesPointer());
-		throw core::TypeException("Wrong type queried", core::GetTypeInfo<T>(), m_Type);
+		throw core::TypeException("Wrong type queried", core::TemplType<T>::Get(), m_Type);
 	}
 
 	template <typename T>
 	const core::Array<math::Sample<T>>& Samples() const
 	{
-		if(core::GetTypeInfo<T>() == m_Type)
+		if(core::TemplType<T>::Get() == m_Type)
 			return *((const core::Array<math::Sample<T>>*)SamplesPointer());
-		throw core::TypeException("Wrong type queried", core::GetTypeInfo<T>(), m_Type);
+		throw core::TypeException("Wrong type queried", core::TemplType<T>::Get(), m_Type);
 	}
 
 	core::Type GetType() const
@@ -93,7 +93,7 @@ class KeyFrameCurveImpl : public KeyFrameCurve
 public:
 	KeyFrameCurveImpl()
 	{
-		m_Type = core::GetTypeInfo<T>();
+		m_Type = core::TemplType<T>::Get();
 	}
 
 	void Evaluate(float time, core::VariableAccess access) const

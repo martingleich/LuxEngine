@@ -582,7 +582,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The number of written output strings.
 	*/
-	size_t Split(u32 ch, String* outArray, size_t maxCount, bool ignoreEmpty=false) const;
+	size_t Split(u32 ch, String* outArray, size_t maxCount, bool ignoreEmpty = false) const;
 
 	//! Split the string on a character.
 	/**
@@ -591,7 +591,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The array of substrings
 	*/
-	core::Array<String> Split(u32 ch, bool ignoreEmpty=false) const;
+	core::Array<String> Split(u32 ch, bool ignoreEmpty = false) const;
 
 	//! Classify the content of the string
 	/**
@@ -691,7 +691,7 @@ namespace Types
 LUX_API Type String();
 } // namespace Types
 
-template<> inline Type GetTypeInfo<String>() { return Types::String(); }
+template<> struct TemplType<String> { static Type Get() { return Types::String(); } };
 
 template <>
 struct HashType<String>

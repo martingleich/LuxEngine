@@ -2,6 +2,7 @@
 #define INCLUDED_LXTYPES_H
 #include "LuxBase.h"
 #include "lxException.h"
+#include "lxUtil.h"
 #include <string.h>
 #include <new>
 
@@ -203,7 +204,7 @@ public:
 
 	bool IsUnknown() const
 	{
-		return m_Info == Unknown.GetInfo();
+		return (*this == Unknown);
 	}
 
 	bool IsTrivial() const
@@ -230,6 +231,16 @@ public:
 private:
 	const TypeInfo* m_Info;
 	bool m_IsConstant;
+};
+
+template <>
+struct HashType<Type>
+{
+	size_t operator()(Type x)
+	{
+		HashType<const TypeInfo*> hasher;
+		return hasher(x.GetInfo());
+	}
 };
 
 namespace Types
@@ -269,12 +280,12 @@ struct TypeException : ErrorException
 
 //! Available Types for params
 template <typename T>
-Type GetTypeInfo() { return Types::Unknown(); }
+struct TemplType { static Type Get() { return Types::Unknown(); } };
 
-template <> inline Type GetTypeInfo<int>() { return Types::Integer(); }
-template <> inline Type GetTypeInfo<u32>() { return Types::U32(); }
-template <> inline Type GetTypeInfo<float>() { return Types::Float(); }
-template <> inline Type GetTypeInfo<bool>() { return Types::Boolean(); }
+template <> struct TemplType<int> { static Type Get() { return Types::Integer(); } };
+template <> struct TemplType<u32> { static Type Get() { return Types::Integer(); } };
+template <> struct TemplType<float> { static Type Get() { return Types::Float(); } };
+template <> struct TemplType<bool> { static Type Get() { return Types::Boolean(); } };
 
 class AnyObject
 {
@@ -340,7 +351,7 @@ public:
 	template <typename T>
 	T& Get()
 	{
-		if(GetTypeInfo<T>() != m_Type)
+		if(TemplType<T>::Get() != m_Type)
 			throw core::TypeException("Invalid type cast");
 		return *reinterpret_cast<T*>(m_Data);
 	}
@@ -348,7 +359,7 @@ public:
 	template <typename T>
 	const T& Get() const
 	{
-		if(GetTypeInfo<T>() != m_Type)
+		if(TemplType<T>::Get() != m_Type)
 			throw core::TypeException("Invalid type cast");
 		return *reinterpret_cast<const T*>(m_Data);
 	}

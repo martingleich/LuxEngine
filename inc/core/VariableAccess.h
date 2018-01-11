@@ -46,7 +46,7 @@ public:
 	template <typename T>
 	VariableAccess(const T& value) :
 		m_Data(const_cast<void*>((const void*)&value)),
-		m_Type(core::GetTypeInfo<T>().GetConstantType())
+		m_Type(core::TemplType<T>::Get().GetConstantType())
 	{
 		lxAssert(!m_Type.IsUnknown());
 	}
@@ -59,7 +59,7 @@ public:
 	template <typename T>
 	VariableAccess(T& value) :
 		m_Data(&value),
-		m_Type(core::GetTypeInfo<T>())
+		m_Type(core::TemplType<T>::Get())
 	{
 	}
 
@@ -68,7 +68,7 @@ public:
 	operator T() const
 	{
 		if(IsValid()) {
-			auto type = core::GetTypeInfo<T>();
+			auto type = core::TemplType<T>::Get();
 			if(!IsConvertible(m_Type, type))
 				throw TypeException("Incompatible types used", m_Type, type);
 
@@ -83,7 +83,7 @@ public:
 	template <typename T>
 	T Default(const T& defaultValue) const
 	{
-		if(!IsConvertible(m_Type, core::GetTypeInfo<T>()) || !IsValid())
+		if(!IsConvertible(m_Type, core::TemplType<T>::Get()) || !IsValid())
 			return defaultValue;
 		else
 			return (T)(*this);
@@ -142,10 +142,10 @@ public:
 	template <typename T>
 	const VariableAccess& operator=(const T& varVal) const
 	{
-		if(!core::IsConvertible(core::GetTypeInfo<T>(), m_Type))
-			throw TypeException("Incompatible types used", core::GetTypeInfo<T>(), m_Type);
+		if(!core::IsConvertible(core::TemplType<T>::Get(), m_Type))
+			throw TypeException("Incompatible types used", core::TemplType<T>::Get(), m_Type);
 		if(IsValid())
-			core::ConvertBaseType(core::GetTypeInfo<T>(), &varVal, m_Type, m_Data);
+			core::ConvertBaseType(core::TemplType<T>::Get(), &varVal, m_Type, m_Data);
 
 		return *this;
 	}

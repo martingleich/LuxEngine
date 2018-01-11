@@ -57,7 +57,7 @@ public:
 	template <typename T>
 	u32 AddParam(const core::StringType& name, const T& defaultValue)
 	{
-		core::Type type = core::GetTypeInfo<T>();
+		core::Type type = core::TemplType<T>::Get();
 		if(type == core::Type::Unknown)
 			throw TypeException("Unsupported type used");
 

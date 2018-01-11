@@ -274,7 +274,7 @@ namespace Types
 {
 LUX_API Type Color();
 }
-template<> inline Type GetTypeInfo<video::Color>() { return Types::Color(); }
+template<> struct TemplType<video::Color> { static Type Get() { return Types::Color(); } };
 } // namespace core
 
 namespace math
