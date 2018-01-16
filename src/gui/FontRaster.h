@@ -26,28 +26,26 @@ struct CharInfo
 	float C;
 };
 
-struct FontPixel
-{
-	u8 intensity;
-};
-
 struct FontCreationData
 {
 	FontDescription desc;
 
-	FontPixel* image;
+	u32 channelCount;
+	u8* image;
 	math::Dimension2U imageSize;
 
 	core::HashMap<u32, CharInfo> charMap;
 	float charHeight;
 	float baseLine;
 
+	FontRenderSettings baseSettings;
+
 	FontCreationData() :
+		channelCount(1),
 		image(nullptr),
 		charHeight(0.0f),
 		baseLine(0.0f)
 	{
-		
 	}
 };
 
@@ -63,34 +61,47 @@ public:
 	float GetTextWidth(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text);
 	size_t GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition);
 	void GetTextCarets(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets);
+	const core::HashMap<u32, CharInfo>& GetCharMap() const;
+	const CharInfo& GetCharInfo(u32 c);
 
 	const video::Material* GetMaterial() const;
+
+	void SetBaseFontSettings(const FontRenderSettings& settings);
+	const FontRenderSettings& GetBaseFontSettings();
 
 	const FontDescription& GetDescription() const;
 	float GetBaseLine() const;
 	float GetFontHeight() const;
 
+	void GetRawData(const void*& ptr, u32& width, u32& height, u32& channels);
+
 	core::Name GetReferableType() const;
 	StrongRef<Referable> Clone() const;
 
-	const core::HashMap<u32, CharInfo>& GetCharMap() const;
-	video::Image* GetImage() const;
+private:
+	FontRenderSettings GetFinalFontSettings(const FontRenderSettings& settings);
+
+	video::MaterialRenderer* EnsureMaterialRenderer();
+	void LoadImageData(const u8* imageData,
+		math::Dimension2U imageSize, u32 channelCount);
 
 private:
-	const CharInfo& GetCharInfo(u32 c);
-
-private:
+	FontDescription m_Desc;
+	FontRenderSettings m_BaseSettings;
 	core::HashMap<u32, CharInfo> m_CharMap;
 	float m_CharHeight;
 	float m_BaseLine;
 
-	StrongRef<video::Material> m_Material;
-	StrongRef<video::Image> m_Image;
+	// Backup image
+	core::Array<u8> m_Image;
+	math::Dimension2U m_ImageSize;
+	u32 m_ChannelCount;
+
 	StrongRef<video::Texture> m_Texture;
+	StrongRef<video::Material> m_Material;
 
+	// Character printed on error
 	CharInfo m_ErrorChar;
-
-	FontDescription m_Desc;
 };
 
 } // namespace gui

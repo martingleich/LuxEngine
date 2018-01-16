@@ -106,6 +106,9 @@ public:
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList) = 0;
 
+	//! Checks if some shader language and version is supported
+	virtual bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor) = 0;
+
 	//////////////////////////////////////////////////////////////////////////////
 
 	virtual const DriverConfig& GetConfig() const = 0;

@@ -160,28 +160,31 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 			if(ani > maxAni)
 				ani = maxAni;
 			SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, ani);
-	}
+		}
 #endif
 		SetSamplerState(stage, D3DSAMP_MINFILTER, filterMin);
 		SetSamplerState(stage, D3DSAMP_MAGFILTER, filterMag);
-}
+	}
 }
 
 void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
 {
-	if(!m_UseLighting && settings.colorArg1 == ETextureArgument::Diffuse && !m_UseVertexData)
+	if(!m_UseLighting && settings.colorArg1 == ETextureArgument::Diffuse && !m_UseVertexData) {
 		SetTextureStageState(stage, D3DTSS_COLORARG1, D3DTA_TFACTOR);
-	else
+		SetTextureStageState(stage, D3DTSS_ALPHAARG1, D3DTA_TFACTOR);
+	} else {
 		SetTextureStageState(stage, D3DTSS_COLORARG1, GetTextureArgument(settings.colorArg1));
-	if(!m_UseLighting && settings.colorArg2 == ETextureArgument::Diffuse && !m_UseVertexData)
+		SetTextureStageState(stage, D3DTSS_ALPHAARG1, GetTextureArgument(settings.alphaArg1));
+	}
+	if(!m_UseLighting && settings.colorArg2 == ETextureArgument::Diffuse && !m_UseVertexData) {
 		SetTextureStageState(stage, D3DTSS_COLORARG2, D3DTA_TFACTOR);
-	else
+		SetTextureStageState(stage, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
+	} else {
 		SetTextureStageState(stage, D3DTSS_COLORARG2, GetTextureArgument(settings.colorArg2));
+		SetTextureStageState(stage, D3DTSS_ALPHAARG2, GetTextureArgument(settings.alphaArg2));
+	}
 
 	SetTextureStageState(stage, D3DTSS_COLOROP, GetTextureOperator(settings.colorOperator));
-
-	SetTextureStageState(stage, D3DTSS_ALPHAARG1, GetTextureArgument(settings.alphaArg1));
-	SetTextureStageState(stage, D3DTSS_ALPHAARG2, GetTextureArgument(settings.alphaArg2));
 	SetTextureStageState(stage, D3DTSS_ALPHAOP, GetTextureOperator(settings.alphaOperator));
 
 	if(settings.HasAlternateCoordSource())
@@ -492,6 +495,6 @@ void DeviceStateD3D9::Reset()
 }
 
 } // namespace video
-	} // namespace lux
+} // namespace lux
 
 #endif // LUX_COMPILE_WITH_D3D9

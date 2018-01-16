@@ -117,10 +117,18 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(FontLoader));
 	core::ResourceSystem::Instance()->AddResourceWriter(LUX_NEW(FontWriter));
 
-	auto file = io::FileSystem::Instance()->OpenVirtualFile(
-		g_BuiltinFontData, g_BuiltinFontData_Size, "[builtin_font_file]", false);
-	if(file)
+	/*
+	auto m_BuiltInFont = GetFontCreator()->CreateFont(
+		FontDescription("Arial", 16, EFontWeight::Bolt),
+		GetFontCreator()->GetDefaultCharset("german"));
+	*/
+	try {
+		auto file = io::FileSystem::Instance()->OpenVirtualFile(
+			g_BuiltinFontData, g_BuiltinFontData_SIZE, "[builtin_font_file]", false);
 		m_BuiltInFont = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Font, file).As<Font>();
+	} catch(...) {
+		log::Error("Can't load builtin font files");
+	}
 
 	SetSkin(LUX_NEW(Skin3D));
 	m_Skin->SetDefaultFont(m_BuiltInFont);

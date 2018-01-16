@@ -379,6 +379,11 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
 		errorList);
 }
 
+bool MaterialLibrary::IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor)
+{
+	return video::VideoDriver::Instance()->IsShaderSupported(lang, vsMajor, vsMinor, psMajor, psMinor);
+}
+
 bool MaterialLibrary::GetShaderInclude(EShaderLanguage language, const core::String& name, const void*& outData, size_t& outBytes)
 {
 	ShaderInclude search(language, name);

@@ -32,12 +32,14 @@ struct FontDescription
 	core::String name; //!< The name of the font family, empty if not available
 
 	u32 size; //!< The size of the base font in pixel, 0 if not available
+	u32 borderSize; //!< Size of the border in pixels
 	EFontWeight weight; //!< The weight of the font
 	bool italic; //!< Is the font italic, false if not available
 	bool antialiased; //!< Is the font antialiased, false if not available
 
 	FontDescription() :
 		size(0),
+		borderSize(0),
 		weight(EFontWeight::Normal),
 		italic(false),
 		antialiased(false)
@@ -49,9 +51,11 @@ struct FontDescription
 		u32 _size,
 		EFontWeight _weight = EFontWeight::Normal,
 		bool _italic = false,
+		u32 _borderSize = 0,
 		bool _antialiased = true) :
 		name(_name),
 		size(_size),
+		borderSize(_borderSize),
 		weight(_weight),
 		italic(_italic),
 		antialiased(_antialiased)
@@ -61,8 +65,10 @@ struct FontDescription
 		u32 _size,
 		EFontWeight _weight = EFontWeight::Normal,
 		bool _italic = false,
+		u32 _borderSize = 0,
 		bool _antialiased = true) :
 		size(_size),
+		borderSize(_borderSize),
 		weight(_weight),
 		italic(_italic),
 		antialiased(_antialiased)
@@ -74,7 +80,7 @@ struct FontRenderSettings
 {
 	/*
 	After each printed characters to printing cursor is advanced,
-	with fontSize*charDistance pixels.
+	with charDistance pixels.
 	A chardistance of 0 means no additional offset, and only uses
 	the default font size.
 	*/
@@ -85,7 +91,7 @@ struct FontRenderSettings
 	*/
 	float wordDistance = 1.0f;
 	/*
-	A new-line advances the y cursor about
+	A new-line advances the y cursor with
 	the font-height multiplied with the line-distance
 	*/
 	float lineDistance = 1.0f;
@@ -97,9 +103,17 @@ struct FontRenderSettings
 	*/
 	float scale = 1.0f;
 
-	float italic = 0.0f;
+	/*
+	Slanting of the font.
+	Positive to the right, negative to the left.
+	*/
+	float slanting = 0.0f;
 
+	//! The color of the font.
 	video::Color color = video::Color::Black;
+
+	//! The color of the font border(if border available).
+	video::Color borderColor = video::Color::Black;
 };
 
 //! A font object
@@ -181,8 +195,20 @@ public:
 
 	//! Get a description of the font
 	virtual const FontDescription& GetDescription() const = 0;
+
 	virtual float GetBaseLine() const = 0;
+
+	//! Get the height of the font in pixels.
 	virtual float GetFontHeight() const = 0;
+
+	//! Set base values for font render settings.
+	/**
+	These settings are combined with the passed setting for each rendercall
+	*/
+	virtual void SetBaseFontSettings(const FontRenderSettings& settings) = 0;
+
+	//! Get base values for font render settings.
+	virtual const FontRenderSettings& GetBaseFontSettings() = 0;
 };
 
 } // namespace gui

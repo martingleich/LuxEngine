@@ -86,8 +86,7 @@ struct HashType<float> : BitWiseHash<float>
 {
 	size_t operator()(float x)
 	{
-		// Force positive sign for -0
-		return BitWiseHash<float>::operator()(x == 0 ? 0 : x);
+		return BitWiseHash<float>::operator()(x == -0 ? +0 : x);
 	}
 };
 
@@ -96,8 +95,7 @@ struct HashType<double> : BitWiseHash<double>
 {
 	size_t operator()(double x)
 	{
-		// Force positive sign for -0
-		return BitWiseHash<double>::operator()(x == 0 ? 0 : x);
+		return BitWiseHash<double>::operator()(x == -0 ? +0 : x);
 	}
 };
 

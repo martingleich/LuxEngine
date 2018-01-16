@@ -30,9 +30,10 @@ void FontRaster::Init(const FontCreationData& data)
 	m_CharHeight = data.charHeight;
 	m_CharMap = data.charMap;
 	m_BaseLine = data.baseLine;
+	m_BaseSettings = data.baseSettings;
 
-	core::String errorChars = "? ";
-
+	// Set replacement character.
+	core::String errorChars = "�? ";
 	for(auto it = errorChars.First(); it != errorChars.End(); ++it) {
 		auto jt = m_CharMap.Find(*it);
 		if(jt != m_CharMap.End()) {
@@ -41,70 +42,15 @@ void FontRaster::Init(const FontCreationData& data)
 		}
 	}
 
-	if(data.image) {
-		m_Image = video::ImageSystem::Instance()->CreateImage(data.imageSize, video::ColorFormat::X8, data.image, true, true);
-		m_Texture = video::VideoDriver::Instance()->CreateTexture(data.imageSize, video::ColorFormat::A8R8G8B8, 1, false);
-		m_Texture->SetFiltering(video::BaseTexture::Filter::Point);
+	LoadImageData(data.image, data.imageSize, data.channelCount);
 
-		video::TextureLock lock(m_Texture, video::BaseTexture::ELockMode::Overwrite);
-		video::ImageLock imgLock(m_Image);
-
-		const FontPixel* srcRow = (const FontPixel*)imgLock.data;
-		u8* dstRow = lock.data;
-		for(u32 y = 0; y < data.imageSize.height; ++y) {
-			const FontPixel* srcPixel = srcRow;
-			u8* dstPixel = dstRow;
-			for(u32 x = 0; x < data.imageSize.width; ++x) {
-				u8 value = srcPixel->intensity;
-				srcPixel++;
-
-				*dstPixel++ = value;        // Red
-				*dstPixel++ = value;        // Green
-				*dstPixel++ = value;        // Blue
-				*dstPixel++ = value;        // Alpha
-			}
-
-			dstRow += lock.pitch;
-			srcRow += imgLock.pitch;
-		}
-	} else {
-		m_Image = nullptr;
-		m_Texture = nullptr;
-	}
-
-	video::MaterialRenderer* renderer;
-	if(!video::MaterialLibrary::Instance()->ExistsMaterialRenderer("font", &renderer)) {
-		renderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("font", "transparent");
-		video::Pass& pass = renderer->GetPass(0);
-		pass.zWriteEnabled = false;
-		pass.zBufferFunc = video::EComparisonFunc::Always;
-		pass.backfaceCulling = false;
-		pass.lighting = video::ELighting::Disabled;
-		pass.fogEnabled = false;
-		pass.useVertexColor = true;
-		pass.requirements = video::EMaterialRequirement::Transparent;
-		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-		pass.alphaOperator = video::EBlendOperator::Add;
-		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
-		video::TextureStageSettings tss;
-		tss.alphaArg1 = video::ETextureArgument::Texture;
-		tss.alphaArg2 = video::ETextureArgument::Diffuse;
-		tss.alphaOperator = video::ETextureOperator::Modulate;
-		tss.colorArg1 = video::ETextureArgument::Texture;
-		tss.colorArg2 = video::ETextureArgument::Diffuse;
-		tss.colorOperator = video::ETextureOperator::Modulate;
-		pass.layerSettings.PushBack(tss);
-	}
-
+	auto renderer = EnsureMaterialRenderer();
 	m_Material = renderer->CreateMaterial();
-
-	if(m_Texture)
-		m_Material->Layer(0) = m_Texture;
+	m_Material->Layer(0) = m_Texture;
 }
 
 void FontRaster::Draw(
-	const FontRenderSettings& settings,
+	const FontRenderSettings& _settings,
 	core::Range<core::String::ConstIterator> text,
 	const math::Vector2F& position,
 	const math::RectF* userClip)
@@ -112,9 +58,11 @@ void FontRaster::Draw(
 	if(text.begin() == text.end())
 		return;
 
-	const float italic = m_CharHeight * settings.italic * settings.scale;
+	auto settings = GetFinalFontSettings(_settings);
+
+	const float slanting = m_CharHeight * settings.slanting * settings.scale;
 	const float charHeight = m_CharHeight * settings.scale;
-	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
+	const float charSpace = settings.charDistance * settings.scale;
 
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
 
@@ -136,7 +84,10 @@ void FontRaster::Draw(
 	if(userClip)
 		renderer->SetScissorRect(clipRect, &tok);
 
+	m_Material->SetDiffuse(settings.color);
+	m_Material->SetEmissive(settings.borderColor);
 	renderer->SetMaterial(m_Material);
+
 	renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 
 	math::Vector2F cursor = position;
@@ -156,23 +107,20 @@ void FontRaster::Draw(
 		cursor.x += info.A * settings.scale;
 
 		// Top-Left
-		vertices[vertexCursor].position.x = std::floor(cursor.x + italic);
+		vertices[vertexCursor].position.x = std::floor(cursor.x + slanting);
 		vertices[vertexCursor].position.y = std::floor(cursor.y);
-		vertices[vertexCursor].color = settings.color;
 		vertices[vertexCursor].texture.x = info.left;
 		vertices[vertexCursor].texture.y = info.top;
 
 		// Top-Right
-		vertices[vertexCursor + 1].position.x = std::floor(cursor.x + charWidth + italic);
+		vertices[vertexCursor + 1].position.x = std::floor(cursor.x + charWidth + slanting);
 		vertices[vertexCursor + 1].position.y = std::floor(cursor.y);
-		vertices[vertexCursor + 1].color = settings.color;
 		vertices[vertexCursor + 1].texture.x = info.right;
 		vertices[vertexCursor + 1].texture.y = info.top;
 
 		// Lower-Right
 		vertices[vertexCursor + 2].position.x = std::floor(cursor.x + charWidth);
 		vertices[vertexCursor + 2].position.y = std::floor(cursor.y + charHeight);
-		vertices[vertexCursor + 2].color = settings.color;
 		vertices[vertexCursor + 2].texture.x = info.right;
 		vertices[vertexCursor + 2].texture.y = info.bottom;
 
@@ -182,7 +130,6 @@ void FontRaster::Draw(
 		// Lower-Left
 		vertices[vertexCursor + 5].position.x = std::floor(cursor.x);
 		vertices[vertexCursor + 5].position.y = std::floor(cursor.y + charHeight);
-		vertices[vertexCursor + 5].color = settings.color;
 		vertices[vertexCursor + 5].texture.x = info.left;
 		vertices[vertexCursor + 5].texture.y = info.bottom;
 
@@ -223,11 +170,12 @@ void FontRaster::Draw(
 	}
 }
 
-float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text)
+float FontRaster::GetTextWidth(const FontRenderSettings& _settings, core::Range<core::String::ConstIterator> text)
 {
 	if(text.begin() == text.end())
 		return 0.0f;
-	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
+	auto settings = GetFinalFontSettings(_settings);
+	const float charSpace = settings.charDistance * settings.scale;
 
 	float width = -charSpace;
 	for(u32 c : text) {
@@ -243,14 +191,15 @@ float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<c
 	return width;
 }
 
-size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition)
+size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& _settings, core::Range<core::String::ConstIterator> text, float XPosition)
 {
 	if(text.begin() == text.end())
 		return 0;
 	if(XPosition < 0.0f)
 		return 0;
 
-	const float charSpace = m_CharHeight * settings.charDistance * settings.scale;
+	auto settings = GetFinalFontSettings(_settings);
+	const float charSpace = settings.charDistance * settings.scale;
 
 	float caret = 0.0f;
 	float lastCaret;
@@ -280,9 +229,10 @@ size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::
 	return counter;
 }
 
-void FontRaster::GetTextCarets(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets)
+void FontRaster::GetTextCarets(const FontRenderSettings& _settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets)
 {
-	const float charSpace = m_CharHeight * settings.charDistance;
+	auto settings = GetFinalFontSettings(_settings);
+	const float charSpace = settings.charDistance;
 
 	if(text.begin() == text.end())
 		return;
@@ -308,33 +258,175 @@ const CharInfo& FontRaster::GetCharInfo(u32 c)
 	return (it != m_CharMap.End()) ? *it : m_ErrorChar;
 }
 
-core::Name FontRaster::GetReferableType() const
+FontRenderSettings FontRaster::GetFinalFontSettings(const FontRenderSettings& _settings)
 {
-	return core::ResourceType::Font;
+	auto settings = _settings;
+	settings.charDistance += m_BaseSettings.charDistance;
+	settings.lineDistance *= m_BaseSettings.lineDistance;
+	settings.scale *= m_BaseSettings.scale;
+	settings.slanting += m_BaseSettings.slanting;
+	settings.wordDistance *= m_BaseSettings.wordDistance;
+	return settings;
 }
 
-StrongRef<Referable> FontRaster::Clone() const
+video::MaterialRenderer* FontRaster::EnsureMaterialRenderer()
 {
-	return LUX_NEW(FontRaster)(*this);
+	video::MaterialRenderer* renderer;
+	auto matLib = video::MaterialLibrary::Instance();
+	if(matLib->ExistsMaterialRenderer("font_raster", &renderer))
+		return renderer;
+
+	renderer = matLib->AddMaterialRenderer("font_raster");
+	auto& pass = renderer->GetPass(0);
+	pass.requirements = video::EMaterialRequirement::Transparent;
+	pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+	pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+	pass.alphaOperator = video::EBlendOperator::Add;
+	pass.zWriteEnabled = false;
+	pass.zBufferFunc = video::EComparisonFunc::Always;
+	pass.backfaceCulling = false;
+	pass.lighting = video::ELighting::Disabled;
+	pass.fogEnabled = false;
+	pass.useVertexColor = false;
+
+	if(matLib->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {
+		const char* vsCode =
+			R"(
+struct VS_OUT
+{
+	float4 hpos : POSITION;
+	float4 uv_pos : TEXCOORD0;
+};
+
+float4x4 scene_viewProj;
+
+VS_OUT mainVS(float3 position : POSITION, float2 uv : TEXCOORD0)
+{
+	VS_OUT Out;
+	Out.hpos = mul(float4(position, 1), scene_viewProj);
+	Out.uv_pos.xy = uv;
+	Out.uv_pos.zw = position.xy;
+	return Out;
+}
+)";
+		const char* psCode = R"(
+sampler2D param_texture;
+float4 param_diffuse; // font color
+float4 param_emissive; // border color
+
+float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
+{
+	float2 uv = uv_pos.xy;
+	float2 pos = uv_pos.zw;
+	float4 value = tex2D(param_texture, uv);
+
+	float alpha = value.a;
+	float inner = value.r;
+	float4 color = lerp(param_emissive, param_diffuse, inner);
+
+	return float4(color.rgb, alpha*color.a);
+}
+)";
+
+		pass.shader = video::MaterialLibrary::Instance()->CreateShaderFromMemory(
+			video::EShaderLanguage::HLSL,
+			vsCode, "mainVS", 2, 0,
+			psCode, "mainPS", 2, 0);
+		pass.AddTexture();
+		renderer->AddShaderParam("texture", 0, "texture");
+	} else {
+		pass.AddTexture();
+		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
+		video::TextureStageSettings tss;
+		tss.alphaArg1 = video::ETextureArgument::Texture;
+		tss.alphaArg2 = video::ETextureArgument::Diffuse;
+		tss.alphaOperator = video::ETextureOperator::Modulate;
+		tss.colorArg1 = video::ETextureArgument::Texture;
+		tss.colorArg2 = video::ETextureArgument::Diffuse;
+		tss.colorOperator = video::ETextureOperator::Modulate;
+		pass.layerSettings.PushBack(tss);
+	}
+
+	return renderer;
 }
 
-const FontDescription& FontRaster::GetDescription() const
+void FontRaster::LoadImageData(
+	const u8* imageData,
+	math::Dimension2U imageSize,
+	u32 channelCount)
 {
-	return m_Desc;
+	lxAssert(imageData);
+	lxAssert(channelCount > 0);
+
+	m_ImageSize = imageSize;
+	m_ChannelCount = channelCount;
+
+	// Create backup image
+	u32 imageBytes = m_ImageSize.GetArea() * m_ChannelCount;
+	m_Image.Resize(imageBytes);
+	memcpy(m_Image.Data(), imageData, imageBytes);
+
+	// Create texture
+	m_Texture = video::VideoDriver::Instance()->CreateTexture(
+		m_ImageSize, video::ColorFormat::A8R8G8B8, 1, false);
+	m_Texture->SetFiltering(video::BaseTexture::Filter::Point);
+
+	video::TextureLock lock(m_Texture, video::BaseTexture::ELockMode::Overwrite);
+
+	const u8* srcRow = imageData;
+	auto srcPitch = m_ChannelCount * m_ImageSize.width;
+	u8* texRow = lock.data;
+	for(u32 y = 0; y < m_ImageSize.width; ++y) {
+		const u8* srcPixel = srcRow;
+		u8* texPixel = texRow;
+
+		// Copy to backup
+		for(u32 x = 0; x < m_ImageSize.width; ++x) {
+			u8 inner = m_ChannelCount == 2 ? srcPixel[1] : 255;
+			*texPixel++ = inner;        // Blue
+			*texPixel++ = inner;        // Green
+			*texPixel++ = inner;        // Red
+			*texPixel++ = srcPixel[0];        // Alpha
+
+			srcPixel += m_ChannelCount;
+		}
+
+		texRow += lock.pitch;
+		srcRow += srcPitch;
+	}
 }
 
 const core::HashMap<u32, CharInfo>& FontRaster::GetCharMap() const
 {
 	return m_CharMap;
 }
-video::Image* FontRaster::GetImage() const
+
+void FontRaster::GetRawData(const void*& ptr, u32& width, u32& height, u32& channels)
 {
-	return m_Image;
+	ptr = m_Image.Data();
+	width = m_ImageSize.width;
+	height = m_ImageSize.height;
+	channels = m_ChannelCount;
 }
 
 const video::Material* FontRaster::GetMaterial() const
 {
 	return m_Material;
+}
+
+void FontRaster::SetBaseFontSettings(const FontRenderSettings& settings)
+{
+	m_BaseSettings = settings;
+}
+
+const FontRenderSettings& FontRaster::GetBaseFontSettings()
+{
+	return m_BaseSettings;
+}
+
+const FontDescription& FontRaster::GetDescription() const
+{
+	return m_Desc;
 }
 
 float FontRaster::GetBaseLine() const
@@ -345,6 +437,16 @@ float FontRaster::GetBaseLine() const
 float FontRaster::GetFontHeight() const
 {
 	return m_CharHeight;
+}
+
+core::Name FontRaster::GetReferableType() const
+{
+	return core::ResourceType::Font;
+}
+
+StrongRef<Referable> FontRaster::Clone() const
+{
+	return LUX_NEW(FontRaster)(*this);
 }
 
 } // namespace gui

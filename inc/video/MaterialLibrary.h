@@ -118,6 +118,9 @@ public:
 		const core::String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList=nullptr);
 
+	//! Checks if some shader language and version is supported
+	LUX_API bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor);
+
 	LUX_API bool GetShaderInclude(EShaderLanguage language, const core::String& name, const void*& outData, size_t& outBytes);
 	LUX_API void SetShaderInclude(EShaderLanguage language, const core::String& name, const void* data, size_t bytes);
 

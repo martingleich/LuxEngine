@@ -31,7 +31,7 @@ public:
 	}
 
 	//! Construct from two corners
-	Rect(T left, T top, T right, T bottom) : left(left), bottom(bottom), right(right), top(top)
+	Rect(T _left, T _top, T _right, T _bottom) : left(_left), bottom(_bottom), right(_right), top(_top)
 	{
 	}
 

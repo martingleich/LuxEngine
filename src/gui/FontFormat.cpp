@@ -52,9 +52,12 @@ struct CharInfoV1
 	u32 nameBytes; maximal 512 byte
 	u8[nameBytes] name;
 	u32 fontSize;
+	u32 borderSize;
 	u32 weight;
 	u32 flags;
 	u32 charCount;
+
+	u32 channelCount;
 	u32 imageWidth;
 	u32 imageHeight;
 	u32 imageCompression;
@@ -66,17 +69,21 @@ struct CharInfoV1
 	Fraction wordDistance;
 	Fraction lineDistance;
 	Fraction baseLine;
+	Fraction slanting;
 */
 static const u32 FontInfoV1SizeWithoutName = 52;
 struct FontInfoV1
 {
 	core::String name;
+
 	u32 fontSize;
+	u32 borderSize;
 	EFontWeightsV1 weight;
 	bool italic;
 	bool antialiased;
 	u32 charCount;
 
+	u32 channelCount;
 	u32 imageWidth;
 	u32 imageHeight;
 	EImageCompressionV1 imageCompression;
@@ -88,6 +95,7 @@ struct FontInfoV1
 	float wordDistance;
 	float lineDistance;
 	float baseLine;
+	float slanting;
 };
 
 struct Context
@@ -127,17 +135,24 @@ struct Context
 		ReadV1Info(info);
 		outData.baseLine = info.baseLine;
 		outData.charHeight = info.charHeight;
+		outData.desc.borderSize = info.borderSize;
 		outData.desc.antialiased = info.antialiased;
 		outData.desc.italic = info.italic;
 		outData.desc.name = info.name;
 		outData.desc.size = info.fontSize;
 		outData.desc.weight = ConvertV1Weight(info.weight);
+		outData.channelCount = info.channelCount;
 		outData.imageSize.width = info.imageWidth;
 		outData.imageSize.height = info.imageHeight;
+		outData.baseSettings.charDistance = info.charDistance;
+		outData.baseSettings.lineDistance = info.lineDistance;
+		outData.baseSettings.scale = info.scale;
+		outData.baseSettings.slanting = info.slanting;
+		outData.baseSettings.wordDistance = info.wordDistance;
 
 		// Read char settings
-		float invHeight = 1.0f/info.imageHeight;
-		float invWidth = 1.0f/info.imageWidth;
+		float invHeight = 1.0f / info.imageHeight;
+		float invWidth = 1.0f / info.imageWidth;
 		outData.charMap.Reserve(info.charCount);
 		for(u32 i = 0; i < info.charCount; ++i) {
 			CharInfoV1 v1Info;
@@ -154,22 +169,25 @@ struct Context
 		}
 
 		// Read image
+		u32 imageBytes = info.channelCount * info.imageWidth * info.imageHeight;
+		m_ImageData.SetMinSize(imageBytes);
 		if(info.imageCompression == EImageCompressionV1::None) {
-			u32 imageBytes = info.imageWidth*info.imageHeight;
-			m_ImageData.SetMinSize(imageBytes);
 			ReadBytes(imageBytes, m_ImageData);
 		} else if(info.imageCompression == EImageCompressionV1::RLE) {
-			u32 imageBytes = info.imageWidth*info.imageHeight;
-			m_ImageData.SetMinSize(imageBytes);
-			u32 compressedBytes = ReadU32();
-			core::RawMemory compressed(compressedBytes);
-			ReadBytes(compressedBytes, compressed);
-			u8* outCur = m_ImageData;
-			for(u32 i = 0; i < compressedBytes; i += 2) {
-				int r = ((u8*)compressed)[i]+1;
-				u8 v = ((u8*)compressed)[i + 1];
-				memset(outCur, v, r);
-				outCur += r;
+			core::RawMemory compressed;
+			for(u32 c = 0; c < info.channelCount; ++c) {
+				u32 compressedBytes = ReadU32();
+				compressed.SetMinSize(compressedBytes);
+				ReadBytes(compressedBytes, compressed);
+				u8* outCur = m_ImageData;
+				for(u32 i = 0; i < compressedBytes; i += 2) {
+					int r = ((u8*)compressed)[i] + 1;
+					u8 v = ((u8*)compressed)[i + 1];
+					for(int j = 0; j < r; ++j) {
+						outCur[c] = v;
+						outCur += info.channelCount;
+					}
+				}
 			}
 		} else {
 			Error("Unknown image compression");
@@ -184,22 +202,30 @@ struct Context
 		info.antialiased = font->GetDescription().antialiased;
 		info.baseLine = font->GetBaseLine();
 		info.charCount = (u32)font->GetCharMap().Size();
-		info.charDistance = 0;
+
 		info.charHeight = font->GetFontHeight();
 		info.fontSize = font->GetDescription().size;
+		info.borderSize = font->GetDescription().borderSize;
 #ifdef FONT_NO_COMPRESS
 		info.imageCompression = EImageCompressionV1::None;
 #else
 		info.imageCompression = EImageCompressionV1::RLE;
 #endif
-		info.imageHeight = font->GetImage()->GetSize().height;
-		info.imageWidth = font->GetImage()->GetSize().width;
+		const void* imgPtr;
+		u32 w, h, channels;
+		font->GetRawData(imgPtr, w, h, channels);
+		info.imageHeight = h;
+		info.imageWidth = w;
+		info.channelCount = channels;
 		info.italic = font->GetDescription().italic;
-		info.lineDistance = 1;
 		info.name = font->GetDescription().name;
-		info.scale = 1;
 		info.weight = ConvertWeightToV1(font->GetDescription().weight);
-		info.wordDistance = 1;
+
+		info.scale = font->GetBaseFontSettings().scale;
+		info.charDistance = font->GetBaseFontSettings().charDistance;
+		info.wordDistance = font->GetBaseFontSettings().wordDistance;
+		info.lineDistance = font->GetBaseFontSettings().lineDistance;
+		info.slanting = font->GetBaseFontSettings().slanting;
 
 		WriteV1Info(info);
 
@@ -219,39 +245,42 @@ struct Context
 		}
 
 		// Write image
-		if(font->GetImage()->GetBytesPerPixel() != 1)
-			throw core::FileFormatException("Format doesn't support image format", "lxf");
-		video::ImageLock lock(font->GetImage());
 #ifdef FONT_NO_COMPRESS
-		auto cur = lock.data;
+		const u8* cur = (const u8*)imgPtr;
+		auto lineSize = info.imageWidth * info.channelCount;
 		for(u32 i = 0; i < info.imageHeight; ++i) {
-			WriteBytes(info.imageWidth, cur);
-			cur += lock.pitch;
+			WriteBytes(lineSize, cur);
+			cur += lineSize;
 		}
 #else
 		// Write rle
 		core::Array<u8> outData;
-		auto cur = lock.data;
-		int runLen = 0;
-		u8 lastByte = 0;
-		for(u32 i = 0; i < info.imageHeight; ++i) {
-			for(u32 j = 0; j < info.imageWidth; ++j) {
-				u8 byte = cur[j];
-				if(i == 0 && j == 0)
-					lastByte = byte;
+		for(u32 c = 0; c < info.channelCount; ++c) {
+			outData.Clear();
+			const u8* cur = (const u8*)imgPtr;
+			auto pitch = info.imageWidth * info.channelCount;
 
-				if((i == info.imageHeight-1 && j == info.imageWidth-1) || byte != lastByte || runLen == 256) {
-					outData.PushBack((u8)(runLen-1));
-					outData.PushBack(lastByte);
-					runLen = 0;
+			int runLen = 0;
+			u8 lastByte = 0;
+			for(u32 i = 0; i < info.imageHeight; ++i) {
+				for(u32 j = 0; j < info.imageWidth; ++j) {
+					u8 byte = cur[info.channelCount*j + c];
+					if(i == 0 && j == 0)
+						lastByte = byte;
+
+					if((i == info.imageHeight - 1 && j == info.imageWidth - 1) || byte != lastByte || runLen == 256) {
+						outData.PushBack((u8)(runLen - 1));
+						outData.PushBack(lastByte);
+						runLen = 0;
+					}
+					lastByte = byte;
+					++runLen;
 				}
-				lastByte = byte;
-				++runLen;
+				cur += pitch;
 			}
-			cur += lock.pitch;
+			WriteU32((u32)outData.Size());
+			WriteBytes((u32)outData.Size(), outData.Data_c());
 		}
-		WriteU32((u32)outData.Size());
-		WriteBytes((u32)outData.Size(), outData.Data_c());
 #endif
 	}
 
@@ -272,11 +301,13 @@ private:
 		}
 
 		out.fontSize = ReadU32();
+		out.borderSize = ReadU32();
 		out.weight = (EFontWeightsV1)ReadU32();
 		u32 flags = ReadU32();
 		out.italic = (flags & FontFlagV1_Italic) != 0;
 		out.antialiased = (flags & FontFlagV1_Antialiased) != 0;
 		out.charCount = ReadU32();
+		out.channelCount = ReadU32();
 		out.imageWidth = ReadU32();
 		out.imageHeight = ReadU32();
 		out.imageCompression = (EImageCompressionV1)ReadU32();
@@ -287,6 +318,7 @@ private:
 		out.wordDistance = ReadFraction();
 		out.lineDistance = ReadFraction();
 		out.baseLine = ReadFraction();
+		out.slanting = ReadFraction();
 	}
 
 	void WriteV1Info(const FontInfoV1& info)
@@ -297,6 +329,7 @@ private:
 		if(!info.name.IsEmpty())
 			WriteBytes((u32)info.name.Size(), info.name.Data_c());
 		WriteU32(info.fontSize);
+		WriteU32(info.borderSize);
 		WriteU32((u32)info.weight);
 		u32 flags = 0;
 		if(info.italic)
@@ -305,6 +338,7 @@ private:
 			flags |= FontFlagV1_Antialiased;
 		WriteU32(flags);
 		WriteU32(info.charCount);
+		WriteU32(info.channelCount);
 		WriteU32(info.imageWidth);
 		WriteU32(info.imageHeight);
 		WriteU32((u32)info.imageCompression);
@@ -315,6 +349,7 @@ private:
 		WriteFraction(info.wordDistance);
 		WriteFraction(info.lineDistance);
 		WriteFraction(info.baseLine);
+		WriteFraction(info.slanting);
 	}
 
 	[[noreturn]] void Error(const char* message = "format is invalid")

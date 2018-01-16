@@ -441,6 +441,15 @@ void VideoDriverD3D9::AddTextureToList(BaseTexture* tex)
 		m_Textures.PushBack(tex);
 }
 
+bool VideoDriverD3D9::IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor)
+{
+	if(lang != EShaderLanguage::HLSL)
+		return false;
+	const char* vsProfile = GetD3DXShaderProfile(false, vsMajor, vsMinor);
+	const char* psProfile = GetD3DXShaderProfile(true, psMajor, psMinor);
+	return vsProfile != nullptr && psProfile != nullptr;
+}
+
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
 	const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,

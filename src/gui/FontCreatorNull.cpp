@@ -96,11 +96,12 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 		throw core::Exception("Font creation failed");
 
 	CharInfo info;
-	FontPixel* image;
+	u8* image;
 	math::Dimension2U imageSize;
+	u32 channelCount;
 	u32 fontHeight;
 
-	GetFontImage(ctx, image, imageSize);
+	GetFontImage(ctx, image, imageSize, channelCount);
 
 	FontCreationData data;
 	for(auto it = charSet.First(); it != charSet.End(); ++it) {
@@ -113,9 +114,13 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	data.image = image;
 	data.imageSize = imageSize;
 	data.baseLine = 0.0f;
+	data.channelCount = channelCount;
 
 	StrongRef<FontRaster> font = LUX_NEW(FontRaster)(core::ResourceOrigin());
 	font->Init(data);
+	auto settings = font->GetBaseFontSettings();
+	settings.charDistance -= 2 * data.desc.borderSize;
+	font->SetBaseFontSettings(settings);
 
 	return font;
 }

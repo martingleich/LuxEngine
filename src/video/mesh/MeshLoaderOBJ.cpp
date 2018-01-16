@@ -146,7 +146,7 @@ public:
 		for(const auto& s : shapes)
 			indexCount += s.mesh.indices.size();
 
-		bool use32BitIndices = indexCount > std::numeric_limits<u16>::max();
+		bool use32BitIndices = attrib.vertices.size() > std::numeric_limits<u16>::max();
 
 		auto geo = video::VideoDriver::Instance()->CreateGeometry();
 		vertexBuffer = geo->GetVertices();

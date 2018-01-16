@@ -60,6 +60,8 @@ public:
 	i.e. Dynamic texture for temporary use
 	*/
 
+	bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor);
+
 	StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,

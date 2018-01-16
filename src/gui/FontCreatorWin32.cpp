@@ -25,6 +25,7 @@ struct Context
 {
 	HDC dc;
 
+	u32 channelCount;
 	math::Dimension2U imageSize;
 	HBITMAP bitmap;
 
@@ -36,10 +37,14 @@ struct Context
 	core::HashMap<u32, CharInfo> charInfos;
 	core::HashMap<u32, gui::CharInfo> outCharInfo;
 
-	FontPixel* image;
+	u8* image;
 	bool antialiased;
 
 	u32 size;
+	math::RectU padding;
+
+	u32 borderSize;
+
 	bool italic;
 	core::String name;
 
@@ -71,17 +76,17 @@ static void GenerateCharInfo(impl_fontCreatorWin32::Context* ctx)
 		core::CodePointToUTF16(ch, utf16Buffer);
 		result = GetTextExtentPoint32W(ctx->dc, (wchar_t*)utf16Buffer, 1, &charSize);
 
-		ctx->fontHeight = (u8)charSize.cy;
+		ctx->fontHeight = (u8)(charSize.cy + ctx->padding.left + ctx->padding.right);
 		if(result) {
 			ABCFLOAT abc;
 			result = GetCharABCWidthsFloatW(ctx->dc, ch, ch, &abc);
 			if(result) {
 				a = abc.abcfA;
-				b = abc.abcfB;
+				b = abc.abcfB + ctx->padding.left + ctx->padding.right;
 				c = abc.abcfC;
 			} else {
 				a = c = 0;
-				b = (float)charSize.cx;
+				b = (float)charSize.cx + ctx->padding.left + ctx->padding.right;
 			}
 		} else {
 			a = b = c = 0;
@@ -105,6 +110,24 @@ static u32 NextPower2(u32 x)
 	x |= x >> 8;
 	x |= x >> 16;
 	return x + 1;
+}
+
+static DWORD GetWin32FontWeight(EFontWeight weight)
+{
+	switch(weight) {
+	case EFontWeight::ExtraThin:
+		return FW_EXTRABOLD;
+	case EFontWeight::Thin:
+		return FW_LIGHT;
+	case EFontWeight::Normal:
+		return FW_NORMAL;
+	case EFontWeight::Bolt:
+		return FW_BOLD;
+	case EFontWeight::ExtraBolt:
+		return FW_ULTRABOLD;
+	default:
+		return FW_NORMAL;
+	}
 }
 
 static void CalculateImageSize(impl_fontCreatorWin32::Context* ctx)
@@ -163,6 +186,13 @@ static void FreeFont(impl_fontCreatorWin32::Context* ctx)
 	DeleteObject(ctx->font);
 }
 
+static u8 InvertAndGammaCorrect(u8 value)
+{
+	// table[i] = (u8)max(0, min(255, pow((255-i)/255, 1/2.2)*255));
+	static u8 table[256] = {255, 254, 254, 253, 253, 252, 252, 251, 251, 250, 250, 249, 249, 249, 248, 248, 247, 247, 246, 246, 245, 245, 244, 244, 243, 243, 242, 242, 241, 241, 240, 240, 239, 239, 238, 238, 237, 237, 236, 236, 235, 235, 234, 234, 233, 233, 232, 232, 231, 231, 230, 230, 229, 229, 228, 228, 227, 227, 226, 226, 225, 225, 224, 224, 223, 223, 222, 222, 221, 220, 220, 219, 219, 218, 218, 217, 217, 216, 216, 215, 214, 214, 213, 213, 212, 212, 211, 210, 210, 209, 209, 208, 208, 207, 206, 206, 205, 205, 204, 203, 203, 202, 202, 201, 200, 200, 199, 199, 198, 197, 197, 196, 196, 195, 194, 194, 193, 192, 192, 191, 190, 190, 189, 189, 188, 187, 187, 186, 185, 185, 184, 183, 183, 182, 181, 181, 180, 179, 178, 178, 177, 176, 176, 175, 174, 174, 173, 172, 171, 171, 170, 169, 168, 168, 167, 166, 165, 165, 164, 163, 162, 162, 161, 160, 159, 158, 158, 157, 156, 155, 154, 153, 153, 152, 151, 150, 149, 148, 147, 147, 146, 145, 144, 143, 142, 141, 140, 139, 138, 137, 136, 136, 135, 134, 133, 132, 131, 130, 129, 128, 126, 125, 124, 123, 122, 121, 120, 119, 118, 117, 115, 114, 113, 112, 111, 109, 108, 107, 106, 104, 103, 102, 100, 99, 97, 96, 94, 93, 91, 90, 88, 87, 85, 83, 81, 80, 78, 76, 74, 72, 70, 68, 65, 63, 61, 58, 55, 52, 49, 46, 42, 38, 33, 28, 20, 0};
+	return table[value];
+}
+
 static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 {
 	SelectObject(ctx->dc, ctx->font);
@@ -181,6 +211,7 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 
 	u32 cur_x = 0;
 	u32 cur_y = 0;
+	core::Array<math::RectU> charRects;
 	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {
 		const u32 c = it.key();
 		const impl_fontCreatorWin32::CharInfo& info = it.value();
@@ -191,8 +222,8 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 		}
 
 		POINT text = {
-			(LONG)(cur_x - info.a),
-			(LONG)(cur_y)
+			(LONG)(cur_x - info.a + ctx->padding.left),
+			(LONG)(cur_y + ctx->padding.top)
 		};
 
 		u16 utf16[2];
@@ -203,6 +234,11 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 		out.A = info.a;
 		out.B = info.b;
 		out.C = info.c;
+
+		charRects.EmplaceBack(
+			cur_x, cur_y,
+			(u32)(cur_x + info.b),
+			(u32)(cur_y + ctx->fontHeight));
 
 		out.left = (float)(cur_x) / width;
 		out.top = (float)(cur_y) / height;
@@ -239,7 +275,7 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 
 	GdiFlush();
 
-	BYTE *bits = new BYTE[bmi.bmiHeader.biSizeImage];
+	core::RawMemory bits(bmi.bmiHeader.biSizeImage);
 	GetDIBits(ctx->dc,
 		ctx->bitmap,
 		0,
@@ -248,21 +284,78 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 		&bmi,
 		DIB_RGB_COLORS);
 
-	ctx->image = new FontPixel[width * height];
-	for(s32 y = height - 1; y >= 0; --y) {
-		for(u32 x = 0; x < width; ++x) {
-			u32 r = bits[(y*width + x) * 3 + 0];
+	ctx->channelCount = ctx->borderSize > 0 ? 2 : 1;
+	ctx->image = new u8[width * height * ctx->channelCount];
 
-			auto& px = ctx->image[(height - y - 1)*width + x];
-			px.intensity = (u8)(255 - r);
-			// Convert to linear color space
-			float value = pow(px.intensity / 255.0f, 1 / 2.2f) * 255;
-			value = math::Clamp<float>(value, 0.0f, 255.0f);
-			px.intensity = (u8)value;
+	// Invert and gamma correct data, and flip upside down
+	u32 inOff = 0;
+	u32 baseOff = 1;
+	u32 outOff = 2;
+	for(u32 y = 0; y < height; ++y) {
+		for(u32 x = 0; x < width; ++x) {
+			auto in = ((BYTE*)bits)[(y*width + x) * 3 + inOff];
+			auto& out = ((BYTE*)bits)[((height - y - 1)*width + x) * 3 + baseOff];
+			out = InvertAndGammaCorrect(in);
 		}
 	}
 
-	delete[] bits;
+	// Apply dilation function
+	u32 dilateSize = ctx->borderSize;
+	u32 dilateCount = 1; // If changing this, the padding has to be changed too.
+	if(dilateSize > 0 && dilateCount > 0) {
+		for(auto& c : charRects) {
+			inOff = baseOff;
+			outOff = 2;
+			for(u32 pass = 0; pass < dilateCount; ++pass) {
+				for(u32 y = c.top; y < c.bottom; ++y) {
+					for(u32 x = c.left; x < c.right; ++x) {
+						s32 minX = (u32)math::Max((s32)x - (s32)dilateSize, (s32)c.left);
+						s32 maxX = (u32)math::Min((s32)x + (s32)dilateSize, (s32)c.right);
+						s32 minY = (u32)math::Max((s32)y - (s32)dilateSize, (s32)c.top);
+						s32 maxY = (u32)math::Min((s32)y + (s32)dilateSize, (s32)c.bottom);
+						u32 dilated = 0;
+						for(s32 j = minY; j <= maxY; ++j) {
+							for(s32 i = minX; i <= maxX; ++i) {
+								auto in = ((BYTE*)bits)[(j*width + i) * 3 + inOff];
+								if(in > dilated)
+									dilated = in;
+							}
+						}
+						((BYTE*)bits)[(y*width + x) * 3 + outOff] = (BYTE)dilated;
+					}
+				}
+				if(pass == 0) {
+					inOff = 2;
+					outOff = 0;
+				} else {
+					std::swap(inOff, outOff);
+				}
+			}
+		}
+	}
+
+	// Convert to final data
+	for(u32 y = 0; y < height; ++y) {
+		for(u32 x = 0; x < width; ++x) {
+			auto alpha = ctx->image + (y*width + x) * ctx->channelCount + 0;
+			auto inner = ctx->image + (y*width + x) * ctx->channelCount + 1;
+
+			if(ctx->borderSize) {
+				u32 dilated = ((BYTE*)bits)[(y*width + x) * 3 + inOff];
+				auto base = ((BYTE*)bits)[(y*width + x) * 3 + baseOff];
+				// a+b 
+				*alpha = (u8)(base + dilated - (base * dilated) / 255);
+				// b/a+b
+				if(*alpha != 0)
+					*inner = (255 * base) / *alpha;
+				else
+					*inner = 255; // Any value would be okay.
+			} else {
+				*alpha = ((BYTE*)bits)[(y*width + x) * 3 + baseOff];
+				// *inner = 255; // Don't write inner since channel not available
+			}
+		}
+	}
 }
 
 int CALLBACK EnumFontFamExProc(
@@ -359,24 +452,6 @@ void* FontCreatorWin32::BeginFontCreation(const core::String& name,
 	return BeginFontCreation(false, name, desc, charSet);
 }
 
-static DWORD GetWin32FontWeight(EFontWeight weight)
-{
-	switch(weight) {
-	case EFontWeight::ExtraThin:
-		return FW_EXTRABOLD;
-	case EFontWeight::Thin:
-		return FW_LIGHT;
-	case EFontWeight::Normal:
-		return FW_NORMAL;
-	case EFontWeight::Bolt:
-		return FW_BOLD;
-	case EFontWeight::ExtraBolt:
-		return FW_ULTRABOLD;
-	default:
-		return FW_NORMAL;
-	}
-}
-
 void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& name,
 	const FontDescription& desc,
 	const core::Array<u32>& charSet)
@@ -388,7 +463,13 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	ctx->italic = desc.italic;
 	ctx->weight = desc.weight;
 	ctx->size = desc.size;
+	ctx->borderSize = desc.borderSize;
 	ctx->name = name;
+	ctx->padding = math::RectU(
+		desc.borderSize,
+		desc.borderSize,
+		desc.borderSize,
+		desc.borderSize);
 
 	if(!GenerateDC(ctx)) {
 		delete ctx;
@@ -430,7 +511,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	return ctx;
 }
 
-bool FontCreatorWin32::GetFontImage(void* void_ctx, FontPixel*& image, math::Dimension2U& imageSize)
+bool FontCreatorWin32::GetFontImage(void* void_ctx, u8*& image, math::Dimension2U& imageSize, u32& channelCount)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)
@@ -438,6 +519,7 @@ bool FontCreatorWin32::GetFontImage(void* void_ctx, FontPixel*& image, math::Dim
 
 	image = ctx->image;
 	imageSize = ctx->imageSize;
+	channelCount = ctx->channelCount;
 
 	return true;
 }
@@ -454,6 +536,7 @@ void FontCreatorWin32::GetFontInfo(void* void_ctx, u32& fontHeight, FontDescript
 	desc.antialiased = ctx->antialiased;
 	desc.size = ctx->size;
 	desc.weight = ctx->weight;
+	desc.borderSize = ctx->borderSize;
 }
 
 bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo)
