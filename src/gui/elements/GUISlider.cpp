@@ -17,9 +17,9 @@ Slider::Slider()
 	auto minSize = GetMinSize();
 	minSize.height = math::Max(m_ThumbSize.height, minSize.height);
 	SetMinSize(minSize);
+	SetStep(1, 10);
 	SetSettings(Horizontal | StepOnClick);
 	SetRange(0, 100);
-	SetStep(1, 10);
 	SetThumbPos(0);
 
 	onPosChange.SetConnectEvent([this](const event::SignalFunc<int>& newSlot) {

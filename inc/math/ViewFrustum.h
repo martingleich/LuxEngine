@@ -175,10 +175,14 @@ public:
 	}
 
 	//! Access the corners
+	/**
+	\param start The first corner to return, a total of 8-start corners are returned
+	\return Range over corners
+	*/
 	core::Range<const math::Vector3F*> Corners(u32 start = 0) const
 	{
 		lxAssert(start <= 8);
-		return core::MakeRange(m_Points, m_Points+8);
+		return core::MakeRange(m_Points+start, m_Points+8);
 	}
 
 	//! Access a single corner

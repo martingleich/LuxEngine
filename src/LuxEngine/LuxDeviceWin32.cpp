@@ -81,10 +81,13 @@ LUX_API StrongRef<LuxDevice> CreateDevice()
 
 LuxDeviceWin32::LuxDeviceWin32()
 {
+	m_NeverSetEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
 }
 
 LuxDeviceWin32::~LuxDeviceWin32()
 {
+	CloseHandle(m_NeverSetEvent);
+
 	ReleaseModules();
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
@@ -169,8 +172,13 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	log::Info("Built Input System.");
 }
 
-bool LuxDeviceWin32::RunMessageQueue()
+bool LuxDeviceWin32::RunMessageQueue(u32 waitTime)
 {
+	if(waitTime) {
+		DWORD res = MsgWaitForMultipleObjects(1, &m_NeverSetEvent, FALSE, waitTime, QS_ALLINPUT);
+		(void)res;
+	}
+
 	MSG Message = {0};
 	while(PeekMessageW(&Message, (HWND)m_Window->GetDeviceWindow(), 0, 0, PM_REMOVE)) {
 		if(Message.message == WM_QUIT)
@@ -213,11 +221,11 @@ bool LuxDeviceWin32::WaitForWindowChange()
 	}
 }
 
-bool LuxDeviceWin32::Run()
+bool LuxDeviceWin32::Run(u32 waitTime)
 {
 	bool wasQuit = false;
 	if(m_Window) {
-		if(RunMessageQueue()) {
+		if(RunMessageQueue(waitTime)) {
 			m_Window->Close();
 			wasQuit = true;
 			m_Window = nullptr;
@@ -236,6 +244,7 @@ StrongRef<LuxSystemInfo> LuxDeviceWin32::GetSystemInfo() const
 {
 	return g_SystemInfo;
 }
+
 StrongRef<gui::Cursor> LuxDeviceWin32::GetCursor() const
 {
 	return m_Window->GetDeviceCursor();

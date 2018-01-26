@@ -253,7 +253,7 @@ private:
 			return false;
 		}
 
-		// Wait unti we are allowed to do something
+		// Wait until we are allowed to do something
 		bool wait;
 		bool pausing = false;
 		do {
@@ -285,8 +285,6 @@ private:
 	{
 		video::RenderStatistics::Instance()->EndFrame();
 		video::RenderStatistics::Instance()->BeginFrame();
-
-		secsPassed *= m_FrameLoop.timeScale;
 
 		if(m_Scene)
 			m_Scene->AnimateAll(secsPassed);
@@ -323,9 +321,9 @@ private:
 				m_PerformDriverReset = true;
 			}
 		}
-		if(m_FrameLoop.callback) {
+
+		if(m_FrameLoop.callback)
 			m_FrameLoop.callback->PostFrame(secsPassed);
-		}
 	}
 
 	bool ResetDriver()
@@ -385,19 +383,21 @@ void LuxDeviceNull::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 	u64 endTime;
 	startTime = core::Clock::GetTicks();
 	float invTicksPerSecond = 1.0f / core::Clock::TicksPerSecond();
-	float secsPassed = 0.0f;
-	while(Run()) {
+	float secsPassed = 0;
+	float minSecsPassed = 1.0f / frameLoop.maxFrameRate;
+	u32 runWaitTime = 1;
+	while(Run(runWaitTime)) {
 		if(!defLoop.CallPreFrame()) {
 			startTime = core::Clock::GetTicks();
 			continue;
 		}
 
-		if(secsPassed != 0)
+		if(secsPassed > minSecsPassed)
 			defLoop.CallDoFrame(secsPassed);
 
 		endTime = core::Clock::GetTicks();
 		secsPassed = (endTime - startTime)*invTicksPerSecond;
-		if(secsPassed != 0)
+		if(secsPassed > minSecsPassed)
 			startTime = endTime;
 	}
 }

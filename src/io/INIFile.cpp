@@ -92,9 +92,10 @@ bool INIFile::ReadSections()
 
 	bool readSection = true;
 	bool useOldLine = false;
-	m_Work.Clear();
 
-	while(useOldLine || ReadLine(m_Work)) {
+	ReadLine(m_Work);
+
+	while(useOldLine || !(m_Work.IsEmpty() && m_IsEOF)) {
 		if(*m_Work.First() == '[') {
 			useOldLine = false;
 
@@ -157,6 +158,9 @@ bool INIFile::ReadSections()
 			useOldLine = false;
 			// Ignore line        
 		}
+
+		if(!useOldLine)
+			ReadLine(m_Work);
 	}
 
 	return !m_IsEOF;
@@ -299,12 +303,12 @@ bool INIFile::IsComment(const core::String& work, core::String::ConstIterator& c
 	return false;
 }
 
-bool INIFile::ReadLine(core::String& out)
+void INIFile::ReadLine(core::String& out)
 {
 	out.Clear();
 
 	if(m_IsEOF)
-		return false;
+		return;
 
 	char c;
 	u32 readBytes;
@@ -346,11 +350,9 @@ bool INIFile::ReadLine(core::String& out)
 				m_LastComment.Append("\n");
 			m_LastComment.Append(commentBegin, out.End());
 		} else {
-			return !m_IsEOF;
+			return;
 		}
 	}
-
-	return !m_IsEOF;
 }
 
 void INIFile::Close()

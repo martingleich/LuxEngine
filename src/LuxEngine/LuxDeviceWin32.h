@@ -22,7 +22,7 @@ public:
 	void BuildWindow(u32 width, u32 height, const core::String& title);
 	void BuildInputSystem(bool isForeground = true);
 	bool WaitForWindowChange();
-	bool Run();
+	bool Run(u32 waitTime);
 
 	void Sleep(u32 millis);
 
@@ -34,7 +34,7 @@ public:
 	StrongRef<LuxSystemInfo> GetSystemInfo() const;
 	StrongRef<gui::Cursor> GetCursor() const;
 
-	bool RunMessageQueue();
+	bool RunMessageQueue(u32 waitTime);
 	bool HandleMessages(
 		HWND wnd,
 		UINT Message,
@@ -48,6 +48,8 @@ private:
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 	StrongRef<input::RawInputReceiver> m_RawInputReceiver;
 #endif
+
+	HANDLE m_NeverSetEvent;
 };
 
 } // namespace lux

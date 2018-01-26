@@ -118,7 +118,7 @@ private:
 
 private:
 	bool LoadData();
-	bool ReadLine(core::String& out);
+	void ReadLine(core::String& out);
 	bool ParseSectionName(core::String& work, core::String& out);
 	bool ReadSections();
 	bool ReadElement(core::String& work, SINIElement& element);

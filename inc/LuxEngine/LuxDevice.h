@@ -93,10 +93,10 @@ public:
 
 	//! Runs all engine internal actions.
 	/**
-	\param [out] numSecsPassed The time in seconds since the last call to Run.
+	\param waitTime Time this function waits for events to occur in milliseconds.
 	\return Returns true if the device is still running, returns false once when the device was closed.
 	*/
-	virtual bool Run() = 0;
+	virtual bool Run(u32 waitTime = 0) = 0;
 
 	//! Wait until the window changed.
 	/**
@@ -122,7 +122,7 @@ public:
 
 	struct SimpleFrameLoop
 	{
-		float timeScale = 1.0f;
+		float maxFrameRate = 1000.0f;
 		bool pauseOnLostFocus = false;
 		bool pauseOnMinimize = true;
 		bool useDefaultPreFrame = true;
