@@ -39,7 +39,6 @@ private:
 	void OnResize(Window* window, const math::Dimension2F& newSize);
 
 private:
-	bool m_IsVisible;
 	WeakRef<Window> m_Window;
 	math::Dimension2F m_WindowSize;
 	math::Dimension2F m_InvWindowSize;
@@ -50,6 +49,7 @@ private:
 	math::Vector2F m_GrabbingPosition;
 
 	math::Vector2F m_OldPos;
+	bool m_Visible;
 };
 
 } // namespace gui

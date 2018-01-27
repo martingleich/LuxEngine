@@ -7,17 +7,15 @@ namespace lux
 namespace gui
 {
 
-CursorWin32::CursorWin32(Window* window) : m_Window(window), m_Grabbing(false)
+CursorWin32::CursorWin32(Window* window) : 
+	m_Window(window),
+	m_Grabbing(false),
+	m_Visible(true)
 {
 	m_OldPos = math::Vector2F(-1, -1);
 
 	m_Window->onResize.Connect(this, &CursorWin32::OnResize);
 	OnResize(m_Window, m_Window->GetFinalSize());
-	CURSORINFO Info;
-	Info.cbSize = sizeof(CURSORINFO);
-	BOOL GotInfo = GetCursorInfo(&Info);
-	if(GotInfo)
-		m_IsVisible = (Info.flags == CURSOR_SHOWING);
 }
 
 CursorWin32::~CursorWin32()
@@ -28,26 +26,6 @@ CursorWin32::~CursorWin32()
 
 void CursorWin32::SetState(ECursorState state)
 {
-	if(state != m_State) {
-		HCURSOR cursor = NULL;
-		switch(state) {
-		case ECursorState::Beam:
-			cursor = LoadCursorW(NULL, IDC_IBEAM);
-			break;
-		case ECursorState::Wait:
-			cursor = LoadCursorW(NULL, IDC_WAIT);
-			break;
-		case ECursorState::Normal:
-			cursor = LoadCursorW(NULL, IDC_ARROW);
-			break;
-		default:
-			cursor = LoadCursorW(NULL, IDC_ARROW);
-			break;
-		}
-		if(cursor)
-			SetCursor(cursor);
-	}
-
 	m_State = state;
 }
 
@@ -92,29 +70,14 @@ const math::Dimension2F& CursorWin32::GetScreenSize() const
 	return m_WindowSize;
 }
 
-void CursorWin32::SetVisible(bool Visible)
+void CursorWin32::SetVisible(bool visible)
 {
-	CURSORINFO Info;
-	Info.cbSize = sizeof(CURSORINFO);
-	BOOL GotInfo = GetCursorInfo(&Info);
-	if(GotInfo) {
-		// Ist der Cursor schon sichtbar/unsichtbar
-		if(!((Visible && Info.flags == CURSOR_SHOWING)
-			|| (!Visible && Info.flags == 0))) {
-			// ShowCursor verringert nur einen Refernzzähler, erst abbrechen wenn er 0 erreicht
-			int ShowResult = ShowCursor(Visible ? TRUE : FALSE);
-			while(Visible != (ShowResult >= 0)) {
-				ShowResult = ShowCursor(Visible ? TRUE : FALSE);
-			}
-		}
-	}
-
-	m_IsVisible = Visible;
+	m_Visible = visible;
 }
 
 bool CursorWin32::IsVisible() const
 {
-	return m_IsVisible;
+	return m_Visible;
 }
 
 bool CursorWin32::IsGrabbing() const

@@ -50,14 +50,14 @@ public:
 	Uses FontRenderSettings and Font set via Ensure.
 	\param r Renderer used to draw the text
 	\param align Alignment of the text inside the textbox
-	\param clipTextInside Text outside the textbox is clipped
 	\param textBox The textbox to draw the text in
+	\param clipBox Additional box to clip the text against
 	*/
 	LUX_API void Render(
 		gui::Renderer* r,
 		EAlign align,
-		bool clipTextInside,
-		const math::RectF& textBox);
+		const math::RectF& textBox,
+		const math::RectF* clipBox=nullptr);
 
 	//! Renders and Ensures text in one call
 	/**
@@ -65,18 +65,18 @@ public:
 	\param font The font used to render the text.
 	\param settings The font render settings.
 	\param wordWrap Should automatic word wrapping be performed.
-	\param clipTextInside Text outside the textbox is clipped
 	\param align Alignment of the text inside the textbox
 	\param textBox The textbox to draw the text in
+	\param clipBox Additional box to clip the text against
 	*/
 	LUX_API void Render(
 		gui::Renderer* r,
 		Font* font,
 		const FontRenderSettings& settings,
 		bool wordWrap,
-		bool clipTextInside,
 		EAlign align,
-		const math::RectF& textBox);
+		const math::RectF& textBox,
+		const math::RectF* clipBox=nullptr);
 
 	LUX_API size_t GetLineCount() const;
 	LUX_API core::Range<core::String::ConstIterator> GetLine(size_t i) const;

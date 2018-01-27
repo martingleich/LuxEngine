@@ -64,7 +64,7 @@ void RadioButton::Paint(Renderer* renderer)
 
 	gui::FontRenderSettings settings;
 	settings.color = palette.GetWindowText(GetState());
-	m_Text.Render(renderer, font, settings, false, false, align, textBox);
+	m_Text.Render(renderer, font, settings, false, align, textBox);
 }
 
 bool RadioButton::IsChecked() const

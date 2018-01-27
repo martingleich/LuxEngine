@@ -37,7 +37,7 @@ void Button::Paint(Renderer* r)
 	settings.color = palette.GetWindowText(GetState());
 	m_Text.Render(
 		r, GetFont(),
-		settings, false, false, GetAlignment(),
+		settings, false, GetAlignment(),
 		GetFinalInnerRect() + textOffset);
 }
 

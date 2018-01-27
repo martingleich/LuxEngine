@@ -48,7 +48,8 @@ void StaticText::Paint(Renderer* r)
 	if(m_DrawBackground)
 		skin->DrawControl(r, this, GetFinalRect(), EGUIControl::StaticText, state, po);
 
-	m_TextContainer.Render(r, GetAlignment(), m_ClipTextInside, GetFinalInnerRect());
+	auto rect = GetFinalRect();
+	m_TextContainer.Render(r, GetAlignment(), rect, m_ClipTextInside ? &rect : nullptr);
 }
 
 void StaticText::FitSizeToText()

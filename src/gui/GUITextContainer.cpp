@@ -135,8 +135,8 @@ void TextContainer::Ensure(
 void TextContainer::Render(
 	gui::Renderer* r,
 	EAlign align,
-	bool clipTextInside,
-	const math::RectF& textBox)
+	const math::RectF& textBox,
+	const math::RectF* clipBox)
 {
 	if(m_Text.IsEmpty())
 		return;
@@ -151,7 +151,6 @@ void TextContainer::Render(
 	else if(TestFlag(align, EAlign::VBottom))
 		cursor.y = textBox.bottom - totalHeight;
 
-	auto clip = clipTextInside ? &textBox : nullptr;
 	for(auto line : m_BrokenText) {
 		auto lineRange = line.line;
 		auto lineWidth = line.width;
@@ -162,10 +161,10 @@ void TextContainer::Render(
 		else if(TestFlag(align, EAlign::HRight))
 			cursor.x = textBox.right - lineWidth;
 
-		if(!clip || cursor.y + lineHeight >= clip->top)
-			r->DrawText(m_Font, m_FontSettings, lineRange, cursor, clip);
+		if(!clipBox || cursor.y + lineHeight >= clipBox->top)
+			r->DrawText(m_Font, m_FontSettings, lineRange, cursor, clipBox);
 		cursor.y += lineHeight;
-		if(clip && cursor.y > clip->bottom)
+		if(clipBox && cursor.y > clipBox->bottom)
 			break;
 	}
 }
@@ -175,12 +174,12 @@ void TextContainer::Render(
 	Font* font,
 	const FontRenderSettings& settings,
 	bool wordWrap,
-	bool clipTextInside,
 	EAlign align,
-	const math::RectF& textBox)
+	const math::RectF& textBox,
+	const math::RectF* clipBox)
 {
 	Ensure(font, settings, wordWrap, textBox.GetSize());
-	Render(r, align, clipTextInside, textBox);
+	Render(r, align, textBox, clipBox);
 }
 
 size_t TextContainer::GetLineCount() const

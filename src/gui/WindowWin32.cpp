@@ -10,6 +10,7 @@
 
 #include "core/lxUnicodeConversion.h"
 #include "platform/Win32Exception.h"
+#include "LuxEngine/DllMainWin32.h"
 
 namespace lux
 {
@@ -23,6 +24,9 @@ WindowWin32::WindowWin32(HWND window) :
 	SetClearBackground(false);
 
 	m_Cursor = LUX_NEW(CursorWin32)(this);
+	m_Beam = LoadCursorW(NULL, IDC_IBEAM);
+	m_Wait = LoadCursorW(NULL, IDC_WAIT);
+	m_Arrow = LoadCursorW(NULL, IDC_ARROW);
 
 	BOOL isIconic = IsIconic(m_Window);
 	BOOL isZoomed = IsZoomed(m_Window);
@@ -360,6 +364,24 @@ bool WindowWin32::HandleMessages(UINT Message,
 			return true;
 		} else {
 			m_Cursor->Tick();
+		}
+		break;
+	case WM_SETCURSOR:
+		if(LOWORD(LParam) == HTCLIENT && !m_Cursor->IsVisible()) {
+			SetCursor(NULL);
+			result = TRUE;
+			return true;
+		} else {
+			HCURSOR cursor;
+			switch(m_Cursor->GetState()) {
+			case ECursorState::Beam: cursor = m_Beam; break;
+			case ECursorState::Wait: cursor = m_Wait; break;
+			case ECursorState::Normal: cursor = m_Arrow; break;
+			default: cursor = m_Arrow; break;
+			}
+			SetCursor(cursor);
+			result = TRUE;
+			return true;
 		}
 		break;
 	case WM_DESTROY:

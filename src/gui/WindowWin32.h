@@ -98,6 +98,9 @@ private:
 	SavedWindow m_SavedWindow;
 
 	StrongRef<CursorWin32> m_Cursor;
+	HCURSOR m_Beam;
+	HCURSOR m_Wait;
+	HCURSOR m_Arrow;
 };
 
 } // namespace gui

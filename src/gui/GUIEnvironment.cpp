@@ -44,6 +44,7 @@ public:
 		m_Cursor(cursor)
 	{
 		m_Visible = cursor->IsVisible();
+		m_VirtualVisible = false;
 	}
 
 	void SetState(ECursorState state) { m_Cursor->SetState(state); }
