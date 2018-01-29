@@ -280,11 +280,15 @@ void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 	m_Win32KeyStates[VK_CAPITAL] = (((GetKeyState(VK_CAPITAL) & 0x0001) != 0) ? 0x81 : 0x00);
 	m_Win32KeyStates[VK_RSHIFT] = (BYTE)GetKeyState(VK_RSHIFT); // Upper byte contains only push button information.
 	m_Win32KeyStates[VK_LSHIFT] = (BYTE)GetKeyState(VK_LSHIFT);// Upper byte contains only push button information.
+	m_Win32KeyStates[VK_RCONTROL] = (BYTE)GetKeyState(VK_RCONTROL); // Upper byte contains only push button information.
+	m_Win32KeyStates[VK_LCONTROL] = (BYTE)GetKeyState(VK_LCONTROL);// Upper byte contains only push button information.
 	m_Win32KeyStates[VK_SHIFT] = m_Win32KeyStates[VK_LSHIFT] | m_Win32KeyStates[VK_RSHIFT];
 
 	m_Win32KeyStates[VK_RMENU] = (BYTE)GetKeyState(VK_RMENU); // Upper byte contains only push button information.
 	m_Win32KeyStates[VK_LMENU] = (BYTE)GetKeyState(VK_LMENU); // Upper byte contains only push button information.
 	m_Win32KeyStates[VK_MENU] = m_Win32KeyStates[VK_LMENU] | m_Win32KeyStates[VK_RMENU];
+	m_Win32KeyStates[VK_CONTROL] = m_Win32KeyStates[VK_LCONTROL] | m_Win32KeyStates[VK_RCONTROL];
+
 
 	UINT flags = (m_Win32KeyStates[VK_MENU] & 0x80) != 0 ? 1 : 0;
 	wchar_t translatedKey[10];
