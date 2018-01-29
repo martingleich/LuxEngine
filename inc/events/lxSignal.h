@@ -26,7 +26,15 @@ struct SignalMemberFuncSafe : SignalFunc<Args...>
 	using MemPtr = void (Class::*)(Args...);
 
 	WeakRef<Class> owner;
+#ifdef _MSC_VER
+	// False positive bug in vc
+#pragma warning(push)
+#pragma warning(disable: 4121)
+#endif
 	MemPtr proc;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 	SignalMemberFuncSafe(Class* o, MemPtr proc) :
 		owner(o),
