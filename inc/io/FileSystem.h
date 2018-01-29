@@ -146,7 +146,7 @@ public:
 	/**
 	\param path The path of the new file if the file ends with a / its a directory
 	\param recursive If this parameter is true, and the subpath to the new file doesn't exist
-	it'S created
+	it's created
 	\return True, if the file or directory was created or already existed, false if the creation failed
 	*/
 	virtual bool CreateFile(const Path& path, bool recursive = false) = 0;

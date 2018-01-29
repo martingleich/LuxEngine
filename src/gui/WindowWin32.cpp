@@ -134,9 +134,9 @@ void WindowWin32::SetInnerSize(const ScalarDimensionF& size)
 	SetRect(&rect, 0, 0, real.width, real.height);
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, false);
 	real.width = rect.right - rect.left;
-	real.width = rect.bottom - rect.top;
+	real.height = rect.bottom - rect.top;
 
-	SetSize(Pixel(real.width), Pixel(real.width));
+	SetSize(Pixel(real.width), Pixel(real.height));
 }
 
 math::RectF WindowWin32::GetParentInnerRect() const

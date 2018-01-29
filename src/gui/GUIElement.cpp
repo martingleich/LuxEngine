@@ -393,14 +393,16 @@ Palette Element::GetFinalPalette() const
 void Element::SetTextColor(video::Color c)
 {
 	auto p = GetPalette();
-	p.SetColor(gui::Palette::EColorRole::WindowText, c);
+	p.SetColor(gui::Palette::EColorGroup::Enabled, gui::Palette::EColorRole::WindowText, c);
+	p.SetColor(gui::Palette::EColorGroup::Disabled, gui::Palette::EColorRole::WindowText, 0.5f*c);
 	SetPalette(p);
 }
 
 void Element::SetBackgroundColor(video::Color c)
 {
 	auto p = GetPalette();
-	p.SetColor(gui::Palette::EColorRole::Window, c);
+	p.SetColor(gui::Palette::EColorGroup::Enabled, gui::Palette::EColorRole::Window, c);
+	p.SetColor(gui::Palette::EColorGroup::Disabled, gui::Palette::EColorRole::WindowText, 0.5f*c);
 	SetPalette(p);
 }
 

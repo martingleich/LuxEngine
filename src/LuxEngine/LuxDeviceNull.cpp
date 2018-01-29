@@ -303,6 +303,15 @@ private:
 		if(m_FrameLoop.callback)
 			m_FrameLoop.callback->PostSceneRender(secsPassed);
 
+		if(!m_Renderer->GetRenderTarget().IsBackbuffer()) {
+			// If the scene graph didn't render into the backbuffer,
+			// finish the scene and renderer the gui into the backbuffer.
+			m_Renderer->EndScene();
+			m_Renderer->BeginScene();
+			m_Renderer->SetRenderTarget(nullptr);
+			m_Renderer->Clear(true, true, true);
+		}
+
 		if(m_GUIEnv)
 			m_GUIEnv->Render();
 

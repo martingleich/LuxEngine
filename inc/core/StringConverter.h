@@ -80,7 +80,7 @@ public:
 
 		return std::move(out);
 	}
-	
+
 	template <typename... T>
 	static void AppendFormat(core::String& str, core::StringType format, T... args)
 	{
@@ -92,28 +92,32 @@ public:
 	/**
 	\param str The string to convert
 	\param errorValue The value which is returned if an error occurs
-	\param [out] nextChar The first character after the number, only written when not null
+	\param [out] nextChar The first character after the number, only written if not null
+	\param [out] error Did an error occur, only written if not null
 	\return The parsed float
 	*/
-	static float ParseFloat(const core::String& str, float errorValue = 0.0f, const char** nextChar = nullptr)
+	static float ParseFloat(const core::String& str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
 	{
-		return ParseFloat(str.Data(), errorValue, nextChar);
+		return ParseFloat(str.Data(), errorValue, nextChar, error);
 	}
 
 	//! Create a float from a string
 	/**
 	\param str The string to convert
 	\param errorValue The value which is returned if an error occurs
-	\param [out] nextChar The first character after the number, only written when not null
+	\param [out] nextChar The first character after the number, only written if not null
+	\param [out] error Did an error occur, only written if not null
 	\return The parsed float
 	*/
-	static float ParseFloat(const char* str, float errorValue = 0.0f, const char** nextChar = nullptr)
+	static float ParseFloat(const char* str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
 	{
 		int sign = 1;
 
 		if(!*str) {
 			if(nextChar)
 				*nextChar = str;
+			if(error)
+				*error = true;
 			return errorValue;
 		}
 
@@ -125,8 +129,11 @@ public:
 			++str;
 		}
 
-		if(strcmp(str, "inf") == 0)
+		if(strcmp(str, "inf") == 0) {
+			if(error)
+				*error = false;
 			return sign * std::numeric_limits<float>::infinity();
+		}
 
 		unsigned int pre = 0;
 		unsigned int post = std::numeric_limits<unsigned int>::max();
@@ -162,15 +169,16 @@ public:
 		}
 
 		float out = (float)pre;
-		if(post != std::numeric_limits<unsigned int>::max()) {
+		if(post != std::numeric_limits<unsigned int>::max())
 			out += (float)post / numDigits;
-		}
 
 		out *= sign;
 
 		if(nextChar)
 			*nextChar = str;
 
+		if(error)
+			*error = true;
 		return out;
 	}
 
@@ -178,12 +186,13 @@ public:
 	/**
 	\param str The string to convert
 	\param errorValue The value which is returned if an error occurs
-	\param [out] nextChar The first character after the number, only written when not null
+	\param [out] nextChar The first character after the number, only written if not null
+	\param [out] error Did an error occur, only written if not null
 	\return The parsed integer
 	*/
-	static int ParseInt(const core::String& str, int errorValue = 0, const char** nextChar = nullptr)
+	static int ParseInt(const core::String& str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
 	{
-		return ParseInt(str.Data(), errorValue, nextChar);
+		return ParseInt(str.Data(), errorValue, nextChar, error);
 	}
 
 	//! Create a integer from a string
@@ -193,7 +202,7 @@ public:
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed integer
 	*/
-	static int ParseInt(const char* str, int errorValue = 0, const char** nextChar = nullptr)
+	static int ParseInt(const char* str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
 	{
 		unsigned int value = 0;
 		int numDigits = 0;
@@ -202,6 +211,8 @@ public:
 		if(!*str) {
 			if(nextChar)
 				*nextChar = str;
+			if(error)
+				*error = true;
 			return errorValue;
 		}
 
@@ -222,6 +233,8 @@ public:
 					|| (sign == -1 && value > (unsigned int)std::numeric_limits<int>::max())) {
 					if(nextChar)
 						*nextChar = str;
+					if(error)
+						*error = true;
 					return errorValue;
 				}
 				++str;
@@ -233,10 +246,15 @@ public:
 		if(nextChar)
 			*nextChar = str;
 
-		if(numDigits > 0)
+		if(numDigits > 0) {
+			if(error)
+				*error = false;
 			return (int)value*sign;
-		else
+		} else {
+			if(error)
+				*error = true;
 			return errorValue;
+		}
 	}
 };
 

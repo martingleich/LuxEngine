@@ -78,8 +78,8 @@ private:
 		m_FinalRect.bottom = (float)(m_WindowScreenRect.bottom - clientRect.top);
 		m_InnerRect.left = 0;
 		m_InnerRect.top = 0;
-		m_InnerRect.right = (float)clientRect.right;
-		m_InnerRect.bottom = (float)clientRect.bottom;
+		m_InnerRect.right = (float)(clientRect.right - clientRect.left);
+		m_InnerRect.bottom = (float)(clientRect.bottom - clientRect.top);
 		m_Size.width = m_FinalRect.GetWidth();
 		m_Size.height = m_FinalRect.GetHeight();
 

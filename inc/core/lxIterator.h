@@ -316,6 +316,12 @@ Range<IterT> MakeRange(IterT first, IterT end)
 {
 	return Range<IterT>(first, end);
 }
+template <typename Class, typename IterT = decltype(std::declval<Class>().begin())>
+Range<IterT> MakeRange(Class&& obj)
+{
+	using namespace std;
+	return Range<IterT>(begin(obj), end(obj));
+}
 
 template <typename BaseT>
 struct IndexIter : public BaseIterator<RandomAccessIteratorTag, BaseT>
@@ -325,16 +331,16 @@ public:
 	IndexIter(BaseT v) : value(v) {}
 	bool operator==(IndexIter other) const { return value == other.value; }
 	bool operator!=(IndexIter other) const { return value != other.value; }
-	IndexIter operator++() {++value; return *this; }
+	IndexIter operator++() { ++value; return *this; }
 	IndexIter& operator+=(intptr_t v) { value += (BaseT)v; return *this; }
 	IndexIter operator+(intptr_t v) { return IndexIter(value + (BaseT)v); }
-	IndexIter operator++(int) {IndexIter tmp(*this); ++value; return tmp; }
-	IndexIter operator--() {--value; return *this; }
+	IndexIter operator++(int) { IndexIter tmp(*this); ++value; return tmp; }
+	IndexIter operator--() { --value; return *this; }
 	IndexIter& operator-=(intptr_t v) { value -= (BaseT)v; return *this; }
 	IndexIter operator-(intptr_t v) { return IndexIter(value - (BaseT)v); }
-	IndexIter operator--(int) {IndexIter tmp(*this); --value; return tmp; }
+	IndexIter operator--(int) { IndexIter tmp(*this); --value; return tmp; }
 
-	intptr_t operator-(IndexIter other) { return value-other.value; }
+	intptr_t operator-(IndexIter other) { return value - other.value; }
 
 	BaseT operator*() const { return value; }
 

@@ -97,8 +97,8 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_DrawVirtualCursor(false)
 {
 	m_KeyRepeatContext.isActive = false;
-	m_KeyRepeatContext.keyRepeatTime = 0.1f;
-	m_KeyRepeatContext.keyRepeatStartTime = 0.3f;
+	m_KeyRepeatContext.keyRepeatTime = 0.03f;
+	m_KeyRepeatContext.keyRepeatStartTime = 0.25f;
 
 	m_OSWindow->SetEnvironment(this);
 
@@ -272,7 +272,8 @@ void GUIEnvironment::Render()
 	m_Renderer->Begin();
 	RecursiveRender(m_Root, m_Renderer, m_SecsPassed);
 
-	if((m_DrawVirtualCursor || m_UseVirtualCursor) && m_CursorCtrl->IsVisible())
+	if((m_DrawVirtualCursor || m_UseVirtualCursor) && m_CursorCtrl->IsVisible() &&
+		m_Root->GetFinalInnerRect().IsInside(m_CursorCtrl->GetPosition()))
 		m_Skin->DrawCursor(m_Renderer, m_CursorCtrl->GetState(), m_LeftState, m_CursorCtrl->GetPosition(), m_Time);
 
 	m_Renderer->Flush();

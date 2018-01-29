@@ -108,6 +108,9 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 	math::Dimension2U dim;
 	if(!targets[0].IsBackbuffer())
 		dim = targets[0].GetSize();
+	else
+		dim = m_BackbufferTarget.GetSize();
+
 	{
 		bool isSet = true;
 		size_t i = 0;
