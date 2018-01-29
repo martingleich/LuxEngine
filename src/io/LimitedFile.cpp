@@ -43,7 +43,7 @@ void LimitedFile::Seek(u32 offset, ESeekOrigin origin)
 	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
 
 	if(!success)
-		throw core::FileException(core::FileException::OutsideFile);
+		throw io::FileException(io::FileException::OutsideFile);
 
 	m_MasterFile->Seek(newCursor, ESeekOrigin::Start);
 }

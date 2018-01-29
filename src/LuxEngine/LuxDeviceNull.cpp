@@ -30,9 +30,7 @@ LuxDeviceNull::LuxDeviceNull()
 {
 	// If there are logs which aren't written, write them to the default file.
 	if(log::EngineLog.HasUnsetLogs())
-		log::EngineLog.SetNewPrinter(log::FilePrinter, true);
-	if(!log::FilePrinter->IsInit())
-		log::FilePrinter->Init();
+		log::EngineLog.SetPrinter(log::FilePrinter, true);
 
 	// Create the singleton classes
 	core::ModuleFactory::Initialize();

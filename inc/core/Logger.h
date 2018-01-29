@@ -36,7 +36,8 @@ public:
 	{
 		Settings() :
 			ShowTime(true)
-		{}
+		{
+		}
 
 		virtual ~Settings() {}
 
@@ -138,7 +139,7 @@ public:
 
 	LUX_API void Exit();
 	LUX_API bool HasUnsetLogs() const;
-	LUX_API void SetNewPrinter(Printer* p, bool OnlyIfNULL = false);
+	LUX_API void SetPrinter(Printer* p, bool OnlyIfNULL = false);
 };
 
 class Logger
@@ -169,13 +170,18 @@ public:
 		m_Printer = nullptr;
 	}
 
-	void SetNewPrinter(Printer* p)
+	void SetPrinter(Printer* p)
 	{
-		if(m_Printer)
+		if(m_Printer) {
+			m_Printer->Exit();
 			m_Printer->Drop();
+		}
 		m_Printer = p;
-		if(m_Printer)
+		if(m_Printer) {
+			if(!m_Printer->IsInit())
+				m_Printer->Init();
 			m_Printer->Grab();
+		}
 	}
 
 	Printer* GetCurrentPrinter()
@@ -190,7 +196,8 @@ public:
 			return;
 
 		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel && m_LogSystem.GetLogLevel() != ELogLevel::None) {
-			ifconst(sizeof...(data)) {
+			ifconst(sizeof...(data))
+			{
 				core::String out;
 				core::StringSink sink(out);
 				format::format(sink, format, data...);
@@ -236,8 +243,7 @@ struct FilePrinterSettings : public Printer::Settings
 };
 
 struct ConsolePrinterSettings : public Printer::Settings
-{
-};
+{};
 
 extern LUX_API Printer* HTMLPrinter; //!< Prints the whole log into a html file
 extern LUX_API Printer* FilePrinter; //!< Prints the whole log into a simple text file

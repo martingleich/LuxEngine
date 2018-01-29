@@ -52,14 +52,14 @@ u32 MemoryFile::WriteBinaryPart(const void* data, u32 numBytes)
 	LX_CHECK_NULL_ARG(numBytes);
 
 	if(m_IsReadOnly)
-		throw core::FileException(core::FileException::WriteError);
+		throw io::FileException(io::FileException::WriteError);
 
 	if(numBytes == 0 || !data)
 		return 0;
 
 	if(m_Cursor > m_Size - numBytes) {
 		if(!m_IsExpandable) {
-			throw core::FileException(core::FileException::WriteError);
+			throw io::FileException(io::FileException::WriteError);
 		} else {
 			u8* pNewData = LUX_NEW_ARRAY(u8, ((m_Cursor + numBytes) * 3) / 2);
 
@@ -87,7 +87,7 @@ void MemoryFile::Seek(u32 offset, ESeekOrigin origin)
 	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
 
 	if(!success)
-		throw core::FileException(core::FileException::OutsideFile);
+		throw io::FileException(io::FileException::OutsideFile);
 
 	m_Cursor = newCursor;
 	m_IsEOF = (m_Cursor == m_Size);

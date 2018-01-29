@@ -3,13 +3,13 @@
 #include "core/ReferenceCounted.h"
 #include "math/lxMath.h"
 #include "io/Path.h"
-#include "ioConstants.h"
+#include "io/ioConstants.h"
+#include "io/ioExceptions.h"
 
 namespace lux
 {
 namespace io
 {
-
 //! A file usable for reading and writing
 class File : public ReferenceCounted
 {
@@ -54,7 +54,7 @@ public:
 	{
 		u32 count = WriteBinaryPart(data, numBytes);
 		if(count != numBytes)
-			throw core::FileException(core::FileException::WriteError);
+			throw io::FileException(io::FileException::WriteError);
 	}
 
 	//! Write binary data to the file
@@ -75,7 +75,7 @@ public:
 	{
 		u32 count = ReadBinaryPart(numBytes, out);
 		if(count != numBytes)
-			throw core::FileException(core::FileException::ReadError);
+			throw io::FileException(io::FileException::ReadError);
 	}
 
 	//! Read binary data

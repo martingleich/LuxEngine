@@ -180,5 +180,6 @@ namespace input
 
 #include "LuxEngine/LuxSystemInfo.h"
 #include "LuxEngine/LuxDevice.h"
+#include "LuxEngine/LuxAppContext.h"
 
 #endif // !INCLUDED_LUX_H

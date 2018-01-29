@@ -37,18 +37,15 @@ bool Adapter::GetMatchingMode(DisplayMode& outMode, const math::Dimension2U& min
 	return (bestError != std::numeric_limits<u32>::max());
 }
 
-bool Adapter::GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, bool use16Bit)
+bool Adapter::GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, u32 minBits)
 {
 	auto formats = GenerateBackbufferFormats(mode, windowed);
 
 	for(auto it = formats.First(); it != formats.End(); ++it) {
-		if(use16Bit) {
-			if(it->GetBitsPerPixel() != 16)
-				continue;
+		if(it->GetBitsPerPixel() > minBits) {
+			outFormat = *it;
+			return true;
 		}
-
-		outFormat = *it;
-		return true;
 	}
 
 	return false;
@@ -78,7 +75,7 @@ bool Adapter::GetMatchingMultisample(u32& outLevel, u32& outQuality, const Displ
 		u32 numQualities = GetNumMultisampleQualities(mode, windowed, backBuffer, zsFormat, *it);
 		if(numQualities == 0)
 			continue;
-		u32 maxQuality = numQualities-1;
+		u32 maxQuality = numQualities - 1;
 		if(minQuality > maxQuality)
 			continue;
 
@@ -94,7 +91,6 @@ bool Adapter::GenerateConfig(
 	video::DriverConfig& outConfig,
 	const math::Dimension2U& minRes,
 	bool windowed, bool vSync,
-	bool backBuffer16Bit,
 	u32 minDepth,
 	u32 minStencil,
 	int multiSample)
@@ -107,7 +103,7 @@ bool Adapter::GenerateConfig(
 	outConfig.windowed = windowed;
 	outConfig.vSync = vSync;
 
-	if(!GetMatchingBackbuffer(outConfig.backBufferFormat, outConfig.display, outConfig.windowed, backBuffer16Bit))
+	if(!GetMatchingBackbuffer(outConfig.backBufferFormat, outConfig.display, outConfig.windowed, 24))
 		return false;
 
 	if(!GetMatchingZStencil(outConfig.zsFormat, outConfig.display, outConfig.windowed, outConfig.backBufferFormat, minDepth, minStencil))

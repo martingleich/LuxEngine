@@ -3,6 +3,7 @@
 #include "core/lxUnicodeConversion.h"
 #include "core/Clock.h"
 #include "core/StringConverter.h"
+#include "io/ioExceptions.h"
 #ifdef LUX_WINDOWS
 #include "platform/StrippedWindows.h"
 #endif
@@ -38,24 +39,24 @@ void LogSystem::Exit()
 {
 	for(auto it = m_Loggers.First(); it != m_Loggers.End(); ++it) {
 		Logger* logger = *it;
-		logger->SetNewPrinter(nullptr);
+		logger->SetPrinter(nullptr);
 	}
 	m_Loggers.Clear();
 }
 
-void LogSystem::SetNewPrinter(Printer* p, bool OnlyIfNULL)
+void LogSystem::SetPrinter(Printer* p, bool OnlyIfNULL)
 {
 	if(OnlyIfNULL) {
 		for(auto it = m_Loggers.First(); it != m_Loggers.End(); ++it) {
 			Logger* logger = *it;
 			Printer* currentPrinter = logger->GetCurrentPrinter();
 			if(!currentPrinter)
-				logger->SetNewPrinter(p);
+				logger->SetPrinter(p);
 		}
 	} else {
 		for(auto it = m_Loggers.First(); it != m_Loggers.End(); ++it) {
 			Logger* logger = *it;
-			logger->SetNewPrinter(p);
+			logger->SetPrinter(p);
 		}
 	}
 }
@@ -229,7 +230,7 @@ public:
 
 		m_File = core::FOpenUTF8(m_Settings.FilePath.Data(), "wb");
 		if(!m_File)
-			throw core::FileNotFoundException(m_Settings.FilePath.Data_c());
+			throw io::FileNotFoundException(m_Settings.FilePath.Data_c());
 
 		Printer::Init();
 	}

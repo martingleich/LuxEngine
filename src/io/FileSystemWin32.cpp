@@ -99,7 +99,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const FileDescription& desc, EFileMode
 		if(desc.GetName().IsEmpty() == false)
 			return OpenFile(desc.GetPath() + desc.GetName(), mode, createIfNotExist);
 		else
-			throw core::FileNotFoundException("[Unnamed file]");
+			throw io::FileNotFoundException("[Unnamed file]");
 	}
 
 	return OpenFile(desc.GetPath() + desc.GetName(), mode, createIfNotExist);
@@ -128,11 +128,11 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 
 	if(!ExistFile(absPath)) {
 		if(!createIfNotExist) {
-			throw core::FileNotFoundException(filename.Data());
+			throw io::FileNotFoundException(filename.Data());
 		} else {
 			file = core::FOpenUTF8(absPath.Data(), GetFileOpenString(mode).Data());
 			if(!file)
-				throw core::FileNotFoundException(filename.Data());
+				throw io::FileNotFoundException(filename.Data());
 			log::Info("The file \"~s\" was created.", absPath);
 			try {
 				desc = GetFileDescription(absPath);
@@ -146,7 +146,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 
 	file = core::FOpenUTF8(absPath.Data(), GetFileOpenString(mode).Data());
 	if(!file)
-		throw core::FileNotFoundException(filename.Data());
+		throw io::FileNotFoundException(filename.Data());
 
 
 	try {
@@ -161,7 +161,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const core::String& name, bool deleteOnDrop, bool isReadOnly)
 {
 	if(!memory || size == 0)
-		throw core::FileNotFoundException("[Empty Memory file]");
+		throw io::FileNotFoundException("[Empty Memory file]");
 
 	FileDescription desc(
 		Path::EMPTY,
@@ -238,7 +238,7 @@ FileDescription FileSystemWin32::GetFileDescription(const Path& name)
 	HANDLE FindHandle = FindFirstFileW((const wchar_t*)ConvertPathToWin32WidePath(name).Data_c(), &FindData);
 
 	if(FindHandle == INVALID_HANDLE_VALUE)
-		throw core::FileNotFoundException(name.Data());
+		throw io::FileNotFoundException(name.Data());
 
 	core::DateAndTime creatinoDate;
 	ConvertWin32FileTimeToLuxTime(FindData.ftCreationTime, creatinoDate);
@@ -267,7 +267,7 @@ StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const core::String& name)
 {
 	if(!file)
-		throw core::FileNotFoundException("[Empty file]");
+		throw io::FileNotFoundException("[Empty file]");
 
 	if(start + size > file->GetSize())
 		throw core::Exception("Limited file size is to big");

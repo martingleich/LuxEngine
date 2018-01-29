@@ -3,6 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
 #include "core/Attributes.h"
+#include "video/videoExceptions.h"
 
 namespace lux
 {
@@ -12,13 +13,6 @@ class ParamPackage;
 }
 namespace video
 {
-struct ShaderCompileException : public core::Exception
-{
-	explicit ShaderCompileException(const char* msg = "shader compile error") :
-		Exception(msg)
-	{}
-};
-
 class Pass;
 class Shader : public ReferenceCounted
 {

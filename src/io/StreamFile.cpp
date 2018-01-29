@@ -58,7 +58,7 @@ u32 StreamFile::WriteBinaryPart(const void* data, u32 numBytes)
 		m_FileSize = ftell(m_File) + numBytes;
 
 	if(fwrite(data, numBytes, 1, m_File) != 1)
-		throw core::FileException(core::FileException::WriteError);
+		throw io::FileException(io::FileException::WriteError);
 
 	return numBytes;
 }
@@ -71,7 +71,7 @@ void StreamFile::Seek(u32 offset, ESeekOrigin origin)
 	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
 
 	if(!success)
-		throw core::FileException(core::FileException::OutsideFile);
+		throw io::FileException(io::FileException::OutsideFile);
 
 	if(fseek(m_File, newCursor, 0) != 0)
 		throw core::RuntimeException("fseek failed");

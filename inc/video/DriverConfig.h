@@ -66,7 +66,7 @@ public:
 
 	LUX_API virtual u32 GetMaxMultisampleLevel(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat);
 	LUX_API virtual bool GetMatchingMode(DisplayMode& outMode, const math::Dimension2U& minRes, bool windowed, u32 minRefresh = 0);
-	LUX_API virtual bool GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, bool use16Bit = false);
+	LUX_API virtual bool GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, u32 minBits = 24);
 	LUX_API virtual bool GetMatchingZStencil(ZStencilFormat& outFormat, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, u32 minDepth = 0, u32 minStencil = 0);
 	LUX_API virtual bool GetMatchingMultisample(u32& outLevel, u32& outQuality, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 minSamples, u32 minQuality);
 
@@ -77,7 +77,6 @@ public:
 		resolution will be bigger or equal on all axes.
 	\param windowed Windowed or fullscreen
 	\param vSync Is vSync enabled
-	\param backBuffer16Bit Should the backbuffer use 16 bit colors
 	\param minDepth The minimal number of depth bits
 	\param minStencil The minimal number of stencil bits
 	\param multiSample The level of multisampling with 0 meaning no multisampling
@@ -88,10 +87,9 @@ public:
 		video::DriverConfig& outConfig,
 		const math::Dimension2U& minRes,
 		bool windowed, bool vSync,
-		bool backBuffer16Bit,
-		u32 minDepth,
-		u32 minStencil,
-		int multiSample);
+		u32 minDepth = 24,
+		u32 minStencil = 8,
+		int multiSample = 2);
 };
 
 struct AdapterListInitData : public core::ModuleInitData

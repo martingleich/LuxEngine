@@ -198,7 +198,7 @@ StrongRef<File> ArchiveFolderWin32::OpenFile(const Path& p, EFileMode mode, bool
 StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileMode mode, bool createIfNotExist)
 {
 	if(file.GetArchive() != this)
-		throw core::FileNotFoundException("");
+		throw io::FileNotFoundException("");
 
 	return OpenFile(file.GetPath() + file.GetName(), mode, createIfNotExist);
 }
@@ -241,7 +241,7 @@ void ArchiveFolderWin32::SetPath(const Path& dir)
 		self->path = NormalizePath(dir, true);
 		self->win32AbsPath = ConvertPathToWin32WidePath(self->path);
 	} else {
-		throw core::FileNotFoundException(dir.Data());
+		throw io::FileNotFoundException(dir.Data());
 	}
 }
 

@@ -15,6 +15,20 @@ namespace scene
 class FirstPersonCameraControl : public Animator
 {
 public:
+	struct KeyboardMouseControls
+	{
+		input::EKeyCode forward;
+		input::EKeyCode backward;
+		input::EKeyCode left;
+		input::EKeyCode right;
+		input::EKeyCode up;
+		input::EKeyCode down;
+		input::EKeyCode fast;
+
+		bool invertX;
+		bool invertY;
+	};
+
 	LX_REFERABLE_MEMBERS_API(LUX_API);
 
 	LUX_API FirstPersonCameraControl();
@@ -44,10 +58,13 @@ public:
 	LUX_API void SetFast(bool fast);
 
 	// Controller functions
-	LUX_API void DefaultEventHandler(const input::Event& event);
+	LUX_API void HandleInput(const input::Event& event);
 	LUX_API void EnableInput();
 	LUX_API void DisableInput();
 	LUX_API bool IsInputActive();
+
+	LUX_API KeyboardMouseControls GetKeyboardMouseControls() const;
+	LUX_API void SetKeyboardMouseControls(const KeyboardMouseControls& controls);
 
 private:
 	float m_MoveSpeed;
@@ -61,13 +78,9 @@ private:
 	bool m_Fast;
 
 	bool m_IsControlActive;
-	struct KeyboardMouseController
-	{
-		math::Vector3F m_Move;
-		input::EKeyCode forward[2];
-		input::EKeyCode flank[2];
-		input::EKeyCode up[2];
-	} m_KeyboardController;
+
+	KeyboardMouseControls m_Controls;
+	math::Vector3F m_KeyboardMouseMove;
 };
 
 } // namespace scene

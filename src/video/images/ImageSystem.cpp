@@ -214,7 +214,7 @@ public:
 			for(size_t i = 0; i < 6; ++i)
 				images[i] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, image_path[i]);
 		} else {
-			throw core::FileNotFoundException(filename.Data());
+			throw io::FileNotFoundException(filename.Data());
 		}
 
 		InitCubeTexture(images, (CubeTexture*)dst);

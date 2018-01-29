@@ -13,7 +13,7 @@ public:
 	MaterialTest()
 	{
 		log::EngineLog.SetLogLevel(log::ELogLevel::Info);
-		log::EngineLog.SetNewPrinter(log::ConsolePrinter);
+		log::EngineLog.SetPrinter(log::ConsolePrinter);
 
 		m_Device = CreateDevice();
 		auto adapter = m_Device->GetVideoAdapters(video::DriverType::Direct3D9)->GetAdapter(0);
@@ -21,7 +21,6 @@ public:
 		adapter->GenerateConfig(config,
 			math::Dimension2U(800, 600),
 			true, true,
-			false,
 			0,
 			8,
 			5);
@@ -88,7 +87,7 @@ public:
 	void OnEvent(const input::Event& e)
 	{
 		if(m_RButton || e.source == input::EEventSource::Keyboard)
-			m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->DefaultEventHandler(e);
+			m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->HandleInput(e);
 		EventHandler::OnEvent(e);
 	}
 

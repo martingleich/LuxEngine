@@ -1,6 +1,7 @@
 #include "scene/components/FirstPersonCameraControl.h"
 #include "scene/Node.h"
 #include "core/Logger.h"
+#include "input/InputSystem.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::scene::FirstPersonCameraControl, lux::scene::SceneComponentType::FirstPersonCameraControl);
 
@@ -22,6 +23,17 @@ FirstPersonCameraControl::FirstPersonCameraControl(float moveSpeed, math::AngleF
 	m_Fast(false)
 {
 	EnableInput();
+	m_Controls.forward = input::EKeyCode::KEY_KEY_W;
+	m_Controls.backward = input::EKeyCode::KEY_KEY_S;
+	m_Controls.left = input::EKeyCode::KEY_KEY_A;
+	m_Controls.right = input::EKeyCode::KEY_KEY_D;
+	m_Controls.up = input::EKeyCode::KEY_KEY_Q;
+	m_Controls.down = input::EKeyCode::KEY_KEY_E;
+	m_Controls.fast = input::EKeyCode::KEY_LSHIFT;
+	m_Controls.invertX = false;
+	m_Controls.invertY = false;
+
+	input::InputSystem::Instance()->GetEventSignal().Connect(this, &FirstPersonCameraControl::HandleInput);
 }
 
 FirstPersonCameraControl::~FirstPersonCameraControl()
@@ -147,9 +159,9 @@ void FirstPersonCameraControl::SetFast(bool fast)
 
 void FirstPersonCameraControl::EnableInput()
 {
-	ForwardSpeed(m_KeyboardController.m_Move.z);
-	FlankSpeed(m_KeyboardController.m_Move.x);
-	UpSpeed(m_KeyboardController.m_Move.y);
+	ForwardSpeed(m_KeyboardMouseMove.z);
+	FlankSpeed(m_KeyboardMouseMove.x);
+	UpSpeed(m_KeyboardMouseMove.y);
 	m_IsControlActive = true;
 }
 
@@ -166,32 +178,48 @@ bool FirstPersonCameraControl::IsInputActive()
 	return m_IsControlActive;
 }
 
-void FirstPersonCameraControl::DefaultEventHandler(const input::Event& event)
+void FirstPersonCameraControl::HandleInput(const input::Event& event)
 {
 	if(event.type == input::EEventType::Button && event.source == input::EEventSource::Keyboard) {
 		float value = event.button.state ? 1.0f : -1.0f;
 		bool changed = true;
-		switch(event.button.code) {
-		case input::KEY_KEY_W: m_KeyboardController.m_Move.z += value; break;
-		case input::KEY_KEY_S: m_KeyboardController.m_Move.z -= value; break;
-		case input::KEY_KEY_D: m_KeyboardController.m_Move.x += value; break;
-		case input::KEY_KEY_A: m_KeyboardController.m_Move.x -= value; break;
-		case input::KEY_KEY_Q: m_KeyboardController.m_Move.y += value; break;
-		case input::KEY_KEY_E: m_KeyboardController.m_Move.y -= value; break;
-		case input::KEY_LSHIFT: SetFast(event.button.state); break;
-		default: changed = false;
-		}
+		if(event.button.code == m_Controls.forward)
+			m_KeyboardMouseMove.z += value;
+		else if(event.button.code == m_Controls.backward)
+			m_KeyboardMouseMove.z -= value;
+		else if(event.button.code == m_Controls.left)
+			m_KeyboardMouseMove.x -= value;
+		else if(event.button.code == m_Controls.right)
+			m_KeyboardMouseMove.x += value;
+		else if(event.button.code == m_Controls.up)
+			m_KeyboardMouseMove.y += value;
+		else if(event.button.code == m_Controls.down)
+			m_KeyboardMouseMove.y -= value;
+		else if(event.button.code == m_Controls.fast)
+			SetFast(event.button.state);
+		else
+			changed = false;
 		if(changed && m_IsControlActive) {
-			ForwardSpeed(m_KeyboardController.m_Move.z);
-			FlankSpeed(m_KeyboardController.m_Move.x);
-			UpSpeed(m_KeyboardController.m_Move.y);
+			ForwardSpeed(m_KeyboardMouseMove.z);
+			FlankSpeed(m_KeyboardMouseMove.x);
+			UpSpeed(m_KeyboardMouseMove.y);
 		}
 	} else if(event.type == input::EEventType::Area && event.source == input::EEventSource::Mouse) {
 		if(m_IsControlActive) {
-			RotX(event.area.relY);
-			RotY(event.area.relX);
+			RotX((m_Controls.invertY ? -1 : 1) * event.area.relY);
+			RotY((m_Controls.invertX ? -1 : 1) * event.area.relX);
 		}
 	}
+}
+
+FirstPersonCameraControl::KeyboardMouseControls FirstPersonCameraControl::GetKeyboardMouseControls() const
+{
+	return m_Controls;
+}
+
+void FirstPersonCameraControl::SetKeyboardMouseControls(const KeyboardMouseControls& controls)
+{
+	m_Controls = controls;
 }
 
 }
