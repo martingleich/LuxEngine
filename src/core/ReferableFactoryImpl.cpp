@@ -63,5 +63,14 @@ size_t ReferableFactoryImpl::GetTypeCount() const
 	return m_Types.Size();
 }
 
+core::Array<core::Name> ReferableFactoryImpl::GetTypeNames() const
+{
+	core::Array<core::Name> names;
+	names.Reserve(m_Types.Size());
+	for(auto& name : m_Types.Keys())
+		names.PushBack(name);
+	return names;
+}
+
 }
 }

@@ -53,6 +53,9 @@ public:
 	\return The total number of types
 	*/
 	virtual size_t GetTypeCount() const = 0;
+
+	//! Get a list of all type names.
+	core::Array<core::Name> GetTypeNames() const;
 };
 
 }

@@ -21,6 +21,7 @@ public:
 	StrongRef<Referable> Create(Name type, const void* data=nullptr);
 
 	size_t GetTypeCount() const;
+	core::Array<core::Name> GetTypeNames() const;
 
 private:
 	struct ReferableType

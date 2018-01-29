@@ -678,13 +678,13 @@ public:
 		}
 
 		//! Support for foreach loop
-		ConstIterator begin() const
+		ConstKeyIterator begin() const
 		{
 			return ref.FirstKey();
 		}
 
 		//! Support for foreach loop
-		ConstIterator end() const
+		ConstKeyIterator end() const
 		{
 			return ref.EndKey();
 		}
