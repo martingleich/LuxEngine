@@ -131,7 +131,7 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 		log::Error("Can't load builtin font files");
 	}
 
-	SetSkin(LUX_NEW(Skin3D));
+	SetSkin(core::ReferableFactory::Instance()->Create(core::Name("lux.gui.skin.3D")).As<gui::Skin>());
 	m_Skin->SetDefaultFont(m_BuiltInFont);
 
 	SetRenderer(LUX_NEW(Renderer)(video::VideoDriver::Instance()->GetRenderer()));
@@ -271,6 +271,9 @@ void GUIEnvironment::Render()
 
 	m_Renderer->Begin();
 	RecursiveRender(m_Root, m_Renderer, m_SecsPassed);
+
+	if(m_Focused)
+		m_Skin->DrawFocus(m_Renderer, m_Focused);
 
 	if((m_DrawVirtualCursor || m_UseVirtualCursor) && m_CursorCtrl->IsVisible() &&
 		m_Root->GetFinalInnerRect().IsInside(m_CursorCtrl->GetPosition()))

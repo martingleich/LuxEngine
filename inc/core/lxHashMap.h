@@ -903,25 +903,25 @@ public:
 		}
 
 		//! Support for foreach loop
-		Iterator begin()
+		KeyIterator begin()
 		{
 			return ref.FirstKey();
 		}
 
 		//! Support for foreach loop
-		Iterator end()
+		KeyIterator end()
 		{
 			return ref.EndKey();
 		}
 
 		//! Support for foreach loop
-		ConstIterator begin() const
+		ConstKeyIterator begin() const
 		{
 			return ref.FirstKey();
 		}
 
 		//! Support for foreach loop
-		ConstIterator end() const
+		ConstKeyIterator end() const
 		{
 			return ref.EndKey();
 		}
@@ -936,13 +936,13 @@ public:
 		}
 
 		//! Support for foreach loop
-		ConstIterator begin() const
+		ConstKeyIterator begin() const
 		{
 			return ref.FirstKey();
 		}
 
 		//! Support for foreach loop
-		ConstIterator end() const
+		ConstKeyIterator end() const
 		{
 			return ref.EndKey();
 		}

@@ -41,8 +41,8 @@ public:
 public:
 	Component() :
 		m_Node(nullptr),
-		m_IsAnimated(false),
-		m_Listener(nullptr)
+		m_Listener(nullptr),
+		m_IsAnimated(false)
 	{
 	}
 
@@ -109,8 +109,8 @@ protected:
 
 protected:
 	Node* m_Node;
-	bool m_IsAnimated;
 	Listener* m_Listener;
+	bool m_IsAnimated;
 };
 
 } // namespace scene

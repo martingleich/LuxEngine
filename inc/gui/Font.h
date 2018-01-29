@@ -25,7 +25,6 @@ enum class EFontWeight
 	ExtraBolt
 };
 
-
 //! Contains information about a font.
 struct FontDescription
 {

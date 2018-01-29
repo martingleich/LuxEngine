@@ -53,7 +53,7 @@ void Renderer::DrawText(gui::Font* font,
 		font->Draw(settings, text, position, clip);
 }
 
-void Renderer::DrawRectangle(const math::RectF& rect, const video::Color& color, const math::RectF* clip)
+void Renderer::DrawRectangle(const math::RectF& rect, video::Color color, const math::RectF* clip)
 {
 	auto realRect = rect;
 	if(clip)
@@ -74,7 +74,7 @@ void Renderer::DrawRectangle(const math::RectF& rect, const video::Color& color,
 		2, quad, 4, video::VertexFormat::STANDARD_2D, false);
 }
 
-void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, const math::RectF& tCoord, const video::Color& color, const math::RectF* clip)
+void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, const math::RectF& tCoord, video::Color color, const math::RectF* clip)
 {
 	auto realRect = rect;
 	if(clip)
@@ -95,7 +95,7 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, c
 		2, quad, 4, video::VertexFormat::STANDARD_2D, false);
 }
 
-void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, const math::Vector2F& c, const video::Color& color, const math::RectF* clip)
+void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, const math::Vector2F& c, video::Color color, const math::RectF* clip)
 {
 	video::Vertex2D tri[3] = {
 		video::Vertex2D(a.x, a.y, color),
@@ -107,6 +107,94 @@ void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, co
 	m_Renderer->DrawPrimitiveList(
 		video::EPrimitiveType::Triangles,
 		1, tri, 3, video::VertexFormat::STANDARD_2D, false);
+}
+
+namespace
+{
+struct LineBuffer
+{
+	video::Renderer* renderer;
+	video::Vertex2D BUFFER[100];
+	size_t cursor;
+	video::Color color;
+
+	LineBuffer(video::Renderer* r, video::Color c) :
+		renderer(r),
+		cursor(0),
+		color(c)
+	{}
+
+	~LineBuffer()
+	{
+		Flush();
+	}
+
+	void DrawLine(math::Vector2F a, math::Vector2F b)
+	{
+		BUFFER[cursor].position = a;
+		BUFFER[cursor].color = color;
+		++cursor;
+		BUFFER[cursor].position = b;
+		BUFFER[cursor].color = color;
+		++cursor;
+		if(cursor == sizeof(BUFFER) / sizeof(*BUFFER))
+			Flush();
+	}
+
+	void Flush()
+	{
+		if(!cursor)
+			return;
+		renderer->DrawPrimitiveList(
+			video::EPrimitiveType::Lines,
+			cursor / 2,
+			&BUFFER, cursor,
+			video::VertexFormat::STANDARD_2D,
+			false);
+		cursor = 0;
+	}
+};
+}
+
+void Renderer::DrawLine(const math::Vector2F& start, const math::Vector2F& end, video::Color color, float thickness, const LineStyle& style)
+{
+	lxAssert(sizeof(style.steps) / sizeof(*style.steps));
+
+	if(thickness <= 0)
+		return;
+	if(style.steps[style.invert] == 0)
+		return;
+	m_Renderer->SetPass(m_DiffusePass);
+	LineBuffer lineBuffer(m_Renderer, color);
+
+	if(style.steps[1 - style.invert] == 0) {
+		lineBuffer.DrawLine(start, end);
+	} else {
+		auto dir = end - start;
+		float length = dir.GetLength();
+		dir /= length;
+
+		int stepId = 0;
+		auto nextStep = [&]() -> float {
+			float out = style.steps[stepId];
+			stepId = (stepId + 1) % (sizeof(style.steps) / sizeof(*style.steps));
+			return out;
+		};
+
+		float pos = 0;
+		math::Vector2F base = start;
+		bool state = !style.invert;
+		while(pos < length) {
+			float step = nextStep();
+			if(pos + step > length)
+				step = length - pos;
+			if(state)
+				lineBuffer.DrawLine(base, base + step*dir);
+			pos += step;
+			base += step*dir;
+			state = !state;
+		}
+	}
 }
 
 void Renderer::Flush()

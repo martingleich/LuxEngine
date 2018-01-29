@@ -7,7 +7,7 @@ namespace lux
 namespace gui
 {
 
-static const math::Dimension2F DEFAULT_RADIOBUTTON_SIZE(25, 25);
+static const math::Dimension2F DEFAULT_RADIOBUTTON_SIZE(17, 17);
 
 RadioButton::RadioButton() :
 	AbstractButton(true)
@@ -32,7 +32,7 @@ void RadioButton::Paint(Renderer* renderer)
 	auto font = GetFont();
 	auto skin = GetSkin();
 	auto palette = GetFinalPalette();
-	auto checkBoxSize = skin->GetPropertyDim("lux.gui.RadioButtom.size", DEFAULT_RADIOBUTTON_SIZE);
+	auto checkBoxSize = skin->GetPropertyDim("lux.gui.RadioButton.size", DEFAULT_RADIOBUTTON_SIZE);
 	auto checkBox = AlignInnerRect<float>(
 		checkBoxSize.width, checkBoxSize.height,
 		final,
@@ -52,6 +52,8 @@ void RadioButton::Paint(Renderer* renderer)
 		textBoxWidth, textBoxHeight,
 		checkBox,
 		FlipAlign(align, true, true));
+	textBox.left += 4;
+	textBox.right += 4;
 
 	gui::PaintOptions po;
 	po.palette = palette;

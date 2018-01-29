@@ -7,7 +7,7 @@ namespace lux
 namespace gui
 {
 
-static const math::Dimension2F DEFAULT_CHECKBOX_SIZE(25, 25);
+static const math::Dimension2F DEFAULT_CHECKBOX_SIZE(17, 17);
 CheckBox::CheckBox() :
 	AbstractButton(true)
 {
@@ -48,6 +48,8 @@ void CheckBox::Paint(Renderer* renderer)
 		textBoxWidth, textBoxHeight,
 		checkBox,
 		FlipAlign(align, true, true));
+	textBox.left += 4;
+	textBox.right += 4;
 
 	gui::PaintOptions po;
 	po.palette = palette;
