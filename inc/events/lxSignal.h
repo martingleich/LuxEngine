@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LX_SIGNAL_H
 #define INCLUDED_LX_SIGNAL_H
-#include "core/lxArray.h"
 #include "core/ReferenceCounted.h"
+#include "core/lxArray.h"
 #include <memory>
 #include <utility>
 

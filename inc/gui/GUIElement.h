@@ -1,11 +1,12 @@
 #ifndef INCLUDED_GUI_ELEMENT_H
 #define INCLUDED_GUI_ELEMENT_H
 #include "core/Referable.h"
-#include "math/Rect.h"
 #include "core/lxArray.h"
-#include "events/lxSignal.h"
+
+#include "math/Rect.h"
 
 #include "gui/GUISkin.h"
+#include "gui/GUIPalette.h"
 #include "gui/GUIScalarDistance.h"
 #include "gui/GUIAlign.h"
 
@@ -14,13 +15,13 @@ namespace lux
 namespace gui
 {
 
+class Font;
 class Event;
 class MouseEvent;
 class KeyboardEvent;
 class ElementEvent;
 class Window;
 class Renderer;
-class Skin;
 class GUIEnvironment;
 
 class Element : public Referable

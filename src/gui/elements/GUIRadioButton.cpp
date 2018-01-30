@@ -1,4 +1,5 @@
 #include "gui/elements/GUIRadioButton.h"
+#include "gui/GUISkin.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::gui::RadioButton, "lux.gui.RadioButton");
 

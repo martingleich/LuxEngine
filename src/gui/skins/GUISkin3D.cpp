@@ -1,5 +1,6 @@
 #include "GUISkin3D.h"
 #include "gui/GUIElement.h"
+#include "gui/GUIRenderer.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::gui::Skin3D, "lux.gui.skin.3D")
 
@@ -18,6 +19,10 @@ Skin3D::Skin3D()
 	SetProperty("lux.gui.showFocus", 0.0f);
 	SetProperty("lux.gui.light3D", 1.2f);
 	SetProperty("lux.gui.shadow3D", 0.2f);
+
+	Palette imgPalette;
+	imgPalette.SetColor(gui::Palette::EColorRole::WindowBackground, video::Color::Black);
+	SetDefaultPalette(core::Name("lux.gui.ImageDisplay"), imgPalette);
 }
 
 void Skin3D::DrawCursor(

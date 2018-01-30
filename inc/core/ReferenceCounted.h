@@ -83,9 +83,7 @@ public:
 	//! Remove ownership of this object
 	/**
 	If you call this you give up ownership of this object
-	You _must_ call this sometime after a call to Grab()
-	or when you retrieved this object from a method beginning with "create"
-	for example createImage or createVertexBuffer...
+	You _must_ call this sometime after a call to Grab().
 	\return True if the object was fully deleted after this call
 	*/
 	bool Drop() const;
@@ -235,9 +233,8 @@ public:
 		if(m_Object)
 			m_Object->Drop();
 
-		if(obj) {
+		if(obj)
 			obj->Grab();
-		}
 
 		m_Object = obj;
 		return *this;

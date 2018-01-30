@@ -22,6 +22,16 @@ enum class EGUIState
 	Sunken = 0x100,
 	Raised = 0x200,
 };
+
+enum class ECursorState
+{
+	Default,
+
+	Normal,
+	Beam,
+	Wait
+};
+
 }
 DECLARE_FLAG_CLASS(gui::EGUIState);
 }

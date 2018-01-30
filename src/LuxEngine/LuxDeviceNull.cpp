@@ -23,6 +23,7 @@
 
 #include "gui/GUIEnvironment.h"
 #include "gui/Window.h"
+#include "gui/Cursor.h"
 
 namespace lux
 {
@@ -58,7 +59,7 @@ LuxDeviceNull::LuxDeviceNull()
 	lux::core::impl_referableRegister::RunAllRegisterReferableFunctions();
 	lux::core::impl_moduleRegister::RunAllModuleFactoryBlocks();
 
-	log::Info("Lux core was build.");
+	log::Info("Lux core was built.");
 }
 
 LuxDeviceNull::~LuxDeviceNull()
@@ -89,7 +90,7 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 {
 	// If system already build -> no op
 	if(video::VideoDriver::Instance()) {
-		log::Warning("Videodriver already build.");
+		log::Warning("Videodriver already built.");
 		return;
 	}
 
@@ -141,7 +142,7 @@ void LuxDeviceNull::BuildScene(const core::String& name, void* user)
 	if(!scene::ParticleSystemManager::Instance())
 		scene::ParticleSystemManager::Initialize();
 
-	log::Info("Build Scene.");
+	log::Info("Building Scene.");
 	m_Scene = CreateScene();
 	m_SceneRenderer = CreateSceneRenderer(name.IsEmpty() ? "SimpleForward" : name, user);
 }
@@ -165,7 +166,7 @@ void LuxDeviceNull::BuildImageSystem()
 		return;
 	}
 
-	log::Info("Build Image System.");
+	log::Info("Building ImageSystem.");
 	video::ImageSystem::Initialize();
 }
 
@@ -176,7 +177,7 @@ void LuxDeviceNull::BuildGUIEnvironment()
 		return;
 	}
 
-	log::Info("Build GUI Environment.");
+	log::Info("Building GUI-Environment.");
 	m_GUIEnv = LUX_NEW(gui::GUIEnvironment)(GetWindow(), GetCursor());
 }
 
@@ -289,6 +290,15 @@ private:
 		if(m_GUIEnv)
 			m_GUIEnv->Update(secsPassed);
 
+		if(!m_Renderer->Present()) {
+			log::Error("Present failed");
+			auto state = m_Driver->GetDeviceState();
+			if(state != video::EDeviceState::OK) {
+				log::Debug("Trying to reset driver.");
+				m_PerformDriverReset = true;
+			}
+		}
+
 		if(m_FrameLoop.callback)
 			m_FrameLoop.callback->PostMove(secsPassed);
 
@@ -319,15 +329,6 @@ private:
 		}
 
 		m_Renderer->EndScene();
-
-		if(!m_Renderer->Present()) {
-			log::Error("Present failed");
-			auto state = m_Driver->GetDeviceState();
-			if(state != video::EDeviceState::OK) {
-				log::Debug("Trying to reset driver.");
-				m_PerformDriverReset = true;
-			}
-		}
 
 		if(m_FrameLoop.callback)
 			m_FrameLoop.callback->PostFrame(secsPassed);

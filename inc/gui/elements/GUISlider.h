@@ -1,6 +1,7 @@
 #ifndef INCLUDED_GUI_GUISLIDER_H
 #define INCLUDED_GUI_GUISLIDER_H
 #include "gui/GUIElement.h"
+#include "events/lxSignal.h"
 
 namespace lux
 {

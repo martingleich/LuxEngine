@@ -1,8 +1,12 @@
 #ifndef INCLUDED_GUI_SKIN_H
 #define INCLUDED_GUI_SKIN_H
-#include "gui/GUIRenderer.h"
-#include "gui/Cursor.h"
+#include "core/Referable.h"
+#include "core/lxHashMap.h"
+
+#include "math/Rect.h"
+
 #include "gui/GUIPalette.h"
+#include "gui/Font.h"
 
 namespace lux
 {
@@ -10,7 +14,7 @@ namespace gui
 {
 class Element;
 class Renderer;
-class Font;
+class Cursor;
 
 enum class EGUIControl
 {

@@ -1,8 +1,8 @@
 #ifndef INCLUDED_LX_HASH_MAP_H
 #define INCLUDED_LX_HASH_MAP_H
-#include "lxAllocator.h"
-#include "lxIterator.h"
-#include "lxUtil.h"
+#include "core/lxAllocator.h"
+#include "core/lxIterator.h"
+#include "core/lxUtil.h"
 #include "math/lxMath.h"
 
 namespace lux

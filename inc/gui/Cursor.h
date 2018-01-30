@@ -3,20 +3,12 @@
 #include "core/ReferenceCounted.h"
 #include "math/Dimension2.h"
 #include "events/lxSignal.h"
+#include "gui/GUIEnums.h"
 
 namespace lux
 {
 namespace gui
 {
-
-enum class ECursorState
-{
-	Default,
-
-	Normal,
-	Beam,
-	Wait
-};
 
 //! Interface to control a cursor
 /**

@@ -1,6 +1,5 @@
 #include "gui/GUIElement.h"
 #include "gui/GUIEnvironment.h"
-#include "gui/GUISkin.h"
 #include "gui/Window.h"
 #include "core/lxAlgorithm.h"
 

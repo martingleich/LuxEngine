@@ -15,6 +15,10 @@ namespace input
 {
 class Event;
 }
+namespace video
+{
+class Texture;
+}
 namespace gui
 {
 class Font;
@@ -30,6 +34,7 @@ class Button;
 class Slider;
 class CheckBox;
 class RadioButton;
+class ImageDisplay;
 
 class Event : public event::Event
 {
@@ -174,6 +179,7 @@ public:
 	LUX_API StrongRef<Slider> AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min = 0, int max = 100, Element* parent = nullptr);
 	LUX_API StrongRef<CheckBox> AddCheckBox(const ScalarVectorF& pos, const ScalarDimensionF& size, bool checked = false, Element* parent = nullptr);
 	LUX_API StrongRef<RadioButton> AddRadioButton(const ScalarVectorF& pos, const ScalarDimensionF& size, RadioButton* group = nullptr, Element* parent = nullptr);
+	LUX_API StrongRef<ImageDisplay> AddImageDisplay(const ScalarVectorF& pos, const ScalarDimensionF& size, video::Texture* img, Element* parent = nullptr);
 
 	///////////////////////////////////////////////////////////////////////////
 

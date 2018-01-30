@@ -1,4 +1,5 @@
 #include "gui/elements/GUICheckBox.h"
+#include "gui/GUISkin.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::gui::CheckBox, "lux.gui.CheckBox");
 

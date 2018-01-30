@@ -17,9 +17,12 @@
 #include "gui/elements/GUISlider.h"
 #include "gui/elements/GUICheckBox.h"
 #include "gui/elements/GUIRadioButton.h"
+#include "gui/elements/GUIImageDisplay.h"
 
 #include "gui/FontFormat.h"
 #include "gui/FontCreator.h"
+
+#include "gui/GUIRenderer.h"
 
 #include "gui/CursorLux.h"
 
@@ -496,6 +499,16 @@ StrongRef<RadioButton> GUIEnvironment::AddRadioButton(const ScalarVectorF& pos, 
 	if(group)
 		radio->SetRadioGroup(group);
 	return radio;
+}
+
+StrongRef<ImageDisplay> GUIEnvironment::AddImageDisplay(const ScalarVectorF& pos, const ScalarDimensionF& size, video::Texture* img, Element* parent)
+{
+	StrongRef<ImageDisplay> imgDisplay = AddElement(core::Name("lux.gui.ImageDisplay"), parent);
+	imgDisplay->SetPosition(pos);
+	imgDisplay->SetSize(size);
+	imgDisplay->SetTexture(img);
+
+	return imgDisplay;
 }
 
 ///////////////////////////////////////////////////////////////////////////

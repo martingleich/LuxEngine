@@ -162,12 +162,14 @@ namespace input
 #include "gui/Window.h"
 #include "gui/Cursor.h"
 #include "gui/FontCreator.h"
+#include "gui/GUIRenderer.h"
 
 #include "gui/elements/GUIStaticText.h"
 #include "gui/elements/GUIButton.h"
 #include "gui/elements/GUISlider.h"
 #include "gui/elements/GUICheckBox.h"
 #include "gui/elements/GUIRadioButton.h"
+#include "gui/elements/GUIImageDisplay.h"
 
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"
