@@ -112,7 +112,7 @@ public:
 	\param texX The number of texture repeats on the x axis.
 	\param texY The number of texture repeats on the y axis.
 	\param texZ The number of texture repeats on the z axis.
-	\param inside If true, the normals point inside the cube, otherwise they show outside.
+	\param inside If true, the normals point inside the cube, otherwise they point outside.
 	\return The created plane
 	*/
 	LUX_API StrongRef<Mesh> CreateCubeMesh(float sizeX = 1.0f, float sizeY = 1.0f, float sizeZ = 1.0f, s32 tesX = 2, s32 tesY = 2, s32 tesZ = 2, float texX = 1.0f, float texY = 1.0f, float texZ = 1.0f, bool inside = false);

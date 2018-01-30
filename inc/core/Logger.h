@@ -245,9 +245,9 @@ struct FilePrinterSettings : public Printer::Settings
 struct ConsolePrinterSettings : public Printer::Settings
 {};
 
-extern LUX_API Printer* HTMLPrinter; //!< Prints the whole log into a html file
-extern LUX_API Printer* FilePrinter; //!< Prints the whole log into a simple text file
-extern LUX_API Printer* ConsolePrinter; //!< Prints the whole log to stdout
+extern LUX_API Printer* HTMLPrinter; //!< Prints the log into a html file
+extern LUX_API Printer* FilePrinter; //!< Prints the log into a text file
+extern LUX_API Printer* ConsolePrinter; //!< Prints the log to stdout
 
 #ifdef LUX_WINDOWS
 extern LUX_API Printer* Win32DebugPrinter;

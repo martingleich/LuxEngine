@@ -78,246 +78,94 @@ struct StringType
 All non-constant methods invalidate all iterators.
 No string can contain the NUL character.
 */
-class LUX_API String
+class String
 {
 public:
-	//! Iterator over the codepoints of the string.
-	class ConstIterator : public core::BaseIterator<core::BidirectionalIteratorTag, u32>
-	{
-		friend class String;
-	public:
-		//! Creates a invalid iterator.
-		ConstIterator() :
-			m_Data(nullptr),
-			m_First(nullptr)
-		{
-		}
-
-		static ConstIterator Invalid()
-		{
-			return ConstIterator();
-		}
-
-		ConstIterator& operator++()
-		{
-			if(m_Data < m_First)
-				++m_Data;
-			else
-				core::AdvanceCursorUTF8(m_Data);
-			return *this;
-		}
-		ConstIterator& operator--()
-		{
-			if(m_Data <= m_First)
-				--m_Data;
-			else
-				core::RetractCursorUTF8(m_Data);
-			return *this;
-		}
-		ConstIterator operator++(int)
-		{
-			ConstIterator tmp(*this);
-			++*this;
-			return tmp;
-		}
-
-		ConstIterator operator--(int)
-		{
-			ConstIterator tmp(*this);
-			++*this;
-			return tmp;
-		}
-
-		ConstIterator Next()
-		{
-			ConstIterator tmp(*this);
-			++tmp;
-			return tmp;
-		}
-
-		ConstIterator Prev()
-		{
-			ConstIterator tmp(*this);
-			--tmp;
-			return tmp;
-		}
-
-		ConstIterator& operator+=(intptr_t i)
-		{
-			if(i < 0)
-				*this -= -i;
-			while(i--)
-				++*this;
-			return *this;
-		}
-
-		ConstIterator& operator-=(intptr_t i)
-		{
-			if(i < 0)
-				*this += -i;
-			while(i--)
-				--*this;
-			return *this;
-		}
-
-		ConstIterator operator+(intptr_t i)
-		{
-			ConstIterator out(*this);
-			out += i;
-			return out;
-		}
-
-		ConstIterator operator-(intptr_t i)
-		{
-			ConstIterator out(*this);
-			out -= i;
-			return out;
-		}
-
-		bool operator==(ConstIterator other) const
-		{
-			return m_Data == other.m_Data;
-		}
-		bool operator!=(ConstIterator other) const
-		{
-			return !(*this == other);
-		}
-		bool operator<(ConstIterator other) const
-		{
-			return m_Data < other.m_Data;
-		}
-
-		bool operator<=(ConstIterator other) const
-		{
-			return m_Data <= other.m_Data;
-		}
-
-		bool operator>(ConstIterator other) const
-		{
-			return m_Data > other.m_Data;
-		}
-
-		bool operator>=(ConstIterator other) const
-		{
-			return m_Data >= other.m_Data;
-		}
-
-		u32 operator*() const
-		{
-			return core::GetCharacterUTF8(m_Data);
-		}
-
-		//! Access the character the iterator is referencing
-		/**
-		All valid string iterators point to a continous block of memory, inside
-		a null-terminated string.
-		\return Pointer to the character referenced by the iterator.
-		*/
-		const char* Pointer() const
-		{
-			return m_Data;
-		}
-
-	private:
-		//! Create a iterator.
-		/**
-		\param ptr The character reference by the iterator.
-		\param first The first character of the string referenced.
-		*/
-		explicit ConstIterator(const char* ptr, const char* first) :
-			m_Data(ptr),
-			m_First(first)
-		{
-		}
-
-	private:
-		const char* m_Data; //!< The character referenced by the iterator, always the first element of a utf8 sequence if valid.
-		const char* m_First; //!< The first character of the string containing the iterator.
-	};
+	using ConstIterator = ConstUTF8Iterator;
 
 public:
 	//! The empty string.
 	/**
 	Can be used to pass referenced without creating a temporary.
 	*/
-	static const String EMPTY;
+	LUX_API static const String EMPTY;
 
 public:
 	//! Creates a empty string.
-	String();
+	LUX_API String();
 	//! Create a string from a c-string.
 	/**
 	\param data A pointer to nul-terminated string data, if null a empty string is created.
 	\param length The number of character to copy from the string if SIZE_T_MAX all characters a copied.
 	*/
-	String(const char* data, size_t length = std::numeric_limits<size_t>::max());
-	String(ConstIterator first, ConstIterator end);
+	LUX_API String(const char* data, size_t length = std::numeric_limits<size_t>::max());
+	LUX_API String(ConstIterator first, ConstIterator end);
 
 	//! Copyconstructor
-	String(const String& other);
+	LUX_API String(const String& other);
 	//! Moveconstructor
-	String(String&& old);
+	LUX_API String(String&& old);
 
 	//! Destructor
-	~String();
+	LUX_API ~String();
 
 	//! Creates a copy of this string.
-	String Copy();
+	LUX_API String Copy();
 
 	//! Reserve size bytes for string memory.
 	/**
 	After this call Data() will point to size+1 bytes of memory.
 	\param size The number of bytes to allocate for string-storage without terminating NUL.
 	*/
-	void Reserve(size_t size);
+	LUX_API void Reserve(size_t size);
 
 	//! Copy-assignment
-	String& operator=(const String& other);
+	LUX_API String& operator=(const String& other);
 	//! Copy-assignment
-	String& operator=(const char* other);
+	LUX_API String& operator=(const char* other);
 	//! Move-assignment
-	String& operator=(String&& old);
+	LUX_API String& operator=(String&& old);
 
 	//! Append another string
-	String& operator+=(const StringType& str);
+	LUX_API String& operator+=(const StringType& str);
 	//! Concat two strings.
-	String operator+(const StringType& str) const;
+	LUX_API String operator+(const StringType& str) const;
 
 	//! Compare two strings for equality
 	/*
 	No unicode normalization is performed
 	*/
-	bool operator==(const StringType& other) const;
+	LUX_API bool operator==(const StringType& other) const;
 	//! Compare two strings for inequality
 	/*
 	No unicode normalization is performed
 	*/
-	bool operator!=(const StringType& other) const;
+	LUX_API bool operator!=(const StringType& other) const;
 
 	//! Smaller comparision for strings.
 	/**
 	This establishs a total order over all strings.
 	This order doesn't have to be equal to the lexical order.
 	*/
-	bool operator<(const StringType& other) const;
+	LUX_API bool operator<(const StringType& other) const;
 
 	//! Compare two strings for equality
 	/*
 	No unicode normalization is performed
 	*/
-	bool Equal(const StringType& other) const;
+	LUX_API bool Equal(const StringType& other) const;
 
 	//! Compare two strings for equality, case insensitive.
 	/*
 	No unicode normalization is performed
 	*/
-	bool EqualCaseInsensitive(const StringType& other) const;
+	LUX_API bool EqualCaseInsensitive(const StringType& other) const;
 
 	//! Compare two strings, case insensitive.
 	/*
 	No unicode normalization is performed
 	*/
-	bool SmallerCaseInsensitive(const StringType& other) const;
+	LUX_API bool SmallerCaseInsensitive(const StringType& other) const;
 
 	//! Insert another string into this one.
 	/**
@@ -326,7 +174,7 @@ public:
 	\param count The number of characters to insert, SIZE_T_MAX to insert all characters.
 	\return A iterator to the first character after the inserted part of the string.
 	*/
-	ConstIterator Insert(ConstIterator pos, const StringType& other, size_t count = std::numeric_limits<size_t>::max());
+	LUX_API ConstIterator Insert(ConstIterator pos, const StringType& other, size_t count = std::numeric_limits<size_t>::max());
 
 	//! Insert another string into this one.
 	/**
@@ -335,7 +183,7 @@ public:
 	\param end The end iterator of the range to insert.
 	\return A iterator to the first character after the inserted part of the string.
 	*/
-	ConstIterator Insert(ConstIterator pos, ConstIterator first, ConstIterator end);
+	LUX_API ConstIterator Insert(ConstIterator pos, ConstIterator first, ConstIterator end);
 
 	//! Append a raw block of bytes
 	/**
@@ -344,7 +192,7 @@ public:
 	\param bytes The number of exact bytes to copy from the string
 	\return selfreference
 	*/
-	String& AppendRaw(const char* data, size_t bytes);
+	LUX_API String& AppendRaw(const char* data, size_t bytes);
 
 	//! Append another string onto this one.
 	/**
@@ -352,7 +200,7 @@ public:
 	\param count The number of characters to append, SIZE_T_MAX to append all characters.
 	\return selfreference
 	*/
-	String& Append(const StringType& other, size_t count = std::numeric_limits<size_t>::max());
+	LUX_API String& Append(const StringType& other, size_t count = std::numeric_limits<size_t>::max());
 
 	//! Append another string onto this one.
 	/**
@@ -360,21 +208,21 @@ public:
 	\param end The end iterator of the range to append.
 	\return selfreference
 	*/
-	String& Append(ConstIterator first, ConstIterator end);
+	LUX_API String& Append(ConstIterator first, ConstIterator end);
 
 	//! Append a single character from a iterator.
 	/**
 	\param character The character referenced by this iterator is appended.
 	\return selfreference
 	*/
-	String& Append(ConstIterator character);
+	LUX_API String& Append(ConstIterator character);
 
 	//! Append a single character.
 	/**
 	\param character A unicode-codepoint to append
 	\return selfreference
 	*/
-	String& Append(u32 character);
+	LUX_API String& Append(u32 character);
 
 	//! Resize this string
 	/**
@@ -386,69 +234,93 @@ public:
 	\param newLength The new lenght of the string.
 	\param filler The character to fill the newly created string with
 	*/
-	void Resize(size_t newLength, const StringType& filler = " ");
+	LUX_API void Resize(size_t newLength, const StringType& filler = " ");
 
 	//! Clear the string contents, making the string empty.
-	String& Clear();
+	LUX_API String& Clear();
 
 	//! The number of bytes contained in the string, without NUL.
-	size_t Size() const;
+	inline size_t Size() const
+	{
+		return m_Size;
+	}
 
 	//! The number of codepoints contained in the string, without NUL.
-	size_t Length() const;
+	inline size_t Length() const
+	{
+		return m_Length;
+	}
 
 	//! Is the string empty.
 	/*
 	The string is empty if is size and length are zero.
 	*/
-	bool IsEmpty() const;
+	inline bool IsEmpty() const
+	{
+		return (Size() == 0);
+	}
 
 	//! Gives access to the raw string-data.
 	/**
 	A pointer to at least Size()+1 bytes of string data.
 	*/
-	const char* Data_c() const;
-	const char* Data() const;
+	LUX_API const char* Data_c() const;
+	LUX_API const char* Data() const;
 
 	//! Gives access to the raw string-data.
 	/**
 	A pointer to at least Size()+1 bytes of string data.
 	Can be used to manipulate the string, use with care.
 	*/
-	char* Data();
+	LUX_API char* Data();
 
 	//! Add a single utf-8 byte to the string.
 	/**
 	Always call this method so often until a full codepoint was added.
 	*/
-	void PushByte(u8 byte);
+	LUX_API void PushByte(u8 byte);
 
 	//! Iterator the the character before the first in the string
 	/**
 	Can't be dereferenced.
 	*/
-	ConstIterator Begin() const;
+	inline ConstIterator Begin() const
+	{
+		return ConstIterator(Data_c() - 1, Data_c());
+	}
 
 	//! Iterator the the first character in the string.
-	ConstIterator First() const;
+	inline ConstIterator First() const
+	{
+		return ConstIterator(Data_c(), Data_c());
+	}
 
 	//! Iterator the the last character in the string.
-	ConstIterator Last() const;
+	inline ConstIterator Last() const
+	{
+		if(m_Size > 0)
+			return End() - 1;
+		else
+			return End();
+	}
 
 	//! Iterator the the character after the last in the string
 	/**
 	Can't be dereferenced.
 	*/
-	ConstIterator End() const;
+	inline ConstIterator End() const
+	{
+		return ConstIterator(Data_c() + m_Size, Data_c());
+	}
 
 	//! Support for foreach loop
-	ConstIterator begin() const
+	inline ConstIterator begin() const
 	{
 		return First();
 	}
 
 	//! Support for foreach loop
-	ConstIterator end() const
+	inline ConstIterator end() const
 	{
 		return End();
 	}
@@ -459,7 +331,7 @@ public:
 	\param first The position from where the test is performed, if invalid the First() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool StartsWith(const StringType& data, ConstIterator first = ConstIterator::Invalid()) const;
+	LUX_API bool StartsWith(const StringType& data, ConstIterator first = ConstIterator::Invalid()) const;
 
 	//! Test if the string ends with a given string.
 	/**
@@ -467,7 +339,7 @@ public:
 	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool EndsWith(const StringType& data, ConstIterator end = ConstIterator::Invalid()) const;
+	LUX_API bool EndsWith(const StringType& data, ConstIterator end = ConstIterator::Invalid()) const;
 
 	//! Replace all occurences of a substring in this string.
 	/**
@@ -478,7 +350,7 @@ public:
 	\param end The iterator where the search is stopped, if invalid End() is used.
 	\return The number of occurences found and replaced.
 	*/
-	size_t Replace(const StringType& replace, const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid());
+	LUX_API size_t Replace(const StringType& replace, const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid());
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -487,7 +359,7 @@ public:
 	\param rangeEnd the end of the replace range
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, ConstIterator rangeEnd = ConstIterator::Invalid());
+	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, ConstIterator rangeEnd = ConstIterator::Invalid());
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -496,7 +368,7 @@ public:
 	\param count The number of characters to replace.
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, size_t count);
+	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, size_t count);
 
 	//! Find the first occurence of a substring in this string.
 	/**
@@ -505,7 +377,7 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	ConstIterator Find(const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
+	LUX_API ConstIterator Find(const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
 
 	//! Find the last occurence of a substring in this string.
 	/**
@@ -514,7 +386,7 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	ConstIterator FindReverse(const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
+	LUX_API ConstIterator FindReverse(const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
 
 	//! Extract a substring from this string.
 	/**
@@ -522,7 +394,7 @@ public:
 	\param count The number of character to extract.
 	\return The extracted substring
 	*/
-	String SubString(ConstIterator first, size_t count = 1) const;
+	LUX_API String SubString(ConstIterator first, size_t count = 1) const;
 
 	//! Extract a substring from this string.
 	/**
@@ -530,14 +402,14 @@ public:
 	\param end The character after the last one to extract.
 	\return The extracted substring
 	*/
-	String SubString(ConstIterator first, ConstIterator end) const;
+	LUX_API String SubString(ConstIterator first, ConstIterator end) const;
 
 	//! Removes a number of characters from the back of string.
 	/**
 	\param count The number of characters to remove, may be bigger than the number of characters in the string.
 	\return The actual number of characters removed, if not equal to count, the string will be empty.
 	*/
-	size_t Pop(size_t count = 1);
+	LUX_API size_t Pop(size_t count = 1);
 
 	//! Removes characters from the string.
 	/**
@@ -545,7 +417,7 @@ public:
 	\param count The number of characters to remove.
 	\return A iterator to the first character after the deleted range.
 	*/
-	ConstIterator Remove(ConstIterator pos, size_t count = 1);
+	LUX_API ConstIterator Remove(ConstIterator pos, size_t count = 1);
 
 	//! Removes characters from the string.
 	/**
@@ -553,7 +425,7 @@ public:
 	\param end Where to stop removing characters.
 	\return A iterator to the first character after the deleted range.
 	*/
-	ConstIterator Remove(ConstIterator from, ConstIterator to);
+	LUX_API ConstIterator Remove(ConstIterator from, ConstIterator to);
 
 	//! Removes all whitespace from the right side of the string.
 	/**
@@ -562,7 +434,7 @@ public:
 	\param end Where should the removing of characters start, if invalid End() is used.
 	\return selfreference
 	*/
-	String& RStrip(ConstIterator end = ConstIterator::Invalid());
+	LUX_API String& RStrip(ConstIterator end = ConstIterator::Invalid());
 
 	//! Removes all whitespace from the left side of the string.
 	/**
@@ -571,7 +443,7 @@ public:
 	\param first Where should the removing of characters start, if invalid First() is used.
 	\return selfreference
 	*/
-	String& LStrip(ConstIterator first = ConstIterator::Invalid());
+	LUX_API String& LStrip(ConstIterator first = ConstIterator::Invalid());
 
 	//! Split the string on a character.
 	/**
@@ -582,7 +454,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The number of written output strings.
 	*/
-	size_t Split(u32 ch, String* outArray, size_t maxCount, bool ignoreEmpty = false) const;
+	LUX_API size_t Split(u32 ch, String* outArray, size_t maxCount, bool ignoreEmpty = false) const;
 
 	//! Split the string on a character.
 	/**
@@ -591,35 +463,35 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The array of substrings
 	*/
-	core::Array<String> Split(u32 ch, bool ignoreEmpty = false) const;
+	LUX_API core::Array<String> Split(u32 ch, bool ignoreEmpty = false) const;
 
 	//! Classify the content of the string
 	/**
 	See \ref{EStringType} for more information about string classification.
 	*/
-	EStringClass Classify() const;
+	LUX_API EStringClass Classify() const;
 
 	//! Contains the string only whitespace(or is empty)
-	bool IsWhitespace() const;
+	LUX_API bool IsWhitespace() const;
 
 	//! Get a string in lower case
-	String GetLower() const;
+	LUX_API String GetLower() const;
 
 	//! Get a string in upper case
-	String GetUpper() const;
+	LUX_API String GetUpper() const;
 
 private:
 	//! Is the string saved in short format.
-	bool IsShortString() const;
+	LUX_API bool IsShortString() const;
 
 	//! Returns the number of allocated bytes, including NUL.
-	size_t GetAllocated() const;
+	LUX_API size_t GetAllocated() const;
 
 	//! Set the number of allocated bytes, including NUL.
-	void SetAllocated(size_t a);
+	LUX_API void SetAllocated(size_t a);
 
 	//! Push a single character to string, it's data is read from ptr.
-	void PushCharacter(const char* ptr);
+	LUX_API void PushCharacter(const char* ptr);
 
 private:
 	//! Contains the raw data of the string.

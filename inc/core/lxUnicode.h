@@ -1,6 +1,7 @@
 #ifndef INCLUDED_LX_UNICODE_H
 #define INCLUDED_LX_UNICODE_H
 #include "LuxBase.h"
+#include "lxIterator.h"
 
 namespace lux
 {
@@ -14,7 +15,7 @@ The passed string must be nul-terminated.
 \param [out] outBytes If not null the number of bytes in the string is written here
 \return The number of characters in the string without NUL.
 */
-LUX_API size_t StringLengthUTF8(const char* str, size_t* outBytes=nullptr);
+LUX_API size_t StringLengthUTF8(const char* str, size_t* outBytes = nullptr);
 
 //! Moves the passed utf8 cursor onto the character before the current one
 LUX_API void RetractCursorUTF8(const char*& ptr);
@@ -32,7 +33,6 @@ LUX_API u32 AdvanceCursorUTF8(const char*& ptr);
 */
 LUX_API u32 GetCharacterUTF8(const char* ptr);
 
-
 //! Computes the number of codepoints inside a utf16 string.
 /**
 The passed string must be nul-terminated.
@@ -40,7 +40,7 @@ The passed string must be nul-terminated.
 \param [out] outBytes If not null the number of bytes in the string is written here
 \return The number of characters in the string without NUL.
 */
-LUX_API size_t StringLengthUTF16(const char* str, size_t* outBytes=nullptr);
+LUX_API size_t StringLengthUTF16(const char* str, size_t* outBytes = nullptr);
 
 //! Moves the passed utf16 cursor onto the character after the current one
 /**
@@ -114,6 +114,161 @@ enum class EUnicodeClass
 };
 
 LUX_API EUnicodeClass CategorizeCodePoint(u32 c);
+
+//! Iterator over the codepoints of the string.
+class ConstUTF8Iterator : public core::BaseIterator<core::BidirectionalIteratorTag, u32>
+{
+public:
+	//! Creates a invalid iterator.
+	ConstUTF8Iterator() :
+		m_Data(nullptr),
+		m_First(nullptr)
+	{
+	}
+	//! Create a iterator.
+	/**
+	\param ptr The character reference by the iterator.
+	\param first The first character of the string referenced.
+	*/
+	explicit ConstUTF8Iterator(const char* ptr, const char* first) :
+		m_Data(ptr),
+		m_First(first)
+	{
+	}
+
+	static ConstUTF8Iterator Invalid()
+	{
+		return ConstUTF8Iterator();
+	}
+
+	ConstUTF8Iterator& operator++()
+	{
+		if(m_Data < m_First)
+			++m_Data;
+		else
+			core::AdvanceCursorUTF8(m_Data);
+		return *this;
+	}
+	ConstUTF8Iterator& operator--()
+	{
+		if(m_Data <= m_First)
+			--m_Data;
+		else
+			core::RetractCursorUTF8(m_Data);
+		return *this;
+	}
+	ConstUTF8Iterator operator++(int)
+	{
+		ConstUTF8Iterator tmp(*this);
+		++*this;
+		return tmp;
+	}
+
+	ConstUTF8Iterator operator--(int)
+	{
+		ConstUTF8Iterator tmp(*this);
+		++*this;
+		return tmp;
+	}
+
+	ConstUTF8Iterator Next()
+	{
+		ConstUTF8Iterator tmp(*this);
+		++tmp;
+		return tmp;
+	}
+
+	ConstUTF8Iterator Prev()
+	{
+		ConstUTF8Iterator tmp(*this);
+		--tmp;
+		return tmp;
+	}
+
+	ConstUTF8Iterator& operator+=(intptr_t i)
+	{
+		if(i < 0)
+			*this -= -i;
+		while(i--)
+			++*this;
+		return *this;
+	}
+
+	ConstUTF8Iterator& operator-=(intptr_t i)
+	{
+		if(i < 0)
+			*this += -i;
+		while(i--)
+			--*this;
+		return *this;
+	}
+
+	ConstUTF8Iterator operator+(intptr_t i)
+	{
+		ConstUTF8Iterator out(*this);
+		out += i;
+		return out;
+	}
+
+	ConstUTF8Iterator operator-(intptr_t i)
+	{
+		ConstUTF8Iterator out(*this);
+		out -= i;
+		return out;
+	}
+
+	bool operator==(ConstUTF8Iterator other) const
+	{
+		return m_Data == other.m_Data;
+	}
+	bool operator!=(ConstUTF8Iterator other) const
+	{
+		return !(*this == other);
+	}
+	bool operator<(ConstUTF8Iterator other) const
+	{
+		return m_Data < other.m_Data;
+	}
+
+	bool operator<=(ConstUTF8Iterator other) const
+	{
+		return m_Data <= other.m_Data;
+	}
+
+	bool operator>(ConstUTF8Iterator other) const
+	{
+		return m_Data > other.m_Data;
+	}
+
+	bool operator>=(ConstUTF8Iterator other) const
+	{
+		return m_Data >= other.m_Data;
+	}
+
+	u32 operator*() const
+	{
+		return core::GetCharacterUTF8(m_Data);
+	}
+
+	//! Access the character the iterator is referencing
+	/**
+	All valid iterators point to a continous block of memory.
+	\return Pointer to the character referenced by the iterator.
+	*/
+	const char* Pointer() const
+	{
+		return m_Data;
+	}
+	
+	const char* First() const
+	{
+		return m_First;
+	}
+
+private:
+	const char* m_Data; //!< The character referenced by the iterator, always the first element of a utf8 sequence if valid.
+	const char* m_First; //!< The first character of the string containing the iterator.
+};
 
 }
 }

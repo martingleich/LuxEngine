@@ -51,7 +51,7 @@ void FontRaster::Init(const FontCreationData& data)
 
 void FontRaster::Draw(
 	const FontRenderSettings& _settings,
-	core::Range<core::String::ConstIterator> text,
+	core::Range<core::ConstUTF8Iterator> text,
 	const math::Vector2F& position,
 	const math::RectF* userClip)
 {
@@ -75,9 +75,8 @@ void FontRaster::Draw(
 			(u32)math::Max(0.0f, std::ceil(userClip->bottom))));
 	}
 
-	if(position.y + charHeight + 1 < (float)clipRect.top)
-		return;
-	if(position.y - 1 > (float)clipRect.bottom)
+	if(position.y + charHeight + 1 < (float)clipRect.top
+		|| position.y - 1 > (float)clipRect.bottom)
 		return;
 
 	video::ScissorRectToken tok;
@@ -170,86 +169,48 @@ void FontRaster::Draw(
 	}
 }
 
-float FontRaster::GetTextWidth(const FontRenderSettings& _settings, core::Range<core::String::ConstIterator> text)
+float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text)
 {
-	if(text.begin() == text.end())
-		return 0.0f;
-	auto settings = GetFinalFontSettings(_settings);
-	const float charSpace = settings.charDistance * settings.scale;
-
-	float width = -charSpace;
-	for(u32 c : text) {
-		const CharInfo& info = GetCharInfo(c);
-		if(c == ' ')
-			width += (info.A + info.B + info.C) * settings.wordDistance * settings.scale;
-		else
-			width += (info.A + info.B + info.C) * settings.scale;
-
-		width += charSpace;
-	}
-
+	float width = 0;
+	IterateCarets(settings, text, [&](float f) -> bool {
+		width = f;
+		return true;
+	});
 	return width;
 }
 
-size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& _settings, core::Range<core::String::ConstIterator> text, float XPosition)
+size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition)
 {
-	if(text.begin() == text.end())
-		return 0;
 	if(XPosition < 0.0f)
 		return 0;
-
-	auto settings = GetFinalFontSettings(_settings);
-	const float charSpace = settings.charDistance * settings.scale;
-
-	float caret = 0.0f;
-	float lastCaret;
+	if(text.begin() == text.end())
+		return 0;
+	float lastCaret = 0;
 	size_t counter = 0;
-	for(auto c : text) {
-		lastCaret = caret;
-		const CharInfo& info = GetCharInfo(c);
-		if(c == ' ')
-			caret += (info.A + info.B + info.C)*settings.scale*settings.wordDistance;
-		else
-			caret += (info.B + info.A + info.C)*settings.scale;
-
-		if(XPosition >= lastCaret && XPosition <= caret) {
+	IterateCarets(settings, text, [&](float f)->bool
+	{
+		if(XPosition >= lastCaret && XPosition <= f) {
 			const float d1 = XPosition - lastCaret;
-			const float d2 = caret - XPosition;
-			if(d1 < d2)
-				return counter;
-			else
-				return counter + 1;
+			const float d2 = f - XPosition;
+			if(d1 > d2)
+				++counter;
+			return false;
 		}
-
-		caret += charSpace;
+		lastCaret = f;
 		++counter;
-	}
+		return true;
+	});
 
-	// Its the last caret
 	return counter;
 }
 
-void FontRaster::GetTextCarets(const FontRenderSettings& _settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets)
+void FontRaster::GetTextCarets(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets)
 {
-	auto settings = GetFinalFontSettings(_settings);
-	const float charSpace = settings.charDistance;
-
-	if(text.begin() == text.end())
-		return;
-
-	float width = 0.0f;
-	for(u32 c : text) {
-		carets.PushBack(width*settings.scale);
-		const CharInfo& info = GetCharInfo(c);
-		if(c == ' ')
-			width += (info.A + info.B + info.C)*settings.wordDistance * settings.scale;
-		else
-			width += (info.A + info.B + info.C)*settings.scale;
-
-		width += charSpace*settings.scale;
-	}
-
-	carets.PushBack(width);
+	IterateCarets(settings, text, [&](float f)->bool
+	{
+		carets.PushBack(f);
+		return true;
+	});
 }
 
 const CharInfo& FontRaster::GetCharInfo(u32 c)

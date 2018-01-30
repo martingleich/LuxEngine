@@ -57,10 +57,11 @@ public:
 
 	void Init(const FontCreationData& data);
 
-	void Draw(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, const math::Vector2F& Position, const math::RectF* clip);
-	float GetTextWidth(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text);
-	size_t GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition);
-	void GetTextCarets(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets);
+	void Draw(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, const math::Vector2F& Position, const math::RectF* clip);
+
+	float GetTextWidth(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text);
+	size_t GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, float XPosition);
+	void GetTextCarets(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, core::Array<float>& carets);
 	const core::HashMap<u32, CharInfo>& GetCharMap() const;
 	const CharInfo& GetCharInfo(u32 c);
 
@@ -84,6 +85,34 @@ private:
 	video::MaterialRenderer* EnsureMaterialRenderer();
 	void LoadImageData(const u8* imageData,
 		math::Dimension2U imageSize, u32 channelCount);
+
+	template <typename FuncT>
+	void IterateCarets(
+		const FontRenderSettings& _settings,
+		core::Range<core::ConstUTF8Iterator> text,
+		FuncT callback)
+	{
+		auto settings = GetFinalFontSettings(_settings);
+		const float charSpace = settings.charDistance;
+
+		if(text.begin() == text.end())
+			return;
+
+		float width = 0;
+		for(u32 c : text) {
+			if(callback(width * settings.scale) == false)
+				return;
+			const CharInfo& info = GetCharInfo(c);
+			if(c == ' ')
+				width += (info.A + info.B + info.C)*settings.wordDistance * settings.scale;
+			else
+				width += (info.A + info.B + info.C)*settings.scale;
+
+			width += charSpace*settings.scale;
+		}
+
+		callback(width);
+	}
 
 private:
 	FontDescription m_Desc;

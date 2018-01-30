@@ -259,7 +259,7 @@ bool String::SmallerCaseInsensitive(const StringType& other) const
 
 String::ConstIterator String::Insert(ConstIterator pos, const StringType& other, size_t count)
 {
-	lxAssert(pos.m_First == Data());
+	lxAssert(pos.First() == Data());
 
 	other.EnsureSize();
 	size_t size;
@@ -435,21 +435,6 @@ String& String::Clear()
 	return *this;
 }
 
-size_t String::Size() const
-{
-	return m_Size;
-}
-
-size_t String::Length() const
-{
-	return m_Length;
-}
-
-bool String::IsEmpty() const
-{
-	return (Size() == 0);
-}
-
 const char* String::Data_c() const
 {
 	return Data();
@@ -487,35 +472,12 @@ void String::PushByte(u8 byte)
 		++m_Length;
 }
 
-String::ConstIterator String::Begin() const
-{
-	return ConstIterator(Data_c() - 1, Data_c());
-}
-
-String::ConstIterator String::First() const
-{
-	return ConstIterator(Data_c(), Data_c());
-}
-
-String::ConstIterator String::Last() const
-{
-	if(m_Size > 0)
-		return End() - 1;
-	else
-		return End();
-}
-
-String::ConstIterator String::End() const
-{
-	return ConstIterator(Data_c() + m_Size, Data_c());
-}
-
 bool String::StartsWith(const StringType& data, ConstIterator first) const
 {
 	if(first == ConstIterator::Invalid())
 		first = First();
 
-	lxAssert(first.m_First == Data());
+	lxAssert(first.First() == Data());
 
 	if(data.data[0] == 0)
 		return true;
@@ -534,7 +496,7 @@ bool String::EndsWith(const StringType& data, ConstIterator end) const
 	if(end == ConstIterator::Invalid())
 		end = End();
 
-	lxAssert(end.m_First == Data());
+	lxAssert(end.First() == Data());
 
 	if(data.data[0] == 0)
 		return true;
@@ -584,7 +546,7 @@ String::ConstIterator String::ReplaceRange(const StringType& replace, ConstItera
 
 String::ConstIterator String::ReplaceRange(const StringType& replace, ConstIterator rangeFirst, size_t count)
 {
-	lxAssert(rangeFirst.m_First == Data());
+	lxAssert(rangeFirst.First() == Data());
 
 	replace.EnsureSize();
 	size_t replacedSize = (rangeFirst + count).Pointer() - rangeFirst.Pointer();
@@ -614,8 +576,8 @@ String::ConstIterator String::Find(const StringType& search, ConstIterator first
 	if(end == ConstIterator::Invalid())
 		end = End();
 
-	lxAssert(first.m_First == Data());
-	lxAssert(end.m_First == Data());
+	lxAssert(first.First() == Data());
+	lxAssert(end.First() == Data());
 
 	search.EnsureSize();
 	if(search.size == 0)
@@ -638,8 +600,8 @@ String::ConstIterator String::FindReverse(const StringType& search, ConstIterato
 	if(end == ConstIterator::Invalid())
 		end = End();
 
-	lxAssert(first.m_First == Data());
-	lxAssert(end.m_First == Data());
+	lxAssert(first.First() == Data());
+	lxAssert(end.First() == Data());
 
 	if(first == end)
 		return end;
@@ -662,15 +624,15 @@ String::ConstIterator String::FindReverse(const StringType& search, ConstIterato
 
 String String::SubString(ConstIterator first, size_t count) const
 {
-	lxAssert(first.m_First == Data());
+	lxAssert(first.First() == Data());
 
 	return String(first.Pointer(), count);
 }
 
 String String::SubString(ConstIterator first, ConstIterator end) const
 {
-	lxAssert(first.m_First == Data());
-	lxAssert(end.m_First == Data());
+	lxAssert(first.First() == Data());
+	lxAssert(end.First() == Data());
 
 	String out;
 	ConstIterator it = first;
@@ -708,7 +670,7 @@ size_t String::Pop(size_t count)
 
 String::ConstIterator String::Remove(ConstIterator pos, size_t count)
 {
-	lxAssert(pos.m_First == Data());
+	lxAssert(pos.First() == Data());
 
 	size_t removeSize = (pos + count).Pointer() - pos.Pointer();
 
@@ -741,7 +703,7 @@ String& String::RStrip(ConstIterator end)
 	if(end == First())
 		return *this;
 
-	lxAssert(end.m_First == Data());
+	lxAssert(end.First() == Data());
 
 	char* data = Data();
 
@@ -770,7 +732,7 @@ String& String::LStrip(ConstIterator first)
 	if(first == ConstIterator::Invalid())
 		first = First();
 
-	lxAssert(first.m_First == Data());
+	lxAssert(first.First() == Data());
 
 	size_t offset = first.Pointer() - Data_c();
 	auto end = End();
