@@ -18,6 +18,7 @@
 #include "gui/elements/GUICheckBox.h"
 #include "gui/elements/GUIRadioButton.h"
 #include "gui/elements/GUIImageDisplay.h"
+#include "gui/elements/GUITextBox.h"
 
 #include "gui/FontFormat.h"
 #include "gui/FontCreator.h"
@@ -420,7 +421,7 @@ void GUIEnvironment::SetFocused(Element* elem)
 {
 	if(!elem)
 		m_Focused = nullptr;
-	if(m_Focused != elem && elem->IsFocusable()) {
+	if(m_Focused != elem && elem->IsFocusable() && elem->IsEnabled()) {
 		m_Focused = elem;
 		ElementEvent e;
 		e.elem = elem;
@@ -444,26 +445,26 @@ StrongRef<Element> GUIEnvironment::AddElement(core::Name name, Element* parent)
 	return parent->AddElement(core::ReferableFactory::Instance()->Create(name).As<Element>());
 }
 
-StrongRef<StaticText> GUIEnvironment::AddStaticText(const ScalarVectorF& position, const core::String& text, Element* parent)
+StrongRef<StaticText> GUIEnvironment::AddStaticText(const ScalarVectorF& position, const core::String& text)
 {
-	StrongRef<StaticText> st = AddElement(core::Name("lux.gui.StaticText"), parent);
+	StrongRef<StaticText> st = AddElement(core::Name("lux.gui.StaticText"));
 	st->SetPosition(position);
 	st->SetText(text);
 	return st;
 }
 
-StrongRef<Button> GUIEnvironment::AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text, Element* parent)
+StrongRef<Button> GUIEnvironment::AddButton(const ScalarVectorF& pos, const ScalarDimensionF& size, const core::String& text)
 {
-	StrongRef<Button> button = AddElement(core::Name("lux.gui.Button"), parent);
+	StrongRef<Button> button = AddElement(core::Name("lux.gui.Button"));
 	button->SetPosition(pos);
 	button->SetSize(size);
 	button->SetText(text);
 	return button;
 }
 
-StrongRef<Slider> GUIEnvironment::AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max, Element* parent)
+StrongRef<Slider> GUIEnvironment::AddSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max)
 {
-	StrongRef<Slider> slider = AddElement(core::Name("lux.gui.Slider"), parent);
+	StrongRef<Slider> slider = AddElement(core::Name("lux.gui.Slider"));
 	slider->SetPosition(pos);
 	slider->SetWidth(size);
 	slider->SetRange(min, max);
@@ -471,9 +472,9 @@ StrongRef<Slider> GUIEnvironment::AddSlider(const ScalarVectorF& pos, const Scal
 	return slider;
 }
 
-StrongRef<Slider> GUIEnvironment::AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max, Element* parent)
+StrongRef<Slider> GUIEnvironment::AddVerticalSlider(const ScalarVectorF& pos, const ScalarDistanceF& size, int min, int max)
 {
-	StrongRef<Slider> slider = AddElement(core::Name("lux.gui.Slider"), parent);
+	StrongRef<Slider> slider = AddElement(core::Name("lux.gui.Slider"));
 	slider->SetHorizontal(false);
 	slider->SetPosition(pos);
 	slider->SetHeight(size);
@@ -482,18 +483,18 @@ StrongRef<Slider> GUIEnvironment::AddVerticalSlider(const ScalarVectorF& pos, co
 	return slider;
 }
 
-StrongRef<CheckBox> GUIEnvironment::AddCheckBox(const ScalarVectorF& pos, const ScalarDimensionF& size, bool checked, Element* parent)
+StrongRef<CheckBox> GUIEnvironment::AddCheckBox(const ScalarVectorF& pos, const ScalarDimensionF& size, bool checked)
 {
-	StrongRef<CheckBox> box = AddElement(core::Name("lux.gui.CheckBox"), parent);
+	StrongRef<CheckBox> box = AddElement(core::Name("lux.gui.CheckBox"));
 	box->SetPosition(pos);
 	box->SetSize(size);
 	box->SetChecked(checked);
 	return box;
 }
 
-StrongRef<RadioButton> GUIEnvironment::AddRadioButton(const ScalarVectorF& pos, const ScalarDimensionF& size, RadioButton* group, Element* parent)
+StrongRef<RadioButton> GUIEnvironment::AddRadioButton(const ScalarVectorF& pos, const ScalarDimensionF& size, RadioButton* group)
 {
-	StrongRef<RadioButton> radio = AddElement(core::Name("lux.gui.RadioButton"), parent);
+	StrongRef<RadioButton> radio = AddElement(core::Name("lux.gui.RadioButton"));
 	radio->SetPosition(pos);
 	radio->SetSize(size);
 	if(group)
@@ -501,9 +502,9 @@ StrongRef<RadioButton> GUIEnvironment::AddRadioButton(const ScalarVectorF& pos, 
 	return radio;
 }
 
-StrongRef<ImageDisplay> GUIEnvironment::AddImageDisplay(const ScalarVectorF& pos, const ScalarDimensionF& size, video::Texture* img, Element* parent)
+StrongRef<ImageDisplay> GUIEnvironment::AddImageDisplay(const ScalarVectorF& pos, const ScalarDimensionF& size, video::Texture* img)
 {
-	StrongRef<ImageDisplay> imgDisplay = AddElement(core::Name("lux.gui.ImageDisplay"), parent);
+	StrongRef<ImageDisplay> imgDisplay = AddElement(core::Name("lux.gui.ImageDisplay"));
 	imgDisplay->SetPosition(pos);
 	imgDisplay->SetSize(size);
 	imgDisplay->SetTexture(img);
@@ -511,6 +512,14 @@ StrongRef<ImageDisplay> GUIEnvironment::AddImageDisplay(const ScalarVectorF& pos
 	return imgDisplay;
 }
 
+StrongRef<TextBox> GUIEnvironment::AddTextBox(const ScalarVectorF& pos, const ScalarDimensionF& size)
+{
+	StrongRef<TextBox> textBox = AddElement(core::Name("lux.gui.TextBox"));
+	textBox->SetPosition(pos);
+	textBox->SetSize(size);
+
+	return textBox;
+}
 ///////////////////////////////////////////////////////////////////////////
 
 StrongRef<FontCreator> GUIEnvironment::GetFontCreator()
@@ -590,11 +599,13 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 
 	if(m_Captured) {
 		e.elem = m_Captured;
-		SendElementEvent(e.elem, e);
+		if(e.elem->IsEnabled())
+			SendElementEvent(e.elem, e);
 	} else {
 		if(m_Hovered) {
 			e.elem = m_Hovered;
-			SendElementEvent(e.elem, e);
+			if(e.elem->IsEnabled())
+				SendElementEvent(e.elem, e);
 		}
 	}
 	if(e.elem && e.IsClick()) {
@@ -612,7 +623,8 @@ void GUIEnvironment::SendKeyboardEvent(KeyboardEvent& e)
 
 	if(m_Focused) {
 		e.elem = m_Focused;
-		SendElementEvent(e.elem, e);
+		if(e.elem->IsEnabled())
+			SendElementEvent(e.elem, e);
 	}
 }
 

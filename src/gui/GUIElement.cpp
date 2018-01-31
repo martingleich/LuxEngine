@@ -114,6 +114,8 @@ bool Element::IsEnabled() const
 void Element::SetEnabled(bool enable)
 {
 	m_IsEnabled = enable;
+	if(IsFocused() && !enable)
+		m_Environment->SetFocused(nullptr);
 }
 
 bool Element::IsClipped() const

@@ -170,6 +170,7 @@ namespace input
 #include "gui/elements/GUICheckBox.h"
 #include "gui/elements/GUIRadioButton.h"
 #include "gui/elements/GUIImageDisplay.h"
+#include "gui/elements/GUITextBox.h"
 
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"

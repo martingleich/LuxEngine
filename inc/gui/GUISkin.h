@@ -50,7 +50,10 @@ public:
 	{
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Enabled, Palette::EColorRole::WindowText, video::Color::Black);
 		m_DefaultPalette.SetColor(Palette::EColorGroup::Disabled, Palette::EColorRole::WindowText, video::Color::LightGray);
-		m_DefaultPalette.SetColor(Palette::EColorRole::Base, video::Color::White);
+		m_DefaultPalette.SetColor(Palette::EColorGroup::Enabled, Palette::EColorRole::Base, video::Color::White);
+		m_DefaultPalette.SetColor(Palette::EColorGroup::Disabled, Palette::EColorRole::Base, video::Color::LightGray);
+		m_DefaultPalette.SetColor(Palette::EColorGroup::Enabled, Palette::EColorRole::BaseText, video::Color::Black);
+		m_DefaultPalette.SetColor(Palette::EColorGroup::Disabled, Palette::EColorRole::BaseText, video::Color::DarkGray);
 		m_DefaultPalette.SetColor(Palette::EColorRole::WindowBackground, video::Color(0xA0, 0xA0, 0xA0));
 		m_DefaultPalette.SetColor(Palette::EColorRole::Window, video::Color::DarkGray);
 		m_DefaultPalette.SetColor(Palette::EColorRole::BaseHightlightText, video::Color::White);
