@@ -259,6 +259,13 @@ MultiIter<IterTs...> ZipIter(IterTs... iter)
 	return MultiIter<IterTs...>(iter...);
 }
 
+template <typename RangeT>
+size_t RangeLength(const RangeT& r)
+{
+	using namespace std;
+	return IteratorDistance(begin(r), end(r));
+}
+
 template <typename IterT>
 class Range
 {
@@ -299,17 +306,15 @@ public:
 		return !(*this == other);
 	}
 
+	bool IsEmpty() const
+	{
+		return m_First == m_End;
+	}
+
 private:
 	IterT m_First;
 	IterT m_End;
 };
-
-template <typename RangeT>
-size_t RangeLength(const RangeT& r)
-{
-	using namespace std;
-	return IteratorDistance(begin(r), end(r));
-}
 
 template <typename IterT>
 Range<IterT> MakeRange(IterT first, IterT end)

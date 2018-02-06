@@ -321,6 +321,11 @@ public:
 	{
 		return dynamic_cast<T2*>(m_Object);
 	}
+	template <typename T2>
+	StrongRef<T2> AsStrong() const
+	{
+		return StrongRef<T2>(dynamic_cast<T2*>(m_Object));
+	}
 };
 
 template <typename T>

@@ -110,6 +110,12 @@ public:
 	*/
 	LUX_API virtual void RecalculateBoundingBox();
 
+	//! Are the triangles drawn in counter-clockwise or clockwise order.
+	LUX_API virtual void SetWindingOrder(bool counterClockwise);
+
+	//! Are the triangles drawn in counter-clockwise or clockwise order.
+	LUX_API virtual bool GetWindingOrder() const;
+
 	//! Get the change id of the geometry
 	LUX_API virtual u32 GetChangeId() const;
 
@@ -120,6 +126,7 @@ protected:
 	EPrimitiveType m_PrimitiveType;
 
 	math::AABBoxF m_BoundingBox;
+	bool m_WindingOrder;
 };
 
 } // namespace video

@@ -151,10 +151,10 @@ private:
 	Printer* m_Printer;
 
 public:
-	Logger(LogSystem& LogSystem, ELogLevel ll, Printer* printer = nullptr) :
+	Logger(LogSystem& LogSystem, ELogLevel ll) :
 		m_MyLogLevel(ll),
 		m_LogSystem(LogSystem),
-		m_Printer(printer)
+		m_Printer(nullptr)
 	{
 		m_LogSystem.AddLogger(this);
 	}

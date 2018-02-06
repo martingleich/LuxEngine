@@ -246,14 +246,13 @@ void RendererD3D9::DrawPrimitiveList(
 	EPrimitiveType primitiveType, u32 firstPrimitive, u32 primitiveCount,
 	const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 	const void* indexData, EIndexFormat indexType,
-	bool is3D, bool user)
+	bool is3D, bool windingOrder, bool user)
 {
 	if(primitiveCount == 0)
 		return;
 
-	SwitchRenderMode(is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 	SetVertexFormat(vertexFormat);
-	SetupRendering();
+	SetupRendering(windingOrder, is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 
 	u32 stride = vertexFormat.GetStride(0);
 
@@ -344,25 +343,19 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 	if(vs.data) {
 		DrawPrimitiveList(
 			pt,
-			firstPrimitive,
-			primitiveCount,
-			vs.data,
-			vertexCount,
-			vertexFormat,
-			is.data,
-			indexFormat,
-			is3D, true);
+			firstPrimitive, primitiveCount,
+			vs.data, vertexCount, vertexFormat,
+			is.data, indexFormat,
+			is3D, geo->GetWindingOrder(),
+			true);
 	} else {
 		DrawPrimitiveList(
 			pt,
-			firstPrimitive,
-			primitiveCount,
-			geo->GetVertices(),
-			vertexCount,
-			vertexFormat,
-			geo->GetIndices(),
-			indexFormat,
-			is3D, false);
+			firstPrimitive, primitiveCount,
+			geo->GetVertices(), vertexCount, vertexFormat,
+			geo->GetIndices(), indexFormat,
+			is3D, geo->GetWindingOrder(),
+			false);
 	}
 }
 
@@ -384,8 +377,10 @@ void RendererD3D9::Reset()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void RendererD3D9::SetupRendering()
+void RendererD3D9::SetupRendering(bool winding, ERenderMode mode)
 {
+	SwitchRenderMode(mode);
+
 	bool dirtyPass = false;
 
 	const auto& pass = m_OverwritePass;
@@ -399,6 +394,15 @@ void RendererD3D9::SetupRendering()
 		}
 		m_OverwritePass.normalizeNormals |= m_NormalizeNormals;
 		dirtyPass = true;
+	}
+	if(!winding) {
+		bool tmp = m_OverwritePass.backfaceCulling;
+		m_OverwritePass.backfaceCulling = m_OverwritePass.frontfaceCulling;
+		m_OverwritePass.frontfaceCulling = tmp;
+	}
+	if(m_PrevWinding != winding) {
+		dirtyPass = true;
+		m_PrevWinding = winding;
 	}
 
 	if((pass.shader != nullptr) != m_UseShader) {
@@ -596,7 +600,6 @@ void RendererD3D9::SetVertexFormat(const VertexFormat& format)
 		return;
 
 	HRESULT hr;
-
 	auto decl = m_Driver->GetD3D9VertexDeclaration(format);
 	if(FAILED(hr = m_Device->SetVertexDeclaration(decl)))
 		throw core::D3D9Exception(hr);

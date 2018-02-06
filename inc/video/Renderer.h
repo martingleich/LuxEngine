@@ -130,7 +130,7 @@ public:
 	virtual void SetPass(const Pass& pass, bool useOverwrite = false, ParamSetCallback* paramSetCallback = nullptr) = 0;
 
 	//! Set the active material
-	virtual void SetMaterial(const Material* material, size_t passId=0) = 0;
+	virtual void SetMaterial(const Material* material, size_t passId = 0) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -177,7 +177,7 @@ public:
 	virtual const math::Matrix4& GetTransform(ETransform transform) const = 0;
 
 	//! Renormalize normals after transformation(default = true)
-	virtual void SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token=nullptr) = 0;
+	virtual void SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token = nullptr) = 0;
 	virtual bool GetNormalizeNormals() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
@@ -189,7 +189,7 @@ public:
 	\param type The type of the new parameter
 	\throws InvalidArgumentException If the name is already in use
 	*/
-	virtual void AddParam(const core::String& name, core::Type type, const void* value=nullptr) = 0;
+	virtual void AddParam(const core::String& name, core::Type type, const void* value = nullptr) = 0;
 
 	template <typename T>
 	void AddParam(const core::String& name, const T& value)
@@ -211,13 +211,41 @@ public:
 	\param vertexFormat The format of the vertices
 	\param indexData The indices to draw
 	\param indexType The format of the indices
-	\param is3D Is the 3d or the 2d pipeline used
+	\param is3D Is the 2D or 3D pipeline used
+	\param windingOrder Clockwise or counter clockwise
 	*/
 	virtual void DrawIndexedPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
-		bool is3D) = 0;
+		bool is3D,
+		bool windingOrder = true) = 0;
+
+	void DrawIndexed3DPrimitiveList(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		const void* indexData, EIndexFormat indexType,
+		bool windingOrder = true)
+	{
+		DrawIndexedPrimitiveList(primitiveType, primitiveCount,
+			vertexData, vertexCount, vertexFormat,
+			indexData, indexType,
+			true,
+			windingOrder);
+	}
+
+	void DrawIndexed2DPrimitiveList(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		const void* indexData, EIndexFormat indexType,
+		bool windingOrder = true)
+	{
+		DrawIndexedPrimitiveList(primitiveType, primitiveCount,
+			vertexData, vertexCount, vertexFormat,
+			indexData, indexType,
+			false,
+			windingOrder);
+	}
 
 	//! Draw a primitive list from memory
 	/**
@@ -227,11 +255,35 @@ public:
 	\param vertexCount The nuumber of vertices to draw
 	\param vertexFormat The format of the vertices
 	\param is3D Is the 3d or the 2d pipeline used
+	\param windingOrder Clockwise or counter clockwise
 	*/
 	virtual void DrawPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		bool is3D) = 0;
+		bool is3D,
+		bool windingOrder = true) = 0;
+
+	void Draw2DPrimitiveList(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		bool windingOrder = true)
+	{
+		DrawPrimitiveList(
+			primitiveType, primitiveCount,
+			vertexData, vertexCount, vertexFormat,
+			false, windingOrder);
+	}
+
+	void Draw3DPrimitiveList(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		bool windingOrder = true)
+	{
+		DrawPrimitiveList(
+			primitiveType, primitiveCount,
+			vertexData, vertexCount, vertexFormat,
+			true, windingOrder);
+	}
 
 	//! Draw some geometry
 	/**

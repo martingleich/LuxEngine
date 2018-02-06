@@ -58,13 +58,12 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 	}
 
 	videoRenderer->SetMaterial(data->EmitLight ? m_EmitMaterial : m_BaseMaterial);
-	videoRenderer->DrawPrimitiveList(
+	videoRenderer->Draw3DPrimitiveList(
 		video::EPrimitiveType::Points,
 		group->GetParticleCount(),
 		m_Vertices.Data_c(),
 		group->GetParticleCount(),
-		m_VertexFormat,
-		true);
+		m_VertexFormat);
 }
 
 core::Name PointRendererMachine::GetType() const

@@ -326,13 +326,12 @@ void Canvas3D::FlushLineBuffer()
 		m_Renderer->SetTransform(video::ETransform::World, m_Transform);
 	}
 
-	m_Renderer->DrawPrimitiveList(
+	m_Renderer->Draw3DPrimitiveList(
 		EPrimitiveType::Lines,
 		m_LineBufferCursor / 2,
 		m_LineBuffer,
 		m_LineBufferCursor,
-		Canvas3DSystem::Instance()->GetPenVertexFormat(),
-		true);
+		Canvas3DSystem::Instance()->GetPenVertexFormat());
 	m_LineBufferCursor = 0;
 	m_LastPass = PenPass;
 }
@@ -350,13 +349,12 @@ void Canvas3D::FlushTriBuffer()
 		m_Renderer->SetTransform(video::ETransform::World, m_Transform);
 	}
 
-	m_Renderer->DrawPrimitiveList(
+	m_Renderer->Draw3DPrimitiveList(
 		EPrimitiveType::Triangles,
 		m_TriBufferCursor / 3,
 		m_TriBuffer,
 		m_TriBufferCursor,
-		Canvas3DSystem::Instance()->GetBrushVertexFormat(),
-		true);
+		Canvas3DSystem::Instance()->GetBrushVertexFormat());
 	m_TriBufferCursor = 0;
 	m_LastPass = BrushPass;
 }

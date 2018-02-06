@@ -169,15 +169,15 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 			video::VertexFormat::TEXTURE_3D,
 			g_Indices,
 			video::EIndexFormat::Bit16,
+			true,
 			true);
 	} else {
-		renderer->DrawPrimitiveList(
+		renderer->Draw3DPrimitiveList(
 			video::EPrimitiveType::Triangles,
 			12,
 			g_Vertices2D,
 			36,
-			video::VertexFormat::STANDARD,
-			true);
+			video::VertexFormat::STANDARD);
 	}
 }
 

@@ -152,20 +152,18 @@ void FontRaster::Draw(
 		vertexCursor += 6;
 
 		if(vertexCursor >= 600) {
-			renderer->DrawPrimitiveList(video::EPrimitiveType::Triangles,
+			renderer->Draw2DPrimitiveList(video::EPrimitiveType::Triangles,
 				vertexCursor / 3, vertices,
-				vertexCursor, video::VertexFormat::STANDARD_2D,
-				false);
+				vertexCursor, video::VertexFormat::STANDARD_2D);
 
 			vertexCursor = 0;
 		}
 	}
 
 	if(vertexCursor > 0) {
-		renderer->DrawPrimitiveList(video::EPrimitiveType::Triangles,
+		renderer->Draw2DPrimitiveList(video::EPrimitiveType::Triangles,
 			vertexCursor / 3, vertices,
-			vertexCursor, video::VertexFormat::STANDARD_2D,
-			false);
+			vertexCursor, video::VertexFormat::STANDARD_2D);
 	}
 }
 

@@ -109,12 +109,11 @@ public:
 
 		m_Renderer->SetTransform(video::ETransform::World, transform.ToMatrix());
 		if(!shadowVolume.points.IsEmpty()) {
-			m_Renderer->DrawPrimitiveList(video::EPrimitiveType::Triangles,
+			m_Renderer->Draw3DPrimitiveList(video::EPrimitiveType::Triangles,
 				shadowVolume.points.Size() / 3,
 				shadowVolume.points.Data(),
 				shadowVolume.points.Size(),
-				video::VertexFormat::POS_ONLY,
-				true);
+				video::VertexFormat::POS_ONLY);
 		}
 	}
 
@@ -230,7 +229,10 @@ public:
 		p.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
 		p.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
 		m_Renderer->SetPass(p);
-		m_Renderer->DrawPrimitiveList(video::EPrimitiveType::TriangleStrip, 2, &points, 4, video::VertexFormat::STANDARD_2D, false);
+		m_Renderer->Draw3DPrimitiveList(
+			video::EPrimitiveType::TriangleStrip,
+			2, &points, 4,
+			video::VertexFormat::STANDARD_2D);
 	}
 
 private:

@@ -1,9 +1,6 @@
 #ifndef INCLUDED_LX_UNKNOWN_REF_COUNTED_H
 #define INCLUDED_LX_UNKNOWN_REF_COUNTED_H
 
-#ifdef LUX_COMPILE_WITH_D3D9
-#include "StrippedD3D9.h"
-
 namespace lux
 {
 template <typename T>
@@ -97,12 +94,11 @@ public:
 	{
 		return !(*this == other);
 	}
+
 private:
 	T* m_Pointer;
 };
 
-}
-
-#endif
+} // namespace lux
 
 #endif // #ifndef INCLUDED_LX_UNKNOWN_REF_COUNTED_H

@@ -73,13 +73,12 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	else
 		videoRenderer->SetMaterial(m_BaseMaterial);
 
-	videoRenderer->DrawPrimitiveList(
+	videoRenderer->Draw3DPrimitiveList(
 		video::EPrimitiveType::Lines,
 		group->GetParticleCount(),
 		m_Vertices.Data_c(),
 		group->GetParticleCount() * 2,
-		m_VertexFormat,
-		true);
+		m_VertexFormat);
 }
 
 core::Name LineRendererMachine::GetType() const

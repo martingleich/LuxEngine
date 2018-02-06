@@ -47,13 +47,15 @@ public:
 		EPrimitiveType primitiveType, u32 firstPrimitive, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
-		bool is3D, bool user);
+		bool is3D, bool windingOrder,
+		bool user);
 
 	void DrawIndexedPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
-		bool is3D)
+		bool is3D,
+		bool windingOrder)
 	{
 		LX_CHECK_NULL_ARG(vertexData);
 		LX_CHECK_NULL_ARG(indexData);
@@ -61,20 +63,22 @@ public:
 		return DrawPrimitiveList(primitiveType, 0, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			indexData, indexType,
-			is3D, true);
+			is3D, windingOrder,
+			true);
 	}
 
 	void DrawPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		bool is3D)
+		bool is3D, bool windingOrder)
 	{
 		LX_CHECK_NULL_ARG(vertexData);
 
 		return DrawPrimitiveList(primitiveType, 0, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			nullptr, EIndexFormat::Bit16,
-			is3D, true);
+			is3D, windingOrder,
+			true);
 	}
 
 	void DrawGeometry(const Geometry* geo, bool is3D = true)
@@ -89,7 +93,7 @@ public:
 	void Reset();
 
 private:
-	void SetupRendering();
+	void SetupRendering(bool winding, ERenderMode mode);
 
 	void SwitchRenderMode(ERenderMode mode);
 	void EnterRenderMode3D();
@@ -125,6 +129,7 @@ private:
 	float m_PrePolyOffset = 0.0f;
 	ELighting m_PrevLighting = ELighting::Disabled;
 	bool m_PrevFog = false;
+	bool m_PrevWinding = true;
 };
 
 } // namespace video

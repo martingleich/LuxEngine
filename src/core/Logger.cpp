@@ -18,11 +18,11 @@ namespace log
 {
 
 LogSystem EngineLog(ELogLevel::Info);
-Logger Debug(EngineLog, ELogLevel::Debug, FilePrinter);
-Logger Info(EngineLog, ELogLevel::Info, FilePrinter);
-Logger Warning(EngineLog, ELogLevel::Warning, FilePrinter);
-Logger Error(EngineLog, ELogLevel::Error, FilePrinter);
-Logger Log(EngineLog, ELogLevel::None, FilePrinter);
+Logger Debug(EngineLog, ELogLevel::Debug);
+Logger Info(EngineLog, ELogLevel::Info);
+Logger Warning(EngineLog, ELogLevel::Warning);
+Logger Error(EngineLog, ELogLevel::Error);
+Logger Log(EngineLog, ELogLevel::None);
 
 bool LogSystem::HasUnsetLogs() const
 {

@@ -9,7 +9,8 @@ namespace video
 {
 
 Geometry::Geometry() :
-	m_PrimitiveType(EPrimitiveType::Triangles)
+	m_PrimitiveType(EPrimitiveType::Triangles),
+	m_WindingOrder(true)
 {
 }
 
@@ -131,6 +132,16 @@ void Geometry::RecalculateBoundingBox()
 			m_BoundingBox.AddPoint(*reinterpret_cast<const math::Vector3F*>(vertex + posOffset));
 		}
 	}
+}
+
+void Geometry::SetWindingOrder(bool counterClockwise)
+{
+	m_WindingOrder = counterClockwise;
+}
+
+bool Geometry::GetWindingOrder() const
+{
+	return m_WindingOrder;
 }
 
 u32 Geometry::GetChangeId() const

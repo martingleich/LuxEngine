@@ -23,4 +23,5 @@ struct Choose<false, IsTrue, IsFalse>
 
 } // namespace core
 } // namespace lux
+
 #endif // #ifndef INCLUDED_HELPER_TEMPLATES_H
