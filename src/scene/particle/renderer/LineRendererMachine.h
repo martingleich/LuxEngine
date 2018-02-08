@@ -1,7 +1,7 @@
 #ifndef INCLUDED_PARTICLERENDERER_LINE_IMPL_H
 #define INCLUDED_PARTICLERENDERER_LINE_IMPL_H
 #include "video/VertexTypes.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/Renderer.h"
 #include "video/MaterialRenderer.h"
 

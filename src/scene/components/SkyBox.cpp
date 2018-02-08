@@ -5,7 +5,7 @@
 
 #include "video/MaterialLibrary.h"
 #include "video/Renderer.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/VertexTypes.h"
 
 #include "math/Transformation.h"

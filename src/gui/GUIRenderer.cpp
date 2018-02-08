@@ -1,6 +1,6 @@
 #include "gui/GUIRenderer.h"
 #include "video/VertexTypes.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 
 namespace lux
 {

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_PARTICLERENDERER_POINT_MACHINE_H
 #define INCLUDED_PARTICLERENDERER_POINT_MACHINE_H
 #include "video/VertexTypes.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/Renderer.h"
 #include "video/MaterialRenderer.h"
 

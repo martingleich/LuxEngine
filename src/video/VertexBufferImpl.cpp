@@ -27,9 +27,10 @@ void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, const v
 		throw core::InvalidArgumentException("format", "Format is invalid");
 
 	if(m_Data) {
-		if(init)
+		if(init) {
 			for(u32 i = 0; i < m_Size; ++i)
 				memcpy(m_Data + i*stride, init, stride);
+		}
 	}
 
 	m_Format = format;
@@ -56,7 +57,7 @@ u32 VertexBufferImpl::AddVertex(const void* vertex)
 
 u32 VertexBufferImpl::AddVertices(const void* vertices, u32 count)
 {
-	if(m_Cursor + count - 1>= m_Size) {
+	if(m_Cursor + count - 1 >= m_Size) {
 		Reserve(m_Cursor + count);
 		m_Size += count;
 	}
@@ -85,7 +86,7 @@ void VertexBufferImpl::GetVertices(void* ptr, u32 count, u32 n) const
 	memcpy(ptr, Pointer(n, count), count*m_Stride);
 }
 
-}    
+}
 
-}    
+}
 

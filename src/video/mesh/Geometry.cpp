@@ -1,7 +1,7 @@
 #include "video/mesh/Geometry.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 
 namespace lux
 {

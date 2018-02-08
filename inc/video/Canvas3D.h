@@ -3,7 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "video/Color.h"
 #include "video/Pass.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/VertexTypes.h"
 #include "math/Vector3.h"
 #include "math/Matrix4.h"

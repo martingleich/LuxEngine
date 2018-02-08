@@ -1,4 +1,4 @@
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/VertexTypes.h"
 #include <cstddef>
 

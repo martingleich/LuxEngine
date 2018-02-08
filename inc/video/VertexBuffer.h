@@ -1,6 +1,7 @@
 #ifndef INCLUDED_VERTEXBUFFER_H
 #define INCLUDED_VERTEXBUFFER_H
 #include "video/HardwareBuffer.h"
+#include "video/VertexFormat.h"
 
 namespace lux
 {
@@ -11,7 +12,7 @@ class VertexFormat;
 class VertexBuffer : public HardwareBuffer
 {
 public:
-	VertexBuffer() : HardwareBuffer(EHardwareBufferType::Vertex) { }
+	VertexBuffer() : HardwareBuffer(EHardwareBufferType::Vertex) {}
 
 	//! Set the format of the vertexbuffer.
 	/**
@@ -46,6 +47,34 @@ public:
 	virtual void SetVertices(const void* vertices, u32 count, u32 n) = 0;
 	virtual void GetVertex(void* ptr, u32 n) const = 0;
 	virtual void GetVertices(void* ptr, u32 count, u32 n) const = 0;
+
+	template <typename T>
+	core::StrideRange<T> Elements(VertexElement::EUsage element, u32 stream = 0)
+	{
+		auto elem = GetFormat().GetElement(stream, element);
+		if(!elem.IsValid()) {
+			core::StrideIterator<T> p(nullptr, 0);
+			return core::StrideRange<T>(p, p);
+		}
+		auto data = Pointer(0, GetSize());
+		auto begin = core::StrideIterator<T>(data, GetStride(), elem.offset);
+		auto end = begin + GetSize();
+		return core::StrideRange<T>(begin, end);
+	}
+
+	template <typename T>
+	core::StrideRange<T> ConstElements(VertexElement::EUsage element, u32 stream = 0) const
+	{
+		auto elem = GetFormat().GetElement(stream, element);
+		if(!elem.IsValid()) {
+			core::ConstStrideIterator<T> p(nullptr, 0);
+			return core::StrideRange<T>(p, p);
+		}
+		auto data = Pointer_c(0, GetSize());
+		auto begin = core::ConstStrideIterator<T>(data, GetStride(), elem.offset);
+		auto end = begin + GetSize();
+		return core::StrideRange<T>(begin, end);
+	}
 };
 
 } //namespace video

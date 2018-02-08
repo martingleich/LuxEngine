@@ -3,7 +3,7 @@
 
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/Color.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/VideoEnums.h"
 #include "video/TextureLayer.h"
 #include "video/FogData.h"

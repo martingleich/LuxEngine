@@ -7,7 +7,7 @@
 #include "math/AABBox.h"
 
 #include "video/Color.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 
 #include "video/VideoEnums.h"
 #include "video/DriverType.h"

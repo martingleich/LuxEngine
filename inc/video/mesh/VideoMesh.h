@@ -4,7 +4,7 @@
 
 #include "resources/Resource.h"
 
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/VideoEnums.h"
 
 

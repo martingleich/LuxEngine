@@ -8,7 +8,7 @@
 #include "scene/Node.h"
 #include "video/mesh/VideoMesh.h"
 #include "video/mesh/Geometry.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 

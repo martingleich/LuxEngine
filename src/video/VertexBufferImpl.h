@@ -2,7 +2,7 @@
 #define INCLUDED_VERTEX_BUFFER_IMPL_H
 #include "video/VertexBuffer.h"
 #include "video/HardwareBufferManager.h"
-#include "video/VertexFormats.h"
+#include "video/VertexFormat.h"
 
 namespace lux
 {

@@ -216,46 +216,85 @@ public:
 		m_Size = 0;
 	}
 
+	//! Add an element at the end of the list.
 	void PushBack(const T& element)
 	{
 		new (GetInsertPointer(End())) T(element);
 	}
+
+	//! Add an element at the end of the list.
 	void PushBack(T&& element)
 	{
 		new (GetInsertPointer(End())) T(std::move(element));
 	}
+
+	//! Add an element at the end of the list.
 	template <typename... Ar>
 	void EmplaceBack(Ar&&... args)
 	{
 		new (GetInsertPointer(End())) T(std::forward<Ar>(args)...);
 	}
 
+	//! Add an element at the beginning of the list.
 	void PushFront(const T& element)
 	{
 		new (GetInsertPointer(First())) T(element);
 	}
+
+	//! Add an element at the beginning of the list.
 	void PushFront(T&& element)
 	{
 		new (GetInsertPointer(First())) T(std::move(element));
 	}
+
+	//! Add an element at the beginning of the list.
 	template <typename... Ar>
 	void EmplaceFront(Ar&&... args)
 	{
 		new (GetInsertPointer(First())) T(std::forward<Ar>(args)...);
 	}
 
+	//! Add an element to the list.
+	/**
+	\param pos Position where the new element is placed.
+	\param element The element to insert.
+	*/
 	void Insert(Iterator pos, const T& element)
 	{
 		new (GetInsertPointer(pos)) T(element);
 	}
+
+	//! Add an element to the list.
+	/**
+	\param pos Position where the new element is placed.
+	\param element The element to insert.
+	*/
 	void Insert(Iterator pos, T&& element)
 	{
 		new (GetInsertPointer(pos)) T(std::move(element));
 	}
+
+	//! Add an element to the list.
+	/**
+	\param pos Position where the new element is placed.
+	\param element The element to insert.
+	*/
 	template <typename... Ar>
 	void Emplace(Iterator pos, Ar&&... args)
 	{
 		new (GetInsertPointer(pos)) T(std::forward(args)...);
+	}
+
+	//! Remove the first element from the list.
+	void PopFront()
+	{
+		Erase(First());
+	}
+
+	//! Remove the last element from the list.
+	void PopBack()
+	{
+		Erase(Last());
 	}
 
 	//! Remove an element from the list.
@@ -320,6 +359,16 @@ public:
 	ConstIterator begin() const { return ConstIterator(m_First); }
 	Iterator end() { return Iterator(nullptr); }
 	ConstIterator end() const { return ConstIterator(nullptr); }
+
+	//! The first element in the list.
+	T& Front() { return m_First->data; }
+	//! The first element in the list.
+	const T& Front() const { return m_First->data; }
+
+	//! The last element in the list.
+	T& Back() { return m_Last->data; }
+	//! The last element in the list.
+	const T& Back() const { return m_Last->data; }
 
 private:
 	T* GetInsertPointer(Iterator pos)
