@@ -5,6 +5,7 @@
 #include "format/Sink.h"
 #include "format/Converters.h"
 #include "core/lxString.h"
+#include "core/ReferenceCounted.h"
 
 namespace lux
 {
@@ -58,7 +59,7 @@ inline void conv_data(format::Context& ctx, const core::String& s, format::Place
 	format::ConvertAddString(ctx, format::StringType::Unicode, s.Data_c(), s.Size());
 }
 
-}
-}
+} // namespace core
+} // namespace lux
 
 #endif // #ifndef INCLUDED_LX_FORMAT_H

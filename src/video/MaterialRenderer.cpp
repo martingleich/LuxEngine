@@ -45,7 +45,7 @@ Pass MaterialRenderer::GeneratePassData(size_t passId, const Material* material)
 	for(auto& x : m_Options) {
 		if(x.pass == passId && !x.isShader) {
 			auto param = material->Param(x.id);
-			out.SetOption(x.mappingId, param.Data());
+			out.SetOption(x.mappingId, param.Pointer());
 		}
 	}
 
@@ -63,7 +63,7 @@ void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const
 	for(const auto& option : m_Options) {
 		if(option.isShader) {
 			auto param = material->Param(option.id);
-			pass.shader->SetParam(param.Data(), option.mappingId);
+			pass.shader->SetParam(param.Pointer(), option.mappingId);
 		}
 	}
 

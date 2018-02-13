@@ -147,17 +147,17 @@ public:
 	\param path The path of the new file if the file ends with a / its a directory
 	\param recursive If this parameter is true, and the subpath to the new file doesn't exist
 	it's created
-	\return True, if the file or directory was created or already existed, false if the creation failed
 	*/
-	virtual bool CreateFile(const Path& path, bool recursive = false) = 0;
-#if 0
+	virtual void CreateFile(const Path& path, bool recursive = false) = 0;
+
 	//! Delete a file or directory
 	/**
 	If a directory is deleted each file and subfolder inside the directory is deleted.
 	\param path The path of the file or directory to delete, the path must end with / to delete a directory
-	\return True, if the file or directory were removed, false otherwise
 	*/
-	virtual bool DeleteFile(const Path& Path) = 0;
+	virtual void DeleteFile(const Path& path) = 0;
+
+#if 0
 
 	//! Copies a file or directory
 	/**

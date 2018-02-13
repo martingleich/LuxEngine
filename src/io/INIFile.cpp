@@ -8,6 +8,7 @@
 #include "core/lxUnicodeConversion.h"
 
 #include <algorithm>
+#include <vector>
 
 #ifdef _WIN32
 #define NEWLINE "\r\n"

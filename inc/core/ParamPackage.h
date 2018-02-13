@@ -52,7 +52,6 @@ public:
 	\param T: The type of the param
 	\param name The name of the new Param(should be unique for package)
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value, if null the param is default constructed.
-	\param reserved Reserved for internal use, dont use this param
 	*/
 	template <typename T>
 	u32 AddParam(const core::StringType& name, const T& defaultValue)

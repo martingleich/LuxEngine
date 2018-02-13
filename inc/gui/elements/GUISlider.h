@@ -56,7 +56,7 @@ protected:
 	LUX_API int GetThumbPos(const math::Vector2F& curPos, int offset = 0) const;
 	LUX_API math::RectF GetThumbRect() const;
 
-private:
+protected:
 	math::Dimension2F m_ThumbSize;
 
 	int m_MinValue;

@@ -5,12 +5,12 @@ namespace lux
 namespace core
 {
 
-void* ArrayAlloc::ArrayAllocate(size_t bytes)
+void* ArrayRawData::ArrayAllocate(size_t bytes)
 {
 	return ::operator new(bytes);
 }
 
-void ArrayAlloc::ArrayFree(void* ptr)
+void ArrayRawData::ArrayFree(void* ptr)
 {
 	::operator delete(ptr);
 }

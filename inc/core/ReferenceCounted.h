@@ -3,29 +3,30 @@
 #include "LuxBase.h"
 #include "lxException.h"
 #include <cstddef>
-#include <vector>
 
 namespace lux
 {
 
 class ReferenceCounted;
 
-class WeakRefBase
+namespace core
+{
+class RefCountedObserver
 {
 	friend class ReferenceCounted;
 public:
-	WeakRefBase() :
+	RefCountedObserver() :
 		m_Next(nullptr),
 		m_Prev(nullptr)
 	{
 	}
-	WeakRefBase(WeakRefBase* n, WeakRefBase* p) :
+	RefCountedObserver(RefCountedObserver* n, RefCountedObserver* p) :
 		m_Next(n),
 		m_Prev(p)
 	{
 	}
 
-	virtual ~WeakRefBase()
+	virtual ~RefCountedObserver()
 	{
 	}
 
@@ -36,19 +37,20 @@ protected:
 	void AssignTo(ReferenceCounted* from, ReferenceCounted* to);
 	void RemoveFrom(ReferenceCounted* obj);
 
-public:
-	WeakRefBase* m_Next;
-	WeakRefBase* m_Prev;
+protected:
+	RefCountedObserver* m_Next;
+	RefCountedObserver* m_Prev;
 };
+}
 
 //! A object implementing reference counting
 class ReferenceCounted
 {
-	friend class WeakRefBase;
+	friend class core::RefCountedObserver;
 
 private:
 	mutable int m_ReferenceCounter;
-	WeakRefBase* m_FirstWeak;
+	core::RefCountedObserver* m_FirstWeak;
 
 public:
 	//! Create a new reference counting object
@@ -68,7 +70,9 @@ public:
 	//! Don't allow assignment.
 	ReferenceCounted& operator=(const ReferenceCounted& other) = delete;
 
-	inline virtual ~ReferenceCounted();
+	virtual ~ReferenceCounted()
+	{
+	}
 
 	//! Reserve this object for me
 	/**
@@ -98,7 +102,7 @@ public:
 	}
 };
 
-inline void WeakRefBase::AddTo(ReferenceCounted* obj)
+inline void core::RefCountedObserver::AddTo(ReferenceCounted* obj)
 {
 	if(obj) {
 		m_Prev = nullptr;
@@ -116,7 +120,7 @@ inline void WeakRefBase::AddTo(ReferenceCounted* obj)
 	}
 }
 
-inline void WeakRefBase::AssignTo(ReferenceCounted* from, ReferenceCounted* to)
+inline void core::RefCountedObserver::AssignTo(ReferenceCounted* from, ReferenceCounted* to)
 {
 	if(from) {
 		if(m_Prev)
@@ -144,7 +148,7 @@ inline void WeakRefBase::AssignTo(ReferenceCounted* from, ReferenceCounted* to)
 	}
 }
 
-inline void WeakRefBase::RemoveFrom(ReferenceCounted* obj)
+inline void core::RefCountedObserver::RemoveFrom(ReferenceCounted* obj)
 {
 	if(obj) {
 		if(m_Prev)
@@ -170,44 +174,73 @@ private:
 	T* m_Object;
 
 public:
-	StrongRef() : m_Object(nullptr)
+	StrongRef() :
+		m_Object(nullptr)
 	{
 	}
 
-	StrongRef(T* obj) : m_Object(obj)
+	StrongRef(T* obj)
 	{
+		m_Object = obj;
 		if(m_Object)
 			m_Object->Grab();
 	}
 
-	StrongRef(const StrongRef<T>& other) : m_Object(other.m_Object)
+	StrongRef(const StrongRef& other) :
+		StrongRef(other.m_Object)
 	{
-		if(m_Object)
-			m_Object->Grab();
 	}
 
 	template <typename T2>
-	StrongRef(const StrongRef<T2>& other) : m_Object(static_cast<T*>(other.m_Object))
+	StrongRef(const StrongRef<T2>& other) :
+		StrongRef(static_cast<T*>(other.m_Object))
 	{
-		if(m_Object)
-			m_Object->Grab();
+	}
+
+	void Reset()
+	{
+		if(m_Object) {
+			m_Object->Drop();
+			m_Object = nullptr;
+		}
+	}
+
+	~StrongRef()
+	{
+		Reset();
 	}
 
 	StrongRef(const WeakRef<T>& other);
 
-	StrongRef<T>& operator=(const StrongRef<T>& other)
+	StrongRef<T>& operator=(T* obj)
 	{
-		*this = other.m_Object;
+		if(obj)
+			obj->Grab();
+
+		if(m_Object)
+			m_Object->Drop();
+
+		m_Object = obj;
 		return *this;
 	}
 
-	template <typename T2>
-	StrongRef<T>& operator=(const StrongRef<T2>& other)
+	// Explicit to make since there are two possible casts( = (T*)x, oder = StrongRef(x))
+	StrongRef<T>& operator=(std::nullptr_t)
 	{
-		*this = static_cast<T*>(other.m_Object);
+		Reset();
 		return *this;
 	}
 
+	StrongRef& operator=(StrongRef&& old)
+	{
+		if(m_Object)
+			m_Object->Drop();
+
+		m_Object = old.m_Object;
+		old.m_Object = nullptr;
+
+		return *this;
+	}
 	template <typename T2>
 	StrongRef<T>& operator=(StrongRef<T2>&& old)
 	{
@@ -220,31 +253,16 @@ public:
 		return *this;
 	}
 
-	~StrongRef()
+	StrongRef& operator=(const StrongRef& other)
 	{
-		if(m_Object)
-			m_Object->Drop();
-		m_Object = nullptr;
-	}
-
-	template <typename T2>
-	StrongRef<T>& operator=(T2* obj)
-	{
-		if(m_Object)
-			m_Object->Drop();
-
-		if(obj)
-			obj->Grab();
-
-		m_Object = obj;
+		*this = other.m_Object;
 		return *this;
 	}
-
-	StrongRef<T>& operator=(std::nullptr_t)
+	
+	template <typename T2 = T>
+	StrongRef<T>& operator=(const StrongRef<T2>& other)
 	{
-		if(m_Object)
-			m_Object->Drop();
-		m_Object = nullptr;
+		*this = static_cast<T*>(other.m_Object);
 		return *this;
 	}
 
@@ -261,15 +279,6 @@ public:
 	T* operator*() const
 	{
 		return m_Object;
-	}
-
-	WeakRef<T> MakeWeak();
-
-	WeakRef<T> GetWeak() const;
-
-	void Reset()
-	{
-		this->operator=(nullptr);
 	}
 
 	bool operator!() const
@@ -308,28 +317,22 @@ public:
 	}
 
 	template <typename T2>
-	operator StrongRef<T2>() const
-	{
-		T2* cast_out = dynamic_cast<T2*>(m_Object);
-		if(!cast_out)
-			throw core::InvalidCastException();
-		return StrongRef<T2>(cast_out);
-	}
-
-	template <typename T2>
 	T2* As() const
 	{
 		return dynamic_cast<T2*>(m_Object);
 	}
+
 	template <typename T2>
 	StrongRef<T2> AsStrong() const
 	{
-		return StrongRef<T2>(dynamic_cast<T2*>(m_Object));
+		return As<T2>();
 	}
+
+	WeakRef<T> GetWeak() const;
 };
 
 template <typename T>
-class WeakRef : public WeakRefBase
+class WeakRef : public core::RefCountedObserver
 {
 	template <typename T2>
 	friend class WeakRef;
@@ -349,28 +352,34 @@ public:
 		AddTo(obj);
 	}
 
-	WeakRef(const WeakRef<T>& other) : WeakRef(other.m_Object)
+	template <typename T2 = T>
+	WeakRef(const WeakRef<T2>& other) :
+		WeakRef(static_cast<T2*>(other.m_Object))
 	{
 	}
 
-	WeakRef(const StrongRef<T>& other) : WeakRef(*other)
+	template <typename T2 = T>
+	WeakRef(const StrongRef<T2>& other) :
+		WeakRef(static_cast<T2*>(*other))
 	{
+	}
+
+	void Reset()
+	{
+		if(m_Object) {
+			RemoveFrom(m_Object);
+			m_Object = nullptr;
+		}
+	}
+
+	~WeakRef()
+	{
+		Reset();
 	}
 
 	WeakRef& operator=(const WeakRef& other)
 	{
-		return this->operator=(dynamic_cast<T*>(other.m_Object));
-	}
-
-	template <typename T2>
-	WeakRef(const WeakRef<T2>& other) : WeakRef(static_cast<T2*>(other.m_Object))
-	{
-	}
-
-	template <typename T2>
-	WeakRef(const StrongRef<T2>& other) : WeakRef(static_cast<T2*>(*other))
-	{
-
+		return this->operator=(other.m_Object);
 	}
 
 	template <typename T2>
@@ -378,17 +387,6 @@ public:
 	{
 		auto cast_out = static_cast<T*>(other.m_Object);
 		return this->operator=(cast_out);
-	}
-
-	~WeakRef()
-	{
-		RemoveFrom(m_Object);
-		m_Object = nullptr;
-	}
-
-	void Destroy()
-	{
-		m_Object = nullptr;
 	}
 
 	WeakRef& operator=(T* obj)
@@ -434,14 +432,15 @@ public:
 		return m_Object;
 	}
 
-	StrongRef<T> GetStrong()
+	template <typename T2>
+	T2* As() const
 	{
-		return StrongRef<T>(m_Object);
+		return dynamic_cast<T2*>(m_Object);
 	}
 
-	void Reset()
+	StrongRef<T> GetStrong()
 	{
-		this->operator=(nullptr);
+		return m_Object;
 	}
 
 	bool operator!() const
@@ -449,34 +448,26 @@ public:
 		return !m_Object;
 	}
 
-	template <typename T2>
-	T2* As() const
+protected:
+	void Destroy()
 	{
-		return dynamic_cast<T2*>(m_Object);
+		m_Object = nullptr;
 	}
 };
 
 template <typename T>
-WeakRef<T> StrongRef<T>::MakeWeak()
+StrongRef<T>::StrongRef(const WeakRef<T>& other) :
+	StrongRef(*other)
 {
-	T* obj = m_Object;
-	*this = nullptr;
-	return WeakRef<T>(obj);
 }
 
 template <typename T>
 WeakRef<T> StrongRef<T>::GetWeak() const
 {
-	return WeakRef<T>(m_Object);
+	return m_Object;
 }
 
-template <typename T>
-StrongRef<T>::StrongRef(const WeakRef<T>& other) : StrongRef(*other)
-{
-
-}
-
-inline  bool ReferenceCounted::Drop() const
+inline bool ReferenceCounted::Drop() const
 {
 	lxAssert(m_ReferenceCounter > 0);
 
@@ -497,10 +488,6 @@ inline  bool ReferenceCounted::Drop() const
 	}
 
 	return false;
-}
-
-inline ReferenceCounted::~ReferenceCounted()
-{
 }
 
 }

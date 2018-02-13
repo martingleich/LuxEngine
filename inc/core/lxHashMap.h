@@ -564,12 +564,14 @@ public:
 		return isNewEntry;
 	}
 
-	Iterator Find(const K& key)
+	template <typename T=K>
+	Iterator Find(const T& key)
 	{
 		return FindEntry(key);
 	}
 
-	ConstIterator Find(const K& key) const
+	template <typename T=K>
+	ConstIterator Find(const T& key) const
 	{
 		return FindEntry(key);
 	}

@@ -299,7 +299,7 @@ public:
 	AnyObject(const Type& type, const void* data = nullptr) :
 		m_Type(type.GetBaseType())
 	{
-		m_Data = new u8[m_Type.GetSize()];
+		m_Data = LUX_NEW_ARRAY(u8, m_Type.GetSize());
 		if(data)
 			m_Type.CopyConstruct(m_Data, data);
 		else
@@ -309,14 +309,14 @@ public:
 	AnyObject(const AnyObject& other) :
 		m_Type(other.m_Type)
 	{
-		m_Data = new u8[m_Type.GetSize()];
+		m_Data = LUX_NEW_ARRAY(u8, m_Type.GetSize());
 		m_Type.CopyConstruct(m_Data, other.m_Data);
 	}
 
 	~AnyObject()
 	{
 		m_Type.Destruct(m_Data);
-		delete[](u8*)m_Data;
+		LUX_FREE_ARRAY((u8*)m_Data);
 	}
 
 	AnyObject& operator=(const AnyObject& other)
@@ -326,8 +326,8 @@ public:
 		} else {
 			m_Type.Destruct(m_Data);
 			m_Type = other.m_Type;
-			delete[](u8*)m_Data;
-			m_Data = new u8[m_Type.GetSize()];
+			LUX_FREE_ARRAY((u8*)m_Data);
+			m_Data = LUX_NEW_ARRAY(u8, m_Type.GetSize());
 			m_Type.CopyConstruct(m_Data, other.m_Data);
 		}
 		return *this;

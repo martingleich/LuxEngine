@@ -63,16 +63,14 @@ UNIT_SUITE(FileSystem)
 
 	UNIT_TEST(CreateFile)
 	{
-		bool result = g_FileSys->CreateFile("FileSystemTestDir/file");
-		UNIT_ASSERT(result == true);
+		g_FileSys->CreateFile("FileSystemTestDir/file");
 		UNIT_ASSERT(CheckForFile("FileSystemTestDir/file"));
 	}
 
 	UNIT_TEST(CreateFile2)
 	{
 		// This tests creation of directories, too.
-		bool result = g_FileSys->CreateFile("FileSystemTestDir/subdir/file", true);
-		UNIT_ASSERT(result == true);
+		g_FileSys->CreateFile("FileSystemTestDir/subdir/file", true);
 		UNIT_ASSERT(CheckForFile("FileSystemTestDir/subdir/file"));
 	}
 }

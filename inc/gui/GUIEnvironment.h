@@ -42,6 +42,7 @@ class GUIEnvironment : public ReferenceCounted
 	class CursorControl;
 public:
 	LUX_API GUIEnvironment(Window* osWindow, Cursor* osCursor);
+	GUIEnvironment(const GUIEnvironment&) = delete;
 	LUX_API ~GUIEnvironment();
 
 	///////////////////////////////////////////////////////////////////////////

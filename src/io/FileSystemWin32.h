@@ -29,13 +29,13 @@ public:
 	StrongRef<INIFile> CreateINIFile(const Path& filename);
 	StrongRef<INIFile> CreateINIFile(File* file);
 
-	StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 Size, const core::String& name);
+	StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const core::String& name);
 
-	bool CreateFile(const Path& path, bool recursive = false);
+	void CreateFile(const Path& path, bool recursive = false);
+	void DeleteFile(const Path& path);
 	/*
-	bool DeleteFile(const Path& path);
-	bool CopyFile(const Path& srcPath, const path& dstPath, bool createDstPath, bool replace);
-	bool MoveFile(const Path& srcPath, const path& dstPath, bool createDstPath, bool replace);
+	void CopyFile(const Path& srcPath, const Path& dstPath, bool createDstPath=true, bool replace=true);
+	void MoveFile(const Path& srcPath, const Path& dstPath, bool createDstPath=true, bool replace=true);
 	*/
 
 	StrongRef<Archive> GetRootArchive();
@@ -49,8 +49,8 @@ private:
 	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
 	u32 GetWin32FileAttributes(const Path& p) const;
 
-	bool CreateWin32File(Win32Path& path, bool recursive = false);
-	bool CreateWin32Directory(Win32Path& path, bool recursive = false);
+	void CreateWin32File(Win32Path& path, bool recursive = false);
+	void CreateWin32Directory(Win32Path& path, bool recursive = false);
 
 private:
 	struct MountEntry

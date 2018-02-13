@@ -12,27 +12,13 @@ namespace lux
 namespace core
 {
 
-class ArrayAlloc
+class ArrayRawData
 {
 public:
-	void GetRaw(void*& data, size_t& used, size_t& alloc) const
-	{
-		data = m_Data;
-		used = m_Used;
-		alloc = m_Alloc;
-	}
-
-	void SetRaw(void* data, size_t used, size_t alloc)
-	{
-		m_Data = data;
-		m_Used = used;
-		m_Alloc = alloc;
-	}
-
 	LUX_API static void* ArrayAllocate(size_t bytes);
 	LUX_API static void ArrayFree(void* ptr);
-	
-protected:
+
+public:
 	void* m_Data = nullptr;
 	size_t m_Used = 0;
 	size_t m_Alloc = 0;
@@ -40,7 +26,7 @@ protected:
 
 //! A template dynamic array
 template <typename T>
-class Array : public ArrayAlloc
+class Array : private ArrayRawData
 {
 private:
 	template <bool isConst>

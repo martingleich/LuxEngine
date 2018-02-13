@@ -50,6 +50,7 @@ public:
 	{
 		lxAssert(!m_Type.IsUnknown());
 	}
+	
 	template <typename T>
 	static VariableAccess Constant(const T& value)
 	{
@@ -242,12 +243,6 @@ public:
 	bool IsValid() const
 	{
 		return (m_Data != nullptr);
-	}
-
-	//! Access the raw data
-	void* Data() const
-	{
-		return m_Data;
 	}
 
 	//! The size of the param in bytes

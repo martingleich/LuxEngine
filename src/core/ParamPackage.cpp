@@ -97,7 +97,7 @@ void ParamPackage::MergePackage(const ParamPackage& other)
 		entry.name = desc.name;
 		entry.type = desc.type;
 		entry.size = (u8)entry.type.GetSize();
-		AddEntry(entry, defaultValue.Data());
+		AddEntry(entry, defaultValue.Pointer());
 	}
 }
 

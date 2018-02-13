@@ -170,7 +170,7 @@ void conv_data(Context& ctx, Cursor* ptr, Placeholder& placeholder)
 		ptr->count = ctx.GetCharacterCount();
 		ptr->collumn = ctx.GetCollumn() + 1;
 	} else {
-		throw invalid_placeholder_type("Invalid placeholder for crusor pointer type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
+		throw invalid_placeholder_type("Invalid placeholder for cursor pointer type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
 	}
 }
 

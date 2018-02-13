@@ -284,33 +284,26 @@ StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size
 }
 
 
-bool FileSystemWin32::CreateFile(const Path& path, bool recursive)
+void FileSystemWin32::CreateFile(const Path& path, bool recursive)
 {
 	Win32Path win32Path = ConvertPathToWin32WidePath(path);
-	if(*win32Path.Last() == L'\\')
-		return CreateWin32Directory(win32Path, recursive);
+	if(win32Path.Back() == L'\\')
+		CreateWin32Directory(win32Path, recursive);
 	else
-		return CreateWin32File(win32Path, recursive);
+		CreateWin32File(win32Path, recursive);
 }
 
-
-/*
-// TODO
-bool FileSystemWin32::DeleteFile(const Path& Path)
+void FileSystemWin32::DeleteFile(const Path& path)
 {
-	return false;
+	Win32Path win32Path = ConvertPathToWin32WidePath(path);
+	if(win32Path.Back() == L'\\') {
+		throw core::RuntimeException("Can't remove directory");
+	} else {
+		auto result = DeleteFileW((LPWSTR)win32Path.Data());
+		if(result == 0)
+			throw core::Win32Exception(GetLastError());
+	}
 }
-// TODO
-bool FileSystemWin32::CopyFile(const Path& srcPath, const Path& dstPath, bool createDstPath, bool replace)
-{
-	return false;
-}
-// TODO
-bool FileSystemWin32::MoveFile(const Path& srcPath, const Path& dstPath, bool createDstPath, bool replace)
-{
-	return false;
-}
-*/
 
 StrongRef<Archive> FileSystemWin32::GetRootArchive()
 {
@@ -381,7 +374,7 @@ u32 FileSystemWin32::GetWin32FileAttributes(const Path& p) const
 	return (u32)GetFileAttributesW((const wchar_t*)win32Path.Data_c());
 }
 
-bool FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
+void FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
 {
 	Win32Path subPath = path;
 	while(*subPath.Last() != '\\')
@@ -396,12 +389,10 @@ bool FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
 	}
 
 	if(!subPathExists) {
-		if(recursive) {
-			if(!CreateWin32Directory(subPath, true))
-				return false;
-		} else {
-			return false;
-		}
+		if(recursive)
+			CreateWin32Directory(subPath, true);
+		else
+			throw core::RuntimeException("Path does not exists.");
 	}
 
 	HANDLE file = CreateFileW((const wchar_t*)path.Data_c(),
@@ -410,15 +401,15 @@ bool FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
 		nullptr);
 
 	if(file == INVALID_HANDLE_VALUE)
-		return false;
+		throw core::Win32Exception(GetLastError());
 
 	CloseHandle(file);
-
-	return true;
 }
 
-bool FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
+void FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 {
+	// Each patch starts with \\?\, meaning the first four charcters are not used.
+
 	wchar_t* path = (wchar_t*)_path.Data_c();
 	wchar_t* path_ptr = path + _path.Size();
 
@@ -439,9 +430,10 @@ bool FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 				if(path_ptr - path > 4)
 					subDirs.PushBack(path_ptr);
 				else
-					break;
-			} else
-				break;
+					throw core::RuntimeException("Filepath isn't a valid path");
+			} else {
+				throw core::Win32Exception(le);
+			}
 		}
 
 		if(result) {
@@ -450,10 +442,10 @@ bool FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 		}
 	} while(!subDirs.IsEmpty() && path_ptr - path > 4 && !recursive);
 
-	return subDirs.IsEmpty();
+	throw core::RuntimeException("Filepath isn't a valid path");
 }
 
-}
-}
+} // namespace io
+} // namespace lux
 
 #endif // LUX_WINDOWS

@@ -90,7 +90,7 @@ void RenderStatistics::PopGroup()
 
 const RenderStatistics::Group& RenderStatistics::GetGroup(const char* name) const
 {
-	auto it = self->groups.Find(name);
+	auto it = self->groups.Find<const char*>(name);
 	if(it == self->groups.End())
 		return self->empty;
 	else

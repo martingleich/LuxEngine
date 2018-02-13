@@ -431,7 +431,7 @@ void ShaderD3D9::LoadSceneParams(const Pass& pass)
 {
 	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
 		if(it->sceneValue)
-			SetShaderValue(*it, (*it->sceneValue).Data());
+			SetShaderValue(*it, (*it->sceneValue).Pointer());
 	}
 
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {

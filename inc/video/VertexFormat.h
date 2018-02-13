@@ -44,6 +44,12 @@ struct VertexElement
 		Unknown
 	};
 
+	static EUsage TexcoordN(u32 i)
+	{
+		lxAssert(i < 4);
+		return EUsage((u32)EUsage::Texcoord0 + i);
+	}
+
 	u8 stream;         // Der Datenstrom für dieses element
 	u16 offset;        // Der Abstand zum Beginn der Defintion pro Datenstrom
 	EType type;        // Der Typ der Daten

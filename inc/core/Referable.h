@@ -2,6 +2,7 @@
 #define INCLUDED_REFERABLE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
+#include "core/lxTypes.h"
 
 namespace lux
 {
@@ -61,6 +62,12 @@ struct ReferableRegisterBlock
 };
 
 }
+namespace Types
+{
+LUX_API Type StrongRef();
+}
+
+template <> struct TemplType<StrongRef<Referable>> { static Type Get() { return Types::StrongRef(); } };
 }
 }
 

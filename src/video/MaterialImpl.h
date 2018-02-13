@@ -68,7 +68,7 @@ public:
 	////////////////////////////////////////////////////////////////////
 
 private:
-	struct RenderData : public WeakRefBase
+	struct RenderData : public core::RefCountedObserver
 	{
 		MaterialRenderer* renderer;
 		core::PackagePuffer puffer;
