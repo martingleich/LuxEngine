@@ -521,6 +521,79 @@ public:
 template <typename T>
 using StrideIterator = StrideBaseIterator<T, false>;
 
+template <typename T, typename Callable, typename IndexT = size_t>
+class IndexCallableIterator : public BaseIterator<RandomAccessIteratorTag, T>
+{
+public:
+	IndexCallableIterator()
+	{
+	}
+
+	IndexCallableIterator(IndexT index, Callable callable) :
+		m_Index(index),
+		m_Callable(callable)
+	{
+	}
+
+	IndexCallableIterator& operator++() { ++m_Index; return *this; }
+	IndexCallableIterator& operator--() { --m_Index; return *this; }
+	IndexCallableIterator operator++(int)
+	{
+		IndexCallableIterator tmp(*this); ++m_Index; return tmp;
+	}
+	IndexCallableIterator operator--(int)
+	{
+		IndexCallableIterator tmp = *this; --m_Index; return tmp;
+	}
+
+	IndexCallableIterator& operator+=(intptr_t num)
+	{
+		m_Index += num;
+		return *this;
+	}
+
+	IndexCallableIterator operator+(intptr_t num) const
+	{
+		IndexCallableIterator temp = *this; return temp += num;
+	}
+	IndexCallableIterator& operator-=(intptr_t num)
+	{
+		return (*this) += (-num);
+	}
+	IndexCallableIterator operator-(intptr_t num) const
+	{
+		return (*this) + (-num);
+	}
+
+	intptr_t operator-(IndexCallableIterator other) const
+	{
+		return m_Index - other.m_Index;
+	}
+
+	bool operator==(const IndexCallableIterator& other) const
+	{
+		return m_Index == other.m_Index;
+	}
+	bool operator!=(const IndexCallableIterator& other) const
+	{
+		return m_Index != other.m_Index;
+	}
+
+	const T& operator*() const
+	{
+		return m_Callable(m_Index);
+	}
+
+	const T* operator->() const
+	{
+		return &m_Callable(m_Index);
+	}
+
+private:
+	IndexT m_Index;
+	Callable m_Callable;
+};
+
 //! Constant iterator based on distance between elements.
 template <typename T>
 using ConstStrideIterator = StrideBaseIterator<T, true>;

@@ -3,6 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 #include "core/lxTypes.h"
+#include "lxID.h"
 
 namespace lux
 {
@@ -15,7 +16,18 @@ They also can be used with the \ref ReferableFactory and created there my name o
 class Referable : public virtual ReferenceCounted
 {
 public:
-	virtual ~Referable() {}
+	Referable() :
+		m_Id(core::IDManager::Instance()->Create(this))
+	{
+	}
+	Referable(const Referable&) :
+		m_Id(core::IDManager::Instance()->Create(this))
+	{
+	}
+	virtual ~Referable()
+	{
+		core::IDManager::Instance()->Release(m_Id);
+	}
 
 	//! Get the name of the referable type
 	/**
@@ -34,6 +46,14 @@ public:
 	{
 		throw core::NotImplementedException();
 	}
+
+	core::ID GetUniqueId()
+	{
+		return m_Id;
+	}
+
+private:
+	core::ID m_Id;
 };
 
 namespace core
@@ -65,15 +85,16 @@ struct ReferableRegisterBlock
 namespace Types
 {
 LUX_API Type StrongRef();
+LUX_API Type WeakRef();
 }
 
-template <> struct TemplType<StrongRef<Referable>> { static Type Get() { return Types::StrongRef(); } };
+template <> struct TemplType<core::ID> { static Type Get() { return Types::StrongRef(); } };
 }
 }
 
-//! Declare default referable members
+//! Helper macro to declare all members for Referable classes
 /**
-Use inside class inherited from Referable
+Must be placed in the class definition in the header.
 */
 #define LX_REFERABLE_MEMBERS() \
 ::lux::core::Name GetReferableType() const; \
@@ -98,11 +119,11 @@ Use in global namespace in a source file.
 static ::lux::Referable* LX_CONCAT(InternalCreatorFunc_, __LINE__)(const void*) { return LUX_NEW(class); } \
 static ::lux::core::impl_referableRegister::ReferableRegisterBlock LX_CONCAT(InternalReferableRegisterStaticObject_, __LINE__)(::lux::core::Name(ref_name), &LX_CONCAT(InternalCreatorFunc_, __LINE__));
 
-//! Define default referable members
+//! Helper macro to declare all members for Referable classes
 /**
-Use in global namespace in a source file.
-\param ref_name C-String or core::Name containing the name of the class
-\param class Fully classified name of the class
+Must be placed in the global namespace in the source file.
+\param class The fully qualified name of the class.
+\param ref_name The refereable type name for this class.
 */
 #define LX_REFERABLE_MEMBERS_SRC(class, ref_name) \
 LX_REGISTER_REFERABLE_CLASS(class, ref_name) \

@@ -25,6 +25,7 @@ private:
 		format::UIntToString(num, buffer);
 		return buffer;
 	}
+
 public:
 	static core::String ToString(unsigned long long num) { return UIntToString(num); }
 	static core::String ToString(unsigned long num) { return UIntToString(num); }

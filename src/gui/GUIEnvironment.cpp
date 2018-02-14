@@ -123,6 +123,7 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	core::ResourceSystem::Instance()->AddResourceWriter(LUX_NEW(FontWriter));
 
 	/*
+	//Code used to generate the built-in-font.
 	auto m_BuiltInFont = GetFontCreator()->CreateFont(
 		FontDescription("Arial", 16, EFontWeight::Bolt),
 		GetFontCreator()->GetDefaultCharset("german"));

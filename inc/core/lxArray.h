@@ -253,10 +253,11 @@ public:
 	}
 
 	template <typename... Ts>
-	void Emplace(Iterator before, Ts&&... args)
+	T& Emplace(Iterator before, Ts&&... args)
 	{
 		auto ptr = GetInsertPointer(before, true);
 		new (ptr) T(std::forward<Ts>(args)...);
+		return *ptr;
 	}
 
 	//! Add a new entry to the end of the array
@@ -278,10 +279,11 @@ public:
 	}
 
 	template <typename... Ts>
-	void EmplaceBack(Ts&&... args)
+	T& EmplaceBack(Ts&&... args)
 	{
 		auto ptr = GetInsertPointer(End());
 		new (ptr) T(std::forward<Ts>(args)...);
+		return *ptr;
 	}
 
 	//! Insert a new entry a the beginning of the array
@@ -305,10 +307,11 @@ public:
 	}
 
 	template <typename... Ts>
-	void EmplaceFront(Ts&&... args)
+	T& EmplaceFront(Ts&&... args)
 	{
 		auto ptr = GetInsertPointer(First(), true);
 		new (ptr) T(std::forward<Ts>(args)...);
+		return *ptr;
 	}
 
 	void PushBack(const core::Array<T>& entries)

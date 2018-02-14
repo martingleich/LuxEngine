@@ -179,9 +179,9 @@ public:
 	{
 	}
 
-	StrongRef(T* obj)
+	StrongRef(T* obj) :
+		m_Object(obj)
 	{
-		m_Object = obj;
 		if(m_Object)
 			m_Object->Grab();
 	}
@@ -197,6 +197,8 @@ public:
 	{
 	}
 
+	StrongRef(const WeakRef<T>& other);
+
 	void Reset()
 	{
 		if(m_Object) {
@@ -209,8 +211,6 @@ public:
 	{
 		Reset();
 	}
-
-	StrongRef(const WeakRef<T>& other);
 
 	StrongRef<T>& operator=(T* obj)
 	{
@@ -241,6 +241,7 @@ public:
 
 		return *this;
 	}
+	
 	template <typename T2>
 	StrongRef<T>& operator=(StrongRef<T2>&& old)
 	{
@@ -259,7 +260,7 @@ public:
 		return *this;
 	}
 	
-	template <typename T2 = T>
+	template <typename T2>
 	StrongRef<T>& operator=(const StrongRef<T2>& other)
 	{
 		*this = static_cast<T*>(other.m_Object);
@@ -276,9 +277,9 @@ public:
 		return m_Object;
 	}
 
-	T* operator*() const
+	T* Raw() const
 	{
-		return m_Object;
+		return m_Object;	
 	}
 
 	bool operator!() const
@@ -352,13 +353,18 @@ public:
 		AddTo(obj);
 	}
 
-	template <typename T2 = T>
+	WeakRef(const WeakRef& other) :
+		WeakRef(other.m_Object)
+	{
+	}
+
+	template <typename T2>
 	WeakRef(const WeakRef<T2>& other) :
 		WeakRef(static_cast<T2*>(other.m_Object))
 	{
 	}
 
-	template <typename T2 = T>
+	template <typename T2>
 	WeakRef(const StrongRef<T2>& other) :
 		WeakRef(static_cast<T2*>(*other))
 	{
@@ -407,6 +413,21 @@ public:
 		return m_Object;
 	}
 
+	T* Raw() const
+	{
+		return m_Object;
+	}
+
+	bool operator==(const WeakRef& v) const
+	{
+		return m_Object == v.m_Object;
+	}
+	
+	bool operator!=(const WeakRef& v) const
+	{
+		return m_Object != v.m_Object;
+	}
+
 	bool operator==(T* v) const
 	{
 		return m_Object == v;
@@ -425,11 +446,6 @@ public:
 	bool operator!=(std::nullptr_t) const
 	{
 		return m_Object != nullptr;
-	}
-
-	T* operator*() const
-	{
-		return m_Object;
 	}
 
 	template <typename T2>
@@ -457,7 +473,7 @@ protected:
 
 template <typename T>
 StrongRef<T>::StrongRef(const WeakRef<T>& other) :
-	StrongRef(*other)
+	StrongRef(other.Raw())
 {
 }
 

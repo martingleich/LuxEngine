@@ -539,6 +539,114 @@ inline bool operator!=(const char* other, const String& string)
 	return string != other;
 }
 
+class SharedString
+{
+private:
+	struct Data
+	{
+		int refCount;
+		String str;
+	};
+	Data* ptr;
+public:
+	SharedString() :
+		ptr(nullptr)
+	{
+	}
+	explicit SharedString(const String& str)
+	{
+		ptr = LUX_NEW(Data);
+		ptr->str = str;
+		ptr->refCount = 1;
+	}
+	explicit SharedString(const char* str) :
+		SharedString(String(str))
+	{
+	}
+	SharedString(const SharedString& other)
+	{
+		ptr = other.ptr;
+		if(ptr)
+			ptr->refCount++;
+	}
+	~SharedString()
+	{
+		if(ptr) {
+			ptr->refCount--;
+			if(ptr->refCount == 0)
+				LUX_FREE(ptr);
+		}
+	}
+	SharedString& operator=(const SharedString& other)
+	{
+		this->~SharedString();
+		ptr = other.ptr;
+		if(ptr)
+			ptr->refCount++;
+		return *this;
+	}
+
+	String* operator->() { return &ptr->str; }
+	const String* operator->() const { return &ptr->str; }
+	String& operator*() { return ptr->str; }
+	const String& operator*() const { return ptr->str; }
+	operator bool() const { return ptr != nullptr; }
+
+	bool operator==(const SharedString& other) const
+	{
+		if(ptr == other.ptr)
+			return true;
+		if(!ptr || !other.ptr)
+			return false;
+		return ptr->str == other.ptr->str;
+	}
+
+	bool operator!=(const SharedString& other) const
+	{
+		return !(*this == other);
+	}
+
+	bool operator<(const SharedString& other) const
+	{
+		if(ptr == other.ptr)
+			return false;
+		if(!ptr)
+			return true;
+		if(!other.ptr)
+			return false;
+		return ptr->str < other.ptr->str;
+	}
+
+	bool operator==(const char* other) const
+	{
+		return ptr->str == other;
+	}
+
+	bool operator!=(const char* other) const
+	{
+		return !(*this == other);
+	}
+
+	bool operator<(const char* other) const
+	{
+		return ptr->str < other;
+	}
+
+	bool operator==(const String& other) const
+	{
+		return ptr->str == other;
+	}
+
+	bool operator!=(const String& other) const
+	{
+		return !(*this == other);
+	}
+
+	bool operator<(const String& other) const
+	{
+		return ptr->str < other;
+	}
+};
 
 inline StringType::StringType(const char* str) :
 	size(0xFFFFFFFF),
@@ -582,6 +690,44 @@ struct HashType<String>
 	{
 		size_t size = strlen(str);
 		return (*this)(str, size);
+	}
+};
+
+template <>
+struct HashType<SharedString>
+{
+	size_t operator()(const SharedString& t) const
+	{
+		core::HashType<core::String> hasher;
+		if(t)
+			return hasher(*t);
+		else
+			return 0;
+	}
+	size_t operator()(const core::String& t) const
+	{
+		core::HashType<core::String> hasher;
+		return hasher(t);
+	}
+	size_t operator()(const char* str) const
+	{
+		core::HashType<core::String> hasher;
+		return hasher(str);
+	}
+};
+
+template <>
+struct CompareType<SharedString>
+{
+	template <typename T>
+	bool Equal(const SharedString& str, const T& b) const
+	{
+		return str == b;
+	}
+	template <typename T>
+	bool Smaller(const SharedString& str, const T& b) const
+	{
+		return str < b;
 	}
 };
 

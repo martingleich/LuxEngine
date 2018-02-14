@@ -428,13 +428,12 @@ public:
 		return ConstIterator(m_Set.Find(Tuple(key)));
 	}
 
-	bool Erase(const K& key)
+	Iterator Erase(const K& key)
 	{
 		auto it = Find(key);
 		if(it == End())
-			return false;
-		Erase(it);
-		return true;
+			return it;
+		return Erase(it);
 	}
 
 	Iterator Erase(const Iterator& it)

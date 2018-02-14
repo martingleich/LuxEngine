@@ -576,19 +576,20 @@ public:
 		return FindEntry(key);
 	}
 
-	Iterator Erase(const K& key)
+	bool Erase(const K& key)
 	{
 		auto it = Find(key);
 		if(it == End())
-			return it;
-		return Erase(it);
+			return false;
+		Erase(it);
+		return true;
 	}
 
-	Iterator Erase(const Iterator& it)
+	void Erase(const Iterator& it)
 	{
 		HashValue<K, V>** bucket = it.m_Bucket;
 		if(!bucket || bucket == m_Buckets + m_BucketCount)
-			return it;
+			return;
 
 		Iterator next(it);
 		++next;
@@ -612,8 +613,6 @@ public:
 
 		if(m_Buckets[m_FirstBucket] == *it.m_Bucket && it.m_Bucket != next.m_Bucket)
 			m_FirstBucket = next.m_Bucket - m_Buckets;
-
-		return next;
 	}
 
 	ConstIterator First() const
