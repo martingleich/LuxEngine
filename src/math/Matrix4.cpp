@@ -18,15 +18,15 @@ namespace math
 {
 
 const Matrix4 Matrix4::IDENTITY = math::Matrix4(
-	1.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 0.0f,
-	0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 0.0f, 0.0f, 1.0f);
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0,
+	0, 0, 0, 1);
 const Matrix4 Matrix4::ZERO = math::Matrix4(
-	0.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 0.0f, 0.0f, 0.0f);
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0);
 
 Matrix4::Matrix4()
 {
@@ -66,10 +66,10 @@ Matrix4& Matrix4::MakeIdent()
 Matrix4 Matrix4::Get3x3() const
 {
 	return Matrix4(
-		m[0][0], m[0][1], m[0][3], 0.0f,
-		m[1][0], m[1][1], m[1][3], 0.0f,
-		m[3][0], m[3][1], m[3][3], 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f);
+		m[0][0], m[0][1], m[0][3], 0,
+		m[1][0], m[1][1], m[1][3], 0,
+		m[3][0], m[3][1], m[3][3], 0,
+		0, 0, 0, 1);
 }
 
 float Matrix4::GetTransformDet() const
@@ -104,7 +104,7 @@ Matrix4& Matrix4::InvertTransform(bool* result)
 	float invDet = GetTransformDet();
 	if(IsZero(invDet))
 		return MakeIdent();
-	invDet = 1.0f / invDet;
+	invDet = 1 / invDet;
 
 	*this = this->GetTransformInverted(result);
 	return *this;
@@ -121,25 +121,25 @@ Matrix4 Matrix4::GetTransformInverted(bool* result) const
 		if(result)
 			*result = true;
 	}
-	invDet = 1.0f / invDet;
+	invDet = 1 / invDet;
 
 	Matrix4 out;
 	out.m[0][0] = invDet * (m[1][1] * m[2][2] - m[1][2] * m[2][1]);
 	out.m[0][1] = -invDet * (m[0][1] * m[2][2] - m[0][2] * m[2][1]);
 	out.m[0][2] = invDet * (m[0][1] * m[1][2] - m[0][2] * m[1][1]);
-	out.m[0][3] = 0.0f;
+	out.m[0][3] = 0;
 	out.m[1][0] = -invDet * (m[1][0] * m[2][2] - m[1][2] * m[2][0]);
 	out.m[1][1] = invDet * (m[0][0] * m[2][2] - m[0][2] * m[2][0]);
 	out.m[1][2] = -invDet * (m[0][0] * m[1][2] - m[0][2] * m[1][0]);
-	out.m[1][3] = 0.0f;
+	out.m[1][3] = 0;
 	out.m[2][0] = invDet * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 	out.m[2][1] = -invDet * (m[0][0] * m[2][1] - m[0][1] * m[2][0]);
 	out.m[2][2] = invDet * (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
-	out.m[2][3] = 0.0f;
+	out.m[2][3] = 0;
 	out.m[3][0] = -(m[3][0] * out.m[0][0] + m[3][1] * out.m[1][0] + m[3][2] * out.m[2][0]);
 	out.m[3][1] = -(m[3][0] * out.m[0][1] + m[3][1] * out.m[1][1] + m[3][2] * out.m[2][1]);
 	out.m[3][2] = -(m[3][0] * out.m[0][2] + m[3][1] * out.m[1][2] + m[3][2] * out.m[2][2]);
-	out.m[3][3] = 1.0f;
+	out.m[3][3] = 1;
 
 	return out;
 }
@@ -378,7 +378,7 @@ Vector3F Matrix4::GetRotationDeg() const
 {
 	const Matrix4& tmp = *this;
 	const Vector3F scale = GetScale();
-	const Vector3F invScale(1.0f / scale.x, 1.0f / scale.y, 1.0f / scale.z);
+	const Vector3F invScale(1 / scale.x, 1 / scale.y, 1 / scale.z);
 
 	float Y = (float)-asin(tmp.m[0][2] * invScale.x);
 	const float C = cosf(Y);
@@ -386,7 +386,7 @@ Vector3F Matrix4::GetRotationDeg() const
 
 	float rotX, rotY, X, Z;
 	if(!IsZero(C)) {
-		const float invC = 1.0f / C;
+		const float invC = 1 / C;
 		rotX = tmp.m[2][2] * invC * invScale.z;
 		rotY = tmp.m[1][2] * invC * invScale.y;
 		X = (float)math::DegToRad(atan2(rotY, rotX));
@@ -394,16 +394,16 @@ Vector3F Matrix4::GetRotationDeg() const
 		rotY = tmp.m[0][1] * invC * invScale.x;
 		Z = (float)math::DegToRad(atan2(rotY, rotX));
 	} else {
-		X = 0.0f;
+		X = 0;
 		rotX = tmp.m[1][1] * invScale.y;
 		rotY = -tmp.m[1][0] * invScale.y;
 		Z = (float)atan2(rotY, rotX) * math::Constants<float>::deg_to_rad();
 	}
 
 	// Die Werte auf 360° zurechtstuzen
-	if(X < 0.0f) X += 360.0f;
-	if(Y < 0.0f) Y += 360.0f;
-	if(Z < 0.0f) Z += 360.0f;
+	if(X < 0) X += 360;
+	if(Y < 0) Y += 360;
+	if(Z < 0) Z += 360;
 
 	return Vector3F(X, Y, Z);
 }
@@ -426,14 +426,14 @@ Matrix4& Matrix4::BuildWorld(const Vector3F& vScale,
 	const Vector3F& vRot,
 	const Vector3F& vTrans)
 {
-	const float cX = vRot.x != 0.0f ? std::cos(vRot.x) : 1.0f;
-	const float sX = vRot.x != 0.0f ? std::sin(vRot.x) : 0.0f;
+	const float cX = vRot.x != 0 ? std::cos(vRot.x) : 1;
+	const float sX = vRot.x != 0 ? std::sin(vRot.x) : 0;
 
-	const float cY = vRot.y != 0.0f ? std::cos(vRot.y) : 1.0f;
-	const float sY = vRot.y != 0.0f ? std::sin(vRot.y) : 0.0f;
+	const float cY = vRot.y != 0 ? std::cos(vRot.y) : 1;
+	const float sY = vRot.y != 0 ? std::sin(vRot.y) : 0;
 
-	const float cZ = vRot.z != 0.0f ? std::cos(vRot.z) : 1.0f;
-	const float sZ = vRot.z != 0.0f ? std::sin(vRot.z) : 0.0f;
+	const float cZ = vRot.z != 0 ? std::cos(vRot.z) : 1;
+	const float sZ = vRot.z != 0 ? std::sin(vRot.z) : 0;
 
 	const float sXsY = sX*sY;
 	const float cXsY = cX*sY;
@@ -441,22 +441,22 @@ Matrix4& Matrix4::BuildWorld(const Vector3F& vScale,
 	m[0][0] = vScale.x*cY*cZ;
 	m[0][1] = vScale.x*cY*sZ;
 	m[0][2] = -sY*vScale.x;
-	m[0][3] = 0.0f;
+	m[0][3] = 0;
 
 	m[1][0] = vScale.y*(sXsY*cZ - cX*sZ);
 	m[1][1] = vScale.y*(sXsY*sZ + cX*cZ);
 	m[1][2] = vScale.y*sX*cY;
-	m[1][3] = 0.0f;
+	m[1][3] = 0;
 
 	m[2][0] = vScale.z*(cXsY*cZ + sX*sZ);
 	m[2][1] = vScale.z*(cXsY*sZ - sX*cZ);
 	m[2][2] = vScale.z*cX*cY;
-	m[2][3] = 0.0f;
+	m[2][3] = 0;
 
 	m[3][0] = vTrans.x;
 	m[3][1] = vTrans.y;
 	m[3][2] = vTrans.z;
-	m[3][3] = 1.0f;
+	m[3][3] = 1;
 
 	return *this;
 }
@@ -467,25 +467,25 @@ Matrix4& Matrix4::BuildWorld(const Vector3F& scale,
 {
 	/*
 	// 57 Aktionen
-	m[0][0] = scale.x*(1.0f - 2.0f*orient.y*orient.y - 2.0f*orient.z*orient.z);
-	m[0][1] = scale.x*(2.0f*orient.x*orient.y + 2.0f*orient.z*orient.w);
-	m[0][2] = scale.x*(2.0f*orient.x*orient.z - 2.0f*orient.y*orient.w);
-	m[0][3] = 0.0f;
+	m[0][0] = scale.x*(1 - 2*orient.y*orient.y - 2*orient.z*orient.z);
+	m[0][1] = scale.x*(2*orient.x*orient.y + 2*orient.z*orient.w);
+	m[0][2] = scale.x*(2*orient.x*orient.z - 2*orient.y*orient.w);
+	m[0][3] = 0;
 
-	m[1][0] = scale.y*(2.0f*orient.x*orient.y - 2.0f*orient.z*orient.w);
-	m[1][1] = scale.y*(1.0f - 2.0f*orient.x*orient.x - 2.0f*orient.z*orient.z);
-	m[1][2] = scale.y*(2.0f*orient.z*orient.y + 2.0f*orient.x*orient.w);
-	m[1][3] = 0.0f;
+	m[1][0] = scale.y*(2*orient.x*orient.y - 2*orient.z*orient.w);
+	m[1][1] = scale.y*(1 - 2*orient.x*orient.x - 2*orient.z*orient.z);
+	m[1][2] = scale.y*(2*orient.z*orient.y + 2*orient.x*orient.w);
+	m[1][3] = 0;
 
-	m[2][0] = scale.z*(2.0f*orient.x*orient.z + 2.0f*orient.y*orient.w);
-	m[2][1] = scale.z*(2.0f*orient.z*orient.y - 2.0f*orient.x*orient.w);
-	m[2][2] = scale.z*(1.0f - 2.0f*orient.x*orient.x - 2.0f*orient.y*orient.y);
-	m[2][3] = 0.0f;
+	m[2][0] = scale.z*(2*orient.x*orient.z + 2*orient.y*orient.w);
+	m[2][1] = scale.z*(2*orient.z*orient.y - 2*orient.x*orient.w);
+	m[2][2] = scale.z*(1 - 2*orient.x*orient.x - 2*orient.y*orient.y);
+	m[2][3] = 0;
 
 	m[3][0] = trans.x;
 	m[3][1] = trans.y;
 	m[3][2] = trans.z;
-	m[3][3] = 1.0f;
+	m[3][3] = 1;
 	*/
 
 	// 36 Aktionen
@@ -499,45 +499,46 @@ Matrix4& Matrix4::BuildWorld(const Vector3F& scale,
 	const float zy = orient.z * orient.y;
 	const float xw = orient.x * orient.w;
 
-	const float ScaleX2 = 2.0f * scale.x;
-	const float ScaleY2 = 2.0f * scale.y;
-	const float ScaleZ2 = 2.0f * scale.z;
+	const float ScaleX2 = 2 * scale.x;
+	const float ScaleY2 = 2 * scale.y;
+	const float ScaleZ2 = 2 * scale.z;
 
-	m[0][0] = scale.x * (1.0f - 2.0f * (yy + zz));
+	m[0][0] = scale.x * (1 - 2 * (yy + zz));
 	m[0][1] = ScaleX2 * (xy + zw);
 	m[0][2] = ScaleX2 * (xz - yw);
-	m[0][3] = 0.0f;
+	m[0][3] = 0;
 
 	m[1][0] = ScaleY2 * (xy - zw);
-	m[1][1] = scale.y * (1.0f - 2.0f * (xx + zz));
+	m[1][1] = scale.y * (1 - 2 * (xx + zz));
 	m[1][2] = ScaleY2 * (zy + xw);
-	m[1][3] = 0.0f;
+	m[1][3] = 0;
 
 	m[2][0] = ScaleZ2 * (xz + yw);
 	m[2][1] = ScaleZ2 * (zy - xw);
-	m[2][2] = scale.z * (1.0f - 2.0f * (xx + yy));
-	m[2][3] = 0.0f;
+	m[2][2] = scale.z * (1 - 2 * (xx + yy));
+	m[2][3] = 0;
 
 	m[3][0] = trans.x;
 	m[3][1] = trans.y;
 	m[3][2] = trans.z;
-	m[3][3] = 1.0f;
+	m[3][3] = 1;
 
 	return *this;
 }
 
-Matrix4& Matrix4::BuildProjection_Persp(float fieldOfVison,
+Matrix4& Matrix4::BuildProjection_Persp(
+	AngleF fieldOfVison,
 	float aspect,
 	float nearPlane,
 	float farPlane)
 {
-	float Cot = 1.0f / tanf(fieldOfVison*0.5f);
+	float Cot = 1 / Tan(fieldOfVison/2);
 	float Q = farPlane / (farPlane - nearPlane);
 
-	m[0][0] = Cot / aspect;    m[0][1] = 0.0f; m[0][2] = 0.0f;             m[0][3] = 0.0f;
-	m[1][0] = 0.0f;            m[1][1] = Cot;  m[1][2] = 0.0f;             m[1][3] = 0.0f;
-	m[2][0] = 0.0f;            m[2][1] = 0.0f; m[2][2] = Q;             m[2][3] = 1.0f;
-	m[3][0] = 0.0f;            m[3][1] = 0.0f; m[3][2] = -nearPlane*Q; m[3][3] = 0.0f;
+	m[0][0] = Cot / aspect; m[0][1] = 0; m[0][2] = 0;             m[0][3] = 0;
+	m[1][0] = 0;            m[1][1] = Cot;  m[1][2] = 0;             m[1][3] = 0;
+	m[2][0] = 0;            m[2][1] = 0; m[2][2] = Q;             m[2][3] = 1;
+	m[3][0] = 0;            m[3][1] = 0; m[3][2] = -nearPlane*Q; m[3][3] = 0;
 
 	return *this;
 }
@@ -547,41 +548,42 @@ Matrix4& Matrix4::BuildProjection_Ortho(float xMax,
 	float nearPlane,
 	float farPlane)
 {
-	float Q = 1.0f / (farPlane - nearPlane);
-	m[0][0] = 1.0f / xMax;    m[0][1] = 0.0f;         m[0][2] = 0.0f;             m[0][3] = 0.0f;
-	m[1][0] = 0.0f;            m[1][1] = 1.0f / (xMax / aspect);    m[1][2] = 0.0f;             m[1][3] = 0.0f;
-	m[2][0] = 0.0f;            m[2][1] = 0.0f;         m[2][2] = Q;             m[2][3] = 0.0f;
-	m[3][0] = 0.0f;            m[3][1] = 0.0f;         m[3][2] = -nearPlane*Q; m[3][3] = 1.0f;
+	float Q = 1 / (farPlane - nearPlane);
+	m[0][0] = 1 / xMax;    m[0][1] = 0;         m[0][2] = 0;             m[0][3] = 0;
+	m[1][0] = 0;           m[1][1] = 1 / (xMax / aspect);    m[1][2] = 0;             m[1][3] = 0;
+	m[2][0] = 0;           m[2][1] = 0;         m[2][2] = Q;             m[2][3] = 0;
+	m[3][0] = 0;           m[3][1] = 0;         m[3][2] = -nearPlane*Q; m[3][3] = 1;
 
 	return *this;
 }
 
 Matrix4& Matrix4::BuildCamera(const Vector3F& vPos,
 	const Vector3F& vDir,
-	const Vector3F& upVector) //=Vector3(0.0f,1.0f,0.0f)
+	const Vector3F& upVector) //=Vector3(0,1,0)
 {
 	Vector3F vZAxis = vDir.Normal();
 	Vector3F vXAxis = upVector.Cross(vZAxis).Normal();
 	Vector3F vYAxis = vZAxis.Cross(vXAxis).Normal();
 
-	m[0][0] = vXAxis.x;        m[0][1] = vYAxis.x;        m[0][2] = vZAxis.x;        m[0][3] = 0.0f;
-	m[1][0] = vXAxis.y;        m[1][1] = vYAxis.y;        m[1][2] = vZAxis.y;        m[1][3] = 0.0f;
-	m[2][0] = vXAxis.z;        m[2][1] = vYAxis.z;        m[2][2] = vZAxis.z;        m[2][3] = 0.0f;
-	m[3][0] = -vXAxis.Dot(vPos); m[3][1] = -vYAxis.Dot(vPos); m[3][2] = -vZAxis.Dot(vPos); m[3][3] = 1.0f;
+	m[0][0] = vXAxis.x;        m[0][1] = vYAxis.x;        m[0][2] = vZAxis.x;        m[0][3] = 0;
+	m[1][0] = vXAxis.y;        m[1][1] = vYAxis.y;        m[1][2] = vZAxis.y;        m[1][3] = 0;
+	m[2][0] = vXAxis.z;        m[2][1] = vYAxis.z;        m[2][2] = vZAxis.z;        m[2][3] = 0;
+	m[3][0] = -vXAxis.Dot(vPos); m[3][1] = -vYAxis.Dot(vPos); m[3][2] = -vZAxis.Dot(vPos); m[3][3] = 1;
 
 	return *this;
 }
 
 Matrix4& Matrix4::BuildCameraLookAt(const Vector3F& vPos,
 	const Vector3F& vLookAt,
-	const Vector3F& upVector) //=Vector3(0.0f,1.0f,0.0f)
+	const Vector3F& upVector) //=Vector3(0,1,0)
 {
 	return BuildCamera(vPos, vLookAt - vPos, upVector);
 }
 
 Matrix4 Matrix4::operator+(const Matrix4& other) const
 {
-	return Matrix4(m[0][0] + other.m[0][0], m[0][1] + other.m[0][1], m[0][2] + other.m[0][2], m[0][3] + other.m[0][3],
+	return Matrix4(
+		m[0][0] + other.m[0][0], m[0][1] + other.m[0][1], m[0][2] + other.m[0][2], m[0][3] + other.m[0][3],
 		m[1][0] + other.m[1][0], m[1][1] + other.m[1][1], m[1][2] + other.m[1][2], m[1][3] + other.m[1][3],
 		m[2][0] + other.m[2][0], m[2][1] + other.m[2][1], m[2][2] + other.m[2][2], m[2][3] + other.m[2][3],
 		m[3][0] + other.m[3][0], m[3][1] + other.m[3][1], m[3][2] + other.m[3][2], m[3][3] + other.m[3][3]);
@@ -611,7 +613,8 @@ Matrix4& Matrix4::operator+=(const Matrix4& other)
 
 Matrix4 Matrix4::operator-(const Matrix4& other) const
 {
-	return Matrix4(m[0][0] - other.m[0][0], m[0][1] - other.m[0][1], m[0][2] - other.m[0][2], m[0][3] - other.m[0][3],
+	return Matrix4(
+		m[0][0] - other.m[0][0], m[0][1] - other.m[0][1], m[0][2] - other.m[0][2], m[0][3] - other.m[0][3],
 		m[1][0] - other.m[1][0], m[1][1] - other.m[1][1], m[1][2] - other.m[1][2], m[1][3] - other.m[1][3],
 		m[2][0] - other.m[2][0], m[2][1] - other.m[2][1], m[2][2] - other.m[2][2], m[2][3] - other.m[2][3],
 		m[3][0] - other.m[3][0], m[3][1] - other.m[3][1], m[3][2] - other.m[3][2], m[3][3] - other.m[3][3]);
@@ -641,7 +644,8 @@ Matrix4& Matrix4::operator-=(const Matrix4& other)
 
 Matrix4 Matrix4::operator*(float f) const
 {
-	return Matrix4(m[0][0] * f, m[0][1] * f, m[0][2] * f, m[0][3] * f,
+	return Matrix4(
+		m[0][0] * f, m[0][1] * f, m[0][2] * f, m[0][3] * f,
 		m[1][0] * f, m[1][1] * f, m[1][2] * f, m[1][3] * f,
 		m[2][0] * f, m[2][1] * f, m[2][2] * f, m[2][3] * f,
 		m[3][0] * f, m[3][1] * f, m[3][2] * f, m[3][3] * f);
@@ -659,62 +663,31 @@ Matrix4& Matrix4::operator*=(float f)
 
 Matrix4 Matrix4::operator* (const Matrix4& other) const
 {
-	// Multiplikationen sind sehr langsam
-	if(this->IsIdent()) return other;
-	if(other.IsIdent()) return *this;
-
-	return Matrix4(
-		m[0][0] * other.m[0][0] + m[0][1] * other.m[1][0] + m[0][2] * other.m[2][0] + m[0][3] * other.m[3][0],
-		m[0][0] * other.m[0][1] + m[0][1] * other.m[1][1] + m[0][2] * other.m[2][1] + m[0][3] * other.m[3][1],
-		m[0][0] * other.m[0][2] + m[0][1] * other.m[1][2] + m[0][2] * other.m[2][2] + m[0][3] * other.m[3][2],
-		m[0][0] * other.m[0][3] + m[0][1] * other.m[1][3] + m[0][2] * other.m[2][3] + m[0][3] * other.m[3][3],
-
-		m[1][0] * other.m[0][0] + m[1][1] * other.m[1][0] + m[1][2] * other.m[2][0] + m[1][3] * other.m[3][0],
-		m[1][0] * other.m[0][1] + m[1][1] * other.m[1][1] + m[1][2] * other.m[2][1] + m[1][3] * other.m[3][1],
-		m[1][0] * other.m[0][2] + m[1][1] * other.m[1][2] + m[1][2] * other.m[2][2] + m[1][3] * other.m[3][2],
-		m[1][0] * other.m[0][3] + m[1][1] * other.m[1][3] + m[1][2] * other.m[2][3] + m[1][3] * other.m[3][3],
-
-		m[2][0] * other.m[0][0] + m[2][1] * other.m[1][0] + m[2][2] * other.m[2][0] + m[2][3] * other.m[3][0],
-		m[2][0] * other.m[0][1] + m[2][1] * other.m[1][1] + m[2][2] * other.m[2][1] + m[2][3] * other.m[3][1],
-		m[2][0] * other.m[0][2] + m[2][1] * other.m[1][2] + m[2][2] * other.m[2][2] + m[2][3] * other.m[3][2],
-		m[2][0] * other.m[0][3] + m[2][1] * other.m[1][3] + m[2][2] * other.m[2][3] + m[2][3] * other.m[3][3],
-
-		m[3][0] * other.m[0][0] + m[3][1] * other.m[1][0] + m[3][2] * other.m[2][0] + m[3][3] * other.m[3][0],
-		m[3][0] * other.m[0][1] + m[3][1] * other.m[1][1] + m[3][2] * other.m[2][1] + m[3][3] * other.m[3][1],
-		m[3][0] * other.m[0][2] + m[3][1] * other.m[1][2] + m[3][2] * other.m[2][2] + m[3][3] * other.m[3][2],
-		m[3][0] * other.m[0][3] + m[3][1] * other.m[1][3] + m[3][2] * other.m[2][3] + m[3][3] * other.m[3][3]);
+	Matrix4 out;
+	out.SetByProduct(*this, other);
+	return out;
 }
 
 Matrix4& Matrix4::SetByProduct(const Matrix4& a, const Matrix4& b)
 {
-	m[0][0] = a.m[0][0] * b.m[0][0] + a.m[0][1] * b.m[1][0] + a.m[0][2] * b.m[2][0] + a.m[0][3] * b.m[3][0],
-		m[0][1] = a.m[0][0] * b.m[0][1] + a.m[0][1] * b.m[1][1] + a.m[0][2] * b.m[2][1] + a.m[0][3] * b.m[3][1],
-		m[0][2] = a.m[0][0] * b.m[0][2] + a.m[0][1] * b.m[1][2] + a.m[0][2] * b.m[2][2] + a.m[0][3] * b.m[3][2],
-		m[0][3] = a.m[0][0] * b.m[0][3] + a.m[0][1] * b.m[1][3] + a.m[0][2] * b.m[2][3] + a.m[0][3] * b.m[3][3],
-
-		m[1][0] = a.m[1][0] * b.m[0][0] + a.m[1][1] * b.m[1][0] + a.m[1][2] * b.m[2][0] + a.m[1][3] * b.m[3][0],
-		m[1][1] = a.m[1][0] * b.m[0][1] + a.m[1][1] * b.m[1][1] + a.m[1][2] * b.m[2][1] + a.m[1][3] * b.m[3][1],
-		m[1][2] = a.m[1][0] * b.m[0][2] + a.m[1][1] * b.m[1][2] + a.m[1][2] * b.m[2][2] + a.m[1][3] * b.m[3][2],
-		m[1][3] = a.m[1][0] * b.m[0][3] + a.m[1][1] * b.m[1][3] + a.m[1][2] * b.m[2][3] + a.m[1][3] * b.m[3][3],
-
-		m[2][0] = a.m[2][0] * b.m[0][0] + a.m[2][1] * b.m[1][0] + a.m[2][2] * b.m[2][0] + a.m[2][3] * b.m[3][0],
-		m[2][1] = a.m[2][0] * b.m[0][1] + a.m[2][1] * b.m[1][1] + a.m[2][2] * b.m[2][1] + a.m[2][3] * b.m[3][1],
-		m[2][2] = a.m[2][0] * b.m[0][2] + a.m[2][1] * b.m[1][2] + a.m[2][2] * b.m[2][2] + a.m[2][3] * b.m[3][2],
-		m[2][3] = a.m[2][0] * b.m[0][3] + a.m[2][1] * b.m[1][3] + a.m[2][2] * b.m[2][3] + a.m[2][3] * b.m[3][3],
-
-		m[3][0] = a.m[3][0] * b.m[0][0] + a.m[3][1] * b.m[1][0] + a.m[3][2] * b.m[2][0] + a.m[3][3] * b.m[3][0],
-		m[3][1] = a.m[3][0] * b.m[0][1] + a.m[3][1] * b.m[1][1] + a.m[3][2] * b.m[2][1] + a.m[3][3] * b.m[3][1],
-		m[3][2] = a.m[3][0] * b.m[0][2] + a.m[3][1] * b.m[1][2] + a.m[3][2] * b.m[2][2] + a.m[3][3] * b.m[3][2],
-		m[3][3] = a.m[3][0] * b.m[0][3] + a.m[3][1] * b.m[1][3] + a.m[3][2] * b.m[2][3] + a.m[3][3] * b.m[3][3];
+	for(int r = 0; r < 4; ++r) {
+		for(int c = 0; c < 4; ++c) {
+			float s = 0;
+			for(int k = 0; k < 4; ++k)
+				s += a(r, k) * b(k, c);
+			m[r][c] = s;
+		}
+	}
 
 	return *this;
 }
 
 Matrix4& Matrix4::operator*=(const Matrix4& other)
 {
-	if(this->IsIdent()) return ((*this) = other);
-	if(other.IsIdent()) return *this;
-	return SetByProduct(*this, other);
+	Matrix4 out;
+	out.SetByProduct(*this, other);
+	*this = out;
+	return *this;
 }
 
 Matrix4& Matrix4::operator=(const Matrix4& other)

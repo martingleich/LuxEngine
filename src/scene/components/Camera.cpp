@@ -217,7 +217,7 @@ math::Matrix4 Camera::CalculateProjectionMatrix(video::Renderer* r)
 			m_FarPlane);
 	} else {
 		out.BuildProjection_Persp(
-			m_FOV.Radian(),
+			m_FOV,
 			aspect,
 			m_NearPlane,
 			m_FarPlane);

@@ -98,28 +98,28 @@ void MatrixTable::UpdateMatrix(EMatrixType type) const
 		m_Matrices[MAT_VIEW_INV] = m_Matrices[MAT_VIEW].GetTransformInverted();
 		break;
 	case MAT_WORLD_VIEW:
-		m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_WORLD), GetMatrix(MAT_WORLD));
+		m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
 		break;
 	case MAT_WORLD_PROJ:
-		m_Matrices[MAT_WORLD_PROJ].SetByProduct(GetMatrix(MAT_WORLD), GetMatrix(MAT_PROJ));
+		m_Matrices[MAT_WORLD_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD));
 		break;
 	case MAT_VIEW_PROJ:
-		m_Matrices[MAT_VIEW_PROJ].SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_PROJ));
+		m_Matrices[MAT_VIEW_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_VIEW));
 		break;
 	case MAT_WORLD_VIEW_PROJ:
 		if(IsUpToDate(MAT_VIEW_PROJ))
-			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_WORLD), GetMatrix(MAT_VIEW_PROJ));
+			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_VIEW_PROJ), GetMatrix(MAT_WORLD));
 		else if(IsUpToDate(MAT_WORLD_VIEW))
-			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_WORLD_VIEW), GetMatrix(MAT_PROJ));
+			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD_VIEW));
 		else {
-			m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_WORLD), GetMatrix(MAT_VIEW));
+			m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
 			m_UpToDate |= 1 << MAT_WORLD_VIEW;
-			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_WORLD_VIEW), GetMatrix(MAT_PROJ));
+			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD_VIEW));
 		}
 		break;
 	case MAT_WORLD_VIEW_INV:
 		if(IsUpToDate(MAT_WORLD_VIEW)) {
-			m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_WORLD), GetMatrix(MAT_VIEW));
+			m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
 			m_UpToDate |= 1 << MAT_WORLD_VIEW;
 		}
 		m_Matrices[MAT_WORLD_VIEW_INV] = GetMatrix(MAT_WORLD_VIEW).GetTransformInverted();

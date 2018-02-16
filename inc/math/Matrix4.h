@@ -84,7 +84,7 @@ public:
 	\param [out] result If not null, true if the matrix was succesfully inverted otherwise false
 	\return Selfreference
 	*/
-	Matrix4& InvertTransform(bool* result=nullptr);
+	Matrix4& InvertTransform(bool* result = nullptr);
 	bool SetByInvertTransform(const Matrix4& m);
 
 	//! Transpose this matrix
@@ -93,7 +93,7 @@ public:
 	*/
 	Matrix4& Transpose();
 
-	//! Transforms a vector with this matrix
+	//! Transforms a row vector with this matrix
 	/**
 	The case w!=1, is ignored, meaning no projection is done
 	\param v The vector to transform
@@ -110,7 +110,7 @@ public:
 		return out;
 	}
 
-	//! Apply only the rotation of this matrix to a vector
+	//! Apply only the rotation of this matrix to a row vector
 	/**
 	\param v The vector to rotate
 	\return The rotated vector
@@ -125,7 +125,7 @@ public:
 		return out;
 	}
 
-	//! Transforms a array of vector with this matrix
+	//! Transforms a array of row vectors with this matrix
 	/**
 	in and out are allowed to be overlapping, with the right alignment
 	\param in The array to transform
@@ -331,7 +331,7 @@ public:
 	\param FarPlane The far clipping plane
 	\return Selfreference
 	*/
-	Matrix4& BuildProjection_Persp(float FOVY,
+	Matrix4& BuildProjection_Persp(AngleF FOVY,
 		float Aspect,
 		float NearPlane,
 		float FarPlane);
