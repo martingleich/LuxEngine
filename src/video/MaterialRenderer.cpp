@@ -63,13 +63,13 @@ void MaterialRenderer::SendShaderSettings(size_t passId, const Pass& pass, const
 	for(const auto& option : m_Options) {
 		if(option.isShader) {
 			auto param = material->Param(option.id);
-			pass.shader->SetParam(param.Pointer(), option.mappingId);
+			pass.shader->SetParam(option.mappingId, param.Pointer());
 		}
 	}
 
 	for(const auto& v : m_ShaderValues) {
 		if(v.pass == passId)
-			pass.shader->SetParam(v.obj.Data(), v.id);
+			pass.shader->SetParam(v.id, v.obj.Data());
 	}
 
 	pass.shader->LoadSceneParams(pass);

@@ -186,12 +186,6 @@ public:
 		core::Range<core::ConstUTF8Iterator> text,
 		core::Array<float>& carets) = 0;
 
-	//! Retrieve the material used for rendering the font
-	/**
-	\return The material used for rendering the font
-	*/
-	virtual const video::Material* GetMaterial() const = 0;
-
 	//! Get a description of the font
 	virtual const FontDescription& GetDescription() const = 0;
 

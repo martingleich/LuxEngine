@@ -409,7 +409,7 @@ void ShaderD3D9::Enable()
 		throw core::D3D9Exception(hr);
 }
 
-void ShaderD3D9::SetParam(const void* data, u32 paramId)
+void ShaderD3D9::SetParam(u32 paramId, const void* data)
 {
 	bool found = false;
 	u32 realId = 0;
@@ -425,6 +425,11 @@ void ShaderD3D9::SetParam(const void* data, u32 paramId)
 		throw core::ObjectNotFoundException("paramId");
 
 	SetShaderValue(m_Params[realId], data);
+}
+
+u32 ShaderD3D9::GetParamId(const core::String& name) const
+{
+	return m_ParamPackage.GetParamId(name);
 }
 
 void ShaderD3D9::LoadSceneParams(const Pass& pass)

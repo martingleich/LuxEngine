@@ -105,10 +105,10 @@ Matrix4& Matrix4::InvertTransform(bool* result)
 	return *this;
 }
 
-bool Matrix4::SetByInvertTransform(const Matrix4& m)
+bool Matrix4::SetByInvertTransform(const Matrix4& mat)
 {
 	bool result;
-	*this = m.GetTransformInverted(&result);
+	*this = mat.GetTransformInverted(&result);
 	return result;
 }
 
@@ -683,7 +683,7 @@ Matrix4& Matrix4::SetByProduct(const Matrix4& a, const Matrix4& b)
 		for(int c = 0; c < 4; ++c) {
 			float s = 0;
 			for(int k = 0; k < 4; ++k)
-				s += a(r, k) * b(k, c);
+				s += a(k, c) * b(r, k);
 			m[r][c] = s;
 		}
 	}

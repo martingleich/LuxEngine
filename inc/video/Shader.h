@@ -20,7 +20,8 @@ public:
 	virtual ~Shader() {}
 
 	virtual void Enable() = 0;
-	virtual void SetParam(const void* data, u32 paramId) = 0;
+	virtual void SetParam(u32 paramId, const void* data) = 0;
+	virtual u32 GetParamId(const core::String& name) const = 0;
 	virtual void LoadSceneParams(const Pass& pass) = 0;
 	virtual void Disable() = 0;
 

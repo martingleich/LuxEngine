@@ -14,6 +14,87 @@ namespace lux
 namespace gui
 {
 
+namespace
+{
+const char* g_VSCode =
+R"(
+struct VS_OUT
+{
+	float4 hpos : POSITION;
+	float4 uv_pos : TEXCOORD0;
+};
+
+float4x4 scene_viewProj;
+
+VS_OUT mainVS(float3 position : POSITION, float2 uv : TEXCOORD0)
+{
+	VS_OUT Out;
+	Out.hpos = mul(float4(position, 1), scene_viewProj);
+	Out.uv_pos.xy = uv;
+	Out.uv_pos.zw = position.xy;
+	return Out;
+}
+)";
+const char* g_PSCode = R"(
+sampler2D param_texture;
+float4 param_diffuse; // font color
+float4 param_emissive; // border color
+
+float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
+{
+	float2 uv = uv_pos.xy;
+	float2 pos = uv_pos.zw;
+	float4 value = tex2D(param_texture, uv);
+
+	float alpha = value.a;
+	float inner = value.r;
+	float4 color = lerp(param_emissive, param_diffuse, inner);
+
+	return float4(color.rgb, alpha*color.a);
+}
+)";
+
+class ShaderParamLoader : public video::ParamSetCallback
+{
+public:
+	u32 m_TexId;
+	void Init(video::Shader* shader)
+	{
+		m_TexId = shader->GetParamId("texture");
+	}
+	virtual void SendShaderSettings(size_t passId, const video::Pass& pass, const video::Material* material) const
+	{
+		LUX_UNUSED(passId);
+		LUX_UNUSED(material);
+		pass.shader->SetParam(m_TexId, &pass.layers[0]);
+		pass.shader->LoadSceneParams(pass);
+	}
+};
+
+WeakRef<video::Shader> g_FontShader;
+ShaderParamLoader g_ParamLoader;
+
+StrongRef<video::Shader> EnsureFontShader()
+{
+	if(g_FontShader)
+		return g_FontShader;
+
+	auto matLib = video::MaterialLibrary::Instance();
+	if(matLib->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {
+		auto shader = video::MaterialLibrary::Instance()->CreateShaderFromMemory(
+			video::EShaderLanguage::HLSL,
+			g_VSCode, "mainVS", 2, 0,
+			g_PSCode, "mainPS", 2, 0);
+		g_ParamLoader.Init(shader);
+		g_FontShader = shader.GetWeak();
+		return shader;
+	} else {
+		return nullptr;
+	}
+}
+
+}
+
 FontRaster::FontRaster(const core::ResourceOrigin& origin) :
 	Font(origin)
 {
@@ -44,9 +125,7 @@ void FontRaster::Init(const FontCreationData& data)
 
 	LoadImageData(data.image, data.imageSize, data.channelCount);
 
-	auto renderer = EnsureMaterialRenderer();
-	m_Material = renderer->CreateMaterial();
-	m_Material->Layer(0) = m_Texture;
+	InitPass();
 }
 
 void FontRaster::Draw(
@@ -83,11 +162,12 @@ void FontRaster::Draw(
 	if(userClip)
 		renderer->SetScissorRect(clipRect, &tok);
 
-	m_Material->SetDiffuse(settings.color);
-	m_Material->SetEmissive(settings.borderColor);
-	renderer->SetMaterial(m_Material);
+	m_Pass.diffuse = settings.color;
+	m_Pass.emissive = settings.borderColor;
+	renderer->SetPass(m_Pass, false, &g_ParamLoader);
 
-	renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
+	if(!m_Pass.shader)
+		renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 
 	math::Vector2F cursor = position;
 	video::Vertex2D vertices[600];
@@ -228,74 +308,27 @@ FontRenderSettings FontRaster::GetFinalFontSettings(const FontRenderSettings& _s
 	return settings;
 }
 
-video::MaterialRenderer* FontRaster::EnsureMaterialRenderer()
+void FontRaster::InitPass()
 {
-	video::MaterialRenderer* renderer;
-	auto matLib = video::MaterialLibrary::Instance();
-	if(matLib->ExistsMaterialRenderer("font_raster", &renderer))
-		return renderer;
+	auto shader = EnsureFontShader();
+	m_Pass.requirements = video::EMaterialRequirement::Transparent;
+	m_Pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+	m_Pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+	m_Pass.alphaOperator = video::EBlendOperator::Add;
+	m_Pass.zWriteEnabled = false;
+	m_Pass.zBufferFunc = video::EComparisonFunc::Always;
+	m_Pass.backfaceCulling = false;
+	m_Pass.lighting = video::ELighting::Disabled;
+	m_Pass.fogEnabled = false;
+	m_Pass.useVertexColor = false;
+	m_Pass.AddTexture();
+	m_Pass.layers[0].texture = m_Texture;
 
-	renderer = matLib->AddMaterialRenderer("font_raster");
-	auto& pass = renderer->GetPass(0);
-	pass.requirements = video::EMaterialRequirement::Transparent;
-	pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-	pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-	pass.alphaOperator = video::EBlendOperator::Add;
-	pass.zWriteEnabled = false;
-	pass.zBufferFunc = video::EComparisonFunc::Always;
-	pass.backfaceCulling = false;
-	pass.lighting = video::ELighting::Disabled;
-	pass.fogEnabled = false;
-	pass.useVertexColor = false;
-
-	if(matLib->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {
-		const char* vsCode =
-			R"(
-struct VS_OUT
-{
-	float4 hpos : POSITION;
-	float4 uv_pos : TEXCOORD0;
-};
-
-float4x4 scene_viewProj;
-
-VS_OUT mainVS(float3 position : POSITION, float2 uv : TEXCOORD0)
-{
-	VS_OUT Out;
-	Out.hpos = mul(float4(position, 1), scene_viewProj);
-	Out.uv_pos.xy = uv;
-	Out.uv_pos.zw = position.xy;
-	return Out;
-}
-)";
-		const char* psCode = R"(
-sampler2D param_texture;
-float4 param_diffuse; // font color
-float4 param_emissive; // border color
-
-float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
-{
-	float2 uv = uv_pos.xy;
-	float2 pos = uv_pos.zw;
-	float4 value = tex2D(param_texture, uv);
-
-	float alpha = value.a;
-	float inner = value.r;
-	float4 color = lerp(param_emissive, param_diffuse, inner);
-
-	return float4(color.rgb, alpha*color.a);
-}
-)";
-
-		pass.shader = video::MaterialLibrary::Instance()->CreateShaderFromMemory(
-			video::EShaderLanguage::HLSL,
-			vsCode, "mainVS", 2, 0,
-			psCode, "mainPS", 2, 0);
-		pass.AddTexture();
-		renderer->AddShaderParam("texture", 0, "texture");
+	if(shader) {
+		// Use shader for rendering
+		m_Pass.shader = shader;
 	} else {
-		pass.AddTexture();
-		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
+		// Use fixed function pipeline
 		video::TextureStageSettings tss;
 		tss.alphaArg1 = video::ETextureArgument::Texture;
 		tss.alphaArg2 = video::ETextureArgument::Diffuse;
@@ -303,10 +336,8 @@ float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 		tss.colorArg1 = video::ETextureArgument::Texture;
 		tss.colorArg2 = video::ETextureArgument::Diffuse;
 		tss.colorOperator = video::ETextureOperator::Modulate;
-		pass.layerSettings.PushBack(tss);
+		m_Pass.layerSettings.PushBack(tss);
 	}
-
-	return renderer;
 }
 
 void FontRaster::LoadImageData(
@@ -366,11 +397,6 @@ void FontRaster::GetRawData(const void*& ptr, u32& width, u32& height, u32& chan
 	width = m_ImageSize.width;
 	height = m_ImageSize.height;
 	channels = m_ChannelCount;
-}
-
-const video::Material* FontRaster::GetMaterial() const
-{
-	return m_Material;
 }
 
 void FontRaster::SetBaseFontSettings(const FontRenderSettings& settings)

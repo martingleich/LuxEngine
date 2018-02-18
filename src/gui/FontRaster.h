@@ -65,8 +65,6 @@ public:
 	const core::HashMap<u32, CharInfo>& GetCharMap() const;
 	const CharInfo& GetCharInfo(u32 c);
 
-	const video::Material* GetMaterial() const;
-
 	void SetBaseFontSettings(const FontRenderSettings& settings);
 	const FontRenderSettings& GetBaseFontSettings();
 
@@ -82,7 +80,7 @@ public:
 private:
 	FontRenderSettings GetFinalFontSettings(const FontRenderSettings& settings);
 
-	video::MaterialRenderer* EnsureMaterialRenderer();
+	void InitPass();
 	void LoadImageData(const u8* imageData,
 		math::Dimension2U imageSize, u32 channelCount);
 
@@ -127,7 +125,7 @@ private:
 	u32 m_ChannelCount;
 
 	StrongRef<video::Texture> m_Texture;
-	StrongRef<video::Material> m_Material;
+	video::Pass m_Pass;
 
 	// Character printed on error
 	CharInfo m_ErrorChar;

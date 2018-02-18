@@ -29,7 +29,8 @@ public:
 		core::Array<core::String>* errorList);
 
 	void Enable();
-	void SetParam(const void* data, u32 paramId);
+	void SetParam(u32 paramId, const void* data);
+	u32 GetParamId(const core::String& name) const;
 	void LoadSceneParams(const Pass& pass);
 	void Disable();
 
