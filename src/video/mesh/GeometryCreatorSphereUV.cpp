@@ -76,7 +76,7 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(
 	StrongRef<VertexBuffer> vertexBuffer = subMesh->GetVertices();
 	StrongRef<IndexBuffer> indexBuffer = subMesh->GetIndices();
 
-	const s32 temp = rings-1;
+	const s32 temp = rings - 1;
 	Vertex3D Vertex;
 	u16 indices[6];
 	math::AngleF alpha;
@@ -86,12 +86,12 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(
 		alpha = x * (math::AngleF::FULL / sectors);
 
 		for(s32 y = 0; y < temp; ++y) {
-			beta = math::AngleF::Radian(float(math::Constants<float>::pi() / rings)*(y - ((rings - 2)*0.5f)));
+			beta = (math::AngleF::HALF / rings) * (y - ((rings - 2)*0.5f));
 
-			Vertex.normal = math::Vector3F::BuildFromPolar(alpha, beta, 1.0f);
+			Vertex.normal = math::Vector3F::BuildFromPolar(alpha, beta, 1);
 			Vertex.position = Vertex.normal * radius;
-			Vertex.texture.x = texX*(alpha/math::AngleF::FULL);
-			Vertex.texture.y = texY*(0.5f - beta/math::AngleF::HALF);
+			Vertex.texture.x = texX*(alpha / math::AngleF::FULL);
+			Vertex.texture.y = texY*(0.5f - beta / math::AngleF::HALF);
 
 			Vertex.color = Color::White;
 

@@ -175,17 +175,17 @@ public:
 	//! Set the translation done by this matrix
 	/**
 	The Tranlation is set in the order Scalation->Rotation->Translation
-	\param Trans The new used translation
+	\param trans The new used translation
 	\return Selfreference
 	*/
-	Matrix4& SetTranslation(const Vector3F& Trans);
+	Matrix4& SetTranslation(const Vector3F& trans);
 
 	//! Creates a Translationmatrix and combine it with this matrix
 	/**
-	\param Trans The Translation to add
+	\param trans The Translation to add
 	\return Selfreference
 	*/
-	Matrix4& AddTranslation(const Vector3F& Trans);
+	Matrix4& AddTranslation(const Vector3F& trans);
 
 	//! The current translation done by this matrix
 	/**
@@ -303,97 +303,102 @@ public:
 	/**
 	Make this matrix perform first a scale then a Rotation then a Translation
 	\param scale The scale for all three axes to perform
-	\param Rot The rotation to perforn in Eulerangles(XYZ) and Rad
-	\param Trans The translation to perform
+	\param rot The rotation to perforn in Eulerangles(XYZ) and Rad
+	\param trans The translation to perform
 	\return Selfreference
 	*/
-	Matrix4& BuildWorld(const Vector3F& scale,
-		const Vector3F& Rot,
-		const Vector3F& Trans);
+	Matrix4& BuildWorld(
+		const Vector3F& scale,
+		const Vector3F& rot,
+		const Vector3F& trans);
 
 	//! Make a worldmatrix
 	/**
 	Make this matrix perform first a scale then a Rotation then a Translation
 	\param scale The scale for all three axes to perform
-	\param Orient The rotation to perform
-	\param Trans The translation to perform
+	\param orient The rotation to perform
+	\param trans The translation to perform
 	\return Selfreference
 	*/
-	Matrix4& BuildWorld(const Vector3F& scale,
-		const QuaternionF& Orient,
-		const Vector3F& Trans);
+	Matrix4& BuildWorld(
+		const Vector3F& scale,
+		const QuaternionF& orient,
+		const Vector3F& trans);
 
 	//! Make a perspective projection matrix(hyperbolic Z-transform)
 	/**
-	\param FOVY The vertical field of vision in rad
-	\param Aspect screenwidth/screenheight
-	\param NearPlane The near clipping plane
-	\param FarPlane The far clipping plane
+	\param verticalFOV The vertical field of vision in rad
+	\param aspect screenwidth/screenheight
+	\param nearPlane The near clipping plane
+	\param farPlane The far clipping plane
 	\return Selfreference
 	*/
-	Matrix4& BuildProjection_Persp(AngleF FOVY,
-		float Aspect,
-		float NearPlane,
-		float FarPlane);
+	Matrix4& BuildProjection_Persp(
+		AngleF verticalFOV,
+		float aspect,
+		float nearPlane,
+		float farPlane);
 
 	//! Make a orthogonale projection matrix
 	/**
-	\param XMax The biggest x-coordinate to show(the screen goes from -XMax to XMax)
-	\param Aspect screenwidth/screenheight
-	\param NearPlane The near clipping plane
-	\param FarPlane The far clipping plane
+	\param aMax The biggest x-coordinate to show(the screen goes from -XMax to XMax)
+	\param aspect screenwidth/screenheight
+	\param nearPlane The near clipping plane
+	\param farPlane The far clipping plane
 	\return Selfreference
 	*/
-	Matrix4& BuildProjection_Ortho(float XMax,
-		float Aspect,
-		float NearPlane,
-		float FarPlane);
-
-
-	//! Make a camera matrix
-	/**
-	\param position The position of the camera
-	\param Dir The direction the camera is looking, must not be normalized
-	\param Up The upside of the camera, must not be normalized
-	\return Selfreference
-	*/
-	Matrix4& BuildCamera(const Vector3F& position,
-		const Vector3F& Dir,
-		const Vector3F& Up = Vector3F::UNIT_Y);
+	Matrix4& BuildProjection_Ortho(
+		float xMax,
+		float aspect,
+		float nearPlane,
+		float farPlane);
 
 	//! Make a camera matrix
 	/**
 	\param position The position of the camera
-	\param LookAt The point the camera is watching
-	\param Up The upside of the camera, must not be normalized
+	\param dir The direction the camera is looking, must not be normalized
+	\param up The upside of the camera, must not be normalized
 	\return Selfreference
 	*/
-	Matrix4& BuildCameraLookAt(const Vector3F& position,
-		const Vector3F& LookAt,
-		const Vector3F& Up = Vector3F::UNIT_Y);
+	Matrix4& BuildCamera(
+		const Vector3F& position,
+		const Vector3F& dir,
+		const Vector3F& up = Vector3F::UNIT_Y);
+
+	//! Make a camera matrix
+	/**
+	\param position The position of the camera
+	\param lookAt The point the camera is watching
+	\param up The upside of the camera, must not be normalized
+	\return Selfreference
+	*/
+	Matrix4& BuildCameraLookAt(
+		const Vector3F& position,
+		const Vector3F& lookAt,
+		const Vector3F& up = Vector3F::UNIT_Y);
 
 	//! Access a element of the matrix
 	/**
-	\param Row The row to access[0-3]
-	\param Col The collum to access[0-3]
+	\param row The row to access[0-3]
+	\param col The collum to access[0-3]
 	\return The element at the specified position
 	*/
-	float& operator() (int Row, int Col)
+	float& operator() (int row, int col)
 	{
-		lxAssert(Row >= 0 && Row < 4 && Col >= 0 && Col < 4);
-		return m[Row][Col];
+		lxAssert(row >= 0 && row < 4 && col >= 0 && col < 4);
+		return m[row][col];
 	}
 
 	//! Access a element of the matrix
 	/**
-	\param Row The row to access[0-3]
-	\param Col The collum to access[0-3]
+	\param row The row to access[0-3]
+	\param col The collum to access[0-3]
 	\return The element at the specified position
 	*/
-	const float& operator() (int Row, int Col) const
+	const float& operator() (int row, int col) const
 	{
-		lxAssert(Row >= 0 && Row < 4 && Col >= 0 && Col < 4);
-		return m[Row][Col];
+		lxAssert(row >= 0 && row < 4 && col >= 0 && col < 4);
+		return m[row][col];
 	}
 
 	//! Access a element of the matrix

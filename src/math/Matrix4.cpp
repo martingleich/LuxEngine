@@ -101,13 +101,15 @@ Matrix4 Matrix4::GetTransposed() const
 
 Matrix4& Matrix4::InvertTransform(bool* result)
 {
-	float invDet = GetTransformDet();
-	if(IsZero(invDet))
-		return MakeIdent();
-	invDet = 1 / invDet;
-
 	*this = this->GetTransformInverted(result);
 	return *this;
+}
+
+bool Matrix4::SetByInvertTransform(const Matrix4& m)
+{
+	bool result;
+	*this = m.GetTransformInverted(&result);
+	return result;
 }
 
 Matrix4 Matrix4::GetTransformInverted(bool* result) const
@@ -144,18 +146,20 @@ Matrix4 Matrix4::GetTransformInverted(bool* result) const
 	return out;
 }
 
-Matrix4& Matrix4::SetTranslation(const Vector3F& vTrans)
+Matrix4& Matrix4::SetTranslation(const Vector3F& trans)
 {
-	m[3][0] = vTrans.x; m[3][1] = vTrans.y; m[3][2] = vTrans.z;
+	m[3][0] = trans.x; 
+	m[3][1] = trans.y;
+	m[3][2] = trans.z;
 	return *this;
 }
 
-Matrix4& Matrix4::AddTranslation(const Vector3F& vTrans)
+Matrix4& Matrix4::AddTranslation(const Vector3F& trans)
 {
-	m[0][0] += m[0][3] * vTrans.x;    m[0][1] += m[0][3] * vTrans.y;    m[0][2] += m[0][3] * vTrans.z;
-	m[1][0] += m[1][3] * vTrans.x;    m[1][1] += m[1][3] * vTrans.y;    m[1][2] += m[1][3] * vTrans.z;
-	m[2][0] += m[2][3] * vTrans.x;    m[2][1] += m[2][3] * vTrans.y;    m[2][2] += m[2][3] * vTrans.z;
-	m[3][0] += m[3][3] * vTrans.x;    m[3][1] += m[3][3] * vTrans.y;    m[3][2] += m[3][3] * vTrans.z;
+	m[0][0] += m[0][3] * trans.x; m[0][1] += m[0][3] * trans.y; m[0][2] += m[0][3] * trans.z;
+	m[1][0] += m[1][3] * trans.x; m[1][1] += m[1][3] * trans.y; m[1][2] += m[1][3] * trans.z;
+	m[2][0] += m[2][3] * trans.x; m[2][1] += m[2][3] * trans.y; m[2][2] += m[2][3] * trans.z;
+	m[3][0] += m[3][3] * trans.x; m[3][1] += m[3][3] * trans.y; m[3][2] += m[3][3] * trans.z;
 
 	return *this;
 }
@@ -165,36 +169,36 @@ Vector3F Matrix4::GetTranslation() const
 	return Vector3F(m[3][0], m[3][1], m[3][2]);
 }
 
-Matrix4& Matrix4::SetScale(const Vector3F& vScale)
+Matrix4& Matrix4::SetScale(const Vector3F& scale)
 {
-	m[0][0] = vScale.x;
-	m[1][1] = vScale.y;
-	m[2][2] = vScale.z;
+	m[0][0] = scale.x;
+	m[1][1] = scale.y;
+	m[2][2] = scale.z;
 	return *this;
 }
 
-Matrix4& Matrix4::AddScale(const Vector3F& vScale)
+Matrix4& Matrix4::AddScale(const Vector3F& scale)
 {
-	m[0][0] *= vScale.x;    m[0][1] *= vScale.y;    m[0][2] *= vScale.z;
-	m[1][0] *= vScale.x;    m[1][1] *= vScale.y;    m[1][2] *= vScale.z;
-	m[2][0] *= vScale.x;    m[2][1] *= vScale.y;    m[2][2] *= vScale.z;
-	m[3][0] *= vScale.x;    m[3][1] *= vScale.y;    m[3][2] *= vScale.z;
+	m[0][0] *= scale.x; m[0][1] *= scale.y; m[0][2] *= scale.z;
+	m[1][0] *= scale.x; m[1][1] *= scale.y; m[1][2] *= scale.z;
+	m[2][0] *= scale.x; m[2][1] *= scale.y; m[2][2] *= scale.z;
+	m[3][0] *= scale.x; m[3][1] *= scale.y; m[3][2] *= scale.z;
 
 	return *this;
 }
 
 Vector3F Matrix4::GetScale() const
 {
-	// 0 Rotationsfall abfangen
+	// Check for no rotation -> only scale
 	if(IsZero(m[0][1]) && IsZero(m[0][2]) &&
 		IsZero(m[1][0]) && IsZero(m[1][2]) &&
 		IsZero(m[2][0]) && IsZero(m[2][1]))
 		return Vector3F(m[0][0], m[1][1], m[2][2]);
 
-	// Volle Berechnung nötig
-	float XScaling = std::sqrt(m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2]);
+	float xScale = std::sqrt(m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2]);
+	float det = GetTransformDet();
 	return Vector3F(
-		GetTransformDet() > 0 ? XScaling : -XScaling,
+		det > 0 ? xScale : -xScale,
 		std::sqrt(m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2]),
 		std::sqrt(m[2][0] * m[0][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2]));
 }
@@ -378,25 +382,25 @@ Vector3F Matrix4::GetRotationDeg() const
 {
 	const Matrix4& tmp = *this;
 	const Vector3F scale = GetScale();
-	const Vector3F invScale(1 / scale.x, 1 / scale.y, 1 / scale.z);
+	const Vector3F inscale(1 / scale.x, 1 / scale.y, 1 / scale.z);
 
-	float Y = (float)-asin(tmp.m[0][2] * invScale.x);
+	float Y = (float)-asin(tmp.m[0][2] * inscale.x);
 	const float C = cosf(Y);
 	Y *= math::Constants<float>::deg_to_rad();
 
 	float rotX, rotY, X, Z;
 	if(!IsZero(C)) {
 		const float invC = 1 / C;
-		rotX = tmp.m[2][2] * invC * invScale.z;
-		rotY = tmp.m[1][2] * invC * invScale.y;
+		rotX = tmp.m[2][2] * invC * inscale.z;
+		rotY = tmp.m[1][2] * invC * inscale.y;
 		X = (float)math::DegToRad(atan2(rotY, rotX));
-		rotX = tmp.m[0][0] * invC * invScale.x;
-		rotY = tmp.m[0][1] * invC * invScale.x;
+		rotX = tmp.m[0][0] * invC * inscale.x;
+		rotY = tmp.m[0][1] * invC * inscale.x;
 		Z = (float)math::DegToRad(atan2(rotY, rotX));
 	} else {
 		X = 0;
-		rotX = tmp.m[1][1] * invScale.y;
-		rotY = -tmp.m[1][0] * invScale.y;
+		rotX = tmp.m[1][1] * inscale.y;
+		rotY = -tmp.m[1][0] * inscale.y;
 		Z = (float)atan2(rotY, rotX) * math::Constants<float>::deg_to_rad();
 	}
 
@@ -422,46 +426,48 @@ Vector3F Matrix4::GetAxisZ() const
 	return Vector3F(m[0][2], m[1][2], m[2][2]);
 }
 
-Matrix4& Matrix4::BuildWorld(const Vector3F& vScale,
-	const Vector3F& vRot,
-	const Vector3F& vTrans)
+Matrix4& Matrix4::BuildWorld(
+	const Vector3F& scale,
+	const Vector3F& rot,
+	const Vector3F& trans)
 {
-	const float cX = vRot.x != 0 ? std::cos(vRot.x) : 1;
-	const float sX = vRot.x != 0 ? std::sin(vRot.x) : 0;
+	const float cX = rot.x != 0 ? std::cos(rot.x) : 1;
+	const float sX = rot.x != 0 ? std::sin(rot.x) : 0;
 
-	const float cY = vRot.y != 0 ? std::cos(vRot.y) : 1;
-	const float sY = vRot.y != 0 ? std::sin(vRot.y) : 0;
+	const float cY = rot.y != 0 ? std::cos(rot.y) : 1;
+	const float sY = rot.y != 0 ? std::sin(rot.y) : 0;
 
-	const float cZ = vRot.z != 0 ? std::cos(vRot.z) : 1;
-	const float sZ = vRot.z != 0 ? std::sin(vRot.z) : 0;
+	const float cZ = rot.z != 0 ? std::cos(rot.z) : 1;
+	const float sZ = rot.z != 0 ? std::sin(rot.z) : 0;
 
 	const float sXsY = sX*sY;
 	const float cXsY = cX*sY;
 
-	m[0][0] = vScale.x*cY*cZ;
-	m[0][1] = vScale.x*cY*sZ;
-	m[0][2] = -sY*vScale.x;
+	m[0][0] = scale.x*cY*cZ;
+	m[0][1] = scale.x*cY*sZ;
+	m[0][2] = -sY*scale.x;
 	m[0][3] = 0;
 
-	m[1][0] = vScale.y*(sXsY*cZ - cX*sZ);
-	m[1][1] = vScale.y*(sXsY*sZ + cX*cZ);
-	m[1][2] = vScale.y*sX*cY;
+	m[1][0] = scale.y*(sXsY*cZ - cX*sZ);
+	m[1][1] = scale.y*(sXsY*sZ + cX*cZ);
+	m[1][2] = scale.y*sX*cY;
 	m[1][3] = 0;
 
-	m[2][0] = vScale.z*(cXsY*cZ + sX*sZ);
-	m[2][1] = vScale.z*(cXsY*sZ - sX*cZ);
-	m[2][2] = vScale.z*cX*cY;
+	m[2][0] = scale.z*(cXsY*cZ + sX*sZ);
+	m[2][1] = scale.z*(cXsY*sZ - sX*cZ);
+	m[2][2] = scale.z*cX*cY;
 	m[2][3] = 0;
 
-	m[3][0] = vTrans.x;
-	m[3][1] = vTrans.y;
-	m[3][2] = vTrans.z;
+	m[3][0] = trans.x;
+	m[3][1] = trans.y;
+	m[3][2] = trans.z;
 	m[3][3] = 1;
 
 	return *this;
 }
 
-Matrix4& Matrix4::BuildWorld(const Vector3F& scale,
+Matrix4& Matrix4::BuildWorld(
+	const Vector3F& scale,
 	const QuaternionF& orient,
 	const Vector3F& trans)
 {
@@ -543,7 +549,8 @@ Matrix4& Matrix4::BuildProjection_Persp(
 	return *this;
 }
 
-Matrix4& Matrix4::BuildProjection_Ortho(float xMax,
+Matrix4& Matrix4::BuildProjection_Ortho(
+	float xMax,
 	float aspect,
 	float nearPlane,
 	float farPlane)
@@ -557,27 +564,29 @@ Matrix4& Matrix4::BuildProjection_Ortho(float xMax,
 	return *this;
 }
 
-Matrix4& Matrix4::BuildCamera(const Vector3F& vPos,
-	const Vector3F& vDir,
+Matrix4& Matrix4::BuildCamera(
+	const Vector3F& pos,
+	const Vector3F& dir,
 	const Vector3F& upVector) //=Vector3(0,1,0)
 {
-	Vector3F vZAxis = vDir.Normal();
-	Vector3F vXAxis = upVector.Cross(vZAxis).Normal();
-	Vector3F vYAxis = vZAxis.Cross(vXAxis).Normal();
+	Vector3F z = dir.Normal();
+	Vector3F x = upVector.Cross(z).Normal();
+	Vector3F y = z.Cross(x).Normal();
 
-	m[0][0] = vXAxis.x;        m[0][1] = vYAxis.x;        m[0][2] = vZAxis.x;        m[0][3] = 0;
-	m[1][0] = vXAxis.y;        m[1][1] = vYAxis.y;        m[1][2] = vZAxis.y;        m[1][3] = 0;
-	m[2][0] = vXAxis.z;        m[2][1] = vYAxis.z;        m[2][2] = vZAxis.z;        m[2][3] = 0;
-	m[3][0] = -vXAxis.Dot(vPos); m[3][1] = -vYAxis.Dot(vPos); m[3][2] = -vZAxis.Dot(vPos); m[3][3] = 1;
+	m[0][0] = x.x;        m[0][1] = y.x;        m[0][2] = z.x;        m[0][3] = 0;
+	m[1][0] = x.y;        m[1][1] = y.y;        m[1][2] = z.y;        m[1][3] = 0;
+	m[2][0] = x.z;        m[2][1] = y.z;        m[2][2] = z.z;        m[2][3] = 0;
+	m[3][0] = -x.Dot(pos); m[3][1] = -y.Dot(pos); m[3][2] = -z.Dot(pos); m[3][3] = 1;
 
 	return *this;
 }
 
-Matrix4& Matrix4::BuildCameraLookAt(const Vector3F& vPos,
+Matrix4& Matrix4::BuildCameraLookAt(
+	const Vector3F& pos,
 	const Vector3F& vLookAt,
 	const Vector3F& upVector) //=Vector3(0,1,0)
 {
-	return BuildCamera(vPos, vLookAt - vPos, upVector);
+	return BuildCamera(pos, vLookAt - pos, upVector);
 }
 
 Matrix4 Matrix4::operator+(const Matrix4& other) const
