@@ -88,6 +88,11 @@ public:
 	}
 };
 
+class AlphaBlendMode
+{
+public:
+};
+
 class Pass
 {
 public:

@@ -40,8 +40,8 @@ private:
 private:
 	core::Array<PointVertex> m_Vertices;
 
-	StrongRef<video::Material> m_BaseMaterial;
-	StrongRef<video::Material> m_EmitMaterial;
+	video::Pass m_DefaultPass;
+	video::Pass m_EmitPass;
 
 	video::VertexFormat m_VertexFormat;
 };

@@ -52,8 +52,8 @@ private:
 	math::Vector3F m_Side;
 	bool m_IsRotationEnabled;
 
-	StrongRef<video::Material> m_BaseMaterial;
-	StrongRef<video::Material> m_EmitMaterial;
+	video::Pass m_DefaultPass;
+	video::Pass m_EmitPass;
 };
 
 } // namespace scene

@@ -63,29 +63,32 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 
 	SetStencilMode(p.stencil);
 
-	// Enable layers
-	static const TextureStageSettings DEFAULT_STAGE;
-	static const TextureStageSettings DIFFUSE_ONLY_STAGE(
-		ETextureArgument::Diffuse,
-		ETextureArgument::Diffuse,
-		ETextureOperator::SelectArg1,
-		ETextureArgument::Diffuse,
-		ETextureArgument::Diffuse,
-		ETextureOperator::SelectArg1);
-	for(size_t i = 0; i < p.layers.Size(); ++i) {
-		EnableTextureLayer(i, p.layers[i]);
+	if(!p.shader) {
+		// Enable texture layers for fixed function pipeline
+		// Shaders handle this while loading their parameters.
+		static const TextureStageSettings DEFAULT_STAGE;
+		static const TextureStageSettings DIFFUSE_ONLY_STAGE(
+			ETextureArgument::Diffuse,
+			ETextureArgument::Diffuse,
+			ETextureOperator::SelectArg1,
+			ETextureArgument::Diffuse,
+			ETextureArgument::Diffuse,
+			ETextureOperator::SelectArg1);
+		for(size_t i = 0; i < p.layers.Size(); ++i) {
+			EnableTextureLayer(i, p.layers[i]);
 
-		const TextureStageSettings* settings;
-		if(!p.layers[i].texture)
-			settings = &DIFFUSE_ONLY_STAGE;
-		else
-			settings = i < p.layerSettings.Size() ? &p.layerSettings[i] : &DEFAULT_STAGE;
+			const TextureStageSettings* settings;
+			if(!p.layers[i].texture)
+				settings = &DIFFUSE_ONLY_STAGE;
+			else
+				settings = i < p.layerSettings.Size() ? &p.layerSettings[i] : &DEFAULT_STAGE;
 
-		EnableTextureStage(i, *settings);
+			EnableTextureStage(i, *settings);
+		}
+
+		for(size_t i = p.layers.Size(); i < p.layerSettings.Size(); ++i)
+			EnableTextureStage(i, p.layerSettings[i]);
 	}
-
-	for(size_t i = p.layers.Size(); i < p.layerSettings.Size(); ++i)
-		EnableTextureStage(i, p.layerSettings[i]);
 
 	// Disable old layers
 	u32 newUsed = math::Max(p.layers.Size(), p.layerSettings.Size());

@@ -318,8 +318,6 @@ void FontRaster::InitPass()
 	m_Pass.zWriteEnabled = false;
 	m_Pass.zBufferFunc = video::EComparisonFunc::Always;
 	m_Pass.backfaceCulling = false;
-	m_Pass.lighting = video::ELighting::Disabled;
-	m_Pass.fogEnabled = false;
 	m_Pass.useVertexColor = false;
 	m_Pass.AddTexture();
 	m_Pass.layers[0].texture = m_Texture;

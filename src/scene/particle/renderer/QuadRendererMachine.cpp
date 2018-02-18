@@ -18,8 +18,20 @@ QuadRendererMachine::QuadRendererMachine() :
 	m_Driver(video::VideoDriver::Instance()),
 	m_Buffer(nullptr)
 {
-	m_BaseMaterial = video::MaterialLibrary::Instance()->CreateMaterial("particleTransparent");
-	m_EmitMaterial = video::MaterialLibrary::Instance()->CreateMaterial("particleEmit");
+	m_DefaultPass.requirements = video::EMaterialRequirement::Transparent;
+	m_DefaultPass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+	m_DefaultPass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+	m_DefaultPass.alphaOperator = video::EBlendOperator::Add;
+	m_DefaultPass.zWriteEnabled = false;
+	m_DefaultPass.fogEnabled = false;
+	m_DefaultPass.lighting = video::ELighting::Disabled;
+	m_DefaultPass.useVertexColor = true;
+	m_DefaultPass.AddTexture();
+
+	m_EmitPass = m_DefaultPass;
+	m_EmitPass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+	m_EmitPass.alphaDstBlend = video::EBlendFactor::One;
+	m_EmitPass.alphaOperator = video::EBlendOperator::Add;
 }
 
 QuadRendererMachine::~QuadRendererMachine()
@@ -151,7 +163,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 
 	m_Model = group->GetModel();
 
-	auto& mat = m_Data->EmitLight ? m_EmitMaterial : m_BaseMaterial;
+	auto& pass = m_Data->EmitLight ? m_EmitPass : m_DefaultPass;
 
 	void (QuadRendererMachine::*RenderQuad)(video::Vertex3D* vertices, const Particle& particle);
 
@@ -169,7 +181,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		}
 		// TODO: Allow more than one texture for particle system.
 		if(m_Data->SpriteBank->GetSprite(sprite, 0, false, rect, texture))
-			mat->Layer(0) = texture;
+			pass.layers[0].texture = texture;
 
 		if(m_Model->IsEnabled(Particle::EParameter::Angle))
 			RenderQuad = &QuadRendererMachine::RenderQuad_ScaledRotated;
@@ -201,7 +213,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	}
 	vertexBuffer->Update();
 
-	videoRenderer->SetMaterial(mat);
+	videoRenderer->SetPass(pass, true);
 	videoRenderer->DrawGeometry(m_Buffer, 0, (u32)(pool.GetActiveCount() * 2));
 }
 

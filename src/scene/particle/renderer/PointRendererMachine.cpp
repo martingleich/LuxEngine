@@ -2,7 +2,7 @@
 #include "scene/particle/ParticleModel.h"
 #include "scene/particle/ParticleGroupData.h"
 
-#include "video/MaterialLibrary.h"
+#include "video/Pass.h"
 
 namespace lux
 {
@@ -16,8 +16,19 @@ PointRendererMachine::PointRendererMachine()
 	decl.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
 	m_VertexFormat = video::VertexFormat("particle_point_renderer", decl);
 
-	m_BaseMaterial = video::MaterialLibrary::Instance()->CreateMaterial("particleTransparent");
-	m_EmitMaterial = video::MaterialLibrary::Instance()->CreateMaterial("particleEmit");
+	m_DefaultPass.requirements = video::EMaterialRequirement::Transparent;
+	m_DefaultPass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+	m_DefaultPass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+	m_DefaultPass.alphaOperator = video::EBlendOperator::Add;
+	m_DefaultPass.zWriteEnabled = false;
+	m_DefaultPass.fogEnabled = false;
+	m_DefaultPass.lighting = video::ELighting::Disabled;
+	m_DefaultPass.useVertexColor = true;
+
+	m_EmitPass = m_DefaultPass;
+	m_EmitPass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
+	m_EmitPass.alphaDstBlend = video::EBlendFactor::One;
+	m_EmitPass.alphaOperator = video::EBlendOperator::Add;
 }
 
 PointRendererMachine::~PointRendererMachine()
@@ -57,7 +68,11 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 		cursor += 1;
 	}
 
-	videoRenderer->SetMaterial(data->EmitLight ? m_EmitMaterial : m_BaseMaterial);
+	if(data->EmitLight)
+		videoRenderer->SetPass(m_EmitPass, true);
+	else
+		videoRenderer->SetPass(m_DefaultPass, true);
+
 	videoRenderer->Draw3DPrimitiveList(
 		video::EPrimitiveType::Points,
 		group->GetParticleCount(),
