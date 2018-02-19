@@ -14,9 +14,9 @@ namespace scene
 
 class SkyBox : public Component, public Renderable
 {
-public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
+	LX_REFERABLE_MEMBERS_API(SkyBox, LUX_API);
 
+public:
 	LUX_API SkyBox();
 	LUX_API SkyBox(const SkyBox& other);
 	LUX_API ~SkyBox();

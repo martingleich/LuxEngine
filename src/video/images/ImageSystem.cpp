@@ -72,7 +72,7 @@ public:
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
 		StrongRef<core::Resource> r = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, file);
-		StrongRef<Image> img = r;
+		auto img = r.AsStrong<Image>();
 		Texture* texture = dynamic_cast<Texture*>(dst);
 		ColorFormat format = img->GetColorFormat();
 		math::Dimension2U size = img->GetSize();
@@ -212,7 +212,7 @@ public:
 
 		if(isValid) {
 			for(size_t i = 0; i < 6; ++i)
-				images[i] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, image_path[i]);
+				images[i] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, image_path[i]).AsStrong<Image>();
 		} else {
 			throw io::FileNotFoundException(filename.Data());
 		}
@@ -313,14 +313,14 @@ ImageSystem::~ImageSystem()
 
 StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format)
 {
-	StrongRef<Image> img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image);
+	auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image).AsStrong<Image>();
 	img->Init(size, format);
 	return img;
 }
 
 StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMem, bool deleteOnDrop)
 {
-	StrongRef<Image> img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image);
+	auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image).AsStrong<Image>();
 	img->Init(size, format, data, CopyMem, deleteOnDrop);
 	return img;
 }

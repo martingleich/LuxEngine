@@ -256,12 +256,12 @@ public:
 		StrongRef<video::Texture> texture;
 		if(io::FileSystem::Instance()->ExistFile(path)) {
 			texture = core::ResourceSystem::Instance()->GetResource(
-				core::ResourceType::Texture, path);
+				core::ResourceType::Texture, path).AsStrong<Texture>();
 		} else {
 			io::FileDescription texFile = io::ConcatFileDesc(baseFileDesc, path);
 			texture = core::ResourceSystem::Instance()->GetResource(
 				core::ResourceType::Texture,
-				io::FileSystem::Instance()->OpenFile(texFile));
+				io::FileSystem::Instance()->OpenFile(texFile)).AsStrong<Texture>();
 		}
 		return texture;
 	}

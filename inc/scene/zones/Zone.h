@@ -26,6 +26,10 @@ public:
 		LUX_UNUSED(point);
 		return math::Vector3F::ZERO;
 	}
+	StrongRef<Zone> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<Zone>();
+	}
 };
 
 } // namespace scene

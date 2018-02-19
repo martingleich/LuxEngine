@@ -11,9 +11,8 @@ namespace gui
 
 class StaticText : public Element
 {
+	LX_REFERABLE_MEMBERS_API(StaticText, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API StaticText();
 	LUX_API ~StaticText();
 

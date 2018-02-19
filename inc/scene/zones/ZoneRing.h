@@ -10,9 +10,8 @@ namespace scene
 
 class RingZone : public Zone
 {
+	LX_REFERABLE_MEMBERS_API(RingZone, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	RingZone() :
 		m_MinRadius(1.0f),
 		m_MaxRadius(1.0f),

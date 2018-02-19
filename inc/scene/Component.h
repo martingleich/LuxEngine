@@ -93,6 +93,11 @@ public:
 		return m_Node;
 	}
 
+	StrongRef<Component> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<Component>();
+	}
+
 protected:
 	virtual void OnAttach(Node* n)
 	{

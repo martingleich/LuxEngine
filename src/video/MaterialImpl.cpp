@@ -218,7 +218,7 @@ core::Name MaterialImpl::GetReferableType() const
 	return core::ResourceType::Material;
 }
 
-StrongRef<Referable> MaterialImpl::Clone() const
+StrongRef<Referable> MaterialImpl::CloneImpl() const
 {
 	return LUX_NEW(MaterialImpl)(*this);
 }

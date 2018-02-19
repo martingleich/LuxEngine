@@ -79,7 +79,10 @@ public:
 		return core::ResourceType::Material;
 	}
 
-	virtual StrongRef<Referable> Clone() const = 0;
+	StrongRef<Material> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<Material>();
+	}
 };
 
 } // namespace video

@@ -10,9 +10,8 @@ namespace scene
 
 class Fog : public Component
 {
+	LX_REFERABLE_MEMBERS_API(Fog, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API Fog();
 	LUX_API virtual ~Fog();
 

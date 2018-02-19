@@ -122,7 +122,7 @@ StrongRef<Node> Scene::AddCamera()
 
 StrongRef<Camera> Scene::CreateCamera() const
 {
-	return CreateComponent(SceneComponentType::Camera);
+	return CreateComponent(SceneComponentType::Camera).As<Camera>();
 }
 
 StrongRef<Mesh> Scene::CreateMesh(const io::Path& path) const
@@ -132,7 +132,7 @@ StrongRef<Mesh> Scene::CreateMesh(const io::Path& path) const
 
 StrongRef<Mesh> Scene::CreateMesh(video::Mesh* mesh) const
 {
-	StrongRef<Mesh> out = CreateComponent(SceneComponentType::Mesh);
+	auto out = CreateComponent(SceneComponentType::Mesh).AsStrong<Mesh>();
 	out->SetMesh(mesh);
 
 	return out;
@@ -140,14 +140,14 @@ StrongRef<Mesh> Scene::CreateMesh(video::Mesh* mesh) const
 
 StrongRef<SkyBox> Scene::CreateSkyBox(const video::Colorf& color) const
 {
-	StrongRef<SkyBox> out = CreateComponent(SceneComponentType::SkyBox);
+	auto out = CreateComponent(SceneComponentType::SkyBox).AsStrong<SkyBox>();
 	out->GetMaterial(0)->SetDiffuse(color);
 	return out;
 }
 
 StrongRef<SkyBox> Scene::CreateSkyBox(video::CubeTexture* skyTexture) const
 {
-	StrongRef<SkyBox> out = CreateComponent(SceneComponentType::SkyBox);
+	auto out = CreateComponent(SceneComponentType::SkyBox).AsStrong<SkyBox>();
 	out->SetSkyTexture(skyTexture);
 
 	return out;
@@ -155,7 +155,7 @@ StrongRef<SkyBox> Scene::CreateSkyBox(video::CubeTexture* skyTexture) const
 
 StrongRef<Light> Scene::CreateLight(video::ELightType lightType, video::Color color) const
 {
-	StrongRef<Light> light = CreateComponent(SceneComponentType::Light);
+	auto light = CreateComponent(SceneComponentType::Light).AsStrong<Light>();
 	light->SetLightType(lightType);
 	light->SetColor(color);
 	return light;
@@ -163,7 +163,7 @@ StrongRef<Light> Scene::CreateLight(video::ELightType lightType, video::Color co
 
 StrongRef<Fog> Scene::CreateFog(const video::Colorf& color, float start, float end) const
 {
-	StrongRef<Fog> fog = CreateComponent(SceneComponentType::Fog);
+	auto fog = CreateComponent(SceneComponentType::Fog).AsStrong<Fog>();
 	fog->SetFogType(video::EFogType::Linear);
 	fog->SetStart(start);
 	fog->SetEnd(end);
@@ -174,7 +174,7 @@ StrongRef<Fog> Scene::CreateFog(const video::Colorf& color, float start, float e
 
 StrongRef<RotationAnimator> Scene::CreateRotator(const math::Vector3F& axis, math::AngleF rotSpeed) const
 {
-	StrongRef<RotationAnimator> out = CreateComponent(SceneComponentType::Rotation);
+	auto out = CreateComponent(SceneComponentType::Rotation).AsStrong<RotationAnimator>();
 	out->SetAxis(axis);
 	out->SetRotationSpeed(rotSpeed);
 
@@ -183,7 +183,7 @@ StrongRef<RotationAnimator> Scene::CreateRotator(const math::Vector3F& axis, mat
 
 StrongRef<LinearMoveAnimator> Scene::CreateLinearMover(const math::Line3F& line, float duration) const
 {
-	StrongRef<LinearMoveAnimator> out = CreateComponent(SceneComponentType::LinearMove);
+	auto out = CreateComponent(SceneComponentType::LinearMove).AsStrong<LinearMoveAnimator>();
 	out->SetData(line, duration);
 
 	return out;
@@ -191,7 +191,7 @@ StrongRef<LinearMoveAnimator> Scene::CreateLinearMover(const math::Line3F& line,
 
 StrongRef<FirstPersonCameraControl> Scene::CreateFirstPersonCameraControl(float moveSpeed, math::AngleF rotSpeed, bool noVerticalMovement) const
 {
-	StrongRef<FirstPersonCameraControl> out = CreateComponent(SceneComponentType::FirstPersonCameraControl);
+	auto out = CreateComponent(SceneComponentType::FirstPersonCameraControl).AsStrong<FirstPersonCameraControl>();
 	out->SetMoveSpeed(moveSpeed);
 	out->SetRotationSpeed(rotSpeed);
 	out->AllowVerticalMovement(!noVerticalMovement);
@@ -201,7 +201,7 @@ StrongRef<FirstPersonCameraControl> Scene::CreateFirstPersonCameraControl(float 
 
 StrongRef<Component> Scene::CreateComponent(core::Name type) const
 {
-	return core::ReferableFactory::Instance()->Create(type);
+	return core::ReferableFactory::Instance()->Create(type).AsStrong<Component>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

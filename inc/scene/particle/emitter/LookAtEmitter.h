@@ -9,9 +9,8 @@ namespace scene
 
 class LookAtEmitter : public ParticleEmitter
 {
+	LX_REFERABLE_MEMBERS_API(LookAtEmitter, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LookAtEmitter() :
 		m_Scatter(0.0f)
 	{

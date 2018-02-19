@@ -9,9 +9,8 @@ namespace scene
 
 class StraightEmitter : public ParticleEmitter
 {
+	LX_REFERABLE_MEMBERS_API(StraightEmitter, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	StraightEmitter() :
 		m_Direction(math::Vector3F::UNIT_X),
 		m_Scatter(0.0f)

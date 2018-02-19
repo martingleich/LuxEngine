@@ -17,9 +17,8 @@ class VolumeQueryCallback;
 
 class BoxCollider : public Collider
 {
+	LX_REFERABLE_MEMBERS_API(BoxCollider, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	BoxCollider()
 	{
 		SetHalfSize(math::Vector3F(1.0f, 1.0f, 1.0f));
@@ -62,9 +61,8 @@ protected:
 
 class BoundingBoxCollider : public BoxCollider
 {
+	LX_REFERABLE_MEMBERS_API(BoundingBoxCollider, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	BoundingBoxCollider() :
 		BoxCollider(math::Vector3F::ZERO, math::Transformation::DEFAULT)
 	{

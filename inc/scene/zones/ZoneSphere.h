@@ -10,9 +10,8 @@ namespace scene
 
 class SphereZone : public Zone
 {
+	LX_REFERABLE_MEMBERS_API(SphereZone, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	SphereZone() :
 		m_Radius(1.0f)
 	{

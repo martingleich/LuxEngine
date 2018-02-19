@@ -64,7 +64,7 @@ MeshSystem::~MeshSystem()
 
 StrongRef<Mesh> MeshSystem::CreateMesh()
 {
-	return core::ReferableFactory::Instance()->Create(core::ResourceType::Mesh);
+	return core::ReferableFactory::Instance()->Create(core::ResourceType::Mesh).AsStrong<Mesh>();
 }
 
 StrongRef<Mesh> MeshSystem::CreateMesh(Geometry* geo)
@@ -146,7 +146,7 @@ StrongRef<Mesh> MeshSystem::CreatePlaneMesh(
 	float(*function)(void* ctx, float x, float y),
 	void* context)
 {
-	StrongRef<GeometryCreatorPlane> creator = m_PlaneCreator;
+	auto creator = m_PlaneCreator.StaticCastStrong<GeometryCreatorPlane>();
 
 	StrongRef<Geometry> sub = creator->CreateGeometry(sizeX, sizeY, tesX, tesY, texX, texY, function, context);
 	StrongRef<Mesh> out = CreateMesh(sub);
@@ -161,7 +161,7 @@ StrongRef<Mesh> MeshSystem::CreateSphereMesh(
 	float texX, float texY,
 	bool inside)
 {
-	StrongRef<GeometryCreatorSphereUV> creator = m_SphereUVCreator;
+	auto creator = m_SphereUVCreator.StaticCastStrong<GeometryCreatorSphereUV>();
 	StrongRef<Geometry> sub = creator->CreateGeometry(radius, rings, sectors, texX, texY, inside);
 	StrongRef<Mesh> out = CreateMesh(sub);
 	out->SetMaterial(m_MatLib->CreateMaterial());
@@ -175,7 +175,7 @@ StrongRef<Mesh> MeshSystem::CreateCubeMesh(
 	float texX, float texY, float texZ,
 	bool inside)
 {
-	StrongRef<GeometryCreatorCube> creator = m_CubeGenerator;
+	auto creator = m_CubeGenerator.StaticCastStrong<GeometryCreatorCube>();
 	StrongRef<Geometry> sub = creator->CreateGeometry(
 		sizeX, sizeY, sizeZ,
 		tesX, tesY, tesZ,
@@ -192,7 +192,7 @@ StrongRef<Mesh> MeshSystem::CreateArrowMesh(
 	float shaft_radius, float head_radius,
 	s32 sectors)
 {
-	StrongRef<GeometryCreatorArrow> creator = m_ArrowCreator;
+	auto creator = m_ArrowCreator.StaticCastStrong<GeometryCreatorArrow>();
 	StrongRef<Geometry> sub = creator->CreateGeometry(
 		shaft_height, head_height,
 		shaft_radius, head_radius,
@@ -205,7 +205,7 @@ StrongRef<Mesh> MeshSystem::CreateArrowMesh(
 
 StrongRef<Mesh> MeshSystem::CreateCylinderMesh(float radius, float height, s32 sectors, s32 planes, s32 texX, s32 texY, bool inside)
 {
-	StrongRef<GeometryCreatorCylinder> creator = m_CylinderGenerator;
+	auto creator = m_CylinderGenerator.StaticCastStrong<GeometryCreatorCylinder>();
 	StrongRef<Geometry> sub = creator->CreateGeometry(
 		radius, height,
 		sectors, planes,
@@ -219,7 +219,7 @@ StrongRef<Mesh> MeshSystem::CreateCylinderMesh(float radius, float height, s32 s
 
 StrongRef<Mesh> MeshSystem::CreateTorusMesh(float radiusMajor, float radiusMinor, s32 sectorsMajor, s32 sectorsMinor, s32 texX, s32 texY, bool inside)
 {
-	StrongRef<GeometryCreatorTorus> creator = m_TorusGenerator;
+	auto creator = m_TorusGenerator.StaticCastStrong<GeometryCreatorTorus>();
 	StrongRef<Geometry> sub = creator->CreateGeometry(
 		radiusMajor, radiusMinor,
 		sectorsMajor, sectorsMinor,

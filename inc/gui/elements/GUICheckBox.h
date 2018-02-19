@@ -10,8 +10,8 @@ namespace gui
 
 class CheckBox : public AbstractButton
 {
+	LX_REFERABLE_MEMBERS_API(CheckBox, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
 	LUX_API CheckBox();
 	LUX_API ~CheckBox();
 

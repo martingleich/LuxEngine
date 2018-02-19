@@ -16,9 +16,8 @@ class VolumeQueryCallback;
 
 class SphereCollider : public Collider
 {
+	LX_REFERABLE_MEMBERS_API(SphereCollider, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	SphereCollider()
 	{
 		SetRadius(1.0f);
@@ -65,9 +64,8 @@ private:
 
 class BoundingSphereCollider : public SphereCollider
 {
+	LX_REFERABLE_MEMBERS_API(BoundingSphereCollider, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	BoundingSphereCollider() :
 		SphereCollider(math::Vector3F::ZERO, 0.0f)
 	{

@@ -426,7 +426,12 @@ void Node::RecalculateBoundingBox()
 	m_HasUserBoundingBox = false;
 }
 
-StrongRef<Referable> Node::Clone() const
+StrongRef<Node> Node::Clone() const
+{
+	return static_cast<Node*>(CloneImpl().Raw());
+}
+
+StrongRef<Referable> Node::CloneImpl() const
 {
 	return LUX_NEW(Node)(*this);
 }

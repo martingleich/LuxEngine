@@ -10,6 +10,7 @@ namespace gui
 
 class Slider : public Element
 {
+	LX_REFERABLE_MEMBERS_API(Slider, LUX_API);
 public:
 	enum ESettings
 	{
@@ -21,8 +22,6 @@ public:
 	};
 
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API Slider();
 	LUX_API ~Slider();
 

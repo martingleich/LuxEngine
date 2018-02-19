@@ -21,7 +21,7 @@ public:
 	void RemoveResource(Name type, u32 id);
 	u32 FreeUnusedResources(Name type);
 	StrongRef<Resource> GetResource(Name type, u32 id);
-	StrongRef<Resource> GetResource(Name type, const core::String& name);
+	StrongRef<Resource> GetResource(Name type, const core::String& name, bool loadIfNotFound);
 	StrongRef<Resource> GetResource(Name type, io::File* file);
 	StrongRef<Resource> CreateResource(Name type, const core::String& name);
 	StrongRef<Resource> CreateResource(Name type, io::File* file);

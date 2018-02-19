@@ -9,9 +9,8 @@ namespace scene
 
 class NormalEmitter : public ParticleEmitter
 {
+	LX_REFERABLE_MEMBERS_API(NormalEmitter, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	NormalEmitter(float scatter=0.0f)
 	{
 		m_Scatter = scatter;

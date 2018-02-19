@@ -541,7 +541,7 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API StrongRef<Referable> Clone() const;
+	LUX_API StrongRef<Node> Clone() const;
 	LUX_API virtual core::Name GetReferableType() const;
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -562,6 +562,8 @@ private:
 	bool UpdateAbsTransform() const;
 
 	void SetDirty() const;
+
+	StrongRef<Referable> CloneImpl() const;
 
 private:
 	Node* m_Parent; //!< Pointer to the parent of this node

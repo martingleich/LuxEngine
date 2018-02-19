@@ -13,9 +13,8 @@ class ParticleSystemTemplate;
 
 class ParticleSystem : public Animator, public Renderable
 {
+	LX_REFERABLE_MEMBERS_API(ParticleSystem, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API ParticleSystem();
 	LUX_API ~ParticleSystem();
 

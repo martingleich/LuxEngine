@@ -27,6 +27,11 @@ public:
 	\return True if the run trough, false if it was aborted
 	*/
 	virtual bool ExecuteQuery(Node* owner, Query* query, QueryCallback* result) = 0;
+
+	StrongRef<Collider> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<Collider>();
+	}
 };
 
 //! A triangle-base collider.
@@ -40,6 +45,11 @@ class TriangleCollider : public Collider
 public:
 	//! Get a triangle contained in the collider, by it's id.
 	virtual const math::Triangle3F& GetTriangle(u32 id) const = 0;
+
+	StrongRef<TriangleCollider> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<TriangleCollider>();
+	}
 };
 
 }

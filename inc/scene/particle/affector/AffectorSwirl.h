@@ -10,9 +10,8 @@ class Node;
 
 class SwirlAffector : public ParticleAffector
 {
+	LX_REFERABLE_MEMBERS_API(SwirlAffector, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	SwirlAffector() :
 		m_Axis(math::Vector3F::UNIT_Y),
 		m_FixedAttractionSpeed(true),

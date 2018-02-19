@@ -17,9 +17,8 @@ namespace scene
 //! Represent a single mesh in the scenegraph
 class Mesh : public Component, public Renderable
 {
+	LX_REFERABLE_MEMBERS_API(Mesh, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API Mesh();
 	LUX_API Mesh(const Mesh& other);
 	LUX_API ~Mesh();

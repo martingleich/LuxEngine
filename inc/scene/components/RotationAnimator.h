@@ -10,9 +10,8 @@ namespace scene
 
 class RotationAnimator : public Animator
 {
+	LX_REFERABLE_MEMBERS_API(RotationAnimator, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API RotationAnimator();
 	LUX_API RotationAnimator(const math::Vector3F& axis, math::AngleF RotSpeed);
 

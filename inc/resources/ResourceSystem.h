@@ -25,7 +25,7 @@ class ResourceSystem : public ReferenceCounted
 {
 public:
 	//! Initialize the global resource system
-	LUX_API static void Initialize(ResourceSystem* resSys=nullptr);
+	LUX_API static void Initialize(ResourceSystem* resSys = nullptr);
 
 	//! Access the global resource system
 	LUX_API static ResourceSystem* Instance();
@@ -104,15 +104,14 @@ public:
 
 	//! Get a resource based on a name.
 	/**
-	If no resource with the given name isn't found, it's tried to load a file with
-	the given name. <br>
 	\param type The type of the resource, can be empty to indicate any resourcetype matching name.
 	\param name The name of the resource.
-	\return The resource.
+	\param loadIfNotFound If the resource is not found, the file <name> will be loaded.
+	\return The resource, or null if the resource is not available.
 	\throws FileNotFoundException
 	\throws FileFormatException
 	*/
-	virtual StrongRef<Resource> GetResource(Name type, const core::String& name) = 0;
+	virtual StrongRef<Resource> GetResource(Name type, const core::String& name, bool loadIfNotFound = true) = 0;
 
 	//! Get a resources based on a file.
 	/**
@@ -196,7 +195,7 @@ public:
 	\param ext The extension(i.e. filetype) of the resource
 	\throws FileFormatException
 	*/
-	virtual void WriteResource(Resource* resource,  io::File* file, const core::String& ext)  const = 0;
+	virtual void WriteResource(Resource* resource, io::File* file, const core::String& ext)  const = 0;
 	//! Write a resource to a file
 	/**
 	\param resource The resource to write to the file.

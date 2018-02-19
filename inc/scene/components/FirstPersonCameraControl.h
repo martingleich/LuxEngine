@@ -14,6 +14,7 @@ namespace scene
 
 class FirstPersonCameraControl : public Animator
 {
+	LX_REFERABLE_MEMBERS_API(FirstPersonCameraControl, LUX_API);
 public:
 	struct KeyboardMouseControls
 	{
@@ -28,8 +29,6 @@ public:
 		bool invertX;
 		bool invertY;
 	};
-
-	LX_REFERABLE_MEMBERS_API(LUX_API);
 
 	LUX_API FirstPersonCameraControl();
 	LUX_API FirstPersonCameraControl(float moveSpeed, math::AngleF rotSpeed, math::AngleF maxVerticalAngle, bool noVerticalMovement);

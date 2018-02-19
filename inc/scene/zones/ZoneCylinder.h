@@ -9,9 +9,8 @@ namespace scene
 
 class CylinderZone : public Zone
 {
+	LX_REFERABLE_MEMBERS_API(CylinderZone, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	CylinderZone() :
 		m_Radius(1.0f),
 		m_HalfHeight(1.0f)

@@ -10,6 +10,8 @@ namespace gui
 
 class RadioButton : public AbstractButton
 {
+	LX_REFERABLE_MEMBERS_API(RadioButton, LUX_API);
+
 	class Group
 	{
 	public:
@@ -51,8 +53,6 @@ class RadioButton : public AbstractButton
 	friend class Group;
 
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API RadioButton();
 	LUX_API ~RadioButton();
 

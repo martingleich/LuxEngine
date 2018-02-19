@@ -96,8 +96,8 @@ public:
 /**
 Also declares referable members. Must be placed in the class definition in the header.
 */
-#define LX_SERIAL_MEMBERS() \
-LX_REFERABLE_MEMBERS() \
+#define LX_SERIAL_MEMBERS(class) \
+LX_REFERABLE_MEMBERS(class) \
 private: static ::lux::u32 TYPE_ID; \
 public: ::lux::u32& GetSerializerStructure() const { return TYPE_ID; }
 

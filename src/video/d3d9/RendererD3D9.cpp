@@ -264,7 +264,7 @@ void RendererD3D9::DrawPrimitiveList(
 	if(!user) {
 		if(indexData) {
 			// Indexed from stream
-			StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
+			auto d3d9Manager = m_Driver->GetBufferManager().StaticCastStrong<BufferManagerD3D9>();
 
 			BufferManagerD3D9::VertexStream vs;
 			BufferManagerD3D9::IndexStream is;
@@ -276,7 +276,7 @@ void RendererD3D9::DrawPrimitiveList(
 				indexOffset = is.offset;
 		} else {
 			// Not indexed from stream
-			StrongRef<BufferManagerD3D9> d3d9Manager = m_Driver->GetBufferManager();
+			auto d3d9Manager = m_Driver->GetBufferManager().StaticCastStrong<BufferManagerD3D9>();
 
 			BufferManagerD3D9::VertexStream vs;
 			if(d3d9Manager->GetVertexStream(0, vs))

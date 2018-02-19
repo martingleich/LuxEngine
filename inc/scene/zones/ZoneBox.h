@@ -11,9 +11,8 @@ namespace scene
 
 class BoxZone : public Zone
 {
+	LX_REFERABLE_MEMBERS_API(BoxZone, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	BoxZone() :
 		m_HalfSize(0.5f, 0.5f, 0.5f)
 	{

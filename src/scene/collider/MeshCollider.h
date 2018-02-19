@@ -21,9 +21,8 @@ class VolumeQueryCallback;
 
 class MeshCollider : public TriangleCollider
 {
+	LX_REFERABLE_MEMBERS_API(MeshCollider, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	MeshCollider()
 	{
 	}

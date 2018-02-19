@@ -9,9 +9,8 @@ namespace scene
 
 class LinearForceAffector : public ParticleAffector
 {
+	LX_REFERABLE_MEMBERS_API(LinearForceAffector, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LinearForceAffector() :
 		m_Direction(math::Vector3F::UNIT_Y)
 	{}

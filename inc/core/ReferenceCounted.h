@@ -191,9 +191,9 @@ public:
 	{
 	}
 
-	template <typename T2>
+	template <typename T2, bool U = std::is_base_of<T, T2>::value, std::enable_if_t<U, int> = 0>
 	StrongRef(const StrongRef<T2>& other) :
-		StrongRef(static_cast<T*>(other.m_Object))
+		StrongRef(other.m_Object)
 	{
 	}
 
@@ -241,14 +241,15 @@ public:
 
 		return *this;
 	}
-	
+
 	template <typename T2>
-	StrongRef<T>& operator=(StrongRef<T2>&& old)
+	std::enable_if_t<std::is_base_of<T, T2>::value, StrongRef<T>&>
+		operator=(StrongRef<T2>&& old)
 	{
 		if(m_Object)
 			m_Object->Drop();
 
-		m_Object = static_cast<T*>(old.m_Object);
+		m_Object = old.m_Object;
 		old.m_Object = nullptr;
 
 		return *this;
@@ -259,11 +260,12 @@ public:
 		*this = other.m_Object;
 		return *this;
 	}
-	
+
 	template <typename T2>
-	StrongRef<T>& operator=(const StrongRef<T2>& other)
+	std::enable_if_t<std::is_base_of<T, T2>::value, StrongRef<T>&>
+		operator=(const StrongRef<T2>& other)
 	{
-		*this = static_cast<T*>(other.m_Object);
+		*this = other.m_Object;
 		return *this;
 	}
 
@@ -279,7 +281,7 @@ public:
 
 	T* Raw() const
 	{
-		return m_Object;	
+		return m_Object;
 	}
 
 	bool operator!() const
@@ -329,6 +331,18 @@ public:
 		return As<T2>();
 	}
 
+	template <typename T2>
+	T2* StaticCast() const
+	{
+		return static_cast<T2*>(m_Object);
+	}
+
+	template <typename T2>
+	StrongRef<T2> StaticCastStrong() const
+	{
+		return StaticCast<T2>();
+	}
+
 	WeakRef<T> GetWeak() const;
 };
 
@@ -358,15 +372,9 @@ public:
 	{
 	}
 
-	template <typename T2>
+	template <typename T2, bool U = std::is_base_of<T, T2>::value, std::enable_if_t<U, int> = 0>
 	WeakRef(const WeakRef<T2>& other) :
-		WeakRef(static_cast<T2*>(other.m_Object))
-	{
-	}
-
-	template <typename T2>
-	WeakRef(const StrongRef<T2>& other) :
-		WeakRef(static_cast<T2*>(*other))
+		WeakRef(other.m_Object)
 	{
 	}
 
@@ -389,10 +397,10 @@ public:
 	}
 
 	template <typename T2>
-	WeakRef<T>& operator=(const WeakRef<T2>& other)
+	std::enable_if_t<std::is_base_of<T, T2>::value, WeakRef<T>&>
+		operator=(const WeakRef<T2>& other)
 	{
-		auto cast_out = static_cast<T*>(other.m_Object);
-		return this->operator=(cast_out);
+		return this->operator=(other.m_Object);
 	}
 
 	WeakRef& operator=(T* obj)
@@ -422,7 +430,7 @@ public:
 	{
 		return m_Object == v.m_Object;
 	}
-	
+
 	bool operator!=(const WeakRef& v) const
 	{
 		return m_Object != v.m_Object;

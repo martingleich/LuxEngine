@@ -10,9 +10,8 @@ namespace scene
 
 class LinearMoveAnimator : public Animator
 {
+	LX_REFERABLE_MEMBERS_API(LinearMoveAnimator, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API LinearMoveAnimator();
 	LUX_API void SetData(
 		const math::Line3F& line,

@@ -9,9 +9,8 @@ namespace scene
 
 class PointZone : public Zone
 {
+	LX_REFERABLE_MEMBERS_API(PointZone, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	PointZone() {}
 
 	PointZone(const math::Vector3F& v) :

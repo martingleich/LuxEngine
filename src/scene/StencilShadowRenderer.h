@@ -221,7 +221,6 @@ public:
 		p.zBufferFunc = video::EComparisonFunc::Always;
 		p.zWriteEnabled = false;
 		p.lighting = video::ELighting::Disabled;
-		p.requirements = video::EMaterialRequirement::Transparent;
 		p.fogEnabled = false;
 		p.useVertexColor = true;
 		p.alpha.srcFactor = video::EBlendFactor::SrcAlpha;

@@ -311,7 +311,6 @@ FontRenderSettings FontRaster::GetFinalFontSettings(const FontRenderSettings& _s
 void FontRaster::InitPass()
 {
 	auto shader = EnsureFontShader();
-	m_Pass.requirements = video::EMaterialRequirement::Transparent;
 	m_Pass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_Pass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_Pass.alpha.blendOperator = video::EBlendOperator::Add;

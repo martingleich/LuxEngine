@@ -17,7 +17,6 @@ Renderer::Renderer(video::Renderer* r)
 	m_TexturePass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_TexturePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_TexturePass.alpha.blendOperator = video::EBlendOperator::Add;
-	m_TexturePass.requirements = video::EMaterialRequirement::Transparent;
 	m_TexturePass.AddTexture();
 	const video::TextureStageSettings MIX_SETTINGS(
 		video::ETextureArgument::Diffuse,
@@ -35,7 +34,6 @@ Renderer::Renderer(video::Renderer* r)
 	m_DiffusePass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_DiffusePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_DiffusePass.alpha.blendOperator = video::EBlendOperator::Add;
-	m_DiffusePass.requirements = video::EMaterialRequirement::Transparent;
 }
 
 void Renderer::Begin()

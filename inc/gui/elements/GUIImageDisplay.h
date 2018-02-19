@@ -10,9 +10,8 @@ namespace gui
 
 class ImageDisplay : public Element
 {
+	LX_REFERABLE_MEMBERS_API(ImageDisplay, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API ImageDisplay();
 	LUX_API ~ImageDisplay();
 

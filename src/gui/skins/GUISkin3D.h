@@ -9,8 +9,8 @@ namespace gui
 
 class Skin3D : public Skin
 {
+	LX_REFERABLE_MEMBERS_API(Skin3D, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
 	LUX_API Skin3D();
 
 	LUX_API void DrawCursor(

@@ -11,9 +11,8 @@ namespace gui
 
 class Button : public AbstractButton
 {
+	LX_REFERABLE_MEMBERS_API(Button, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API Button();
 	LUX_API ~Button();
 	LUX_API void Paint(Renderer* r);

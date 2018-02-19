@@ -103,8 +103,8 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 	init.config = config;
 	init.destHandle = GetWindow()->GetDeviceWindow();
 	init.user = user;
-	StrongRef<video::VideoDriver> driver = core::ModuleFactory::Instance()->CreateModule(
-		"VideoDriver", config.adapter->GetDriverType(), init);
+	auto driver = core::ModuleFactory::Instance()->CreateModule(
+		"VideoDriver", config.adapter->GetDriverType(), init).AsStrong<video::VideoDriver>();
 
 	video::VideoDriver::Initialize(driver);
 
@@ -128,7 +128,7 @@ core::Array<core::String> LuxDeviceNull::GetDriverTypes()
 
 StrongRef<video::AdapterList> LuxDeviceNull::GetVideoAdapters(const core::String& driver)
 {
-	return core::ModuleFactory::Instance()->CreateModule("AdapterList", driver, core::ModuleInitData());
+	return core::ModuleFactory::Instance()->CreateModule("AdapterList", driver, core::ModuleInitData()).As<video::AdapterList>();
 }
 
 void LuxDeviceNull::BuildScene(const core::String& name, void* user)
@@ -156,7 +156,7 @@ StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(const core::S
 {
 	scene::SceneRendererInitData init;
 	init.user = user;
-	return core::ModuleFactory::Instance()->CreateModule("SceneRenderer", name, init);
+	return core::ModuleFactory::Instance()->CreateModule("SceneRenderer", name, init).As<scene::SceneRenderer>();
 }
 
 void LuxDeviceNull::BuildImageSystem()

@@ -46,7 +46,7 @@ public:
 	};
 
 public:
-	StrongRef<BaseTexture>  texture;
+	StrongRef<BaseTexture> texture;
 	RepeatMode repeat;
 
 	inline bool operator!=(const TextureLayer& other) const

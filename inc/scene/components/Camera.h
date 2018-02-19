@@ -47,9 +47,8 @@ public:
 //! Represent a camera in the scenegraph
 class Camera : public CameraBase
 {
+	LX_REFERABLE_MEMBERS_API(Camera, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API Camera();
 	LUX_API ~Camera();
 

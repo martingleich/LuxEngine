@@ -36,20 +36,20 @@ public:
 	*/
 	virtual core::Name GetReferableType() const = 0;
 
-	//! Clones the referable object
-	/**
-	The newly created object is fully independent of the old one.
-	Should copy data from the old object, but doesn't have too.
-	\return The new object
-	*/
-	virtual StrongRef<Referable> Clone() const
-	{
-		throw core::NotImplementedException();
-	}
-
 	core::ID GetUniqueId()
 	{
 		return m_Id;
+	}
+
+	StrongRef<Referable> Clone() const
+	{
+		return CloneImpl();
+	}
+
+protected:
+	virtual StrongRef<Referable> CloneImpl() const
+	{
+		throw core::NotImplementedException();
 	}
 
 private:
@@ -95,19 +95,28 @@ template <> struct TemplType<core::ID> { static Type Get() { return Types::Stron
 //! Helper macro to declare all members for Referable classes
 /**
 Must be placed in the class definition in the header.
+At best directly at the begin of the class.
 */
-#define LX_REFERABLE_MEMBERS() \
+#define LX_REFERABLE_MEMBERS(class) \
+public: \
 ::lux::core::Name GetReferableType() const; \
-::lux::StrongRef<::lux::Referable> Clone() const;
+::lux::StrongRef<class> Clone() const; \
+protected: \
+::lux::StrongRef<::lux::Referable> CloneImpl() const; \
+private:
 
 //! Declare default referable members
 /**
 Use inside class inherited from Referable.
 \param API API used to declare members.
 */
-#define LX_REFERABLE_MEMBERS_API(API) \
+#define LX_REFERABLE_MEMBERS_API(class, API) \
+public: \
 API ::lux::core::Name GetReferableType() const; \
-API ::lux::StrongRef<::lux::Referable> Clone() const;
+API ::lux::StrongRef<class> Clone() const; \
+protected: \
+API ::lux::StrongRef<::lux::Referable> CloneImpl() const; \
+private:
 
 //! Register referable class with ReferableFactory
 /**
@@ -128,6 +137,7 @@ Must be placed in the global namespace in the source file.
 #define LX_REFERABLE_MEMBERS_SRC(class, ref_name) \
 LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
 ::lux::core::Name class::GetReferableType() const { static ::lux::core::Name n(ref_name); return n; } \
-::lux::StrongRef<::lux::Referable> class::Clone() const { return LUX_NEW(class)(*this); }
+::lux::StrongRef<::lux::Referable> class::CloneImpl() const { return LUX_NEW(class)(*this); } \
+::lux::StrongRef<class> class::Clone() const { return CloneImpl().StaticCastStrong<class>(); }
 
 #endif // INCLUDED_REFERABLE_H

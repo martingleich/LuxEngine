@@ -291,7 +291,7 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, u32 id)
 	return self->resources[typeId].GetResource(id);
 }
 
-StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const core::String& name)
+StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const core::String& name, bool loadIfNotFound)
 {
 	if(name.IsEmpty())
 		return nullptr;
@@ -300,11 +300,14 @@ StrongRef<Resource> ResourceSystemImpl::GetResource(Name type, const core::Strin
 	if(id != INVALID_ID)
 		return GetResource(type, id);
 
-	StrongRef<io::File> file = self->fileSystem->OpenFile(name);
+	StrongRef<Resource> resource;
+	if(loadIfNotFound) {
+		auto file = self->fileSystem->OpenFile(name);
 
-	ResourceOrigin origin(this, name);
-	StrongRef<Resource> resource = CreateResource(type, file, &origin);
-	AddResource(file->GetName(), resource);
+		ResourceOrigin origin(this, name);
+		resource = CreateResource(type, file, &origin);
+		AddResource(file->GetName(), resource);
+	}
 
 	return resource;
 }

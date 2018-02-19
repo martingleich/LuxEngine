@@ -153,6 +153,11 @@ public:
 
 	LUX_API virtual bool IsPointInside(const math::Vector2F& point) const;
 
+	StrongRef<gui::Element> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<gui::Element>();
+	}
+
 protected:
 	LUX_API virtual void SetSkin(Skin* s);
 

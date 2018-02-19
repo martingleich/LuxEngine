@@ -63,9 +63,10 @@ public:
 	////////////////////////////////////////////////////////////////////
 
 	core::Name GetReferableType() const;
-	StrongRef<Referable> Clone() const;
-
 	////////////////////////////////////////////////////////////////////
+
+private:
+	StrongRef<Referable> CloneImpl() const;
 
 private:
 	struct RenderData : public core::RefCountedObserver

@@ -15,9 +15,8 @@ namespace scene
 //! Represent a light in the scenegraph
 class Light : public Component
 {
+	LX_REFERABLE_MEMBERS_API(Light, LUX_API);
 public:
-	LX_REFERABLE_MEMBERS_API(LUX_API);
-
 	LUX_API Light();
 	LUX_API virtual ~Light();
 
