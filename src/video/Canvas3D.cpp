@@ -22,12 +22,12 @@ Canvas3DSystem::Canvas3DSystem()
 
 	m_BrushPass.lighting = video::ELighting::Disabled;
 	m_BrushPass.fogEnabled = false;
-	m_BrushPass.backfaceCulling = false;
+	m_BrushPass.culling = video::EFaceSide::None;
 	m_BrushPass.useVertexColor = true;
 	m_BrushPass.zWriteEnabled = false;
-	m_BrushPass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-	m_BrushPass.alphaOperator = video::EBlendOperator::Add;
-	m_BrushPass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+	m_BrushPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+	m_BrushPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+	m_BrushPass.alpha.blendOperator = video::EBlendOperator::Add;
 }
 
 Canvas3DSystem::~Canvas3DSystem()

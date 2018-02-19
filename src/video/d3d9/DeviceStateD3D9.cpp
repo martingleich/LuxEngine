@@ -58,7 +58,7 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 	EnableShader(p.shader);
 
 	// Apply overwrite and enable pipeline settings.
-	EnableAlpha(p.alphaSrcBlend, p.alphaDstBlend, p.alphaOperator);
+	EnableAlpha(p.alpha);
 	EnableVertexData(p.useVertexColor);
 
 	SetStencilMode(p.stencil);
@@ -202,23 +202,21 @@ void DeviceStateD3D9::DisableTexture(u32 stage)
 	SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, stage);
 }
 
-void DeviceStateD3D9::EnableAlpha(EBlendFactor src, EBlendFactor dst, EBlendOperator op)
+void DeviceStateD3D9::EnableAlpha(AlphaBlendMode mode)
 {
-	if(m_SrcBlendFactor == src && m_DstBlendFactor == dst && m_BlendOperator == op && !m_ResetAll)
+	if(m_AlphaMode == mode && !m_ResetAll)
 		return;
 
-	if(op == EBlendOperator::None) {
+	if(mode.blendOperator == EBlendOperator::None) {
 		SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 	} else {
 		SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		SetRenderState(D3DRS_DESTBLEND, GetD3DBlend(dst));
-		SetRenderState(D3DRS_SRCBLEND, GetD3DBlend(src));
-		SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(op));
+		SetRenderState(D3DRS_SRCBLEND, GetD3DBlend(mode.srcFactor));
+		SetRenderState(D3DRS_DESTBLEND, GetD3DBlend(mode.dstFactor));
+		SetRenderState(D3DRS_BLENDOP, GetD3DBlendFunc(mode.blendOperator));
 	}
 
-	m_SrcBlendFactor = src;
-	m_DstBlendFactor = dst;
-	m_BlendOperator = op;
+	m_AlphaMode = mode;
 }
 
 void DeviceStateD3D9::EnableVertexData(bool useColor)
@@ -304,9 +302,9 @@ u32 DeviceStateD3D9::GetFillMode(const Pass& p)
 
 u32 DeviceStateD3D9::GetCullMode(const Pass& p)
 {
-	if(p.backfaceCulling)
+	if(p.culling == video::EFaceSide::Back)
 		return D3DCULL_CCW;
-	else if(p.frontfaceCulling)
+	else if(p.culling == video::EFaceSide::Front)
 		return D3DCULL_CW;
 	else
 		return D3DCULL_NONE;

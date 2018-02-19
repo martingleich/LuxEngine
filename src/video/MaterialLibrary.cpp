@@ -105,9 +105,9 @@ MaterialLibrary::MaterialLibrary()
 	{
 		auto transparent = AddMaterialRenderer("transparent");
 		auto& pass = transparent->GetPass(0);
-		pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-		pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-		pass.alphaOperator = video::EBlendOperator::Add;
+		pass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+		pass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+		pass.alpha.blendOperator = video::EBlendOperator::Add;
 		pass.zWriteEnabled = false;
 		pass.fogEnabled = false;
 		pass.requirements = video::EMaterialRequirement::Transparent;

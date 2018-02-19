@@ -19,7 +19,6 @@ class FogData;
 class LightData;
 class BaseTexture;
 class Pass;
-class StencilMode;
 
 class DeviceStateD3D9
 {
@@ -37,7 +36,7 @@ public:
 	void DisableTexture(u32 stage);
 	void EnableVertexData(bool useColor);
 
-	void EnableAlpha(EBlendFactor src, EBlendFactor dst, EBlendOperator op);
+	void EnableAlpha(AlphaBlendMode mode);
 
 	void* GetLowLevelDevice();
 	void SetRenderState(D3DRENDERSTATETYPE state, DWORD value);
@@ -90,9 +89,7 @@ private:
 
 	size_t m_UsedTextureLayers;
 
-	EBlendFactor m_SrcBlendFactor;
-	EBlendFactor m_DstBlendFactor;
-	EBlendOperator m_BlendOperator;
+	AlphaBlendMode m_AlphaMode;
 
 	u32 m_MaxTextureCount;
 	u32 m_MaxVSTextureCount;

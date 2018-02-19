@@ -18,10 +18,9 @@ QuadRendererMachine::QuadRendererMachine() :
 	m_Driver(video::VideoDriver::Instance()),
 	m_Buffer(nullptr)
 {
-	m_DefaultPass.requirements = video::EMaterialRequirement::Transparent;
-	m_DefaultPass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-	m_DefaultPass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-	m_DefaultPass.alphaOperator = video::EBlendOperator::Add;
+	m_DefaultPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+	m_DefaultPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+	m_DefaultPass.alpha.blendOperator = video::EBlendOperator::Add;
 	m_DefaultPass.zWriteEnabled = false;
 	m_DefaultPass.fogEnabled = false;
 	m_DefaultPass.lighting = video::ELighting::Disabled;
@@ -29,9 +28,9 @@ QuadRendererMachine::QuadRendererMachine() :
 	m_DefaultPass.AddTexture();
 
 	m_EmitPass = m_DefaultPass;
-	m_EmitPass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-	m_EmitPass.alphaDstBlend = video::EBlendFactor::One;
-	m_EmitPass.alphaOperator = video::EBlendOperator::Add;
+	m_EmitPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+	m_EmitPass.alpha.dstFactor = video::EBlendFactor::One;
+	m_EmitPass.alpha.blendOperator = video::EBlendOperator::Add;
 }
 
 QuadRendererMachine::~QuadRendererMachine()

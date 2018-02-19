@@ -10,7 +10,7 @@ namespace video
 
 Geometry::Geometry() :
 	m_PrimitiveType(EPrimitiveType::Triangles),
-	m_WindingOrder(true)
+	m_FrontFaceWind(EFaceWinding::CCW)
 {
 }
 
@@ -134,14 +134,14 @@ void Geometry::RecalculateBoundingBox()
 	}
 }
 
-void Geometry::SetWindingOrder(bool counterClockwise)
+void Geometry::SetFrontFaceWinding(EFaceWinding winding)
 {
-	m_WindingOrder = counterClockwise;
+	m_FrontFaceWind = winding;
 }
 
-bool Geometry::GetWindingOrder() const
+EFaceWinding Geometry::GetFrontFaceWinding() const
 {
-	return m_WindingOrder;
+	return m_FrontFaceWind;
 }
 
 u32 Geometry::GetChangeId() const

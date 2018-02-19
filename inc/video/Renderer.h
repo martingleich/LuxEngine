@@ -212,39 +212,39 @@ public:
 	\param indexData The indices to draw
 	\param indexType The format of the indices
 	\param is3D Is the 2D or 3D pipeline used
-	\param windingOrder Clockwise or counter clockwise
+	\param frontFace Clockwise or counter clockwise
 	*/
 	virtual void DrawIndexedPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
 		bool is3D,
-		bool windingOrder = true) = 0;
+		EFaceWinding frontFace = EFaceWinding::CCW) = 0;
 
 	void DrawIndexed3DPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
-		bool windingOrder = true)
+		EFaceWinding frontFace = EFaceWinding::CCW)
 	{
 		DrawIndexedPrimitiveList(primitiveType, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			indexData, indexType,
 			true,
-			windingOrder);
+			frontFace);
 	}
 
 	void DrawIndexed2DPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
-		bool windingOrder = true)
+		EFaceWinding frontFace = EFaceWinding::CCW)
 	{
 		DrawIndexedPrimitiveList(primitiveType, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
 			indexData, indexType,
 			false,
-			windingOrder);
+			frontFace);
 	}
 
 	//! Draw a primitive list from memory
@@ -255,34 +255,34 @@ public:
 	\param vertexCount The nuumber of vertices to draw
 	\param vertexFormat The format of the vertices
 	\param is3D Is the 3d or the 2d pipeline used
-	\param windingOrder Clockwise or counter clockwise
+	\param frontFace Clockwise or counter clockwise
 	*/
 	virtual void DrawPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		bool is3D,
-		bool windingOrder = true) = 0;
+		EFaceWinding frontFace = EFaceWinding::CCW) = 0;
 
 	void Draw2DPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		bool windingOrder = true)
+		EFaceWinding frontFace = EFaceWinding::CCW)
 	{
 		DrawPrimitiveList(
 			primitiveType, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
-			false, windingOrder);
+			false, frontFace);
 	}
 
 	void Draw3DPrimitiveList(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		bool windingOrder = true)
+		EFaceWinding frontFace = EFaceWinding::CCW)
 	{
 		DrawPrimitiveList(
 			primitiveType, primitiveCount,
 			vertexData, vertexCount, vertexFormat,
-			true, windingOrder);
+			true, frontFace);
 	}
 
 	//! Draw some geometry

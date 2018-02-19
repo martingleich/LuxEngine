@@ -100,8 +100,7 @@ public:
 		p.stencil.writeMask = m_StencilBitMask;
 		p.stencil.readMask = m_StencilBitMask;
 		p.zWriteEnabled = false;
-		p.backfaceCulling = false;
-		p.frontfaceCulling = false;
+		p.culling = video::EFaceSide::None;
 		p.lighting = video::ELighting::Disabled;
 		p.fogEnabled = false;
 		p.polygonOffset = -100.0f;
@@ -225,9 +224,9 @@ public:
 		p.requirements = video::EMaterialRequirement::Transparent;
 		p.fogEnabled = false;
 		p.useVertexColor = true;
-		p.alphaOperator = video::EBlendOperator::Add;
-		p.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-		p.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
+		p.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+		p.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+		p.alpha.blendOperator = video::EBlendOperator::Add;
 		m_Renderer->SetPass(p);
 		m_Renderer->Draw3DPrimitiveList(
 			video::EPrimitiveType::TriangleStrip,

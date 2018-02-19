@@ -45,7 +45,8 @@ class RenderableCollector : public RenderableVisitor
 public:
 	RenderableCollector(SceneRendererSimpleForward* _sr) :
 		sr(_sr)
-	{}
+	{
+	}
 
 	void Visit(Node* node, Renderable* r)
 	{
@@ -349,13 +350,16 @@ void SceneRendererSimpleForward::DrawScene()
 			m_StencilShadowRenderer.End();
 
 			video::PipelineOverwrite illumOver;
-			illumOver.disableZWrite = true;
+			illumOver.
+				Enable(video::EPipelineSetting::ZWrite).
+				Enable(video::EPipelineSetting::Lighting).
+				Enable(video::EPipelineSetting::AlphaBlending).
+				Enable(video::EPipelineSetting::Stencil);
+			illumOver.zWriteEnabled = false;
 			illumOver.lighting = video::ELighting::DiffSpec;
-			illumOver.useAlphaOverwrite = true;
-			illumOver.alphaOperator = video::EBlendOperator::Add;
-			illumOver.alphaSrcBlend = video::EBlendFactor::One;
-			illumOver.alphaDstBlend = video::EBlendFactor::One;
-			illumOver.useStencilOverwrite = true;
+			illumOver.alpha.blendOperator = video::EBlendOperator::Add;
+			illumOver.alpha.srcFactor = video::EBlendFactor::One;
+			illumOver.alpha.dstFactor = video::EBlendFactor::One;
 			illumOver.stencil = m_StencilShadowRenderer.GetIllumniatedStencilMode();
 
 			EnableOverwrite(ERenderPass::Solid, pot);
@@ -379,12 +383,15 @@ void SceneRendererSimpleForward::DrawScene()
 				m_Renderer->AddLight(illum->GetLightData());
 
 			video::PipelineOverwrite illumOver;
-			illumOver.disableZWrite = true;
+			illumOver.
+				Enable(video::EPipelineSetting::ZWrite).
+				Enable(video::EPipelineSetting::Lighting).
+				Enable(video::EPipelineSetting::AlphaBlending);
+			illumOver.zWriteEnabled = false;
 			illumOver.lighting = video::ELighting::DiffSpec;
-			illumOver.useAlphaOverwrite = true;
-			illumOver.alphaOperator = video::EBlendOperator::Add;
-			illumOver.alphaSrcBlend = video::EBlendFactor::One;
-			illumOver.alphaDstBlend = video::EBlendFactor::One;
+			illumOver.alpha.blendOperator = video::EBlendOperator::Add;
+			illumOver.alpha.srcFactor = video::EBlendFactor::One;
+			illumOver.alpha.dstFactor = video::EBlendFactor::One;
 			EnableOverwrite(ERenderPass::Solid, pot);
 			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 

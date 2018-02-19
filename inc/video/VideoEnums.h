@@ -16,7 +16,6 @@ enum class ELighting : u8
 	Enabled = AmbientEmit | DiffSpec,
 };
 
-
 // Blendfaktor für Alphablending
 enum class EBlendFactor : u8
 {
@@ -64,6 +63,47 @@ enum class EStencilOperator : u8
 	IncrementSat,
 	DecrementSat,
 };
+
+enum class EFaceWinding
+{
+	CCW,
+	CW,
+};
+
+inline EFaceWinding FlipWinding(EFaceWinding winding)
+{
+	return winding == EFaceWinding::CCW ? EFaceWinding::CW : EFaceWinding::CCW;
+}
+
+enum class EFaceSide
+{
+	Front,
+	Back,
+	None,
+	FrontAndBack,
+};
+
+inline EFaceSide FlipFaceSide(EFaceSide side)
+{
+	if(side == EFaceSide::Front)
+		return EFaceSide::Back;
+	if(side == EFaceSide::Back)
+		return EFaceSide::Front;
+	return side;
+}
+
+inline EFaceSide FlipCulling(EFaceSide cull)
+{
+	if(cull == EFaceSide::Front)
+		return EFaceSide::Back;
+	if(cull == EFaceSide::Back)
+		return EFaceSide::Front;
+	if(cull == EFaceSide::None)
+		return EFaceSide::FrontAndBack;
+	if(cull == EFaceSide::FrontAndBack)
+		return EFaceSide::None;
+	return cull;
+}
 
 //! Different Primitive Types
 enum class EPrimitiveType
@@ -244,6 +284,74 @@ struct ZStencilFormat
 	}
 
 	bool operator!=(const ZStencilFormat& other) const
+	{
+		return !(*this == other);
+	}
+};
+
+struct StencilMode
+{
+	u32 ref = 0;
+
+	u32 readMask = 0xFFFFFFFF;
+	u32 writeMask = 0xFFFFFFFF;
+
+	EComparisonFunc test = EComparisonFunc::Always;
+
+	EStencilOperator pass = EStencilOperator::Keep;
+	EStencilOperator fail = EStencilOperator::Keep;
+	EStencilOperator zFail = EStencilOperator::Keep;
+
+	EStencilOperator passCCW = EStencilOperator::Keep;
+	EStencilOperator failCCW = EStencilOperator::Keep;
+	EStencilOperator zFailCCW = EStencilOperator::Keep;
+
+	bool IsTwoSided() const
+	{
+		return
+			pass != passCCW ||
+			fail != failCCW ||
+			zFail != zFailCCW;
+	}
+
+	bool IsEnabled() const
+	{
+		return !(test == EComparisonFunc::Always &&
+			pass == EStencilOperator::Keep &&
+			fail == EStencilOperator::Keep &&
+			zFail == EStencilOperator::Keep &&
+			passCCW == EStencilOperator::Keep &&
+			failCCW == EStencilOperator::Keep &&
+			zFailCCW == EStencilOperator::Keep);
+	}
+};
+
+struct AlphaBlendMode
+{
+	AlphaBlendMode() :
+		srcFactor(EBlendFactor::One),
+		dstFactor(EBlendFactor::Zero),
+		blendOperator(EBlendOperator::None)
+	{
+	}
+
+	AlphaBlendMode(EBlendFactor src, EBlendFactor dst, EBlendOperator op) :
+		srcFactor(src),
+		dstFactor(dst),
+		blendOperator(op)
+	{
+	}
+
+	EBlendFactor srcFactor;
+	EBlendFactor dstFactor;
+	EBlendOperator blendOperator;
+
+	bool operator==(const AlphaBlendMode& other) const
+	{
+		return srcFactor == other.srcFactor && dstFactor == other.dstFactor && blendOperator == other.blendOperator;
+	}
+
+	bool operator!=(const AlphaBlendMode& other) const
 	{
 		return !(*this == other);
 	}

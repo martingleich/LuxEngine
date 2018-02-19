@@ -152,7 +152,8 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 
 	// Disable z comparison for sky box renderering
 	video::PipelineOverwrite over;
-	over.disableZCmp = true;
+	over.Enable(video::EPipelineSetting::ZWrite);
+	over.zWriteEnabled = false;
 	video::PipelineOverwriteToken token;
 	renderer->PushPipelineOverwrite(over, &token);
 
@@ -169,7 +170,6 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 			video::VertexFormat::TEXTURE_3D,
 			g_Indices,
 			video::EIndexFormat::Bit16,
-			true,
 			true);
 	} else {
 		renderer->Draw3DPrimitiveList(

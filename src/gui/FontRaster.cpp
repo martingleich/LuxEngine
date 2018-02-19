@@ -312,12 +312,12 @@ void FontRaster::InitPass()
 {
 	auto shader = EnsureFontShader();
 	m_Pass.requirements = video::EMaterialRequirement::Transparent;
-	m_Pass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-	m_Pass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-	m_Pass.alphaOperator = video::EBlendOperator::Add;
+	m_Pass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+	m_Pass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+	m_Pass.alpha.blendOperator = video::EBlendOperator::Add;
 	m_Pass.zWriteEnabled = false;
 	m_Pass.zBufferFunc = video::EComparisonFunc::Always;
-	m_Pass.backfaceCulling = false;
+	m_Pass.culling = video::EFaceSide::None;
 	m_Pass.useVertexColor = false;
 	m_Pass.AddTexture();
 	m_Pass.layers[0].texture = m_Texture;

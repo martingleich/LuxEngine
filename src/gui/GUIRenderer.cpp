@@ -11,12 +11,12 @@ Renderer::Renderer(video::Renderer* r)
 {
 	m_Renderer = r;
 	m_TexturePass.useVertexColor = true;
-	m_TexturePass.backfaceCulling = false;
+	m_TexturePass.culling = video::EFaceSide::None;
 	m_TexturePass.zWriteEnabled = false;
 	m_TexturePass.zBufferFunc = video::EComparisonFunc::Always;
-	m_TexturePass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-	m_TexturePass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-	m_TexturePass.alphaOperator = video::EBlendOperator::Add;
+	m_TexturePass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+	m_TexturePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+	m_TexturePass.alpha.blendOperator = video::EBlendOperator::Add;
 	m_TexturePass.requirements = video::EMaterialRequirement::Transparent;
 	m_TexturePass.AddTexture();
 	const video::TextureStageSettings MIX_SETTINGS(
@@ -29,12 +29,12 @@ Renderer::Renderer(video::Renderer* r)
 	m_TexturePass.layerSettings.PushBack(MIX_SETTINGS);
 
 	m_DiffusePass.useVertexColor = true;
-	m_DiffusePass.backfaceCulling = false;
+	m_DiffusePass.culling = video::EFaceSide::None;
 	m_DiffusePass.zWriteEnabled = false;
 	m_DiffusePass.zBufferFunc = video::EComparisonFunc::Always;
-	m_DiffusePass.alphaSrcBlend = video::EBlendFactor::SrcAlpha;
-	m_DiffusePass.alphaDstBlend = video::EBlendFactor::OneMinusSrcAlpha;
-	m_DiffusePass.alphaOperator = video::EBlendOperator::Add;
+	m_DiffusePass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+	m_DiffusePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+	m_DiffusePass.alpha.blendOperator = video::EBlendOperator::Add;
 	m_DiffusePass.requirements = video::EMaterialRequirement::Transparent;
 }
 

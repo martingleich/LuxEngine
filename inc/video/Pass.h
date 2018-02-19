@@ -20,6 +20,23 @@ enum class EMaterialRequirement
 	DeferredEffect = 2,
 };
 
+enum class EPipelineSetting
+{
+	Stencil,
+	PolygonOffset,
+	AlphaBlending,
+	ZBufferFunc,
+	ColorMask,
+	DrawMode,
+	Lighting,
+	Fog,
+	ZWrite,
+	NormalizeNormals,
+	GourandShading,
+	Culling,
+	UseVertexColor,
+};
+
 class Pass;
 class RenderSettings;
 class Material;
@@ -50,49 +67,6 @@ enum class EOptionId
 
 #define EOptionId_Layer(n) EOptionId((int)EOptionId::Layer0+n)
 
-class StencilMode
-{
-public:
-	u32 ref = 0;
-
-	u32 readMask = 0xFFFFFFFF;
-	u32 writeMask = 0xFFFFFFFF;
-
-	EComparisonFunc test = EComparisonFunc::Always;
-
-	EStencilOperator pass = EStencilOperator::Keep;
-	EStencilOperator fail = EStencilOperator::Keep;
-	EStencilOperator zFail = EStencilOperator::Keep;
-
-	EStencilOperator passCCW = EStencilOperator::Keep;
-	EStencilOperator failCCW = EStencilOperator::Keep;
-	EStencilOperator zFailCCW = EStencilOperator::Keep;
-
-	bool IsTwoSided() const
-	{
-		return
-			pass != passCCW ||
-			fail != failCCW ||
-			zFail != zFailCCW;
-	}
-
-	bool IsEnabled() const
-	{
-		return !(test == EComparisonFunc::Always &&
-			pass == EStencilOperator::Keep &&
-			fail == EStencilOperator::Keep &&
-			zFail == EStencilOperator::Keep &&
-			passCCW == EStencilOperator::Keep &&
-			failCCW == EStencilOperator::Keep &&
-			zFailCCW == EStencilOperator::Keep);
-	}
-};
-
-class AlphaBlendMode
-{
-public:
-};
-
 class Pass
 {
 public:
@@ -102,46 +76,46 @@ public:
 		zWriteEnabled(true),
 		normalizeNormals(false),
 		gouraudShading(true),
-		backfaceCulling(true),
-		frontfaceCulling(false),
 		useVertexColor(false)
 	{
 	}
 
+	EMaterialRequirement requirements;
+
+	// Material
 	float ambient = 1.0f;
 	Colorf diffuse = video::Colorf(1, 1, 1, 1);
 	Colorf emissive = video::Colorf(0, 0, 0, 0);
 	Colorf specular = video::Colorf(1, 1, 1, 1);
 	float shininess = 0;
 
-	StencilMode stencil;
-
+	// Textures
 	core::Array<TextureLayer> layers;
 	core::Array<TextureStageSettings> layerSettings;
 
+	// Shader
 	StrongRef<Shader> shader;
+
+	// Pipelinesettings
+	StencilMode stencil;
 
 	float polygonOffset = 0.0f;
 
-	EBlendFactor alphaSrcBlend = EBlendFactor::One;
-	EBlendFactor alphaDstBlend = EBlendFactor::Zero;
-	EBlendOperator alphaOperator = EBlendOperator::None;
+	AlphaBlendMode alpha;
 
 	EComparisonFunc zBufferFunc = EComparisonFunc::LessEqual;
 	u32 colorMask = 0xFFFFFFFF;
 	EDrawMode drawMode = EDrawMode::Fill;
 	ELighting lighting = ELighting::Enabled;
+	EFaceSide culling = EFaceSide::Back;
 
-	EMaterialRequirement requirements;
 	bool fogEnabled : 1;
 	bool zWriteEnabled : 1;
 	bool normalizeNormals : 1;
 	bool gouraudShading : 1;
-	bool backfaceCulling : 1;
-	bool frontfaceCulling : 1;
-
 	bool useVertexColor : 1;
 
+	// Functions
 	u32 AddTexture(u32 count = 1)
 	{
 		u32 out = layers.Size();
@@ -187,117 +161,106 @@ public:
 class PipelineOverwrite
 {
 public:
+	// Bitset for enabled flags.
+	u32 enabledOverwrites;
+
+	// Pipelinesettings.
 	StencilMode stencil;
 
 	float polygonOffset;
+
+	AlphaBlendMode alpha;
+
+	EComparisonFunc zBufferFunc;
+	u32 colorMask;
 	EDrawMode drawMode;
-	u32 colorMask = 0xFFFFFFFF;
-
 	ELighting lighting;
+	EFaceSide culling;
 
-	EBlendFactor alphaSrcBlend = EBlendFactor::One;
-	EBlendFactor alphaDstBlend = EBlendFactor::Zero;
-	EBlendOperator alphaOperator = EBlendOperator::None;
-
-	bool useAlphaOverwrite : 1;
-	bool useStencilOverwrite : 1;
-	bool disableFog : 1;
-
-	bool disableZWrite : 1;
-	bool disableZCmp : 1;
+	bool fogEnabled : 1;
+	bool zWriteEnabled : 1;
 	bool normalizeNormals : 1;
-
-	bool disableBackfaceCulling : 1;
-	bool enableFrontfaceCulling : 1;
+	bool gouraudShading : 1;
+	bool useVertexColor : 1;
 
 	PipelineOverwrite() :
-		polygonOffset(0.0f),
-		drawMode(EDrawMode::Fill),
-		lighting(ELighting::Enabled),
-		useAlphaOverwrite(false),
-		useStencilOverwrite(false),
-		disableFog(false),
-		disableZWrite(false),
-		disableZCmp(false),
-		normalizeNormals(false),
-		disableBackfaceCulling(false),
-		enableFrontfaceCulling(false)
+		enabledOverwrites(0)
 	{
+	}
+
+	PipelineOverwrite& Enable(EPipelineSetting setting)
+	{
+		enabledOverwrites |= 1 << ((u32)setting);
+		return *this;
+	}
+	PipelineOverwrite& Disable(EPipelineSetting setting)
+	{
+		enabledOverwrites &= ~(1 << ((u32)setting));
+		return *this;
+	}
+	bool IsEnabled(EPipelineSetting setting) const
+	{
+		return (enabledOverwrites & (1 << (u32)setting)) != 0;
 	}
 
 	void Append(const PipelineOverwrite& next)
 	{
-		if(next.useStencilOverwrite) {
-			useStencilOverwrite = true;
+		enabledOverwrites |= next.enabledOverwrites;
+		if(next.IsEnabled(EPipelineSetting::Stencil))
 			stencil = next.stencil;
-		}
-		if(next.useAlphaOverwrite) {
-			useAlphaOverwrite = true;
-			alphaDstBlend = next.alphaDstBlend;
-			alphaSrcBlend = next.alphaSrcBlend;
-			alphaOperator = next.alphaOperator;
-		}
-		polygonOffset += next.polygonOffset;
-		if(next.lighting != ELighting::Enabled)
+		if(next.IsEnabled(EPipelineSetting::AlphaBlending))
+			alpha = next.alpha;
+		if(next.IsEnabled(EPipelineSetting::PolygonOffset))
+			polygonOffset += next.polygonOffset;
+		if(next.IsEnabled(EPipelineSetting::Lighting))
 			lighting = next.lighting;
-		if(next.disableFog)
-			disableFog = true;
-		if(next.drawMode == EDrawMode::Wire)
-			drawMode = EDrawMode::Wire;
-		if(next.drawMode == EDrawMode::Point)
-			drawMode = EDrawMode::Point;
-
-		colorMask &= next.colorMask;
-
-		if(next.disableZCmp)
-			disableZCmp = true;
-		if(next.disableZWrite)
-			disableZWrite = true;
-		if(next.normalizeNormals)
-			normalizeNormals = true;
-		if(next.disableBackfaceCulling)
-			disableBackfaceCulling = true;
-		if(next.enableFrontfaceCulling)
-			enableFrontfaceCulling = true;
+		if(next.IsEnabled(EPipelineSetting::Fog))
+			fogEnabled = next.fogEnabled;
+		if(next.IsEnabled(EPipelineSetting::DrawMode))
+			drawMode = next.drawMode;
+		if(next.IsEnabled(EPipelineSetting::ColorMask))
+			colorMask &= next.colorMask;
+		if(next.IsEnabled(EPipelineSetting::ZBufferFunc))
+			zBufferFunc = next.zBufferFunc;
+		if(next.IsEnabled(EPipelineSetting::ZWrite))
+			zWriteEnabled = next.zWriteEnabled;
+		if(next.IsEnabled(EPipelineSetting::NormalizeNormals))
+			normalizeNormals = next.normalizeNormals;
+		if(next.IsEnabled(EPipelineSetting::Culling))
+			culling = next.culling;
 	}
 
 	void Apply(Pass& pass)
 	{
-		if(useStencilOverwrite)
+		if(IsEnabled(EPipelineSetting::Stencil))
 			pass.stencil = stencil;
-
-		if(useAlphaOverwrite) {
-			pass.alphaDstBlend = alphaDstBlend;
-			pass.alphaSrcBlend = alphaSrcBlend;
-			pass.alphaOperator = alphaOperator;
-		}
-		pass.polygonOffset += polygonOffset;
-		if(lighting != ELighting::Enabled)
+		if(IsEnabled(EPipelineSetting::AlphaBlending))
+			pass.alpha = alpha;
+		if(IsEnabled(EPipelineSetting::PolygonOffset))
+			pass.polygonOffset += polygonOffset;
+		if(IsEnabled(EPipelineSetting::Lighting))
 			pass.lighting = lighting;
-		if(disableFog)
-			pass.fogEnabled = false;
-		if(drawMode == EDrawMode::Wire)
-			pass.drawMode = EDrawMode::Wire;
-		if(drawMode == EDrawMode::Point)
-			pass.drawMode = EDrawMode::Point;
-
-		pass.colorMask &= colorMask;
-
-		if(disableZCmp)
-			pass.zBufferFunc = EComparisonFunc::Always;
-		if(disableZWrite)
-			pass.zWriteEnabled = false;
-		if(normalizeNormals)
-			pass.normalizeNormals = true;
-		if(disableBackfaceCulling)
-			pass.backfaceCulling = false;
-		if(enableFrontfaceCulling)
-			pass.frontfaceCulling = false;
+		if(IsEnabled(EPipelineSetting::Fog))
+			pass.fogEnabled = fogEnabled;
+		if(IsEnabled(EPipelineSetting::DrawMode))
+			pass.drawMode = drawMode;
+		if(IsEnabled(EPipelineSetting::ColorMask))
+			pass.colorMask &= colorMask;
+		if(IsEnabled(EPipelineSetting::ZBufferFunc))
+			pass.zBufferFunc = zBufferFunc;
+		if(IsEnabled(EPipelineSetting::ZWrite))
+			pass.zWriteEnabled = zWriteEnabled;
+		if(IsEnabled(EPipelineSetting::NormalizeNormals))
+			pass.normalizeNormals = normalizeNormals;
+		if(IsEnabled(EPipelineSetting::Culling))
+			pass.culling = culling;
 	}
 
+	/*
 	bool operator==(const PipelineOverwrite& other) const
 	{
-		return polygonOffset == other.polygonOffset &&
+		return
+			polygonOffset == other.polygonOffset &&
 			lighting == other.lighting &&
 			disableFog == other.disableFog &&
 			drawMode == other.drawMode &&
@@ -311,6 +274,7 @@ public:
 	{
 		return !(*this == other);
 	}
+	*/
 };
 
 } // namespace video

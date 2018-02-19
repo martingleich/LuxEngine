@@ -246,13 +246,13 @@ void RendererD3D9::DrawPrimitiveList(
 	EPrimitiveType primitiveType, u32 firstPrimitive, u32 primitiveCount,
 	const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 	const void* indexData, EIndexFormat indexType,
-	bool is3D, bool windingOrder, bool user)
+	bool is3D, EFaceWinding frontFace, bool user)
 {
 	if(primitiveCount == 0)
 		return;
 
 	SetVertexFormat(vertexFormat);
-	SetupRendering(windingOrder, is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
+	SetupRendering(frontFace, is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 
 	u32 stride = vertexFormat.GetStride(0);
 
@@ -346,7 +346,7 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 			firstPrimitive, primitiveCount,
 			vs.data, vertexCount, vertexFormat,
 			is.data, indexFormat,
-			is3D, geo->GetWindingOrder(),
+			is3D, geo->GetFrontFaceWinding(),
 			true);
 	} else {
 		DrawPrimitiveList(
@@ -354,7 +354,7 @@ void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 pri
 			firstPrimitive, primitiveCount,
 			geo->GetVertices(), vertexCount, vertexFormat,
 			geo->GetIndices(), indexFormat,
-			is3D, geo->GetWindingOrder(),
+			is3D, geo->GetFrontFaceWinding(),
 			false);
 	}
 }
@@ -377,7 +377,7 @@ void RendererD3D9::Reset()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void RendererD3D9::SetupRendering(bool winding, ERenderMode mode)
+void RendererD3D9::SetupRendering(EFaceWinding frontFace, ERenderMode mode)
 {
 	SwitchRenderMode(mode);
 
@@ -395,14 +395,12 @@ void RendererD3D9::SetupRendering(bool winding, ERenderMode mode)
 		m_OverwritePass.normalizeNormals |= m_NormalizeNormals;
 		dirtyPass = true;
 	}
-	if(!winding) {
-		bool tmp = m_OverwritePass.backfaceCulling;
-		m_OverwritePass.backfaceCulling = m_OverwritePass.frontfaceCulling;
-		m_OverwritePass.frontfaceCulling = tmp;
-	}
-	if(m_PrevWinding != winding) {
+	if(frontFace == EFaceWinding::CW)
+		m_OverwritePass.culling = FlipFaceSide(m_OverwritePass.culling);
+	
+	if(m_PrevFrontFace != frontFace) {
 		dirtyPass = true;
-		m_PrevWinding = winding;
+		m_PrevFrontFace = frontFace;
 	}
 
 	if((pass.shader != nullptr) != m_UseShader) {
