@@ -56,16 +56,6 @@ struct LuxAppContext
 			Renderer = Driver->GetRenderer();
 		else
 			Renderer = nullptr;
-
-		if(MatLib) {
-			SolidRenderer = MatLib->GetMaterialRenderer("solid");
-			TransparentRenderer = MatLib->GetMaterialRenderer("transparent");
-			MixRenderer = MatLib->GetMaterialRenderer("solidMix");
-		} else {
-			SolidRenderer = nullptr;
-			TransparentRenderer = nullptr;
-			MixRenderer = nullptr;
-		}
 	}
 
 	LuxDevice* Device = nullptr;
@@ -84,10 +74,6 @@ struct LuxAppContext
 	video::DriverConfig DriverConfig;
 	gui::Cursor* Cursor = nullptr;
 	core::ReferableFactory* RefFactory = nullptr;
-
-	video::MaterialRenderer* SolidRenderer = nullptr;
-	video::MaterialRenderer* TransparentRenderer = nullptr;
-	video::MaterialRenderer* MixRenderer = nullptr;
 
 	StrongRef<video::Mesh> GetMesh(const io::Path& path)
 	{

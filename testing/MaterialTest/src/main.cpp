@@ -1,8 +1,8 @@
-#include "Context.h"
+#include <Lux.h>
 
 using namespace lux;
 
-AppContext Context;
+LuxAppContext Context;
 
 class MaterialTest : public input::EventHandler, public LuxDevice::SimpleFrameLoopCallback
 {
@@ -26,7 +26,7 @@ public:
 			5);
 		m_Device->BuildAll(config);
 
-		Context = AppContext(m_Device);
+		Context = LuxAppContext(m_Device);
 
 		Context.Input->GetEventSignal().Connect(this, &MaterialTest::OnEvent);
 	}
@@ -130,11 +130,11 @@ core::Array<StrongRef<video::Material>> MaterialTest::GenMaterialList()
 	core::Array<StrongRef<video::Material>> out;
 	StrongRef<video::Material> mat;
 
-	mat = Context.MatLib->CreateMaterial("solid");
+	mat = Context.MatLib->CloneMaterial("solid");
 	mat->SetDiffuse(video::Color::Red);
 	out.PushBack(mat);
 
-	mat = Context.MatLib->CreateMaterial("transparent");
+	mat = Context.MatLib->CloneMaterial("transparent");
 	mat->SetDiffuse(video::Color::Green);
 	mat->SetAlpha(0.5f);
 	out.PushBack(mat);

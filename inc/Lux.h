@@ -110,7 +110,6 @@ namespace input
 
 #include "video/Shader.h"
 #include "video/Material.h"
-#include "video/MaterialRenderer.h"
 #include "video/MaterialLibrary.h"
 
 #include "video/LightData.h"

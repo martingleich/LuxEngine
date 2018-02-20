@@ -12,7 +12,6 @@ namespace lux
 {
 namespace video
 {
-//! Requierments of a material renderer(flag class)
 enum class EMaterialRequirement
 {
 	None = 0,
@@ -37,22 +36,6 @@ enum class EPipelineSetting
 	UseVertexColor,
 };
 
-class Pass;
-class RenderSettings;
-class Material;
-class ParamSetCallback
-{
-public:
-	virtual ~ParamSetCallback() {}
-
-	virtual void SendShaderSettings(size_t passId, const Pass& pass, const Material* material) const
-	{
-		LUX_UNUSED(passId);
-		LUX_UNUSED(pass);
-		LUX_UNUSED(material);
-	}
-};
-
 enum class EOptionId
 {
 	Layer0,
@@ -71,7 +54,6 @@ class Pass
 {
 public:
 	Pass() :
-		requirements(EMaterialRequirement::None),
 		fogEnabled(true),
 		zWriteEnabled(true),
 		normalizeNormals(false),
@@ -79,8 +61,6 @@ public:
 		useVertexColor(false)
 	{
 	}
-
-	EMaterialRequirement requirements;
 
 	// Material
 	float ambient = 1.0f;
@@ -116,12 +96,15 @@ public:
 	bool useVertexColor : 1;
 
 	// Functions
-	u32 AddTexture(u32 count = 1)
+	TextureLayer& AddTexture()
 	{
-		u32 out = layers.Size();
-		while(count--)
-			layers.PushBack(TextureLayer());
-		return out;
+		layers.EmplaceBack();
+		return layers.Back();
+	}
+	TextureStageSettings& AddStage()
+	{
+		layerSettings.EmplaceBack();
+		return layerSettings.Back();
 	}
 
 	u32 GetOptionCount() const
@@ -155,6 +138,23 @@ public:
 		if(id >= layers.Size())
 			throw core::OutOfRangeException();
 		GetOptionType(id).CopyConstruct(&layers[id], data);
+	}
+};
+
+class ShaderParamSetCallback
+{
+public:
+	virtual ~ShaderParamSetCallback() {}
+
+	virtual void SendShaderSettings(const Pass& pass, void* userParam) const
+	{
+		LUX_UNUSED(pass);
+		LUX_UNUSED(userParam);
+	}
+	virtual void SendShaderSettings(u32 passId, const Pass& pass, void* userParam) const
+	{
+		LUX_UNUSED(passId);
+		SendShaderSettings(pass, userParam);
 	}
 };
 

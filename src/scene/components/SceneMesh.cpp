@@ -4,7 +4,6 @@
 #include "video/mesh/VideoMesh.h"
 #include "video/mesh/Geometry.h"
 #include "video/Renderer.h"
-#include "video/MaterialRenderer.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::scene::Mesh, lux::scene::SceneComponentType::Mesh);
 
@@ -61,20 +60,19 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 	for(size_t i = 0; i < m_Mesh->GetRangeCount(); ++i) {
 		size_t matId, firstPrimitive, lastPrimitive;
 		m_Mesh->GetMaterialRange(i, matId, firstPrimitive, lastPrimitive);
-		const video::Material* material = m_OnlyReadMaterials ? m_Mesh->GetMaterial(matId) : (const video::Material*)m_Materials[matId];
+		video::Material* material = m_OnlyReadMaterials ?
+			m_Mesh->GetMaterial(matId) :
+			(video::Material*)m_Materials[matId];
 
-		video::MaterialRenderer* matRenderer = nullptr;
-		if(material)
-			matRenderer = material->GetRenderer();
-
-		auto pass = ERenderPass::Solid;
-		if(matRenderer)
-			pass = GetPassFromReq(matRenderer->GetRequirements());
+		auto pass = GetPassFromReq(material->GetRequirements());
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
 		if(pass == sceneData.pass && firstPrimitive < lastPrimitive) {
 			renderer->SetMaterial(material);
-			renderer->DrawGeometry(geo, firstPrimitive, lastPrimitive - firstPrimitive + 1);
+			renderer->DrawGeometry(
+				geo,
+				firstPrimitive,
+				lastPrimitive - firstPrimitive + 1);
 		}
 	}
 }
@@ -83,17 +81,8 @@ ERenderPass Mesh::GetRenderPass() const
 {
 	ERenderPass pass = ERenderPass::None;
 	for(size_t i = 0; i < GetMaterialCount(); ++i) {
-		const video::Material* Mat = GetMaterial(i);
-
-		// Determine the type of renderer used
-		video::MaterialRenderer* renderer = Mat ? Mat->GetRenderer() : nullptr;
-		ERenderPass nextPass;
-		if(!renderer) {
-			nextPass = ERenderPass::Solid;
-		} else {
-			auto req = renderer->GetRequirements();
-			nextPass = GetPassFromReq(req);
-		}
+		auto mat = GetMaterial(i);
+		ERenderPass nextPass = GetPassFromReq(mat->GetRequirements());
 
 		if(pass != ERenderPass::None && pass != nextPass)
 			return ERenderPass::Any;

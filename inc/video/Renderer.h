@@ -27,9 +27,9 @@ class Geometry;
 class LightData;
 class FogData;
 class RenderTarget;
-class Material;
+class AbstractMaterial;
 class Pass;
-class ParamSetCallback;
+class ShaderParamSetCallback;
 class PipelineSettings;
 class PipelineOverwrite;
 class VertexFormat;
@@ -127,10 +127,11 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	virtual void SetPass(const Pass& pass, bool useOverwrite = false, ParamSetCallback* paramSetCallback = nullptr) = 0;
+	//! Set the active pass
+	virtual void SetPass(const Pass& pass, bool useOverwrite = false, ShaderParamSetCallback* paramSetCallback = nullptr, void* userParam = nullptr) = 0;
 
 	//! Set the active material
-	virtual void SetMaterial(const Material* material, size_t passId = 0) = 0;
+	virtual void SetMaterial(AbstractMaterial* material) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

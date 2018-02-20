@@ -5,9 +5,6 @@
 #include "core/Logger.h"
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
-#include "video/Material.h"
-#include "video/RenderSettings.h"
-#include "video/MaterialRenderer.h"
 
 #include "io/FileSystem.h"
 #include "io/File.h"

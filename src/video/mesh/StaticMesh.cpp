@@ -3,7 +3,7 @@
 
 #include "video/VideoDriver.h"
 
-LUX_REGISTER_RESOURCE_CLASS("lux.resource.Mesh", lux::video::StaticMesh);
+LX_REGISTER_RESOURCE_CLASS("lux.resource.Mesh", lux::video::StaticMesh);
 
 namespace lux
 {

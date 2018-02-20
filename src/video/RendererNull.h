@@ -4,9 +4,7 @@
 
 #include "core/ParamPackage.h"
 
-#include "video/RenderSettings.h"
-#include "video/Material.h"
-#include "video/MaterialRenderer.h"
+#include "video/AbstractMaterial.h"
 #include "video/LightData.h"
 #include "video/FogData.h"
 #include "video/RenderStatistics.h"
@@ -47,13 +45,8 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void SetPass(const Pass& pass, bool useOverwrite = false, ParamSetCallback* paramSetCallback = nullptr);
-	void SetMaterial(const Material* material, size_t passId=0);
-
-	/*
-	void SetInvalidMaterial(const Material* material);
-	const Material* GetInvalidMaterial();
-	*/
+	void SetPass(const Pass& pass, bool useOverwrite = false, ShaderParamSetCallback* paramSetCallback = nullptr, void* userParam=nullptr);
+	void SetMaterial(AbstractMaterial* material);
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -62,6 +55,7 @@ public:
 
 private:
 	void UpdatePipelineOverwrite();
+
 public:
 
 	///////////////////////////////////////////////////////////////////////////
@@ -130,15 +124,11 @@ protected:
 	ERenderMode m_RenderMode; //!< Active rendermode
 
 	// The userset parameters are only rememberd they don't have to be activated immediatly
-	//bool m_UseMaterial;
 	bool m_UseOverwrite;
-	ParamSetCallback* m_ParamSetCallback;
+	ShaderParamSetCallback* m_ParamSetCallback;
+	void* m_UserParam;
 	Pass m_Pass;
-	const Material* m_Material;
-	size_t m_PassId;
-
-	//StrongRef<Material> m_Material; //!< User set material
-	//StrongRef<Material> m_InvalidMaterial; //!< The material used to render invalid materials
+	AbstractMaterial* m_Material;
 
 	core::Array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
 	PipelineOverwrite m_FinalOverwrite;

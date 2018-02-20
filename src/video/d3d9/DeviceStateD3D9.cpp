@@ -9,7 +9,6 @@
 #include "video/Material.h"
 
 #include "video/BaseTexture.h"
-#include "video/MaterialRenderer.h"
 
 namespace lux
 {

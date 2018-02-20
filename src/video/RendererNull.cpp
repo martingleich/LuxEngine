@@ -1,6 +1,5 @@
 #include "RendererNull.h"
 #include "core/Logger.h"
-#include "video/MaterialImpl.h"
 #include "video/RenderTarget.h"
 
 namespace lux
@@ -34,26 +33,23 @@ RendererNull::RendererNull(VideoDriver* driver) :
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ParamSetCallback* paramSetCallback)
+void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ShaderParamSetCallback* paramSetCallback, void* userParam)
 {
 	SetDirty(Dirty_Material);
 
 	m_Material = nullptr;
-	m_PassId = 0;
 	m_Pass = pass;
 	m_ParamSetCallback = paramSetCallback;
+	m_UserParam = userParam;
 	m_UseOverwrite = useOverwrite;
 }
 
-void RendererNull::SetMaterial(const Material* material, size_t passId)
+void RendererNull::SetMaterial(AbstractMaterial* material)
 {
 	SetDirty(Dirty_Material);
 	m_Material = material;
-	m_PassId = passId;
-
-	m_Pass = m_Material->GeneratePass(m_PassId);
-	m_ParamSetCallback = m_Material->GetRenderer();
-
+	m_ParamSetCallback = material;
+	m_UserParam = material;
 	m_UseOverwrite = true;
 }
 

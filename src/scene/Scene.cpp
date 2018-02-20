@@ -141,7 +141,7 @@ StrongRef<Mesh> Scene::CreateMesh(video::Mesh* mesh) const
 StrongRef<SkyBox> Scene::CreateSkyBox(const video::Colorf& color) const
 {
 	auto out = CreateComponent(SceneComponentType::SkyBox).AsStrong<SkyBox>();
-	out->GetMaterial(0)->SetDiffuse(color);
+	out->GetMaterial()->SetDiffuse(color);
 	return out;
 }
 

@@ -1,13 +1,14 @@
 #ifndef INCLUDED_PARTICLE_QUAD_RENDERER_MACHINE_H
 #define INCLUDED_PARTICLE_QUAD_RENDERER_MACHINE_H
+#include "video/mesh/Geometry.h"
+#include "video/VertexTypes.h"
+#include "video/Renderer.h"
+#include "video/Pass.h"
+
 #include "scene/particle/ParticleRenderer.h"
 #include "scene/particle/Particle.h"
 
-#include "video/mesh/Geometry.h"
-#include "video/VertexTypes.h"
 #include "math/Matrix4.h"
-#include "video/Renderer.h"
-#include "video/MaterialRenderer.h"
 
 namespace lux
 {

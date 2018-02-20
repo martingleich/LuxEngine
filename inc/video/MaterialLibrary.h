@@ -5,7 +5,7 @@
 #include "core/lxArray.h"
 #include "core/lxOrderedMap.h"
 
-#include "video/MaterialRenderer.h"
+#include "video/Material.h"
 #include "video/Shader.h"
 #include "video/VideoEnums.h"
 
@@ -28,66 +28,9 @@ public:
 	LUX_API static MaterialLibrary* Instance();
 	LUX_API static void Destroy();
 
-	//! Create a new material
-	/**
-	\param renderer The material renderer of the new material, if null is passed the solid renderer is used
-	*/
-	LUX_API StrongRef<Material> CreateMaterial(MaterialRenderer* renderer = nullptr);
-
-	//! Create a new material
-	/**
-	\param rendererName The name of the material renderer
-	*/
-	LUX_API StrongRef<Material> CreateMaterial(const core::String& rendererName);
-
-	//! Add a new material renderer
-	/**
-	\param renderer The material renderer
-	\param name The name of the material renderer
-	*/
-	LUX_API StrongRef<MaterialRenderer> AddMaterialRenderer(MaterialRenderer* renderer);
-	LUX_API StrongRef<MaterialRenderer> ReplaceMaterialRenderer(const core::String& newName);
-
-	//! Add a new material renderer
-	/**
-	\param name The name of the material renderer
-	*/
-	LUX_API StrongRef<MaterialRenderer> AddMaterialRenderer(const core::String& newName);
-
-	//! Clone an old material renderer
-	/**
-	\param newName The name of the new renderer
-	\param baseName The name of the copied renderer
-	\return The new material renderer
-	*/
-	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const core::String& newName, const core::String& baseName);
-
-	//! Clone an old material renderer
-	/**
-	\param name The name of the new renderer
-	\param old The copied material renderer
-	\return The new material renderer
-	*/
-	LUX_API StrongRef<MaterialRenderer> CloneMaterialRenderer(const core::String& name, const MaterialRenderer* old);
-
-	//! Removes a material renderer from the scene graph
-	/**
-	The user should only remove material renderer which he created by himself.
-	All materials using this renderer will become invalid materials.
-	*/
-	LUX_API void RemoveMaterialRenderer(MaterialRenderer* renderer);
-
-	//! Returns a material renderer by its index
-	LUX_API StrongRef<MaterialRenderer> GetMaterialRenderer(size_t index) const;
-
-	//! Returns a material renderer by its name
-	LUX_API StrongRef<MaterialRenderer> GetMaterialRenderer(const core::String& name) const;
-
-	//! Check if a material renderer exists
-	LUX_API bool ExistsMaterialRenderer(const core::String& name, MaterialRenderer** outRenderer=nullptr) const;
-
-	//! Returns the total number of material renderers
-	LUX_API size_t GetMaterialRendererCount() const;
+	LUX_API void SetMaterial(const core::String& name, Material* material);
+	LUX_API StrongRef<video::Material> GetMaterial(const core::String& name);
+	LUX_API StrongRef<video::Material> CloneMaterial(const core::String& name);
 
 	//! Create a shader from file
 	/**
@@ -97,15 +40,18 @@ public:
 	\param PSPath The path of the pixel shader
 	\param PSEntryPoint The name of the pixel shader entry point, if empty defaults to mainPS
 	\param PSType The type of the pixel shader
-	\param [out] errorList If not null, here a list of all errors/warning while creating the shader is written.
+	\param [out] errorList If not null, here a list of all errors/warning
+		while creating the shader is written.
 	\return The new shader
 	\throws ShaderCompileException
 	\throws FileNotFoundException
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromFile(
 		video::EShaderLanguage language,
-		const io::Path& VSPath, const core::String& VSEntryPoint, int VSMajor, int VSMinor,
-		const io::Path& PSPath, const core::String& PSEntryPoint, int PSMajor, int PSMinor,
+		const io::Path& VSPath, const core::String& VSEntryPoint,
+		int VSMajor, int VSMinor,
+		const io::Path& PSPath, const core::String& PSEntryPoint,
+		int PSMajor, int PSMinor,
 		core::Array<core::String>* errorList = nullptr);
 
 	//! Creates a new shader from code
@@ -114,22 +60,26 @@ public:
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromMemory(
 		EShaderLanguage language,
-		const core::String& VSCode, const char* VSEntryPoint, int VSmajorVersion, int VSminorVersion,
-		const core::String& PSCode, const char* PSEntryPoint, int PSmajorVersion, int PSminorVersion,
+		const core::String& VSCode, const char* VSEntryPoint,
+		int VSmajorVersion, int VSminorVersion,
+		const core::String& PSCode, const char* PSEntryPoint,
+		int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList=nullptr);
 
 	//! Checks if some shader language and version is supported
-	LUX_API bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor);
+	LUX_API bool IsShaderSupported(
+		EShaderLanguage lang,
+		int vsMajor, int vsMinor,
+		int psMajor, int psMinor);
 
-	LUX_API bool GetShaderInclude(EShaderLanguage language, const core::String& name, const void*& outData, size_t& outBytes);
-	LUX_API void SetShaderInclude(EShaderLanguage language, const core::String& name, const void* data, size_t bytes);
+	LUX_API bool GetShaderInclude(
+		EShaderLanguage language, const core::String& name,
+		const void*& outData, size_t& outBytes);
+	LUX_API void SetShaderInclude(
+		EShaderLanguage language, const core::String& name,
+		const void* data, size_t bytes);
 
 private:
-	bool FindRenderer(const core::String& name, size_t& id) const;
-
-private:
-	core::Array<StrongRef<MaterialRenderer>> m_Renderers;
-
 	struct ShaderInclude
 	{
 		EShaderLanguage language;
@@ -155,6 +105,7 @@ private:
 	};
 
 	core::OrderedMap<ShaderInclude, core::RawMemory> m_ShaderIncludes;
+	core::HashMap<core::String, StrongRef<Material>> m_BaseMaterials;
 };
 
 } // namespace video

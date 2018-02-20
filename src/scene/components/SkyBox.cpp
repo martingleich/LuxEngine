@@ -20,16 +20,15 @@ namespace scene
 SkyBox::SkyBox() :
 	m_UseCubeTexture(true)
 {
-	video::MaterialRenderer* renderer;
-	if(!video::MaterialLibrary::Instance()->ExistsMaterialRenderer("skyBox", &renderer)) {
-		renderer = video::MaterialLibrary::Instance()->CloneMaterialRenderer("skyBox", "solid");
-		auto& pass = renderer->GetPass(0);
+	m_Material = video::MaterialLibrary::Instance()->CloneMaterial("skybox");
+	if(!m_Material) {
+		auto material = video::MaterialLibrary::Instance()->CloneMaterial("solid");
+		auto& pass = material->GetPass();
 		pass.fogEnabled = false;
 		pass.lighting = video::ELighting::Disabled;
-		renderer->AddParam("texture", 0, video::EOptionId::Layer0);
+		video::MaterialLibrary::Instance()->SetMaterial("skybox", material);
+		m_Material = material;
 	}
-
-	m_Material = renderer->CreateMaterial();
 }
 
 SkyBox::SkyBox(const SkyBox& other) :
@@ -138,7 +137,6 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 	if(!m_Material)
 		return;
 
-
 	math::Transformation t = node->GetAbsoluteTransform();
 	t.translation = data.activeCameraNode->GetAbsolutePosition();
 
@@ -158,7 +156,7 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 	renderer->PushPipelineOverwrite(over, &token);
 
 	if(m_SkyTexture)
-		m_Material->Layer(0) = m_SkyTexture;
+		m_Material->SetTexture(0, m_SkyTexture);
 
 	renderer->SetMaterial(m_Material);
 	if(m_UseCubeTexture) {
@@ -206,33 +204,19 @@ StrongRef<video::BaseTexture> SkyBox::GetSkyTexture() const
 	return m_SkyTexture;
 }
 
-video::Material* SkyBox::GetMaterial(size_t i)
+video::Material* SkyBox::GetMaterial()
 {
-	if(i > 0)
-		throw core::OutOfRangeException();
-	else
 		return m_Material;
 }
 
-const video::Material* SkyBox::GetMaterial(size_t i) const
+const video::Material* SkyBox::GetMaterial() const
 {
-	if(i > 0)
-		throw core::OutOfRangeException();
-	else
-		return m_Material;
+	return m_Material;
 }
 
-void SkyBox::SetMaterial(size_t i, video::Material* m)
+void SkyBox::SetMaterial(video::Material* m)
 {
-	if(i > 0)
-		throw core::OutOfRangeException();
-	else
-		m_Material = m;
-}
-
-size_t SkyBox::GetMaterialCount() const
-{
-	return 1;
+	m_Material = m;
 }
 
 const math::AABBoxF& SkyBox::GetBoundingBox() const

@@ -184,6 +184,9 @@ public:
 		s32 texX = 1, s32 texY = 1,
 		bool inside = false);
 
+	LUX_API StrongRef<Material> GetDefaultMaterial();
+	LUX_API void SetDefaultMaterial(Material* m);
+
 private:
 	LUX_API MeshSystem();
 

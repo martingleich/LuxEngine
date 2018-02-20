@@ -123,7 +123,7 @@ private:
 	bool m_Loaded;
 };
 
-#define LUX_REGISTER_RESOURCE_CLASS(type, class) \
+#define LX_REGISTER_RESOURCE_CLASS(type, class) \
 static ::lux::Referable* LX_CONCAT(InternalCreatorFunc_, __LINE__)(const void* origin) { return LUX_NEW(class)(origin?*(lux::core::ResourceOrigin*)origin:lux::core::ResourceOrigin()); } \
 static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(::lux::core::Name(type), &LX_CONCAT(InternalCreatorFunc_, __LINE__));
 

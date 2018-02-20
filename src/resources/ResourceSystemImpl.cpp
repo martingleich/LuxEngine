@@ -24,7 +24,6 @@ const Name CubeTexture("lux.resource.CubeTexture");
 const Name Mesh("lux.resource.Mesh");
 const Name Font("lux.resource.Font");
 const Name Sound("lux.resource.Sound");
-const Name Material("lux.resource.Material");
 }
 
 static u32 INVALID_ID = 0xFFFFFFFF;

@@ -93,7 +93,7 @@ public:
 	void Reset();
 
 private:
-	void SetupRendering(EFaceWinding frontFace, ERenderMode mode);
+	void SetupRendering(EFaceWinding frontFace, u32 passId);
 
 	void SwitchRenderMode(ERenderMode mode);
 	void EnterRenderMode3D();

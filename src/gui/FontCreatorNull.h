@@ -8,7 +8,6 @@ namespace lux
 namespace video
 {
 class MaterialLibrary;
-class MaterialRenderer;
 }
 namespace gui
 {

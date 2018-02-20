@@ -251,9 +251,6 @@ void RendererD3D9::DrawPrimitiveList(
 	if(primitiveCount == 0)
 		return;
 
-	SetVertexFormat(vertexFormat);
-	SetupRendering(frontFace, is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
-
 	u32 stride = vertexFormat.GetStride(0);
 
 	D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
@@ -289,22 +286,39 @@ void RendererD3D9::DrawPrimitiveList(
 	else
 		vertexOffset += video::GetPointCount(primitiveType, firstPrimitive);
 
-	HRESULT hr = E_FAIL;
-	if(!user) {
-		if(indexData)
-			hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
-		else
-			hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
-	} else {
-		if(indexData) // Indexed from memory
-			hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
-				indexData, d3dIndexFormat, vertexData, stride);
-		else // Not indexed from memory
-			hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
+	SetVertexFormat(vertexFormat);
+	SwitchRenderMode(is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
+
+	u32 passCount = m_Material ? m_Material->GetPassCount() : 1;
+	for(u32 pass = 0; pass < passCount; ++pass) {
+		if(pass > 0) {
+			// For the first pass it was set in SetMaterial
+			SetDirty(Dirty_Material);
+		}
+
+		SetupRendering(frontFace, pass);
+		HRESULT hr = E_FAIL;
+		if(!user) {
+			if(indexData)
+				hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
+			else
+				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
+		} else {
+			if(indexData) // Indexed from memory
+				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
+					indexData, d3dIndexFormat, vertexData, stride);
+			else // Not indexed from memory
+				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
+		}
+		if(FAILED(hr)) {
+			log::Error("Error while drawing.");
+			return;
+		}
 	}
-	if(FAILED(hr)) {
-		log::Error("Error while drawing.");
-		return;
+
+	if(passCount > 1) {
+		// The next rendercall will start with another pass.
+		SetDirty(Dirty_Material);
 	}
 
 	if(m_RenderStatistics)
@@ -377,15 +391,15 @@ void RendererD3D9::Reset()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void RendererD3D9::SetupRendering(EFaceWinding frontFace, ERenderMode mode)
+void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 {
-	SwitchRenderMode(mode);
-
 	bool dirtyPass = false;
+
+	auto& srcPass = m_Material ? m_Material->GetPass(passId) : m_Pass;
 
 	const auto& pass = m_OverwritePass;
 	if(IsDirty(Dirty_Overwrites) || IsDirty(Dirty_Material)) {
-		m_OverwritePass = m_Pass;
+		m_OverwritePass = srcPass;
 		if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty())
 			m_FinalOverwrite.Apply(m_OverwritePass);
 		if(m_RenderMode == ERenderMode::Mode2D) {
@@ -397,7 +411,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, ERenderMode mode)
 	}
 	if(frontFace == EFaceWinding::CW)
 		m_OverwritePass.culling = FlipFaceSide(m_OverwritePass.culling);
-	
+
 	if(m_PrevFrontFace != frontFace) {
 		dirtyPass = true;
 		m_PrevFrontFace = frontFace;
@@ -436,7 +450,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, ERenderMode mode)
 
 	// Send the generated data to the shader
 	if(m_ParamSetCallback)
-		m_ParamSetCallback->SendShaderSettings(m_PassId, pass, m_Material);
+		m_ParamSetCallback->SendShaderSettings(passId, pass, m_UserParam);
 
 	ClearDirty(Dirty_Rendertarget);
 	ClearDirty(Dirty_Material);

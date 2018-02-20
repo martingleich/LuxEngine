@@ -7,7 +7,7 @@
 #include "video/MaterialLibrary.h"
 #include "video/images/ImageSystem.h"
 
-LUX_REGISTER_RESOURCE_CLASS("lux.resource.Font", lux::gui::FontRaster);
+LX_REGISTER_RESOURCE_CLASS("lux.resource.Font", lux::gui::FontRaster);
 
 namespace lux
 {
@@ -54,7 +54,7 @@ float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 }
 )";
 
-class ShaderParamLoader : public video::ParamSetCallback
+class ShaderParamLoader : public video::ShaderParamSetCallback
 {
 public:
 	u32 m_TexId;
@@ -62,10 +62,8 @@ public:
 	{
 		m_TexId = shader->GetParamId("texture");
 	}
-	virtual void SendShaderSettings(size_t passId, const video::Pass& pass, const video::Material* material) const
+	void SendShaderSettings(const video::Pass& pass, void*) const
 	{
-		LUX_UNUSED(passId);
-		LUX_UNUSED(material);
 		pass.shader->SetParam(m_TexId, &pass.layers[0]);
 		pass.shader->LoadSceneParams(pass);
 	}

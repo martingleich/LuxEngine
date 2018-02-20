@@ -2,7 +2,7 @@
 #include "core/lxMemory.h"
 #include "video/DrawingCanvas.h"
 
-LUX_REGISTER_RESOURCE_CLASS("lux.resource.Image", lux::video::ImageImpl);
+LX_REGISTER_RESOURCE_CLASS("lux.resource.Image", lux::video::ImageImpl);
 
 namespace lux
 {

@@ -3,7 +3,7 @@
 #include "video/VertexTypes.h"
 #include "video/VertexFormat.h"
 #include "video/Renderer.h"
-#include "video/MaterialRenderer.h"
+#include "video/Pass.h"
 
 #include "scene/particle/ParticleRenderer.h"
 #include "scene/particle/Particle.h"

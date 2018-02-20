@@ -5,7 +5,6 @@
 #include "core/Logger.h"
 
 #include "video/MaterialLibrary.h"
-#include "video/MaterialRenderer.h"
 #include "video/VideoDriver.h"
 #include "video/Texture.h"
 #include "video/VertexTypes.h"
@@ -139,7 +138,7 @@ public:
 			throw core::FileFormatException("File contains no geometry", "obj");
 
 		ConvertMaterials();
-		invalidMaterial = video::MaterialLibrary::Instance()->CreateMaterial("debugOverlay");
+		invalidMaterial = video::MaterialLibrary::Instance()->CloneMaterial("debugOverlay");
 		invalidMaterial->SetDiffuse(video::Color::Pink);
 
 		u32 indexCount = 0;
@@ -256,12 +255,12 @@ public:
 		StrongRef<video::Texture> texture;
 		if(io::FileSystem::Instance()->ExistFile(path)) {
 			texture = core::ResourceSystem::Instance()->GetResource(
-				core::ResourceType::Texture, path).AsStrong<Texture>();
+				core::ResourceType::Texture, path).AsStrong<video::Texture>();
 		} else {
 			io::FileDescription texFile = io::ConcatFileDesc(baseFileDesc, path);
 			texture = core::ResourceSystem::Instance()->GetResource(
 				core::ResourceType::Texture,
-				io::FileSystem::Instance()->OpenFile(texFile)).AsStrong<Texture>();
+				io::FileSystem::Instance()->OpenFile(texFile)).AsStrong<video::Texture>();
 		}
 		return texture;
 	}
@@ -269,11 +268,10 @@ public:
 	StrongRef<video::Material> ConvertMaterial(const tinyobj::material_t& mat)
 	{
 		StrongRef<Material> lxm;
-		if(mat.dissolve != 1) {
-			lxm = video::MaterialLibrary::Instance()->CreateMaterial("transparent");
-		} else {
-			lxm = video::MaterialLibrary::Instance()->CreateMaterial("solid");
-		}
+		if(mat.dissolve != 1)
+			lxm = video::MaterialLibrary::Instance()->CloneMaterial("transparent");
+		else
+			lxm = video::MaterialLibrary::Instance()->CloneMaterial("solid");
 
 		lxm->SetDiffuse(video::Colorf(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], mat.dissolve));
 		lxm->SetEmissive(video::Colorf(mat.emission[0], mat.emission[1], mat.emission[2]));
@@ -290,7 +288,7 @@ public:
 			io::Path texname = mat.diffuse_texname.data();
 			texname.Replace("\\", "/");
 
-			lxm->Layer(0) = LoadTexture(texname);
+			lxm->SetTexture(0, LoadTexture(texname));
 		}
 
 		return lxm;
