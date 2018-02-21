@@ -331,7 +331,7 @@ void FontRaster::InitPass()
 		tss.colorArg1 = video::ETextureArgument::Texture;
 		tss.colorArg2 = video::ETextureArgument::Diffuse;
 		tss.colorOperator = video::ETextureOperator::Modulate;
-		m_Pass.layerSettings.PushBack(tss);
+		m_Pass.textureStages.PushBack(tss);
 	}
 }
 

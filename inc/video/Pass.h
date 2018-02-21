@@ -69,9 +69,11 @@ public:
 	Colorf specular = video::Colorf(1, 1, 1, 1);
 	float shininess = 0;
 
-	// Textures
+	// List of texture for this material, will not be set automatic when using a shader.
 	core::Array<TextureLayer> layers;
-	core::Array<TextureStageSettings> layerSettings;
+
+	// Fixed-function texture stages will be ignored when using a shader.
+	core::Array<TextureStageSettings> textureStages;
 
 	// Shader
 	StrongRef<Shader> shader;
@@ -103,8 +105,8 @@ public:
 	}
 	TextureStageSettings& AddStage()
 	{
-		layerSettings.EmplaceBack();
-		return layerSettings.Back();
+		textureStages.EmplaceBack();
+		return textureStages.Back();
 	}
 
 	u32 GetOptionCount() const

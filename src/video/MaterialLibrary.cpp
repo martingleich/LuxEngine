@@ -41,14 +41,11 @@ MaterialLibrary::MaterialLibrary()
 {
 	{
 		auto solid = LUX_NEW(Material);
-		auto& pass = solid->GetPass();
-		pass.AddTexture();
 		SetMaterial("solid", solid);
 	}
 
 	{
-		auto debug = LUX_NEW(Material);
-		auto& pass = debug->GetPass();
+		video::Pass pass;
 		pass.fogEnabled = false;
 		pass.lighting = video::ELighting::Disabled;
 		pass.useVertexColor = true;
@@ -57,21 +54,22 @@ MaterialLibrary::MaterialLibrary()
 		tss.colorOperator = ETextureOperator::SelectArg1;
 		tss.colorArg1 = ETextureArgument::Diffuse;
 
+		auto debug = LUX_NEW(Material);
+		debug->SetPass(pass);
 		SetMaterial("debugOverlay", debug);
 	}
 
 	{
-		auto transparent = LUX_NEW(Material);
-		transparent->SetRequirements(video::EMaterialRequirement::Transparent);
-		auto& pass = transparent->GetPass();
-		pass.AddTexture();
-
+		video::Pass pass;
 		pass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 		pass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 		pass.alpha.blendOperator = video::EBlendOperator::Add;
 		pass.zWriteEnabled = false;
 		pass.fogEnabled = false;
 
+		auto transparent = LUX_NEW(Material);
+		transparent->SetRequirements(video::EMaterialRequirement::Transparent);
+		transparent->SetPass(pass);
 		SetMaterial("transparent", transparent);
 	}
 

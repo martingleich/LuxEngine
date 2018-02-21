@@ -444,6 +444,9 @@ void ShaderD3D9::LoadSceneParams(const Pass& pass)
 			case DefaultParam_Shininess:
 				f = pass.shininess;
 				SetShaderValue(*it, &f); break;
+			case DefaultParam_Ambient:
+				f = pass.ambient;
+				SetShaderValue(*it, &f); break;
 			case DefaultParam_Diffuse:
 				c = pass.diffuse;
 				SetShaderValue(*it, &c); break;

@@ -25,7 +25,7 @@ Renderer::Renderer(video::Renderer* r)
 		video::ETextureArgument::Diffuse,
 		video::ETextureArgument::Texture,
 		video::ETextureOperator::Modulate);
-	m_TexturePass.layerSettings.PushBack(MIX_SETTINGS);
+	m_TexturePass.textureStages.PushBack(MIX_SETTINGS);
 
 	m_DiffusePass.useVertexColor = true;
 	m_DiffusePass.culling = video::EFaceSide::None;

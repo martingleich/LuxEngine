@@ -187,6 +187,11 @@ private:
 class PackagePuffer
 {
 public:
+	PackagePuffer() :
+		m_Pack(nullptr)
+	{
+	}
+
 	//! Create data for given parameter packaged
 	/**
 	\param pack The parameter package on which the data builds up

@@ -23,9 +23,10 @@ SkyBox::SkyBox() :
 	m_Material = video::MaterialLibrary::Instance()->CloneMaterial("skybox");
 	if(!m_Material) {
 		auto material = video::MaterialLibrary::Instance()->CloneMaterial("solid");
-		auto& pass = material->GetPass();
+		auto pass = material->GetPass();
 		pass.fogEnabled = false;
 		pass.lighting = video::ELighting::Disabled;
+		material->SetPass(pass);
 		video::MaterialLibrary::Instance()->SetMaterial("skybox", material);
 		m_Material = material;
 	}
@@ -52,71 +53,71 @@ void SkyBox::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
 
 static const video::Vertex3DTCoord g_Vertices3D[8] =
 {
-	video::Vertex3DTCoord(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f),
-	video::Vertex3DTCoord(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-	video::Vertex3DTCoord(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f),
-	video::Vertex3DTCoord(-1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f),
-	video::Vertex3DTCoord(-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f),
-	video::Vertex3DTCoord(1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f),
-	video::Vertex3DTCoord(1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f),
-	video::Vertex3DTCoord(-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f)
+	video::Vertex3DTCoord(-1, +1, +1, -1, +1, +1),
+	video::Vertex3DTCoord(+1, +1, +1, +1, +1, +1),
+	video::Vertex3DTCoord(+1, +1, -1, +1, +1, -1),
+	video::Vertex3DTCoord(-1, +1, -1, -1, +1, -1),
+	video::Vertex3DTCoord(-1, -1, +1, -1, -1, +1),
+	video::Vertex3DTCoord(+1, -1, +1, +1, -1, +1),
+	video::Vertex3DTCoord(+1, -1, -1, +1, -1, -1),
+	video::Vertex3DTCoord(-1, -1, -1, -1, -1, -1)
 };
 
 static const video::Vertex3D g_Vertices2D[] =
 {
 	// create front side
-	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, 1, 1, 1),
-	video::Vertex3D(1, -1, -1, video::Color::Black, 0, 0, 1, 0, 1),
-	video::Vertex3D(1, 1, -1, video::Color::Black, 0, 0, 1, 0, 0),
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, +1, 1, 1),
+	video::Vertex3D(+1, -1, -1, video::Color::Black, 0, 0, +1, 0, 1),
+	video::Vertex3D(+1, +1, -1, video::Color::Black, 0, 0, +1, 0, 0),
 
-	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, 1, 1, 1),
-	video::Vertex3D(1, 1, -1, video::Color::Black, 0, 0, 1, 0, 0),
-	video::Vertex3D(-1, 1, -1, video::Color::Black, 0, 0, 1, 1, 0),
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 0, +1, 1, 1),
+	video::Vertex3D(+1, +1, -1, video::Color::Black, 0, 0, +1, 0, 0),
+	video::Vertex3D(-1, +1, -1, video::Color::Black, 0, 0, +1, 1, 0),
 
 	// create left side
-	video::Vertex3D(1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
-	video::Vertex3D(1, -1, 1, video::Color::Black, -1, 0, 0, 0, 1),
-	video::Vertex3D(1, 1, 1, video::Color::Black, -1, 0, 0, 0, 0),
+	video::Vertex3D(+1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
+	video::Vertex3D(+1, -1, +1, video::Color::Black, -1, 0, 0, 0, 1),
+	video::Vertex3D(+1, +1, +1, video::Color::Black, -1, 0, 0, 0, 0),
 
-	video::Vertex3D(1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
-	video::Vertex3D(1, 1, 1, video::Color::Black, -1, 0, 0, 0, 0),
-	video::Vertex3D(1, 1, -1, video::Color::Black, -1, 0, 0, 1, 0),
+	video::Vertex3D(+1, -1, -1, video::Color::Black, -1, 0, 0, 1, 1),
+	video::Vertex3D(+1, +1, +1, video::Color::Black, -1, 0, 0, 0, 0),
+	video::Vertex3D(+1, +1, -1, video::Color::Black, -1, 0, 0, 1, 0),
 
 	// create back side
-	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 0, -1, 1, 1),
-	video::Vertex3D(-1, -1, 1, video::Color::Black, 0, 0, -1, 0, 1),
-	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, 0, -1, 0, 0),
+	video::Vertex3D(+1, -1, +1, video::Color::Black, 0, 0, -1, 1, 1),
+	video::Vertex3D(-1, -1, +1, video::Color::Black, 0, 0, -1, 0, 1),
+	video::Vertex3D(-1, +1, +1, video::Color::Black, 0, 0, -1, 0, 0),
 
-	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 0, -1, 1, 1),
-	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, 0, -1, 0, 0),
-	video::Vertex3D(1, 1, 1, video::Color::Black, 0, 0, -1, 1, 0),
+	video::Vertex3D(+1, -1, +1, video::Color::Black, 0, 0, -1, 1, 1),
+	video::Vertex3D(-1, +1, +1, video::Color::Black, 0, 0, -1, 0, 0),
+	video::Vertex3D(+1, +1, +1, video::Color::Black, 0, 0, -1, 1, 0),
 
 	// create right side
-	video::Vertex3D(-1, -1, 1, video::Color::Black, 1, 0, 0, 1, 1),
+	video::Vertex3D(-1, -1, +1, video::Color::Black, 1, 0, 0, 1, 1),
 	video::Vertex3D(-1, -1, -1, video::Color::Black, 1, 0, 0, 0, 1),
-	video::Vertex3D(-1, 1, -1, video::Color::Black, 1, 0, 0, 0, 0),
+	video::Vertex3D(-1, +1, -1, video::Color::Black, 1, 0, 0, 0, 0),
 
-	video::Vertex3D(-1, -1, 1, video::Color::Black, 1, 0, 0, 1, 1),
-	video::Vertex3D(-1, 1, -1, video::Color::Black, 1, 0, 0, 0, 0),
-	video::Vertex3D(-1, 1, 1, video::Color::Black, 1, 0, 0, 1, 0),
+	video::Vertex3D(-1, -1, +1, video::Color::Black, 1, 0, 0, 1, 1),
+	video::Vertex3D(-1, +1, -1, video::Color::Black, 1, 0, 0, 0, 0),
+	video::Vertex3D(-1, +1, +1, video::Color::Black, 1, 0, 0, 1, 0),
 
 	// create top side
-	video::Vertex3D(1, 1, -1, video::Color::Black, 0, -1, 0, 1, 1),
-	video::Vertex3D(1, 1, 1, video::Color::Black, 0, -1, 0, 0, 1),
-	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, -1, 0, 0, 0),
+	video::Vertex3D(+1, +1, -1, video::Color::Black, 0, -1, 0, 1, 1),
+	video::Vertex3D(+1, +1, +1, video::Color::Black, 0, -1, 0, 0, 1),
+	video::Vertex3D(-1, +1, +1, video::Color::Black, 0, -1, 0, 0, 0),
 
-	video::Vertex3D(1, 1, -1, video::Color::Black, 0, -1, 0, 1, 1),
-	video::Vertex3D(-1, 1, 1, video::Color::Black, 0, -1, 0, 0, 0),
-	video::Vertex3D(-1, 1, -1, video::Color::Black, 0, -1, 0, 1, 0),
+	video::Vertex3D(+1, +1, -1, video::Color::Black, 0, -1, 0, 1, 1),
+	video::Vertex3D(-1, +1, +1, video::Color::Black, 0, -1, 0, 0, 0),
+	video::Vertex3D(-1, +1, -1, video::Color::Black, 0, -1, 0, 1, 0),
 
 	// create bottom side
-	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 1, 0, 0, 0),
-	video::Vertex3D(1, -1, -1, video::Color::Black, 0, 1, 0, 1, 0),
-	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 1, 0, 1, 1),
+	video::Vertex3D(+1, -1, +1, video::Color::Black, 0, +1, 0, 0, 0),
+	video::Vertex3D(+1, -1, -1, video::Color::Black, 0, +1, 0, 1, 0),
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, +1, 0, 1, 1),
 
-	video::Vertex3D(1, -1, 1, video::Color::Black, 0, 1, 0, 0, 0),
-	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, 1, 0, 1, 1),
-	video::Vertex3D(-1, -1, 1, video::Color::Black, 0, 1, 0, 0, 1),
+	video::Vertex3D(+1, -1, +1, video::Color::Black, 0, +1, 0, 0, 0),
+	video::Vertex3D(-1, -1, -1, video::Color::Black, 0, +1, 0, 1, 1),
+	video::Vertex3D(-1, -1, +1, video::Color::Black, 0, +1, 0, 0, 1),
 };
 
 static const u16 g_Indices[36] =

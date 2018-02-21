@@ -228,7 +228,7 @@ public:
 
 	//! Clone from other param package
 	/**
-	Swallow copy
+	Shallow copy
 	\param otherParam The other package param
 	*/
 	VariableAccess& Set(const VariableAccess& otherParam)

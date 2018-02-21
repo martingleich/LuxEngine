@@ -449,7 +449,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 	LoadLightSettings(pass);
 
 	// Send the generated data to the shader
-	if(m_ParamSetCallback)
+	if(m_ParamSetCallback && pass.shader)
 		m_ParamSetCallback->SendShaderSettings(passId, pass, m_UserParam);
 
 	ClearDirty(Dirty_Rendertarget);

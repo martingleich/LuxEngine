@@ -36,7 +36,7 @@ void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Pass& pas
 		// Enable d3d material
 		D3DMATERIAL9 D3DMaterial = {
 			TestFlag(pass.lighting, ELighting::DiffSpec) ? SColorToD3DColor(pass.diffuse) : black,
-			TestFlag(pass.lighting, ELighting::AmbientEmit) ? SColorToD3DColor(ambient*pass.ambient) : black,
+			TestFlag(pass.lighting, ELighting::AmbientEmit) ? SColorToD3DColor(pass.ambient*pass.diffuse) : black,
 			TestFlag(pass.lighting, ELighting::DiffSpec) ? SColorToD3DColor(pass.specular) : black,
 			TestFlag(pass.lighting, ELighting::AmbientEmit) ? SColorToD3DColor(pass.emissive) : black,
 			TestFlag(pass.lighting, ELighting::DiffSpec) ? pass.shininess : 0.0f
@@ -62,6 +62,9 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 
 	SetStencilMode(p.stencil);
 
+	u32 layerCount = p.layers.Size();
+	if(layerCount == 0)
+		layerCount = 1;
 	if(!p.shader) {
 		// Enable texture layers for fixed function pipeline
 		// Shaders handle this while loading their parameters.
@@ -73,24 +76,26 @@ void DeviceStateD3D9::EnablePass(const Pass& p)
 			ETextureArgument::Diffuse,
 			ETextureArgument::Diffuse,
 			ETextureOperator::SelectArg1);
-		for(size_t i = 0; i < p.layers.Size(); ++i) {
-			EnableTextureLayer(i, p.layers[i]);
+		static const TextureLayer EMPTY_LAYER;
+		for(size_t i = 0; i < layerCount; ++i) {
+			auto& tex = i < p.layers.Size() ? p.layers[i] : EMPTY_LAYER;
+			EnableTextureLayer(i, tex);
 
 			const TextureStageSettings* settings;
-			if(!p.layers[i].texture)
+			if(!tex.texture)
 				settings = &DIFFUSE_ONLY_STAGE;
 			else
-				settings = i < p.layerSettings.Size() ? &p.layerSettings[i] : &DEFAULT_STAGE;
+				settings = i < p.textureStages.Size() ? &p.textureStages[i] : &DEFAULT_STAGE;
 
 			EnableTextureStage(i, *settings);
 		}
 
-		for(size_t i = p.layers.Size(); i < p.layerSettings.Size(); ++i)
-			EnableTextureStage(i, p.layerSettings[i]);
+		for(size_t i = layerCount; i < p.textureStages.Size(); ++i)
+			EnableTextureStage(i, p.textureStages[i]);
 	}
 
 	// Disable old layers
-	u32 newUsed = math::Max(p.layers.Size(), p.layerSettings.Size());
+	u32 newUsed = math::Max(layerCount, p.textureStages.Size());
 	for(size_t i = newUsed; i < m_UsedTextureLayers; ++i)
 		DisableTexture(i);
 
@@ -162,11 +167,11 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 			if(ani > maxAni)
 				ani = maxAni;
 			SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, ani);
-		}
+	}
 #endif
 		SetSamplerState(stage, D3DSAMP_MINFILTER, filterMin);
 		SetSamplerState(stage, D3DSAMP_MAGFILTER, filterMag);
-	}
+}
 }
 
 void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)

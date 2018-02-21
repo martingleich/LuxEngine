@@ -346,6 +346,11 @@ struct AlphaBlendMode
 	EBlendFactor dstFactor;
 	EBlendOperator blendOperator;
 
+	bool IsTransparent() const
+	{
+		return dstFactor != EBlendFactor::Zero && blendOperator != EBlendOperator::None;
+	}
+
 	bool operator==(const AlphaBlendMode& other) const
 	{
 		return srcFactor == other.srcFactor && dstFactor == other.dstFactor && blendOperator == other.blendOperator;
