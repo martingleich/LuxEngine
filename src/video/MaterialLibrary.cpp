@@ -41,22 +41,28 @@ MaterialLibrary::MaterialLibrary()
 {
 	{
 		auto solid = LUX_NEW(Material);
-		SetMaterial("solid", solid);
+		video::Pass pass;
+		video::TextureStageSettings tss;
+		pass.shader = GetFixedFunctionShader({"texture"}, {tss});
+		solid->SetPass(pass);
+		m_MaterialMap["solid"] = 0;
+		m_MaterialList.PushBack(solid);
 	}
 
 	{
 		video::Pass pass;
 		pass.fogEnabled = false;
 		pass.lighting = video::ELighting::Disabled;
-		pass.useVertexColor = true;
 
-		auto& tss = pass.AddStage();
+		video::TextureStageSettings tss;
 		tss.colorOperator = ETextureOperator::SelectArg1;
 		tss.colorArg1 = ETextureArgument::Diffuse;
+		pass.shader = GetFixedFunctionShader({"texture"}, {tss}, true);
 
 		auto debug = LUX_NEW(Material);
 		debug->SetPass(pass);
-		SetMaterial("debugOverlay", debug);
+		m_MaterialMap["debugOverlay"] = 1;
+		m_MaterialList.PushBack(debug);
 	}
 
 	{
@@ -66,11 +72,14 @@ MaterialLibrary::MaterialLibrary()
 		pass.alpha.blendOperator = video::EBlendOperator::Add;
 		pass.zWriteEnabled = false;
 		pass.fogEnabled = false;
+		video::TextureStageSettings tss;
+		pass.shader = GetFixedFunctionShader({"texture"}, {tss});
 
 		auto transparent = LUX_NEW(Material);
 		transparent->SetRequirements(video::EMaterialRequirement::Transparent);
 		transparent->SetPass(pass);
-		SetMaterial("transparent", transparent);
+		m_MaterialMap["transparent"] = 2;
+		m_MaterialList.PushBack(transparent);
 	}
 
 	{
@@ -110,7 +119,7 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 		float illumFactor = 1;
 		float4 illumCol;
 		if(light._m03 == 1) { // Directonal
-			illumCol = dot(normal, lightDir) * diffuse * lightDiffuse;
+			illumCol = max(dot(normal, lightDir),0) * diffuse * lightDiffuse;
 		} else { // Spot/Point light
 			lightVector = lightPos - pos;
 			float lightDistance = length(lightVector);
@@ -127,7 +136,7 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 					spotFactor = pow((rho - co) / (ci - co), falloff);
 			}
 			illumFactor = spotFactor / lightDistance;
-			illumCol = dot(normal, lightVector) * diffuse * lightDiffuse;
+			illumCol = max(dot(normal, lightVector),0) * diffuse * lightDiffuse;
 		}
 		if(shininess > 0) {
 			float3 h = normalize(normalize(camPos - pos) + lightVector);
@@ -151,21 +160,44 @@ MaterialLibrary::~MaterialLibrary()
 void MaterialLibrary::SetMaterial(
 	const core::String& name, video::Material* material)
 {
-	m_BaseMaterials[name] = material;
+	auto& key = m_MaterialMap.At(name, m_MaterialList.Size());
+	if(key == m_MaterialList.Size())
+		m_MaterialList.PushBack(material);
+	else
+		m_MaterialList[key] = material;
 }
 
 StrongRef<video::Material> MaterialLibrary::GetMaterial(
 	const core::String& name)
 {
-	auto it = m_BaseMaterials.Find(name);
-	if(it == m_BaseMaterials.End())
+	auto it = m_MaterialMap.Find(name);
+	if(it == m_MaterialMap.End())
 		return nullptr;
 	else
-		return *it;
+		return m_MaterialList[*it];
 }
 
 StrongRef<video::Material> MaterialLibrary::CloneMaterial(
 	const core::String& name)
+{
+	auto m = GetMaterial(name);
+	if(m)
+		return m->Clone();
+	else
+		return nullptr;
+}
+
+void MaterialLibrary::SetMaterial(EKnownMaterial name, Material* material)
+{
+	m_MaterialList.At((u32)name) = material;
+}
+
+StrongRef<video::Material> MaterialLibrary::GetMaterial(EKnownMaterial name)
+{
+	return m_MaterialList.At((u32)name);
+}
+
+StrongRef<video::Material> MaterialLibrary::CloneMaterial(EKnownMaterial name)
 {
 	auto m = GetMaterial(name);
 	if(m)
@@ -218,6 +250,32 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 		vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSMajor, VSMinor,
 		psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSMajor, PSMinor,
 		errorList);
+}
+
+StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
+	const core::Array<core::String>& textures,
+	const core::Array<TextureStageSettings>& stages,
+	bool useVertexColors)
+{
+	return GetFixedFunctionShader(FixedFunctionParameters(textures, stages, useVertexColors));
+}
+
+StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
+	const FixedFunctionParameters& params)
+{
+	bool useCache = params.textures.Size() <= 1;
+	if(useCache) {
+		for(auto& p : m_FixedFunctionShaders) {
+			if(p.params == params)
+				return p.shader;
+		}
+	}
+
+	auto shader = video::VideoDriver::Instance()->CreateFixedFunctionShader(params);
+	if(shader)
+		m_FixedFunctionShaders.EmplaceBack(params, shader);
+
+	return shader;
 }
 
 StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(

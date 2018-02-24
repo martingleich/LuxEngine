@@ -5,7 +5,7 @@
 
 #include "video/Color.h"
 #include "video/TextureStageSettings.h"
-#include "video/Shader.h"
+#include "video/FixedFunctionShader.h"
 
 #include "platform/StrippedD3D9.h"
 #include "platform/UnknownRefCounted.h"
@@ -27,14 +27,18 @@ public:
 
 	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
-	void SetD3DColors(const video::Colorf& ambient, const Pass& pass);
-	void EnablePass(const Pass& p);
+	void SetD3DColors(const Pass& pass);
+	void EnablePass(const Pass& p, const video::Colorf& ambient);
+
+	void EnableFixedFunctionShader(
+		const core::Array<TextureLayer>& layer,
+		const core::Array<TextureStageSettings>& settings,
+		bool useVertexColor);
 
 	void EnableTextureLayer(u32 stage, const TextureLayer& layer);
-	void EnableTextureStage(u32 stage, const TextureStageSettings& settings);
+	void EnableTextureStage(u32 stage, const TextureStageSettings& settings, bool useVertexData);
 
 	void DisableTexture(u32 stage);
-	void EnableVertexData(bool useColor);
 
 	void EnableAlpha(AlphaBlendMode mode);
 
@@ -51,17 +55,29 @@ public:
 
 	void SetStencilMode(const StencilMode& mode);
 	void EnableLight(bool enable);
-	void ClearLights();
-	void AddLight(const LightData& light, ELighting lighting);
+	void SetLight(u32 id, const LightData& light, ELighting lighting);
+	void DisableLight(u32 id);
 
 	void EnableShader(Shader* s)
 	{
-		if(s == nullptr && m_Shader)
+		if(s != m_Shader && m_Shader)
 			m_Shader->Disable();
-		else if(s != m_Shader)
+		if(s) {
 			s->Enable();
+			m_IsFixedShader = (dynamic_cast<FixedFunctionShader*>(s) != nullptr);
+		}
 
 		m_Shader = s;
+	}
+
+	Shader* GetShader() 
+	{
+		return m_Shader;
+	}
+
+	bool IsFixedShader()
+	{
+		return m_IsFixedShader;
 	}
 
 	void ReleaseUnmanaged();
@@ -82,19 +98,17 @@ private:
 
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
 
-	size_t m_LightCount;
 	bool m_UseLighting;
 
 	WeakRef<video::Shader> m_Shader;
+	bool m_IsFixedShader = false;
 
-	size_t m_UsedTextureLayers;
+	u32 m_ActiveTextureLayers;
 
 	AlphaBlendMode m_AlphaMode;
 
 	u32 m_MaxTextureCount;
 	u32 m_MaxVSTextureCount;
-
-	bool m_UseVertexData;
 
 	bool m_ResetAll;
 

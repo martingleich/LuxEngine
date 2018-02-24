@@ -29,7 +29,7 @@ DeviceStateD3D9::~DeviceStateD3D9()
 	ReleaseUnmanaged();
 }
 
-void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Pass& pass)
+void DeviceStateD3D9::SetD3DColors(const Pass& pass)
 {
 	if(pass.lighting != ELighting::Disabled) {
 		D3DCOLORVALUE black = {0};
@@ -45,83 +45,90 @@ void DeviceStateD3D9::SetD3DColors(const video::Colorf& ambient, const Pass& pas
 		m_D3DMaterial = D3DMaterial;
 		m_Device->SetMaterial(&m_D3DMaterial);
 	}
-	m_Ambient = ambient;
-
-	SetRenderState(D3DRS_TEXTUREFACTOR, pass.diffuse.ToHex());
 }
 
-void DeviceStateD3D9::EnablePass(const Pass& p)
+void DeviceStateD3D9::EnablePass(const Pass& p, const video::Colorf& ambient)
 {
 	m_UseLighting = (p.lighting != ELighting::Disabled);
 
-	EnableShader(p.shader);
+	// Load material for fixed function
+	if(m_IsFixedShader) {
+		SetD3DColors(p);
+		m_Ambient = ambient;
+		if(TestFlag(p.lighting, ELighting::AmbientEmit))
+			SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
+		else
+			SetRenderState(D3DRS_AMBIENT, 0);
+
+		if(TestFlag(p.lighting, ELighting::DiffSpec) && !math::IsZero(m_D3DMaterial.Power))
+			SetRenderState(D3DRS_SPECULARENABLE, 1);
+		else
+			SetRenderState(D3DRS_SPECULARENABLE, 0);
+		if(!m_UseLighting)
+			SetRenderState(D3DRS_TEXTUREFACTOR, p.diffuse.ToHex());
+	}
+
 
 	// Apply overwrite and enable pipeline settings.
 	EnableAlpha(p.alpha);
-	EnableVertexData(p.useVertexColor);
 
 	SetStencilMode(p.stencil);
 
-	u32 layerCount = p.layers.Size();
-	if(layerCount == 0)
-		layerCount = 1;
-	if(!p.shader) {
-		// Enable texture layers for fixed function pipeline
-		// Shaders handle this while loading their parameters.
-		static const TextureStageSettings DEFAULT_STAGE;
-		static const TextureStageSettings DIFFUSE_ONLY_STAGE(
-			ETextureArgument::Diffuse,
-			ETextureArgument::Diffuse,
-			ETextureOperator::SelectArg1,
-			ETextureArgument::Diffuse,
-			ETextureArgument::Diffuse,
-			ETextureOperator::SelectArg1);
-		static const TextureLayer EMPTY_LAYER;
-		for(size_t i = 0; i < layerCount; ++i) {
-			auto& tex = i < p.layers.Size() ? p.layers[i] : EMPTY_LAYER;
-			EnableTextureLayer(i, tex);
-
-			const TextureStageSettings* settings;
-			if(!tex.texture)
-				settings = &DIFFUSE_ONLY_STAGE;
-			else
-				settings = i < p.textureStages.Size() ? &p.textureStages[i] : &DEFAULT_STAGE;
-
-			EnableTextureStage(i, *settings);
-		}
-
-		for(size_t i = layerCount; i < p.textureStages.Size(); ++i)
-			EnableTextureStage(i, p.textureStages[i]);
-	}
-
-	// Disable old layers
-	u32 newUsed = math::Max(layerCount, p.textureStages.Size());
-	for(size_t i = newUsed; i < m_UsedTextureLayers; ++i)
-		DisableTexture(i);
-
-	m_UsedTextureLayers = newUsed;
-
 	// Set Material parameters
-	if(TestFlag(p.lighting, ELighting::AmbientEmit))
-		SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
-	else
-		SetRenderState(D3DRS_AMBIENT, 0);
-
-	if(TestFlag(p.lighting, ELighting::DiffSpec) && !math::IsZero(m_D3DMaterial.Power))
-		SetRenderState(D3DRS_SPECULARENABLE, 1);
-	else
-		SetRenderState(D3DRS_SPECULARENABLE, 0);
-
 	SetRenderState(D3DRS_COLORWRITEENABLE, p.colorMask);
 
 	SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(p.zBufferFunc));
 	SetRenderState(D3DRS_ZWRITEENABLE, p.zWriteEnabled ? TRUE : FALSE);
-	SetRenderState(D3DRS_NORMALIZENORMALS, p.normalizeNormals ? TRUE : FALSE);
+	//SetRenderState(D3DRS_NORMALIZENORMALS, p.normalizeNormals ? TRUE : FALSE);
 	SetRenderState(D3DRS_FILLMODE, GetFillMode(p));
 	SetRenderState(D3DRS_SHADEMODE, p.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
 	SetRenderState(D3DRS_CULLMODE, GetCullMode(p));
 
 	m_ResetAll = false;
+}
+
+void DeviceStateD3D9::EnableFixedFunctionShader(
+	const core::Array<TextureLayer>& layers,
+	const core::Array<TextureStageSettings>& stages,
+	bool useVertexColors)
+{
+	SetRenderState(D3DRS_COLORVERTEX, useVertexColors ? TRUE : FALSE);
+
+	u32 layerCount = layers.Size();
+	if(layerCount == 0)
+		layerCount = 1;
+	// Enable texture layers for fixed function pipeline
+	// Shaders handle this while loading their parameters.
+	static const TextureStageSettings DEFAULT_STAGE;
+	static const TextureStageSettings DIFFUSE_ONLY_STAGE(
+		ETextureArgument::Diffuse,
+		ETextureArgument::Diffuse,
+		ETextureOperator::SelectArg1,
+		ETextureArgument::Diffuse,
+		ETextureArgument::Diffuse,
+		ETextureOperator::SelectArg1);
+	static const TextureLayer EMPTY_LAYER;
+	for(size_t i = 0; i < layerCount; ++i) {
+		auto& tex = i < layers.Size() ? layers[i] : EMPTY_LAYER;
+		EnableTextureLayer(i, tex);
+
+		const TextureStageSettings* settings;
+		if(!tex.texture)
+			settings = &DIFFUSE_ONLY_STAGE;
+		else
+			settings = i < stages.Size() ? &stages[i] : &DEFAULT_STAGE;
+
+		EnableTextureStage(i, *settings, useVertexColors);
+	}
+
+	for(u32 i = layerCount; i < (u32)stages.Size(); ++i)
+		EnableTextureStage(i, stages[i], useVertexColors);
+
+	u32 newUsed = math::Max(layerCount, stages.Size());
+	for(u32 i = newUsed; i < m_ActiveTextureLayers; ++i)
+		DisableTexture(i);
+
+	m_ActiveTextureLayers = newUsed;
 }
 
 void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
@@ -174,16 +181,19 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 }
 }
 
-void DeviceStateD3D9::EnableTextureStage(u32 stage, const TextureStageSettings& settings)
+void DeviceStateD3D9::EnableTextureStage(
+	u32 stage,
+	const TextureStageSettings& settings,
+	bool useVertexData)
 {
-	if(!m_UseLighting && settings.colorArg1 == ETextureArgument::Diffuse && !m_UseVertexData) {
+	if(!m_UseLighting && settings.colorArg1 == ETextureArgument::Diffuse && !useVertexData) {
 		SetTextureStageState(stage, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 		SetTextureStageState(stage, D3DTSS_ALPHAARG1, D3DTA_TFACTOR);
 	} else {
 		SetTextureStageState(stage, D3DTSS_COLORARG1, GetTextureArgument(settings.colorArg1));
 		SetTextureStageState(stage, D3DTSS_ALPHAARG1, GetTextureArgument(settings.alphaArg1));
 	}
-	if(!m_UseLighting && settings.colorArg2 == ETextureArgument::Diffuse && !m_UseVertexData) {
+	if(!m_UseLighting && settings.colorArg2 == ETextureArgument::Diffuse && !useVertexData) {
 		SetTextureStageState(stage, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 		SetTextureStageState(stage, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 	} else {
@@ -221,15 +231,6 @@ void DeviceStateD3D9::EnableAlpha(AlphaBlendMode mode)
 	}
 
 	m_AlphaMode = mode;
-}
-
-void DeviceStateD3D9::EnableVertexData(bool useColor)
-{
-	if(m_UseVertexData == useColor && !m_ResetAll)
-		return;
-
-	SetRenderState(D3DRS_COLORVERTEX, useColor ? TRUE : FALSE);
-	m_UseVertexData = useColor;
 }
 
 void* DeviceStateD3D9::GetLowLevelDevice()
@@ -365,11 +366,6 @@ u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
 	throw core::InvalidArgumentException("arg");
 }
 
-void DeviceStateD3D9::EnableFog(bool enable)
-{
-	SetRenderState(D3DRS_FOGENABLE, enable ? TRUE : FALSE);
-}
-
 void DeviceStateD3D9::SetFog(const FogData& fog)
 {
 	DWORD type = GetD3DFogType(fog.type);
@@ -390,11 +386,9 @@ void DeviceStateD3D9::EnableLight(bool enable)
 	m_UseLighting = enable;
 }
 
-void DeviceStateD3D9::ClearLights()
+void DeviceStateD3D9::DisableLight(u32 id)
 {
-	for(size_t i = 0; i < m_LightCount; ++i)
-		m_Device->LightEnable((DWORD)i, FALSE);
-	m_LightCount = 0;
+	m_Device->LightEnable((DWORD)id, FALSE);
 }
 
 void DeviceStateD3D9::SetStencilMode(const StencilMode& mode)
@@ -422,9 +416,9 @@ void DeviceStateD3D9::SetStencilMode(const StencilMode& mode)
 	}
 }
 
-void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
+void DeviceStateD3D9::SetLight(u32 id, const LightData& light, ELighting lighting)
 {
-	DWORD lightId = (DWORD)m_LightCount;
+	DWORD lightId = (DWORD)id;
 
 	D3DLIGHT9 D3DLight;
 
@@ -466,8 +460,6 @@ void DeviceStateD3D9::AddLight(const LightData& light, ELighting lighting)
 
 	if(FAILED(hr = m_Device->LightEnable(lightId, TRUE)))
 		throw core::D3D9Exception(hr);
-
-	++m_LightCount;
 }
 
 void DeviceStateD3D9::ReleaseUnmanaged()
@@ -481,9 +473,7 @@ void DeviceStateD3D9::ReleaseUnmanaged()
 void DeviceStateD3D9::Reset()
 {
 	m_Shader = nullptr;
-	m_LightCount = 0;
-	m_UsedTextureLayers = 0;
-	m_UseVertexData = true;
+	m_ActiveTextureLayers = 0;
 	m_ResetAll = true;
 
 	for(auto i = 0; i < RENDERSTATE_COUNT; ++i)

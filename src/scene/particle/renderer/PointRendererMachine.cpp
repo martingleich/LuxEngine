@@ -2,7 +2,7 @@
 #include "scene/particle/ParticleModel.h"
 #include "scene/particle/ParticleGroupData.h"
 
-#include "video/Pass.h"
+#include "video/MaterialLibrary.h"
 
 namespace lux
 {
@@ -22,7 +22,8 @@ PointRendererMachine::PointRendererMachine()
 	m_DefaultPass.zWriteEnabled = false;
 	m_DefaultPass.fogEnabled = false;
 	m_DefaultPass.lighting = video::ELighting::Disabled;
-	m_DefaultPass.useVertexColor = true;
+	video::FixedFunctionParameters paramsDiffuse({}, {}, true);
+	m_DefaultPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramsDiffuse);
 
 	m_EmitPass = m_DefaultPass;
 	m_EmitPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;

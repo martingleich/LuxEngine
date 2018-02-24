@@ -49,6 +49,11 @@ public:
 	StrongRef<BaseTexture> texture;
 	RepeatMode repeat;
 
+	TextureLayer() {}
+	explicit TextureLayer(BaseTexture* tex) :
+		texture(tex)
+	{}
+
 	inline bool operator!=(const TextureLayer& other) const
 	{
 		return texture != other.texture || repeat != other.repeat;

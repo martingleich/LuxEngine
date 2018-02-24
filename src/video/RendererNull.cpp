@@ -35,7 +35,7 @@ RendererNull::RendererNull(VideoDriver* driver) :
 
 void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ShaderParamSetCallback* paramSetCallback, void* userParam)
 {
-	SetDirty(Dirty_Material);
+	SetDirty(Dirty_Pass);
 
 	m_Material = nullptr;
 	m_Pass = pass;
@@ -47,6 +47,7 @@ void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ShaderParamSetCa
 void RendererNull::SetMaterial(AbstractMaterial* material)
 {
 	SetDirty(Dirty_Material);
+
 	m_Material = material;
 	m_ParamSetCallback = material;
 	m_UserParam = material;

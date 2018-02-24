@@ -1,6 +1,7 @@
 #include "video/Canvas3D.h"
 #include "video/Renderer.h"
 #include "video/VideoDriver.h"
+#include "video/MaterialLibrary.h"
 
 namespace lux
 {
@@ -13,7 +14,7 @@ Canvas3DSystem::Canvas3DSystem()
 {
 	m_PenPass.lighting = video::ELighting::Disabled;
 	m_PenPass.fogEnabled = false;
-	m_PenPass.useVertexColor = true;
+	m_PenPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader({}, {}, true);
 
 	video::VertexDeclaration decl;
 	decl.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
@@ -23,11 +24,11 @@ Canvas3DSystem::Canvas3DSystem()
 	m_BrushPass.lighting = video::ELighting::Disabled;
 	m_BrushPass.fogEnabled = false;
 	m_BrushPass.culling = video::EFaceSide::None;
-	m_BrushPass.useVertexColor = true;
 	m_BrushPass.zWriteEnabled = false;
 	m_BrushPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_BrushPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_BrushPass.alpha.blendOperator = video::EBlendOperator::Add;
+	m_BrushPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader({}, {}, true);
 }
 
 Canvas3DSystem::~Canvas3DSystem()

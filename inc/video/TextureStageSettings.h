@@ -54,6 +54,22 @@ public:
 	{
 		return coordSource != 0xFFFFFFFF;
 	}
+
+	bool operator==(const TextureStageSettings& other) const
+	{
+		return
+			coordSource == other.coordSource &&
+			colorArg1 == other.colorArg1 &&
+			colorArg2 == other.colorArg2 &&
+			colorOperator == other.colorOperator &&
+			alphaArg1 == other.alphaArg1 &&
+			alphaArg2 == other.alphaArg2 &&
+			alphaOperator == other.alphaOperator;
+	}
+	bool operator!=(const TextureStageSettings& other) const
+	{
+		return !(*this == other);
+	}
 };
 
 } // namespace video

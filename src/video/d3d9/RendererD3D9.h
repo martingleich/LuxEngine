@@ -20,11 +20,14 @@ class RendererD3D9 : public RendererNull
 {
 public:
 	RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& d3d9);
+	~RendererD3D9();
 
 	void BeginScene();
 	void Clear(
 		bool clearColor, bool clearZBuffer, bool clearStencil,
-		video::Color color = video::Color::Black, float z = 1.0f, u32 stencil = 0);
+		video::Color color = video::Color::Black,
+		float z = 1.0f,
+		u32 stencil = 0);
 	void EndScene();
 	bool Present();
 
@@ -86,7 +89,9 @@ public:
 		RendererD3D9::DrawGeometry(geo, 0, 0xFFFFFFFF, is3D);
 	}
 
-	void DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D = true);
+	void DrawGeometry(const Geometry* geo,
+		u32 firstPrimitive, u32 primitiveCount,
+		bool is3D = true);
 
 	///////////////////////////////////////////////////////////////////////////
 	void ReleaseUnmanaged();
@@ -101,9 +106,9 @@ private:
 	void EnterRenderMode2D();
 	void LeaveRenderMode2D();
 
-	void LoadTransforms(const Pass& pass);
-	void LoadFogSettings(const Pass& pass);
-	void LoadLightSettings(const Pass& pass);
+	void UpdateTransforms(float polygonOffset);
+	void LoadFogSettings(bool isFogActive, bool fixedFunction, bool changedShader, bool changedFogEnable);
+	void LoadLightSettings(ELighting lighting, bool fixedFunction, bool changedShader, bool changeLighting);
 
 	void SetVertexFormat(const VertexFormat& format);
 
@@ -118,18 +123,13 @@ private:
 
 	VideoDriverD3D9* m_Driver;
 
-	// The current state of rendersettings, for optimization purposes
-	Pass m_OverwritePass;
-
 	VertexFormat m_VertexFormat;
-	bool m_ChangedShaderFixed = false;
-	bool m_ChangedLighting = false;
-	bool m_ChangedFog = false;
-	bool m_UseShader = false;
-	float m_PrePolyOffset = 0.0f;
+
+	float m_PrevPolyOffset = 0.0f;
 	ELighting m_PrevLighting = ELighting::Disabled;
 	bool m_PrevFog = false;
-	EFaceWinding m_PrevFrontFace = EFaceWinding::CCW;
+
+	u32 m_ActiveFixedLights;
 };
 
 } // namespace video

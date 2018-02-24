@@ -62,10 +62,10 @@ public:
 	{
 		m_TexId = shader->GetParamId("texture");
 	}
-	void SendShaderSettings(const video::Pass& pass, void*) const
+
+	void SendShaderSettings(const video::Pass& pass, void* texLayer) const
 	{
-		pass.shader->SetParam(m_TexId, &pass.layers[0]);
-		pass.shader->LoadSceneParams(pass);
+		pass.shader->SetParam(m_TexId, texLayer);
 	}
 };
 
@@ -78,17 +78,28 @@ StrongRef<video::Shader> EnsureFontShader()
 		return g_FontShader;
 
 	auto matLib = video::MaterialLibrary::Instance();
+	StrongRef<video::Shader> shader;
 	if(matLib->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {
-		auto shader = video::MaterialLibrary::Instance()->CreateShaderFromMemory(
+		// Use real shader
+		shader = video::MaterialLibrary::Instance()->CreateShaderFromMemory(
 			video::EShaderLanguage::HLSL,
 			g_VSCode, "mainVS", 2, 0,
 			g_PSCode, "mainPS", 2, 0);
-		g_ParamLoader.Init(shader);
-		g_FontShader = shader.GetWeak();
-		return shader;
 	} else {
-		return nullptr;
+		// Use fixed function shader
+		video::TextureStageSettings tss;
+		tss.alphaArg1 = video::ETextureArgument::Texture;
+		tss.alphaArg2 = video::ETextureArgument::Diffuse;
+		tss.alphaOperator = video::ETextureOperator::Modulate;
+		tss.colorArg1 = video::ETextureArgument::Texture;
+		tss.colorArg2 = video::ETextureArgument::Diffuse;
+		tss.colorOperator = video::ETextureOperator::Modulate;
+		video::FixedFunctionParameters params({"textures"}, {tss}, true);
+		shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(params);
 	}
+	g_ParamLoader.Init(shader);
+	g_FontShader = shader.GetWeak();
+	return shader;
 }
 
 }
@@ -162,7 +173,9 @@ void FontRaster::Draw(
 
 	m_Pass.diffuse = settings.color;
 	m_Pass.emissive = settings.borderColor;
-	renderer->SetPass(m_Pass, false, &g_ParamLoader);
+	video::TextureLayer texLayer;
+	texLayer.texture = m_Texture;
+	renderer->SetPass(m_Pass, false, &g_ParamLoader, &texLayer);
 
 	if(!m_Pass.shader)
 		renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
@@ -308,31 +321,13 @@ FontRenderSettings FontRaster::GetFinalFontSettings(const FontRenderSettings& _s
 
 void FontRaster::InitPass()
 {
-	auto shader = EnsureFontShader();
 	m_Pass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_Pass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_Pass.alpha.blendOperator = video::EBlendOperator::Add;
 	m_Pass.zWriteEnabled = false;
 	m_Pass.zBufferFunc = video::EComparisonFunc::Always;
 	m_Pass.culling = video::EFaceSide::None;
-	m_Pass.useVertexColor = false;
-	m_Pass.AddTexture();
-	m_Pass.layers[0].texture = m_Texture;
-
-	if(shader) {
-		// Use shader for rendering
-		m_Pass.shader = shader;
-	} else {
-		// Use fixed function pipeline
-		video::TextureStageSettings tss;
-		tss.alphaArg1 = video::ETextureArgument::Texture;
-		tss.alphaArg2 = video::ETextureArgument::Diffuse;
-		tss.alphaOperator = video::ETextureOperator::Modulate;
-		tss.colorArg1 = video::ETextureArgument::Texture;
-		tss.colorArg2 = video::ETextureArgument::Diffuse;
-		tss.colorOperator = video::ETextureOperator::Modulate;
-		m_Pass.textureStages.PushBack(tss);
-	}
+	m_Pass.shader = EnsureFontShader();
 }
 
 void FontRaster::LoadImageData(

@@ -32,12 +32,18 @@ public:
 	void SetParam(u32 paramId, const void* data);
 	u32 GetParamId(const core::String& name) const;
 	void LoadSceneParams(const Pass& pass);
+	void Render() {}
 	void Disable();
 
 	size_t GetSceneParamCount() const;
 	core::AttributePtr GetSceneParam(size_t id) const;
 
 	const core::ParamPackage& GetParamPackage() const;
+
+	bool IsFixedFunction() const
+	{
+		return false;
+	}
 
 private:
 	enum EParamType

@@ -50,7 +50,7 @@ public:
 	{
 		lxAssert(!m_Type.IsUnknown());
 	}
-	
+
 	template <typename T>
 	static VariableAccess Constant(const T& value)
 	{
@@ -64,9 +64,8 @@ public:
 	{
 	}
 
-	//! Access as any type
 	template <typename T>
-	operator T() const
+	T As() const
 	{
 		if(IsValid()) {
 			auto type = core::TemplType<T>::Get();
@@ -81,13 +80,20 @@ public:
 		return T();
 	}
 
+	//! Access as any type
+	template <typename T>
+	operator T() const
+	{
+		return As<T>();
+	}
+
 	template <typename T>
 	T Default(const T& defaultValue) const
 	{
-		if(!IsConvertible(m_Type, core::TemplType<T>::Get()) || !IsValid())
-			return defaultValue;
+		if(IsConvertible(m_Type, core::TemplType<T>::Get()) && IsValid())
+			return As<T>();
 		else
-			return (T)(*this);
+			return defaultValue;
 	}
 
 	operator const char*() const
@@ -114,13 +120,13 @@ public:
 	//! Access as texture
 	operator video::BaseTexture*() const
 	{
-		return ((video::TextureLayer)*this).texture;
+		return As<video::TextureLayer>().texture;
 	}
 
 	//! Access as texture
 	operator video::Texture*() const
 	{
-		auto base = (video::BaseTexture*)*this;
+		auto base = As<video::BaseTexture*>();
 		auto out = dynamic_cast<video::Texture*>(base);
 		if(!out)
 			throw core::Exception("Invalid cast");
@@ -131,7 +137,7 @@ public:
 	//! Access as texture
 	operator video::CubeTexture*() const
 	{
-		auto base = (video::BaseTexture*)*this;
+		auto base = As<video::BaseTexture*>();
 		auto out = dynamic_cast<video::CubeTexture*>(base);
 		if(!out)
 			throw core::Exception("Invalid cast");

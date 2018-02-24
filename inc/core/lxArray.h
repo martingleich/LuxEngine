@@ -224,6 +224,22 @@ public:
 		return *this;
 	}
 
+	//! Comparison
+	bool operator==(const Array<T>& other) const
+	{
+		if(Size() != other.Size())
+			return false;
+		for(size_t i = 0; i < other.Size(); ++i) {
+			if(Data_c()[i] != other.Data_c()[i])
+				return false;
+		}
+		return true;
+	}
+	bool operator!=(const Array<T>& other) const
+	{
+		return !(*this == other);
+	}
+
 	//! Add a new entry at any position to the array
 	/**
 	\param entry The new entry

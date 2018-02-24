@@ -7,6 +7,7 @@
 #include "video/d3d9/TextureD3D9.h"
 #include "video/d3d9/CubeTextureD3D9.h"
 #include "video/d3d9/ShaderD3D9.h"
+#include "video/d3d9/FixedFunctionShaderD3D9.h"
 
 #include "video/mesh/Geometry.h"
 #include "video/IndexBuffer.h"
@@ -84,7 +85,7 @@ VideoDriverD3D9::~VideoDriverD3D9()
 	m_D3DDevice->SetPixelShader(nullptr);
 
 	AuxiliaryTextureManagerD3D9::Destroy();
-	
+
 	// Destroy buffer manager before the device is destroyed
 	m_BufferManager.Reset();
 
@@ -452,15 +453,19 @@ bool VideoDriverD3D9::IsShaderSupported(EShaderLanguage lang, int vsMajor, int v
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
-	const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
-	const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
+	const char* vsCode, const char* vsEntryPoint, u32 vsLength,
+	int vsMajorVersion, int vsMinorVersion,
+	const char* psCode, const char* psEntryPoint, u32 psLength,
+	int psMajorVersion, int psMinorVersion,
 	core::Array<core::String>* errorList)
 {
 	if(language != EShaderLanguage::HLSL)
 		throw core::InvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");
 
-	const char* vsProfile = GetD3DXShaderProfile(false, VSmajorVersion, VSminorVersion);
-	const char* psProfile = GetD3DXShaderProfile(true, PSmajorVersion, PSminorVersion);
+	const char* vsProfile = GetD3DXShaderProfile(false,
+		vsMajorVersion, vsMinorVersion);
+	const char* psProfile = GetD3DXShaderProfile(true,
+		psMajorVersion, psMinorVersion);
 
 	if(!vsProfile)
 		throw core::InvalidArgumentException("vertex shader profile", "Invalid vertex shader profile(~d.~d).");
@@ -469,9 +474,18 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 		throw core::InvalidArgumentException("pixel shader profile", "Invalid pixel shader profile(~d.~d).");
 
 	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this, m_DeviceState);
-	out->Init(VSCode, VSEntryPoint, VSLength, vsProfile, PSCode, PSEntryPoint, PSLength, psProfile, errorList);
+	out->Init(
+		vsCode, vsEntryPoint, vsLength, vsProfile,
+		psCode, psEntryPoint, psLength, psProfile,
+		errorList);
 
 	return out;
+}
+
+StrongRef<Shader> VideoDriverD3D9::CreateFixedFunctionShader(
+	const FixedFunctionParameters& params)
+{
+	return LUX_NEW(FixedFunctionShaderD3D9)(m_DeviceState, params);
 }
 
 const RendertargetD3D9& VideoDriverD3D9::GetBackbufferTarget()

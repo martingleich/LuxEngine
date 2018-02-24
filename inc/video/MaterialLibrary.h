@@ -7,6 +7,7 @@
 
 #include "video/Material.h"
 #include "video/Shader.h"
+#include "video/FixedFunctionShader.h"
 #include "video/VideoEnums.h"
 
 namespace lux
@@ -21,6 +22,13 @@ Caches materialsrenders and is used to created new ones.
 class MaterialLibrary : public ReferenceCounted
 {
 public:
+	enum EKnownMaterial
+	{
+		Solid,
+		Transparent,
+		DebugOverlay
+	};
+
 	LUX_API MaterialLibrary();
 	LUX_API virtual ~MaterialLibrary();
 
@@ -31,6 +39,10 @@ public:
 	LUX_API void SetMaterial(const core::String& name, Material* material);
 	LUX_API StrongRef<video::Material> GetMaterial(const core::String& name);
 	LUX_API StrongRef<video::Material> CloneMaterial(const core::String& name);
+
+	LUX_API void SetMaterial(EKnownMaterial name, Material* material);
+	LUX_API StrongRef<video::Material> GetMaterial(EKnownMaterial name);
+	LUX_API StrongRef<video::Material> CloneMaterial(EKnownMaterial name);
 
 	//! Create a shader from file
 	/**
@@ -54,6 +66,7 @@ public:
 		int PSMajor, int PSMinor,
 		core::Array<core::String>* errorList = nullptr);
 
+
 	//! Creates a new shader from code
 	/**
 	\throws ShaderCompileException
@@ -64,7 +77,16 @@ public:
 		int VSmajorVersion, int VSminorVersion,
 		const core::String& PSCode, const char* PSEntryPoint,
 		int PSmajorVersion, int PSminorVersion,
-		core::Array<core::String>* errorList=nullptr);
+		core::Array<core::String>* errorList = nullptr);
+
+	//! Retrieves a shader matching a fixed function description.
+	LUX_API StrongRef<Shader> GetFixedFunctionShader(
+		const core::Array<core::String>& textures,
+		const core::Array<TextureStageSettings>& stages,
+		bool useVertexColors = false);
+
+	//! Retrieves a shader matching a fixed function description.
+	LUX_API StrongRef<Shader> GetFixedFunctionShader(const FixedFunctionParameters& params);
 
 	//! Checks if some shader language and version is supported
 	LUX_API bool IsShaderSupported(
@@ -88,7 +110,8 @@ private:
 		ShaderInclude(EShaderLanguage& lang, const core::String& n) :
 			language(lang),
 			name(n)
-		{}
+		{
+		}
 
 		bool operator<(const ShaderInclude& other) const
 		{
@@ -104,8 +127,23 @@ private:
 		}
 	};
 
+	struct FixedFunctionEntry
+	{
+		FixedFunctionEntry(
+			const FixedFunctionParameters& _params,
+			Shader* _shader) :
+			params(_params),
+			shader(_shader)
+		{}
+		FixedFunctionParameters params;
+		StrongRef<Shader> shader;
+	};
+
 	core::OrderedMap<ShaderInclude, core::RawMemory> m_ShaderIncludes;
-	core::HashMap<core::String, StrongRef<Material>> m_BaseMaterials;
+	core::HashMap<core::String, size_t> m_MaterialMap;
+	core::Array<StrongRef<Material>> m_MaterialList;
+
+	core::Array<FixedFunctionEntry> m_FixedFunctionShaders;
 };
 
 } // namespace video

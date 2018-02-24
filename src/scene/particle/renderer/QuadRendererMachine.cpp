@@ -13,6 +13,25 @@ namespace lux
 {
 namespace scene
 {
+namespace
+{
+class ShaderParamLoader : public video::ShaderParamSetCallback
+{
+public:
+	u32 m_TexId;
+	void Init(video::Shader* shader)
+	{
+		m_TexId = shader->GetParamId("texture");
+	}
+
+	void SendShaderSettings(const video::Pass& pass, void* texLayer) const
+	{
+		pass.shader->SetParam(m_TexId, texLayer);
+	}
+};
+
+ShaderParamLoader g_ParamLoader;
+}
 
 QuadRendererMachine::QuadRendererMachine() :
 	m_Driver(video::VideoDriver::Instance()),
@@ -24,13 +43,22 @@ QuadRendererMachine::QuadRendererMachine() :
 	m_DefaultPass.zWriteEnabled = false;
 	m_DefaultPass.fogEnabled = false;
 	m_DefaultPass.lighting = video::ELighting::Disabled;
-	m_DefaultPass.useVertexColor = true;
-	m_DefaultPass.AddTexture();
+	video::TextureStageSettings tss;
+	tss.alphaArg1 = video::ETextureArgument::Texture;
+	tss.alphaArg2 = video::ETextureArgument::Diffuse;
+	tss.alphaOperator = video::ETextureOperator::Modulate;
+	tss.colorArg1 = video::ETextureArgument::Texture;
+	tss.colorArg2 = video::ETextureArgument::Diffuse;
+	tss.colorOperator = video::ETextureOperator::Modulate;
+	video::FixedFunctionParameters paramDefault({"texture"}, {tss}, true);
+	m_DefaultPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramDefault);
 
 	m_EmitPass = m_DefaultPass;
 	m_EmitPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_EmitPass.alpha.dstFactor = video::EBlendFactor::One;
 	m_EmitPass.alpha.blendOperator = video::EBlendOperator::Add;
+
+	g_ParamLoader.Init(m_DefaultPass.shader);
 }
 
 QuadRendererMachine::~QuadRendererMachine()
@@ -166,6 +194,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 
 	void (QuadRendererMachine::*RenderQuad)(video::Vertex3D* vertices, const Particle& particle);
 
+	video::TextureLayer particleTexture;
 	{
 		video::Texture* texture;
 		math::RectF* rect;
@@ -180,7 +209,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		}
 		// TODO: Allow more than one texture for particle system.
 		if(m_Data->SpriteBank->GetSprite(sprite, 0, false, rect, texture))
-			pass.layers[0].texture = texture;
+			particleTexture = video::TextureLayer(texture);
 
 		if(m_Model->IsEnabled(Particle::EParameter::Angle))
 			RenderQuad = &QuadRendererMachine::RenderQuad_ScaledRotated;
@@ -212,7 +241,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	}
 	vertexBuffer->Update();
 
-	videoRenderer->SetPass(pass, true);
+	videoRenderer->SetPass(pass, true, &g_ParamLoader, &particleTexture);
 	videoRenderer->DrawGeometry(m_Buffer, 0, (u32)(pool.GetActiveCount() * 2));
 }
 

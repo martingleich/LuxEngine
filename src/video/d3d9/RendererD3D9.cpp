@@ -13,6 +13,7 @@
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
 #include "platform/D3D9Exception.h"
+#include "video/FixedFunctionShader.h"
 
 namespace lux
 {
@@ -28,6 +29,17 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
 	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
+	m_ActiveFixedLights = 0;
+}
+
+RendererD3D9::~RendererD3D9()
+{
+	// Free all bound objects
+	m_Device->SetVertexDeclaration(nullptr);
+	m_Device->SetVertexShader(nullptr);
+	m_Device->SetPixelShader(nullptr);
+
+	// Index and Vertexbuffer are unbound in Hardwarebuffermanager destructor.
 }
 
 void RendererD3D9::BeginScene()
@@ -388,82 +400,117 @@ void RendererD3D9::Reset()
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
 	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
+	m_ActiveFixedLights = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 {
-	bool dirtyPass = false;
+	bool dirtyPass = IsDirty(Dirty_Pass | Dirty_Material);
+	auto pass = m_Material ? m_Material->GetPass(passId) : m_Pass;
 
-	auto& srcPass = m_Material ? m_Material->GetPass(passId) : m_Pass;
+	lxAssert(pass.shader != nullptr);
 
-	const auto& pass = m_OverwritePass;
-	if(IsDirty(Dirty_Overwrites) || IsDirty(Dirty_Material)) {
-		m_OverwritePass = srcPass;
-		if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty())
-			m_FinalOverwrite.Apply(m_OverwritePass);
-		if(m_RenderMode == ERenderMode::Mode2D) {
-			m_OverwritePass.lighting = ELighting::Disabled;
-			m_OverwritePass.fogEnabled = false;
-		}
-		m_OverwritePass.normalizeNormals |= m_NormalizeNormals;
+	if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty()) {
+		m_FinalOverwrite.Apply(pass);
 		dirtyPass = true;
 	}
-	if(frontFace == EFaceWinding::CW)
-		m_OverwritePass.culling = FlipFaceSide(m_OverwritePass.culling);
-
-	if(m_PrevFrontFace != frontFace) {
+	if(m_RenderMode == ERenderMode::Mode2D) {
+		pass.lighting = ELighting::Disabled;
+		pass.fogEnabled = false;
 		dirtyPass = true;
-		m_PrevFrontFace = frontFace;
+	}
+	if(frontFace != EFaceWinding::CCW) {
+		pass.culling = FlipFaceSide(pass.culling);
+		dirtyPass = true;
+	}
+	if(pass.fogEnabled != m_IsFogActive && pass.fogEnabled) {
+		pass.fogEnabled = m_IsFogActive && pass.fogEnabled;
+		dirtyPass = true;
 	}
 
-	if((pass.shader != nullptr) != m_UseShader) {
-		m_ChangedShaderFixed = true;
-		m_UseShader = (pass.shader != nullptr);
-	}
-
-	if(pass.lighting != m_PrevLighting) {
-		m_PrevLighting = pass.lighting;
-		m_ChangedLighting = true;
-	}
-
-	if(pass.fogEnabled != m_PrevFog) {
-		m_PrevFog = pass.fogEnabled;
-		m_ChangedFog = true;
-	}
-
-	if(pass.polygonOffset != m_PrePolyOffset) {
-		SetDirty(Dirty_PolygonOffset);
-		m_PrePolyOffset = pass.polygonOffset;
-	}
-
-	// Enable pass settings
+	bool changedFogEnable = false;
+	bool changedLighting = false;
+	bool changedShader = false;
+	bool useFixedPipeline = (pass.shader.As<FixedFunctionShader>() != nullptr);
 	if(dirtyPass) {
-		m_DeviceState.SetD3DColors(*m_ParamId.ambient, pass);
-		m_DeviceState.EnablePass(pass);
+		if(pass.fogEnabled != m_PrevFog) {
+			changedFogEnable = true;
+		}
+		if(pass.lighting != m_PrevLighting) {
+			changedLighting = true;
+		}
+
+		if(pass.polygonOffset != m_PrevPolyOffset) {
+			SetDirty(Dirty_PolygonOffset);
+		}
+
+		// Enable pass settings
+		// First enable shader to mimize stage changes.
+		auto oldShader = m_DeviceState.GetShader();
+		auto oldUseFixedPipeline = m_DeviceState.IsFixedShader();
+		if(pass.shader != oldShader) {
+			m_DeviceState.EnableShader(pass.shader);
+
+			// If we switches from a fixed shader to another fixed shader, it's no real switch.
+			changedShader = true;
+			if(oldUseFixedPipeline && useFixedPipeline && oldShader)
+				changedShader = false;
+			else
+				changedShader = true;
+		}
+		m_DeviceState.EnablePass(pass, *m_ParamId.ambient);
 	}
 
-	// Generate data for transforms, fog and light
-	LoadTransforms(pass);
-	LoadFogSettings(pass);
-	LoadLightSettings(pass);
+	m_DeviceState.SetRenderState(D3DRS_NORMALIZENORMALS, m_NormalizeNormals ? TRUE : FALSE);
+
+	// Update projection matrices to include polygon offset, or change for 2D mode
+	UpdateTransforms(pass.polygonOffset);
+	ClearDirty(Dirty_PolygonOffset);
+
+	// Load fixed function transforms
+	if(useFixedPipeline) {
+		// Only if matrix changed or shader changed
+		if(IsDirty(Dirty_ViewProj) || changedShader) {
+			m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
+			m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
+		}
+		if(IsDirty(Dirty_World) || changedShader) {
+			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
+		}
+	}
+	ClearDirty(Dirty_World);
+	ClearDirty(Dirty_ViewProj);
+
+	// Generate data for fog and light
+	LoadFogSettings(pass.fogEnabled, useFixedPipeline, changedShader, changedFogEnable);
+	LoadLightSettings(pass.lighting, useFixedPipeline, changedShader, changedLighting);
 
 	// Send the generated data to the shader
+	// Only if scene or shader changed.
+	pass.shader->LoadSceneParams(pass);
+
 	if(m_ParamSetCallback && pass.shader)
 		m_ParamSetCallback->SendShaderSettings(passId, pass, m_UserParam);
+
+	// Start rendering with this shader
+	pass.shader->Render();
 
 	ClearDirty(Dirty_Rendertarget);
 	ClearDirty(Dirty_Material);
 	ClearDirty(Dirty_RenderMode);
 	ClearDirty(Dirty_Overwrites);
-	m_ChangedLighting = false;
-	m_ChangedShaderFixed = false;
+	m_PrevFog = pass.fogEnabled;
+	m_PrevLighting = pass.lighting;
+	m_PrevPolyOffset = pass.polygonOffset;
 }
 
 void RendererD3D9::SwitchRenderMode(ERenderMode mode)
 {
-	if(m_RenderMode != mode)
-		SetDirty(Dirty_Overwrites);
+	if(m_RenderMode == mode)
+		return;
+
+	SetDirty(Dirty_RenderMode);
 
 	// Leave the old mode
 	switch(m_RenderMode) {
@@ -478,9 +525,6 @@ void RendererD3D9::SwitchRenderMode(ERenderMode mode)
 	case ERenderMode::Mode2D: EnterRenderMode2D(); break;
 	case ERenderMode::Mode3D: EnterRenderMode3D(); break;
 	}
-
-	if(m_RenderMode != mode)
-		SetDirty(Dirty_RenderMode);
 
 	m_RenderMode = mode;
 }
@@ -501,16 +545,16 @@ void RendererD3D9::LeaveRenderMode2D()
 {
 }
 
-void RendererD3D9::LoadTransforms(const Pass& pass)
+void RendererD3D9::UpdateTransforms(float polygonOffset)
 {
 	if(m_RenderMode == ERenderMode::Mode3D) {
 		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode) || IsDirty(Dirty_ViewProj)) {
 			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
-			if(pass.polygonOffset) {
+			if(polygonOffset) {
 				const u32 zBits = m_Driver->GetConfig().zsFormat.zBits;
 				const u32 values = 1 << zBits;
 				const float min = 1.0f / values;
-				projCopy.AddTranslation(math::Vector3F(0.0f, 0.0f, -min * pass.polygonOffset));
+				projCopy.AddTranslation(math::Vector3F(0.0f, 0.0f, -min * polygonOffset));
 			}
 			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, projCopy);
 			SetDirty(Dirty_ViewProj);
@@ -536,40 +580,24 @@ void RendererD3D9::LoadTransforms(const Pass& pass)
 			SetDirty(Dirty_ViewProj);
 		}
 	}
-
-	if(IsDirty(Dirty_ViewProj)) {
-		m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
-		m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
-		ClearDirty(Dirty_ViewProj);
-	}
-	if(IsDirty(Dirty_World)) {
-		m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
-		ClearDirty(Dirty_World);
-	}
-
-	ClearDirty(Dirty_PolygonOffset);
 }
 
-void RendererD3D9::LoadFogSettings(const Pass& pass)
+void RendererD3D9::LoadFogSettings(
+	bool isFogActive,
+	bool fixedFunction,
+	bool changedShader,
+	bool changedFogState)
 {
-	bool useFog = pass.fogEnabled && m_IsFogActive;
-	bool useFixedFog = pass.shader ? false : useFog;
+	bool useFixedFog = fixedFunction && isFogActive;
 
-	// Enable or disable the fog, for fixed and shader
-	m_DeviceState.EnableFog(useFixedFog);
-
-	// Update always since it enables or disables fog for the shader
-	video::Colorf fog1;
-	fog1.r = m_Fog.color.r;
-	fog1.g = m_Fog.color.g;
-	fog1.b = m_Fog.color.b;
-	fog1.a = useFog ? 1.0f : 0.0f;
-	*m_ParamId.fog1 = fog1;
-
-	if(IsDirty(Dirty_Fog) || (useFixedFog && m_ChangedFog) || m_ChangedShaderFixed) {
-		if(useFixedFog)
-			m_DeviceState.SetFog(m_Fog);
-		video::Colorf fog2;
+	// Change if not using fixed function, and the fog or shader changed
+	if(!fixedFunction && (IsDirty(Dirty_Fog) || changedShader || changedFogState)) {
+		// Set shader fog state.
+		video::Colorf fog1, fog2;
+		fog1.r = m_Fog.color.r;
+		fog1.g = m_Fog.color.g;
+		fog1.b = m_Fog.color.b;
+		fog1.a = isFogActive ? 1.0f : 0.0f;
 		fog2.r =
 			m_Fog.type == EFogType::Linear ? 1.0f :
 			m_Fog.type == EFogType::Exp ? 2.0f :
@@ -577,30 +605,51 @@ void RendererD3D9::LoadFogSettings(const Pass& pass)
 		fog2.g = m_Fog.start;
 		fog2.b = m_Fog.end;
 		fog2.a = m_Fog.density;
+
+		*m_ParamId.fog1 = fog1;
 		*m_ParamId.fog2 = fog2;
-		ClearDirty(Dirty_Fog);
 	}
+	// Change if using fixed function, and the fog or shader changed
+	if(fixedFunction && (IsDirty(Dirty_Fog) || changedShader || changedFogState)) {
+		m_DeviceState.SetRenderState(D3DRS_FOGENABLE, useFixedFog ? TRUE : FALSE);
+		m_DeviceState.SetFog(m_Fog);
+	}
+
+	ClearDirty(Dirty_Fog);
 }
 
-void RendererD3D9::LoadLightSettings(const Pass& pass)
+void RendererD3D9::LoadLightSettings(
+	ELighting lighting,
+	bool fixedFunction,
+	bool changedShader,
+	bool changedLighting)
 {
-	bool useLights = (pass.lighting != ELighting::Disabled);
-	bool useFixedLights = pass.shader ? false : useLights;
+	bool useLights = (lighting != ELighting::Disabled);
 
-	m_DeviceState.EnableLight(useFixedLights);
-	*m_ParamId.lighting = (float)pass.lighting;
+	if(!fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
+		*m_ParamId.lighting = (float)lighting;
+	}
+	if(fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
+		m_DeviceState.EnableLight(useLights);
+	}
 
-	if(IsDirty(Dirty_Lights) || (useFixedLights && m_ChangedLighting) || m_ChangedShaderFixed) {
-		// Only use the fixed pipeline if there is no shader
-		if(!pass.shader) {
-			m_DeviceState.ClearLights();
-			// Enable fixed pipeline lights
-			for(auto it = m_Lights.First(); it != m_Lights.End(); ++it)
-				m_DeviceState.AddLight(*it, pass.lighting);
+	if(IsDirty(Dirty_Lights) || changedLighting) {
+		if(fixedFunction) {
+			if(useLights) {
+				u32 i = 0;
+				for(auto& l : m_Lights)
+					m_DeviceState.SetLight(i++, l, lighting);
+				u32 newLightCount = i;
+				for(; i < m_ActiveFixedLights; ++i)
+					m_DeviceState.DisableLight(i);
+				m_ActiveFixedLights = newLightCount;
+			}
 		} else {
-			// Generate light matrices and set as param.
-			for(size_t i = 0; i < m_Lights.Size(); ++i)
-				*m_ParamId.lights[i] = GenerateLightMatrix(m_Lights[i], true);
+			if(IsDirty(Dirty_Lights)) {
+				// Generate light matrices and set as param.
+				for(size_t i = 0; i < m_Lights.Size(); ++i)
+					*m_ParamId.lights[i] = GenerateLightMatrix(m_Lights[i], true);
+			}
 		}
 		ClearDirty(Dirty_Lights);
 	}

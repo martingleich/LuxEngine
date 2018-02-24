@@ -15,12 +15,13 @@
 #include "video/DriverConfig.h"
 
 #include "video/HardwareBufferManager.h"
+#include "video/TextureStageSettings.h"
+#include "video/FixedFunctionShader.h"
 
 namespace lux
 {
 namespace video
 {
-class Shader;
 class Texture;
 class CubeTexture;
 class BaseTexture;
@@ -105,6 +106,9 @@ public:
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList) = 0;
+
+	//! Create a new fixed function shader.
+	virtual StrongRef<Shader> CreateFixedFunctionShader(const FixedFunctionParameters& params) = 0;
 
 	//! Checks if some shader language and version is supported
 	virtual bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor) = 0;

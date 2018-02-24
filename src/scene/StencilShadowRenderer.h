@@ -9,6 +9,7 @@
 #include "video/VertexBuffer.h"
 #include "video/IndexBuffer.h"
 #include "video/RenderTarget.h"
+#include "video/MaterialLibrary.h"
 
 namespace lux
 {
@@ -72,6 +73,35 @@ public:
 		m_StencilBitMask(stencilBitMask),
 		m_Renderer(renderer)
 	{
+		m_ShadowRenderPass.stencil = GetShadowStencilMode();
+		m_ShadowRenderPass.zBufferFunc = video::EComparisonFunc::Always;
+		m_ShadowRenderPass.zWriteEnabled = false;
+		m_ShadowRenderPass.lighting = video::ELighting::Disabled;
+		m_ShadowRenderPass.fogEnabled = false;
+		m_ShadowRenderPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+		m_ShadowRenderPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+		m_ShadowRenderPass.alpha.blendOperator = video::EBlendOperator::Add;
+		m_ShadowRenderPass.shader = video::MaterialLibrary::Instance()->
+			GetFixedFunctionShader({}, {}, true);
+
+		m_Silhouette.colorMask = 0;
+		m_Silhouette.gouraudShading = false;
+		if(m_UseZFail) {
+			m_Silhouette.stencil.zFail = video::EStencilOperator::Increment;
+			m_Silhouette.stencil.zFailCCW = video::EStencilOperator::Decrement;
+		} else {
+			m_Silhouette.stencil.pass = video::EStencilOperator::Decrement;
+			m_Silhouette.stencil.passCCW = video::EStencilOperator::Increment;
+		}
+		m_Silhouette.stencil.writeMask = m_StencilBitMask;
+		m_Silhouette.stencil.readMask = m_StencilBitMask;
+		m_Silhouette.zWriteEnabled = false;
+		m_Silhouette.culling = video::EFaceSide::None;
+		m_Silhouette.lighting = video::ELighting::Disabled;
+		m_Silhouette.fogEnabled = false;
+		m_Silhouette.polygonOffset = -100.0f;
+		m_Silhouette.shader = video::MaterialLibrary::Instance()->
+			GetFixedFunctionShader({}, {}, false);
 	}
 
 	// Begin a new silhouette rendering
@@ -87,27 +117,9 @@ public:
 		ShadowVolume shadowVolume;
 		GenerateVolume(mesh, lightPos, isInfiniteLight, shadowVolume);
 
-		video::Pass p;
-		p.colorMask = 0;
-		p.gouraudShading = false;
-		if(m_UseZFail) {
-			p.stencil.zFail = video::EStencilOperator::Increment;
-			p.stencil.zFailCCW = video::EStencilOperator::Decrement;
-		} else {
-			p.stencil.pass = video::EStencilOperator::Decrement;
-			p.stencil.passCCW = video::EStencilOperator::Increment;
-		}
-		p.stencil.writeMask = m_StencilBitMask;
-		p.stencil.readMask = m_StencilBitMask;
-		p.zWriteEnabled = false;
-		p.culling = video::EFaceSide::None;
-		p.lighting = video::ELighting::Disabled;
-		p.fogEnabled = false;
-		p.polygonOffset = -100.0f;
-		m_Renderer->SetPass(p);
-
-		m_Renderer->SetTransform(video::ETransform::World, transform.ToMatrix());
 		if(!shadowVolume.points.IsEmpty()) {
+			m_Renderer->SetTransform(video::ETransform::World, transform.ToMatrix());
+			m_Renderer->SetPass(m_Silhouette);
 			m_Renderer->Draw3DPrimitiveList(video::EPrimitiveType::Triangles,
 				shadowVolume.points.Size() / 3,
 				shadowVolume.points.Data(),
@@ -216,17 +228,7 @@ public:
 			video::Vertex2D((float)size.width, (float)size.height, color)
 		};
 
-		video::Pass p;
-		p.stencil = GetShadowStencilMode();
-		p.zBufferFunc = video::EComparisonFunc::Always;
-		p.zWriteEnabled = false;
-		p.lighting = video::ELighting::Disabled;
-		p.fogEnabled = false;
-		p.useVertexColor = true;
-		p.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
-		p.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
-		p.alpha.blendOperator = video::EBlendOperator::Add;
-		m_Renderer->SetPass(p);
+		m_Renderer->SetPass(m_ShadowRenderPass);
 		m_Renderer->Draw3DPrimitiveList(
 			video::EPrimitiveType::TriangleStrip,
 			2, &points, 4,
@@ -307,6 +309,10 @@ private:
 
 private:
 	bool m_UseZFail = true;
+
+	video::Pass m_ShadowRenderPass;
+
+	video::Pass m_Silhouette;
 
 	u32 m_StencilBitMask;
 	math::Vector3F m_CamPos;

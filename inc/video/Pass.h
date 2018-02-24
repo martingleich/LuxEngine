@@ -30,10 +30,8 @@ enum class EPipelineSetting
 	Lighting,
 	Fog,
 	ZWrite,
-	NormalizeNormals,
 	GourandShading,
 	Culling,
-	UseVertexColor,
 };
 
 enum class EOptionId
@@ -56,9 +54,7 @@ public:
 	Pass() :
 		fogEnabled(true),
 		zWriteEnabled(true),
-		normalizeNormals(false),
-		gouraudShading(true),
-		useVertexColor(false)
+		gouraudShading(true)
 	{
 	}
 
@@ -68,12 +64,6 @@ public:
 	Colorf emissive = video::Colorf(0, 0, 0, 0);
 	Colorf specular = video::Colorf(1, 1, 1, 1);
 	float shininess = 0;
-
-	// List of texture for this material, will not be set automatic when using a shader.
-	core::Array<TextureLayer> layers;
-
-	// Fixed-function texture stages will be ignored when using a shader.
-	core::Array<TextureStageSettings> textureStages;
 
 	// Shader
 	StrongRef<Shader> shader;
@@ -93,54 +83,7 @@ public:
 
 	bool fogEnabled : 1;
 	bool zWriteEnabled : 1;
-	bool normalizeNormals : 1;
 	bool gouraudShading : 1;
-	bool useVertexColor : 1;
-
-	// Functions
-	TextureLayer& AddTexture()
-	{
-		layers.EmplaceBack();
-		return layers.Back();
-	}
-	TextureStageSettings& AddStage()
-	{
-		textureStages.EmplaceBack();
-		return textureStages.Back();
-	}
-
-	u32 GetOptionCount() const
-	{
-		return layers.Size();
-	}
-
-	const core::String& GetOptionName(u32 id) const
-	{
-		static core::Array<core::String> layerNames;
-		if(id >= layers.Size())
-			throw core::OutOfRangeException();
-		if(id >= layerNames.Size()) {
-			for(size_t i = layerNames.Size(); i < id; ++i)
-				layerNames.PushBack(
-					"layer" + core::StringConverter::ToString(i));
-		}
-
-		return layerNames[id];
-	}
-
-	core::Type GetOptionType(u32 id) const
-	{
-		if(id >= layers.Size())
-			throw core::OutOfRangeException();
-		return core::Types::Texture();
-	}
-
-	void SetOption(u32 id, const void* data)
-	{
-		if(id >= layers.Size())
-			throw core::OutOfRangeException();
-		GetOptionType(id).CopyConstruct(&layers[id], data);
-	}
 };
 
 class ShaderParamSetCallback
@@ -181,9 +124,7 @@ public:
 
 	bool fogEnabled : 1;
 	bool zWriteEnabled : 1;
-	bool normalizeNormals : 1;
 	bool gouraudShading : 1;
-	bool useVertexColor : 1;
 
 	PipelineOverwrite() :
 		enabledOverwrites(0)
@@ -226,8 +167,6 @@ public:
 			zBufferFunc = next.zBufferFunc;
 		if(next.IsEnabled(EPipelineSetting::ZWrite))
 			zWriteEnabled = next.zWriteEnabled;
-		if(next.IsEnabled(EPipelineSetting::NormalizeNormals))
-			normalizeNormals = next.normalizeNormals;
 		if(next.IsEnabled(EPipelineSetting::Culling))
 			culling = next.culling;
 	}
@@ -252,8 +191,6 @@ public:
 			pass.zBufferFunc = zBufferFunc;
 		if(IsEnabled(EPipelineSetting::ZWrite))
 			pass.zWriteEnabled = zWriteEnabled;
-		if(IsEnabled(EPipelineSetting::NormalizeNormals))
-			pass.normalizeNormals = normalizeNormals;
 		if(IsEnabled(EPipelineSetting::Culling))
 			pass.culling = culling;
 	}

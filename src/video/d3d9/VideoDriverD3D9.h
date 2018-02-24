@@ -55,11 +55,6 @@ public:
 
 	void AddTextureToList(BaseTexture* tex);
 
-	// Cache for auxalarity textures
-	/*
-	i.e. Dynamic texture for temporary use
-	*/
-
 	bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor);
 
 	StrongRef<Shader> CreateShader(
@@ -67,6 +62,8 @@ public:
 		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
 		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList);
+
+	StrongRef<Shader> CreateFixedFunctionShader(const FixedFunctionParameters& params);
 
 	const RendertargetD3D9& GetBackbufferTarget();
 

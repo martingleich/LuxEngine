@@ -24,72 +24,74 @@ public:
 	{
 		return GetPass(0);
 	}
+
 	void SetPass(const Pass& pass)
 	{
+		lxAssert(pass.shader != nullptr);
+
 		m_Pass = pass;
 
-		if(m_Pass.shader) {
-			if(m_ShaderValues.GetType() != &m_Pass.shader->GetParamPackage())
-				m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
-		}
+		if(m_ShaderValues.GetType() != &m_Pass.shader->GetParamPackage())
+			m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
 	}
-	
+
 	void SetShader(Shader* shader)
 	{
+		lxAssert(shader != nullptr);
+
 		m_Pass.shader = shader;
-		if(m_Pass.shader) {
-			if(m_ShaderValues.GetType() != &m_Pass.shader->GetParamPackage())
-				m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
-		}
+		if(m_ShaderValues.GetType() != &m_Pass.shader->GetParamPackage())
+			m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
 	}
+	
 	StrongRef<Shader> GetShader() const
 	{
 		return m_Pass.shader;
 	}
 
-	void SetShaderValue(const core::String& name, const core::VariableAccess& data)
+	void SetValue(const core::String& name, const core::VariableAccess& data)
 	{
-		GetShaderValue(name) = data;
+		GetValue(name) = data;
 	}
-	core::VariableAccess GetShaderValue(const core::String& name) const
+	
+	core::VariableAccess GetValue(const core::String& name) const
 	{
 		return m_ShaderValues.FromName(name, true);
 	}
-	core::VariableAccess GetShaderValue(const core::String& name)
+	
+	core::VariableAccess GetValue(const core::String& name)
 	{
 		return m_ShaderValues.FromName(name, false);
 	}
+	
 	void SetShaderValue(u32 id, const core::VariableAccess& data)
 	{
-		GetShaderValue(id) = data;
+		GetValue(id) = data;
 	}
-	core::VariableAccess GetShaderValue(u32 id) const
+	
+	core::VariableAccess GetValue(u32 id) const
 	{
 		return m_ShaderValues.FromID(id, true);
 	}
-	core::VariableAccess GetShaderValue(u32 id)
+	
+	core::VariableAccess GetValue(u32 id)
 	{
 		return m_ShaderValues.FromID(id, false);
 	}
 
-	core::PackagePuffer& GetShaderValues()
+	core::PackagePuffer& GetValues()
 	{
 		return m_ShaderValues;
 	}
-	const core::PackagePuffer& GetShaderValues() const
+	
+	const core::PackagePuffer& GetValues() const
 	{
 		return m_ShaderValues;
 	}
 
 	void SetTexture(u32 id, video::BaseTexture* texture)
 	{
-		if(m_Pass.shader) {
-			m_ShaderValues.FromType(core::Types::Texture(), id, false) = texture;
-		} else {
-			if(id >= m_Pass.layers.Size())
-				m_Pass.layers.Resize(id + 1);
-			m_Pass.layers[id].texture = texture;
-		}
+		m_ShaderValues.FromType(core::Types::Texture(), id, false) = texture;
 	}
 
 	void SetDiffuse(const video::Colorf& color) { m_Pass.diffuse = color; }
@@ -110,7 +112,7 @@ public:
 	{
 		m_Requirement = requirements;
 	}
-	
+
 	EMaterialRequirement GetRequirements() const
 	{
 		return m_Requirement;
@@ -123,8 +125,6 @@ public:
 				auto param = m_ShaderValues.FromID(i, true);
 				pass.shader->SetParam(i, param.Pointer());
 			}
-
-			pass.shader->LoadSceneParams(pass);
 		}
 	}
 

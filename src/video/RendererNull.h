@@ -29,6 +29,7 @@ protected:
 	enum EDirtyFlags
 	{
 		Dirty_Material,
+		Dirty_Pass,
 		Dirty_World,
 		Dirty_ViewProj,
 		Dirty_Lights,

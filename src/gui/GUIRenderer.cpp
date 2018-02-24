@@ -1,39 +1,53 @@
 #include "gui/GUIRenderer.h"
 #include "video/VertexTypes.h"
 #include "video/VertexFormat.h"
+#include "video/MaterialLibrary.h"
 
 namespace lux
 {
 namespace gui
 {
 
+namespace
+{
+class ParamSetCallback : public video::ShaderParamSetCallback
+{
+	void SendShaderSettings(const video::Pass& pass, void* userParam) const
+	{
+		if(userParam)
+			pass.shader->SetParam(0, userParam);
+	}
+} g_ShaderParamSet;
+}
+
 Renderer::Renderer(video::Renderer* r)
 {
 	m_Renderer = r;
-	m_TexturePass.useVertexColor = true;
+
 	m_TexturePass.culling = video::EFaceSide::None;
 	m_TexturePass.zWriteEnabled = false;
 	m_TexturePass.zBufferFunc = video::EComparisonFunc::Always;
 	m_TexturePass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_TexturePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_TexturePass.alpha.blendOperator = video::EBlendOperator::Add;
-	m_TexturePass.AddTexture();
-	const video::TextureStageSettings MIX_SETTINGS(
+	const video::TextureStageSettings tss(
 		video::ETextureArgument::Diffuse,
 		video::ETextureArgument::Texture,
 		video::ETextureOperator::Modulate,
 		video::ETextureArgument::Diffuse,
 		video::ETextureArgument::Texture,
 		video::ETextureOperator::Modulate);
-	m_TexturePass.textureStages.PushBack(MIX_SETTINGS);
+	video::FixedFunctionParameters paramsTexture({"textures"}, {tss}, true);
+	m_TexturePass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramsTexture);
 
-	m_DiffusePass.useVertexColor = true;
 	m_DiffusePass.culling = video::EFaceSide::None;
 	m_DiffusePass.zWriteEnabled = false;
 	m_DiffusePass.zBufferFunc = video::EComparisonFunc::Always;
 	m_DiffusePass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_DiffusePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_DiffusePass.alpha.blendOperator = video::EBlendOperator::Add;
+	video::FixedFunctionParameters paramsDiffuse({}, {}, true);
+	m_DiffusePass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramsDiffuse);
 }
 
 void Renderer::Begin()
@@ -66,7 +80,7 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Color color, const 
 		video::Vertex2D(realRect.right, realRect.top, color),
 	};
 
-	m_Renderer->SetPass(m_DiffusePass);
+	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
 	m_Renderer->Draw2DPrimitiveList(
 		video::EPrimitiveType::TriangleStrip,
 		2, quad, 4, video::VertexFormat::STANDARD_2D);
@@ -86,8 +100,8 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, c
 		video::Vertex2D(realRect.left, realRect.top, color, tCoord.left, tCoord.top),
 		video::Vertex2D(realRect.right, realRect.top, color, tCoord.right, tCoord.top)
 	};
-	m_TexturePass.layers[0].texture = texture;
-	m_Renderer->SetPass(m_TexturePass);
+	video::TextureLayer layer(texture);
+	m_Renderer->SetPass(m_TexturePass, false, &g_ShaderParamSet, &layer);
 	m_Renderer->Draw2DPrimitiveList(
 		video::EPrimitiveType::TriangleStrip,
 		2, quad, 4, video::VertexFormat::STANDARD_2D);
@@ -101,7 +115,7 @@ void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, co
 		video::Vertex2D(c.x, c.y, color),
 	};
 
-	m_Renderer->SetPass(m_DiffusePass);
+	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
 	m_Renderer->Draw2DPrimitiveList(
 		video::EPrimitiveType::Triangles,
 		1, tri, 3, video::VertexFormat::STANDARD_2D);
@@ -120,7 +134,8 @@ struct LineBuffer
 		renderer(r),
 		cursor(0),
 		color(c)
-	{}
+	{
+	}
 
 	~LineBuffer()
 	{
@@ -161,7 +176,7 @@ void Renderer::DrawLine(const math::Vector2F& start, const math::Vector2F& end, 
 		return;
 	if(style.steps[style.invert] == 0)
 		return;
-	m_Renderer->SetPass(m_DiffusePass);
+	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
 	LineBuffer lineBuffer(m_Renderer, color);
 
 	if(style.steps[1 - style.invert] == 0) {
