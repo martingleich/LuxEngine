@@ -141,7 +141,7 @@ StrongRef<Mesh> MeshSystem::CreateMesh(
 {
 	StrongRef<Geometry> sub = GetCreatorByName(name)->CreateGeometry(params);
 	StrongRef<Mesh> out = CreateMesh(sub);
-	out->SetMaterial(m_DefaultMaterial);
+	out->SetMaterial(m_DefaultMaterial->Clone());
 
 	return out;
 }
@@ -161,7 +161,7 @@ StrongRef<Mesh> MeshSystem::CreatePlaneMesh(
 		texX, texY,
 		function, context);
 	StrongRef<Mesh> out = CreateMesh(sub);
-	out->SetMaterial(m_DefaultMaterial);
+	out->SetMaterial(m_DefaultMaterial->Clone());
 
 	return out;
 }
@@ -179,7 +179,7 @@ StrongRef<Mesh> MeshSystem::CreateSphereMesh(
 		texX, texY,
 		inside);
 	StrongRef<Mesh> out = CreateMesh(sub);
-	out->SetMaterial(m_DefaultMaterial);
+	out->SetMaterial(m_DefaultMaterial->Clone());
 
 	return out;
 }
@@ -197,7 +197,7 @@ StrongRef<Mesh> MeshSystem::CreateCubeMesh(
 		texX, texY, texZ,
 		inside);
 	StrongRef<Mesh> out = CreateMesh(sub);
-	out->SetMaterial(m_DefaultMaterial);
+	out->SetMaterial(m_DefaultMaterial->Clone());
 
 	return out;
 }
@@ -213,7 +213,7 @@ StrongRef<Mesh> MeshSystem::CreateArrowMesh(
 		shaft_radius, head_radius,
 		sectors);
 	StrongRef<Mesh> out = CreateMesh(sub);
-	out->SetMaterial(m_DefaultMaterial);
+	out->SetMaterial(m_DefaultMaterial->Clone());
 
 	return out;
 }
@@ -231,7 +231,7 @@ StrongRef<Mesh> MeshSystem::CreateCylinderMesh(
 		texX, texY,
 		inside);
 	StrongRef<Mesh> out = CreateMesh(sub);
-	out->SetMaterial(m_DefaultMaterial);
+	out->SetMaterial(m_DefaultMaterial->Clone());
 
 	return out;
 }
@@ -249,7 +249,7 @@ StrongRef<Mesh> MeshSystem::CreateTorusMesh(
 		texX, texY,
 		inside);
 	StrongRef<Mesh> out = CreateMesh(sub);
-	out->SetMaterial(m_DefaultMaterial);
+	out->SetMaterial(m_DefaultMaterial->Clone());
 
 	return out;
 }
