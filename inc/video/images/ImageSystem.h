@@ -24,7 +24,7 @@ public:
 	LUX_API static void Destroy();
 
 	LUX_API ImageSystem();
-	LUX_API virtual ~ImageSystem();
+	LUX_API ~ImageSystem();
 
 	//! Create a new empty image
 	/**

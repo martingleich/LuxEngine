@@ -35,10 +35,10 @@ void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format)
 	m_Format = format;
 	m_DeleteOnDrop = true;
 	m_Locked = false;
-	m_BytePerPixel = m_Format.GetBytePerPixel();
-	m_Pitch = m_Dimension.width * m_BytePerPixel;
+	m_BitPerPixel = m_Format.GetBitsPerPixel();
+	m_Pitch = (m_Dimension.width * m_BitPerPixel)/8;
 	if(size.GetArea() != 0)
-		m_Data = LUX_NEW_ARRAY(u8, m_BytePerPixel * m_Dimension.GetArea());
+		m_Data = LUX_NEW_ARRAY(u8, (m_BitPerPixel * m_Dimension.GetArea())/8);
 	else
 		m_Data = nullptr;
 }
@@ -51,13 +51,13 @@ void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format, void* da
 	m_Format = format;
 	m_DeleteOnDrop = deleteOnDrop;
 	m_Locked = false;
-	m_BytePerPixel = m_Format.GetBytePerPixel();
-	m_Pitch = m_Dimension.width * m_BytePerPixel;
+	m_BitPerPixel = m_Format.GetBitsPerPixel();
+	m_Pitch = (m_Dimension.width * m_BitPerPixel)/8;
 
 	if(CopyMemory) {
 		if(m_Dimension.GetArea() != 0) {
-			m_Data = LUX_NEW_ARRAY(u8, m_BytePerPixel * m_Dimension.GetArea());
-			memcpy(m_Data, data, m_BytePerPixel * m_Dimension.GetArea());
+			m_Data = LUX_NEW_ARRAY(u8, (m_BitPerPixel * m_Dimension.GetArea())/8);
+			memcpy(m_Data, data, (m_BitPerPixel * m_Dimension.GetArea())/8);
 		} else {
 			m_Data = nullptr;
 		}
@@ -78,32 +78,31 @@ ColorFormat ImageImpl::GetColorFormat() const
 
 u32 ImageImpl::GetBitsPerPixel() const
 {
-	return m_BytePerPixel * 8;
-}
-
-u32 ImageImpl::GetBytesPerPixel() const
-{
-	return m_BytePerPixel;
+	return m_BitPerPixel;
 }
 
 u32 ImageImpl::GetSizeInBytes() const
 {
-	return m_Pitch * m_Dimension.height;
+	return (m_BitPerPixel * m_Dimension.GetArea())/8;
 }
 
 u32 ImageImpl::GetSizeInPixels() const
 {
-	return m_Dimension.width * m_Dimension.height;
+	return m_Dimension.GetArea();
 }
 
 Color ImageImpl::GetPixel(u32 x, u32 y)
 {
-	return Color(m_Format.FormatToA8R8G8B8(m_Data + (y * m_Pitch + x*m_BytePerPixel)));
+	lxAssert(!m_Format.IsCompressed());
+
+	return Color(m_Format.FormatToA8R8G8B8(m_Data + (y * m_Pitch + (x*m_BitPerPixel)/8)));
 }
 
 void ImageImpl::SetPixel(u32 x, u32 y, Color Col)
 {
-	void* dst = (m_Data + (y * m_Pitch + x*m_BytePerPixel));
+	lxAssert(!m_Format.IsCompressed());
+
+	void* dst = (m_Data + (y * m_Pitch + (x*m_BitPerPixel)/8));
 	m_Format.A8R8G8B8ToFormat((u32)Col, (u8*)dst);
 }
 

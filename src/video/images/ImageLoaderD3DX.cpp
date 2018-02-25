@@ -4,17 +4,19 @@
 #include "io/File.h"
 #include "video/ColorConverter.h"
 #include "video/images/Image.h"
+#include "video/Texture.h"
 #include "core/lxMemory.h"
 #include "platform/StrippedD3D9X.h"
 #include "platform/UnknownRefCounted.h"
+#include "video/d3d9/D3DHelper.h"
 
 namespace lux
 {
 namespace video
 {
 
-ImageLoaderD3DX::ImageLoaderD3DX(IDirect3DDevice9* pDevice) :
-	m_Device(pDevice)
+ImageLoaderD3DX::ImageLoaderD3DX(IDirect3DDevice9* device) :
+	m_Device(device)
 {
 }
 
@@ -24,13 +26,33 @@ ImageLoaderD3DX::~ImageLoaderD3DX()
 
 core::Name ImageLoaderD3DX::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Image)
+	if(requestedType && requestedType != core::ResourceType::Image &&
+		requestedType != core::ResourceType::Texture)
 		return core::Name::INVALID;
 
 	core::String ext = io::GetFileExtension(file->GetName());
-	if(ext.EqualCaseInsensitive("jpg"))
-		return core::ResourceType::Image;
+	u8 bytes[128];
+	u32 count = file->ReadBinaryPart(sizeof(bytes), bytes);
+	if(count >= 2 && bytes[0] == 0xFF && bytes[1] == 0xD8)
+		return requestedType; // jpg
+	if(count >= 128 && // 128 ist the 4 bytes + the size of the DDS header
+		bytes[0] == 'D' && bytes[1] == 'D' &&
+		bytes[2] == 'S' && bytes[3] == ' ') {
+		// dds
 
+		// Check pixel format to determine type.
+		u8* pxformat = bytes + 76;
+		u8* flagptr = pxformat + 4;
+		u32 flags = (flagptr[3] << 24) | (flagptr[2] << 16) | (flagptr[1] << 8) | flagptr[0];
+		if(flags & 0x4) {
+			// Compressed data, can only be loaded as texture
+			if(requestedType && requestedType != core::ResourceType::Texture)
+				return core::Name::INVALID;
+			return core::ResourceType::Texture;
+		}
+		// Otherwise we don't care
+		return core::ResourceType::Image;
+	}
 	return core::Name::INVALID;
 }
 
@@ -53,6 +75,16 @@ static ColorFormat ConvertD3DToLuxFormat(D3DFORMAT Format)
 		return ColorFormat::A1R5G5B5;
 	case D3DFMT_R5G6B5:
 		return ColorFormat::R5G6B5;
+	case D3DFMT_DXT1:
+		return ColorFormat::DXT1;
+	case D3DFMT_DXT2:
+		return ColorFormat::A8R8G8B8;
+	case D3DFMT_DXT3:
+		return ColorFormat::DXT3;
+	case D3DFMT_DXT4:
+		return ColorFormat::A8R8G8B8;
+	case D3DFMT_DXT5:
+		return ColorFormat::DXT5;
 	default:
 		return ColorFormat::UNKNOWN;
 	}
@@ -212,14 +244,14 @@ static void CopyTextureData(
 
 struct TempMemory
 {
-	void* ptr;
+	u8* ptr;
 	size_t size;
 	bool drop;
 
 	~TempMemory()
 	{
 		if(drop)
-			delete ptr;
+			LUX_FREE_ARRAY(ptr);
 	}
 };
 
@@ -231,12 +263,12 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 
 	buffer.size = file->GetSize() - file->GetCursor();
 	if(file->GetBuffer() == nullptr) {
-		void* tmp = LUX_NEW_ARRAY(u8, buffer.size);
+		u8* tmp = LUX_NEW_ARRAY(u8, buffer.size);
 		buffer.ptr = tmp;
 		buffer.drop = true;
 		file->ReadBinary((u32)buffer.size, tmp);
 	} else {
-		buffer.ptr = file->GetBuffer();
+		buffer.ptr = (u8*)file->GetBuffer();
 		buffer.drop = false;
 	}
 
@@ -248,30 +280,52 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 	if(FAILED(hr))
 		throw core::FileFormatException("Corrupted or not supported", io::GetFileExtension(file->GetName()).Data());
 
+	auto loadFormat = GetD3DFormat(ConvertD3DToLuxFormat(info.Format));
 	D3DSURFACE_DESC desc;
-	auto texture = LoadTexture(
+	auto d3dTexture = LoadTexture(
 		m_Device,
 		buffer.ptr, buffer.size,
-		info.Format, info,
+		loadFormat, info,
 		desc);
 
-	if(!texture)
+	if(!d3dTexture)
 		throw core::FileFormatException("Corrupted or not supported", io::GetFileExtension(file->GetName()).Data());
 
-	video::ColorFormat lxFormat = ConvertD3DToLuxFormat(desc.Format);
+	auto lxFormat = ConvertD3DToLuxFormat(desc.Format);
 	if(lxFormat == video::ColorFormat::UNKNOWN)
 		throw core::FileFormatException("Unsupported color format", io::GetFileExtension(file->GetName()).Data());
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
-	img->Init(math::Dimension2U(desc.Width, desc.Height), lxFormat);
+	if(img) {
+		img->Init(math::Dimension2U(desc.Width, desc.Height), lxFormat);
 
-	video::ImageLock imgLock(img);
-	CopyTextureData(0, imgLock.data, texture, info, desc, lxFormat);
+		video::ImageLock imgLock(img);
+		CopyTextureData(0, imgLock.data, d3dTexture, info, desc, lxFormat);
+		return;
+	}
+
+	video::Texture* texture = dynamic_cast<video::Texture*>(dst);
+	if(texture) {
+		texture->Init(math::Dimension2U(desc.Width, desc.Height), lxFormat, 0, false, false);
+
+		if(info.ResourceType == D3DRTYPE_TEXTURE) {
+			video::TextureLock texLock(texture, BaseTexture::ELockMode::Overwrite);
+			D3DLOCKED_RECT lock;
+			auto orgTex = d3dTexture.StaticCast<IDirect3DTexture9>();
+			orgTex->LockRect(0, &lock, nullptr, D3DLOCK_READONLY);
+			if(lxFormat.IsCompressed())
+				memcpy(texLock.data, lock.pBits, (desc.Width*desc.Height*lxFormat.GetBitsPerPixel()) / 8);
+			else
+				memcpy(texLock.data, lock.pBits, desc.Height*lock.Pitch);
+			orgTex->UnlockRect(0);
+			return;
+		} else {
+			throw core::FileFormatException("Can't load cube- and volumetexture as texture");
+		}
+	}
 }
 
-
 }
-
 }
 
 #endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER

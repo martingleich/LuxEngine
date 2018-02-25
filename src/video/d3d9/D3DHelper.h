@@ -90,6 +90,13 @@ inline D3DFORMAT GetD3DFormat(ColorFormat Format)
 	case ColorFormat::A32B32G32R32F:
 		return D3DFMT_A32B32G32R32F;
 
+	case ColorFormat::DXT1:
+		return D3DFMT_DXT1;
+	case ColorFormat::DXT3:
+		return D3DFMT_DXT3;
+	case ColorFormat::DXT5:
+		return D3DFMT_DXT5;
+
 	case ColorFormat::UNKNOWN:
 	default:
 		return D3DFMT_UNKNOWN;

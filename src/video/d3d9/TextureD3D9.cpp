@@ -24,6 +24,8 @@ TextureD3D9::~TextureD3D9()
 
 void TextureD3D9::RegenerateMIPMaps()
 {
+	if(m_Format.IsCompressed())
+		return;
 	HRESULT hr = D3DXFilterTexture(m_Texture, NULL, D3DX_DEFAULT, D3DX_DEFAULT);
 	if(FAILED(hr))
 		throw core::D3D9Exception(hr);

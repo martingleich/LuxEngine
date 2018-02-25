@@ -95,7 +95,7 @@ static void CopyImage(const void* src, void* dst, ColorFormat format, u32 width,
 		u8* dB = (u8*)dst;
 		const u8* sB = (const u8*)src;
 		for(u32 l = 0; l < height; ++l) {
-			memcpy(dB, sB, format.GetBytePerPixel() * width);
+			memcpy(dB, sB, (format.GetBitsPerPixel() * width)/8);
 			dB += pitch;
 			sB += pitch;
 		}
@@ -104,7 +104,9 @@ static void CopyImage(const void* src, void* dst, ColorFormat format, u32 width,
 
 bool ColorConverter::IsConvertable(ColorFormat srcFormat, ColorFormat dstFormat)
 {
-	if(srcFormat.IsFloatingPoint() || dstFormat.IsFloatingPoint())
+	if(srcFormat == dstFormat)
+		return true;
+	if(srcFormat.IsFloatingPoint() || dstFormat.IsFloatingPoint() || srcFormat.IsCompressed() || dstFormat.IsCompressed())
 		return false;
 
 	return true;
@@ -115,7 +117,7 @@ bool ColorConverter::ConvertByFormat(
 	void* dst, ColorFormat dstFormat,
 	u32 width, u32 height, u32 srcPitch, u32 dstPitch)
 {
-	if(srcFormat.IsFloatingPoint() || dstFormat.IsFloatingPoint())
+	if(!IsConvertable(srcFormat, dstFormat))
 		return false;
 
 	if(srcPitch < width * srcFormat.GetBytePerPixel())

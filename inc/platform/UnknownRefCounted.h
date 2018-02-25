@@ -58,10 +58,26 @@ public:
 		return *this;
 	}
 
-	template <typename T2 = T>
+	operator T*() const
+	{
+		return m_Pointer;
+	}
+
+	template <typename T2>
 	operator T2*() const
 	{
 		return m_Pointer;
+	}
+
+	template <typename T2>
+	T2* StaticCast() const
+	{
+		return static_cast<T2*>(m_Pointer);
+	}
+	template <typename T2>
+	UnknownRefCounted<T2> StaticCastStrong() const
+	{
+		return static_cast<T2*>(m_Pointer);
 	}
 
 	T* operator->() const
@@ -89,10 +105,18 @@ public:
 	{
 		return m_Pointer == other.m_Pointer;
 	}
+	bool operator==(std::nullptr_t) const
+	{
+		return m_Pointer == nullptr;
+	}
 
 	bool operator!=(UnknownRefCounted other) const
 	{
 		return !(*this == other);
+	}
+	bool operator!=(std::nullptr_t) const
+	{
+		return m_Pointer != nullptr;
 	}
 
 private:

@@ -39,11 +39,16 @@ public:
 		G32R32F,
 		A32B32G32R32F,
 
+		// Compressed formats
+		DXT1,
+		DXT3,
+		DXT5,
+
 		UNKNOWN,
 	};
 
 	//! The number of available formats
-	static const u32 FORMAT_COUNT = 15;
+	static const u32 FORMAT_COUNT = 18;
 
 public:
 	//! Constructor from format
@@ -100,20 +105,32 @@ public:
 			"R32F",
 			"G32R32F",
 			"A32B32G32R32F",
+			"DXT1",
+			"DXT3",
+			"DXT5",
 			"UNKNOWN"
 		};
 
-		return STRINGS[m_Format];
+		if(m_Format < sizeof(STRINGS))
+			return STRINGS[m_Format];
+		else
+			return STRINGS[UNKNOWN];
 	}
 
 	//! The number of bits in a pixel for this format
 	inline u8 GetBitsPerPixel() const
 	{
-		static const u8 BitPerPixel[FORMAT_COUNT] = {24, 32, 32, 32, 16, 16, 16, 8, 16, 16, 32, 64, 32, 64, 128};
-		if(m_Format >= FORMAT_COUNT)
+		static const u8 BitPerPixel[FORMAT_COUNT] = {
+			24,
+			32, 32, 32,
+			16, 16, 16,
+			8, 16,
+			16, 32, 64, 32, 64, 128,
+			4, 8, 8};
+		if(m_Format < FORMAT_COUNT)
+			return BitPerPixel[(u32)m_Format];
+		else
 			return 0;
-
-		return BitPerPixel[(u32)m_Format];
 	}
 
 	//! The number of bytes in a pixel for this format
@@ -130,9 +147,12 @@ public:
 	inline u32 GetRedMask() const
 	{
 		static const u32 Mask[9] = {0xff0000, 0xff0000, 0xff0000, 0xffff0000, 0x7c00, 0x7c00, 0xf800, 0xff, 0xffff};
-		if(IsFloatingPoint())
+		if(IsFloatingPoint() || IsCompressed())
 			return 0;
-		return Mask[(u32)m_Format];
+		if(m_Format < 9)
+			return Mask[(u32)m_Format];
+		else
+			return 0;
 	}
 
 	//! The mask for the green channel
@@ -143,9 +163,12 @@ public:
 	inline u32 GetGreenMask() const
 	{
 		static const u32 Mask[9] = {0xff00, 0xff00, 0xff00, 0xffff0000, 0x3e0, 0x3e0, 0x7e0, 0xff, 0xffff};
-		if(IsFloatingPoint())
+		if(IsFloatingPoint() || IsCompressed())
 			return 0;
-		return Mask[(u32)m_Format];
+		if(m_Format < 9)
+			return Mask[(u32)m_Format];
+		else
+			return 0;
 	}
 
 	//! The mask for the blue channel
@@ -156,9 +179,12 @@ public:
 	inline u32 GetBlueMask() const
 	{
 		static const u32 Mask[9] = {0xff, 0xff, 0xff, 0, 0x1f, 0x1f, 0x1f, 0xff, 0xffff};
-		if(IsFloatingPoint())
+		if(IsFloatingPoint() || IsCompressed())
 			return 0;
-		return Mask[(u32)m_Format];
+		if(m_Format < 9)
+			return Mask[(u32)m_Format];
+		else
+			return 0;
 	}
 
 	//! The mask for the alpha channel
@@ -169,9 +195,12 @@ public:
 	inline u32 GetAlphaMask() const
 	{
 		static const u32 Mask[9] = {0x0, 0x0, 0xff000000, 0x0, 0x0, 0x8000, 0x0, 0x0, 0x0};
-		if(IsFloatingPoint())
+		if(IsFloatingPoint() || IsCompressed())
 			return 0;
-		return Mask[(u32)m_Format];
+		if(m_Format < 9)
+			return Mask[(u32)m_Format];
+		else
+			return 0;
 	}
 
 	//! Can this format contain a alpha value
@@ -189,7 +218,14 @@ public:
 	//! Is this format a floating point value
 	inline bool IsFloatingPoint() const
 	{
-		if(m_Format >= R16F && m_Format <= UNKNOWN)
+		if(m_Format >= R16F && m_Format <= A32B32G32R32F)
+			return true;
+		else
+			return false;
+	}
+	inline bool IsCompressed() const
+	{
+		if(m_Format >= DXT1 && m_Format <= DXT5)
 			return true;
 		else
 			return false;
@@ -316,8 +352,7 @@ struct ColorFormatException : Exception
 	video::ColorFormat format;
 };
 
-}
-
-}
+} // namespace video
+} // namespace lux
 
 #endif // #ifndef INCLUDED_COLOR_FORMAT_H

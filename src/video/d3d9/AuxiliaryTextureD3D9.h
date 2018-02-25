@@ -23,7 +23,7 @@ public:
 	AuxiliaryTextureManagerD3D9(IDirect3DDevice9* device);
 	~AuxiliaryTextureManagerD3D9();
 
-	UnknownRefCounted<IDirect3DSurface9> GetSurface(DWORD width, DWORD height, D3DFORMAT format);
+	UnknownRefCounted<IDirect3DSurface9> GetSurface(DWORD width, DWORD height, D3DFORMAT format, bool exactSize = true);
 
 	void ReleaseUnmanaged();
 	void RestoreUnmanaged();
@@ -44,7 +44,7 @@ private:
 
 	core::Array<Entry> m_Surfaces;
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
-	static const u32 MAX_TEXTURES=5;
+	static const u32 MAX_TEXTURES = 5;
 };
 
 }

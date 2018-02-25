@@ -34,6 +34,7 @@ namespace
 class ImageToTextureLoader : public core::ResourceLoader
 {
 public:
+	core::ResourceLoader* m_ResourceLoader;
 	core::Name GetFileType(io::File* file)
 	{
 		const u32 fileCursor = file->GetCursor();
@@ -42,37 +43,35 @@ public:
 		auto resSys = core::ResourceSystem::Instance();
 		u32 count = resSys->GetResourceLoaderCount();
 		for(u32 i = 0; i < count; ++i) {
-			auto loader = resSys->GetResourceLoader(count - i - 1);
-			if(loader == this)
+			m_ResourceLoader = resSys->GetResourceLoader(count - i - 1);
+			if(m_ResourceLoader == this)
 				continue;
-			core::Name fileType = loader->GetResourceType(file);
+			core::Name fileType = m_ResourceLoader->GetResourceType(file);
 			if(fileType != core::Name::INVALID)
 				return fileType;
 
 			file->Seek(fileCursor, io::ESeekOrigin::Start);
 		}
-
+		m_ResourceLoader = nullptr;
 		return core::Name::INVALID;
 	}
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType)
 	{
-		if(requestedType && requestedType != core::ResourceType::Texture && requestedType != core::ResourceType::CubeTexture)
+		if(requestedType && requestedType != core::ResourceType::Texture)
 			return core::Name::INVALID;
 
-		core::Name type = GetFileType(file);
+		auto type = GetFileType(file);
 		if(type == core::ResourceType::Image)
 			return core::ResourceType::Texture;
-		if(type == core::ResourceType::ImageList)
-			return core::ResourceType::CubeTexture;
 
 		return core::Name::INVALID;
 	}
 
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
-		StrongRef<core::Resource> r = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, file);
-		auto img = r.AsStrong<Image>();
+		auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image, nullptr).StaticCastStrong<video::Image>();
+		m_ResourceLoader->LoadResource(file, img);
 		Texture* texture = dynamic_cast<Texture*>(dst);
 		ColorFormat format = img->GetColorFormat();
 		math::Dimension2U size = img->GetSize();
@@ -276,6 +275,7 @@ ImageSystem* ImageSystem::Instance()
 {
 	return g_ImageSystem;
 }
+
 void ImageSystem::Destroy()
 {
 	g_ImageSystem.Reset();
@@ -287,6 +287,7 @@ ImageSystem::ImageSystem()
 	m_Driver = VideoDriver::Instance();
 
 	// Register before image loaders, to make default load type images, instead of textures.
+	// These both are always the last option to try and load.
 	resSys->AddResourceLoader(LUX_NEW(ImageToTextureLoader));
 	resSys->AddResourceLoader(LUX_NEW(MultiImageToCubeTextureLoader));
 

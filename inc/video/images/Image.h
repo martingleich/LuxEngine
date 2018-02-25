@@ -38,9 +38,6 @@ public:
 	//! The number of bits per image pixel
 	virtual u32 GetBitsPerPixel() const = 0;
 
-	//! The number of bytes per image pixel
-	virtual u32 GetBytesPerPixel() const = 0;
-
 	//! The size of the whole image in bytes
 	virtual u32 GetSizeInBytes() const = 0;
 

@@ -41,7 +41,7 @@ private:
 	math::Dimension2U m_Dimension;
 	ColorFormat m_Format;
 	u32 m_Pitch;
-	u32 m_BytePerPixel;
+	u32 m_BitPerPixel;
 
 	u8* m_Data;
 	bool m_DeleteOnDrop;
