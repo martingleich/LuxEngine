@@ -45,11 +45,14 @@ void FirstPersonCameraControl::Animate(float time)
 	auto node = GetParent();
 	if(!node)
 		return;
-
-	math::Vector3F pos = node->GetAbsolutePosition();
-	math::Vector3F flank = node->FromRelativeDir(math::Vector3F::UNIT_X);
-	math::Vector3F up = node->FromRelativeDir(math::Vector3F::UNIT_Y);
-	math::Vector3F look = node->FromRelativeDir(math::Vector3F::UNIT_Z);
+	math::Vector3F pos;
+	math::Vector3F flank;
+	math::Vector3F up;
+	math::Vector3F look;
+	pos = node->GetPosition();
+	flank = node->FromRelativeDir(math::Vector3F::UNIT_X, node->GetParent());
+	up = node->FromRelativeDir(math::Vector3F::UNIT_Y, node->GetParent());
+	look = node->FromRelativeDir(math::Vector3F::UNIT_Z, node->GetParent());
 
 	math::Vector3F move = look;
 	if(m_NoVerticalMovement) {
@@ -222,5 +225,5 @@ void FirstPersonCameraControl::SetKeyboardMouseControls(const KeyboardMouseContr
 	m_Controls = controls;
 }
 
-}
-}
+} // namespace scene
+} // namespace lux
