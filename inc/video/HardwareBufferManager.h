@@ -16,16 +16,7 @@ class VideoDriver;
 class BufferManager : public ReferenceCounted
 {
 public:
-	virtual ~BufferManager()
-	{
-	}
-
-	//! Update all hardwarebuffer in a given group
-	/**
-	All hardwarebuffer in a group are updated. \ref UpdateBuffer.
-	\param updateGroup The group to update. Should be bigger than 0
-	*/
-	virtual void Update(u32 updateGroup) = 0;
+	virtual ~BufferManager() {}
 
 	//! Informs the buffermanager that a new buffer was created
 	/**
@@ -43,9 +34,8 @@ public:
 	/**
 	Update the data in a single buffer and resets its dirty area.
 	\param buffer The buffer which should be updated
-	\param group The group which should be updated use 0 to update immeditly
 	*/
-	virtual void UpdateBuffer(HardwareBuffer* buffer, u32 group = 0) = 0;
+	virtual void UpdateBuffer(HardwareBuffer* buffer) = 0;
 
 	//! Enable a single hardwarebuffer for rendering
 	/**
@@ -66,6 +56,7 @@ public:
 	virtual StrongRef<VertexBuffer> CreateVertexBuffer() = 0;
 };
 
-}
-}
+} // namespace vidoe
+} // namespace lux
+
 #endif // !INCLUDED_HARDWAREBUFFERMANAGER_H

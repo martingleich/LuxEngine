@@ -65,9 +65,8 @@ private:
 	core::Array<HardwareBuffer*> m_HardwareBuffers;
 };
 
-}
-}
+} // namespace video
+} // namespace lux
 
 #endif // LUX_COMPILE_WITH_D3D9
-
 #endif // !INCLUDED_HARDWAREBUFFERMANAGERD3D9_H

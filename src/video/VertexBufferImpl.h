@@ -30,7 +30,7 @@ public:
 	void SetHandle(void* handle) { m_Handle = handle; }
 	void* GetHandle() const { return m_Handle; }
 	BufferManager* GetManager() { return m_Manager; }
-	void UpdateByManager(u32 group) { m_Manager->UpdateBuffer(this, group); }
+	void UpdateByManager() { m_Manager->UpdateBuffer(this); }
 
 private:
 	u32 m_Stream;

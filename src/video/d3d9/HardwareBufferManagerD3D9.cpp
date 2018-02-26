@@ -315,7 +315,7 @@ void BufferManagerD3D9::RestoreHardwareBuffers()
 	m_HardwareBuffers.Clear();
 	for(auto hb : oldBuffers) {
 		hb->SetDirty(0, hb->GetSize() - 1);
-		hb->Update(0);
+		hb->Update();
 	}
 }
 
