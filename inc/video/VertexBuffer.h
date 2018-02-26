@@ -49,8 +49,9 @@ public:
 	virtual void GetVertices(void* ptr, u32 count, u32 n) const = 0;
 
 	template <typename T>
-	core::StrideRange<T> Elements(VertexElement::EUsage element, u32 stream = 0)
+	core::StrideRange<T> Elements(VertexElement::EUsage element)
 	{
+		auto stream = GetStream();
 		auto elem = GetFormat().GetElement(stream, element);
 		if(!elem.IsValid()) {
 			core::StrideIterator<T> p(nullptr, 0);
@@ -63,8 +64,9 @@ public:
 	}
 
 	template <typename T>
-	core::StrideRange<T> ConstElements(VertexElement::EUsage element, u32 stream = 0) const
+	core::StrideRange<T> ConstElements(VertexElement::EUsage element) const
 	{
+		auto stream = GetStream();
 		auto elem = GetFormat().GetElement(stream, element);
 		if(!elem.IsValid()) {
 			core::ConstStrideIterator<T> p(nullptr, 0);
