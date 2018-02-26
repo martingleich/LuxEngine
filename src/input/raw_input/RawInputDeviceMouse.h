@@ -28,7 +28,8 @@ private:
 	static u32 GetKeyCodeFromVKey(u32 vkey);
 
 	// Raw input supports at max 5 mouse buttons.
-	static const size_t MAX_MOUSE_BUTTONS = 5;
+	// But we don't trust raw input.
+	static const size_t MAX_MOUSE_BUTTONS = 10;
 private:
 	bool m_ButtonStates[MAX_MOUSE_BUTTONS];
 

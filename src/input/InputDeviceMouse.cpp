@@ -108,7 +108,7 @@ bool MouseDevice::Update(Event& event)
 {
 	if(event.type == EEventType::Button) {
 		if((size_t)event.button.code >= m_Buttons.Size())
-			throw core::OutOfRangeException();
+			return false; // Silent ignore
 
 		if(m_Buttons[event.button.code].state != event.button.state) {
 			m_Buttons[event.button.code].state = event.button.state;
@@ -119,7 +119,7 @@ bool MouseDevice::Update(Event& event)
 
 	if(event.type == EEventType::Axis) {
 		if((size_t)event.axis.code >= m_Axes.Size())
-			throw core::OutOfRangeException();
+			return false; // Silent ignore
 
 		if(event.internal_abs_only)
 			event.axis.rel = m_Axes[event.axis.code].state - event.axis.abs;
@@ -136,7 +136,7 @@ bool MouseDevice::Update(Event& event)
 
 	if(event.type == EEventType::Area) {
 		if(event.area.code != 0)
-			throw core::OutOfRangeException();
+			return false; // Silent ignore
 
 		if(event.internal_abs_only) {
 			event.area.relX = m_Pos.state.x - event.area.absX;

@@ -35,7 +35,7 @@ void RawKeyboardDevice::HandleInput(RAWINPUT* input)
 		return;
 
 	bool isControl = false;
-	if(event.button.code == 143) {
+	if(event.button.code == EKeyCode::KEY_SHIFT) {
 		if(input->data.keyboard.MakeCode == 0x2a)
 			event.button.code = EKeyCode::KEY_LSHIFT;
 		else
@@ -43,13 +43,15 @@ void RawKeyboardDevice::HandleInput(RAWINPUT* input)
 		isControl = true;
 	}
 
-	if(event.button.code == 143 || event.button.code == 144 || event.button.code == 145) {
+	if(event.button.code == EKeyCode::KEY_SHIFT ||
+		event.button.code == EKeyCode::KEY_CONTROL ||
+		event.button.code == EKeyCode::KEY_MENU) {
 		bool right = ((input->data.keyboard.Flags & 2) != 0);
-		if(event.button.code == 143)
+		if(event.button.code == EKeyCode::KEY_SHIFT)
 			event.button.code = right ? EKeyCode::KEY_RSHIFT : EKeyCode::KEY_LSHIFT;
-		if(event.button.code == 144)
+		if(event.button.code == EKeyCode::KEY_CONTROL)
 			event.button.code = right ? EKeyCode::KEY_RCONTROL : EKeyCode::KEY_LCONTROL;
-		if(event.button.code == 145)
+		if(event.button.code == EKeyCode::KEY_MENU)
 			event.button.code = right ? EKeyCode::KEY_RMENU : EKeyCode::KEY_LMENU;
 		isControl = true;
 	}
@@ -102,9 +104,9 @@ u32 RawKeyboardDevice::VKeyCodeToKeyCode(u16 code)
 	case 0x09: return (u32)EKeyCode::KEY_TAB;
 	case 0x0C: return (u32)EKeyCode::KEY_CLEAR;
 	case 0x0D: return (u32)EKeyCode::KEY_RETURN;
-	case 0x10: return 143;
-	case 0x11: return 144;
-	case 0x12: return 145;
+	case 0x10: return (u32)EKeyCode::KEY_SHIFT;
+	case 0x11: return (u32)EKeyCode::KEY_CONTROL;
+	case 0x12: return (u32)EKeyCode::KEY_MENU;
 	case 0x13: return (u32)EKeyCode::KEY_PAUSE;
 	case 0x14: return (u32)EKeyCode::KEY_CAPITAL;
 	case 0x15: return (u32)EKeyCode::KEY_HANGUL;

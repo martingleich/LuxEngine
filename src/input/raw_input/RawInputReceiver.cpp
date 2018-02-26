@@ -81,12 +81,12 @@ StrongRef<InputSystem> RawInputReceiver::GetSystem() const
 
 RAWINPUT* RawInputReceiver::GetRawInputData(HRAWINPUT raw)
 {
-	UINT Size = 0;
-	::GetRawInputData(raw, RID_INPUT, NULL, &Size, sizeof(RAWINPUTHEADER));
-	m_RawData.SetMinSize(Size);
+	UINT size = 0;
+	::GetRawInputData(raw, RID_INPUT, NULL, &size, sizeof(RAWINPUTHEADER));
+	m_RawData.SetMinSize(size);
 
-	UINT Return = ::GetRawInputData(raw, RID_INPUT, m_RawData, &Size, sizeof(RAWINPUTHEADER));
-	if(Return != Size)
+	UINT result = ::GetRawInputData(raw, RID_INPUT, m_RawData, &size, sizeof(RAWINPUTHEADER));
+	if(result != size)
 		throw core::Win32Exception(GetLastError());
 
 	return (RAWINPUT*)m_RawData;
@@ -126,15 +126,35 @@ void RawInputReceiver::DestroyDevice(RawInputDevice* device)
 	}
 }
 
-StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle)
+StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle, u32 deviceHint)
 {
-	auto it = m_DeviceMap.Find(rawHandle);
 	StrongRef<RawInputDevice> out;
-	if(it == m_DeviceMap.End()) {
-		out = CreateDevice(rawHandle);
-		m_DeviceMap.Set(rawHandle, out);
+	if(!rawHandle) {
+		// Seems to happen for some inputs, for example Mouse-Scrolling via Touchpad.
+		// We look if there is a default device of the given type.
+		EEventSource deviceType;
+		if(deviceHint == RIM_TYPEKEYBOARD)
+			deviceType = EEventSource::Keyboard;
+		else if(deviceHint == RIM_TYPEMOUSE)
+			deviceType = EEventSource::Mouse;
+		else
+			return nullptr; // It's quite possible for many HID's to be active at the same time, so don't take risk
+
+
+		for(auto& d : m_DeviceMap.Values()) {
+			if(d->GetType() == deviceType) {
+				out = d;
+				break;
+			}
+		}
 	} else {
-		out = *it;
+		auto it = m_DeviceMap.Find(rawHandle);
+		if(it == m_DeviceMap.End()) {
+			out = CreateDevice(rawHandle);
+			m_DeviceMap.Set(rawHandle, out);
+		} else {
+			out = *it;
+		}
 	}
 
 	return out;
@@ -152,7 +172,7 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 		try {
 			RAWINPUT* raw_data = GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam));
 			if(raw_data) {
-				StrongRef<RawInputDevice> device = GetDevice(raw_data->header.hDevice);
+				StrongRef<RawInputDevice> device = GetDevice(raw_data->header.hDevice, raw_data->header.dwType);
 
 				if(device)
 					device->HandleInput(raw_data);
@@ -160,8 +180,10 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 		} catch(core::RuntimeException&) {
 			// Can't receive input -> just ignore the input
 		}
+
 		result = S_OK;
-		ret = true;
+		// Since ret=false
+		// Call DefWindowProc to clean up.
 		break;
 	}
 	case WM_INPUT_DEVICE_CHANGE:

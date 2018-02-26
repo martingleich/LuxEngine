@@ -60,7 +60,7 @@ public:
 	RAWINPUT* GetRawInputData(HRAWINPUT raw);
 	StrongRef<RawInputDevice> CreateDevice(HANDLE rawHandle);
 	void DestroyDevice(RawInputDevice* device);
-	StrongRef<RawInputDevice> GetDevice(HANDLE rawHandle);
+	StrongRef<RawInputDevice> GetDevice(HANDLE rawHandle, u32 deviceHint=0);
 	bool HandleMessage(UINT msg,
 		WPARAM wParam,
 		LPARAM lParam,

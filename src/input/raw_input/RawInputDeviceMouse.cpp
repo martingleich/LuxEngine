@@ -25,7 +25,10 @@ RawMouseDevice::RawMouseDevice(InputSystem* system, HANDLE rawHandle) :
 		throw core::InvalidArgumentException("rawHandle", "Is not a mouse");
 
 	m_ButtonCount = info.mouse.dwNumberOfButtons;
-	//m_HasHWheel = (info.mouse.fHasHorizontalWheel == TRUE); // Windows does report this wrong sometimes
+	// Force at least 3 buttons and a hwheel since windows is really bad at
+	// reporting correct data
+	if(m_ButtonCount < 3)
+		m_ButtonCount = 3;
 	m_HasHWheel = true;
 
 	if(m_ButtonCount > MAX_MOUSE_BUTTONS)
