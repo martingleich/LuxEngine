@@ -134,7 +134,7 @@ public:
 			return basePath + name + GetAxis(id) + "." + ext;
 		default:
 			lxAssertNeverReach("Unsupported cube texture naming scheme.");
-			return "";
+			return core::String::EMPTY;
 		}
 	}
 
@@ -148,19 +148,21 @@ public:
 			outId = *nameonly.Last() - '1';
 			return ENameScheme::Numeric;
 		}
-		for(size_t i = 0; i < 6; ++i)
+		for(size_t i = 0; i < 6; ++i) {
 			if(nameonly.EndsWith(GetName(i))) {
 				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetName(i)));
 				outId = i;
 				return ENameScheme::Names;
 			}
+		}
 
-		for(size_t i = 0; i < 6; ++i)
+		for(size_t i = 0; i < 6; ++i) {
 			if(nameonly.EndsWith(GetAxis(i))) {
 				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetAxis(i)));
 				outId = i;
 				return ENameScheme::Axes;
 			}
+		}
 
 		return ENameScheme::Invalid;
 	}
@@ -261,7 +263,8 @@ private:
 		}
 	}
 };
-}
+} // anonynmous namespace
+
 static StrongRef<ImageSystem> g_ImageSystem;
 
 void ImageSystem::Initialize(ImageSystem* system)
