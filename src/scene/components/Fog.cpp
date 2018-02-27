@@ -1,6 +1,6 @@
 #include "scene/components/Fog.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::Fog, lux::scene::SceneComponentType::Fog);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::Fog, "lux.comp.Fog");
 
 namespace lux
 {

@@ -2,7 +2,7 @@
 #include "scene/Node.h"
 #include "video/Renderer.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::Light, lux::scene::SceneComponentType::Light);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::Light, "lux.comp.Light");
 
 namespace lux
 {

@@ -5,7 +5,7 @@
 #include "video/mesh/Geometry.h"
 #include "video/Renderer.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::Mesh, lux::scene::SceneComponentType::Mesh);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::Mesh, "lux.comp.Mesh");
 
 namespace lux
 {

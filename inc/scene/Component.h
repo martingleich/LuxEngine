@@ -15,6 +15,7 @@ namespace SceneComponentType
 {
 LUX_API extern const core::Name Rotation;
 LUX_API extern const core::Name FirstPersonCameraControl;
+LUX_API extern const core::Name TurntableCameraControl;
 LUX_API extern const core::Name LinearMove;
 
 LUX_API extern const core::Name Camera;

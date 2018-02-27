@@ -18,6 +18,7 @@
 #include "scene/components/RotationAnimator.h"
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/components/FirstPersonCameraControl.h"
+#include "scene/components/TurntableCameraControl.h"
 
 #include "scene/query/LineQuery.h"
 #include "scene/query/VolumeQuery.h"
@@ -195,6 +196,15 @@ StrongRef<FirstPersonCameraControl> Scene::CreateFirstPersonCameraControl(float 
 	out->SetMoveSpeed(moveSpeed);
 	out->SetRotationSpeed(rotSpeed);
 	out->AllowVerticalMovement(!noVerticalMovement);
+
+	return out;
+}
+
+StrongRef<TurntableCameraControl> Scene::CreateTurntableCameraControl(const math::Vector3F& orbit, const math::Vector3F& normal) const
+{
+	auto out = CreateComponent(SceneComponentType::TurntableCameraControl).AsStrong<TurntableCameraControl>();
+	out->SetOrbitCenter(orbit);
+	out->SetTableNormal(normal);
 
 	return out;
 }

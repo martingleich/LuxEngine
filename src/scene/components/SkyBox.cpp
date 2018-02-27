@@ -10,7 +10,7 @@
 
 #include "math/Transformation.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::SkyBox, lux::scene::SceneComponentType::SkyBox);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::SkyBox, "lux.comp.SkyBox");
 
 namespace lux
 {

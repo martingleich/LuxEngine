@@ -3,7 +3,7 @@
 #include "core/Logger.h"
 #include "input/InputSystem.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::FirstPersonCameraControl, lux::scene::SceneComponentType::FirstPersonCameraControl);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::FirstPersonCameraControl, "lux.comp.FirstPersonCameraControl");
 
 namespace lux
 {

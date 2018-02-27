@@ -1,7 +1,7 @@
 #include "scene/components/LinearMoveAnimator.h"
 #include "scene/Node.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::LinearMoveAnimator, lux::scene::SceneComponentType::LinearMove);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::LinearMoveAnimator, "lux.comp.LinearMove");
 
 namespace lux
 {

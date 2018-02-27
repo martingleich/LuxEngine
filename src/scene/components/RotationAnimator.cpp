@@ -2,7 +2,7 @@
 #include "scene/Node.h"
 #include "math/Quaternion.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::RotationAnimator, lux::scene::SceneComponentType::Rotation);
+LX_REFERABLE_MEMBERS_SRC(lux::scene::RotationAnimator, "lux.comp.Rotation");
 
 namespace lux
 {

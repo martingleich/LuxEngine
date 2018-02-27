@@ -52,6 +52,7 @@ class SkyBox;
 
 class Animator;
 class FirstPersonCameraControl;
+class TurntableCameraControl;
 class RotationAnimator;
 class LinearMoveAnimator;
 
@@ -93,6 +94,7 @@ public:
 	LUX_API virtual StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f)) const;
 	LUX_API virtual StrongRef<LinearMoveAnimator> CreateLinearMover(const math::Line3F& line, float duration) const;
 	LUX_API virtual StrongRef<FirstPersonCameraControl> CreateFirstPersonCameraControl(float moveSpeed = 4.0f, math::AngleF rotSpeed = math::AngleF::Degree(9.0f), bool noVerticalMovement = false) const;
+	LUX_API virtual StrongRef<TurntableCameraControl> CreateTurntableCameraControl(const math::Vector3F& orbit = math::Vector3F::ZERO, const math::Vector3F& normal = math::Vector3F::UNIT_Y) const;
 
 	LUX_API virtual StrongRef<Component> CreateComponent(core::Name type) const;
 
