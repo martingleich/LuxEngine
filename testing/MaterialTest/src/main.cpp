@@ -1,4 +1,11 @@
 #include <Lux.h>
+#include "scene/components/Light.h"
+#include "scene/components/SkyBox.h"
+#include "scene/components/Camera.h"
+#include "scene/components/SceneMesh.h"
+#include "scene/components/FirstPersonCameraControl.h"
+
+#include "gui/elements/GUIStaticText.h"
 
 using namespace lux;
 

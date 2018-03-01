@@ -20,12 +20,13 @@ Node::Node(Scene* scene, bool isRoot) :
 	m_Sibling(nullptr),
 	m_Child(nullptr),
 	m_Tags(0),
-	m_DebugFlags(EDD_NONE),
 	m_AnimatedCount(0),
 	m_Scene(scene),
 	m_IsVisible(true),
+	m_IsRoot(isRoot),
 	m_HasUserBoundingBox(false),
-	m_IsRoot(isRoot)
+	m_CastShadow(true),
+	m_IsDirty(true)
 {
 	UpdateAbsTransform();
 }
@@ -139,7 +140,7 @@ bool Node::HasTag(u32 tag) const
 void Node::SetRelativeTransform(const math::Transformation& t)
 {
 	m_RelativeTrans = t;
-	Transformable::SetDirty();
+	SetDirty();
 }
 
 const math::Transformation& Node::GetAbsoluteTransform() const
@@ -148,24 +149,18 @@ const math::Transformation& Node::GetAbsoluteTransform() const
 	return m_AbsoluteTrans;
 }
 
-const math::Transformation& Node::GetRelativeTransform() const
-{
-	return m_RelativeTrans;
-}
-
 bool Node::UpdateAbsTransform() const
 {
-	if(!Transformable::IsDirty())
+	if(!IsDirty())
 		return false;
 
 	Node* parent = GetParent();
-	if(parent && !parent->m_IsRoot) {
+	if(parent && !parent->m_IsRoot)
 		m_AbsoluteTrans = parent->GetAbsoluteTransform().CombineLeft(m_RelativeTrans);
-	} else {
+	else
 		m_AbsoluteTrans = m_RelativeTrans;
-	}
 
-	Transformable::ClearDirty();
+	ClearDirty();
 	return true;
 }
 
@@ -331,7 +326,7 @@ void Node::SetParent(Node* newParent)
 		return;
 
 	newParent->AddChild(this);
-	Transformable::SetDirty();
+	SetDirty();
 }
 
 Node* Node::GetParent() const
@@ -351,19 +346,6 @@ Node* Node::GetRoot()
 	return this;
 }
 
-void Node::SetDebugData(EDebugData debugData, bool state)
-{
-	if(state)
-		m_DebugFlags |= debugData;
-	else
-		m_DebugFlags &= ~debugData;
-}
-
-bool Node::GetDebugData(EDebugData debugData)
-{
-	return (m_DebugFlags & debugData) != 0;
-}
-
 StrongRef<Collider> Node::SetCollider(Collider* collider)
 {
 	m_Collider = collider;
@@ -373,21 +355,6 @@ StrongRef<Collider> Node::SetCollider(Collider* collider)
 StrongRef<Collider> Node::GetCollider() const
 {
 	return m_Collider;
-}
-
-bool Node::ExecuteQuery(Query* query, QueryCallback* callback)
-{
-	bool wasNotAborted = true;
-	if(HasTag(query->GetTags()) && m_Collider)
-		wasNotAborted = m_Collider->ExecuteQuery(this, query, callback);
-
-	for(auto child : Children()) {
-		wasNotAborted = child->ExecuteQuery(query, callback);
-		if(!wasNotAborted)
-			break;
-	}
-
-	return wasNotAborted;
 }
 
 const math::AABBoxF& Node::GetBoundingBox() const
@@ -447,7 +414,6 @@ Node::Node(const Node& other) :
 	m_Sibling(nullptr),
 	m_Child(nullptr),
 	m_Tags(other.m_Tags),
-	m_DebugFlags(other.m_DebugFlags),
 	m_AnimatedCount(0),
 	m_Scene(other.m_Scene),
 	m_IsVisible(other.m_IsVisible),
@@ -536,7 +502,7 @@ void Node::SetDirty() const
 	if(IsDirty())
 		return;
 
-	Transformable::SetDirty();
+	m_IsDirty = true;
 
 	// Set all children dirty to
 	for(auto child : Children())

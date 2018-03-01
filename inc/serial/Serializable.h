@@ -46,6 +46,7 @@ public:
 		if(elem)
 			var.AssignData((u8*)((Serializable*)this) + elem->objectOffset);
 	}
+	
 	//! Retrieve value of a single attribute via name.
 	/**
 	\param name The name of the attribute.

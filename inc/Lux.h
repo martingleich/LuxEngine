@@ -84,7 +84,6 @@ namespace input
 #include "io/FileSystem.h"
 #include "io/File.h"
 #include "io/Path.h"
-#include "io/INIFile.h"
 #include "io/Archive.h"
 
 #include "input/InputSystem.h"
@@ -119,16 +118,11 @@ namespace input
 
 #include "video/images/Image.h"
 #include "video/images/ImageSystem.h"
-#include "video/images/ImageWriter.h"
-
-#include "video/DrawingCanvas.h"
-#include "video/Canvas3D.h"
 
 #include "logic/Logic.h"
 
 #include "scene/Scene.h"
 #include "scene/SceneRenderer.h"
-#include "scene/Transformable.h"
 
 #include "scene/collider/Collider.h"
 
@@ -136,16 +130,6 @@ namespace input
 #include "scene/query/Query.h"
 
 #include "scene/Node.h"
-#include "scene/components/Camera.h"
-#include "scene/components/Light.h"
-#include "scene/components/Fog.h"
-#include "scene/components/SceneMesh.h"
-#include "scene/components/SkyBox.h"
-
-#include "scene/components/FirstPersonCameraControl.h"
-#include "scene/components/TurntableCameraControl.h"
-#include "scene/components/LinearMoveAnimator.h"
-#include "scene/components/RotationAnimator.h"
 
 #include "scene/animation/Curve.h"
 
@@ -164,21 +148,12 @@ namespace input
 #include "gui/FontCreator.h"
 #include "gui/GUIRenderer.h"
 
-#include "gui/elements/GUIStaticText.h"
-#include "gui/elements/GUIButton.h"
-#include "gui/elements/GUISlider.h"
-#include "gui/elements/GUICheckBox.h"
-#include "gui/elements/GUIRadioButton.h"
-#include "gui/elements/GUIImageDisplay.h"
-#include "gui/elements/GUITextBox.h"
-
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"
 
 #include "core/ModuleFactory.h"
 
 #include "resources/Resource.h"
-#include "resources/ResourceLoader.h"
 #include "resources/ResourceSystem.h"
 
 #include "LuxEngine/LuxSystemInfo.h"

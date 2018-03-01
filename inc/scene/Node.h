@@ -1,10 +1,9 @@
 #ifndef INCLUDED_SCENE_NODE_H
 #define INCLUDED_SCENE_NODE_H
-#include "core/Referable.h"
 #include "core/lxName.h"
 #include "core/lxArray.h"
 
-#include "scene/Transformable.h"
+#include "math/Transformation.h"
 #include "scene/Component.h"
 
 namespace lux
@@ -15,19 +14,9 @@ class RenderableVisitor;
 class Renderable;
 class Component;
 class Collider;
-class Query;
-class QueryCallback;
 class Scene;
 
-enum EDebugData : u32
-{
-	EDD_NONE = 0,
-	EDD_SUB_BBOX = 1,        // Alle Unterboundingboxen zeichen(z.B. Submeshes)
-	EDD_MAIN_BBOX = 2,        // Nur die Hautpboundingbox zeichnen
-	EDD_ALL_BBOX = EDD_SUB_BBOX | EDD_MAIN_BBOX,        // Sowohl Haupt- als auch Unterboundingbox zeichnen
-};
-
-class Node : public Referable, public scene::Transformable
+class Node : public Referable
 {
 private:
 	class ComponentEntry
@@ -416,14 +405,173 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API virtual void SetRelativeTransform(const math::Transformation& t);
-	LUX_API virtual const math::Transformation& GetAbsoluteTransform() const;
-	LUX_API virtual const math::Vector3F& GetAbsolutePosition() const
+	LUX_API void SetRelativeTransform(const math::Transformation& t);
+	LUX_API const math::Transformation& GetAbsoluteTransform() const;
+	LUX_API const math::Vector3F& GetAbsolutePosition() const
 	{
 		return GetAbsoluteTransform().translation;
 	}
 
-	LUX_API virtual const math::Transformation& GetRelativeTransform() const;
+	//! Set a new uniform scalation
+	/**
+	\param s The the scale
+	*/
+	void SetScale(float s)
+	{
+		m_RelativeTrans.scale = s;
+		SetDirty();
+	}
+
+	//! Change the scale
+	/**
+	\param s The change of the scale
+	*/
+	void Scale(float s)
+	{
+		m_RelativeTrans.scale *= s;
+		SetDirty();
+	}
+
+	//! Set a new position
+	/**
+	\param p The new position
+	*/
+	void SetPosition(const math::Vector3F& p)
+	{
+		m_RelativeTrans.translation = p;
+		SetDirty();
+	}
+
+	void SetPosition(float x, float y, float z)
+	{
+		SetPosition(math::Vector3F(x, y, z));
+	}
+
+	//! Translate the node in relative coordinates
+	/**
+	\param p The translation
+	*/
+	void Translate(const math::Vector3F& p)
+	{
+		m_RelativeTrans.translation += p;
+		SetDirty();
+	}
+
+	void Translate(float x, float y, float z)
+	{
+		Translate(math::Vector3F(x, y, z));
+	}
+
+	//! Set a new orientation
+	/**
+	\param o The new orientation
+	*/
+	void SetOrientation(const math::QuaternionF& o)
+	{
+		m_RelativeTrans.orientation = o;
+		SetDirty();
+	}
+
+	//! Apply a rotation to the transformable
+	/**
+	\param o The orientation to apply.
+	*/
+	void Rotate(const math::QuaternionF& o)
+	{
+		m_RelativeTrans.orientation *= o;
+		SetDirty();
+	}
+
+	void Rotate(const math::Vector3F& axis, math::AngleF alpha)
+	{
+		Rotate(math::QuaternionF(axis, alpha));
+	}
+
+	void RotateX(math::AngleF alpha)
+	{
+		Rotate(math::Vector3F::UNIT_X, alpha);
+	}
+
+	void RotateY(math::AngleF alpha)
+	{
+		Rotate(math::Vector3F::UNIT_Y, alpha);
+	}
+
+	void RotateZ(math::AngleF alpha)
+	{
+		Rotate(math::Vector3F::UNIT_Z, alpha);
+	}
+
+	//! Get the current relative scale
+	/**
+	\return The current relative scale
+	*/
+	float GetScale() const
+	{
+		return m_RelativeTrans.scale;
+	}
+
+	//! Get the current relative position
+	/**
+	\return The current relative position
+	*/
+	const math::Vector3F& GetPosition() const
+	{
+		return m_RelativeTrans.translation;
+	}
+
+	//! Get the current relative orientation
+	/**
+	\return The current relative orientation
+	*/
+	const math::QuaternionF& GetOrientation() const
+	{
+		return m_RelativeTrans.orientation;
+	}
+
+	//! Set the looking direction of the transfomable
+	/**
+	Rotates the transforable to move a local vector in direction of another vector
+	\param dir The direction in which the local direction should point
+	\param local The local vector which should used as pointer
+	*/
+	void SetDirection(const math::Vector3F& dir, const math::Vector3F& local = math::Vector3F::UNIT_Z)
+	{
+		m_RelativeTrans.orientation = math::QuaternionF::FromTo(local, dir);
+		SetDirty();
+	}
+
+	//! Set the looking directon of the transformable
+	/**
+	local_dir and local_up must be orthogonal.
+	\param dir The new direction of the local dir axis
+	\param up The new direction of the local up axis
+	\param local_dir The local direction vector
+	\param local_up The local up vector
+	*/
+	void SetDirectionUp(const math::Vector3F& dir,
+		const math::Vector3F& up = math::Vector3F::UNIT_Y,
+		const math::Vector3F& local_dir = math::Vector3F::UNIT_Z,
+		const math::Vector3F& local_up = math::Vector3F::UNIT_Y)
+	{
+		m_RelativeTrans.orientation = math::QuaternionF::FromTo(
+			local_dir, local_up,
+			dir, up);
+		SetDirty();
+	}
+
+	void LookAt(const math::Vector3F& pos,
+		const math::Vector3F& up = math::Vector3F::UNIT_Y,
+		const math::Vector3F& local_dir = math::Vector3F::UNIT_Z,
+		const math::Vector3F& local_up = math::Vector3F::UNIT_Y)
+	{
+		SetDirectionUp(pos - GetPosition(), up, local_dir, local_up);
+	}
+
+	const math::Transformation& GetTransform() const
+	{
+		return m_RelativeTrans;
+	}
 
 	//! transform a relative position to another coordinate system
 	/**
@@ -523,15 +671,8 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API void SetDebugData(EDebugData debugData, bool state);
-	LUX_API bool GetDebugData(EDebugData debugData);
-
-	////////////////////////////////////////////////////////////////////////////////
-
 	LUX_API StrongRef<Collider> SetCollider(Collider* collider);
 	LUX_API StrongRef<Collider> GetCollider() const;
-
-	LUX_API bool ExecuteQuery(Query* query, QueryCallback* queryCallback);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -561,7 +702,15 @@ private:
 
 	bool UpdateAbsTransform() const;
 
+	bool IsDirty() const
+	{
+		return m_IsDirty;
+	}
 	void SetDirty() const;
+	void ClearDirty() const
+	{
+		m_IsDirty = false;
+	}
 
 	StrongRef<Referable> CloneImpl() const;
 
@@ -572,14 +721,13 @@ private:
 
 	u32 m_Tags;
 
-	u32 m_DebugFlags;
-
 	u32 m_AnimatedCount;
 	SceneNodeComponentList m_Components;
 
 	Scene* m_Scene;
 
 	mutable math::Transformation m_AbsoluteTrans;
+	math::Transformation m_RelativeTrans;
 
 	StrongRef<Collider> m_Collider;
 
@@ -589,6 +737,7 @@ private:
 	bool m_HasUserBoundingBox;
 	bool m_IsRoot;
 	bool m_CastShadow;
+	mutable bool m_IsDirty;
 };
 
 } // namespace scene
