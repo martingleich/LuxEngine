@@ -14,7 +14,7 @@ const core::Name LinearMove("lux.comp.LinearMove");
 const core::Name Camera("lux.comp.Camera");
 const core::Name Mesh("lux.comp.Mesh");
 const core::Name Light("lux.comp.Light");
-const core::Name Fog("lux.comp.Fog");
+const core::Name GlobalFog("lux.comp.GlobalFog");
 const core::Name SkyBox("lux.comp.SkyBox");
 
 }

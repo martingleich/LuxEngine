@@ -21,7 +21,7 @@ LUX_API extern const core::Name LinearMove;
 LUX_API extern const core::Name Camera;
 LUX_API extern const core::Name Mesh;
 LUX_API extern const core::Name Light;
-LUX_API extern const core::Name Fog;
+LUX_API extern const core::Name GlobalFog;
 LUX_API extern const core::Name SkyBox;
 }
 
@@ -106,7 +106,7 @@ protected:
 			m_Listener->Attach(n);
 		m_Node = n;
 	}
-	virtual void OnDettach(Node* n)
+	virtual void OnDetach(Node* n)
 	{
 		if(m_Listener)
 			m_Listener->Dettach(n);

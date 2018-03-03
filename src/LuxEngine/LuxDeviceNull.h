@@ -21,7 +21,7 @@ public:
 	void BuildImageSystem();
 	void BuildScene(const core::String& renderer, void* user=nullptr);
 	StrongRef<scene::Scene> CreateScene();
-	StrongRef<scene::SceneRenderer> CreateSceneRenderer(const core::String& name, void* user=nullptr);
+	StrongRef<scene::SceneRenderer> CreateSceneRenderer(const core::String& name, scene::Scene* scene, void* user=nullptr);
 	void BuildGUIEnvironment();
 	void BuildAll(const video::DriverConfig& config);
 

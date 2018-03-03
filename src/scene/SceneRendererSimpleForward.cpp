@@ -9,7 +9,6 @@
 
 #include "core/lxAlgorithm.h"
 
-#include "scene/Scene.h"
 #include "scene/components/Fog.h"
 #include "scene/components/Light.h"
 #include "scene/components/SceneMesh.h"
@@ -23,6 +22,90 @@ namespace lux
 namespace scene
 {
 
+void SceneDataCollector::RegisterCamera(AbstractCamera* camera)
+{
+	cameraList.PushBack(camera);
+}
+
+void SceneDataCollector::UnregisterCamera(AbstractCamera* camera)
+{
+	auto it = core::LinearSearch(camera, cameraList);
+	if(it != cameraList.End())
+		cameraList.Erase(it);
+}
+
+void SceneDataCollector::RegisterLight(Light* light)
+{
+	lightList.PushBack(light);
+}
+
+void SceneDataCollector::UnregisterLight(Light* light)
+{
+	auto it = core::LinearSearch(light, lightList);
+	if(it != lightList.End())
+		lightList.Erase(it);
+}
+
+void SceneDataCollector::RegisterFog(GlobalFog* fog)
+{
+	fogList.PushBack(fog);
+}
+
+void SceneDataCollector::UnregisterFog(GlobalFog* fog)
+{
+	auto it = core::LinearSearch(fog, fogList);
+	if(it != fogList.End())
+		fogList.Erase(it);
+}
+
+void SceneDataCollector::OnAttach(Node* node)
+{
+	for(auto c : node->Children())
+		OnAttach(c);
+	for(auto c : node->Components())
+		OnAttach(c);
+}
+
+void SceneDataCollector::OnDetach(Node* node)
+{
+	for(auto c : node->Children())
+		OnDetach(c);
+	for(auto c : node->Components())
+		OnDetach(c);
+}
+
+void SceneDataCollector::OnAttach(Component* comp)
+{
+	auto fog = dynamic_cast<GlobalFog*>(comp);
+	if(fog)
+		RegisterFog(fog);
+	auto light = dynamic_cast<Light*>(comp);
+	if(light)
+		RegisterLight(light);
+	auto camera = dynamic_cast<AbstractCamera*>(comp);
+	if(camera)
+		RegisterCamera(camera);
+	auto ambient = dynamic_cast<GlobalAmbientLight*>(comp);
+	if(ambient)
+		ambientLight = ambient;
+}
+
+void SceneDataCollector::OnDetach(Component* comp)
+{
+	auto fog = dynamic_cast<GlobalFog*>(comp);
+	if(fog)
+		UnregisterFog(fog);
+	auto light = dynamic_cast<Light*>(comp);
+	if(light)
+		UnregisterLight(light);
+	auto camera = dynamic_cast<AbstractCamera*>(comp);
+	if(camera)
+		UnregisterCamera(camera);
+	auto ambient = dynamic_cast<GlobalAmbientLight*>(comp);
+	if(ambient)
+		ambientLight = nullptr;
+}
+
 SceneRendererSimpleForward::SceneRendererSimpleForward(const core::ModuleInitData& data) :
 	m_CollectedRoot(nullptr),
 	m_StencilShadowRenderer(video::VideoDriver::Instance()->GetRenderer(), 0xFFFFFFFF)
@@ -30,10 +113,14 @@ SceneRendererSimpleForward::SceneRendererSimpleForward(const core::ModuleInitDat
 	LUX_UNUSED(data);
 
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
+	m_Scene = static_cast<const scene::SceneRendererInitData&>(data).scene;
+	m_SceneData = LUX_NEW(SceneDataCollector);
 
 	m_Attributes.AddAttribute("drawStencilShadows", false);
 	m_Attributes.AddAttribute("maxShadowCasters", 1);
 	m_Attributes.AddAttribute("culling", true);
+
+	m_Scene->RegisterObserver(m_SceneData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -58,22 +145,21 @@ public:
 
 struct CameraSortT
 {
-	bool Smaller(const Camera* a, const Camera* b) const
+	bool Smaller(const AbstractCamera* a, const AbstractCamera* b) const
 	{
 		return a->GetRenderPriority() < b->GetRenderPriority();
 	}
 };
 }
 
-void SceneRendererSimpleForward::DrawScene(Scene* scene, bool beginScene, bool endScene)
+void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 {
 	video::RenderStatistics::GroupScope grpScope("scene");
-	m_Scene = scene;
 
 	// Collect "real" camera nodes
-	auto camList = m_Scene->GetCameraList();
+	auto camList = m_SceneData->cameraList;
 	auto newEnd = core::RemoveIf(camList,
-		[](const Camera* c) { return !c->GetParent()->IsTrulyVisible(); }
+		[](const AbstractCamera* c) { return !c->GetParent()->IsTrulyVisible(); }
 	);
 	camList.Resize(core::IteratorDistance(camList.First(), newEnd));
 
@@ -141,6 +227,8 @@ void SceneRendererSimpleForward::DrawScene(Scene* scene, bool beginScene, bool e
 ////////////////////////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////
 
 void SceneRendererSimpleForward::EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
@@ -220,7 +308,9 @@ void SceneRendererSimpleForward::DrawScene()
 
 	//-------------------------------------------------------------------------
 	// The lights
-	*m_Renderer->GetParam("ambient") = m_Scene->GetAmbient();
+	*m_Renderer->GetParam("ambient") = m_SceneData->ambientLight ?
+		m_SceneData->ambientLight->GetColor() :
+		video::Colorf(0, 0, 0);
 
 	m_Renderer->ClearLights();
 
@@ -231,7 +321,7 @@ void SceneRendererSimpleForward::DrawScene()
 
 	size_t count = 0;
 	size_t shadowCount = 0;
-	for(auto& e : m_Scene->GetLightList()) {
+	for(auto& e : m_SceneData->lightList) {
 		auto node = e->GetParent();
 		if(node->IsTrulyVisible()) {
 			illuminating.PushBack(e);
@@ -260,7 +350,7 @@ void SceneRendererSimpleForward::DrawScene()
 	// The fog
 	m_Renderer->ClearFog();
 	bool foundFog = false;
-	for(auto& f : m_Scene->GetFogList()) {
+	for(auto& f : m_SceneData->fogList) {
 		auto node = f->GetParent();
 		if(node->IsTrulyVisible()) {
 			if(!foundFog) {

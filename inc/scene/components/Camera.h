@@ -14,17 +14,17 @@ class Renderer;
 namespace scene
 {
 
-class CameraBase : public Component
+class AbstractCamera : public Component
 {
 public:
 	class Listener
 	{
 	public:
 		//! Called before rendering the camera, after beginning the scene.
-		virtual void PreRender(CameraBase* cam) { LUX_UNUSED(cam); }
+		virtual void PreRender(AbstractCamera* cam) { LUX_UNUSED(cam); }
 
 		//! Called after rendering all nodes, before ending the scene.
-		virtual void PostRender(CameraBase* cam) { LUX_UNUSED(cam); }
+		virtual void PostRender(AbstractCamera* cam) { LUX_UNUSED(cam); }
 	};
 
 public:
@@ -42,10 +42,15 @@ public:
 
 	virtual void SetCameraListener(Listener* l) = 0;
 	virtual Listener* GetCameraListener() const = 0;
+
+	StrongRef<AbstractCamera> Clone()
+	{
+		return CloneImpl().StaticCastStrong<AbstractCamera>();
+	}
 };
 
 //! Represent a camera in the scenegraph
-class Camera : public CameraBase
+class Camera : public AbstractCamera
 {
 	LX_REFERABLE_MEMBERS_API(Camera, LUX_API);
 public:

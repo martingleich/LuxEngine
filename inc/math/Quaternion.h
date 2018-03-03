@@ -445,9 +445,9 @@ public:
 		return v;
 	}
 
-	//! Build a new quaternion moving from one coordiante system to angother
+	//! Build a new quaternion moving from one coordiante system to another.
 	/**
-	to_dir and to_up must be orthogornal.
+	from_dir and from_up must be orthogornal.
 	\param from_dir The direction in the from system
 	\param from_up The up in the from system
 	\param to_dir The direction in the to system
@@ -489,7 +489,7 @@ public:
 		m00+m11+m22 = wr*lr + wu*lu + wf*lf
 
 		m21 = wr.z*lr.y + wu.z*lu.y + wf.z*lf.y
-		m12 = wr.y*lr.z + wu.y‹lu.z + wf.y*lf.z
+		m12 = wr.y*lr.z + wu.y*lu.z + wf.y*lf.z
 
 		m02 = wr.x*lr.z + wu.x*lu.z + wf.x*lf.z
 		m20 = wr.z*lr.x + wu.z*lu.x + wf.z*lf.x

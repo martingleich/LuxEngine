@@ -43,6 +43,11 @@ public:
 		return m_Model;
 	}
 
+	StrongRef<ParticleAffector> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<ParticleAffector>();
+	}
+
 private:
 	bool m_IsGlobal;
 	StrongRef<ParticleModel> m_Model;

@@ -5,14 +5,9 @@
 
 namespace lux
 {
-namespace video
-{
-class Renderer;
-}
 namespace scene
 {
 
-//! Represent a light in the scenegraph
 class Light : public Component
 {
 	LX_REFERABLE_MEMBERS_API(Light, LUX_API);
@@ -42,7 +37,7 @@ public:
 
 	//! Set the power of the light
 	LUX_API virtual void SetPower(float power);
-	
+
 	//! Get the power of the light
 	LUX_API virtual float GetPower() const;
 
@@ -100,6 +95,23 @@ protected:
 	float m_Power;
 	float m_Range;
 	bool m_IsShadowCasting;
+};
+
+/////////////////////////////////////////////////////////////////////
+
+class GlobalAmbientLight : public Component
+{
+	LX_REFERABLE_MEMBERS_API(GlobalAmbientLight, LUX_API);
+
+public:
+	LUX_API GlobalAmbientLight();
+	LUX_API ~GlobalAmbientLight();
+
+	LUX_API virtual void SetColor(const video::Colorf& color);
+	LUX_API virtual video::Colorf GetColor() const;
+
+protected:
+	video::Colorf m_Color;
 };
 
 } // namespace scene

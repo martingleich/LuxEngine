@@ -3,6 +3,7 @@
 #include "video/Renderer.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::scene::Light, "lux.comp.Light");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::GlobalAmbientLight, "lux.comp.GlobalAmbientLight");
 
 namespace lux
 {
@@ -117,6 +118,26 @@ bool Light::IsShadowCasting() const
 void Light::SetShadowCasting(bool b)
 {
 	m_IsShadowCasting = b;
+}
+
+/////////////////////////////////////////////////////////////////////
+
+GlobalAmbientLight::GlobalAmbientLight()
+{
+}
+
+GlobalAmbientLight::~GlobalAmbientLight()
+{
+}
+
+void GlobalAmbientLight::SetColor(const video::Colorf& color)
+{
+	m_Color = color;
+}
+
+video::Colorf GlobalAmbientLight::GetColor() const
+{
+	return m_Color;
 }
 
 }

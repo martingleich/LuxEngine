@@ -1,6 +1,7 @@
 #ifndef INCLUDED_SCENERENDERER_IMPL_H
 #define INCLUDED_SCENERENDERER_IMPL_H
 #include "scene/SceneRenderer.h"
+#include "scene/Scene.h"
 
 #include "core/lxOrderedMap.h"
 #include "video/Renderer.h"
@@ -14,6 +15,30 @@ namespace lux
 {
 namespace scene
 {
+class GlobalAmbientLight;
+class SceneDataCollector : public SceneObserver
+{
+public:
+	void OnAttach(Node* node);
+	void OnDetach(Node* node);
+
+	void OnAttach(Component* comp);
+	void OnDetach(Component* comp);
+
+	void RegisterCamera(AbstractCamera* camera);
+	void UnregisterCamera(AbstractCamera* camera);
+
+	void RegisterLight(Light* light);
+	void UnregisterLight(Light* light);
+
+	void RegisterFog(GlobalFog* fog);
+	void UnregisterFog(GlobalFog* fog);
+
+	core::Array<AbstractCamera*> cameraList; //!< The cameras of the graph
+	core::Array<Light*> lightList; //!< The lights of the graph
+	core::Array<GlobalFog*> fogList; //!< The fogs of the graph
+	GlobalAmbientLight* ambientLight = nullptr;
+};
 
 class SceneRendererSimpleForward : public SceneRenderer
 {
@@ -22,7 +47,7 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	void DrawScene(Scene* scene, bool beginScene, bool endScene);
+	void DrawScene(bool beginScene, bool endScene);
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,10 +115,13 @@ private:
 	};
 
 private:
+	StrongRef<Scene> m_Scene;
+
+	StrongRef<SceneDataCollector> m_SceneData;
+
 	/////////////////////////////////////////////////////////////////////////
 	// Caches and temporary values
 	/////////////////////////////////////////////////////////////////////////
-	Scene* m_Scene;
 
 	core::Array<RenderEntry> m_SkyBoxList;
 	core::Array<RenderEntry> m_SolidNodeList;
@@ -103,7 +131,7 @@ private:
 
 	// Information about the current camera
 	WeakRef<Node> m_ActiveCameraNode;
-	WeakRef<Camera> m_ActiveCamera;
+	WeakRef<AbstractCamera> m_ActiveCamera;
 	math::Vector3F m_AbsoluteCamPos;
 
 	/////////////////////////////////////////////////////////////////////////

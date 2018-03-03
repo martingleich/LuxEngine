@@ -8,12 +8,12 @@ namespace lux
 namespace scene
 {
 
-class Fog : public Component
+class GlobalFog : public Component
 {
-	LX_REFERABLE_MEMBERS_API(Fog, LUX_API);
+	LX_REFERABLE_MEMBERS_API(GlobalFog, LUX_API);
 public:
-	LUX_API Fog();
-	LUX_API virtual ~Fog();
+	LUX_API GlobalFog();
+	LUX_API virtual ~GlobalFog();
 
 	LUX_API virtual void SetFogType(video::EFogType type);
 	LUX_API virtual video::EFogType GetFogType() const;

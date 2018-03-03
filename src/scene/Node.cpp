@@ -1,13 +1,7 @@
 #include "scene/Scene.h"
 #include "scene/Node.h"
 #include "scene/Renderable.h"
-#include "scene/query/Query.h"
-#include "scene/query/QueryCallback.h"
-#include "scene/query/VolumeQuery.h"
 #include "scene/collider/Collider.h"
-#include "scene/components/Camera.h"
-#include "scene/components/Light.h"
-#include "scene/components/Fog.h"
 #include "core/Logger.h"
 
 namespace lux
@@ -79,7 +73,7 @@ StrongRef<Component> Node::AddComponent(Component* component)
 
 	m_Components.PushBack(ComponentEntry(component));
 
-	OnAddComponent(component);
+	OnAttach(component);
 
 	return component;
 }
@@ -108,7 +102,7 @@ void Node::RemoveComponent(Component* comp)
 	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
 		if(it->comp == comp) {
 			m_Components.Erase(it);
-			OnRemoveComponent(comp);
+			OnDetach(comp);
 			break;
 		}
 	}
@@ -117,7 +111,7 @@ void Node::RemoveComponent(Component* comp)
 void Node::RemoveAllComponents()
 {
 	for(auto it = m_Components.First(); it != m_Components.End(); ++it)
-		OnRemoveComponent(it->comp);
+		OnDetach(it->comp);
 
 	m_Components.Clear();
 }
@@ -242,7 +236,7 @@ void Node::RemoveChild(Node* child)
 	Node* current = m_Child;
 	while(current) { // Iterator over each child
 		if(current == child) {
-			child->OnDettach(); // Send dettach event
+			child->OnDetach(); // Send dettach event
 
 			if(last)
 				last->m_Sibling = current->m_Sibling;
@@ -269,7 +263,7 @@ void Node::RemoveAllChildren()
 	Node* current = m_Child;
 	Node* next;
 	while(current) {
-		current->OnDettach();
+		current->OnDetach();
 
 		next = current->m_Sibling;
 
@@ -313,7 +307,7 @@ void Node::MarkForDelete(Component* comp)
 {
 	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
 		if(it->comp == comp) {
-			OnRemoveComponent(comp);
+			OnAttach(comp);
 			it->markForDelete = true;
 			break;
 		}
@@ -434,29 +428,20 @@ Node::Node(const Node& other) :
 
 void Node::OnAttach()
 {
+	if(m_Scene)
+		m_Scene->OnAttach(this);
 }
 
-void Node::OnDettach()
+void Node::OnDetach()
 {
+	if(m_Scene)
+		m_Scene->OnDetach(this);
 }
 
-void Node::OnAddComponent(Component* c)
+void Node::OnAttach(Component* c)
 {
 	if(m_Scene) {
-		auto camera = dynamic_cast<Camera*>(c);
-		if(camera)
-			m_Scene->RegisterCamera(camera);
-
-		auto light = dynamic_cast<Light*>(c);
-		if(light) {
-			m_Scene->RegisterLight(light);
-			SetShadowCasting(false);
-		}
-
-		auto fog = dynamic_cast<Fog*>(c);
-		if(fog) {
-			m_Scene->RegisterFog(fog);
-		}
+		m_Scene->OnAttach(c);
 
 		if(c->IsAnimated()) {
 			if(m_AnimatedCount == 0)
@@ -471,19 +456,11 @@ void Node::OnAddComponent(Component* c)
 	c->OnAttach(this);
 }
 
-void Node::OnRemoveComponent(Component* c)
+void Node::OnDetach(Component* c)
 {
 	if(m_Scene) {
-		auto camera = dynamic_cast<Camera*>(c);
-		if(camera)
-			m_Scene->UnregisterCamera(camera);
+		m_Scene->OnDetach(c);
 
-		auto light = dynamic_cast<Light*>(c);
-		if(light)
-			m_Scene->UnregisterLight(light);
-		auto fog = dynamic_cast<Fog*>(c);
-		if(fog)
-			m_Scene->UnregisterFog(fog);
 		if(c->IsAnimated()) {
 			--m_AnimatedCount;
 			if(m_AnimatedCount == 0)
@@ -494,7 +471,7 @@ void Node::OnRemoveComponent(Component* c)
 	if(!m_HasUserBoundingBox)
 		RecalculateBoundingBox();
 
-	c->OnDettach(this);
+	c->OnDetach(this);
 }
 
 void Node::SetDirty() const

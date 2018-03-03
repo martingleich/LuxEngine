@@ -26,12 +26,12 @@ enum class ERenderPass
 };
 
 class Light;
-class Camera;
+class AbstractCamera;
 class SceneData
 {
 public:
 	Node* activeCameraNode;
-	Camera* activeCamera;
+	AbstractCamera* activeCamera;
 
 	ERenderPass pass;
 

@@ -149,7 +149,7 @@ void Camera::SetCameraListener(Listener* l)
 	m_Listener = l;
 }
 
-CameraBase::Listener* Camera::GetCameraListener() const
+AbstractCamera::Listener* Camera::GetCameraListener() const
 {
 	return m_Listener;
 }

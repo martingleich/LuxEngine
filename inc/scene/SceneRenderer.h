@@ -21,7 +21,9 @@ class Scene;
 
 //! Data passed to module factory to create a scene renderer.
 struct SceneRendererInitData : public core::ModuleInitData
-{};
+{
+	StrongRef<Scene> scene;
+};
 
 //! Interface to render scenes.
 class SceneRenderer : public ReferenceCounted
@@ -33,11 +35,10 @@ public:
 
 	//! Draws a scene.
 	/**
-	\param scene The scene to draw.
 	\param beginScene Should the renderer call video::Renderer::BeginScene, if not the scene must be already started with the correct rendertarget in place.
 	\param endScene Should the renderer call video::Renderer::EndScene
 	*/
-	virtual void DrawScene(Scene* scene,
+	virtual void DrawScene(
 		bool beginScene = true,
 		bool endScene = true) = 0;
 

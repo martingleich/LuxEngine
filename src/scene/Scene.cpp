@@ -7,8 +7,6 @@
 
 #include "video/mesh/VideoMesh.h"
 
-#include "scene/Node.h"
-
 #include "scene/components/Camera.h"
 #include "scene/components/SceneMesh.h"
 #include "scene/components/Light.h"
@@ -45,13 +43,26 @@ Scene::~Scene()
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+void Scene::RegisterObserver(SceneObserver* observer)
+{
+	m_Observers.PushBack(observer);
+}
+
+void Scene::UnregisterObserver(SceneObserver* observer)
+{
+	for(auto it = m_Observers.First(); it != m_Observers.End(); ++it) {
+		if(*it == observer) {
+			m_Observers.Erase(it);
+			break;
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
 void Scene::Clear()
 {
 	ClearDeletionQueue();
-
-	m_CameraList.Clear();
-	m_LightList.Clear();
-	m_FogList.Clear();
 
 	m_AnimatedNodes.Clear();
 
@@ -162,9 +173,9 @@ StrongRef<Light> Scene::CreateLight(video::ELightType lightType, video::Color co
 	return light;
 }
 
-StrongRef<Fog> Scene::CreateFog(const video::Colorf& color, float start, float end) const
+StrongRef<GlobalFog> Scene::CreateFog(const video::Colorf& color, float start, float end) const
 {
-	auto fog = CreateComponent(SceneComponentType::Fog).AsStrong<Fog>();
+	auto fog = CreateComponent(SceneComponentType::GlobalFog).AsStrong<GlobalFog>();
 	fog->SetFogType(video::EFogType::Linear);
 	fog->SetStart(start);
 	fog->SetEnd(end);
@@ -250,46 +261,10 @@ Node* Scene::GetRoot() const
 
 bool Scene::IsEmpty() const
 {
-	return !m_Root->HasChildren();
+	return !GetRoot()->HasChildren();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-
-void Scene::RegisterCamera(Camera* camera)
-{
-	m_CameraList.PushBack(camera);
-}
-
-void Scene::UnregisterCamera(Camera* camera)
-{
-	auto it = core::LinearSearch(camera, m_CameraList);
-	if(it != m_CameraList.End())
-		m_CameraList.Erase(it);
-}
-
-void Scene::RegisterLight(Light* light)
-{
-	m_LightList.PushBack(light);
-}
-
-void Scene::UnregisterLight(Light* light)
-{
-	auto it = core::LinearSearch(light, m_LightList);
-	if(it != m_LightList.End())
-		m_LightList.Erase(it);
-}
-
-void Scene::RegisterFog(Fog* fog)
-{
-	m_FogList.PushBack(fog);
-}
-
-void Scene::UnregisterFog(Fog* fog)
-{
-	auto it = core::LinearSearch(fog, m_FogList);
-	if(it != m_FogList.End())
-		m_FogList.Erase(it);
-}
 
 void Scene::RegisterAnimated(Node* node)
 {
@@ -299,33 +274,6 @@ void Scene::RegisterAnimated(Node* node)
 void Scene::UnregisterAnimated(Node* node)
 {
 	m_AnimatedNodes.Erase(node);
-}
-
-const core::Array<Camera*>& Scene::GetCameraList() const
-{
-	return m_CameraList;
-}
-
-const core::Array<Light*>& Scene::GetLightList() const
-{
-	return m_LightList;
-}
-
-const core::Array<Fog*>& Scene::GetFogList() const
-{
-	return m_FogList;
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-
-void Scene::SetAmbient(const video::Colorf& ambient)
-{
-	m_AmbientColor = ambient;
-}
-
-const video::Colorf& Scene::GetAmbient() const
-{
-	return m_AmbientColor;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -352,6 +300,32 @@ void Scene::VisitRenderables(RenderableVisitor* visitor, bool noDebug, Node* roo
 	if(!root)
 		root = m_Root;
 	VisitRenderablesRec(root, visitor, noDebug);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+void Scene::OnAttach(Node* node)
+{
+	for(auto& obs : m_Observers)
+		obs->OnAttach(node);
+}
+
+void Scene::OnDetach(Node* node)
+{
+	for(auto& obs : m_Observers)
+		obs->OnDetach(node);
+}
+
+void Scene::OnAttach(Component* comp)
+{
+	for(auto& obs : m_Observers)
+		obs->OnAttach(comp);
+}
+
+void Scene::OnDetach(Component* comp)
+{
+	for(auto& obs : m_Observers)
+		obs->OnDetach(comp);
 }
 
 } // namespace scene

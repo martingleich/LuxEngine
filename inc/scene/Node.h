@@ -529,7 +529,7 @@ public:
 		return m_RelativeTrans.orientation;
 	}
 
-	//! Set the looking direction of the transfomable
+	//! Set a direction of the transfomable
 	/**
 	Rotates the transforable to move a local vector in direction of another vector
 	\param dir The direction in which the local direction should point
@@ -541,7 +541,7 @@ public:
 		SetDirty();
 	}
 
-	//! Set the looking directon of the transformable
+	//! Set a directon of the transformable
 	/**
 	local_dir and local_up must be orthogonal.
 	\param dir The new direction of the local dir axis
@@ -676,12 +676,28 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
+	//! Retrieve the bounding box of the node.
 	LUX_API const math::AABBoxF& GetBoundingBox() const;
+	//! Set the bounding box to any value.
+	/**
+	The bounding box here does not change until Recalculate bounding box.
+	is explicit called.
+	*/
 	LUX_API void SetBoundingBox(const math::AABBoxF& box);
+	//! Set the bounding box to the bounding box of all renderables.
+	/**
+	If new components are added/removed from the node, the bounding
+	box is updated automatically.
+	*/
 	LUX_API void RecalculateBoundingBox();
 
 	////////////////////////////////////////////////////////////////////////////////
 
+	//! Create clone of the current node
+	/**
+	Clones all children and components.
+	But is not attached to any parent.
+	*/
 	LUX_API StrongRef<Node> Clone() const;
 	LUX_API virtual core::Name GetReferableType() const;
 
@@ -695,10 +711,10 @@ protected:
 
 private:
 	void OnAttach();
-	void OnDettach();
+	void OnDetach();
 
-	void OnAddComponent(Component* c);
-	void OnRemoveComponent(Component* c);
+	void OnAttach(Component* c);
+	void OnDetach(Component* c);
 
 	bool UpdateAbsTransform() const;
 
@@ -706,7 +722,7 @@ private:
 	{
 		return m_IsDirty;
 	}
-	void SetDirty() const;
+	LUX_API void SetDirty() const;
 	void ClearDirty() const
 	{
 		m_IsDirty = false;
@@ -734,6 +750,7 @@ private:
 	math::AABBoxF m_BoundingBox;
 
 	bool m_IsVisible;
+	//! Is the current bounding box set by the user.
 	bool m_HasUserBoundingBox;
 	bool m_IsRoot;
 	bool m_CastShadow;

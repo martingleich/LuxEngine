@@ -142,8 +142,11 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 	t.translation = data.activeCameraNode->GetAbsolutePosition();
 
 	// Place the skybox right between the clipping planes
-	const Camera* camera = data.activeCamera;
-	t.scale = 0.5f * (camera->GetNearPlane() + camera->GetFarPlane());
+	const AbstractCamera* camera = data.activeCamera;
+	auto frustum = camera->GetActiveFrustum();
+	auto near = frustum.Plane(math::ViewFrustum::EPlane::Near).GetDistanceTo(t.translation);
+	auto far = frustum.Plane(math::ViewFrustum::EPlane::Far).GetDistanceTo(t.translation);
+	t.scale = 0.5f * (near + far);
 
 	math::Matrix4 m;
 	t.ToMatrix(m);

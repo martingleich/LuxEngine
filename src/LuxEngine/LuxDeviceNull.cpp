@@ -14,6 +14,7 @@
 #include "video/images/ImageSystem.h"
 
 #include "video/VideoDriver.h"
+#include "video/RenderTarget.h"
 #include "video/Renderer.h"
 #include "video/Canvas3D.h"
 
@@ -144,7 +145,7 @@ void LuxDeviceNull::BuildScene(const core::String& name, void* user)
 
 	log::Info("Building Scene.");
 	m_Scene = CreateScene();
-	m_SceneRenderer = CreateSceneRenderer(name.IsEmpty() ? "SimpleForward" : name, user);
+	m_SceneRenderer = CreateSceneRenderer(name.IsEmpty() ? "SimpleForward" : name, m_Scene, user);
 }
 
 StrongRef<scene::Scene> LuxDeviceNull::CreateScene()
@@ -152,9 +153,10 @@ StrongRef<scene::Scene> LuxDeviceNull::CreateScene()
 	return LUX_NEW(scene::Scene);
 }
 
-StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(const core::String& name, void* user)
+StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(const core::String& name, scene::Scene* scene, void* user)
 {
 	scene::SceneRendererInitData init;
+	init.scene = scene;
 	init.user = user;
 	return core::ModuleFactory::Instance()->CreateModule("SceneRenderer", name, init).As<scene::SceneRenderer>();
 }
@@ -302,9 +304,9 @@ private:
 		if(m_FrameLoop.callback)
 			m_FrameLoop.callback->PostMove(secsPassed);
 
-		if(m_SceneRenderer)
-			m_SceneRenderer->DrawScene(m_Scene, true, false);
-		else {
+		if(m_SceneRenderer) {
+			m_SceneRenderer->DrawScene(true, false);
+		} else {
 			m_Renderer->Clear(true, true, true);
 			m_Renderer->BeginScene();
 		}

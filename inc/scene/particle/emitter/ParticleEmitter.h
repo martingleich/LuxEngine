@@ -149,6 +149,11 @@ public:
 		return m_Model;
 	}
 
+	StrongRef<ParticleEmitter> Clone() const
+	{
+		return CloneImpl().StaticCastStrong<ParticleEmitter>();
+	}
+
 protected:
 	core::Randomizer m_Rand;
 
