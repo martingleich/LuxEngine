@@ -23,7 +23,7 @@ public:
 	LUX_API size_t GetTemplateCount() const;
 	LUX_API ParticleSystemTemplate* GetTemplate(size_t i);
 	LUX_API const ParticleSystemTemplate* GetTemplate(size_t i) const;
-	LUX_API void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
+	LUX_API void VisitRenderables(RenderableVisitor* visitor, scene::ERenderableTags tags);
 	LUX_API void Animate(float time);
 	LUX_API void Render(Node* node, video::Renderer* renderer, const SceneData& sceneData);
 	LUX_API ERenderPass GetRenderPass() const;

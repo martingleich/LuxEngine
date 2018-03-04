@@ -49,9 +49,9 @@ const ParticleSystemTemplate* ParticleSystem::GetTemplate(size_t i) const
 	return m_Templates.At(i);
 }
 
-void ParticleSystem::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
+void ParticleSystem::VisitRenderables(RenderableVisitor* visitor, scene::ERenderableTags tags)
 {
-	LUX_UNUSED(noDebug);
+	LUX_UNUSED(tags);
 
 	visitor->Visit(GetParent(), this);
 }
