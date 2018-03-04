@@ -31,11 +31,11 @@ Node::~Node()
 	RemoveAllComponents();
 }
 
-void Node::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
+void Node::VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags)
 {
 	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
 		if(!it->markForDelete)
-			it->comp->VisitRenderables(visitor, noDebug);
+			it->comp->VisitRenderables(visitor, tags);
 	}
 }
 
@@ -381,7 +381,7 @@ void Node::RecalculateBoundingBox()
 	};
 
 	BoxVisitor visitor;
-	VisitRenderables(&visitor, true);
+	VisitRenderables(&visitor, ERenderableTags::None);
 
 	m_BoundingBox = visitor.box;
 	m_HasUserBoundingBox = false;

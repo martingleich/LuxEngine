@@ -1,13 +1,14 @@
 #ifndef INCLUDED_SCENERENDERER_IMPL_H
 #define INCLUDED_SCENERENDERER_IMPL_H
 #include "scene/SceneRenderer.h"
-#include "scene/Scene.h"
 
 #include "core/lxOrderedMap.h"
+
 #include "video/Renderer.h"
 
-#include "scene/components/Camera.h"
+#include "scene/Scene.h"
 #include "scene/Node.h"
+#include "scene/components/Camera.h"
 
 #include "scene/StencilShadowRenderer.h"
 
@@ -44,20 +45,35 @@ class SceneRendererSimpleForward : public SceneRenderer
 {
 public:
 	SceneRendererSimpleForward(const core::ModuleInitData& data);
-
-	////////////////////////////////////////////////////////////////////////////////////
+	SceneRendererSimpleForward(const SceneRendererSimpleForward&) = delete;
+	~SceneRendererSimpleForward();
 
 	void DrawScene(bool beginScene, bool endScene);
+	core::VariableAccess Attribute(const core::String& str)
+	{
+		return m_Attributes[str];
+	}
+	const core::Attributes& Attributes() const
+	{
+		return m_Attributes;
+	}
 
-	////////////////////////////////////////////////////////////////////////////////////
+	void SetPassSettings(ERenderPass pass, const SceneRendererPassSettings& settings)
+	{
+		m_PassSettings[pass] = settings;
+	}
+	const SceneRendererPassSettings& GetPassSettings(ERenderPass pass)
+	{
+		return m_PassSettings[pass];
+	}
 
-	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
-	void DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
+	virtual void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
+	virtual void DisableOverwrite(video::PipelineOverwriteToken& token);
 
-	void AddRenderEntry(Node* n, Renderable* r);
+	virtual void AddRenderEntry(Node* n, Renderable* r);
 
-	void DrawScene();
-	bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
+	virtual void DrawScene();
+	virtual bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
 
 private:
 	struct RenderEntry
@@ -138,6 +154,10 @@ private:
 	// Settings and parameters
 	/////////////////////////////////////////////////////////////////////////
 	bool m_Culling; // Read from m_Attributes
+	core::Attributes m_Attributes;
+	core::HashMap<ERenderPass, SceneRendererPassSettings> m_PassSettings;
+
+	bool m_SettingsActive;
 
 	/////////////////////////////////////////////////////////////////////////
 	// References to other classes

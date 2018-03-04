@@ -20,9 +20,18 @@ namespace scene
 class Scene;
 
 //! Data passed to module factory to create a scene renderer.
-struct SceneRendererInitData : public core::ModuleInitData
+class SceneRendererInitData : public core::ModuleInitData
 {
+public:
 	StrongRef<Scene> scene;
+};
+
+class SceneRendererPassSettings
+{
+public:
+	virtual ~SceneRendererPassSettings() {}
+	bool wireframe = false;
+	bool disableCulling = false;
 };
 
 //! Interface to render scenes.
@@ -48,16 +57,16 @@ public:
 	/**
 	Attributes are options to change the behaviour of the renderer, see the renderer documentaions for available options.
 	*/
-	LUX_API core::VariableAccess Attribute(const core::String& str);
+	virtual core::VariableAccess Attribute(const core::String& str) = 0;
 
 	//! Get the list of attributes of the scene renderer.
 	/**
 	Attributes are options to change the behaviour of the renderer, see the renderer documentaions for available options.
 	*/
-	LUX_API const core::Attributes& Attributes() const;
+	virtual const core::Attributes& Attributes() const = 0;
 
-protected:
-	core::Attributes m_Attributes;
+	virtual void SetPassSettings(ERenderPass pass, const SceneRendererPassSettings& settings) = 0;
+	virtual const SceneRendererPassSettings& GetPassSettings(ERenderPass pass ) = 0;
 };
 
 } // namespace scene

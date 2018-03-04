@@ -13,7 +13,7 @@
 #include "video/LightData.h"
 #include "video/FogData.h"
 
-#include "scene/Node.h"
+#include "scene/Renderable.h"
 
 namespace lux
 {
@@ -67,6 +67,7 @@ class Scene : public ReferenceCounted
 {
 public:
 	LUX_API Scene();
+	Scene(const Scene&) = delete;
 	LUX_API ~Scene();
 
 	LUX_API void RegisterObserver(SceneObserver* observer);
@@ -125,7 +126,9 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API void AnimateAll(float secsPassed);
-	LUX_API void VisitRenderables(RenderableVisitor* visitor, bool noDebug, Node* root = nullptr);
+	LUX_API void VisitRenderables(
+		RenderableVisitor* visitor,
+		ERenderableTags tags = ERenderableTags::None, Node* root = nullptr);
 
 	////////////////////////////////////////////////////////////////////////////////////
 

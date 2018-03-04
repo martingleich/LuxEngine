@@ -3,7 +3,6 @@
 #include "scene/Component.h"
 #include "math/AABBox.h"
 #include "video/Material.h"
-#include "scene/Renderable.h"
 
 namespace lux
 {
@@ -59,7 +58,7 @@ public:
 	*/
 	LUX_API virtual bool GetReadMaterialsOnly() const;
 
-	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
+	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags);
 	LUX_API virtual void Render(Node* node, video::Renderer* renderer, const SceneData& sceneData);
 	LUX_API virtual ERenderPass GetRenderPass() const;
 

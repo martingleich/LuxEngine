@@ -43,9 +43,9 @@ Mesh::~Mesh()
 {
 }
 
-void Mesh::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
+void Mesh::VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags)
 {
-	LUX_UNUSED(noDebug);
+	LUX_UNUSED(tags);
 
 	if(m_Mesh)
 		visitor->Visit(GetParent(), this);

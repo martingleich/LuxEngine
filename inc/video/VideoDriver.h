@@ -38,8 +38,9 @@ enum class EDeviceState
 	Error,
 };
 
-struct VideoDriverInitData : public core::ModuleInitData
+class VideoDriverInitData : public core::ModuleInitData
 {
+public:
 	DriverConfig config;
 	void* destHandle;
 };

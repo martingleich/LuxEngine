@@ -323,7 +323,7 @@ public:
 	LUX_API Node(Scene* scene, bool isRoot = false);
 	LUX_API virtual ~Node();
 
-	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
+	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags);
 	LUX_API virtual void Animate(float time);
 
 	////////////////////////////////////////////////////////////////////////////////

@@ -44,9 +44,9 @@ SkyBox::~SkyBox()
 {
 }
 
-void SkyBox::VisitRenderables(RenderableVisitor* visitor, bool noDebug)
+void SkyBox::VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags)
 {
-	LUX_UNUSED(noDebug);
+	LUX_UNUSED(tags);
 
 	visitor->Visit(GetParent(), this);
 }

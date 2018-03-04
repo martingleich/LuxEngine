@@ -113,7 +113,7 @@ SceneRendererSimpleForward::SceneRendererSimpleForward(const core::ModuleInitDat
 	LUX_UNUSED(data);
 
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
-	m_Scene = static_cast<const scene::SceneRendererInitData&>(data).scene;
+	m_Scene = dynamic_cast<const scene::SceneRendererInitData&>(data).scene;
 	m_SceneData = LUX_NEW(SceneDataCollector);
 
 	m_Attributes.AddAttribute("drawStencilShadows", false);
@@ -123,7 +123,9 @@ SceneRendererSimpleForward::SceneRendererSimpleForward(const core::ModuleInitDat
 	m_Scene->RegisterObserver(m_SceneData);
 }
 
-////////////////////////////////////////////////////////////////////////////////////
+SceneRendererSimpleForward::~SceneRendererSimpleForward()
+{
+}
 
 namespace
 {
@@ -208,7 +210,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 		m_SolidNodeList.Clear();
 		m_TransparentNodeList.Clear();
 		RenderableCollector collector(this);
-		m_Scene->VisitRenderables(&collector, true);
+		m_Scene->VisitRenderables(&collector, ERenderableTags::None);
 		DrawScene();
 
 		m_ActiveCamera->PostRender(m_Renderer);
@@ -225,23 +227,36 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// Private functions
-////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////
 
 void SceneRendererSimpleForward::EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
 {
-	// Enable debug things like wire frame
-	LUX_UNUSED(pass);
-	LUX_UNUSED(token);
+	auto anySettings = m_PassSettings[ERenderPass::Any];
+	auto settings = m_PassSettings[pass];
+	settings.wireframe |= anySettings.wireframe;
+	settings.disableCulling |= anySettings.disableCulling;
+	bool useOverwrite = false;
+	video::PipelineOverwrite overwrite;
+	if(settings.wireframe) {
+		overwrite.Enable(video::EPipelineSetting::DrawMode);
+		overwrite.drawMode = video::EDrawMode::Wire;
+		useOverwrite = true;
+	}
+	if(settings.disableCulling) {
+		overwrite.Enable(video::EPipelineSetting::Culling);
+		overwrite.culling = video::EFaceSide::None;
+		useOverwrite = true;
+	}
+	if(useOverwrite)
+		m_Renderer->PushPipelineOverwrite(overwrite, &token);
+	m_SettingsActive = useOverwrite;
 }
 
-void SceneRendererSimpleForward::DisableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
+void SceneRendererSimpleForward::DisableOverwrite(video::PipelineOverwriteToken& token)
 {
-	// Disable debug things like wire frame
-	LUX_UNUSED(pass);
-	LUX_UNUSED(token);
+	if(m_SettingsActive) {
+		m_Renderer->PopPipelineOverwrite(&token);
+		m_SettingsActive = false;
+	}
 }
 
 void SceneRendererSimpleForward::AddRenderEntry(Node* n, Renderable* r)
@@ -383,12 +398,11 @@ void SceneRendererSimpleForward::DrawScene()
 		e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 
-	DisableOverwrite(ERenderPass::SkyBox, pot);
+	DisableOverwrite(pot); // SkyBox
 
 	//-------------------------------------------------------------------------
 	// Solid objects
 
-	EnableOverwrite(ERenderPass::Any, pot);
 	EnableOverwrite(ERenderPass::Solid, pot);
 
 	if(drawStencilShadows) {
@@ -406,7 +420,7 @@ void SceneRendererSimpleForward::DrawScene()
 		if(!e.IsCulled())
 			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
-	DisableOverwrite(ERenderPass::Solid, pot);
+	DisableOverwrite(pot); // Solid
 
 	// Stencil shadow rendering
 	if(drawStencilShadows) {
@@ -461,7 +475,7 @@ void SceneRendererSimpleForward::DrawScene()
 			}
 
 			m_Renderer->PopPipelineOverwrite(&pot);
-			DisableOverwrite(ERenderPass::Solid, pot);
+			DisableOverwrite(pot); // Solid
 
 			m_Renderer->Clear(false, false, true);
 		}
@@ -492,7 +506,7 @@ void SceneRendererSimpleForward::DrawScene()
 			}
 
 			m_Renderer->PopPipelineOverwrite(&pot);
-			DisableOverwrite(ERenderPass::Solid, pot);
+			DisableOverwrite(pot); // Solid
 		}
 		// Add shadow casting light for remaining render jobs
 		for(auto illum : shadowCasting)
@@ -517,8 +531,7 @@ void SceneRendererSimpleForward::DrawScene()
 			e.renderable->Render(e.node, m_Renderer, sceneData);
 	}
 
-	DisableOverwrite(ERenderPass::Transparent, pot);
-	DisableOverwrite(ERenderPass::Any, pot);
+	DisableOverwrite(pot); // Transparent
 }
 
 } // namespace scene

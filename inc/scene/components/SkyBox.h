@@ -7,7 +7,9 @@ namespace lux
 {
 namespace video
 {
+class BaseTexture;
 class CubeTexture;
+class Material;
 }
 namespace scene
 {
@@ -20,7 +22,7 @@ public:
 	LUX_API SkyBox(const SkyBox& other);
 	LUX_API ~SkyBox();
 
-	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug);
+	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags);
 	LUX_API virtual void Render(Node* node, video::Renderer* renderer, const SceneData& data);
 	LUX_API virtual ERenderPass GetRenderPass() const;
 

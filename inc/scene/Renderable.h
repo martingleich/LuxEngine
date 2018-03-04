@@ -1,6 +1,6 @@
 #ifndef INCLUDED_SCENE_RENDERABLE_H
 #define INCLUDED_SCENE_RENDERABLE_H
-#include "video/Material.h"
+#include "core/lxArray.h"
 #include "math/AABBox.h"
 
 namespace lux
@@ -23,6 +23,12 @@ enum class ERenderPass
 	Solid,
 	DeferredEffect,
 	Any,
+};
+
+enum class ERenderableTags
+{
+	None = 0,
+	EditView = 1,
 };
 
 class Light;
@@ -62,6 +68,9 @@ public:
 };
 
 } // namespace scene
+
+DECLARE_FLAG_CLASS(scene::ERenderableTags);
+
 } // namespace lux
 
 #endif // #ifndef INCLUDED_SCENE_RENDERABLE_H

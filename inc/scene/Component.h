@@ -1,15 +1,12 @@
 #ifndef INCLUDED_SCENE_COMPONENT_H
 #define INCLUDED_SCENE_COMPONENT_H
 #include "core/Referable.h"
+#include "scene/Renderable.h"
 
 namespace lux
 {
 namespace scene
 {
-
-class Node;
-class Renderable;
-class RenderableVisitor;
 
 namespace SceneComponentType
 {
@@ -49,10 +46,10 @@ public:
 
 	virtual ~Component() {}
 
-	virtual void VisitRenderables(RenderableVisitor* visitor, bool noDebug)
+	virtual void VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags)
 	{
 		LUX_UNUSED(visitor);
-		LUX_UNUSED(noDebug);
+		LUX_UNUSED(tags);
 	}
 
 	//! Called to animate the component

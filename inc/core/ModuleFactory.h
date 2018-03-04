@@ -9,7 +9,7 @@ namespace core
 {
 
 //! Structure passed to module factory function.
-struct ModuleInitData
+class ModuleInitData
 {
 public:
 	// Virtual destructor to make dynamic_cast possible

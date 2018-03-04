@@ -7,6 +7,8 @@
 
 #include "video/mesh/VideoMesh.h"
 
+#include "scene/Node.h"
+
 #include "scene/components/Camera.h"
 #include "scene/components/SceneMesh.h"
 #include "scene/components/Light.h"
@@ -287,19 +289,23 @@ void Scene::AnimateAll(float secsPassed)
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-static void VisitRenderablesRec(Node* node, RenderableVisitor* visitor, bool noDebug)
+static void VisitRenderablesRec(
+	Node* node, RenderableVisitor* visitor,
+	ERenderableTags tags)
 {
-	node->VisitRenderables(visitor, noDebug);
+	node->VisitRenderables(visitor, tags);
 
 	for(auto child : node->Children())
-		VisitRenderablesRec(child, visitor, noDebug);
+		VisitRenderablesRec(child, visitor, tags);
 }
 
-void Scene::VisitRenderables(RenderableVisitor* visitor, bool noDebug, Node* root)
+void Scene::VisitRenderables(
+	RenderableVisitor* visitor,
+	ERenderableTags tags, Node* root)
 {
 	if(!root)
 		root = m_Root;
-	VisitRenderablesRec(root, visitor, noDebug);
+	VisitRenderablesRec(root, visitor, tags);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
