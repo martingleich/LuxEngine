@@ -8,9 +8,9 @@ namespace core
 {
 namespace Types
 {
-Type Colorf()
+Type ColorF()
 {
-	static const Type t(new core::TypeInfoTemplate<video::Colorf>("colorF"));
+	static const Type t(new core::TypeInfoTemplate<video::ColorF>("ColorF", true));
 	return t;
 }
 }

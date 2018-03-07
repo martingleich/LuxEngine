@@ -16,11 +16,11 @@ RendererNull::RendererNull(VideoDriver* driver) :
 {
 	m_Params.AddAttribute("camPos", math::Vector3F(0, 0, 0));
 	m_ParamId.lighting = m_Params.AddAttribute("lighting", (float)video::ELighting::Enabled);
-	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::Colorf(0, 0, 0));
+	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::ColorF(0, 0, 0));
 	m_ParamId.time = m_Params.AddAttribute("time", 0.0f);
 
-	m_ParamId.fog1 = m_Params.AddAttribute("fog1", video::Colorf(1, 1, 1, 0));
-	m_ParamId.fog2 = m_Params.AddAttribute("fog2", video::Colorf(0, 0, 0, 0));
+	m_ParamId.fog1 = m_Params.AddAttribute("fog1", video::ColorF(1, 1, 1, 0));
+	m_ParamId.fog2 = m_Params.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
 
 	for(size_t i = 0; i < m_MatrixTable.GetCount(); ++i)
 		m_Params.AddAttribute(m_MatrixTable.CreateAttribute(i));

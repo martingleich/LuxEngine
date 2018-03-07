@@ -254,7 +254,7 @@ inline DWORD GetD3DDeclType(VertexElement::EType type)
 	}
 }
 
-inline D3DCOLORVALUE SColorToD3DColor(const Colorf& color)
+inline D3DCOLORVALUE SColorToD3DColor(const ColorF& color)
 {
 	D3DCOLORVALUE out = {
 		color.r,

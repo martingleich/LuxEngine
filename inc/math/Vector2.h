@@ -408,14 +408,14 @@ namespace core
 {
 namespace Types
 {
-LUX_API Type Vector2f();
-LUX_API Type Vector2i();
+LUX_API Type Vector2F();
+LUX_API Type Vector2I();
 }
 
-template<> struct TemplType<math::Vector2F> { static Type Get() { return Types::Vector2f(); } };
-template<> struct TemplType<math::Vector2I> { static Type Get() { return Types::Vector2i(); } };
-} // namespace core
+template<> struct TemplType<math::Vector2F> { static Type Get() { return Types::Vector2F(); } };
+template<> struct TemplType<math::Vector2I> { static Type Get() { return Types::Vector2I(); } };
 
+} // namespace core
 } // namespace lux
 
 #endif

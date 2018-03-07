@@ -418,7 +418,18 @@ inline void conv_data(format::Context& ctx, const Transformation& t, format::Pla
 	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
 }
 
-} // !namespace math
-} // !namespace lux
+} // namespace math
+
+namespace core
+{
+namespace Types
+{
+LUX_API Type Transformation();
+} // namespace Types
+
+template<> struct TemplType<math::Transformation> { static Type Get() { return Types::Transformation(); } };
+
+} // namespace core
+} // namespace lux
 
 #endif // !INCLUDED_TRANSFORMATION_H

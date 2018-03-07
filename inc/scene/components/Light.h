@@ -64,14 +64,14 @@ public:
 	See \ref video::LightData::diffuse
 	\param color The new diffuse color of the light
 	*/
-	LUX_API virtual void SetColor(const video::Colorf& color);
+	LUX_API virtual void SetColor(const video::ColorF& color);
 
 	//! Get the diffuse color of the light
 	/**
 	See \ref video::LightData::diffuse
 	\return The diffuse color of the light
 	*/
-	LUX_API virtual const video::Colorf& GetColor() const;
+	LUX_API virtual const video::ColorF& GetColor() const;
 
 	//! Set the type of the light
 	/**
@@ -107,11 +107,11 @@ public:
 	LUX_API GlobalAmbientLight();
 	LUX_API ~GlobalAmbientLight();
 
-	LUX_API virtual void SetColor(const video::Colorf& color);
-	LUX_API virtual video::Colorf GetColor() const;
+	LUX_API virtual void SetColor(const video::ColorF& color);
+	LUX_API virtual video::ColorF GetColor() const;
 
 protected:
-	video::Colorf m_Color;
+	video::ColorF m_Color;
 };
 
 } // namespace scene

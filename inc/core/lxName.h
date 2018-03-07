@@ -1,9 +1,10 @@
 #ifndef INCLUDED_LX_NAME_H
 #define INCLUDED_LX_NAME_H
-#include "StringConverter.h"
+#include "core/StringConverter.h"
 #include "core/lxStringTable.h"
-#include "lxUtil.h"
-#include "lxFormat.h"
+#include "core/lxUtil.h"
+#include "core/lxFormat.h"
+
 namespace lux
 {
 namespace core
@@ -28,39 +29,60 @@ public:
 	\param findOnly If the name isn't already in the table and this is true, the string isn't put in the table
 		and a empty name is returned, if it's false, the string is added into the table
 	*/
-	explicit Name(const StringType& str, int action = ADD, StringTable* table = nullptr);
+	Name(const char* str, int action = ADD, StringTable* table = nullptr);
+	Name(const String& str, int action = ADD, StringTable* table = nullptr);
 
 	void SetHandle(StringTableHandle handle);
 	Name& operator=(const Name& other);
-	Name& operator=(const StringType& str);
+	Name& operator=(const char* str);
+	Name& operator=(const String& str);
 
 	const char* c_str() const;
+	size_t GetHash() const;
 	bool operator==(const Name& other) const;
-	bool operator==(const StringType& str) const;
+	bool operator==(const char* str) const;
+	bool operator==(const String& str) const;
 	bool operator!=(const Name& other) const;
-	bool operator!=(const StringType& str) const;
+	bool operator!=(const char* str) const;
+	bool operator!=(const String& str) const;
 
 	operator bool() const
 	{
 		return (Size() != 0);
 	}
 
+	operator StringType() const
+	{
+		return StringType(c_str());
+	}
+
 	bool operator<(const Name& other) const;
 	size_t Size() const;
 	bool IsEmpty() const;
 
-	void Set(const StringType& str, int action = ADD, StringTable* table = nullptr);
+	void Set(const char* str, int action = ADD, StringTable* table = nullptr);
+	void Set(const String& str, int action = ADD, StringTable* table = nullptr);
 
 private:
 	StringTableHandle m_Handle;
 };
 
-inline bool operator==(const StringType& cstr, const Name& namestring)
+inline bool operator==(const char* cstr, const Name& namestring)
 {
 	return (namestring == cstr);
 }
 
-inline bool operator!=(const StringType& cstr, const Name& namestring)
+inline bool operator==(const String& str, const Name& namestring)
+{
+	return (namestring == str);
+}
+
+inline bool operator!=(const char* cstr, const Name& namestring)
+{
+	return (namestring != cstr);
+}
+
+inline bool operator!=(const String& cstr, const Name& namestring)
 {
 	return (namestring != cstr);
 }
@@ -70,10 +92,7 @@ struct HashType<Name>
 {
 	size_t operator()(const Name& n) const
 	{
-		if(n.Size() == 0)
-			return 0;
-
-		return HashSequence(reinterpret_cast<const u8*>(n.c_str()), n.Size());
+		return n.GetHash();
 	}
 };
 

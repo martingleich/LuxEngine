@@ -94,16 +94,16 @@ public:
 		m_ShaderValues.FromType(core::Types::Texture(), id, false) = texture;
 	}
 
-	void SetDiffuse(const video::Colorf& color) { m_Pass.diffuse = color; }
-	void SetSpecular(const video::Colorf& color) { m_Pass.specular = color; }
-	void SetEmissive(const video::Colorf& color) { m_Pass.emissive = color; }
+	void SetDiffuse(const video::ColorF& color) { m_Pass.diffuse = color; }
+	void SetSpecular(const video::ColorF& color) { m_Pass.specular = color; }
+	void SetEmissive(const video::ColorF& color) { m_Pass.emissive = color; }
 	void SetShininess(float shininess) { m_Pass.shininess = shininess; }
 	void SetAmbient(float ambient) { m_Pass.ambient = ambient; }
 	void SetAlpha(float alpha) { m_Pass.diffuse.SetAlpha(alpha); }
 
-	video::Colorf GetDiffuse() const { return m_Pass.diffuse; }
-	video::Colorf GetSpecular() const { return m_Pass.specular; }
-	video::Colorf GetEmissive() const { return m_Pass.emissive; }
+	video::ColorF GetDiffuse() const { return m_Pass.diffuse; }
+	video::ColorF GetSpecular() const { return m_Pass.specular; }
+	video::ColorF GetEmissive() const { return m_Pass.emissive; }
 	float GetShininess() const { return m_Pass.shininess; }
 	float GetAmbient() const { return m_Pass.ambient; }
 	float GetAlpha() const { return m_Pass.diffuse.GetAlpha(); }

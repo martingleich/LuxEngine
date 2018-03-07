@@ -47,7 +47,7 @@ void DeviceStateD3D9::SetD3DColors(const Pass& pass)
 	}
 }
 
-void DeviceStateD3D9::EnablePass(const Pass& p, const video::Colorf& ambient)
+void DeviceStateD3D9::EnablePass(const Pass& p, const video::ColorF& ambient)
 {
 	m_UseLighting = (p.lighting != ELighting::Disabled);
 

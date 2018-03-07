@@ -47,10 +47,6 @@ public:
 	\return The new object
 	*/
 	LUX_API StrongRef<Referable> Create(Name type, const void* data = nullptr);
-	StrongRef<Referable> Create(const char* type, const void* data = nullptr)
-	{
-		return Create(Name(type), data);
-	}
 
 	//! The total number of types
 	/**

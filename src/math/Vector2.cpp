@@ -6,14 +6,14 @@ namespace core
 {
 namespace Types
 {
-Type Vector2f()
+Type Vector2F()
 {
-	static const Type t(new core::TypeInfoTemplate<math::Vector2F>("vector2f"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector2F>("Vector2I", true));
 	return t;
 }
-Type Vector2i()
+Type Vector2I()
 {
-	static const Type t(new core::TypeInfoTemplate<math::Vector2I>("vector2i"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector2I>("Vector2F", true));
 	return t;
 }
 }

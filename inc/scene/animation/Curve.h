@@ -141,8 +141,8 @@ inline StrongRef<KeyFrameCurve> MakeKeyFrameCurve(core::Type type)
 		return LUX_NEW(KeyFrameCurveImpl<math::Vector2F>());
 	else if(type == core::Types::Vector3f())
 		return LUX_NEW(KeyFrameCurveImpl<math::Vector3F>());
-	else if(type == core::Types::Colorf())
-		return LUX_NEW(KeyFrameCurveImpl<video::Colorf>());
+	else if(type == core::Types::ColorF())
+		return LUX_NEW(KeyFrameCurveImpl<video::ColorF>());
 	else {
 		lxAssertNeverReach("Type doesn't support interpolation.");
 		return nullptr;

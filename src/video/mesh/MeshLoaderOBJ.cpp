@@ -273,11 +273,11 @@ public:
 		else
 			lxm = video::MaterialLibrary::Instance()->CloneMaterial("solid");
 
-		lxm->SetDiffuse(video::Colorf(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], mat.dissolve));
-		lxm->SetEmissive(video::Colorf(mat.emission[0], mat.emission[1], mat.emission[2]));
-		video::Colorf spec = video::Colorf(mat.specular[0], mat.specular[1], mat.specular[2]);
+		lxm->SetDiffuse(video::ColorF(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], mat.dissolve));
+		lxm->SetEmissive(video::ColorF(mat.emission[0], mat.emission[1], mat.emission[2]));
+		video::ColorF spec = video::ColorF(mat.specular[0], mat.specular[1], mat.specular[2]);
 		if(math::IsZero(spec.r) && math::IsZero(spec.g) && math::IsZero(spec.b)) {
-			lxm->SetSpecular(video::Colorf(1, 1, 1));
+			lxm->SetSpecular(video::ColorF(1, 1, 1));
 			lxm->SetShininess(0);
 		} else {
 			lxm->SetSpecular(spec);

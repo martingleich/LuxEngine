@@ -4,6 +4,7 @@
 #include "video/TextureLayer.h"
 #include "video/Texture.h"
 #include "video/CubeTexture.h"
+#include "core/lxArray.h"
 
 namespace lux
 {
@@ -36,15 +37,23 @@ public:
 	}
 
 	//! Construct from any object
-	VariableAccess(const AnyObject& any, bool isConst = false) :
+	explicit VariableAccess(const AnyObject& any, bool isConst = false) :
 		m_Data(const_cast<void*>(any.Data())),
 		m_Type(isConst ? any.GetType().GetConstantType() : any.GetType())
 	{
 		lxAssert(!m_Type.IsUnknown());
 	}
 
-	template <typename T>
-	VariableAccess(const T& value) :
+	VariableAccess(VariableAccess&& old)
+	{
+		m_Data = old.m_Data;
+		m_Type = old.m_Type;
+	}
+
+	VariableAccess(const VariableAccess&) = delete;
+
+	template <typename T, bool U = !std::is_same<T, VariableAccess>::value, std::enable_if_t<U, int> = 0>
+	constexpr VariableAccess(const T& value) :
 		m_Data(const_cast<void*>((const void*)&value)),
 		m_Type(core::TemplType<T>::Get().GetConstantType())
 	{
@@ -57,8 +66,8 @@ public:
 		return VariableAccess(value);
 	}
 
-	template <typename T>
-	VariableAccess(T& value) :
+	template <typename T, bool U = !std::is_same<T, VariableAccess>::value, std::enable_if_t<U, int> = 0>
+	constexpr VariableAccess(T& value) :
 		m_Data(&value),
 		m_Type(core::TemplType<T>::Get())
 	{
@@ -237,7 +246,7 @@ public:
 	Shallow copy
 	\param otherParam The other package param
 	*/
-	VariableAccess& Set(const VariableAccess& otherParam)
+	VariableAccess& CopyAccess(const VariableAccess& otherParam)
 	{
 		m_Data = otherParam.m_Data;
 		m_Type = otherParam.m_Type;
@@ -278,14 +287,14 @@ private:
 template <>
 inline const VariableAccess& VariableAccess::operator=(const video::Color& color) const
 {
-	if(m_Type != core::Types::Color() && m_Type != core::Types::Colorf())
+	if(m_Type != core::Types::Color() && m_Type != core::Types::ColorF())
 		throw TypeException("Incompatible types used", m_Type, core::Types::Color());
 
 	if(m_Type == core::Types::Color())
 		*((video::Color*)m_Data) = color;
 
-	if(m_Type == core::Types::Colorf())
-		*((video::Colorf*)m_Data) = video::Colorf(color);
+	if(m_Type == core::Types::ColorF())
+		*((video::ColorF*)m_Data) = video::ColorF(color);
 
 	return *this;
 }
@@ -293,17 +302,111 @@ inline const VariableAccess& VariableAccess::operator=(const video::Color& color
 template <>
 inline const VariableAccess& VariableAccess::operator=(const video::Color::EPredefinedColors& color) const
 {
-	if(m_Type != core::Types::Color() && m_Type != core::Types::Colorf())
+	if(m_Type != core::Types::Color() && m_Type != core::Types::ColorF())
 		throw TypeException("Incompatible types used", m_Type, core::Types::Color());
 
 	if(m_Type == core::Types::Color())
 		*((video::Color*)m_Data) = color;
 
-	if(m_Type == core::Types::Colorf())
-		*((video::Colorf*)m_Data) = video::Colorf(color);
+	if(m_Type == core::Types::ColorF())
+		*((video::ColorF*)m_Data) = video::ColorF(color);
 
 	return *this;
 }
+
+class VariableArrayAccess
+{
+public:
+	VariableArrayAccess(const VariableAccess& access) :
+		VariableArrayAccess(access.Pointer(), access.GetType())
+	{
+	}
+
+	VariableArrayAccess(const void* ptr, Type type)
+	{
+		m_ArrayInfo = dynamic_cast<const AbstractArrayTypeInfo*>(type.GetInfo());
+		lxAssert(m_ArrayInfo);
+		m_BaseType = m_ArrayInfo->GetBaseType();
+#ifdef LUX_ENABLE_ASSERTS
+		m_IsConst = type.IsConstant();
+#endif
+		// Can be read an written
+		// But the const type will only be read, never written.
+		m_ArrayPtr = const_cast<void*>(ptr);
+	}
+	size_t Size() const
+	{
+		return m_ArrayInfo->Size(m_ArrayPtr);
+	}
+	void Resize(size_t used)
+	{
+		lxAssert(m_IsConst == false);
+		m_ArrayInfo->Resize(m_ArrayPtr, used);
+	}
+	VariableAccess operator[](size_t i)
+	{
+		lxAssert(m_IsConst == false);
+		return VariableAccess(m_BaseType, m_ArrayInfo->At(m_ArrayPtr, i));
+	}
+
+	VariableAccess operator[](size_t i) const
+	{
+		return VariableAccess(m_BaseType.GetConstantType(), m_ArrayInfo->At(m_ArrayPtr, i));
+	}
+
+private:
+	const AbstractArrayTypeInfo* m_ArrayInfo;
+	void* m_ArrayPtr;
+	Type m_BaseType;
+#ifdef LUX_ENABLE_ASSERTS
+	bool m_IsConst;
+#endif
+};
+
+template <typename T>
+class ArrayAccess
+{
+public:
+	ArrayAccess(const VariableAccess& access) :
+		ArrayAccess(access.Pointer(), access.GetType())
+	{
+	}
+	ArrayAccess(const void* ptr, Type type)
+	{
+		lxAssert(Types::IsArray(type));
+		lxAssert(Types::GetArrayBase(type).GetBaseType() == core::TemplType<T>::Get());
+#ifdef LUX_ENABLE_ASSERTS
+		m_IsConst = type.IsConstant();
+#endif
+		// But the const type will only be read, never written.
+		m_ArrayPtr = static_cast<core::Array<T>*>(const_cast<void*>(ptr));
+	}
+
+	size_t Size() const
+	{
+		return m_ArrayPtr->Size();
+	}
+	void Resize(size_t used)
+	{
+		lxAssert(m_IsConst == false);
+		m_ArrayPtr->Resize(used);
+	}
+	T& operator[](size_t i)
+	{
+		lxAssert(m_IsConst == false);
+		return (*m_ArrayPtr)[i];
+	}
+	const T& operator[](size_t i) const
+	{
+		return (*m_ArrayPtr)[i];
+	}
+
+private:
+	core::Array<T>* m_ArrayPtr;
+#ifdef LUX_ENABLE_ASSERTS
+	bool m_IsConst;
+#endif
+};
 
 } // namespace core
 } // namespace lux

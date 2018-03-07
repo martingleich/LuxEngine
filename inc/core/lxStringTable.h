@@ -22,6 +22,7 @@ public:
 	bool operator!=(const StringTableHandle& other) const;
 	const char* c_str() const;
 	size_t Size() const;
+	size_t GetHash() const;
 
 private:
 	const void* m_Handle;
@@ -43,7 +44,7 @@ public:
 	\param str The string to check
 	\return The handle of the entry
 	*/
-	StringTableHandle FindString(const core::StringType& str);
+	StringTableHandle FindString(const StringType& str);
 
 	//! Add a string to the string table
 	/**
@@ -51,7 +52,7 @@ public:
 	\param str The string to add
 	\return The handle to the entry
 	*/
-	StringTableHandle AddString(const core::StringType& str);
+	StringTableHandle AddString(const StringType& str);
 
 private:
 	struct MemBlock;

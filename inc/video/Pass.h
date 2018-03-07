@@ -60,9 +60,9 @@ public:
 
 	// Material
 	float ambient = 1.0f;
-	Colorf diffuse = video::Colorf(1, 1, 1, 1);
-	Colorf emissive = video::Colorf(0, 0, 0, 0);
-	Colorf specular = video::Colorf(1, 1, 1, 1);
+	ColorF diffuse = video::ColorF(1, 1, 1, 1);
+	ColorF emissive = video::ColorF(0, 0, 0, 0);
+	ColorF specular = video::ColorF(1, 1, 1, 1);
 	float shininess = 0;
 
 	// Shader

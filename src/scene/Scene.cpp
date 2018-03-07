@@ -109,7 +109,7 @@ StrongRef<Node> Scene::AddMesh(video::Mesh* mesh)
 	return AddNode(CreateMesh(mesh));
 }
 
-StrongRef<Node> Scene::AddSkyBox(const video::Colorf& color)
+StrongRef<Node> Scene::AddSkyBox(const video::ColorF& color)
 {
 	return AddNode(CreateSkyBox(color));
 }
@@ -124,7 +124,7 @@ StrongRef<Node> Scene::AddLight(video::ELightType lightType, video::Color color)
 	return AddNode(CreateLight(lightType, color));
 }
 
-StrongRef<Node> Scene::AddFog(const video::Colorf& color, float start, float end)
+StrongRef<Node> Scene::AddFog(const video::ColorF& color, float start, float end)
 {
 	return AddNode(CreateFog(color, start, end));
 }
@@ -152,7 +152,7 @@ StrongRef<Mesh> Scene::CreateMesh(video::Mesh* mesh) const
 	return out;
 }
 
-StrongRef<SkyBox> Scene::CreateSkyBox(const video::Colorf& color) const
+StrongRef<SkyBox> Scene::CreateSkyBox(const video::ColorF& color) const
 {
 	auto out = CreateComponent(SceneComponentType::SkyBox).AsStrong<SkyBox>();
 	out->GetMaterial()->SetDiffuse(color);
@@ -175,7 +175,7 @@ StrongRef<Light> Scene::CreateLight(video::ELightType lightType, video::Color co
 	return light;
 }
 
-StrongRef<GlobalFog> Scene::CreateFog(const video::Colorf& color, float start, float end) const
+StrongRef<GlobalFog> Scene::CreateFog(const video::ColorF& color, float start, float end) const
 {
 	auto fog = CreateComponent(SceneComponentType::GlobalFog).AsStrong<GlobalFog>();
 	fog->SetFogType(video::EFogType::Linear);

@@ -28,21 +28,25 @@ public:
 	virtual void Assign(void* ptr, const void* other) const = 0;
 	virtual bool Compare(const void* a, const void* b) const = 0;
 
+	//! Unique name of the type
 	inline const char* GetName() const
 	{
 		return m_Name;
 	}
 
+	//! Size of the type in bytes.
 	inline size_t GetSize() const
 	{
 		return m_Size;
 	}
 
+	//! Alignment of the type in bytes.
 	inline size_t GetAlign() const
 	{
 		return m_Align;
 	}
 
+	//! Can the type be copied via memcpy
 	inline bool IsTrivial() const
 	{
 		return m_IsTrivial;
@@ -59,8 +63,8 @@ template <typename T>
 class TypeInfoTemplate : public TypeInfo
 {
 public:
-	TypeInfoTemplate(const char* name) :
-		TypeInfo(name, sizeof(T), alignof(T), std::is_trivial<T>::value)
+	TypeInfoTemplate(const char* name, bool trivial = std::is_trivial<T>::value) :
+		TypeInfo(name, sizeof(T), alignof(T), trivial)
 	{
 	}
 
@@ -136,7 +140,7 @@ public:
 	}
 
 	//! Can be used to declare a new type.
-	Type(const TypeInfo* info) :
+	explicit Type(const TypeInfo* info) :
 		m_Info(info),
 		m_IsConstant(false)
 	{
@@ -144,7 +148,9 @@ public:
 
 	bool operator==(const Type& other) const
 	{
-		return m_Info == other.m_Info;
+		if(m_Info == other.m_Info)
+			return true;
+		return strcmp(m_Info->GetName(), other.m_Info->GetName()) == 0;
 	}
 
 	bool operator!=(const Type& other) const
@@ -251,6 +257,7 @@ inline Type Unknown()
 }
 LUX_API Type Integer();
 LUX_API Type U32();
+LUX_API Type Byte();
 LUX_API Type Float();
 LUX_API Type Boolean();
 }
@@ -283,7 +290,8 @@ template <typename T>
 struct TemplType { static Type Get() { return Types::Unknown(); } };
 
 template <> struct TemplType<int> { static Type Get() { return Types::Integer(); } };
-template <> struct TemplType<u32> { static Type Get() { return Types::Integer(); } };
+template <> struct TemplType<u32> { static Type Get() { return Types::U32(); } };
+template <> struct TemplType<u8> { static Type Get() { return Types::Byte(); } };
 template <> struct TemplType<float> { static Type Get() { return Types::Float(); } };
 template <> struct TemplType<bool> { static Type Get() { return Types::Boolean(); } };
 
@@ -296,7 +304,7 @@ public:
 	{
 	}
 
-	AnyObject(const Type& type, const void* data = nullptr) :
+	explicit AnyObject(const Type& type, const void* data = nullptr) :
 		m_Type(type.GetBaseType())
 	{
 		m_Data = LUX_NEW_ARRAY(u8, m_Type.GetSize());

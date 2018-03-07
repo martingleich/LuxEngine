@@ -28,7 +28,7 @@ public:
 	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
 	void SetD3DColors(const Pass& pass);
-	void EnablePass(const Pass& p, const video::Colorf& ambient);
+	void EnablePass(const Pass& p, const video::ColorF& ambient);
 
 	void EnableFixedFunctionShader(
 		const core::Array<TextureLayer>& layer,
@@ -94,7 +94,7 @@ private:
 private:
 	const D3DCAPS9* m_Caps;
 	D3DMATERIAL9 m_D3DMaterial;
-	video::Colorf m_Ambient;
+	video::ColorF m_Ambient;
 
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
 

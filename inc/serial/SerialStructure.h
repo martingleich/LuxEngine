@@ -4,6 +4,7 @@
 #include "core/lxArray.h"
 #include "core/lxID.h"
 
+#include "core/Referable.h"
 #include "math/Vector3.h"
 #include "math/Vector3.h"
 #include "math/Quaternion.h"
@@ -15,35 +16,41 @@ namespace lux
 namespace serial
 {
 
-//! Basetypes of the serialization system.
-/**
-Value of the array is identical to type id.
-*/
-enum EType
+//! Description of a single element in a structure
+struct StructureElement
 {
-	Type_Invalid = 0,
-	Type_Int,
-	Type_Float,
-	Type_Vec2,
-	Type_Vec3,
-	Type_Colorf,
-	Type_Color,
-	Type_Quaternion,
-	Type_Bool,
+	//! Name of the element
+	core::SharedString name;
 
-	Type_String,
-	Type_Blob,
-	Type_StrongRef,
-	Type_WeakRef,
+	//! Core type of the elememnt
+	core::Type type;
+
+	//! The index of the element in the structure.
+	u32 elemId;
+
+	//! Offset of the element from the start of the structure in bytes.
+	u32 offset;
+
+	//! Offset of the mapped element.
+	/**
+	Distance from the mapped element to (Serialzable*)this in bytes.
+	Only available if hasObjectData is true.
+	*/
+	u32 objectOffset;
+
+	//! The size of the element if serialized.
+	/**
+	May be diffrent from type.GetSize().
+	But will always be the same for trivial types.
+	*/
+	u32 size;
+
+	//! Has this element object information
+	bool hasObjectData;
 };
 
-//! Retrieve the core::Type based on a base type.
-LUX_API core::Type GetCoreType(u32 baseType);
-//! Retrieve the basetype from a core::Type
-LUX_API u32 GetFromCoreType(core::Type type);
-
-//! Description of a type
-struct Type
+//! Description of a structure.
+struct Structure
 {
 	//! Name of the type
 	core::SharedString name;
@@ -60,42 +67,6 @@ struct Type
 	//! Can the whole structure be copied at once via memcpy
 	bool isCompact;
 
-	//! Is the type a base type, structure otherwise
-	bool isStructure;
-};
-
-//! Description of a single element in a structure
-struct StructureElement
-{
-	//! Name of the element
-	core::SharedString name;
-
-	//! Type of the elememt.
-	u32 typeId;
-
-	//! The index of the element in the structure.
-	u32 elemId;
-
-	//! Offset of the element from the start of the structure in bytes.
-	u32 offset;
-
-	//! Offset of the mapped element.
-	/**
-	Distance from the mapped element to (Serialzable*)this in bytes.
-	Only available if hasObjectData is true.
-	*/
-	u32 objectOffset;
-
-	//! Is this element an array.
-	bool isArray;
-
-	//! Has this element object information
-	bool hasObjectData;
-};
-
-//! Description of a structure.
-struct Structure : public Type
-{
 	//! Elements of the structure.
 	core::Array<StructureElement> elements;
 };
@@ -103,11 +74,11 @@ struct Structure : public Type
 #define LX_STRUCTURE_BUILDER_ADD(tname, type) \
 void Add##tname(const core::String& name) \
 { \
-	AddBaseType(Type_##tname, name, nullptr); \
+	AddElement(core::Types::##tname(), name, nullptr); \
 } \
 void Add##tname(const core::String& name, const type& addr) \
 { \
-	AddBaseType(Type_##tname, name, &addr); \
+	AddElement(core::Types::##tname(), name, &addr); \
 }
 
 class StructuralTable;
@@ -130,45 +101,30 @@ public:
 		u32 version);
 
 	//! Add a single element, type is inferred from template.
+	LUX_API void AddElement(core::Type type, const core::String& name, const void* ptr);
+
 	template <typename T>
-	void AddType(const core::String& name, const T& addr)
+	void AddElement(const core::String& name, const T& addr)
 	{
-		AddBaseType(
-			GetFromCoreType(core::TemplType<T>::Get()),
-			name, &addr);
+		AddElement(core::TemplType<T>::Get(), name, &addr);
+	}
+	template <typename T>
+	void AddElement(const core::String& name)
+	{
+		AddElement(core::TemplType<T>::Get(), name);
 	}
 
-	LX_STRUCTURE_BUILDER_ADD(Int, s32);
+	LX_STRUCTURE_BUILDER_ADD(Integer, s32);
 	LX_STRUCTURE_BUILDER_ADD(Float, float);
-	LX_STRUCTURE_BUILDER_ADD(Vec2, math::Vector2F);
-	LX_STRUCTURE_BUILDER_ADD(Vec3, math::Vector3F);
-	LX_STRUCTURE_BUILDER_ADD(Colorf, video::Colorf);
+	LX_STRUCTURE_BUILDER_ADD(Vector2f, math::Vector2F);
+	LX_STRUCTURE_BUILDER_ADD(Vector3f, math::Vector3F);
+	LX_STRUCTURE_BUILDER_ADD(ColorF, video::ColorF);
 	LX_STRUCTURE_BUILDER_ADD(Color, video::Color);
-	LX_STRUCTURE_BUILDER_ADD(Quaternion, math::QuaternionF);
-	LX_STRUCTURE_BUILDER_ADD(Bool, bool);
+	LX_STRUCTURE_BUILDER_ADD(QuaternionF, math::QuaternionF);
+	LX_STRUCTURE_BUILDER_ADD(Boolean, bool);
 	LX_STRUCTURE_BUILDER_ADD(String, core::String);
-	LX_STRUCTURE_BUILDER_ADD(StrongRef, core::ID);
-	LX_STRUCTURE_BUILDER_ADD(WeakRef, core::ID);
-
-	//! Add a blob element.
-	void AddBlob(const core::String& name)
-	{
-		AddBaseType(Type_Blob, name, nullptr);
-	}
-
-	//! Add a array element, type is inferred from template.
-	template <typename T>
-	void AddArray(const core::String& name)
-	{
-		AddArrayBaseType(GetFromCoreType(core::TemplType<T>::Get()), name, nullptr);
-	}
-
-	//! Add a array element, type is inferred from template.
-	template <typename T>
-	void AddArray(const core::String& name, const core::Array<T>& addr)
-	{
-		AddArrayBaseType(GetFromCoreType(core::TemplType<T>::Get()), name, (const core::ArrayAlloc*)&addr);
-	}
+	LX_STRUCTURE_BUILDER_ADD(StrongID, core::ID);
+	LX_STRUCTURE_BUILDER_ADD(WeakID, core::ID);
 
 	//! Finish the creation of the structure.
 	/**
@@ -178,17 +134,13 @@ public:
 	LUX_API u32 Finalize();
 
 private:
-	LUX_API void AddBaseType(u32 type, const core::String& name, const void* ptr);
-	LUX_API void AddArrayBaseType(u32 type, const core::String& name, const void* ptr);
-	void AddType(u32 type, u32 size, bool array, const core::String& name, const void* ptr);
-
-private:
 	StructuralTable* m_StructTable;
 	const void* m_BasePtr;
 
-	Structure m_Data;
+	Structure m_Structure;
 
 	u32 m_NextOffset;
+	u32 m_NextElemId;
 };
 
 #undef LX_STRUCTURE_BUILDER_ADD

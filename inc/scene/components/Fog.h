@@ -27,8 +27,8 @@ public:
 	LUX_API virtual void SetEnd(float end);
 	LUX_API virtual float GetEnd() const;
 
-	LUX_API virtual void SetColor(const video::Colorf& color);
-	LUX_API virtual const video::Colorf& GetColor() const;
+	LUX_API virtual void SetColor(const video::ColorF& color);
+	LUX_API virtual const video::ColorF& GetColor() const;
 
 	LUX_API virtual video::FogData GetFogData() const;
 

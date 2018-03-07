@@ -15,33 +15,22 @@ class Serializable;
 class StructuralTable : public ReferenceCounted
 {
 public:
-	struct TypeCallable
-	{
-		const StructuralTable* table;
-		TypeCallable() {}
-		TypeCallable(const StructuralTable* _table) :
-			table(_table)
-		{}
-
-		const Type& operator()(u32 i) const {
-			return table->GetTypeInfo(i);
-		}
-	};
 	struct StructureCallable
 	{
 		const StructuralTable* table;
 		StructureCallable() {}
 		StructureCallable(const StructuralTable* _table) :
 			table(_table)
-		{}
+		{
+		}
 
-		const Structure& operator()(u32 i) const {
-			return (const Structure&)table->GetTypeInfo(i);
+		const Structure& operator()(u32 i) const
+		{
+			return table->GetStructure(i);
 		}
 	};
 
 	using ElementRange = core::Range<const StructureElement*>;
-	using TypeIterator = core::IndexCallableIterator<Type, TypeCallable, u32>;
 	using StructureIterator = core::IndexCallableIterator<Structure, StructureCallable, u32>;
 
 public:
@@ -49,6 +38,7 @@ public:
 	LUX_API static StructuralTable* EngineTable();
 
 	LUX_API StructuralTable();
+	LUX_API StructuralTable(const StructuralTable& other);
 	LUX_API ~StructuralTable();
 
 	//! Add a new structure via builder.
@@ -73,24 +63,14 @@ public:
 	*/
 	LUX_API u32 AddStructure(const Structure& data);
 
-	//! Get detailed typeinformation about a type id.
+	//! Get structure information based on its id.
 	/**
-	If typeid does not exists an exception is thrown.
+	If id does not exists an exception is thrown.
 	*/
-	LUX_API const Type& GetTypeInfo(u32 typeId) const;
+	LUX_API const Structure& GetStructure(u32 sid) const;
 
-	//! Get elements about a type id.
-	/**
-	If typeid does not exists an exception is thrown.
-	If typeid isn't a structure an empty range is returned.
-	*/
-	LUX_API ElementRange GetStructElements(u32 typeId) const;
-
-	//! Get the typeid based on the name of the type.
-	LUX_API u32 GetTypeId(const core::String& str) const;
-
-	//! Retrieve all types.
-	LUX_API core::Range<TypeIterator> GetTypes() const;
+	//! Get the id based on the name of the structure.
+	LUX_API u32 GetStructureId(const core::String& str) const;
 
 	//! Retrieve all structures.
 	LUX_API core::Range<StructureIterator> GetStructures() const;
@@ -99,25 +79,21 @@ public:
 	/**
 	If element doesn't exists null is returned.
 	*/
-	LUX_API const StructureElement* GetStructElement(u32 typeId, const core::String& name) const;
+	LUX_API const StructureElement* GetStructureElement(u32 sid, const core::String& name) const;
 
 	//! Retrieve a single element of a structure based on its name.
 	/**
 	If element doesn't exists null is returned.
 	*/
-	LUX_API const StructureElement* GetStructElement(u32 typeId, const char* name) const;
+	LUX_API const StructureElement* GetStructureElement(u32 sid, const char* name) const;
 
 	//! Retrieve a single element of a structure based on its id.
-	LUX_API const StructureElement* GetStructElement(u32 typeId, u32 elemId) const;
-
-private:
-	u32 AddBaseType(const core::String& name, u32 size, bool complex = false);
+	LUX_API const StructureElement* GetStructureElement(u32 sid, u32 elemId) const;
 
 private:
 	using TypeMap = core::HashMap<core::SharedString, u32>;
 	using ElemMap = core::HashMap<core::SharedString, u32>;
 
-	core::Array<Type> m_BaseTypes;
 	core::Array<Structure> m_StructureTypes;
 	core::Array<ElemMap> m_ElementMaps;
 

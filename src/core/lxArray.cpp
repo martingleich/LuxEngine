@@ -5,15 +5,19 @@ namespace lux
 namespace core
 {
 
-void* ArrayRawData::ArrayAllocate(size_t bytes)
+const char* MakeArrayTypeName(Type baseType)
 {
-	return ::operator new(bytes);
+	auto baseName = baseType.GetName();
+	auto length = strlen(baseName);
+	char* ptr = new char[length + 3];
+	strcpy(ptr, baseName);
+	strcpy(ptr + length, "[]");
+	return ptr;
 }
 
-void ArrayRawData::ArrayFree(void* ptr)
+Type TestCall()
 {
-	::operator delete(ptr);
+	return TemplType<core::Array<u32>>::Get();
 }
-
 } // namespace core
 } // namespace lux

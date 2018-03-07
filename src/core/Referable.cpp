@@ -6,16 +6,22 @@ namespace core
 {
 namespace Types
 {
-static Type strongRef(new TypeInfoTemplate<core::ID>("strong_ref"));
-static Type weakRef(new TypeInfoTemplate<core::ID>("strong_ref"));
 
-Type StrongRef()
+Type StrongID()
 {
+	static Type strongRef(new TypeInfoTemplate<core::ID>("strong_id"));
 	return strongRef;
 }
-Type WeakRef()
+
+Type WeakID()
 {
+	static Type weakRef(new TypeInfoTemplate<core::ID>("weak_id"));
 	return weakRef;
+}
+
+bool IsIDType(Type t)
+{
+	return t == StrongID() || t == WeakID();
 }
 
 }

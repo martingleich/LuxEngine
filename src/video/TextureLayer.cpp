@@ -8,7 +8,7 @@ namespace Types
 {
 Type Texture()
 {
-	static const Type t(new core::TypeInfoTemplate<video::TextureLayer>("texture"));
+	static const Type t(new core::TypeInfoTemplate<video::TextureLayer>("Texture"));
 	return t;
 }
 }

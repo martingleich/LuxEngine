@@ -439,7 +439,7 @@ void ShaderD3D9::LoadSceneParams(const Pass& pass)
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
 		if(it->paramType == ParamType_DefaultMaterial) {
 			float f;
-			video::Colorf c;
+			video::ColorF c;
 			switch(it->index) {
 			case DefaultParam_Shininess:
 				f = pass.shininess;
@@ -490,7 +490,7 @@ bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* tab
 			else if(desc.Columns == 3)
 				outType = EType::Vector3;
 			else if(desc.Columns == 4)
-				outType = EType::Colorf;
+				outType = EType::ColorF;
 		}
 	} else if(desc.Class == D3DXPC_MATRIX_ROWS && desc.Rows == 4 && desc.Columns == 4) {
 		if(desc.Type == D3DXPT_FLOAT)
@@ -526,7 +526,7 @@ void ShaderD3D9::CastTypeToShader(EType type, const void* in, void* out)
 	case EType::Integer:
 		*(u32*)out = *(int*)in;
 		break;
-	case EType::Colorf:    ((float*)out)[3] = ((float*)in)[3];
+	case EType::ColorF:    ((float*)out)[3] = ((float*)in)[3];
 	case EType::Vector3:      ((float*)out)[2] = ((float*)in)[2];
 	case EType::Vector2:      ((float*)out)[1] = ((float*)in)[1];
 	case EType::Float:     ((float*)out)[0] = ((float*)in)[0];
@@ -558,7 +558,7 @@ void ShaderD3D9::CastShaderToType(EType type, const void* in, void* out)
 	case EType::Integer:
 		((int*)out)[0] = *(int*)in;
 		break;
-	case EType::Colorf:
+	case EType::ColorF:
 		((float*)out)[3] = ((float*)in)[3];
 	case EType::Vector3:
 		((float*)out)[2] = ((float*)in)[2];
@@ -617,7 +617,7 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 		case EType::Float:
 		case EType::Vector2:
 		case EType::Vector3:
-		case EType::Colorf:
+		case EType::ColorF:
 			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, 1);
 			break;
 		case EType::Matrix:
@@ -644,7 +644,7 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 		case EType::Float:
 		case EType::Vector2:
 		case EType::Vector3:
-		case EType::Colorf:
+		case EType::ColorF:
 			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, 1);
 			break;
 
@@ -690,7 +690,7 @@ ShaderD3D9::EType ShaderD3D9::GetDefaultType(u32 id)
 	case DefaultParam_Diffuse:
 	case DefaultParam_Emissive:
 	case DefaultParam_Specular:
-		return EType::Colorf;
+		return EType::ColorF;
 	default:
 		return EType::Unknown;
 	}
@@ -716,7 +716,7 @@ core::Type ShaderD3D9::GetCoreType(EType type)
 	case EType::U32: return core::Types::U32();
 	case EType::Texture: return core::Types::Texture();
 	case EType::Color: return core::Types::Color();
-	case EType::Colorf: return core::Types::Colorf();
+	case EType::ColorF: return core::Types::ColorF();
 	case EType::Vector2: return core::Types::Vector2f();
 	case EType::Vector3: return core::Types::Vector3f();
 	case EType::Vector2Int: return core::Types::Vector2i();

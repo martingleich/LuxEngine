@@ -42,9 +42,12 @@ struct StringType
 	/**
 	\param str A nul-terminated c-string, must not be null.
 	*/
-	StringType(const char* str);
-	//! Create a dummy string form a lux::string.
-	StringType(const String& str);
+	StringType(const char* str) :
+		size(0xFFFFFFFF),
+		data(str)
+	{
+	}
+
 
 	//! Create a dummy string from a pointer
 	/**
@@ -61,7 +64,11 @@ struct StringType
 	/**
 	Should be called at least one before accessing the size property.
 	*/
-	void EnsureSize() const;
+	void EnsureSize() const
+	{
+		if(size == 0xFFFFFFFF)
+			size = strlen(data);
+	}
 
 	//! The number of bytes in the string, without the NUL-Byte.
 	mutable size_t size;
@@ -112,6 +119,11 @@ public:
 	//! Creates a copy of this string.
 	LUX_API String Copy();
 
+	operator StringType() const
+	{
+		return StringType(Data_c(), Size());
+	}
+
 	//! Reserve size bytes for string memory.
 	/**
 	After this call Data() will point to size+1 bytes of memory.
@@ -128,26 +140,6 @@ public:
 
 	//! Append another string
 	LUX_API String& operator+=(const StringType& str);
-	//! Concat two strings.
-	LUX_API String operator+(const StringType& str) const;
-
-	//! Compare two strings for equality
-	/*
-	No unicode normalization is performed
-	*/
-	LUX_API bool operator==(const StringType& other) const;
-	//! Compare two strings for inequality
-	/*
-	No unicode normalization is performed
-	*/
-	LUX_API bool operator!=(const StringType& other) const;
-
-	//! Smaller comparision for strings.
-	/**
-	This establishs a total order over all strings.
-	This order doesn't have to be equal to the lexical order.
-	*/
-	LUX_API bool operator<(const StringType& other) const;
 
 	//! Compare two strings for equality
 	/*
@@ -524,19 +516,86 @@ private:
 	size_t m_Length;
 };
 
+//! Concat two strings.
+inline String operator+(const String& a, const String& b)
+{
+	String out;
+	out.Reserve(a.Size() + b.Size());
+	out.Append(a);
+	out.Append(b);
+	return out;
+}
 inline String operator+(const char* str, const String& string)
 {
 	return String(str) + string;
 }
+inline String operator+(const String& string, const char* str)
+{
+	return string + String(str);
+}
 
 inline bool operator==(const char* other, const String& string)
 {
-	return string == other;
+	return string.Equal(other);
 }
-
+inline bool operator==(const String& string, const char* other)
+{
+	return string.Equal(other);
+}
+inline bool operator==(const String& a, const String& b)
+{
+	return a.Equal(b);
+}
+inline bool operator==(const String& a, const StringType& b)
+{
+	return a.Equal(b);
+}
+inline bool operator==(const StringType& a, const String& b)
+{
+	return b.Equal(a);
+}
 inline bool operator!=(const char* other, const String& string)
 {
-	return string != other;
+	return string.Equal(other);
+}
+inline bool operator!=(const String& string, const char* other)
+{
+	return !string.Equal(other);
+}
+inline bool operator!=(const String& a, const String& b)
+{
+	return !a.Equal(b);
+}
+inline bool operator!=(const StringType& a, const String& b)
+{
+	return !b.Equal(a);
+}
+inline bool operator!=(const String& a, const StringType& b)
+{
+	return !a.Equal(b);
+}
+
+//! Smaller comparision for strings.
+/**
+This establishs a total order over all strings.
+This order doesn't have to be equal to the lexical order.
+*/
+inline bool operator<(const String& a, const char* b)
+{
+	auto size = strlen(b);
+	size_t s = a.Size() < size ? a.Size() : size;
+	return (memcmp(a.Data(), b, s) < 0);
+}
+inline bool operator<(const char* a, const String& b)
+{
+	auto size = strlen(a);
+	size_t s = size < b.Size() ? size : b.Size();
+	return (memcmp(a, b.Data(), s) < 0);
+}
+inline bool operator<(const String& a, const String& b)
+{
+	size_t s = a.Size() < b.Size() ? a.Size() : b.Size();
+	return (memcmp(a.Data(), b.Data(), s) < 0);
 }
 
 class SharedString
@@ -647,24 +706,6 @@ public:
 		return ptr->str < other;
 	}
 };
-
-inline StringType::StringType(const char* str) :
-	size(0xFFFFFFFF),
-	data(str)
-{
-}
-
-inline StringType::StringType(const String& str) :
-	size(str.Size()),
-	data(str.Data())
-{
-}
-
-inline void StringType::EnsureSize() const
-{
-	if(size == 0xFFFFFFFF)
-		size = strlen(data);
-}
 
 namespace Types
 {

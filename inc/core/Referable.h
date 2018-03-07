@@ -84,11 +84,13 @@ struct ReferableRegisterBlock
 }
 namespace Types
 {
-LUX_API Type StrongRef();
-LUX_API Type WeakRef();
+LUX_API Type StrongID();
+LUX_API Type WeakID();
+
+LUX_API bool IsIDType(Type t);
 }
 
-template <> struct TemplType<core::ID> { static Type Get() { return Types::StrongRef(); } };
+template <> struct TemplType<core::ID> { static Type Get() { return Types::StrongID(); } };
 }
 }
 

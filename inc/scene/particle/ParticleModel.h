@@ -105,10 +105,10 @@ public:
 	}
 
 	void SetColor(
-		const video::Colorf& a,
-		const video::Colorf& b = video::Colorf(),
-		const video::Colorf& c = video::Colorf(),
-		const video::Colorf& d = video::Colorf())
+		const video::ColorF& a,
+		const video::ColorF& b = video::ColorF(),
+		const video::ColorF& c = video::ColorF(),
+		const video::ColorF& d = video::ColorF())
 	{
 		SetValues(Particle::EParameter::Red, a.r, b.r, c.r, d.r);
 		SetValues(Particle::EParameter::Blue, a.b, b.b, c.b, d.b);

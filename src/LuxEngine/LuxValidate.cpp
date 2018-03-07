@@ -23,11 +23,11 @@ static_assert(offsetof(math::QuaternionF, z) == 8, "Bad offset");
 static_assert(offsetof(math::QuaternionF, w) == 12, "Bad offset");
 static_assert(sizeof(math::QuaternionF) == 16, "Bad size");
 
-static_assert(offsetof(video::Colorf, r) == 0, "Bad offset");
-static_assert(offsetof(video::Colorf, g) == 4, "Bad offset");
-static_assert(offsetof(video::Colorf, b) == 8, "Bad offset");
-static_assert(offsetof(video::Colorf, a) == 12, "Bad offset");
-static_assert(sizeof(video::Colorf) == 16, "Bad size");
+static_assert(offsetof(video::ColorF, r) == 0, "Bad offset");
+static_assert(offsetof(video::ColorF, g) == 4, "Bad offset");
+static_assert(offsetof(video::ColorF, b) == 8, "Bad offset");
+static_assert(offsetof(video::ColorF, a) == 12, "Bad offset");
+static_assert(sizeof(video::ColorF) == 16, "Bad size");
 
 static_assert(sizeof(math::Matrix4) == 4 * 4 * 4, "Bad size");
 static_assert(sizeof(video::Color) == 4, "Bad size");

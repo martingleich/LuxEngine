@@ -5,28 +5,21 @@ namespace lux
 namespace core
 {
 
-static int strcicmp(char const *a, char const *b)
-{
-	while(ToLowerChar(*a) == ToLowerChar(*b)) {
-		++b;
-		++a;
-		if(*a == '\0')
-			return 0;
-	}
-
-	return (ToLowerChar(*a) - ToLowerChar(*b));
-}
-
 Name::Name() :
 	m_Handle(StringTableHandle::INVALID)
 {
 }
 
-Name::Name(const StringType& str, int action, StringTable* table) :
+Name::Name(const char* str, int action, StringTable* table) :
 	m_Handle(StringTableHandle::INVALID)
 {
-	if(str.data)
+	if(str)
 		Set(str, action, table);
+}
+Name::Name(const String& str, int action, StringTable* table) :
+	m_Handle(StringTableHandle::INVALID)
+{
+	Set(str, action, table);
 }
 
 void Name::SetHandle(StringTableHandle handle)
@@ -40,9 +33,9 @@ Name& Name::operator=(const Name& other)
 	return *this;
 }
 
-void Name::Set(const StringType& str, int action, StringTable* table)
+void Name::Set(const char* str, int action, StringTable* table)
 {
-	lxAssert("Assign null to name string." && str.data);
+	lxAssert("Assign null to name string." && str);
 
 	if(!table)
 		table = &StringTable::GlobalInstance();
@@ -55,9 +48,19 @@ void Name::Set(const StringType& str, int action, StringTable* table)
 		(void)0;
 }
 
-Name& Name::operator=(const StringType& str)
+void Name::Set(const String& str, int action, StringTable* table)
 {
-	Set(str.data, ADD, nullptr);
+	Set(str.Data(), action, table);
+}
+
+Name& Name::operator=(const char* str)
+{
+	Set(str, ADD, nullptr);
+	return *this;
+}
+Name& Name::operator=(const String& str)
+{
+	Set(str, ADD, nullptr);
 	return *this;
 }
 
@@ -66,13 +69,22 @@ const char* Name::c_str() const
 	return m_Handle.c_str();
 }
 
-bool Name::operator==(const StringType& other) const
+size_t Name::GetHash() const
 {
-	lxAssert("Compare null to name string." && other.data);
-	if(!other.data)
+	return m_Handle.GetHash();
+}
+
+bool Name::operator==(const char* other) const
+{
+	if(!other)
 		return false;
 
-	return (strcicmp(c_str(), other.data) == 0);
+	return (strcmp(c_str(), other) == 0);
+}
+
+bool Name::operator==(const String& other) const
+{
+	return (strcmp(c_str(), other.Data()) == 0);
 }
 
 bool Name::operator==(const Name& other) const
@@ -85,7 +97,12 @@ bool Name::operator!=(const Name& other) const
 	return !(*this == other);
 }
 
-bool Name::operator!=(const StringType& str) const
+bool Name::operator!=(const char* str) const
+{
+	return !(*this == str);
+}
+
+bool Name::operator!=(const String& str) const
 {
 	return !(*this == str);
 }

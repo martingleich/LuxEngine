@@ -7,14 +7,14 @@ namespace core
 {
 namespace Types
 {
-Type Vector3f()
+Type Vector3F()
 {
-	static const Type t(new core::TypeInfoTemplate<math::Vector3F>("vector3f"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector3F>("Vector3F", true));
 	return t;
 }
-Type Vector3i()
+Type Vector3I()
 {
-	static const Type t(new core::TypeInfoTemplate<math::Vector3I>("Vector3I"));
+	static const Type t(new core::TypeInfoTemplate<math::Vector3I>("Vector3I", true));
 	return t;
 }
 }

@@ -64,7 +64,7 @@ private:
 
 		Texture,
 		Color,
-		Colorf,
+		ColorF,
 		Vector2,
 		Vector3,
 		Vector2Int,

@@ -1,4 +1,5 @@
 #include "core/lxStringTable.h"
+#include "core/lxUtil.h"
 #include <unordered_map>
 #include <cctype>
 
@@ -38,6 +39,11 @@ const char* StringTableHandle::c_str() const
 		return (reinterpret_cast<const char*>(m_Handle) + sizeof(size_t));
 }
 
+size_t StringTableHandle::GetHash() const
+{
+	return reinterpret_cast<size_t>(m_Handle);
+}
+
 size_t StringTableHandle::Size() const
 {
 	if(m_Handle)
@@ -59,7 +65,7 @@ struct CheckEntry
 	{
 		size_t operator()(const CheckEntry& entry) const
 		{
-			return core::HashSequence(reinterpret_cast<const u8*>(entry.m_Handle) + sizeof(size_t),
+			return HashSequence(reinterpret_cast<const u8*>(entry.m_Handle) + sizeof(size_t),
 				*reinterpret_cast<const size_t*>(entry.m_Handle));
 		}
 	};
@@ -123,12 +129,12 @@ StringTable::~StringTable()
 	LUX_FREE(self);
 }
 
-StringTableHandle StringTable::FindString(const core::StringType& str)
+StringTableHandle StringTable::FindString(const StringType& str)
 {
 	return AddFindString(str.data, true);
 }
 
-StringTableHandle StringTable::AddString(const core::StringType& str)
+StringTableHandle StringTable::AddString(const StringType& str)
 {
 	return AddFindString(str.data, false);
 }

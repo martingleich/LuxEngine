@@ -36,22 +36,21 @@ public:
 			auto& srcName = src.name;
 
 			// Find the matching dst structure
-			auto dstId = m_Src->GetTypeId(*srcName);
+			auto dstId = m_Src->GetStructureId(*srcName);
 			link.strct = dstId;
 			link.isSame = true;
 			link.elemMap.Clear();
 			if(link.strct) {
 				// If the dst structure exists
-				auto srcElems = m_Src->GetStructElements(srcId);
+				auto& srcElems = m_Src->GetStructure(srcId).elements;
 				u32 id2 = 1; //
 				// For each src element
 				for(auto& srcElem : srcElems) {
 					// Get the dest element
-					auto dstElem = m_Dst->GetStructElement(dstId,
-						srcElem.name);
+					auto dstElem = m_Dst->GetStructureElement(dstId, srcElem.name);
 					u32 id = 0;
 					// If the dst element exists and is of the same type
-					if(dstElem && dstElem->typeId == srcElem.typeId) {
+					if(dstElem && dstElem->type == srcElem.type) {
 						// Add it to the list
 						id = dstElem->elemId;
 					} // else if not matching dst element -> Add 0 to list
@@ -116,7 +115,7 @@ public:
 	virtual core::ID GetObject(u32 fileId) = 0;
 };
 
-class Serializer
+class Serializer : public ReferenceCounted
 {
 public:
 	Serializer(const StructuralTable* inClass,
@@ -139,8 +138,8 @@ public:
 	virtual void WriteElement(const char* element, const void* elemAddr) = 0;
 	virtual void ReadElement(const char* element, void* elemAddr) = 0;
 
-	virtual void WriteBinary(const void* data, u32 size) = 0;
-	virtual void ReadBinary(void* data, u32 size) = 0;
+	virtual void WriteType(core::Type type, const void* data) = 0;
+	virtual void ReadType(core::Type type, void* data) = 0;
 
 	virtual void Seek(u32 move, io::ESeekOrigin origin = io::ESeekOrigin::Cursor) = 0;
 	virtual u32 GetCursor() const = 0;
@@ -160,6 +159,8 @@ protected:
 	const StructuralTable* m_OutClass;
 	StrongRef<ObjectMap> m_ObjectMap;
 };
+
+LUX_API StrongRef<Serializer> CreateBinaryMemorySerializer(core::RawMemory& destination, StructuralTable* table, ObjectMap* map);
 
 } // namespace serial
 } // namespace lux

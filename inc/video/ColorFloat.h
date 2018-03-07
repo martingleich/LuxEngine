@@ -11,7 +11,7 @@ namespace video
 /**
 Saves a three component color with alpha, in floating point format.
 */
-class Colorf
+class ColorF
 {
 public:
 	float r; //!< The red color channel.
@@ -21,7 +21,7 @@ public:
 
 public:
 	//! Default construct to transparent black.
-	Colorf() :
+	ColorF() :
 		r(0.0f),
 		g(0.0f),
 		b(0.0f),
@@ -29,50 +29,50 @@ public:
 	{
 	}
 
-	static Colorf Uniform(float f, float alpha = 1.0f)
+	static ColorF Uniform(float f, float alpha = 1.0f)
 	{
-		return Colorf(f,f,f,alpha);
+		return ColorF(f,f,f,alpha);
 	}
 
 	//! Construct from single values.
 	/**
 		Alpha is set to 1.
 	*/
-	Colorf(const float _r, const float _g, const float _b) : r(_r), g(_g), b(_b), a(1.0f)
+	ColorF(const float _r, const float _g, const float _b) : r(_r), g(_g), b(_b), a(1.0f)
 	{
 	}
 
 	//! Construct from single values.
-	Colorf(const float _r, const float _g, const float _b, const float _a) : r(_r), g(_g), b(_b), a(_a)
+	ColorF(const float _r, const float _g, const float _b, const float _a) : r(_r), g(_g), b(_b), a(_a)
 	{
 	}
 
 	//! Construct from color.
-	Colorf(Color c)
+	ColorF(Color c)
 	{
 		SetInt((u32)(c.GetAlpha()), c.GetRed(), c.GetGreen(), c.GetBlue());
 	}
 
 	//! Construct from color(u32)
-	Colorf(u32 c)
+	ColorF(u32 c)
 	{
 		Color rc(c);
-		*this = Colorf(rc);
+		*this = ColorF(rc);
 	}
 
-	static Colorf FromHex(u32 c)
+	static ColorF FromHex(u32 c)
 	{
-		return Colorf(c);
+		return ColorF(c);
 	}
 
-	static Colorf FromRGB(float r, float g, float b, float a = 1.0f)
+	static ColorF FromRGB(float r, float g, float b, float a = 1.0f)
 	{
-		return Colorf(r, g, b, a);
+		return ColorF(r, g, b, a);
 	}
 
-	static Colorf FromHSV(float h, float s, float v, float a = 1.0f)
+	static ColorF FromHSV(float h, float s, float v, float a = 1.0f)
 	{
-		Colorf out;
+		ColorF out;
 		HSVToRGB(h, s, v, out.r, out.g, out.b);
 		out.a = a;
 		return out;
@@ -92,7 +92,7 @@ public:
 	}
 
 	//! Mix with other color
-	Colorf& operator+=(const Colorf& c)
+	ColorF& operator+=(const ColorF& c)
 	{
 		r += c.r;
 		g += c.g;
@@ -101,7 +101,7 @@ public:
 		return *this;
 	}
 
-	Colorf& operator-=(const Colorf& c)
+	ColorF& operator-=(const ColorF& c)
 	{
 		r -= c.r;
 		g -= c.g;
@@ -113,7 +113,7 @@ public:
 	/**
 		Alpha is changed too.
 	*/
-	Colorf& operator*=(const float f)
+	ColorF& operator*=(const float f)
 	{
 		r *= f;
 		g *= f;
@@ -123,16 +123,16 @@ public:
 	}
 
 	//! Mix with other color.
-	Colorf operator+(const Colorf& other) const
+	ColorF operator+(const ColorF& other) const
 	{
-		Colorf out(*this);
+		ColorF out(*this);
 		out += other;
 		return out;
 	}
 
-	Colorf operator-(const Colorf& other) const
+	ColorF operator-(const ColorF& other) const
 	{
-		Colorf out(*this);
+		ColorF out(*this);
 		out -= other;
 		return out;
 	}
@@ -141,23 +141,23 @@ public:
 	/**
 	Alpha is changed too.
 	*/
-	Colorf operator*(const float f) const
+	ColorF operator*(const float f) const
 	{
-		Colorf out(*this);
+		ColorF out(*this);
 		out *= f;
 		return out;
 	}
 
-	Colorf operator*(const Colorf& other) const
+	ColorF operator*(const ColorF& other) const
 	{
-		return Colorf(
+		return ColorF(
 			r*other.r,
 			g*other.g,
 			b*other.b,
 			a*other.a);
 	}
 
-	Colorf& operator*=(const Colorf& other)
+	ColorF& operator*=(const ColorF& other)
 	{
 		r *= other.r;
 		g *= other.g;
@@ -170,7 +170,7 @@ public:
 	/**
 		Is true, if the colors are the same, including alpha.
 	*/
-	bool operator==(const Colorf& other) const
+	bool operator==(const ColorF& other) const
 	{
 		return ((r == other.r) && (g == other.g) && (b == other.b) && (a == other.a));
 	}
@@ -179,13 +179,13 @@ public:
 	/**
 		Is false, if the colors are the same, including alpha.
 	*/
-	bool operator!=(const Colorf& other) const
+	bool operator!=(const ColorF& other) const
 	{
 		return !(*this == other);
 	}
 
 	//! Comparison for sorting.
-	bool operator<(const Colorf& other) const
+	bool operator<(const ColorF& other) const
 	{
 		if(r != other.r)
 			return r < other.r;
@@ -239,9 +239,9 @@ public:
 	}
 
 	//! Get the negated color
-	inline Colorf GetNegative() const
+	inline ColorF GetNegative() const
 	{
-		return Colorf(1.0f - r, 1.0f - g, 1.0f - g, 1.0f - a);
+		return ColorF(1.0f - r, 1.0f - g, 1.0f - g, 1.0f - a);
 	}
 
 	//! Get the brightness of the color.
@@ -260,9 +260,9 @@ public:
 		return a < 1.0f;
 	}
 
-	inline Colorf WeightWith(const Colorf& c) const
+	inline ColorF WeightWith(const ColorF& c) const
 	{
-		return Colorf(r*c.r, g*c.g, b*c.b, a*c.a);
+		return ColorF(r*c.r, g*c.g, b*c.b, a*c.a);
 	}
 
 	float* Data()
@@ -275,12 +275,12 @@ public:
 	}
 };
 
-inline Colorf operator*(const float f, const Colorf& a)
+inline ColorF operator*(const float f, const ColorF& a)
 {
-	Colorf out(a); out *= f; return out;
+	ColorF out(a); out *= f; return out;
 }
 
-inline void conv_data(format::Context& ctx, Colorf format, format::Placeholder& placeholder)
+inline void conv_data(format::Context& ctx, ColorF format, format::Placeholder& placeholder)
 {
 	using namespace format;
 	placeholder.type = 'a';
@@ -303,9 +303,9 @@ namespace core
 {
 namespace Types
 {
-LUX_API Type Colorf();
+LUX_API Type ColorF();
 }
-template<> struct TemplType<video::Colorf> { static Type Get() { return Types::Colorf(); } };
+template<> struct TemplType<video::ColorF> { static Type Get() { return Types::ColorF(); } };
 } // namespace core
 
 }

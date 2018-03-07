@@ -11,7 +11,7 @@ namespace Types
 {
 Type String()
 {
-	static const Type t(new TypeInfoTemplate<lux::core::String>("string"));
+	static const Type t(new TypeInfoTemplate<lux::core::String>("String"));
 	return t;
 }
 } // namespace Types
@@ -179,37 +179,14 @@ String& String::operator+=(const StringType& str)
 {
 	return Append(str);
 }
-String String::operator+(const StringType& str) const
-{
-	String n(*this);
-	n += str;
-	return n;
-}
 
-bool String::operator==(const StringType& other) const
+bool String::Equal(const StringType& other) const
 {
 	other.EnsureSize();
 	if(m_Size != other.size)
 		return false;
 
 	return (memcmp(Data(), other.data, m_Size) == 0);
-}
-
-bool String::operator<(const StringType& other) const
-{
-	other.EnsureSize();
-	size_t s = m_Size < other.size ? m_Size : other.size;
-	return (memcmp(Data(), other.data, s) < 0);
-}
-
-bool String::operator!=(const StringType& other) const
-{
-	return !(*this == other);
-}
-
-bool String::Equal(const StringType& other) const
-{
-	return (*this == other);
 }
 
 bool String::EqualCaseInsensitive(const StringType& other) const

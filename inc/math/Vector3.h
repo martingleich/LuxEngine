@@ -601,12 +601,12 @@ namespace core
 {
 namespace Types
 {
-LUX_API Type Vector3f();
-LUX_API Type Vector3i();
+LUX_API Type Vector3F();
+LUX_API Type Vector3I();
 }
 
-template<> struct TemplType<math::Vector3F> { static Type Get() { return Types::Vector3f(); } };
-template<> struct TemplType<math::Vector3I> { static Type Get() { return Types::Vector3i(); } };
+template<> struct TemplType<math::Vector3F> { static Type Get() { return Types::Vector3F(); } };
+template<> struct TemplType<math::Vector3I> { static Type Get() { return Types::Vector3I(); } };
 
 } // namespace core
 

@@ -593,7 +593,7 @@ void RendererD3D9::LoadFogSettings(
 	// Change if not using fixed function, and the fog or shader changed
 	if(!fixedFunction && (IsDirty(Dirty_Fog) || changedShader || changedFogState)) {
 		// Set shader fog state.
-		video::Colorf fog1, fog2;
+		video::ColorF fog1, fog2;
 		fog1.r = m_Fog.color.r;
 		fog1.g = m_Fog.color.g;
 		fog1.b = m_Fog.color.b;

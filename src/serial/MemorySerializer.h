@@ -13,7 +13,8 @@ public:
 	MemorySerializer(core::RawMemory& mem,
 		const StructuralTable* table, ObjectMap* map = nullptr) :
 		BinarySerializer(table, table, map),
-		m_Memory(mem)
+		m_Memory(mem),
+		m_Cursor(0)
 	{
 	}
 

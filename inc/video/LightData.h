@@ -49,7 +49,7 @@ public:
 	/**
 	Default: White
 	*/
-	Colorf color;
+	ColorF color;
 
 	//! The lightposition in world coordinates
 	math::Vector3F position;

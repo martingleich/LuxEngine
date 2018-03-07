@@ -125,9 +125,9 @@ public:
 	\param alpha The alpha channel of the color, if alpha is smaller than 0 its generated random
 	\return A random generated color
 	*/
-	inline video::Colorf GetColorf(float alpha = -1.0f) const
+	inline video::ColorF GetColorf(float alpha = -1.0f) const
 	{
-		video::Colorf out(GetFloat(), GetFloat(), GetFloat(), alpha);
+		video::ColorF out(GetFloat(), GetFloat(), GetFloat(), alpha);
 		if(alpha < 0.0f)
 			out.a = GetFloat();
 

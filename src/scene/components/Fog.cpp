@@ -9,7 +9,7 @@ namespace scene
 
 GlobalFog::GlobalFog()
 {
-	m_Data.color = video::Colorf(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Data.color = video::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Data.type = video::EFogType::Linear;
 	m_Data.start = 0;
 	m_Data.end = 0;
@@ -56,12 +56,12 @@ float GlobalFog::GetEnd() const
 	return m_Data.end;
 }
 
-void GlobalFog::SetColor(const video::Colorf& color)
+void GlobalFog::SetColor(const video::ColorF& color)
 {
 	m_Data.color = color;
 }
 
-const video::Colorf& GlobalFog::GetColor() const
+const video::ColorF& GlobalFog::GetColor() const
 {
 	return m_Data.color;
 }

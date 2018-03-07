@@ -4,6 +4,7 @@
 #include "core/lxSort.h"
 #include "core/lxMemory.h"
 #include "core/lxIterator.h"
+#include "core/lxTypes.h"
 #include <initializer_list>
 #include <type_traits>
 
@@ -12,21 +13,9 @@ namespace lux
 namespace core
 {
 
-class ArrayRawData
-{
-public:
-	LUX_API static void* ArrayAllocate(size_t bytes);
-	LUX_API static void ArrayFree(void* ptr);
-
-public:
-	void* m_Data = nullptr;
-	size_t m_Used = 0;
-	size_t m_Alloc = 0;
-};
-
 //! A template dynamic array
 template <typename T>
-class Array : private ArrayRawData
+class Array
 {
 private:
 	template <bool isConst>
@@ -499,7 +488,7 @@ public:
 	*/
 	void Reserve(size_t newSize)
 	{
-		T* newEntries = (T*)ArrayAllocate(newSize*sizeof(T));
+		T* newEntries = (T*)ArrayAllocate(newSize * sizeof(T));
 
 		if(m_Data) {
 			size_t end = m_Used < (size_t)(newSize) ? m_Used : (size_t)(newSize);
@@ -787,6 +776,15 @@ public:
 	}
 
 private:
+	static void* ArrayAllocate(size_t bytes)
+	{
+		return ::operator new(bytes);
+	}
+	static void ArrayFree(void* ptr)
+	{
+		::operator delete(ptr);
+	}
+
 	T* GetInsertPointer(Iterator before, bool destroy = false)
 	{
 		lxAssert(before.m_Current - Data() <= (int)m_Used);
@@ -813,7 +811,98 @@ private:
 		++m_Used;
 		return ptr;
 	}
+
+private:
+	void* m_Data = nullptr;
+	size_t m_Used = 0;
+	size_t m_Alloc = 0;
 };
+
+LUX_API const char* MakeArrayTypeName(Type baseType);
+
+class AbstractArrayTypeInfo
+{
+public:
+	virtual ~AbstractArrayTypeInfo() {}
+	virtual void* At(void* ptr, size_t i) const = 0;
+	virtual const void* AtConst(const void* ptr, size_t i) const = 0;
+	virtual size_t Size(const void* ptr) const = 0;
+	virtual void Resize(void* ptr, size_t size) const = 0;
+	virtual Type GetBaseType() const = 0;
+};
+
+template <typename T>
+class ArrayTypeInfo : public TypeInfoTemplate<Array<T>>, public AbstractArrayTypeInfo
+{
+public:
+	using ArrayT = Array<T>;
+	ArrayTypeInfo(Type baseType) :
+		TypeInfoTemplate(MakeArrayTypeName(baseType)),
+		m_BaseType(baseType)
+	{
+	}
+
+	Type GetBaseType() const
+	{
+		return m_BaseType;
+	}
+
+	void* At(void* ptr, size_t i) const
+	{
+		return &static_cast<ArrayT*>(ptr)->At(i);
+	}
+	const void* AtConst(const void* ptr, size_t i) const
+	{
+		return &static_cast<const ArrayT*>(ptr)->At(i);
+	}
+	size_t Size(const void* ptr) const
+	{
+		return static_cast<const ArrayT*>(ptr)->Size();
+	}
+	void Resize(void* ptr, size_t size) const
+	{
+		return static_cast<ArrayT*>(ptr)->Resize(size);
+	}
+
+private:
+	Type m_BaseType;
+};
+
+template <typename T>
+struct TemplType<Array<T>>
+{
+	static ArrayTypeInfo<T> typeInfo;
+	static Type Get()
+	{
+		return Type(&typeInfo);
+	}
+};
+
+template <typename T>
+ArrayTypeInfo<T> TemplType<Array<T>>::typeInfo(TemplType<T>::Get());
+
+namespace Types
+{
+template <typename T>
+Type Array()
+{
+	return TemplType<Array<T>>::Get();
+}
+
+inline bool IsArray(Type type)
+{
+	return dynamic_cast<const AbstractArrayTypeInfo*>(type.GetInfo()) != nullptr;
+}
+
+inline Type GetArrayBase(Type type)
+{
+	auto aati = dynamic_cast<const AbstractArrayTypeInfo*>(type.GetInfo());
+	if(aati)
+		return aati->GetBaseType();
+	return Type::Unknown;
+}
+
+} // namespace Types
 
 template <typename T>
 struct HashType<Array<T>>
@@ -832,6 +921,8 @@ struct HashType<Array<T>>
 		return out;
 	}
 };
+
+LUX_API Type TestCall();
 
 } // namespace core
 } // namespace lux

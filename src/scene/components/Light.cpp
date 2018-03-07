@@ -80,12 +80,12 @@ float Light::GetSpotFalloff() const
 	return m_LightData.falloff;
 }
 
-void Light::SetColor(const video::Colorf& color)
+void Light::SetColor(const video::ColorF& color)
 {
 	m_LightData.color = color;
 }
 
-const video::Colorf& Light::GetColor() const
+const video::ColorF& Light::GetColor() const
 {
 	return m_LightData.color;
 }
@@ -130,12 +130,12 @@ GlobalAmbientLight::~GlobalAmbientLight()
 {
 }
 
-void GlobalAmbientLight::SetColor(const video::Colorf& color)
+void GlobalAmbientLight::SetColor(const video::ColorF& color)
 {
 	m_Color = color;
 }
 
-video::Colorf GlobalAmbientLight::GetColor() const
+video::ColorF GlobalAmbientLight::GetColor() const
 {
 	return m_Color;
 }

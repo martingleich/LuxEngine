@@ -325,7 +325,7 @@ void SceneRendererSimpleForward::DrawScene()
 	// The lights
 	*m_Renderer->GetParam("ambient") = m_SceneData->ambientLight ?
 		m_SceneData->ambientLight->GetColor() :
-		video::Colorf(0, 0, 0);
+		video::ColorF(0, 0, 0);
 
 	m_Renderer->ClearLights();
 
