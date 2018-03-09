@@ -14,8 +14,7 @@ namespace format
 class cfile_sink : public Sink
 {
 public:
-	cfile_sink(FILE* f, size_t collumn = 0) :
-		Sink(collumn),
+	cfile_sink(FILE* f) :
 		m_File(f)
 	{
 	}

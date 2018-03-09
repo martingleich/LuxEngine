@@ -11,9 +11,9 @@ struct Placeholder
 	{
 	private:
 		int value; //!< The value of the option
-		bool enabled; //!< Is the option enabled, i.e. Used in the output
-		bool hasDefaultValue; //!< True if the option doesnt have a value passed
-		bool placeholder; //!< True if the option uses a placeholder
+		bool enabled : 1; //!< Is the option enabled, i.e. Used in the output
+		bool hasDefaultValue : 1; //!< True if the option doesnt have a value passed
+		bool placeholder : 1; //!< True if the option uses a placeholder
 
 	public:
 		Option() :
@@ -108,11 +108,9 @@ struct Placeholder
 	char order[8 + 1]; //!< The order in which the option where set, string is null-terminated, only enabled options
 	char placeholderOrder[9 + 1]; //!< The order in which the sub-placeholder where used, string is null-terminated, only enabled options
 	char type; //!< The type character of the placeholder
-	int subPlaceholderCount; //!< The number of subplaceholders used
 
 	Placeholder(char _c = 0) :
-		type(_c),
-		subPlaceholderCount(0)
+		type(_c)
 	{
 		order[0] = 0;
 		placeholderOrder[0] = 0;
@@ -139,6 +137,12 @@ struct Placeholder
 		case '<': return &left_align;
 		default: return nullptr;
 		}
+	}
+
+	//! Has the placeholder subplaceholders.
+	bool HasSubPlaceholder() const
+	{
+		return placeholderOrder[0] != '\0';
 	}
 };
 

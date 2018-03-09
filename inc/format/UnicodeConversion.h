@@ -87,30 +87,25 @@ inline int CodePointToUtf8(uint32_t c, uint8_t* out)
 	return (int)(out - orig);
 }
 
-inline std::vector<uint16_t> CodePointsToUtf16(const uint32_t* data, size_t count)
+inline void CodePointsToUtf16(const uint32_t* data, size_t count, std::vector<uint16_t>& out)
 {
-	std::vector<uint16_t> utf16;
-	utf16.reserve(count);
+	out.reserve(out.size() + count);
 
 	const uint32_t* end = data + count;
 	for(auto it = data; *it && it != end; ++it)
-		CodePointToUtf16(*it, utf16);
-
-	return utf16;
+		CodePointToUtf16(*it, out);
 }
 
-inline std::vector<uint16_t> Utf8ToUtf16(const char* data, size_t size)
+inline void Utf8ToUtf16(const char* data, size_t size, std::vector<uint16_t>& out)
 {
-	std::vector<uint16_t> utf16;
-	utf16.reserve(size / 2);
+	// Approximation for new size.
+	out.reserve(out.size() + size);
 
 	while(size) {
-		uint32_t c = AdvanceCursorUnicode(data);
 		--size;
-		CodePointToUtf16(c, utf16);
+		uint32_t c = AdvanceCursor(data);
+		CodePointToUtf16(c, out);
 	}
-
-	return utf16;
 }
 
 }

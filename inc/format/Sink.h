@@ -18,14 +18,7 @@ struct ESinkFlags
 class Sink
 {
 public:
-	//! Create a new sink
-	/**
-	\param collumn The text collumn where the sink starts writting, important for tabulators
-	*/
-	Sink(size_t collumn = 0) :
-		m_Collumn(collumn)
-	{
-	}
+	virtual ~Sink() {}
 
 	//! Write data to the sink.
 	/**
@@ -36,18 +29,6 @@ public:
 	\return The number of characters written
 	*/
 	virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags) = 0;
-
-	//! Get the current collum of the sink
-	/**
-	Defaults to the initialized collumn, but if the sink has more information available it should be used here
-	*/
-	virtual size_t GetCollumn() const
-	{
-		return m_Collumn;
-	}
-
-protected:
-	size_t m_Collumn;
 };
 
 //! Wrapper around a sink reference
@@ -64,10 +45,6 @@ public:
 	virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags)
 	{
 		return m_Ref.Write(ctx, firstSlice, flags);
-	}
-	virtual size_t GetCollumn() const
-	{
-		return m_Ref.GetCollumn();
 	}
 private:
 	Sink& m_Ref;

@@ -14,8 +14,7 @@ namespace format
 class stdstring_sink : public Sink
 {
 public:
-	stdstring_sink(std::string& s, size_t collumn = 0) :
-		Sink(collumn),
+	stdstring_sink(std::string& s) :
 		m_Str(s)
 	{
 	}

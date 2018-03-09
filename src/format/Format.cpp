@@ -1,18 +1,77 @@
 #include "format/Format.h"
 #include "format/ConvInternal.h"
-#include "format/RAII.h"
 #include <limits.h>
 
 namespace format
 {
 namespace internal
 {
-	static bool TryReadInteger(StringType stringType, const char*& cur, int& out)
+	static void FormatTilde(Context& ctx, const Placeholder& placeholder)
 	{
-		uint32_t c = GetCharacter(stringType, cur);
+		static const char* TILDES = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"; // 32 Tildes
+
+		const int count = placeholder.master.GetValue(0);
+
+		if(count == 0)
+			return;
+
+		if(count < 0)
+			throw invalid_placeholder_value("Number of tildes must be bigger than zero.", ctx.fstrLastArgPos, count);
+
+		PutCount(ctx, count, TILDES, sizeof(TILDES));
+	}
+
+	static void FormatTab(Context& ctx, const Placeholder& placeholder)
+	{
+		if(!placeholder.master.HasValue())
+			throw value_exception("Tab placeholder requires argument.");
+		const int tab_stop = placeholder.master.GetValue();
+
+		if(placeholder.hash) {
+			if(tab_stop < 0)
+				throw value_exception("Tab placeholder value must be bigger than 0.");
+
+			PutSpaces(ctx, tab_stop);
+		} else {
+			if(tab_stop < 1)
+				throw value_exception("Tab placeholder value must be bigger than 0.");
+			if(tab_stop == 1)
+				return;
+
+			size_t p = ctx.GetCollumn() + 1;
+			if(!placeholder.plus && p == 1)
+				return;
+			if(p%tab_stop == 0)
+				return;
+
+			size_t count = ((p / tab_stop + 1)*tab_stop - p);
+
+			PutSpaces(ctx, count);
+		}
+	}
+
+	static bool TryFormatArgFree(Context& ctx, Placeholder& placeholder)
+	{
+		switch(placeholder.type) {
+		case '~':
+			FormatTilde(ctx, placeholder);
+			break;
+		case 't':
+			FormatTab(ctx, placeholder);
+			break;
+		default:
+			return false;
+		}
+
+		return true;
+	}
+
+	static bool TryReadInteger(const char*& cur, int& out)
+	{
+		uint32_t c = *cur;
 		if(c < '0' || c > '9')
 			return false;
-		AdvanceCursor(stringType, cur);
+		++cur;
 
 		const char* backtrack = cur;
 		out = 0;
@@ -23,7 +82,7 @@ namespace internal
 			out *= 10;
 			out += c - '0';
 			backtrack = cur;
-			c = AdvanceCursor(stringType, cur);
+			c = *cur++;
 		}
 
 		cur = backtrack;
@@ -42,52 +101,50 @@ namespace internal
 		outPlaceholder.Reset();
 
 		const char* cur = str;
-		uint32_t c = GetCharacter(ctx.fstrType, cur);
+		char c = *cur;
 		int value;
-		int idx = 0;
-		int idx2 = 0;
+		int placeholderId = 0;
+		int subPlaceholderId = 0;
 		if(c == '?') {
-			AdvanceCursor(ctx.fstrType, cur);
 			outPlaceholder.master.SetPlaceholder();
-			outPlaceholder.placeholderOrder[idx2++] = ' ';
-			++outPlaceholder.subPlaceholderCount;
-			c = GetCharacter(ctx.fstrType, cur);
-		} else if(TryReadInteger(ctx.fstrType, cur, value)) {
+			outPlaceholder.placeholderOrder[subPlaceholderId++] = ' ';
+			++cur;
+		} else if(c >= '0' && c <= '9' && TryReadInteger(cur, value)) {
 			outPlaceholder.master.SetValue(value);
-			c = GetCharacter(ctx.fstrType, cur);
 		}
+		c = *cur;
+
 		while(c && !IsValidPlaceholder(c)) {
 			Placeholder::Option* op = outPlaceholder.GetOption(c);
 			if(!op)
-				throw syntax_exception("unknown placeholder option", ctx.fstrPos);
+				throw syntax_exception("unknown placeholder option", ctx.argId);
 
-			outPlaceholder.order[idx++] = (char)c;
+			outPlaceholder.order[placeholderId++] = (char)c;
 			op->Enable();
 
-			AdvanceCursor(ctx.fstrType, cur);
-			c = GetCharacter(ctx.fstrType, cur); // Character after placeholder
+			++cur;
+			c = *cur; // Character after placeholder
 			if(c == '?') {
-				AdvanceCursor(ctx.fstrType, cur);
+				++cur;
 				op->SetPlaceholder();
-				outPlaceholder.placeholderOrder[idx2++] = outPlaceholder.order[idx - 1];
-				++outPlaceholder.subPlaceholderCount;
-				c = GetCharacter(ctx.fstrType, cur);
-			} else if(TryReadInteger(ctx.fstrType, cur, value)) {
+				outPlaceholder.placeholderOrder[subPlaceholderId++] = outPlaceholder.order[placeholderId - 1];
+				c = *cur;
+			} else if(TryReadInteger(cur, value)) {
 				op->SetValue(value);
-				c = GetCharacter(ctx.fstrType, cur);
+				c = *cur;
 			}
 		}
 
 		// Cursor is on first character after placeholder
-		outPlaceholder.order[idx] = 0;
-		outPlaceholder.placeholderOrder[idx2] = 0;
+		outPlaceholder.order[placeholderId] = 0;
+		outPlaceholder.placeholderOrder[subPlaceholderId] = 0;
 		if(IsValidPlaceholder(c))
 			outPlaceholder.type = (char)c;
 		else
 			outPlaceholder.type = 0;
 
 		if(c)
-			AdvanceCursor(ctx.fstrType, cur);
+			cur++;
 
 		str = cur;
 	}
@@ -108,32 +165,17 @@ namespace internal
 		const char* cur = str;
 		size_t size;
 
-		size_t counter;
-		size_t newLines;
-		size_t collumns;
-
 		while(true) {
 			size = 0;
-			counter = 0;
-			newLines = 0;
-			collumns = 0;
 			outPlaceholder.type = 0;
 
 			// Advance cursor until ~ character.
-			uint32_t c;
+			char c;
 			const char* before = cur;
 			const char* tmp;
 			do {
 				tmp = cur;
-				c = AdvanceCursor(ctx.fstrType, cur);
-				if(c != '~') {
-					++counter;
-					++collumns;
-					if(c == '\n') {
-						++newLines;
-						collumns = 0;
-					}
-				}
+				c = *cur++;
 			} while(c && c != '~');
 
 			size = tmp - before;
@@ -143,13 +185,14 @@ namespace internal
 				break;
 
 			// Remember offset of the current placeholder
-			ctx.fstrLastArgPos = cur - ctx.fstr;
+			ctx.fstrLastArgPos = cur - ctx.GetFormatString();
+			++ctx.argId;
 
 			ParsePlaceholder(ctx, cur, outPlaceholder);
 
 			// If a argument free placeholder without subplaceholders is found.
-			if(outPlaceholder.subPlaceholderCount == 0 && IsArgFreePlaceholder(outPlaceholder.type)) {
-				ConvertAddString(ctx, ctx.fstrType, str, size);
+			if(!outPlaceholder.HasSubPlaceholder() && IsArgFreePlaceholder(outPlaceholder.type)) {
+				ctx.AddSlice(size, str);
 				str = cur;
 
 				TryFormatArgFree(ctx, outPlaceholder);
@@ -159,24 +202,17 @@ namespace internal
 		}
 
 		// Write remaining text
-		if(size) {
-			Cursor diff;
-			diff.collumn = collumns;
-			diff.count = counter;
-			diff.line = newLines;
-			ConvertAddString(ctx, ctx.fstrType, str, size, diff);
-		}
+		if(size)
+			ctx.AddSlice(size, str);
 
 		str = cur;
 
 		return (outPlaceholder.type != 0);
 	}
 
-	static void AlignString(Context& ctx, Slice* prevSlice, size_t beforeLength, const Placeholder& placeholder)
+	static void AlignString(Context& ctx, Slice* prevSlice, size_t length, const Placeholder& placeholder)
 	{
 		// Align content
-		const size_t curLength = ctx.GetCharacterCount();
-		const size_t length = curLength - beforeLength;
 		if(placeholder.left_align) {
 			if(!placeholder.left_align.HasValue())
 				return;
@@ -217,11 +253,13 @@ namespace internal
 
 	static void WriteData(Context& ctx, const FormatEntry* entry, Placeholder& placeholder)
 	{
-		size_t beforeLength = ctx.GetCharacterCount();
-
+		size_t beforeLength = 0;
 		Slice* prevSlice = nullptr;
-		if(placeholder.right_align)
-			prevSlice = ctx.GetLastSlice();
+		if(placeholder.left_align || placeholder.right_align) {
+			beforeLength = ctx.StartCounting();
+			if(placeholder.right_align)
+				prevSlice = ctx.LockLastSlice();
+		}
 
 #if defined(FORMAT_ERROR_TEXT) && defined(FORMAT_NO_EXCEPTIONS)
 		try {
@@ -229,25 +267,20 @@ namespace internal
 			entry->Convert(ctx, placeholder);
 #if defined(FORMAT_ERROR_TEXT) && defined(FORMAT_NO_EXCEPTIONS)
 		} catch(...) {
-			ctx.AddSlice(14, "<FORMAT_ERROR>");
+			ctx.AddTermiatedSlice("<FORMAT_ERROR>");
 		}
 #endif
 
-		if(placeholder.left_align || placeholder.right_align)
-			AlignString(ctx, prevSlice, beforeLength, placeholder);
+		if(placeholder.left_align || placeholder.right_align) {
+			auto newLength = ctx.StopCounting();
+			AlignString(ctx, prevSlice, newLength - beforeLength, placeholder);
+		}
 	}
 
-	void format(Context& ctx, StringType fmtStringType, const char* str, FormatEntry** entries, int entryCount)
+	void format(Context& ctx, const BaseFormatEntryType* rawEntries, int entryCount)
 	{
-		const char* cur = str;
-
-		const Context::SubContext subCtx = ctx.SaveSubContext();
-		internal::RAII restoreOldSubContext([&ctx, &subCtx] { ctx.RestoreSubContext(subCtx); });
-		ctx.fstrType = fmtStringType;
-		ctx.fstrPos = 0;
-		ctx.fstrLastArgPos = 0;
-		ctx.fstr = str;
-		ctx.argId = 0;
+		auto GetEntry = [&](int i) { return reinterpret_cast<const FormatEntry*>(rawEntries + i); };
+		const char* cur = ctx.GetFormatString();
 
 		// Go to placeholder, try arg free, fill subplaceholder, convert string
 		int curId = 0;
@@ -258,15 +291,15 @@ namespace internal
 			bool isArgFree = IsArgFreePlaceholder(pl.type);
 			if(!isArgFree)
 				curId = pl.master.GetValue(curId);
+
 			// Replace subplaceholders
-			for(int i = 0; i < pl.subPlaceholderCount; ++i) {
-				char c = pl.placeholderOrder[i]; // The subplaceholder to replace
+			for(char* sub = pl.placeholderOrder; *sub; ++sub) {
 				if(curId >= entryCount)
 					throw syntax_exception("Not enough arguments");
-				if(c == ' ')
-					pl.master.SetValue(entries[curId]->AsInteger());
+				if(*sub == ' ')
+					pl.master.SetValue(GetEntry(curId)->AsInteger());
 				else
-					pl.GetOption(c)->SetValue(entries[curId]->AsInteger());
+					pl.GetOption(*sub)->SetValue(GetEntry(curId)->AsInteger());
 				++curId;
 			}
 			if(isArgFree) {
@@ -274,7 +307,7 @@ namespace internal
 			} else {
 				if(curId >= entryCount)
 					throw syntax_exception("Not enough arguments");
-				internal::WriteData(ctx, entries[curId], pl);
+				internal::WriteData(ctx, GetEntry(curId), pl);
 				++curId;
 			}
 		}

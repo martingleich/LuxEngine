@@ -3,7 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 #include "core/lxTypes.h"
-#include "lxID.h"
+#include "core/lxID.h"
 
 namespace lux
 {

@@ -6,6 +6,12 @@
 #include <string.h>
 #include <new>
 
+namespace format
+{
+	class Context;
+	struct Placeholder;
+} // namespace format
+
 namespace lux
 {
 namespace core
@@ -27,6 +33,7 @@ public:
 	virtual void Destruct(void* ptr) const = 0;
 	virtual void Assign(void* ptr, const void* other) const = 0;
 	virtual bool Compare(const void* a, const void* b) const = 0;
+	LUX_API virtual void FmtPrint(format::Context& ctx, const void* p, format::Placeholder& placeholder) const;
 
 	//! Unique name of the type
 	inline const char* GetName() const
@@ -52,6 +59,7 @@ public:
 		return m_IsTrivial;
 	}
 
+
 private:
 	const char* const m_Name;
 	const size_t m_Size;
@@ -75,23 +83,29 @@ public:
 
 	void CopyConstruct(void* ptr, const void* other) const
 	{
-		new (ptr) T(*(reinterpret_cast<const T*>(other)));
+		new (ptr) T(*(static_cast<const T*>(other)));
 	}
 
 	void Destruct(void* ptr) const
 	{
 		if(ptr)
-			reinterpret_cast<const T*>(ptr)->~T();
+			static_cast<const T*>(ptr)->~T();
 	}
 
 	void Assign(void* ptr, const void* other) const
 	{
-		*(reinterpret_cast<T*>(ptr)) = *(reinterpret_cast<const T*>(other));
+		*(static_cast<T*>(ptr)) = *(static_cast<const T*>(other));
 	}
 
 	bool Compare(const void* a, const void* b) const
 	{
-		return *(reinterpret_cast<const T*>(a)) == *(reinterpret_cast<const T*>(b));
+		return *(static_cast<const T*>(a)) == *(static_cast<const T*>(b));
+	}
+
+	void FmtPrint(format::Context& ctx, const void* ptr, format::Placeholder& placeholder) const
+	{
+		using namespace format;
+		fmtPrint(ctx, *static_cast<const T*>(ptr), placeholder);
 	}
 };
 

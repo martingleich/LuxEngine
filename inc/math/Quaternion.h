@@ -591,22 +591,21 @@ bool IsZero(const Quaternion<T>& v, const T tolerance = math::Constants<T>::roun
 }
 
 template <typename T>
-void conv_data(format::Context& ctx, const Quaternion<T>& v, format::Placeholder& placeholder)
+void fmtPrint(format::Context& ctx, const Quaternion<T>& v, format::Placeholder& placeholder)
 {
 	using namespace format;
 	placeholder.type = 'a';
 	placeholder.hash.Disable();
 
-	ConvertAddString(ctx, format::StringType::Ascii, "[x=", 3);
-	conv_data(ctx, v.x, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " y=", 3);
-	conv_data(ctx, v.y, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " z=", 3);
-	conv_data(ctx, v.z, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " w=", 3);
-	conv_data(ctx, v.w, placeholder);
-
-	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
+	ctx.AddTerminatedSlice("[x=");
+	fmtPrint(ctx, v.x, placeholder);
+	ctx.AddTerminatedSlice(" y=");
+	fmtPrint(ctx, v.y, placeholder);
+	ctx.AddTerminatedSlice(" z=");
+	fmtPrint(ctx, v.z, placeholder);
+	ctx.AddTerminatedSlice(" w=");
+	fmtPrint(ctx, v.w, placeholder);
+	ctx.AddTerminatedSlice("]");
 }
 
 } // !namespace math

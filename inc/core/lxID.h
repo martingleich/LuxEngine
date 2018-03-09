@@ -1,6 +1,7 @@
 #ifndef INCLUDED_LX_ID_H
 #define INCLUDED_LX_ID_H
 #include "core/LuxBase.h"
+#include "core/lxFormat.h"
 #include "core/ReferenceCounted.h"
 
 namespace lux
@@ -39,6 +40,11 @@ public:
 private:
 	u32 m_Value;
 };
+
+inline void fmtPrint(format::Context& ctx, ID id, format::Placeholder& placeholder)
+{
+	format::fmtPrint(ctx, id.GetValue(), placeholder);
+}
 
 class IDManager : public ReferenceCounted
 {

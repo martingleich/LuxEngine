@@ -820,6 +820,19 @@ private:
 
 LUX_API const char* MakeArrayTypeName(Type baseType);
 
+template <typename T>
+void fmtPrint(format::Context& ctx, const core::Array<T>& array, format::Placeholder& placeholder)
+{
+	using namespace format;
+	ctx.AddTerminatedSlice("[");
+	for(size_t i = 0; i < array.Size(); ++i) {
+		fmtPrint(ctx, array[i], placeholder);
+		if(i < array.Size() - 1)
+			ctx.AddTerminatedSlice(", ");
+	}
+	ctx.AddTerminatedSlice("]");
+}
+
 class AbstractArrayTypeInfo
 {
 public:

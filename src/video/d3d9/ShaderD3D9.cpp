@@ -717,10 +717,10 @@ core::Type ShaderD3D9::GetCoreType(EType type)
 	case EType::Texture: return core::Types::Texture();
 	case EType::Color: return core::Types::Color();
 	case EType::ColorF: return core::Types::ColorF();
-	case EType::Vector2: return core::Types::Vector2f();
-	case EType::Vector3: return core::Types::Vector3f();
-	case EType::Vector2Int: return core::Types::Vector2i();
-	case EType::Vector3Int: return core::Types::Vector3i();
+	case EType::Vector2: return core::Types::Vector2F();
+	case EType::Vector3: return core::Types::Vector3F();
+	case EType::Vector2Int: return core::Types::Vector2I();
+	case EType::Vector3Int: return core::Types::Vector3I();
 	case EType::Matrix: return core::Types::Matrix();
 	case EType::Matrix_ColMajor: return core::Types::Matrix();
 	case EType::Structure: return core::Types::Unknown();

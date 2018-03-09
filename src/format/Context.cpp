@@ -2,34 +2,46 @@
 #include "format/Sink.h"
 #include <limits>
 
+#include <iostream>
+
 namespace format
 {
-Context::Context() :
-	stringType(Ascii),
-	fstrType(Ascii),
-	dstSink(nullptr),
-	fstrPos(0),
+Context::Context(
+	const Locale* locale,
+	size_t startCollumn,
+	size_t startLine) :
 	fstrLastArgPos(0),
 	argId(0),
-	fstr(nullptr),
+	m_FmtString(nullptr),
 	m_FirstSlice(nullptr),
 	m_LastSlice(nullptr),
-	m_ForceSlice(true),
-	m_Line(0),
-	m_Collumn(0),
+	m_CursorSlice(nullptr),
+	m_Line(startLine),
+	m_Collumn(startCollumn),
 	m_CharacterCount(0),
-	m_SinkCollumn(std::numeric_limits<size_t>::max()),
-	m_Locale(nullptr)
+	m_Counting(0),
+	m_Size(0),
+	m_Locale(locale),
+	m_ForceSlice(true)
 {
+	if(!m_Locale)
+		m_Locale = format::GetLocale();
 }
 
-Slice* Context::AddSlice(size_t size, const char* data, bool forceCopy, const Cursor* curDiff)
+void Context::AddSlice(size_t size, const char* data, bool forceCopy)
 {
+	if(size == 0)
+		return;
+
 	Slice* out;
 	if(!m_ForceSlice && !forceCopy && m_LastSlice && m_LastSlice->data + m_LastSlice->size == data) {
+		// Is the new slice just more data at the end of the new slice
 		out = m_LastSlice;
 		out->size += size;
 	} else if(!m_ForceSlice && m_LastSlice && (size < sizeof(Slice) || forceCopy) && m_Memory.TryExpand(m_LastSlice->data, size)) {
+		// If copying the data of the slice is less memory than a new slice or we must copy the data.
+		// And we can expand the last slice.
+		// We expand the last slice and copy the new data at it's end.
 		memcpy(const_cast<char*>(m_LastSlice->data) + m_LastSlice->size, data, size);
 		m_LastSlice->size += size;
 		out = m_LastSlice;
@@ -47,42 +59,29 @@ Slice* Context::AddSlice(size_t size, const char* data, bool forceCopy, const Cu
 
 	m_ForceSlice = false;
 
-	if(!curDiff) {
-		const char* cur = data;
-		while(size) {
-			uint32_t c = AdvanceCursor(stringType, cur);
-			--size;
-
-			if(c == '\n') {
-				m_Collumn = 0;
-				m_Line++;
-			} else {
-				m_Collumn++;
-			}
-			++m_CharacterCount;
+	// Update cursor.
+	if(m_Counting) {
+		const char* ptr = data;
+		const char* end = ptr + size;
+		while(ptr <= end) {
+			AdvanceCursor(ptr);
+			m_CharacterCount++;
 		}
-	} else {
-		if(curDiff->line) {
-			m_Collumn = curDiff->collumn;
-			m_Line = curDiff->line;
-		} else {
-			m_Collumn += curDiff->collumn;
-		}
-		m_CharacterCount += curDiff->count;
 	}
 
-	return out;
+	m_Size += size;
 }
 
-Context::SubContext Context::SaveSubContext() const
+Context::SubContext Context::SaveSubContext(const char* fmtString)
 {
 	SubContext out;
 	out.fstrLastArgPos = fstrLastArgPos;
-	out.fstrPos = fstrPos;
-	out.stringType = stringType;
-	out.fstrType = fstrType;
-	out.fstr = fstr;
+	out.fstr = m_FmtString;
 	out.argId = argId;
+
+	m_FmtString = fmtString;
+	fstrLastArgPos = 0;
+	argId = 0;
 
 	return out;
 }
@@ -90,11 +89,20 @@ Context::SubContext Context::SaveSubContext() const
 void Context::RestoreSubContext(const SubContext& ctx)
 {
 	fstrLastArgPos = ctx.fstrLastArgPos;
-	fstrPos = ctx.fstrPos;
-	stringType = ctx.stringType;
-	fstrType = ctx.fstrType;
-	fstr = ctx.fstr;
+	m_FmtString = ctx.fstr;
 	argId = ctx.argId;
+}
+
+size_t Context::GetLine() const
+{
+	EnsureCursor();
+	return m_Line;
+}
+
+size_t Context::GetCollumn() const
+{
+	EnsureCursor();
+	return m_Line;
 }
 
 Slice* Context::InsertSlice(Slice* prev, Slice sl)
@@ -116,6 +124,8 @@ Slice* Context::InsertSlice(Slice* prev, Slice sl)
 		}
 	}
 
+	m_Size = sl.size;
+
 	return s;
 }
 
@@ -132,14 +142,26 @@ Slice* Context::AddSlice()
 	return m_LastSlice;
 }
 
-size_t Context::GetCollumn() const
+void Context::EnsureCursor() const
 {
-	if(m_Line == 0) {
-		if(m_SinkCollumn == std::numeric_limits<size_t>::max())
-			m_SinkCollumn = dstSink ? dstSink->GetCollumn() : 0;
-		return m_SinkCollumn + m_Collumn;
-	} else {
-		return m_Collumn;
+	if(m_CursorSlice == m_LastSlice && m_CursorPos == m_LastSlice->size)
+		return;
+
+	while(true) {
+		const char* cur = m_CursorSlice->data + m_CursorPos;
+		for(size_t i = m_CursorPos; i < m_CursorSlice->size; ++i) {
+			uint32_t c = AdvanceCursor(cur);
+			if(c == '\n') {
+				m_Collumn = 0;
+				++m_Line;
+			} else {
+				++m_Collumn;
+			}
+		}
+		if(!m_CursorSlice->next)
+			break;
+		m_CursorSlice = m_CursorSlice->next;
+		m_CursorPos = 0;
 	}
 }
 

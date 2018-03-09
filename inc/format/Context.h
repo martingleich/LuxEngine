@@ -1,22 +1,62 @@
 #ifndef INCLUDED_FORMAT_CONTEXT_H
 #define INCLUDED_FORMAT_CONTEXT_H
 #include "format/FormatConfig.h"
-#include "format/Slice.h"
 #include "format/FormatMemory.h"
-#include "format/StringType.h"
 #include "format/StringBasics.h"
-#include <limits.h>
+#include "format/FormatLocale.h"
+#include <string>
 
 namespace format
 {
 class Sink;
-class Locale;
 
 struct Cursor
 {
-	size_t count;
 	size_t line;
 	size_t collumn;
+};
+
+//! A string in the format system.
+/**
+slices are the fundamental element of the format system.
+Slices just contain normal stringdata, and a pointer to the next slice in the output
+All the connected slices of a series create a full output string.
+*/
+struct Slice
+{
+	friend class Context;
+
+	size_t size;  //!< Number of bytes in the string
+	const char* data; //!< Data of the string, is not null-termainted
+
+	Slice() :
+		size(0),
+		data(nullptr),
+		next(nullptr)
+	{
+	}
+
+	Slice(size_t len, const char* d) :
+		size(len),
+		data(d),
+		next(nullptr)
+	{
+	}
+
+	//! Get the next string in the list
+	Slice* GetNext()
+	{
+		return next;
+	}
+
+	//! Get the next string in the list
+	const Slice* GetNext() const
+	{
+		return next;
+	}
+
+private:
+	Slice* next;
 };
 
 class Context
@@ -24,34 +64,48 @@ class Context
 public:
 	struct SubContext
 	{
-		StringType stringType;
-		StringType fstrType;
-		size_t fstrPos;
 		size_t fstrLastArgPos;
 		size_t argId;
 		const char* fstr;
 	};
 
-public:
-	StringType stringType;
-	StringType fstrType;
-
-	Sink* dstSink;
-
-	size_t fstrPos;
-	size_t fstrLastArgPos;
-	size_t argId;
-	const char* fstr;
-
-public:
-	FORMAT_API Context();
-
-	FORMAT_API Slice* AddSlice(size_t size, const char* data, bool forceCopy = false, const Cursor* curDiff = nullptr);
-	FORMAT_API Slice* InsertSlice(Slice* prev, Slice sl);
-
-	void SetLocale(const Locale* loc)
+	struct AutoRestoreSubContext : public SubContext
 	{
-		m_Locale = loc;
+		Context& _ctx;
+		AutoRestoreSubContext(Context& ctx, const char* fmtString) :
+			_ctx(ctx)
+		{
+			*(SubContext*)this = ctx.SaveSubContext(fmtString);
+		}
+		~AutoRestoreSubContext()
+		{
+			_ctx.RestoreSubContext(*this);
+		}
+	};
+
+public:
+	// Parsing information, for error reporting
+	size_t fstrLastArgPos; // Position of the last parsed argument
+	size_t argId; // Index of the current arguments
+
+public:
+	FORMAT_API Context(
+		const Locale* locale = nullptr,
+		size_t startCollum = 0,
+		size_t startLine = 0);
+
+	FORMAT_API void AddSlice(size_t size, const char* data, bool forceCopy = false);
+	void AddSlice(Slice s, bool forceCopy = false)
+	{
+		AddSlice(s.size, s.data, forceCopy);
+	}
+	void AddSlice(const std::string& str, bool forceCopy = false)
+	{
+		AddSlice(str.size(), str.data(), forceCopy);
+	}
+	void AddTerminatedSlice(const char* data, bool forceCopy = false)
+	{
+		AddSlice(strlen(data), data, forceCopy);
 	}
 
 	const Locale* GetLocale() const
@@ -59,46 +113,32 @@ public:
 		return m_Locale;
 	}
 
-	void SetDstStringType(StringType type)
+	size_t GetSize() const
 	{
-		stringType = type;
+		return m_Size;
 	}
+	FORMAT_API size_t GetLine() const;
+	FORMAT_API size_t GetCollumn() const;
 
-	void SetFmtStringType(StringType type)
+	size_t StartCounting()
 	{
-		fstrType = type;
-	}
-
-	size_t GetLine() const
-	{
-		return m_Line;
-	}
-
-	size_t GetCharacterCount() const
-	{
+		++m_Counting;
 		return m_CharacterCount;
 	}
-
-	FORMAT_API size_t GetCollumn() const;
+	size_t StopCounting()
+	{
+		--m_Counting;
+		return m_CharacterCount;
+	}
 
 	char* AllocByte(size_t len)
 	{
 		return (char*)m_Memory.Alloc(len);
 	}
 
-	char* ReallocByte(char* ptr, size_t newlen)
+	const char* GetFormatString() const
 	{
-		return (char*)m_Memory.Realloc(ptr, newlen);
-	}
-
-	void UnallocByte(char* ptr)
-	{
-		m_Memory.Unalloc(ptr, m_Memory.lastAllocSize);
-	}
-
-	Slice* AddSlice(Slice s)
-	{
-		return AddSlice(s.size, s.data);
+		return m_FmtString;
 	}
 
 	const Slice* GetFirstSlice() const
@@ -111,7 +151,7 @@ public:
 		return m_LastSlice;
 	}
 
-	Slice* GetLastSlice()
+	Slice* LockLastSlice()
 	{
 		m_ForceSlice = true;
 		return m_LastSlice;
@@ -123,28 +163,38 @@ public:
 		m_SliceMemory.Clear();
 	}
 
-	FORMAT_API SubContext SaveSubContext() const;
+	FORMAT_API SubContext SaveSubContext(const char* newFmtString);
 	FORMAT_API void RestoreSubContext(const SubContext& ctx);
+
+	FORMAT_API Slice* InsertSlice(Slice* prev, Slice sl);
 
 private:
 	Slice* AddSlice();
+	void EnsureCursor() const;
 
 private:
+	const char* m_FmtString;
+
 	// Memory information
 	Slice* m_FirstSlice;
 	Slice* m_LastSlice;
-	bool m_ForceSlice;
+
 	internal::FormatMemory m_Memory;
 	internal::FormatMemory m_SliceMemory;
 
 	// Output information
-	size_t m_Line;
-	size_t m_Collumn;
+	mutable size_t m_Line;
+	mutable size_t m_Collumn;
 	size_t m_CharacterCount;
+	int m_Counting;
+	size_t m_Size;
 
-	mutable size_t m_SinkCollumn; // Cache for collumn returned by sink.
+	mutable Slice* m_CursorSlice;
+	mutable size_t m_CursorPos;
 
 	const Locale* m_Locale;
+
+	bool m_ForceSlice;
 };
 
 }

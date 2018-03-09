@@ -1,6 +1,7 @@
 #ifndef INCLUDED_FORMAT_SINK_MSGBOX_H
 #define INCLUDED_FORMAT_SINK_MSGBOX_H
 #include "../Sink.h"
+#include <string>
 #ifdef FORMAT_WINDOWS
 
 namespace format
@@ -55,13 +56,7 @@ Currently only available for Windows
 class MsgBox_sink : public Sink
 {
 public:
-	MsgBox_sink(EIcon icon = EIcon::None, const char* Utf8Caption = nullptr, EButtons button = EButtons::Ok) :
-		m_Icon(icon),
-		m_Caption(Utf8Caption),
-		m_Buttons(button),
-		m_PressedButton(EButton::Invalid)
-	{
-	}
+	FORMAT_API MsgBox_sink(EIcon icon = EIcon::None, const std::string& caption = "", EButtons button = EButtons::Ok);
 	FORMAT_API size_t Write(Context& ctx, const Slice* firstSlice, int flags);
 
 	//! Get the pressed button of the message, only available after showing it to the user
@@ -69,15 +64,15 @@ public:
 	
 private:
 	EIcon m_Icon;
-	const char* m_Caption;
+	std::vector<uint16_t> m_Caption;
 	EButtons m_Buttons;
 	EButton m_PressedButton;
 };
 
 //! Helper function to create a message box
-inline MsgBox_sink MsgBox(EIcon icon = EIcon::None, const char* Utf8Caption = nullptr, EButtons button = EButtons::Ok)
+inline MsgBox_sink MsgBox(EIcon icon = EIcon::None, const std::string& utf8Caption = "", EButtons button = EButtons::Ok)
 {
-	return MsgBox_sink(icon, Utf8Caption, button);
+	return MsgBox_sink(icon, utf8Caption, button);
 }
 
 /** @}*/

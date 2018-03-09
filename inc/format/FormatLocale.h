@@ -2,6 +2,7 @@
 #define INCLUDED_FORMAT_FORMAT_LOCALE_H
 #include "format/FormatConfig.h"
 #include "format/Exception.h"
+#include <string>
 
 namespace format
 {
@@ -32,7 +33,7 @@ extern FORMAT_API FacetType BooleanFormat; //!< The marker of the boolean facet
 /**
 For example how to write number or booleans or dates and so on.
 A concrete facets describes how this is handled for some concrete language.
-Each type of facet(number, boolean, etc.) is assosiated with a single facet type
+Each type of facet(number, boolean, etc.) is associated with a single facet type
 */
 class Facet
 {
@@ -115,12 +116,12 @@ public:
 	}
 
 public:
-	const char* Seperator; //! Seperator of thousands
-	const char* Comma; //! Character used seperate pre-comma and after-comma value
-	const char* Plus; //! Mark position values
-	const char* Minus; //! Mark negative values
-	const char* NaN; //! Name of the not-a-number value
-	const char* Inf; //! Name of the infinite value
+	std::string Seperator; //! Seperator of thousands
+	std::string Comma; //! Character used seperate pre-comma and after-comma value
+	std::string Plus; //! Mark position values
+	std::string Minus; //! Mark negative values
+	std::string NaN; //! Name of the not-a-number value
+	std::string Inf; //! Name of the infinite value
 	int DefaultDigitCount; //! Number of after-comma digit, if nothing is specified
 };
 
@@ -154,8 +155,8 @@ public:
 	}
 
 public:
-	const char* True; //!< Null-terminated utf8-string to represent <true>
-	const char* False; //!< Null-terminated utf8-string to represent <false>
+	std::string True; //!< Null-terminated utf8-string to represent <true>
+	std::string False; //!< Null-terminated utf8-string to represent <false>
 };
 
 extern FORMAT_API Facet_BooleanFormat BooleanFormat_English; //!< Boolean format for english language

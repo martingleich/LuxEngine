@@ -30,8 +30,7 @@ struct SafeCString
 class cstring_sink : public Sink
 {
 public:
-	cstring_sink(SafeCString s, size_t collumn = 0) :
-		Sink(collumn),
+	cstring_sink(SafeCString s) :
 		m_Str(s)
 	{
 	}

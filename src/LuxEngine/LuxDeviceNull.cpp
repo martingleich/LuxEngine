@@ -110,11 +110,6 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 	video::VideoDriver::Initialize(driver);
 
 	video::MaterialLibrary::Initialize();
-	/*
-	auto invalidMaterial = video::MaterialLibrary::Instance()->CreateMaterial("debugOverlay");
-	invalidMaterial->SetDiffuse(video::Color(255, 0, 255));
-	driver->GetRenderer()->SetInvalidMaterial(invalidMaterial);
-	*/
 
 	BuildImageSystem();
 

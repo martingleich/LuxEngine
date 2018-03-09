@@ -88,13 +88,13 @@ inline core::String GetWin32ErrorString(DWORD error)
 	return out;
 }
 
-inline void conv_data(format::Context& ctx, const LogWin32Error& v, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, const LogWin32Error& v, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
 
 	using namespace format;
 	lux::core::String str = GetWin32ErrorString(v.error);
-	format::CopyConvertAddString(ctx, format::StringType::Unicode, str.Data_c(), str.Size());
+	ctx.AddSlice(str.Size(), str.Data());
 }
 
 }

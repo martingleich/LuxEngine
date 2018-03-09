@@ -35,62 +35,37 @@ void RetractCursorUTF8(const char*& ptr)
 
 u32 AdvanceCursorUTF8(const char*& ptr)
 {
-	u8 u0 = ptr[0];
-	if((u0 & 0x80) == 0) { // 0xxxxxxx 
-		ptr += 1;
-		return (u32)u0;
-	}
-	u8 u1 = ptr[1];
-	if((u0 & 0xE0) == 0xC0) { // 110xxxxx 10xxxxxx
-		ptr += 2;
+	uint8_t u0 = *ptr++;
+	if((u0 & 0x80) == 0) // 0xxxxxxx 
+		return (uint32_t)u0;
+	uint8_t u1 = *ptr++;
+	if((u0 & 0xE0) == 0xC0) // 110xxxxx 10xxxxxx
 		return (u0&~0xE0) << 6 | (u1&~0xC0);
-	}
-	u8 u2 = ptr[2];
-	if((u0 & 0xF0) == 0xE0) { // 1110xxxx 10xxxxxx 10xxxxxx
-		ptr += 3;
+	uint8_t u2 = *ptr++;
+	if((u0 & 0xF0) == 0xE0) // 1110xxxx 10xxxxxx 10xxxxxx
 		return (u0&~0xF0) << 12 | (u1&~0xC0) << 6 | (u2&~0xC0) << 0;
-	}
-	u8 u3 = ptr[3];
-	if((u0 & 0xF8) == 0xF0) { // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		ptr += 4;
-		return (u0&~0xF8) << 18 | (u1&~0xC0) << 12 | (u2&~0xC0) << 6 | (u3 &~0xC) << 0;
-	}
-	u8 u4 = ptr[4];
-	if((u0 & 0xFD) == 0xF8) { // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		ptr += 5;
-		return (u0&~0xFD) << 24 | (u1&~0xC0) << 18 | (u2&~0xC0) << 12 | (u3 &~0xC) << 6 | (u4 &~0xC) << 0;
-	}
-	u8 u5 = ptr[4];
-	if((u0 & 0xFE) == 0xFD) { // 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		ptr += 6;
-		return (u0&~0xFE) << 30 | (u1&~0xC0) << 24 | (u2&~0xC0) << 18 | (u3 &~0xC) << 12 | (u4 &~0xC) << 6 | (u5 &~0xC) << 0;
-	}
+	uint8_t u3 = *ptr++;
+	if((u0 & 0xF8) == 0xF0) // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+		return (u0&~0xF8) << 18 | (u1&~0xC0) << 12 | (u2&~0xC0) << 6 | (u3 &~0xC0) << 0;
 
-	throw UnicodeException("Invalid utf8 codepoint");
+	lxAssertNeverReach("Invalid utf8-codepoint");
 }
 
 u32 GetCharacterUTF8(const char* ptr)
 {
-	u8 u0 = ptr[0];
-	if((u0 & 0x80) == 0) // 0xxxxxxx
-		return (u32)u0;
-	u8 u1 = ptr[1];
+	uint8_t u0 = *ptr++;
+	if((u0 & 0x80) == 0) // 0xxxxxxx 
+		return (uint32_t)u0;
+	uint8_t u1 = *ptr++;
 	if((u0 & 0xE0) == 0xC0) // 110xxxxx 10xxxxxx
 		return (u0&~0xE0) << 6 | (u1&~0xC0);
-	u8 u2 = ptr[2];
+	uint8_t u2 = *ptr++;
 	if((u0 & 0xF0) == 0xE0) // 1110xxxx 10xxxxxx 10xxxxxx
 		return (u0&~0xF0) << 12 | (u1&~0xC0) << 6 | (u2&~0xC0) << 0;
-	u8 u3 = ptr[3];
-	if((u0 & 0xF8) == 0xF0) // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		return (u0&~0xF8) << 18 | (u1&~0xC0) << 12 | (u2&~0xC0) << 6 | (u3 &~0xC) << 0;
-	u8 u4 = ptr[4];
-	if((u0 & 0xFD) == 0xF8) // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		return (u0&~0xFD) << 24 | (u1&~0xC0) << 18 | (u2&~0xC0) << 12 | (u3 &~0xC) << 6 | (u4 &~0xC) << 0;
-	u8 u5 = ptr[4];
-	if((u0 & 0xFE) == 0xFD) // 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		return (u0&~0xFE) << 30 | (u1&~0xC0) << 24 | (u2&~0xC0) << 18 | (u3 &~0xC) << 12 | (u4 &~0xC) << 6 | (u5 &~0xC) << 0;
-
-	throw UnicodeException("Invalid utf8 codepoint");
+	uint8_t u3 = *ptr++;
+	if((u0 & 0xF8) == 0xF0) // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+		return (u0&~0xF8) << 18 | (u1&~0xC0) << 12 | (u2&~0xC0) << 6 | (u3 &~0xC0) << 0;
+	lxAssertNeverReach("Invalid utf8-codepoint");
 }
 
 size_t StringLengthUTF16(const char* str, size_t* outBytes)

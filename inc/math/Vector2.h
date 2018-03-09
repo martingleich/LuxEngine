@@ -381,7 +381,7 @@ bool IsZero(const Vector2<T>& v, T tolerance = math::Constants<T>::rounding_erro
 }
 
 template <typename T>
-void conv_data(format::Context& ctx, const Vector2<T>& v, format::Placeholder& placeholder)
+void fmtPrint(format::Context& ctx, const Vector2<T>& v, format::Placeholder& placeholder)
 {
 	using namespace format;
 
@@ -389,16 +389,16 @@ void conv_data(format::Context& ctx, const Vector2<T>& v, format::Placeholder& p
 	bool printLength = placeholder.hash.IsEnabled();
 	placeholder.hash.Disable();
 
-	ConvertAddString(ctx, format::StringType::Ascii, "[x=", 3);
-	conv_data(ctx, v.x, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " y=", 3);
-	conv_data(ctx, v.y, placeholder);
+	ctx.AddTerminatedSlice("[x=");
+	fmtPrint(ctx, v.x, placeholder);
+	ctx.AddTerminatedSlice(" y=");
+	fmtPrint(ctx, v.y, placeholder);
 	if(printLength) {
-		ConvertAddString(ctx, format::StringType::Ascii, " len=", 5);
-		conv_data(ctx, v.GetLength(), placeholder);
+		ctx.AddTerminatedSlice(" len=");
+		fmtPrint(ctx, v.GetLength(), placeholder);
 	}
 
-	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
+	ctx.AddTerminatedSlice("]");
 }
 
 

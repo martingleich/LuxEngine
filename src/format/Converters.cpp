@@ -3,34 +3,27 @@
 #include "format/ConvInternal.h"
 #include "format/UnicodeConversion.h"
 
+#include <iostream>
 namespace format
 {
 
-static void write_integer(Context& ctx, int base, bool sign, uintmax_t value, Placeholder& placeholder);
-static void conv_data_integer(Context& ctx, bool sign, uintmax_t value, Placeholder& placeholder);
-
-void conv_data(Context& ctx, const char* data, Placeholder& placeholder)
+void fmtPrint(Context& ctx, const char* data, Placeholder& placeholder)
 {
 	if(placeholder.type == 'a' || placeholder.type == 's') {
-		if(data) {
-			size_t len = StringLengthFixed<uint8_t>(data);
-			ConvertAddString(ctx, StringType::FORMAT_STRING_TYPE, data, len);
-		} else {
-			throw value_exception("Can only print non-null string pointers.", ctx.fstrLastArgPos, ctx.argId);
-		}
+		if(data)
+			ctx.AddTerminatedSlice(data, true);
 	} else {
 		throw invalid_placeholder_type("Invalid placeholder for char string pointer type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
 	}
 }
 
-void write_integer(Context& ctx, int base, bool sign, uintmax_t value, Placeholder& placeholder)
+template <typename T>
+void write_integer(Context& ctx, int base, bool sign, T value, Placeholder& placeholder)
 {
 	auto& facet = ctx.GetLocale()->GetNumericalFacet();
 
-	if(sign || placeholder.plus) {
-		const char* str = sign ? facet.Minus : facet.Plus;
-		ConvertAddString(ctx, StringType::Unicode, str, strlen(str));
-	}
+	if(sign || placeholder.plus)
+		ctx.AddSlice(sign ? facet.Minus : facet.Plus);
 
 	char buffer[64];
 	char* cur = buffer;
@@ -45,22 +38,21 @@ void write_integer(Context& ctx, int base, bool sign, uintmax_t value, Placehold
 		}
 	}
 
-	CopyConvertAddString(ctx, StringType::Ascii, buffer, cur-buffer);
+	ctx.AddSlice(cur - buffer, buffer, true);
 	cur = buffer;
-	size_t numLen = internal::uitoa(value, cur, base);
+	size_t numLen = uitoa(value, cur, base);
 
 	int precision = placeholder.dot.GetValue(0);
 	if(precision < 0)
-		throw syntax_exception("precision must be bigger than 0.", ctx.fstrPos);
-	if(numLen < (size_t)precision) {
-		static const char ZEROS[32 + 1] = "00000000000000000000000000000000";
-		internal::PutCount(ctx, precision - numLen, StringType::Ascii, ZEROS, 32);
-	}
+		throw syntax_exception("precision must be bigger than 0.", ctx.argId);
+	if(numLen < (size_t)precision)
+		PutZeros(ctx, precision - numLen);
 
-	CopyConvertAddString(ctx, StringType::Ascii, buffer, numLen);
+	ctx.AddSlice(numLen, buffer, true);
 }
 
-void conv_data_integer(Context& ctx, bool sign, uintmax_t value, Placeholder& placeholder)
+template <typename T>
+void conv_data_integer(Context& ctx, bool sign, T value, Placeholder& placeholder)
 {
 	if(placeholder.type == 'a' || placeholder.type == 'd') {
 		if(placeholder.at.IsDefault())
@@ -77,12 +69,12 @@ void conv_data_integer(Context& ctx, bool sign, uintmax_t value, Placeholder& pl
 		if(sign)
 			throw value_exception("C placeholder can only print positive codepoints.", ctx.fstrLastArgPos);
 		if(placeholder.hash.IsEnabled()) {
-			internal::AddCharLong(ctx, (uint32_t)value);
+			AddCharLong(ctx, (uint32_t)value);
 		} else {
 			if(value != 0) {
 				uint8_t utf8[6];
 				int count = CodePointToUtf8((uint32_t)value, utf8);
-				CopyConvertAddString(ctx, StringType::Unicode, (const char*)utf8, count);
+				ctx.AddSlice(count, (const char*)utf8, true);
 			}
 		}
 	} else {
@@ -90,17 +82,54 @@ void conv_data_integer(Context& ctx, bool sign, uintmax_t value, Placeholder& pl
 	}
 }
 
-void conv_data(Context& ctx, intmax_t data, Placeholder& placeholder)
+void fmtPrint(Context& ctx, char data, Placeholder& placeholder)
 {
-	conv_data_integer(ctx, data < 0, abs(data), placeholder);
+	conv_data_integer<int>(ctx, data < 0, abs(data), placeholder);
 }
 
-void conv_data(Context& ctx, uintmax_t data, Placeholder& placeholder)
+void fmtPrint(Context& ctx, signed char data, Placeholder& placeholder)
 {
-	conv_data_integer(ctx, false, data, placeholder);
+	conv_data_integer<unsigned int>(ctx, data < 0, abs(data), placeholder);
+}
+void fmtPrint(Context& ctx, signed short data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned int>(ctx, data < 0, abs(data), placeholder);
+}
+void fmtPrint(Context& ctx, signed int data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned int>(ctx, data < 0, abs(data), placeholder);
+}
+void fmtPrint(Context& ctx, signed long data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned long>(ctx, data < 0, abs(data), placeholder);
+}
+void fmtPrint(Context& ctx, signed long long data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned long long>(ctx, data < 0, abs(data), placeholder);
 }
 
-void conv_data(Context& ctx, const void* data, Placeholder& placeholder)
+void fmtPrint(Context& ctx, unsigned char data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned int>(ctx, false, data, placeholder);
+}
+void fmtPrint(Context& ctx, unsigned short data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned int>(ctx, false, data, placeholder);
+}
+void fmtPrint(Context& ctx, unsigned int data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned int>(ctx, false, data, placeholder);
+}
+void fmtPrint(Context& ctx, unsigned long data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned long>(ctx, false, data, placeholder);
+}
+void fmtPrint(Context& ctx, unsigned long long data, Placeholder& placeholder)
+{
+	conv_data_integer<unsigned long long>(ctx, false, data, placeholder);
+}
+
+void fmtPrint(Context& ctx, const void* data, Placeholder& placeholder)
 {
 	if(placeholder.type == 'a' || placeholder.type == 'p')
 		write_integer(ctx, 16, false, (uintptr_t)data, placeholder);
@@ -108,7 +137,7 @@ void conv_data(Context& ctx, const void* data, Placeholder& placeholder)
 		throw invalid_placeholder_type("Invalid placeholder for pointer type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
 }
 
-void conv_data(Context& ctx, double data, Placeholder& placeholder)
+void fmtPrint(Context& ctx, double data, Placeholder& placeholder)
 {
 	if(placeholder.dot.IsDefault())
 		throw syntax_exception("Dot option is missing value.");
@@ -124,50 +153,49 @@ void conv_data(Context& ctx, double data, Placeholder& placeholder)
 
 	if(placeholder.type == 'a' || placeholder.type == 'f') {
 		bool sign = (data < 0);
-		if(sign || placeholder.plus) {
-			const char* str = sign ? facet.Minus : facet.Plus;
-			ConvertAddString(ctx, StringType::Unicode, str, strlen(str));
-		}
+		if(sign || placeholder.plus)
+			ctx.AddSlice(sign ? facet.Minus : facet.Plus);
 
-		internal::ftoa(ctx, sign ? -data : data, digits, forcePrecision, facet);
+		ftoa(ctx, sign ? -data : data, digits, forcePrecision, facet);
 	} else if(placeholder.type == 'x') {
 		if(placeholder.hash)
-			ConvertAddString(ctx, StringType::Unicode, "0x", 2);
+			ctx.AddSlice("0x");
 
 		bool sign = (data < 0);
-		if(sign || placeholder.plus) {
-			const char* str = sign ? facet.Minus : facet.Plus;
-			ConvertAddString(ctx, StringType::Unicode, str, strlen(str));
-		}
-		internal::hftoa(ctx, sign ? -data : data, facet);
+		if(sign || placeholder.plus)
+			ctx.AddSlice(sign ? facet.Minus : facet.Plus);
+		hftoa(ctx, sign ? -data : data, facet);
 	} else {
 		throw invalid_placeholder_type("Invalid placeholder for floating-point type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
 	}
 }
 
-void conv_data(Context& ctx, bool data, Placeholder& placeholder)
+void fmtPrint(Context& ctx, float data, Placeholder& placeholder)
 {
-	const char* buffer;
-	size_t len;
+	fmtPrint(ctx, (double)data, placeholder);
+}
+void fmtPrint(Context& ctx, long double data, Placeholder& placeholder)
+{
+	fmtPrint(ctx, (double)data, placeholder);
+}
+
+void fmtPrint(Context& ctx, bool data, Placeholder& placeholder)
+{
 	if(placeholder.type == 'a') {
 		auto& facet = ctx.GetLocale()->GetBooleanFacet();
-		buffer = data ? facet.True : facet.False;
-		len = strlen(buffer);
+		ctx.AddSlice(data ? facet.True : facet.False);
 	} else {
 		throw invalid_placeholder_type("Invalid placeholder for bool type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
 	}
-
-	ctx.AddSlice(ConvertString(ctx, StringType::Unicode, buffer, len));
 }
 
-void conv_data(Context& ctx, Cursor* ptr, Placeholder& placeholder)
+void fmtPrint(Context& ctx, Cursor* ptr, Placeholder& placeholder)
 {
 	if(!ptr)
 		throw value_exception("Cursor pointer must be non-null.", ctx.fstrLastArgPos, ctx.argId);
 
 	if(placeholder.type == 'n') {
 		ptr->line = ctx.GetLine();
-		ptr->count = ctx.GetCharacterCount();
 		ptr->collumn = ctx.GetCollumn() + 1;
 	} else {
 		throw invalid_placeholder_type("Invalid placeholder for cursor pointer type.", ctx.fstrLastArgPos, ctx.argId, placeholder.type);
@@ -181,14 +209,14 @@ size_t IntToString(intmax_t data, char* str, int base)
 		*str++ = '-';
 		data = -data;
 	}
-	size_t len = internal::uitoa(data, str, base) + sign;
+	size_t len = uitoa(data, str, base) + sign;
 	str[len] = 0;
 	return len;
 }
 
 size_t UIntToString(uintmax_t data, char* str, int base)
 {
-	size_t len = internal::uitoa(data, str, base);
+	size_t len = uitoa(data, str, base);
 	str[len] = 0;
 	return len;
 }
@@ -200,7 +228,7 @@ size_t FloatToString(double data, char* str, int precision)
 	if(precision > 10)
 		precision = 10;
 
-	size_t len = internal::ftoaSimple(data, precision, str);
+	size_t len = ftoaSimple(data, precision, str);
 	str[len] = 0;
 	return len;
 }

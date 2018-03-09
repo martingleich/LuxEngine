@@ -7,7 +7,6 @@ set(LuxEngine_VERSION_MINOR 1)
 
 option(FORMAT_EXCEPTIONS "Throw exceptions on invalid format" ON)
 option(FORMAT_ERROR_TEXT "Write error string if single placeholder fails" OFF)
-option(FORMAT_USE_ASCII "Compile with ascii instead of unicode" OFF)
 
 if(WIN32)
 	set(LuxEngine_OS_WINDOWS true)
@@ -21,12 +20,6 @@ elseif(UNIX AND NOT APPLE)
 	option(LUX_COMPILE_WITH_D3D9 "" OFF)
 	option(LUX_COMPILE_WITH_D3DX_IMAGE_LOADER "" OFF)
 	option(LUX_COMPILE_WITH_RAW_INPUT "" OFF)
-endif()
-
-if(FORMAT_USE_ASCII)
-	set(FormatStringType Ascii)
-else()
-	set(FormatStringType Unicode)
 endif()
 
 configure_file(

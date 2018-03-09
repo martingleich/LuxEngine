@@ -96,10 +96,10 @@ struct HashType<Name>
 	}
 };
 
-inline void conv_data(format::Context& ctx, Name name, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, Name name, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
-	format::ConvertAddString(ctx, format::StringType::Unicode, name.c_str(), name.Size());
+	ctx.AddSlice(name.Size(), name.c_str());
 }
 
 }

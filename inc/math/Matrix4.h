@@ -1,8 +1,9 @@
 #ifndef INCLUDED_MATRIX4_H
 #define INCLUDED_MATRIX4_H
 #include "math/Vector2.h"
-#include "Plane.h"
+#include "math/Plane.h"
 #include "math/Quaternion.h"
+#include "core/lxFormat.h"
 
 namespace lux
 {
@@ -478,6 +479,8 @@ inline bool IsEqual(const Matrix4& a, const Matrix4& b, float tolerance = math::
 
 	return true;
 }
+
+LUX_API void fmtPrint(format::Context& ctx, const Matrix4& m, format::Placeholder& placeholder);
 
 } // namespace math
 

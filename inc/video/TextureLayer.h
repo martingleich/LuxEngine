@@ -1,6 +1,7 @@
 #ifndef INCLUDED_SMATERIALLAYER_H
 #define INCLUDED_SMATERIALLAYER_H
 #include "core/lxTypes.h"
+#include "core/lxFormat.h"
 #include "video/BaseTexture.h"
 #include "video/VideoEnums.h"
 
@@ -65,6 +66,13 @@ public:
 	}
 };
 
+inline void fmtPrint(format::Context& ctx, const TextureLayer& layer, format::Placeholder& placeholder)
+{
+	ctx.AddTerminatedSlice("<texturelayer:");
+	format::fmtPrint(ctx, (const void*)&layer, placeholder);
+	ctx.AddTerminatedSlice(">");
+}
+
 } // namespace video
 
 namespace core
@@ -75,6 +83,7 @@ LUX_API Type Texture();
 }
 
 template<> struct TemplType<video::TextureLayer> { static Type Get() { return Types::Texture(); } };
+
 } // namespace core
 } // namespace lux
 

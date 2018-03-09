@@ -5,7 +5,7 @@
 
 namespace format
 {
-void conv_data(Context& ctx, const std::string& data, Placeholder& placeholder);
+void fmtPrint(Context& ctx, const std::string& data, Placeholder& placeholder);
 }
 
 #endif // #ifndef INCLUDED_FORMAT_CONVERTERS_STD_H

@@ -237,6 +237,12 @@ public:
 		return m_Size;
 	}
 
+	//! The number of bytes allocated for the string.
+	inline size_t Allocated() const
+	{
+		return m_Allocated - 1;
+	}
+
 	//! The number of codepoints contained in the string, without NUL.
 	inline size_t Length() const
 	{

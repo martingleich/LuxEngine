@@ -1,5 +1,5 @@
-#ifdef FORMAT_WINDOWS
 #include "format/sinks/SinkMsgBox.h"
+#ifdef FORMAT_WINDOWS
 #include "format/UnicodeConversion.h"
 #include <string>
 #include <codecvt>
@@ -9,7 +9,7 @@
 
 namespace format
 {
-static const char* GetDefaultTitle(EIcon icon)
+static std::string GetDefaultTitle(EIcon icon)
 {
 	switch(icon) {
 	case EIcon::Error:
@@ -98,45 +98,36 @@ static EButton GetButton(int i)
 	}
 }
 
+MsgBox_sink::MsgBox_sink(EIcon icon, const std::string& caption, EButtons button) :
+	m_Icon(icon),
+	m_Buttons(button),
+	m_PressedButton(EButton::Invalid)
+{
+	auto _caption = !caption.empty() ? caption : GetDefaultTitle(m_Icon);
+	Utf8ToUtf16(_caption.data(), _caption.size(), m_Caption);
+	m_Caption.push_back(0);
+}
+
 size_t MsgBox_sink::Write(Context& ctx, const Slice* firstSlice, int flags)
 {
 	(void)flags;
-	
-	size_t size = 1;
-	for(auto slice = firstSlice; slice; slice = slice->GetNext())
-		size += slice->size;
 
-	char* str = ctx.AllocByte(size);
-	char* c = str;
-
-	for(auto slice = firstSlice; slice; slice = slice->GetNext()) {
-		memcpy(c, slice->data, slice->size);
-		c += slice->size;
-	}
-
-	*c++ = 0;
-
-	const char* caption = m_Caption ? m_Caption : GetDefaultTitle(m_Icon);
-	UINT boxflags = GetFlags(m_Buttons, m_Icon);
-	int ret;
-
-	auto utf16Caption = Utf8ToUtf16(caption, strlen(caption)+1);
+	size_t size = ctx.GetSize();
 	std::vector<uint16_t> utf16Msg;
-	if(ctx.stringType == StringType::Ascii || ctx.stringType == StringType::Unicode)
-		utf16Msg = Utf8ToUtf16(str, size);
-	else if(ctx.stringType == StringType::CodePoint)
-		utf16Msg = CodePointsToUtf16((const uint32_t*)str, size / 4);
-	else
-		throw not_implemeted_exception("StringType not supported.");
+	utf16Msg.reserve(size + 1);
+	for(auto slice = firstSlice; slice; slice = slice->GetNext())
+		Utf8ToUtf16(slice->data, slice->size, utf16Msg);
+	utf16Msg.push_back(0);
 
-	ret = MessageBoxW(nullptr,
+	UINT boxflags = GetFlags(m_Buttons, m_Icon);
+	int ret = MessageBoxW(nullptr,
 		(LPCWSTR)utf16Msg.data(),
-		(LPCWSTR)utf16Caption.data(),
+		(LPCWSTR)m_Caption.data(),
 		boxflags);
 
 	m_PressedButton = GetButton(ret);
 
-	return size-1;
+	return size;
 }
 
 EButton MsgBox_sink::GetPressedButton() const

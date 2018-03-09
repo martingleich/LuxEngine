@@ -325,10 +325,10 @@ private:
 	EColorFormat m_Format;
 };
 
-inline void conv_data(format::Context& ctx, ColorFormat format, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, ColorFormat format, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
-	format::ConvertAddString(ctx, format::StringType::Ascii, format.AsString(), strlen(format.AsString()));
+	ctx.AddTerminatedSlice(format.AsString());
 }
 
 }

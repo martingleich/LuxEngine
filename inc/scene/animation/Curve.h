@@ -137,14 +137,14 @@ inline StrongRef<KeyFrameCurve> MakeKeyFrameCurve(core::Type type)
 {
 	if(type == core::Types::Float())
 		return LUX_NEW(KeyFrameCurveImpl<float>());
-	else if(type == core::Types::Vector2f())
+	else if(type == core::Types::Vector2F())
 		return LUX_NEW(KeyFrameCurveImpl<math::Vector2F>());
-	else if(type == core::Types::Vector3f())
+	else if(type == core::Types::Vector3F())
 		return LUX_NEW(KeyFrameCurveImpl<math::Vector3F>());
 	else if(type == core::Types::ColorF())
 		return LUX_NEW(KeyFrameCurveImpl<video::ColorF>());
 	else {
-		lxAssertNeverReach("Type doesn't support interpolation.");
+		lxAssertNeverReach("Type does not support interpolation.");
 		return nullptr;
 	}
 }

@@ -44,7 +44,7 @@ struct DateAndTime
 	}
 };
 
-inline void conv_data(format::Context& ctx, const DateAndTime& date, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, const DateAndTime& date, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
 
@@ -53,9 +53,9 @@ inline void conv_data(format::Context& ctx, const DateAndTime& date, format::Pla
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 	if(!date.IsValid()) {
-		format::CopyConvertAddString(ctx, format::StringType::Ascii, "[invalid date]", 14);
+		ctx.AddTerminatedSlice("[invalid date]");
 	} else {
-		format::vformat(ctx, format::StringType::Ascii,
+		format::vformat(ctx,
 			"~s ~s ~d ~.2d:~.2d:~.2d ~d",
 			wday_name[(int)date.weekDay],
 			mon_name[date.month - 1],

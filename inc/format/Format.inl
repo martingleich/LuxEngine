@@ -1,85 +1,60 @@
-#include "FormatMagicTemplates.h"
+#include "format/FormatMagicTemplates.h"
 #include <initializer_list>
-#include <type_traits>
 
 namespace format
 {
 namespace internal
 {
-	template <typename T1, typename T2, bool First>
-	struct Select;
-
-	template <typename T1, typename T2>
-	struct Select<T1, T2, true> { using type = T1; };
-
-	template <typename T1, typename T2>
-	struct Select<T1, T2, false> { using type = T2; };
-
 	class FormatEntry
 	{
 	public:
-		virtual ~FormatEntry() {}
 		virtual void Convert(Context& ctx, Placeholder& placeholder) const = 0;
 		virtual int AsInteger() const = 0;
 	};
+
+	struct null_type {};
+	inline void fmtPrint(Context&, null_type, Placeholder&) {}
+	template <>
+	inline int GetAsInt(const null_type&)
+	{
+		return 0;
+	}
 
 	template <typename T>
 	class RefFormatEntry : public FormatEntry
 	{
 	public:
-		RefFormatEntry(const T& data) :
+		RefFormatEntry(const T* data) :
 			m_Data(data)
 		{
 		}
 
 		void Convert(Context& ctx, Placeholder& placeholder) const
 		{
-			conv_data(ctx, m_Data, placeholder);
+			fmtPrint(ctx, *m_Data, placeholder);
 		}
 
 		int AsInteger() const
 		{
-			return GetAsInt(m_Data);
+			return GetAsInt(*m_Data);
 		}
 
 	private:
-		const T& m_Data;
+		const T* m_Data;
 	};
 
-	template <typename T>
-	class CopyFormatEntry : public FormatEntry
-	{
-	public:
-		CopyFormatEntry(const T& data) :
-			m_Data(data)
-		{
-		}
-
-		void Convert(Context& ctx, Placeholder& placeholder) const
-		{
-			conv_data(ctx, m_Data, placeholder);
-		}
-
-		int AsInteger() const
-		{
-			return GetAsInt(m_Data);
-		}
-
-	private:
-		T m_Data;
-	};
+	using BaseFormatEntryType = char[sizeof(RefFormatEntry<null_type>)];
 
 	template <typename T>
-	void AddEntry(const T& arg, FormatEntry**& ptr)
+	void AddEntry(const T& arg, void*& ptr)
 	{
-		*ptr++ = new typename Select<
-			CopyFormatEntry<T>,
-			RefFormatEntry<T>,
-			std::is_integral<T>::value || std::is_floating_point<T>::value || std::is_pointer<T>::value
-		>::type(arg);
+		static_assert(sizeof(RefFormatEntry<T>) == sizeof(BaseFormatEntryType), "Big problem");
+
+		new (ptr) RefFormatEntry<T>(&arg);
+		ptr = (char*)ptr + sizeof(RefFormatEntry<T>);
 	}
 
-	LUX_API void format(Context& ctx, StringType fmtStringType, const char* str, FormatEntry** entries, int entryCount);
+	FORMAT_API void format(Context& ctx, const BaseFormatEntryType* entries, int entryCount);
 
 	template<class T> struct remove_all { typedef T type; };
 	template<class T> struct remove_all<T&> : remove_all<T> {};
@@ -96,71 +71,66 @@ Useful conv_data implementations.
 Will perform normal formatting, but will write the result into a Context.
 */
 template <typename... Types>
-inline void vformat(Context& ctx, StringType fmtStringType, const char* str, const Types&... args)
+inline void vformat(Context& ctx, const char* str, const Types&... args)
 {
+	Context::AutoRestoreSubContext subCtx(ctx, str);
+
 	// Put each argument in an array
-	struct Entries
-	{
-		const int entryCount = (int)sizeof...(Types);
-		internal::FormatEntry* entries[sizeof...(Types) ? sizeof...(Types) : 1];
-
-		Entries(const Types&... args)
-		{
-			auto ptr = entries;
-			(void)ptr; // Fixed warning if entryCount is zero.
-			(void)std::initializer_list<int> {
-				(internal::AddEntry(internal::format_type_conv<Types>::get(args), ptr), 0)...
-			};
-		}
-
-		~Entries()
-		{
-			for(int i = 0; i < entryCount; ++i)
-				delete entries[i];
-		}
+	internal::BaseFormatEntryType entries[sizeof...(Types) ? sizeof...(Types) : 1];
+	void* ptr = entries;
+	(void)ptr; // Fixed warning if entryCount is zero.
+	(void)std::initializer_list<int> {
+		(internal::AddEntry(args, ptr), 0)...
 	};
 
-	Entries entries(args...);
-	internal::format(ctx, fmtStringType, str, entries.entries, entries.entryCount);
+	internal::format(ctx, entries, (int)sizeof...(Types));
 }
 
 template <typename SinkT, typename... Types>
-inline size_t formatEx(SinkT&& Sink, StringType dstStringType, const Locale* locale, int sinkFlags, StringType fmtStringType, const char* str, const Types&... args)
+inline size_t formatEx(SinkT&& sink, const FormatExData& exData, const char* str, const Types&... args)
 {
 	using CleanSinkT = typename internal::remove_all<SinkT>::type;
 	if(!str)
 		return (size_t)-1;
 
-	auto real_sink = sink_access<CleanSinkT>::Get(Sink);
+	auto real_sink = sink_access<CleanSinkT>::Get(sink);
 
-	Context ctx;
-	ctx.SetDstStringType(dstStringType);
-	ctx.SetFmtStringType(fmtStringType);
-	ctx.SetLocale(locale ? locale : GetLocale());
-	ctx.dstSink = &real_sink;
+	Context ctx(exData.locale, exData.startCollumn, exData.startLine);
 
 #ifdef FORMAT_NO_EXCEPTIONS
 	try {
 #endif
-		vformat(ctx, fmtStringType, str, args...);
-		return real_sink.Write(ctx, ctx.GetFirstSlice(), sinkFlags);
+		vformat(ctx, str, args...);
+		size_t outCharacters = real_sink.Write(ctx, ctx.GetFirstSlice(), exData.sinkFlags);
+		if(exData.outCollum) {
+			if(exData.sinkFlags & ESinkFlags::Newline)
+				*exData.outCollum = 0;
+			else
+				*exData.outCollum = ctx.GetCollumn();
+		}
+		if(exData.outLine)
+			*exData.outLine = ctx.GetLine();
 #ifdef FORMAT_NO_EXCEPTIONS
 	} catch(...) {
-		return (size_t)-1;
+		outCharacters = (size_t)-1;
 	}
 #endif
+	return outCharacters;
 }
 
 template <typename SinkT, typename... Types>
-inline size_t format(SinkT&& Sink, const char* str, const Types&... args)
+inline size_t format(SinkT&& sink, const char* str, const Types&... args)
 {
-	return formatEx(Sink, StringType::FORMAT_STRING_TYPE, nullptr, ESinkFlags::Null, StringType::FORMAT_STRING_TYPE, str, args...);
+	FormatExData data;
+	return formatEx(sink, data, str, args...);
 }
 
 template <typename SinkT, typename... Types>
-inline size_t formatln(SinkT&& Sink, const char* str, const Types&... args)
+inline size_t formatln(SinkT&& sink, const char* str, const Types&... args)
 {
-	return formatEx(Sink, StringType::FORMAT_STRING_TYPE, nullptr, ESinkFlags::Newline | ESinkFlags::Flush, StringType::FORMAT_STRING_TYPE, str, args...);
+	FormatExData data;
+	data.sinkFlags = ESinkFlags::Newline;
+	return formatEx(sink, data, str, args...);
 }
 
 }

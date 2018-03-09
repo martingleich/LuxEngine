@@ -116,8 +116,8 @@ public:
 
 	LX_STRUCTURE_BUILDER_ADD(Integer, s32);
 	LX_STRUCTURE_BUILDER_ADD(Float, float);
-	LX_STRUCTURE_BUILDER_ADD(Vector2f, math::Vector2F);
-	LX_STRUCTURE_BUILDER_ADD(Vector3f, math::Vector3F);
+	LX_STRUCTURE_BUILDER_ADD(Vector2F, math::Vector2F);
+	LX_STRUCTURE_BUILDER_ADD(Vector3F, math::Vector3F);
 	LX_STRUCTURE_BUILDER_ADD(ColorF, video::ColorF);
 	LX_STRUCTURE_BUILDER_ADD(Color, video::Color);
 	LX_STRUCTURE_BUILDER_ADD(QuaternionF, math::QuaternionF);

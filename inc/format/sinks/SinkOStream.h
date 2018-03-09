@@ -13,8 +13,7 @@ namespace format
 class ostream_sink : public Sink
 {
 public:
-	ostream_sink(std::ostream& o, size_t collumn = 0) :
-		Sink(collumn),
+	ostream_sink(std::ostream& o) :
 		m_Stream(o)
 	{
 	}

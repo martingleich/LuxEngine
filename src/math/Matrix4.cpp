@@ -148,7 +148,7 @@ Matrix4 Matrix4::GetTransformInverted(bool* result) const
 
 Matrix4& Matrix4::SetTranslation(const Vector3F& trans)
 {
-	m[3][0] = trans.x; 
+	m[3][0] = trans.x;
 	m[3][1] = trans.y;
 	m[3][2] = trans.z;
 	return *this;
@@ -538,7 +538,7 @@ Matrix4& Matrix4::BuildProjection_Persp(
 	float nearPlane,
 	float farPlane)
 {
-	float Cot = 1 / Tan(fieldOfVison/2);
+	float Cot = 1 / Tan(fieldOfVison / 2);
 	float Q = farPlane / (farPlane - nearPlane);
 
 	m[0][0] = Cot / aspect; m[0][1] = 0; m[0][2] = 0;             m[0][3] = 0;
@@ -719,6 +719,17 @@ bool Matrix4::operator==(const Matrix4& other) const
 bool Matrix4::operator!=(const Matrix4& other) const
 {
 	return !(*this == other);
+}
+
+void fmtPrint(format::Context& ctx, const Matrix4& m, format::Placeholder& placeholder)
+{
+	ctx.AddTerminatedSlice("[");
+	for(size_t i = 0; i < 16; ++i) {
+		format::fmtPrint(ctx, m[i], placeholder);
+		if(i < 15)
+			ctx.AddTerminatedSlice(", ");
+	}
+	ctx.AddTerminatedSlice("]");
 }
 
 }

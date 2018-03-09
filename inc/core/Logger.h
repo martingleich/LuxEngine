@@ -190,7 +190,7 @@ public:
 	}
 
 	template <typename... T>
-	void Write(const char* format, T... data)
+	void Write(const char* format, const T&... data)
 	{
 		if(!m_Printer)
 			return;
@@ -210,13 +210,13 @@ public:
 	}
 
 	template <typename... T>
-	void operator()(const char* format, T... data)
+	void operator()(const char* format, const T&... data)
 	{
 		Write(format, data...);
 	}
 
 	template <typename... T>
-	void operator()(const core::String& format, T... data)
+	void operator()(const core::String& format, const T&... data)
 	{
 		Write(format.Data(), data...);
 	}

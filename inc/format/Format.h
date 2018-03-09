@@ -1,10 +1,6 @@
 #ifndef INCLUDED_FORMAT_FORMAT_H
 #define INCLUDED_FORMAT_FORMAT_H
-
-#include "format/FormatLocale.h"
-#include "format/StringType.h"
 #include "format/Placeholder.h"
-#include "format/Slice.h"
 #include "format/Context.h"
 #include "format/Sink.h"
 
@@ -20,31 +16,38 @@ namespace format
 /**
 Will throw syntax_exception on bad syntax.<br>
 Can throw exception on conversion error, depending on FORMAT_ERROR_TEXT.<br>
-Usefull for conv_data implementations.<br>
+Usefull for fmtPrint implementations.<br>
 Will perform normal formatting, but will write the result into a Context.<br>
 
 \param ctx The context where the formatted data is written to
-\param fmtStringType The format of the string type, for improved compatibilty a ascii string if best
 \param str The format string
 \param args The placeholder arguments
 */
 template <typename... Types>
-void vformat(Context& ctx, StringType fmtStringType, const char* str, const Types&... args);
+void vformat(Context& ctx, const char* str, const Types&... args);
+
+struct FormatExData
+{
+	size_t startCollumn = 0;
+	size_t startLine = 0;
+	const Locale* locale = nullptr;
+	int sinkFlags = 0;
+
+	size_t* outCollum = nullptr;
+	size_t* outLine = nullptr;
+};
 
 //! Format a string
 /**
 \param sink The destination sink
-\param dstStringType The string type to write into the sink
-\param locale The locale to use while writing, pass NULL too use the default locale
-\param sinkFlags A combination of ESinkFlag values
-\param fmtStringType The format of the format string
+\param exData Extended data for formatting.
 \param str The format string
 \param args The placeholder arguments
 \return The number of characters written, or -1 on error
 \throws format::exception When an error occured an FORMAT_EXCEPTIONS is set
 */
 template <typename SinkT, typename... Types>
-size_t formatEx(SinkT&& sink, StringType dstStringType, const Locale* locale, int sinkFlags, StringType fmtStringType, const char* str, const Types&... args);
+size_t formatEx(SinkT&& sink, const FormatExData& exData, const char* str, const Types&... args);
 
 //! Format a string
 /**

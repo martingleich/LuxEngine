@@ -9,72 +9,105 @@ namespace core
 {
 
 //! Converter to and from strings
-class StringConverter
+namespace StringConverter
 {
-private:
-	static core::String IntToString(intmax_t num)
+	inline core::String IntToString(intmax_t num)
 	{
 		char buffer[22]; // See format::IntToString for size reasoning
 		format::IntToString(num, buffer);
 		return buffer;
 	}
-
-	static core::String UIntToString(uintmax_t num)
+	
+	inline core::String UIntToString(intmax_t num)
 	{
-		char buffer[22]; // See format::UIntToString for size reasoning
+		char buffer[22]; // See format::IntToString for size reasoning
 		format::UIntToString(num, buffer);
 		return buffer;
 	}
-
-public:
-	static core::String ToString(unsigned long long num) { return UIntToString(num); }
-	static core::String ToString(unsigned long num) { return UIntToString(num); }
-	static core::String ToString(unsigned int num) { return UIntToString(num); }
-	static core::String ToString(unsigned short num) { return UIntToString(num); }
-	static core::String ToString(unsigned char num) { return UIntToString(num); }
-
-	static core::String ToString(long long num) { return IntToString(num); }
-	static core::String ToString(long num) { return IntToString(num); }
-	static core::String ToString(int num) { return IntToString(num); }
-	static core::String ToString(short num) { return IntToString(num); }
-	static core::String ToString(char num) { return IntToString(num); }
-
-	//! Convert a float to a string
-	static core::String ToString(float value)
+	
+	inline core::String& AppendIntToString(core::String& str, intmax_t num)
 	{
-		char buffer[43]; // See format::FloatToString for size reasoning
-		format::FloatToString(value, buffer);
-		return buffer;
-	}
-
-	//! Convert a float to a string
-	static core::String ToString(double value)
-	{
-		char buffer[43]; // See format::FloatToString for size reasoning
-		format::FloatToString(value, buffer);
-		return buffer;
-	}
-
-	//! Convert a date to a string
-	static core::String ToString(const core::DateAndTime& value)
-	{
-		return Format("~a", value);
-	}
-
-	//! Convert a string to a string.
-	static const core::String& ToString(const core::String& value)
-	{
-		return value;
-	}
-
-	//! Convert a string to a string.
-	static core::String ToString(const char* str)
-	{
+		char buffer[22]; // See format::IntToString for size reasoning
+		format::IntToString(num, buffer);
+		str.Append(buffer);
 		return str;
 	}
 
+	inline core::String& AppendUIntToString(core::String& str, uintmax_t num)
+	{
+		char buffer[22]; // See format::UIntToString for size reasoning
+		format::UIntToString(num, buffer);
+		str.Append(buffer);
+		return str;
+	}
+
+	inline core::String& Append(core::String& str, unsigned long long num) { return AppendUIntToString(str, num); }
+	inline core::String& Append(core::String& str, unsigned long num) { return AppendUIntToString(str, num); }
+	inline core::String& Append(core::String& str, unsigned int num) { return AppendUIntToString(str, num); }
+	inline core::String& Append(core::String& str, unsigned short num) { return AppendUIntToString(str, num); }
+	inline core::String& Append(core::String& str, unsigned char num) { return AppendUIntToString(str, num); }
+
+	inline core::String& Append(core::String& str, long long num) { return AppendIntToString(str, num); }
+	inline core::String& Append(core::String& str, long num) { return AppendIntToString(str, num); }
+	inline core::String& Append(core::String& str, int num) { return AppendIntToString(str, num); }
+	inline core::String& Append(core::String& str, short num) { return AppendIntToString(str, num); }
+	inline core::String& Append(core::String& str, char num) { return AppendIntToString(str, num); }
+
 	template <typename... T>
-	static core::String Format(core::StringType format, T... args)
+	inline core::String& AppendFormat(core::String& str, core::StringType format, T... args)
+	{
+		core::StringSink sink(str);
+		format::format(sink, format.data, args...);
+		return str;
+	}
+
+	//! Convert a float to a string
+	inline core::String& Append(core::String& str, float value)
+	{
+		char buffer[43]; // See format::FloatToString for size reasoning
+		format::FloatToString(value, buffer);
+		str.Append(buffer);
+		return str;
+	}
+
+	//! Convert a float to a string
+	inline core::String& Append(core::String& str, double value)
+	{
+		char buffer[43]; // See format::FloatToString for size reasoning
+		format::FloatToString(value, buffer);
+		str.Append(buffer);
+		return str;
+	}
+
+	//! Convert a date to a string
+	inline core::String& Append(core::String& str, const core::DateAndTime& value)
+	{
+		return AppendFormat(str, "~a", value);
+	}
+
+	//! Convert a string to a string.
+	inline core::String& Append(core::String& str, const core::String& value)
+	{
+		str.Append(value);
+		return str;
+	}
+
+	//! Convert a string to a string.
+	inline core::String& Append(core::String& str, const char* value)
+	{
+		str.Append(value);
+		return str;
+	}
+
+	template <typename T>
+	inline core::String ToString(const T& value)
+	{
+		core::String str;
+		return Append(str, value);
+	}
+
+	template <typename... T>
+	inline core::String Format(core::StringType format, T... args)
 	{
 		core::String out;
 		AppendFormat(out, format, args...);
@@ -82,13 +115,6 @@ public:
 		return std::move(out);
 	}
 
-	template <typename... T>
-	static void AppendFormat(core::String& str, core::StringType format, T... args)
-	{
-		core::StringSink sink(str);
-		format::format(sink, format.data, args...);
-	}
-
 	//! Create a float from a string
 	/**
 	\param str The string to convert
@@ -97,20 +123,7 @@ public:
 	\param [out] error Did an error occur, only written if not null
 	\return The parsed float
 	*/
-	static float ParseFloat(const core::String& str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
-	{
-		return ParseFloat(str.Data(), errorValue, nextChar, error);
-	}
-
-	//! Create a float from a string
-	/**
-	\param str The string to convert
-	\param errorValue The value which is returned if an error occurs
-	\param [out] nextChar The first character after the number, only written if not null
-	\param [out] error Did an error occur, only written if not null
-	\return The parsed float
-	*/
-	static float ParseFloat(const char* str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
+	inline float ParseFloat(const char* str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
 	{
 		int sign = 1;
 
@@ -187,23 +200,10 @@ public:
 	/**
 	\param str The string to convert
 	\param errorValue The value which is returned if an error occurs
-	\param [out] nextChar The first character after the number, only written if not null
-	\param [out] error Did an error occur, only written if not null
-	\return The parsed integer
-	*/
-	static int ParseInt(const core::String& str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
-	{
-		return ParseInt(str.Data(), errorValue, nextChar, error);
-	}
-
-	//! Create a integer from a string
-	/**
-	\param str The string to convert
-	\param errorValue The value which is returned if an error occurs
 	\param [out] nextChar The first character after the number, only written when not null
 	\return The parsed integer
 	*/
-	static int ParseInt(const char* str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
+	inline int ParseInt(const char* str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
 	{
 		unsigned int value = 0;
 		int numDigits = 0;
@@ -256,6 +256,32 @@ public:
 				*error = true;
 			return errorValue;
 		}
+	}
+
+	//! Create a integer from a string
+	/**
+	\param str The string to convert
+	\param errorValue The value which is returned if an error occurs
+	\param [out] nextChar The first character after the number, only written if not null
+	\param [out] error Did an error occur, only written if not null
+	\return The parsed integer
+	*/
+	inline int ParseInt(const core::String& str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
+	{
+		return ParseInt(str.Data(), errorValue, nextChar, error);
+	}
+
+	//! Create a float from a string
+	/**
+	\param str The string to convert
+	\param errorValue The value which is returned if an error occurs
+	\param [out] nextChar The first character after the number, only written if not null
+	\param [out] error Did an error occur, only written if not null
+	\return The parsed float
+	*/
+	inline float ParseFloat(const core::String& str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
+	{
+		return ParseFloat(str.Data(), errorValue, nextChar, error);
 	}
 };
 

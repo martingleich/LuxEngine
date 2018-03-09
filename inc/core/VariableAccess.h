@@ -1,6 +1,7 @@
 #ifndef INCLUDED_VARIABLE_ACCESS_H
 #define INCLUDED_VARIABLE_ACCESS_H
 #include "core/lxTypes.h"
+#include "core/lxFormat.h"
 #include "video/TextureLayer.h"
 #include "video/Texture.h"
 #include "video/CubeTexture.h"
@@ -407,6 +408,11 @@ private:
 	bool m_IsConst;
 #endif
 };
+
+inline void fmtPrint(format::Context& ctx, const VariableAccess& access, format::Placeholder& pl)
+{
+	access.GetType().GetInfo()->FmtPrint(ctx, access.Pointer(), pl);
+}
 
 } // namespace core
 } // namespace lux

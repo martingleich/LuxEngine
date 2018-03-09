@@ -2,29 +2,44 @@
 #define INCLUDED_FORMAT_CONVERTERS_H
 #include "format/Context.h"
 #include "format/Placeholder.h"
-#include "format/Exception.h"
-#include "format/StringBasics.h"
 
 namespace format
 {
 
 /*
-The conv_data function is called to convert a placeholder-argument to a string.
-Each conv_data function, must convert it's argument to a string and
+The fmtPrint function is called to convert a placeholder-argument to a string.
+Each fmtPrint function, must convert it's argument to a string and
 add it to the Context.
 There can be additional memory allocation.
 If a conversion is not possible or invalid, a exception should be thrown.
 The passed FormatOptions can be changed to change the behavior of the align operation
-following the conv_data call.
+following the fmtPrint call.
 */
 
-FORMAT_API void conv_data(Context& ctx, const char* data, Placeholder& placeholder);
-FORMAT_API void conv_data(Context& ctx, intmax_t data, Placeholder& placeholder);
-FORMAT_API void conv_data(Context& ctx, uintmax_t data, Placeholder& placeholder);
-FORMAT_API void conv_data(Context& ctx, const void* data, Placeholder& placeholder);
-FORMAT_API void conv_data(Context& ctx, double data, Placeholder& placeholder);
-FORMAT_API void conv_data(Context& ctx, bool data, Placeholder& placeholder);
-FORMAT_API void conv_data(Context& ctx, Cursor* ptr, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, const char* data, Placeholder& placeholder);
+
+FORMAT_API void fmtPrint(Context& ctx, char data, Placeholder& placeholder);
+
+FORMAT_API void fmtPrint(Context& ctx, signed char data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, signed short data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, signed int data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, signed long data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, signed long long data, Placeholder& placeholder);
+
+FORMAT_API void fmtPrint(Context& ctx, unsigned char data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, unsigned short data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, unsigned int data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, unsigned long data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, unsigned long long data, Placeholder& placeholder);
+
+FORMAT_API void fmtPrint(Context& ctx, const void* data, Placeholder& placeholder);
+
+FORMAT_API void fmtPrint(Context& ctx, float data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, double data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, long double data, Placeholder& placeholder);
+
+FORMAT_API void fmtPrint(Context& ctx, bool data, Placeholder& placeholder);
+FORMAT_API void fmtPrint(Context& ctx, Cursor* ptr, Placeholder& placeholder);
 
 //! Convert a signed integer to a string
 /**
@@ -52,7 +67,7 @@ FORMAT_API size_t UIntToString(uintmax_t data, char* str, int base = 10);
 /**
 The resulting string will be null terminated.
 Zero will be written as "0".
-Infinitiy will be written as "inf".
+Infinity will be written as "inf".
 Not-A-Number will be written as "nan".
 Trailing zeros will never be written.
 \param data The number to convert

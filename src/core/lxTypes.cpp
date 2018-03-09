@@ -1,4 +1,5 @@
 #include "core/lxTypes.h"
+#include "core/lxFormat.h"
 
 namespace lux
 {
@@ -41,5 +42,15 @@ Type Boolean()
 }
 
 }
+
+void TypeInfo::FmtPrint(format::Context& ctx, const void* p, format::Placeholder& placeholder) const
+{
+	ctx.AddTerminatedSlice("<");
+	ctx.AddTerminatedSlice(GetName());
+	ctx.AddTerminatedSlice(":");
+	format::fmtPrint(ctx, p, placeholder);
+	ctx.AddTerminatedSlice(">");
+}
+
 }
 }

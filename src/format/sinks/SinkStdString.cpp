@@ -5,35 +5,20 @@ namespace format
 {
 size_t stdstring_sink::Write(Context& ctx, const Slice* firstSlice, int flags)
 {
-	if(ctx.stringType == StringType::CodePoint)
-		throw not_implemeted_exception("Stringtype not supported.");
-
-	m_Collumn = ctx.GetCollumn();
-
-	(void)ctx;
-
-	size_t size = 0;
-	for(auto slice = firstSlice; slice; slice = slice->GetNext())
-		size += slice->size;
-
+	size_t size = ctx.GetSize();
 	if((flags & ESinkFlags::Newline) != 0)
 		++size;
 
-	char* base = ctx.AllocByte(size);
-	char* c = base;
+	m_Str.resize(size);
+	char* c = &m_Str[0];
 
 	for(auto slice = firstSlice; slice; slice = slice->GetNext()) {
 		memcpy(c, slice->data, slice->size);
 		c += slice->size;
 	}
 
-	if((flags & ESinkFlags::Newline) != 0) {
+	if((flags & ESinkFlags::Newline) != 0)
 		*c++ = '\n';
-		m_Collumn = 0;
-	}
-
-
-	m_Str.assign(base, size);
 
 	return size;
 }

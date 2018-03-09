@@ -280,21 +280,20 @@ inline ColorF operator*(const float f, const ColorF& a)
 	ColorF out(a); out *= f; return out;
 }
 
-inline void conv_data(format::Context& ctx, ColorF format, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, ColorF format, format::Placeholder& placeholder)
 {
 	using namespace format;
 	placeholder.type = 'a';
 
-	ConvertAddString(ctx, format::StringType::Ascii, "[r=", 3);
-	conv_data(ctx, format.r, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " g=", 3);
-	conv_data(ctx, format.g, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " b=", 3);
-	conv_data(ctx, format.b, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " a=", 3);
-	conv_data(ctx, format.a, placeholder);
-
-	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
+	ctx.AddSlice(3, "[r=");
+	fmtPrint(ctx, format.r, placeholder);
+	ctx.AddSlice(3, " g=");
+	fmtPrint(ctx, format.g, placeholder);
+	ctx.AddSlice(3, " b=");
+	fmtPrint(ctx, format.b, placeholder);
+	ctx.AddSlice(3, " a=");
+	fmtPrint(ctx, format.a, placeholder);
+	ctx.AddSlice(1, "]");
 }
 
 }

@@ -2,6 +2,7 @@
 #define INCLUDED_FORMAT_FORMAT_MEMORY_H
 #include <string.h>
 #include <stdlib.h>
+#include <vector>
 #include <new>
 
 namespace format
@@ -12,32 +13,32 @@ namespace internal
 	{
 		static const size_t FIXED_MEMORY = 64;
 		static const size_t BLOCK_SIZE = 256;
+		static const size_t THRESHOLD = BLOCK_SIZE / 4;
 
-		char fixed[FIXED_MEMORY];
 		struct Block
 		{
-			Block* next;
+			Block* prev;
 			size_t used;
 
 			char data[BLOCK_SIZE];
 		};
 
-		size_t used;
-		size_t fixed_used;
-		Block* firstBlock;
+		size_t fixedUsed;
+		char fixed[FIXED_MEMORY];
 		Block* curBlock;
-		void** freeAlloc;
-		size_t freeAllocCount;
+
+		std::vector<void*> freeAlloc;
+
 		void* lastAlloc;
 		size_t lastAllocSize;
 
+		// Statistics
+		size_t used;
+
 		FormatMemory() :
 			used(0),
-			fixed_used(0),
-			firstBlock(nullptr),
+			fixedUsed(0),
 			curBlock(nullptr),
-			freeAlloc(nullptr),
-			freeAllocCount(0),
 			lastAlloc(nullptr),
 			lastAllocSize(0)
 		{
@@ -48,96 +49,51 @@ namespace internal
 			Clear();
 		}
 
+		void Clear()
+		{
+			while(curBlock) {
+				Block* next = curBlock->prev;
+				free(curBlock);
+				curBlock = next;
+			}
+
+			for(auto p : freeAlloc)
+				free(p);
+			freeAlloc.clear();
+
+			used = 0;
+			fixedUsed = 0;
+			lastAlloc = nullptr;
+			lastAllocSize = 0;
+		}
+
 		void* Alloc(size_t bytes)
 		{
-			if(bytes > BLOCK_SIZE) {
-				void** newData = (void**)realloc((void*)freeAlloc, sizeof(void*)*(freeAllocCount + 1));
-				if(!newData)
-					throw std::bad_alloc();
-				freeAlloc = newData;
+			if(bytes > THRESHOLD) {
 				void* newBytes = malloc(bytes);
-				freeAlloc[freeAllocCount] = newBytes;
-				++freeAllocCount;
-
-				used += bytes;
+				freeAlloc.push_back(newBytes);
 				lastAlloc = newBytes;
-			} else if(fixed_used + bytes <= FIXED_MEMORY) {
-				void* out = fixed + fixed_used;
-				fixed_used += bytes;
-				used += bytes;
+			} else if(fixedUsed + bytes <= FIXED_MEMORY) {
+				void* out = fixed + fixedUsed;
+				fixedUsed += bytes;
 				lastAlloc = out;
 			} else {
-				if(!curBlock) {
+				if(!curBlock || curBlock->used + bytes > BLOCK_SIZE) {
 					Block* b = (Block*)malloc(sizeof(Block));
 					if(!b)
 						throw std::bad_alloc();
-					curBlock = firstBlock = b;
-					curBlock->next = nullptr;
-					curBlock->used = 0;
-				}
-
-
-				if(curBlock->used + bytes > BLOCK_SIZE) {
-					Block* b = (Block*)malloc(sizeof(Block));
-					if(!b)
-						throw std::bad_alloc();
-					b->next = nullptr;
+					b->prev = curBlock;
 					b->used = 0;
-					curBlock->next = b;
 					curBlock = b;
 				}
 
-				void* out = curBlock->data + curBlock->used;
+				lastAlloc = curBlock->data + curBlock->used;
 				curBlock->used += bytes;
-				used += bytes;
-				lastAlloc = out;
 			}
 
+			used += bytes;
 			lastAllocSize = bytes;
-
 			return lastAlloc;
-		}
-
-		bool Unalloc(const void* p, size_t bytes)
-		{
-			if(p != lastAlloc)
-				return false;
-
-			if(p >= fixed && p < fixed + FIXED_MEMORY && bytes <= fixed_used)
-				fixed_used -= bytes;
-			else if(bytes <= curBlock->used)
-				curBlock->used -= bytes;
-			else
-				return false;
-
-			used -= bytes;
-
-			return true;
-		}
-
-		void* Realloc(void* p, size_t newSize)
-		{
-			if(p != lastAlloc)
-				return nullptr;
-
-			if(freeAllocCount && p == freeAlloc[freeAllocCount - 1]) {
-				void* n = realloc(p, newSize);
-				if(!n)
-					throw std::bad_alloc();
-				p = n;
-				freeAlloc[freeAllocCount - 1] = p;
-				return p;
-			}
-
-			size_t blockSize = lastAllocSize;
-			Unalloc(p, blockSize);
-			void* newP = Alloc(newSize);
-			if(newP != p) {
-				size_t copy = blockSize < newSize ? blockSize : newSize;
-				memcpy(newP, p, copy);
-			}
-
-			return newP;
 		}
 
 		bool TryExpand(const void* p, size_t expand)
@@ -146,8 +102,8 @@ namespace internal
 				return false;
 
 			if(p >= fixed && p <= fixed + FIXED_MEMORY) {
-				if(fixed_used + expand <= FIXED_MEMORY) {
-					fixed_used += expand;
+				if(fixedUsed + expand <= FIXED_MEMORY) {
+					fixedUsed += expand;
 					used += expand;
 					return true;
 				}
@@ -162,23 +118,6 @@ namespace internal
 			return false;
 		}
 
-		void Clear()
-		{
-			while(firstBlock) {
-				Block* next = firstBlock->next;
-				free(firstBlock);
-				firstBlock = next;
-			}
-
-			for(size_t i = 0; i < freeAllocCount; ++i)
-				free(freeAlloc[i]);
-
-			free(freeAlloc);
-			freeAlloc = nullptr;
-
-			used = 0;
-			fixed_used = 0;
-		}
 	};
 }
 }

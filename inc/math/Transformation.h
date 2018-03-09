@@ -405,17 +405,16 @@ inline math::Triangle3F& Transformation::TransformObject(const math::Triangle3F&
 	return out;
 }
 
-inline void conv_data(format::Context& ctx, const Transformation& t, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, const Transformation& t, format::Placeholder& placeholder)
 {
 	using namespace format;
-	ConvertAddString(ctx, format::StringType::Ascii, "[transl=", 8);
-	conv_data(ctx, t.translation, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " orient=", 8);
-	conv_data(ctx, t.orientation, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " scale=", 7);
-	conv_data(ctx, t.scale, placeholder);
-
-	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
+	ctx.AddTerminatedSlice("[transl=");
+	fmtPrint(ctx, t.translation, placeholder);
+	ctx.AddTerminatedSlice(" orient=");
+	fmtPrint(ctx, t.orientation, placeholder);
+	ctx.AddTerminatedSlice(" scale=");
+	fmtPrint(ctx, t.scale, placeholder);
+	ctx.AddTerminatedSlice("]");
 }
 
 } // namespace math

@@ -260,10 +260,10 @@ inline Color operator*(const float f, Color a)
 	Color out(a); out *= f; return out;
 }
 
-inline void conv_data(format::Context& ctx, Color format, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, Color format, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
-	format::vformat(ctx, format::StringType::Ascii, "~h", (u32)format);
+	format::vformat(ctx, "~h", (u32)format);
 }
 
 } // namespace video

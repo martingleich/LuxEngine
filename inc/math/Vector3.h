@@ -303,7 +303,7 @@ public:
 		double len = GetLength();
 		if(IsZero(len))
 			return *this;
-		
+
 		double factor = newLength / len;
 		x *= T(factor);
 		y *= T(factor);
@@ -556,25 +556,25 @@ template <typename T>
 const Vector3<T> Vector3<T>::UNIT_scale = math::Vector3<T>(1, 1, 1);
 
 template <typename T>
-void conv_data(format::Context& ctx, const Vector3<T>& v, format::Placeholder& placeholder)
+void fmtPrint(format::Context& ctx, const Vector3<T>& v, format::Placeholder& placeholder)
 {
 	using namespace format;
 	placeholder.type = 'a';
 	bool printLength = placeholder.hash.IsEnabled();
 	placeholder.hash.Disable();
 
-	ConvertAddString(ctx, format::StringType::Ascii, "[x=", 3);
-	conv_data(ctx, v.x, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " y=", 3);
-	conv_data(ctx, v.y, placeholder);
-	ConvertAddString(ctx, format::StringType::Ascii, " z=", 3);
-	conv_data(ctx, v.z, placeholder);
+	ctx.AddTerminatedSlice("[");
+	fmtPrint(ctx, v.x, placeholder);
+	ctx.AddTerminatedSlice(" ");
+	fmtPrint(ctx, v.y, placeholder);
+	ctx.AddTerminatedSlice(" ");
+	fmtPrint(ctx, v.z, placeholder);
 	if(printLength) {
-		ConvertAddString(ctx, format::StringType::Ascii, " len=", 5);
-		conv_data(ctx, v.GetLength(), placeholder);
+		ctx.AddTerminatedSlice(" len=");
+		fmtPrint(ctx, v.GetLength(), placeholder);
 	}
 
-	ConvertAddString(ctx, format::StringType::Ascii, "]", 1);
+	ctx.AddTerminatedSlice("]");
 }
 
 template <typename T>
