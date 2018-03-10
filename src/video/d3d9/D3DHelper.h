@@ -1,6 +1,7 @@
 #ifndef INCLUDED_D3DHELPER_H
 #define INCLUDED_D3DHELPER_H
 
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/Color.h"
 #include "video/VertexFormat.h"

@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "DeviceStateD3D9.h"
 

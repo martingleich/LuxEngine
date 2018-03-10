@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "RendererD3D9.h"
 

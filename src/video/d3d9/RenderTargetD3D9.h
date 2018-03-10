@@ -2,6 +2,7 @@
 #define INCLUDED_RENDERTARGET_D3D9_H
 #include "video/RenderTarget.h"
 
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "platform/StrippedD3D9.h"
 #include "D3DHelper.h"

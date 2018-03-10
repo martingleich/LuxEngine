@@ -1,26 +1,25 @@
 #ifndef INCLUDED_FORMAT_EXCEPTION_H
 #define INCLUDED_FORMAT_EXCEPTION_H
-#include <stddef.h>
+#include <cstddef>
+#include <exception>
 
 namespace format
 {
 /** \addtogroup Exceptions
 @{
 */
-struct exception
+struct format_exception : std::exception
 {
-	exception(const char* _msg = "format_exception") :
-		msg(_msg)
+	format_exception(const char* msg = "format_exception") :
+		exception(msg)
 	{
 	}
-
-	const char* msg; // Always ascii
 };
 
-struct syntax_exception : public exception
+struct syntax_exception : public format_exception
 {
 	syntax_exception(const char* msg = "format_syntax_exception", size_t pos = -1) :
-		exception(msg),
+		format_exception(msg),
 		position(pos)
 	{
 	}
@@ -35,7 +34,6 @@ struct invalid_placeholder_type : public syntax_exception
 		argPosition(argPos),
 		placeholder(place)
 	{
-
 	}
 
 	size_t argPosition;
@@ -48,16 +46,15 @@ struct invalid_placeholder_value : public syntax_exception
 		syntax_exception(msg, pos),
 		value(v)
 	{
-
 	}
 
 	int value;
 };
 
-struct value_exception : public exception
+struct value_exception : public format_exception
 {
 	value_exception(const char* msg = "format_value_exception", size_t pos = -1, size_t argPos = -1) :
-		exception(msg),
+		format_exception(msg),
 		position(pos),
 		argPosition(argPos)
 	{
@@ -65,30 +62,6 @@ struct value_exception : public exception
 
 	size_t position;
 	size_t argPosition;
-};
-
-struct not_implemeted_exception : public exception
-{
-	not_implemeted_exception(const char* msg = "format_not_implemented_exception") :
-		exception(msg)
-	{
-	}
-};
-
-struct bad_cast_exception : public exception
-{
-	bad_cast_exception(const char* msg = "format_bad_cast_exception") :
-		exception(msg)
-	{
-	}
-};
-
-struct bad_locale_exception : public exception
-{
-	bad_locale_exception(const char* msg = "bad_locale_exception") :
-		exception(msg)
-	{
-	}
 };
 
 /** @}*/

@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_WINDOWS
 #include "FontCreatorWin32.h"
 #include "core/lxHashMap.h"

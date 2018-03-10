@@ -1,9 +1,7 @@
 #include "format/Converters.h"
-
 #include "format/ConvInternal.h"
 #include "format/UnicodeConversion.h"
 
-#include <iostream>
 namespace format
 {
 
@@ -209,7 +207,7 @@ size_t IntToString(intmax_t data, char* str, int base)
 		*str++ = '-';
 		data = -data;
 	}
-	size_t len = uitoa(data, str, base) + sign;
+	size_t len = uitoa<uintmax_t>(data, str, base) + sign;
 	str[len] = 0;
 	return len;
 }

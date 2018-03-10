@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "core/Logger.h"

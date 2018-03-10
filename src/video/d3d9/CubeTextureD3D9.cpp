@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "CubeTextureD3D9.h"
 #include "platform/StrippedD3D9X.h"

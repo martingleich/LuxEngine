@@ -51,7 +51,7 @@ public:
 	{
 		T* out = dynamic_cast<T*>(this);
 		if(!out)
-			throw bad_cast_exception("Bad locale facet cast");
+			throw format_exception("Bad locale facet cast.");
 
 		return *out;
 	}
@@ -62,7 +62,7 @@ public:
 	{
 		const T* out = dynamic_cast<const T*>(this);
 		if(!out)
-			throw bad_cast_exception("Bad locale facet cast");
+			throw format_exception("Bad locale facet cast.");
 
 		return *out;
 	}

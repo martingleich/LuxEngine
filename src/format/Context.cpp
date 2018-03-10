@@ -1,8 +1,6 @@
 #include "format/Context.h"
-#include "format/Sink.h"
-#include <limits>
-
-#include <iostream>
+#include "format/StringBasics.h"
+#include "format/FormatLocale.h"
 
 namespace format
 {
@@ -13,19 +11,45 @@ Context::Context(
 	fstrLastArgPos(0),
 	argId(0),
 	m_FmtString(nullptr),
-	m_FirstSlice(nullptr),
 	m_LastSlice(nullptr),
-	m_CursorSlice(nullptr),
 	m_Line(startLine),
 	m_Collumn(startCollumn),
 	m_CharacterCount(0),
 	m_Counting(0),
 	m_Size(0),
-	m_Locale(locale),
+	m_CursorSlice(m_SliceMemory.Last()),
+	m_Locale(locale ? locale : format::GetLocale()),
 	m_ForceSlice(true)
 {
-	if(!m_Locale)
-		m_Locale = format::GetLocale();
+}
+
+void Context::Reset(
+	const Locale* locale,
+	size_t startCollumn,
+	size_t startLine)
+{
+	fstrLastArgPos = 0;
+	argId = 0;
+
+	m_Memory.Clear();
+	m_SliceMemory.Clear();
+	m_LastSlice = nullptr;
+
+	m_FmtString = nullptr;
+
+	m_Line = startLine;
+	m_Collumn = startCollumn;
+	m_CharacterCount = 0;
+	m_Counting = 0;
+	m_Size = 0;
+
+	m_CursorSlice = m_SliceMemory.Last();
+	m_CursorPos = 0;
+
+	if(locale)
+		m_Locale = locale;
+
+	m_ForceSlice = false;
 }
 
 void Context::AddSlice(size_t size, const char* data, bool forceCopy)
@@ -33,43 +57,50 @@ void Context::AddSlice(size_t size, const char* data, bool forceCopy)
 	if(size == 0)
 		return;
 
-	Slice* out;
-	if(!m_ForceSlice && !forceCopy && m_LastSlice && m_LastSlice->data + m_LastSlice->size == data) {
-		// Is the new slice just more data at the end of the new slice
-		out = m_LastSlice;
-		out->size += size;
-	} else if(!m_ForceSlice && m_LastSlice && (size < sizeof(Slice) || forceCopy) && m_Memory.TryExpand(m_LastSlice->data, size)) {
+	if(!m_ForceSlice && m_LastSlice && (size < sizeof(Slice) || forceCopy) && m_Memory.TryExpand(m_LastSlice->data, size)) {
 		// If copying the data of the slice is less memory than a new slice or we must copy the data.
 		// And we can expand the last slice.
 		// We expand the last slice and copy the new data at it's end.
 		memcpy(const_cast<char*>(m_LastSlice->data) + m_LastSlice->size, data, size);
 		m_LastSlice->size += size;
-		out = m_LastSlice;
 	} else {
-		out = AddSlice();
+		m_LastSlice = m_SliceMemory.Alloc();
 		if(forceCopy) {
 			char* newData = AllocByte(size);
 			memcpy(newData, data, size);
 			data = newData;
 		}
-		out->size = size;
-		out->data = data;
-		out->next = nullptr;
-	}
-
-	m_ForceSlice = false;
-
-	// Update cursor.
-	if(m_Counting) {
-		const char* ptr = data;
-		const char* end = ptr + size;
-		while(ptr <= end) {
-			AdvanceCursor(ptr);
-			m_CharacterCount++;
-		}
+		m_LastSlice->size = size;
+		m_LastSlice->data = data;
+		m_ForceSlice = false;
 	}
 
 	m_Size += size;
+
+	// Update cursor.
+	if(m_Counting)
+		m_CharacterCount += StringLength(data, data + size);
+}
+
+Slice* Context::AddLockedSlice()
+{
+	m_ForceSlice = true;
+	Slice* out = m_SliceMemory.Alloc();
+	out->data = nullptr;
+	out->size = 0;
+	return out;
+}
+
+size_t Context::GetLine() const
+{
+	EnsureCursor();
+	return m_Line;
+}
+
+size_t Context::GetCollumn() const
+{
+	EnsureCursor();
+	return m_Line;
 }
 
 Context::SubContext Context::SaveSubContext(const char* fmtString)
@@ -93,58 +124,10 @@ void Context::RestoreSubContext(const SubContext& ctx)
 	argId = ctx.argId;
 }
 
-size_t Context::GetLine() const
-{
-	EnsureCursor();
-	return m_Line;
-}
-
-size_t Context::GetCollumn() const
-{
-	EnsureCursor();
-	return m_Line;
-}
-
-Slice* Context::InsertSlice(Slice* prev, Slice sl)
-{
-	Slice* s = (Slice*)m_SliceMemory.Alloc(sizeof(Slice));
-	*s = sl;
-
-	if(!prev) {
-		s->next = m_FirstSlice;
-		m_FirstSlice = s;
-	} else {
-		if(prev == m_LastSlice) {
-			m_LastSlice->next = s;
-			m_LastSlice = s;
-		} else {
-			Slice* tmp = prev->next;
-			prev->next = s;
-			s->next = tmp;
-		}
-	}
-
-	m_Size = sl.size;
-
-	return s;
-}
-
-Slice* Context::AddSlice()
-{
-	Slice* s = (Slice*)m_SliceMemory.Alloc(sizeof(Slice));
-
-	if(m_LastSlice)
-		m_LastSlice->next = s;
-	else
-		m_FirstSlice = s;
-	m_LastSlice = s;
-	m_LastSlice->next = nullptr;
-	return m_LastSlice;
-}
-
 void Context::EnsureCursor() const
 {
-	if(m_CursorSlice == m_LastSlice && m_CursorPos == m_LastSlice->size)
+	auto last = m_SliceMemory.Last();
+	if(m_CursorSlice == last && m_CursorPos == last->size)
 		return;
 
 	while(true) {
@@ -158,9 +141,9 @@ void Context::EnsureCursor() const
 				++m_Collumn;
 			}
 		}
-		if(!m_CursorSlice->next)
+		if(m_CursorSlice == last)
 			break;
-		m_CursorSlice = m_CursorSlice->next;
+		++m_CursorSlice;
 		m_CursorPos = 0;
 	}
 }

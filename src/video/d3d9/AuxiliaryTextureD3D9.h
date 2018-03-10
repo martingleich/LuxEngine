@@ -1,6 +1,7 @@
 #ifndef INCLUDED_AUXILIARY_TEXTURE_H
 #define INCLUDED_AUXILIARY_TEXTURE_H
 
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "core/ReferenceCounted.h"
 #include "platform/UnknownRefCounted.h"

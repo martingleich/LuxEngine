@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 
 #include "ImageLoaderD3DX.h"

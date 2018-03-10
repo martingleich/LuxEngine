@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "RawInputReceiver.h"
 

@@ -2,13 +2,12 @@
 #define INCLUDED_FORMAT_CONTEXT_H
 #include "format/FormatConfig.h"
 #include "format/FormatMemory.h"
-#include "format/StringBasics.h"
-#include "format/FormatLocale.h"
 #include <string>
 
 namespace format
 {
 class Sink;
+class Locale;
 
 struct Cursor
 {
@@ -24,39 +23,20 @@ All the connected slices of a series create a full output string.
 */
 struct Slice
 {
-	friend class Context;
-
 	size_t size;  //!< Number of bytes in the string
 	const char* data; //!< Data of the string, is not null-termainted
 
 	Slice() :
 		size(0),
-		data(nullptr),
-		next(nullptr)
+		data(nullptr)
 	{
 	}
 
 	Slice(size_t len, const char* d) :
 		size(len),
-		data(d),
-		next(nullptr)
+		data(d)
 	{
 	}
-
-	//! Get the next string in the list
-	Slice* GetNext()
-	{
-		return next;
-	}
-
-	//! Get the next string in the list
-	const Slice* GetNext() const
-	{
-		return next;
-	}
-
-private:
-	Slice* next;
 };
 
 class Context
@@ -83,6 +63,141 @@ public:
 		}
 	};
 
+	struct SliceMemory
+	{
+		static const size_t BLOCK_SIZE = 64;
+
+		struct Block
+		{
+			Block* next;
+			size_t used;
+
+			char data[BLOCK_SIZE];
+		};
+
+		class Iterator
+		{
+		public:
+			Iterator() :
+				ptr(nullptr)
+			{
+			}
+			Iterator(const Slice* _ptr, const Block* b) :
+				ptr(_ptr),
+				block(b)
+			{
+			}
+
+			void Next()
+			{
+				if((void*)(ptr + 1) < (void*)(block->data + BLOCK_SIZE)) {
+					++ptr;
+					return;
+				} else {
+					block = block->next;
+					ptr = (Slice*)block->data;
+				}
+			}
+
+			Iterator& operator++()
+			{
+				Next();
+				return *this;
+			}
+			Iterator operator++(int)
+			{
+				Iterator tmp(*this);
+				this->Next();
+				return tmp;
+			}
+
+			const Slice& operator*()
+			{
+				return *ptr;
+			}
+
+			const Slice* operator->()
+			{
+				return ptr;
+			}
+			bool operator==(const Iterator& other) const
+			{
+				return ptr == other.ptr;
+			}
+			bool operator!=(const Iterator& other) const
+			{
+				return ptr != other.ptr;
+			}
+
+		private:
+			const Slice* ptr;
+			const Block* block;
+		};
+
+		Block firstBlock;
+		Block* curBlock;
+
+		SliceMemory()
+		{
+			firstBlock.next = 0;
+			firstBlock.used = 0;
+			curBlock = &firstBlock;
+		}
+
+		~SliceMemory()
+		{
+			Clear();
+		}
+
+		void Clear()
+		{
+			Block* b = firstBlock.next;
+			while(b) {
+				Block* next = b->next;
+				free(b);
+				b = next;
+			}
+			firstBlock.used = 0;
+			firstBlock.next = nullptr;
+			curBlock = &firstBlock;
+		}
+
+		Slice* Alloc()
+		{
+			const size_t bytes = sizeof(Slice);
+			void* out;
+			if(!curBlock || curBlock->used + bytes > BLOCK_SIZE) {
+				Block* b = (Block*)malloc(sizeof(Block));
+				if(!b)
+					throw std::bad_alloc();
+				b->used = 0;
+				b->next = nullptr;
+
+				curBlock->next = b;
+				curBlock = b;
+			}
+			out = curBlock->data + curBlock->used;
+			curBlock->used += bytes;
+
+			return (Slice*)out;
+		}
+
+		Iterator Begin() const
+		{
+			return Iterator((Slice*)firstBlock.data, &firstBlock);
+		}
+		Iterator End() const
+		{
+			auto it = Last();
+			++it;
+			return it;
+		}
+		Iterator Last() const
+		{
+			return Iterator((Slice*)(curBlock->data + curBlock->used - sizeof(Slice)), curBlock);
+		}
+	};
+
 public:
 	// Parsing information, for error reporting
 	size_t fstrLastArgPos; // Position of the last parsed argument
@@ -92,6 +207,11 @@ public:
 	FORMAT_API Context(
 		const Locale* locale = nullptr,
 		size_t startCollum = 0,
+		size_t startLine = 0);
+
+	FORMAT_API void Reset(
+		const Locale* locale = nullptr,
+		size_t startCollumn = 0,
 		size_t startLine = 0);
 
 	FORMAT_API void AddSlice(size_t size, const char* data, bool forceCopy = false);
@@ -107,16 +227,8 @@ public:
 	{
 		AddSlice(strlen(data), data, forceCopy);
 	}
+	FORMAT_API Slice* AddLockedSlice();
 
-	const Locale* GetLocale() const
-	{
-		return m_Locale;
-	}
-
-	size_t GetSize() const
-	{
-		return m_Size;
-	}
 	FORMAT_API size_t GetLine() const;
 	FORMAT_API size_t GetCollumn() const;
 
@@ -125,6 +237,7 @@ public:
 		++m_Counting;
 		return m_CharacterCount;
 	}
+
 	size_t StopCounting()
 	{
 		--m_Counting;
@@ -136,51 +249,46 @@ public:
 		return (char*)m_Memory.Alloc(len);
 	}
 
-	const char* GetFormatString() const
+	struct SlicesT
 	{
-		return m_FmtString;
-	}
-
-	const Slice* GetFirstSlice() const
+		SliceMemory::Iterator _begin;
+		SliceMemory::Iterator _end;
+		SliceMemory::Iterator begin() const { return _begin; }
+		SliceMemory::Iterator end() const { return _end; }
+	};
+	SlicesT Slices() const
 	{
-		return m_FirstSlice;
-	}
-
-	const Slice* GetLastSlice() const
-	{
-		return m_LastSlice;
-	}
-
-	Slice* LockLastSlice()
-	{
-		m_ForceSlice = true;
-		return m_LastSlice;
-	}
-
-	void ClearMemory()
-	{
-		m_Memory.Clear();
-		m_SliceMemory.Clear();
+		return {m_SliceMemory.Begin(), m_SliceMemory.End()};
 	}
 
 	FORMAT_API SubContext SaveSubContext(const char* newFmtString);
 	FORMAT_API void RestoreSubContext(const SubContext& ctx);
 
-	FORMAT_API Slice* InsertSlice(Slice* prev, Slice sl);
+	const char* GetFormatString() const
+	{
+		return m_FmtString;
+	}
+
+	const Locale* GetLocale() const
+	{
+		return m_Locale;
+	}
+
+	size_t GetSize() const
+	{
+		return m_Size;
+	}
 
 private:
-	Slice* AddSlice();
 	void EnsureCursor() const;
 
 private:
 	const char* m_FmtString;
 
 	// Memory information
-	Slice* m_FirstSlice;
-	Slice* m_LastSlice;
-
 	internal::FormatMemory m_Memory;
-	internal::FormatMemory m_SliceMemory;
+	SliceMemory m_SliceMemory;
+	Slice* m_LastSlice;
 
 	// Output information
 	mutable size_t m_Line;
@@ -189,7 +297,7 @@ private:
 	int m_Counting;
 	size_t m_Size;
 
-	mutable Slice* m_CursorSlice;
+	mutable SliceMemory::Iterator m_CursorSlice;
 	mutable size_t m_CursorPos;
 
 	const Locale* m_Locale;

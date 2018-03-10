@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_WINDOWS
 #include "io/FileSystemWin32.h"
 

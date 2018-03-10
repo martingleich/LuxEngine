@@ -1,5 +1,6 @@
 #ifndef INCLUDED_VIDEODRIVER_D3D9_H
 #define INCLUDED_VIDEODRIVER_D3D9_H
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/VideoDriverNull.h"
 

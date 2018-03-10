@@ -47,7 +47,7 @@ enum class HIDUsagePage
 	CameraControlPage = 0x90,
 };
 
-class RawInputReceiver : public ReferenceCounted
+class RawInputReceiver : virtual public ReferenceCounted
 {
 public:
 	RawInputReceiver(InputSystem* inputSystem, HWND window);

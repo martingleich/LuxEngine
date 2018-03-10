@@ -5,7 +5,6 @@ set(INCS
 	"src/Context.h"
 )
 
-include_directories("${PROJECT_SOURCE_DIR}/inc")
 include_directories("${PROJECT_SOURCE_DIR}/testing/MaterialTest/src")
 link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 

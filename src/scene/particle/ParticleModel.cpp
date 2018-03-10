@@ -97,7 +97,7 @@ void ParticleModel::ResetToDefault()
 
 void ParticleModel::SetLifeTime(float min, float max)
 {
-	assert(min <= max);
+	lxAssert(min <= max);
 
 	m_LifeTimeMin = min;
 	m_LifeTimeMax = max;
@@ -208,7 +208,7 @@ void ParticleModel::InitParticle(Particle& particle) const
 
 		case EParticleParamState::Interpolated:
 			auto interpolator = m_Params[i].interpolator;
-			assert(interpolator);
+			lxAssert(interpolator);
 			value = interpolator->Interpolate(particle, 1.0f);
 			scaleX = 1.0f;
 			inter = true;

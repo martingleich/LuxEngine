@@ -33,7 +33,7 @@ struct FormatExData
 	const Locale* locale = nullptr;
 	int sinkFlags = 0;
 
-	size_t* outCollum = nullptr;
+	size_t* outCollumn = nullptr;
 	size_t* outLine = nullptr;
 };
 

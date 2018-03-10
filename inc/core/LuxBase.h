@@ -1,15 +1,6 @@
 #ifndef INCLUDED_LUXBASE_H
 #define INCLUDED_LUXBASE_H
-
 #include "LuxConfig.h"
-
-#if !defined(LUX_WINDOWS) && !defined(LUX_LINUX)
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64)
-#define LUX_WINDOWS
-#else
-#define LUX_LINUX
-#endif
-#endif
 
 //---------------------------------------------
 // LUX_EXPORT

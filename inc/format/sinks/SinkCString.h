@@ -35,7 +35,7 @@ public:
 	{
 	}
 
-	FORMAT_API size_t Write(Context& ctx, const Slice* firstSlice, int flags);
+	FORMAT_API size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
 
 private:
 	SafeCString m_Str;
@@ -54,6 +54,14 @@ struct sink_access<char*>
 	static cstring_sink Get(char* x)
 	{
 		return cstring_sink(SafeCString(x, SIZE_MAX));
+	}
+};
+template <size_t SIZE>
+struct sink_access<char[SIZE]>
+{
+	static cstring_sink Get(char* x)
+	{
+		return cstring_sink(SafeCString(x, SIZE));
 	}
 };
 /** \endcond */

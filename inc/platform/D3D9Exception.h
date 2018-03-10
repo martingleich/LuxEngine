@@ -1,6 +1,6 @@
 #ifndef INCLUDED_D3D9_EXCEPTION
 #define INCLUDED_D3D9_EXCEPTION
-
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "Win32Exception.h"
 #include <dxerr/dxerr.h>

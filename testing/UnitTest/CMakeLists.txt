@@ -41,7 +41,6 @@ set(UNITTEST_INCS
 	"src/UnitTestEx.h"
 	)
 
-include_directories("${PROJECT_SOURCE_DIR}/inc")
 include_directories("${PROJECT_SOURCE_DIR}/testing/UnitTest/src")
 link_directories(${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 

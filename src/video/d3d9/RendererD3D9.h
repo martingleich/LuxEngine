@@ -1,5 +1,6 @@
 #ifndef INCLUDED_RENDERER_D3D9_H
 #define INCLUDED_RENDERER_D3D9_H
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/RendererNull.h"
 

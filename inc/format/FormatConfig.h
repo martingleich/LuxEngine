@@ -8,4 +8,6 @@
 #define FORMAT_WINDOWS
 #endif
 
+#define FORMAT_EXCEPTIONS
+
 #endif // #ifndef INCLUDED_FORMAT_CONFIG_H

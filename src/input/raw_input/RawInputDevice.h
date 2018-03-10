@@ -1,5 +1,6 @@
 #ifndef INCLUDED_RAW_INPUT_DEVICE_H
 #define INCLUDED_RAW_INPUT_DEVICE_H
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 #include "input/InputDevice.h"
 #include "input/InputSystem.h"

@@ -49,6 +49,7 @@ u32 AdvanceCursorUTF8(const char*& ptr)
 		return (u0&~0xF8) << 18 | (u1&~0xC0) << 12 | (u2&~0xC0) << 6 | (u3 &~0xC0) << 0;
 
 	lxAssertNeverReach("Invalid utf8-codepoint");
+	return 0;
 }
 
 u32 GetCharacterUTF8(const char* ptr)
@@ -66,6 +67,7 @@ u32 GetCharacterUTF8(const char* ptr)
 	if((u0 & 0xF8) == 0xF0) // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 		return (u0&~0xF8) << 18 | (u1&~0xC0) << 12 | (u2&~0xC0) << 6 | (u3 &~0xC0) << 0;
 	lxAssertNeverReach("Invalid utf8-codepoint");
+	return 0;
 }
 
 size_t StringLengthUTF16(const char* str, size_t* outBytes)

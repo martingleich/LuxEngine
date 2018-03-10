@@ -8,7 +8,7 @@ namespace serial
 {
 
 //! Base class for serializable classes.
-class Serializable : public Referable
+class Serializable : public virtual Referable
 {
 public:
 	//! Serialize object into target.

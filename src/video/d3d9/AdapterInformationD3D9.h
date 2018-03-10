@@ -1,5 +1,6 @@
 #ifndef INCLUDED_ADAPTER_INFORMATION_D3D9_H
 #define INCLUDED_ADAPTER_INFORMATION_D3D9_H
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/DriverConfig.h"
 

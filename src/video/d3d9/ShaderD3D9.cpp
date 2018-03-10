@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "ShaderD3D9.h"
 #include "video/d3d9/DeviceStateD3D9.h"

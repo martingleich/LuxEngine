@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FORMAT_FORMAT_MEMORY_H
 #define INCLUDED_FORMAT_FORMAT_MEMORY_H
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #include <vector>
 #include <new>
 
@@ -11,9 +11,8 @@ namespace internal
 {
 	struct FormatMemory
 	{
-		static const size_t FIXED_MEMORY = 64;
-		static const size_t BLOCK_SIZE = 256;
-		static const size_t THRESHOLD = BLOCK_SIZE / 4;
+		static const size_t BLOCK_SIZE = 64;
+		static const size_t THRESHOLD = 64;
 
 		struct Block
 		{
@@ -23,8 +22,7 @@ namespace internal
 			char data[BLOCK_SIZE];
 		};
 
-		size_t fixedUsed;
-		char fixed[FIXED_MEMORY];
+		Block firstBlock;
 		Block* curBlock;
 
 		std::vector<void*> freeAlloc;
@@ -32,16 +30,15 @@ namespace internal
 		void* lastAlloc;
 		size_t lastAllocSize;
 
-		// Statistics
-		size_t used;
-
 		FormatMemory() :
-			used(0),
-			fixedUsed(0),
 			curBlock(nullptr),
 			lastAlloc(nullptr),
 			lastAllocSize(0)
 		{
+			firstBlock.used = 0;
+			firstBlock.prev = 0;
+			curBlock = &firstBlock;
+			curBlock->prev = nullptr;
 		}
 
 		~FormatMemory()
@@ -51,32 +48,30 @@ namespace internal
 
 		void Clear()
 		{
-			while(curBlock) {
-				Block* next = curBlock->prev;
+			while(curBlock != &firstBlock) {
+				Block* prev = curBlock->prev;
 				free(curBlock);
-				curBlock = next;
+				curBlock = prev;
 			}
 
 			for(auto p : freeAlloc)
 				free(p);
 			freeAlloc.clear();
 
-			used = 0;
-			fixedUsed = 0;
 			lastAlloc = nullptr;
 			lastAllocSize = 0;
+
+			firstBlock.used = 0;
 		}
 
 		void* Alloc(size_t bytes)
 		{
+			void* out;
 			if(bytes > THRESHOLD) {
 				void* newBytes = malloc(bytes);
 				freeAlloc.push_back(newBytes);
-				lastAlloc = newBytes;
-			} else if(fixedUsed + bytes <= FIXED_MEMORY) {
-				void* out = fixed + fixedUsed;
-				fixedUsed += bytes;
-				lastAlloc = out;
+				out = newBytes;
+				lastAlloc = nullptr; // Dont't record free allocs
 			} else {
 				if(!curBlock || curBlock->used + bytes > BLOCK_SIZE) {
 					Block* b = (Block*)malloc(sizeof(Block));
@@ -87,13 +82,13 @@ namespace internal
 					curBlock = b;
 				}
 
-				lastAlloc = curBlock->data + curBlock->used;
+				out = curBlock->data + curBlock->used;
 				curBlock->used += bytes;
+				lastAlloc = out;
 			}
 
-			used += bytes;
 			lastAllocSize = bytes;
-			return lastAlloc;
+			return out;
 		}
 
 		bool TryExpand(const void* p, size_t expand)
@@ -101,23 +96,15 @@ namespace internal
 			if(p != lastAlloc)
 				return false;
 
-			if(p >= fixed && p <= fixed + FIXED_MEMORY) {
-				if(fixedUsed + expand <= FIXED_MEMORY) {
-					fixedUsed += expand;
-					used += expand;
-					return true;
-				}
-			} else if(p >= curBlock->data && p <= curBlock->data + BLOCK_SIZE) {
+			if(p >= curBlock->data && p <= curBlock->data + BLOCK_SIZE) {
 				if(curBlock->used + expand <= BLOCK_SIZE) {
 					curBlock->used += expand;
-					used += expand;
 					return true;
 				}
 			}
 
 			return false;
 		}
-
 	};
 }
 }

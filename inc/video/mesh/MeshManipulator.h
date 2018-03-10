@@ -48,21 +48,21 @@ protected:
 		return geo->GetVertices()->Elements
 			<math::Vector3F>(VertexElement::EUsage::Position);
 	}
-	
+
 	//! Helper method, get all modifiable normals in geometry.
 	core::StrideRange<math::Vector3F> GetNormals(Geometry* geo)
 	{
 		return geo->GetVertices()->Elements
 			<math::Vector3F>(VertexElement::EUsage::Normal);
 	}
-	
+
 	//! Helper method, get all modifiable colors in geometry.
 	core::StrideRange<Color> GetColors(Geometry* geo)
 	{
 		return geo->GetVertices()->Elements
 			<Color>(VertexElement::EUsage::Diffuse);
 	}
-	
+
 	//! Helper method, get all modifiable texture coords in geometry.
 	core::StrideRange<math::Vector2F> GetTCoords(Geometry* geo, u32 index = 0)
 	{
@@ -152,7 +152,7 @@ public:
 
 		return geo;
 	}
-	
+
 private:
 	math::Matrix4 m_Transform;
 	math::Matrix4 m_TransformIT;
@@ -305,7 +305,7 @@ public:
 					c = indices->GetIndex(3 * i + 2);
 					break;
 				default:
-					(void)0;
+					a = b = c = 0;
 				}
 				u32 index = 3 * i + 0;
 				memcpy(dstV + index*strideV, srcV + a*strideV, strideV);
@@ -335,7 +335,7 @@ public:
 
 //! Recalculates the normals of the mesh.
 /**
-Generates flat-shading i.e. The normal of each vertex is equal to the 
+Generates flat-shading i.e. The normal of each vertex is equal to the
 face it belongs to.<br>
 All faces a vertex belongs to, should have the same normal. This is the
 case if the mesh in fully unwelded.<br>

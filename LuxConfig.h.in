@@ -1,0 +1,18 @@
+#pragma once
+#ifndef INCLUDED_LUXCONFIG_H
+#define INCLUDED_LUXCONFIG_H
+
+// Version information
+#define LuxEngine_VERSION_MAJOR 0
+#define LuxEngine_VERSION_MINOR 1
+
+// Platform defines
+#cmakedefine LUX_WINDOWS
+#cmakedefine LUX_LINUX
+
+// Library specific variables
+#cmakedefine LUX_COMPILE_WITH_D3D9
+#cmakedefine LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
+#cmakedefine LUX_COMPILE_WITH_RAW_INPUT
+
+#endif // #ifndef INCLUDED_LUXCONFIG_H

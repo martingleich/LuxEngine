@@ -1,6 +1,6 @@
 #include "format/Format.h"
 #include "format/ConvInternal.h"
-#include <limits.h>
+#include <climits>
 
 namespace format
 {
@@ -170,19 +170,17 @@ namespace internal
 			outPlaceholder.type = 0;
 
 			// Advance cursor until ~ character.
-			char c;
 			const char* before = cur;
-			const char* tmp;
-			do {
-				tmp = cur;
-				c = *cur++;
-			} while(c && c != '~');
-
-			size = tmp - before;
+			while(*cur && *cur != '~')
+				++cur;
+			size = cur - before;
 
 			// The string ended before another placeholder.
-			if(c == 0)
+			if(*cur == 0)
 				break;
+
+			// Move to first character of placeholder
+			++cur;
 
 			// Remember offset of the current placeholder
 			ctx.fstrLastArgPos = cur - ctx.GetFormatString();
@@ -193,8 +191,6 @@ namespace internal
 			// If a argument free placeholder without subplaceholders is found.
 			if(!outPlaceholder.HasSubPlaceholder() && IsArgFreePlaceholder(outPlaceholder.type)) {
 				ctx.AddSlice(size, str);
-				str = cur;
-
 				TryFormatArgFree(ctx, outPlaceholder);
 			} else {
 				break;
@@ -206,12 +202,13 @@ namespace internal
 			ctx.AddSlice(size, str);
 
 		str = cur;
-
 		return (outPlaceholder.type != 0);
 	}
 
-	static void AlignString(Context& ctx, Slice* prevSlice, size_t length, const Placeholder& placeholder)
+	static void AlignString(Context& ctx, Slice* rightAlignSlice, size_t length, const Placeholder& placeholder)
 	{
+		static const char* SPACES = "                                "; // 32 Spaces
+
 		// Align content
 		if(placeholder.left_align) {
 			if(!placeholder.left_align.HasValue())
@@ -235,30 +232,23 @@ namespace internal
 			if((size_t)width <= length)
 				return;
 
-			static const char* SPACES = "                                "; // 32 Spaces
 			const size_t maxCount = 32;
 			size_t count = (size_t)width - length;
-
-			while(count > 0) {
-				if(count >= maxCount) {
-					prevSlice = ctx.InsertSlice(prevSlice, Slice(maxCount, SPACES));
-					count -= maxCount;
-				} else {
-					prevSlice = ctx.InsertSlice(prevSlice, Slice(count, SPACES));
-					return;
-				}
-			}
+			if(count > maxCount)
+				throw syntax_exception("Width of align must be smaller than 32.");
+			rightAlignSlice->data = SPACES;
+			rightAlignSlice->size = count;
 		}
 	}
 
 	static void WriteData(Context& ctx, const FormatEntry* entry, Placeholder& placeholder)
 	{
 		size_t beforeLength = 0;
-		Slice* prevSlice = nullptr;
+		Slice* alignSlice = nullptr;
 		if(placeholder.left_align || placeholder.right_align) {
 			beforeLength = ctx.StartCounting();
 			if(placeholder.right_align)
-				prevSlice = ctx.LockLastSlice();
+				alignSlice = ctx.AddLockedSlice();
 		}
 
 #if defined(FORMAT_ERROR_TEXT) && defined(FORMAT_NO_EXCEPTIONS)
@@ -273,12 +263,14 @@ namespace internal
 
 		if(placeholder.left_align || placeholder.right_align) {
 			auto newLength = ctx.StopCounting();
-			AlignString(ctx, prevSlice, newLength - beforeLength, placeholder);
+			AlignString(ctx, alignSlice, newLength - beforeLength - 1, placeholder);
 		}
 	}
 
-	void format(Context& ctx, const BaseFormatEntryType* rawEntries, int entryCount)
+	void format(Context& ctx, const char* fmtStr, const BaseFormatEntryType* rawEntries, int entryCount)
 	{
+		Context::AutoRestoreSubContext subCtx(ctx, fmtStr);
+
 		auto GetEntry = [&](int i) { return reinterpret_cast<const FormatEntry*>(rawEntries + i); };
 		const char* cur = ctx.GetFormatString();
 

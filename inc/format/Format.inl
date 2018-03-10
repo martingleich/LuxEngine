@@ -1,5 +1,5 @@
-#include "format/FormatMagicTemplates.h"
-#include <initializer_list>
+#include "format/Exception.h"
+#include <type_traits>
 
 namespace format
 {
@@ -14,10 +14,21 @@ namespace internal
 
 	struct null_type {};
 	inline void fmtPrint(Context&, null_type, Placeholder&) {}
-	template <>
-	inline int GetAsInt(const null_type&)
+
+	template <typename T>
+	typename std::enable_if<std::is_integral<T>::value, int>::type
+		AsInteger(T arg)
 	{
-		return 0;
+		if(arg > (T)INT_MAX)
+			throw value_exception("Passed integer value is to big.");
+		return (int)arg;
+	}
+
+	template <typename T>
+	typename std::enable_if<!std::is_integral<T>::value, int>::type
+		AsInteger(const T&)
+	{
+		throw value_exception("Passed placeholder value must be an integer.");
 	}
 
 	template <typename T>
@@ -36,7 +47,7 @@ namespace internal
 
 		int AsInteger() const
 		{
-			return GetAsInt(*m_Data);
+			return internal::AsInteger(*m_Data);
 		}
 
 	private:
@@ -46,67 +57,55 @@ namespace internal
 	using BaseFormatEntryType = char[sizeof(RefFormatEntry<null_type>)];
 
 	template <typename T>
-	void AddEntry(const T& arg, void*& ptr)
+	void CheckRefEntryType()
 	{
-		static_assert(sizeof(RefFormatEntry<T>) == sizeof(BaseFormatEntryType), "Big problem");
-
-		new (ptr) RefFormatEntry<T>(&arg);
-		ptr = (char*)ptr + sizeof(RefFormatEntry<T>);
+		static_assert(sizeof(RefFormatEntry<T>) <= sizeof(BaseFormatEntryType), "Big problem");
 	}
 
-	FORMAT_API void format(Context& ctx, const BaseFormatEntryType* entries, int entryCount);
-
-	template<class T> struct remove_all { typedef T type; };
-	template<class T> struct remove_all<T&> : remove_all<T> {};
-	template<class T> struct remove_all<T const> : remove_all<T> {};
-	template<class T> struct remove_all<T volatile> : remove_all<T> {};
-	template<class T> struct remove_all<T const volatile> : remove_all<T> {};
+	FORMAT_API void format(Context& ctx, const char* fmtStr, const BaseFormatEntryType* entries, int entryCount);
 }
 
-// Format string into Context
-/**
-Will throw syntax_exception on bad syntax.
-Can throw exception on conversion error, depending on FORMAT_ERROR_TEXT.
-Useful conv_data implementations.
-Will perform normal formatting, but will write the result into a Context.
-*/
 template <typename... Types>
 inline void vformat(Context& ctx, const char* str, const Types&... args)
 {
-	Context::AutoRestoreSubContext subCtx(ctx, str);
+	// Validate RefFormatEntry sizes
+	int unused1[] = {0, (internal::CheckRefEntryType<Types>(), 0)...};
+	(void)unused1;
 
-	// Put each argument in an array
-	internal::BaseFormatEntryType entries[sizeof...(Types) ? sizeof...(Types) : 1];
+	// Allocate stack memory for RefEntries
+	internal::BaseFormatEntryType entries[sizeof...(Types) ? sizeof...(Types) : 1]; // Arrays of size 0 are forbidden.
 	void* ptr = entries;
 	(void)ptr; // Fixed warning if entryCount is zero.
-	(void)std::initializer_list<int> {
-		(internal::AddEntry(args, ptr), 0)...
+	int unused2[] = {0, 
+		// Perform calls directly to reduce compile file size.
+		(new (ptr) internal::RefFormatEntry<Types>(&args), ptr = (char*)ptr + sizeof(internal::BaseFormatEntryType), 0)...
 	};
+	(void)unused2;
 
-	internal::format(ctx, entries, (int)sizeof...(Types));
+	internal::format(ctx, str, entries, (int)sizeof...(Types));
 }
 
 template <typename SinkT, typename... Types>
 inline size_t formatEx(SinkT&& sink, const FormatExData& exData, const char* str, const Types&... args)
 {
-	using CleanSinkT = typename internal::remove_all<SinkT>::type;
 	if(!str)
 		return (size_t)-1;
-
-	auto real_sink = sink_access<CleanSinkT>::Get(sink);
-
-	Context ctx(exData.locale, exData.startCollumn, exData.startLine);
-
 #ifdef FORMAT_NO_EXCEPTIONS
 	try {
 #endif
+		Context ctx(exData.locale, exData.startCollumn, exData.startLine);
 		vformat(ctx, str, args...);
-		size_t outCharacters = real_sink.Write(ctx, ctx.GetFirstSlice(), exData.sinkFlags);
-		if(exData.outCollum) {
+
+		using CleanSinkT =
+			typename std::remove_cv<
+			typename std::remove_reference<SinkT>::type>::type;
+		auto real_sink = sink_access<CleanSinkT>::Get(sink);
+		size_t outCharacters = real_sink.Write(ctx, ctx.Slices(), exData.sinkFlags);
+		if(exData.outCollumn) {
 			if(exData.sinkFlags & ESinkFlags::Newline)
-				*exData.outCollum = 0;
+				*exData.outCollumn = 0;
 			else
-				*exData.outCollum = ctx.GetCollumn();
+				*exData.outCollumn = ctx.GetCollumn();
 		}
 		if(exData.outLine)
 			*exData.outLine = ctx.GetLine();
@@ -116,7 +115,7 @@ inline size_t formatEx(SinkT&& sink, const FormatExData& exData, const char* str
 	}
 #endif
 	return outCharacters;
-}
+	}
 
 template <typename SinkT, typename... Types>
 inline size_t format(SinkT&& sink, const char* str, const Types&... args)

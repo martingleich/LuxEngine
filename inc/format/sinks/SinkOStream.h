@@ -18,7 +18,7 @@ public:
 	{
 	}
 
-	FORMAT_API virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags);
+	FORMAT_API virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
 
 private:
 	std::ostream& m_Stream;

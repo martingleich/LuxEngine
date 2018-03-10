@@ -1,6 +1,5 @@
 #ifndef INCLUDED_FORMAT_SINK_H
 #define INCLUDED_FORMAT_SINK_H
-
 #include "format/Context.h"
 
 namespace format
@@ -24,11 +23,11 @@ public:
 	/**
 	This function is only called once for each format call, all the passed data should be written at once to the output
 	\param ctx The context used to write the data, contains information about string types and so on
-	\param firstSlice The firstSlice to write to the output, the next slice can be accessed through it
+	\param slices The slices to write.
 	\param flags The flags to used while writing
 	\return The number of characters written
 	*/
-	virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags) = 0;
+	virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags) = 0;
 };
 
 //! Wrapper around a sink reference
@@ -42,9 +41,9 @@ public:
 		m_Ref(r)
 	{
 	}
-	virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags)
+	virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags)
 	{
-		return m_Ref.Write(ctx, firstSlice, flags);
+		return m_Ref.Write(ctx, slices, flags);
 	}
 private:
 	Sink& m_Ref;
@@ -56,7 +55,7 @@ All classes used as sink-types must implement a sink_access specialication
 The default implemention handles all classes inheriting from format::Sink.
 You can use classes like FILE*, std::ostream, or std::string as sinks, by
 specialicing this class, and returning a custom sink class.
-See SinkOStream, SinkCFil, or SinkStdString for examples of usage.
+See SinkOStream, SinkCFile, or SinkStdString for examples of usage.
 */
 template <typename T>
 struct sink_access

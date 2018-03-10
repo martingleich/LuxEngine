@@ -11,12 +11,7 @@ UNIT_SUITE(format)
 	UNIT_TEST(IntPrecision)
 	{
 		std::string str;
-		size_t col, line;
-		format::FormatExData data;
-		data.outCollum = &col;
-		data.outLine = &line;
-		//format::format(str, "~.3d", 3);
-		format::formatEx(str, data, "~.3d", 3);
+		format::format(str, "~.3d", 3);
 		UNIT_ASSERT_EQUAL(str, "003");
 
 		format::format(str, "~.3d", 7532);

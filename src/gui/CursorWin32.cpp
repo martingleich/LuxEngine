@@ -1,3 +1,4 @@
+#include "LuxConfig.h"
 #ifdef LUX_WINDOWS
 #include "CursorWin32.h"
 #include "platform/StrippedWindows.h"

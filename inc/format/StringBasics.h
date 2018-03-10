@@ -1,17 +1,17 @@
 #ifndef INCLUDED_FORMAT_STRING_BASICS_H
 #define INCLUDED_FORMAT_STRING_BASICS_H
 #include "format/Exception.h"
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace format
 {
 
 //! Returns the number of codepoints in the string, null-termainted
-inline size_t StringLength(const char* ptr)
+inline size_t StringLength(const char* ptr, const char* end = nullptr)
 {
 	size_t len = 0;
 	const uint8_t* s = (const uint8_t*)ptr;
-	while(*s) {
+	while(*s && s != (uint8_t*)end) {
 		if((*s & 0xC0) != 0x80)
 			++len;
 		++s;

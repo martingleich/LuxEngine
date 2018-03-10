@@ -1,7 +1,6 @@
 #ifndef INCLUDED_FORMAT_PLACEHOLDER_H
 #define INCLUDED_FORMAT_PLACEHOLDER_H
-#include <string.h>
-#include <inttypes.h>
+#include <cstring>
 
 namespace format
 {
@@ -124,7 +123,7 @@ struct Placeholder
 	}
 
 	//! Get a Option based on the character used to access it
-	Placeholder::Option* GetOption(uint32_t c)
+	Placeholder::Option* GetOption(char c)
 	{
 		switch(c) {
 		case '.': return &dot;
@@ -146,12 +145,12 @@ struct Placeholder
 	}
 };
 
-inline bool IsValidPlaceholder(uint32_t c)
+inline bool IsValidPlaceholder(char c)
 {
 	return ((c >= 'a' && c <= 'z') || c == '~');
 }
 
-inline bool IsArgFreePlaceholder(uint32_t c)
+inline bool IsArgFreePlaceholder(char c)
 {
 	return (c == '~' || c == 't');
 }

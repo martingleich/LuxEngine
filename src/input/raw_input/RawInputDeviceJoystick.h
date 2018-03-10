@@ -1,6 +1,7 @@
 #ifndef INCLUDED_RAW_JOYSTICK_DEVICE_H
 #define INCLUDED_RAW_JOYSTICK_DEVICE_H
 
+#include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_RAW_INPUT
 
 #include "RawInputDevice.h"

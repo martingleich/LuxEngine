@@ -17,7 +17,7 @@ Currently only available for Windows
 class OutputDebugString_sink : public Sink
 {
 public:
-	FORMAT_API virtual size_t Write(Context& ctx, const Slice* firstSlice, int flags);
+	FORMAT_API virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
 };
 
 //! Helper function to create a debug writer

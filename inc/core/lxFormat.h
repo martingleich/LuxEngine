@@ -19,7 +19,7 @@ public:
 	{
 	}
 
-	virtual size_t Write(format::Context& ctx, const format::Slice* firstSlice, int flags)
+	virtual size_t Write(format::Context& ctx, const format::Context::SlicesT& slices, int flags)
 	{
 		(void)ctx;
 
@@ -28,8 +28,8 @@ public:
 			++size;
 
 		m_Str.Reserve(m_Str.Size() + size);
-		for(auto slice = firstSlice; slice; slice = slice->GetNext())
-			m_Str.AppendRaw(slice->data, slice->size);
+		for(auto& s : slices)
+			m_Str.AppendRaw(s.data, s.size);
 
 		if((flags & format::ESinkFlags::Newline) != 0)
 			m_Str.Append("\n");

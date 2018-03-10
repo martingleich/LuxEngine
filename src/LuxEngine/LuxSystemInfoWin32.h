@@ -1,5 +1,6 @@
 #ifndef INCLUDED_LUX_SYSTEM_INFO_WIN32_H
 #define INCLUDED_LUX_SYSTEM_INFO_WIN32_H
+#include "LuxConfig.h"
 #ifdef LUX_WINDOWS
 #include "LuxEngine/LuxSystemInfo.h"
 #include "platform/StrippedWindows.h"

@@ -47,7 +47,7 @@ class Collider;
 class VolumeQuery;
 class LineQuery;
 
-class SceneObserver : public ReferenceCounted
+class SceneObserver : public virtual ReferenceCounted
 {
 public:
 	// Only called for parent node

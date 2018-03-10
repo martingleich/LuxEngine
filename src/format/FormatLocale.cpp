@@ -80,7 +80,7 @@ const Facet& Locale::GetFacet(const FacetType& type) const
 
 	auto it = self->facets.find(&type);
 	if(it == self->facets.end())
-		throw bad_locale_exception("Unknown locale-facet requested.");
+		throw format_exception("Unknown locale-facet requested.");
 	return *it->second;
 }
 
@@ -91,7 +91,7 @@ Facet& Locale::GetFacet(const FacetType& type)
 
 	auto it = self->facets.find(&type);
 	if(it == self->facets.end())
-		throw bad_locale_exception("Unknown locale-facet requested.");
+		throw format_exception("Unknown locale-facet requested.");
 	return *it->second;
 }
 
