@@ -17,10 +17,10 @@ class Archive;
 File enumerators iterate over some list of files.
 The list and order depends on the file enumerator i.e. The way it was created.
 */
-class FileEnumerator : public ReferenceCounted
+class AbstractFileEnumerator : public ReferenceCounted
 {
 public:
-	virtual ~FileEnumerator() {}
+	virtual ~AbstractFileEnumerator() {}
 
 	//! Points the enumerator to a valid file.
 	/**
@@ -36,6 +36,62 @@ public:
 
 	//! The the description of the current file.
 	virtual const FileDescription& GetCurrent() const = 0;
+};
+
+class FileIterator : public core::BaseIterator<core::ForwardIteratorTag, FileDescription>
+{
+public:
+	FileIterator() :
+		m_Index((u32)-1)
+	{
+	}
+	FileIterator(AbstractFileEnumerator* enumerator, int index = 0) :
+		m_Enumerator(enumerator),
+		m_Index(index)
+	{
+	}
+
+	FileIterator& operator++()
+	{
+		if(m_Enumerator->Advance())
+			++m_Index;
+		else
+			m_Index = (u32)-1;
+		return *this;
+	}
+	FileIterator operator++(int)
+	{
+		FileIterator tmp(*this);
+		++(*this);
+		return tmp;
+	}
+
+	bool operator==(const FileIterator& other) const
+	{
+		return m_Enumerator == other.m_Enumerator && m_Index == other.m_Index;
+	}
+	bool operator!=(const FileIterator& other) const
+	{
+		return !(*this == other);
+	}
+
+	const FileDescription& operator*() const
+	{
+		return m_Enumerator->GetCurrent();
+	}
+	const FileDescription* operator->() const
+	{
+		return &m_Enumerator->GetCurrent();
+	}
+
+	StrongRef<AbstractFileEnumerator> GetEnumerator() const
+	{
+		return m_Enumerator;
+	}
+
+private:
+	StrongRef<AbstractFileEnumerator> m_Enumerator;
+	u32 m_Index;
 };
 
 //! A file archive
@@ -66,10 +122,10 @@ public:
 	virtual StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
 	//! Check if a files exists
-	virtual bool ExistFile(const Path& p) = 0;
+	virtual bool ExistFile(const Path& p) const = 0;
 
 	//! Create a enumerator for a subdirecorty in the archive.
-	virtual StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = core::String::EMPTY) = 0;
+	virtual core::Range<FileIterator> EnumerateFiles(const Path& subDir = core::String::EMPTY) = 0;
 
 	//! Get the capabilites of the archive
 	virtual EArchiveCapabilities GetCaps() const = 0;
@@ -78,7 +134,10 @@ public:
 	/**
 	This only works if the requested file has an absolute path in the _real_ file system.
 	*/
-	virtual Path GetAbsolutePath(const Path& p) = 0;
+	virtual Path GetAbsolutePath(const Path& p) const = 0;
+
+	//! Get the path of the archive, may be empty.
+	virtual const Path& GetPath() const = 0;
 };
 
 }

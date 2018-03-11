@@ -3,7 +3,7 @@
 #include "core/ReferenceCounted.h"
 
 #include "core/DateAndTime.h"
-#include "ioConstants.h"
+#include "io/ioConstants.h"
 #include "io/Path.h"
 
 namespace lux
@@ -29,7 +29,7 @@ public:
 	}
 
 	//! Initialize the global filesystem
-	LUX_API static void Initialize(FileSystem* fileSys=nullptr);
+	LUX_API static void Initialize(FileSystem* fileSys = nullptr);
 
 	//! Access the global filesystem
 	LUX_API static FileSystem* Instance();
@@ -63,12 +63,12 @@ public:
 	\param memory The memory location to use for the file, dont delete this while the file is in usage
 	\param size The size of the memory used by the file in bytes
 	\param name The name of the newly created file, can be empty
-	\param deleteOnDrop Should the used memory be deleted, if the file is not longer referenced
+	\param flags Flags for the creation of a virtual file.
 	\return The newly created file.
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, bool deleteOnDrop, bool isReadOnly) = 0;
-	virtual StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, bool deleteOnDrop) = 0;
+	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
+	virtual StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
 
 	//! Create a limited file
 	/**
@@ -206,15 +206,13 @@ public:
 	if NULL remove the whole mount-point.
 	*/
 	virtual void RemoveMountPoint(const Path& point, Archive* archive = nullptr) = 0;
-	//virtual StrongRef<Archive> CreateArchive(File* file) = 0;
 };
 
-}    
-
+}
 
 DECLARE_FLAG_CLASS(io::EFileMode);
 
-}    
+}
 
 
 #endif

@@ -130,7 +130,7 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	*/
 	try {
 		auto file = io::FileSystem::Instance()->OpenVirtualFile(
-			g_BuiltinFontData, g_BuiltinFontData_SIZE, "[builtin_font_file]", false);
+			g_BuiltinFontData, g_BuiltinFontData_SIZE, "[builtin_font_file]", io::EVirtualCreateFlag::ReadOnly);
 		m_BuiltInFont = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Font, file).As<Font>();
 	} catch(...) {
 		log::Error("Can't load builtin font files");

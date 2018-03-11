@@ -159,7 +159,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 	}
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const core::String& name, bool deleteOnDrop, bool isReadOnly)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags)
 {
 	if(!memory || size == 0)
 		throw io::FileNotFoundException("[Empty Memory file]");
@@ -172,13 +172,13 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const c
 		core::DateAndTime(),
 		true);
 
-	return LUX_NEW(MemoryFile)(memory, desc, name, deleteOnDrop, false, isReadOnly);
+	return LUX_NEW(MemoryFile)(memory, desc, name, flags);
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, u32 size, const core::String& name, bool deleteOnDrop)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags)
 {
 	// File is set to read only in last parameter
-	return OpenVirtualFile(const_cast<void*>(memory), size, name, deleteOnDrop, true);
+	return OpenVirtualFile(const_cast<void*>(memory), size, name, flags | EVirtualCreateFlag::ReadOnly);
 }
 
 Path FileSystemWin32::GetAbsoluteFilename(const Path& filename) const
@@ -226,11 +226,11 @@ bool FileSystemWin32::ExistDirectory(const Path& filename) const
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
-File* FileSystemWin32::CreateTemporaryFile(u32 Size)
+File* FileSystemWin32::CreateTemporaryFile(u32 size)
 {
-	void* ptr = LUX_NEW_ARRAY(u8, Size);
+	void* ptr = LUX_NEW_ARRAY(u8, size);
 
-	return OpenVirtualFile(ptr, Size, core::String::EMPTY, true, false);
+	return OpenVirtualFile(ptr, size, core::String::EMPTY, EVirtualCreateFlag::DeleteOnDrop);
 }
 
 FileDescription FileSystemWin32::GetFileDescription(const Path& name)

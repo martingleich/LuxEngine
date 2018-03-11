@@ -54,7 +54,7 @@ static bool IsFilenameValid(const wchar_t* filename)
 
 namespace
 {
-class ArchiveFolderEnumerator : public FileEnumerator
+class ArchiveFolderEnumerator : public AbstractFileEnumerator
 {
 public:
 	ArchiveFolderEnumerator(
@@ -74,7 +74,6 @@ private:
 	FileDescription m_Current;
 };
 
-
 ArchiveFolderEnumerator::ArchiveFolderEnumerator(
 	Archive* archive,
 	const Path& basePath,
@@ -82,12 +81,12 @@ ArchiveFolderEnumerator::ArchiveFolderEnumerator(
 {
 	Win32Path win32searchPath;
 	win32searchPath.Reserve(win32Path.Size() + 2);
-	win32searchPath.PushBack(win32Path);
+	win32searchPath.PushBack(win32Path.Data(), win32Path.Size() - 1);
 	win32searchPath.PushBack(L'*');
 	win32searchPath.PushBack(0);
 
-	m_FindHandle = FindFirstFileW((const wchar_t*)win32searchPath.Data_c(), &m_FindData);
-	m_IsValid = (m_FindHandle != nullptr);
+	m_FindHandle = FindFirstFileW((LPCWSTR)win32searchPath.Data_c(), &m_FindData);
+	m_IsValid = (m_FindHandle != INVALID_HANDLE_VALUE);
 
 	while(m_IsValid && !IsFilenameValid(m_FindData.cFileName))
 		m_IsValid = (FindNextFileW(m_FindHandle, &m_FindData) == TRUE);
@@ -183,7 +182,14 @@ ArchiveFolderWin32::ArchiveFolderWin32(io::FileSystem* fileSystem, const Path& d
 	self(LUX_NEW(SelfData))
 {
 	self->fileSystem = fileSystem;
-	SetPath(dir);
+	if(dir.IsEmpty() || self->fileSystem->ExistDirectory(dir)) {
+		self->path = NormalizePath(dir, true);
+		core::String win32Path = "\\\\?\\" + self->path;
+		win32Path.Replace("\\", "/");
+		self->win32AbsPath = core::UTF8ToUTF16(win32Path.Data());
+	} else {
+		throw io::FileNotFoundException(dir.Data());
+	}
 }
 
 ArchiveFolderWin32::~ArchiveFolderWin32()
@@ -204,7 +210,7 @@ StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileM
 	return OpenFile(file.GetPath() + file.GetName(), mode, createIfNotExist);
 }
 
-bool ArchiveFolderWin32::ExistFile(const Path& p)
+bool ArchiveFolderWin32::ExistFile(const Path& p) const
 {
 #ifdef LUX_WINDOWS
 	DWORD fatt = GetWin32FileAttributes(p);
@@ -217,13 +223,13 @@ bool ArchiveFolderWin32::ExistFile(const Path& p)
 #endif
 }
 
-StrongRef<FileEnumerator> ArchiveFolderWin32::EnumerateFiles(const Path& subDir)
+core::Range<FileIterator> ArchiveFolderWin32::EnumerateFiles(const Path& subDir)
 {
 	Path correctedSubDir = NormalizePath(subDir, true);
-	Path fullPath = self->path + correctedSubDir;
-	Win32Path win32Path = ConvertPathToWin32WidePath(fullPath);
+	Win32Path win32Path = ConvertPathToWin32WidePath(correctedSubDir);
 
-	return LUX_NEW(ArchiveFolderEnumerator)(this, correctedSubDir, win32Path);
+	StrongRef<AbstractFileEnumerator> enumerator = LUX_NEW(ArchiveFolderEnumerator)(this, correctedSubDir, win32Path);
+	return core::MakeRange(FileIterator(enumerator), FileIterator(enumerator, -1));
 }
 
 EArchiveCapabilities ArchiveFolderWin32::GetCaps() const
@@ -231,42 +237,37 @@ EArchiveCapabilities ArchiveFolderWin32::GetCaps() const
 	return EArchiveCapabilities::Read | EArchiveCapabilities::Add | EArchiveCapabilities::Delete | EArchiveCapabilities::Change;
 }
 
-Path ArchiveFolderWin32::GetAbsolutePath(const Path& p)
+Path ArchiveFolderWin32::GetAbsolutePath(const Path& p) const
 {
 	return (self->path + p);
 }
 
-void ArchiveFolderWin32::SetPath(const Path& dir)
+const Path& ArchiveFolderWin32::GetPath() const
 {
-	if(dir.IsEmpty() || self->fileSystem->ExistDirectory(dir)) {
-		self->path = NormalizePath(dir, true);
-		self->win32AbsPath = ConvertPathToWin32WidePath(self->path);
-	} else {
-		throw io::FileNotFoundException(dir.Data());
-	}
-}
-
-core::Array<u16> ArchiveFolderWin32::ConvertPathToWin32WidePath(const Path& p) const
-{
-	core::Array<u16> p2 = core::UTF8ToUTF16(p.Data());
-
-	for(auto it = p2.First(); it != p2.End(); ++it)
-		if(*it == L'/')
-			*it = L'\\';
-
-	core::Array<u16> out;
-	out.Reserve(4 + self->win32AbsPath.Size() + p2.Size() + 1);
-	if(!self->win32AbsPath.IsEmpty())
-		out.PushBack(self->win32AbsPath.Data(), self->win32AbsPath.Size() - 1);
-	out.PushBack(p2.Data(), p2.Size());
-
-	return out;
+	return self->path;
 }
 
 u32 ArchiveFolderWin32::GetWin32FileAttributes(const Path& p) const
 {
 	Win32Path win32Path = ConvertPathToWin32WidePath(p);
 	return (u32)GetFileAttributesW((wchar_t*)win32Path.Data_c());
+}
+
+core::Array<u16> ArchiveFolderWin32::ConvertPathToWin32WidePath(const Path& p) const
+{
+	core::Array<u16> out = self->win32AbsPath;
+	out.PopBack(); // Remove \0 
+	core::Array<u16> p2 = core::UTF8ToUTF16(p.Data());
+	out.Reserve(out.Size() + p2.Size() + 1);
+
+	for(auto it = p2.First(); it != p2.End(); ++it) {
+		if(*it == L'/')
+			out.PushBack(L'\\');
+		else
+			out.PushBack(*it);
+	}
+
+	return out;
 }
 
 }

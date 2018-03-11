@@ -11,12 +11,10 @@ class MemoryFile : public File
 {
 public:
 	MemoryFile(
-		void* Buffer,
+		void* buffer,
 		const FileDescription& desc,
-		core::String name,
-		bool DeleteBufferOnDrop,
-		bool Expandable,
-		bool readOnly);
+		const core::String& name,
+		EVirtualCreateFlag flags);
 	~MemoryFile();
 	u32 ReadBinaryPart(u32 numBytes, void* out);
 	u32 WriteBinaryPart(const void* data, u32 length);
@@ -32,9 +30,7 @@ private:
 	u32 m_Cursor;
 	bool m_IsEOF;
 
-	const bool m_DeleteBufferOnDrop;
-	const bool m_IsExpandable;
-	const bool m_IsReadOnly;
+	EVirtualCreateFlag m_Flags;
 };
 
 } //namespace io

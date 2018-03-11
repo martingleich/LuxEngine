@@ -16,8 +16,8 @@ public:
 	FileSystemWin32();
 	StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const Path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, bool deleteOnDrop, bool isReadOnly);
-	StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, bool deleteOnDrop);
+	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, EVirtualCreateFlag flag);
+	StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, EVirtualCreateFlag flag);
 	bool ExistFile(const Path& filename) const;
 	bool ExistDirectory(const Path& filename) const;
 	Path GetAbsoluteFilename(const Path& filename) const;

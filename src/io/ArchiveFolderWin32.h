@@ -19,13 +19,13 @@ public:
 	~ArchiveFolderWin32();
 	StrongRef<File> OpenFile(const Path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	bool ExistFile(const Path& p);
-	StrongRef<FileEnumerator> EnumerateFiles(const Path& subDir = core::String::EMPTY);
+	bool ExistFile(const Path& p) const;
+	core::Range<FileIterator> EnumerateFiles(const Path& subDir = core::String::EMPTY);
 	EArchiveCapabilities GetCaps() const;
-	Path GetAbsolutePath(const Path& p);
+	Path GetAbsolutePath(const Path& p) const;
+	const Path& GetPath() const;
 
 private:
-	void SetPath(const Path& dir);
 	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
 	u32 GetWin32FileAttributes(const Path& p) const;
 

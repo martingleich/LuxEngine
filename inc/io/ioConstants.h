@@ -30,9 +30,20 @@ enum class EArchiveCapabilities
 	Change = 0x8
 };
 
+enum class EVirtualCreateFlag
+{
+	None = 0,
+	Copy = 1,
+	ReadOnly = 2,
+	DeleteOnDrop = 4,
+	Expandable = 8,
+};
+
 }
 
 DECLARE_FLAG_CLASS(io::EArchiveCapabilities);
+DECLARE_FLAG_CLASS(io::EVirtualCreateFlag);
+
 }
 
 #endif // #ifndef INCLUDED_IOCONSTANTS_H
