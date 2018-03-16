@@ -1,5 +1,0 @@
-#ifndef INCLUDED_LX_ALLOCATOR_H
-#define INCLUDED_LX_ALLOCATOR_H
-#include "lxMemory.h"
-
-#endif // !INCLUDED_LX_ALLOCATOR_H

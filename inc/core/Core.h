@@ -13,7 +13,6 @@
 #include "core/LuxBase.h"
 #include "core/lxActions.h"
 #include "core/lxAlgorithm.h"
-#include "core/lxAllocator.h"
 #include "core/lxArray.h"
 #include "core/lxAssert.h"
 #include "core/lxBinary.h"
