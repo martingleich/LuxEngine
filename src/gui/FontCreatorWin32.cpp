@@ -286,7 +286,7 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 		DIB_RGB_COLORS);
 
 	ctx->channelCount = ctx->borderSize > 0 ? 2 : 1;
-	ctx->image = new u8[width * height * ctx->channelCount];
+	ctx->image = LUX_NEW_ARRAY(u8, width * height * ctx->channelCount);
 
 	// Invert and gamma correct data, and flip upside down
 	u32 inOff = 0;
@@ -457,7 +457,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	const FontDescription& desc,
 	const core::Array<u32>& charSet)
 {
-	impl_fontCreatorWin32::Context* ctx = new impl_fontCreatorWin32::Context;
+	core::UniquePtr<impl_fontCreatorWin32::Context> ctx = LUX_NEW(impl_fontCreatorWin32::Context);
 	ctx->characters = charSet;
 
 	ctx->antialiased = desc.antialiased;
@@ -472,10 +472,8 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 		desc.borderSize,
 		desc.borderSize);
 
-	if(!GenerateDC(ctx)) {
-		delete ctx;
+	if(!GenerateDC(ctx))
 		return nullptr;
-	}
 
 	if(isFileFont || DoesFontFamilyExist(ctx, name)) {
 		ctx->font = CreateFontW(desc.size, 0,
@@ -486,12 +484,10 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 			ctx->antialiased ? ANTIALIASED_QUALITY : NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, core::StringToUTF16W(name));
 		if(!ctx->font) {
 			FreeDC(ctx);
-			delete ctx;
 			return nullptr;
 		}
 	} else {
 		FreeDC(ctx);
-		delete ctx;
 		return nullptr;
 	}
 
@@ -499,7 +495,6 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	CalculateImageSize(ctx);
 	if(!AllocBitmap(ctx)) {
 		FreeDC(ctx);
-		delete ctx;
 		return nullptr;
 	}
 
@@ -509,7 +504,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	FreeDC(ctx);
 	FreeFont(ctx);
 
-	return ctx;
+	return ctx.Take();
 }
 
 bool FontCreatorWin32::GetFontImage(void* void_ctx, u8*& image, math::Dimension2U& imageSize, u32& channelCount)

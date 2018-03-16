@@ -124,9 +124,6 @@ int main(int argc, const char* argv[])
 	if(isProject)
 		UnitTesting::Environment::Instance().SetControl(new ProjectPrinter(succeded, failed));
 
-	//	NameFilter nameFilter = NameFilter::Include({"String", "unicode", "path"});
-	//	UnitTesting::Environment::Instance().AddFilter(&nameFilter);
-
 #ifdef _DEBUG
 	// This is pure evil.
 	// We can maybe catch the first exception, after that the stack is most likly fucked up.

@@ -18,10 +18,16 @@ class Filter;
 class ControlCallback;
 typedef void(*TestFunction)(TestContext&);
 
+enum EUnitFlags
+{
+	Flags_None = 0,
+	Flags_Only = 1,
+};
+
 struct Info
 {
 	Info();
-	Info(const std::string& name, const std::string& file, int line);
+	Info(const std::string& name, const std::string& file, int line, int flags = Flags_None);
 
 	const std::string& GetName() const;
 	const std::string& GetFile() const;
@@ -30,6 +36,7 @@ struct Info
 	const Environment* env;
 	const Suite* suite;
 	const Test* test;
+	int flags;
 
 private:
 	std::string m_Name;
@@ -191,6 +198,8 @@ private:
 	std::vector<std::string> m_Dependencies;
 	std::vector<Test*> m_Tests;
 	std::set<std::string> m_Tags;
+
+	bool m_IsOnly;
 };
 
 class EnvironmentResult : public ResultObject
@@ -404,7 +413,7 @@ public:
 	}
 	virtual void OnEnd(const EnvironmentResult& result)
 	{
-		std::cout << "====== " << m_SuccessCount << " succeeded, " << m_TestCount-m_SuccessCount << " failed =======" << std::endl;
+		std::cout << "====== " << m_SuccessCount << " succeeded, " << m_TestCount - m_SuccessCount << " failed =======" << std::endl;
 	}
 
 	virtual ControlAction OnException(const Info& ctx)

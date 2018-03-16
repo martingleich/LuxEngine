@@ -29,9 +29,12 @@ struct MemoryDebugInfo
 	}
 };
 
+LUX_API void InitMemoryDebugging();
+LUX_API void ExitMemoryDebugging();
+
 LUX_API void DebugNew(const void* ptr, const MemoryDebugInfo& info);
 LUX_API void DebugFree(const void* ptr, const MemoryDebugInfo& info);
-LUX_API void EnumerateDebugMemoryBlocks(void (*func)(const MemoryDebugInfo& info));
+LUX_API void EnumerateDebugMemoryBlocks(void(*func)(const MemoryDebugInfo& info));
 
 }
 }
@@ -47,6 +50,8 @@ LUX_API void EnumerateDebugMemoryBlocks(void (*func)(const MemoryDebugInfo& info
 #define LUX_FREE delete
 #define LUX_NEW_ARRAY(type, count) new type[count]
 #define LUX_FREE_ARRAY(ptr) delete[] (ptr)
+#define LUX_NEW_RAW(bytes) new u8[bytes]
+#define LUX_FREE_RAW(ptr) delete[] (u8*)(ptr)
 #endif
 
 inline void* operator new(std::size_t sz, const lux::core::MemoryDebugInfo& info)
@@ -61,6 +66,70 @@ inline void operator delete(void* ptr, const lux::core::MemoryDebugInfo&)
 {
 	// Is called when the coresponding new throws.
 	::operator delete(ptr);
+}
+
+namespace lux
+{
+namespace core
+{
+
+template <typename T>
+class UniquePtr
+{
+public:
+	UniquePtr() :
+		m_Ptr(nullptr)
+	{
+	}
+	UniquePtr(T* ptr) :
+		m_Ptr(ptr)
+	{
+	}
+	UniquePtr(const UniquePtr&) = delete;
+	UniquePtr(UniquePtr&& old)
+	{
+		m_Ptr = old.m_Ptr;
+		old.m_Ptr = nullptr;
+	}
+
+	~UniquePtr()
+	{
+		LUX_FREE(m_Ptr);
+	}
+
+	UniquePtr& operator=(const UniquePtr&) = delete;
+	UniquePtr& operator=(UniquePtr&& old)
+	{
+		this->~UniquePtr();
+		m_Ptr = old.m_Ptr;
+		old.m_Ptr = nullptr;
+		return *this;
+	}
+
+	operator T*() const
+	{
+		return m_Ptr;
+	}
+	T* operator->() const
+	{
+		return m_Ptr;
+	}
+
+	T* Get() const
+	{
+		return m_Ptr;
+	}
+
+	T* Take()
+	{
+		T* out = m_Ptr;
+		m_Ptr = nullptr;
+		return out;
+	}
+private:
+	T* m_Ptr;
+};
+}
 }
 
 #endif // #ifndef INCLUDED_LX_MEMORY_ALLOC_H

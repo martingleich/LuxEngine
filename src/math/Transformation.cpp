@@ -4,6 +4,6 @@ const lux::math::Transformation lux::math::Transformation::DEFAULT = lux::math::
 
 lux::core::Type lux::core::Types::Transformation()
 {
-	static lux::core::Type type(new TypeInfoTemplate<lux::math::Transformation>("Transformation", true));
+	static lux::core::Type type(LUX_NEW(TypeInfoTemplate<lux::math::Transformation>)("Transformation", true));
 	return type;
 }

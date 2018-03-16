@@ -93,7 +93,7 @@ private:
 		auto settings = GetFinalFontSettings(_settings);
 		const float charSpace = settings.charDistance;
 
-		if(text.begin() == text.end())
+		if(text.First() == text.End())
 			return;
 
 		float width = 0;

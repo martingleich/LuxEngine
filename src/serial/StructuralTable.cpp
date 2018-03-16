@@ -69,7 +69,7 @@ core::Range<StructuralTable::StructureIterator> StructuralTable::GetStructures()
 
 u32 StructuralTable::GetStructureId(const core::String& name) const
 {
-	return m_TypeMap.At<core::String>(name, 0);
+	return m_TypeMap.Get(name, 0);
 }
 
 const StructureElement* StructuralTable::GetStructureElement(u32 sid, const core::String& name) const

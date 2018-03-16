@@ -561,13 +561,9 @@ public:
 	*/
 	ConstIterator First() const
 	{
-		return FirstC();
-	}
-
-	ConstIterator FirstC() const
-	{
 		return ConstIterator(Data());
 	}
+
 	//! Iterator to the last element in the array
 	/**
 	\return The element beyond the last in the array
@@ -583,13 +579,9 @@ public:
 	*/
 	ConstIterator End() const
 	{
-		return EndC();
-	}
-
-	ConstIterator EndC() const
-	{
 		return ConstIterator(Data() + m_Used);
 	}
+
 	//! Iterator to the first element in the array
 	/**
 	\return The element before the first in the array
@@ -817,6 +809,16 @@ private:
 	size_t m_Used = 0;
 	size_t m_Alloc = 0;
 };
+
+template <typename T>
+inline typename Array<T>::Iterator begin(Array<T>& array) { return array.First(); }
+template <typename T>
+inline typename Array<T>::Iterator end(Array<T>& array) { return array.End(); }
+
+template <typename T>
+inline typename Array<T>::ConstIterator begin(const Array<T>& array) { return array.First(); }
+template <typename T>
+inline typename Array<T>::ConstIterator end(const Array<T>& array) { return array.End(); }
 
 LUX_API const char* MakeArrayTypeName(Type baseType);
 

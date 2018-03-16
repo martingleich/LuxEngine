@@ -311,18 +311,6 @@ public:
 		return ConstIterator(Data_c() + m_Size, Data_c());
 	}
 
-	//! Support for foreach loop
-	inline ConstIterator begin() const
-	{
-		return First();
-	}
-
-	//! Support for foreach loop
-	inline ConstIterator end() const
-	{
-		return End();
-	}
-
 	//! Test if the string starts with a given string.
 	/**
 	\param data The string to test with.
@@ -712,6 +700,9 @@ public:
 		return ptr->str < other;
 	}
 };
+
+inline String::ConstIterator begin(const String& str) { return str.First(); }
+inline String::ConstIterator end(const String& str) { return str.End(); }
 
 namespace Types
 {

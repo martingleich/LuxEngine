@@ -62,23 +62,27 @@ public:
 		return !(*this == other);
 	}
 
-	Iterator Insert(T&& value)
+	bool Insert(T&& value, Iterator* it = nullptr)
 	{
-		auto n = m_Tree.Insert(value);
-
-		return Iterator(m_Tree.GetRoot(), n);
+		typename Tree::Node* node;
+		bool added = m_Tree.Insert(value, &node);
+		if(it)
+			*it = Iterator(m_Tree.GetRoot(), node);
+		return added;
 	}
 
-	Iterator Insert(const T& value)
+	bool Insert(const T& value, Iterator* it = nullptr)
 	{
-		auto n = m_Tree.Insert(value);
-
-		return Iterator(m_Tree.GetRoot(), n);
+		typename Tree::Node* node;
+		bool added = m_Tree.Insert(value, &node);
+		if(it)
+			*it = Iterator(m_Tree.GetRoot(), node);
+		return added;
 	}
 
-	void Erase(const T& value)
+	bool Erase(const T& value)
 	{
-		m_Tree.Erase(value);
+		return m_Tree.Erase(value);
 	}
 
 	Iterator Erase(const Iterator& it)
@@ -102,7 +106,7 @@ public:
 		return (n ? ConstIterator(m_Tree.GetRoot(), n) : End());
 	}
 
-	bool HasKey(const T& value)
+	bool HasValue(const T& value)
 	{
 		auto n = m_Tree.Find(value);
 
@@ -114,44 +118,24 @@ public:
 		m_Tree.Clear();
 	}
 
-	ConstIterator FirstC() const
+	ConstIterator First() const
 	{
 		return ConstIterator(m_Tree.GetRoot(), true);
 	}
 
-	ConstIterator LastC() const
+	ConstIterator Last() const
 	{
 		return ConstIterator(m_Tree.GetRoot(), false);
 	}
 
-	ConstIterator BeginC() const
-	{
-		return ConstIterator(m_Tree.GetRoot(), nullptr);
-	}
-
-	ConstIterator EndC() const
-	{
-		return ConstIterator(m_Tree.GetRoot(), nullptr);
-	}
-
-	ConstIterator First() const
-	{
-		return FirstC();
-	}
-
-	ConstIterator Last() const
-	{
-		return LastC();
-	}
-
 	ConstIterator Begin() const
 	{
-		return BeginC();
+		return ConstIterator(m_Tree.GetRoot(), nullptr);
 	}
 
 	ConstIterator End() const
 	{
-		return EndC();
+		return ConstIterator(m_Tree.GetRoot(), nullptr);
 	}
 
 	Iterator First()
@@ -174,29 +158,6 @@ public:
 		return Iterator(m_Tree.GetRoot(), nullptr);
 	}
 
-	//! Support for foreach loop
-	Iterator begin()
-	{
-		return First();
-	}
-
-	//! Support for foreach loop
-	Iterator end()
-	{
-		return End();
-	}
-
-	//! Support for foreach loop
-	ConstIterator begin() const
-	{
-		return FirstC();
-	}
-
-	//! Support for foreach loop
-	ConstIterator end() const
-	{
-		return EndC();
-	}
 	bool IsEmpty() const
 	{
 		return m_Tree.IsEmpty();
@@ -238,7 +199,7 @@ public:
 				else
 					--maxErrorCount;
 			}
-			
+
 			if(jt == other.End())
 				return true; // Found each element in the subset
 		}
@@ -258,6 +219,16 @@ public:
 private:
 	Tree m_Tree;
 };
+
+template <typename V, typename Compare>
+inline typename OrderedSet<V, Compare>::Iterator begin(OrderedSet<V, Compare>& set) { return set.First(); }
+template <typename V, typename Compare>
+inline typename OrderedSet<V, Compare>::Iterator end(OrderedSet<V, Compare>& set) { return set.End(); }
+
+template <typename V, typename Compare>
+inline typename OrderedSet<V, Compare>::ConstIterator begin(const OrderedSet<V, Compare>& set) { return set.First(); }
+template <typename V, typename Compare>
+inline typename OrderedSet<V, Compare>::ConstIterator end(const OrderedSet<V, Compare>& set) { return set.End(); }
 
 } // namespace core
 } // namespace lux

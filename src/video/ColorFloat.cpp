@@ -10,7 +10,7 @@ namespace Types
 {
 Type ColorF()
 {
-	static const Type t(new core::TypeInfoTemplate<video::ColorF>("ColorF", true));
+	static const Type t(LUX_NEW(core::TypeInfoTemplate<video::ColorF>)("ColorF", true));
 	return t;
 }
 }

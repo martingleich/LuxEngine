@@ -9,7 +9,7 @@ namespace Types
 {
 Type QuaternionF()
 {
-	static const Type t(new core::TypeInfoTemplate<math::QuaternionF>("QuaternionF", true));
+	static const Type t(LUX_NEW(core::TypeInfoTemplate<math::QuaternionF>)("QuaternionF", true));
 	return t;
 }
 }

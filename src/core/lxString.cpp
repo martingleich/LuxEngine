@@ -116,12 +116,12 @@ void String::Reserve(size_t size)
 	if(willBeShort)
 		newData = m_Data.raw;
 	else
-		newData = new char[newAlloc];
+		newData = LUX_NEW_ARRAY(char, newAlloc);
 
 	memcpy(newData, Data_c(), m_Size + 1);
 
 	if(!IsShortString())
-		delete[] m_Data.ptr;
+		LUX_FREE_ARRAY(m_Data.ptr);
 	if(!willBeShort)
 		m_Data.ptr = newData;
 

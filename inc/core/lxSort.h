@@ -58,10 +58,11 @@ inline void Heapsort(RanIt first, RanIt end, const Compare& compare)
 template <typename RangeT, typename CompareType>
 void Sort(RangeT&& range, CompareType compare)
 {
-	Heapsort(range.begin(), range.end(), compare);
+	using namespace std;
+	Heapsort(begin(range), end(range), compare);
 }
 
-}    
-}    
+}
+}
 
 #endif

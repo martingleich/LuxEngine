@@ -2,6 +2,18 @@
 
 UNIT_SUITE(HashMap)
 {
+	u32 permutation[1000];
+
+	UNIT_SUITE_INIT()
+	{
+		for(int i = 0; i < 1000; ++i)
+			permutation[i] = i;
+
+		srand(0);
+		for(int i = 0; i < 1000; ++i)
+			std::swap(permutation[i], permutation[rand() % 1000]);
+	}
+
 	UNIT_TEST(Constructor)
 	{
 		core::HashMap<u32, u32> map;
@@ -32,6 +44,16 @@ UNIT_SUITE(HashMap)
 		UNIT_ASSERT(map.HasKey(1));
 		UNIT_ASSERT(map.HasKey(2));
 		UNIT_ASSERT(map.HasKey(3) == false);
+	}
+
+	UNIT_TEST(Get)
+	{
+		core::HashMap<u32, u32> map;
+		map.Set(1, 2);
+		map.Set(2, 1);
+
+		UNIT_ASSERT(map.Get(1) == 2);
+		UNIT_ASSERT(map.Get(5, 66) == 66);
 	}
 
 	UNIT_TEST(ChangeEntry)
@@ -108,5 +130,19 @@ UNIT_SUITE(HashMap)
 		map.At(1, 0) += 5;
 		UNIT_ASSERT(map[1] == 5);
 		UNIT_ASSERT(map.Size() == 1);
+	}
+
+	UNIT_TEST(BigMap)
+	{
+		core::HashMap<u32, u32> map;
+		for(int i = 0; i < 1000; ++i)
+			map[i] = i*i;
+
+		bool success = true;
+		for(int i = 0; i < 1000; ++i) {
+			if(map.Get(permutation[i], 1001) != permutation[i] * permutation[i])
+				success = false;
+		}
+		UNIT_ASSERT(success);
 	}
 }

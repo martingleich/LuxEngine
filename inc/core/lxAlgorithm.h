@@ -17,10 +17,12 @@ returns true if the entry matches otherwise false
 \return An iterator to the searched entry if found, otherwise from
 */
 template <typename RangeT, typename type, typename Condition>
-decltype(std::declval<RangeT>().begin()) LinearSearch(const type& entry, RangeT&& range, Condition con)
+auto LinearSearch(const type& entry, RangeT&& range, Condition con)
 {
-	auto it = range.first();
-	for(; it != range.end(); ++it) {
+	using namespace std;
+	auto it = begin(range);
+	auto endIt = end(range);
+	for(; it != endIt; ++it) {
 		if(con(*it, entry))
 			break;
 	}
@@ -38,11 +40,13 @@ The operation
 \return An iterator to the searched entry if found, otherwise from
 */
 template <typename RangeT, typename type>
-decltype(std::declval<RangeT>().begin()) LinearSearch(const type& entry, RangeT&& range)
+auto LinearSearch(const type& entry, RangeT&& range)
 {
+	using namespace std;
 	// Lineare Suche
-	auto it = range.begin();
-	for(; it != range.end(); ++it) {
+	auto it = begin(range);
+	auto endIt = end(range);
+	for(; it != endIt; ++it) {
 		if(*it == entry)
 			break;
 	}
@@ -103,10 +107,11 @@ Performs an action for each element between two iterators
 template <typename RangeT, typename Action>
 void Foreach(RangeT&& range, Action act)
 {
-	auto it = range.begin();
-	for(; it != range.end(); ++it) {
+	using namespace std;
+	auto it = begin(range);
+	auto endIt = end(range);
+	for(; it != endIt; ++it)
 		act(*it);
-	}
 }
 
 //! Performs a binary search in an sorted array
@@ -117,20 +122,21 @@ void Foreach(RangeT&& range, Action act)
 \param outNewEntry If not null and the entry was not found here the Interator where it should placed to keep the array sorted is written.
 \return The iterator to the search interator or end if it couldn't be found.
 */
-template <typename RangeT, typename T, typename IterT = decltype(std::declval<RangeT>().begin())>
+template <typename RangeT, typename T, typename IterT = decltype(begin(std::declval<RangeT>()))>
 IterT BinarySearch(const T& entry, RangeT&& range, IterT* outNextEntry = nullptr)
 {
-	auto begin = range.begin();
-	auto end = range.end();
+	using namespace std;
+	auto beginIt = begin(range);
+	auto endIt = end(range);
 
-	if(begin == end) {
+	if(beginIt == endIt) {
 		if(outNextEntry)
-			*outNextEntry = end;
-		return end;
+			*outNextEntry = endIt;
+		return endIt;
 	}
 
-	IterT left = begin;
-	IterT right = end - 1;
+	IterT left = beginIt;
+	IterT right = endIt - 1;
 	IterT middle = left;
 	while(IteratorDistance(left, right) >= 0) {
 		middle = AdvanceIterator(left, IteratorDistance(left, right) / 2);
@@ -149,7 +155,7 @@ IterT BinarySearch(const T& entry, RangeT&& range, IterT* outNextEntry = nullptr
 			*outNextEntry = middle + 1;
 	}
 
-	return end;
+	return endIt;
 }
 
 //! Delete all elements fullfilling a condition
@@ -162,13 +168,14 @@ contains elements not fullfilling the condition.
 \param predicate The condition, returns true to delete a element.
 \return The end iterator of the new sequence.
 */
-template <typename RangeT, typename Predicate, typename IterT = decltype(std::declval<RangeT>().begin())>
-IterT RemoveIf(RangeT&& range, Predicate pred)
+template <typename RangeT, typename Predicate>
+auto RemoveIf(RangeT&& range, Predicate pred)
 {
-	IterT first = range.begin();
-	IterT cursor = first;
-	IterT end = range.end();
-	while(first != end) {
+	using namespace std;
+	auto first = begin(range);
+	auto cursor = first;
+	auto endIt = end(range);
+	while(first != endIt) {
 		if(!pred(*first)) {
 			if(cursor != first)
 				*cursor = std::move(*first);
@@ -188,13 +195,15 @@ The order of the not removed elements is preserved.
 \param value The value to remove
 \return The end iterator of the new sequence.
 */
-template <typename RangeT, typename ValueT, typename IterT = decltype(std::declval<RangeT>().begin())>
-IterT Remove(RangeT&& range, ValueT& value)
+template <typename RangeT, typename ValueT>
+auto Remove(RangeT&& range, ValueT& value)
 {
-	IterT first = range.begin();
-	IterT end = range.end();
-	IterT cursor = first;
-	while(first != end) {
+	using namespace std;
+
+	auto first = begin(range);
+	auto endIt = end(range);
+	auto cursor = first;
+	while(first != endIt) {
 		if(*first != value) {
 			if(cursor != first)
 				*cursor = std::move(*first);
@@ -215,9 +224,10 @@ IterT Remove(RangeT&& range, ValueT& value)
 template <typename RangeT, typename Value>
 void Fill(RangeT&& range, Value v)
 {
-	auto first = range.begin();
-	auto end = range.end();
-	while(first != end) {
+	using namespace std;
+	auto first = begin(range);
+	auto endIt = end(range);
+	while(first != endIt) {
 		*first = v;
 		++first;
 	}

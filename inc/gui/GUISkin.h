@@ -149,13 +149,13 @@ public:
 	core::Range<core::HashMap<core::String, float>::ConstKeyIterator>
 		GetPropertiesFloat() const
 	{
-		return core::MakeRange(m_PropsF.Keys());
+		return m_PropsF.Keys();
 	}
 
 	core::Range<core::HashMap<core::String, math::Vector2F>::ConstKeyIterator>
 		GetPropertiesVector() const
 	{
-		return core::MakeRange(m_PropsV.Keys());
+		return m_PropsV.Keys();
 	}
 
 private:

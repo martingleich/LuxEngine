@@ -122,7 +122,7 @@ StringTable::~StringTable()
 	MemBlock* cur = self->first;
 	while(cur) {
 		MemBlock* next = cur->next;
-		delete cur;
+		LUX_FREE(cur);
 		cur = next;
 	}
 
@@ -196,7 +196,7 @@ StringTable::MemBlock* StringTable::GetMatchingPosition(size_t length)
 
 StringTable::MemBlock* StringTable::AddNewMemBlock()
 {
-	MemBlock* newBlock = new MemBlock;
+	MemBlock* newBlock = LUX_NEW(MemBlock);
 
 	newBlock->next = nullptr;
 	newBlock->used = 0;

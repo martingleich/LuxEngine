@@ -9,13 +9,13 @@ namespace Types
 
 Type StrongID()
 {
-	static Type strongRef(new TypeInfoTemplate<core::ID>("strong_id"));
+	static Type strongRef(LUX_NEW(TypeInfoTemplate<core::ID>)("strong_id"));
 	return strongRef;
 }
 
 Type WeakID()
 {
-	static Type weakRef(new TypeInfoTemplate<core::ID>("weak_id"));
+	static Type weakRef(LUX_NEW(TypeInfoTemplate<core::ID>)("weak_id"));
 	return weakRef;
 }
 

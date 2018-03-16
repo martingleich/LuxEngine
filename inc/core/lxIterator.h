@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <utility>
+#include <xutility>
 #include <tuple>
 #include <limits>
 
@@ -282,17 +283,7 @@ public:
 		return m_First;
 	}
 
-	IterT begin() const
-	{
-		return m_First;
-	}
-
 	IterT End() const
-	{
-		return m_End;
-	}
-
-	IterT end() const
 	{
 		return m_End;
 	}
@@ -317,15 +308,21 @@ private:
 };
 
 template <typename IterT>
+IterT begin(const Range<IterT>& range) { return range.First(); }
+template <typename IterT>
+IterT end(const Range<IterT>& range) { return range.End(); }
+
+template <typename IterT>
 Range<IterT> MakeRange(IterT first, IterT end)
 {
 	return Range<IterT>(first, end);
 }
-template <typename Class, typename IterT = decltype(std::declval<Class>().begin())>
-Range<IterT> MakeRange(Class&& obj)
+
+template <typename Class>
+auto MakeRange(Class&& obj)
 {
 	using namespace std;
-	return Range<IterT>(begin(obj), end(obj));
+	return MakeRange(begin(obj), end(obj));
 }
 
 template <typename BaseT>
@@ -365,21 +362,21 @@ Range<IndexIter<IndexT>> MakeIndexRange(IndexT start, IndexT end)
 	return Range<IndexIter<IndexT>>(start, end);
 }
 
-template <typename RangeT, typename IterT = decltype(std::declval<RangeT>().begin())>
-Range<IterT> SliceRange(RangeT&& range, intptr_t first, intptr_t end = -1)
+template <typename RangeT>
+auto SliceRange(RangeT&& range, intptr_t first, intptr_t end = -1)
 {
 	using namespace std;
 	size_t len = RangeLength(std::forward<RangeT>(range));
 	if(end < 0)
 		end = len + end + 1;
 	lxAssert(end >= first);
-	IterT itFirst = AdvanceIterator(begin(range), first);
-	IterT itEnd = AdvanceIterator(itFirst, end - first);
-	return Range<IterT>(itFirst, itEnd);
+	auto itFirst = AdvanceIterator(begin(range), first);
+	auto itEnd = AdvanceIterator(itFirst, end - first);
+	return MakeRange(itFirst, itEnd);
 }
 
-template <typename RangeT, typename IterT = decltype(std::declval<RangeT>().begin())>
-Range<IterT> SliceRangeCount(RangeT&& range, intptr_t first, intptr_t count)
+template <typename RangeT>
+auto SliceRangeCount(RangeT&& range, intptr_t first, intptr_t count)
 {
 	return SliceRange(std::forward<RangeT>(range), first, first + count);
 }
@@ -609,17 +606,17 @@ public:
 
 	size_t Size() const
 	{
-		return IteratorDistance(begin(), end());
+		return IteratorDistance(First(), End());
 	}
 
 	const T& operator[](size_t i) const
 	{
-		return *AdvanceIterator(begin(), i);
+		return *AdvanceIterator(First(), i);
 	}
 	template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
 	T& operator[](size_t i)
 	{
-		return *AdvanceIterator(begin(), i);
+		return *AdvanceIterator(First(), i);
 	}
 };
 

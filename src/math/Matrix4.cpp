@@ -8,7 +8,7 @@ namespace Types
 {
 Type Matrix()
 {
-	static const Type t(new core::TypeInfoTemplate<math::Matrix4>("Matrix4", true));
+	static const Type t(LUX_NEW(core::TypeInfoTemplate<math::Matrix4>("Matrix4", true)));
 	return t;
 }
 }

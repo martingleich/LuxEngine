@@ -429,20 +429,24 @@ public:
 		return !(*this == other);
 	}
 
-	Node* Insert(const T& v)
+	bool Insert(const T& v, Node** node = nullptr)
 	{
 		if(!m_Root) {
 			lxAssert(m_Size == 0);
 			SetRoot(CreateEntry(v));
 			m_Size = 1;
-			return m_Root;
+			if(node)
+				*node = m_Root;
+			return true;
 		}
 
 		Node* n = m_Root;
 		while(true) {
 			if(m_Compare.Equal(v, n->GetValue())) {
 				n->SetValue(v);
-				return n;
+				if(node)
+					*node = n;
+				return false;
 			} else if(m_Compare.Smaller(v, n->GetValue())) {
 				if(n->GetLeft() == nullptr) {
 					Node* newNode = CreateEntry(v);
@@ -465,8 +469,9 @@ public:
 		}
 
 		++m_Size;
-
-		return n;
+		if(node)
+			*node = n;
+		return true;
 	}
 
 	void Clear()
@@ -508,7 +513,7 @@ public:
 			// Delete the node
 			toDelete->RemoveFromParent();
 
-			delete toDelete;
+			LUX_FREE(toDelete);
 
 			--m_Size;
 		}
@@ -534,13 +539,14 @@ public:
 		return nullptr;
 	}
 
-	void Erase(const T& v)
+	bool Erase(const T& v)
 	{
 		Node* n = Find(v);
 		if(!n)
-			return;
+			return false;
 
 		Erase(n);
+		return true;
 	}
 
 	Node* Erase(Node* n)
@@ -659,7 +665,7 @@ private:
 
 	Node* CreateEntry(const T& v)
 	{
-		return new Node(v);
+		return LUX_NEW(Node)(v);
 	}
 
 	void AdjustInsertion(Node* n)

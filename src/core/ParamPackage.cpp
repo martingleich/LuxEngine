@@ -18,7 +18,7 @@ struct ParamPackage::SelfData
 };
 
 ParamPackage::ParamPackage() :
-	self(new SelfData)
+	self(LUX_NEW(SelfData))
 {
 	self->TextureCount = 0;
 	self->TotalSize = 0;
@@ -26,11 +26,11 @@ ParamPackage::ParamPackage() :
 
 ParamPackage::~ParamPackage()
 {
-	delete self;
+	LUX_FREE(self);
 }
 
 ParamPackage::ParamPackage(const ParamPackage& other) :
-	self(new SelfData)
+	self(LUX_NEW(SelfData))
 {
 	self->TextureCount = other.self->TextureCount;
 	self->TotalSize = other.self->TotalSize;

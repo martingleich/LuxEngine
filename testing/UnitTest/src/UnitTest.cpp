@@ -27,15 +27,17 @@ Info::Info() :
 	env(nullptr),
 	suite(nullptr),
 	test(nullptr),
+	flags(Flags_None),
 	m_Name(""),
 	m_File(""),
 	m_Line(0)
 {}
 
-Info::Info(const std::string& name, const std::string& file, int line) :
+Info::Info(const std::string& name, const std::string& file, int line, int _flags) :
 	env(nullptr),
 	suite(nullptr),
 	test(nullptr),
+	flags(_flags),
 	m_Name(name),
 	m_File(file),
 	m_Line(line)

@@ -6,20 +6,24 @@ namespace lux
 {
 namespace core
 {
-std::map<const void*, MemoryDebugInfo>& GetMap()
-{
-	static std::map<const void*, MemoryDebugInfo>* map = nullptr;
-	if(!map)
-		map = new std::map<const void*, MemoryDebugInfo>;
+static std::map<const void*, MemoryDebugInfo>* g_MemoryMap = nullptr;
 
-	return *map;
+void InitMemoryDebugging()
+{
+	if(!g_MemoryMap)
+		g_MemoryMap = new std::map<const void*, MemoryDebugInfo>;
+}
+
+void ExitMemoryDebugging()
+{
+	delete g_MemoryMap;
 }
 
 void DebugNew(const void* ptr, const MemoryDebugInfo& info)
 {
 	MemoryDebugInfo i = info;
 	i.ptr = ptr;
-	GetMap().emplace(ptr, i);
+	g_MemoryMap->emplace(ptr, i);
 }
 
 void DebugFree(const void* ptr, const MemoryDebugInfo& info)
@@ -27,9 +31,9 @@ void DebugFree(const void* ptr, const MemoryDebugInfo& info)
 	if(!ptr)
 		return;
 
-	auto it = GetMap().find(ptr);
+	auto it = g_MemoryMap->find(ptr);
 
-	if(it == GetMap().end()) {
+	if(it == g_MemoryMap->end()) {
 		log::Error("~s:~d: ERROR: Free called on not allocated pointer. (~p)", info.file, info.line, ptr);
 		return;
 	}
@@ -39,14 +43,14 @@ void DebugFree(const void* ptr, const MemoryDebugInfo& info)
 		return;
 	}
 
-	GetMap().erase(it);
+	g_MemoryMap->erase(it);
 }
 
 void EnumerateDebugMemoryBlocks(void(*func)(const MemoryDebugInfo& info))
 {
 	if(func) {
-		for(auto it = GetMap().begin(); it != GetMap().end(); ++it)
-			func(it->second);
+		for(auto& x : *g_MemoryMap)
+			func(x.second);
 	}
 }
 

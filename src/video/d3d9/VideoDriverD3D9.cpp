@@ -68,7 +68,7 @@ VideoDriverD3D9::VideoDriverD3D9(const core::ModuleInitData& data) :
 	CreateDevice(initData.config, m_Window);
 
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
-	m_Renderer = new RendererD3D9(this, m_DeviceState);
+	m_Renderer = LUX_NEW(RendererD3D9)(this, m_DeviceState);
 
 	g_D3DDevice9 = m_D3DDevice;
 	g_Driver = this;

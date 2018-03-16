@@ -19,7 +19,6 @@ private:
 			key(k)
 		{
 		}
-
 		Tuple(const K& k, const V& v) :
 			key(k),
 			value(v)
@@ -38,8 +37,25 @@ private:
 		{
 			return m_Compare.Smaller(a.key, b.key);
 		}
+		bool Equal(const Tuple& a, const K& b) const
+		{
+			return m_Compare.Equal(a.key, b);
+		}
+		bool Smaller(const Tuple& a, const K& b) const
+		{
+			return m_Compare.Smaller(a.key, key);
+		}
+		bool Equal(const K& a, const Tuple& b) const
+		{
+			return m_Compare.Equal(a, b.key);
+		}
+		bool Smaller(const K& a, const Tuple& b) const
+		{
+			return m_Compare.Smaller(a, b.key);
+		}
 		Compare m_Compare;
 	};
+
 	using BaseSet = OrderedSet<Tuple, CompareTuple>;
 	using BaseIter = typename BaseSet::Iterator;
 	using BaseConstIter = typename BaseSet::ConstIterator;
@@ -405,17 +421,21 @@ public:
 		return !(*this == other);
 	}
 
-	Iterator Set(const K& key, const V& value)
+	bool Set(const K& key, const V& value, Iterator* out = nullptr)
 	{
-		return Iterator(m_Set.Insert(Tuple(key, value)));
+		typename BaseSet::Iterator it;
+		bool added = m_Set.Insert(Tuple(key, value), &it);
+		if(out)
+			*out = Iterator(it);
+		return added;
 	}
 
-	void SetIfNotExist(const K& key, const V& value)
+	bool SetIfNotExist(const K& key, const V& value)
 	{
 		auto it = Find(key);
 		if(it != End())
-			return;
-		Insert(key, value);
+			return false;
+		return Set(key, value);
 	}
 
 	Iterator Find(const K& key)
@@ -428,12 +448,18 @@ public:
 		return ConstIterator(m_Set.Find(Tuple(key)));
 	}
 
-	Iterator Erase(const K& key)
+	bool Erase(const K& key, Iterator* next = nullptr)
 	{
 		auto it = Find(key);
-		if(it == End())
-			return it;
-		return Erase(it);
+		if(it == End()) {
+			if(next)
+				*next = it;
+			return false;
+		}
+		Iterator n = Erase(it);
+		if(next)
+			*next = n;
+		return true;
 	}
 
 	Iterator Erase(const Iterator& it)
@@ -451,14 +477,13 @@ public:
 		return At(key);
 	}
 
-	V& At(const K& key, const V& init=V())
+	V& At(const K& key, const V& init = V())
 	{
 		Tuple tuple(key, init);
 		auto it = m_Set.Find(tuple);
 		if(it == m_Set.End())
-			return m_Set.Insert(std::move(tuple))->value;
-		else
-			return it->value;
+			m_Set.Insert(std::move(tuple), &it);
+		return it->value;
 	}
 
 	const V& At(const K& key) const
@@ -477,20 +502,10 @@ public:
 
 	ConstIterator First() const
 	{
-		return FirstC();
-	}
-
-	ConstIterator End() const
-	{
-		return EndC();
-	}
-
-	ConstIterator FirstC() const
-	{
 		return ConstIterator(m_Set.FirstC());
 	}
 
-	ConstIterator EndC() const
+	ConstIterator End() const
 	{
 		return ConstIterator(m_Set.EndC());
 	}
@@ -507,20 +522,10 @@ public:
 
 	ConstKeyIterator FirstKey() const
 	{
-		return FirstKeyC();
-	}
-
-	ConstKeyIterator EndKey() const
-	{
-		return EndKeyC();
-	}
-
-	ConstKeyIterator FirstKeyC() const
-	{
 		return ConstKeyIterator(m_Set.FirstC());
 	}
 
-	ConstKeyIterator EndKeyC() const
+	ConstKeyIterator EndKey() const
 	{
 		return ConstKeyIterator(m_Set.EndC());
 	}
@@ -535,169 +540,25 @@ public:
 		return KeyIterator(m_Set.End());
 	}
 
-	//! Support for foreach loop
-	Iterator begin()
+	Range<Iterator> Values()
 	{
-		return First();
+		return Range<Iterator>(First(), End());
 	}
 
-	//! Support for foreach loop
-	Iterator end()
+	Range<ConstIterator> Values() const
 	{
-		return End();
+		return Range<ConstIterator>(First(), End());
+	}
+	Range<KeyIterator> Keys()
+	{
+		return Range<KeyIterator>(FirstKey(), EndKey());
 	}
 
-	//! Support for foreach loop
-	ConstIterator begin() const
+	Range<ConstKeyIterator> Keys() const
 	{
-		return FirstC();
+		return Range<ConstKeyIterator>(FirstKey(), EndKey());
 	}
 
-	//! Support for foreach loop
-	ConstIterator end() const
-	{
-		return EndC();
-	}
-
-	struct ValueAccess
-	{
-		OrderedMap& ref;
-		ValueAccess(OrderedMap& r) :
-			ref(r)
-		{
-		}
-
-		//! Support for foreach loop
-		Iterator begin()
-		{
-			return ref.begin();
-		}
-
-		//! Support for foreach loop
-		Iterator end()
-		{
-			return ref.end();
-		}
-
-		//! Support for foreach loop
-		ConstIterator begin() const
-		{
-			return ref.begin();
-		}
-
-		//! Support for foreach loop
-		ConstIterator end() const
-		{
-			return ref.end();
-		}
-	};
-
-	struct ConstValueAccess
-	{
-		const OrderedMap& ref;
-		ConstValueAccess(const OrderedMap& r) :
-			ref(r)
-		{
-		}
-
-		//! Support for foreach loop
-		Iterator begin()
-		{
-			return ref.begin();
-		}
-
-		//! Support for foreach loop
-		Iterator end()
-		{
-			return ref.end();
-		}
-
-		//! Support for foreach loop
-		ConstIterator begin() const
-		{
-			return ref.begin();
-		}
-
-		//! Support for foreach loop
-		ConstIterator end() const
-		{
-			return ref.end();
-		}
-	};
-	
-	ValueAccess Values()
-	{
-		return ValueAccess(*this);
-	}
-
-	ConstValueAccess Values() const
-	{
-		return ConstValueAccess(*this);
-	}
-
-	struct KeyAccess
-	{
-		OrderedMap& ref;
-		KeyAccess(OrderedMap& r) :
-			ref(r)
-		{
-		}
-
-		//! Support for foreach loop
-		Iterator begin()
-		{
-			return ref.FirstKey();
-		}
-
-		//! Support for foreach loop
-		Iterator end()
-		{
-			return ref.EndKey();
-		}
-
-		//! Support for foreach loop
-		ConstIterator begin() const
-		{
-			return ref.FirstKey();
-		}
-
-		//! Support for foreach loop
-		ConstIterator end() const
-		{
-			return ref.EndKey();
-		}
-	};
-
-	struct ConstKeyAccess
-	{
-		const OrderedMap& ref;
-		ConstKeyAccess(const OrderedMap& r) :
-			ref(r)
-		{
-		}
-
-		//! Support for foreach loop
-		ConstKeyIterator begin() const
-		{
-			return ref.FirstKey();
-		}
-
-		//! Support for foreach loop
-		ConstKeyIterator end() const
-		{
-			return ref.EndKey();
-		}
-	};
-	
-	KeyAccess Keys()
-	{
-		return KeyAccess(*this);
-	}
-
-	ConstKeyAccess Keys() const
-	{
-		return ConstKeyAccess(*this);
-	}
 	size_t Size() const
 	{
 		return m_Set.Size();
@@ -721,6 +582,16 @@ public:
 private:
 	BaseSet m_Set;
 };
+
+template <typename K, typename V, typename Compare>
+inline typename OrderedMap<K, V, Compare>::Iterator begin(OrderedMap<K, V, Compare>& map) { return map.First(); }
+template <typename K, typename V, typename Compare>
+inline typename OrderedMap<K, V, Compare>::Iterator end(OrderedMap<K, V, Compare>& map) { return map.End(); }
+
+template <typename K, typename V, typename Compare>
+inline typename OrderedMap<K, V, Compare>::ConstIterator begin(const OrderedMap<K, V, Compare>& map) { return map.First(); }
+template <typename K, typename V, typename Compare>
+inline typename OrderedMap<K, V, Compare>::ConstIterator end(const OrderedMap<K, V, Compare>& map) { return map.End(); }
 
 } // namespace core
 } // namespace lux

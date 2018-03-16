@@ -116,7 +116,8 @@ private:
 
 class Attributes
 {
-	typedef core::HashMap<core::String, StrongRef<Attribute>>::ConstKeyIterator ConstIterator;
+public:
+	using ConstIterator = core::HashMap<core::String, StrongRef<Attribute>>::ConstKeyIterator;
 public:
 	template <typename T>
 	AttributePtr AddAttribute(const core::String& name, const T& value)
@@ -183,22 +184,12 @@ public:
 
 	ConstIterator First() const
 	{
-		return m_ObjectMap.FirstKeyC();
+		return m_ObjectMap.FirstKey();
 	}
 
 	ConstIterator End() const
 	{
-		return m_ObjectMap.EndKeyC();
-	}
-
-	ConstIterator begin() const
-	{
-		return First();
-	}
-
-	ConstIterator end() const
-	{
-		return End();
+		return m_ObjectMap.EndKey();
 	}
 
 	AttributePtr Pointer(const core::String& name) const
@@ -212,6 +203,9 @@ public:
 private:
 	core::HashMap<core::String, StrongRef<Attribute>> m_ObjectMap;
 };
+
+inline Attributes::ConstIterator begin(const Attributes& attributes) { return attributes.First(); }
+inline Attributes::ConstIterator end(const Attributes& attributes) { return attributes.End(); }
 
 } // namespace core
 } // namespace lux

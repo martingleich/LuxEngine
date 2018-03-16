@@ -28,16 +28,16 @@ struct RenderStatistics::SelfT
 };
 
 RenderStatistics::RenderStatistics() :
-	self(new SelfT)
+	self(LUX_NEW(SelfT))
 {
 
 }
 RenderStatistics::~RenderStatistics()
 {
 	for(auto grp : self->groups)
-		delete grp;
+		LUX_FREE(grp);
 
-	delete self;
+	LUX_FREE(self);
 }
 
 void RenderStatistics::AddPrimitives(u32 count)
@@ -77,9 +77,9 @@ float RenderStatistics::GetDuration() const
 
 void RenderStatistics::PushGroup(const char* name)
 {
-	auto& grp = self->groups[name];
+	auto& grp = self->groups.At(name, nullptr);
 	if(!grp)
-		grp = new Group;
+		grp = LUX_NEW(Group);
 	self->groupStack.PushBack(grp);
 }
 

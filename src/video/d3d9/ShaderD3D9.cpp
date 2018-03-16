@@ -39,7 +39,7 @@ public:
 			if(io::FileSystem::Instance()->ExistFile(pFileName)) {
 				auto file = io::FileSystem::Instance()->OpenFile(pFileName);
 				*pBytes = file->GetSize();
-				void* data = new u8[*pBytes];
+				void* data = LUX_NEW_RAW(*pBytes);
 				m_Allocated.PushBack(data);
 				if(file->ReadBinaryPart(*pBytes, data) != *pBytes)
 					return E_FAIL;
@@ -67,7 +67,7 @@ public:
 	{
 		auto it = core::LinearSearch(pData, m_Allocated);
 		if(it != m_Allocated.End()) {
-			delete[] * it;
+			LUX_FREE_RAW(*it);
 			m_Allocated.Erase(it);
 		}
 

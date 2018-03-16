@@ -253,7 +253,7 @@ size_t TextBox::BPos() const
 		--it;
 		++count;
 	}
-	if(it != text.begin())
+	if(it != text.First())
 		--count;
 	return m_Caret - count;
 }
@@ -261,7 +261,7 @@ size_t TextBox::BPos() const
 size_t TextBox::WPos() const
 {
 	auto text = m_Container.GetText();
-	auto it = text.begin() + m_Caret + 1;
+	auto it = text.First() + m_Caret + 1;
 	size_t count = 1;
 	// Move until space, Move until non space
 	while(it != text.End() && !core::IsSpace(*it)) {

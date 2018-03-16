@@ -79,7 +79,7 @@ void TextContainer::Ensure(
 		textDim.width = math::Max(textDim.width, width);
 	};
 	auto AddLine = [&](core::Range<core::String::ConstIterator> line) {
-		if(line.begin() == line.end())
+		if(line.First() == line.End())
 			return;
 		auto lineWidth = font->GetTextWidth(settings, line);
 		if(!wordWrap || lineWidth <= width) {
@@ -110,7 +110,7 @@ void TextContainer::Ensure(
 		textDim.height = lineHeight * m_BrokenText.Size();
 	};
 
-	auto textFirst = m_BrokenText.IsEmpty() ? m_Text.First() : m_BrokenText[rebreakText].line.begin();
+	auto textFirst = m_BrokenText.IsEmpty() ? m_Text.First() : m_BrokenText[rebreakText].line.First();
 	auto first = m_Text.First();
 	auto end = first;
 	core::String line;

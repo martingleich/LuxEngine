@@ -204,7 +204,7 @@ public:
 	*/
 	Pool(size_t capacity = 1024)
 	{
-		m_Data = new T[capacity];
+		m_Data = LUX_NEW_ARRAY(T, capacity);
 		m_Alloc = capacity;
 		m_Active = 0;
 		m_AutoAllocation = false;
@@ -225,7 +225,7 @@ public:
 		m_Alloc = other.m_Alloc;
 		m_Active = other.m_Active;
 		m_AutoAllocation = other.m_AutoAllocation;
-		m_Data = new T[m_Alloc];
+		m_Data = LUX_NEW_ARRAY(T, m_Alloc);
 		for(size_t i = 0; i < m_Active; ++i)
 			m_Data[i] = std::move(other.m_Data);
 	}
@@ -335,30 +335,6 @@ public:
 	ConstIterator Last() const
 	{
 		return ConstIterator(m_Data + m_Active - 1);
-	}
-
-	//! Support for foreach loop
-	Iterator begin()
-	{
-		return First();
-	}
-
-	//! Support for foreach loop
-	Iterator end()
-	{
-		return End();
-	}
-
-	//! Support for foreach loop
-	ConstIterator begin() const
-	{
-		return First();
-	}
-
-	//! Support for foreach loop
-	ConstIterator end() const
-	{
-		return End();
 	}
 
 	//! Add a new active element to the pool
@@ -487,12 +463,12 @@ public:
 	void Reserve(size_t capacity)
 	{
 		m_Alloc += capacity;
-		T* pNew = new T[m_Alloc];
+		T* newData = LUX_NEW_ARRAY(T, m_Alloc);
 		for(size_t i = 0; i < m_Active; ++i)
-			pNew[i] = std::move(m_Data[i]);
-		delete[] m_Data;
+			newData[i] = std::move(m_Data[i]);
+		LUX_FREE_ARRAY(m_Data);
 
-		m_Data = pNew;
+		m_Data = newData;
 	}
 
 private:
@@ -502,6 +478,11 @@ private:
 
 	bool m_AutoAllocation;
 };
+
+template <typename T> inline typename Pool<T>::Iterator begin(Pool<T>& pool) { return pool.First(); }
+template <typename T> inline typename Pool<T>::Iterator end(Pool<T>& pool) { return pool.End(); }
+template <typename T> inline typename Pool<T>::ConstIterator begin(const Pool<T>& pool) { return pool.First(); }
+template <typename T> inline typename Pool<T>::ConstIterator end(const Pool<T>& pool) { return pool.End(); }
 
 } // !namespace core
 } // !namespace lux

@@ -61,7 +61,7 @@ void Renderer::DrawText(gui::Font* font,
 	const math::Vector2F& position,
 	const math::RectF* clip)
 {
-	if(font && text.begin() != text.end())
+	if(font && text.First() != text.End())
 		font->Draw(settings, text, position, clip);
 }
 

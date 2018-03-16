@@ -143,7 +143,7 @@ void FontRaster::Draw(
 	const math::Vector2F& position,
 	const math::RectF* userClip)
 {
-	if(text.begin() == text.end())
+	if(text.First() == text.End())
 		return;
 
 	auto settings = GetFinalFontSettings(_settings);
@@ -272,7 +272,7 @@ size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::
 {
 	if(XPosition < 0.0f)
 		return 0;
-	if(text.begin() == text.end())
+	if(text.First() == text.End())
 		return 0;
 	float lastCaret = 0;
 	size_t counter = 0;

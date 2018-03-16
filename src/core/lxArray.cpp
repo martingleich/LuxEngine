@@ -9,7 +9,7 @@ const char* MakeArrayTypeName(Type baseType)
 {
 	auto baseName = baseType.GetName();
 	auto length = strlen(baseName);
-	char* ptr = new char[length + 3];
+	char* ptr = LUX_NEW_ARRAY(char, length + 3);
 	strcpy(ptr, baseName);
 	strcpy(ptr + length, "[]");
 	return ptr;

@@ -19,15 +19,6 @@ private:
 		Entry* next;
 		Entry* prev;
 		T data;
-
-		static Entry* Alloc()
-		{
-			return (Entry*)::operator new(sizeof(Entry));
-		}
-		static void Free(Entry* e)
-		{
-			::operator delete(e);
-		}
 	};
 
 	template <bool isConst>
@@ -355,11 +346,6 @@ public:
 	Iterator Begin() { return Iterator(nullptr); }
 	ConstIterator Begin() const { return ConstIterator(nullptr); }
 
-	Iterator begin() { return Iterator(m_First); }
-	ConstIterator begin() const { return ConstIterator(m_First); }
-	Iterator end() { return Iterator(nullptr); }
-	ConstIterator end() const { return ConstIterator(nullptr); }
-
 	//! The first element in the list.
 	T& Front() { return m_First->data; }
 	//! The first element in the list.
@@ -403,6 +389,11 @@ private:
 	Entry* m_Last;
 	u32 m_Size;
 };
+
+template <typename T> typename List<T>::Iterator begin(List<T>& list) { return list.Frist(); }
+template <typename T> typename List<T>::Iterator end(List<T>& list) { return list.End(); }
+template <typename T> typename List<T>::ConstIterator begin(const List<T>& list) { return list.Frist(); }
+template <typename T> typename List<T>::ConstIterator end(const List<T>& list) { return list.End(); }
 
 } // namespace core
 } // namespace lux

@@ -55,10 +55,9 @@ void ReferableFactory::RegisterType(Name type, CreationFunc create)
 	if(!create)
 		throw InvalidArgumentException("create", "A creation function must be given.");
 
-	if(m_Types.HasKey(type))
+	bool set = m_Types.SetIfNotExist(type, ReferableType(create));
+	if(!set)
 		throw core::InvalidArgumentException("type", "Type name is already used");
-
-	m_Types.Set(type, ReferableType(create));
 
 	log::Debug("Registered type ~s.", type);
 }
