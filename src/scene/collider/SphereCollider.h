@@ -1,6 +1,6 @@
 #ifndef INCLUDED_SPHERE_COLLIDER_H
 #define INCLUDED_SPHERE_COLLIDER_H
-#include "scene/collider/Collider.h"
+#include "scene/Collider.h"
 
 namespace lux
 {

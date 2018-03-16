@@ -2,7 +2,7 @@
 #include "video/mesh/StaticMesh.h"
 
 #include "core/ReferableFactory.h"
-#include "resources/ResourceSystem.h"
+#include "core/ResourceSystem.h"
 
 #include "video/MaterialLibrary.h"
 #include "video/VideoDriver.h"

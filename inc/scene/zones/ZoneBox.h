@@ -1,6 +1,6 @@
 #ifndef INCLUDED_ZONE_BOX_H
 #define INCLUDED_ZONE_BOX_H
-#include "Zone.h"
+#include "scene/Zone.h"
 #include "math/Transformation.h"
 #include "core/lxRandom.h"
 

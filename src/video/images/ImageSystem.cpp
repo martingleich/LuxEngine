@@ -1,6 +1,6 @@
 #include "video/images/ImageSystem.h"
 
-#include "resources/ResourceSystem.h"
+#include "core/ResourceSystem.h"
 #include "core/ReferableFactory.h"
 
 #include "video/VideoDriver.h"

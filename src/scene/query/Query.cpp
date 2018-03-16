@@ -1,6 +1,6 @@
-#include "scene/query/Query.h"
+#include "scene/Query.h"
 #include "scene/Node.h"
-#include "scene/collider/Collider.h"
+#include "scene/Collider.h"
 
 namespace lux
 {

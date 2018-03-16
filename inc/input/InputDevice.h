@@ -2,7 +2,7 @@
 #define INCLUDED_INPUT_DEVICE_H
 #include "core/ReferenceCounted.h"
 #include "input/InputEvent.h"
-#include "events/lxActions.h"
+#include "core/lxActions.h"
 
 namespace lux
 {

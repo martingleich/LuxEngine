@@ -18,7 +18,7 @@
 #include "platform/D3D9Exception.h"
 #include "video/d3d9/AuxiliaryTextureD3D9.h"
 
-#include "core/ModuleFactoryRegister.h"
+#include "core/ModuleFactory.h"
 
 LUX_REGISTER_MODULE("VideoDriver", "Direct3D9", lux::video::VideoDriverD3D9);
 

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_WINDOW_H
 #define INCLUDED_WINDOW_H
 #include "gui/GUIElement.h"
-#include "events/lxSignal.h"
+#include "core/lxSignal.h"
 
 namespace lux
 {

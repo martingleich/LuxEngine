@@ -2,7 +2,7 @@
 
 #include "video/Shader.h"
 #include "video/VideoDriver.h"
-#include "resources/ResourceSystem.h"
+#include "core/ResourceSystem.h"
 
 #include "io/FileSystem.h"
 #include "io/File.h"

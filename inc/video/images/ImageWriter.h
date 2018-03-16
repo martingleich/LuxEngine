@@ -1,6 +1,6 @@
 #ifndef INCLUDED_IMAGEWRITER_H
 #define INCLUDED_IMAGEWRITER_H
-#include "resources/ResourceWriter.h"
+#include "core/ResourceWriter.h"
 #include "video/images/Image.h"
 #include "video/Texture.h"
 #include "core/lxException.h"

@@ -35,12 +35,29 @@ if(WIN32)
 	add_subdirectory(external/dxerr)
 endif()
 
-# Always include inc!
+macro(ADD_PRECOMPILED_HEADER PrecompiledHeader PrecompiledSource SourcesVar)
+  if(MSVC)
+    get_filename_component(PrecompiledBasename ${PrecompiledHeader} NAME_WE)
+    set(PrecompiledBinary "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${PrecompiledBasename}.pch")
+    set(Sources ${${SourcesVar}})
 
+    set_source_files_properties(${Sources}
+                                PROPERTIES COMPILE_FLAGS "/Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\""
+                                           OBJECT_DEPENDS "${PrecompiledBinary}")  
+    set_source_files_properties(${PrecompiledSource}
+                                PROPERTIES COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\""
+                                           OBJECT_OUTPUTS "${PrecompiledBinary}")
+    # Add precompiled source file to sources
+    list(APPEND ${SourcesVar} ${PrecompiledSource})
+  endif(MSVC)
+endmacro(ADD_PRECOMPILED_HEADER)
 
 # I'm not going to list all cpp files manually ...
 file(GLOB_RECURSE SRCS_CPP "src/*.cpp")
 file(GLOB_RECURSE SRCS_H "src/*.h")
+
+ADD_PRECOMPILED_HEADER("core/Core.h" "src/core/Core.cpp" SRCS_CPP)
+
 set(SRCS ${SRCS_CPP} ${SRCS_H})
 file(GLOB_RECURSE INCS "inc/*.h")
 

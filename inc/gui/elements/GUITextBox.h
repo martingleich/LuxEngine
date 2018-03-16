@@ -2,7 +2,7 @@
 #define INCLUDED_GUI_TEXT_BOX_H
 #include "gui/GUIElement.h"
 #include "gui/GUITextContainer.h"
-#include "events/lxSignal.h"
+#include "core/lxSignal.h"
 
 namespace lux
 {

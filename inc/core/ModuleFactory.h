@@ -69,7 +69,40 @@ private:
 	core::Array<Entry> m_Entries;
 };
 
+namespace impl_moduleRegister
+{
+struct ModuleFactoryRegisterBlock;
+void LUX_API RegisterModuleFactoryBlock(ModuleFactoryRegisterBlock* block);
+void LUX_API RunAllModuleFactoryBlocks();
+
+struct ModuleFactoryRegisterBlock
+{
+	core::String module;
+	core::String name;
+
+	ModuleFactory::CreatorT creator;
+
+	ModuleFactoryRegisterBlock* next;
+
+	ModuleFactoryRegisterBlock(
+		const core::String& _module,
+		const core::String& _name,
+		ModuleFactory::CreatorT _creator) :
+		module(_module),
+		name(_name),
+		creator(_creator),
+		next(nullptr)
+	{
+		RegisterModuleFactoryBlock(this);
+	}
+};
+
+} // impl_moduleRegister
 } // namespace core
 } // namespace lux
+
+#define LUX_REGISTER_MODULE(module, name, class) \
+static ::lux::ReferenceCounted* InternalCreatorFunc(const ::lux::core::ModuleInitData& data) { return LUX_NEW(class)(data); } \
+static ::lux::core::impl_moduleRegister::ModuleFactoryRegisterBlock InternalModuleRegisterStaticObject(module, name, &InternalCreatorFunc);
 
 #endif // #ifndef INCLUDED_MODULE_FACTORY_H

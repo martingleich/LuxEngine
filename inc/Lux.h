@@ -124,17 +124,16 @@ namespace input
 #include "scene/Scene.h"
 #include "scene/SceneRenderer.h"
 
-#include "scene/collider/Collider.h"
+#include "scene/Collider.h"
 
-#include "scene/query/QueryCallback.h"
-#include "scene/query/Query.h"
+#include "scene/Query.h"
 
 #include "scene/Node.h"
 
-#include "scene/animation/Curve.h"
+#include "scene/Curve.h"
 
-#include "events/lxSignal.h"
-#include "events/lxActions.h"
+#include "core/lxSignal.h"
+#include "core/lxActions.h"
 
 #include "video/mesh/Geometry.h"
 #include "video/mesh/VideoMesh.h"
@@ -153,8 +152,8 @@ namespace input
 
 #include "core/ModuleFactory.h"
 
-#include "resources/Resource.h"
-#include "resources/ResourceSystem.h"
+#include "core/Resource.h"
+#include "core/ResourceSystem.h"
 
 #include "LuxEngine/LuxSystemInfo.h"
 #include "LuxEngine/LuxDevice.h"

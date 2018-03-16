@@ -1,6 +1,6 @@
 #ifndef INCLUDED_IMAGELOADER_TGA_H
 #define INCLUDED_IMAGELOADER_TGA_H
-#include "resources/ResourceLoader.h"
+#include "core/ResourceLoader.h"
 
 namespace lux
 {

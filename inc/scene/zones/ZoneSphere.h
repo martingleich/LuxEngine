@@ -1,6 +1,6 @@
 #ifndef INCLUDED_ZONE_SPHERE_H
 #define INCLUDED_ZONE_SPHERE_H
-#include "Zone.h"
+#include "scene/Zone.h"
 #include "core/lxRandom.h"
 
 namespace lux

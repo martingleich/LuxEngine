@@ -1,6 +1,6 @@
 #ifndef INCLUDED_IMAGELOADERD3DX_H
 #define INCLUDED_IMAGELOADERD3DX_H
-#include "resources/ResourceLoader.h"
+#include "core/ResourceLoader.h"
 
 #ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
 

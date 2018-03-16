@@ -1,6 +1,6 @@
 #ifndef INCLUDED_BOX_COLLIDER_H
 #define INCLUDED_BOX_COLLIDER_H
-#include "scene/collider/Collider.h"
+#include "scene/Collider.h"
 #include "math/Transformation.h"
 
 namespace lux

@@ -1,7 +1,7 @@
 #include "scene/Scene.h"
 #include "scene/Node.h"
 #include "scene/Renderable.h"
-#include "scene/collider/Collider.h"
+#include "scene/Collider.h"
 #include "core/Logger.h"
 
 namespace lux

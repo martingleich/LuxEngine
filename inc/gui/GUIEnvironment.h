@@ -3,7 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 #include "math/Vector2.h"
-#include "events/lxSignal.h"
+#include "core/lxSignal.h"
 #include "gui/GUIEvent.h"
 
 #include "gui/GUIScalarDistance.h"

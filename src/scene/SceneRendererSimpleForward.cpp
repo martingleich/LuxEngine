@@ -13,7 +13,7 @@
 #include "scene/components/Light.h"
 #include "scene/components/SceneMesh.h"
 
-#include "core/ModuleFactoryRegister.h"
+#include "core/ModuleFactory.h"
 
 LUX_REGISTER_MODULE("SceneRenderer", "SimpleForward", lux::scene::SceneRendererSimpleForward)
 

@@ -2,9 +2,9 @@
 #include "core/Clock.h"
 #include "core/Logger.h"
 
-#include "core/ModuleFactoryRegister.h"
+#include "core/ModuleFactory.h"
 #include "core/ReferableFactory.h"
-#include "resources/ResourceSystem.h"
+#include "core/ResourceSystem.h"
 
 #include "io/FileSystem.h"
 

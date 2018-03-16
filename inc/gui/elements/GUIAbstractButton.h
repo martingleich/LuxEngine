@@ -1,7 +1,7 @@
 #ifndef INCLUDED_GUI_ABSTRACT_BUTTON_H
 #define INCLUDED_GUI_ABSTRACT_BUTTON_H
 #include "gui/GUIElement.h"
-#include "events/lxSignal.h"
+#include "core/lxSignal.h"
 
 namespace lux
 {

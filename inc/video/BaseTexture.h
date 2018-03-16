@@ -2,7 +2,7 @@
 #define INCLUDED_BASETEXTURE_H
 #include "video/Color.h"
 #include "math/Dimension2.h"
-#include "resources/Resource.h"
+#include "core/Resource.h"
 
 namespace lux
 {

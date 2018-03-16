@@ -58,5 +58,22 @@ StrongRef<ReferenceCounted> ModuleFactory::CreateModule(const core::String& modu
 	throw core::ObjectNotFoundException((module + "." + name).Data());
 }
 
+namespace impl_moduleRegister
+{
+static ModuleFactoryRegisterBlock* g_FirstModuleBlock = nullptr;
+
+void RegisterModuleFactoryBlock(ModuleFactoryRegisterBlock* block)
+{
+	block->next = g_FirstModuleBlock;
+	g_FirstModuleBlock = block;
 }
+
+void RunAllModuleFactoryBlocks()
+{
+	for(auto block = g_FirstModuleBlock; block; block = block->next)
+		ModuleFactory::Instance()->AddModuleFactory(block->module, block->name, block->creator);
 }
+
+} // namespace impl_moduleRegister
+} // namespace core
+} // namespace lux

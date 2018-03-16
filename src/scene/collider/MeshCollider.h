@@ -1,6 +1,6 @@
 #ifndef INCLUDED_MESH_COLLIDER_H
 #define INCLUDED_MESH_COLLIDER_H
-#include "scene/collider/Collider.h"
+#include "scene/Collider.h"
 #include "math/Triangle3.h"
 #include "core/lxArray.h"
 

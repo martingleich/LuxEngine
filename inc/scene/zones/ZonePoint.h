@@ -1,6 +1,6 @@
 #ifndef INCLUDED_ZONE_POINT_H
 #define INCLUDED_ZONE_POINT_H
-#include "Zone.h"
+#include "scene/Zone.h"
 
 namespace lux
 {

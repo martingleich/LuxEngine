@@ -9,7 +9,7 @@
 #include "io/FileSystem.h"
 #include "gui/GUIEnvironment.h"
 #include "core/ReferableFactory.h"
-#include "resources/ResourceSystem.h"
+#include "core/ResourceSystem.h"
 
 namespace lux
 {

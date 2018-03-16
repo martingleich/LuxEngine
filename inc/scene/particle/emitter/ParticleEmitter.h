@@ -3,7 +3,7 @@
 #include "scene/particle/Particle.h"
 
 #include "scene/Component.h"
-#include "scene/zones/Zone.h"
+#include "scene/Zone.h"
 
 #include "core/lxRandom.h"
 #include "math/Transformation.h"

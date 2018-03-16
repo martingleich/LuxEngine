@@ -1,6 +1,6 @@
 #ifndef INCLUDED_GUI_EVENT_H
 #define INCLUDED_GUI_EVENT_H
-#include "events/lxEvent.h"
+#include "core/lxEvent.h"
 #include "input/Keycodes.h"
 
 namespace lux

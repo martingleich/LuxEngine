@@ -1,6 +1,6 @@
 #ifndef INCLUDED_IMAGELOADERBMP_H
 #define INCLUDED_IMAGELOADERBMP_H
-#include "resources/ResourceLoader.h"
+#include "core/ResourceLoader.h"
 
 //#define USE_ALPHA_CHANNEL
 

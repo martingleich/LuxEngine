@@ -2,7 +2,7 @@
 #define INCLUDED_MESH_H
 #include "math/AABBox.h"
 
-#include "resources/Resource.h"
+#include "core/Resource.h"
 
 #include "video/VertexFormat.h"
 #include "video/VideoEnums.h"

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_RESOURCE_LOADER_H
 #define INCLUDED_RESOURCE_LOADER_H
-#include "resources/Resource.h"
+#include "core/Resource.h"
 
 namespace lux
 {

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_FONT_H
 #define INCLUDED_FONT_H
-#include "resources/Resource.h"
+#include "core/Resource.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
 #include "math/Rect.h"

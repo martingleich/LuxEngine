@@ -1,7 +1,7 @@
 #ifndef INCLUDED_INPUT_EVENT_H
 #define INCLUDED_INPUT_EVENT_H
 #include "input/Keycodes.h"
-#include "events/lxEvent.h"
+#include "core/lxEvent.h"
 
 namespace lux
 {

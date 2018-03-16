@@ -2,7 +2,7 @@
 #define INCLUDED_CURSOR_H
 #include "core/ReferenceCounted.h"
 #include "math/Dimension2.h"
-#include "events/lxSignal.h"
+#include "core/lxSignal.h"
 #include "gui/GUIEnums.h"
 
 namespace lux

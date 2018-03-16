@@ -1,6 +1,6 @@
 #ifndef INCLUDED_ZONE_RING_H
 #define INCLUDED_ZONE_RING_H
-#include "Zone.h"
+#include "scene/Zone.h"
 #include "core/lxRandom.h"
 
 namespace lux

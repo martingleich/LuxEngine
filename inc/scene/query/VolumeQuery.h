@@ -1,8 +1,8 @@
 #ifndef INCLUDED_VOLUME_QUERY_H
 #define INCLUDED_VOLUME_QUERY_H
-#include "scene/query/Query.h"
-#include "scene/query/QueryCallback.h"
-#include "scene/zones/Zone.h"
+#include "scene/Query.h"
+
+#include "scene/Zone.h"
 
 namespace lux
 {

@@ -6,7 +6,7 @@
 #include "platform/D3D9Exception.h"
 #include "D3DHelper.h"
 
-#include "core/ModuleFactoryRegister.h"
+#include "core/ModuleFactory.h"
 
 LUX_REGISTER_MODULE("AdapterList", "Direct3D9", lux::video::AdapterListD3D9);
 

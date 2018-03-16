@@ -1,7 +1,7 @@
 #ifndef INCLUDED_ACTION_MAPPER_H
 #define INCLUDED_ACTION_MAPPER_H
-#include "events/lxSignal.h"
-#include "events/lxEvent.h"
+#include "core/lxSignal.h"
+#include "core/lxEvent.h"
 #include "core/lxString.h"
 #include "core/lxHashMap.h"
 

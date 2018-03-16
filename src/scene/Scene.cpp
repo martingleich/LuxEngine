@@ -3,7 +3,7 @@
 #include "core/ReferableFactory.h"
 #include "core/lxAlgorithm.h"
 
-#include "resources/ResourceSystem.h"
+#include "core/ResourceSystem.h"
 
 #include "video/mesh/VideoMesh.h"
 

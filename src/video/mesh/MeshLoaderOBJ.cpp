@@ -1,6 +1,6 @@
 #include "MeshLoaderOBJ.h"
 
-#include "resources/ResourceSystem.h"
+#include "core/ResourceSystem.h"
 
 #include "core/Logger.h"
 

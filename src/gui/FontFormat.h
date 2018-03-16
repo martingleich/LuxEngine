@@ -1,8 +1,8 @@
 #ifndef INCLUDED_FONT_FORMAT_H
 #define INCLUDED_FONT_FORMAT_H
-#include "resources/ResourceSystem.h"
-#include "resources/ResourceLoader.h"
-#include "resources/ResourceWriter.h"
+#include "core/ResourceSystem.h"
+#include "core/ResourceLoader.h"
+#include "core/ResourceWriter.h"
 
 namespace lux
 {
