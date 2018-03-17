@@ -121,7 +121,7 @@ public:
 	*/
 	virtual StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
 
-	//! Check if a files exists
+	//! Check if a file exists
 	virtual bool ExistFile(const Path& p) const = 0;
 
 	//! Create a enumerator for a subdirecorty in the archive.
@@ -142,4 +142,5 @@ public:
 
 }
 }
+
 #endif // #ifndef INCLUDED_ARCHIVE_H

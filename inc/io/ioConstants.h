@@ -39,11 +39,20 @@ enum class EVirtualCreateFlag
 	Expandable = 8,
 };
 
-}
+enum class ELineEnding
+{
+	Unix,
+	Window,
+	Macintosh,
+
+	Unknown,
+};
+
+} // namespace io
 
 DECLARE_FLAG_CLASS(io::EArchiveCapabilities);
 DECLARE_FLAG_CLASS(io::EVirtualCreateFlag);
 
-}
+} // namespace lux
 
 #endif // #ifndef INCLUDED_IOCONSTANTS_H

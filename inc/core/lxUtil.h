@@ -42,44 +42,27 @@ struct BitWiseHash
 template <typename T>
 struct HashType : BitWiseHash<T>
 {
-	static_assert(__is_enum(T), "Type is not supported for hashes.");
+	std::enable_if<std::is_enum<T>::value, size_t> operator()(T t) const
+	{
+		return (size_t)t;
+	}
 };
 
 template <typename T>
-struct HashType<T*> : BitWiseHash<T*>
-{};
+struct HashType<T*> : BitWiseHash<T*> {};
 
-template <>
-struct HashType<u32> : BitWiseHash<u32>
-{};
-
-template <>
-struct HashType<u16> : BitWiseHash<u16>
-{};
-
-template <>
-struct HashType<u8> : BitWiseHash<u8>
-{};
-
-template <>
-struct HashType<s32> : BitWiseHash<u32>
-{};
-
-template <>
-struct HashType<s16> : BitWiseHash<u16>
-{};
-
-template <>
-struct HashType<s8> : BitWiseHash<u8>
-{};
-
-template <>
-struct HashType<char> : BitWiseHash<char>
-{};
-
-template <>
-struct HashType<wchar_t> : BitWiseHash<wchar_t>
-{};
+template <> struct HashType<char> : BitWiseHash<char> {};
+template <> struct HashType<wchar_t> : BitWiseHash<wchar_t> {};
+template <> struct HashType<signed char> : BitWiseHash<signed char> {};
+template <> struct HashType<unsigned char> : BitWiseHash<unsigned char> {};
+template <> struct HashType<signed short> : BitWiseHash<signed short> {};
+template <> struct HashType<unsigned short> : BitWiseHash<unsigned short> {};
+template <> struct HashType<signed int> : BitWiseHash<signed int> {};
+template <> struct HashType<unsigned int> : BitWiseHash<unsigned int> {};
+template <> struct HashType<signed long> : BitWiseHash<signed long> {};
+template <> struct HashType<unsigned long> : BitWiseHash<unsigned long> {};
+template <> struct HashType<signed long long> : BitWiseHash<signed long long> {};
+template <> struct HashType<unsigned long long> : BitWiseHash<unsigned long long> {};
 
 template <>
 struct HashType<float> : BitWiseHash<float>
@@ -96,6 +79,15 @@ struct HashType<double> : BitWiseHash<double>
 	size_t operator()(double x)
 	{
 		return BitWiseHash<double>::operator()(x == -0 ? +0 : x);
+	}
+};
+
+template <>
+struct HashType<long double> : BitWiseHash<long double>
+{
+	size_t operator()(long double x)
+	{
+		return BitWiseHash<long double>::operator()(x == -0 ? +0 : x);
 	}
 };
 

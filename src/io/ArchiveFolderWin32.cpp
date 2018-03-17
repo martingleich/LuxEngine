@@ -212,15 +212,11 @@ StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileM
 
 bool ArchiveFolderWin32::ExistFile(const Path& p) const
 {
-#ifdef LUX_WINDOWS
 	DWORD fatt = GetWin32FileAttributes(p);
 	if(fatt == INVALID_FILE_ATTRIBUTES)
 		return false;
 	else
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) == 0;
-#else
-#error Not implemented
-#endif
 }
 
 core::Range<FileIterator> ArchiveFolderWin32::EnumerateFiles(const Path& subDir)

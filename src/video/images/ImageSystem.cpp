@@ -7,6 +7,7 @@
 #include "video/ColorConverter.h"
 
 #include "io/File.h"
+#include "io/FileUtilities.h"
 #include "io/FileSystem.h"
 
 #include "video/CubeTexture.h"
@@ -123,22 +124,7 @@ public:
 		return AXES[i];
 	}
 
-	core::String GetName(ENameScheme scheme, size_t id, const io::Path& basePath, const core::String& name, const core::String& ext)
-	{
-		switch(scheme) {
-		case ENameScheme::Numeric:
-			return basePath + name + core::StringConverter::ToString(id + 1) + "." + ext;
-		case ENameScheme::Names:
-			return basePath + name + GetName(id) + "." + ext;
-		case ENameScheme::Axes:
-			return basePath + name + GetAxis(id) + "." + ext;
-		default:
-			lxAssertNeverReach("Unsupported cube texture naming scheme.");
-			return core::String::EMPTY;
-		}
-	}
-
-	ENameScheme GetNameSchema(const io::Path& path, core::String& outBaseName, size_t& outId)
+	ENameScheme GetNameScheme(const io::Path& path, core::String& outBaseName, size_t& outId)
 	{
 		io::Path basePath = io::GetFileDir(path);
 		core::String nameonly = io::GetFilenameOnly(path, false);
@@ -172,50 +158,57 @@ public:
 		if(requestedType && requestedType != core::ResourceType::CubeTexture)
 			return core::Name::INVALID;
 
-		auto fileSys = io::FileSystem::Instance();
-		auto filename = file->GetName();
-		if(fileSys->ExistFile(filename)) {
-			core::String baseName;
-			size_t id;
-			ENameScheme scheme = GetNameSchema(filename, baseName, id);
-			if(scheme == ENameScheme::Invalid)
-				return core::Name::INVALID;
-
-			core::String otherName = GetName(scheme, (id + 1) % 6, io::GetFileDir(filename), baseName, io::GetFileExtension(filename));
-			if(!fileSys->ExistFile(otherName))
-				return core::Name::INVALID;
-
-			return core::ResourceType::CubeTexture;
+		auto lineEnding = io::GetLineEnding(file);
+		if(lineEnding == io::ELineEnding::Unknown)
+			return core::Name::INVALID;
+		core::Array<core::String> lines;
+		for(auto& l : Lines(file, lineEnding)) {
+			if(!l.IsWhitespace())
+				lines.PushBack(l);
 		}
-
-		return core::Name::INVALID;
+		if(lines.Size() != 6)
+			return core::Name::INVALID;
+		return core::ResourceType::CubeTexture;
 	}
 
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
-		auto fileSys = io::FileSystem::Instance();
-		auto filename = file->GetName();
-
-		io::Path basePath = io::GetFileDir(filename);
-		core::String ext = io::GetFileExtension(filename);
-		core::String baseName;
-		size_t id;
-		ENameScheme scheme = GetNameSchema(filename, baseName, id);
-
-		bool isValid = true;
-		io::Path image_path[6];
+		u32 order[6] = {0, 1, 2, 3, 4, 5};
+		core::String lines[6];
 		StrongRef<Image> images[6];
-		for(size_t i = 0; i < 6; ++i) {
-			image_path[i] = GetName(scheme, i, basePath, baseName, ext);
-			if(!fileSys->ExistFile(image_path[i]))
-				isValid = false;
+
+		auto lineEnding = io::GetLineEnding(file);
+		u32 i = 0;
+		for(auto& l : Lines(file, lineEnding)) {
+			if(!l.IsWhitespace()) {
+				if(i == 6)
+					continue;
+				lines[i++] = l;
+			}
 		}
 
-		if(isValid) {
-			for(size_t i = 0; i < 6; ++i)
-				images[i] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, image_path[i]).AsStrong<Image>();
-		} else {
-			throw io::FileNotFoundException(filename.Data());
+		core::String baseName;
+		size_t id;
+		ENameScheme scheme = GetNameScheme(lines[0], baseName, id);
+		if(scheme != ENameScheme::Invalid) {
+			core::String baseName2;
+			i = 0;
+			for(auto& l : lines) {
+				ENameScheme scheme2 = GetNameScheme(l, baseName2, order[i++]);
+				if(scheme2 != scheme || baseName != baseName2) {
+					scheme = ENameScheme::Invalid;
+					break;
+				}
+			}
+		}
+
+		auto baseDir = file->GetDescription();
+		auto fileSys = io::FileSystem::Instance();
+		for(i = 0; i < 6; ++i) {
+			auto& path = lines[i];
+			auto imgfile = fileSys->OpenFile(io::ConcatFileDesc(baseDir, path));
+			if(imgfile)
+				images[order[i]] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, imgfile).AsStrong<Image>();
 		}
 
 		InitCubeTexture(images, (CubeTexture*)dst);
