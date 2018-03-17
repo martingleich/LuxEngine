@@ -1,6 +1,5 @@
 #include "scene/particle/ParticleModel.h"
 #include "scene/particle/ParticleInterpolator.h"
-#include "scene/particle/ParticleSystemManager.h"
 
 namespace lux
 {
@@ -275,8 +274,7 @@ StrongRef<ParticleRenderer> ParticleModel::GetRenderer()
 StrongRef<ParticleRenderer> ParticleModel::SetRenderMode(core::Name type)
 {
 	if(m_Renderer == nullptr || type != m_Renderer->GetType())
-		m_Renderer = ParticleSystemManager::Instance()->GetParticleRendererMachine(type)->CreateRenderer();
-
+		m_Renderer = core::ReferableFactory::Instance()->CreateShared(type).AsStrong<RendererMachine>()->CreateRenderer();
 	return m_Renderer;
 }
 

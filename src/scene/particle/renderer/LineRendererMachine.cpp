@@ -3,6 +3,8 @@
 #include "scene/particle/ParticleGroupData.h"
 #include "video/MaterialLibrary.h"
 
+LX_REGISTER_REFERABLE_CLASS(lux::scene::LineRendererMachine, "lux.particlerenderer.Line");
+
 namespace lux
 {
 namespace scene
@@ -91,16 +93,15 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		m_VertexFormat);
 }
 
-core::Name LineRendererMachine::GetType() const
-{
-	static const core::Name name("lux.particlerenderer.line");
-
-	return name;
-}
-
 StrongRef<ParticleRenderer> LineRendererMachine::CreateRenderer()
 {
 	return LUX_NEW(LineRenderer)(this);
+}
+
+core::Name LineRendererMachine::GetReferableType() const
+{
+	static const core::Name name("lux.particlerenderer.Line");
+	return name;
 }
 
 } // namespace scene

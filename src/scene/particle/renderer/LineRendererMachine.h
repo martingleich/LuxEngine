@@ -29,8 +29,9 @@ public:
 	~LineRendererMachine();
 
 	void Render(video::Renderer* videoRenderer, ParticleGroupData* group, ParticleRenderer* renderer);
-	core::Name GetType() const;
 	StrongRef<ParticleRenderer> CreateRenderer();
+
+	core::Name GetReferableType() const;
 
 private:
 	void CreateBuffer(ParticleGroupData* group);

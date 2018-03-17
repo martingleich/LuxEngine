@@ -3,15 +3,16 @@
 #include "affector/ParticleAffector.h"
 #include "emitter/ParticleEmitter.h"
 #include "emitter/StraightEmitter.h"
-#include "ParticleModel.h"
+#include "scene/particle/ParticleModel.h"
 
 namespace lux
 {
 namespace scene
 {
 
-class ParticleSystemTemplate : public ReferenceCounted
+class ParticleSystemTemplate : public Referable
 {
+	LX_REFERABLE_MEMBERS_API(ParticleSystemTemplate, LUX_API);
 public:
 	virtual ~ParticleSystemTemplate() {}
 

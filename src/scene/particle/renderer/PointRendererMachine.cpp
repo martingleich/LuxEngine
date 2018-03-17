@@ -4,6 +4,8 @@
 
 #include "video/MaterialLibrary.h"
 
+LX_REGISTER_REFERABLE_CLASS(lux::scene::PointRendererMachine, "lux.particlerenderer.Point");
+
 namespace lux
 {
 namespace scene
@@ -81,15 +83,15 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 		m_VertexFormat);
 }
 
-core::Name PointRendererMachine::GetType() const
-{
-	static const core::Name name("lux.particlerenderer.point");
-	return name;
-}
-
 StrongRef<ParticleRenderer> PointRendererMachine::CreateRenderer()
 {
 	return LUX_NEW(PointRenderer)(this);
+}
+
+core::Name PointRendererMachine::GetReferableType() const
+{
+	static const core::Name name("lux.particlerenderer.Point");
+	return name;
 }
 
 } // namespace scene

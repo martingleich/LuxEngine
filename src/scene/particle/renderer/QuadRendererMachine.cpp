@@ -9,6 +9,8 @@
 
 #include "video/VideoDriver.h"
 
+LX_REGISTER_REFERABLE_CLASS(lux::scene::QuadRendererMachine, "lux.particlerenderer.Quad");
+
 namespace lux
 {
 namespace scene
@@ -367,15 +369,15 @@ void QuadRendererMachine::CreateBuffers(ParticleGroupData* group)
 	}
 }
 
-core::Name QuadRendererMachine::GetType() const
-{
-	static const core::Name name("lux.particlerenderer.quad");
-	return name;
-}
-
 StrongRef<ParticleRenderer> QuadRendererMachine::CreateRenderer()
 {
 	return LUX_NEW(QuadRenderer(this));
+}
+
+core::Name QuadRendererMachine::GetReferableType() const
+{
+	static const core::Name name("lux.particlerenderer.Quad");
+	return name;
 }
 
 } // namespace scene

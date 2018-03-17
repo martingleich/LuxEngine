@@ -20,7 +20,6 @@
 
 #include "scene/Scene.h"
 #include "scene/SceneRenderer.h"
-#include "scene/particle/ParticleSystemManager.h"
 
 #include "gui/GUIEnvironment.h"
 #include "gui/Window.h"
@@ -72,7 +71,6 @@ void LuxDeviceNull::ReleaseModules()
 	m_GUIEnv.Reset();
 	m_Scene.Reset();
 	m_SceneRenderer.Reset();
-	scene::ParticleSystemManager::Destroy();
 
 	video::MeshSystem::Destroy();
 	video::ImageSystem::Destroy();
@@ -134,9 +132,6 @@ void LuxDeviceNull::BuildScene(const core::String& name, void* user)
 		log::Warning("Scene already built.");
 		return;
 	}
-
-	if(!scene::ParticleSystemManager::Instance())
-		scene::ParticleSystemManager::Initialize();
 
 	log::Info("Building Scene.");
 	m_Scene = CreateScene();

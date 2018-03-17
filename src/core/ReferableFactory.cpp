@@ -70,7 +70,21 @@ void ReferableFactory::UnregisterType(Name type)
 
 StrongRef<Referable> ReferableFactory::Create(Name type, const void* data)
 {
-	CreationFunc create = m_Types.At(type).create;
+	auto& entry = m_Types.Get(type, ReferableType());
+	CreationFunc create = entry.create;
+	StrongRef<Referable> r = create ? create(data) : nullptr;
+	if(!r)
+		throw Exception("Can't create new instance of given type.");
+
+	return r;
+}
+
+StrongRef<Referable> ReferableFactory::CreateShared(Name type, const void* data)
+{
+	auto& entry = m_Types.Get(type, ReferableType());
+	if(entry.sharedInstance)
+		return entry.sharedInstance;
+	CreationFunc create = entry.create;
 	StrongRef<Referable> r = create ? create(data) : nullptr;
 	if(!r)
 		throw Exception("Can't create new instance of given type.");

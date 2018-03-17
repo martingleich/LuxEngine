@@ -1,8 +1,8 @@
 #ifndef INCLUDED_PARTICLERENDERER_H
 #define INCLUDED_PARTICLERENDERER_H
+#include "core/Referable.h"
 #include "video/SpriteBank.h"
 #include "math/Vector3.h"
-#include "core/lxName.h"
 
 namespace lux
 {
@@ -18,35 +18,34 @@ class ParticleRenderer : public ReferenceCounted
 {
 public:
 	ParticleRenderer(RendererMachine* machine) :
-		mMachine(machine)
+		m_Machine(machine)
 	{
 	}
-
 	virtual ~ParticleRenderer() {}
+
 	inline core::Name GetType() const;
 	StrongRef<RendererMachine> GetMachine() const
 	{
-		return mMachine;
+		return m_Machine;
 	}
 
 private:
-	StrongRef<RendererMachine> mMachine;
+	StrongRef<RendererMachine> m_Machine;
 };
 
 class ParticleGroupData;
-class RendererMachine : public ReferenceCounted
+class RendererMachine : public Referable
 {
 public:
 	virtual ~RendererMachine() {}
 
 	virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, ParticleRenderer* renderer = nullptr) = 0;
 	virtual StrongRef<ParticleRenderer> CreateRenderer() = 0;
-	virtual core::Name GetType() const = 0;
 };
 
 inline core::Name ParticleRenderer::GetType() const
 {
-	return mMachine->GetType();
+	return m_Machine->GetReferableType();
 }
 
 enum class ELookOrientation

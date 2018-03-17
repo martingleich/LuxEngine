@@ -40,9 +40,9 @@ struct BitWiseHash
 };
 
 template <typename T>
-struct HashType : BitWiseHash<T>
+struct HashType
 {
-	std::enable_if<std::is_enum<T>::value, size_t> operator()(T t) const
+	typename std::enable_if<std::is_enum<T>::value, size_t>::type operator()(T t) const
 	{
 		return (size_t)t;
 	}
