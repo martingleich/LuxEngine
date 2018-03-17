@@ -7,9 +7,10 @@ namespace lux
 namespace input
 {
 
-RawKeyboardDevice::RawKeyboardDevice(InputSystem* system, HANDLE rawHandle) :
+RawKeyboardDevice::RawKeyboardDevice(InputSystem* system, HANDLE rawHandle, HKL keyboardLayout) :
 	RawInputDevice(system),
-	m_DeadKey(0)
+	m_DeadKey(0),
+	m_KeyboardLayout(keyboardLayout)
 {
 	memset(m_Win32KeyStates, 0, sizeof(m_Win32KeyStates));
 
@@ -95,6 +96,11 @@ RawInputDevice::ElemDesc RawKeyboardDevice::GetElementDesc(EEventType type, u32 
 	static const core::String name = "(unknown)";
 
 	return ElemDesc(name, 0, 0, EElementType::Other);
+}
+
+void RawKeyboardDevice::SetKeyboardLayout(HKL hkl)
+{
+	m_KeyboardLayout = hkl;
 }
 
 u32 RawKeyboardDevice::VKeyCodeToKeyCode(u16 code)
@@ -275,8 +281,6 @@ static u32 CombToKey(u32 c)
 void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 	wchar_t* character, u32 maxSize)
 {
-	const HKL keyboardLayout = GetKeyboardLayout(0);
-
 	int conversionResult;
 	const UINT scanCode = input.MakeCode;
 	const UINT vKeyCode = input.VKey;
@@ -292,7 +296,6 @@ void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 	m_Win32KeyStates[VK_MENU] = m_Win32KeyStates[VK_LMENU] | m_Win32KeyStates[VK_RMENU];
 	m_Win32KeyStates[VK_CONTROL] = m_Win32KeyStates[VK_LCONTROL] | m_Win32KeyStates[VK_RCONTROL];
 
-
 	UINT flags = (m_Win32KeyStates[VK_MENU] & 0x80) != 0 ? 1 : 0;
 	wchar_t translatedKey[10];
 	conversionResult = ToUnicodeEx(
@@ -302,7 +305,7 @@ void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,
 		translatedKey,
 		sizeof(translatedKey) / sizeof(*translatedKey),
 		flags,
-		keyboardLayout);
+		m_KeyboardLayout);
 
 	if(conversionResult == 0) {
 		character[0] = 0;

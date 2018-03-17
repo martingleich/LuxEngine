@@ -19,6 +19,8 @@ RawInputReceiver::RawInputReceiver(InputSystem* inputSystem, HWND window) :
 	m_Window(window),
 	m_InputSystem(inputSystem)
 {
+	m_KeyboardLayout = GetKeyboardLayout(0);
+
 	RegisterDevices(HIDUsagePage::GenericDesktopControls, 2, false);
 	RegisterDevices(HIDUsagePage::GenericDesktopControls, 4, false);
 	RegisterDevices(HIDUsagePage::GenericDesktopControls, 5, false);
@@ -104,14 +106,11 @@ StrongRef<RawInputDevice> RawInputReceiver::CreateDevice(HANDLE rawHandle)
 
 	switch(info.dwType) {
 	case RIM_TYPEKEYBOARD:
-		return LUX_NEW(RawKeyboardDevice)(m_InputSystem, rawHandle);
-		break;
+		return LUX_NEW(RawKeyboardDevice)(m_InputSystem, rawHandle, m_KeyboardLayout);
 	case RIM_TYPEMOUSE:
 		return LUX_NEW(RawMouseDevice)(m_InputSystem, rawHandle);
-		break;
 	case RIM_TYPEHID:
 		return LUX_NEW(RawJoystickDevice)(m_InputSystem, rawHandle);
-		break;
 	default:
 		throw core::RuntimeException("Unsupported device type");
 	}
@@ -211,6 +210,16 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 		ret = true;
 		break;
 	}
+	case WM_INPUTLANGCHANGE:
+		m_KeyboardLayout = reinterpret_cast<HKL>(lParam);
+		for(auto& device : m_DeviceMap.Values()) {
+			if(device->GetType() == EEventSource::Keyboard) {
+				auto keyboard = device.AsStrong<RawKeyboardDevice>();
+				if(keyboard)
+					keyboard->SetKeyboardLayout(m_KeyboardLayout);
+			}
+		}
+		break;
 	case WM_SETFOCUS:
 		if(m_InputSystem)
 			m_InputSystem->SetForegroundState(true);

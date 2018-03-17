@@ -13,11 +13,13 @@ namespace input
 class RawKeyboardDevice : public RawInputDevice
 {
 public:
-	RawKeyboardDevice(InputSystem* system, HANDLE rawHandle);
+	RawKeyboardDevice(InputSystem* system, HANDLE rawHandle, HKL keyboardLayout);
 	void HandleInput(RAWINPUT* input);
 	EEventSource GetType() const;
 	size_t GetElementCount(EEventType type) const;
 	ElemDesc GetElementDesc(EEventType type, u32 code) const;
+
+	void SetKeyboardLayout(HKL hkl);
 
 private:
 	u32 VKeyCodeToKeyCode(u16 code);
@@ -28,6 +30,8 @@ private:
 private:
 	BYTE m_Win32KeyStates[MAX_KEY_COUNT];
 	wchar_t m_DeadKey;
+
+	HKL m_KeyboardLayout;
 };
 
 }

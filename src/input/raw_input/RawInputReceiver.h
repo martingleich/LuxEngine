@@ -69,8 +69,10 @@ public:
 	u32 DiscoverDevices(EEventSource deviceType);
 
 private:
-	core::RawMemory m_RawData;
 	HWND m_Window;
+	HKL m_KeyboardLayout;
+
+	core::RawMemory m_RawData;
 	StrongRef<InputSystem> m_InputSystem;
 
 	core::HashMap<HANDLE, StrongRef<RawInputDevice>> m_DeviceMap;
