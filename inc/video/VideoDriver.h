@@ -65,36 +65,36 @@ public:
 	virtual StrongRef<Geometry> CreateEmptyGeometry(
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles) = 0;
 	virtual StrongRef<Geometry> CreateGeometry(
-		const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, u32 vertexCount,
-		EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, u32 indexCount,
+		const VertexFormat& vertexFormat, EHardwareBufferMapping vertexHWMapping, int vertexCount,
+		EIndexFormat indexType, EHardwareBufferMapping indexHWMapping, int indexCount,
 		EPrimitiveType primitiveType) = 0;
 	virtual StrongRef<Geometry> CreateGeometry(
 		const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
-		u32 primitiveCount = 0,
+		int primitiveCount = 0,
 		bool dynamic = false) = 0;
 
 	//////////////////////////////////////////////////////////////////////////////
 
 	virtual bool CheckTextureFormat(ColorFormat format, bool cube, bool rendertarget) = 0;
-	virtual bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube, bool rendertarget) = 0;
+	virtual bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2I& size, bool cube, bool rendertarget) = 0;
 
 	virtual StrongRef<Texture> CreateTexture(
-		const math::Dimension2U& size,
+		const math::Dimension2I& size,
 		ColorFormat format = ColorFormat::R8G8B8,
-		u32 mipCount = 0,
+		int mipCount = 0,
 		bool isDynamic = false) = 0;
 
 	virtual StrongRef<CubeTexture> CreateCubeTexture(
-		u32 size,
+		int size,
 		ColorFormat format = ColorFormat::R8G8B8,
 		bool isDynamic = false) = 0;
 
 	virtual StrongRef<Texture> CreateRendertargetTexture(
-		const math::Dimension2U& size,
+		const math::Dimension2I& size,
 		ColorFormat format) = 0;
 	virtual StrongRef<CubeTexture> CreateRendertargetCubeTexture(
-		u32 size,
+		int size,
 		ColorFormat format) = 0;
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -104,8 +104,8 @@ public:
 	*/
 	virtual StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
-		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
-		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
+		const char* VSCode, const char* VSEntryPoint, int VSLength, int VSmajorVersion, int VSminorVersion,
+		const char* PSCode, const char* PSEntryPoint, int PSLength, int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList) = 0;
 
 	//! Create a new fixed function shader.
@@ -123,7 +123,7 @@ public:
 
 	virtual EDeviceState GetDeviceState() const = 0;
 
-	virtual u32 GetDeviceCapability(EDriverCaps capability) const = 0;
+	virtual int GetDeviceCapability(EDriverCaps capability) const = 0;
 	virtual const core::String& GetVideoDriverType() const = 0;
 	virtual void* GetLowLevelDevice() const = 0;
 };

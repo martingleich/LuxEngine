@@ -22,7 +22,7 @@ const Name Font("lux.resource.Font");
 const Name Sound("lux.resource.Sound");
 }
 
-static u32 INVALID_ID = 0xFFFFFFFF;
+static int INVALID_ID = -1;
 
 struct Entry
 {
@@ -84,32 +84,32 @@ struct ResourceBlock
 {
 	Array<Entry> resources;
 
-	u32 Size() const
+	int Size() const
 	{
-		return (u32)resources.Size();
+		return resources.Size();
 	}
 
-	StrongRef<Resource> GetResource(u32 id)
+	StrongRef<Resource> GetResource(int id)
 	{
 		return resources.At(id).resource;
 	}
 
-	const String& GetName(u32 id) const
+	const String& GetName(int id) const
 	{
 		return resources.At(id).name;
 	}
 
-	u32 GetResourceId(Resource* resource) const
+	int GetResourceId(Resource* resource) const
 	{
 		for(auto it = resources.First(); it != resources.End(); ++it) {
 			if(it->resource == resource)
-				return (u32)IteratorDistance(resources.First(), it);
+				return IteratorDistance(resources.First(), it);
 		}
 
 		return INVALID_ID;
 	}
 
-	u32 GetResourceId(const String& name) const
+	int GetResourceId(const String& name) const
 	{
 		if(name.IsEmpty())
 			return INVALID_ID;
@@ -119,7 +119,7 @@ struct ResourceBlock
 		if(it == resources.End())
 			return INVALID_ID;
 
-		return (u32)IteratorDistance(resources.First(), it);
+		return IteratorDistance(resources.First(), it);
 	}
 
 	void AddResource(const String& name, Resource* resource)
@@ -140,7 +140,7 @@ struct ResourceBlock
 		resources.Insert(entry, n);
 	}
 
-	void RemoveResource(u32 id)
+	void RemoveResource(int id)
 	{
 		if(id >= resources.Size())
 			throw OutOfRangeException();
@@ -148,15 +148,15 @@ struct ResourceBlock
 		resources.Erase(AdvanceIterator(resources.First(), id), true);
 	}
 
-	u32 RemoveUnused()
+	int RemoveUnused()
 	{
-		const u32 oldCount = (u32)resources.Size();
+		auto oldCount = resources.Size();
 		if(resources.Size() > 0) {
 			auto newEnd1 = RemoveIf(resources, [](const Entry& e) -> bool { return e.resource->GetReferenceCount() == 1; });
 			resources.Resize(IteratorDistance(resources.First(), newEnd1));
 		}
 
-		const u32 newCount = (u32)resources.Size();
+		auto newCount = resources.Size();
 
 		return (oldCount - newCount);
 	}
@@ -204,53 +204,53 @@ ResourceSystem::~ResourceSystem()
 	LUX_FREE(self);
 }
 
-u32 ResourceSystem::GetResourceCount(Name type) const
+int ResourceSystem::GetResourceCount(Name type) const
 {
-	const u32 typeID = GetTypeID(type);
+	auto typeID = GetTypeID(type);
 	if(typeID == INVALID_ID)
 		throw InvalidArgumentException("type", "type does not exist");
 
-	return (u32)self->resources[typeID].Size();
+	return self->resources[typeID].Size();
 }
 
-const String& ResourceSystem::GetResourceName(Name type, u32 id) const
+const String& ResourceSystem::GetResourceName(Name type, int id) const
 {
-	const u32 typeId = GetTypeID(type);
+	auto typeId = GetTypeID(type);
 	if(typeId > GetTypeCount())
 		throw Exception("Type does not exist");
 
 	return self->resources[typeId].GetName(id);
 }
 
-u32 ResourceSystem::GetResourceId(Resource* resource) const
+int ResourceSystem::GetResourceId(Resource* resource) const
 {
 	if(!resource)
 		throw InvalidArgumentException("resource", "Must not be null");
 
-	const u32 typeId = GetTypeID(resource->GetReferableType());
+	auto typeId = GetTypeID(resource->GetReferableType());
 
-	const u32 resId = self->resources[typeId].GetResourceId(resource);
+	auto resId = self->resources[typeId].GetResourceId(resource);
 	if(resId == INVALID_ID)
 		throw Exception("Resource does not exist");
 
 	return resId;
 }
 
-u32 ResourceSystem::GetResourceId(Name type, const String& name) const
+int ResourceSystem::GetResourceId(Name type, const String& name) const
 {
-	u32 id = GetResourceIdUnsafe(type, name);
+	int id = GetResourceIdUnsafe(type, name);
 	if(id == INVALID_ID)
 		throw ObjectNotFoundException(name.Data());
 
 	return id;
 }
 
-u32 ResourceSystem::GetResourceIdUnsafe(Name type, const String& name) const
+int ResourceSystem::GetResourceIdUnsafe(Name type, const String& name) const
 {
 	if(name.IsEmpty())
 		throw InvalidArgumentException("name", "Must not be empty");
 
-	const u32 typeId = GetTypeID(type);
+	auto typeId = GetTypeID(type);
 
 	if(self->types[typeId].isCached == false)
 		return INVALID_ID;
@@ -268,28 +268,28 @@ void ResourceSystem::AddResource(const String& name, Resource* resource)
 	if(!resource)
 		throw InvalidArgumentException("resource", "Must not be null");
 
-	const u32 typeId = GetTypeID(resource->GetReferableType());
+	auto typeId = GetTypeID(resource->GetReferableType());
 	if(self->types[typeId].isCached == false)
 		return;
 
 	self->resources[typeId].AddResource(name, resource);
 }
 
-void ResourceSystem::RemoveResource(Name type, u32 id)
+void ResourceSystem::RemoveResource(Name type, int id)
 {
-	const u32 typeId = GetTypeID(type);
+	auto typeId = GetTypeID(type);
 
 	self->resources[typeId].RemoveResource(id);
 }
 
-u32 ResourceSystem::FreeUnusedResources(Name type)
+int ResourceSystem::FreeUnusedResources(Name type)
 {
-	u32 count = 0;
+	int count = 0;
 	if(type.IsEmpty()) {
 		for(auto it = self->resources.First(); it != self->resources.End(); ++it)
 			count += it->RemoveUnused();
 	} else {
-		const u32 typeId = GetTypeID(type);
+		auto typeId = GetTypeID(type);
 		if(typeId > GetTypeCount())
 			return 0;
 		count += self->resources[typeId].RemoveUnused();
@@ -297,9 +297,9 @@ u32 ResourceSystem::FreeUnusedResources(Name type)
 
 	return count;
 }
-StrongRef<Resource> ResourceSystem::GetResource(Name type, u32 id)
+StrongRef<Resource> ResourceSystem::GetResource(Name type, int id)
 {
-	const u32 typeId = GetTypeID(type);
+	auto typeId = GetTypeID(type);
 
 	return self->resources[typeId].GetResource(id);
 }
@@ -309,7 +309,7 @@ StrongRef<Resource> ResourceSystem::GetResource(Name type, const String& name, b
 	if(name.IsEmpty())
 		return nullptr;
 
-	const u32 id = GetResourceIdUnsafe(type, name);
+	auto id = GetResourceIdUnsafe(type, name);
 	if(id != INVALID_ID)
 		return GetResource(type, id);
 
@@ -341,11 +341,11 @@ StrongRef<Resource> ResourceSystem::CreateResource(Name type, const String& name
 	if(name.IsEmpty())
 		throw InvalidArgumentException("name", "Name may not be empty");
 
-	const u32 id = GetResourceIdUnsafe(type, name);
+	auto id = GetResourceIdUnsafe(type, name);
 	if(id != INVALID_ID)
 		return GetResource(type, id);
 
-	StrongRef<io::File> file = self->fileSystem->OpenFile(name);
+	auto file = self->fileSystem->OpenFile(name);
 
 	ResourceOrigin origin(this, name);
 	return CreateResource(type, file, &origin);
@@ -358,7 +358,7 @@ StrongRef<Resource> ResourceSystem::CreateResource(Name type, io::File* file)
 
 void ResourceSystem::SetCaching(Name type, bool caching)
 {
-	u32 typeId = GetTypeID(type);
+	auto typeId = GetTypeID(type);
 	if(typeId >= self->types.Size())
 		return;
 
@@ -368,12 +368,12 @@ void ResourceSystem::SetCaching(Name type, bool caching)
 	self->types[typeId].isCached = caching;
 }
 
-u32 ResourceSystem::GetResourceLoaderCount() const
+int ResourceSystem::GetResourceLoaderCount() const
 {
-	return (u32)self->loaders.Size();
+	return self->loaders.Size();
 }
 
-StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(u32 id) const
+StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(int id) const
 {
 	return self->loaders.At(id).loader;
 }
@@ -386,7 +386,7 @@ void ResourceSystem::AddResourceWriter(ResourceWriter* writer)
 	self->writers.PushBack(writer);
 }
 
-u32 ResourceSystem::GetResourceWriterCount() const
+int ResourceSystem::GetResourceWriterCount() const
 {
 	return self->writers.Size();
 }
@@ -402,7 +402,7 @@ StrongRef<ResourceWriter> ResourceSystem::GetResourceWriter(Name resourceType, c
 	return nullptr;
 }
 
-StrongRef<ResourceWriter> ResourceSystem::GetResourceWriter(u32 id) const
+StrongRef<ResourceWriter> ResourceSystem::GetResourceWriter(int id) const
 {
 	return self->writers.At(id);
 }
@@ -441,12 +441,12 @@ void ResourceSystem::AddResourceLoader(ResourceLoader* loader)
 	self->loaders.PushBack(loader);
 }
 
-u32 ResourceSystem::GetTypeCount() const
+int ResourceSystem::GetTypeCount() const
 {
-	return (u32)self->types.Size();
+	return self->types.Size();
 }
 
-Name ResourceSystem::GetType(u32 id) const
+Name ResourceSystem::GetType(int id) const
 {
 	return self->types.At(id).name;
 }
@@ -463,19 +463,19 @@ void ResourceSystem::AddType(Name name)
 	log::Debug("New resource type \"~s\".", name);
 }
 
-u32 ResourceSystem::GetTypeID(Name type) const
+int ResourceSystem::GetTypeID(Name type) const
 {
 	TypeEntry entry(type);
 	auto it = LinearSearch(entry, self->types);
 	if(it == self->types.End())
 		throw Exception("Resourcetype does not exist");
 
-	return (u32)IteratorDistance(self->types.First(), it);
+	return IteratorDistance(self->types.First(), it);
 }
 
 StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name& type, io::File* file) const
 {
-	const u32 fileCursor = file->GetCursor();
+	auto fileCursor = file->GetCursor();
 	StrongRef<ResourceLoader> result;
 	for(auto it = self->loaders.Last(); it != self->loaders.Begin(); --it) {
 		Name fileType = it->loader->GetResourceType(file, type);
@@ -507,7 +507,7 @@ void ResourceSystem::LoadResource(const ResourceOrigin& origin, Resource* dst) c
 		throw FileFormatException("File format not supported", type.c_str());
 
 	// Load the resource
-	const u32 oldCursor = file->GetCursor();
+	auto oldCursor = file->GetCursor();
 	try {
 		loader->LoadResource(file, dst);
 		dst->SetLoaded(true);
@@ -530,7 +530,7 @@ StrongRef<Resource> ResourceSystem::CreateResource(Name type, io::File* file, co
 		throw InvalidArgumentException("type", "Is no valid resource type");
 
 	// Load the resource
-	const u32 oldCursor = file->GetCursor();
+	auto oldCursor = file->GetCursor();
 	try {
 		loader->LoadResource(file, resource);
 		resource->SetLoaded(true);

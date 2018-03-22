@@ -18,7 +18,7 @@ struct Context
 	tga_struct* tga;
 	tga_info* info;
 
-	math::Dimension2U size;
+	math::Dimension2I size;
 	video::ColorFormat format;
 
 	Context() :
@@ -38,7 +38,7 @@ struct Context
 static uint32_t tga_proc_read(tga_struct* tga, uint32_t size, void* buffer)
 {
 	io::File* file = (io::File*)tga_get_io_data(tga);
-	return file->ReadBinaryPart(size, buffer);
+	return (uint32_t)file->ReadBinaryPart(size, buffer);
 }
 
 static uint32_t tga_proc_seek(tga_struct* tga, uint32_t offset)

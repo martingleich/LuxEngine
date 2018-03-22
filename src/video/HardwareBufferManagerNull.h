@@ -20,12 +20,12 @@ public:
 	void ForceBufferUpdate(HardwareBuffer* buffer);
 	StrongRef<IndexBuffer> CreateIndexBuffer();
 	StrongRef<VertexBuffer> CreateVertexBuffer();
-	void EnableBuffer(const HardwareBuffer* buffer, u32 streamID);
+	void EnableBuffer(const HardwareBuffer* buffer, int streamID);
 
 	virtual void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
 	virtual void RemoveInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
 	virtual void EnableHardwareBuffer(
-		u32 streamID,
+		int streamID,
 		const HardwareBuffer* buffer,
 		const void* handle) = 0;
 

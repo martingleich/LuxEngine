@@ -5,11 +5,11 @@ namespace lux
 namespace video
 {
 
-u32 Adapter::GetMaxMultisampleLevel(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat)
+int Adapter::GetMaxMultisampleLevel(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat)
 {
 	auto levels = GenerateMultisampleLevels(mode, windowed, backBuffer, zsFormat);
 
-	u32 max = 0;
+	int max = 0;
 	for(auto it = levels.First(); it != levels.End(); ++it) {
 		if(*it > max)
 			max = *it;
@@ -18,13 +18,13 @@ u32 Adapter::GetMaxMultisampleLevel(const DisplayMode& mode, bool windowed, Colo
 	return max;
 }
 
-bool Adapter::GetMatchingMode(DisplayMode& outMode, const math::Dimension2U& minRes, bool windowed, u32 minRefresh)
+bool Adapter::GetMatchingMode(DisplayMode& outMode, const math::Dimension2I& minRes, bool windowed, int minRefresh)
 {
 	auto modes = GenerateDisplayModes(windowed);
-	u32 bestError = std::numeric_limits<u32>::max();
+	int bestError = INT_MAX;
 	for(auto it = modes.First(); it != modes.End(); ++it) {
 		if(it->width >= minRes.width && it->height >= minRes.height && it->refreshRate >= minRefresh) {
-			u32 error = it->width*it->height - minRes.GetArea();
+			int error = it->width*it->height - minRes.GetArea();
 			if(error < bestError) {
 				outMode = *it;
 				bestError = error;
@@ -34,10 +34,10 @@ bool Adapter::GetMatchingMode(DisplayMode& outMode, const math::Dimension2U& min
 		}
 	}
 
-	return (bestError != std::numeric_limits<u32>::max());
+	return (bestError != INT_MAX);
 }
 
-bool Adapter::GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, u32 minBits)
+bool Adapter::GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, int minBits)
 {
 	auto formats = GenerateBackbufferFormats(mode, windowed);
 
@@ -50,7 +50,8 @@ bool Adapter::GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& m
 
 	return false;
 }
-bool Adapter::GetMatchingZStencil(ZStencilFormat& outFormat, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, u32 minDepth, u32 minStencil)
+
+bool Adapter::GetMatchingZStencil(ZStencilFormat& outFormat, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, int minDepth, int minStencil)
 {
 	auto formats = GenerateZStencilFormats(mode, windowed, backBuffer);
 
@@ -64,7 +65,8 @@ bool Adapter::GetMatchingZStencil(ZStencilFormat& outFormat, const DisplayMode& 
 
 	return false;
 }
-bool Adapter::GetMatchingMultisample(u32& outLevel, u32& outQuality, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 minSamples, u32 minQuality)
+
+bool Adapter::GetMatchingMultisample(int& outLevel, int& outQuality, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, int minSamples, int minQuality)
 {
 	auto levels = GenerateMultisampleLevels(mode, windowed, backBuffer, zsFormat);
 
@@ -72,10 +74,10 @@ bool Adapter::GetMatchingMultisample(u32& outLevel, u32& outQuality, const Displ
 		if(*it < minSamples)
 			continue;
 
-		u32 numQualities = GetNumMultisampleQualities(mode, windowed, backBuffer, zsFormat, *it);
+		int numQualities = GetNumMultisampleQualities(mode, windowed, backBuffer, zsFormat, *it);
 		if(numQualities == 0)
 			continue;
-		u32 maxQuality = numQualities - 1;
+		int maxQuality = numQualities - 1;
 		if(minQuality > maxQuality)
 			continue;
 
@@ -89,10 +91,10 @@ bool Adapter::GetMatchingMultisample(u32& outLevel, u32& outQuality, const Displ
 
 bool Adapter::GenerateConfig(
 	video::DriverConfig& outConfig,
-	const math::Dimension2U& minRes,
+	const math::Dimension2I& minRes,
 	bool windowed, bool vSync,
-	u32 minDepth,
-	u32 minStencil,
+	int minDepth,
+	int minStencil,
 	int multiSample)
 {
 	outConfig.adapter = this;
@@ -110,8 +112,8 @@ bool Adapter::GenerateConfig(
 		return false;
 
 	multiSample = math::Clamp(multiSample, 0, 10);
-	u32 maxMultisample = GetMaxMultisampleLevel(outConfig.display, outConfig.windowed, outConfig.backBufferFormat, outConfig.zsFormat);
-	u32 realMultisample = math::Lerp<u32>(0, maxMultisample, multiSample*0.1f);
+	auto maxMultisample = GetMaxMultisampleLevel(outConfig.display, outConfig.windowed, outConfig.backBufferFormat, outConfig.zsFormat);
+	auto realMultisample = math::Lerp<int>(0, maxMultisample, multiSample*0.1f);
 	if(!GetMatchingMultisample(outConfig.multiSamples, outConfig.multiQuality, outConfig.display, outConfig.windowed, outConfig.backBufferFormat, outConfig.zsFormat, realMultisample, 0))
 		return false;
 

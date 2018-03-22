@@ -14,12 +14,12 @@ public:
 	virtual ~LuxSystemInfo() {}
 
 	virtual bool GetProcessorName(core::String& displayName) = 0;
-	virtual bool GetProcessorSpeed(u32& speedInMhz) = 0;
+	virtual bool GetProcessorSpeed(int& speedInMhz) = 0;
 
-	virtual bool GetTotalRAM(u32& ramInMB) = 0;
-	virtual bool GetAvailableRAM(u32& ramInMB) = 0;
+	virtual bool GetTotalRAM(int& ramInMB) = 0;
+	virtual bool GetAvailableRAM(int& ramInMB) = 0;
 
-	virtual bool GetPrimaryScreenResolution(math::Dimension2U& dimension) = 0;
+	virtual bool GetPrimaryScreenResolution(math::Dimension2I& dimension) = 0;
 };
 
 } // namespace lux

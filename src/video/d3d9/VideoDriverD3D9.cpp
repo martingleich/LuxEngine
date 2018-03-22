@@ -82,9 +82,6 @@ VideoDriverD3D9::VideoDriverD3D9(const core::ModuleInitData& data) :
 
 VideoDriverD3D9::~VideoDriverD3D9()
 {
-	m_D3DDevice->SetVertexShader(nullptr);
-	m_D3DDevice->SetPixelShader(nullptr);
-
 	AuxiliaryTextureManagerD3D9::Destroy();
 
 	// Destroy buffer manager before the device is destroyed
@@ -233,16 +230,16 @@ bool VideoDriverD3D9::Reset(const DriverConfig& config)
 
 void VideoDriverD3D9::FillCaps()
 {
-	m_DriverCaps[(u32)EDriverCaps::MaxPrimitives] = m_Caps.MaxPrimitiveCount;
-	m_DriverCaps[(u32)EDriverCaps::MaxStreams] = m_Caps.MaxStreams;
-	m_DriverCaps[(u32)EDriverCaps::MaxTextureWidth] = m_Caps.MaxTextureWidth;
-	m_DriverCaps[(u32)EDriverCaps::MaxTextureHeight] = m_Caps.MaxTextureHeight;
-	m_DriverCaps[(u32)EDriverCaps::TexturesPowerOfTwoOnly] = (m_Caps.TextureCaps & D3DPTEXTURECAPS_POW2) != 0 ? 1 : 0;
-	m_DriverCaps[(u32)EDriverCaps::TextureSquareOnly] = (m_Caps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY) != 0 ? 1 : 0;
-	m_DriverCaps[(u32)EDriverCaps::MaxSimultaneousTextures] = m_Caps.MaxSimultaneousTextures;
-	m_DriverCaps[(u32)EDriverCaps::MaxLights] = m_Caps.MaxActiveLights;
-	m_DriverCaps[(u32)EDriverCaps::MaxAnisotropy] = m_Caps.MaxAnisotropy;
-	m_DriverCaps[(u32)EDriverCaps::MaxSimultaneousRT] = m_Caps.NumSimultaneousRTs;
+	m_DriverCaps[(int)EDriverCaps::MaxPrimitives] = m_Caps.MaxPrimitiveCount;
+	m_DriverCaps[(int)EDriverCaps::MaxStreams] = m_Caps.MaxStreams;
+	m_DriverCaps[(int)EDriverCaps::MaxTextureWidth] = m_Caps.MaxTextureWidth;
+	m_DriverCaps[(int)EDriverCaps::MaxTextureHeight] = m_Caps.MaxTextureHeight;
+	m_DriverCaps[(int)EDriverCaps::TexturesPowerOfTwoOnly] = (m_Caps.TextureCaps & D3DPTEXTURECAPS_POW2) != 0 ? 1 : 0;
+	m_DriverCaps[(int)EDriverCaps::TextureSquareOnly] = (m_Caps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY) != 0 ? 1 : 0;
+	m_DriverCaps[(int)EDriverCaps::MaxSimultaneousTextures] = m_Caps.MaxSimultaneousTextures;
+	m_DriverCaps[(int)EDriverCaps::MaxLights] = m_Caps.MaxActiveLights;
+	m_DriverCaps[(int)EDriverCaps::MaxAnisotropy] = m_Caps.MaxAnisotropy;
+	m_DriverCaps[(int)EDriverCaps::MaxSimultaneousRT] = m_Caps.NumSimultaneousRTs;
 }
 
 void VideoDriverD3D9::InitRendertargetData()
@@ -266,13 +263,13 @@ UnknownRefCounted<IDirect3DSurface9> VideoDriverD3D9::GetD3D9MatchingDepthBuffer
 	D3DSURFACE_DESC desc;
 	target->GetDesc(&desc);
 
-	math::Dimension2U size = math::Dimension2U(desc.Width, desc.Height);
+	math::Dimension2I size = math::Dimension2I(desc.Width, desc.Height);
 
 	size.GetConstrained(
 		GetDeviceCapability(EDriverCaps::TexturesPowerOfTwoOnly) == 1,
 		GetDeviceCapability(EDriverCaps::TextureSquareOnly) == 1,
 		true,
-		math::Dimension2U(
+		math::Dimension2I(
 			GetDeviceCapability(EDriverCaps::MaxTextureWidth),
 			GetDeviceCapability(EDriverCaps::MaxTextureWidth)));
 
@@ -307,8 +304,8 @@ StrongRef<Geometry> VideoDriverD3D9::CreateEmptyGeometry(EPrimitiveType primitiv
 }
 
 StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(
-	const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
-	EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, u32 IndexCount,
+	const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, int vertexCount,
+	EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, int IndexCount,
 	EPrimitiveType primitiveType)
 {
 	StrongRef<Geometry> out = CreateEmptyGeometry(primitiveType);
@@ -330,7 +327,7 @@ StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(
 
 StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(const VertexFormat& vertexFormat,
 	EPrimitiveType primitiveType,
-	u32 primitiveCount,
+	int primitiveCount,
 	bool dynamic)
 {
 	LUX_UNUSED(primitiveCount);
@@ -364,7 +361,7 @@ bool VideoDriverD3D9::CheckTextureFormat(ColorFormat format, bool cube, bool ren
 	return SUCCEEDED(hr);
 }
 
-bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube, bool rendertarget)
+bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::Dimension2I& size, bool cube, bool rendertarget)
 {
 	LUX_UNUSED(size);
 
@@ -394,7 +391,7 @@ bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::Dimensi
 	return true;
 }
 
-StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2U& size, ColorFormat format, u32 mipCount, bool isDynamic)
+StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2I& size, ColorFormat format, int mipCount, bool isDynamic)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, mipCount, false, isDynamic);
@@ -403,7 +400,7 @@ StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2U& size,
 	return out;
 }
 
-StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format)
+StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimension2I& size, ColorFormat format)
 {
 	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, 1, true, false);
@@ -412,7 +409,7 @@ StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimens
 	return out;
 }
 
-StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat format, bool isDynamic)
+StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(int size, ColorFormat format, bool isDynamic)
 {
 	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, false, isDynamic);
@@ -420,7 +417,7 @@ StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(u32 size, ColorFormat 
 
 	return out;
 }
-StrongRef<CubeTexture> VideoDriverD3D9::CreateRendertargetCubeTexture(u32 size, ColorFormat format)
+StrongRef<CubeTexture> VideoDriverD3D9::CreateRendertargetCubeTexture(int size, ColorFormat format)
 {
 	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
 	out->Init(size, format, true, false);
@@ -454,9 +451,9 @@ bool VideoDriverD3D9::IsShaderSupported(EShaderLanguage lang, int vsMajor, int v
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
-	const char* vsCode, const char* vsEntryPoint, u32 vsLength,
+	const char* vsCode, const char* vsEntryPoint, int vsLength,
 	int vsMajorVersion, int vsMinorVersion,
-	const char* psCode, const char* psEntryPoint, u32 psLength,
+	const char* psCode, const char* psEntryPoint, int psLength,
 	int psMajorVersion, int psMinorVersion,
 	core::Array<core::String>* errorList)
 {
@@ -530,13 +527,13 @@ UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::CreateVertexForm
 	core::Array<D3DVERTEXELEMENT9> d3dElements;
 	d3dElements.Resize(format.GetElemCount() + 1);
 
-	for(u32 stream = 0; stream < format.GetStreamCount(); ++stream) {
-		for(u32 elem = 0; elem < format.GetElemCount(stream); ++elem) {
+	for(int stream = 0; stream < format.GetStreamCount(); ++stream) {
+		for(int elem = 0; elem < format.GetElemCount(stream); ++elem) {
 			bool error = false;
 
 			auto element = format.GetElement(stream, elem);
-			d3dElements[elem].Stream = element.stream;
-			d3dElements[elem].Offset = element.offset;
+			d3dElements[elem].Stream = (WORD)element.stream;
+			d3dElements[elem].Offset = (WORD)element.offset;
 			d3dElements[elem].Method = D3DDECLMETHOD_DEFAULT;
 
 			if(element.sematic == VertexElement::EUsage::Texcoord0)
@@ -565,7 +562,7 @@ UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::CreateVertexForm
 		}
 	}
 
-	const u32 size = format.GetElemCount();
+	auto size = format.GetElemCount();
 	d3dElements[size].Stream = 0xFF;
 	d3dElements[size].Offset = 0;
 	d3dElements[size].Type = D3DDECLTYPE_UNUSED;

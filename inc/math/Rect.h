@@ -262,9 +262,9 @@ const Rect<T> Rect<T>::EMPTY = Rect<T>(0, 0, 0, 0);
 
 //! Typedef for rect with float precision
 typedef Rect<float> RectF;
+
 //! Typedef for rect with integer precision
-typedef Rect<s32> RectI;
-typedef Rect<u32> RectU;
+typedef Rect<int> RectI;
 
 } // !namespace math
 } // !namespace lux

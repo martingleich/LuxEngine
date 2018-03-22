@@ -43,7 +43,7 @@ struct StringType
 	\param str A nul-terminated c-string, must not be null.
 	*/
 	StringType(const char* str) :
-		size(0xFFFFFFFF),
+		size(-1),
 		data(str)
 	{
 	}
@@ -54,7 +54,7 @@ struct StringType
 	\param str A nul-terminated c-string, must not be null.
 	\param s The number of bytes in the string, wihtout the NUL-Byte.
 	*/
-	StringType(const char* str, size_t s) :
+	StringType(const char* str, int s) :
 		size(s),
 		data(str)
 	{
@@ -66,12 +66,12 @@ struct StringType
 	*/
 	void EnsureSize() const
 	{
-		if(size == 0xFFFFFFFF)
-			size = strlen(data);
+		if(size < 0)
+			size = (int)strlen(data);
 	}
 
 	//! The number of bytes in the string, without the NUL-Byte.
-	mutable size_t size;
+	mutable int size;
 
 	//! Pointer to the string-data
 	/**
@@ -103,9 +103,9 @@ public:
 	//! Create a string from a c-string.
 	/**
 	\param data A pointer to nul-terminated string data, if null a empty string is created.
-	\param length The number of character to copy from the string if SIZE_T_MAX all characters a copied.
+	\param length The number of character to copy from the string if -1 all characters a copied.
 	*/
-	LUX_API String(const char* data, size_t length = std::numeric_limits<size_t>::max());
+	LUX_API String(const char* data, int length = -1);
 	LUX_API String(ConstIterator first, ConstIterator end);
 
 	//! Copyconstructor
@@ -129,7 +129,7 @@ public:
 	After this call Data() will point to size+1 bytes of memory.
 	\param size The number of bytes to allocate for string-storage without terminating NUL.
 	*/
-	LUX_API void Reserve(size_t size);
+	LUX_API void Reserve(int size);
 
 	//! Copy-assignment
 	LUX_API String& operator=(const String& other);
@@ -163,10 +163,10 @@ public:
 	/**
 	\param pos The location of the first inserted character.
 	\param other The string to insert.
-	\param count The number of characters to insert, SIZE_T_MAX to insert all characters.
+	\param count The number of characters to insert, -1 to insert all characters.
 	\return A iterator to the first character after the inserted part of the string.
 	*/
-	LUX_API ConstIterator Insert(ConstIterator pos, const StringType& other, size_t count = std::numeric_limits<size_t>::max());
+	LUX_API ConstIterator Insert(ConstIterator pos, const StringType& other, int count = -1);
 
 	//! Insert another string into this one.
 	/**
@@ -184,15 +184,15 @@ public:
 	\param bytes The number of exact bytes to copy from the string
 	\return selfreference
 	*/
-	LUX_API String& AppendRaw(const char* data, size_t bytes);
+	LUX_API String& AppendRaw(const char* data, int bytes);
 
 	//! Append another string onto this one.
 	/**
 	\param other The string to append.
-	\param count The number of characters to append, SIZE_T_MAX to append all characters.
+	\param count The number of characters to append, -1 to append all characters.
 	\return selfreference
 	*/
-	LUX_API String& Append(const StringType& other, size_t count = std::numeric_limits<size_t>::max());
+	LUX_API String& Append(const StringType& other, int count = -1);
 
 	//! Append another string onto this one.
 	/**
@@ -226,25 +226,25 @@ public:
 	\param newLength The new lenght of the string.
 	\param filler The character to fill the newly created string with
 	*/
-	LUX_API void Resize(size_t newLength, const StringType& filler = " ");
+	LUX_API void Resize(int newLength, const StringType& filler = " ");
 
 	//! Clear the string contents, making the string empty.
 	LUX_API String& Clear();
 
 	//! The number of bytes contained in the string, without NUL.
-	inline size_t Size() const
+	inline int Size() const
 	{
 		return m_Size;
 	}
 
 	//! The number of bytes allocated for the string.
-	inline size_t Allocated() const
+	inline int Allocated() const
 	{
 		return m_Allocated - 1;
 	}
 
 	//! The number of codepoints contained in the string, without NUL.
-	inline size_t Length() const
+	inline int Length() const
 	{
 		return m_Length;
 	}
@@ -336,7 +336,7 @@ public:
 	\param end The iterator where the search is stopped, if invalid End() is used.
 	\return The number of occurences found and replaced.
 	*/
-	LUX_API size_t Replace(const StringType& replace, const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid());
+	LUX_API int Replace(const StringType& replace, const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid());
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -354,7 +354,7 @@ public:
 	\param count The number of characters to replace.
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, size_t count);
+	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, int count);
 
 	//! Find the first occurence of a substring in this string.
 	/**
@@ -380,7 +380,7 @@ public:
 	\param count The number of character to extract.
 	\return The extracted substring
 	*/
-	LUX_API String SubString(ConstIterator first, size_t count = 1) const;
+	LUX_API String SubString(ConstIterator first, int count = 1) const;
 
 	//! Extract a substring from this string.
 	/**
@@ -395,7 +395,7 @@ public:
 	\param count The number of characters to remove, may be bigger than the number of characters in the string.
 	\return The actual number of characters removed, if not equal to count, the string will be empty.
 	*/
-	LUX_API size_t Pop(size_t count = 1);
+	LUX_API int Pop(int count = 1);
 
 	//! Removes characters from the string.
 	/**
@@ -403,7 +403,7 @@ public:
 	\param count The number of characters to remove.
 	\return A iterator to the first character after the deleted range.
 	*/
-	LUX_API ConstIterator Remove(ConstIterator pos, size_t count = 1);
+	LUX_API ConstIterator Remove(ConstIterator pos, int count = 1);
 
 	//! Removes characters from the string.
 	/**
@@ -440,7 +440,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The number of written output strings.
 	*/
-	LUX_API size_t Split(u32 ch, String* outArray, size_t maxCount, bool ignoreEmpty = false) const;
+	LUX_API int Split(u32 ch, String* outArray, int maxCount, bool ignoreEmpty = false) const;
 
 	//! Split the string on a character.
 	/**
@@ -471,10 +471,10 @@ private:
 	LUX_API bool IsShortString() const;
 
 	//! Returns the number of allocated bytes, including NUL.
-	LUX_API size_t GetAllocated() const;
+	LUX_API int GetAllocated() const;
 
 	//! Set the number of allocated bytes, including NUL.
-	LUX_API void SetAllocated(size_t a);
+	LUX_API void SetAllocated(int a);
 
 	//! Push a single character to string, it's data is read from ptr.
 	LUX_API void PushCharacter(const char* ptr);
@@ -492,22 +492,22 @@ private:
 		char raw[16];
 	} m_Data;
 
-	static const size_t MAX_SHORT_BYTES = sizeof(DataUnion);
+	static const int MAX_SHORT_BYTES = sizeof(DataUnion);
 
 	// The number of bytes allocated for the string, including the terminating NULL character.
 	// If this is smaller than MAX_SHORT_BYTES the string is saved in m_Data.raw otherwise in m_Data.ptr;
-	size_t m_Allocated;
+	int m_Allocated;
 
 	/*
 		Contains the number of bytes in the string.
 		Without NUL
 	*/
-	size_t m_Size;
+	int m_Size;
 
 	/*
 	Contains the number of codepoints in the string.
 	*/
-	size_t m_Length;
+	int m_Length;
 };
 
 //! Concat two strings.
@@ -576,19 +576,19 @@ This order doesn't have to be equal to the lexical order.
 */
 inline bool operator<(const String& a, const char* b)
 {
-	auto size = strlen(b);
-	size_t s = a.Size() < size ? a.Size() : size;
+	auto size = (int)strlen(b);
+	auto s = a.Size() < size ? a.Size() : size;
 	return (memcmp(a.Data(), b, s) < 0);
 }
 inline bool operator<(const char* a, const String& b)
 {
-	auto size = strlen(a);
-	size_t s = size < b.Size() ? size : b.Size();
+	auto size = (int)strlen(a);
+	auto s = size < b.Size() ? size : b.Size();
 	return (memcmp(a, b.Data(), s) < 0);
 }
 inline bool operator<(const String& a, const String& b)
 {
-	size_t s = a.Size() < b.Size() ? a.Size() : b.Size();
+	auto s = a.Size() < b.Size() ? a.Size() : b.Size();
 	return (memcmp(a.Data(), b.Data(), s) < 0);
 }
 
@@ -714,19 +714,19 @@ template<> struct TemplType<String> { static Type Get() { return Types::String()
 template <>
 struct HashType<String>
 {
-	size_t operator()(const String& str) const
+	int operator()(const String& str) const
 	{
 		return (*this)(str.Data(), str.Size());
 	}
-	size_t operator()(const char* str, size_t size) const
+	int operator()(const char* str, int size) const
 	{
 		if(size == 0)
 			return 0;
 		return HashSequence(reinterpret_cast<const u8*>(str), size);
 	}
-	size_t operator()(const char* str) const
+	int operator()(const char* str) const
 	{
-		size_t size = strlen(str);
+		int size = (int)strlen(str);
 		return (*this)(str, size);
 	}
 };
@@ -734,7 +734,7 @@ struct HashType<String>
 template <>
 struct HashType<SharedString>
 {
-	size_t operator()(const SharedString& t) const
+	int operator()(const SharedString& t) const
 	{
 		core::HashType<core::String> hasher;
 		if(t)
@@ -742,12 +742,12 @@ struct HashType<SharedString>
 		else
 			return 0;
 	}
-	size_t operator()(const core::String& t) const
+	int operator()(const core::String& t) const
 	{
 		core::HashType<core::String> hasher;
 		return hasher(t);
 	}
-	size_t operator()(const char* str) const
+	int operator()(const char* str) const
 	{
 		core::HashType<core::String> hasher;
 		return hasher(str);

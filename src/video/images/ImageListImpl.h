@@ -13,7 +13,7 @@ class ImageListImpl : public ImageList
 {
 	LX_REFERABLE_MEMBERS_API(ImageListImpl, LUX_API);
 public:
-	size_t GetImageCount() const
+	int GetImageCount() const
 	{
 		return m_Images.Size();
 	}
@@ -24,7 +24,7 @@ public:
 			m_Images.PushBack(img);
 	}
 
-	StrongRef<Image> GetImage(size_t i) const
+	StrongRef<Image> GetImage(int i) const
 	{
 		if(i < GetImageCount())
 			return m_Images[i];

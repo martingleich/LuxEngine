@@ -5,7 +5,7 @@ namespace lux
 namespace video
 {
 
-static u32 CalcStride(EIndexFormat type)
+static int CalcStride(EIndexFormat type)
 {
 	if(type == EIndexFormat::Bit16)
 		return 2;
@@ -36,7 +36,7 @@ EIndexFormat IndexBufferImpl::GetFormat() const
 
 void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 {
-	u32 stride = CalcStride(type);
+	int stride = CalcStride(type);
 
 	if(!m_Data) {
 		m_Format = type;
@@ -51,7 +51,7 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 			return;
 
 		if(init)
-			for(u32 i = 0; i < m_Size; ++i)
+			for(int i = 0; i < m_Size; ++i)
 				memcpy(m_Data + i*m_Stride, init, m_Stride);
 		return;
 	}
@@ -61,11 +61,11 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 		m_Data = LUX_NEW_ARRAY(u8, stride*m_Allocated);
 
 		if(moveOld) {
-			for(u32 i = 0; i < m_Size; ++i)
-				*((u32*)m_Data + i*stride) = *((u16*)old + i*m_Stride);
+			for(int i = 0; i < m_Size; ++i)
+				*((int*)m_Data + i*stride) = *((u16*)old + i*m_Stride);
 		} else {
 			if(init) {
-				for(u32 i = 0; i < m_Size; ++i)
+				for(int i = 0; i < m_Size; ++i)
 					memcpy(m_Data + i*stride, init, stride);
 			}
 		}
@@ -76,11 +76,11 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 		m_Data = LUX_NEW_ARRAY(u8, stride*m_Allocated);
 
 		if(moveOld) {
-			for(u32 i = 0; i < m_Size; ++i)
-				*((u16*)m_Data + i*stride) = (u16)*((u32*)old + i*m_Stride);
+			for(int i = 0; i < m_Size; ++i)
+				*((u16*)m_Data + i*stride) = (u16)*((int*)old + i*m_Stride);
 		} else {
 			if(init) {
-				for(u32 i = 0; i < m_Size; ++i)
+				for(int i = 0; i < m_Size; ++i)
 					memcpy(m_Data + i*stride, init, stride);
 			}
 		}
@@ -92,11 +92,11 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 	m_Stride = stride;
 }
 
-u32 IndexBufferImpl::AddIndex(const void* index)
+int IndexBufferImpl::AddIndex(const void* index)
 {
 	return AddIndices(index, 1);
 }
-u32 IndexBufferImpl::AddIndices(const void* indices, u32 count)
+int IndexBufferImpl::AddIndices(const void* indices, int count)
 {
 	if(m_Cursor + count - 1 >= m_Size) {
 		Reserve(m_Cursor + count);
@@ -104,11 +104,11 @@ u32 IndexBufferImpl::AddIndices(const void* indices, u32 count)
 	}
 
 	SetIndices(indices, count, m_Cursor);
-	u32 ret = m_Cursor;
+	int ret = m_Cursor;
 	m_Cursor += count;
 	return ret;
 }
-u32 IndexBufferImpl::AddIndices32(const u32* indices, u32 count)
+int IndexBufferImpl::AddIndices32(const u32* indices, int count)
 {
 	if(m_Cursor + count - 1 >= m_Size) {
 		Reserve(m_Cursor + count);
@@ -116,24 +116,24 @@ u32 IndexBufferImpl::AddIndices32(const u32* indices, u32 count)
 	}
 
 	SetIndices32(indices, count, m_Cursor);
-	u32 ret = m_Cursor;
+	int ret = m_Cursor;
 	m_Cursor += count;
 	return ret;
 }
 
-void IndexBufferImpl::SetIndex(const void* index, u32 n)
+void IndexBufferImpl::SetIndex(const void* index, int n)
 {
 	SetIndices(index, 1, n);
 }
-void IndexBufferImpl::SetIndices(const void* indices, u32 count, u32 n)
+void IndexBufferImpl::SetIndices(const void* indices, int count, int n)
 {
 	memcpy(Pointer(n, count), indices, count*m_Stride);
 }
-void IndexBufferImpl::SetIndices32(const u32* indices, u32 count, u32 n)
+void IndexBufferImpl::SetIndices32(const u32* indices, int count, int n)
 {
 	if(m_Format == EIndexFormat::Bit16) {
 		u16* ptr = (u16*)Pointer(n, count);
-		for(u32 i = 0; i < count; ++i)
+		for(int i = 0; i < count; ++i)
 			*ptr++ = (u16)*indices++;
 	} else if(m_Format == EIndexFormat::Bit32) {
 		memcpy(Pointer(n, count), indices, count*m_Stride);
@@ -142,11 +142,11 @@ void IndexBufferImpl::SetIndices32(const u32* indices, u32 count, u32 n)
 	}
 }
 
-void IndexBufferImpl::GetIndex(void* ptr, u32 n) const
+void IndexBufferImpl::GetIndex(void* ptr, int n) const
 {
 	GetIndices(ptr, 1, n);
 }
-void IndexBufferImpl::GetIndices(void* ptr, u32 count, u32 n) const
+void IndexBufferImpl::GetIndices(void* ptr, int count, int n) const
 {
 	memcpy(ptr, Pointer(n, count), count*m_Stride);
 }

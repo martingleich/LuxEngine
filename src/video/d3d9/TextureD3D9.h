@@ -20,11 +20,11 @@ public:
 	~TextureD3D9();
 
 	void Init(
-		const math::Dimension2U& Size,
+		const math::Dimension2I& Size,
 		ColorFormat format,
-		u32 MipCount, bool isRendertarget, bool isDynamic);
+		int MipCount, bool isRendertarget, bool isDynamic);
 
-	LockedRect Lock(ELockMode Mode, u32 MipLevel);
+	LockedRect Lock(ELockMode Mode, int MipLevel);
 	void Unlock(bool regenMipMaps);
 	void RegenerateMIPMaps();
 
@@ -33,8 +33,8 @@ public:
 
 	ColorFormat GetColorFormat() const;
 	void* GetRealTexture();
-	u32 GetLevelCount() const;
-	const math::Dimension2U& GetSize() const;
+	int GetLevelCount() const;
+	const math::Dimension2I& GetSize() const;
 
 	const Filter& GetFiltering() const;
 	void SetFiltering(const Filter& f);
@@ -48,12 +48,12 @@ protected:
 	D3DSURFACE_DESC m_Desc;
 	ColorFormat m_Format;
 	Filter m_Filtering;
-	UINT m_Levels;
+	int m_Levels;
 
-	math::Dimension2U m_Dimension;
+	math::Dimension2I m_Dimension;
 
 	bool m_IsLocked;
-	u32 m_LockedLevel;
+	int m_LockedLevel;
 	ELockMode m_LockedMode;
 	UnknownRefCounted<IDirect3DSurface9> m_TempSurface;
 };

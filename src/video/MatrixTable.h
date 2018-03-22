@@ -42,7 +42,7 @@ public:
 	class MatrixAttribute : public core::Attribute
 	{
 	public:
-		MatrixAttribute(MatrixTable* _table, u32 _id) :
+		MatrixAttribute(MatrixTable* _table, int _id) :
 			table(_table),
 			id(_id)
 		{
@@ -65,21 +65,21 @@ public:
 
 	private:
 		MatrixTable* table;
-		u32 id;
+		int id;
 	};
 
 public:
 	MatrixTable();
 
 	void SetMatrix(EMatrixType type, const math::Matrix4& matrix);
-	core::VariableAccess GetParamById(size_t id) const;
+	core::VariableAccess GetParamById(int id) const;
 	const math::Matrix4& GetMatrix(EMatrixType type) const;
 	bool IsDirty(EMatrixType type) const;
 	void ClearDirty(EMatrixType type) const;
 
-	size_t GetCount() const;
-	const core::String& GetMatrixName(size_t id) const;
-	StrongRef<core::Attribute> CreateAttribute(size_t id);
+	int GetCount() const;
+	const core::String& GetMatrixName(int id) const;
+	StrongRef<core::Attribute> CreateAttribute(int id);
 
 private:
 	bool IsUpToDate(EMatrixType type) const;

@@ -34,16 +34,16 @@ public:
 
 	void SetRenderTarget(const RenderTarget& target);
 	void SetRenderTarget(const core::Array<RenderTarget>& targets);
-	void SetRenderTarget(const RenderTarget* targets, size_t count, bool restore);
+	void SetRenderTarget(const RenderTarget* targets, int count, bool restore);
 	const RenderTarget& GetRenderTarget();
-	const math::Dimension2U& GetRenderTargetSize();
+	const math::Dimension2I& GetRenderTargetSize();
 
-	void SetScissorRect(const math::RectU& rect, ScissorRectToken* token = nullptr);
-	const math::RectU& GetScissorRect() const;
+	void SetScissorRect(const math::RectI& rect, ScissorRectToken* token = nullptr);
+	const math::RectI& GetScissorRect() const;
 
 	///////////////////////////////////////////////////////////////////////////
 
-	size_t GetMaxLightCount() const;
+	int GetMaxLightCount() const;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -120,7 +120,7 @@ private:
 	core::Array<RendertargetD3D9> m_CurrentRendertargets;
 	RendertargetD3D9 m_BackbufferTarget;
 
-	math::RectU m_ScissorRect;
+	math::RectI m_ScissorRect;
 
 	VideoDriverD3D9* m_Driver;
 

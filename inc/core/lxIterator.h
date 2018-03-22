@@ -52,15 +52,15 @@ typename _iter_traits<IterType>::_iter_cat _iterCat(IterType& it)
 }
 
 template <typename IterType>
-intptr_t _IteratorDistance(IterType a, IterType b, RandomAccessIteratorTag)
+int _IteratorDistance(IterType a, IterType b, RandomAccessIteratorTag)
 {
-	return b - a;
+	return static_cast<int>(b - a);
 }
 
 template <typename IterType>
-intptr_t _IteratorDistance(IterType a, IterType b, BidirectionalIteratorTag)
+int _IteratorDistance(IterType a, IterType b, BidirectionalIteratorTag)
 {
-	intptr_t count = 0;
+	int count = 0;
 	while(a != b) {
 		count++;
 		a++;
@@ -70,9 +70,9 @@ intptr_t _IteratorDistance(IterType a, IterType b, BidirectionalIteratorTag)
 }
 
 template <typename IterType>
-intptr_t _IteratorDistance(IterType a, IterType b, InputIteratorTag)
+int _IteratorDistance(IterType a, IterType b, InputIteratorTag)
 {
-	size_t count = 0;
+	int count = 0;
 	while(a != b) {
 		count++;
 		a++;
@@ -82,9 +82,9 @@ intptr_t _IteratorDistance(IterType a, IterType b, InputIteratorTag)
 }
 
 template <typename IterType>
-intptr_t _IteratorDistance(IterType a, IterType b, ForwardIteratorTag)
+int _IteratorDistance(IterType a, IterType b, ForwardIteratorTag)
 {
-	size_t count = 0;
+	int count = 0;
 	while(a != b) {
 		count++;
 		a++;
@@ -94,13 +94,13 @@ intptr_t _IteratorDistance(IterType a, IterType b, ForwardIteratorTag)
 }
 
 template <typename IterType>
-IterType _IteratorAdvance(IterType iter, size_t distance, RandomAccessIteratorTag)
+IterType _IteratorAdvance(IterType iter, int distance, RandomAccessIteratorTag)
 {
 	return (iter + distance);
 }
 
 template <typename IterType>
-IterType _IteratorAdvance(IterType iter, size_t distance, BidirectionalIteratorTag)
+IterType _IteratorAdvance(IterType iter, int distance, BidirectionalIteratorTag)
 {
 	while(distance > 0) {
 		++iter;
@@ -111,7 +111,7 @@ IterType _IteratorAdvance(IterType iter, size_t distance, BidirectionalIteratorT
 }
 
 template <typename IterType>
-IterType _IteratorAdvance(IterType iter, size_t distance, InputIteratorTag)
+IterType _IteratorAdvance(IterType iter, int distance, InputIteratorTag)
 {
 	while(distance > 0) {
 		++iter;
@@ -122,7 +122,7 @@ IterType _IteratorAdvance(IterType iter, size_t distance, InputIteratorTag)
 }
 
 template <typename IterType>
-IterType _IteratorAdvance(IterType iter, size_t distance, ForwardIteratorTag)
+IterType _IteratorAdvance(IterType iter, int distance, ForwardIteratorTag)
 {
 	while(distance > 0) {
 		++iter;
@@ -143,7 +143,7 @@ The distance is defined as the smallest value x, with (a += x) == b
 \return The distance between the iterators
 */
 template <typename IterType>
-intptr_t IteratorDistance(IterType a, IterType b)
+int IteratorDistance(IterType a, IterType b)
 {
 	return _IteratorDistance(a, b, _iterCat(a));
 }
@@ -155,7 +155,7 @@ The operation is equivalent to repeated inkrement of the interator
 \param distance The distance to advance the iterator.
 */
 template <typename IterType>
-IterType AdvanceIterator(IterType a, size_t distance)
+IterType AdvanceIterator(IterType a, int distance)
 {
 	return _IteratorAdvance(a, distance, _iterCat(a));
 }
@@ -182,7 +182,7 @@ void SwapIterator(IterType& a, IterType& b)
 template <typename... Ts>
 class MultiIter
 {
-	static const size_t TupleSize = sizeof...(Ts);
+	static const int TupleSize = sizeof...(Ts);
 	using TupleType = std::tuple<Ts...>;
 
 	struct DerefType
@@ -193,7 +193,7 @@ class MultiIter
 		{
 		}
 
-		template <size_t Index>
+		template <int Index>
 		typename std::tuple_element<Index, TupleType>::type get() { return std::get<Index>(m_Tuple); }
 
 	private:
@@ -228,7 +228,7 @@ public:
 		return !(*this == other);
 	}
 
-	template <size_t Index>
+	template <int Index>
 	typename std::tuple_element<Index, TupleType>::type get() { return std::get<Index>(m_Tuple); }
 
 	DerefType operator*()
@@ -237,15 +237,15 @@ public:
 	}
 
 private:
-	template <size_t... Indices>
-	static void IncImpl(TupleType& tuple, std::integer_sequence<size_t, Indices...>)
+	template <int... Indices>
+	static void IncImpl(TupleType& tuple, std::integer_sequence<int, Indices...>)
 	{
 		int ignored[] = {(std::get<Indices>(tuple)++, 0)...};
 		(void)ignored;
 	}
 
-	template <typename TupleT, size_t... Indices>
-	static DerefType DerefImpl(TupleT&& tuple, std::integer_sequence<size_t, Indices...>)
+	template <typename TupleT, int... Indices>
+	static DerefType DerefImpl(TupleT&& tuple, std::integer_sequence<int, Indices...>)
 	{
 		return std::forward_as_tuple((*std::get<Indices>(tuple))...);
 	}
@@ -261,7 +261,7 @@ MultiIter<IterTs...> ZipIter(IterTs... iter)
 }
 
 template <typename RangeT>
-size_t RangeLength(const RangeT& r)
+int RangeLength(const RangeT& r)
 {
 	using namespace std;
 	return IteratorDistance(begin(r), end(r));
@@ -334,15 +334,15 @@ public:
 	bool operator==(IndexIter other) const { return value == other.value; }
 	bool operator!=(IndexIter other) const { return value != other.value; }
 	IndexIter operator++() { ++value; return *this; }
-	IndexIter& operator+=(intptr_t v) { value += (BaseT)v; return *this; }
-	IndexIter operator+(intptr_t v) { return IndexIter(value + (BaseT)v); }
+	IndexIter& operator+=(int v) { value += (BaseT)v; return *this; }
+	IndexIter operator+(int v) { return IndexIter(value + (BaseT)v); }
 	IndexIter operator++(int) { IndexIter tmp(*this); ++value; return tmp; }
 	IndexIter operator--() { --value; return *this; }
-	IndexIter& operator-=(intptr_t v) { value -= (BaseT)v; return *this; }
-	IndexIter operator-(intptr_t v) { return IndexIter(value - (BaseT)v); }
+	IndexIter& operator-=(int v) { value -= (BaseT)v; return *this; }
+	IndexIter operator-(int v) { return IndexIter(value - (BaseT)v); }
 	IndexIter operator--(int) { IndexIter tmp(*this); --value; return tmp; }
 
-	intptr_t operator-(IndexIter other) { return value - other.value; }
+	int operator-(IndexIter other) { return value - other.value; }
 
 	BaseT operator*() const { return value; }
 
@@ -350,23 +350,23 @@ private:
 	BaseT value;
 };
 
-template <typename IndexT = size_t>
+template <typename IndexT = int>
 Range<IndexIter<IndexT>> MakeIndexRange(IndexT end = std::numeric_limits<IndexT>::max())
 {
 	return Range<IndexIter<IndexT>>(0, end);
 }
 
-template <typename IndexT = size_t>
+template <typename IndexT = int>
 Range<IndexIter<IndexT>> MakeIndexRange(IndexT start, IndexT end)
 {
 	return Range<IndexIter<IndexT>>(start, end);
 }
 
 template <typename RangeT>
-auto SliceRange(RangeT&& range, intptr_t first, intptr_t end = -1)
+auto SliceRange(RangeT&& range, int first, int end = -1)
 {
 	using namespace std;
-	size_t len = RangeLength(std::forward<RangeT>(range));
+	int len = RangeLength(std::forward<RangeT>(range));
 	if(end < 0)
 		end = len + end + 1;
 	lxAssert(end >= first);
@@ -376,7 +376,7 @@ auto SliceRange(RangeT&& range, intptr_t first, intptr_t end = -1)
 }
 
 template <typename RangeT>
-auto SliceRangeCount(RangeT&& range, intptr_t first, intptr_t count)
+auto SliceRangeCount(RangeT&& range, int first, int count)
 {
 	return SliceRange(std::forward<RangeT>(range), first, first + count);
 }
@@ -420,34 +420,34 @@ public:
 	\param stride Distance between two objects in byte.
 	\param off Offset of the first object from the data pointer in bytes.
 	*/
-	StrideBaseIterator(VoidPtrT ptr, u32 stride, u32 off = 0) :
+	StrideBaseIterator(VoidPtrT ptr, int stride, int off = 0) :
 		m_Stride(stride),
 		m_Ptr((BytePtrT)ptr + off)
 	{
 	}
 
-	StrideBaseIterator& operator+=(intptr_t i)
+	StrideBaseIterator& operator+=(int i)
 	{
 		m_Ptr += i*m_Stride;
 		return *this;
 	}
-	StrideBaseIterator& operator-=(intptr_t i)
+	StrideBaseIterator& operator-=(int i)
 	{
 		return (*this += -i);
 	}
-	StrideBaseIterator operator+(intptr_t i) const
+	StrideBaseIterator operator+(int i) const
 	{
 		auto tmp = *this;
 		tmp += i;
 		return tmp;
 	}
-	StrideBaseIterator operator-(intptr_t i) const
+	StrideBaseIterator operator-(int i) const
 	{
 		auto tmp = *this;
 		tmp -= i;
 		return tmp;
 	}
-	intptr_t operator-(StrideBaseIterator& other) const
+	int operator-(StrideBaseIterator& other) const
 	{
 		return (m_Ptr - other.m_Ptr) / m_Stride;
 	}
@@ -510,7 +510,7 @@ public:
 		return ((ElemPtrT)m_Ptr);
 	}
 
-	u32 m_Stride;
+	int m_Stride;
 	BytePtrT m_Ptr;
 };
 
@@ -518,7 +518,7 @@ public:
 template <typename T>
 using StrideIterator = StrideBaseIterator<T, false>;
 
-template <typename T, typename Callable, typename IndexT = size_t>
+template <typename T, typename Callable, typename IndexT = int>
 class IndexCallableIterator : public BaseIterator<RandomAccessIteratorTag, T>
 {
 public:
@@ -543,26 +543,26 @@ public:
 		IndexCallableIterator tmp = *this; --m_Index; return tmp;
 	}
 
-	IndexCallableIterator& operator+=(intptr_t num)
+	IndexCallableIterator& operator+=(int num)
 	{
 		m_Index += num;
 		return *this;
 	}
 
-	IndexCallableIterator operator+(intptr_t num) const
+	IndexCallableIterator operator+(int num) const
 	{
 		IndexCallableIterator temp = *this; return temp += num;
 	}
-	IndexCallableIterator& operator-=(intptr_t num)
+	IndexCallableIterator& operator-=(int num)
 	{
 		return (*this) += (-num);
 	}
-	IndexCallableIterator operator-(intptr_t num) const
+	IndexCallableIterator operator-(int num) const
 	{
 		return (*this) + (-num);
 	}
 
-	intptr_t operator-(IndexCallableIterator other) const
+	int operator-(IndexCallableIterator other) const
 	{
 		return m_Index - other.m_Index;
 	}
@@ -604,17 +604,17 @@ public:
 	{
 	}
 
-	size_t Size() const
+	int Size() const
 	{
 		return IteratorDistance(First(), End());
 	}
 
-	const T& operator[](size_t i) const
+	const T& operator[](int i) const
 	{
 		return *AdvanceIterator(First(), i);
 	}
 	template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-	T& operator[](size_t i)
+	T& operator[](int i)
 	{
 		return *AdvanceIterator(First(), i);
 	}

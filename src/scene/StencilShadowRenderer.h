@@ -48,7 +48,7 @@ public:
 		{
 		}
 
-		u32 changeId;
+		int changeId;
 		const video::Geometry* geo;
 
 		struct Face
@@ -134,9 +134,9 @@ public:
 		const AdjacenceInfo& adjInfo = GetAdjacenceInfo(mesh);
 
 		// Generate facing information
-		const u32 faceCount = (u32)adjInfo.faces.Size();
+		auto faceCount = adjInfo.faces.Size();
 		m_FacingData.Resize(faceCount);
-		for(u32 i = 0; i < faceCount; ++i) {
+		for(int i = 0; i < faceCount; ++i) {
 			if(isInfiniteLight)
 				m_FacingData[i] = (adjInfo.faces[i].normal.Dot(lightPos) < 0);
 			else
@@ -151,7 +151,7 @@ public:
 		};
 
 		// Foreach forward facing face, check if adjacent face is backward facing, then add edge to contour
-		for(u32 i = 0; i < faceCount; ++i) {
+		for(int i = 0; i < faceCount; ++i) {
 			if(!m_FacingData[i])
 				continue;
 
@@ -177,15 +177,15 @@ public:
 				outVolume.points.PushBack(extend(v2));
 			}
 
-			if(m_FacingData[i] != m_FacingData[adj0] || i == adj0) {
+			if(m_FacingData[i] != m_FacingData[adj0] || (u32)i == adj0) {
 				outVolume.AddQuad(v1, v2, extend(v1), extend(v2));
 			}
 
-			if(m_FacingData[i] != m_FacingData[adj1] || i == adj1) {
+			if(m_FacingData[i] != m_FacingData[adj1] || (u32)i == adj1) {
 				outVolume.AddQuad(v2, v3, extend(v2), extend(v3));
 			}
 
-			if(m_FacingData[i] != m_FacingData[adj2] || i == adj2) {
+			if(m_FacingData[i] != m_FacingData[adj2] || (u32)i == adj2) {
 				outVolume.AddQuad(v3, v1, extend(v3), extend(v1));
 			}
 		}
@@ -256,7 +256,7 @@ private:
 		info.points.Reserve(vertexCount);
 		auto vb = info.geo->GetVertices();
 		auto poff = info.geo->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;
-		for(u32 i = 0; i < vertexCount; ++i) {
+		for(int i = 0; i < vertexCount; ++i) {
 			auto pos = *(math::Vector3F*)((u8*)vb->Pointer_c(i, 1) + poff);
 			info.points.PushBack(pos);
 		}
@@ -268,7 +268,7 @@ private:
 		auto ib = info.geo->GetIndices();
 		auto faceCount = info.geo->GetPrimitiveCount();
 		info.faces.Resize(faceCount);
-		for(u32 i = 0; i < faceCount; ++i) {
+		for(int i = 0; i < faceCount; ++i) {
 			ib->GetIndices(info.faces[i].points, 3, 3 * i);
 			auto pa = info.points[info.faces[i].points[0]];
 			auto pb = info.points[info.faces[i].points[1]];
@@ -277,17 +277,17 @@ private:
 		}
 
 		// Generate adjacence info
-		for(u32 i = 0; i < faceCount; ++i) {
-			for(u32 e = 0; e < 3; ++e) {
+		for(int i = 0; i < faceCount; ++i) {
+			for(int e = 0; e < 3; ++e) {
 				auto v1 = info.points[info.faces[i].points[e]];
 				auto v2 = info.points[info.faces[i].points[(e + 1) % 3]];
 
-				u32 j;
+				int j;
 				for(j = 0; j < faceCount; ++j) {
 					if(i != j) {
 						bool cnt1 = false;
 						bool cnt2 = false;
-						for(u32 e2 = 0; e2 < 3; ++e2) {
+						for(int e2 = 0; e2 < 3; ++e2) {
 							auto v = info.points[info.faces[j].points[e2]];
 							if(math::IsEqual(v1, v))
 								cnt1 = true;

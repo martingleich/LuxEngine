@@ -51,6 +51,7 @@
 #include "core/ResourceLoader.h"
 #include "core/ResourceSystem.h"
 #include "core/ResourceWriter.h"
+#include "core/SafeCast.h"
 #include "core/StringBuffer.h"
 #include "core/StringConverter.h"
 #include "core/VariableAccess.h"

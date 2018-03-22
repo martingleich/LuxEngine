@@ -57,12 +57,12 @@ public:
 	struct SystemData
 	{
 		AffectorEntry* globals;
-		size_t globalCount;
+		int globalCount;
 		AffectorEntry* locals;
-		size_t localCount;
+		int localCount;
 
 		EmitterEntry* emitters;
-		size_t emitterCount;
+		int emitterCount;
 
 		const Node* owner;
 		const Node* psSystem;
@@ -106,8 +106,8 @@ public:
 	LUX_API void AddParticle(u32 count, const math::Vector3F& position, const math::Vector3F& velocity);
 	LUX_API void AddParticle(u32 count, ParticleEmitter* emitter);
 
-	LUX_API u32 GetParticleCount() const;
-	LUX_API u32 GetParticleCapacity() const;
+	LUX_API int GetParticleCount() const;
+	LUX_API int GetParticleCapacity() const;
 
 	LUX_API const core::Pool<Particle>& GetPool() const;
 	LUX_API ParticleModel* GetModel();

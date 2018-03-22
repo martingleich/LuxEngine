@@ -42,14 +42,14 @@ public:
 	LUX_API void RemoveCreator(GeometryCreator* creator);
 
 	//! Returns the total number of available creators.
-	LUX_API size_t GetCreatorCount() const;
+	LUX_API int GetCreatorCount() const;
 
 	//! Retrieve a geometry creator based on it's name.
 	LUX_API StrongRef<GeometryCreator> GetCreatorByName(
 		const core::String& name) const;
 
 	//! Returns a creator by it's index.
-	LUX_API StrongRef<GeometryCreator> GetCreatorById(size_t id) const;
+	LUX_API StrongRef<GeometryCreator> GetCreatorById(int id) const;
 
 	//! Creates a new param package puffer for a given creator.
 	/**

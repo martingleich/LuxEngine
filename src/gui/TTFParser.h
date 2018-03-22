@@ -10,7 +10,7 @@ namespace lux
 class TTFParser
 {
 public:
-	TTFParser(void* data, size_t size)
+	TTFParser(void* data, int size)
 	{
 		m_Data = (u8*)data;
 		m_Cursor = m_Data;

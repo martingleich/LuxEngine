@@ -17,16 +17,16 @@ public:
 	void SetFormat(EIndexFormat type, bool moveOld = true, void* init = nullptr);
 	EIndexFormat GetFormat() const;
 
-	u32 AddIndex(const void* index);
-	u32 AddIndices(const void* indices, u32 count);
-	u32 AddIndices32(const u32* indices, u32 count);
-	void SetIndex(const void* index, u32 n);
-	void SetIndices(const void* indices, u32 count, u32 n);
-	void SetIndices32(const u32* indices, u32 count, u32 n);
-	void GetIndex(void* ptr, u32 n) const;
-	void GetIndices(void* ptr, u32 count, u32 n) const;
+	int AddIndex(const void* index);
+	int AddIndices(const void* indices, int count);
+	int AddIndices32(const u32* indices, int count);
+	void SetIndex(const void* index, int n);
+	void SetIndices(const void* indices, int count, int n);
+	void SetIndices32(const u32* indices, int count, int n);
+	void GetIndex(void* ptr, int n) const;
+	void GetIndices(void* ptr, int count, int n) const;
 
-	u32 GetIndex(u32 n) const
+	int GetIndex(int n) const
 	{
 		if(GetFormat() == EIndexFormat::Bit32) {
 			u32 data;

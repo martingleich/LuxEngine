@@ -57,7 +57,7 @@ public:
 
 	FileDescription(const Path& path,
 		const core::String& name,
-		u32 size,
+		s64 size,
 		EType type,
 		const core::DateAndTime& creationDate,
 		bool isVirtual) :
@@ -111,12 +111,12 @@ public:
 		m_Archive = a;
 	}
 
-	void SetSize(u32 size)
+	void SetSize(s64 size)
 	{
 		m_Size = size;
 	}
 
-	u32 GetSize() const
+	s64 GetSize() const
 	{
 		return m_Size;
 	}
@@ -156,7 +156,7 @@ private:
 	core::String m_Name;
 	Archive* m_Archive;
 
-	u32 m_Size;
+	s64 m_Size;
 	EType m_Type;
 	core::DateAndTime m_Creation;
 	bool m_IsVirtual;

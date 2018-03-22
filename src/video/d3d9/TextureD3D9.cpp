@@ -13,7 +13,7 @@ namespace video
 {
 TextureD3D9::TextureD3D9(IDirect3DDevice9* device, const core::ResourceOrigin& origin) :
 	Texture(origin),
-	m_LockedLevel(0),
+	m_LockedLevel(-1),
 	m_IsLocked(false),
 	m_Device(device)
 {
@@ -33,9 +33,9 @@ void TextureD3D9::RegenerateMIPMaps()
 }
 
 void TextureD3D9::Init(
-	const math::Dimension2U& size,
+	const math::Dimension2I& size,
 	video::ColorFormat lxFormat,
-	u32 mipCount, bool isRendertarget, bool isDynamic)
+	int mipCount, bool isRendertarget, bool isDynamic)
 {
 	if(!m_Device)
 		throw core::Exception("No driver available");
@@ -62,7 +62,7 @@ void TextureD3D9::Init(
 		pool = D3DPOOL_DEFAULT;
 	}
 
-	HRESULT hr = m_Device->CreateTexture(size.width, size.height, m_Levels,
+	HRESULT hr = m_Device->CreateTexture((UINT)size.width, (UINT)size.height, m_Levels,
 		usage, format,
 		pool, m_Texture.Access(), nullptr);
 
@@ -77,14 +77,14 @@ void TextureD3D9::Init(
 	m_Format = lxFormat;
 }
 
-BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, u32 mipLevel)
+BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 {
 	if(m_IsLocked)
 		throw core::Exception("Texture is already locked");
 
 	m_LockedLevel = mipLevel;
-	if(m_LockedLevel >= m_Texture->GetLevelCount())
-		m_LockedLevel = m_Texture->GetLevelCount() - 1;
+	if(m_LockedLevel >= (int)m_Texture->GetLevelCount())
+		m_LockedLevel = (int)m_Texture->GetLevelCount() - 1;
 
 	D3DLOCKED_RECT d3dlocked;
 	DWORD flags;
@@ -182,12 +182,12 @@ void* TextureD3D9::GetRealTexture()
 	return (void*)(m_Texture);
 }
 
-u32 TextureD3D9::GetLevelCount() const
+int TextureD3D9::GetLevelCount() const
 {
 	return m_Texture->GetLevelCount();
 }
 
-const math::Dimension2U& TextureD3D9::GetSize() const
+const math::Dimension2I& TextureD3D9::GetSize() const
 {
 	return m_Dimension;
 }

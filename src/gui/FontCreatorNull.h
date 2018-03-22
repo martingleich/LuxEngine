@@ -47,8 +47,8 @@ private:
 	virtual void* BeginFontCreation(const core::String& name,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet) = 0;
-	virtual void GetFontInfo(void*, u32& fontHeight, FontDescription& desc) = 0;
-	virtual bool GetFontImage(void*, u8*& image, math::Dimension2U& imageSize, u32& channnelCount) = 0;
+	virtual void GetFontInfo(void*, int& fontHeight, FontDescription& desc) = 0;
+	virtual bool GetFontImage(void*, u8*& image, math::Dimension2I& imageSize, int& channnelCount) = 0;
 	virtual bool GetFontCharInfo(void*, u32 character, CharInfo& outInfo) = 0;
 	virtual void EndFontCreation(void*) = 0;
 };

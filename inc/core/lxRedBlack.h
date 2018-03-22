@@ -591,7 +591,7 @@ public:
 		return it.GetNode();
 	}
 
-	size_t Size() const
+	int Size() const
 	{
 		return m_Size;
 	}
@@ -644,7 +644,7 @@ private:
 	}
 
 	template <typename IterT>
-	Node* FromOrderedRec(IterT* first, size_t count, bool color)
+	Node* FromOrderedRec(IterT* first, int count, bool color)
 	{
 		if(count == 0)
 			return nullptr;
@@ -858,7 +858,7 @@ private:
 
 private:
 	Node* m_Root;
-	size_t m_Size;
+	int m_Size;
 	Compare m_Compare;
 };
 

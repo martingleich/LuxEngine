@@ -14,9 +14,9 @@ class File;
 class INIFile : public ReferenceCounted
 {
 public:
-	typedef size_t SectionID;
-	typedef size_t ElementID;
-	static const size_t InvalidID = 0xFFFFFFFF;
+	typedef int SectionID;
+	typedef int ElementID;
+	static const int InvalidID = -1;
 
 	enum class ECommentPos
 	{
@@ -47,7 +47,7 @@ public:
 	LUX_API void SetCommentChars(const core::String& chars);
 	LUX_API u32 GetCommentChar() const;
 
-	LUX_API size_t GetSectionCount();
+	LUX_API int GetSectionCount();
 	LUX_API bool SortSections(ESorting sorting, bool recursive = false);
 	LUX_API bool AddSection(const char* name, const char* comment = nullptr);
 	LUX_API bool RemoveSection(const char* section);
@@ -56,7 +56,7 @@ public:
 	LUX_API const core::String& GetSectionName(SectionID id);
 	LUX_API const core::String& GetSectionComment(const char* section);
 
-	LUX_API size_t GetElementCount(const char* section);
+	LUX_API int GetElementCount(const char* section);
 	LUX_API bool SortElements(const char* section, ESorting sorting);
 	LUX_API bool AddElement(const char* section, const char* name, const char* value, const char* comment = nullptr);
 	LUX_API bool RemoveElement(const char* section, const char* element);
@@ -84,7 +84,7 @@ private:
 		core::String name;
 		core::String comment;
 		ElementID firstElem;
-		size_t elemCount;
+		int elemCount;
 		bool sorted : 1;
 		ESorting sorting;
 	};
@@ -124,7 +124,7 @@ private:
 	bool ReadElement(core::String& work, SINIElement& element);
 	bool IsComment(const core::String& work, core::String::ConstIterator& CommentBegin);
 
-	void WriteComment(const core::String& comment, size_t identDepth, ECommentPos pos);
+	void WriteComment(const core::String& comment, int identDepth, ECommentPos pos);
 
 	SectionID GetSectionID(const char* Section);
 	ElementID GetElemID(const char* Section, const char* Element, SectionID& outSection);

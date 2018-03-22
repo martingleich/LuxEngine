@@ -65,7 +65,7 @@ public:
 	}
 
 	//! Convert the format to an id
-	explicit operator u32() const
+	EColorFormat ToEnum() const
 	{
 		return m_Format;
 	}
@@ -118,9 +118,9 @@ public:
 	}
 
 	//! The number of bits in a pixel for this format
-	inline u8 GetBitsPerPixel() const
+	inline int GetBitsPerPixel() const
 	{
-		static const u8 BitPerPixel[FORMAT_COUNT] = {
+		static const int BitPerPixel[FORMAT_COUNT] = {
 			24,
 			32, 32, 32,
 			16, 16, 16,
@@ -134,7 +134,7 @@ public:
 	}
 
 	//! The number of bytes in a pixel for this format
-	inline u32 GetBytePerPixel() const
+	inline int GetBytePerPixel() const
 	{
 		return GetBitsPerPixel() / 8;
 	}

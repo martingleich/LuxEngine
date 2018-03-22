@@ -13,17 +13,20 @@ MemoryFile::MemoryFile(void* buffer,
 	EVirtualCreateFlag flags) :
 	File(name, desc),
 	m_Buffer((u8*)buffer),
-	m_Size(desc.GetSize()),
 	m_Cursor(0),
 	m_IsEOF(false),
 	m_Flags(flags)
 {
+	if(desc.GetSize() > std::numeric_limits<size_t>::max())
+		throw core::Exception("Memory file is to big");
+	m_Size = (size_t)desc.GetSize();
+
 	if(TestFlag(m_Flags, EVirtualCreateFlag::Copy)) {
-		auto newData = LUX_NEW_ARRAY(u8, m_Size);
+		auto newData = LUX_NEW_RAW(m_Size);
 		if(m_Buffer)
 			memcpy(newData, m_Buffer, m_Size);
 		if(TestFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop))
-			LUX_FREE_ARRAY(m_Buffer);
+			LUX_FREE_RAW(m_Buffer);
 
 		m_Buffer = newData;
 		SetFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop | EVirtualCreateFlag::Expandable);
@@ -34,67 +37,66 @@ MemoryFile::MemoryFile(void* buffer,
 MemoryFile::~MemoryFile()
 {
 	if(TestFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop))
-		LUX_FREE_ARRAY(m_Buffer);
+		LUX_FREE_RAW(m_Buffer);
 }
 
-u32 MemoryFile::ReadBinaryPart(u32 numBytes, void* out)
+s64 MemoryFile::ReadBinaryPart(s64 numBytes, void* out)
 {
 	LX_CHECK_NULL_ARG(out);
-	LX_CHECK_NULL_ARG(numBytes);
+	if(numBytes <= 0 || numBytes > std::numeric_limits<size_t>::max())
+		throw io::FileException(io::FileException::ReadError);
+	size_t sizeBytes = (size_t)numBytes;
 
-	if(m_Cursor + numBytes > m_Size) {
-		numBytes = m_Size - m_Cursor;
+	if(m_Cursor + sizeBytes > m_Size) {
+		sizeBytes = m_Size - m_Cursor;
 		m_IsEOF = true;
 	}
 
-	memcpy(out, m_Buffer + m_Cursor, numBytes);
-	m_Cursor += numBytes;
+	memcpy(out, m_Buffer + m_Cursor, sizeBytes);
+	m_Cursor += sizeBytes;
 
-	return numBytes;
+	return (s64)sizeBytes;
 }
 
-u32 MemoryFile::WriteBinaryPart(const void* data, u32 numBytes)
+s64 MemoryFile::WriteBinaryPart(const void* data, s64 numBytes)
 {
 	LX_CHECK_NULL_ARG(data);
-	LX_CHECK_NULL_ARG(numBytes);
+	if(numBytes < 0 || numBytes > std::numeric_limits<size_t>::max())
+		throw io::FileException(io::FileException::WriteError);
+	size_t sizeBytes = (size_t)numBytes;
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::ReadOnly))
 		throw io::FileException(io::FileException::WriteError);
 
-	if(numBytes == 0 || !data)
-		return 0;
-
-	if(m_Cursor > m_Size - numBytes) {
+	if(m_Cursor > m_Size - sizeBytes) {
 		if(!TestFlag(m_Flags, EVirtualCreateFlag::Expandable)) {
 			throw io::FileException(io::FileException::WriteError);
 		} else {
-			u8* pNewData = LUX_NEW_ARRAY(u8, ((m_Cursor + numBytes) * 3) / 2);
+			u8* pNewData = LUX_NEW_RAW(((m_Cursor + sizeBytes) * 3) / 2);
 			if(m_Buffer)
 				memcpy(pNewData, m_Buffer, m_Size);
 			if(TestFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop))
-				LUX_FREE_ARRAY(m_Buffer);
+				LUX_FREE_RAW(m_Buffer);
 			SetFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop | EVirtualCreateFlag::Expandable);
 			ClearFlag(m_Flags, EVirtualCreateFlag::Copy | EVirtualCreateFlag::ReadOnly);
 
 			m_Buffer = pNewData;
-			m_Size = (3 * (m_Cursor + numBytes)) / 2;
+			m_Size = (3 * (m_Cursor + sizeBytes)) / 2;
 		}
 	}
 
-	memcpy(m_Buffer + m_Cursor, data, numBytes);
-	m_Cursor += numBytes;
+	memcpy(m_Buffer + m_Cursor, data, sizeBytes);
+	m_Cursor += sizeBytes;
 
-	return numBytes;
+	return (s64)sizeBytes;
 }
 
-void MemoryFile::Seek(u32 offset, ESeekOrigin origin)
+void MemoryFile::Seek(s64 offset, ESeekOrigin origin)
 {
-	u32 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
+	size_t cursor = (origin == ESeekOrigin::Start) ? 0 : (size_t)GetCursor();
 
-	u32 newCursor;
-	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
-
-	if(!success)
+	size_t newCursor = (size_t)((s64)cursor + offset);
+	if(newCursor > GetSize())
 		throw io::FileException(io::FileException::OutsideFile);
 
 	m_Cursor = newCursor;
@@ -115,14 +117,14 @@ const void* MemoryFile::GetBuffer() const
 	return m_Buffer;
 }
 
-u32 MemoryFile::GetSize() const
+s64 MemoryFile::GetSize() const
 {
-	return m_Size;
+	return (s64)m_Size;
 }
 
-u32 MemoryFile::GetCursor() const
+s64 MemoryFile::GetCursor() const
 {
-	return m_Cursor;
+	return (s64)m_Cursor;
 }
 
 }

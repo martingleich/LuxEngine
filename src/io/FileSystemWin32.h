@@ -16,20 +16,20 @@ public:
 	FileSystemWin32();
 	StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const Path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, EVirtualCreateFlag flag);
-	StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, EVirtualCreateFlag flag);
+	StrongRef<File> OpenVirtualFile(void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
+	StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
 	bool ExistFile(const Path& filename) const;
 	bool ExistDirectory(const Path& filename) const;
 	Path GetAbsoluteFilename(const Path& filename) const;
 	const Path& GetWorkingDirectory() const;
 
-	File* CreateTemporaryFile(u32 Size);
+	File* CreateTemporaryFile(s64 Size);
 	FileDescription GetFileDescription(const Path& name);
 
 	StrongRef<INIFile> CreateINIFile(const Path& filename);
 	StrongRef<INIFile> CreateINIFile(File* file);
 
-	StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const core::String& name);
+	StrongRef<File> OpenLimitedFile(File* file, s64 start, s64 size, const core::String& name);
 
 	void CreateFile(const Path& path, bool recursive = false);
 	void DeleteFile(const Path& path);
@@ -47,7 +47,7 @@ public:
 private:
 	core::String GetFileOpenString(EFileMode mode) const;
 	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
-	u32 GetWin32FileAttributes(const Path& p) const;
+	DWORD GetWin32FileAttributes(const Path& p) const;
 
 	void CreateWin32File(Win32Path& path, bool recursive = false);
 	void CreateWin32Directory(Win32Path& path, bool recursive = false);

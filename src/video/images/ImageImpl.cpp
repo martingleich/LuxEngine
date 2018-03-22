@@ -27,7 +27,7 @@ void ImageImpl::Clear()
 	m_Data = nullptr;
 }
 
-void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format)
+void ImageImpl::Init(const math::Dimension2I& size, ColorFormat format)
 {
 	Clear();
 
@@ -43,7 +43,7 @@ void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format)
 		m_Data = nullptr;
 }
 
-void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop)
+void ImageImpl::Init(const math::Dimension2I& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop)
 {
 	Clear();
 
@@ -66,7 +66,7 @@ void ImageImpl::Init(const math::Dimension2U& size, ColorFormat format, void* da
 	}
 }
 
-const math::Dimension2U& ImageImpl::GetSize() const
+const math::Dimension2I& ImageImpl::GetSize() const
 {
 	return m_Dimension;
 }
@@ -76,34 +76,34 @@ ColorFormat ImageImpl::GetColorFormat() const
 	return m_Format;
 }
 
-u32 ImageImpl::GetBitsPerPixel() const
+int ImageImpl::GetBitsPerPixel() const
 {
 	return m_BitPerPixel;
 }
 
-u32 ImageImpl::GetSizeInBytes() const
+int ImageImpl::GetSizeInBytes() const
 {
 	return (m_BitPerPixel * m_Dimension.GetArea())/8;
 }
 
-u32 ImageImpl::GetSizeInPixels() const
+int ImageImpl::GetSizeInPixels() const
 {
 	return m_Dimension.GetArea();
 }
 
-Color ImageImpl::GetPixel(u32 x, u32 y)
+Color ImageImpl::GetPixel(int x, int y)
 {
 	lxAssert(!m_Format.IsCompressed());
 
 	return Color(m_Format.FormatToA8R8G8B8(m_Data + (y * m_Pitch + (x*m_BitPerPixel)/8)));
 }
 
-void ImageImpl::SetPixel(u32 x, u32 y, Color Col)
+void ImageImpl::SetPixel(int x, int y, Color Col)
 {
 	lxAssert(!m_Format.IsCompressed());
 
 	void* dst = (m_Data + (y * m_Pitch + (x*m_BitPerPixel)/8));
-	m_Format.A8R8G8B8ToFormat((u32)Col, (u8*)dst);
+	m_Format.A8R8G8B8ToFormat(Col.ToDWORD(), (u8*)dst);
 }
 
 void ImageImpl::Fill(Color color)
@@ -112,7 +112,7 @@ void ImageImpl::Fill(Color color)
 	c.Clear(color);
 }
 
-u32 ImageImpl::GetPitch() const
+int ImageImpl::GetPitch() const
 {
 	return m_Pitch;
 }

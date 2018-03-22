@@ -93,7 +93,7 @@ io::Path MakeAbsolutePath(const io::Path& base, const io::Path& rel)
 			else if(state == 1) // Single dot
 				out.Pop(); // Erase the dot
 			else if(state == 2) { // Two dots
-				size_t removed = out.Pop(3); // Erase the two dots and the last slash
+				int removed = out.Pop(3); // Erase the two dots and the last slash
 				if(removed != 3)
 					return Path::EMPTY;
 				auto lastSlash = out.FindReverse("/"); // Find the last slash...

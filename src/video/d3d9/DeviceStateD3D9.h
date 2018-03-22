@@ -104,19 +104,19 @@ private:
 	WeakRef<video::Shader> m_Shader;
 	bool m_IsFixedShader = false;
 
-	u32 m_ActiveTextureLayers;
+	int m_ActiveTextureLayers;
 
 	AlphaBlendMode m_AlphaMode;
 
-	u32 m_MaxTextureCount;
-	u32 m_MaxVSTextureCount;
+	int m_MaxTextureCount;
+	int m_MaxVSTextureCount;
 
 	bool m_ResetAll;
 
-	static const u32 CACHED_TEXTURES = 8;
-	static const u32 RENDERSTATE_COUNT = 210;
-	static const u32 SAMPLER_STATE_COUNT = 14;
-	static const u32 TEXTURE_STAGE_STATE_COUNT = 33;
+	static const int CACHED_TEXTURES = 8;
+	static const int RENDERSTATE_COUNT = 210;
+	static const int SAMPLER_STATE_COUNT = 14;
+	static const int TEXTURE_STAGE_STATE_COUNT = 33;
 	DWORD m_RenderStates[210];
 	DWORD m_SamplerStates[CACHED_TEXTURES][14];
 	DWORD m_TextureStageStates[CACHED_TEXTURES][33];

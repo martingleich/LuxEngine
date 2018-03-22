@@ -58,11 +58,11 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 	m_ReportSize = caps.InputReportByteLength;
 
 	core::Array<HIDP_BUTTON_CAPS> buttonCaps;
-	size_t buttonCount = 0;
+	int buttonCount = 0;
 	GetButtonCaps(caps, buttonCaps, buttonCount);
 
 	core::Array<HIDP_VALUE_CAPS> axesCaps;
-	size_t axesCount = 0;
+	int axesCount = 0;
 	GetAxesCaps(caps, axesCaps, axesCount);
 
 	MappingAndCalibration directInputAxisMapping[7] = {};
@@ -122,7 +122,7 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 			int32_t calibratedCenter = 0;
 			wchar_t const *toName = L"";
 
-			for(size_t i = 0; i < ARRAYSIZE(directInputAxisMapping); ++i) {
+			for(int i = 0; i < ARRAYSIZE(directInputAxisMapping); ++i) {
 				auto& mapping = directInputAxisMapping[i];
 
 				if(it->UsagePage == mapping.usagePage && currentUsage == mapping.usage) {
@@ -166,7 +166,7 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 		for(USAGE currentUsage = firstUsage; currentUsage <= lastUsage; ++currentUsage) {
 			WORD currentIndex = it->Range.DataIndexMin + (currentUsage - firstUsage);
 			wchar_t const* toName = L"";
-			for(size_t i = 0; i < ARRAYSIZE(directInputButtonMapping); ++i) {
+			for(int i = 0; i < ARRAYSIZE(directInputButtonMapping); ++i) {
 				auto& mapping = directInputButtonMapping[i];
 
 				if(it->UsagePage == mapping.usagePage && currentUsage == mapping.usage) {
@@ -291,18 +291,18 @@ HANDLE RawJoystickDevice::GetDeviceHandle()
 
 core::String RawJoystickDevice::GetDeviceName()
 {
-	const size_t max_size = 127;
+	const int max_size = 127;
 
 	wchar_t nameBuffer[max_size];
 
-	size_t len = 0;
+	int len = 0;
 	if(HidD_GetManufacturerString(m_NtHandle, nameBuffer, max_size * 2)) {
-		len = wcslen(nameBuffer);
+		len = (int)wcslen(nameBuffer);
 		nameBuffer[len++] = ' ';
 	}
 
 	if(HidD_GetProductString(m_NtHandle, nameBuffer + len, ULONG(max_size - len) * 2)) {
-		len = wcslen(nameBuffer);
+		len = (int)wcslen(nameBuffer);
 	}
 
 	if(len == 0)
@@ -311,7 +311,7 @@ core::String RawJoystickDevice::GetDeviceName()
 		return core::UTF16ToString(nameBuffer);
 }
 
-void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount)
+void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, int& buttonCount)
 {
 	buttonCaps.Clear();
 	buttonCaps.Resize(deviceCaps.NumberInputButtonCaps);
@@ -338,7 +338,7 @@ void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<H
 	}
 }
 
-void RawJoystickDevice::GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount)
+void RawJoystickDevice::GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, int& valueCount)
 {
 	valueCaps.Clear();
 	valueCaps.Resize(deviceCaps.NumberInputValueCaps);
@@ -372,15 +372,15 @@ void RawJoystickDevice::GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HID
 	}
 }
 
-void RawJoystickDevice::LoadDirectInputMapping(bool isAxis, Mapping* mappings, size_t mappingCount, size_t offset, const HIDD_ATTRIBUTES& attribs)
+void RawJoystickDevice::LoadDirectInputMapping(bool isAxis, Mapping* mappings, int mappingCount, int offset, const HIDD_ATTRIBUTES& attribs)
 {
 	wchar_t* subType = isAxis ? L"Axes" : L"Buttons";
 
 	wchar_t path[128];
 	wsprintfW(path, L"System\\CurrentControlSet\\Control\\MediaProperties\\PrivateProperties\\Joystick\\OEM\\VID_%04X&PID_%04X\\%s\\", attribs.VendorID, attribs.ProductID, subType);
 
-	size_t numberBegin = wcslen(path);
-	for(size_t i = 0; i < mappingCount; ++i) {
+	int numberBegin = (int)wcslen(path);
+	for(int i = 0; i < mappingCount; ++i) {
 		wsprintfW(path + numberBegin, L"%d", i);
 
 		HKEY key = NULL;
@@ -414,13 +414,13 @@ void RawJoystickDevice::LoadDirectInputMapping(bool isAxis, Mapping* mappings, s
 	}
 }
 
-void RawJoystickDevice::LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, size_t mappingCount, const HIDD_ATTRIBUTES& attribs)
+void RawJoystickDevice::LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, int mappingCount, const HIDD_ATTRIBUTES& attribs)
 {
 	wchar_t path[128];
 	wsprintfW(path, L"System\\CurrentControlSet\\Control\\MediaProperties\\PrivateProperties\\DirectInput\\VID_%04X&PID_%04X\\Calibration\\0\\Type\\Axes\\", attribs.VendorID, attribs.ProductID);
 
-	size_t numberBegin = wcslen(path);
-	for(size_t i = 0; i < mappingCount; ++i) {
+	int numberBegin = (int)wcslen(path);
+	for(int i = 0; i < mappingCount; ++i) {
 		wsprintfW(path + numberBegin, L"%d", i);
 
 		HKEY key = NULL;
@@ -450,11 +450,11 @@ void RawJoystickDevice::HandleInput(RAWINPUT* input)
 		(PCHAR)input->data.hid.bRawData, input->data.hid.dwSizeHid))
 		throw core::Win32Exception(GetLastError());
 
-	size_t axisCur = 0;
-	size_t buttonCur = 0;
+	int axisCur = 0;
+	int buttonCur = 0;
 
 	core::Fill(m_NewButtonStates, false);
-	for(size_t i = 0; i < dataCount; ++i) {
+	for(ULONG i = 0; i < dataCount; ++i) {
 		USHORT dataIndex = data[i].DataIndex;
 		bool matched = false;
 		while(!matched) {
@@ -507,7 +507,7 @@ void RawJoystickDevice::HandleInput(RAWINPUT* input)
 		}
 	}
 
-	for(size_t i = 0; i < m_Buttons.Size(); ++i) {
+	for(int i = 0; i < m_Buttons.Size(); ++i) {
 		if(m_NewButtonStates[i] != m_ButtonStates[i]) {
 			Event event;
 			event.source = EEventSource::Joystick;
@@ -528,7 +528,7 @@ EEventSource RawJoystickDevice::GetType() const
 	return EEventSource::Joystick;
 }
 
-size_t RawJoystickDevice::GetElementCount(EEventType type) const
+int RawJoystickDevice::GetElementCount(EEventType type) const
 {
 	if(type == EEventType::Button)
 		return m_Buttons.Size();
@@ -538,7 +538,7 @@ size_t RawJoystickDevice::GetElementCount(EEventType type) const
 		return 0;
 }
 
-RawJoystickDevice::ElemDesc RawJoystickDevice::GetElementDesc(EEventType type, u32 code) const
+RawJoystickDevice::ElemDesc RawJoystickDevice::GetElementDesc(EEventType type, int code) const
 {
 	if(type == EEventType::Button) {
 		const Button& button = m_Buttons[m_CodeHIDMapping[code]];

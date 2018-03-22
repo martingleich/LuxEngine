@@ -17,24 +17,24 @@ public:
 
 	void HandleInput(RAWINPUT* input);
 	EEventSource GetType() const;
-	size_t GetElementCount(EEventType type) const;
-	ElemDesc GetElementDesc(EEventType type, u32 code) const;
+	int GetElementCount(EEventType type) const;
+	ElemDesc GetElementDesc(EEventType type, int code) const;
 
 private:
-	void SendButtonEvent(u32 button, bool state);
-	void SendPosEvent(bool relative, s32 x, s32 y);
-	void SendWheelEvent(s32 move);
-	void SendHWheelEvent(s32 move);
+	void SendButtonEvent(int button, bool state);
+	void SendPosEvent(bool relative, int x, int y);
+	void SendWheelEvent(int move);
+	void SendHWheelEvent(int move);
 
-	static u32 GetKeyCodeFromVKey(u32 vkey);
+	static EKeyCode GetKeyCodeFromVKey(int vkey);
 
 	// Raw input supports at max 5 mouse buttons.
 	// But we don't trust raw input.
-	static const size_t MAX_MOUSE_BUTTONS = 10;
+	static const int MAX_MOUSE_BUTTONS = 10;
 private:
 	bool m_ButtonStates[MAX_MOUSE_BUTTONS];
 
-	size_t m_ButtonCount;
+	int m_ButtonCount;
 	bool m_HasHWheel;
 };
 

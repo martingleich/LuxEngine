@@ -42,7 +42,7 @@ class FileIterator : public core::BaseIterator<core::ForwardIteratorTag, FileDes
 {
 public:
 	FileIterator() :
-		m_Index((u32)-1)
+		m_Index(-1)
 	{
 	}
 	FileIterator(AbstractFileEnumerator* enumerator, int index = 0) :
@@ -56,7 +56,7 @@ public:
 		if(m_Enumerator->Advance())
 			++m_Index;
 		else
-			m_Index = (u32)-1;
+			m_Index = -1;
 		return *this;
 	}
 	FileIterator operator++(int)
@@ -91,7 +91,7 @@ public:
 
 private:
 	StrongRef<AbstractFileEnumerator> m_Enumerator;
-	u32 m_Index;
+	int m_Index;
 };
 
 //! A file archive

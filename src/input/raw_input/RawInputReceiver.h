@@ -53,20 +53,20 @@ public:
 	RawInputReceiver(InputSystem* inputSystem, HWND window);
 	~RawInputReceiver();
 
-	void RegisterDevices(HIDUsagePage usagePage, s32 usageID, bool exclusive);
-	void UnregisterDevice(HIDUsagePage usagePage, s32 usageID);
+	void RegisterDevices(HIDUsagePage usagePage, int usageID, bool exclusive);
+	void UnregisterDevice(HIDUsagePage usagePage, int usageID);
 	void UnregisterAll();
 	StrongRef<InputSystem> GetSystem() const;
 	RAWINPUT* GetRawInputData(HRAWINPUT raw);
 	StrongRef<RawInputDevice> CreateDevice(HANDLE rawHandle);
 	void DestroyDevice(RawInputDevice* device);
-	StrongRef<RawInputDevice> GetDevice(HANDLE rawHandle, u32 deviceHint=0);
+	StrongRef<RawInputDevice> GetDevice(HANDLE rawHandle, int deviceHint=0);
 	bool HandleMessage(UINT msg,
 		WPARAM wParam,
 		LPARAM lParam,
 		LRESULT& result);
 
-	u32 DiscoverDevices(EEventSource deviceType);
+	int DiscoverDevices(EEventSource deviceType);
 
 private:
 	HWND m_Window;

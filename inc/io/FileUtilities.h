@@ -111,10 +111,10 @@ inline core::Range<FileLineIterator> Lines(File* file, ELineEnding ending = ELin
 	return core::MakeRange(it, it.GetEnd());
 }
 
-inline ELineEnding GetLineEnding(File* file, size_t readBytes = 128)
+inline ELineEnding GetLineEnding(File* file, s64 readBytes = 128)
 {
 	auto cursor = file->GetCursor();
-	core::RawMemory data(readBytes);
+	core::RawMemory data(core::SafeCast<size_t>(readBytes));
 	readBytes = file->ReadBinaryPart(readBytes, data);
 	if(readBytes == 0)
 		return ELineEnding::Unknown;
@@ -122,7 +122,7 @@ inline ELineEnding GetLineEnding(File* file, size_t readBytes = 128)
 	int winCount = 0;
 	int rCount = 0;
 	int nCount = 0;
-	for(u32 i = 0; i < readBytes - 1; ++i) {
+	for(s64 i = 0; i < readBytes - 1; ++i) {
 		if(chars[i] == '\r' && chars[i + 1] == '\n') {
 			++winCount;
 			++chars;

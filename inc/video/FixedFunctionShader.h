@@ -48,11 +48,11 @@ public:
 			m_ParamPackage.AddParam(s, TextureLayer());
 	}
 
-	virtual size_t GetTextureStageCount() const
+	virtual int GetTextureStageCount() const
 	{
 		return m_TextureStages.Size();
 	}
-	virtual const TextureStageSettings& GetTextureStage(size_t id)
+	virtual const TextureStageSettings& GetTextureStage(int id)
 	{
 		return m_TextureStages[id];
 	}

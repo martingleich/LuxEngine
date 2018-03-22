@@ -41,7 +41,7 @@ void StructureBuilder::AddElement(
 	elem.type = type;
 	elem.elemId = m_NextElemId;
 	elem.offset = m_Structure.size;
-	elem.objectOffset = (ptr != nullptr) ? ((u8*)ptr - (u8*)m_BasePtr) : 0xFFFFFFFF;
+	elem.objectOffset = (ptr != nullptr) ? static_cast<u32>((u8*)ptr - (u8*)m_BasePtr) : 0xFFFFFFFF;
 	elem.hasObjectData = (ptr != nullptr);
 	if(!type.IsTrivial()) {
 		if(type == core::Types::String())

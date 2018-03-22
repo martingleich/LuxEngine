@@ -21,7 +21,7 @@ struct Context
 
 	int depth;
 	int colorType;
-	math::Dimension2U size;
+	math::Dimension2I size;
 	ColorFormat format;
 
 	Context() :
@@ -162,7 +162,7 @@ static bool LoadImageToMemory(Context& ctx, void* dest)
 		return false;
 
 	png_bytepp row_pointers = (png_bytepp)alloca(ctx.size.height * sizeof(png_bytep));
-	for(u32 i = 0; i < ctx.size.height; ++i)
+	for(int i = 0; i < ctx.size.height; ++i)
 		row_pointers[i] = (png_bytep)dest + i * rowbytes;
 
 	png_read_image(ctx.png, row_pointers);
@@ -202,7 +202,7 @@ core::Name ImageLoaderPNG::GetResourceType(io::File* file, core::Name requestedT
 		return core::Name::INVALID;
 
 	u8 bytes[8];
-	u32 readBytes = file->ReadBinaryPart(sizeof(bytes), bytes);
+	auto readBytes = file->ReadBinaryPart(sizeof(bytes), bytes);
 	if(readBytes < 8 || !png_check_sig(bytes, sizeof(bytes)))
 		return core::Name::INVALID;
 

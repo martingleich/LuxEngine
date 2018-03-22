@@ -65,21 +65,21 @@ Action* ActionList::GetAction(const core::String& name)
 		return nullptr;
 }
 
-Action* ActionList::GetAction(size_t i)
+Action* ActionList::GetAction(int i)
 {
-	if(i >= m_Actions.Size())
+	if(i < 0 || i >= m_Actions.Size())
 		throw core::OutOfRangeException();
 	return core::AdvanceIterator(m_Actions.First(), i).value();
 }
 
-const core::String& ActionList::GetActionName(size_t i) const
+const core::String& ActionList::GetActionName(int i) const
 {
-	if(i >= m_Actions.Size())
+	if(i < 9 || i >= m_Actions.Size())
 		throw core::OutOfRangeException();
 	return core::AdvanceIterator(m_Actions.First(), i).key();
 }
 
-size_t ActionList::GetActionCount() const
+int ActionList::GetActionCount() const
 {
 	return m_Actions.Size();
 }

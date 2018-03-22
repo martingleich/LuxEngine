@@ -41,12 +41,12 @@ class HashMap
 	struct HashTuple
 	{
 		Hash hasher;
-		size_t operator()(const Tuple& e) const
+		int operator()(const Tuple& e) const
 		{
 			return hasher(e.key);
 		}
 		template <typename KeyT>
-		size_t operator()(const KeyT& key) const
+		int operator()(const KeyT& key) const
 		{
 			return hasher(key);
 		}
@@ -233,7 +233,7 @@ public:
 	HashMap()
 	{
 	}
-	HashMap(size_t allocated, size_t bucketCount = 0) :
+	HashMap(int allocated, int bucketCount = 0) :
 		m_Set(allocated, bucketCount)
 	{
 	}
@@ -285,12 +285,12 @@ public:
 	// No comparisions functions.
 
 	// Resizing
-	void Reserve(size_t allocated)
+	void Reserve(int allocated)
 	{
 		m_Set.Reserve(allocated);
 	}
 
-	void ReserveAndRehash(size_t allocated, size_t bucketCount)
+	void ReserveAndRehash(int allocated, int bucketCount)
 	{
 		m_Set.ReserveAndRehash(allocated, bucketCount);
 	}
@@ -435,11 +435,11 @@ public:
 	core::Range<ConstIterator> Values() const { return core::MakeRange(First(), End()); }
 
 	// Infomations
-	size_t Size() const
+	int Size() const
 	{
 		return m_Set.Size();
 	}
-	size_t Allocated() const
+	int Allocated() const
 	{
 		return m_Set.Allocated();
 	}

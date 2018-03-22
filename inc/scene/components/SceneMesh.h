@@ -62,11 +62,11 @@ public:
 	LUX_API virtual void Render(Node* node, video::Renderer* renderer, const SceneData& sceneData);
 	LUX_API virtual ERenderPass GetRenderPass() const;
 
-	LUX_API virtual video::Material* GetMaterial(size_t index);
-	LUX_API virtual const video::Material* GetMaterial(size_t index) const;
-	LUX_API virtual void SetMaterial(size_t index, video::Material* m);
+	LUX_API virtual video::Material* GetMaterial(int index);
+	LUX_API virtual const video::Material* GetMaterial(int index) const;
+	LUX_API virtual void SetMaterial(int index, video::Material* m);
 
-	LUX_API virtual size_t GetMaterialCount() const;
+	LUX_API virtual int GetMaterialCount() const;
 
 	LUX_API virtual const math::AABBoxF& GetBoundingBox() const;
 

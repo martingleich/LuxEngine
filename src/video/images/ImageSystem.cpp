@@ -38,12 +38,12 @@ public:
 	core::ResourceLoader* m_ResourceLoader;
 	core::Name GetFileType(io::File* file)
 	{
-		const u32 fileCursor = file->GetCursor();
+		auto fileCursor = file->GetCursor();
 		StrongRef<ResourceLoader> result;
 
 		auto resSys = core::ResourceSystem::Instance();
-		u32 count = resSys->GetResourceLoaderCount();
-		for(u32 i = 0; i < count; ++i) {
+		auto count = resSys->GetResourceLoaderCount();
+		for(int i = 0; i < count; ++i) {
 			m_ResourceLoader = resSys->GetResourceLoader(count - i - 1);
 			if(m_ResourceLoader == this)
 				continue;
@@ -75,7 +75,7 @@ public:
 		m_ResourceLoader->LoadResource(file, img);
 		Texture* texture = dynamic_cast<Texture*>(dst);
 		ColorFormat format = img->GetColorFormat();
-		math::Dimension2U size = img->GetSize();
+		math::Dimension2I size = img->GetSize();
 
 		bool result = VideoDriver::Instance()->GetFittingTextureFormat(format, size, false, false);
 		if(!result)
@@ -112,19 +112,19 @@ private:
 	};
 
 public:
-	static const char* GetName(size_t i)
+	static const char* GetName(int i)
 	{
 		static const char* NAMES[] = {"right", "left", "top", "bottom", "front", "back"};
 		return NAMES[i];
 	}
 
-	static const char* GetAxis(size_t i)
+	static const char* GetAxis(int i)
 	{
 		static const char* AXES[] = {"posx", "negx", "posy", "negy", "posz", "negz"};
 		return AXES[i];
 	}
 
-	ENameScheme GetNameScheme(const io::Path& path, core::String& outBaseName, size_t& outId)
+	ENameScheme GetNameScheme(const io::Path& path, core::String& outBaseName, int& outId)
 	{
 		io::Path basePath = io::GetFileDir(path);
 		core::String nameonly = io::GetFilenameOnly(path, false);
@@ -134,7 +134,7 @@ public:
 			outId = *nameonly.Last() - '1';
 			return ENameScheme::Numeric;
 		}
-		for(size_t i = 0; i < 6; ++i) {
+		for(int i = 0; i < 6; ++i) {
 			if(nameonly.EndsWith(GetName(i))) {
 				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetName(i)));
 				outId = i;
@@ -142,7 +142,7 @@ public:
 			}
 		}
 
-		for(size_t i = 0; i < 6; ++i) {
+		for(int i = 0; i < 6; ++i) {
 			if(nameonly.EndsWith(GetAxis(i))) {
 				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetAxis(i)));
 				outId = i;
@@ -173,12 +173,12 @@ public:
 
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
-		u32 order[6] = {0, 1, 2, 3, 4, 5};
+		int order[6] = {0, 1, 2, 3, 4, 5};
 		core::String lines[6];
 		StrongRef<Image> images[6];
 
 		auto lineEnding = io::GetLineEnding(file);
-		u32 i = 0;
+		int i = 0;
 		for(auto& l : Lines(file, lineEnding)) {
 			if(!l.IsWhitespace()) {
 				if(i == 6)
@@ -188,7 +188,7 @@ public:
 		}
 
 		core::String baseName;
-		size_t id;
+		int id;
 		ENameScheme scheme = GetNameScheme(lines[0], baseName, id);
 		if(scheme != ENameScheme::Invalid) {
 			core::String baseName2;
@@ -225,8 +225,8 @@ private:
 	{
 		ColorFormat format = ColorFormat::A8R8G8B8;
 		u32 size = 0;
-		u32 real_count = 0;
-		for(u32 i = 0; i < 6; ++i) {
+		int real_count = 0;
+		for(int i = 0; i < 6; ++i) {
 			if(images[i]) {
 				if(real_count == 0) {
 					format = images[i]->GetColorFormat();
@@ -239,12 +239,12 @@ private:
 		if(real_count != 6)
 			throw core::InvalidArgumentException("images", "Must not be null");
 
-		math::Dimension2U ds(size, size);
+		math::Dimension2I ds(size, size);
 		if(!VideoDriver::Instance()->GetFittingTextureFormat(format, ds, true, false))
 			throw core::ColorFormatException(format);
 
 		tex->Init(size, format, false, false);
-		for(u32 i = 0; i < 6; ++i) {
+		for(int i = 0; i < 6; ++i) {
 			CubeTextureLock lock(tex, BaseTexture::ELockMode::Overwrite, (CubeTexture::EFace)i);
 			ImageLock imgLock(images[i]);
 
@@ -308,14 +308,14 @@ ImageSystem::~ImageSystem()
 {
 }
 
-StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format)
+StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2I& size, ColorFormat format)
 {
 	auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image).AsStrong<Image>();
 	img->Init(size, format);
 	return img;
 }
 
-StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMem, bool deleteOnDrop)
+StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2I& size, ColorFormat format, void* data, bool CopyMem, bool deleteOnDrop)
 {
 	auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image).AsStrong<Image>();
 	img->Init(size, format, data, CopyMem, deleteOnDrop);
@@ -327,9 +327,9 @@ StrongRef<SpriteBank> ImageSystem::CreateSpriteBank()
 	return LUX_NEW(SpriteBankImpl);
 }
 
-StrongRef<Texture> ImageSystem::CreateFittingTexture(const math::Dimension2U& size, ColorFormat format, u32 mipCount, bool isDynamic)
+StrongRef<Texture> ImageSystem::CreateFittingTexture(const math::Dimension2I& size, ColorFormat format, u32 mipCount, bool isDynamic)
 {
-	math::Dimension2U copy(size);
+	math::Dimension2I copy(size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, false, false))
 		throw core::RuntimeException("No matching texture format found");
 
@@ -338,16 +338,16 @@ StrongRef<Texture> ImageSystem::CreateFittingTexture(const math::Dimension2U& si
 
 StrongRef<CubeTexture> ImageSystem::CreateFittingCubeTexture(u32 size, ColorFormat format, bool isDynamic)
 {
-	math::Dimension2U copy(size, size);
+	math::Dimension2I copy(size, size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, true, false))
 		throw core::RuntimeException("No matching texture format found");
 
 	return m_Driver->CreateCubeTexture(copy.width, format, isDynamic);
 }
 
-StrongRef<Texture> ImageSystem::CreateFittingRendertargetTexture(const math::Dimension2U& size, ColorFormat format)
+StrongRef<Texture> ImageSystem::CreateFittingRendertargetTexture(const math::Dimension2I& size, ColorFormat format)
 {
-	math::Dimension2U copy(size);
+	math::Dimension2I copy(size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, false, true))
 		throw core::RuntimeException("No matching texture format found");
 

@@ -69,7 +69,7 @@ const char* Name::c_str() const
 	return m_Handle.c_str();
 }
 
-size_t Name::GetHash() const
+int Name::GetHash() const
 {
 	return m_Handle.GetHash();
 }
@@ -113,7 +113,7 @@ bool Name::operator<(const Name& other) const
 	return c_str() < other.c_str();
 }
 
-size_t Name::Size() const
+int Name::Size() const
 {
 	return m_Handle.Size();
 }

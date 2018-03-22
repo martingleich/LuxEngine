@@ -120,7 +120,7 @@ public:
 	*/
 	virtual void SetRenderTarget(const RenderTarget& target) = 0;
 	virtual void SetRenderTarget(const core::Array<RenderTarget>& targets) = 0;
-	virtual const math::Dimension2U& GetRenderTargetSize() = 0;
+	virtual const math::Dimension2I& GetRenderTargetSize() = 0;
 
 	//! Get the current major rendertarget
 	virtual const RenderTarget& GetRenderTarget() = 0;
@@ -149,8 +149,8 @@ public:
 	*/
 	virtual void PopPipelineOverwrite(PipelineOverwriteToken* token = nullptr) = 0;
 
-	virtual void SetScissorRect(const math::RectU& rect, ScissorRectToken* token = nullptr) = 0;
-	virtual const math::RectU& GetScissorRect() const = 0;
+	virtual void SetScissorRect(const math::RectI& rect, ScissorRectToken* token = nullptr) = 0;
+	virtual const math::RectI& GetScissorRect() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -161,7 +161,7 @@ public:
 	virtual void ClearLights() = 0;
 
 	//! The maximal number of lights which can be active at once
-	virtual size_t GetMaxLightCount() const = 0;
+	virtual int GetMaxLightCount() const = 0;
 
 	//! Set and enable fog
 	virtual void SetFog(const FogData& fog) = 0;
@@ -357,7 +357,7 @@ struct ScissorRectToken : VideoRendererToken
 			renderer->SetScissorRect(prevRect);
 	}
 
-	math::RectU prevRect;
+	math::RectI prevRect;
 };
 
 struct NormalizeNormalsToken : public VideoRendererToken

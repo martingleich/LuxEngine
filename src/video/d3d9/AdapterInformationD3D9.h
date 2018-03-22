@@ -27,8 +27,8 @@ public:
 	core::Array<DisplayMode> GenerateDisplayModes(bool windowed);
 	core::Array<ColorFormat> GenerateBackbufferFormats(const DisplayMode& mode, bool windowed);
 	core::Array<ZStencilFormat> GenerateZStencilFormats(const DisplayMode& mode, bool windowed, ColorFormat backBuffer);
-	core::Array<u32> GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat);
-	u32 GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 level);
+	core::Array<int> GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat);
+	int GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, int level);
 
 private:
 	UnknownRefCounted<IDirect3D9> m_D3D9;

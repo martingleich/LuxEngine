@@ -45,7 +45,7 @@ public:
 	Degenerated primitves are also counted.
 	\return The number of primitives
 	*/
-	LUX_API virtual u32 GetPrimitiveCount() const;
+	LUX_API virtual int GetPrimitiveCount() const;
 
 	//! Set new vertices for the submesh
 	/**
@@ -66,7 +66,7 @@ public:
 	LUX_API virtual StrongRef<VertexBuffer> GetVertices();
 
 	//! The total number of vertices in the submesh
-	LUX_API virtual u32 GetVertexCount() const;
+	LUX_API virtual int GetVertexCount() const;
 
 	//! The vertextype used by the submesh
 	LUX_API virtual const VertexFormat& GetVertexFormat() const;
@@ -89,7 +89,7 @@ public:
 	LUX_API virtual StrongRef<IndexBuffer> GetIndices();
 
 	//! The total number of indices in the submesh
-	LUX_API virtual u32 GetIndexCount() const;
+	LUX_API virtual int GetIndexCount() const;
 
 	//! The indexformat used by the submesh
 	LUX_API virtual video::EIndexFormat GetIndexFormat() const;
@@ -117,7 +117,7 @@ public:
 	LUX_API virtual EFaceWinding GetFrontFaceWinding() const;
 
 	//! Get the change id of the geometry
-	LUX_API virtual u32 GetChangeId() const;
+	LUX_API virtual int GetChangeId() const;
 
 protected:
 	StrongRef<VertexBuffer> m_Vertices;

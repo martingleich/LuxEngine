@@ -44,7 +44,7 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 	}
 }
 
-core::VariableAccess MatrixTable::GetParamById(size_t id) const
+core::VariableAccess MatrixTable::GetParamById(int id) const
 {
 	const math::Matrix4& m = GetMatrix((EMatrixType)id);
 	return core::VariableAccess(core::Types::Matrix().GetConstantType(), const_cast<float*>(m.DataRowMajor()));
@@ -68,7 +68,7 @@ void MatrixTable::ClearDirty(EMatrixType type) const
 	m_Dirty &= ~(1 << type);
 }
 
-size_t MatrixTable::GetCount() const
+int MatrixTable::GetCount() const
 {
 	return MAT_COUNT;
 }
@@ -149,7 +149,7 @@ void MatrixTable::UpdateMatrix(EMatrixType type) const
 	m_UpToDate |= (1 << type);
 }
 
-const core::String& MatrixTable::GetMatrixName(size_t id) const
+const core::String& MatrixTable::GetMatrixName(int id) const
 {
 	static const core::String MATRIX_NAMES[16] = {
 		"world",
@@ -173,7 +173,7 @@ const core::String& MatrixTable::GetMatrixName(size_t id) const
 	return MATRIX_NAMES[id];
 }
 
-StrongRef<core::Attribute> MatrixTable::CreateAttribute(size_t id)
+StrongRef<core::Attribute> MatrixTable::CreateAttribute(int id)
 {
 	return LUX_NEW(MatrixAttribute)(this, id);
 }

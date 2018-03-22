@@ -69,7 +69,7 @@ void RendererD3D9::Clear(
 	HRESULT hr = S_OK;
 
 	if(flags) {
-		const D3DCOLOR d3dClear = (u32)color;
+		const D3DCOLOR d3dClear = color.ToDWORD();
 		if(FAILED(hr = m_Device->Clear(
 			0, nullptr,
 			flags,
@@ -110,7 +110,7 @@ void RendererD3D9::SetRenderTarget(const core::Array<RenderTarget>& targets)
 	SetRenderTarget(targets.Data(), targets.Size(), false);
 }
 
-void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bool restore)
+void RendererD3D9::SetRenderTarget(const RenderTarget* targets, int count, bool restore)
 {
 	if(count == 0)
 		throw core::InvalidArgumentException("count", "There must be at least one rendertarget.");
@@ -118,7 +118,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 		throw core::InvalidArgumentException("count", "To many rendertargets.");
 
 	// Check if textures are valid
-	math::Dimension2U dim;
+	math::Dimension2I dim;
 	if(!targets[0].IsBackbuffer())
 		dim = targets[0].GetSize();
 	else
@@ -126,7 +126,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 
 	{
 		bool isSet = true;
-		size_t i = 0;
+		int i = 0;
 		for(auto& t : core::MakeRange(targets, targets + count)) {
 			if(!t.IsBackbuffer()) {
 				if(t.GetSize() != dim)
@@ -158,7 +158,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 		throw core::Exception("Can't find matching depth buffer for rendertarget.");
 
 	HRESULT hr = S_OK;
-	for(size_t i = 0; i < count && !FAILED(hr); ++i) {
+	for(int i = 0; i < count && !FAILED(hr); ++i) {
 		if(targets[i].IsBackbuffer())
 			newRendertarget = m_BackbufferTarget;
 		else
@@ -168,7 +168,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 	}
 
 	if(!FAILED(hr)) {
-		for(size_t i = count; i < m_CurrentRendertargets.Size() && !FAILED(hr); ++i) {
+		for(int i = count; i < m_CurrentRendertargets.Size() && !FAILED(hr); ++i) {
 			hr = m_Device->SetRenderTarget(i, nullptr);
 		}
 	}
@@ -186,7 +186,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 	}
 
 	m_CurrentRendertargets.Clear();
-	for(size_t i = 0; i < count; ++i) {
+	for(int i = 0; i < count; ++i) {
 		if(targets[i].IsBackbuffer())
 			newRendertarget = m_BackbufferTarget;
 		else
@@ -195,7 +195,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, size_t count, bo
 	}
 
 	// Reset scissor rectangle
-	SetScissorRect(math::RectU(0, 0, dim.width, dim.height));
+	SetScissorRect(math::RectI(0, 0, dim.width, dim.height));
 }
 
 const RenderTarget& RendererD3D9::GetRenderTarget()
@@ -203,16 +203,16 @@ const RenderTarget& RendererD3D9::GetRenderTarget()
 	return m_CurrentRendertargets[0];
 }
 
-const math::Dimension2U& RendererD3D9::GetRenderTargetSize()
+const math::Dimension2I& RendererD3D9::GetRenderTargetSize()
 {
 	return m_CurrentRendertargets[0].GetSize();
 }
 
-void RendererD3D9::SetScissorRect(const math::RectU& rect, ScissorRectToken* token)
+void RendererD3D9::SetScissorRect(const math::RectI& rect, ScissorRectToken* token)
 {
 	auto bufferSize = GetRenderTarget().GetSize();
-	math::RectU fittedRect = rect;
-	fittedRect.FitInto(math::RectU(0, 0, bufferSize.width, bufferSize.height));
+	math::RectI fittedRect = rect;
+	fittedRect.FitInto(math::RectI(0, 0, bufferSize.width, bufferSize.height));
 	if(!fittedRect.IsValid())
 		throw core::InvalidArgumentException("rect", "Rectangle is invalid");
 
@@ -241,14 +241,14 @@ void RendererD3D9::SetScissorRect(const math::RectU& rect, ScissorRectToken* tok
 	m_ScissorRect = fittedRect;
 }
 
-const math::RectU& RendererD3D9::GetScissorRect() const
+const math::RectI& RendererD3D9::GetScissorRect() const
 {
 	return m_ScissorRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-size_t RendererD3D9::GetMaxLightCount() const
+int RendererD3D9::GetMaxLightCount() const
 {
 	return m_Driver->GetDeviceCapability(EDriverCaps::MaxLights);
 }
@@ -648,7 +648,7 @@ void RendererD3D9::LoadLightSettings(
 		} else {
 			if(IsDirty(Dirty_Lights)) {
 				// Generate light matrices and set as param.
-				for(size_t i = 0; i < m_Lights.Size(); ++i)
+				for(int i = 0; i < m_Lights.Size(); ++i)
 					*m_ParamId.lights[i] = GenerateLightMatrix(m_Lights[i], true);
 			}
 		}

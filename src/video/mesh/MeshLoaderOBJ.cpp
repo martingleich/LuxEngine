@@ -82,13 +82,12 @@ public:
 			return false;
 		}
 
-		u32 filesize = mtlFile->GetSize();
+		auto filesize = mtlFile->GetSize();
 		if(!filesize)
 			throw core::FileFormatException("Can't load streaming file", "obj");
 
-		core::RawMemory memory(filesize);
-		if(mtlFile->ReadBinaryPart(filesize, memory) != filesize)
-			throw core::RuntimeException("Can't read input file.");
+		core::RawMemory memory(core::SafeCast<size_t>(filesize));
+		mtlFile->ReadBinary(filesize, memory);
 		std::stringstream fileStream;
 		fileStream.write(memory, filesize);
 
@@ -118,13 +117,9 @@ public:
 		auto mesh = dynamic_cast<video::Mesh*>(resource);
 		if(!mesh)
 			throw core::Exception("Wrong resource type passed");
-		u32 filesize = baseFileDesc.GetSize();
-		if(!filesize)
-			throw core::FileFormatException("Can't load streaming file", "obj");
-
-		core::RawMemory memory(filesize);
-		if(file->ReadBinaryPart(filesize, memory) != filesize)
-			throw core::RuntimeException("Can't read input file.");
+		auto filesize = baseFileDesc.GetSize();
+		core::RawMemory memory(core::SafeCast<size_t>(filesize));
+		file->ReadBinary(filesize, memory);
 		std::stringstream fileStream;
 		fileStream.write(memory, filesize);
 
@@ -141,9 +136,11 @@ public:
 		invalidMaterial = video::MaterialLibrary::Instance()->CloneMaterial("debugOverlay");
 		invalidMaterial->SetDiffuse(video::Color::Pink);
 
-		u32 indexCount = 0;
+		size_t indexCount = 0;
 		for(const auto& s : shapes)
 			indexCount += s.mesh.indices.size();
+		if(indexCount > INT_MAX)
+			throw core::FileFormatException("To many indices", "obj");
 
 		bool use32BitIndices = attrib.vertices.size() > std::numeric_limits<u16>::max();
 
@@ -154,7 +151,7 @@ public:
 			indexBuffer->SetFormat(video::EIndexFormat::Bit32);
 		else
 			indexBuffer->SetFormat(video::EIndexFormat::Bit16);
-		indexBuffer->Reserve(indexCount);
+		indexBuffer->Reserve((int)indexCount);
 
 		u32 realFaceId = 0;
 		int prevMaterialId = -1;

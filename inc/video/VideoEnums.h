@@ -128,7 +128,7 @@ enum class EPrimitiveType
 	Triangles,
 };
 
-inline u32 GetPrimitiveCount(EPrimitiveType type, u32 pointCount)
+inline int GetPrimitiveCount(EPrimitiveType type, int pointCount)
 {
 	switch(type) {
 	case video::EPrimitiveType::Lines:
@@ -147,7 +147,7 @@ inline u32 GetPrimitiveCount(EPrimitiveType type, u32 pointCount)
 	return 0;
 }
 
-inline u32 GetPointCount(EPrimitiveType type, u32 primitiveCount)
+inline int GetPointCount(EPrimitiveType type, int primitiveCount)
 {
 	switch(type) {
 	case video::EPrimitiveType::Lines:

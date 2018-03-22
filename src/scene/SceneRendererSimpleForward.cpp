@@ -329,13 +329,13 @@ void SceneRendererSimpleForward::DrawScene()
 
 	m_Renderer->ClearLights();
 
-	size_t maxLightCount = m_Renderer->GetMaxLightCount();
-	size_t maxShadowCastingCount = m_Attributes["maxShadowCasters"];
+	int maxLightCount = m_Renderer->GetMaxLightCount();
+	int maxShadowCastingCount = m_Attributes["maxShadowCasters"];
 	if(!drawStencilShadows)
 		maxShadowCastingCount = 0;
 
-	size_t count = 0;
-	size_t shadowCount = 0;
+	int count = 0;
+	int shadowCount = 0;
 	for(auto& e : m_SceneData->lightList) {
 		auto node = e->GetParent();
 		if(node->IsTrulyVisible()) {
@@ -352,7 +352,7 @@ void SceneRendererSimpleForward::DrawScene()
 		}
 	}
 
-	size_t passCount;
+	int passCount;
 	if(drawStencilShadows) {
 		passCount = 1 + shadowCasting.Size();
 		if(!nonShadowCasting.IsEmpty())

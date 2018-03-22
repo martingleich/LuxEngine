@@ -126,7 +126,7 @@ bool TextBox::OnKeyboardEvent(const gui::KeyboardEvent& e)
 		return true;
 	case input::KEY_BACK:
 		if(m_Caret > 0) {
-			size_t newPos;
+			int newPos;
 			if(e.ctrl)
 				newPos = BPos();
 			else
@@ -140,7 +140,7 @@ bool TextBox::OnKeyboardEvent(const gui::KeyboardEvent& e)
 		break;
 	case input::KEY_DELETE:
 		if(m_Caret < m_Container.Text().Size()) {
-			size_t newPos;
+			int newPos;
 			if(e.ctrl)
 				newPos = WPos();
 			else
@@ -231,7 +231,7 @@ void TextBox::WriteCharacter(u32 character)
 	}
 }
 
-void TextBox::SetCursor(size_t pos)
+void TextBox::SetCursor(int pos)
 {
 	if(pos > m_Container.Text().Size())
 		return;
@@ -239,11 +239,11 @@ void TextBox::SetCursor(size_t pos)
 	m_Caret = pos;
 }
 
-size_t TextBox::BPos() const
+int TextBox::BPos() const
 {
 	auto text = m_Container.GetText();
 	auto it = text.First() + m_Caret - 1;
-	size_t count = 1;
+	int count = 1;
 	// Move until non space, Move until space
 	while(core::IsSpace(*it) && it != text.First()) {
 		--it;
@@ -258,11 +258,11 @@ size_t TextBox::BPos() const
 	return m_Caret - count;
 }
 
-size_t TextBox::WPos() const
+int TextBox::WPos() const
 {
 	auto text = m_Container.GetText();
 	auto it = text.First() + m_Caret + 1;
-	size_t count = 1;
+	int count = 1;
 	// Move until space, Move until non space
 	while(it != text.End() && !core::IsSpace(*it)) {
 		++it;

@@ -26,15 +26,15 @@ public:
 		m_Affectors.PushBack(affector);
 		return affector;
 	}
-	size_t GetAffectorCount() const
+	int GetAffectorCount() const
 	{
 		return m_Affectors.Size();
 	}
-	StrongRef<ParticleAffector> GetAffector(size_t i)
+	StrongRef<ParticleAffector> GetAffector(int i)
 	{
 		return m_Affectors.At(i);
 	}
-	void RemoveAffector(size_t i)
+	void RemoveAffector(int i)
 	{
 		if(i >= m_Affectors.Size())
 			throw core::OutOfRangeException();
@@ -58,15 +58,15 @@ public:
 		return out;
 	}
 
-	size_t GetEmitterCount() const
+	int GetEmitterCount() const
 	{
 		return m_Emitters.Size();
 	}
-	StrongRef<ParticleEmitter> GetEmitter(size_t i)
+	StrongRef<ParticleEmitter> GetEmitter(int i)
 	{
 		return m_Emitters.At(i);
 	}
-	void RemoveEmitter(size_t i)
+	void RemoveEmitter(int i)
 	{
 		if(i >= m_Emitters.Size())
 			throw core::OutOfRangeException();

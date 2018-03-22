@@ -36,7 +36,7 @@ public:
 	\param height The height of the window.
 	\param title The title of the window.
 	*/
-	virtual void BuildWindow(u32 Width, u32 height, const core::String& title) = 0;
+	virtual void BuildWindow(int Width, int height, const core::String& title) = 0;
 
 	//! Create the input system of the engine.
 	/**
@@ -96,7 +96,7 @@ public:
 	\param waitTime Time this function waits for events to occur in milliseconds.
 	\return Returns true if the device is still running, returns false once when the device was closed.
 	*/
-	virtual bool Run(u32 waitTime = 0) = 0;
+	virtual bool Run(int waitTime = 0) = 0;
 
 	//! Wait until the window changed.
 	/**
@@ -138,7 +138,7 @@ public:
 	virtual void RunSimpleFrameLoop(const SimpleFrameLoop& loop) = 0;
 
 	//! Pauses the calling process for some time
-	virtual void Sleep(u32 millis) = 0;
+	virtual void Sleep(int millis) = 0;
 
 	//! Get the main scene of the engine.
 	virtual StrongRef<scene::Scene> GetScene() const = 0;

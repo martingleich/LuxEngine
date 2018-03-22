@@ -159,7 +159,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 	}
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, s64 size, const core::String& name, EVirtualCreateFlag flags)
 {
 	if(!memory || size == 0)
 		throw io::FileNotFoundException("[Empty Memory file]");
@@ -175,7 +175,7 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, u32 size, const c
 	return LUX_NEW(MemoryFile)(memory, desc, name, flags);
 }
 
-StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags)
+StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, s64 size, const core::String& name, EVirtualCreateFlag flags)
 {
 	// File is set to read only in last parameter
 	return OpenVirtualFile(const_cast<void*>(memory), size, name, flags | EVirtualCreateFlag::ReadOnly);
@@ -226,9 +226,9 @@ bool FileSystemWin32::ExistDirectory(const Path& filename) const
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
-File* FileSystemWin32::CreateTemporaryFile(u32 size)
+File* FileSystemWin32::CreateTemporaryFile(s64 size)
 {
-	void* ptr = LUX_NEW_ARRAY(u8, size);
+	void* ptr = LUX_NEW_RAW(core::SafeCast<size_t>(size));
 
 	return OpenVirtualFile(ptr, size, core::String::EMPTY, EVirtualCreateFlag::DeleteOnDrop);
 }
@@ -265,7 +265,7 @@ StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 	return LUX_NEW(INIFile)(this, file);
 }
 
-StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, u32 start, u32 size, const core::String& name)
+StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, s64 start, s64 size, const core::String& name)
 {
 	if(!file)
 		throw io::FileNotFoundException("[Empty file]");
@@ -369,10 +369,10 @@ Win32Path FileSystemWin32::ConvertPathToWin32WidePath(const Path& p) const
 	return out;
 }
 
-u32 FileSystemWin32::GetWin32FileAttributes(const Path& p) const
+DWORD FileSystemWin32::GetWin32FileAttributes(const Path& p) const
 {
 	const Win32Path& win32Path = ConvertPathToWin32WidePath(p);
-	return (u32)GetFileAttributesW((const wchar_t*)win32Path.Data_c());
+	return GetFileAttributesW((const wchar_t*)win32Path.Data_c());
 }
 
 void FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)

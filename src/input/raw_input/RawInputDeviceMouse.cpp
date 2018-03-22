@@ -71,7 +71,7 @@ EEventSource RawMouseDevice::GetType() const
 	return EEventSource::Mouse;
 }
 
-size_t RawMouseDevice::GetElementCount(EEventType type) const
+int RawMouseDevice::GetElementCount(EEventType type) const
 {
 	if(type == EEventType::Button)
 		return m_ButtonCount;
@@ -81,7 +81,7 @@ size_t RawMouseDevice::GetElementCount(EEventType type) const
 		return 1;
 }
 
-RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 code) const
+RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, int code) const
 {
 	static const core::String button_names[] = {
 		"Left Button",
@@ -116,7 +116,7 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, u32 cod
 	}
 }
 
-void RawMouseDevice::SendButtonEvent(u32 button, bool state)
+void RawMouseDevice::SendButtonEvent(int button, bool state)
 {
 	lxAssert(button < MAX_MOUSE_BUTTONS);
 
@@ -126,7 +126,7 @@ void RawMouseDevice::SendButtonEvent(u32 button, bool state)
 	event.internal_abs_only = false;
 	event.internal_rel_only = false;
 
-	event.button.code = (EKeyCode)GetKeyCodeFromVKey(button);
+	event.button.code = GetKeyCodeFromVKey(button);
 	event.button.pressedDown = state;
 	event.button.state = event.button.pressedDown;
 
@@ -135,7 +135,7 @@ void RawMouseDevice::SendButtonEvent(u32 button, bool state)
 	SendInputEvent(event);
 }
 
-void RawMouseDevice::SendPosEvent(bool relative, s32 x, s32 y)
+void RawMouseDevice::SendPosEvent(bool relative, int x, int y)
 {
 	Event event;
 	event.source = EEventSource::Mouse;
@@ -155,7 +155,7 @@ void RawMouseDevice::SendPosEvent(bool relative, s32 x, s32 y)
 	SendInputEvent(event);
 }
 
-void RawMouseDevice::SendWheelEvent(s32 move)
+void RawMouseDevice::SendWheelEvent(int move)
 {
 	Event event;
 	event.source = EEventSource::Mouse;
@@ -169,7 +169,7 @@ void RawMouseDevice::SendWheelEvent(s32 move)
 	SendInputEvent(event);
 }
 
-void RawMouseDevice::SendHWheelEvent(s32 move)
+void RawMouseDevice::SendHWheelEvent(int move)
 {
 	if(!m_HasHWheel)
 		m_HasHWheel = true;
@@ -186,15 +186,15 @@ void RawMouseDevice::SendHWheelEvent(s32 move)
 	SendInputEvent(event);
 }
 
-u32 RawMouseDevice::GetKeyCodeFromVKey(u32 vkey)
+EKeyCode RawMouseDevice::GetKeyCodeFromVKey(int vkey)
 {
 	switch(vkey) {
-	case 0: return (u32)EKeyCode::KEY_LBUTTON;
-	case 1: return (u32)EKeyCode::KEY_RBUTTON;
-	case 2: return (u32)EKeyCode::KEY_MBUTTON;
-	case 3: return (u32)EKeyCode::KEY_X1BUTTON;
-	case 4: return (u32)EKeyCode::KEY_X2BUTTON;
-	default: return (u32)EKeyCode::KEY_NONE;
+	case 0: return EKeyCode::KEY_LBUTTON;
+	case 1: return EKeyCode::KEY_RBUTTON;
+	case 2: return EKeyCode::KEY_MBUTTON;
+	case 3: return EKeyCode::KEY_X1BUTTON;
+	case 4: return EKeyCode::KEY_X2BUTTON;
+	default: return EKeyCode::KEY_NONE;
 	}
 }
 

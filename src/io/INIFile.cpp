@@ -120,7 +120,7 @@ bool INIFile::ReadSections()
 					section->sorted = false;
 					section->elemCount = 0;
 					section->firstElem = InvalidID;
-					sectionID = section - m_Sections.Data();
+					sectionID = core::IteratorDistance(m_Sections.Data(), section);
 					section->comment = m_LastComment;
 				}
 
@@ -143,7 +143,7 @@ bool INIFile::ReadSections()
 				} else {
 					element.comment = m_LastComment;
 					m_Elements.PushBack(element);
-					elemID = m_Elements.Size()-1;
+					elemID = m_Elements.Size() - 1;
 				}
 
 				m_LastComment.Clear();
@@ -312,11 +312,11 @@ void INIFile::ReadLine(core::String& out)
 		return;
 
 	char c;
-	u32 readBytes;
+	u64 readBytes;
 
 	while(!m_IsEOF) {
-		size_t spaceCount = 0;
-		size_t count;
+		int spaceCount = 0;
+		int count;
 		do {
 			out.Clear();
 			count = 0;
@@ -372,7 +372,7 @@ INIFile::SectionID INIFile::GetSectionID(const char* section)
 	if(m_Sections[m_CurrentSection].name == section)
 		return m_CurrentSection;
 
-	for(size_t i = m_CurrentSection + 1; i < m_Sections.Size(); ++i) {
+	for(int i = m_CurrentSection + 1; i < m_Sections.Size(); ++i) {
 		if(m_Sections[i].name == section) {
 			m_CurrentSection = i;
 			m_CurrentElement = 0;
@@ -380,7 +380,7 @@ INIFile::SectionID INIFile::GetSectionID(const char* section)
 		}
 	}
 
-	for(size_t i = 0; i < m_CurrentSection; ++i) {
+	for(int i = 0; i < m_CurrentSection; ++i) {
 		if(m_Sections[i].name == section) {
 			m_CurrentSection = i;
 			m_CurrentElement = 0;
@@ -411,21 +411,21 @@ INIFile::ElementID INIFile::GetElemID(INIFile::SectionID sectionID, const char* 
 		return InvalidID;
 
 	ElementID FirstElem = m_Sections[sectionID].firstElem;
-	size_t ElemCount = m_Sections[sectionID].elemCount;
+	int ElemCount = m_Sections[sectionID].elemCount;
 	if(m_CurrentSection != sectionID)
 		m_CurrentElement = 0;
 
 	if(m_Elements[FirstElem + m_CurrentElement].name == element)
 		return (ElementID)(m_CurrentElement + FirstElem);
 
-	for(size_t i = m_CurrentElement + 1; i < ElemCount; ++i) {
+	for(int i = m_CurrentElement + 1; i < ElemCount; ++i) {
 		if(m_Elements[FirstElem + i].name == element) {
 			m_CurrentElement = i;
 			return (ElementID)i;
 		}
 	}
 
-	for(size_t i = 0; i < m_CurrentElement; ++i) {
+	for(int i = 0; i < m_CurrentElement; ++i) {
 		if(m_Elements[FirstElem + i].name == element) {
 			m_CurrentElement = i;
 			return (ElementID)i;
@@ -441,28 +441,28 @@ void INIFile::Reload()
 	LoadData();
 }
 
-void INIFile::WriteComment(const core::String& comment, size_t identDepth, INIFile::ECommentPos pos)
+void INIFile::WriteComment(const core::String& comment, int identDepth, INIFile::ECommentPos pos)
 {
 	if(comment.IsEmpty())
 		return;
 
 	u8 utf8Buffer[6];
-	size_t utf8Size;
+	int utf8Size;
 	u32 commentChar = GetCommentChar();
 
-	for(size_t i = 0; i < identDepth; ++i)
+	for(int i = 0; i < identDepth; ++i)
 		m_File->WriteBinary("\t", 1);
 
-	utf8Size = core::CodePointToUTF8(commentChar, utf8Buffer) - utf8Buffer;
+	utf8Size = static_cast<int>(core::CodePointToUTF8(commentChar, utf8Buffer) - utf8Buffer);
 
-	m_File->WriteBinary(utf8Buffer, utf8Size);
+	m_File->WriteBinary(utf8Buffer, (u32)utf8Size);
 	m_File->WriteBinary(" ", 1);
 
 	for(auto it = comment.First(); it != comment.End(); ++it) {
 		u32 c = *it;
 		if(c == '\n') {
 			if(it != comment.Last()) {
-				for(size_t j = 0; j < identDepth; ++j)
+				for(int j = 0; j < identDepth; ++j)
 					m_File->WriteBinary("\t", 1);
 			}
 			m_File->WriteBinary(NEWLINE, sizeof(NEWLINE) - 1);
@@ -470,8 +470,8 @@ void INIFile::WriteComment(const core::String& comment, size_t identDepth, INIFi
 				m_File->WriteBinary(" ", 1);
 			}
 		} else {
-			utf8Size = core::CodePointToUTF8(c, utf8Buffer) - utf8Buffer;
-			m_File->WriteBinary(utf8Buffer, utf8Size);
+			utf8Size = static_cast<int>(core::CodePointToUTF8(c, utf8Buffer) - utf8Buffer);
+			m_File->WriteBinary(utf8Buffer, (u32)utf8Size);
 		}
 	}
 
@@ -495,7 +495,7 @@ bool INIFile::Commit()
 
 	m_File->Seek(0, io::ESeekOrigin::Start);
 
-	for(size_t i = 0; i < m_Elements.Size(); ++i) {
+	for(int i = 0; i < m_Elements.Size(); ++i) {
 		SINIElement& element = m_Elements[i];
 		SINISection& section = m_Sections[element.section];
 
@@ -529,7 +529,7 @@ bool INIFile::Commit()
 }
 
 
-size_t INIFile::GetSectionCount()
+int INIFile::GetSectionCount()
 {
 	return m_Sections.Size();
 }
@@ -563,7 +563,7 @@ bool INIFile::RemoveSection(const char* section)
 	if(sec.firstElem != InvalidID)
 		m_Elements.Erase(m_Elements.First() + sec.firstElem, sec.elemCount, true);
 
-	for(size_t i = 0; i < m_Elements.Size(); ++i) {
+	for(int i = 0; i < m_Elements.Size(); ++i) {
 		SINIElement& elem = m_Elements[i];
 		if(elem.section > sectionID)
 			elem.section--;
@@ -583,26 +583,26 @@ bool INIFile::SortSections(INIFile::ESorting sorting, bool recursive)
 {
 	if(m_Sections.Size() <= 1) {
 		if(recursive) {
-			for(size_t i = 0; i < m_Sections.Size(); ++i)
+			for(int i = 0; i < m_Sections.Size(); ++i)
 				SortElements(m_Sections[i].name.Data(), sorting);
 		}
 
 		return true;
 	}
 
-	auto sortAscending = [this](const size_t& a, const size_t& b) ->bool { return m_Sections[a].name < m_Sections[b].name; };
-	auto sortDescending = [this](const size_t& a, const size_t& b) ->bool { return m_Sections[b].name < m_Sections[a].name; };
+	auto sortAscending = [this](const int& a, const int& b) ->bool { return m_Sections[a].name < m_Sections[b].name; };
+	auto sortDescending = [this](const int& a, const int& b) ->bool { return m_Sections[b].name < m_Sections[a].name; };
 
 	struct DummyGenerator
 	{
-		size_t i = 0;
-		size_t operator()()
+		int i = 0;
+		int operator()()
 		{
 			return i++;
 		}
 	};
 
-	std::vector<size_t> dummy(m_Sections.Size());
+	std::vector<int> dummy(m_Sections.Size());
 	std::generate(dummy.begin(), dummy.end(), DummyGenerator());
 	if(sorting == ESorting::Ascending)
 		std::stable_sort(dummy.begin(), dummy.end(), sortAscending);
@@ -611,10 +611,10 @@ bool INIFile::SortSections(INIFile::ESorting sorting, bool recursive)
 
 	core::Array<SINISection> newSections;
 	newSections.Resize(m_Sections.Size());
-	for(size_t i = 0; i < dummy.size(); ++i) {
+	for(int i = 0; i < (int)dummy.size(); ++i) {
 		newSections[i] = m_Sections[dummy[i]];
 		if(i != dummy[i]) {
-			for(size_t j = newSections[i].firstElem; j < newSections[i].firstElem + newSections[i].elemCount; ++j) {
+			for(int j = newSections[i].firstElem; j < newSections[i].firstElem + newSections[i].elemCount; ++j) {
 				m_Elements[j].section = i;
 			}
 		}
@@ -623,7 +623,7 @@ bool INIFile::SortSections(INIFile::ESorting sorting, bool recursive)
 	m_Sections = std::move(newSections);
 
 	if(recursive) {
-		for(size_t i = 0; i < m_Sections.Size(); ++i)
+		for(int i = 0; i < m_Sections.Size(); ++i)
 			SortElements(m_Sections[i].name.Data(), sorting);
 	}
 	return true;
@@ -671,7 +671,7 @@ const core::String& INIFile::GetSectionComment(const char* section)
 	return m_Sections[sectionID].name;
 }
 
-size_t INIFile::GetElementCount(const char* section)
+int INIFile::GetElementCount(const char* section)
 {
 	ElementID elementID = GetSectionID(section);
 	if(elementID == InvalidID)
@@ -712,7 +712,7 @@ bool INIFile::AddElement(const char* section, const char* name, const char* valu
 	else
 		firstElem = m_Sections[sectionID].firstElem;
 
-	for(size_t i = firstElem != InvalidID ? firstElem + 1 : 0; i < m_Elements.Size(); ++i) {
+	for(int i = firstElem != InvalidID ? firstElem + 1 : 0; i < m_Elements.Size(); ++i) {
 		SINIElement& e = m_Elements[i];
 		if(currentSec < e.section) {
 			m_Sections[e.section].firstElem++;
@@ -742,7 +742,7 @@ bool INIFile::RemoveElement(const char* section, const char* element)
 	// Goto section of group
 	// Decrement section.FirstElem
 	SectionID currentSec = sectionID;
-	for(size_t i = elementID + 1; i < m_Elements.Size(); ++i) {
+	for(int i = elementID + 1; i < m_Elements.Size(); ++i) {
 		SINIElement& Elem = m_Elements[i];
 		if(currentSec != Elem.section) {
 			m_Sections[Elem.section].firstElem--;

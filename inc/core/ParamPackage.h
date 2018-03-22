@@ -15,12 +15,12 @@ struct ParamDesc
 {
 	const char* name; //!< The name of the parameter
 	core::Type type; //!< The type of the parameter
-	u32 id; //!< The id of the parameter
+	int id; //!< The id of the parameter
 };
 
 //! A collection of named variable.
 /**
-Can be compared with a class, this class contains members and types, but no values.
+Can be compared with a class, this class contains members and types, bjt no values.
 */
 class ParamPackage
 {
@@ -28,9 +28,9 @@ private:
 	struct Entry
 	{
 		core::String name;
+		core::Type type;
 		u8 size;
 		u8 offset;
-		core::Type type;
 
 		bool operator<(const Entry& other) const
 		{
@@ -54,7 +54,7 @@ public:
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value, if null the param is default constructed.
 	*/
 	template <typename T>
-	u32 AddParam(const core::StringType& name, const T& defaultValue)
+	int AddParam(const core::StringType& name, const T& defaultValue)
 	{
 		core::Type type = core::TemplType<T>::Get();
 		if(type == core::Type::Unknown)
@@ -68,9 +68,8 @@ public:
 	\param type: The type of the param
 	\param name The name of the new Param(should be unique for package)
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value
-	\param reserved Reserved for internal use, dont use this param
 	*/
-	LUX_API u32 AddParam(core::Type type, const core::StringType& name, const void* defaultValue = nullptr);
+	LUX_API int AddParam(core::Type type, const core::StringType& name, const void* defaultValue = nullptr);
 
 	//! Merges two packages
 	/**
@@ -100,7 +99,7 @@ public:
 	\param [out] desc The description of the parameter
 	\exception OutOfRange param is out of range
 	*/
-	LUX_API ParamDesc GetParamDesc(u32 param) const;
+	LUX_API ParamDesc GetParamDesc(int param) const;
 
 	//! Retrieve the name of a param
 	/**
@@ -108,7 +107,7 @@ public:
 	\return The name of the param
 	\exception OutOfRange param is out of range
 	*/
-	LUX_API const core::String& GetParamName(u32 param) const;
+	LUX_API const core::String& GetParamName(int param) const;
 
 	//! Get a param from a id
 	/**
@@ -118,7 +117,7 @@ public:
 	\return The found param
 	\exception OutOfRange param is out of range
 	*/
-	LUX_API VariableAccess GetParam(u32 param, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParam(int param, void* baseData, bool isConst) const;
 
 	//! Get a param from a name
 	/**
@@ -139,14 +138,14 @@ public:
 	\param isConst Should the package param be constant, i.e. can't be changed
 	\return The index of the found param, if no param could be found the invalid param is returned
 	*/
-	LUX_API VariableAccess GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParamFromType(core::Type type, int index, void* baseData, bool isConst) const;
 
 	//! Access the default value of a param
 	/**
 	\param param The id of the Param, which default value should be changed
 	*/
-	LUX_API VariableAccess DefaultValue(u32 param);
-	LUX_API VariableAccess DefaultValue(u32 param) const;
+	LUX_API VariableAccess DefaultValue(int param);
+	LUX_API VariableAccess DefaultValue(int param) const;
 
 	//! Set a new default value for a param
 	/**
@@ -163,20 +162,20 @@ public:
 	\return The id of the parameter.
 	\exception Exception name does not exist
 	*/
-	LUX_API u32 GetParamId(const core::StringType& name, core::Type type = core::Type::Unknown) const;
+	LUX_API int GetParamId(const core::StringType& name, core::Type type = core::Type::Unknown) const;
 
 	//! The number of existing params in this package
-	LUX_API u32 GetParamCount() const;
+	LUX_API int GetParamCount() const;
 
 	//! The number of texturelayers in this package
-	LUX_API u32 GetTextureCount() const;
+	LUX_API int GetTextureCount() const;
 
 	//! The size of the allocated data, in bytes
-	LUX_API u32 GetTotalSize() const;
+	LUX_API int GetTotalSize() const;
 
 private:
-	LUX_API u32 AddEntry(Entry& entry, const void* defaultValue);
-	LUX_API bool GetId(core::StringType name, core::Type t, u32& outId) const;
+	LUX_API int AddEntry(Entry& entry, const void* defaultValue);
+	LUX_API bool GetId(core::StringType name, core::Type t, int& outId) const;
 
 private:
 	struct SelfData;
@@ -297,7 +296,7 @@ public:
 	\param index Which param of this type
 	\param isConst Should the param be constant
 	*/
-	VariableAccess FromType(core::Type type, u32 index, bool isConst) const
+	VariableAccess FromType(core::Type type, int index, bool isConst) const
 	{
 		if(!m_Pack)
 			throw Exception("No param pack set");
@@ -310,7 +309,7 @@ public:
 	\param id The index of the param
 	\param isConst Should the param be constant
 	*/
-	VariableAccess FromID(u32 id, bool isConst) const
+	VariableAccess FromID(int id, bool isConst) const
 	{
 		if(m_Pack)
 			return m_Pack->GetParam(id, m_Data, isConst);
@@ -319,7 +318,7 @@ public:
 	}
 
 	//! The total number of parameters in the package
-	u32 GetParamCount() const
+	int GetParamCount() const
 	{
 		if(m_Pack)
 			return m_Pack->GetParamCount();
@@ -328,7 +327,7 @@ public:
 	}
 
 	//! The total number of textures in the package
-	u32 GetTextureCount() const
+	int GetTextureCount() const
 	{
 		if(m_Pack)
 			return m_Pack->GetTextureCount();
@@ -346,12 +345,12 @@ public:
 		return FromName(name, true);
 	}
 
-	core::VariableAccess Param(u32 id)
+	core::VariableAccess Param(int id)
 	{
 		return FromID(id, false);
 	}
 
-	core::VariableAccess Param(u32 id) const
+	core::VariableAccess Param(int id) const
 	{
 		return FromID(id, true);
 	}

@@ -11,7 +11,7 @@ namespace core
 template <typename T>
 class Deque
 {
-	static const size_t BLOCK_SIZE = 16;
+	static const int BLOCK_SIZE = 16;
 private:
 	struct Block
 	{
@@ -84,14 +84,14 @@ private:
 			--m_DataEnd;
 		}
 
-		size_t Size() const
+		int Size() const
 		{
 			return m_RawEnd - m_RawFirst;
 		}
 
-		void Resize(size_t newCount, bool front)
+		void Resize(int newCount, bool front)
 		{
-			size_t count = m_RawEnd - m_RawFirst;
+			int count = m_RawEnd - m_RawFirst;
 			Block** newData = LUX_NEW_ARRAY(Block*, newCount);
 			Block** newFirst = newData + ((newCount - count) / 2);
 			if(front) {
@@ -173,7 +173,7 @@ private:
 		{
 		}
 
-		BaseIterator(BlockPtr b, size_t i) :
+		BaseIterator(BlockPtr b, int i) :
 			block(b),
 			id(i)
 		{
@@ -289,7 +289,7 @@ private:
 
 	private:
 		BlockPtr block;
-		size_t id;
+		int id;
 	};
 
 public:
@@ -445,7 +445,7 @@ public:
 		return out;
 	}
 
-	size_t Size() const
+	int Size() const
 	{
 		return  BLOCK_SIZE*(m_Base.Size() - 1) + (m_EndId - m_FirstId);
 	}
@@ -532,8 +532,8 @@ private:
 
 private:
 	BaseList m_Base;
-	size_t m_FirstId;
-	size_t m_EndId;
+	int m_FirstId;
+	int m_EndId;
 };
 
 template <typename T> typename Deque<T>::Iterator begin(Deque<T>& dequeu) { return dequeu.Frist(); }

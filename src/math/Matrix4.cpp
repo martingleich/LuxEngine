@@ -724,7 +724,7 @@ bool Matrix4::operator!=(const Matrix4& other) const
 void fmtPrint(format::Context& ctx, const Matrix4& m, format::Placeholder& placeholder)
 {
 	ctx.AddTerminatedSlice("[");
-	for(size_t i = 0; i < 16; ++i) {
+	for(int i = 0; i < 16; ++i) {
 		format::fmtPrint(ctx, m[i], placeholder);
 		if(i < 15)
 			ctx.AddTerminatedSlice(", ");

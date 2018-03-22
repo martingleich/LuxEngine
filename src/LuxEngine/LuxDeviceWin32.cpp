@@ -103,7 +103,7 @@ LuxDeviceWin32::~LuxDeviceWin32()
 	log::Info("Shutdown complete.");
 }
 
-void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const core::String& title)
+void LuxDeviceWin32::BuildWindow(int width, int height, const core::String& title)
 {
 	if(m_Window) {
 		log::Warning("Window already built.");
@@ -112,11 +112,11 @@ void LuxDeviceWin32::BuildWindow(u32 width, u32 height, const core::String& titl
 
 	log::Info("Create new Lux window \"~s\".", title);
 
-	math::Dimension2U realSize(width, height);
-	if(realSize.width > (u32)GetSystemMetrics(SM_CXSCREEN))
-		realSize.width = (u32)GetSystemMetrics(SM_CXSCREEN);
-	if(realSize.height > (u32)GetSystemMetrics(SM_CYSCREEN))
-		realSize.height = (u32)GetSystemMetrics(SM_CYSCREEN);
+	math::Dimension2I realSize(width, height);
+	if(realSize.width > GetSystemMetrics(SM_CXSCREEN))
+		realSize.width = GetSystemMetrics(SM_CXSCREEN);
+	if(realSize.height > GetSystemMetrics(SM_CYSCREEN))
+		realSize.height = GetSystemMetrics(SM_CYSCREEN);
 
 	RECT rect;
 	SetRect(&rect, 0, 0, realSize.width, realSize.height);
@@ -173,7 +173,7 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	log::Info("Built Input System.");
 }
 
-bool LuxDeviceWin32::RunMessageQueue(u32 waitTime)
+bool LuxDeviceWin32::RunMessageQueue(int waitTime)
 {
 	if(waitTime) {
 		DWORD res = MsgWaitForMultipleObjects(1, &m_NeverSetEvent, FALSE, waitTime, QS_ALLINPUT);
@@ -222,7 +222,7 @@ bool LuxDeviceWin32::WaitForWindowChange()
 	}
 }
 
-bool LuxDeviceWin32::Run(u32 waitTime)
+bool LuxDeviceWin32::Run(int waitTime)
 {
 	bool wasQuit = false;
 	if(m_Window) {
@@ -236,9 +236,9 @@ bool LuxDeviceWin32::Run(u32 waitTime)
 	return !wasQuit;
 }
 
-void LuxDeviceWin32::Sleep(u32 millis)
+void LuxDeviceWin32::Sleep(int millis)
 {
-	::Sleep(millis);
+	::Sleep((DWORD)millis);
 }
 
 StrongRef<LuxSystemInfo> LuxDeviceWin32::GetSystemInfo() const

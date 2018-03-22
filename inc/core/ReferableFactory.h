@@ -62,7 +62,7 @@ public:
 	/**
 	\return The total number of types
 	*/
-	LUX_API size_t GetTypeCount() const;
+	LUX_API int GetTypeCount() const;
 
 	//! Get a list of all type names.
 	LUX_API core::Array<core::Name> GetTypeNames() const;

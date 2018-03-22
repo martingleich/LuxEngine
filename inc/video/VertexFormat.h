@@ -47,16 +47,16 @@ struct VertexElement
 	};
 
 	//! Get the usage for the i-th Texturecoordinate
-	static EUsage TexcoordN(u32 i)
+	static EUsage TexcoordN(int i)
 	{
-		lxAssert(i < 4);
-		return EUsage((u32)EUsage::Texcoord0 + i);
+		lxAssert(i >= 0 && i < 4);
+		return EUsage((int)EUsage::Texcoord0 + i);
 	}
 
 	//! Stream id of this element.
-	u8 stream;
+	int stream;
 	//! Offset of this element zu begin of stream.
-	u16 offset;
+	int offset;
 	//! Type of the element.
 	EType type;
 	//! Usage of the element.
@@ -70,7 +70,7 @@ struct VertexElement
 
 	//! Initialize an invalid element.
 	VertexElement() :
-		stream(0xFF),
+		stream(-1),
 		offset(0),
 		type(EType::Unknown),
 		sematic(EUsage::Unknown)
@@ -78,7 +78,7 @@ struct VertexElement
 	}
 
 	//! Initalize by members
-	VertexElement(u8 _stream, u16 _offset, EType _type, EUsage _sematic) :
+	VertexElement(int _stream, int _offset, EType _type, EUsage _sematic) :
 		stream(_stream),
 		offset(_offset),
 		type(_type),
@@ -114,16 +114,16 @@ namespace core
 template <>
 struct HashType<video::VertexElement>
 {
-	size_t operator()(const video::VertexElement& e) const
+	int operator()(const video::VertexElement& e) const
 	{
 		if(!e.IsValid())
 			return 0;
 
-		size_t out = 7;
+		int out = 7;
 		out += 31 * out + e.stream;
 		out += 31 * out + e.offset;
-		out += 31 * out + (size_t)e.sematic;
-		out += 31 * out + (size_t)e.type;
+		out += 31 * out + (int)e.sematic;
+		out += 31 * out + (int)e.type;
 		return out;
 	}
 };
@@ -162,7 +162,7 @@ public:
 	*/
 	void AddStream()
 	{
-		u32 firstElem = m_Data.IsEmpty() ? 0 : ((u32)m_Data.Size() - 1);
+		int firstElem = m_Data.IsEmpty() ? 0 : (m_Data.Size() - 1);
 		m_Streams.PushBack(Stream(firstElem));
 
 		m_CurrentStream = &m_Streams[m_Streams.Size() - 1];
@@ -181,7 +181,7 @@ public:
 		if(type == VertexElement::EType::Unknown)
 			type = GetSematicDefaultType(usage);
 
-		u32 offset;
+		int offset;
 		if(m_CurrentStream->elemCount == 0)
 			offset = 0;
 		else
@@ -203,7 +203,7 @@ public:
 	\param type The type of the new element,
 		pass Unknown to select the default type for this usage.
 	*/
-	void AddElement(u32 offset, 
+	void AddElement(int offset, 
 		VertexElement::EUsage usage,
 		VertexElement::EType type = VertexElement::EType::Unknown)
 	{
@@ -218,16 +218,16 @@ public:
 	}
 
 	//! Get the total number of element in the format.
-	u32 GetElemCount() const
+	int GetElemCount() const
 	{
-		return (u32)m_Data.Size();
+		return m_Data.Size();
 	}
 
 	//! Get the number of element in a given stream.
 	/**
 	Returns 0 if stream does not exist.
 	*/
-	u32 GetElemCount(u32 stream) const
+	int GetElemCount(int stream) const
 	{
 		if(stream < m_Streams.Size())
 			return m_Streams[stream].elemCount;
@@ -236,9 +236,9 @@ public:
 	}
 
 	//! Get the number of streams.
-	u32 GetStreamCount() const
+	int GetStreamCount() const
 	{
-		return (u32)m_Streams.Size();
+		return m_Streams.Size();
 	}
 
 	//! Get some element in the declaraction
@@ -248,12 +248,12 @@ public:
 	\return Copy of the vertexelement, or the invalid element if requested
 		element does not exist.
 	*/
-	VertexElement GetElement(u32 stream, u32 elem) const
+	VertexElement GetElement(int stream, int elem) const
 	{
 		if(stream >= m_Streams.Size())
 			return VertexElement::Invalid();
 
-		u32 firstElem = m_Streams[stream].firstElement;
+		int firstElem = m_Streams[stream].firstElement;
 		if(firstElem >= m_Streams.Size())
 			return VertexElement::Invalid();
 
@@ -269,7 +269,7 @@ public:
 	\return Number of bytes for as single element of the stream,
 		or 0 if stream doesn't exist.
 	*/
-	u32 GetStride(u32 stream = 0) const
+	int GetStride(int stream = 0) const
 	{
 		if(stream < m_Streams.Size())
 			return m_Streams[stream].stride;
@@ -283,11 +283,11 @@ public:
 		if(m_Streams.Size() == 0)
 			return false;
 
-		for(u32 streamID = 0; streamID < m_Streams.Size(); ++streamID) {
+		for(int streamID = 0; streamID < m_Streams.Size(); ++streamID) {
 			const Stream& stream = m_Streams[streamID];
 			if(stream.elemCount == 0)
 				return false;
-			for(u32 elemID = 0; elemID < stream.elemCount; ++elemID) {
+			for(int elemID = 0; elemID < stream.elemCount; ++elemID) {
 				const Element& elem = m_Data[stream.firstElement + elemID];
 				if(elem.type == VertexElement::EType::Unknown)
 					return false;
@@ -322,7 +322,7 @@ public:
 			}
 		};
 
-		for(size_t streamId = m_Streams.Size(); streamId < m_Streams.Size(); ++streamId) {
+		for(int streamId = m_Streams.Size(); streamId < m_Streams.Size(); ++streamId) {
 			const auto& stream = m_Streams[streamId];
 
 			core::Sort(
@@ -414,14 +414,14 @@ private:
 		{
 		}
 
-		Element(u32 _offset, VertexElement::EUsage _usage, VertexElement::EType _type) :
+		Element(int _offset, VertexElement::EUsage _usage, VertexElement::EType _type) :
 			offset(_offset),
 			usage(_usage),
 			type(_type)
 		{
 		}
 
-		u32 offset;
+		int offset;
 		VertexElement::EUsage usage;
 		VertexElement::EType type;
 	};
@@ -435,17 +435,17 @@ private:
 		{
 		}
 
-		Stream(u32 firstElem) :
+		Stream(int firstElem) :
 			elemCount(0),
 			stride(0),
 			firstElement(firstElem)
 		{
 		}
 
-		u32 elemCount;
-		u32 stride;
+		int elemCount;
+		int stride;
 
-		u32 firstElement;
+		int firstElement;
 	};
 
 private:
@@ -541,8 +541,8 @@ public:
 		if(GetElemCount() != other.GetElemCount())
 			return false;
 
-		for(u32 streamId = 0; streamId < GetStreamCount(); ++streamId) {
-			for(u32 elemId = 0; elemId < GetElemCount(streamId); ++elemId) {
+		for(int streamId = 0; streamId < GetStreamCount(); ++streamId) {
+			for(int elemId = 0; elemId < GetElemCount(streamId); ++elemId) {
 				if(GetElement(streamId, elemId) !=
 					other.GetElement(streamId, elemId))
 					return false;
@@ -564,7 +564,7 @@ public:
 	}
 
 	//! Get the number of elements in the format.
-	u32 GetElemCount() const
+	int GetElemCount() const
 	{
 		if(IsValid())
 			return m_Declaration->GetElemCount();
@@ -576,7 +576,7 @@ public:
 	/**
 	Returns 0 if the stream doesn't exist.
 	*/
-	u32 GetElemCount(u32 stream) const
+	int GetElemCount(int stream) const
 	{
 		if(IsValid())
 			return m_Declaration->GetElemCount(stream);
@@ -585,7 +585,7 @@ public:
 	}
 
 	//! Get the number of streams.
-	u32 GetStreamCount() const
+	int GetStreamCount() const
 	{
 		if(IsValid())
 			return m_Declaration->GetStreamCount();
@@ -597,7 +597,7 @@ public:
 	/**
 	Returns an invalid element if the stream doesn't exist.
 	*/
-	VertexElement GetElement(u32 stream, u32 elem) const
+	VertexElement GetElement(int stream, int elem) const
 	{
 		if(IsValid())
 			return m_Declaration->GetElement(stream, elem);
@@ -606,7 +606,7 @@ public:
 	}
 
 	//! Get the stride of a single stream.
-	u32 GetStride(u32 stream = 0) const
+	int GetStride(int stream = 0) const
 	{
 		if(IsValid())
 			return m_Declaration->GetStride(stream);
@@ -624,12 +624,12 @@ public:
 	/**
 	Returns an invalid element if the stream doesn't exist.
 	*/
-	VertexElement GetElement(u32 stream, VertexElement::EUsage usage) const
+	VertexElement GetElement(int stream, VertexElement::EUsage usage) const
 	{
 		if(!IsValid() || stream >= GetStreamCount())
 			return VertexElement::Invalid();
 
-		for(u32 elemId = 0; elemId < GetElemCount(stream); ++elemId) {
+		for(int elemId = 0; elemId < GetElemCount(stream); ++elemId) {
 			VertexElement e = GetElement(stream, elemId);
 			if(e.IsValid() && e.sematic == usage)
 				return e;
@@ -648,7 +648,7 @@ public:
 		if(!IsValid())
 			return VertexElement::Invalid();
 
-		for(u32 streamId = 0; streamId < GetStreamCount(); ++streamId) {
+		for(int streamId = 0; streamId < GetStreamCount(); ++streamId) {
 			VertexElement e = GetElement(streamId, usage);
 			if(e.IsValid())
 				return e;
@@ -658,13 +658,13 @@ public:
 	}
 
 	//! Gets a hash for this element
-	size_t GetHash() const
+	int GetHash() const
 	{
 		return m_Hash;
 	}
 
 private:
-	size_t CalcHash()
+	int CalcHash()
 	{
 		if(!m_IsValid)
 			return 0;
@@ -672,8 +672,8 @@ private:
 		m_Hash = 7;
 
 		core::HashType<VertexElement> hasher;
-		for(u32 s = 0; s < GetStreamCount(); ++s) {
-			for(u32 e = 0; e < GetElemCount(s); ++s) {
+		for(int s = 0; s < GetStreamCount(); ++s) {
+			for(int e = 0; e < GetElemCount(s); ++s) {
 				m_Hash = 31 * m_Hash + hasher(GetElement(s, e));
 			}
 		}
@@ -686,7 +686,7 @@ private:
 	std::shared_ptr<VertexDeclaration> m_Declaration;
 	bool m_IsValid;
 
-	size_t m_Hash;
+	int m_Hash;
 };
 
 } // namespace video
@@ -696,7 +696,7 @@ namespace core
 template <>
 struct HashType<video::VertexFormat>
 {
-	size_t operator()(const video::VertexFormat& e) const
+	int operator()(const video::VertexFormat& e) const
 	{
 		return e.GetHash();
 	}

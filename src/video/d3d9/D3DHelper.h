@@ -56,7 +56,7 @@ inline ZStencilFormat GetZStencil(D3DFORMAT format)
 
 inline D3DFORMAT GetD3DFormat(ColorFormat Format)
 {
-	switch((u32)Format) {
+	switch(Format.ToEnum()) {
 	case ColorFormat::R8G8B8:
 		return D3DFMT_R8G8B8;
 	case ColorFormat::X8R8G8B8:
@@ -179,7 +179,7 @@ inline ColorFormat GetLuxFormat(D3DFORMAT Format)
 	}
 }
 
-inline u32 GetBitsPerPixel(D3DFORMAT Format)
+inline int GetBitsPerPixel(D3DFORMAT Format)
 {
 	// Format suchen
 	switch(Format) {
@@ -439,7 +439,11 @@ inline D3DCUBEMAP_FACES GetD3DCubeMapFace(CubeTexture::EFace face)
 	static const D3DCUBEMAP_FACES CONV[6] = {D3DCUBEMAP_FACE_POSITIVE_X, D3DCUBEMAP_FACE_NEGATIVE_X,
 		D3DCUBEMAP_FACE_POSITIVE_Y, D3DCUBEMAP_FACE_NEGATIVE_Y,
 		D3DCUBEMAP_FACE_POSITIVE_Z, D3DCUBEMAP_FACE_NEGATIVE_Z};
-	return CONV[(u32)face];
+	int i = (int)face;
+	if(i < 0 || i >= 6)
+		return D3DCUBEMAP_FACE_FORCE_DWORD;
+	else
+		return CONV[i];
 }
 } // namespace video
 } // namesapce lux

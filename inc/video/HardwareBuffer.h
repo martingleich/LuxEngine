@@ -20,22 +20,22 @@ public:
 	inline EHardwareBufferType GetBufferType() const;
 	inline void Clear();
 	inline void ResetDirty();
-	inline void SetDirty(u32 begin, u32 end);
-	inline u32 GetChangeId() const;
-	inline void* Pointer(u32 n, u32 count);
-	inline const void* Pointer(u32 n, u32 count) const;
-	inline const void* Pointer_c(u32 n, u32 count) const;
-	inline u32 GetSize() const;
-	inline u32 GetAlloc() const;
+	inline void SetDirty(int begin, int end);
+	inline int GetChangeId() const;
+	inline void* Pointer(int n, int count);
+	inline const void* Pointer(int n, int count) const;
+	inline const void* Pointer_c(int n, int count) const;
+	inline int GetSize() const;
+	inline int GetAlloc() const;
 	inline void Update();
-	inline void SetCursor(u32 c);
-	inline u32 GetCursor() const;
-	inline u32 GetStride() const;
+	inline void SetCursor(int c);
+	inline int GetCursor() const;
+	inline int GetStride() const;
 	inline void SetHWMapping(EHardwareBufferMapping hwm);
 	inline EHardwareBufferMapping GetHWMapping() const;
-	inline bool GetDirty(u32& begin, u32& end) const;
-	inline void Reserve(u32 size, bool moveOld = true, void* init = nullptr);
-	inline void SetSize(u32 size, bool moveOld = true, void* init = nullptr);
+	inline bool GetDirty(int& begin, int& end) const;
+	inline void Reserve(int size, bool moveOld = true, void* init = nullptr);
+	inline void SetSize(int size, bool moveOld = true, void* init = nullptr);
 
 	virtual void SetHandle(void* handle) = 0;
 	virtual void* GetHandle() const = 0;
@@ -44,22 +44,22 @@ public:
 
 protected:
 	u8* m_Data;
-	u32 m_Size;
-	u32 m_Allocated;
+	int m_Size;
+	int m_Allocated;
 
-	u32 m_Cursor;
+	int m_Cursor;
 
-	u32 m_Stride;
+	int m_Stride;
 
-	u32 m_BeginDirty; // First dirty element
-	u32 m_EndDirty; // Last dirty element
-	u32 m_ChangeId;
+	int m_BeginDirty; // First dirty element
+	int m_EndDirty; // Last dirty element
+	int m_ChangeId;
 
 	EHardwareBufferMapping m_Mapping;
 	EHardwareBufferType m_BufferType;
 };
 
-inline u32 HardwareBuffer::GetChangeId() const
+inline int HardwareBuffer::GetChangeId() const
 {
 	return m_ChangeId;
 }
@@ -76,7 +76,7 @@ inline HardwareBuffer::HardwareBuffer(EHardwareBufferType type) :
 	m_Data = nullptr;
 	m_Size = 0;
 	m_Cursor = 0;
-	m_BeginDirty = 0xFFFFFFFF;
+	m_BeginDirty = INT_MAX;
 	m_EndDirty = 0;
 	m_Allocated = 0;
 	m_Mapping = EHardwareBufferMapping::Static;
@@ -93,24 +93,24 @@ inline HardwareBuffer::~HardwareBuffer()
 	m_Data = nullptr;
 	m_Size = 0;
 	m_Cursor = 0;
-	m_BeginDirty = 0xFFFFFFFF;
+	m_BeginDirty = INT_MAX;
 	m_EndDirty = 0;
 	m_Allocated = 0;
 }
 
 inline void HardwareBuffer::ResetDirty()
 {
-	m_BeginDirty = 0xFFFFFFFF;
+	m_BeginDirty = INT_MAX;
 	m_EndDirty = 0;
 }
 
-inline void HardwareBuffer::SetDirty(u32 begin, u32 end)
+inline void HardwareBuffer::SetDirty(int begin, int end)
 {
 	m_BeginDirty = math::Min(m_Size-1, begin);
 	m_EndDirty = math::Min(m_Size-1, end);
 }
 
-inline void* HardwareBuffer::Pointer(u32 n, u32 count)
+inline void* HardwareBuffer::Pointer(int n, int count)
 {
 	lxAssert(n + count <= m_Size);
 	m_BeginDirty = math::Min(m_BeginDirty, n);
@@ -119,24 +119,24 @@ inline void* HardwareBuffer::Pointer(u32 n, u32 count)
 	return m_Data + n*m_Stride;
 }
 
-inline const void* HardwareBuffer::Pointer(u32 n, u32 count) const
+inline const void* HardwareBuffer::Pointer(int n, int count) const
 {
 	LUX_UNUSED(count);
 	lxAssert(n + count <= m_Size);
 	return m_Data + n*m_Stride;
 }
 
-inline const void* HardwareBuffer::Pointer_c(u32 n, u32 count) const
+inline const void* HardwareBuffer::Pointer_c(int n, int count) const
 {
 	return this->Pointer(n, count);
 }
 
-inline u32 HardwareBuffer::GetSize() const
+inline int HardwareBuffer::GetSize() const
 {
 	return m_Size;
 }
 
-inline u32 HardwareBuffer::GetAlloc() const
+inline int HardwareBuffer::GetAlloc() const
 {
 	return m_Allocated;
 }
@@ -149,21 +149,21 @@ inline void HardwareBuffer::Update()
 	UpdateByManager();
 
 	m_EndDirty = 0;
-	m_BeginDirty = 0xFFFFFFFF;
+	m_BeginDirty = INT_MAX;
 }
 
-inline void HardwareBuffer::SetCursor(u32 c)
+inline void HardwareBuffer::SetCursor(int c)
 {
 	lxAssert(c <= m_Size);
 	m_Cursor = c;
 }
 
-inline u32 HardwareBuffer::GetCursor() const
+inline int HardwareBuffer::GetCursor() const
 {
 	return m_Cursor;
 }
 
-inline u32 HardwareBuffer::GetStride() const
+inline int HardwareBuffer::GetStride() const
 {
 	return m_Stride;
 }
@@ -178,7 +178,7 @@ inline EHardwareBufferMapping HardwareBuffer::GetHWMapping() const
 	return m_Mapping;
 }
 
-inline bool HardwareBuffer::GetDirty(u32& begin, u32& end) const
+inline bool HardwareBuffer::GetDirty(int& begin, int& end) const
 {
 	if(m_EndDirty >= m_BeginDirty) {
 		begin = m_BeginDirty;
@@ -188,7 +188,7 @@ inline bool HardwareBuffer::GetDirty(u32& begin, u32& end) const
 	return false;
 }
 
-inline void HardwareBuffer::Reserve(u32 size, bool moveOld, void* init)
+inline void HardwareBuffer::Reserve(int size, bool moveOld, void* init)
 {
 	if(size <= m_Allocated)
 		return;
@@ -199,11 +199,11 @@ inline void HardwareBuffer::Reserve(u32 size, bool moveOld, void* init)
 	if(moveOld && old) {
 		memcpy(m_Data, old, m_Size*m_Stride);
 		if(init)
-			for(u32 i = m_Size; i < size; ++i)
+			for(int i = m_Size; i < size; ++i)
 				memcpy(m_Data + i*m_Stride, init, m_Stride);
 	} else {
 		if(init)
-			for(u32 i = m_Size; i < size; ++i)
+			for(int i = m_Size; i < size; ++i)
 				memcpy(m_Data + i*m_Stride, init, m_Stride);
 	}
 
@@ -212,7 +212,7 @@ inline void HardwareBuffer::Reserve(u32 size, bool moveOld, void* init)
 	m_Allocated = size;
 }
 
-inline void HardwareBuffer::SetSize(u32 size, bool moveOld, void* init)
+inline void HardwareBuffer::SetSize(int size, bool moveOld, void* init)
 {
 	if(size > m_Allocated)
 		Reserve(size, moveOld, init);

@@ -1,6 +1,6 @@
 #ifndef INCLUDED_JOYSTICK_H
 #define INCLUDED_JOYSTICK_H
-#include "InputDeviceNull.h"
+#include "input/InputDeviceNull.h"
 #include "core/lxArray.h"
 
 namespace lux
@@ -15,15 +15,15 @@ public:
 	void Reset();
 	void DisconnectReporting(InputSystem* system);
 	EEventSource GetType() const;
-	const event::Button* GetButton(u32 buttonCode) const;
-	const event::Axis* GetAxis(u32 axisCode) const;
-	const event::Area* GetArea(u32 areaCode) const;
+	const event::Button* GetButton(int buttonCode) const;
+	const event::Axis* GetAxis(int axisCode) const;
+	const event::Area* GetArea(int areaCode) const;
 	bool Update(Event& event);
 
-	const core::String& GetElementName(EEventType type, u32 code) const;
+	const core::String& GetElementName(EEventType type, int code) const;
 
-	EElementType GetElementType(EEventType type, u32 id) const;
-	size_t GetElementCount(EEventType type) const;
+	EElementType GetElementType(EEventType type, int id) const;
+	int GetElementCount(EEventType type) const;
 	
 	// TODO:
 	/*

@@ -321,7 +321,7 @@ void PutCount(Context& ctx, size_t count, const char* buffer, size_t bufferSize)
 {
 	const char* ptr = buffer;
 	AdvanceCursor(ptr);
-	int charSize = ptr - buffer;
+	size_t charSize = ptr - buffer;
 	auto bufferCount = bufferSize / charSize;
 
 	while(count > 0) {

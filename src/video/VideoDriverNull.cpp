@@ -15,9 +15,9 @@ const DriverConfig& VideoDriverNull::GetConfig() const
 	return m_Config;
 }
 
-u32 VideoDriverNull::GetDeviceCapability(EDriverCaps Capability) const
+int VideoDriverNull::GetDeviceCapability(EDriverCaps Capability) const
 {
-	return m_DriverCaps[(u32)Capability];
+	return m_DriverCaps[(int)Capability];
 }
 
 }

@@ -30,7 +30,7 @@ public:
 	CubeTexture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
 	virtual ~CubeTexture() {}
 
-	virtual void Init(u32 size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic) = 0;
+	virtual void Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic) = 0;
 
 	//! Retrieve access to the texturedata
 	/**
@@ -41,7 +41,7 @@ public:
 	\param mipLevel Which mipmap level should be locked
 	\return The locked rectangle
 	*/
-	virtual LockedRect Lock(ELockMode mode, EFace face, u32 mipLevel = 0) = 0;
+	virtual LockedRect Lock(ELockMode mode, EFace face, int mipLevel = 0) = 0;
 
 	virtual void Unlock(bool regenMipMaps) = 0;
 
@@ -50,7 +50,7 @@ public:
 		return core::ResourceType::CubeTexture;
 	}
 
-	inline DrawingCanvasAuto<CubeTexture> GetCanvas(ELockMode mode, EFace face, u32 mipLevel = 0, bool regenMipMaps = false);
+	inline DrawingCanvasAuto<CubeTexture> GetCanvas(ELockMode mode, EFace face, int mipLevel = 0, bool regenMipMaps = false);
 };
 
 template <>
@@ -64,7 +64,7 @@ public:
 	{
 	}
 
-	DrawingCanvasAuto(CubeTexture* tex, CubeTexture::ELockMode mode, CubeTexture::EFace face, u32 level, bool _regenMipMaps) :
+	DrawingCanvasAuto(CubeTexture* tex, CubeTexture::ELockMode mode, CubeTexture::EFace face, int level, bool _regenMipMaps) :
 		DrawingCanvasAuto(tex, tex->Lock(mode, face, level), _regenMipMaps)
 	{
 	}
@@ -108,14 +108,14 @@ public:
 	bool regenMipMaps;
 };
 
-inline DrawingCanvasAuto<CubeTexture> CubeTexture::GetCanvas(ELockMode mode, EFace face, u32 mipLevel, bool regenMipMaps)
+inline DrawingCanvasAuto<CubeTexture> CubeTexture::GetCanvas(ELockMode mode, EFace face, int mipLevel, bool regenMipMaps)
 {
 	return DrawingCanvasAuto<CubeTexture>(this, mode, face, mipLevel, regenMipMaps);
 }
 
 struct CubeTextureLock
 {
-	CubeTextureLock(CubeTexture* t, BaseTexture::ELockMode mode, CubeTexture::EFace face, u32 mipLevel = 0, bool _regenMipMaps = true) :
+	CubeTextureLock(CubeTexture* t, BaseTexture::ELockMode mode, CubeTexture::EFace face, int mipLevel = 0, bool _regenMipMaps = true) :
 		base(t),
 		regenMipsMaps(_regenMipMaps)
 	{

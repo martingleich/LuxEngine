@@ -30,36 +30,39 @@ static const bool value = true;\
 
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type operator~ (T a)
 {
-	return (T)~(size_t)a;
+	return static_cast<T>(~static_cast<int>(a));
 }
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type operator| (T a, T b)
 {
-	return (T)((size_t)a | (size_t)b);
+	return static_cast<T>(static_cast<int>(a) | static_cast<int>(b));
 }
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type operator& (T a, T b)
 {
-	return (T)((size_t)a & (size_t)b);
+	return static_cast<T>(static_cast<int>(a) & static_cast<int>(b));
 }
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type operator^ (T a, T b)
 {
-	return (T)((size_t)a ^ (size_t)b);
+	return static_cast<T>(static_cast<int>(a) ^ static_cast<int>(b));
 }
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type& operator|= (T& a, T b)
 {
-	return (T&)((size_t&)a |= (size_t)b);
+	a = static_cast<T>(static_cast<int>(a) | static_cast<int>(b));
+	return a;
 }
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type& operator&= (T& a, T b)
 {
-	return (T&)((size_t&)a &= (size_t)b);
+	a = static_cast<T>(static_cast<int>(a) & static_cast<int>(b));
+	return a;
 }
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type& operator^= (T& a, T b)
 {
-	return (T&)((size_t&)a ^= (size_t)b);
+	a = static_cast<T>(static_cast<int>(a) ^ static_cast<int>(b));
+	return a;
 }
 
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, bool>::type TestFlag(T a, T b)
 {
-	return ((size_t)(a&b) != 0);
+	return (static_cast<int>(a&b) != 0);
 }
 template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::type& SetFlag(T& a, T b)
 {

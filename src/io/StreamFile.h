@@ -16,17 +16,17 @@ public:
 		const core::String& name);
 
 	~StreamFile();
-	u32 ReadBinaryPart(u32 numBytes, void* out);
-	u32 WriteBinaryPart(const void* data, u32 length);
-	void Seek(u32 offset, ESeekOrigin origin = ESeekOrigin::Cursor);
+	s64 ReadBinaryPart(s64 numBytes, void* out);
+	s64 WriteBinaryPart(const void* data, s64 length);
+	void Seek(s64 offset, ESeekOrigin origin = ESeekOrigin::Cursor);
 	void* GetBuffer();
 	const void* GetBuffer() const;
-	u32 GetSize() const;
-	u32 GetCursor() const;
+	s64 GetSize() const;
+	s64 GetCursor() const;
 
 private:
 	FILE* m_File;
-	u32 m_FileSize;
+	s64 m_FileSize;
 };
 
 } //namespace io

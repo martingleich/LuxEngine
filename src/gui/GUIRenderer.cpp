@@ -127,7 +127,7 @@ struct LineBuffer
 {
 	video::Renderer* renderer;
 	video::Vertex2D BUFFER[100];
-	size_t cursor;
+	u32 cursor;
 	video::Color color;
 
 	LineBuffer(video::Renderer* r, video::Color c) :
@@ -160,8 +160,8 @@ struct LineBuffer
 			return;
 		renderer->Draw2DPrimitiveList(
 			video::EPrimitiveType::Lines,
-			cursor / 2,
-			&BUFFER, cursor,
+			(u32)cursor / 2,
+			&BUFFER, (u32)cursor,
 			video::VertexFormat::STANDARD_2D);
 		cursor = 0;
 	}

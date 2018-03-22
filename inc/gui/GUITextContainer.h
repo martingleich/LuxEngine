@@ -26,7 +26,7 @@ public:
 	in all other cases called automatically.
 	\param firstLine All lines before this one didn't change.
 	*/
-	LUX_API void Rebreak(size_t firstLine = 0);
+	LUX_API void Rebreak(int firstLine = 0);
 
 	//! Update all data for the text
 	/**
@@ -78,10 +78,10 @@ public:
 		const math::RectF& textBox,
 		const math::RectF* clipBox=nullptr);
 
-	LUX_API size_t GetLineCount() const;
-	LUX_API core::Range<core::String::ConstIterator> GetLine(size_t i) const;
+	LUX_API int GetLineCount() const;
+	LUX_API core::Range<core::String::ConstIterator> GetLine(int i) const;
 
-	LUX_API float GetLineWidth(size_t i) const;
+	LUX_API float GetLineWidth(int i) const;
 	LUX_API math::Dimension2F GetDimension() const;
 
 	LUX_API void SetText(const core::String& str);
@@ -106,7 +106,7 @@ private:
 		float width;
 	};
 	core::String m_Text;
-	size_t m_Rebreak;
+	int m_Rebreak;
 
 	// Cached data
 	WeakRef<Font> m_Font;

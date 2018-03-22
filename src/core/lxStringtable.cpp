@@ -36,18 +36,18 @@ const char* StringTableHandle::c_str() const
 	if(!m_Handle)
 		return &null;
 	else
-		return (reinterpret_cast<const char*>(m_Handle) + sizeof(size_t));
+		return (reinterpret_cast<const char*>(m_Handle) + sizeof(int));
 }
 
-size_t StringTableHandle::GetHash() const
+int StringTableHandle::GetHash() const
 {
-	return reinterpret_cast<size_t>(m_Handle);
+	return core::HashSequence((u8*)(&m_Handle), sizeof(void*));
 }
 
-size_t StringTableHandle::Size() const
+int StringTableHandle::Size() const
 {
 	if(m_Handle)
-		return *reinterpret_cast<const size_t*>(m_Handle);
+		return *reinterpret_cast<const int*>(m_Handle);
 	return 0;
 }
 
@@ -63,10 +63,10 @@ struct CheckEntry
 	const void* m_Handle;
 	struct Hasher
 	{
-		size_t operator()(const CheckEntry& entry) const
+		int operator()(const CheckEntry& entry) const
 		{
-			return HashSequence(reinterpret_cast<const u8*>(entry.m_Handle) + sizeof(size_t),
-				*reinterpret_cast<const size_t*>(entry.m_Handle));
+			return HashSequence(reinterpret_cast<const u8*>(entry.m_Handle) + sizeof(int),
+				*reinterpret_cast<const int*>(entry.m_Handle));
 		}
 	};
 
@@ -74,8 +74,8 @@ struct CheckEntry
 	{
 		bool operator()(const CheckEntry& a, const CheckEntry& b) const
 		{
-			size_t aSize = *reinterpret_cast<const size_t*>(a.m_Handle) + sizeof(size_t);
-			size_t bSize = *reinterpret_cast<const size_t*>(b.m_Handle) + sizeof(size_t);
+			int aSize = *reinterpret_cast<const int*>(a.m_Handle) + sizeof(int);
+			int bSize = *reinterpret_cast<const int*>(b.m_Handle) + sizeof(int);
 			if(bSize != aSize)
 				return false;
 			return (memcmp(a.m_Handle, b.m_Handle, aSize) == 0);
@@ -86,8 +86,8 @@ struct CheckEntry
 struct StringTable::MemBlock
 {
 	MemBlock* next;
-	size_t used;
-	static const size_t DATA_SIZE = 4000;
+	int used;
+	static const int DATA_SIZE = 4000;
 	char data[DATA_SIZE];
 };
 
@@ -144,24 +144,16 @@ StringTableHandle StringTable::AddFindString(const char* str, bool find)
 	if(!str)
 		throw InvalidArgumentException("str", "Entry in stringtable may not be empty.");
 
-	size_t strSize = strlen(str);
-	size_t size = strSize + 1 + sizeof(size_t);
+	int strSize = (int)strlen(str);
+	int size = strSize + 1 + sizeof(int);
 
 	MemBlock* block = GetMatchingPosition(size);
 
 	void* handle = block->data + block->used;
 
-	*reinterpret_cast<size_t*>(handle) = strSize;
-	char* strPos = reinterpret_cast<char*>(handle) + sizeof(size_t);
-
-	/*
-	ifconst(LUX_STRING_TABLE_CASE_HANDLING == 0) {
-		for(size_t i = 0; i < strSize + 1; ++i)
-			strPos[i] = static_cast<char>(std::tolower(str[i]));
-	} else {
-	*/
-		memcpy(strPos, str, strSize + 1);
-	//}
+	*reinterpret_cast<int*>(handle) = strSize;
+	char* strPos = reinterpret_cast<char*>(handle) + sizeof(int);
+	memcpy(strPos, str, strSize + 1);
 
 	CheckEntry checkEntry(handle);
 	auto it = self->map.find(checkEntry);
@@ -178,7 +170,7 @@ StringTableHandle StringTable::AddFindString(const char* str, bool find)
 	}
 }
 
-StringTable::MemBlock* StringTable::GetMatchingPosition(size_t length)
+StringTable::MemBlock* StringTable::GetMatchingPosition(int length)
 {
 	if(length > MemBlock::DATA_SIZE)
 		throw Exception("String is to long for string table");

@@ -11,8 +11,8 @@ struct ParamPackage::SelfData
 {
 	core::Array<Entry> Params;
 
-	u32 TotalSize;
-	u32 TextureCount;
+	int TotalSize;
+	int TextureCount;
 
 	core::RawMemory DefaultPackage;
 };
@@ -55,9 +55,9 @@ void ParamPackage::Clear()
 	self->Params.Clear();
 }
 
-u32 ParamPackage::AddParam(core::Type type, const core::StringType& name, const void* defaultValue)
+int ParamPackage::AddParam(core::Type type, const core::StringType& name, const void* defaultValue)
 {
-	u32 id;
+	int id;
 	if(GetId(name, core::Type::Unknown, id)) {
 		if(self->Params[id].type != type)
 			throw InvalidArgumentException("", "Param already exists with diffrent parameter.");
@@ -66,7 +66,7 @@ u32 ParamPackage::AddParam(core::Type type, const core::StringType& name, const 
 
 	Entry entry;
 	entry.name = name.data;
-	const u32 size = type.GetSize();
+	const int size = type.GetSize();
 
 	// There are currently no types triggering this, just to be shure
 	if(size > 255)
@@ -82,10 +82,10 @@ u32 ParamPackage::AddParam(core::Type type, const core::StringType& name, const 
 
 void ParamPackage::MergePackage(const ParamPackage& other)
 {
-	for(u32 i = 0; i < other.GetParamCount(); ++i) {
+	for(int i = 0; i < other.GetParamCount(); ++i) {
 		auto desc = other.GetParamDesc(i);
 
-		u32 id;
+		int id;
 		if(GetId(desc.name, core::Type::Unknown, id)) {
 			if(self->Params[id].type != desc.type)
 				throw Exception("Same name with diffrent types in package merge");
@@ -137,11 +137,8 @@ void* ParamPackage::CopyPackage(const void* b) const
 	return out;
 }
 
-ParamDesc ParamPackage::GetParamDesc(u32 param) const
+ParamDesc ParamPackage::GetParamDesc(int param) const
 {
-	if(param >= self->Params.Size())
-		throw OutOfRangeException();
-
 	auto& p = self->Params.At(param);
 	ParamDesc desc;
 	desc.name = p.name.Data();
@@ -151,12 +148,12 @@ ParamDesc ParamPackage::GetParamDesc(u32 param) const
 	return desc;
 }
 
-const core::String& ParamPackage::GetParamName(u32 param) const
+const core::String& ParamPackage::GetParamName(int param) const
 {
 	return self->Params.At(param).name;
 }
 
-VariableAccess ParamPackage::GetParam(u32 param, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParam(int param, void* baseData, bool isConst) const
 {
 	auto& p = self->Params.At(param);
 
@@ -170,10 +167,10 @@ VariableAccess ParamPackage::GetParamFromName(const core::StringType& name, void
 	return GetParam(GetParamId(name), baseData, isConst);
 }
 
-VariableAccess ParamPackage::GetParamFromType(core::Type type, u32 index, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParamFromType(core::Type type, int index, void* baseData, bool isConst) const
 {
-	u32 id = 0;
-	for(u32 i = 0; i < self->Params.Size(); ++i) {
+	int id = 0;
+	for(int i = 0; i < self->Params.Size(); ++i) {
 		if(self->Params[i].type == type) {
 			if(id == index)
 				return GetParam(i, baseData, isConst);
@@ -184,13 +181,13 @@ VariableAccess ParamPackage::GetParamFromType(core::Type type, u32 index, void* 
 	throw core::ObjectNotFoundException("param_by_type");
 }
 
-VariableAccess ParamPackage::DefaultValue(u32 param)
+VariableAccess ParamPackage::DefaultValue(int param)
 {
 	auto& p = self->Params.At(param);
 	return VariableAccess(p.type, (u8*)self->DefaultPackage + p.offset);
 }
 
-VariableAccess ParamPackage::DefaultValue(u32 param) const
+VariableAccess ParamPackage::DefaultValue(int param) const
 {
 	auto& p = self->Params.At(param);
 	return VariableAccess(p.type.GetConstantType(), (u8*)self->DefaultPackage + p.offset);
@@ -201,31 +198,31 @@ VariableAccess ParamPackage::DefaultValue(const core::StringType& param)
 	return DefaultValue(GetParamId(param));
 }
 
-u32 ParamPackage::GetParamId(const core::StringType& name, core::Type type) const
+int ParamPackage::GetParamId(const core::StringType& name, core::Type type) const
 {
-	u32 out;
+	int out;
 	if(!GetId(name, type, out))
 		throw ObjectNotFoundException(name.data);
 
 	return out;
 }
 
-u32 ParamPackage::GetParamCount() const
+int ParamPackage::GetParamCount() const
 {
-	return (size_t)self->Params.Size();
+	return self->Params.Size();
 }
 
-u32 ParamPackage::GetTextureCount() const
+int ParamPackage::GetTextureCount() const
 {
 	return self->TextureCount;
 }
 
-u32 ParamPackage::GetTotalSize() const
+int ParamPackage::GetTotalSize() const
 {
 	return self->TotalSize;
 }
 
-u32 ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
+int ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 {
 	if(self->Params.Size() > 0)
 		entry.offset = self->Params.Last()->offset + self->Params.Last()->size;
@@ -254,10 +251,10 @@ u32 ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	self->Params.PushBack(entry);
 	self->DefaultPackage = std::move(newBlock);
 
-	return (size_t)(self->Params.Size() - 1);
+	return self->Params.Size() - 1;
 }
 
-bool ParamPackage::GetId(core::StringType name, core::Type t, u32& outId) const
+bool ParamPackage::GetId(core::StringType name, core::Type t, int& outId) const
 {
 	core::StringType cname = name;
 	cname.EnsureSize();

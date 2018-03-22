@@ -17,10 +17,10 @@ Type Integer()
 	return intT;
 }
 
-Type U32()
+Type UInteger()
 {
-	static const Type u32T(LUX_NEW(TypeInfoTemplate<u32>)("u32"));
-	return u32T;
+	static const Type uintT(LUX_NEW(TypeInfoTemplate<unsigned int>)("uint"));
+	return uintT;
 }
 
 Type Byte()

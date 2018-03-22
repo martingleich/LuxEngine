@@ -22,7 +22,7 @@ namespace scene
 MeshCollider::MeshCollider(video::Mesh* mesh)
 {
 	m_BoundingBox = mesh->GetBoundingBox();
-	size_t faceCount = mesh->GetGeometry()->GetPrimitiveCount();
+	int faceCount = mesh->GetGeometry()->GetPrimitiveCount();
 
 	m_Triangles.Clear();
 	m_Triangles.Reserve(faceCount);
@@ -30,13 +30,13 @@ MeshCollider::MeshCollider(video::Mesh* mesh)
 	auto sub = mesh->GetGeometry();
 	auto indices = sub->GetIndices();
 	auto vertices = sub->GetVertices();
-	u32 offset = sub->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;
-	u32 stride = sub->GetVertexFormat().GetStride();
+	int offset = sub->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;
+	int stride = sub->GetVertexFormat().GetStride();
 	const u8* data = (const u8*)vertices->Pointer_c(0, vertices->GetSize());
-	for(u32 j = 0; j < indices->GetSize(); j += 3) {
-		u32 i0 = indices->GetIndex(j + 0);
-		u32 i1 = indices->GetIndex(j + 1);
-		u32 i2 = indices->GetIndex(j + 2);
+	for(int j = 0; j < indices->GetSize(); j += 3) {
+		int i0 = indices->GetIndex(j + 0);
+		int i1 = indices->GetIndex(j + 1);
+		int i2 = indices->GetIndex(j + 2);
 		math::Triangle3F tri(
 			*(const math::Vector3F*)(data + stride*i0 + offset),
 			*(const math::Vector3F*)(data + stride*i1 + offset),
@@ -79,7 +79,7 @@ bool MeshCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCall
 		trans.TransformInvPoint(line.end));
 
 	math::Vector3F pos;
-	size_t id;
+	int id;
 	float distance;
 	bool found = SelectFirstTriangle(transLine, pos, id, distance, query->GetLevel() == Query::EQueryLevel::Object);
 
@@ -141,14 +141,14 @@ bool MeshCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZon
 	return procceed;
 }
 
-bool MeshCollider::SelectFirstTriangle(const math::Line3F& line, math::Vector3F& out_pos, size_t& triId, float& distance, bool testOnly)
+bool MeshCollider::SelectFirstTriangle(const math::Line3F& line, math::Vector3F& out_pos, int& triId, float& distance, bool testOnly)
 {
 	if(!m_BoundingBox.IsEmpty()) {
 		if(!m_BoundingBox.IntersectWithLine(line))
 			return false;
 	}
 
-	size_t i = 0;
+	int i = 0;
 	for(auto it = m_Triangles.First(); it != m_Triangles.End(); ++it) {
 		math::Vector3F pos;
 		if(it->IntersectWithLineBary(line, &pos)) {

@@ -49,7 +49,7 @@ public:
 	//! Create frustum from planes
 	ViewFrustum(math::PlaneF planes[Count])
 	{
-		for(u32 i = 0; i < Count; ++i) {
+		for(int i = 0; i < Count; ++i) {
 			m_Planes[i] = planes[i];
 			m_Planes[i].Normalize();
 		}
@@ -179,16 +179,16 @@ public:
 	\param start The first corner to return, a total of 8-start corners are returned
 	\return Range over corners
 	*/
-	core::Range<const math::Vector3F*> Corners(u32 start = 0) const
+	core::Range<const math::Vector3F*> Corners(int start = 0) const
 	{
-		lxAssert(start <= 8);
+		lxAssert(start >= 0 && start <= 8);
 		return core::MakeRange(m_Points+start, m_Points+8);
 	}
 
 	//! Access a single corner
-	const math::Vector3F& Corner(u32 id) const
+	const math::Vector3F& Corner(int id) const
 	{
-		lxAssert(id < 8);
+		lxAssert(id >= 0 && id < 8);
 		return m_Points[id];
 	}
 
@@ -196,8 +196,8 @@ public:
 	void RecalculateInternals()
 	{
 		// Corners
-		for(size_t i = 0; i < 8; ++i) {
-			u32 a=0, b=0, c=0;
+		for(int i = 0; i < 8; ++i) {
+			int a=0, b=0, c=0;
 			switch(i) {
 			case 0: a = Near; b = Left; c = Top; break;
 			case 1: a = Near; b = Right; c = Top; break;

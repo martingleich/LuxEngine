@@ -47,10 +47,10 @@ struct SColorMasks
 
 struct Context
 {
-	math::Dimension2U size;
+	math::Dimension2I size;
 	ColorFormat format;
 	u8* colorTable;
-	u32 dataOffset;
+	s64 dataOffset;
 	BITMAPFILEHEADER header;
 	BITMAPINFOHEADER info;
 	SColorMasks colorMasks;
@@ -151,14 +151,14 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 		pitch = ImagePitch;
 	}
 
-	u32 filePitch = (ctx.size.width * ctx.info.BitCount) / 8;
+	int filePitch = (ctx.size.width * ctx.info.BitCount) / 8;
 
 	if(filePitch % 4 != 0)
 		filePitch = filePitch + (4 - filePitch % 4);    // Auf 4-Byte ausrichten
 
 	u8* lineData = LUX_NEW_ARRAY(u8, filePitch);
 
-	for(u32 j = 0; j < ctx.size.height; ++j) {
+	for(int j = 0; j < ctx.size.height; ++j) {
 		// Read one line from the file
 		file->ReadBinary(filePitch, lineData);
 
@@ -169,7 +169,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 			u32* pS = (u32*)lineData;
 
 			if(ctx.info.Compression == 3) {
-				for(u32 i = 0; i < ctx.size.width; ++i) {
+				for(int i = 0; i < ctx.size.width; ++i) {
 					*(pD++) = (u8)((*pS & ctx.colorMasks.mRed) >> ctx.colorMasks.oRed);
 					*(pD++) = (u8)((*pS & ctx.colorMasks.mGreen) >> ctx.colorMasks.oGreen);
 					*(pD++) = (u8)((*pS & ctx.colorMasks.mBlue) >> ctx.colorMasks.oBlue);
@@ -177,7 +177,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 					pS++;
 				}
 			} else {
-				for(u32 i = 0; i < ctx.size.width; ++i) {
+				for(int i = 0; i < ctx.size.width; ++i) {
 					*(pD++) = (u8)((*pS & 0x00FF0000) >> 16);
 					*(pD++) = (u8)((*pS & 0x0000FF00) >> 8);
 					*(pD++) = (u8)((*pS & 0x000000FF) >> 0);
@@ -190,7 +190,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 		} else if(ctx.info.BitCount == 24) {
 			u8* pS = (u8*)lineData;
 
-			for(u32 i = 0; i < ctx.size.width; ++i) {
+			for(int i = 0; i < ctx.size.width; ++i) {
 				// data is in BGR order
 				*(pD++) = *(pS + 2);
 				*(pD++) = *(pS + 1);
@@ -204,7 +204,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 			u16* pS = (u16*)lineData;
 
 			if(ctx.info.Compression == 3) {
-				for(u32 i = 0; i < ctx.size.width; ++i) {
+				for(int i = 0; i < ctx.size.width; ++i) {
 					*(pD++) = (u8)((*pS & ctx.colorMasks.mRed) >> ctx.colorMasks.oRed);
 					*(pD++) = (u8)((*pS & ctx.colorMasks.mGreen) >> ctx.colorMasks.oGreen);
 					*(pD++) = (u8)((*pS & ctx.colorMasks.mBlue) >> ctx.colorMasks.oBlue);
@@ -212,7 +212,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 					++pS;
 				}
 			} else {
-				for(u32 i = 0; i < ctx.size.width; ++i) {
+				for(int i = 0; i < ctx.size.width; ++i) {
 					*(pD++) = (u8)((*pS & 0x00007C00) >> 11);
 					*(pD++) = (u8)((*pS & 0x000003E0) >> 5);
 					*(pD++) = (u8)((*pS & 0x0000001F) >> 0);
@@ -225,7 +225,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 		} else if(ctx.info.BitCount == 8) {
 			u8* pS = (u8*)lineData;
 
-			for(u32 i = 0; i < ctx.size.width; ++i) {
+			for(int i = 0; i < ctx.size.width; ++i) {
 				u8 e = *pS;
 				*(pD++) = ctx.colorTable[4 * e + 2];
 				*(pD++) = ctx.colorTable[4 * e + 1];
@@ -238,7 +238,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 		} else if(ctx.info.BitCount == 4) {
 			u8* pS = (u8*)lineData;
 
-			for(u32 i = 0; i < ctx.size.width / 2; ++i) {
+			for(int i = 0; i < ctx.size.width / 2; ++i) {
 				u8 e = 4 * ((*pS >> 4) & 0x0F);
 				*(pD++) = ctx.colorTable[e + 2];
 				*(pD++) = ctx.colorTable[e + 1];
@@ -264,7 +264,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 			cursor += pitch;
 		} else if(ctx.info.BitCount == 1) {
 			u8* pS = (u8*)lineData;
-			for(u32 i = 0; i < ctx.size.width / 8; ++i) {
+			for(int i = 0; i < ctx.size.width / 8; ++i) {
 				u8 x = *pS;
 
 				u8 e = ((x & 0x80) != 0);

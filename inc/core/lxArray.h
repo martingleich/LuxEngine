@@ -64,28 +64,28 @@ private:
 			ArrayIterator tmp = *this; --m_Current; return tmp;
 		}
 
-		ArrayIterator& operator+=(intptr_t num)
+		ArrayIterator& operator+=(int num)
 		{
 			m_Current += num;
 			return *this;
 		}
 
-		ArrayIterator operator+(intptr_t num) const
+		ArrayIterator operator+(int num) const
 		{
 			ArrayIterator temp = *this; return temp += num;
 		}
-		ArrayIterator& operator-=(intptr_t num)
+		ArrayIterator& operator-=(int num)
 		{
 			return (*this) += (-num);
 		}
-		ArrayIterator operator-(intptr_t num) const
+		ArrayIterator operator-(int num) const
 		{
 			return (*this) + (-num);
 		}
 
-		intptr_t operator-(ArrayIterator other) const
+		int operator-(ArrayIterator other) const
 		{
-			return m_Current - other.m_Current;
+			return static_cast<int>(m_Current - other.m_Current);
 		}
 
 		template <bool isConst2>
@@ -139,7 +139,7 @@ public:
 
 	Array(std::initializer_list<T> init)
 	{
-		Reserve(init.size());
+		Reserve((int)init.size());
 		for(auto& e : init)
 			PushBack(std::move(e));
 	}
@@ -165,7 +165,7 @@ public:
 		lxAssert(this != &old);
 
 		if(Data()) {
-			for(size_t i = 0; i < m_Used; ++i)
+			for(int i = 0; i < m_Used; ++i)
 				(Data() + i)->~T();
 			ArrayFree(Data());
 		}
@@ -206,7 +206,7 @@ public:
 		lxAssert(m_Used <= m_Alloc);
 
 		if(m_Data) {
-			for(size_t i = 0; i < m_Used; ++i)
+			for(int i = 0; i < m_Used; ++i)
 				new (Data() + i) T(other.Data()[i]);
 		}
 
@@ -218,7 +218,7 @@ public:
 	{
 		if(Size() != other.Size())
 			return false;
-		for(size_t i = 0; i < other.Size(); ++i) {
+		for(int i = 0; i < other.Size(); ++i) {
 			if(Data_c()[i] != other.Data_c()[i])
 				return false;
 		}
@@ -330,12 +330,12 @@ public:
 	\param entries A pointer to then entries to add
 	\param numEntries The number of entries to add
 	*/
-	void PushBack(const T* entries, size_t numEntries)
+	void PushBack(const T* entries, int numEntries)
 	{
 		if(m_Used + numEntries > m_Alloc)
 			Reserve(m_Alloc + numEntries);
 
-		for(size_t entry = 0; entry < numEntries; ++entry)
+		for(int entry = 0; entry < numEntries; ++entry)
 			new ((void*)(Data() + m_Used + entry))T(entries[entry]);
 
 		m_Used += numEntries;
@@ -347,7 +347,7 @@ public:
 	\param entries A pointer to then entries to add
 	\param numEntries The number of entries to add
 	*/
-	void PushBack(T* entries, size_t numEntries)
+	void PushBack(T* entries, int numEntries)
 	{
 		// Wenn kein Platz mehr ist welchen machen
 		if(m_Used + numEntries > m_Alloc) {
@@ -355,7 +355,7 @@ public:
 			Reserve(m_Alloc + numEntries);
 		}
 
-		for(size_t entry = 0; entry < numEntries; ++entry) {
+		for(int entry = 0; entry < numEntries; ++entry) {
 			// Listeneintrag erzeugen
 			new ((void*)(Data() + m_Used + entry))T(std::move(entries[entry]));
 		}
@@ -403,7 +403,7 @@ public:
 	*/
 	Iterator Erase(Iterator it, bool holdOrder = false)
 	{
-		size_t cur = it.m_Current - Data();
+		auto cur = static_cast<int>(it.m_Current - Data());
 		lxAssert(it.m_Current - Data() <= (int)m_Used);
 
 		if(holdOrder) {
@@ -430,25 +430,24 @@ public:
 	\return The iterator of the element that took the place of the first erased, if
 		the last element of the array was erased, returns the end iterator.
 	*/
-	Iterator Erase(Iterator from, size_t count, bool holdOrder)
+	Iterator Erase(Iterator from, int count, bool holdOrder)
 	{
-		size_t cur = from.m_Current - Data();
+		auto cur = static_cast<int>(from.m_Current - Data());
 		lxAssert((from.m_Current - Data()) + count - 1 <= m_Used);
 
 		if(holdOrder) {
 			for(T* i = from.m_Current; i < Data() + m_Used - count; ++i)
 				*(i) = std::move(*(i + count));
 		} else {
-			size_t offset = m_Used - count - (from.m_Current - Data());
-			size_t ToCopy = math::Min(count, offset);
+			auto offset = m_Used - count - static_cast<int>(from.m_Current - Data());
+			auto ToCopy = math::Min(count, offset);
 
-			for(size_t i = 0; i < ToCopy; ++i)
+			for(int i = 0; i < ToCopy; ++i)
 				*(from.m_Current + i) = std::move(*(from.m_Current + offset + i));
 		}
 
-		for(size_t i = 0; i < count; ++i) {
+		for(int i = 0; i < count; ++i)
 			Data()[m_Used - 1 - i].~T();
-		}
 
 		m_Used -= count;
 
@@ -466,7 +465,7 @@ public:
 	void Clear()
 	{
 		if(Data()) {
-			for(size_t i = 0; i < m_Used; ++i)
+			for(int i = 0; i < m_Used; ++i)
 				Data()[i].~T();
 			ArrayFree(Data());
 
@@ -486,13 +485,13 @@ public:
 	/**
 	\param newSize The new reserved size of the list
 	*/
-	void Reserve(size_t newSize)
+	void Reserve(int newSize)
 	{
 		T* newEntries = (T*)ArrayAllocate(newSize * sizeof(T));
 
 		if(m_Data) {
-			size_t end = m_Used < (size_t)(newSize) ? m_Used : (size_t)(newSize);
-			for(size_t i = 0; i < end; ++i) {
+			int end = m_Used < (int)(newSize) ? m_Used : (int)(newSize);
+			for(int i = 0; i < end; ++i) {
 				new ((void*)&newEntries[i])T(std::move(Data()[i]));
 				(Data() + i)->~T();
 			}
@@ -509,16 +508,16 @@ public:
 	\param used The new size of the list
 	\param defaultValue The value of new elements.
 	*/
-	void Resize(size_t used, const T& defaultValue)
+	void Resize(int used, const T& defaultValue)
 	{
 		if(m_Alloc < used) {
 			Reserve(used);
 		} else {
-			for(size_t i = used; i < m_Used; ++i)
+			for(int i = used; i < m_Used; ++i)
 				Data()[i].~T();
 		}
 
-		for(size_t i = m_Used; i < used; ++i)
+		for(int i = m_Used; i < used; ++i)
 			new ((void*)&Data()[i]) T(defaultValue);
 
 		m_Used = used;
@@ -530,18 +529,18 @@ public:
 	New elements are default constructed
 	\param used The new size of the list
 	*/
-	void Resize(size_t used)
+	void Resize(int used)
 	{
 		if(m_Alloc < used) {
 			Reserve(used);
-			for(size_t i = m_Used; i < used; ++i)
+			for(int i = m_Used; i < used; ++i)
 				new ((void*)&Data()[i]) T();
 		} else {
-			for(size_t i = used; i < m_Used; ++i)
+			for(int i = used; i < m_Used; ++i)
 				Data()[i].~T();
 		}
 
-		for(size_t i = m_Used; i < used; ++i)
+		for(int i = m_Used; i < used; ++i)
 			new ((void*)&Data()[i]) T();
 
 		m_Used = used;
@@ -619,30 +618,30 @@ public:
 	}
 
 	//! The i-th element from the back of the array
-	const T& Back(size_t i = 0) const
+	const T& Back(int i = 0) const
 	{
-		lxAssert(i < m_Used);
+		lxAssert(i >= 0 && i < m_Used);
 		return Data()[m_Used - i - 1];
 	}
 
 	//! The i-th element from the back of the array
-	T& Back(size_t i = 0)
+	T& Back(int i = 0)
 	{
-		lxAssert(i < m_Used);
+		lxAssert(i >= 0 && i < m_Used);
 		return Data()[m_Used - i - 1];
 	}
 
 	//! The i-th element from the front of the array
-	const T& Front(size_t i = 0) const
+	const T& Front(int i = 0) const
 	{
-		lxAssert(i < m_Used);
+		lxAssert(i >= 0 && i < m_Used);
 		return Data()[i];
 	}
 
 	//! The i-th element from the front of the array
-	T& Front(size_t i = 0)
+	T& Front(int i = 0)
 	{
-		lxAssert(i < m_Used);
+		lxAssert(i >= 0 && i < m_Used);
 		return Data()[i];
 	}
 
@@ -692,7 +691,7 @@ public:
 	/**
 	\return The size of the array
 	*/
-	size_t Size() const
+	int Size() const
 	{
 		return m_Used;
 	}
@@ -700,22 +699,22 @@ public:
 	/**
 	\return The max size of the array, before reallocation
 	*/
-	size_t Allocated() const
+	int Allocated() const
 	{
 		return m_Alloc;
 	}
 
 	//! Access a single element
-	const T& operator[](size_t entry) const
+	const T& operator[](int entry) const
 	{
-		lxAssert(entry < m_Used);
+		lxAssert(entry >= 0 || entry < m_Used);
 		return Data()[entry];
 	}
 
 	//! Access a single element
-	T& operator[](size_t entry)
+	T& operator[](int entry)
 	{
-		lxAssert(entry < m_Used);
+		lxAssert(entry >= 0 || entry < m_Used);
 		return Data()[entry];
 	}
 
@@ -747,9 +746,9 @@ public:
 	/**
 	\throws OutOfRangeException
 	*/
-	const T& At(size_t entry) const
+	const T& At(int entry) const
 	{
-		if(entry >= m_Used)
+		if(entry < 0 || entry >= m_Used)
 			throw core::OutOfRangeException();
 
 		return Data()[entry];
@@ -759,16 +758,16 @@ public:
 	/**
 	\throws OutOfRangeException
 	*/
-	T& At(size_t entry)
+	T& At(int entry)
 	{
-		if(entry >= m_Used)
+		if(entry < 0 || entry >= m_Used)
 			throw core::OutOfRangeException();
 
 		return Data()[entry];
 	}
 
 private:
-	static void* ArrayAllocate(size_t bytes)
+	static void* ArrayAllocate(int bytes)
 	{
 		return ::operator new(bytes);
 	}
@@ -781,7 +780,7 @@ private:
 	{
 		lxAssert(before.m_Current - Data() <= (int)m_Used);
 
-		const size_t pos = before.m_Current - Data();
+		auto pos = (int)(before.m_Current - Data());
 
 		if(m_Used == m_Alloc)
 			Reserve((m_Used * 3) / 2 + 1);
@@ -793,7 +792,7 @@ private:
 			new ((void*)(Data() + m_Used)) T(std::move(Data()[m_Used - 1]));
 
 			// Move the remaining
-			for(size_t i = m_Used - 1; i > pos; --i)
+			for(int i = m_Used - 1; i > pos; --i)
 				Data()[i] = std::move(Data()[i - 1]);
 		}
 
@@ -806,8 +805,8 @@ private:
 
 private:
 	void* m_Data = nullptr;
-	size_t m_Used = 0;
-	size_t m_Alloc = 0;
+	int m_Used = 0;
+	int m_Alloc = 0;
 };
 
 template <typename T>
@@ -827,7 +826,7 @@ void fmtPrint(format::Context& ctx, const core::Array<T>& array, format::Placeho
 {
 	using namespace format;
 	ctx.AddTerminatedSlice("[");
-	for(size_t i = 0; i < array.Size(); ++i) {
+	for(int i = 0; i < array.Size(); ++i) {
 		fmtPrint(ctx, array[i], placeholder);
 		if(i < array.Size() - 1)
 			ctx.AddTerminatedSlice(", ");
@@ -839,10 +838,10 @@ class AbstractArrayTypeInfo
 {
 public:
 	virtual ~AbstractArrayTypeInfo() {}
-	virtual void* At(void* ptr, size_t i) const = 0;
-	virtual const void* AtConst(const void* ptr, size_t i) const = 0;
-	virtual size_t Size(const void* ptr) const = 0;
-	virtual void Resize(void* ptr, size_t size) const = 0;
+	virtual void* At(void* ptr, int i) const = 0;
+	virtual const void* AtConst(const void* ptr, int i) const = 0;
+	virtual int Size(const void* ptr) const = 0;
+	virtual void Resize(void* ptr, int size) const = 0;
 	virtual Type GetBaseType() const = 0;
 };
 
@@ -862,19 +861,19 @@ public:
 		return m_BaseType;
 	}
 
-	void* At(void* ptr, size_t i) const
+	void* At(void* ptr, int i) const
 	{
 		return &static_cast<ArrayT*>(ptr)->At(i);
 	}
-	const void* AtConst(const void* ptr, size_t i) const
+	const void* AtConst(const void* ptr, int i) const
 	{
 		return &static_cast<const ArrayT*>(ptr)->At(i);
 	}
-	size_t Size(const void* ptr) const
+	int Size(const void* ptr) const
 	{
 		return static_cast<const ArrayT*>(ptr)->Size();
 	}
-	void Resize(void* ptr, size_t size) const
+	void Resize(void* ptr, int size) const
 	{
 		return static_cast<ArrayT*>(ptr)->Resize(size);
 	}
@@ -922,12 +921,12 @@ inline Type GetArrayBase(Type type)
 template <typename T>
 struct HashType<Array<T>>
 {
-	size_t operator()(const Array<T>& arr) const
+	int operator()(const Array<T>& arr) const
 	{
 		if(arr.IsEmpty())
 			return 0;
 
-		size_t out = 7;
+		int out = 7;
 		const T* ptr = arr.Data();
 		const T* end = ptr + arr.Size();
 		HashType<T> hasher;

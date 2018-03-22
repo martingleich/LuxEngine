@@ -323,7 +323,7 @@ public:
 	/**
 	\return The number of elements in the list
 	*/
-	u32 Size() const
+	int Size() const
 	{
 		return m_Size;
 	}
@@ -387,7 +387,7 @@ private:
 private:
 	Entry* m_First;
 	Entry* m_Last;
-	u32 m_Size;
+	int m_Size;
 };
 
 template <typename T> typename List<T>::Iterator begin(List<T>& list) { return list.Frist(); }

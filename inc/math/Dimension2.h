@@ -249,7 +249,7 @@ Dimension2<T> operator*(T s, const Dimension2<T>& d)
 typedef Dimension2<float> Dimension2F;
 
 //! Dimension with unsigned int precision
-typedef Dimension2<u32> Dimension2U;
+typedef Dimension2<int> Dimension2I;
 
 } // namespace math
 } // namespace lux

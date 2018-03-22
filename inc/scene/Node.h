@@ -737,7 +737,7 @@ private:
 
 	u32 m_Tags;
 
-	u32 m_AnimatedCount;
+	int m_AnimatedCount;
 	SceneNodeComponentList m_Components;
 
 	Scene* m_Scene;

@@ -157,40 +157,8 @@ public:
 	{
 		lxAssert(false);
 		return core::String::EMPTY;
-		/*
-		m_ConversionBuffer.Clear();
-		for(size_t i = 0; i < str.Length(); ++i)
-			ConvertChar(str[i], m_ConversionBuffer);
-		return m_ConversionBuffer.GetString();
-		*/
 	}
-	/*
-		void ConvertChar(wchar_t c, core::WStringBuffer& e)
-		{
-			switch((char)c) {
-			case '\n':
-				e << "<br/>";
-				break;
-			case '\"':
-				e << "&quot;";
-				break;
-			case '&':
-				e << "&amp;";
-				break;
-			case '<':
-				e << "&lt;";
-				break;
-			case '>':
-				e << "&gt;";
-				break;
-			case '\'':
-				e << "&apos;";
-				break;
-			default:
-				e << c;
-			}
-		}
-	*/
+	
 	void Exit()
 	{
 		if(IsInit() == false)

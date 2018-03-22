@@ -30,17 +30,17 @@ public:
 
 private:
 	void WriteCharacter(u32 character);
-	void SetCursor(size_t pos);
+	void SetCursor(int pos);
 
-	size_t BPos() const;
-	size_t WPos() const;
+	int BPos() const;
+	int WPos() const;
 
 public:
 	event::Signal<const core::String&> onTextChange;
 
 private:
 	gui::TextContainer m_Container;
-	size_t m_Caret = 0;
+	int m_Caret = 0;
 	float m_Time = 0;
 
 	float m_Offset = 0;

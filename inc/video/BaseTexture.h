@@ -69,7 +69,7 @@ public:
 	virtual ~BaseTexture() {}
 
 	//! The number of mip-maps, these texture contains, 0 for none
-	virtual u32 GetLevelCount() const = 0;
+	virtual int GetLevelCount() const = 0;
 
 	//! A pointer to the device depending texture
 	virtual void* GetRealTexture() = 0;
@@ -78,7 +78,7 @@ public:
 	virtual ColorFormat GetColorFormat() const = 0;
 
 	//! Returns the resolution of a texture surface in pixel
-	virtual const math::Dimension2U& GetSize() const = 0;
+	virtual const math::Dimension2I& GetSize() const = 0;
 
 	//! Is the texture a rendertarget.
 	virtual bool IsRendertarget() const = 0;

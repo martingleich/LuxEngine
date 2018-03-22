@@ -173,9 +173,9 @@ public:
 	}
 
 	//! Access component by id.
-	T& operator[](u32 i)
+	T& operator[](int i)
 	{
-		lxAssert(i < 3);
+		lxAssert(i >= 0 && i < 3);
 		switch(i) {
 		case 0:
 			return x;
@@ -188,9 +188,9 @@ public:
 		}
 	}
 
-	T operator[](u32 i) const
+	T operator[](int i) const
 	{
-		lxAssert(i < 3);
+		lxAssert(i >= 0 && i < 3);
 		switch(i) {
 		case 0:
 			return x;

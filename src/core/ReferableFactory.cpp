@@ -92,7 +92,7 @@ StrongRef<Referable> ReferableFactory::CreateShared(Name type, const void* data)
 	return r;
 }
 
-size_t ReferableFactory::GetTypeCount() const
+int ReferableFactory::GetTypeCount() const
 {
 	return m_Types.Size();
 }

@@ -4,6 +4,8 @@
 #include "video/d3d9/DeviceStateD3D9.h"
 
 #include "core/Logger.h"
+#include "core/SafeCast.h"
+
 #include "video/VideoDriver.h"
 #include "video/Renderer.h"
 
@@ -38,7 +40,7 @@ public:
 		if(IncludeType == D3DXINC_LOCAL) {
 			if(io::FileSystem::Instance()->ExistFile(pFileName)) {
 				auto file = io::FileSystem::Instance()->OpenFile(pFileName);
-				*pBytes = file->GetSize();
+				*pBytes = core::SafeCast<UINT>(file->GetSize());
 				void* data = LUX_NEW_RAW(*pBytes);
 				m_Allocated.PushBack(data);
 				if(file->ReadBinaryPart(*pBytes, data) != *pBytes)
@@ -50,7 +52,7 @@ public:
 			}
 		} else if(IncludeType == D3DXINC_SYSTEM) {
 			const void* data;
-			size_t bytes;
+			int bytes;
 			if(MaterialLibrary::Instance()->GetShaderInclude(EShaderLanguage::HLSL, pFileName, data, bytes)) {
 				*ppData = data;
 				*pBytes = (UINT)bytes;
@@ -105,8 +107,8 @@ ShaderD3D9::~ShaderD3D9()
 }
 
 void ShaderD3D9::Init(
-	const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
-	const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
+	const char* vsCode, const char* vsEntryPoint, int vsLength, const char* vsProfile,
+	const char* psCode, const char* psEntryPoint, int psLength, const char* psProfile,
 	core::Array<core::String>* errorList)
 {
 	LX_CHECK_NULL_ARG(vsCode);
@@ -115,9 +117,9 @@ void ShaderD3D9::Init(
 	LX_CHECK_NULL_ARG(psProfile);
 
 	if(vsLength == 0)
-		vsLength = strlen(vsCode);
+		vsLength = (int)strlen(vsCode);
 	if(psLength == 0)
-		psLength = strlen(psCode);
+		psLength = (int)strlen(psCode);
 
 	if(!vsEntryPoint)
 		vsEntryPoint = "mainVS";
@@ -320,7 +322,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 }
 
 UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
-	const char* code, const char* entryPoint, size_t length, const char* profile,
+	const char* code, const char* entryPoint, int length, const char* profile,
 	core::Array<core::String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
@@ -352,7 +354,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 }
 
 UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
-	const char* code, const char* entryPoint, size_t length, const char* profile,
+	const char* code, const char* entryPoint, int length, const char* profile,
 	core::Array<core::String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
@@ -386,12 +388,12 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	return shader;
 }
 
-size_t ShaderD3D9::GetSceneParamCount() const
+int ShaderD3D9::GetSceneParamCount() const
 {
 	return m_SceneValues.Size();
 }
 
-core::AttributePtr ShaderD3D9::GetSceneParam(size_t id) const
+core::AttributePtr ShaderD3D9::GetSceneParam(int id) const
 {
 	return m_SceneValues.At(id).sceneValue;
 }
@@ -407,25 +409,22 @@ void ShaderD3D9::Enable()
 		throw core::D3D9Exception(hr);
 }
 
-void ShaderD3D9::SetParam(u32 paramId, const void* data)
+void ShaderD3D9::SetParam(int paramId, const void* data)
 {
-	bool found = false;
-	u32 realId = 0;
+	int realId = -1;
 	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
-		if(it->index == paramId + DefaultParam_COUNT) {
-			found = true;
-			break;
-		}
 		++realId;
+		if(it->index == paramId + DefaultParam_COUNT)
+			break;
 	}
 
-	if(!found)
+	if(realId < 0)
 		throw core::ObjectNotFoundException("paramId");
 
 	SetShaderValue(m_Params[realId], data);
 }
 
-u32 ShaderD3D9::GetParamId(const core::String& name) const
+int ShaderD3D9::GetParamId(const core::String& name) const
 {
 	return m_ParamPackage.GetParamId(name);
 }
@@ -675,7 +674,7 @@ int ShaderD3D9::GetDefaultId(const char* name)
 		"ambient"
 	};
 
-	for(size_t i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
+	for(int i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
 		if(strcmp(NAMES[i], name) == 0)
 			return (int)i;
 	}
@@ -714,7 +713,7 @@ core::Type ShaderD3D9::GetCoreType(EType type)
 	case EType::Integer: return core::Types::Integer();
 	case EType::Float: return core::Types::Float();
 	case EType::Boolean: return core::Types::Boolean();
-	case EType::U32: return core::Types::U32();
+	case EType::U32: return core::Types::UInteger();
 	case EType::Texture: return core::Types::Texture();
 	case EType::Color: return core::Types::Color();
 	case EType::ColorF: return core::Types::ColorF();

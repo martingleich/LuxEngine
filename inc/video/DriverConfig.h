@@ -22,9 +22,9 @@ class DriverConfig;
 
 struct DisplayMode
 {
-	u32 width;
-	u32 height;
-	u32 refreshRate;
+	int width;
+	int height;
+	int refreshRate;
 	ColorFormat format;
 };
 
@@ -41,8 +41,8 @@ public:
 
 	ZStencilFormat zsFormat;
 
-	u32 multiSamples = 0;
-	u32 multiQuality = 0;
+	int multiSamples = 0;
+	int multiQuality = 0;
 
 	bool windowed = true;
 	bool vSync = false;
@@ -61,14 +61,14 @@ public:
 	virtual core::Array<DisplayMode> GenerateDisplayModes(bool windowed) = 0;
 	virtual core::Array<ColorFormat> GenerateBackbufferFormats(const DisplayMode& mode, bool windowed) = 0;
 	virtual core::Array<ZStencilFormat> GenerateZStencilFormats(const DisplayMode& mode, bool windowed, ColorFormat backBuffer) = 0;
-	virtual core::Array<u32> GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat) = 0;
-	virtual u32 GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 level) = 0;
+	virtual core::Array<int> GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat) = 0;
+	virtual int GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, int level) = 0;
 
-	LUX_API virtual u32 GetMaxMultisampleLevel(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat);
-	LUX_API virtual bool GetMatchingMode(DisplayMode& outMode, const math::Dimension2U& minRes, bool windowed, u32 minRefresh = 0);
-	LUX_API virtual bool GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, u32 minBits = 24);
-	LUX_API virtual bool GetMatchingZStencil(ZStencilFormat& outFormat, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, u32 minDepth = 0, u32 minStencil = 0);
-	LUX_API virtual bool GetMatchingMultisample(u32& outLevel, u32& outQuality, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 minSamples, u32 minQuality);
+	LUX_API virtual int GetMaxMultisampleLevel(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat);
+	LUX_API virtual bool GetMatchingMode(DisplayMode& outMode, const math::Dimension2I& minRes, bool windowed, int minRefresh = 0);
+	LUX_API virtual bool GetMatchingBackbuffer(ColorFormat& outFormat, const DisplayMode& mode, bool windowed, int minBits = 24);
+	LUX_API virtual bool GetMatchingZStencil(ZStencilFormat& outFormat, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, int minDepth = 0, int minStencil = 0);
+	LUX_API virtual bool GetMatchingMultisample(int& outLevel, int& outQuality, const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, int minSamples, int minQuality);
 
 	//! Generate a simple config file for the given settings
 	/**
@@ -85,10 +85,10 @@ public:
 	*/
 	LUX_API virtual bool GenerateConfig(
 		video::DriverConfig& outConfig,
-		const math::Dimension2U& minRes,
+		const math::Dimension2I& minRes,
 		bool windowed, bool vSync,
-		u32 minDepth = 24,
-		u32 minStencil = 8,
+		int minDepth = 24,
+		int minStencil = 8,
 		int multiSample = 2);
 };
 

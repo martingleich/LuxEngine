@@ -184,13 +184,13 @@ void Canvas3D::DrawMarker(const math::Vector3F& pos, float size)
 
 void Canvas3D::DrawCircle(const math::Vector3F& pos, const math::Vector3F& nor, float radius)
 {
-	u32 res = 32;
+	int res = 32;
 	math::Vector3F ux = nor.GetOrthoNormal();
 	math::Vector3F uy = nor.Cross(ux);
 	math::Vector3F start = pos + radius*ux;
 	math::Vector3F last = start;
 	float lastSeg = 0;
-	for(u32 i = 1; i < res; ++i) {
+	for(int i = 1; i < res; ++i) {
 		float t = (i*math::Constants<float>::two_pi()) / res;
 		math::Vector3F v = pos + radius*std::cos(t)*ux + radius*std::sin(t)*uy;
 		float seg = lastSeg + last.GetDistanceTo(v);
@@ -253,11 +253,11 @@ void Canvas3D::DrawTri(
 }
 
 void Canvas3D::DrawCurve(
-	const math::Sample<math::Vector3F>* points, size_t count,
+	const math::Sample<math::Vector3F>* points, int count,
 	math::EEdgeHandling edgeHandling,
-	u32 quality)
+	int quality)
 {
-	size_t samples = count * quality;
+	int samples = count * quality;
 	auto getSample = [&](float x) {
 		return math::CurveInterpolation(
 			points, count, x, edgeHandling,
@@ -267,7 +267,7 @@ void Canvas3D::DrawCurve(
 	math::Vector3F start = getSample(0);
 	math::Vector3F last = start;
 	float lastSeg = 0;
-	for(u32 i = 1; i < samples; ++i) {
+	for(int i = 1; i < samples; ++i) {
 		math::Vector3F v = getSample((float)i / (samples - 1));
 		float seg = lastSeg + last.GetDistanceTo(v);
 		DrawPartialLine(m_Pen, last, lastSeg,

@@ -30,9 +30,9 @@ video::EPrimitiveType Geometry::GetPrimitiveType() const
 	return m_PrimitiveType;
 }
 
-u32 Geometry::GetPrimitiveCount() const
+int Geometry::GetPrimitiveCount() const
 {
-	u32 pointCount;
+	int pointCount;
 	if(m_Indices != nullptr)
 		pointCount = m_Indices->GetSize();
 	else
@@ -61,7 +61,7 @@ const VertexBuffer* Geometry::GetVertices() const
 	return m_Vertices;
 }
 
-u32 Geometry::GetVertexCount() const
+int Geometry::GetVertexCount() const
 {
 	if(!m_Vertices)
 		return 0;
@@ -92,7 +92,7 @@ StrongRef<IndexBuffer> Geometry::GetIndices()
 	return m_Indices;
 }
 
-u32 Geometry::GetIndexCount() const
+int Geometry::GetIndexCount() const
 {
 	if(!m_Indices)
 		return 0;
@@ -122,12 +122,12 @@ void Geometry::RecalculateBoundingBox()
 	if(GetVertexCount() == 0) {
 		m_BoundingBox.Set(0.0f, 0.0f, 0.0f);
 	} else {
-		const u32 posOffset = GetVertexFormat().GetElement(0, video::VertexElement::EUsage::Position).offset;
+		const int posOffset = GetVertexFormat().GetElement(0, video::VertexElement::EUsage::Position).offset;
 
 		const u8* vertex = reinterpret_cast<const u8*>(m_Vertices->Pointer_c(0, 1));
 		m_BoundingBox.Set(*reinterpret_cast<const math::Vector3F*>(vertex + posOffset));
 
-		for(u32 i = 1; i < m_Vertices->GetSize(); ++i) {
+		for(int i = 1; i < m_Vertices->GetSize(); ++i) {
 			vertex = reinterpret_cast<const u8*>(m_Vertices->Pointer_c(i, 1));
 			m_BoundingBox.AddPoint(*reinterpret_cast<const math::Vector3F*>(vertex + posOffset));
 		}
@@ -144,7 +144,7 @@ EFaceWinding Geometry::GetFrontFaceWinding() const
 	return m_FrontFaceWind;
 }
 
-u32 Geometry::GetChangeId() const
+int Geometry::GetChangeId() const
 {
 	return m_Vertices ? m_Vertices->GetChangeId() : 0 + m_Indices ? m_Indices->GetChangeId() : 0;
 }

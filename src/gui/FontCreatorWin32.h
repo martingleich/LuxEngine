@@ -21,8 +21,8 @@ public:
 	void* BeginFontCreation(bool isFileFont, const core::String& name,
 		const FontDescription& desc,
 		const core::Array<u32>& charSet);
-	bool GetFontImage(void* void_ctx, u8*& image, math::Dimension2U& imageSize, u32& channelCount);
-	void GetFontInfo(void*, u32& fontHeight, FontDescription& desc);
+	bool GetFontImage(void* void_ctx, u8*& image, math::Dimension2I& imageSize, int& channelCount);
+	void GetFontInfo(void*, int& fontHeight, FontDescription& desc);
 	bool GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo);
 	void EndFontCreation(void* void_ctx);
 };

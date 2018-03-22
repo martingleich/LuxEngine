@@ -35,19 +35,19 @@ public:
 
 	void Clear()
 	{
-		for(size_t i = 0; i < (size_t)Particle::EParameter::COUNT; ++i)
+		for(int i = 0; i < (int)Particle::EParameter::COUNT; ++i)
 			states[i] = EParticleParamState::Disabled;
 	}
 
-	ParticleParamStates& Disabled(Particle::EParameter p) { states[(size_t)p] = EParticleParamState::Disabled; return *this; }
-	ParticleParamStates& Fixed(Particle::EParameter p) { states[(size_t)p] = EParticleParamState::Constant; return *this; }
-	ParticleParamStates& Constant(Particle::EParameter p) { states[(size_t)p] = EParticleParamState::Fixed; return *this; }
-	ParticleParamStates& Random(Particle::EParameter p) { states[(size_t)p] = EParticleParamState::Random; return *this; }
-	ParticleParamStates& Changing(Particle::EParameter p) { states[(size_t)p] = EParticleParamState::Changing; return *this; }
-	ParticleParamStates& ChangingRandom(Particle::EParameter p) { states[(size_t)p] = EParticleParamState::ChangingRandom; return *this; }
-	ParticleParamStates& Interpolated(Particle::EParameter p) { states[(size_t)p] = EParticleParamState::Interpolated; return *this; }
+	ParticleParamStates& Disabled(Particle::EParameter p) { states[(int)p] = EParticleParamState::Disabled; return *this; }
+	ParticleParamStates& Fixed(Particle::EParameter p) { states[(int)p] = EParticleParamState::Constant; return *this; }
+	ParticleParamStates& Constant(Particle::EParameter p) { states[(int)p] = EParticleParamState::Fixed; return *this; }
+	ParticleParamStates& Random(Particle::EParameter p) { states[(int)p] = EParticleParamState::Random; return *this; }
+	ParticleParamStates& Changing(Particle::EParameter p) { states[(int)p] = EParticleParamState::Changing; return *this; }
+	ParticleParamStates& ChangingRandom(Particle::EParameter p) { states[(int)p] = EParticleParamState::ChangingRandom; return *this; }
+	ParticleParamStates& Interpolated(Particle::EParameter p) { states[(int)p] = EParticleParamState::Interpolated; return *this; }
 
-	EParticleParamState states[(size_t)Particle::EParameter::COUNT];
+	EParticleParamState states[(int)Particle::EParameter::COUNT];
 };
 
 class ParticleModel : public ReferenceCounted
@@ -78,7 +78,7 @@ public:
 		if(off != -1)
 			return p.Param(off);
 		else
-			return m_Params[(u32)param].values[0];
+			return m_Params[(int)param].values[0];
 	}
 
 	/*
@@ -123,8 +123,8 @@ public:
 
 	LUX_API int GetOffset(Particle::EParameter param);
 	LUX_API float GetDefaultValue(Particle::EParameter param) const;
-	LUX_API u32 GetBytesParticleParams() const;
-	LUX_API u32 GetFloatParticleParams() const;
+	LUX_API int GetBytesParticleParams() const;
+	LUX_API int GetFloatParticleParams() const;
 
 	LUX_API void InitParticle(Particle& particle) const;
 	LUX_API void UpdateParticle(Particle& particle, float secsPassed) const;
@@ -142,12 +142,12 @@ public:
 	Use 0 to enable automatic calculation of the particle count, based
 	on the emitters and the average lifetime.
 	*/
-	void SetCapacity(u32 capacity)
+	void SetCapacity(int capacity)
 	{
 		m_Capacity = capacity;
 	}
 
-	u32 GetCapacity() const
+	int GetCapacity() const
 	{
 		return m_Capacity;
 	}
@@ -170,18 +170,18 @@ private:
 private:
 	Param& GetParam(Particle::EParameter param)
 	{
-		lxAssert((u32)param < (u32)Particle::EParameter::COUNT);
-		return m_Params[(u32)param];
+		lxAssert((int)param < (int)Particle::EParameter::COUNT);
+		return m_Params[(int)param];
 	}
 
 	const Param& GetParam(Particle::EParameter param) const
 	{
-		lxAssert((u32)param < (u32)Particle::EParameter::COUNT);
-		return m_Params[(u32)param];
+		lxAssert((int)param < (int)Particle::EParameter::COUNT);
+		return m_Params[(int)param];
 	}
 
 private:
-	static const u32 PARAM_COUNT = (u32)Particle::EParameter::COUNT;
+	static const int PARAM_COUNT = (int)Particle::EParameter::COUNT;
 	static const float DEFAULT[PARAM_COUNT];
 
 	float m_LifeTimeMin;
@@ -190,23 +190,23 @@ private:
 	bool  m_IsImmortal;
 
 	Param m_Params[PARAM_COUNT];
-	u32 m_ParamCount;
-	u32 m_StaticCount;
-	u32 m_ChangingCount;
-	u32 m_InterpolatedCount;
+	int m_ParamCount;
+	int m_StaticCount;
+	int m_ChangingCount;
+	int m_InterpolatedCount;
 
 	// Contains the base offset for the fixed value of a parameter.
 	// At first for the first, second, third ... changing parameter, then for the last, before-last, ..., second, first interpolated parameter.
 	u8 m_BaseOffset[PARAM_COUNT];
 
-	u32 m_ParticleDataSize;
+	int m_ParticleDataSize;
 
 	mutable core::Randomizer m_Randomizer;
 
 	StrongRef<ParticleRenderer> m_Renderer; //!< The renderer used to display the particles
 	math::Vector3F m_Gravity; //!< The gravity used by the group
 
-	u32 m_Capacity; //!< The maximal number of particles of this model or 0 to auto calculate the capacititys
+	int m_Capacity; //!< The maximal number of particles of this model or 0 to auto calculate the capacititys
 };
 
 } // namespace scene

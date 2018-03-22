@@ -6,13 +6,12 @@ namespace lux
 {
 namespace impl_assert
 {
-
-typedef bool (*AssertHandler)(const char* file, size_t line, const char* assert_msg, const char* msg);
+typedef bool (*AssertHandler)(const char* file, int line, const char* assert_msg, const char* msg);
 
 LUX_API AssertHandler SetHandler(AssertHandler newHandler);
 LUX_API AssertHandler GetHandler();
 
-LUX_API bool Report(const char* file, size_t line, const char* lxAssert, const char* msg);
+LUX_API bool Report(const char* file, int line, const char* lxAssert, const char* msg);
 }
 }
 

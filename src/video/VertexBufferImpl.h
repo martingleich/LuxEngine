@@ -15,17 +15,17 @@ public:
 	VertexBufferImpl(BufferManager* mgr);
 	~VertexBufferImpl();
 
-	void SetFormat(const VertexFormat& format, u32 stream, const void* init = nullptr);
+	void SetFormat(const VertexFormat& format, int stream, const void* init = nullptr);
 
 	const VertexFormat& GetFormat() const;
-	u32 GetStream() const;
+	int GetStream() const;
 
-	u32 AddVertex(const void* vertex);
-	u32 AddVertices(const void* vertices, u32 count);
-	void SetVertex(const void* vertex, u32 n);
-	void SetVertices(const void* vertices, u32 count, u32 n);
-	void GetVertex(void* ptr, u32 n) const;
-	void GetVertices(void* ptr, u32 count, u32 n) const;
+	int AddVertex(const void* vertex);
+	int AddVertices(const void* vertices, int count);
+	void SetVertex(const void* vertex, int n);
+	void SetVertices(const void* vertices, int count, int n);
+	void GetVertex(void* ptr, int n) const;
+	void GetVertices(void* ptr, int count, int n) const;
 
 	void SetHandle(void* handle) { m_Handle = handle; }
 	void* GetHandle() const { return m_Handle; }
@@ -33,7 +33,7 @@ public:
 	void UpdateByManager() { m_Manager->UpdateBuffer(this); }
 
 private:
-	u32 m_Stream;
+	int m_Stream;
 	VertexFormat m_Format;
 
 	BufferManager* m_Manager;

@@ -8,9 +8,10 @@ namespace lux
 namespace core
 {
 
-template <typename T, size_t SIZE>
+template <typename T, int SIZE>
 class FixedArray
 {
+	static_assert(SIZE >= 0, "SIZE must be bigger than zero");
 public:
 	using Iterator = T*;
 	using ConstIterator = const T*;
@@ -30,7 +31,7 @@ public:
 	ConstIterator First() const { return m_Data; }
 	ConstIterator End() const { return m_Data + SIZE; }
 
-	size_t Size() const
+	int Size() const
 	{
 		return SIZE;
 	}
@@ -45,15 +46,15 @@ public:
 		return m_Data;
 	}
 
-	T& operator[](size_t i)
+	T& operator[](int i)
 	{
-		lxAssert(i < SIZE);
+		lxAssert(i >= 0 && i < SIZE);
 		return m_Data[i];
 	}
 	
-	const T& operator[](size_t i) const
+	const T& operator[](int i) const
 	{
-		lxAssert(i < SIZE);
+		lxAssert(i >= 0 && i < SIZE);
 		return m_Data[i];
 	}
 
@@ -61,10 +62,10 @@ private:
 	T m_Data[SIZE];
 };
 
-template <typename T, size_t SIZE> typename FixedArray<T, SIZE>::Iterator begin(FixedArray<T, SIZE>& array) { return array.Frist(); }
-template <typename T, size_t SIZE> typename FixedArray<T, SIZE>::Iterator end(FixedArray<T, SIZE>& array) { return array.End(); }
-template <typename T, size_t SIZE> typename FixedArray<T, SIZE>::ConstIterator begin(const FixedArray<T, SIZE>& array) { return array.Frist(); }
-template <typename T, size_t SIZE> typename FixedArray<T, SIZE>::ConstIterator end(const FixedArray<T, SIZE>& array) { return array.End(); }
+template <typename T, int SIZE> typename FixedArray<T, SIZE>::Iterator begin(FixedArray<T, SIZE>& array) { return array.Frist(); }
+template <typename T, int SIZE> typename FixedArray<T, SIZE>::Iterator end(FixedArray<T, SIZE>& array) { return array.End(); }
+template <typename T, int SIZE> typename FixedArray<T, SIZE>::ConstIterator begin(const FixedArray<T, SIZE>& array) { return array.Frist(); }
+template <typename T, int SIZE> typename FixedArray<T, SIZE>::ConstIterator end(const FixedArray<T, SIZE>& array) { return array.End(); }
 
 } // namespace core
 } // namespace lux

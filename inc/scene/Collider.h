@@ -44,7 +44,7 @@ class TriangleCollider : public Collider
 {
 public:
 	//! Get a triangle contained in the collider, by it's id.
-	virtual const math::Triangle3F& GetTriangle(u32 id) const = 0;
+	virtual const math::Triangle3F& GetTriangle(int id) const = 0;
 
 	StrongRef<TriangleCollider> Clone() const
 	{

@@ -32,7 +32,7 @@ RawInputReceiver::~RawInputReceiver()
 	UnregisterAll();
 }
 
-void RawInputReceiver::RegisterDevices(HIDUsagePage usagePage, s32 usageID, bool exclusive)
+void RawInputReceiver::RegisterDevices(HIDUsagePage usagePage, int usageID, bool exclusive)
 {
 	LUX_UNUSED(exclusive);
 
@@ -45,7 +45,7 @@ void RawInputReceiver::RegisterDevices(HIDUsagePage usagePage, s32 usageID, bool
 		m_Subscribed.PushBack(device);
 }
 
-void RawInputReceiver::UnregisterDevice(HIDUsagePage usagePage, s32 usageID)
+void RawInputReceiver::UnregisterDevice(HIDUsagePage usagePage, int usageID)
 {
 	for(auto it = m_Subscribed.First(); it != m_Subscribed.End();) {
 		if(it->usUsagePage == (int)usagePage && (it->usUsage == usageID || usageID < 0)) {
@@ -126,7 +126,7 @@ void RawInputReceiver::DestroyDevice(RawInputDevice* device)
 	}
 }
 
-StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle, u32 deviceHint)
+StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle, int deviceHint)
 {
 	StrongRef<RawInputDevice> out;
 	if(!rawHandle) {
@@ -234,7 +234,7 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 	return ret;
 }
 
-u32 RawInputReceiver::DiscoverDevices(EEventSource deviceType)
+int RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 {
 	DWORD win32DeviceType;
 	if(deviceType == EEventSource::Keyboard)
@@ -256,8 +256,8 @@ u32 RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 	if(GetRawInputDeviceList(device_list.Data(), &device_count, sizeof(RAWINPUTDEVICELIST)) == -1)
 		return 0;
 
-	u32 count = 0;
-	for(size_t i = 0; i < device_list.Size(); ++i) {
+	int count = 0;
+	for(int i = 0; i < device_list.Size(); ++i) {
 		RAWINPUTDEVICELIST& device_info = device_list[i];
 		if(device_info.dwType == win32DeviceType) {
 			try {

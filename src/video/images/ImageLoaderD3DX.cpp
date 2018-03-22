@@ -33,7 +33,7 @@ core::Name ImageLoaderD3DX::GetResourceType(io::File* file, core::Name requested
 
 	core::String ext = io::GetFileExtension(file->GetName());
 	u8 bytes[128];
-	u32 count = file->ReadBinaryPart(sizeof(bytes), bytes);
+	auto count = file->ReadBinaryPart(sizeof(bytes), bytes);
 	if(count >= 2 && bytes[0] == 0xFF && bytes[1] == 0xD8)
 		return requestedType; // jpg
 	if(count >= 128 && // 128 ist the 4 bytes + the size of the DDS header
@@ -93,7 +93,7 @@ static ColorFormat ConvertD3DToLuxFormat(D3DFORMAT Format)
 
 static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	IDirect3DDevice9* device,
-	void* buffer, size_t bufferSize,
+	void* buffer, int bufferSize,
 	D3DFORMAT format,
 	const D3DXIMAGE_INFO& imageInfo,
 	D3DSURFACE_DESC& outDesc)
@@ -104,7 +104,7 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	{
 		UnknownRefCounted<IDirect3DTexture9> out;
 		hr = D3DXCreateTextureFromFileInMemoryEx(device,
-			buffer, (UINT)bufferSize,
+			buffer, bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT, 0,
@@ -121,7 +121,7 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	{
 		UnknownRefCounted<IDirect3DCubeTexture9> out;
 		hr = D3DXCreateCubeTextureFromFileInMemoryEx(device,
-			buffer, (UINT)bufferSize,
+			buffer, bufferSize,
 			D3DX_DEFAULT, 1, 0,
 			format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT,
@@ -136,7 +136,7 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	{
 		UnknownRefCounted<IDirect3DVolumeTexture9> out;
 		hr = D3DXCreateVolumeTextureFromFileInMemoryEx(device,
-			buffer, (UINT)bufferSize,
+			buffer, bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
 			D3DX_DEFAULT, D3DX_DEFAULT,
@@ -160,7 +160,7 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	}
 }
 
-static void ConvertLine(void* Src, void* Dst, D3DFORMAT SrcFormat, ColorFormat DstFormat, u32 Width)
+static void ConvertLine(void* Src, void* Dst, D3DFORMAT SrcFormat, ColorFormat DstFormat, int Width)
 {
 	if(SrcFormat == D3DFMT_R8G8B8 && DstFormat == ColorFormat::R8G8B8)
 		ColorConverter::ConvertByFormat(Src, ColorFormat::R8G8B8, Dst, DstFormat, Width, 1);
@@ -172,7 +172,7 @@ static void ConvertLine(void* Src, void* Dst, D3DFORMAT SrcFormat, ColorFormat D
 		// Alpha nur bei letzerem wichtig
 		if(DstFormat == ColorFormat::A8R8G8B8) {
 			u8* dB = (u8*)Dst;
-			for(u32 i = 0; i < Width; ++i) {
+			for(int i = 0; i < Width; ++i) {
 				dB[3] = 0xFF;
 				dB += 4;
 			}
@@ -193,7 +193,7 @@ static void CopyTextureData(
 		D3DLOCKED_RECT lock;
 		IDirect3DTexture9* texture = (IDirect3DTexture9*)base_texture;
 		texture->LockRect(0, &lock, nullptr, D3DLOCK_READONLY);
-		for(int i = 0; i < (int)desc.Height; ++i) {
+		for(UINT i = 0; i < desc.Height; ++i) {
 			ConvertLine(lock.pBits, dest, desc.Format, lxFormat, desc.Width);
 			dest = (u8*)dest + lxFormat.GetBytePerPixel() * desc.Width;
 			lock.pBits = (u8*)lock.pBits + lock.Pitch;
@@ -207,7 +207,7 @@ static void CopyTextureData(
 		D3DLOCKED_RECT lock;
 		IDirect3DCubeTexture9* texture = (IDirect3DCubeTexture9*)base_texture;
 		texture->LockRect((D3DCUBEMAP_FACES)imageIndex, 0, &lock, nullptr, D3DLOCK_READONLY);
-		for(int i = 0; i < (int)desc.Height; ++i) {
+		for(UINT i = 0; i < desc.Height; ++i) {
 			ConvertLine(lock.pBits, dest, desc.Format, lxFormat, desc.Width);
 			dest = (u8*)dest + lxFormat.GetBytePerPixel() * desc.Width;
 			lock.pBits = (u8*)lock.pBits + lock.Pitch;
@@ -229,7 +229,7 @@ static void CopyTextureData(
 		box.Back = imageIndex + 1;
 		HRESULT hr = texture->LockBox(0, &lock, &box, D3DLOCK_READONLY);
 		if(SUCCEEDED(hr)) {
-			for(int i = 0; i < (int)desc.Height; ++i) {
+			for(UINT i = 0; i < desc.Height; ++i) {
 				ConvertLine(lock.pBits, dest, desc.Format, lxFormat, desc.Width);
 				dest = (u8*)dest + lxFormat.GetBytePerPixel() * desc.Width;
 				lock.pBits = (u8*)lock.pBits + lock.RowPitch;
@@ -262,12 +262,12 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 
 	TempMemory buffer;
 
-	buffer.size = file->GetSize() - file->GetCursor();
+	buffer.size = core::SafeCast<size_t>(file->GetSize() - file->GetCursor());
 	if(file->GetBuffer() == nullptr) {
 		u8* tmp = LUX_NEW_ARRAY(u8, buffer.size);
 		buffer.ptr = tmp;
 		buffer.drop = true;
-		file->ReadBinary((u32)buffer.size, tmp);
+		file->ReadBinary(buffer.size, tmp);
 	} else {
 		buffer.ptr = (u8*)file->GetBuffer();
 		buffer.drop = false;
@@ -298,7 +298,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(img) {
-		img->Init(math::Dimension2U(desc.Width, desc.Height), lxFormat);
+		img->Init(math::Dimension2I(desc.Width, desc.Height), lxFormat);
 
 		video::ImageLock imgLock(img);
 		CopyTextureData(0, imgLock.data, d3dTexture, info, desc, lxFormat);
@@ -307,7 +307,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 
 	video::Texture* texture = dynamic_cast<video::Texture*>(dst);
 	if(texture) {
-		texture->Init(math::Dimension2U(desc.Width, desc.Height), lxFormat, 0, false, false);
+		texture->Init(math::Dimension2I(desc.Width, desc.Height), lxFormat, 0, false, false);
 
 		if(info.ResourceType == D3DRTYPE_TEXTURE) {
 			video::TextureLock texLock(texture, BaseTexture::ELockMode::Overwrite);

@@ -20,15 +20,15 @@ VertexBufferImpl::~VertexBufferImpl()
 	m_Manager->RemoveBuffer(this);
 }
 
-void VertexBufferImpl::SetFormat(const VertexFormat& format, u32 stream, const void* init)
+void VertexBufferImpl::SetFormat(const VertexFormat& format, int stream, const void* init)
 {
-	u32 stride = format.GetStride(stream);
+	int stride = format.GetStride(stream);
 	if(!format.IsValid() || stride == 0)
 		throw core::InvalidArgumentException("format", "Format is invalid");
 
 	if(m_Data) {
 		if(init) {
-			for(u32 i = 0; i < m_Size; ++i)
+			for(int i = 0; i < m_Size; ++i)
 				memcpy(m_Data + i*stride, init, stride);
 		}
 	}
@@ -45,17 +45,17 @@ const VertexFormat& VertexBufferImpl::GetFormat() const
 	return m_Format;
 }
 
-u32 VertexBufferImpl::GetStream() const
+int VertexBufferImpl::GetStream() const
 {
 	return m_Stream;
 }
 
-u32 VertexBufferImpl::AddVertex(const void* vertex)
+int VertexBufferImpl::AddVertex(const void* vertex)
 {
 	return AddVertices(vertex, 1);
 }
 
-u32 VertexBufferImpl::AddVertices(const void* vertices, u32 count)
+int VertexBufferImpl::AddVertices(const void* vertices, int count)
 {
 	if(m_Cursor + count - 1 >= m_Size) {
 		Reserve(m_Cursor + count);
@@ -64,24 +64,24 @@ u32 VertexBufferImpl::AddVertices(const void* vertices, u32 count)
 
 	SetVertices(vertices, count, m_Cursor);
 
-	u32 ret = m_Cursor;
+	int ret = m_Cursor;
 	m_Cursor += count;
 	return ret;
 }
 
-void VertexBufferImpl::SetVertex(const void* vertex, u32 n)
+void VertexBufferImpl::SetVertex(const void* vertex, int n)
 {
 	SetVertices(vertex, 1, n);
 }
-void VertexBufferImpl::SetVertices(const void* vertices, u32 count, u32 n)
+void VertexBufferImpl::SetVertices(const void* vertices, int count, int n)
 {
 	memcpy(Pointer(n, count), vertices, count*m_Stride);
 }
-void VertexBufferImpl::GetVertex(void* ptr, u32 n) const
+void VertexBufferImpl::GetVertex(void* ptr, int n) const
 {
 	GetVertices(ptr, 1, n);
 }
-void VertexBufferImpl::GetVertices(void* ptr, u32 count, u32 n) const
+void VertexBufferImpl::GetVertices(void* ptr, int count, int n) const
 {
 	memcpy(ptr, Pointer(n, count), count*m_Stride);
 }

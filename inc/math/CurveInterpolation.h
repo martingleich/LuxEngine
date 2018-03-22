@@ -85,7 +85,7 @@ inline float MapToValidRange(float x, float minX, float maxX, EEdgeHandling edge
 
 //! The index of the next element >= x, to the right.
 template <typename T>
-u32 GetUpperBound(const Sample<T>* samples, size_t count, float x)
+int GetUpperBound(const Sample<T>* samples, int count, float x)
 {
 	const Sample<T>* n;
 	const Sample<T>* i;
@@ -100,9 +100,9 @@ u32 GetUpperBound(const Sample<T>* samples, size_t count, float x)
 }
 
 template <typename T>
-void GetBounds(const Sample<T>* samples, size_t count, float x, u32& lower, u32& upper)
+void GetBounds(const Sample<T>* samples, int count, float x, int& lower, int& upper)
 {
-	const u32 t = GetUpperBound(samples, count, x);
+	const int t = GetUpperBound(samples, count, x);
 
 	if(t != 0) {
 		upper = t;
@@ -115,7 +115,7 @@ void GetBounds(const Sample<T>* samples, size_t count, float x, u32& lower, u32&
 
 //! Return the tangent at a given index.
 template <typename T>
-T GetTangent(const Sample<T>* samples, size_t count, u32 idx, EEdgeHandling edgeHandling)
+T GetTangent(const Sample<T>* samples, int count, int idx, EEdgeHandling edgeHandling)
 {
 	T a, b;
 	float da;
@@ -200,7 +200,7 @@ Addition, Subtraction, Postmultiplication with float.
 */
 template <typename T>
 T CurveInterpolation(
-	const Sample<T>* samples, size_t count,
+	const Sample<T>* samples, int count,
 	float x,
 	EEdgeHandling edgeHandling = EEdgeHandling::Clamp,
 	EInterpolation interpolate = EInterpolation::Smooth)
@@ -211,7 +211,7 @@ T CurveInterpolation(
 		return samples[0].value;
 
 	x = CurveHelper::MapToValidRange(x, samples[0].x, samples[count - 1].x, edgeHandling); // x in [lower, upper]
-	u32 upper, lower;
+	int upper, lower;
 	CurveHelper::GetBounds(samples, count, x, lower, upper);
 	const float xl = samples[lower].x;
 	const T vl = samples[lower].value;

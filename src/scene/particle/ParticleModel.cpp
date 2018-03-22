@@ -6,7 +6,7 @@ namespace lux
 namespace scene
 {
 
-const float ParticleModel::DEFAULT[(u32)Particle::EParameter::COUNT] = {
+const float ParticleModel::DEFAULT[(int)Particle::EParameter::COUNT] = {
 	1.0f, // Red
 	1.0f, // Green
 	1.0f, // Blue
@@ -49,14 +49,14 @@ void ParticleModel::SetParamStates(const ParticleParamStates& states)
 	u8 cur = 0;
 	const EParticleParamState* params = states.states;
 
-	for(u32 i = 0; i < PARAM_COUNT; ++i) {
+	for(int i = 0; i < PARAM_COUNT; ++i) {
 		m_Params[i].state = params[i];
 		if(i < 3 && params[i] == EParticleParamState::Disabled)
 			m_Params[i].state = EParticleParamState::Constant; // Force red, green and blue.
 
 		// Force angle when rot-speed is given.
-		if(i == (u32)Particle::EParameter::Angle) {
-			if(states.states[(u32)Particle::EParameter::RotSpeed] != EParticleParamState::Disabled && m_Params[i].state == EParticleParamState::Disabled)
+		if(i == (int)Particle::EParameter::Angle) {
+			if(states.states[(int)Particle::EParameter::RotSpeed] != EParticleParamState::Disabled && m_Params[i].state == EParticleParamState::Disabled)
 				m_Params[i].state = EParticleParamState::Fixed;
 		}
 
@@ -80,7 +80,7 @@ void ParticleModel::SetParamStates(const ParticleParamStates& states)
 		}
 	}
 
-	m_ParamCount = (u32)cur;
+	m_ParamCount = (int)cur;
 	m_ParticleDataSize = m_StaticCount * sizeof(float) + m_ChangingCount * sizeof(float) * 2 + m_InterpolatedCount * sizeof(float) * 2;
 
 	ResetToDefault();
@@ -88,8 +88,8 @@ void ParticleModel::SetParamStates(const ParticleParamStates& states)
 
 void ParticleModel::ResetToDefault()
 {
-	for(u32 i = 0; i < (size_t)Particle::EParameter::COUNT; ++i) {
-		for(u32 j = 0; j < 4; ++j)
+	for(int i = 0; i < (int)Particle::EParameter::COUNT; ++i) {
+		for(int j = 0; j < 4; ++j)
 			m_Params[i].values[j] = DEFAULT[i];
 	}
 }
@@ -125,13 +125,13 @@ EParticleParamState ParticleModel::GetParamState(Particle::EParameter param) con
 
 void ParticleModel::SetValues(Particle::EParameter param, const float* values)
 {
-	for(u32 i = 0; i < 4; ++i)
+	for(int i = 0; i < 4; ++i)
 		GetParam(param).values[i] = values[i];
 }
 
 void ParticleModel::GetValues(Particle::EParameter param, float* values) const
 {
-	for(u32 i = 0; i < 4; ++i)
+	for(int i = 0; i < 4; ++i)
 		values[i] = GetParam(param).values[i];
 }
 
@@ -155,15 +155,15 @@ int ParticleModel::GetOffset(Particle::EParameter param)
 
 float ParticleModel::GetDefaultValue(Particle::EParameter param) const
 {
-	return DEFAULT[(u32)param];
+	return DEFAULT[(int)param];
 }
 
-u32 ParticleModel::GetBytesParticleParams() const
+int ParticleModel::GetBytesParticleParams() const
 {
 	return m_ParticleDataSize;
 }
 
-u32 ParticleModel::GetFloatParticleParams() const
+int ParticleModel::GetFloatParticleParams() const
 {
 	return m_ParticleDataSize / sizeof(float);
 }
@@ -178,7 +178,7 @@ void ParticleModel::InitParticle(Particle& particle) const
 	float* p_delta = p_val + m_StaticCount + m_ChangingCount;
 	float* p_inter = p_delta + m_ChangingCount;
 
-	for(u32 i = 0; i < (u32)Particle::EParameter::COUNT; ++i) {
+	for(int i = 0; i < (int)Particle::EParameter::COUNT; ++i) {
 		const Param& param = m_Params[i];
 
 		float value = 0, delta = 0, scaleX = 1;
@@ -230,8 +230,8 @@ void ParticleModel::UpdateParticle(Particle& particle, float secsPassed) const
 {
 	if(!m_IsImmortal) {
 		const float* p_mut = particle.params + m_StaticCount + m_ChangingCount;
-		for(u32 i = 0; i < m_ChangingCount; ++i) {
-			const u32 off = m_Params[m_BaseOffset[i]].offset;
+		for(int i = 0; i < m_ChangingCount; ++i) {
+			const int off = m_Params[m_BaseOffset[i]].offset;
 			particle.Param(off) += *p_mut * secsPassed;
 			++p_mut;
 		}
@@ -240,9 +240,9 @@ void ParticleModel::UpdateParticle(Particle& particle, float secsPassed) const
 	// Interpolation isn't based on percentage of used life
 	// so it can be used on immortal particles
 	const float* p_inter = particle.params + m_StaticCount + 2 * m_ChangingCount;
-	for(u32 i = 0; i < m_InterpolatedCount; ++i) {
-		const u32 index = m_BaseOffset[PARAM_COUNT - i - 1];
-		const u32 offset = m_Params[index].offset;
+	for(int i = 0; i < m_InterpolatedCount; ++i) {
+		const int index = m_BaseOffset[PARAM_COUNT - i - 1];
+		const int offset = m_Params[index].offset;
 		const float scaleX = *p_inter++;
 		const ParticleInterpolator* inter = m_Params[index].interpolator;
 

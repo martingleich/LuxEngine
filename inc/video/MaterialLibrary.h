@@ -96,10 +96,10 @@ public:
 
 	LUX_API bool GetShaderInclude(
 		EShaderLanguage language, const core::String& name,
-		const void*& outData, size_t& outBytes);
+		const void*& outData, int& outBytes);
 	LUX_API void SetShaderInclude(
 		EShaderLanguage language, const core::String& name,
-		const void* data, size_t bytes);
+		const void* data, int bytes);
 
 private:
 	struct ShaderInclude
@@ -140,7 +140,7 @@ private:
 	};
 
 	core::OrderedMap<ShaderInclude, core::RawMemory> m_ShaderIncludes;
-	core::HashMap<core::String, size_t> m_MaterialMap;
+	core::HashMap<core::String, int> m_MaterialMap;
 	core::Array<StrongRef<Material>> m_MaterialList;
 
 	core::Array<FixedFunctionEntry> m_FixedFunctionShaders;

@@ -185,11 +185,11 @@ core::Array<ZStencilFormat> AdapterD3D9::GenerateZStencilFormats(const DisplayMo
 	return out;
 }
 
-core::Array<u32> AdapterD3D9::GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat)
+core::Array<int> AdapterD3D9::GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat)
 {
 	LUX_UNUSED(mode);
 
-	core::Array<u32> out;
+	core::Array<int> out;
 	D3DMULTISAMPLE_TYPE samplingTypes[] = {
 		D3DMULTISAMPLE_NONE,
 		D3DMULTISAMPLE_NONMASKABLE,
@@ -245,7 +245,7 @@ core::Array<u32> AdapterD3D9::GenerateMultisampleLevels(const DisplayMode& mode,
 	return out;
 }
 
-u32 AdapterD3D9::GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, u32 level)
+int AdapterD3D9::GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, int level)
 {
 	LUX_UNUSED(mode);
 	LUX_UNUSED(zsFormat);
@@ -270,7 +270,7 @@ u32 AdapterD3D9::GetNumMultisampleQualities(const DisplayMode& mode, bool window
 	if(FAILED(hr))
 		return 0;
 
-	return numQualities;
+	return (int)numQualities;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

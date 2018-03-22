@@ -202,8 +202,10 @@ public:
 	/**
 	\param capactatiy The max number of elements in the pool
 	*/
-	Pool(size_t capacity = 1024)
+	Pool(int capacity = 1024)
 	{
+		lxAssert(capacity > 0);
+
 		m_Data = LUX_NEW_ARRAY(T, capacity);
 		m_Alloc = capacity;
 		m_Active = 0;
@@ -226,7 +228,7 @@ public:
 		m_Active = other.m_Active;
 		m_AutoAllocation = other.m_AutoAllocation;
 		m_Data = LUX_NEW_ARRAY(T, m_Alloc);
-		for(size_t i = 0; i < m_Active; ++i)
+		for(int i = 0; i < m_Active; ++i)
 			m_Data[i] = std::move(other.m_Data);
 	}
 
@@ -243,7 +245,7 @@ public:
 	/**
 	\return The number of active elements
 	*/
-	size_t GetActiveCount() const
+	int GetActiveCount() const
 	{
 		return m_Active;
 	}
@@ -252,7 +254,7 @@ public:
 	/**
 	\return The number of inactive elements
 	*/
-	size_t GetInactiveCount() const
+	int GetInactiveCount() const
 	{
 		return m_Alloc - m_Active;
 	}
@@ -261,7 +263,7 @@ public:
 	/**
 	\return The maximal size of the pool
 	*/
-	size_t Capactity() const
+	int Capactity() const
 	{
 		return m_Alloc;
 	}
@@ -460,11 +462,11 @@ public:
 	/**
 	\param capacity The number of element to add to the pool
 	*/
-	void Reserve(size_t capacity)
+	void Reserve(int capacity)
 	{
 		m_Alloc += capacity;
 		T* newData = LUX_NEW_ARRAY(T, m_Alloc);
-		for(size_t i = 0; i < m_Active; ++i)
+		for(int i = 0; i < m_Active; ++i)
 			newData[i] = std::move(m_Data[i]);
 		LUX_FREE_ARRAY(m_Data);
 
@@ -473,8 +475,8 @@ public:
 
 private:
 	T*  m_Data;
-	size_t m_Alloc;
-	size_t m_Active;
+	int m_Alloc;
+	int m_Active;
 
 	bool m_AutoAllocation;
 };

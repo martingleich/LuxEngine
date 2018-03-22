@@ -1,7 +1,7 @@
 #ifndef INCLUDED_DATE_AND_TIME_H
 #define INCLUDED_DATE_AND_TIME_H
-#include "LuxBase.h"
-#include "lxFormat.h"
+#include "core/LuxBase.h"
+#include "core/lxFormat.h"
 
 namespace lux
 {
@@ -23,13 +23,13 @@ struct DateAndTime
 		Saturday,
 	};
 
-	u32 milliseconds;      //!< Milliseconds - [0, 999]
-	u32 seconds;           //!< Seconds - [0,59] 
-	u32 minutes;           //!< Minutes - [0,59] 
-	u32 hours;             //!< Hours - [0,23] 
-	u32 dayOfMonth;        //!< Day of month - [1,31] 
-	u32 month;             //!< month - [1,12] 
-	u32 year;              //!< Year
+	int milliseconds;      //!< Milliseconds - [0, 999]
+	int seconds;           //!< Seconds - [0,59] 
+	int minutes;           //!< Minutes - [0,59] 
+	int hours;             //!< Hours - [0,23] 
+	int dayOfMonth;        //!< Day of month - [1,31] 
+	int month;             //!< month - [1,12] 
+	int year;              //!< Year
 	EWeekDay weekDay;      //!< Day of week 
 	bool isDayLightSaving; //!< Is daylightsaving
 

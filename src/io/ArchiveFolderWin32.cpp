@@ -4,7 +4,6 @@
 #include "io/FileSystem.h"
 #include "io/File.h"
 #include "core/lxUnicodeConversion.h"
-#include "platform/StrippedWindows.h"
 
 namespace lux
 {
@@ -212,7 +211,7 @@ StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileM
 
 bool ArchiveFolderWin32::ExistFile(const Path& p) const
 {
-	DWORD fatt = GetWin32FileAttributes(p);
+	auto fatt = GetWin32FileAttributes(p);
 	if(fatt == INVALID_FILE_ATTRIBUTES)
 		return false;
 	else
@@ -243,10 +242,10 @@ const Path& ArchiveFolderWin32::GetPath() const
 	return self->path;
 }
 
-u32 ArchiveFolderWin32::GetWin32FileAttributes(const Path& p) const
+DWORD ArchiveFolderWin32::GetWin32FileAttributes(const Path& p) const
 {
 	Win32Path win32Path = ConvertPathToWin32WidePath(p);
-	return (u32)GetFileAttributesW((wchar_t*)win32Path.Data_c());
+	return GetFileAttributesW((wchar_t*)win32Path.Data_c());
 }
 
 core::Array<u16> ArchiveFolderWin32::ConvertPathToWin32WidePath(const Path& p) const

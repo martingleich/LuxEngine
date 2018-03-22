@@ -10,7 +10,7 @@ namespace lux
 namespace gui
 {
 
-const u32 Element::NO_TAB_STOP(0xFFFFFFFF);
+const int Element::NO_TAB_STOP = INT_MAX;
 const ScalarDistanceF Element::AUTO_SIZE(INFINITY);
 const ScalarDistanceF Element::AUTO_MARGIN(INFINITY);
 const ScalarDistanceF Element::AUTO_OUT_MARGIN(-INFINITY);
@@ -56,12 +56,12 @@ void Element::SetEnvironment(GUIEnvironment* env)
 	m_Environment = env;
 }
 
-void Element::SetTabId(u32 tabId)
+void Element::SetTabId(int tabId)
 {
 	m_TabId = tabId;
 }
 
-u32 Element::GetTabId() const
+int Element::GetTabId() const
 {
 	return m_TabId;
 }

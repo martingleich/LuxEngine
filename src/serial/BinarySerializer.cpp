@@ -61,7 +61,7 @@ void BinarySerializer::WriteAll(const void* baseAddr)
 void BinarySerializer::WriteArray(core::Type type, core::Type base, const void* data)
 {
 	core::VariableArrayAccess arrayAccess(data, type);
-	size_t size = arrayAccess.Size();
+	int size = arrayAccess.Size();
 
 	u32 dword_size = (u32)size;
 	u32 addr = AllocBehind(dword_size);

@@ -24,13 +24,13 @@ public:
 		m_IsDirty = true;
 	}
 
-	void SetParam(u32 paramId, const void* data)
+	void SetParam(int paramId, const void* data)
 	{
 		m_Layers[paramId] = *(video::TextureLayer*)data;
 		m_IsDirty = true;
 	}
 
-	u32 GetParamId(const core::String& name) const
+	int GetParamId(const core::String& name) const
 	{
 		return m_ParamPackage.GetParamId(name);
 	}
@@ -50,12 +50,12 @@ public:
 	{
 	}
 
-	size_t GetSceneParamCount() const
+	int GetSceneParamCount() const
 	{
 		return 0;
 	}
 
-	core::AttributePtr GetSceneParam(size_t id) const
+	core::AttributePtr GetSceneParam(int id) const
 	{
 		LUX_UNUSED(id);
 		return nullptr;

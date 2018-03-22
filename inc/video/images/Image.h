@@ -26,23 +26,23 @@ public:
 	{
 	}
 
-	virtual void Init(const math::Dimension2U& size, ColorFormat format) = 0;
-	virtual void Init(const math::Dimension2U& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop) = 0;
+	virtual void Init(const math::Dimension2I& size, ColorFormat format) = 0;
+	virtual void Init(const math::Dimension2I& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop) = 0;
 
 	//! Get the size of the image in pixel
-	virtual const math::Dimension2U& GetSize() const = 0;
+	virtual const math::Dimension2I& GetSize() const = 0;
 
 	//! Get the colorformat of the image
 	virtual ColorFormat GetColorFormat() const = 0;
 
 	//! The number of bits per image pixel
-	virtual u32 GetBitsPerPixel() const = 0;
+	virtual int GetBitsPerPixel() const = 0;
 
 	//! The size of the whole image in bytes
-	virtual u32 GetSizeInBytes() const = 0;
+	virtual int GetSizeInBytes() const = 0;
 
 	//! The size of the whole image in pixels
-	virtual u32 GetSizeInPixels() const = 0;
+	virtual int GetSizeInPixels() const = 0;
 
 	//! Get a single pixel of the image
 	/**
@@ -51,7 +51,7 @@ public:
 	\param y The y coordinate of the pixel
 	\return The color of the pixel
 	*/
-	virtual Color GetPixel(u32 x, u32 y) = 0;
+	virtual Color GetPixel(int x, int y) = 0;
 
 	//! Set a single pixel of the image
 	/**
@@ -60,7 +60,7 @@ public:
 	\param y The y coordinate of the pixel
 	\param color The new color of the pixel
 	*/
-	virtual void SetPixel(u32 x, u32 y, Color color) = 0;
+	virtual void SetPixel(int x, int y, Color color) = 0;
 
 	//! Fill the image with a single color
 	/**
@@ -73,7 +73,7 @@ public:
 	The pitch is the number of bytes between the begin of one line and the start of the next.
 	\return The pitch of the image
 	*/
-	virtual u32 GetPitch() const = 0;
+	virtual int GetPitch() const = 0;
 
 	//! Locks the image
 	/**
@@ -192,15 +192,15 @@ struct ImageLock
 
 	Image* base;
 	u8* data;
-	u32 pitch;
+	int pitch;
 };
 
 class ImageList : public core::Resource
 {
 public:
-	virtual size_t GetImageCount() const = 0;
+	virtual int GetImageCount() const = 0;
 	virtual void AddImage(Image* img) = 0;
-	virtual StrongRef<Image> GetImage(size_t i) const = 0;
+	virtual StrongRef<Image> GetImage(int i) const = 0;
 	virtual void RemoveImage(Image* img) = 0;
 	virtual void Clear() = 0;
 };

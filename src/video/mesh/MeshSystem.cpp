@@ -106,14 +106,14 @@ void MeshSystem::RemoveCreator(GeometryCreator* creator)
 	m_Creators.Erase(creator->GetName());
 }
 
-size_t MeshSystem::GetCreatorCount() const
+int MeshSystem::GetCreatorCount() const
 {
 	return m_Creators.Size();
 }
 
-StrongRef<GeometryCreator> MeshSystem::GetCreatorById(size_t id) const
+StrongRef<GeometryCreator> MeshSystem::GetCreatorById(int id) const
 {
-	if(id >= m_Creators.Size())
+	if(id < 0 && id >= m_Creators.Size())
 		throw core::OutOfRangeException();
 
 	return *core::AdvanceIterator(m_Creators.First(), id);

@@ -4,6 +4,8 @@
 #include "core/lxArray.h"
 
 #ifdef LUX_WINDOWS
+#include "platform/StrippedWindows.h"
+
 namespace lux
 {
 namespace io
@@ -27,7 +29,7 @@ public:
 
 private:
 	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
-	u32 GetWin32FileAttributes(const Path& p) const;
+	DWORD GetWin32FileAttributes(const Path& p) const;
 
 private:
 	struct SelfData;

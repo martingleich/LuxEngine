@@ -129,11 +129,11 @@ public:
 
 	LUX_API Action* GetAction(const core::String& name);
 
-	LUX_API Action* GetAction(size_t i);
+	LUX_API Action* GetAction(int i);
 
-	LUX_API const core::String& GetActionName(size_t i) const;
+	LUX_API const core::String& GetActionName(int i) const;
 
-	LUX_API size_t GetActionCount() const;
+	LUX_API int GetActionCount() const;
 
 private:
 	ActionList();

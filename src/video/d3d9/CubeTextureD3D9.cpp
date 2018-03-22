@@ -21,7 +21,7 @@ CubeTextureD3D9::~CubeTextureD3D9()
 {
 }
 
-void CubeTextureD3D9::Init(u32 size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic)
+void CubeTextureD3D9::Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic)
 {
 	if(!m_D3DDevice)
 		throw core::Exception("No driver available");
@@ -42,12 +42,12 @@ void CubeTextureD3D9::Init(u32 size, ColorFormat lxFormat, bool isRendertarget, 
 		usage = D3DUSAGE_RENDERTARGET;
 		pool = D3DPOOL_DEFAULT;
 	}
-	HRESULT hr = m_D3DDevice->CreateCubeTexture(size, 1, usage, format, pool, m_Texture.Access(), nullptr);
+	HRESULT hr = m_D3DDevice->CreateCubeTexture((UINT)size, 1, usage, format, pool, m_Texture.Access(), nullptr);
 
 	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
 
-	m_LockedLevel = 0xFFFFFFFF;
+	m_LockedLevel = -1;
 
 	m_Texture->GetLevelDesc(0, &m_Desc);
 
@@ -63,7 +63,7 @@ void CubeTextureD3D9::RegenerateMIPMaps()
 		throw core::D3D9Exception(hr);
 }
 
-BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode mode, EFace face, u32 mipLevel)
+BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode mode, EFace face, int mipLevel)
 {
 	if(m_LockedLevel != 0xFFFFFFFF)
 		throw core::Exception("Texture is already locked");
@@ -78,7 +78,7 @@ BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode mode, EFace face, u32 mi
 	else if(mode == ELockMode::ReadOnly)
 		flags = D3DLOCK_READONLY;
 
-	HRESULT hr = m_Texture->LockRect(m_LockedFace, mipLevel, &d3dlocked, nullptr, flags);
+	HRESULT hr = m_Texture->LockRect(m_LockedFace, (UINT)mipLevel, &d3dlocked, nullptr, flags);
 	if(FAILED(hr)) {
 		if(mode == ELockMode::Overwrite && m_Desc.Usage == 0) {
 			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
@@ -103,7 +103,7 @@ BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode mode, EFace face, u32 mi
 
 void CubeTextureD3D9::Unlock(bool regenMipMaps)
 {
-	if(m_LockedLevel == 0xFFFFFFFF)
+	if(m_LockedLevel == -1)
 		return;
 
 	HRESULT hr;
@@ -111,7 +111,7 @@ void CubeTextureD3D9::Unlock(bool regenMipMaps)
 		m_TempSurface->UnlockRect();
 		if(m_Desc.Usage == 0) {
 			UnknownRefCounted<IDirect3DSurface9> surface;
-			hr = m_Texture->GetCubeMapSurface(m_LockedFace, m_LockedLevel, surface.Access());
+			hr = m_Texture->GetCubeMapSurface(m_LockedFace, (UINT)m_LockedLevel, surface.Access());
 			if(SUCCEEDED(hr))
 				hr = m_D3DDevice->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
 			if(FAILED(hr))
@@ -123,19 +123,19 @@ void CubeTextureD3D9::Unlock(bool regenMipMaps)
 		m_Texture->UnlockRect(m_LockedFace, m_LockedLevel);
 	}
 
-	m_LockedLevel = 0xFFFFFFFF;
+	m_LockedLevel = -1;
 	if(regenMipMaps)
 		RegenerateMIPMaps();
 }
 
-const math::Dimension2U& CubeTextureD3D9::GetSize() const
+const math::Dimension2I& CubeTextureD3D9::GetSize() const
 {
 	return m_Dimension;
 }
 
-u32 CubeTextureD3D9::GetLevelCount() const
+int CubeTextureD3D9::GetLevelCount() const
 {
-	return m_Texture->GetLevelCount();
+	return (int)m_Texture->GetLevelCount();
 }
 
 const BaseTexture::Filter& CubeTextureD3D9::GetFiltering() const

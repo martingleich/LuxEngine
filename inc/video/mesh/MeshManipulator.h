@@ -200,7 +200,7 @@ public:
 		auto pos = GetPositions(geo);
 		auto nor = GetNormals(geo);
 		if(pos.Size() == nor.Size()) {
-			for(size_t i = 0; i < pos.Size(); ++i) {
+			for(int i = 0; i < pos.Size(); ++i) {
 				pos[i] += scale * nor[i];
 				newBoundingBox.AddPoint(pos[i]);
 			}
@@ -280,8 +280,8 @@ public:
 			auto dstV = (u8*)targetVertices->Pointer(0, targetVertices->GetSize());
 			auto dstI = (u8*)targetIndices->Pointer(0, targetIndices->GetSize());
 			bool winding = geo->GetFrontFaceWinding() == video::EFaceWinding::CCW;
-			for(u32 i = 0; i < primCount; ++i) {
-				u32 a, b, c;
+			for(int i = 0; i < primCount; ++i) {
+				int a, b, c;
 				switch(primType) {
 				case EPrimitiveType::TriangleStrip:
 					if(winding) {
@@ -307,7 +307,7 @@ public:
 				default:
 					a = b = c = 0;
 				}
-				u32 index = 3 * i + 0;
+				int index = 3 * i + 0;
 				memcpy(dstV + index*strideV, srcV + a*strideV, strideV);
 				index = 3 * i + 1;
 				memcpy(dstV + index*strideV, srcV + b*strideV, strideV);
@@ -318,10 +318,10 @@ public:
 			targetVertices->Update();
 
 			if(targetIndices->GetFormat() == EIndexFormat::Bit32) {
-				for(u32 i = 0; i < 3 * primCount; ++i)
+				for(u32 i = 0; i < 3 * (u32)primCount; ++i)
 					memcpy(dstI + i * 4, &i, 4);
 			} else {
-				for(u16 i = 0; i < 3 * primCount; ++i)
+				for(u16 i = 0; i < 3 * (u16)primCount; ++i)
 					memcpy(dstI + i * 2, &i, 2);
 			}
 			targetIndices->Update();
@@ -357,12 +357,12 @@ public:
 		auto pos = GetPositions(geo);
 		auto nor = GetNormals(geo);
 		auto winding = geo->GetFrontFaceWinding() == video::EFaceWinding::CCW;
-		u32 ob = winding ? 1 : 2;
-		u32 oc = winding ? 2 : 1;
-		for(u32 i = 0; i < geo->GetPrimitiveCount(); ++i) {
-			u32 a = indices->GetIndex(3 * i);
-			u32 b = indices->GetIndex(3 * i + ob);
-			u32 c = indices->GetIndex(3 * i + oc);
+		int ob = winding ? 1 : 2;
+		int oc = winding ? 2 : 1;
+		for(int i = 0; i < geo->GetPrimitiveCount(); ++i) {
+			int a = indices->GetIndex(3 * i);
+			int b = indices->GetIndex(3 * i + ob);
+			int c = indices->GetIndex(3 * i + oc);
 
 			auto v1 = pos[b] - pos[a];
 			auto v2 = pos[c] - pos[a];

@@ -15,7 +15,7 @@ TextContainer::~TextContainer()
 {
 }
 
-void TextContainer::Rebreak(size_t firstLine)
+void TextContainer::Rebreak(int firstLine)
 {
 	m_Rebreak = firstLine;
 }
@@ -30,7 +30,7 @@ void TextContainer::Ensure(
 		m_BrokenText.Clear();
 		return;
 	}
-	size_t rebreakText = m_Rebreak;
+	int rebreakText = m_Rebreak;
 	if(!m_BrokenText.IsEmpty() && m_Text.First() != m_BrokenText[0].line.First()) {
 		m_BrokenText.Clear();
 		rebreakText = 0;
@@ -56,17 +56,17 @@ void TextContainer::Ensure(
 	}
 	m_FontSettings = settings; // Copy outside of it, to get non-geometric member(for example color)
 
-	if(rebreakText == std::numeric_limits<size_t>::max())
+	if(rebreakText == std::numeric_limits<int>::max())
 		return;
 
-	m_Rebreak = std::numeric_limits<size_t>::max();
+	m_Rebreak = std::numeric_limits<int>::max();
 
 	auto width = m_TextBoxSize.width;
 	auto& textDim = m_TextDim;
 	textDim = math::Dimension2F(0, 0);
 	core::Array<float> carets;
 	bool keepBreaking = true;
-	size_t lineId = rebreakText;
+	int lineId = rebreakText;
 	auto AddBrokenLine = [&](core::Range<core::String::ConstIterator> str, float width) {
 		if(m_BrokenText.Size() > lineId) {
 			if(m_BrokenText[lineId].line == str && m_BrokenText[lineId].width == width)
@@ -90,7 +90,7 @@ void TextContainer::Ensure(
 			m_Font->GetTextCarets(settings, line, carets);
 			float offset = 0.0f;
 			core::String::ConstIterator lineFirst = line.First();
-			size_t id = 0;
+			int id = 0;
 			for(auto jt = line.First(); jt != line.End(); ++jt) {
 				++id;
 				if(*jt == ' ') {
@@ -182,17 +182,17 @@ void TextContainer::Render(
 	Render(r, align, textBox, clipBox);
 }
 
-size_t TextContainer::GetLineCount() const
+int TextContainer::GetLineCount() const
 {
 	return m_BrokenText.Size();
 }
 
-core::Range<core::String::ConstIterator> TextContainer::GetLine(size_t i) const
+core::Range<core::String::ConstIterator> TextContainer::GetLine(int i) const
 {
 	return m_BrokenText[i].line;
 }
 
-float TextContainer::GetLineWidth(size_t i) const
+float TextContainer::GetLineWidth(int i) const
 {
 	return m_BrokenText[i].width;
 }

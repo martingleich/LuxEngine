@@ -21,9 +21,9 @@ struct CompareType
 	}
 };
 
-inline size_t HashSequence(const u8* ptr, size_t size)
+inline int HashSequence(const u8* ptr, int size)
 {
-	size_t out = 7;
+	int out = 7;
 	const u8* end = ptr + size;
 	for(; ptr != end; ++ptr)
 		out = 31 * out + *ptr;
@@ -33,7 +33,7 @@ inline size_t HashSequence(const u8* ptr, size_t size)
 template <typename T>
 struct BitWiseHash
 {
-	size_t operator()(const T& t) const
+	int operator()(const T& t) const
 	{
 		return HashSequence(reinterpret_cast<const u8*>(&t), sizeof(T));
 	}
@@ -42,9 +42,9 @@ struct BitWiseHash
 template <typename T>
 struct HashType
 {
-	typename std::enable_if<std::is_enum<T>::value, size_t>::type operator()(T t) const
+	typename std::enable_if<std::is_enum<T>::value, int>::type operator()(T t) const
 	{
-		return (size_t)t;
+		return (int)t;
 	}
 };
 
@@ -67,7 +67,7 @@ template <> struct HashType<unsigned long long> : BitWiseHash<unsigned long long
 template <>
 struct HashType<float> : BitWiseHash<float>
 {
-	size_t operator()(float x)
+	int operator()(float x)
 	{
 		return BitWiseHash<float>::operator()(x == -0 ? +0 : x);
 	}
@@ -76,7 +76,7 @@ struct HashType<float> : BitWiseHash<float>
 template <>
 struct HashType<double> : BitWiseHash<double>
 {
-	size_t operator()(double x)
+	int operator()(double x)
 	{
 		return BitWiseHash<double>::operator()(x == -0 ? +0 : x);
 	}
@@ -85,7 +85,7 @@ struct HashType<double> : BitWiseHash<double>
 template <>
 struct HashType<long double> : BitWiseHash<long double>
 {
-	size_t operator()(long double x)
+	int operator()(long double x)
 	{
 		return BitWiseHash<long double>::operator()(x == -0 ? +0 : x);
 	}

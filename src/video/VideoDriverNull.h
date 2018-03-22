@@ -15,11 +15,11 @@ public:
 	VideoDriverNull(const VideoDriverInitData& data);
 
 	virtual const DriverConfig& GetConfig() const;
-	virtual u32 GetDeviceCapability(EDriverCaps Capability) const;
+	virtual int GetDeviceCapability(EDriverCaps Capability) const;
 
 protected:
 	DriverConfig m_Config;
-	u32 m_DriverCaps[(u32)EDriverCaps::EDriverCaps_Count];
+	int m_DriverCaps[(int)EDriverCaps::EDriverCaps_Count];
 };
 
 }

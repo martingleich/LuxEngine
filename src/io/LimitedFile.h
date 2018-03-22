@@ -12,24 +12,24 @@ class LimitedFile : public File
 public:
 	LimitedFile(
 		StrongRef<File> Master,
-		u32 offset,
+		s64 offset,
 		const FileDescription& desc,
 		core::String name);
 
-	u32 ReadBinaryPart(u32 numBytes, void* out);
-	u32 WriteBinaryPart(const void* data, u32 length);
-	void Seek(u32 offset, ESeekOrigin origin);
+	s64 ReadBinaryPart(s64 numBytes, void* out);
+	s64 WriteBinaryPart(const void* data, s64 length);
+	void Seek(s64 offset, ESeekOrigin origin);
 	void* GetBuffer();
 	const void* GetBuffer() const;
-	u32 GetSize() const;
-	u32 GetCursor() const;
+	s64 GetSize() const;
+	s64 GetCursor() const;
 
 private:
-	u32 m_StartOffset;
-	u32 m_FileSize;
-	u32 m_Cursor;
+	s64 m_StartOffset;
+	s64 m_FileSize;
+	s64 m_Cursor;
+	
 	StrongRef<File> m_MasterFile;
-
 };
 
 } //namespace io

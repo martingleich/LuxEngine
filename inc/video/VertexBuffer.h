@@ -21,7 +21,7 @@ public:
 	\param stream Which stream of the format to use
 	\param init Pointer to the default vertex, null if no default is used.
 	*/
-	virtual void SetFormat(const VertexFormat& format, u32 stream, const void* init = nullptr) = 0;
+	virtual void SetFormat(const VertexFormat& format, int stream, const void* init = nullptr) = 0;
 
 	//! Set the format of the vertexbuffer.
 	/**
@@ -39,14 +39,14 @@ public:
 	//! Get the used vertex format
 	virtual const VertexFormat& GetFormat() const = 0;
 	//! Get the used stream of the vertex format.
-	virtual u32 GetStream() const = 0;
+	virtual int GetStream() const = 0;
 
-	virtual u32 AddVertex(const void* vertex) = 0;
-	virtual u32 AddVertices(const void* vertices, u32 count) = 0;
-	virtual void SetVertex(const void* vertex, u32 n) = 0;
-	virtual void SetVertices(const void* vertices, u32 count, u32 n) = 0;
-	virtual void GetVertex(void* ptr, u32 n) const = 0;
-	virtual void GetVertices(void* ptr, u32 count, u32 n) const = 0;
+	virtual int AddVertex(const void* vertex) = 0;
+	virtual int AddVertices(const void* vertices, int count) = 0;
+	virtual void SetVertex(const void* vertex, int n) = 0;
+	virtual void SetVertices(const void* vertices, int count, int n) = 0;
+	virtual void GetVertex(void* ptr, int n) const = 0;
+	virtual void GetVertices(void* ptr, int count, int n) const = 0;
 
 	template <typename T>
 	core::StrideRange<T> Elements(VertexElement::EUsage element)

@@ -27,7 +27,7 @@ public:
 		u16 usage;
 
 		EElementType type;
-		u32 instance;
+		int instance;
 	};
 
 public:
@@ -36,8 +36,8 @@ public:
 	virtual EEventSource GetType() const = 0;
 	virtual const core::String& GetName() const = 0;
 	virtual const core::String& GetGUID() const = 0;
-	virtual size_t GetElementCount(EEventType type) const = 0;
-	virtual ElemDesc GetElementDesc(EEventType type, u32 id) const = 0;
+	virtual int GetElementCount(EEventType type) const = 0;
+	virtual ElemDesc GetElementDesc(EEventType type, int id) const = 0;
 };
 
 //! Class for a single input device.
@@ -59,7 +59,7 @@ public:
 	\param type The event type given by the queried elements.
 	\return The number of elments on the device.
 	*/
-	virtual size_t GetElementCount(EEventType type) const = 0;
+	virtual int GetElementCount(EEventType type) const = 0;
 
 	//! The name of a device element.
 	/**
@@ -68,7 +68,7 @@ public:
 	\param id The id of the element
 	\return The name of the element.
 	*/
-	virtual const core::String& GetElementName(EEventType type, u32 id) const = 0;
+	virtual const core::String& GetElementName(EEventType type, int id) const = 0;
 
 	//! The exact type of the device element.
 	/**
@@ -76,27 +76,27 @@ public:
 	\param id The id of the element
 	\return A or'ed combination of element types.
 	*/
-	virtual EElementType GetElementType(EEventType type, u32 id) const = 0;
+	virtual EElementType GetElementType(EEventType type, int id) const = 0;
 
 	//! Get the state of a button
 	/**
 	\param buttonCode The id of the button.
 	*/
-	virtual const event::Button* GetButton(u32 buttonCode) const = 0;
+	virtual const event::Button* GetButton(int buttonCode) const = 0;
 
 	//! Get the state of an axis.
 	/**
 	\param axisCode The id of the axis.
 	\return The value of the axis in device units.
 	*/
-	virtual const event::Axis* GetAxis(u32 axisCode) const = 0;
+	virtual const event::Axis* GetAxis(int axisCode) const = 0;
 
 	//! Get the state of an area.
 	/**
 	\param areaCode The id of the area.
 	\return The value of the area in device units.
 	*/
-	virtual const event::Area* GetArea(u32 areaCode) const = 0;
+	virtual const event::Area* GetArea(int areaCode) const = 0;
 
 	//! Update the device with this event.
 	/**

@@ -54,7 +54,7 @@ StrongRef<VertexBuffer> BufferManagerNull::CreateVertexBuffer()
 	return LUX_NEW(VertexBufferImpl)(this);
 }
 
-void BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer, u32 streamID)
+void BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer, int streamID)
 {
 	if(!buffer)
 		return;

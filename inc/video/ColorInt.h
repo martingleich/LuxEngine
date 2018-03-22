@@ -52,7 +52,7 @@ public:
 	/**
 	\return The color in A8R8G8B8 format
 	*/
-	explicit operator u32() const
+	u32 ToDWORD() const
 	{
 		return c;
 	}
@@ -263,7 +263,7 @@ inline Color operator*(const float f, Color a)
 inline void fmtPrint(format::Context& ctx, Color format, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
-	format::vformat(ctx, "~h", (u32)format);
+	format::vformat(ctx, "~h", format.ToDWORD());
 }
 
 } // namespace video

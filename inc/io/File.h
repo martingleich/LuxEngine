@@ -50,9 +50,9 @@ public:
 	\param data The data to write to the file
 	\param numBytes The number of bytes to write
 	*/
-	void WriteBinary(const void* data, u32 numBytes)
+	void WriteBinary(const void* data, s64 numBytes)
 	{
-		u32 count = WriteBinaryPart(data, numBytes);
+		s64 count = WriteBinaryPart(data, numBytes);
 		if(count != numBytes)
 			throw io::FileException(io::FileException::WriteError);
 	}
@@ -63,7 +63,7 @@ public:
 	\param numBytes The number of bytes to write
 	\return The number of bytes writtefn, may be smaller than numBytes
 	*/
-	virtual u32 WriteBinaryPart(const void* data, u32 numBytes) = 0;
+	virtual s64 WriteBinaryPart(const void* data, s64 numBytes) = 0;
 
 	//! Read binary data
 	/**
@@ -71,9 +71,9 @@ public:
 	\param numBytes The number of bytes to read
 	\param out Here the number of bytes are written
 	*/
-	void ReadBinary(u32 numBytes, void* out)
+	void ReadBinary(s64 numBytes, void* out)
 	{
-		u32 count = ReadBinaryPart(numBytes, out);
+		s64 count = ReadBinaryPart(numBytes, out);
 		if(count != numBytes)
 			throw io::FileException(io::FileException::ReadError);
 	}
@@ -85,7 +85,7 @@ public:
 	\param out Here the number of bytes are written
 	\return The number of bytes read, may be smaller than numBytes
 	*/
-	virtual u32 ReadBinaryPart(u32 numBytes, void* out) = 0;
+	virtual s64 ReadBinaryPart(s64 numBytes, void* out) = 0;
 
 	//! A binary buffer of the file data
 	/**
@@ -110,13 +110,13 @@ public:
 	\param Origin The origin of the seek operation
 	\param offset The seek offset
 	*/
-	virtual void Seek(u32 offset, ESeekOrigin origin = ESeekOrigin::Cursor) = 0;
+	virtual void Seek(s64 offset, ESeekOrigin origin = ESeekOrigin::Cursor) = 0;
 
 	//! The size of the file in bytes
-	virtual u32 GetSize() const = 0;
+	virtual s64 GetSize() const = 0;
 
 	//! The current cursor position in the file
-	virtual u32 GetCursor() const = 0;
+	virtual s64 GetCursor() const = 0;
 
 protected:
 	core::String m_Name;

@@ -6,6 +6,7 @@
 #include "TTFParser.h"
 #include "core/lxMemory.h"
 #include "core/Logger.h"
+#include "core/SafeCast.h"
 #include "platform/StrippedWindows.h"
 
 namespace lux
@@ -26,8 +27,8 @@ struct Context
 {
 	HDC dc;
 
-	u32 channelCount;
-	math::Dimension2U imageSize;
+	int channelCount;
+	math::Dimension2I imageSize;
 	HBITMAP bitmap;
 
 	HFONT font;
@@ -41,10 +42,10 @@ struct Context
 	u8* image;
 	bool antialiased;
 
-	u32 size;
-	math::RectU padding;
+	int size;
+	math::RectI padding;
 
-	u32 borderSize;
+	int borderSize;
 
 	bool italic;
 	core::String name;
@@ -102,7 +103,7 @@ static void GenerateCharInfo(impl_fontCreatorWin32::Context* ctx)
 	}
 }
 
-static u32 NextPower2(u32 x)
+static int NextPower2(int x)
 {
 	--x;
 	x |= x >> 1;
@@ -133,21 +134,21 @@ static DWORD GetWin32FontWeight(EFontWeight weight)
 
 static void CalculateImageSize(impl_fontCreatorWin32::Context* ctx)
 {
-	u32 count = 0;
+	int count = 0;
 	float sum_length = 0;
 	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {
 		++count;
 		sum_length += math::Max(it->b, it->a + it->b + it->c);
 	}
 
-	u32 avg_length = (u32)(sum_length / count + 2);
+	int avg_length = (int)(sum_length / count) + 2;
 
-	u32 elems_per_line = count;
-	u32 width = elems_per_line * (avg_length + 2);
-	u32 height = ctx->fontHeight + 2;
+	int elems_per_line = count;
+	int width = elems_per_line * (avg_length + 2);
+	int height = ctx->fontHeight + 2;
 
-	u32 p2width;
-	u32 p2height;
+	int p2width;
+	int p2height;
 	do {
 		p2width = NextPower2(width);
 		p2height = NextPower2(height);
@@ -201,8 +202,8 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 
 	SetTextColor(ctx->dc, RGB(0, 0, 0));
 	SetTextAlign(ctx->dc, TA_TOP | TA_LEFT);
-	const u32 width = ctx->imageSize.width;
-	const u32 height = ctx->imageSize.height;
+	auto width = ctx->imageSize.width;
+	auto height = ctx->imageSize.height;
 
 	RECT fullRect = {0, 0, (LONG)width, (LONG)height};
 	FillRect(ctx->dc, &fullRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
@@ -212,7 +213,7 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 
 	u32 cur_x = 0;
 	u32 cur_y = 0;
-	core::Array<math::RectU> charRects;
+	core::Array<math::RectI> charRects;
 	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {
 		const u32 c = it.key();
 		const impl_fontCreatorWin32::CharInfo& info = it.value();
@@ -238,8 +239,8 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 
 		charRects.EmplaceBack(
 			cur_x, cur_y,
-			(u32)(cur_x + info.b),
-			(u32)(cur_y + ctx->fontHeight));
+			(int)(cur_x + info.b),
+			(int)(cur_y + ctx->fontHeight));
 
 		out.left = (float)(cur_x) / width;
 		out.top = (float)(cur_y) / height;
@@ -292,8 +293,8 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 	u32 inOff = 0;
 	u32 baseOff = 1;
 	u32 outOff = 2;
-	for(u32 y = 0; y < height; ++y) {
-		for(u32 x = 0; x < width; ++x) {
+	for(int y = 0; y < height; ++y) {
+		for(int x = 0; x < width; ++x) {
 			auto in = ((BYTE*)bits)[(y*width + x) * 3 + inOff];
 			auto& out = ((BYTE*)bits)[((height - y - 1)*width + x) * 3 + baseOff];
 			out = InvertAndGammaCorrect(in);
@@ -301,22 +302,22 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 	}
 
 	// Apply dilation function
-	u32 dilateSize = ctx->borderSize;
-	u32 dilateCount = 1; // If changing this, the padding has to be changed too.
+	int dilateSize = ctx->borderSize;
+	int dilateCount = 1; // If changing this, the padding has to be changed too.
 	if(dilateSize > 0 && dilateCount > 0) {
 		for(auto& c : charRects) {
 			inOff = baseOff;
 			outOff = 2;
-			for(u32 pass = 0; pass < dilateCount; ++pass) {
-				for(u32 y = c.top; y < c.bottom; ++y) {
-					for(u32 x = c.left; x < c.right; ++x) {
-						s32 minX = (u32)math::Max((s32)x - (s32)dilateSize, (s32)c.left);
-						s32 maxX = (u32)math::Min((s32)x + (s32)dilateSize, (s32)c.right);
-						s32 minY = (u32)math::Max((s32)y - (s32)dilateSize, (s32)c.top);
-						s32 maxY = (u32)math::Min((s32)y + (s32)dilateSize, (s32)c.bottom);
-						u32 dilated = 0;
-						for(s32 j = minY; j <= maxY; ++j) {
-							for(s32 i = minX; i <= maxX; ++i) {
+			for(int pass = 0; pass < dilateCount; ++pass) {
+				for(int y = c.top; y < c.bottom; ++y) {
+					for(int x = c.left; x < c.right; ++x) {
+						int minX = math::Max(x - dilateSize, c.left);
+						int maxX = math::Min(x + dilateSize, c.right);
+						int minY = math::Max(y - dilateSize, c.top);
+						int maxY = math::Min(y + dilateSize, c.bottom);
+						int dilated = 0;
+						for(int j = minY; j <= maxY; ++j) {
+							for(int i = minX; i <= maxX; ++i) {
 								auto in = ((BYTE*)bits)[(j*width + i) * 3 + inOff];
 								if(in > dilated)
 									dilated = in;
@@ -336,13 +337,13 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 	}
 
 	// Convert to final data
-	for(u32 y = 0; y < height; ++y) {
-		for(u32 x = 0; x < width; ++x) {
+	for(int y = 0; y < height; ++y) {
+		for(int x = 0; x < width; ++x) {
 			auto alpha = ctx->image + (y*width + x) * ctx->channelCount + 0;
 			auto inner = ctx->image + (y*width + x) * ctx->channelCount + 1;
 
 			if(ctx->borderSize) {
-				u32 dilated = ((BYTE*)bits)[(y*width + x) * 3 + inOff];
+				int dilated = ((BYTE*)bits)[(y*width + x) * 3 + inOff];
 				auto base = ((BYTE*)bits)[(y*width + x) * 3 + baseOff];
 				// a+b 
 				*alpha = (u8)(base + dilated - (base * dilated) / 255);
@@ -370,7 +371,7 @@ int CALLBACK EnumFontFamExProc(
 	LUX_UNUSED(fontType);
 	LUX_UNUSED(lParam);
 
-	size_t* count = (size_t*)lParam;
+	int* count = (int*)lParam;
 	*count = *count + 1;
 	return 1;
 }
@@ -380,14 +381,14 @@ static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const core:
 	LOGFONTW logFont;
 	ZeroMemory(&logFont, sizeof(logFont));
 	auto utf16Buffer = core::UTF8ToUTF16(name.Data());
-	size_t charCount = math::Min<size_t>(LF_FACESIZE, utf16Buffer.Size());
+	int charCount = math::Min(LF_FACESIZE, utf16Buffer.Size());
 
 	memcpy(logFont.lfFaceName, utf16Buffer.Data(), charCount * 2);
 	logFont.lfFaceName[charCount] = 0;
 	logFont.lfCharSet = ANSI_CHARSET;
 	logFont.lfPitchAndFamily = 0;
 
-	size_t fontCounts = 0;
+	int fontCounts = 0;
 	EnumFontFamiliesExW(
 		ctx->dc,
 		&logFont,
@@ -403,10 +404,10 @@ static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const core:
 
 static bool RegisterFileFont(io::File* file, HANDLE& outHandle, core::String& outFontFamily)
 {
-	core::RawMemory data(file->GetSize());
+	core::RawMemory data(core::SafeCast<size_t>(file->GetSize()));
 
 	file->ReadBinary(file->GetSize(), data);
-	TTFParser ttfParser(data, data.GetSize());
+	TTFParser ttfParser(data, core::SafeCast<int>(data.GetSize()));
 	if(!ttfParser.IsValid())
 		return false;
 
@@ -415,7 +416,7 @@ static bool RegisterFileFont(io::File* file, HANDLE& outHandle, core::String& ou
 	DWORD fontCount;
 	outHandle = AddFontMemResourceEx(
 		data,
-		(DWORD)data.GetSize(),
+		core::SafeCast<DWORD>(data.GetSize()),
 		NULL,
 		&fontCount);
 
@@ -466,7 +467,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	ctx->size = desc.size;
 	ctx->borderSize = desc.borderSize;
 	ctx->name = name;
-	ctx->padding = math::RectU(
+	ctx->padding = math::RectI(
 		desc.borderSize,
 		desc.borderSize,
 		desc.borderSize,
@@ -507,7 +508,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	return ctx.Take();
 }
 
-bool FontCreatorWin32::GetFontImage(void* void_ctx, u8*& image, math::Dimension2U& imageSize, u32& channelCount)
+bool FontCreatorWin32::GetFontImage(void* void_ctx, u8*& image, math::Dimension2I& imageSize, int& channelCount)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)
@@ -520,7 +521,7 @@ bool FontCreatorWin32::GetFontImage(void* void_ctx, u8*& image, math::Dimension2
 	return true;
 }
 
-void FontCreatorWin32::GetFontInfo(void* void_ctx, u32& fontHeight, FontDescription& desc)
+void FontCreatorWin32::GetFontInfo(void* void_ctx, int& fontHeight, FontDescription& desc)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
 	if(!ctx)

@@ -32,7 +32,7 @@ struct FontCreationData
 
 	u32 channelCount;
 	u8* image;
-	math::Dimension2U imageSize;
+	math::Dimension2I imageSize;
 
 	core::HashMap<u32, CharInfo> charMap;
 	float charHeight;
@@ -60,7 +60,7 @@ public:
 	void Draw(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, const math::Vector2F& Position, const math::RectF* clip);
 
 	float GetTextWidth(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text);
-	size_t GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, float XPosition);
+	int GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, float XPosition);
 	void GetTextCarets(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, core::Array<float>& carets);
 	const core::HashMap<u32, CharInfo>& GetCharMap() const;
 	const CharInfo& GetCharInfo(u32 c);
@@ -72,7 +72,7 @@ public:
 	float GetBaseLine() const;
 	float GetFontHeight() const;
 
-	void GetRawData(const void*& ptr, u32& width, u32& height, u32& channels);
+	void GetRawData(const void*& ptr, int& width, int& height, int& channels);
 
 	core::Name GetReferableType() const;
 	StrongRef<Referable> Clone() const;
@@ -82,7 +82,7 @@ private:
 
 	void InitPass();
 	void LoadImageData(const u8* imageData,
-		math::Dimension2U imageSize, u32 channelCount);
+		math::Dimension2I imageSize, int channelCount);
 
 	template <typename FuncT>
 	void IterateCarets(
@@ -121,7 +121,7 @@ private:
 
 	// Backup image
 	core::Array<u8> m_Image;
-	math::Dimension2U m_ImageSize;
+	math::Dimension2I m_ImageSize;
 	u32 m_ChannelCount;
 
 	StrongRef<video::Texture> m_Texture;

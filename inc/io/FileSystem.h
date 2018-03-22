@@ -67,8 +67,8 @@ public:
 	\return The newly created file.
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenVirtualFile(void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
-	virtual StrongRef<File> OpenVirtualFile(const void* memory, u32 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
+	virtual StrongRef<File> OpenVirtualFile(void* memory, s64 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
+	virtual StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
 
 	//! Create a limited file
 	/**
@@ -80,7 +80,7 @@ public:
 	\return The new file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenLimitedFile(File* file, u32 start, u32 size, const core::String& name) = 0;
+	virtual StrongRef<File> OpenLimitedFile(File* file, s64 start, s64 size, const core::String& name) = 0;
 
 	//! Test if a file exist
 	/**
@@ -117,7 +117,7 @@ public:
 	\return The newly created file.
 	\throws FileNotFoundException
 	*/
-	virtual File* CreateTemporaryFile(u32 size) = 0;
+	virtual File* CreateTemporaryFile(s64 size) = 0;
 
 	//! Retrieve important fileinformations
 	/**

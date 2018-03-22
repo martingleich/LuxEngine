@@ -39,10 +39,10 @@ WindowWin32::WindowWin32(HWND window) :
 		this->OnStateChange(EStateChange::Normal);
 
 	u16 text[200];
-	size_t length;
+	int length;
 	DWORD_PTR result;
 	text[0] = 0;
-	length = (size_t)SendMessageTimeoutW(m_Window, WM_GETTEXT,
+	length = (int)SendMessageTimeoutW(m_Window, WM_GETTEXT,
 		200, reinterpret_cast<LPARAM>(text),
 		SMTO_ABORTIFHUNG, 2000, &result);
 	core::String newTitle = core::UTF16ToString(text);
@@ -127,7 +127,7 @@ void WindowWin32::SetText(const core::String& text)
 void WindowWin32::SetInnerSize(const ScalarDimensionF& size)
 {
 	auto screen = GetParentInnerRect();
-	math::Dimension2U real(
+	math::Dimension2I real(
 		(u32)size.width.GetRealValue(screen.GetWidth()),
 		(u32)size.height.GetRealValue(screen.GetHeight()));
 

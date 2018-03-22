@@ -52,7 +52,7 @@ public:
 			WriteFile(file, texture);
 	}
 
-	virtual void WriteFile(io::File* File, void* data, video::ColorFormat format, math::Dimension2U size, u32 pitch, u32 writerParam = 0) = 0;
+	virtual void WriteFile(io::File* File, void* data, video::ColorFormat format, math::Dimension2I size, u32 pitch, u32 writerParam = 0) = 0;
 };
 
 }

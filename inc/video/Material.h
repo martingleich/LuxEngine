@@ -121,7 +121,7 @@ public:
 	void SendShaderSettings(const Pass& pass, void*) const
 	{
 		if(pass.shader) {
-			for(u32 i = 0; i < m_ShaderValues.GetParamCount(); ++i) {
+			for(int i = 0; i < m_ShaderValues.GetParamCount(); ++i) {
 				auto param = m_ShaderValues.FromID(i, true);
 				pass.shader->SetParam(i, param.Pointer());
 			}

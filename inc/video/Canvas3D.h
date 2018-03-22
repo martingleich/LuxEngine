@@ -138,9 +138,9 @@ public:
 		const math::Vector3F& c);
 
 	LUX_API void DrawCurve(
-		const math::Sample<math::Vector3F>* points, size_t count,
+		const math::Sample<math::Vector3F>* points, int count,
 		math::EEdgeHandling edgeHandling,
-		u32 quality = 4);
+		int quality = 4);
 
 private:
 	void DrawPartialLine(
@@ -170,14 +170,14 @@ private:
 	float m_PolyOffset;
 
 	Brush3D m_Brush;
-	static const u32 TRI_BUFFER_SIZE = 128 * 3;
+	static const int TRI_BUFFER_SIZE = 128 * 3;
 	Vertex3D m_TriBuffer[TRI_BUFFER_SIZE];
-	u32 m_TriBufferCursor;
+	int m_TriBufferCursor;
 
 	Pen3D m_Pen;
-	static const u32 LINE_BUFFER_SIZE = 128 * 2;
+	static const int LINE_BUFFER_SIZE = 128 * 2;
 	Canvas3DSystem::PenVertex m_LineBuffer[LINE_BUFFER_SIZE];
-	u32 m_LineBufferCursor;
+	int m_LineBufferCursor;
 
 	Renderer* m_Renderer;
 	EPass m_LastPass;

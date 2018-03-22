@@ -31,7 +31,7 @@ private:
 	bool PrecomputeOrientation(const math::Matrix4& invModelView);
 	void ComputeGlobalOrientation();
 	void ComputeLocalOrientation(const Particle& particle);
-	void SetIndexBuffer(video::IndexBuffer* indexBuffer, u32 from, u32 to);
+	void SetIndexBuffer(video::IndexBuffer* indexBuffer, int from, int to);
 	void CreateBuffers(ParticleGroupData* group);
 
 	void RenderQuad_Scaled(video::Vertex3D* vertices, const Particle& particle);

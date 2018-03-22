@@ -38,7 +38,7 @@ public:
 	Name& operator=(const String& str);
 
 	const char* c_str() const;
-	size_t GetHash() const;
+	int GetHash() const;
 	bool operator==(const Name& other) const;
 	bool operator==(const char* str) const;
 	bool operator==(const String& str) const;
@@ -57,7 +57,7 @@ public:
 	}
 
 	bool operator<(const Name& other) const;
-	size_t Size() const;
+	int Size() const;
 	bool IsEmpty() const;
 
 	void Set(const char* str, int action = ADD, StringTable* table = nullptr);
@@ -90,7 +90,7 @@ inline bool operator!=(const String& cstr, const Name& namestring)
 template <>
 struct HashType<Name>
 {
-	size_t operator()(const Name& n) const
+	int operator()(const Name& n) const
 	{
 		return n.GetHash();
 	}

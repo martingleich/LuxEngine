@@ -34,17 +34,17 @@ void ParticleSystem::RemoveTemplate(ParticleSystemTemplate* templ)
 	}
 }
 
-size_t ParticleSystem::GetTemplateCount() const
+int ParticleSystem::GetTemplateCount() const
 {
 	return m_Templates.Size();
 }
 
-ParticleSystemTemplate* ParticleSystem::GetTemplate(size_t i)
+ParticleSystemTemplate* ParticleSystem::GetTemplate(int i)
 {
 	return m_Templates.At(i);
 }
 
-const ParticleSystemTemplate* ParticleSystem::GetTemplate(size_t i) const
+const ParticleSystemTemplate* ParticleSystem::GetTemplate(int i) const
 {
 	return m_Templates.At(i);
 }
@@ -85,9 +85,9 @@ void ParticleSystem::Animate(float time)
 			it->transform = ownerTrans.CombineLeft(psTransI);
 	}
 
-	size_t ai = 0;
-	for(size_t i = 0; i < m_GroupData.Size(); ++i) {
-		size_t ac = 0;
+	int ai = 0;
+	for(int i = 0; i < m_GroupData.Size(); ++i) {
+		int ac = 0;
 		for(; ai < m_Affectors.Size(); ++ai) {
 			if(m_Affectors[ai]->GetModel() != m_GroupData[i]->GetModel())
 				break;
@@ -195,14 +195,14 @@ void ParticleSystem::CollectGroups(Node* n)
 	m_Emitters.Clear();
 
 	for(auto tmpl : m_Templates) {
-		for(size_t i = 0; i < tmpl->GetAffectorCount(); ++i) {
+		for(int i = 0; i < tmpl->GetAffectorCount(); ++i) {
 			auto aff = tmpl->GetAffector(i);
 			if(aff->GetModel())
 				m_Affectors.PushBack(ParticleGroupData::AffectorEntry(aff));
 			else
 				m_GlobalAffectors.PushBack(ParticleGroupData::AffectorEntry(aff));
 		}
-		for(size_t i = 0; i < tmpl->GetEmitterCount(); ++i) {
+		for(int i = 0; i < tmpl->GetEmitterCount(); ++i) {
 			auto em = tmpl->GetEmitter(i);
 			if(em->GetModel())
 				m_Emitters.PushBack(ParticleGroupData::EmitterEntry(em));
@@ -255,10 +255,10 @@ void ParticleSystem::UpdateGroupData(Node* n)
 
 	// Generate group data for all changed groups
 	m_GroupData.Resize(modelCount);
-	size_t modId = 0;
+	int modId = 0;
 	lastModel = m_Emitters.Front()->GetModel();
 	float totalFlow = 0.0f;
-	for(size_t i = 0; i < m_Emitters.Size() + 1; ++i) {
+	for(int i = 0; i < m_Emitters.Size() + 1; ++i) {
 		auto model = (i < m_Emitters.Size()) ? m_Emitters[i]->GetModel() : nullptr;
 		if(model != lastModel) {
 			u32 capacity;

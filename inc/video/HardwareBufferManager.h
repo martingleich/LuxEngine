@@ -44,7 +44,7 @@ public:
 	\param buffer The buffer to set
 	\param streamID The stream where the buffer is set
 	*/
-	virtual void EnableBuffer(const HardwareBuffer* buffer, u32 streamID = 0) = 0;
+	virtual void EnableBuffer(const HardwareBuffer* buffer, int streamID = 0) = 0;
 
 	//! The driver which uses this buffermanager
 	virtual VideoDriver* GetDriver() = 0;

@@ -41,7 +41,7 @@ public:
 	\param type The resource type for which to query the number of resources.
 	\return The number of loaded resources
 	*/
-	LUX_API u32 GetResourceCount(Name type) const;
+	LUX_API int GetResourceCount(Name type) const;
 
 	//! Query the name of a resource
 	/**
@@ -51,7 +51,7 @@ public:
 		of the type.
 	\return The name of the resource.
 	*/
-	LUX_API const String& GetResourceName(Name type, u32 id) const;
+	LUX_API const String& GetResourceName(Name type, int id) const;
 
 	//! Query the index of a resource
 	/**
@@ -60,7 +60,7 @@ public:
 	\param resource The resource to query the name from.
 	\return The index of the resource.
 	*/
-	LUX_API u32 GetResourceId(Resource* resource) const;
+	LUX_API int GetResourceId(Resource* resource) const;
 
 	//! Query the index of a resource.
 	/**
@@ -68,7 +68,7 @@ public:
 	\param name The name of the resource to query.
 	\return The index of the resource.
 	*/
-	LUX_API u32 GetResourceId(Name type, const String& name) const;
+	LUX_API int GetResourceId(Name type, const String& name) const;
 
 	//! Add a resource to the system
 	/**
@@ -83,7 +83,7 @@ public:
 	\param type The type of the resource to remove.
 	\param id The id of the resource to remove.
 	*/
-	LUX_API void RemoveResource(Name type, u32 id);
+	LUX_API void RemoveResource(Name type, int id);
 
 	//! Remove unused resources from the system
 	/**
@@ -93,7 +93,7 @@ public:
 		Use the empty string to remove _all_ unused resources.
 	\return The number of resources freed.
 	*/
-	LUX_API u32 FreeUnusedResources(Name type = Name::INVALID);
+	LUX_API int FreeUnusedResources(Name type = Name::INVALID);
 
 	//! Get a resource based on a id.
 	/**
@@ -101,7 +101,7 @@ public:
 	\param id The index of the resource.
 	\return A resource.
 	*/
-	LUX_API StrongRef<Resource> GetResource(Name type, u32 id);
+	LUX_API StrongRef<Resource> GetResource(Name type, int id);
 
 	//! Get a resource based on a name.
 	/**
@@ -136,14 +136,14 @@ public:
 	/**
 	\return The number of resource loaders.
 	*/
-	LUX_API u32 GetResourceLoaderCount() const;
+	LUX_API int GetResourceLoaderCount() const;
 
 	//! Query a resource loader
 	/**
 	\param id The id of the resource loader must be between 0 and the number of resource loaders.
 	\return A resource loader.
 	*/
-	LUX_API StrongRef<ResourceLoader> GetResourceLoader(u32 id) const;
+	LUX_API StrongRef<ResourceLoader> GetResourceLoader(int id) const;
 
 	//! Add a resource writer
 	LUX_API void AddResourceWriter(ResourceWriter* writer);
@@ -152,14 +152,14 @@ public:
 	/**
 	\return The number of resource writers.
 	*/
-	LUX_API u32 GetResourceWriterCount() const;
+	LUX_API int GetResourceWriterCount() const;
 
 	//! Query a resource writer
 	/**
 	\param id The id of the resource writer must be between 0 and the number of resource writer.
 	\return A resource writer.
 	*/
-	LUX_API StrongRef<ResourceWriter> GetResourceWriter(u32 id) const;
+	LUX_API StrongRef<ResourceWriter> GetResourceWriter(int id) const;
 
 	//! Get a resource writer for a type and a extension
 	/**
@@ -204,14 +204,14 @@ public:
 	/**
 	\return The number of resource types.
 	*/
-	LUX_API u32 GetTypeCount() const;
+	LUX_API int GetTypeCount() const;
 
 	//! Get the name of a resource type.
 	/**
 	\param id The id of the resource type, must be between 0 and the number of types.
 	\return The name of the loader, or and empty string in the case of an error.
 	*/
-	LUX_API Name GetType(u32 id) const;
+	LUX_API Name GetType(int id) const;
 
 	//! Add a new resourcetype to the system
 	/**
@@ -228,11 +228,11 @@ private:
 	void LoadResource(const ResourceOrigin& origin, Resource* dst) const;
 
 private:
-	u32 GetTypeID(Name type) const;
+	int GetTypeID(Name type) const;
 
 	StrongRef<ResourceLoader> GetResourceLoader(Name& type, io::File* file) const;
 
-	u32 GetResourceIdUnsafe(Name type, const String& name) const;
+	int GetResourceIdUnsafe(Name type, const String& name) const;
 private:
 	struct SelfType;
 	SelfType* self;

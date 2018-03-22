@@ -16,7 +16,7 @@ class RenderTarget
 {
 public:
 	//! Create a backbuffer rendertarget of a given size
-	RenderTarget(const math::Dimension2U& size = math::Dimension2U(0, 0)) :
+	RenderTarget(const math::Dimension2I& size = math::Dimension2I(0, 0)) :
 		m_Texture(nullptr),
 		m_Size(size)
 	{
@@ -70,7 +70,7 @@ public:
 	}
 
 	//! The size of the rendertarget texture
-	const math::Dimension2U& GetSize() const
+	const math::Dimension2I& GetSize() const
 	{
 		return m_Size;
 	}
@@ -94,7 +94,7 @@ protected:
 	StrongRef<BaseTexture> m_Texture;
 	CubeTexture::EFace m_CubeFace;
 	bool m_IsCube;
-	math::Dimension2U m_Size;
+	math::Dimension2I m_Size;
 };
 
 } // namespace video

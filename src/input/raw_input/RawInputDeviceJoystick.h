@@ -81,20 +81,20 @@ public:
 	~RawJoystickDevice();
 	HANDLE GetDeviceHandle();
 	core::String GetDeviceName();
-	void GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, size_t& buttonCount);
-	void GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, size_t& valueCount);
-	void LoadDirectInputMapping(bool isAxis, Mapping* mappings, size_t mappingCount, size_t offset, const HIDD_ATTRIBUTES& attribs);
-	void LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, size_t mappingCount, const HIDD_ATTRIBUTES& attribs);
+	void GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, int& buttonCount);
+	void GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, int& valueCount);
+	void LoadDirectInputMapping(bool isAxis, Mapping* mappings, int mappingCount, int offset, const HIDD_ATTRIBUTES& attribs);
+	void LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, int mappingCount, const HIDD_ATTRIBUTES& attribs);
 	void HandleInput(RAWINPUT* input);
 	EEventSource GetType() const;
-	size_t GetElementCount(EEventType type) const;
-	ElemDesc GetElementDesc(EEventType type, u32 code) const;
+	int GetElementCount(EEventType type) const;
+	ElemDesc GetElementDesc(EEventType type, int code) const;
 
 private:
 	HANDLE m_RawInputHandle;
 	HANDLE m_NtHandle;
 
-	size_t m_ReportSize;
+	int m_ReportSize;
 
 	PHIDP_PREPARSED_DATA m_InputReportProtocol;
 

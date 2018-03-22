@@ -20,7 +20,7 @@ UNIT_SUITE(algorithm)
 		arr.Sort();
 
 		bool sorted = true;
-		for(u32 i = 1; i < arr.Size(); ++i) {
+		for(int i = 1; i < arr.Size(); ++i) {
 			if(arr[i-1] > arr[i]) {
 				sorted = false;
 				break;

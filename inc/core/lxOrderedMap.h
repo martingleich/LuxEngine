@@ -559,7 +559,7 @@ public:
 		return Range<ConstKeyIterator>(FirstKey(), EndKey());
 	}
 
-	size_t Size() const
+	int Size() const
 	{
 		return m_Set.Size();
 	}

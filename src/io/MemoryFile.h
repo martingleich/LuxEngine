@@ -16,18 +16,18 @@ public:
 		const core::String& name,
 		EVirtualCreateFlag flags);
 	~MemoryFile();
-	u32 ReadBinaryPart(u32 numBytes, void* out);
-	u32 WriteBinaryPart(const void* data, u32 length);
-	void Seek(u32 offset, ESeekOrigin origin = ESeekOrigin::Cursor);
+	s64 ReadBinaryPart(s64 numBytes, void* out);
+	s64 WriteBinaryPart(const void* data, s64 length);
+	void Seek(s64 offset, ESeekOrigin origin = ESeekOrigin::Cursor);
 	void* GetBuffer();
 	const void* GetBuffer() const;
-	u32 GetSize() const;
-	u32 GetCursor() const;
+	s64 GetSize() const;
+	s64 GetCursor() const;
 
 private:
 	u8* m_Buffer;
-	u32 m_Size;
-	u32 m_Cursor;
+	size_t m_Size;
+	size_t m_Cursor;
 	bool m_IsEOF;
 
 	EVirtualCreateFlag m_Flags;

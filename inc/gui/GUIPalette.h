@@ -30,7 +30,7 @@ public:
 		Disabled = 1,
 	};
 
-	static const u32 COLOR_COUNT = 14;
+	static const int COLOR_COUNT = 14;
 
 private:
 	struct Data
@@ -43,7 +43,7 @@ private:
 
 		video::Color colors[COLOR_COUNT];
 		u32 colorFlags;
-		size_t refCount;
+		int refCount;
 	};
 
 	LUX_API static Data DEFAULT_DATA;
@@ -58,7 +58,7 @@ public:
 	Palette(video::Color color) :
 		Palette()
 	{
-		for(u32 i = 0; i < COLOR_COUNT; ++i)
+		for(int i = 0; i < COLOR_COUNT; ++i)
 			SetColor(i, color);
 	}
 
@@ -159,7 +159,7 @@ public:
 			return;
 
 		EnsureDataCopy();
-		for(u32 i = 0; i < COLOR_COUNT; ++i) {
+		for(int i = 0; i < COLOR_COUNT; ++i) {
 			if((m_Data->colorFlags & (1 << i)) == 0) {
 				m_Data->colors[i] = base.m_Data->colors[i];
 				m_Data->colorFlags |= (1 << i);

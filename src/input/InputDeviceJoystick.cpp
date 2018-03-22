@@ -13,9 +13,9 @@ JoystickDevice::JoystickDevice(const DeviceCreationDesc* desc, InputSystem* syst
 	m_Buttons.Resize(desc->GetElementCount(EEventType::Button));
 	m_Axes.Resize(desc->GetElementCount(EEventType::Axis));
 
-	for(size_t i = 0; i < m_Buttons.Size(); ++i) {
+	for(int i = 0; i < m_Buttons.Size(); ++i) {
 		auto& button = m_Buttons[i];
-		auto elemDesc = desc->GetElementDesc(EEventType::Button, (u32)i);
+		auto elemDesc = desc->GetElementDesc(EEventType::Button, i);
 		button.name = elemDesc.name;
 		button.type = elemDesc.type;
 
@@ -23,9 +23,9 @@ JoystickDevice::JoystickDevice(const DeviceCreationDesc* desc, InputSystem* syst
 			button.name = "Button-" + core::StringConverter::ToString(i);
 	}
 
-	for(size_t i = 0; i < m_Axes.Size(); ++i) {
+	for(int i = 0; i < m_Axes.Size(); ++i) {
 		auto& axis = m_Axes[i];
-		auto elemDesc = desc->GetElementDesc(EEventType::Axis, (u32)i);
+		auto elemDesc = desc->GetElementDesc(EEventType::Axis, i);
 		axis.name = elemDesc.name;
 		axis.type = elemDesc.type;
 
@@ -56,18 +56,18 @@ void JoystickDevice::DisconnectReporting(InputSystem* system)
 	event.type = EEventType::Button;
 	event.button.pressedDown = false;
 	event.button.state = false;
-	for(size_t i = 0; i < m_Buttons.Size(); ++i) {
+	for(int i = 0; i < m_Buttons.Size(); ++i) {
 		if(m_Buttons[i].state && !TestFlag(m_Buttons[i].type, EElementType::Rel)) {
-			event.button.code = (EKeyCode)(u32)i;
+			event.button.code = static_cast<EKeyCode>(i);
 			system->SendUserEvent(event);
 		}
 	}
 
 	event.type = EEventType::Axis;
 	event.axis.abs = 0;
-	for(size_t i = 0; i < m_Axes.Size(); ++i) {
+	for(int i = 0; i < m_Axes.Size(); ++i) {
 		if(m_Axes[i].state && !TestFlag(m_Axes[i].type, EElementType::Rel)) {
-			event.axis.code = (EAxisCode)(u32)i;
+			event.axis.code = static_cast<EAxisCode>(i);
 			event.axis.rel = -m_Axes[i].state;
 			system->SendUserEvent(event);
 		}
@@ -79,17 +79,17 @@ EEventSource JoystickDevice::GetType() const
 	return EEventSource::Joystick;
 }
 
-const event::Button* JoystickDevice::GetButton(u32 buttonCode) const
+const event::Button* JoystickDevice::GetButton(int buttonCode) const
 {
 	return &m_Buttons.At(buttonCode);
 }
 
-const event::Axis* JoystickDevice::GetAxis(u32 axisCode) const
+const event::Axis* JoystickDevice::GetAxis(int axisCode) const
 {
 	return &m_Axes.At(axisCode);
 }
 
-const event::Area* JoystickDevice::GetArea(u32 areaCode) const
+const event::Area* JoystickDevice::GetArea(int areaCode) const
 {
 	LUX_UNUSED(areaCode);
 	throw core::OutOfRangeException();
@@ -98,7 +98,7 @@ const event::Area* JoystickDevice::GetArea(u32 areaCode) const
 bool JoystickDevice::Update(Event& event)
 {
 	if(event.type == EEventType::Button) {
-		if((size_t)event.button.code >= m_Buttons.Size())
+		if((int)event.button.code >= m_Buttons.Size())
 			throw core::OutOfRangeException();
 
 		if(m_Buttons[event.button.code].state != event.button.state) {
@@ -109,7 +109,7 @@ bool JoystickDevice::Update(Event& event)
 	}
 
 	if(event.type == EEventType::Axis) {
-		if((size_t)event.axis.code >= m_Axes.Size())
+		if((int)event.axis.code >= m_Axes.Size())
 			throw core::OutOfRangeException();
 
 		if(event.internal_abs_only)
@@ -128,7 +128,7 @@ bool JoystickDevice::Update(Event& event)
 	return false;
 }
 
-const core::String& JoystickDevice::GetElementName(EEventType type, u32 code) const
+const core::String& JoystickDevice::GetElementName(EEventType type, int code) const
 {
 	static core::String unknown = "(unknown)";
 	if(type == EEventType::Button && code < m_Buttons.Size())
@@ -140,7 +140,7 @@ const core::String& JoystickDevice::GetElementName(EEventType type, u32 code) co
 	return unknown;
 }
 
-EElementType JoystickDevice::GetElementType(EEventType type, u32 id) const
+EElementType JoystickDevice::GetElementType(EEventType type, int id) const
 {
 	if(type == EEventType::Button) {
 		if(id < m_Buttons.Size())
@@ -153,7 +153,7 @@ EElementType JoystickDevice::GetElementType(EEventType type, u32 id) const
 	return EElementType::Other;
 }
 
-size_t JoystickDevice::GetElementCount(EEventType type) const
+int JoystickDevice::GetElementCount(EEventType type) const
 {
 	if(type == EEventType::Button)
 		return m_Buttons.Size();

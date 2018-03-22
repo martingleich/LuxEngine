@@ -43,14 +43,14 @@ bool ParticleGroupData::AnimateParticle(Particle& particle, float secsPassed, co
 	if(!m_Model->IsImmortal())
 		particle.life -= secsPassed;
 
-	for(size_t i = 0; i < data.globalCount; ++i) {
+	for(int i = 0; i < data.globalCount; ++i) {
 		auto affector = data.globals[i];
 		affector->Apply(particle, secsPassed);
 		if(particle.life <= 0.0f)
 			return true;
 	}
 
-	for(size_t i = 0; i < data.localCount; ++i) {
+	for(int i = 0; i < data.localCount; ++i) {
 		auto affector = data.locals[i];
 		affector->Apply(particle, secsPassed);
 		if(particle.life <= 0.0f)
@@ -135,7 +135,7 @@ void ParticleGroupData::Update(float secsPassed, const SystemData& data)
 	const math::Transformation& psTrans = data.psSystem->GetAbsoluteTransform();
 	math::Transformation psTransI = psTrans.GetInverted();
 
-	for(size_t i = 0; i < data.emitterCount; ++i) {
+	for(int i = 0; i < data.emitterCount; ++i) {
 		EmitterEntry& emitter = data.emitters[i];
 		u32 number = emitter->GetEmitCount(secsPassed);
 		if(number > 0) {
@@ -146,7 +146,7 @@ void ParticleGroupData::Update(float secsPassed, const SystemData& data)
 		}
 	}
 
-	for(size_t i = 0; i < data.globalCount; ++i) {
+	for(int i = 0; i < data.globalCount; ++i) {
 		auto affector = data.globals[i];
 		const math::Transformation& ownerTrans = affector.n ?
 			affector.n->GetAbsoluteTransform() :
@@ -157,7 +157,7 @@ void ParticleGroupData::Update(float secsPassed, const SystemData& data)
 			affector->Begin(ownerTrans.CombineLeft(psTransI));
 	}
 
-	for(size_t i = 0; i < data.localCount; ++i) {
+	for(int i = 0; i < data.localCount; ++i) {
 		auto affector = data.locals[i];
 		const math::Transformation& ownerTrans = affector.n ?
 			affector.n->GetAbsoluteTransform() :
@@ -207,12 +207,12 @@ void ParticleGroupData::Update(float secsPassed, const SystemData& data)
 	m_CreationData.Clear();
 }
 
-u32 ParticleGroupData::GetParticleCount() const
+int ParticleGroupData::GetParticleCount() const
 {
 	return m_Pool.GetActiveCount();
 }
 
-u32 ParticleGroupData::GetParticleCapacity() const
+int ParticleGroupData::GetParticleCapacity() const
 {
 	return m_Pool.Capactity();
 }

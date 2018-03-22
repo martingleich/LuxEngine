@@ -19,11 +19,11 @@ public:
 	virtual ~Texture() {}
 
 	virtual void Init(
-		const math::Dimension2U& size,
+		const math::Dimension2I& size,
 		ColorFormat format,
-		u32 mipCount, bool isRendertarget, bool isDynamic) = 0;
+		int mipCount, bool isRendertarget, bool isDynamic) = 0;
 
-	virtual LockedRect Lock(ELockMode mode, u32 mipLevel = 0) = 0;
+	virtual LockedRect Lock(ELockMode mode, int mipLevel = 0) = 0;
 	virtual void Unlock(bool regenMipMaps) = 0;
 
 	core::Name GetReferableType() const
@@ -31,7 +31,7 @@ public:
 		return core::ResourceType::Texture;
 	}
 
-	inline DrawingCanvasAuto<Texture> GetCanvas(ELockMode mode, u32 mipLevel = 0, bool regenMipMaps = true);
+	inline DrawingCanvasAuto<Texture> GetCanvas(ELockMode mode, int mipLevel = 0, bool regenMipMaps = true);
 };
 
 template <>
@@ -45,7 +45,7 @@ public:
 	{
 	}
 
-	DrawingCanvasAuto(Texture* tex, Texture::ELockMode mode, u32 level, bool _regenMipMaps) :
+	DrawingCanvasAuto(Texture* tex, Texture::ELockMode mode, int level, bool _regenMipMaps) :
 		DrawingCanvasAuto(tex, tex->Lock(mode, level), _regenMipMaps)
 	{
 	}
@@ -90,14 +90,14 @@ public:
 	bool regenMipMaps;
 };
 
-inline DrawingCanvasAuto<Texture> Texture::GetCanvas(ELockMode mode, u32 mipLevel, bool regenMipMaps)
+inline DrawingCanvasAuto<Texture> Texture::GetCanvas(ELockMode mode, int mipLevel, bool regenMipMaps)
 {
 	return DrawingCanvasAuto<Texture>(this, mode, mipLevel, regenMipMaps);
 }
 
 struct TextureLock
 {
-	TextureLock(Texture* t, BaseTexture::ELockMode mode, bool regMips = true, u32 mipLevel = 0) :
+	TextureLock(Texture* t, BaseTexture::ELockMode mode, bool regMips = true, int mipLevel = 0) :
 		base(t),
 		regenMipMaps(regMips)
 	{

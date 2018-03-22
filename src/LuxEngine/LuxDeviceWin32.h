@@ -20,12 +20,12 @@ public:
 	LuxDeviceWin32();
 	~LuxDeviceWin32();
 
-	void BuildWindow(u32 width, u32 height, const core::String& title);
+	void BuildWindow(int width, int height, const core::String& title);
 	void BuildInputSystem(bool isForeground = true);
 	bool WaitForWindowChange();
-	bool Run(u32 waitTime);
+	bool Run(int waitTime);
 
-	void Sleep(u32 millis);
+	void Sleep(int millis);
 
 	StrongRef<gui::Window> GetWindow() const
 	{
@@ -35,7 +35,7 @@ public:
 	StrongRef<LuxSystemInfo> GetSystemInfo() const;
 	StrongRef<gui::Cursor> GetCursor() const;
 
-	bool RunMessageQueue(u32 waitTime);
+	bool RunMessageQueue(int waitTime);
 	bool HandleMessages(
 		HWND wnd,
 		UINT Message,

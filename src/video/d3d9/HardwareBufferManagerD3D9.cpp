@@ -20,7 +20,7 @@ BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 	m_D3DDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetLowLevelDevice());
 
 	m_UsedStreams = 0;
-	m_MaxStreamCount = m_Driver->GetDeviceCapability(EDriverCaps::MaxStreams);
+	m_MaxStreamCount = (UINT)m_Driver->GetDeviceCapability(EDriverCaps::MaxStreams);
 	VideoDriverD3D9* drv = reinterpret_cast<VideoDriverD3D9*>(driver);
 	if((drv->GetCaps().Caps2 & D3DDEVCAPS2_STREAMOFFSET) != 0)
 		m_AllowStreamOffset = true;
@@ -32,7 +32,7 @@ BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 
 BufferManagerD3D9::~BufferManagerD3D9()
 {
-	for(u32 i = 0; i < m_MaxStreamCount; ++i)
+	for(UINT i = 0; i < m_MaxStreamCount; ++i)
 		m_D3DDevice->SetStreamSource(i, nullptr, 0, 0);
 	m_D3DDevice->SetIndices(nullptr);
 }
@@ -71,17 +71,17 @@ void* BufferManagerD3D9::UpdateVertexBuffer(VertexBuffer* buffer, void* handle)
 	IDirect3DVertexBuffer9* d3dBuffer = reinterpret_cast<IDirect3DVertexBuffer9*>(handle);
 
 	const EHardwareBufferMapping HWMapping = buffer->GetHWMapping();
-	u32 beginDirty;
-	u32 endDirty;
+	int beginDirty;
+	int endDirty;
 	buffer->GetDirty(beginDirty, endDirty);
 
-	u32 size = buffer->GetSize();
-	u32 stride = buffer->GetStride();
-	u32 mapping = (HWMapping == EHardwareBufferMapping::Dynamic ? D3DUSAGE_DYNAMIC : 0);
+	UINT size = (UINT)buffer->GetSize();
+	UINT stride = (UINT)buffer->GetStride();
+	DWORD mapping = (HWMapping == EHardwareBufferMapping::Dynamic ? D3DUSAGE_DYNAMIC : 0);
 	mapping |= D3DUSAGE_WRITEONLY;
 
-	u32 oldSize = 0;
-	u32 oldMapping = 0xFFFFFFFF;
+	UINT oldSize = 0;
+	UINT oldMapping = 0xFFFFFFFF;
 	if(d3dBuffer) {
 		D3DVERTEXBUFFER_DESC desc;
 		d3dBuffer->GetDesc(&desc);
@@ -135,19 +135,19 @@ void* BufferManagerD3D9::UpdateIndexBuffer(IndexBuffer* buffer, void* handle)
 	IDirect3DIndexBuffer9* d3dBuffer = reinterpret_cast<IDirect3DIndexBuffer9*>(handle);
 
 	const EHardwareBufferMapping HWMapping = buffer->GetHWMapping();
-	u32 beginDirty;
-	u32 endDirty;
+	int beginDirty;
+	int endDirty;
 	buffer->GetDirty(beginDirty, endDirty);
 
-	u32 size = buffer->GetSize();
-	u32 stride = buffer->GetStride();
+	auto size = (UINT)buffer->GetSize();
+	auto stride = (UINT)buffer->GetStride();
 	D3DFORMAT format = buffer->GetFormat() == EIndexFormat::Bit16 ? D3DFMT_INDEX16 : D3DFMT_INDEX32;
-	u32 mapping = (HWMapping == EHardwareBufferMapping::Dynamic ? D3DUSAGE_DYNAMIC : 0);
+	DWORD mapping = (HWMapping == EHardwareBufferMapping::Dynamic ? D3DUSAGE_DYNAMIC : 0);
 	mapping |= D3DUSAGE_WRITEONLY;
 
-	u32 oldSize = 0;
+	UINT oldSize = 0;
 	D3DFORMAT oldFormat = D3DFMT_UNKNOWN;
-	u32 oldMapping = 0xFFFFFFFF;
+	UINT oldMapping = 0xFFFFFFFF;
 	if(d3dBuffer) {
 		D3DINDEXBUFFER_DESC desc;
 		d3dBuffer->GetDesc(&desc);
@@ -219,9 +219,9 @@ void* BufferManagerD3D9::UpdateInternalBuffer(HardwareBuffer* buffer, void* hand
 	}
 }
 
-void BufferManagerD3D9::EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle)
+void BufferManagerD3D9::EnableHardwareBuffer(int streamID, const HardwareBuffer* buffer, const void* handle)
 {
-	if(streamID > m_MaxStreamCount)
+	if((UINT)streamID > m_MaxStreamCount)
 		throw core::InvalidArgumentException("streamID");
 
 	switch(buffer->GetBufferType()) {
@@ -269,7 +269,7 @@ void BufferManagerD3D9::EnableHardwareBuffer(u32 streamID, const HardwareBuffer*
 	}
 }
 
-bool BufferManagerD3D9::GetVertexStream(u32 streamID, VertexStream& vs) const
+bool BufferManagerD3D9::GetVertexStream(int streamID, VertexStream& vs) const
 {
 	if((m_UsedStreams & (1 << streamID)) == 0)
 		return false;
@@ -299,7 +299,7 @@ void BufferManagerD3D9::ResetStreams()
 
 void BufferManagerD3D9::ReleaseHardwareBuffers()
 {
-	for(u32 i = 0; i < m_MaxStreamCount; ++i)
+	for(UINT i = 0; i < m_MaxStreamCount; ++i)
 		m_D3DDevice->SetStreamSource(i, nullptr, 0, 0);
 	m_D3DDevice->SetIndices(nullptr);
 

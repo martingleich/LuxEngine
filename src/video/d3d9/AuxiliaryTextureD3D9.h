@@ -45,7 +45,7 @@ private:
 
 	core::Array<Entry> m_Surfaces;
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
-	static const u32 MAX_TEXTURES = 5;
+	static const int MAX_TEXTURES = 5;
 };
 
 }

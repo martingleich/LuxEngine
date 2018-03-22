@@ -23,57 +23,59 @@ StreamFile::~StreamFile()
 		fclose(m_File);
 }
 
-u32 StreamFile::ReadBinaryPart(u32 numBytes, void* out)
+s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
 {
 	LX_CHECK_NULL_ARG(out);
 	LX_CHECK_NULL_ARG(numBytes);
+	if(numBytes > INT_MAX)
+		throw io::FileException(io::FileException::ReadError);
 
-	if((u32)ftell(m_File) + numBytes > m_FileSize)
+	if((s64)ftell(m_File) + numBytes > m_FileSize)
 		numBytes = m_FileSize - ftell(m_File);
 
-	u32 read = (u32)fread(out, numBytes, 1, m_File)*numBytes;
+	s64 read = (s64)fread(out, (size_t)numBytes, 1, m_File)*numBytes;
 	if(read != numBytes) {
 		u8* cur = (u8*)out + read;
-		u32 count = numBytes - read;
+		s64 count = numBytes - read;
 		while(count > 0) {
-			u32 block = (u32)fread(cur, 1024, 1, m_File) * 1024;
+			s64 block = (s64)fread(cur, 1024, 1, m_File) * 1024;
 			read += block;
 			if(block != 1024)
-				return (u32)read;
+				return read;
 
 			cur += block;
 			count -= block;
 		}
 	}
 
-	return (u32)read;
+	return read;
 }
 
-u32 StreamFile::WriteBinaryPart(const void* data, u32 numBytes)
+s64 StreamFile::WriteBinaryPart(const void* data, s64 numBytes)
 {
 	LX_CHECK_NULL_ARG(data);
 	LX_CHECK_NULL_ARG(numBytes);
+	if(numBytes > INT_MAX)
+		throw io::FileException(io::FileException::WriteError);
 
-	if((u32)ftell(m_File) > m_FileSize - numBytes)
+	if((s64)ftell(m_File) > m_FileSize - numBytes)
 		m_FileSize = ftell(m_File) + numBytes;
 
-	if(fwrite(data, numBytes, 1, m_File) != 1)
+	if(fwrite(data, (size_t)numBytes, 1, m_File) != 1)
 		throw io::FileException(io::FileException::WriteError);
 
 	return numBytes;
 }
 
-void StreamFile::Seek(u32 offset, ESeekOrigin origin)
+void StreamFile::Seek(s64 offset, ESeekOrigin origin)
 {
-	u32 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
+	s64 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
 
-	u32 newCursor;
-	bool success = math::AddInsideBounds(cursor, offset, GetSize(), newCursor);
-
-	if(!success)
+	s64 newCursor = cursor + offset;
+	if(newCursor < 0 || newCursor > GetSize())
 		throw io::FileException(io::FileException::OutsideFile);
 
-	if(fseek(m_File, newCursor, 0) != 0)
+	if(fseek(m_File, (long)newCursor, 0) != 0)
 		throw core::RuntimeException("fseek failed");
 }
 
@@ -87,17 +89,16 @@ const void* StreamFile::GetBuffer() const
 	return nullptr;
 }
 
-u32 StreamFile::GetSize() const
+s64 StreamFile::GetSize() const
 {
 	return m_FileSize;
 }
 
-u32 StreamFile::GetCursor() const
+s64 StreamFile::GetCursor() const
 {
 	return ftell(m_File);
 }
 
 }
-
 }
 

@@ -262,7 +262,7 @@ public:
 	}
 
 	//! The size of the param in bytes
-	u32 GetSize() const
+	int GetSize() const
 	{
 		return m_Type.GetSize();
 	}
@@ -335,22 +335,22 @@ public:
 		// But the const type will only be read, never written.
 		m_ArrayPtr = const_cast<void*>(ptr);
 	}
-	size_t Size() const
+	int Size() const
 	{
 		return m_ArrayInfo->Size(m_ArrayPtr);
 	}
-	void Resize(size_t used)
+	void Resize(int used)
 	{
 		lxAssert(m_IsConst == false);
 		m_ArrayInfo->Resize(m_ArrayPtr, used);
 	}
-	VariableAccess operator[](size_t i)
+	VariableAccess operator[](int i)
 	{
 		lxAssert(m_IsConst == false);
 		return VariableAccess(m_BaseType, m_ArrayInfo->At(m_ArrayPtr, i));
 	}
 
-	VariableAccess operator[](size_t i) const
+	VariableAccess operator[](int i) const
 	{
 		return VariableAccess(m_BaseType.GetConstantType(), m_ArrayInfo->At(m_ArrayPtr, i));
 	}
@@ -383,21 +383,21 @@ public:
 		m_ArrayPtr = static_cast<core::Array<T>*>(const_cast<void*>(ptr));
 	}
 
-	size_t Size() const
+	int Size() const
 	{
 		return m_ArrayPtr->Size();
 	}
-	void Resize(size_t used)
+	void Resize(int used)
 	{
 		lxAssert(m_IsConst == false);
 		m_ArrayPtr->Resize(used);
 	}
-	T& operator[](size_t i)
+	T& operator[](int i)
 	{
 		lxAssert(m_IsConst == false);
 		return (*m_ArrayPtr)[i];
 	}
-	const T& operator[](size_t i) const
+	const T& operator[](int i) const
 	{
 		return (*m_ArrayPtr)[i];
 	}

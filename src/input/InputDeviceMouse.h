@@ -15,14 +15,14 @@ public:
 	void Reset();
 	void DisconnectReporting(InputSystem* system);
 	EEventSource GetType() const;
-	const event::Button* GetButton(u32 buttonCode) const;
-	const event::Axis* GetAxis(u32 axisCode) const;
-	const event::Area* GetArea(u32 areaCode) const;
+	const event::Button* GetButton(int buttonCode) const;
+	const event::Axis* GetAxis(int axisCode) const;
+	const event::Area* GetArea(int areaCode) const;
 	bool Update(Event& event);
 
-	const core::String& GetElementName(EEventType type, u32 code) const;
-	EElementType GetElementType(EEventType type, u32 id) const;
-	size_t GetElementCount(EEventType type) const;
+	const core::String& GetElementName(EEventType type, int code) const;
+	EElementType GetElementType(EEventType type, int id) const;
+	int GetElementCount(EEventType type) const;
 
 private:
 	core::Array<ButtonElement> m_Buttons;

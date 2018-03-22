@@ -101,8 +101,8 @@ public:
 	LUX_API void SetRenderTarget(const video::RenderTarget& target);
 	LUX_API const video::RenderTarget& GetRenderTarget() const;
 
-	LUX_API void SetRenderPriority(s32 p);
-	LUX_API s32 GetRenderPriority() const;
+	LUX_API void SetRenderPriority(int p);
+	LUX_API int GetRenderPriority() const;
 
 	LUX_API void SetCameraListener(Listener* l);
 	LUX_API Listener* GetCameraListener() const;
@@ -137,7 +137,7 @@ private:
 	bool m_IsOrtho;
 
 	video::RenderTarget m_RenderTarget;
-	u32 m_RenderPriority;
+	int m_RenderPriority;
 
 	Listener* m_Listener;
 

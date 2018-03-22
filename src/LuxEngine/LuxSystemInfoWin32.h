@@ -25,37 +25,37 @@ public:
 		return true;
 	}
 
-	bool GetProcessorSpeed(u32& speedInMhz)
+	bool GetProcessorSpeed(int& speedInMhz)
 	{
 		speedInMhz = m_ProcessorSpeed;
-		return m_ProcessorSpeed!=0;
+		return m_ProcessorSpeed != 0;
 	}
 
-	bool GetProcessorCount(u32& count)
+	bool GetProcessorCount(int& count)
 	{
 		count = m_ProcessorCount;
-		return count!=0;
+		return count != 0;
 	}
 
-	bool GetTotalRAM(u32& ramInMB)
+	bool GetTotalRAM(int& ramInMB)
 	{
 		MEMORYSTATUS memStat;
 		GlobalMemoryStatus(&memStat);
 
-		ramInMB = memStat.dwTotalPhys >> 10; // Is given in kb
+		ramInMB = (int)(memStat.dwTotalPhys >> 10); // Is given in kb
 		return true;
 	}
 
-	bool GetAvailableRAM(u32& ramInMB)
+	bool GetAvailableRAM(int& ramInMB)
 	{
 		MEMORYSTATUS memStat;
 		GlobalMemoryStatus(&memStat);
 
-		ramInMB = memStat.dwAvailPhys >> 10; // Is given in kb
+		ramInMB = (int)(memStat.dwAvailPhys >> 10); // Is given in kb
 		return true;
 	}
 
-	bool GetPrimaryScreenResolution(math::Dimension2U& dimension)
+	bool GetPrimaryScreenResolution(math::Dimension2I& dimension)
 	{
 		dimension.width = GetSystemMetrics(SM_CXSCREEN);
 		dimension.height = GetSystemMetrics(SM_CYSCREEN);
@@ -95,7 +95,7 @@ private:
 
 			nameBuffer.Resize(64); // Just some number
 			do {
-				size = (u32)nameBuffer.Size();
+				size = (DWORD)nameBuffer.Size();
 				status = RegQueryValueExW(key, L"ProcessorNameString", NULL, &type, (LPBYTE)nameBuffer.Data(), &size);
 				if(status == ERROR_SUCCESS && type == REG_SZ) {
 					m_ProcessorName = core::UTF16ToString(nameBuffer.Data());
@@ -111,8 +111,8 @@ private:
 
 private:
 	core::String m_ProcessorName;
-	u32 m_ProcessorSpeed;
-	u32 m_ProcessorCount;
+	int m_ProcessorSpeed;
+	int m_ProcessorCount;
 };
 
 } // namespace lux

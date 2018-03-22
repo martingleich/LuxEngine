@@ -37,7 +37,7 @@ public:
 		return m_BoundingBox;
 	}
 
-	const math::Triangle3F& GetTriangle(u32 id) const
+	const math::Triangle3F& GetTriangle(int id) const
 	{
 		return m_Triangles[id];
 	}
@@ -45,12 +45,12 @@ public:
 private:
 	struct FindEntry
 	{
-		size_t id;
+		int id;
 		float distanceSq;
 		math::Vector3F pos;
 
 		FindEntry() = default;
-		FindEntry(size_t i, float ds, const math::Vector3F& p) :
+		FindEntry(int i, float ds, const math::Vector3F& p) :
 			id(i),
 			distanceSq(ds),
 			pos(p)
@@ -64,7 +64,7 @@ private:
 	};
 
 private:
-	bool SelectFirstTriangle(const math::Line3F& line, math::Vector3F& pos, size_t& triId, float& distance, bool testOnly);
+	bool SelectFirstTriangle(const math::Line3F& line, math::Vector3F& pos, int& triId, float& distance, bool testOnly);
 
 private:
 	core::Array<math::Triangle3F> m_Triangles;

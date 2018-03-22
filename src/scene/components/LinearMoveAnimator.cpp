@@ -17,7 +17,7 @@ void LinearMoveAnimator::SetData(
 	const math::Line3F& line,
 	float duration,
 	bool jumpBack,
-	u32 count)
+	int count)
 {
 	m_Line = line;
 	m_Period = 2 * duration;
@@ -25,9 +25,8 @@ void LinearMoveAnimator::SetData(
 	m_Direction = false;
 	m_Time = 0.0f;
 	m_Count = count;
-
-	if(m_Count != std::numeric_limits<u32>::max())
-		m_Count++;
+	if(count > -1)
+		++m_Count;
 }
 
 void LinearMoveAnimator::Animate(float secsPassed)
@@ -53,7 +52,7 @@ void LinearMoveAnimator::Animate(float secsPassed)
 			t = 2 - m_Time / (m_Period / 2);
 	}
 	if(dir != m_Direction) {
-		if(m_Count != std::numeric_limits<u32>::max())
+		if(m_Count > -1)
 			--m_Count;
 		m_Direction = dir;
 		if(m_Count == 0) {

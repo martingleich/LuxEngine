@@ -20,7 +20,7 @@ namespace
 class ShaderParamLoader : public video::ShaderParamSetCallback
 {
 public:
-	u32 m_TexId;
+	int m_TexId;
 	void Init(video::Shader* shader)
 	{
 		m_TexId = shader->GetParamId("texture");
@@ -244,7 +244,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	vertexBuffer->Update();
 
 	videoRenderer->SetPass(pass, true, &g_ParamLoader, &particleTexture);
-	videoRenderer->DrawGeometry(m_Buffer, 0, (u32)(pool.GetActiveCount() * 2));
+	videoRenderer->DrawGeometry(m_Buffer, 0, (int)(pool.GetActiveCount() * 2));
 }
 
 void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Particle& particle)
@@ -280,7 +280,7 @@ void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Par
 	math::RectF* rect;
 	video::Texture* texture;
 	// Spritebank works in milliseconds instead of seconds
-	if(m_Data->SpriteBank->GetSprite(sprite, (u32)(1000.0f * particle.age), true, rect, texture)) {
+	if(m_Data->SpriteBank->GetSprite(sprite, (int)(1000.0f * particle.age), true, rect, texture)) {
 		vertices[0].texture.Set(rect->left, rect->top);
 		vertices[1].texture.Set(rect->right, rect->top);
 		vertices[2].texture.Set(rect->left, rect->bottom);
@@ -324,7 +324,7 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 
 	math::RectF* rect;
 	video::Texture* texture;
-	if(m_Data->SpriteBank->GetSprite(sprite, (u32)(1000.0f * particle.age), true, rect, texture)) {
+	if(m_Data->SpriteBank->GetSprite(sprite, (int)(1000.0f * particle.age), true, rect, texture)) {
 		vertices[0].texture.Set(rect->left, rect->top);
 		vertices[1].texture.Set(rect->right, rect->top);
 		vertices[2].texture.Set(rect->left, rect->bottom);
@@ -332,11 +332,11 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 	}
 }
 
-void QuadRendererMachine::SetIndexBuffer(video::IndexBuffer* indexBuffer, u32 From, u32 To)
+void QuadRendererMachine::SetIndexBuffer(video::IndexBuffer* indexBuffer, int From, int To)
 {
 	u16 index = (u16)(From / 6) * 4;
 	indexBuffer->SetCursor(From);
-	for(u32 i = From; i < To;) {
+	for(int i = From; i < To;) {
 		u16 indices[6] = {
 			(u16)(index + 0), (u16)(index + 1), (u16)(index + 2),
 			(u16)(index + 3), (u16)(index + 2), (u16)(index + 1)};
@@ -351,7 +351,7 @@ void QuadRendererMachine::SetIndexBuffer(video::IndexBuffer* indexBuffer, u32 Fr
 
 void QuadRendererMachine::CreateBuffers(ParticleGroupData* group)
 {
-	u32 maxParticleCount = group->GetPool().Capactity();
+	int maxParticleCount = group->GetPool().Capactity();
 	if(m_Buffer == nullptr) {
 		m_Buffer = m_Driver->CreateGeometry(
 			video::VertexFormat::STANDARD, video::EHardwareBufferMapping::Dynamic, 4 * maxParticleCount,
@@ -362,7 +362,7 @@ void QuadRendererMachine::CreateBuffers(ParticleGroupData* group)
 	}
 
 	if(m_Buffer->GetVertices()->GetAlloc() < maxParticleCount * 4) {
-		u32 From = m_Buffer->GetIndices()->GetSize();
+		int From = m_Buffer->GetIndices()->GetSize();
 		m_Buffer->GetVertices()->SetSize(maxParticleCount * 4, false);
 		m_Buffer->GetIndices()->SetSize(maxParticleCount * 6);
 		SetIndexBuffer(m_Buffer->GetIndices(), From, maxParticleCount * 6);

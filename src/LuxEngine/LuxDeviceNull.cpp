@@ -385,7 +385,7 @@ void LuxDeviceNull::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 	float invTicksPerSecond = 1.0f / core::Clock::TicksPerSecond();
 	float secsPassed = 0;
 	float minSecsPassed = 1.0f / frameLoop.maxFrameRate;
-	u32 runWaitTime = 1;
+	int runWaitTime = 1;
 	while(Run(runWaitTime)) {
 		if(!defLoop.CallPreFrame()) {
 			startTime = core::Clock::GetTicks();

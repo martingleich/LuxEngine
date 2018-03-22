@@ -30,7 +30,7 @@ SpriteBank::Sprite SpriteBankImpl::AddSprite(Texture* texture, const math::Rect<
 		it = m_Textures.Last();
 	}
 
-	math::Dimension2U dim = texture->GetSize();
+	math::Dimension2I dim = texture->GetSize();
 	Sprite sprite;
 	sprite.textureID = (u16)core::IteratorDistance(m_Textures.First(), it);
 	sprite.rect.top = rect.top / (float)dim.height;
@@ -66,9 +66,9 @@ SpriteBank::Sprite SpriteBankImpl::AddAnimatedSprite(SpriteBank::Sprite first, S
 	first.id -= 1;
 	last.id -= 1;
 
-	if((u32)first.id > m_Sprites.Size())
+	if(first.id > m_Sprites.Size())
 		first.id = (s32)m_Sprites.Size();
-	if((u32)last.id > m_Sprites.Size())
+	if(last.id > m_Sprites.Size())
 		last.id = (s32)m_Sprites.Size();
 
 	if(first.id >= last.id)

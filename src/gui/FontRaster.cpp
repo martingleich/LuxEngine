@@ -57,7 +57,7 @@ float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 class ShaderParamLoader : public video::ShaderParamSetCallback
 {
 public:
-	u32 m_TexId;
+	int m_TexId;
 	void Init(video::Shader* shader)
 	{
 		m_TexId = shader->GetParamId("texture");
@@ -154,9 +154,9 @@ void FontRaster::Draw(
 
 	auto renderer = video::VideoDriver::Instance()->GetRenderer();
 
-	math::RectU clipRect = renderer->GetScissorRect();
+	math::RectI clipRect = renderer->GetScissorRect();
 	if(userClip) {
-		clipRect.FitInto(math::RectU(
+		clipRect.FitInto(math::RectI(
 			(u32)math::Max(0.0f, userClip->left),
 			(u32)math::Max(0.0f, userClip->top),
 			(u32)math::Max(0.0f, std::ceil(userClip->right)),
@@ -232,11 +232,11 @@ void FontRaster::Draw(
 			vertices[vertexCursor].position.x,
 			vertices[vertexCursor + 5].position.x) - 1;
 		if(minX > 0) {
-			if((u32)minX > clipRect.right)
+			if(minX > clipRect.right)
 				break; // Abort rendering loop
 		}
 
-		if(maxX < 0 || (u32)maxX < clipRect.left)
+		if(maxX < 0 || maxX < clipRect.left)
 			continue; // Abort this character
 
 		// Add this character to the chunk
@@ -268,14 +268,14 @@ float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<c
 	return width;
 }
 
-size_t FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition)
+int FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition)
 {
 	if(XPosition < 0.0f)
 		return 0;
 	if(text.First() == text.End())
 		return 0;
 	float lastCaret = 0;
-	size_t counter = 0;
+	int counter = 0;
 	IterateCarets(settings, text, [&](float f)->bool
 	{
 		if(XPosition >= lastCaret && XPosition <= f) {
@@ -332,8 +332,8 @@ void FontRaster::InitPass()
 
 void FontRaster::LoadImageData(
 	const u8* imageData,
-	math::Dimension2U imageSize,
-	u32 channelCount)
+	math::Dimension2I imageSize,
+	int channelCount)
 {
 	lxAssert(imageData);
 	lxAssert(channelCount > 0);
@@ -342,7 +342,7 @@ void FontRaster::LoadImageData(
 	m_ChannelCount = channelCount;
 
 	// Create backup image
-	u32 imageBytes = m_ImageSize.GetArea() * m_ChannelCount;
+	int imageBytes = m_ImageSize.GetArea() * m_ChannelCount;
 	m_Image.Resize(imageBytes);
 	memcpy(m_Image.Data(), imageData, imageBytes);
 
@@ -356,12 +356,12 @@ void FontRaster::LoadImageData(
 	const u8* srcRow = imageData;
 	auto srcPitch = m_ChannelCount * m_ImageSize.width;
 	u8* texRow = lock.data;
-	for(u32 y = 0; y < m_ImageSize.width; ++y) {
+	for(int y = 0; y < m_ImageSize.width; ++y) {
 		const u8* srcPixel = srcRow;
 		u8* texPixel = texRow;
 
 		// Copy to backup
-		for(u32 x = 0; x < m_ImageSize.width; ++x) {
+		for(int x = 0; x < m_ImageSize.width; ++x) {
 			u8 inner = m_ChannelCount == 2 ? srcPixel[1] : 255;
 			*texPixel++ = inner;        // Blue
 			*texPixel++ = inner;        // Green
@@ -381,7 +381,7 @@ const core::HashMap<u32, CharInfo>& FontRaster::GetCharMap() const
 	return m_CharMap;
 }
 
-void FontRaster::GetRawData(const void*& ptr, u32& width, u32& height, u32& channels)
+void FontRaster::GetRawData(const void*& ptr, int& width, int& height, int& channels)
 {
 	ptr = m_Image.Data();
 	width = m_ImageSize.width;

@@ -17,9 +17,9 @@ struct MemoryDebugInfo
 	bool array;
 
 	const char* file;
-	size_t line;
+	int line;
 
-	MemoryDebugInfo(const char* _file, size_t _line, const char* _type, bool _array) :
+	MemoryDebugInfo(const char* _file, int _line, const char* _type, bool _array) :
 		ptr(nullptr),
 		type(_type),
 		array(_array),

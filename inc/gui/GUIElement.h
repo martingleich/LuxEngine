@@ -32,7 +32,7 @@ public:
 	using ConstElementIterator = ElementList::ConstIterator;
 
 public:
-	LUX_API static const u32 NO_TAB_STOP;
+	LUX_API static const int NO_TAB_STOP;
 	LUX_API static const ScalarDistanceF AUTO_SIZE;
 	LUX_API static const ScalarDistanceF AUTO_MARGIN;
 	LUX_API static const ScalarDistanceF AUTO_OUT_MARGIN;
@@ -47,8 +47,8 @@ public:
 	LUX_API GUIEnvironment* GetEnvironment() const;
 	LUX_API virtual void SetEnvironment(GUIEnvironment* env);
 
-	LUX_API virtual void SetTabId(u32 tabId);
-	LUX_API virtual u32 GetTabId() const;
+	LUX_API virtual void SetTabId(int tabId);
+	LUX_API virtual int GetTabId() const;
 	LUX_API bool IsTabStop() const;
 
 	LUX_API virtual bool IsFocusable() const;
@@ -199,7 +199,7 @@ protected:
 	ScalarDimensionF m_Size;
 	math::Dimension2F m_MinSize;
 
-	u32 m_TabId;
+	int m_TabId;
 
 	bool m_CanFocus : 1;
 	bool m_IsVisible : 1;

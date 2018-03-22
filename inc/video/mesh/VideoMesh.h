@@ -44,25 +44,25 @@ public:
 	virtual void SetBoundingBox(const math::AABBoxF& box) = 0;
 
 	LUX_API virtual void SetMaterial(Material* m);
-	LUX_API virtual void SetMaterial(size_t index, Material* m);
-	LUX_API virtual const Material* GetMaterial(size_t index) const;
-	LUX_API virtual Material* GetMaterial(size_t index);
-	LUX_API virtual size_t GetMaterialCount() const;
+	LUX_API virtual void SetMaterial(int index, Material* m);
+	LUX_API virtual const Material* GetMaterial(int index) const;
+	LUX_API virtual Material* GetMaterial(int index);
+	LUX_API virtual int GetMaterialCount() const;
 
-	LUX_API virtual void SetMaterialRange(Material* m, size_t firstPrimitive, size_t lastPrimitive);
-	LUX_API virtual void SetMaterialRange(size_t materialIndex, size_t firstPrimitive, size_t lastPrimitive);
-	LUX_API virtual void GetMaterialRange(size_t rangeIndex, size_t& materialIndex, size_t& firstPrimitive, size_t& lastPrimitive);
-	LUX_API virtual size_t GetRangeCount() const;
+	LUX_API virtual void SetMaterialRange(Material* m, int firstPrimitive, int lastPrimitive);
+	LUX_API virtual void SetMaterialRange(int materialIndex, int firstPrimitive, int lastPrimitive);
+	LUX_API virtual void GetMaterialRange(int rangeIndex, int& materialIndex, int& firstPrimitive, int& lastPrimitive);
+	LUX_API virtual int GetRangeCount() const;
 
 	LUX_API core::Name GetReferableType() const;
 
 private:
 	struct MaterialRange
 	{
-		size_t material;
-		size_t begin;
+		int material;
+		int begin;
 
-		MaterialRange(size_t m, size_t b) :
+		MaterialRange(int m, int b) :
 			material(m),
 			begin(b)
 		{}

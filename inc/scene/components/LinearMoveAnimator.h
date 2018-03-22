@@ -17,13 +17,13 @@ public:
 		const math::Line3F& line,
 		float duration,
 		bool jumpBack = false,
-		u32 count = std::numeric_limits<u32>::max());
+		int count = -1);
 
 	void Animate(float secsPassed);
 
 private:
 	math::Line3F m_Line;
-	u32 m_Count;
+	int m_Count;
 	float m_Period;
 	float m_Time;
 

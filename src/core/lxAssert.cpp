@@ -8,10 +8,10 @@ namespace lux
 namespace impl_assert
 {
 
-static bool DefaultHandler(const char* file, size_t line, const char* assert_str, const char* msg)
+static bool DefaultHandler(const char* file, int line, const char* assert_str, const char* msg)
 {
 	if(file)
-		std::printf("%s (%zu)", file, line);
+		std::printf("%s (%d)", file, line);
 
 	if(assert_str) {
 		if(file)
@@ -57,7 +57,7 @@ AssertHandler GetHandler()
 	return g_HandlingData.handler;
 }
 
-bool Report(const char* file, size_t line, const char* assert, const char* msg)
+bool Report(const char* file, int line, const char* assert, const char* msg)
 {
 	return g_HandlingData.handler(file, line, assert, msg);
 }

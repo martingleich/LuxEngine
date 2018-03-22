@@ -22,10 +22,10 @@ RendererNull::RendererNull(VideoDriver* driver) :
 	m_ParamId.fog1 = m_Params.AddAttribute("fog1", video::ColorF(1, 1, 1, 0));
 	m_ParamId.fog2 = m_Params.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
 
-	for(size_t i = 0; i < m_MatrixTable.GetCount(); ++i)
+	for(int i = 0; i < m_MatrixTable.GetCount(); ++i)
 		m_Params.AddAttribute(m_MatrixTable.CreateAttribute(i));
 
-	for(size_t i = 0; i < 16; ++i)
+	for(int i = 0; i < 16; ++i)
 		m_ParamId.lights.PushBack(m_Params.AddAttribute("light" + core::StringConverter::ToString(i), math::Matrix4::ZERO));
 
 	m_RenderStatistics = RenderStatistics::Instance();
@@ -87,7 +87,7 @@ void RendererNull::UpdatePipelineOverwrite()
 	}
 
 	m_FinalOverwrite = m_PipelineOverwrites[0];
-	for(size_t i = 1; i < m_PipelineOverwrites.Size(); ++i)
+	for(int i = 1; i < m_PipelineOverwrites.Size(); ++i)
 		m_FinalOverwrite.Append(m_PipelineOverwrites[i]);
 }
 

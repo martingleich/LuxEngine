@@ -57,8 +57,8 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 	renderer->SetTransform(video::ETransform::World, worldMat);
 
 	video::Geometry* geo = m_Mesh->GetGeometry();
-	for(size_t i = 0; i < m_Mesh->GetRangeCount(); ++i) {
-		size_t matId, firstPrimitive, lastPrimitive;
+	for(int i = 0; i < m_Mesh->GetRangeCount(); ++i) {
+		int matId, firstPrimitive, lastPrimitive;
 		m_Mesh->GetMaterialRange(i, matId, firstPrimitive, lastPrimitive);
 		video::Material* material = m_OnlyReadMaterials ?
 			m_Mesh->GetMaterial(matId) :
@@ -80,7 +80,7 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 ERenderPass Mesh::GetRenderPass() const
 {
 	ERenderPass pass = ERenderPass::None;
-	for(size_t i = 0; i < GetMaterialCount(); ++i) {
+	for(int i = 0; i < GetMaterialCount(); ++i) {
 		auto mat = GetMaterial(i);
 		ERenderPass nextPass = GetPassFromReq(mat->GetRequirements());
 
@@ -98,7 +98,7 @@ const math::AABBoxF& Mesh::GetBoundingBox() const
 	return m_BoundingBox;
 }
 
-video::Material* Mesh::GetMaterial(size_t index)
+video::Material* Mesh::GetMaterial(int index)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
 		return m_Mesh->GetMaterial(index);
@@ -106,7 +106,7 @@ video::Material* Mesh::GetMaterial(size_t index)
 		return m_Materials.At(index);
 }
 
-const video::Material* Mesh::GetMaterial(size_t index) const
+const video::Material* Mesh::GetMaterial(int index) const
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
 		return m_Mesh->GetMaterial(index);
@@ -114,7 +114,7 @@ const video::Material* Mesh::GetMaterial(size_t index) const
 		return m_Materials.At(index);
 }
 
-void Mesh::SetMaterial(size_t index, video::Material* m)
+void Mesh::SetMaterial(int index, video::Material* m)
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
 		m_Mesh->SetMaterial(index, m);
@@ -122,7 +122,7 @@ void Mesh::SetMaterial(size_t index, video::Material* m)
 		m_Materials.At(index) = m;
 }
 
-size_t Mesh::GetMaterialCount() const
+int Mesh::GetMaterialCount() const
 {
 	if(m_OnlyReadMaterials && m_Mesh != nullptr)
 		return m_Mesh->GetMaterialCount();
@@ -164,9 +164,9 @@ void Mesh::CopyMaterials()
 	if(m_OnlyReadMaterials || !m_Mesh)
 		return;
 
-	size_t materialCount = m_Mesh->GetMaterialCount();
+	int materialCount = m_Mesh->GetMaterialCount();
 	m_Materials.Reserve(materialCount);
-	for(size_t i = 0; i < materialCount; ++i) {
+	for(int i = 0; i < materialCount; ++i) {
 		auto material = m_Mesh->GetMaterial(i)->Clone();
 		m_Materials.PushBack(material);
 	}

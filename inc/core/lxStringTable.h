@@ -21,8 +21,8 @@ public:
 	bool operator==(const StringTableHandle& other) const;
 	bool operator!=(const StringTableHandle& other) const;
 	const char* c_str() const;
-	size_t Size() const;
-	size_t GetHash() const;
+	int Size() const;
+	int GetHash() const;
 
 private:
 	const void* m_Handle;
@@ -56,7 +56,7 @@ public:
 
 private:
 	struct MemBlock;
-	MemBlock* GetMatchingPosition(size_t length);
+	MemBlock* GetMatchingPosition(int length);
 	MemBlock* AddNewMemBlock();
 
 	StringTableHandle AddFindString(const char* str, bool find);

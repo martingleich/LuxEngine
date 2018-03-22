@@ -27,9 +27,9 @@ public:
 		if((flags & format::ESinkFlags::Newline) != 0)
 			++size;
 
-		m_Str.Reserve(m_Str.Size() + size);
+		m_Str.Reserve(m_Str.Size() + (int)size);
 		for(auto& s : slices)
-			m_Str.AppendRaw(s.data, s.size);
+			m_Str.AppendRaw(s.data, (int)s.size);
 
 		if((flags & format::ESinkFlags::Newline) != 0)
 			m_Str.Append("\n");

@@ -45,8 +45,8 @@ public:
 	void* UpdateVertexBuffer(VertexBuffer* buffer, void* handle);
 	void* UpdateIndexBuffer(IndexBuffer* buffer, void* handle);
 	void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle);
-	void EnableHardwareBuffer(u32 streamID, const HardwareBuffer* buffer, const void* handle);
-	bool GetVertexStream(u32 streamID, VertexStream& vs) const;
+	void EnableHardwareBuffer(int streamID, const HardwareBuffer* buffer, const void* handle);
+	bool GetVertexStream(int streamID, VertexStream& vs) const;
 	bool GetIndexStream(IndexStream& is) const;
 	void ResetStreams();
 
@@ -60,7 +60,7 @@ private:
 	u32 m_UsedStreams;
 	IndexStream m_IStream;
 	bool m_AllowStreamOffset;
-	u32  m_MaxStreamCount;
+	UINT  m_MaxStreamCount;
 
 	core::Array<HardwareBuffer*> m_HardwareBuffers;
 };

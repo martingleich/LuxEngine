@@ -30,8 +30,8 @@ struct FontDescription
 {
 	core::String name; //!< The name of the font family, empty if not available
 
-	u32 size; //!< The size of the base font in pixel, 0 if not available
-	u32 borderSize; //!< Size of the border in pixels
+	int size; //!< The size of the base font in pixel, 0 if not available
+	int borderSize; //!< Size of the border in pixels
 	EFontWeight weight; //!< The weight of the font
 	bool italic; //!< Is the font italic, false if not available
 	bool antialiased; //!< Is the font antialiased, false if not available
@@ -47,10 +47,10 @@ struct FontDescription
 
 	FontDescription(
 		const core::String& _name,
-		u32 _size,
+		int _size,
 		EFontWeight _weight = EFontWeight::Normal,
 		bool _italic = false,
-		u32 _borderSize = 0,
+		int _borderSize = 0,
 		bool _antialiased = true) :
 		name(_name),
 		size(_size),
@@ -61,10 +61,10 @@ struct FontDescription
 	{
 	}
 	FontDescription(
-		u32 _size,
+		int _size,
 		EFontWeight _weight = EFontWeight::Normal,
 		bool _italic = false,
-		u32 _borderSize = 0,
+		int _borderSize = 0,
 		bool _antialiased = true) :
 		size(_size),
 		borderSize(_borderSize),
@@ -168,7 +168,7 @@ public:
 	\param xPosition The text position from the begin of the text, 0.0 is the left edge of the text box
 	\return The hit caret
 	*/
-	virtual size_t GetCaretFromOffset(const FontRenderSettings& settings,
+	virtual int GetCaretFromOffset(const FontRenderSettings& settings,
 		core::Range<core::ConstUTF8Iterator> text,
 		float xPosition) = 0;
 

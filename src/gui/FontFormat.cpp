@@ -76,16 +76,16 @@ struct FontInfoV1
 {
 	core::String name;
 
-	u32 fontSize;
-	u32 borderSize;
+	int fontSize;
+	int borderSize;
 	EFontWeightsV1 weight;
 	bool italic;
 	bool antialiased;
-	u32 charCount;
+	int charCount;
 
-	u32 channelCount;
-	u32 imageWidth;
-	u32 imageHeight;
+	int channelCount;
+	int imageWidth;
+	int imageHeight;
 	EImageCompressionV1 imageCompression;
 
 	float charHeight;
@@ -154,7 +154,7 @@ struct Context
 		float invHeight = 1.0f / info.imageHeight;
 		float invWidth = 1.0f / info.imageWidth;
 		outData.charMap.Reserve(info.charCount);
-		for(u32 i = 0; i < info.charCount; ++i) {
+		for(int i = 0; i < info.charCount; ++i) {
 			CharInfoV1 v1Info;
 			ReadCharInfo(v1Info);
 			CharInfo c;
@@ -175,7 +175,7 @@ struct Context
 			ReadBytes(imageBytes, m_ImageData);
 		} else if(info.imageCompression == EImageCompressionV1::RLE) {
 			core::RawMemory compressed;
-			for(u32 c = 0; c < info.channelCount; ++c) {
+			for(int c = 0; c < info.channelCount; ++c) {
 				u32 compressedBytes = ReadU32();
 				compressed.SetMinSize(compressedBytes);
 				ReadBytes(compressedBytes, compressed);
@@ -201,7 +201,7 @@ struct Context
 		FontInfoV1 info;
 		info.antialiased = font->GetDescription().antialiased;
 		info.baseLine = font->GetBaseLine();
-		info.charCount = (u32)font->GetCharMap().Size();
+		info.charCount = font->GetCharMap().Size();
 
 		info.charHeight = font->GetFontHeight();
 		info.fontSize = font->GetDescription().size;
@@ -212,7 +212,7 @@ struct Context
 		info.imageCompression = EImageCompressionV1::RLE;
 #endif
 		const void* imgPtr;
-		u32 w, h, channels;
+		int w, h, channels;
 		font->GetRawData(imgPtr, w, h, channels);
 		info.imageHeight = h;
 		info.imageWidth = w;
@@ -255,15 +255,15 @@ struct Context
 #else
 		// Write rle
 		core::Array<u8> outData;
-		for(u32 c = 0; c < info.channelCount; ++c) {
+		for(int c = 0; c < info.channelCount; ++c) {
 			outData.Clear();
 			const u8* cur = (const u8*)imgPtr;
 			auto pitch = info.imageWidth * info.channelCount;
 
 			int runLen = 0;
 			u8 lastByte = 0;
-			for(u32 i = 0; i < info.imageHeight; ++i) {
-				for(u32 j = 0; j < info.imageWidth; ++j) {
+			for(int i = 0; i < info.imageHeight; ++i) {
+				for(int j = 0; j < info.imageWidth; ++j) {
 					u8 byte = cur[info.channelCount*j + c];
 					if(i == 0 && j == 0)
 						lastByte = byte;
@@ -278,8 +278,8 @@ struct Context
 				}
 				cur += pitch;
 			}
-			WriteU32((u32)outData.Size());
-			WriteBytes((u32)outData.Size(), outData.Data_c());
+			WriteU32(outData.Size());
+			WriteBytes(outData.Size(), outData.Data_c());
 		}
 #endif
 	}
@@ -414,7 +414,7 @@ private:
 		}
 	}
 
-	void WriteU32(u32 v)
+	void WriteU32(int v)
 	{
 		WriteBytes(4, &v);
 	}
@@ -425,7 +425,7 @@ private:
 		WriteBytes(4, &value);
 	}
 
-	void WriteBytes(u32 count, const void* data)
+	void WriteBytes(int count, const void* data)
 	{
 		m_File->WriteBinary(data, count);
 	}
@@ -472,7 +472,7 @@ core::Name FontLoader::GetResourceType(io::File* file, core::Name requestedType)
 		return core::Name::INVALID;
 
 	u32 magic = 0;
-	const u32 bytes = file->ReadBinaryPart(sizeof(u32), &magic);
+	auto bytes = file->ReadBinaryPart(sizeof(u32), &magic);
 	if(bytes != 4 || magic != LX_MAKE_FOURCC('F', 'O', 'N', 'T'))
 		return core::Name::INVALID;
 	else

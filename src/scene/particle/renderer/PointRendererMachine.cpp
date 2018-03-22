@@ -55,7 +55,7 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 	CreateBuffer(group);
 
 	ParticleModel* model = group->GetModel();
-	u32 cursor = 0;
+	int cursor = 0;
 	for(auto& p : group->GetPool()) {
 		video::Color color;
 		float alpha = model->ReadValue(p, Particle::EParameter::Alpha);

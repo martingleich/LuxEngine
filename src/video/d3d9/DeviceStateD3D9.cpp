@@ -95,7 +95,7 @@ void DeviceStateD3D9::EnableFixedFunctionShader(
 {
 	SetRenderState(D3DRS_COLORVERTEX, useVertexColors ? TRUE : FALSE);
 
-	u32 layerCount = layers.Size();
+	int layerCount = layers.Size();
 	if(layerCount == 0)
 		layerCount = 1;
 	// Enable texture layers for fixed function pipeline
@@ -109,7 +109,7 @@ void DeviceStateD3D9::EnableFixedFunctionShader(
 		ETextureArgument::Diffuse,
 		ETextureOperator::SelectArg1);
 	static const TextureLayer EMPTY_LAYER;
-	for(size_t i = 0; i < layerCount; ++i) {
+	for(int i = 0; i < layerCount; ++i) {
 		auto& tex = i < layers.Size() ? layers[i] : EMPTY_LAYER;
 		EnableTextureLayer(i, tex);
 
@@ -122,11 +122,11 @@ void DeviceStateD3D9::EnableFixedFunctionShader(
 		EnableTextureStage(i, *settings, useVertexColors);
 	}
 
-	for(u32 i = layerCount; i < (u32)stages.Size(); ++i)
+	for(int i = layerCount; i < stages.Size(); ++i)
 		EnableTextureStage(i, stages[i], useVertexColors);
 
-	u32 newUsed = math::Max(layerCount, stages.Size());
-	for(u32 i = newUsed; i < m_ActiveTextureLayers; ++i)
+	auto newUsed = math::Max(layerCount, stages.Size());
+	for(int i = newUsed; i < m_ActiveTextureLayers; ++i)
 		DisableTexture(i);
 
 	m_ActiveTextureLayers = newUsed;
@@ -142,14 +142,14 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 		SetTexture(stage, nullptr);
 	}
 	if(stage >= D3DVERTEXTEXTURESAMPLER0)
-		m_MaxVSTextureCount = math::Max(stage - D3DVERTEXTEXTURESAMPLER0 + 1, m_MaxVSTextureCount);
+		m_MaxVSTextureCount = math::Max<int>(stage - D3DVERTEXTEXTURESAMPLER0 + 1, m_MaxVSTextureCount);
 	else
-		m_MaxTextureCount = math::Max(stage + 1, m_MaxTextureCount);
+		m_MaxTextureCount = math::Max<int>(stage + 1, m_MaxTextureCount);
 
 	if(textureSet) {
 		SetSamplerState(stage, D3DSAMP_ADDRESSU, GetD3DRepeatMode(layer.repeat.u));
 		SetSamplerState(stage, D3DSAMP_ADDRESSV, GetD3DRepeatMode(layer.repeat.v));
-		SetSamplerState(stage, D3DSAMP_BORDERCOLOR, (u32)layer.repeat.border);
+		SetSamplerState(stage, D3DSAMP_BORDERCOLOR, layer.repeat.border.ToDWORD());
 
 		BaseTexture::Filter filter = layer.texture->GetFiltering();
 
@@ -375,7 +375,7 @@ void DeviceStateD3D9::SetFog(const FogData& fog)
 	SetRenderState(D3DRS_FOGVERTEXMODE, type);
 	SetRenderState(D3DRS_RANGEFOGENABLE, TRUE);
 
-	SetRenderState(D3DRS_FOGCOLOR, (u32)ColorFToColor(fog.color));
+	SetRenderState(D3DRS_FOGCOLOR, ColorFToColor(fog.color).ToDWORD());
 	SetRenderStateF(D3DRS_FOGSTART, fog.start);
 	SetRenderStateF(D3DRS_FOGEND, fog.end);
 	SetRenderStateF(D3DRS_FOGDENSITY, fog.density);
@@ -465,10 +465,13 @@ void DeviceStateD3D9::SetLight(u32 id, const LightData& light, ELighting lightin
 
 void DeviceStateD3D9::ReleaseUnmanaged()
 {
-	for(u32 i = 0; i < m_MaxTextureCount; ++i)
+	for(int i = 0; i < m_MaxTextureCount; ++i)
 		m_Device->SetTexture(i, nullptr);
-	for(u32 i = 0; i < m_MaxVSTextureCount; ++i)
+	for(int i = 0; i < m_MaxVSTextureCount; ++i)
 		m_Device->SetTexture(D3DVERTEXTEXTURESAMPLER0 + i, nullptr);
+	m_Shader = nullptr;
+	m_Device->SetPixelShader(nullptr);
+	m_Device->SetVertexShader(nullptr);
 }
 
 void DeviceStateD3D9::Reset()

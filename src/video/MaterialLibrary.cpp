@@ -83,7 +83,7 @@ MaterialLibrary::MaterialLibrary()
 	}
 
 	{
-		const char* luxHLSLInclude =
+		const char luxHLSLInclude[] =
 			R"(
 // d is the distance from the geomtry to the camera.
 // Returns 0 for minimal fog effect, 1 for maximal effect
@@ -149,7 +149,7 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 	return color;
 }
 )";
-		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude, strlen(luxHLSLInclude));
+		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude, sizeof(luxHLSLInclude));
 	}
 }
 
@@ -225,30 +225,33 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 
 	core::RawMemory vsCodeBuffer;
 	char* vsCode = (char*)VSFile->GetBuffer();
+	int vsCodeSize = core::SafeCast<int>(VSFile->GetSize());
 	if(!vsCode) {
-		vsCodeBuffer.SetSize(VSFile->GetSize() + 1);
+		vsCodeBuffer.SetSize((size_t)vsCodeSize);
 		vsCode = vsCodeBuffer;
 		VSFile->ReadBinary(VSFile->GetSize(), vsCode);
-		vsCode[VSFile->GetSize()] = 0;
 	}
 
 	core::RawMemory psCodeBuffer;
-	char* psCode = (char*)PSFile->GetBuffer();
-	if(!psCode) {
-		if(PSFile == VSFile) {
-			psCode = vsCode;
-		} else {
-			psCodeBuffer.SetSize(PSFile->GetSize() + 1);
+	char* psCode;
+	int psCodeSize = 0;
+	if(PSFile == VSFile) {
+		psCode = vsCode;
+		psCodeSize = vsCodeSize;
+	} else {
+		psCode = (char*)PSFile->GetBuffer();
+		if(!psCode) {
+			psCodeSize = core::SafeCast<int>(VSFile->GetSize());
+			psCodeBuffer.SetSize((size_t)psCodeSize);
 			psCode = psCodeBuffer;
 			PSFile->ReadBinary(PSFile->GetSize(), psCode);
-			psCode[PSFile->GetSize()] = 0;
 		}
 	}
 
 	return video::VideoDriver::Instance()->CreateShader(
 		language,
-		vsCode, VSEntryPoint.Data(), VSFile->GetSize(), VSMajor, VSMinor,
-		psCode, PSEntryPoint.Data(), PSFile->GetSize(), PSMajor, PSMinor,
+		vsCode, VSEntryPoint.Data(), vsCodeSize, VSMajor, VSMinor,
+		psCode, PSEntryPoint.Data(), psCodeSize, PSMajor, PSMinor,
 		errorList);
 }
 
@@ -308,20 +311,20 @@ bool MaterialLibrary::IsShaderSupported(
 
 bool MaterialLibrary::GetShaderInclude(
 	EShaderLanguage language, const core::String& name,
-	const void*& outData, size_t& outBytes)
+	const void*& outData, int& outBytes)
 {
 	ShaderInclude search(language, name);
 	auto it = m_ShaderIncludes.Find(search);
 	if(it == m_ShaderIncludes.End())
 		return false;
 	outData = it->PointerC();
-	outBytes = it->GetSize();
+	outBytes = (int)it->GetSize();
 	return true;
 }
 
 void MaterialLibrary::SetShaderInclude(
 	EShaderLanguage language, const core::String& name,
-	const void* data, size_t bytes)
+	const void* data, int bytes)
 {
 	ShaderInclude search(language, name);
 	auto& mem = m_ShaderIncludes.At(search);

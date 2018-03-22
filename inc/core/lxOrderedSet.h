@@ -163,7 +163,7 @@ public:
 		return m_Tree.IsEmpty();
 	}
 
-	size_t Size() const
+	int Size() const
 	{
 		return m_Tree.Size();
 	}
@@ -188,7 +188,7 @@ public:
 
 		auto jt = other.First();
 		auto& comp = m_Tree.GetCompare();
-		size_t maxErrorCount = Size() - other.Size();
+		auto maxErrorCount = Size() - other.Size();
 		for(auto it = First(); it != End(); ++it) {
 			if(comp.Equal(*it, *jt)) {
 				++jt; // Found this element, next one

@@ -25,19 +25,19 @@ public:
 	~ShaderD3D9();
 
 	void Init(
-		const char* vsCode, const char* vsEntryPoint, size_t vsLength, const char* vsProfile,
-		const char* psCode, const char* psEntryPoint, size_t psLength, const char* psProfile,
+		const char* vsCode, const char* vsEntryPoint, int vsLength, const char* vsProfile,
+		const char* psCode, const char* psEntryPoint, int psLength, const char* psProfile,
 		core::Array<core::String>* errorList);
 
 	void Enable();
-	void SetParam(u32 paramId, const void* data);
-	u32 GetParamId(const core::String& name) const;
+	void SetParam(int paramId, const void* data);
+	int GetParamId(const core::String& name) const;
 	void LoadSceneParams(const Pass& pass);
 	void Render() {}
 	void Disable();
 
-	size_t GetSceneParamCount() const;
-	core::AttributePtr GetSceneParam(size_t id) const;
+	int GetSceneParamCount() const;
+	core::AttributePtr GetSceneParam(int id) const;
 
 	const core::ParamPackage& GetParamPackage() const;
 
@@ -132,7 +132,7 @@ private:
 		EType type;
 
 		EParamType paramType;
-		u32 index;
+		int index;
 		u32 samplerStage;
 		core::AttributePtr sceneValue;
 	};
@@ -142,9 +142,9 @@ private:
 
 	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<core::String>* errorList);
 
-	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(const char* code, const char* entryPoint, size_t length, const char* profile,
+	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(const char* code, const char* entryPoint, int length, const char* profile,
 		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
-	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(const char* code, const char* entryPoint, size_t length, const char* profile,
+	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(const char* code, const char* entryPoint, int length, const char* profile,
 		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 
 	void SetShaderValue(const Param& p, const void* data);

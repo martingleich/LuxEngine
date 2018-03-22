@@ -20,7 +20,7 @@ namespace core
 class TypeInfo
 {
 public:
-	TypeInfo(const char* name, size_t size, size_t align, bool isTrivial) :
+	TypeInfo(const char* name, int size, int align, bool isTrivial) :
 		m_Name(name),
 		m_Size(size),
 		m_Align(align),
@@ -42,13 +42,13 @@ public:
 	}
 
 	//! Size of the type in bytes.
-	inline size_t GetSize() const
+	inline int GetSize() const
 	{
 		return m_Size;
 	}
 
 	//! Alignment of the type in bytes.
-	inline size_t GetAlign() const
+	inline int GetAlign() const
 	{
 		return m_Align;
 	}
@@ -62,8 +62,8 @@ public:
 
 private:
 	const char* const m_Name;
-	const size_t m_Size;
-	const size_t m_Align;
+	const int m_Size;
+	const int m_Align;
 	const bool m_IsTrivial;
 };
 
@@ -112,7 +112,7 @@ public:
 class TypeInfoVirtual : public TypeInfo
 {
 public:
-	TypeInfoVirtual(const char* name, size_t size, size_t align, bool isTrivial) :
+	TypeInfoVirtual(const char* name, int size, int align, bool isTrivial) :
 		TypeInfo(name, size, align, isTrivial)
 	{
 	}
@@ -207,12 +207,12 @@ public:
 		m_Info->Assign(ptr, other);
 	}
 
-	size_t GetSize() const
+	int GetSize() const
 	{
 		return m_Info->GetSize();
 	}
 
-	size_t GetAlign() const
+	int GetAlign() const
 	{
 		return m_Info->GetAlign();
 	}
@@ -256,7 +256,7 @@ private:
 template <>
 struct HashType<Type>
 {
-	size_t operator()(Type x)
+	int operator()(Type x)
 	{
 		HashType<const TypeInfo*> hasher;
 		return hasher(x.GetInfo());
@@ -270,7 +270,7 @@ inline Type Unknown()
 	return Type::Unknown;
 }
 LUX_API Type Integer();
-LUX_API Type U32();
+LUX_API Type UInteger();
 LUX_API Type Byte();
 LUX_API Type Float();
 LUX_API Type Boolean();
@@ -304,7 +304,7 @@ template <typename T>
 struct TemplType { static Type Get() { return Types::Unknown(); } };
 
 template <> struct TemplType<int> { static Type Get() { return Types::Integer(); } };
-template <> struct TemplType<u32> { static Type Get() { return Types::U32(); } };
+template <> struct TemplType<unsigned int> { static Type Get() { return Types::UInteger(); } };
 template <> struct TemplType<u8> { static Type Get() { return Types::Byte(); } };
 template <> struct TemplType<float> { static Type Get() { return Types::Float(); } };
 template <> struct TemplType<bool> { static Type Get() { return Types::Boolean(); } };
@@ -398,7 +398,7 @@ private:
 
 //! Converts between base types.
 /**
-The base types are int, u32, float and bool.
+The base types are int, unsigned int, float and bool.
 */
 inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, void* toData)
 {
@@ -411,8 +411,8 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 		return false;
 
 	if(fromType == Types::Integer()) {
-		if(toType == Types::U32()) {
-			*((u32*)toData) = *((int*)fromData);
+		if(toType == Types::UInteger()) {
+			*((unsigned int*)toData) = *((int*)fromData);
 			return true;
 		}
 		if(toType == Types::Float()) {
@@ -426,18 +426,18 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 		return false;
 	}
 
-	if(fromType == Types::U32()) {
+	if(fromType == Types::UInteger()) {
 		if(toType == Types::Integer()) {
-			*((int*)toData) = *((u32*)fromData);
+			*((int*)toData) = *((unsigned int*)fromData);
 			return true;
 		}
 		if(toType == Types::Float()) {
-			*((float*)toData) = (float)*((u32*)fromData);
+			*((float*)toData) = (float)*((unsigned int*)fromData);
 			return true;
 		}
 
 		if(toType == Types::Boolean()) {
-			*((bool*)toData) = *((u32*)fromData) ? true : false;
+			*((bool*)toData) = *((unsigned int*)fromData) ? true : false;
 			return true;
 		}
 		return false;
@@ -448,8 +448,8 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 			*((int*)toData) = (int)*((float*)fromData);
 			return true;
 		}
-		if(toType == Types::U32()) {
-			*((u32*)toData) = (size_t)*((float*)fromData);
+		if(toType == Types::UInteger()) {
+			*((unsigned int*)toData) = (int)*((float*)fromData);
 			return true;
 		}
 		return false;
@@ -460,8 +460,8 @@ inline bool ConvertBaseType(Type fromType, const void* fromData, Type toType, vo
 			*((int*)toData) = *((bool*)fromData) ? 1 : 0;
 			return true;
 		}
-		if(toType == Types::U32()) {
-			*((u32*)toData) = *((bool*)fromData) ? 1 : 0;
+		if(toType == Types::UInteger()) {
+			*((unsigned int*)toData) = *((bool*)fromData) ? 1 : 0;
 			return true;
 		}
 		if(toType == Types::Float()) {
@@ -483,7 +483,7 @@ inline bool IsConvertible(Type fromType, Type toType)
 		return false;
 
 	if(fromType == Types::Integer()) {
-		if(toType == Types::U32()) {
+		if(toType == Types::UInteger()) {
 			return true;
 		}
 		if(toType == Types::Float()) {
@@ -495,7 +495,7 @@ inline bool IsConvertible(Type fromType, Type toType)
 		return false;
 	}
 
-	if(fromType == Types::U32()) {
+	if(fromType == Types::UInteger()) {
 		if(toType == Types::Integer()) {
 			return true;
 		}
@@ -513,7 +513,7 @@ inline bool IsConvertible(Type fromType, Type toType)
 		if(toType == Types::Integer()) {
 			return true;
 		}
-		if(toType == Types::U32()) {
+		if(toType == Types::UInteger()) {
 			return true;
 		}
 		return false;
@@ -523,7 +523,7 @@ inline bool IsConvertible(Type fromType, Type toType)
 		if(toType == Types::Integer()) {
 			return true;
 		}
-		if(toType == Types::U32()) {
+		if(toType == Types::UInteger()) {
 			return true;
 		}
 		if(toType == Types::Float()) {

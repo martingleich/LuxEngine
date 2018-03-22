@@ -39,7 +39,7 @@ bool ImageWriterTGA::CanWriteFile(const core::String& ext)
 static uint32_t tga_proc_write(tga_struct* tga, uint32_t size, void* buffer)
 {
 	io::File* file = (io::File*)tga_get_io_data(tga);
-	return file->WriteBinaryPart(buffer, size);
+	return (uint32_t)file->WriteBinaryPart(buffer, size);
 }
 
 static uint32_t tga_proc_seek(tga_struct* tga, uint32_t offset)
@@ -55,7 +55,7 @@ static uint32_t tga_proc_seek(tga_struct* tga, uint32_t offset)
 	return 0;
 }
 
-void ImageWriterTGA::WriteFile(io::File* file, void* data, video::ColorFormat format, math::Dimension2U size, u32 pitch, u32 writerParam)
+void ImageWriterTGA::WriteFile(io::File* file, void* data, video::ColorFormat format, math::Dimension2I size, u32 pitch, u32 writerParam)
 {
 	LX_CHECK_NULL_ARG(file);
 	LX_CHECK_NULL_ARG(data);

@@ -134,12 +134,12 @@ const video::RenderTarget& Camera::GetRenderTarget() const
 	return m_RenderTarget;
 }
 
-void Camera::SetRenderPriority(s32 p)
+void Camera::SetRenderPriority(int p)
 {
 	m_RenderPriority = p;
 }
 
-s32 Camera::GetRenderPriority() const
+int Camera::GetRenderPriority() const
 {
 	return m_RenderPriority;
 }

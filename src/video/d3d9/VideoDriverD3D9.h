@@ -35,24 +35,24 @@ public:
 	//------------------------------------------------------------------
 	virtual StrongRef<Geometry> CreateEmptyGeometry(EPrimitiveType primitiveType = EPrimitiveType::Triangles);
 	virtual StrongRef<Geometry> CreateGeometry(
-		const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, u32 vertexCount,
-		EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, u32 IndexCount,
+		const VertexFormat& vertexFormat, EHardwareBufferMapping VertexHWMapping, int vertexCount,
+		EIndexFormat indexType, EHardwareBufferMapping IndexHWMapping, int IndexCount,
 		EPrimitiveType primitiveType);
 
 	virtual StrongRef<Geometry> CreateGeometry(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
-		u32 primitiveCount = 0,
+		int primitiveCount = 0,
 		bool dynamic = false);
 
 	//------------------------------------------------------------------
 	// Textur-Methoden
 	bool CheckTextureFormat(ColorFormat format, bool cube, bool rendertarget);
-	bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2U& size, bool cube, bool rendertarget);
+	bool GetFittingTextureFormat(ColorFormat& format, math::Dimension2I& size, bool cube, bool rendertarget);
 
-	StrongRef<Texture> CreateTexture(const math::Dimension2U& Size, ColorFormat Format, u32 MipCount, bool isDynamic);
-	StrongRef<Texture> CreateRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
-	StrongRef<CubeTexture> CreateCubeTexture(u32 Size, ColorFormat Format, bool isDynamic);
-	StrongRef<CubeTexture> CreateRendertargetCubeTexture(u32 size, ColorFormat format);
+	StrongRef<Texture> CreateTexture(const math::Dimension2I& Size, ColorFormat Format, int MipCount, bool isDynamic);
+	StrongRef<Texture> CreateRendertargetTexture(const math::Dimension2I& size, ColorFormat format);
+	StrongRef<CubeTexture> CreateCubeTexture(int Size, ColorFormat Format, bool isDynamic);
+	StrongRef<CubeTexture> CreateRendertargetCubeTexture(int size, ColorFormat format);
 
 	void AddTextureToList(BaseTexture* tex);
 
@@ -60,8 +60,8 @@ public:
 
 	StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
-		const char* VSCode, const char* VSEntryPoint, u32 VSLength, int VSmajorVersion, int VSminorVersion,
-		const char* PSCode, const char* PSEntryPoint, u32 PSLength, int PSmajorVersion, int PSminorVersion,
+		const char* VSCode, const char* VSEntryPoint, int VSLength, int VSmajorVersion, int VSminorVersion,
+		const char* PSCode, const char* PSEntryPoint, int PSLength, int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList);
 
 	StrongRef<Shader> CreateFixedFunctionShader(const FixedFunctionParameters& params);
@@ -112,11 +112,11 @@ private:
 	public:
 		DepthBuffer_d3d9() {}
 		DepthBuffer_d3d9(UnknownRefCounted<IDirect3DSurface9> surface);
-		const math::Dimension2U& GetSize() const { return m_Size; }
+		const math::Dimension2I& GetSize() const { return m_Size; }
 		IDirect3DSurface9* GetSurface() const { return m_Surface; }
 
 	private:
-		math::Dimension2U m_Size;
+		math::Dimension2I m_Size;
 		UnknownRefCounted<IDirect3DSurface9> m_Surface;
 	};
 

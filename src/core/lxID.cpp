@@ -22,7 +22,7 @@ struct IDManager::IDList
 			value = biggest;
 			++biggest;
 		}
-		if(objects.Size() < value)
+		if((u32)objects.Size() < value)
 			objects.Resize(objects.Size() * 2 + 1);
 		objects[value - 1] = object;
 		return value;
@@ -38,7 +38,7 @@ struct IDManager::IDList
 		if(id == 0)
 			return nullptr;
 		id--;
-		if(id >= objects.Size())
+		if(id >= (u32)objects.Size())
 			return nullptr;
 		return objects[id];
 	}

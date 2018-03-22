@@ -19,12 +19,12 @@ class HashSet
 	struct Entry
 	{
 		T value;
-		size_t next;
+		int next;
 	};
 
 	// The value of id that point nowhere.
 	// Used to indicate empty buckets.
-	static const size_t INVALID_ID = (size_t)-1;
+	static const int INVALID_ID = -1;
 
 public:
 	template <bool IsConst>
@@ -126,7 +126,7 @@ public:
 	{
 	}
 
-	HashSet(size_t allocated, size_t bucketCount = 0) :
+	HashSet(int allocated, int bucketCount = 0) :
 		HashSet()
 	{
 		ReserveAndRehash(allocated, bucketCount);
@@ -167,10 +167,10 @@ public:
 
 	void Clear()
 	{
-		for(size_t i = 0; i < m_Size; ++i)
+		for(int i = 0; i < m_Size; ++i)
 			m_Entries[i].value.~T();
 		m_Size = 0;
-		for(size_t i = 0; i < m_BucketCount; ++i)
+		for(int i = 0; i < m_BucketCount; ++i)
 			m_Buckets[i] = INVALID_ID;
 	}
 
@@ -184,13 +184,13 @@ public:
 			m_Allocated = other.m_Size;
 		}
 		m_Size = other.Size();
-		for(size_t i = 0; i < m_Size; ++i)
+		for(int i = 0; i < m_Size; ++i)
 			new (&m_Entries[i]) Entry(other.m_Entries[i]);
 
 		LUX_FREE_RAW(m_Buckets);
-		m_Buckets = (size_t*)LUX_NEW_RAW(sizeof(size_t) * other.m_BucketCount);
+		m_Buckets = (int*)LUX_NEW_RAW(sizeof(int) * other.m_BucketCount);
 		m_BucketCount = other.m_BucketCount;
-		memcpy(m_Buckets, other.m_Buckets, sizeof(size_t) * other.m_BucketCount);
+		memcpy(m_Buckets, other.m_Buckets, sizeof(int) * other.m_BucketCount);
 
 		m_MaxLoadFactor = other.m_MaxLoadFactor;
 
@@ -249,8 +249,8 @@ public:
 	{
 		if(m_Size == 0)
 			return false;
-		auto hash = m_Hasher(value) % m_BucketCount;
-		size_t prev;
+		auto hash = unsigned int(m_Hasher(value)) % m_BucketCount;
+		int prev;
 		auto id = GetId<K>(hash, value, &prev);
 		if(id == INVALID_ID)
 			return false;
@@ -272,12 +272,12 @@ public:
 
 		if(id != m_Size) {
 			// Update references to moved entry(redirect from m_Size to id)
-			auto hash2 = m_Hasher(m_Entries[id].value) % m_BucketCount;
+			auto hash2 = unsigned int(m_Hasher(m_Entries[id].value)) % m_BucketCount;
 			if(m_Entries[id].next == m_Size) {
 				m_Entries[id].next = id;
 				m_Buckets[hash2] = id;
 			} else {
-				size_t prev2 = Previous(m_Size);
+				int prev2 = Previous(m_Size);
 				m_Entries[prev2].next = id;
 				m_Buckets[hash2] = prev2;
 			}
@@ -347,27 +347,27 @@ public:
 	ConstIterator First() const { return ConstIterator(m_Entries); }
 	ConstIterator End() const { return ConstIterator(m_Entries + m_Size); }
 
-	void Reserve(size_t allocated)
+	void Reserve(int allocated)
 	{
-		auto bucketCount = (size_t)(allocated / m_MaxLoadFactor);
+		auto bucketCount = (int)(allocated / m_MaxLoadFactor);
 		ReserveAndRehash(allocated, bucketCount);
 	}
 
-	void ReserveAndRehash(size_t allocated, size_t bucketCount)
+	void ReserveAndRehash(int allocated, int bucketCount)
 	{
 		bucketCount = GoodBucketCount(bucketCount);
 
 		PureReserve(allocated);
 
 		if(m_BucketCount < bucketCount) {
-			auto newBuckets = (size_t*)LUX_NEW_RAW(bucketCount * sizeof(size_t));
+			auto newBuckets = (int*)LUX_NEW_RAW(bucketCount * sizeof(int));
 			// Reset connections.
-			for(size_t i = 0; i < bucketCount; ++i)
+			for(int i = 0; i < bucketCount; ++i)
 				newBuckets[i] = INVALID_ID;
 
 			// Rehash needed.
-			for(size_t i = 0; i < m_Size; ++i) {
-				auto hash = m_Hasher(m_Entries[i].value) % bucketCount;
+			for(int i = 0; i < m_Size; ++i) {
+				auto hash = unsigned int(m_Hasher(m_Entries[i].value)) % bucketCount;
 				if(newBuckets[hash] == INVALID_ID) {
 					newBuckets[hash] = i;
 					m_Entries[i].next = i;
@@ -392,15 +392,15 @@ public:
 		return m_MaxLoadFactor;
 	}
 
-	size_t Size() const
+	int Size() const
 	{
 		return m_Size;
 	}
-	size_t Allocated() const
+	int Allocated() const
 	{
 		return m_Allocated;
 	}
-	size_t BucketCount() const
+	int BucketCount() const
 	{
 		return m_BucketCount;
 	}
@@ -419,7 +419,7 @@ public:
 	}
 
 private:
-	void PureReserve(size_t allocated)
+	void PureReserve(int allocated)
 	{
 		// No rehash requiered.
 		if(m_Allocated >= allocated)
@@ -427,7 +427,7 @@ private:
 		Entry* newEntries = (Entry*)LUX_NEW_RAW(allocated * sizeof(Entry));
 
 		// Move construct new values
-		for(size_t i = 0; i < m_Size; ++i) {
+		for(int i = 0; i < m_Size; ++i) {
 			new (&newEntries[i]) Entry(std::move(m_Entries[i]));
 			m_Entries[i].~Entry();
 		}
@@ -437,23 +437,23 @@ private:
 	}
 
 	template <typename K>
-	size_t GetId(const K& value) const
+	int GetId(const K& value) const
 	{
 		if(m_Size == 0)
 			return INVALID_ID;
-		auto pureHash = m_Hasher(value);
+		auto pureHash = unsigned int(m_Hasher(value));
 		return GetId<K>(pureHash % m_BucketCount, value);
 	}
 
 	template <typename K>
-	size_t GetId(size_t hash, const K& value, size_t* _prev = nullptr) const
+	int GetId(unsigned int hash, const K& value, int* _prev = nullptr) const
 	{
 		if(m_Size == 0)
 			return INVALID_ID;
 		auto id = m_Buckets[hash];
 		if(id == INVALID_ID)
 			return INVALID_ID;
-		size_t prev = INVALID_ID;
+		int prev = INVALID_ID;
 		auto begin = id;
 		while(!m_Comparer.Equal(m_Entries[id].value, value)) {
 			prev = id;
@@ -471,9 +471,9 @@ private:
 		return id;
 	}
 
-	size_t Previous(size_t i) const
+	int Previous(int i) const
 	{
-		size_t prev;
+		int prev;
 		auto cur = i;
 		do {
 			prev = cur;
@@ -485,9 +485,9 @@ private:
 	template <bool Copy>
 	bool BaseInsert(T&& value, Iterator* it = nullptr, bool replace = true)
 	{
-		auto pureHash = m_Hasher(value);
-		size_t hash = 0;
-		size_t id = 0;
+		auto pureHash = unsigned int(m_Hasher(value));
+		unsigned int hash = 0;
+		int id = 0;
 		if(m_Size != 0) {
 			hash = pureHash % m_BucketCount;
 			id = GetId<T>(hash, value);
@@ -500,7 +500,7 @@ private:
 			}
 		}
 
-		size_t oldBucketSize = m_BucketCount;
+		int oldBucketSize = m_BucketCount;
 		if(m_Size == m_Allocated)
 			Reserve(NewSize(Size()));
 		if(double(m_Size + 1) / m_BucketCount > GetMaxLoadFactor())
@@ -526,17 +526,17 @@ private:
 	}
 
 private:
-	static size_t NewSize(size_t oldSize)
+	static int NewSize(int oldSize)
 	{
 		if(oldSize == 0)
 			return 5;
 		return oldSize * 2;
 	}
-	static size_t NextBucketCount(size_t oldCount)
+	static int NextBucketCount(int oldCount)
 	{
 		return GoodBucketCount((oldCount * 2) / 3);
 	}
-	static size_t GoodBucketCount(size_t bucketCount)
+	static int GoodBucketCount(int bucketCount)
 	{
 		if(bucketCount <= 7)
 			return 7;
@@ -545,11 +545,11 @@ private:
 
 private:
 	Entry* m_Entries;
-	size_t m_Allocated;
-	size_t m_Size;
+	int m_Allocated;
+	int m_Size;
 
-	size_t* m_Buckets;
-	size_t m_BucketCount;
+	int* m_Buckets;
+	int m_BucketCount;
 
 	float m_MaxLoadFactor;
 

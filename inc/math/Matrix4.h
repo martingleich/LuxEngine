@@ -386,7 +386,7 @@ public:
 	*/
 	float& operator() (int row, int col)
 	{
-		lxAssert(row >= 0 && row < 4 && col >= 0 && col < 4);
+		lxAssert(row < 4 && col < 4);
 		return m[row][col];
 	}
 
@@ -398,7 +398,7 @@ public:
 	*/
 	const float& operator() (int row, int col) const
 	{
-		lxAssert(row >= 0 && row < 4 && col >= 0 && col < 4);
+		lxAssert(row < 4 && col < 4);
 		return m[row][col];
 	}
 
@@ -409,7 +409,7 @@ public:
 	*/
 	float& operator[] (int elem)
 	{
-		lxAssert(elem >= 0 && elem < 16);
+		lxAssert(elem < 16);
 		return ((float*)m)[elem];
 	}
 
@@ -420,7 +420,7 @@ public:
 	*/
 	float operator[] (int elem) const
 	{
-		lxAssert(elem >= 0 && elem < 16);
+		lxAssert(elem < 16);
 		return ((const float*)m)[elem];
 	}
 

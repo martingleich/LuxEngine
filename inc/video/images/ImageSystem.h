@@ -32,7 +32,7 @@ public:
 	\param format The colorformat of the new image
 	\return The newly created image
 	*/
-	LUX_API StrongRef<Image> CreateImage(const math::Dimension2U& size, ColorFormat format);
+	LUX_API StrongRef<Image> CreateImage(const math::Dimension2I& size, ColorFormat format);
 
 	//! Create a new image from data in memory
 	/**
@@ -43,14 +43,14 @@ public:
 	\param deleteOnDrop Only if copyMem=true. Should the referenced memory be deleted if the image is destructed(memory is freed via delete[](u8*) operator)
 	\return The newly created image
 	*/
-	LUX_API StrongRef<Image> CreateImage(const math::Dimension2U& size, ColorFormat format, void* data, bool copyMem, bool deleteOnDrop);
+	LUX_API StrongRef<Image> CreateImage(const math::Dimension2I& size, ColorFormat format, void* data, bool copyMem, bool deleteOnDrop);
 
 	//! Create s new sprite bank
 	LUX_API StrongRef<SpriteBank> CreateSpriteBank();
 
-	LUX_API StrongRef<Texture> CreateFittingTexture(const math::Dimension2U& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false);
+	LUX_API StrongRef<Texture> CreateFittingTexture(const math::Dimension2I& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false);
 	LUX_API StrongRef<CubeTexture> CreateFittingCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false);
-	LUX_API StrongRef<Texture> CreateFittingRendertargetTexture(const math::Dimension2U& size, ColorFormat format);
+	LUX_API StrongRef<Texture> CreateFittingRendertargetTexture(const math::Dimension2I& size, ColorFormat format);
 
 private:
 	VideoDriver* m_Driver;

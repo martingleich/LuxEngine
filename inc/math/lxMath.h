@@ -247,6 +247,7 @@ struct Constants<u32> : impl_math::BaseConstants<u32>
 
 ///\endcond
 
+
 //! Calculate value+offset, returns false if the result is outside of the range [0, upper_limit],
 //! new_value is only set, if the return value is true.
 inline bool AddInsideBounds(u32 value, s32 offset, u32 upper_limit, u32& new_value)
@@ -444,14 +445,12 @@ inline float SCurve3(float x)
 /**
 T must be an unsigned integral type.
 */
-template <typename T>
-typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, bool>::type
-IsPrime(T x)
+inline bool IsPrime(int x)
 {
-	T o = 4;
-	T i = 5;
+	int o = 4;
+	int i = 5;
 	while(true) {
-		T q = x / i;
+		int q = x / i;
 		if(q < i)
 			return true;
 		if(x == q * i)
@@ -467,9 +466,7 @@ IsPrime(T x)
 /**
 T must be an unsigned integral type.
 */
-template <typename T>
-typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
-NextPrime(T x)
+inline int NextPrime(int x)
 {
 	switch(x) {
 	case 0:
@@ -483,9 +480,9 @@ NextPrime(T x)
 		return 5;
 	}
 
-	T k = x / 6;
-	T i = x - 6 * k;
-	T o = i < 2 ? 1 : 5;
+	int k = x / 6;
+	int i = x - 6 * k;
+	int o = i < 2 ? 1 : 5;
 	x = 6 * k + o;
 
 	for(i = (3 + o) / 2; !IsPrime(x); x += i)
@@ -500,15 +497,14 @@ T must be an unsigned integral type.
 Zero is considered a power of two.
 */
 template <typename T>
-typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, bool>::type
+typename std::enable_if<std::is_integral<T>::value, bool>::type
 IsPowerOfTwo(T x)
 {
 	return ((x - 1)&x) == 0;
 }
 
-
 template <typename T>
-typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+typename std::enable_if<std::is_integral<T>::value, T>::type
 HighestBitPos(T value)
 {
 	T bit = 0;

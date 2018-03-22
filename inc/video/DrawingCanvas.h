@@ -13,17 +13,17 @@ class DrawingCanvas
 {
 public:
 	LUX_API DrawingCanvas();
-	LUX_API DrawingCanvas(void* d, ColorFormat f, const math::Dimension2U& dim, u32 p);
+	LUX_API DrawingCanvas(void* d, ColorFormat f, const math::Dimension2I& dim, int p);
 	LUX_API ~DrawingCanvas();
 
 	LUX_API bool IsValid();
 
 	LUX_API void Clear(Color color);
 
-	LUX_API void SetPixel(s32 x, s32 y, Color color);
-	LUX_API Color GetPixel(s32 x, s32 y);
+	LUX_API void SetPixel(int x, int y, Color color);
+	LUX_API Color GetPixel(int x, int y);
 
-	void SetFastPixelCheck(s32 x, s32 y, u8 native_color[4])
+	void SetFastPixelCheck(int x, int y, u8 native_color[4])
 	{
 		if(x < 0 || x >= m_Width)
 			return;
@@ -33,23 +33,23 @@ public:
 		SetFastPixel(x, y, native_color);
 	}
 
-	void SetFastPixel(s32 x, s32 y, u8 native_color[4])
+	void SetFastPixel(int x, int y, u8 native_color[4])
 	{
-		u32 b = m_Format.GetBytePerPixel();
+		int b = m_Format.GetBytePerPixel();
 		memcpy(m_Data + y*m_Pitch + b * x, native_color, b);
 	}
 
-	void SetPixelUnchecked(s32 x, s32 y, Color color)
+	void SetPixelUnchecked(int x, int y, Color color)
 	{
-		m_Format.A8R8G8B8ToFormat((u32)color, m_Data + y*m_Pitch + x*m_Format.GetBytePerPixel());
+		m_Format.A8R8G8B8ToFormat(color.ToDWORD(), m_Data + y*m_Pitch + x*m_Format.GetBytePerPixel());
 	}
 
-	Color GetPixelUnchecked(s32 x, s32 y)
+	Color GetPixelUnchecked(int x, int y)
 	{
 		return m_Format.FormatToA8R8G8B8(m_Data + y*m_Pitch + x*m_Format.GetBytePerPixel());
 	}
 
-	void DrawAlphaPixel(s32 x, s32 y, s32 blend, Color color)
+	void DrawAlphaPixel(int x, int y, int blend, Color color)
 	{
 		if(x < 0)
 			return;
@@ -63,17 +63,17 @@ public:
 		blend = 255 - blend;
 
 		Color c0 = GetPixelUnchecked(x, y);
-		u32 r0 = c0.GetRed();
-		u32 g0 = c0.GetGreen();
-		u32 b0 = c0.GetBlue();
+		int r0 = c0.GetRed();
+		int g0 = c0.GetGreen();
+		int b0 = c0.GetBlue();
 
-		u32 r1 = color.GetRed();
-		u32 g1 = color.GetGreen();
-		u32 b1 = color.GetBlue();
+		int r1 = color.GetRed();
+		int g1 = color.GetGreen();
+		int b1 = color.GetBlue();
 
-		u32 r = (r1*blend + r0*(255 - blend)) / 255;
-		u32 g = (g1*blend + g0*(255 - blend)) / 255;
-		u32 b = (b1*blend + b0*(255 - blend)) / 255;
+		int r = (r1*blend + r0*(255 - blend)) / 255;
+		int g = (g1*blend + g0*(255 - blend)) / 255;
+		int b = (b1*blend + b0*(255 - blend)) / 255;
 		SetPixelUnchecked(x, y, Color(r, g, b));
 	}
 
@@ -81,18 +81,18 @@ public:
 	void ApplyMapping(const MapFunc& func)
 	{
 		if(m_Format == ColorFormat::A8R8G8B8) {
-			for(s32 y = 0; y < m_Height; ++y) {
+			for(int y = 0; y < m_Height; ++y) {
 				u8* cur = m_Data + y*m_Pitch;
-				for(s32 x = 0; x < m_Width; ++x) {
+				for(int x = 0; x < m_Width; ++x) {
 					func(cur[3], cur[2], cur[1], cur[0],
 						cur[3], cur[2], cur[1], cur[0]);
 					cur += 4;
 				}
 			}
 		} else if(m_Format == ColorFormat::R8G8B8) {
-			for(s32 y = 0; y < m_Height; ++y) {
+			for(int y = 0; y < m_Height; ++y) {
 				u8* cur = m_Data + y*m_Pitch;
-				for(s32 x = 0; x < m_Width; ++x) {
+				for(int x = 0; x < m_Width; ++x) {
 					u8 dummyAlpha;
 					func(0, cur[2], cur[1], cur[0],
 						dummyAlpha, cur[2], cur[1], cur[0]);
@@ -100,9 +100,9 @@ public:
 				}
 			}
 		} else {
-			for(s32 y = 0; y < m_Height; ++y) {
+			for(int y = 0; y < m_Height; ++y) {
 				u8* cur = m_Data + y*m_Pitch;
-				for(s32 x = 0; x < m_Width; ++x) {
+				for(int x = 0; x < m_Width; ++x) {
 					Color px = m_Format.FormatToA8R8G8B8(cur);
 					u8 data[4];
 					func(px.GetAlpha(), px.GetRed(), px.GetGreen(), px.GetBlue(),
@@ -111,7 +111,7 @@ public:
 					px.SetRed(data[1]);
 					px.SetGreen(data[2]);
 					px.SetBlue(data[3]);
-					m_Format.A8R8G8B8ToFormat((u32)px, cur);
+					m_Format.A8R8G8B8ToFormat((int)px, cur);
 					cur += m_Format.GetBytePerPixel();
 				}
 			}
@@ -156,38 +156,38 @@ public:
 		u8 key_b;
 	};
 
-	LUX_API void DrawHLine(s32 y, s32 left, s32 right, Color color);
-	LUX_API void DrawVLine(s32 x, s32 top, s32 bottom, Color color);
-	LUX_API void DrawLine(s32 x0, s32 y0, s32 x1, s32 y1, Color color);
-	LUX_API void DrawRectangle(s32 left, s32 top, s32 right, s32 bottom, Color color);
+	LUX_API void DrawHLine(int y, int left, int right, Color color);
+	LUX_API void DrawVLine(int x, int top, int bottom, Color color);
+	LUX_API void DrawLine(int x0, int y0, int x1, int y1, Color color);
+	LUX_API void DrawRectangle(int left, int top, int right, int bottom, Color color);
 
 	// Draw a rectangle in range [left, right] and [top, bottom];
-	LUX_API void FillRectangle(s32 left, s32 top, s32 right, s32 bottom, Color color);
-	LUX_API void DrawEllipse(s32 xm, s32 ym, s32 a, s32 b, Color color);
-	LUX_API void FillEllipse(s32 xm, s32 ym, s32 a, s32 b, Color color);
-	LUX_API void FillTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, Color color);
+	LUX_API void FillRectangle(int left, int top, int right, int bottom, Color color);
+	LUX_API void DrawEllipse(int xm, int ym, int a, int b, Color color);
+	LUX_API void FillEllipse(int xm, int ym, int a, int b, Color color);
+	LUX_API void FillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color);
 
-	LUX_API u32 GetWidth() const;
-	LUX_API u32 GetHeight() const;
+	LUX_API int GetWidth() const;
+	LUX_API int GetHeight() const;
 	LUX_API void* GetRaw();
 	LUX_API ColorFormat GetFormat() const;
-	LUX_API u32 GetPitch() const;
+	LUX_API int GetPitch() const;
 
 private:
-	LUX_API s32 orient2d(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2);
-	LUX_API u8 ComputeOutCode(s32 x, s32 y, const math::RectI& r);
-	LUX_API bool ClipLine(s32& x0, s32& y0, s32& x1, s32& y1, const math::RectI& r);
-	LUX_API bool ClipRectangle(s32& left, s32& top, s32& right, s32& bottom, const math::RectI&r);
+	LUX_API int orient2d(int x0, int y0, int x1, int y1, int x2, int y2);
+	LUX_API u8 ComputeOutCode(int x, int y, const math::RectI& r);
+	LUX_API bool ClipLine(int& x0, int& y0, int& x1, int& y1, const math::RectI& r);
+	LUX_API bool ClipRectangle(int& left, int& top, int& right, int& bottom, const math::RectI&r);
 
 private:
 	u8* m_Data;
 	ColorFormat m_Format;
-	s32 m_Width;
-	s32 m_Height;
+	int m_Width;
+	int m_Height;
 
 	math::RectI m_Rect;
 
-	u32 m_Pitch;
+	int m_Pitch;
 };
 
 template <typename T>

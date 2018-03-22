@@ -37,7 +37,7 @@ bool ImageWriterBMP::CanWriteFile(const core::String& ext)
 	return ext.IsEmpty() || ext.EqualCaseInsensitive("bmp") || ext.EqualCaseInsensitive("dib");
 }
 
-void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::Dimension2U Size, u32 Pitch, u32 WriterParam)
+void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::Dimension2I Size, u32 Pitch, u32 WriterParam)
 {
 	LUX_UNUSED(WriterParam);
 
@@ -70,7 +70,7 @@ void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Fo
 
 	const int BytePerPixel = Format.GetBytePerPixel();
 	u8* DataCursor = (u8*)Data + (Size.height - 1) * Pitch;
-	u32 Len = 3 * Size.width;
+	int Len = 3 * Size.width;
 	if(Len % 4 != 0)
 		Len += 4 - (Len % 4);
 	core::RawMemory lineMem(Len);
@@ -78,8 +78,8 @@ void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Fo
 	*((u32*)(line + Len - 4)) = 0;
 	u8* LineCursor = line;
 
-	for(u32 i = 0; i < Size.height; ++i) {
-		for(u32 j = 0; j < Size.width; ++j) {
+	for(int i = 0; i < Size.height; ++i) {
+		for(int j = 0; j < Size.width; ++j) {
 			u32 pixel = Format.FormatToA8R8G8B8(DataCursor);
 			LineCursor[0] = (u8)((pixel & 0x000000FF) >> 0);
 			LineCursor[1] = (u8)((pixel & 0x0000FF00) >> 8);

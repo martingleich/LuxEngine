@@ -29,29 +29,29 @@ void Mesh::SetMaterial(Material* m)
 	m_Ranges.PushBack(MaterialRange(0, 0));
 }
 
-void Mesh::SetMaterial(size_t index, Material* m)
+void Mesh::SetMaterial(int index, Material* m)
 {
 	m_Materials.At(index) = m;
 }
 
-const Material* Mesh::GetMaterial(size_t index) const
+const Material* Mesh::GetMaterial(int index) const
 {
 	return m_Materials.At(index);
 }
 
-Material* Mesh::GetMaterial(size_t index)
+Material* Mesh::GetMaterial(int index)
 {
 	return m_Materials.At(index);
 }
 
-size_t Mesh::GetMaterialCount() const
+int Mesh::GetMaterialCount() const
 {
 	return m_Materials.Size();
 }
 
-void Mesh::SetMaterialRange(Material* mat, size_t firstPrimitive, size_t lastPrimitive)
+void Mesh::SetMaterialRange(Material* mat, int firstPrimitive, int lastPrimitive)
 {
-	u32 mid = 0;
+	int mid = 0;
 	for(auto m : m_Materials) {
 		if(m == mat)
 			break;
@@ -64,7 +64,7 @@ void Mesh::SetMaterialRange(Material* mat, size_t firstPrimitive, size_t lastPri
 	SetMaterialRange(mid, firstPrimitive, lastPrimitive);
 }
 
-void Mesh::SetMaterialRange(size_t mid, size_t firstPrimitive, size_t lastPrimitive)
+void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 {
 	if(firstPrimitive > lastPrimitive)
 		return;
@@ -81,10 +81,10 @@ void Mesh::SetMaterialRange(size_t mid, size_t firstPrimitive, size_t lastPrimit
 	insertAt.
 	*/
 	bool inside = false;
-	size_t insertAt = 0;
-	size_t begin1 = 0;
-	u32 mid1 = 0, mid2 = 0;
-	for(size_t i = 0; i < m_Ranges.Size(); ++i) {
+	int insertAt = 0;
+	int begin1 = 0;
+	int mid1 = 0, mid2 = 0;
+	for(int i = 0; i < m_Ranges.Size(); ++i) {
 		if(!inside && m_Ranges[i].begin <= firstPrimitive && (m_Ranges.Size() == i + 1 || firstPrimitive <= m_Ranges[i+1].begin)) {
 			insertAt = i;
 			inside = true;
@@ -124,7 +124,7 @@ void Mesh::SetMaterialRange(size_t mid, size_t firstPrimitive, size_t lastPrimit
 	}
 
 	auto geo = GetGeometry();
-	u32 primCount = geo ? geo->GetPrimitiveCount() : 0xFFFFFFFF;
+	int primCount = geo ? geo->GetPrimitiveCount() : 0xFFFFFFFF;
 	if(lastPrimitive < primCount) {
 		if(insertAt > 0 && m_Ranges[insertAt - 1].material == mid2) {
 			(void)0;
@@ -136,19 +136,19 @@ void Mesh::SetMaterialRange(size_t mid, size_t firstPrimitive, size_t lastPrimit
 	// Remove unused materials
 	core::Array<bool> used;
 	used.Resize(m_Materials.Size(), false);
-	size_t count = 0;
-	for(size_t i = 0; i < m_Ranges.Size(); ++i) {
+	int count = 0;
+	for(int i = 0; i < m_Ranges.Size(); ++i) {
 		if(used[m_Ranges[i].material] == false)
 			++count;
 		used[m_Ranges[i].material] = true;
 	}
 
 	if(count != m_Materials.Size()) {
-		core::Array<u32> replaceTable;
+		core::Array<int> replaceTable;
 		replaceTable.Resize(m_Materials.Size());
-		for(size_t i = 0; i < m_Materials.Size(); ++i) {
+		for(int i = 0; i < m_Materials.Size(); ++i) {
 			if(!used[i]) {
-				size_t idx = i;
+				int idx = i;
 				while(idx < used.Size() && !used[idx])
 					++idx;
 				if(idx < used.Size()) {
@@ -169,18 +169,18 @@ void Mesh::SetMaterialRange(size_t mid, size_t firstPrimitive, size_t lastPrimit
 	}
 }
 
-void Mesh::GetMaterialRange(size_t rangeIndex, size_t& materialIndex, size_t& firstPrimitive, size_t& lastPrimitive)
+void Mesh::GetMaterialRange(int rangeIndex, int& materialIndex, int& firstPrimitive, int& lastPrimitive)
 {
 	auto geo = GetGeometry();
-	u32 primCount = geo ? geo->GetPrimitiveCount() : 0;
+	int primCount = geo ? geo->GetPrimitiveCount() : 0;
 	auto& range = m_Ranges.At(rangeIndex);
 	materialIndex = range.material;
 	firstPrimitive = range.begin;
 	lastPrimitive = rangeIndex + 1 < m_Ranges.Size() ? m_Ranges[rangeIndex + 1].begin - 1 : GetGeometry()->GetPrimitiveCount() - 1;
-	lastPrimitive = math::Min<u32>(lastPrimitive, primCount);
+	lastPrimitive = math::Min<int>(lastPrimitive, primCount);
 }
 
-size_t Mesh::GetRangeCount() const
+int Mesh::GetRangeCount() const
 {
 	return m_Ranges.Size();
 }
