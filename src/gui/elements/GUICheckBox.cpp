@@ -13,7 +13,7 @@ CheckBox::CheckBox() :
 	AbstractButton(true)
 {
 	m_IsChecked = false;
-	onStateChange.SetConnectEvent([this](const event::SignalFunc<bool>& f) { f.Call(m_IsChecked); });
+	onStateChange.SetConnectEvent([this](const core::SignalFunc<bool>& f) { f.Call(m_IsChecked); });
 	SetMinSize(DEFAULT_CHECKBOX_SIZE);
 	SetAlignment(EAlign::VCenter | EAlign::HLeft);
 }

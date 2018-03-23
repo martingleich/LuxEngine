@@ -19,7 +19,7 @@ public:
 	LUX_API bool OnElementEvent(const gui::ElementEvent& e);
 
 	LUX_API bool IsPressed();
-	event::Signal<> onClick;
+	core::Signal<> onClick;
 
 protected:
 	LUX_API virtual void OnClick();

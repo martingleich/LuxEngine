@@ -7,7 +7,7 @@
 
 namespace lux
 {
-namespace event
+namespace core
 {
 
 class Action : public ReferenceCounted
@@ -57,7 +57,7 @@ public:
 		FireButton(v >= 0.5f);
 	}
 
-	const event::Button* GetButton() const
+	const core::Button* GetButton() const
 	{
 		return &state;
 	}
@@ -68,7 +68,7 @@ public:
 	}
 
 private:
-	event::Button state;
+	core::Button state;
 };
 
 class AxisAction : public Action
@@ -95,7 +95,7 @@ public:
 		state.state = v;
 	}
 
-	const event::Axis* GetAxis() const
+	const core::Axis* GetAxis() const
 	{
 		return &state;
 	}
@@ -106,7 +106,7 @@ public:
 	}
 
 private:
-	event::Axis state;
+	core::Axis state;
 };
 
 class ActionList : public ReferenceCounted

@@ -138,7 +138,7 @@ public:
 		this->SetGrabbing(false);
 	}
 
-	event::Signal<const math::Vector2F&> onCursorMove;
+	core::Signal<const math::Vector2F&> onCursorMove;
 };
 
 } // namespace gui

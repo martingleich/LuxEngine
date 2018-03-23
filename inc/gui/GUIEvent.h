@@ -10,7 +10,7 @@ namespace gui
 
 class Element;
 
-class Event : public event::Event
+class Event : public core::Event
 {
 public:
 	Element* elem;

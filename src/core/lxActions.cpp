@@ -2,7 +2,7 @@
 
 namespace lux
 {
-namespace event
+namespace core
 {
 
 ActionList::ActionList()

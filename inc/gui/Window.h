@@ -101,10 +101,10 @@ public:
 	virtual void SetClearBackground(bool clear) = 0;
 	virtual bool ClearBackground() const = 0;
 
-	event::Signal<Window*, const math::Dimension2F&> onResize;
-	event::Signal<Window*, const math::Vector2F&> onMove;
-	event::Signal<Window*, EStateChange> onStateChange;
-	event::Signal<Window*> onClose;
+	core::Signal<Window*, const math::Dimension2F&> onResize;
+	core::Signal<Window*, const math::Vector2F&> onMove;
+	core::Signal<Window*, EStateChange> onStateChange;
+	core::Signal<Window*> onClose;
 };
 
 } // namespace gui

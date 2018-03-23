@@ -36,7 +36,7 @@ private:
 	int WPos() const;
 
 public:
-	event::Signal<const core::String&> onTextChange;
+	core::Signal<const core::String&> onTextChange;
 
 private:
 	gui::TextContainer m_Container;

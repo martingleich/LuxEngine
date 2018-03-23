@@ -15,7 +15,7 @@ RadioButton::RadioButton() :
 {
 	m_Next = this;
 
-	onStateChange.SetConnectEvent([this](const event::SignalFunc<bool>& f) { f.Call(m_IsChecked); });
+	onStateChange.SetConnectEvent([this](const core::SignalFunc<bool>& f) { f.Call(m_IsChecked); });
 	SetMinSize(DEFAULT_RADIOBUTTON_SIZE);
 	SetAlignment(EAlign::VCenter | EAlign::HLeft);
 	m_IsChecked = true;

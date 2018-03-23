@@ -4,7 +4,7 @@
 
 namespace lux
 {
-namespace event
+namespace core
 {
 	struct Button
 	{

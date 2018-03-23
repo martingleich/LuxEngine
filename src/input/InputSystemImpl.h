@@ -15,7 +15,7 @@ class InputSystemImpl : public InputSystem
 public:
 	InputSystemImpl();
 
-	event::Signal<const Event&>& GetEventSignal();
+	core::Signal<const Event&>& GetEventSignal();
 
 	void Update(Event& event);
 	void SendUserEvent(const Event& event);
@@ -36,7 +36,7 @@ private:
 	WeakRef<InputDevice> m_KeyboardDevice;
 	WeakRef<InputDevice> m_MouseDevice;
 
-	event::Signal<const input::Event&> m_EventSignal;
+	core::Signal<const input::Event&> m_EventSignal;
 
 	bool m_IsForeground;
 	bool m_DefaultForegroundHandling;

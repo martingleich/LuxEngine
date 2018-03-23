@@ -15,9 +15,9 @@ public:
 	void Reset();
 	void DisconnectReporting(InputSystem* system);
 	EEventSource GetType() const;
-	const event::Button* GetButton(int buttonCode) const;
-	const event::Axis* GetAxis(int axisCode) const;
-	const event::Area* GetArea(int areaCode) const;
+	const core::Button* GetButton(int buttonCode) const;
+	const core::Axis* GetAxis(int axisCode) const;
+	const core::Area* GetArea(int areaCode) const;
 	bool Update(Event& event);
 
 	const core::String& GetElementName(EEventType type, int code) const;

@@ -82,21 +82,21 @@ public:
 	/**
 	\param buttonCode The id of the button.
 	*/
-	virtual const event::Button* GetButton(int buttonCode) const = 0;
+	virtual const core::Button* GetButton(int buttonCode) const = 0;
 
 	//! Get the state of an axis.
 	/**
 	\param axisCode The id of the axis.
 	\return The value of the axis in device units.
 	*/
-	virtual const event::Axis* GetAxis(int axisCode) const = 0;
+	virtual const core::Axis* GetAxis(int axisCode) const = 0;
 
 	//! Get the state of an area.
 	/**
 	\param areaCode The id of the area.
 	\return The value of the area in device units.
 	*/
-	virtual const event::Area* GetArea(int areaCode) const = 0;
+	virtual const core::Area* GetArea(int areaCode) const = 0;
 
 	//! Update the device with this event.
 	/**

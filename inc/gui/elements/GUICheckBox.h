@@ -26,7 +26,7 @@ protected:
 	LUX_API void OnClick();
 
 public:
-	event::Signal<bool> onStateChange;
+	core::Signal<bool> onStateChange;
 
 protected:
 	TextContainer m_Text;

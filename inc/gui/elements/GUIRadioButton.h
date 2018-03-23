@@ -70,7 +70,7 @@ public:
 	LUX_API void SetRadioGroup(RadioButton* group);
 
 public:
-	event::Signal<bool> onStateChange;
+	core::Signal<bool> onStateChange;
 
 protected:
 	LUX_API void OnClick();

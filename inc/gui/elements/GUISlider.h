@@ -49,7 +49,7 @@ public:
 	LUX_API bool IsHorizontal() const;
 	LUX_API void SetHorizontal(bool isHorizontal);
 
-	event::Signal<int> onPosChange;
+	core::Signal<int> onPosChange;
 
 protected:
 	LUX_API int GetThumbPos(const math::Vector2F& curPos, int offset = 0) const;

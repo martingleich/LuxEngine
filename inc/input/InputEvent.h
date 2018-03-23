@@ -56,7 +56,7 @@ enum class EElementType // Flag class
 };
 
 //! An single event for the user
-class Event : public event::Event
+class Event : public core::Event
 {
 public:
 	//! General data about input events, available for all input events

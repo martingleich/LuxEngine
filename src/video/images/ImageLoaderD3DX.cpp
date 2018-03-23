@@ -285,7 +285,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 	D3DSURFACE_DESC desc;
 	auto d3dTexture = LoadTexture(
 		m_Device,
-		buffer.ptr, buffer.size,
+		buffer.ptr, core::SafeCast<UINT>(buffer.size),
 		loadFormat, info,
 		desc);
 

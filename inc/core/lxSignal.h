@@ -7,7 +7,7 @@
 
 namespace lux
 {
-namespace event
+namespace core
 {
 
 template <typename... Args>

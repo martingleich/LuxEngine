@@ -86,17 +86,17 @@ EEventSource MouseDevice::GetType() const
 	return EEventSource::Mouse;
 }
 
-const event::Button* MouseDevice::GetButton(int buttonCode) const
+const core::Button* MouseDevice::GetButton(int buttonCode) const
 {
 	return &m_Buttons.At(buttonCode);
 }
 
-const event::Axis* MouseDevice::GetAxis(int axisCode) const
+const core::Axis* MouseDevice::GetAxis(int axisCode) const
 {
 	return &m_Axes.At(axisCode);
 }
 
-const event::Area* MouseDevice::GetArea(int areaCode) const
+const core::Area* MouseDevice::GetArea(int areaCode) const
 {
 	if(areaCode != 0)
 		throw core::OutOfRangeException();

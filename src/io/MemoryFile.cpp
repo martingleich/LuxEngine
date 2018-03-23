@@ -17,9 +17,9 @@ MemoryFile::MemoryFile(void* buffer,
 	m_IsEOF(false),
 	m_Flags(flags)
 {
-	if(desc.GetSize() > std::numeric_limits<size_t>::max())
+	if(desc.GetSize() > (s64)std::numeric_limits<size_t>::max())
 		throw core::Exception("Memory file is to big");
-	m_Size = (size_t)desc.GetSize();
+	m_Size = core::SafeCast<size_t>(desc.GetSize());
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::Copy)) {
 		auto newData = LUX_NEW_RAW(m_Size);
@@ -43,7 +43,7 @@ MemoryFile::~MemoryFile()
 s64 MemoryFile::ReadBinaryPart(s64 numBytes, void* out)
 {
 	LX_CHECK_NULL_ARG(out);
-	if(numBytes <= 0 || numBytes > std::numeric_limits<size_t>::max())
+	if(numBytes <= 0 || numBytes > (s64)std::numeric_limits<size_t>::max())
 		throw io::FileException(io::FileException::ReadError);
 	size_t sizeBytes = (size_t)numBytes;
 
@@ -61,9 +61,9 @@ s64 MemoryFile::ReadBinaryPart(s64 numBytes, void* out)
 s64 MemoryFile::WriteBinaryPart(const void* data, s64 numBytes)
 {
 	LX_CHECK_NULL_ARG(data);
-	if(numBytes < 0 || numBytes > std::numeric_limits<size_t>::max())
+	if(numBytes < 0 || numBytes > (s64)std::numeric_limits<size_t>::max())
 		throw io::FileException(io::FileException::WriteError);
-	size_t sizeBytes = (size_t)numBytes;
+	size_t sizeBytes = core::SafeCast<size_t>(numBytes);
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::ReadOnly))
 		throw io::FileException(io::FileException::WriteError);
@@ -94,15 +94,14 @@ s64 MemoryFile::WriteBinaryPart(const void* data, s64 numBytes)
 void MemoryFile::Seek(s64 offset, ESeekOrigin origin)
 {
 	size_t cursor = (origin == ESeekOrigin::Start) ? 0 : (size_t)GetCursor();
-
-	size_t newCursor = (size_t)((s64)cursor + offset);
-	if(newCursor > GetSize())
+	s64 newCursor64 = (s64)cursor + offset;
+	if(newCursor64 > GetSize())
 		throw io::FileException(io::FileException::OutsideFile);
 
+	size_t newCursor = core::SafeCast<size_t>(newCursor64);
 	m_Cursor = newCursor;
 	m_IsEOF = (m_Cursor == m_Size);
 }
-
 
 void* MemoryFile::GetBuffer()
 {

@@ -27,7 +27,7 @@ s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
 {
 	LX_CHECK_NULL_ARG(out);
 	LX_CHECK_NULL_ARG(numBytes);
-	if(numBytes > INT_MAX)
+	if(numBytes > (s64)std::numeric_limits<size_t>::max())
 		throw io::FileException(io::FileException::ReadError);
 
 	if((s64)ftell(m_File) + numBytes > m_FileSize)
@@ -55,7 +55,7 @@ s64 StreamFile::WriteBinaryPart(const void* data, s64 numBytes)
 {
 	LX_CHECK_NULL_ARG(data);
 	LX_CHECK_NULL_ARG(numBytes);
-	if(numBytes > INT_MAX)
+	if(numBytes > (s64)std::numeric_limits<size_t>::max())
 		throw io::FileException(io::FileException::WriteError);
 
 	if((s64)ftell(m_File) > m_FileSize - numBytes)

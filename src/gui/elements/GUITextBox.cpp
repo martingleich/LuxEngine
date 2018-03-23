@@ -14,7 +14,7 @@ TextBox::TextBox()
 	SetAlignment(gui::EAlign::HLeft | gui::EAlign::VCenter);
 
 	onTextChange.SetConnectEvent([this]
-	(const event::SignalFunc<const core::String&>& func) {
+	(const core::SignalFunc<const core::String&>& func) {
 		func.Call(m_Container.GetText()); });
 }
 

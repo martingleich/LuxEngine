@@ -22,7 +22,7 @@ Slider::Slider()
 	SetRange(0, 100);
 	SetThumbPos(0);
 
-	onPosChange.SetConnectEvent([this](const event::SignalFunc<int>& newSlot) {
+	onPosChange.SetConnectEvent([this](const core::SignalFunc<int>& newSlot) {
 		newSlot.Call(m_Pos);
 	});
 }
