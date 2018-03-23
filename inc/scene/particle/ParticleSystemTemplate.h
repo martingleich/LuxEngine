@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLE_SYSTEM_TEMPLATE_H
-#define INCLUDED_PARTICLE_SYSTEM_TEMPLATE_H
+#ifndef INCLUDED_LUX_PARTICLE_SYSTEM_TEMPLATE_H
+#define INCLUDED_LUX_PARTICLE_SYSTEM_TEMPLATE_H
 #include "scene/particle/ParticleAffector.h"
 #include "scene/particle/ParticleEmitter.h"
 #include "scene/particle/ParticleModel.h"
@@ -109,4 +109,4 @@ inline StrongRef<ParticleSystemTemplate> ParticleSystemTemplateBuilder::MakeTemp
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_PARTICLESYSTEMTEMPLATE_H
+#endif // !INCLUDED_LUX_PARTICLESYSTEMTEMPLATE_H

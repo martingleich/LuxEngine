@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RESOURCE_LOADER_H
-#define INCLUDED_RESOURCE_LOADER_H
+#ifndef INCLUDED_LUX_RESOURCE_LOADER_H
+#define INCLUDED_LUX_RESOURCE_LOADER_H
 #include "core/Resource.h"
 
 namespace lux
@@ -47,4 +47,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_RESOURCE_LOADER_H
+#endif // #ifndef INCLUDED_LUX_RESOURCE_LOADER_H

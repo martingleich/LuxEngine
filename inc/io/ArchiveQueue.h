@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ARCHIVE_QUEUE_H
-#define INCLUDED_ARCHIVE_QUEUE_H
+#ifndef INCLUDED_LUX_ARCHIVE_QUEUE_H
+#define INCLUDED_LUX_ARCHIVE_QUEUE_H
 #include "io/Archive.h"
 
 namespace lux
@@ -20,4 +20,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_ARCHIVE_QUEUE_H
+#endif // #ifndef INCLUDED_LUX_ARCHIVE_QUEUE_H

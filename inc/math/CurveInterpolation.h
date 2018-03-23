@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CURVE_INTERPOLATION_H
-#define INCLUDED_CURVE_INTERPOLATION_H
+#ifndef INCLUDED_LUX_CURVE_INTERPOLATION_H
+#define INCLUDED_LUX_CURVE_INTERPOLATION_H
 #include "lxMath.h"
 #include "core/lxAlgorithm.h"
 
@@ -240,4 +240,4 @@ T CurveInterpolation(
 }
 }
 
-#endif // #ifndef INCLUDED_CURVE_H
+#endif // #ifndef INCLUDED_LUX_CURVE_H

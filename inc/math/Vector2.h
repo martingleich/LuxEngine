@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VECTOR2_H
-#define INCLUDED_VECTOR2_H
+#ifndef INCLUDED_LUX_VECTOR2_H
+#define INCLUDED_LUX_VECTOR2_H
 #include "math/Angle.h"
 
 namespace lux

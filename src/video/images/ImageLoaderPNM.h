@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGELOADERPNM_H
-#define INCLUDED_IMAGELOADERPNM_H
+#ifndef INCLUDED_LUX_IMAGELOADERPNM_H
+#define INCLUDED_LUX_IMAGELOADERPNM_H
 #include "core/ResourceLoader.h"
 
 namespace lux

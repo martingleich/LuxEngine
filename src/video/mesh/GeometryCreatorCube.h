@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GEOMETRY_CREATOR_CUBE_H
-#define INCLUDED_GEOMETRY_CREATOR_CUBE_H
+#ifndef INCLUDED_LUX_GEOMETRY_CREATOR_CUBE_H
+#define INCLUDED_LUX_GEOMETRY_CREATOR_CUBE_H
 #include "video/mesh/GeometryCreator.h"
 #include "core/ParamPackage.h"
 
@@ -45,4 +45,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_GEOMETRY_CREATOR_CUBE_H
+#endif // #ifndef INCLUDED_LUX_GEOMETRY_CREATOR_CUBE_H

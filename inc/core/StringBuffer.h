@@ -1,5 +1,5 @@
-#ifndef INCLUDED_STRING_BUFFER_H
-#define INCLUDED_STRING_BUFFER_H
+#ifndef INCLUDED_LUX_STRING_BUFFER_H
+#define INCLUDED_LUX_STRING_BUFFER_H
 #include "core/StringConverter.h"
 
 namespace lux
@@ -93,4 +93,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_STRING_BUFFER_H
+#endif // #ifndef INCLUDED_LUX_STRING_BUFFER_H

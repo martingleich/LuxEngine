@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DIMENSION2D_H
-#define INCLUDED_DIMENSION2D_H
+#ifndef INCLUDED_LUX_DIMENSION2D_H
+#define INCLUDED_LUX_DIMENSION2D_H
 #include "math/Vector2.h"
 
 namespace lux
@@ -254,7 +254,7 @@ typedef Dimension2<int> Dimension2I;
 } // namespace math
 } // namespace lux
 
-#endif // INCLUDED_DIMENSION2D_H
+#endif // INCLUDED_LUX_DIMENSION2D_H
 
 
 

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLERENDERER_H
-#define INCLUDED_PARTICLERENDERER_H
+#ifndef INCLUDED_LUX_PARTICLERENDERER_H
+#define INCLUDED_LUX_PARTICLERENDERER_H
 #include "core/Referable.h"
 #include "video/SpriteBank.h"
 #include "math/Vector3.h"
@@ -35,4 +35,4 @@ public:
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_IPARTICLERENDERER
+#endif // !INCLUDED_LUX_IPARTICLERENDERER

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_SKIN_3D_H
-#define INCLUDED_GUI_SKIN_3D_H
+#ifndef INCLUDED_LUX_GUI_SKIN_3D_H
+#define INCLUDED_LUX_GUI_SKIN_3D_H
 #include "gui/GUISkin.h"
 
 namespace lux
@@ -68,4 +68,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_SKIN_3D_H
+#endif // #ifndef INCLUDED_LUX_GUI_SKIN_3D_H

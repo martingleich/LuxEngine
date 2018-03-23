@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PASS_H
-#define INCLUDED_PASS_H
+#ifndef INCLUDED_LUX_PASS_H
+#define INCLUDED_LUX_PASS_H
 #include "core/LuxBase.h"
 #include "video/TextureLayer.h"
 #include "video/TextureStageSettings.h"
@@ -223,4 +223,4 @@ DECLARE_FLAG_CLASS(lux::video::EMaterialRequirement);
 
 } // namespace lux
 
-#endif // #ifndef INCLUDED_PASS_H
+#endif // #ifndef INCLUDED_LUX_PASS_H

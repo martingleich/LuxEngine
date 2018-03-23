@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGEWRITERBMP_H
-#define INCLUDED_IMAGEWRITERBMP_h
+#ifndef INCLUDED_LUX_IMAGEWRITERBMP_H
+#define INCLUDED_LUX_IMAGEWRITERBMP_h
 #include "video/images/ImageWriter.h"
 
 namespace lux
@@ -22,4 +22,4 @@ public:
 
 }
 }
-#endif // !INCLUDED_IMAGEWRITERBMP
+#endif // !INCLUDED_LUX_IMAGEWRITERBMP

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_ENUMS_H
-#define INCLUDED_GUI_ENUMS_H
+#ifndef INCLUDED_LUX_GUI_ENUMS_H
+#define INCLUDED_LUX_GUI_ENUMS_H
 #include "core/LuxBase.h"
 
 namespace lux
@@ -36,4 +36,4 @@ enum class ECursorState
 DECLARE_FLAG_CLASS(gui::EGUIState);
 }
 
-#endif // #ifndef INCLUDED_GUI_ENUMS_H
+#endif // #ifndef INCLUDED_LUX_GUI_ENUMS_H

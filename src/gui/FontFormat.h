@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FONT_FORMAT_H
-#define INCLUDED_FONT_FORMAT_H
+#ifndef INCLUDED_LUX_FONT_FORMAT_H
+#define INCLUDED_LUX_FONT_FORMAT_H
 #include "core/ResourceSystem.h"
 #include "core/ResourceLoader.h"
 #include "core/ResourceWriter.h"
@@ -27,4 +27,4 @@ public:
 
 }
 }
-#endif // #ifndef INCLUDED_FONT_FORMAT_H
+#endif // #ifndef INCLUDED_LUX_FONT_FORMAT_H

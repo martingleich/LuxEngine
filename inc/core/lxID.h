@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_ID_H
-#define INCLUDED_LX_ID_H
+#ifndef INCLUDED_LUX_ID_H
+#define INCLUDED_LUX_ID_H
 #include "core/LuxBase.h"
 #include "core/lxFormat.h"
 #include "core/ReferenceCounted.h"
@@ -67,4 +67,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_LX_ID_H
+#endif // #ifndef INCLUDED_LUX_ID_H

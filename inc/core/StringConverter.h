@@ -1,5 +1,5 @@
-#ifndef INCLUDED_STRINGCONVERTER_H
-#define INCLUDED_STRINGCONVERTER_H
+#ifndef INCLUDED_LUX_STRINGCONVERTER_H
+#define INCLUDED_LUX_STRINGCONVERTER_H
 #include "DateAndTime.h"
 #include "lxFormat.h"
 
@@ -287,4 +287,4 @@ namespace StringConverter
 
 }
 }
-#endif // !INCLUDED_STRINGCONVERTER_H
+#endif // !INCLUDED_LUX_STRINGCONVERTER_H

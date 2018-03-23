@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_UTIL_H
-#define INCLUDED_LX_UTIL_H
+#ifndef INCLUDED_LUX_LX_UTIL_H
+#define INCLUDED_LUX_LX_UTIL_H
 #include "LuxBase.h"
 
 namespace lux
@@ -94,4 +94,4 @@ struct HashType<long double> : BitWiseHash<long double>
 }
 }
 
-#endif // !INCLUDED_LX_UTIL_H
+#endif // !INCLUDED_LUX_LX_UTIL_H

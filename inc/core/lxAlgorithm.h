@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXALGORITHM_H
-#define INCLUDED_LXALGORITHM_H 
+#ifndef INCLUDED_LUX_ALGORITHM_H
+#define INCLUDED_LUX_ALGORITHM_H 
 #include "lxSort.h"
 
 namespace lux

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_INIFILE_H
-#define INCLUDED_INIFILE_H
+#ifndef INCLUDED_LUX_INIFILE_H
+#define INCLUDED_LUX_INIFILE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
@@ -139,4 +139,4 @@ private:
 } // namespace io
 } // namespace lux
 
-#endif // #ifndef INCLUDED_INIFILE_IMPL_H
+#endif // #ifndef INCLUDED_LUX_INIFILE_IMPL_H

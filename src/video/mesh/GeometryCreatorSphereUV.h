@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GEOMETRYCREATOR_SPHERE_UV_H
-#define INCLUDED_GEOMETRYCREATOR_SPHERE_UV_H
+#ifndef INCLUDED_LUX_GEOMETRYCREATOR_SPHERE_UV_H
+#define INCLUDED_LUX_GEOMETRYCREATOR_SPHERE_UV_H
 #include "video/mesh/GeometryCreator.h"
 #include "core/ParamPackage.h"
 
@@ -39,4 +39,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_GEOMETRYCREATOR_SPHERE_UV_H
+#endif // #ifndef INCLUDED_LUX_GEOMETRYCREATOR_SPHERE_UV_H

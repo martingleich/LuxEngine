@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DATE_AND_TIME_H
-#define INCLUDED_DATE_AND_TIME_H
+#ifndef INCLUDED_LUX_DATE_AND_TIME_H
+#define INCLUDED_LUX_DATE_AND_TIME_H
 #include "core/LuxBase.h"
 #include "core/lxFormat.h"
 
@@ -70,4 +70,4 @@ inline void fmtPrint(format::Context& ctx, const DateAndTime& date, format::Plac
 }
 
 
-#endif // #ifndef INCLUDED_DATE_AND_TIME_H
+#endif // #ifndef INCLUDED_LUX_DATE_AND_TIME_H

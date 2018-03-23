@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LINE_QUERY_H
-#define INCLUDED_LINE_QUERY_H
+#ifndef INCLUDED_LUX_LINE_QUERY_H
+#define INCLUDED_LUX_LINE_QUERY_H
 #include "scene/Query.h"
 
 #include "math/Line3.h"
@@ -70,4 +70,4 @@ public:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LINE_QUERY_H
+#endif // #ifndef INCLUDED_LUX_LINE_QUERY_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_MESH_H
-#define INCLUDED_SCENE_MESH_H
+#ifndef INCLUDED_LUX_SCENE_MESH_H
+#define INCLUDED_LUX_SCENE_MESH_H
 #include "scene/Component.h"
 #include "math/AABBox.h"
 #include "video/Material.h"

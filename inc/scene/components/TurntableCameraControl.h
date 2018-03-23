@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TURNTABLE_CAMERA_CONTROL_H
-#define INCLUDED_TURNTABLE_CAMERA_CONTROL_H
+#ifndef INCLUDED_LUX_TURNTABLE_CAMERA_CONTROL_H
+#define INCLUDED_LUX_TURNTABLE_CAMERA_CONTROL_H
 #include "scene/components/Animator.h"
 #include "math/Vector3.h"
 #include "input/InputEvent.h"
@@ -95,4 +95,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_TURNTABLE_CAMERA_CONTROL_H
+#endif // #ifndef INCLUDED_LUX_TURNTABLE_CAMERA_CONTROL_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SERIAL_MEMORY_SERIALIZER_H
-#define INCLUDED_SERIAL_MEMORY_SERIALIZER_H
+#ifndef INCLUDED_LUX_SERIAL_MEMORY_SERIALIZER_H
+#define INCLUDED_LUX_SERIAL_MEMORY_SERIALIZER_H
 #include "serial/BinarySerializer.h"
 
 namespace lux
@@ -62,4 +62,4 @@ private:
 } // namespace serial
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SERIAL_MEMORY_SERIALIZER_H
+#endif // #ifndef INCLUDED_LUX_SERIAL_MEMORY_SERIALIZER_H

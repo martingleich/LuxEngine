@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DEQUE_H
-#define INCLUDED_DEQUE_H
+#ifndef INCLUDED_LUX_DEQUE_H
+#define INCLUDED_LUX_DEQUE_H
 #include "core/LuxBase.h"
 #include "core/lxIterator.h"
 
@@ -544,4 +544,4 @@ template <typename T> typename Deque<T>::ConstIterator end(const Deque<T>& deque
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_DEQUE_H
+#endif // #ifndef INCLUDED_LUX_DEQUE_H

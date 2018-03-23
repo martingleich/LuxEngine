@@ -1,5 +1,5 @@
-#ifndef INCLUDED_WINDOW_H
-#define INCLUDED_WINDOW_H
+#ifndef INCLUDED_LUX_WINDOW_H
+#define INCLUDED_LUX_WINDOW_H
 #include "gui/GUIElement.h"
 #include "core/lxSignal.h"
 

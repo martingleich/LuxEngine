@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXMATH_H
-#define INCLUDED_LXMATH_H
+#ifndef INCLUDED_LUX_LXMATH_H
+#define INCLUDED_LUX_LXMATH_H
 #include "core/LuxBase.h"
 #include "core/lxTypes.h"
 #include "core/lxFormat.h"

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FONTCREATOR_NULL_H
-#define INCLUDED_FONTCREATOR_NULL_H
+#ifndef INCLUDED_LUX_FONTCREATOR_NULL_H
+#define INCLUDED_LUX_FONTCREATOR_NULL_H
 #include "gui/FontCreator.h"
 #include "gui/FontRaster.h"
 
@@ -56,4 +56,4 @@ private:
 }
 }
 
-#endif // !__INCLUDED_CFONTCREATORNULL
+#endif // !__INCLUDED_LUX_CFONTCREATORNULL

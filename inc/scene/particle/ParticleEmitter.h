@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLEEMITTER_H
-#define INCLUDED_PARTICLEEMITTER_H
+#ifndef INCLUDED_LUX_PARTICLEEMITTER_H
+#define INCLUDED_LUX_PARTICLEEMITTER_H
 #include "core/lxRandom.h"
 #include "math/Transformation.h"
 
@@ -127,4 +127,4 @@ protected:
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_IPARTICLEEMITTER
+#endif // !INCLUDED_LUX_IPARTICLEEMITTER

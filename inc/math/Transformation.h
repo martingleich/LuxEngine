@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TRANSFORMATION_H
-#define INCLUDED_TRANSFORMATION_H
+#ifndef INCLUDED_LUX_TRANSFORMATION_H
+#define INCLUDED_LUX_TRANSFORMATION_H
 #include "math/Matrix4.h"
 #include "math/Triangle3.h"
 #include "core/lxFormat.h"
@@ -431,4 +431,4 @@ template<> struct TemplType<math::Transformation> { static Type Get() { return T
 } // namespace core
 } // namespace lux
 
-#endif // !INCLUDED_TRANSFORMATION_H
+#endif // !INCLUDED_LUX_TRANSFORMATION_H

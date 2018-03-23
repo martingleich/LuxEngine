@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_SCALAR_DISTANCE_H
-#define INCLUDED_GUI_SCALAR_DISTANCE_H
+#ifndef INCLUDED_LUX_GUI_SCALAR_DISTANCE_H
+#define INCLUDED_LUX_GUI_SCALAR_DISTANCE_H
 #include "core/LuxBase.h"
 #include "math/Dimension2.h"
 
@@ -137,4 +137,4 @@ inline ScalarDistanceF Percent(float value)
 }
 }
 
-#endif // #ifndef INCLUDED_GUI_SCALAR_DISTANCE_H
+#endif // #ifndef INCLUDED_LUX_GUI_SCALAR_DISTANCE_H

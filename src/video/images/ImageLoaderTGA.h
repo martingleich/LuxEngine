@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGELOADER_TGA_H
-#define INCLUDED_IMAGELOADER_TGA_H
+#ifndef INCLUDED_LUX_IMAGELOADER_TGA_H
+#define INCLUDED_LUX_IMAGELOADER_TGA_H
 #include "core/ResourceLoader.h"
 
 namespace lux
@@ -18,4 +18,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_IMAGELOADER_TGA_H
+#endif // #ifndef INCLUDED_LUX_IMAGELOADER_TGA_H

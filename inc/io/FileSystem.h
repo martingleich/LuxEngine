@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FILESYSTEM_H
-#define INCLUDED_FILESYSTEM_H
+#ifndef INCLUDED_LUX_FILESYSTEM_H
+#define INCLUDED_LUX_FILESYSTEM_H
 #include "core/ReferenceCounted.h"
 
 #include "core/DateAndTime.h"

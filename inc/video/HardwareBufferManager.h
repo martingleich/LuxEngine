@@ -1,5 +1,5 @@
-#ifndef INCLUDED_HARDWAREBUFFERMANAGER_H
-#define INCLUDED_HARDWAREBUFFERMANAGER_H
+#ifndef INCLUDED_LUX_HARDWAREBUFFERMANAGER_H
+#define INCLUDED_LUX_HARDWAREBUFFERMANAGER_H
 #include "core/ReferenceCounted.h"
 
 namespace lux
@@ -59,4 +59,4 @@ public:
 } // namespace vidoe
 } // namespace lux
 
-#endif // !INCLUDED_HARDWAREBUFFERMANAGER_H
+#endif // !INCLUDED_LUX_HARDWAREBUFFERMANAGER_H

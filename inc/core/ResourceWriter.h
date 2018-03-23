@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RESOURCE_WRITER_H
-#define INCLUDED_RESOURCE_WRITER_H
+#ifndef INCLUDED_LUX_RESOURCE_WRITER_H
+#define INCLUDED_LUX_RESOURCE_WRITER_H
 #include "core/Resource.h"
 
 namespace lux
@@ -37,4 +37,4 @@ public:
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_RESOURCE_LOADER_H
+#endif // #ifndef INCLUDED_LUX_RESOURCE_LOADER_H

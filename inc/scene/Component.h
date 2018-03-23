@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_COMPONENT_H
-#define INCLUDED_SCENE_COMPONENT_H
+#ifndef INCLUDED_LUX_SCENE_COMPONENT_H
+#define INCLUDED_LUX_SCENE_COMPONENT_H
 #include "core/Referable.h"
 #include "scene/Renderable.h"
 

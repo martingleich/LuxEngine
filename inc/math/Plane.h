@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PLANE3D_H
-#define INCLUDED_PLANE3D_H
+#ifndef INCLUDED_LUX_PLANE3D_H
+#define INCLUDED_LUX_PLANE3D_H
 #include "math/Line3.h"
 
 namespace lux

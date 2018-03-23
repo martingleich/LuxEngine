@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGE_LOADER_PNG_H
-#define INCLUDED_IMAGE_LOADER_PNG_H
+#ifndef INCLUDED_LUX_IMAGE_LOADER_PNG_H
+#define INCLUDED_LUX_IMAGE_LOADER_PNG_H
 #include "core/ResourceLoader.h"
 
 namespace lux
@@ -18,4 +18,4 @@ public:
 }
 }
 
-#endif // !INCLUDED_IMAGE_LOADER_PNG_H
+#endif // !INCLUDED_LUX_IMAGE_LOADER_PNG_H

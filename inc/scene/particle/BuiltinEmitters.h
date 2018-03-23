@@ -1,5 +1,5 @@
-#ifndef INCLUDED_BUILTIN_EMITTERS_H
-#define INCLUDED_BUILTIN_EMITTERS_H
+#ifndef INCLUDED_LUX_BUILTIN_EMITTERS_H
+#define INCLUDED_LUX_BUILTIN_EMITTERS_H
 #include "scene/particle/ParticleEmitter.h"
 
 namespace lux
@@ -85,4 +85,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_BUILTIN_EMITTERS_H
+#endif // #ifndef INCLUDED_LUX_BUILTIN_EMITTERS_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VERTEX_BUFFER_IMPL_H
-#define INCLUDED_VERTEX_BUFFER_IMPL_H
+#ifndef INCLUDED_LUX_VERTEX_BUFFER_IMPL_H
+#define INCLUDED_LUX_VERTEX_BUFFER_IMPL_H
 #include "video/VertexBuffer.h"
 #include "video/HardwareBufferManager.h"
 #include "video/VertexFormat.h"
@@ -43,4 +43,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_VERTEX_BUFFER_IMPL_H
+#endif // #ifndef INCLUDED_LUX_VERTEX_BUFFER_IMPL_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARAMPACKAGE_H
-#define INCLUDED_PARAMPACKAGE_H
+#ifndef INCLUDED_LUX_PARAMPACKAGE_H
+#define INCLUDED_LUX_PARAMPACKAGE_H
 #include "core/lxString.h"
 #include "core/lxArray.h"
 

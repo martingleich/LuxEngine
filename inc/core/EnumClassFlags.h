@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ENUMCLASSFLAGS_H
-#define INCLUDED_ENUMCLASSFLAGS_H
+#ifndef INCLUDED_LUX_ENUMCLASSFLAGS_H
+#define INCLUDED_LUX_ENUMCLASSFLAGS_H
 #include <type_traits>
 #include <cstddef>
 
@@ -79,4 +79,4 @@ template<typename T> inline typename std::enable_if<is_flag_enum<T>::value, T>::
 
 }
 
-#endif // INCLUDED_ENUMCLASSFLAGS_H
+#endif // INCLUDED_LUX_ENUMCLASSFLAGS_H

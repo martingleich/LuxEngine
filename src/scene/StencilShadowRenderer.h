@@ -1,5 +1,5 @@
-#ifndef INCLUDED_STENCIL_SHADOW_RENDERER_H
-#define INCLUDED_STENCIL_SHADOW_RENDERER_H
+#ifndef INCLUDED_LUX_STENCIL_SHADOW_RENDERER_H
+#define INCLUDED_LUX_STENCIL_SHADOW_RENDERER_H
 #include "video/Renderer.h"
 #include "video/Pass.h"
 #include "video/VertexTypes.h"
@@ -328,4 +328,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_STENCIL_SHADOW_RENDERER_H
+#endif // #ifndef INCLUDED_LUX_STENCIL_SHADOW_RENDERER_H

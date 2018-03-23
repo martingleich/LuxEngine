@@ -1,5 +1,5 @@
-#ifndef INCLUDED_BUILTIN_PARTICLE_RENDERERS_H
-#define INCLUDED_BUILTIN_PARTICLE_RENDERERS_H
+#ifndef INCLUDED_LUX_BUILTIN_PARTICLE_RENDERERS_H
+#define INCLUDED_LUX_BUILTIN_PARTICLE_RENDERERS_H
 #include "scene/particle/ParticleRenderer.h"
 #include "core/ReferableFactory.h"
 
@@ -121,4 +121,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_BUILTIN_PARTICLE_RENDERERS_H
+#endif // #ifndef INCLUDED_LUX_BUILTIN_PARTICLE_RENDERERS_H

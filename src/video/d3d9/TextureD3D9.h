@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TEXTURE_D3D9_H
-#define INCLUDED_TEXTURE_D3D9_H
+#ifndef INCLUDED_LUX_TEXTURE_D3D9_H
+#define INCLUDED_LUX_TEXTURE_D3D9_H
 #include "video/Texture.h"
 #include "core/lxArray.h"
 

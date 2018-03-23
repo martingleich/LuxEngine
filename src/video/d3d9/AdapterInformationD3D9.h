@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ADAPTER_INFORMATION_D3D9_H
-#define INCLUDED_ADAPTER_INFORMATION_D3D9_H
+#ifndef INCLUDED_LUX_ADAPTER_INFORMATION_D3D9_H
+#define INCLUDED_LUX_ADAPTER_INFORMATION_D3D9_H
 #include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/DriverConfig.h"
@@ -58,4 +58,4 @@ private:
 } // namespace lux
 
 #endif
-#endif // #ifndef INCLUDED_ADAPTER_INFORMATION_D3D9_H
+#endif // #ifndef INCLUDED_LUX_ADAPTER_INFORMATION_D3D9_H

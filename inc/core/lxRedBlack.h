@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_RED_BLACK_H
-#define INCLUDED_LX_RED_BLACK_H
+#ifndef INCLUDED_LUX_LX_RED_BLACK_H
+#define INCLUDED_LUX_LX_RED_BLACK_H
 #include "LuxBase.h"
 #include "core/lxUtil.h"
 #include "core/lxIterator.h"
@@ -865,4 +865,4 @@ private:
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LX_RED_BLACK_H
+#endif // #ifndef INCLUDED_LUX_LX_RED_BLACK_H

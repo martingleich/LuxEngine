@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_BUTTON_H
-#define INCLUDED_GUI_BUTTON_H
+#ifndef INCLUDED_LUX_GUI_BUTTON_H
+#define INCLUDED_LUX_GUI_BUTTON_H
 #include "gui/elements/GUIAbstractButton.h"
 #include "video/Color.h"
 #include "gui/GUITextContainer.h"
@@ -26,4 +26,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_BUTTON_H
+#endif // #ifndef INCLUDED_LUX_GUI_BUTTON_H

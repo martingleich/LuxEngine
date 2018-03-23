@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MATH_VIEW_FRUSTUM_H
-#define INCLUDED_MATH_VIEW_FRUSTUM_H
+#ifndef INCLUDED_LUX_MATH_VIEW_FRUSTUM_H
+#define INCLUDED_LUX_MATH_VIEW_FRUSTUM_H
 #include "math/AABBox.h"
 #include "math/Matrix4.h"
 #include "math/Plane.h"
@@ -304,4 +304,4 @@ private:
 } // namespace math
 } // namespace lux
 
-#endif // #ifndef INCLUDED_MATH_VIEW_FRUSTUM_H
+#endif // #ifndef INCLUDED_LUX_MATH_VIEW_FRUSTUM_H

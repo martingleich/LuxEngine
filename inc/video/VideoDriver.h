@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VIDEODRIVER_H
-#define INCLUDED_VIDEODRIVER_H
+#ifndef INCLUDED_LUX_VIDEODRIVER_H
+#define INCLUDED_LUX_VIDEODRIVER_H
 #include "core/ReferenceCounted.h"
 #include "core/ModuleFactory.h"
 

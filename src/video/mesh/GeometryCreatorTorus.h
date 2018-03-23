@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GEOMETRY_CREATOR_TORUS_H
-#define INCLUDED_GEOMETRY_CREATOR_TORUS_H
+#ifndef INCLUDED_LUX_GEOMETRY_CREATOR_TORUS_H
+#define INCLUDED_LUX_GEOMETRY_CREATOR_TORUS_H
 #include "video/mesh/GeometryCreator.h"
 #include "core/ParamPackage.h"
 
@@ -31,4 +31,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_GEOMETRY_CREATOR_TORUS_H
+#endif // #ifndef INCLUDED_LUX_GEOMETRY_CREATOR_TORUS_H

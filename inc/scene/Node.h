@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_NODE_H
-#define INCLUDED_SCENE_NODE_H
+#ifndef INCLUDED_LUX_SCENE_NODE_H
+#define INCLUDED_LUX_SCENE_NODE_H
 #include "core/lxName.h"
 #include "core/lxArray.h"
 

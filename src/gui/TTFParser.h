@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TTF_PARSER_H
-#define INCLUDED_TTF_PARSER_H
+#ifndef INCLUDED_LUX_TTF_PARSER_H
+#define INCLUDED_LUX_TTF_PARSER_H
 #include "core/LuxBase.h"
 #include "core/lxString.h"
 #include "core/lxUnicodeConversion.h"
@@ -213,4 +213,4 @@ private:
 
 }
 
-#endif // #ifndef INCLUDED_TTF_PARSER_H
+#endif // #ifndef INCLUDED_LUX_TTF_PARSER_H

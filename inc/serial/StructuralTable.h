@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SERIAL_STRUCTURAL_TABLE_H
-#define INCLUDED_SERIAL_STRUCTURAL_TABLE_H
+#ifndef INCLUDED_LUX_SERIAL_STRUCTURAL_TABLE_H
+#define INCLUDED_LUX_SERIAL_STRUCTURAL_TABLE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxHashMap.h"
 #include "serial/SerialStructure.h"
@@ -103,4 +103,4 @@ private:
 } // namespace serial
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SERIAL_STRUCTURAL_TABLE_H
+#endif // #ifndef INCLUDED_LUX_SERIAL_STRUCTURAL_TABLE_H

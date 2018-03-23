@@ -1,5 +1,5 @@
-#ifndef INCLUDED_COLOR_INT_H
-#define INCLUDED_COLOR_INT_H
+#ifndef INCLUDED_LUX_COLOR_INT_H
+#define INCLUDED_LUX_COLOR_INT_H
 #include "core/lxFormat.h"
 #include "math/lxMath.h"
 #include "core/lxTypes.h"
@@ -304,4 +304,4 @@ inline video::Color Lerp(const video::Color& a, const video::Color& b, float t)
 } // namespace math
 } // namespace lux
 
-#endif // #ifndef INCLUDED_COLOR_INT_H
+#endif // #ifndef INCLUDED_LUX_COLOR_INT_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_KEYBOARD_H
-#define INCLUDED_KEYBOARD_H
+#ifndef INCLUDED_LUX_KEYBOARD_H
+#define INCLUDED_LUX_KEYBOARD_H
 #include "InputDeviceNull.h"
 #include "core/lxArray.h"
 
@@ -31,4 +31,4 @@ private:
 }
 }
 
-#endif // !INCLUDED_KEYBOARD_H
+#endif // !INCLUDED_LUX_KEYBOARD_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_BUILTIN_AFFECTORS_H
-#define INCLUDED_BUILTIN_AFFECTORS_H
+#ifndef INCLUDED_LUX_BUILTIN_AFFECTORS_H
+#define INCLUDED_LUX_BUILTIN_AFFECTORS_H
 #include "scene/particle/ParticleAffector.h"
 
 namespace lux
@@ -134,4 +134,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_BUILTIN_AFFECTORS_H
+#endif // #ifndef INCLUDED_LUX_BUILTIN_AFFECTORS_H

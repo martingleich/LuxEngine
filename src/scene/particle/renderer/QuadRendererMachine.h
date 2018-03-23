@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLE_QUAD_RENDERER_MACHINE_H
-#define INCLUDED_PARTICLE_QUAD_RENDERER_MACHINE_H
+#ifndef INCLUDED_LUX_PARTICLE_QUAD_RENDERER_MACHINE_H
+#define INCLUDED_LUX_PARTICLE_QUAD_RENDERER_MACHINE_H
 #include "video/mesh/Geometry.h"
 #include "video/VertexTypes.h"
 #include "video/Renderer.h"
@@ -57,4 +57,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_CPARTICLERENDERER
+#endif // !INCLUDED_LUX_CPARTICLERENDERER

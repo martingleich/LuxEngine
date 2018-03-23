@@ -1,5 +1,5 @@
-#ifndef INCLUDED_INDEXBUFFER_IMPL
-#define INCLUDED_INDEXBUFFER_IMPL
+#ifndef INCLUDED_LUX_INDEXBUFFER_IMPL
+#define INCLUDED_LUX_INDEXBUFFER_IMPL
 #include "video/IndexBuffer.h"
 #include "video/HardwareBufferManager.h"
 
@@ -55,4 +55,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_INDEXBUFFER_IMPL
+#endif // #ifndef INCLUDED_LUX_INDEXBUFFER_IMPL

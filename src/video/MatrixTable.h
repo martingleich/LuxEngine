@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MATRIX_TABLE_H
-#define INCLUDED_MATRIX_TABLE_H
+#ifndef INCLUDED_LUX_MATRIX_TABLE_H
+#define INCLUDED_LUX_MATRIX_TABLE_H
 #include "math/Matrix4.h"
 #include "core/Attributes.h"
 
@@ -94,4 +94,4 @@ private:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_MATRIX_TABLE_H
+#endif // #ifndef INCLUDED_LUX_MATRIX_TABLE_H

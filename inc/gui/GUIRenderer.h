@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_RENDERER_H
-#define INCLUDED_GUI_RENDERER_H
+#ifndef INCLUDED_LUX_GUI_RENDERER_H
+#define INCLUDED_LUX_GUI_RENDERER_H
 #include "core/ReferenceCounted.h"
 #include "math/Rect.h"
 #include "math/Triangle3.h"
@@ -63,4 +63,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_RENDERER_H
+#endif // #ifndef INCLUDED_LUX_GUI_RENDERER_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VERTEX_FORMAT_H
-#define INCLUDED_VERTEX_FORMAT_H
+#ifndef INCLUDED_LUX_VERTEX_FORMAT_H
+#define INCLUDED_LUX_VERTEX_FORMAT_H
 #include "core/lxArray.h"
 #include "core/lxString.h"
 #include "math/lxMath.h"
@@ -705,4 +705,4 @@ struct HashType<video::VertexFormat>
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_VERTEX_FORMAT_H
+#endif // #ifndef INCLUDED_LUX_VERTEX_FORMAT_H

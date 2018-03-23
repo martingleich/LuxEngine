@@ -1,5 +1,5 @@
-#ifndef INCLUDED_COLOR_SPACES_H
-#define INCLUDED_COLOR_SPACES_H
+#ifndef INCLUDED_LUX_COLOR_SPACES_H
+#define INCLUDED_LUX_COLOR_SPACES_H
 #include "math/lxMath.h"
 
 namespace lux
@@ -60,4 +60,4 @@ inline void HSVToRGB(float h, float s, float v, float& r, float& g, float& b)
 }
 }
 
-#endif // #ifndef INCLUDED_COLOR_SPACES_H
+#endif // #ifndef INCLUDED_LUX_COLOR_SPACES_H

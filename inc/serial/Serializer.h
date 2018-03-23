@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SERIAL_SERIALIZER_H
-#define INCLUDED_SERIAL_SERIALIZER_H
+#ifndef INCLUDED_LUX_SERIAL_SERIALIZER_H
+#define INCLUDED_LUX_SERIAL_SERIALIZER_H
 #include "serial/StructuralTable.h"
 #include "core/Referable.h"
 #include "core/VariableAccess.h"
@@ -165,4 +165,4 @@ LUX_API StrongRef<Serializer> CreateBinaryMemorySerializer(core::RawMemory& dest
 } // namespace serial
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SERIAL_SERIALIZER_H
+#endif // #ifndef INCLUDED_LUX_SERIAL_SERIALIZER_H

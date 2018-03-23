@@ -1,5 +1,5 @@
-#ifndef INCLUDED_INPUT_DEVICE_NULL_H
-#define INCLUDED_INPUT_DEVICE_NULL_H
+#ifndef INCLUDED_LUX_INPUT_DEVICE_NULL_H
+#define INCLUDED_LUX_INPUT_DEVICE_NULL_H
 #include "input/InputDevice.h"
 
 namespace lux
@@ -50,4 +50,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_INPUT_DEVICE_NULL_H
+#endif // #ifndef INCLUDED_LUX_INPUT_DEVICE_NULL_H

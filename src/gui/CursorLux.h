@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CURSOR_LUX_H
-#define INCLUDED_CURSOR_LUX_H
+#ifndef INCLUDED_LUX_CURSOR_LUX_H
+#define INCLUDED_LUX_CURSOR_LUX_H
 #include "gui/Cursor.h"
 #include "gui/Window.h"
 
@@ -108,4 +108,4 @@ private:
 
 } // namespace gui
 } // namespace lux
-#endif // #ifndef INCLUDED_CURSOR_LUX_H
+#endif // #ifndef INCLUDED_LUX_CURSOR_LUX_H

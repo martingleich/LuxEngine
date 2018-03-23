@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXITERATOR_H
-#define INCLUDED_LXITERATOR_H 
+#ifndef INCLUDED_LUX_ITERATOR_H
+#define INCLUDED_LUX_ITERATOR_H 
 #include <stdint.h>
 #include <stdlib.h>
 #include <utility>

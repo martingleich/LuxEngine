@@ -1,5 +1,5 @@
-#ifndef INCLUDED_COLOR_FLOAT_H
-#define INCLUDED_COLOR_FLOAT_H
+#ifndef INCLUDED_LUX_COLOR_FLOAT_H
+#define INCLUDED_LUX_COLOR_FLOAT_H
 #include "core/lxFormat.h"
 #include "core/lxTypes.h"
 
@@ -309,4 +309,4 @@ template<> struct TemplType<video::ColorF> { static Type Get() { return Types::C
 
 }
 
-#endif // #ifndef INCLUDED_COLOR_FLOAT_H
+#endif // #ifndef INCLUDED_LUX_COLOR_FLOAT_H

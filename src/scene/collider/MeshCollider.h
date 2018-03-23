@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MESH_COLLIDER_H
-#define INCLUDED_MESH_COLLIDER_H
+#ifndef INCLUDED_LUX_MESH_COLLIDER_H
+#define INCLUDED_LUX_MESH_COLLIDER_H
 #include "scene/Collider.h"
 #include "math/Triangle3.h"
 #include "core/lxArray.h"
@@ -75,4 +75,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_MESH_COLLIDER_H
+#endif // #ifndef INCLUDED_LUX_MESH_COLLIDER_H

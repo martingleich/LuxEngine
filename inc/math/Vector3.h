@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VECTOR3_H
-#define INCLUDED_VECTOR3_H
+#ifndef INCLUDED_LUX_VECTOR3_H
+#define INCLUDED_LUX_VECTOR3_H
 #include "math/Vector2.h"
 #include "math/Angle.h"
 

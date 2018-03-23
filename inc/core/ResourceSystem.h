@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RESOURCESYSTEM_H
-#define INCLUDED_RESOURCESYSTEM_H
+#ifndef INCLUDED_LUX_RESOURCESYSTEM_H
+#define INCLUDED_LUX_RESOURCESYSTEM_H
 #include "core/ReferenceCounted.h"
 #include "core/Resource.h"
 #include "core/ResourceLoader.h"
@@ -241,4 +241,4 @@ private:
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_RESOURCESYSTEM_H
+#endif // #ifndef INCLUDED_LUX_RESOURCESYSTEM_H

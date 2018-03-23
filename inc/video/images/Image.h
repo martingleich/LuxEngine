@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGE_H
-#define INCLUDED_IMAGE_H
+#ifndef INCLUDED_LUX_IMAGE_H
+#define INCLUDED_LUX_IMAGE_H
 #include "core/Resource.h"
 #include "math/Dimension2.h"
 #include "video/Color.h"
@@ -210,4 +210,4 @@ public:
 }
 
 
-#endif // INCLUDED_IMAGE_H
+#endif // INCLUDED_LUX_IMAGE_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ARCHIVEFOLDER_WIN32_H
-#define INCLUDED_ARCHIVEFOLDER_WIN32_H
+#ifndef INCLUDED_LUX_ARCHIVEFOLDER_WIN32_H
+#define INCLUDED_LUX_ARCHIVEFOLDER_WIN32_H
 #include "io/ArchiveLoader.h"
 #include "core/lxArray.h"
 
@@ -71,4 +71,4 @@ public:
 
 #endif // LUX_WINDOWS
 
-#endif // #ifndef INCLUDED_ARCHIVEFOLDER_H
+#endif // #ifndef INCLUDED_LUX_ARCHIVEFOLDER_H

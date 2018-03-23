@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SPRITEBANK_IMPL_H
-#define INCLUDED_SPRITEBANK_IMPL_H
+#ifndef INCLUDED_LUX_SPRITEBANK_IMPL_H
+#define INCLUDED_LUX_SPRITEBANK_IMPL_H
 #include "video/SpriteBank.h"
 #include "core/lxArray.h"
 
@@ -45,4 +45,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_SPRITEBANK_IMPL_H
+#endif // #ifndef INCLUDED_LUX_SPRITEBANK_IMPL_H

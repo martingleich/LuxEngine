@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LUX_DEVICE_NULL_H
-#define INCLUDED_LUX_DEVICE_NULL_H
+#ifndef INCLUDED_LUX_LUX_DEVICE_NULL_H
+#define INCLUDED_LUX_LUX_DEVICE_NULL_H
 #include "LuxEngine/LuxDevice.h"
 
 namespace lux
@@ -39,4 +39,4 @@ protected:
 
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LUX_DEVICE_NULL_H
+#endif // #ifndef INCLUDED_LUX_LUX_DEVICE_NULL_H

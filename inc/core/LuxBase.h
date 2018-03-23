@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LUXBASE_H
-#define INCLUDED_LUXBASE_H
+#ifndef INCLUDED_LUX_LUXBASE_H
+#define INCLUDED_LUX_LUXBASE_H
 #include "LuxConfig.h"
 
 //---------------------------------------------

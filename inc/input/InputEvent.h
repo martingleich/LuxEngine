@@ -1,5 +1,5 @@
-#ifndef INCLUDED_INPUT_EVENT_H
-#define INCLUDED_INPUT_EVENT_H
+#ifndef INCLUDED_LUX_INPUT_EVENT_H
+#define INCLUDED_LUX_INPUT_EVENT_H
 #include "input/Keycodes.h"
 #include "core/lxEvent.h"
 

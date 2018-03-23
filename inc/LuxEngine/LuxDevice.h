@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LUXDEVICE_H
-#define INCLUDED_LUXDEVICE_H
+#ifndef INCLUDED_LUX_DEVICE_H
+#define INCLUDED_LUX_DEVICE_H
 #include "core/lxString.h"
 #include "core/ReferenceCounted.h"
 #include "video/DriverConfig.h"

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_FORMAT_H
-#define INCLUDED_LX_FORMAT_H
+#ifndef INCLUDED_LUX_FORMAT_H
+#define INCLUDED_LUX_FORMAT_H
 #include "format/ConvInternal.h"
 #include "format/Format.h"
 #include "format/Sink.h"
@@ -50,4 +50,4 @@ inline void fmtPrint(format::Context& ctx, const core::String& s, format::Placeh
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LX_FORMAT_H
+#endif // #ifndef INCLUDED_LUX_FORMAT_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_INPUT_SYSTEM_IMPL_H
-#define INCLUDED_INPUT_SYSTEM_IMPL_H
+#ifndef INCLUDED_LUX_INPUT_SYSTEM_IMPL_H
+#define INCLUDED_LUX_INPUT_SYSTEM_IMPL_H
 #include "input/InputSystem.h"
 
 #include "core/lxHashMap.h"
@@ -45,4 +45,4 @@ private:
 }
 }
 
-#endif // !INCLUDED_INPUT_SYSTEM_H
+#endif // !INCLUDED_LUX_INPUT_SYSTEM_H

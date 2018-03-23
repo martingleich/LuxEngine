@@ -1,5 +1,5 @@
-#ifndef INCLUDED_STATICMESH_H
-#define INCLUDED_STATICMESH_H
+#ifndef INCLUDED_LUX_STATICMESH_H
+#define INCLUDED_LUX_STATICMESH_H
 #include "video/mesh/VideoMesh.h"
 #include "core/lxArray.h"
 

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_ASSERT_H
-#define INCLUDED_LX_ASSERT_H
+#ifndef INCLUDED_LUX_ASSERT_H
+#define INCLUDED_LUX_ASSERT_H
 #include <cstddef>
 
 namespace lux
@@ -35,4 +35,4 @@ LUX_API bool Report(const char* file, int line, const char* lxAssert, const char
 #define lxAssertNeverReach(_Msg)      ((void)0)
 #endif
 
-#endif // #ifndef INCLUDED_LX_ASSERT_H
+#endif // #ifndef INCLUDED_LUX_ASSERT_H

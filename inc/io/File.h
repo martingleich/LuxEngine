@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FILE_H
-#define INCLUDED_FILE_H
+#ifndef INCLUDED_LUX_FILE_H
+#define INCLUDED_LUX_FILE_H
 #include "core/ReferenceCounted.h"
 #include "math/lxMath.h"
 #include "io/Path.h"

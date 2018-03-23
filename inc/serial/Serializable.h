@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SERIAL_SERIALIZABLE_H
-#define INCLUDED_SERIAL_SERIALIZABLE_H
+#ifndef INCLUDED_LUX_SERIAL_SERIALIZABLE_H
+#define INCLUDED_LUX_SERIAL_SERIALIZABLE_H
 #include "serial/Serializer.h"
 
 namespace lux
@@ -115,4 +115,4 @@ LX_REFERABLE_MEMBERS_SRC(class, ref_name) \
 	return TYPE_ID; \
 }
 
-#endif // #ifndef INCLUDED_SERIAL_SERIALIZABLE_H
+#endif // #ifndef INCLUDED_LUX_SERIAL_SERIALIZABLE_H

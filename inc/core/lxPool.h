@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXPOOL_H
-#define INCLUDED_LXPOOL_H
+#ifndef INCLUDED_LUX_POOL_H
+#define INCLUDED_LUX_POOL_H
 #include "LuxBase.h"
 #include "lxIterator.h"
 #include "lxMemory.h"
@@ -489,4 +489,4 @@ template <typename T> inline typename Pool<T>::ConstIterator end(const Pool<T>& 
 } // !namespace core
 } // !namespace lux
 
-#endif // !INCLUDED_LXPOOL_H
+#endif // !INCLUDED_LUX_POOL_H

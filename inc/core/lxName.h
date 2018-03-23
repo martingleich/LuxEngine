@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_NAME_H
-#define INCLUDED_LX_NAME_H
+#ifndef INCLUDED_LUX_NAME_H
+#define INCLUDED_LUX_NAME_H
 #include "core/StringConverter.h"
 #include "core/lxStringTable.h"
 #include "core/lxUtil.h"
@@ -105,4 +105,4 @@ inline void fmtPrint(format::Context& ctx, Name name, format::Placeholder& place
 }
 }
 
-#endif // #ifndef INCLUDED_LX_NAME_H
+#endif // #ifndef INCLUDED_LUX_NAME_H

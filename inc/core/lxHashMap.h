@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_HASH_MAP_H
-#define INCLUDED_LX_HASH_MAP_H
+#ifndef INCLUDED_LUX_LX_HASH_MAP_H
+#define INCLUDED_LUX_LX_HASH_MAP_H
 #include "core/lxHashSet.h"
 
 namespace lux
@@ -483,4 +483,4 @@ typename HashMap<K, V, Hash, Compare>::ConstIterator end(const HashMap<K, V, Has
 } // namespace core
 } // namespace lux
 
-#endif // !INCLUDED_LX_HASH_MAP_H
+#endif // !INCLUDED_LUX_LX_HASH_MAP_H

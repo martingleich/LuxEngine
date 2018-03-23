@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_WIN32_HELPER
-#define INCLUDED_LX_WIN32_HELPER
+#ifndef INCLUDED_LUX_WIN32_HELPER
+#define INCLUDED_LUX_WIN32_HELPER
 
 #ifdef LUX_WINDOWS
 
@@ -102,4 +102,4 @@ inline void fmtPrint(format::Context& ctx, const LogWin32Error& v, format::Place
 
 #endif
 
-#endif // #ifndef INCLUDED_LX_WIN32_HELPER
+#endif // #ifndef INCLUDED_LUX_WIN32_HELPER

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXLIST_H
-#define INCLUDED_LXLIST_H
+#ifndef INCLUDED_LUX_LIST_H
+#define INCLUDED_LUX_LIST_H
 #include "LuxBase.h"
 #include "lxMemory.h"
 #include "lxIterator.h"

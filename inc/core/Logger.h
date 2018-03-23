@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LOGGER_H
-#define INCLUDED_LOGGER_H
+#ifndef INCLUDED_LUX_LOGGER_H
+#define INCLUDED_LUX_LOGGER_H
 #include "core/StringConverter.h"
 #include "core/lxAlgorithm.h"
 #include "core/lxName.h"

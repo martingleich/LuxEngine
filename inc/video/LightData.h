@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LIGHTDATA_H
-#define INCLUDED_LIGHTDATA_H
+#ifndef INCLUDED_LUX_LIGHTDATA_H
+#define INCLUDED_LUX_LIGHTDATA_H
 #include "math/Vector3.h"
 #include "video/Color.h"
 

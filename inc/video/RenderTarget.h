@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RENDER_TARGET_H
-#define INCLUDED_RENDER_TARGET_H
+#ifndef INCLUDED_LUX_RENDER_TARGET_H
+#define INCLUDED_LUX_RENDER_TARGET_H
 #include "video/Texture.h"
 #include "video/CubeTexture.h"
 
@@ -100,4 +100,4 @@ protected:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_RENDER_TARGET_H
+#endif // #ifndef INCLUDED_LUX_RENDER_TARGET_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXRANDOM_H
-#define INCLUDED_LXRANDOM_H
+#ifndef INCLUDED_LUX_RANDOM_H
+#define INCLUDED_LUX_RANDOM_H
 #include "core/Clock.h"
 
 #include "video/Color.h"

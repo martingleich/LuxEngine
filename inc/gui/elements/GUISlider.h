@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_GUISLIDER_H
-#define INCLUDED_GUI_GUISLIDER_H
+#ifndef INCLUDED_LUX_GUI_GUISLIDER_H
+#define INCLUDED_LUX_GUI_GUISLIDER_H
 #include "gui/GUIElement.h"
 #include "core/lxSignal.h"
 
@@ -75,4 +75,4 @@ protected:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_GUISLIDER_H
+#endif // #ifndef INCLUDED_LUX_GUI_GUISLIDER_H

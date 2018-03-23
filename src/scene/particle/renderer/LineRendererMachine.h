@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLERENDERER_LINE_IMPL_H
-#define INCLUDED_PARTICLERENDERER_LINE_IMPL_H
+#ifndef INCLUDED_LUX_PARTICLERENDERER_LINE_IMPL_H
+#define INCLUDED_LUX_PARTICLERENDERER_LINE_IMPL_H
 #include "video/VertexTypes.h"
 #include "video/VertexFormat.h"
 #include "video/Renderer.h"
@@ -47,4 +47,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_CPARTICLELINERENDERER
+#endif // !INCLUDED_LUX_CPARTICLELINERENDERER

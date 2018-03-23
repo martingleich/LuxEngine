@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MESH_SYSTEM_H
-#define INCLUDED_MESH_SYSTEM_H
+#ifndef INCLUDED_LUX_MESH_SYSTEM_H
+#define INCLUDED_LUX_MESH_SYSTEM_H
 #include "video/mesh/GeometryCreator.h"
 #include "core/lxHashMap.h"
 #include "io/Path.h"

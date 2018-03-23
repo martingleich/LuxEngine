@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FONT_RASTER_H
-#define INCLUDED_FONT_RASTER_H
+#ifndef INCLUDED_LUX_FONT_RASTER_H
+#define INCLUDED_LUX_FONT_RASTER_H
 #include "gui/Font.h"
 #include "video/Material.h"
 #include "core/lxHashMap.h"

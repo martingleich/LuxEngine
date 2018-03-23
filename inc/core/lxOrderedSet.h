@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_ORDERED_SET_H
-#define INCLUDED_LX_ORDERED_SET_H
+#ifndef INCLUDED_LUX_ORDERED_SET_H
+#define INCLUDED_LUX_ORDERED_SET_H
 #include "core/lxRedBlack.h"
 
 namespace lux
@@ -233,4 +233,4 @@ inline typename OrderedSet<V, Compare>::ConstIterator end(const OrderedSet<V, Co
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LX_ORDERED_SET_H
+#endif // #ifndef INCLUDED_LUX_ORDERED_SET_H

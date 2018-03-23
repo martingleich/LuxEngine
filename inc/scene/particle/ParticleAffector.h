@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLE_AFFECTOR_H
-#define INCLUDED_PARTICLE_AFFECTOR_H
+#ifndef INCLUDED_LUX_PARTICLE_AFFECTOR_H
+#define INCLUDED_LUX_PARTICLE_AFFECTOR_H
 #include "scene/particle/ParticleModel.h"
 
 #include "scene/Component.h"
@@ -61,4 +61,4 @@ protected:
 }
 }
 
-#endif // #ifndef INCLUDED_PARTICLE_AFFECTOR_H
+#endif // #ifndef INCLUDED_LUX_PARTICLE_AFFECTOR_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LIMITEDFILE_H
-#define INCLUDED_LIMITEDFILE_H
+#ifndef INCLUDED_LUX_LIMITEDFILE_H
+#define INCLUDED_LUX_LIMITEDFILE_H
 #include "io/File.h"
 
 namespace lux

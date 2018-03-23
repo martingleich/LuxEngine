@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SHADER_D3D9_H
-#define INCLUDED_SHADER_D3D9_H
+#ifndef INCLUDED_LUX_SHADER_D3D9_H
+#define INCLUDED_LUX_SHADER_D3D9_H
 #include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/Shader.h"

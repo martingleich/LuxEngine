@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_MEMORY_ALLOC_H
-#define INCLUDED_LX_MEMORY_ALLOC_H
+#ifndef INCLUDED_LUX_MEMORY_ALLOC_H
+#define INCLUDED_LUX_MEMORY_ALLOC_H
 #include "core/LuxBase.h"
 #include <stdlib.h>
 
@@ -132,4 +132,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_LX_MEMORY_ALLOC_H
+#endif // #ifndef INCLUDED_LUX_MEMORY_ALLOC_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SPRITEBANK_H
-#define INCLUDED_SPRITEBANK_H
+#ifndef INCLUDED_LUX_SPRITEBANK_H
+#define INCLUDED_LUX_SPRITEBANK_H
 #include "core/ReferenceCounted.h"
 #include "math/Rect.h"
 
@@ -120,4 +120,4 @@ public:
 
 }
 }
-#endif // INCLUDED_SPRITEBANK_H
+#endif // INCLUDED_LUX_SPRITEBANK_H

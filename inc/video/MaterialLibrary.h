@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MATERIALLIBRARY_H
-#define INCLUDED_MATERIALLIBRARY_H
+#ifndef INCLUDED_LUX_MATERIALLIBRARY_H
+#define INCLUDED_LUX_MATERIALLIBRARY_H
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
@@ -149,4 +149,4 @@ private:
 } // namespace video
 } // namespace lux
 
-#endif // INCLUDED_MATERIALLIBRARY_H
+#endif // INCLUDED_LUX_MATERIALLIBRARY_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_KEYCODES_H
-#define INCLUDED_KEYCODES_H
+#ifndef INCLUDED_LUX_KEYCODES_H
+#define INCLUDED_LUX_KEYCODES_H
 
 namespace lux
 {

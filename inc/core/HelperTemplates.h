@@ -1,5 +1,5 @@
-#ifndef INCLUDED_HELPER_TEMPLATES_H
-#define INCLUDED_HELPER_TEMPLATES_H
+#ifndef INCLUDED_LUX_HELPER_TEMPLATES_H
+#define INCLUDED_LUX_HELPER_TEMPLATES_H
 
 namespace lux
 {
@@ -24,4 +24,4 @@ struct Choose<false, IsTrue, IsFalse>
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_HELPER_TEMPLATES_H
+#endif // #ifndef INCLUDED_LUX_HELPER_TEMPLATES_H

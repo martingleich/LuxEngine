@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLE_GROUP_DATA_H
-#define INCLUDED_PARTICLE_GROUP_DATA_H
+#ifndef INCLUDED_LUX_PARTICLE_GROUP_DATA_H
+#define INCLUDED_LUX_PARTICLE_GROUP_DATA_H
 #include "core/ReferenceCounted.h"
 #include "core/lxPool.h"
 #include "core/lxArray.h"

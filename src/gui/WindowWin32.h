@@ -1,5 +1,5 @@
-#ifndef INCLUDED_WINDOW_WIN32_H
-#define INCLUDED_WINDOW_WIN32_H
+#ifndef INCLUDED_LUX_WINDOW_WIN32_H
+#define INCLUDED_LUX_WINDOW_WIN32_H
 #include "gui/WindowBase.h"
 #include "gui/CursorWin32.h"
 
@@ -109,4 +109,4 @@ private:
 #endif // LUX_WINDOWS
 
 
-#endif // !INCLUDED_WINDOWWIN32_H
+#endif // !INCLUDED_LUX_WINDOWWIN32_H

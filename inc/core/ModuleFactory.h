@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MODULE_FACTORY_H
-#define INCLUDED_MODULE_FACTORY_H
+#ifndef INCLUDED_LUX_MODULE_FACTORY_H
+#define INCLUDED_LUX_MODULE_FACTORY_H
 #include "core/lxArray.h"
 #include "core/ReferenceCounted.h"
 
@@ -105,4 +105,4 @@ struct ModuleFactoryRegisterBlock
 static ::lux::ReferenceCounted* InternalCreatorFunc(const ::lux::core::ModuleInitData& data) { return LUX_NEW(class)(data); } \
 static ::lux::core::impl_moduleRegister::ModuleFactoryRegisterBlock InternalModuleRegisterStaticObject(module, name, &InternalCreatorFunc);
 
-#endif // #ifndef INCLUDED_MODULE_FACTORY_H
+#endif // #ifndef INCLUDED_LUX_MODULE_FACTORY_H

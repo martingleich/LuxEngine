@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RENDERER_D3D9_H
-#define INCLUDED_RENDERER_D3D9_H
+#ifndef INCLUDED_LUX_RENDERER_D3D9_H
+#define INCLUDED_LUX_RENDERER_D3D9_H
 #include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/RendererNull.h"
@@ -137,4 +137,4 @@ private:
 } // namespace lux
 
 #endif // LUX_COMPILE_WITH_D3D9
-#endif // #ifndef INCLUDED_RENDERER_D3D9_H
+#endif // #ifndef INCLUDED_LUX_RENDERER_D3D9_H

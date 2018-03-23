@@ -1,5 +1,5 @@
-#ifndef INCLUDED_COLORCONVERTER_H
-#define INCLUDED_COLORCONVERTER_H
+#ifndef INCLUDED_LUX_COLORCONVERTER_H
+#define INCLUDED_LUX_COLORCONVERTER_H
 #include "video/Color.h"
 
 namespace lux
@@ -42,4 +42,4 @@ public:
 } // !namespace video
 } // !namespace lux
 
-#endif // !INCLUDED_CCOLORCONVERTER_H
+#endif // !INCLUDED_LUX_CCOLORCONVERTER_H

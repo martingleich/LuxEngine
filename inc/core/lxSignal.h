@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_SIGNAL_H
-#define INCLUDED_LX_SIGNAL_H
+#ifndef INCLUDED_LUX_LX_SIGNAL_H
+#define INCLUDED_LUX_LX_SIGNAL_H
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
 #include <memory>
@@ -543,4 +543,4 @@ Signal<Args...>& Signal<Args...>::operator=(Signal&& old)
 }
 }
 
-#endif // #ifndef INCLUDED_LX_SIGNAL_H
+#endif // #ifndef INCLUDED_LUX_LX_SIGNAL_H

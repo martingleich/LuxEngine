@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FILE_UTITILIES_H
-#define INCLUDED_FILE_UTITILIES_H
+#ifndef INCLUDED_LUX_FILE_UTITILIES_H
+#define INCLUDED_LUX_FILE_UTITILIES_H
 #include "io/File.h"
 #include "io/ioConstants.h"
 #include "core/lxString.h"
@@ -146,4 +146,4 @@ inline ELineEnding GetLineEnding(File* file, s64 readBytes = 128)
 } // namespace io
 } // namespace lux
 
-#endif // #ifndef INCLUDED_FILE_UTITILIES_H
+#endif // #ifndef INCLUDED_LUX_FILE_UTITILIES_H

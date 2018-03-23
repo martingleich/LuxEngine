@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_UNKNOWN_REF_COUNTED_H
-#define INCLUDED_LX_UNKNOWN_REF_COUNTED_H
+#ifndef INCLUDED_LUX_UNKNOWN_REF_COUNTED_H
+#define INCLUDED_LUX_UNKNOWN_REF_COUNTED_H
 
 namespace lux
 {
@@ -125,4 +125,4 @@ private:
 
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LX_UNKNOWN_REF_COUNTED_H
+#endif // #ifndef INCLUDED_LUX_UNKNOWN_REF_COUNTED_H

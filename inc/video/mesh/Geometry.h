@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SUBMESH_H
-#define INCLUDED_SUBMESH_H
+#ifndef INCLUDED_LUX_SUBMESH_H
+#define INCLUDED_LUX_SUBMESH_H
 #include "core/ReferenceCounted.h"
 #include "math/AABBox.h"
 #include "video/VideoEnums.h"

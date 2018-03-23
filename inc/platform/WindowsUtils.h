@@ -1,9 +1,9 @@
-#ifndef INCLUDED_PLATFORM_WINDOW_UTILS_H
-#define INCLUDED_PLATFORM_WINDOW_UTILS_H
+#ifndef INCLUDED_LUX_PLATFORM_WINDOW_UTILS_H
+#define INCLUDED_LUX_PLATFORM_WINDOW_UTILS_H
 #include "Win32Exception.h"
 
 namespace lux
 {
 } // namespace lux
 
-#endif // #ifndef INCLUDED_PLATFORM_WINDOW_UTILS_H
+#endif // #ifndef INCLUDED_LUX_PLATFORM_WINDOW_UTILS_H

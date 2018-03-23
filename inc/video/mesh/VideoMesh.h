@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MESH_H
-#define INCLUDED_MESH_H
+#ifndef INCLUDED_LUX_MESH_H
+#define INCLUDED_LUX_MESH_H
 #include "math/AABBox.h"
 
 #include "core/Resource.h"

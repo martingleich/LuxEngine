@@ -1,5 +1,5 @@
-#ifndef INCLUDED_D3DHELPER_H
-#define INCLUDED_D3DHELPER_H
+#ifndef INCLUDED_LUX_D3DHELPER_H
+#define INCLUDED_LUX_D3DHELPER_H
 
 #include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
@@ -450,4 +450,4 @@ inline D3DCUBEMAP_FACES GetD3DCubeMapFace(CubeTexture::EFace face)
 
 #endif // LUX_COMPILE_WITH_D3D9
 
-#endif // #ifndef INCLUDED_D3DHELPER_H
+#endif // #ifndef INCLUDED_LUX_D3DHELPER_H

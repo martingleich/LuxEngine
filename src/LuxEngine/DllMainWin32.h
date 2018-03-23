@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DLL_MAIN_WIN32_H
-#define INCLUDED_DLL_MAIN_WIN32_H
+#ifndef INCLUDED_LUX_DLL_MAIN_WIN32_H
+#define INCLUDED_LUX_DLL_MAIN_WIN32_H
 #ifdef LUX_WINDOWS
 #include "core/LuxBase.h"
 #include "platform/StrippedWindows.h"
@@ -11,4 +11,4 @@ HINSTANCE GetLuxModule();
 
 #endif // LUX_WINDOWS
 
-#endif // #ifndef INCLUDED_DLL_MAIN_WIN32_H
+#endif // #ifndef INCLUDED_LUX_DLL_MAIN_WIN32_H

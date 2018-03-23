@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CURSOR_WIN32_H
-#define INCLUDED_CURSOR_WIN32_H
+#ifndef INCLUDED_LUX_CURSOR_WIN32_H
+#define INCLUDED_LUX_CURSOR_WIN32_H
 #include "gui/Cursor.h"
 #include "gui/Window.h"
 
@@ -57,4 +57,4 @@ private:
 
 #endif // LUX_WINDOWS
 
-#endif // !INCLUDED_CURSORCONTROLWIN32_H
+#endif // !INCLUDED_LUX_CURSORCONTROLWIN32_H

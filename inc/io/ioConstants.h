@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IOCONSTANTS_H
-#define INCLUDED_IOCONSTANTS_H
+#ifndef INCLUDED_LUX_IOCONSTANTS_H
+#define INCLUDED_LUX_IOCONSTANTS_H
 #include "core/EnumClassFlags.h"
 
 namespace lux
@@ -55,4 +55,4 @@ DECLARE_FLAG_CLASS(io::EVirtualCreateFlag);
 
 } // namespace lux
 
-#endif // #ifndef INCLUDED_IOCONSTANTS_H
+#endif // #ifndef INCLUDED_LUX_IOCONSTANTS_H

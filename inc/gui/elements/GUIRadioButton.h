@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_RADIO_BUTTON_H
-#define INCLUDED_GUI_RADIO_BUTTON_H
+#ifndef INCLUDED_LUX_GUI_RADIO_BUTTON_H
+#define INCLUDED_LUX_GUI_RADIO_BUTTON_H
 #include "gui/elements/GUIAbstractButton.h"
 #include "gui/GUITextContainer.h"
 
@@ -85,4 +85,4 @@ protected:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_RADIO_BUTTON_H
+#endif // #ifndef INCLUDED_LUX_GUI_RADIO_BUTTON_H

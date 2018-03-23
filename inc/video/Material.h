@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MATERIAL_H
-#define INCLUDED_MATERIAL_H
+#ifndef INCLUDED_LUX_MATERIAL_H
+#define INCLUDED_LUX_MATERIAL_H
 #include "video/AbstractMaterial.h"
 
 namespace lux

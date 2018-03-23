@@ -1,5 +1,5 @@
-#ifndef INCLUDED_COLLISION_HELPER_H
-#define INCLUDED_COLLISION_HELPER_H
+#ifndef INCLUDED_LUX_COLLISION_HELPER_H
+#define INCLUDED_LUX_COLLISION_HELPER_H
 #include "math/Vector3.h"
 #include "math/Line3.h"
 #include "math/Transformation.h"
@@ -450,4 +450,4 @@ bool TriangleTestSphere(
 }
 }
 
-#endif // #ifndef INCLUDED_COLLISION_HELPER_H
+#endif // #ifndef INCLUDED_LUX_COLLISION_HELPER_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ATTRIBUTES_H
-#define INCLUDED_ATTRIBUTES_H
+#ifndef INCLUDED_LUX_ATTRIBUTES_H
+#define INCLUDED_LUX_ATTRIBUTES_H
 #include "core/ParamPackage.h"
 #include "core/lxHashMap.h"
 #include "core/lxOrderedMap.h"
@@ -210,4 +210,4 @@ inline Attributes::ConstIterator end(const Attributes& attributes) { return attr
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_ATTRIBUTES_H
+#endif // #ifndef INCLUDED_LUX_ATTRIBUTES_H

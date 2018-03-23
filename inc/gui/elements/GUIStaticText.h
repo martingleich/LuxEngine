@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_STATIC_TEXT_H
-#define INCLUDED_GUI_STATIC_TEXT_H
+#ifndef INCLUDED_LUX_GUI_STATIC_TEXT_H
+#define INCLUDED_LUX_GUI_STATIC_TEXT_H
 #include "gui/GUIElement.h"
 #include "gui/Font.h"
 #include "gui/GUITextContainer.h"
@@ -46,4 +46,4 @@ protected:
 
 } // namespace gui
 } // namespace lux
-#endif // #ifndef INCLUDED_GUI_STATIC_TEXT_H
+#endif // #ifndef INCLUDED_LUX_GUI_STATIC_TEXT_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ANIMATOR_H
-#define INCLUDED_ANIMATOR_H
+#ifndef INCLUDED_LUX_ANIMATOR_H
+#define INCLUDED_LUX_ANIMATOR_H
 #include "scene/Component.h"
 
 namespace lux
@@ -56,4 +56,4 @@ protected:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_ANIMATOR_H
+#endif // #ifndef INCLUDED_LUX_ANIMATOR_H

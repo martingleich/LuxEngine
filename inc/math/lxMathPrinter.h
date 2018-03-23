@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_MATH_PRINTER_H
-#define INCLUDED_LX_MATH_PRINTER_H
+#ifndef INCLUDED_LUX_MATH_PRINTER_H
+#define INCLUDED_LUX_MATH_PRINTER_H
 #include "core/StringConverter.h"
 #include "math/Vector2.h"
 #include "math/Vector3.h"
@@ -34,4 +34,4 @@ core::BasicStringBuffer<T>& operator<<(core::BasicStringBuffer<T>& buffer, const
 }
 }
 
-#endif // #ifndef INCLUDED_LX_MATH_PRINTER_H
+#endif // #ifndef INCLUDED_LUX_MATH_PRINTER_H

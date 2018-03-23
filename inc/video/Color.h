@@ -1,5 +1,5 @@
-#ifndef INCLUDED_COLOR_H
-#define INCLUDED_COLOR_H
+#ifndef INCLUDED_LUX_COLOR_H
+#define INCLUDED_LUX_COLOR_H
 #include "video/ColorSpaces.h"
 #include "video/ColorInt.h"
 #include "video/ColorFloat.h"

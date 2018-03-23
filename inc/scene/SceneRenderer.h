@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_RENDERER_H
-#define INCLUDED_SCENE_RENDERER_H
+#ifndef INCLUDED_LUX_SCENE_RENDERER_H
+#define INCLUDED_LUX_SCENE_RENDERER_H
 #include "core/ReferenceCounted.h"
 #include "core/Attributes.h"
 #include "core/ModuleFactory.h"
@@ -72,4 +72,4 @@ public:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SCENE_RENDERER_H
+#endif // #ifndef INCLUDED_LUX_SCENE_RENDERER_H

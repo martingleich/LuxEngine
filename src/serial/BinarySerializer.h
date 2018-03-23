@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SERIAL_BINARY_SERIALZER_H
-#define INCLUDED_SERIAL_BINARY_SERIALZER_H
+#ifndef INCLUDED_LUX_SERIAL_BINARY_SERIALZER_H
+#define INCLUDED_LUX_SERIAL_BINARY_SERIALZER_H
 #include "serial/Serializer.h"
 
 namespace lux
@@ -62,4 +62,4 @@ protected:
 } // namespace serial
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SERIAL_BINARY_SERIALZER_H
+#endif // #ifndef INCLUDED_LUX_SERIAL_BINARY_SERIALZER_H

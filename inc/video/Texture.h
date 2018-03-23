@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TEXTURE_H
-#define INCLUDED_TEXTURE_H
+#ifndef INCLUDED_LUX_TEXTURE_H
+#define INCLUDED_LUX_TEXTURE_H
 #include "BaseTexture.h"
 #include "DrawingCanvas.h"
 

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_EDRIVER_CAPS_H
-#define INCLUDED_EDRIVER_CAPS_H
+#ifndef INCLUDED_LUX_EDRIVER_CAPS_H
+#define INCLUDED_LUX_EDRIVER_CAPS_H
 
 namespace lux
 {
@@ -35,4 +35,4 @@ enum class EDriverCaps
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_EDRIVER_CAPS_H
+#endif // #ifndef INCLUDED_LUX_EDRIVER_CAPS_H

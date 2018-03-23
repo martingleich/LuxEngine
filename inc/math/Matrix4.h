@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MATRIX4_H
-#define INCLUDED_MATRIX4_H
+#ifndef INCLUDED_LUX_MATRIX4_H
+#define INCLUDED_LUX_MATRIX4_H
 #include "math/Vector2.h"
 #include "math/Plane.h"
 #include "math/Quaternion.h"

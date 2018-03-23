@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CAMERASCENENODE_H
-#define INCLUDED_CAMERASCENENODE_H
+#ifndef INCLUDED_LUX_CAMERASCENENODE_H
+#define INCLUDED_LUX_CAMERASCENENODE_H
 #include "scene/Component.h"
 #include "video/RenderTarget.h"
 #include "math/Matrix4.h"

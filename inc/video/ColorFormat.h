@@ -1,5 +1,5 @@
-#ifndef INCLUDED_COLOR_FORMAT_H
-#define INCLUDED_COLOR_FORMAT_H
+#ifndef INCLUDED_LUX_COLOR_FORMAT_H
+#define INCLUDED_LUX_COLOR_FORMAT_H
 #include "core/lxException.h"
 #include "core/lxFormat.h"
 
@@ -355,4 +355,4 @@ struct ColorFormatException : Exception
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_COLOR_FORMAT_H
+#endif // #ifndef INCLUDED_LUX_COLOR_FORMAT_H

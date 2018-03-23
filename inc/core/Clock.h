@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CLOCK_H
-#define INCLUDED_CLOCK_H
+#ifndef INCLUDED_LUX_CLOCK_H
+#define INCLUDED_LUX_CLOCK_H
 #include "LuxBase.h"
 #include "DateAndTime.h"
 

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXSORT_H
-#define INCLUDED_LXSORT_H
+#ifndef INCLUDED_LUX_SORT_H
+#define INCLUDED_LUX_SORT_H
 #include "lxIterator.h"
 #include "lxUtil.h"
 

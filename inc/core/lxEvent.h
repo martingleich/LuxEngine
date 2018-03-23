@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_EVENTS_H
-#define INCLUDED_LX_EVENTS_H
+#ifndef INCLUDED_LUX_LX_EVENTS_H
+#define INCLUDED_LUX_LX_EVENTS_H
 #include "math/Vector2.h"
 
 namespace lux
@@ -30,4 +30,4 @@ namespace core
 } // namespace event
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LX_EVENTS_H
+#endif // #ifndef INCLUDED_LUX_LX_EVENTS_H

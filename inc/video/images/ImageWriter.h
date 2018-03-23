@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGEWRITER_H
-#define INCLUDED_IMAGEWRITER_H
+#ifndef INCLUDED_LUX_IMAGEWRITER_H
+#define INCLUDED_LUX_IMAGEWRITER_H
 #include "core/ResourceWriter.h"
 #include "video/images/Image.h"
 #include "video/Texture.h"
@@ -58,4 +58,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_IMAGEWRITER_H
+#endif // #ifndef INCLUDED_LUX_IMAGEWRITER_H

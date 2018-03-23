@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_EVENT_H
-#define INCLUDED_GUI_EVENT_H
+#ifndef INCLUDED_LUX_GUI_EVENT_H
+#define INCLUDED_LUX_GUI_EVENT_H
 #include "core/lxEvent.h"
 #include "input/Keycodes.h"
 
@@ -103,4 +103,4 @@ class ControlEvent
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_EVENT_H
+#endif // #ifndef INCLUDED_LUX_GUI_EVENT_H

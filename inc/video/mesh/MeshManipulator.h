@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MESH_MANIPULATOR_H
-#define INCLUDED_MESH_MANIPULATOR_H
+#ifndef INCLUDED_LUX_MESH_MANIPULATOR_H
+#define INCLUDED_LUX_MESH_MANIPULATOR_H
 #include "video/mesh/VideoMesh.h"
 #include "video/mesh/Geometry.h"
 #include "video/VertexBuffer.h"
@@ -377,4 +377,4 @@ public:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_MESH_MANIPULATOR_H
+#endif // #ifndef INCLUDED_LUX_MESH_MANIPULATOR_H

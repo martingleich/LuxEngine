@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VOLUME_QUERY_H
-#define INCLUDED_VOLUME_QUERY_H
+#ifndef INCLUDED_LUX_VOLUME_QUERY_H
+#define INCLUDED_LUX_VOLUME_QUERY_H
 #include "scene/Query.h"
 
 #include "scene/Zone.h"
@@ -77,4 +77,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_VOLUME_QUERY_H
+#endif // #ifndef INCLUDED_LUX_VOLUME_QUERY_H

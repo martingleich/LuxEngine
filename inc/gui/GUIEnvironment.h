@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUIENVIRONMENT_H
-#define INCLUDED_GUIENVIRONMENT_H
+#ifndef INCLUDED_LUX_GUIENVIRONMENT_H
+#define INCLUDED_LUX_GUIENVIRONMENT_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 #include "math/Vector2.h"
@@ -171,4 +171,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // INCLUDED_GUIENVIRONMENT_H
+#endif // INCLUDED_LUX_GUIENVIRONMENT_H

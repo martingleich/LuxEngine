@@ -1,5 +1,5 @@
-#ifndef INCLUDED_QUATERNION_H
-#define INCLUDED_QUATERNION_H
+#ifndef INCLUDED_LUX_QUATERNION_H
+#define INCLUDED_LUX_QUATERNION_H
 #include "math/Vector3.h"
 #include "core/lxTypes.h"
 #include "core/lxFormat.h"
@@ -621,4 +621,4 @@ template<> struct TemplType<math::QuaternionF> { static Type Get() { return Type
 }
 } // !namespace lux
 
-#endif // !INCLUDED_QUATERNION_H
+#endif // !INCLUDED_LUX_QUATERNION_H

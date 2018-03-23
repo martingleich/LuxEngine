@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SERIAL_STRUCTURE_H
-#define INCLUDED_SERIAL_STRUCTURE_H
+#ifndef INCLUDED_LUX_SERIAL_STRUCTURE_H
+#define INCLUDED_LUX_SERIAL_STRUCTURE_H
 #include "core/lxString.h"
 #include "core/lxArray.h"
 #include "core/lxID.h"
@@ -148,4 +148,4 @@ private:
 } // namespace serial
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SERIAL_STRUCTURE_H
+#endif // #ifndef INCLUDED_LUX_SERIAL_STRUCTURE_H

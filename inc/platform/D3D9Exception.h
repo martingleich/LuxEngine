@@ -1,5 +1,5 @@
-#ifndef INCLUDED_D3D9_EXCEPTION
-#define INCLUDED_D3D9_EXCEPTION
+#ifndef INCLUDED_LUX_D3D9_EXCEPTION
+#define INCLUDED_LUX_D3D9_EXCEPTION
 #include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "Win32Exception.h"
@@ -52,4 +52,4 @@ struct D3D9Exception : RuntimeException
 
 #endif
 
-#endif // #ifndef INCLUDED_D3D9_EXCEPTION
+#endif // #ifndef INCLUDED_LUX_D3D9_EXCEPTION

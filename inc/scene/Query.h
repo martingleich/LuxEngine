@@ -1,5 +1,5 @@
-#ifndef INCLUDED_QUERY_H
-#define INCLUDED_QUERY_H
+#ifndef INCLUDED_LUX_QUERY_H
+#define INCLUDED_LUX_QUERY_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 
@@ -128,4 +128,4 @@ protected:
 }
 }
 
-#endif // #ifndef INCLUDED_QUERY_H
+#endif // #ifndef INCLUDED_LUX_QUERY_H

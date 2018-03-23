@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FONTCREATOR_H
-#define INCLUDED_FONTCREATOR_H
+#ifndef INCLUDED_LUX_FONTCREATOR_H
+#define INCLUDED_LUX_FONTCREATOR_H
 #include "gui/Font.h"
 
 namespace lux
@@ -29,4 +29,4 @@ public:
 }
 }
 
-#endif // !__INCLUDED_IFONTCREATOR
+#endif // !__INCLUDED_LUX_IFONTCREATOR

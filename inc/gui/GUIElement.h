@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_ELEMENT_H
-#define INCLUDED_GUI_ELEMENT_H
+#ifndef INCLUDED_LUX_GUI_ELEMENT_H
+#define INCLUDED_LUX_GUI_ELEMENT_H
 #include "core/Referable.h"
 #include "core/lxArray.h"
 
@@ -210,4 +210,4 @@ protected:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_ELEMENT_H
+#endif // #ifndef INCLUDED_LUX_GUI_ELEMENT_H

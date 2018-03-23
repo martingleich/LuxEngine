@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FIXED_ARRAY_H
-#define INCLUDED_FIXED_ARRAY_H
+#ifndef INCLUDED_LUX_FIXED_ARRAY_H
+#define INCLUDED_LUX_FIXED_ARRAY_H
 #include "core/LuxBase.h"
 #include <initializer_list>
 
@@ -70,4 +70,4 @@ template <typename T, int SIZE> typename FixedArray<T, SIZE>::ConstIterator end(
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_FIXED_ARRAY_H
+#endif // #ifndef INCLUDED_LUX_FIXED_ARRAY_H

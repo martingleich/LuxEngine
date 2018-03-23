@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GEOMETRY_CREATOR_CYLINDER_H
-#define INCLUDED_GEOMETRY_CREATOR_CYLINDER_H
+#ifndef INCLUDED_LUX_GEOMETRY_CREATOR_CYLINDER_H
+#define INCLUDED_LUX_GEOMETRY_CREATOR_CYLINDER_H
 #include "video/mesh/GeometryCreator.h"
 #include "core/ParamPackage.h"
 
@@ -31,4 +31,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_GEOMETRY_CREATOR_CYLINDER_H
+#endif // #ifndef INCLUDED_LUX_GEOMETRY_CREATOR_CYLINDER_H

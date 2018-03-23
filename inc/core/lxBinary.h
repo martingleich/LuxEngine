@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_BINARY_H
-#define INCLUDED_LX_BINARY_H
+#ifndef INCLUDED_LUX_BINARY_H
+#define INCLUDED_LUX_BINARY_H
 
 namespace lux
 {
@@ -9,4 +9,4 @@ namespace core
 }
 }
 
-#endif // #ifndef INCLUDED_LX_BINARY_H
+#endif // #ifndef INCLUDED_LUX_BINARY_H

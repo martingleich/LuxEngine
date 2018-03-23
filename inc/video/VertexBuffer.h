@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VERTEXBUFFER_H
-#define INCLUDED_VERTEXBUFFER_H
+#ifndef INCLUDED_LUX_VERTEXBUFFER_H
+#define INCLUDED_LUX_VERTEXBUFFER_H
 #include "video/HardwareBuffer.h"
 #include "video/VertexFormat.h"
 

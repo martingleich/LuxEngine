@@ -1,5 +1,5 @@
-#ifndef INCLUDED_STREAMFILE_H
-#define INCLUDED_STREAMFILE_H
+#ifndef INCLUDED_LUX_STREAMFILE_H
+#define INCLUDED_LUX_STREAMFILE_H
 #include "io/File.h"
 
 namespace lux

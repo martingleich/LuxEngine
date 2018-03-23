@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_RENDERABLE_H
-#define INCLUDED_SCENE_RENDERABLE_H
+#ifndef INCLUDED_LUX_SCENE_RENDERABLE_H
+#define INCLUDED_LUX_SCENE_RENDERABLE_H
 #include "core/lxArray.h"
 #include "math/AABBox.h"
 
@@ -73,4 +73,4 @@ DECLARE_FLAG_CLASS(scene::ERenderableTags);
 
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SCENE_RENDERABLE_H
+#endif // #ifndef INCLUDED_LUX_SCENE_RENDERABLE_H

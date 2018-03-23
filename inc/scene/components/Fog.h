@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_FOG_H
-#define INCLUDED_SCENE_FOG_H
+#ifndef INCLUDED_LUX_SCENE_FOG_H
+#define INCLUDED_LUX_SCENE_FOG_H
 #include "scene/Component.h"
 #include "video/FogData.h"
 
@@ -39,4 +39,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SCENE_FOG_H
+#endif // #ifndef INCLUDED_LUX_SCENE_FOG_H

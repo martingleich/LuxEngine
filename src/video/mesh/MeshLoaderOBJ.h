@@ -1,5 +1,5 @@
-#ifndef INCLUDED_OBJ_MESHLOADER_H
-#define INCLUDED_OBJ_MESHLOADER_H
+#ifndef INCLUDED_LUX_OBJ_MESHLOADER_H
+#define INCLUDED_LUX_OBJ_MESHLOADER_H
 #include "core/ResourceLoader.h"
 
 namespace lux

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_GUIALIGN_H
-#define INCLUDED_GUI_GUIALIGN_H
+#ifndef INCLUDED_LUX_GUI_GUIALIGN_H
+#define INCLUDED_LUX_GUI_GUIALIGN_H
 #include "math/Rect.h"
 
 namespace lux
@@ -122,5 +122,5 @@ math::Rect<T> AlignOuterRect(
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_GUIALIGN_H
+#endif // #ifndef INCLUDED_LUX_GUI_GUIALIGN_H
 

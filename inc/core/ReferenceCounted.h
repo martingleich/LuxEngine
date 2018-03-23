@@ -1,5 +1,5 @@
-#ifndef INCLUDED_REFERENCECOUNTED_H
-#define INCLUDED_REFERENCECOUNTED_H
+#ifndef INCLUDED_LUX_REFERENCECOUNTED_H
+#define INCLUDED_LUX_REFERENCECOUNTED_H
 #include "LuxBase.h"
 #include "lxException.h"
 #include <cstddef>

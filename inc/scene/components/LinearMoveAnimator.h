@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_LINEAR_MOVE_ANIMATOR_H
-#define INCLUDED_SCENE_LINEAR_MOVE_ANIMATOR_H
+#ifndef INCLUDED_LUX_SCENE_LINEAR_MOVE_ANIMATOR_H
+#define INCLUDED_LUX_SCENE_LINEAR_MOVE_ANIMATOR_H
 #include "scene/components/Animator.h"
 #include "math/Line3.h"
 
@@ -34,4 +34,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_LINEAR_MOVE_ANIMATOR_H
+#endif // #ifndef INCLUDED_LUX_LINEAR_MOVE_ANIMATOR_H

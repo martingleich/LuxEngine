@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IINDEXBUFFER_H
-#define INCLUDED_IINDEXBUFFER_H
+#ifndef INCLUDED_LUX_IINDEXBUFFER_H
+#define INCLUDED_LUX_IINDEXBUFFER_H
 #include "video/HardwareBuffer.h"
 
 namespace lux

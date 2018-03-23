@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FIRST_PERSON_CAMERA_CONTROL_H
-#define INCLUDED_FIRST_PERSON_CAMERA_CONTROL_H
+#ifndef INCLUDED_LUX_FIRST_PERSON_CAMERA_CONTROL_H
+#define INCLUDED_LUX_FIRST_PERSON_CAMERA_CONTROL_H
 #include "scene/components/Animator.h"
 #include "math/Angle.h"
 #include "math/Vector2.h"

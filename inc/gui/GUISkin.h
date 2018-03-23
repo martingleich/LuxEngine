@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_SKIN_H
-#define INCLUDED_GUI_SKIN_H
+#ifndef INCLUDED_LUX_GUI_SKIN_H
+#define INCLUDED_LUX_GUI_SKIN_H
 #include "core/Referable.h"
 #include "core/lxHashMap.h"
 
@@ -169,4 +169,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_SKIN_H
+#endif // #ifndef INCLUDED_LUX_GUI_SKIN_H

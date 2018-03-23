@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DRIVER_TYPE_H
-#define INCLUDED_DRIVER_TYPE_H
+#ifndef INCLUDED_LUX_DRIVER_TYPE_H
+#define INCLUDED_LUX_DRIVER_TYPE_H
 #include "core/LuxBase.h"
 #include "core/lxString.h"
 
@@ -16,4 +16,4 @@ LUX_API extern const core::String Direct3D9;
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_DRIVER_TYPE_H
+#endif // #ifndef INCLUDED_LUX_DRIVER_TYPE_H

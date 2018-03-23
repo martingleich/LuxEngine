@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_ORDERED_MAP_H
-#define INCLUDED_LX_ORDERED_MAP_H
+#ifndef INCLUDED_LUX_ORDERED_MAP_H
+#define INCLUDED_LUX_ORDERED_MAP_H
 #include "core/lxOrderedSet.h"
 
 namespace lux
@@ -596,4 +596,4 @@ inline typename OrderedMap<K, V, Compare>::ConstIterator end(const OrderedMap<K,
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LX_ORDERED_MAP_H
+#endif // #ifndef INCLUDED_LUX_ORDERED_MAP_H

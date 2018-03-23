@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RENDERER_NULL
-#define INCLUDED_RENDERER_NULL
+#ifndef INCLUDED_LUX_RENDERER_NULL
+#define INCLUDED_LUX_RENDERER_NULL
 #include "video/Renderer.h"
 
 #include "core/ParamPackage.h"
@@ -157,4 +157,4 @@ protected:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_RENDERER_NULL
+#endif // #ifndef INCLUDED_LUX_RENDERER_NULL

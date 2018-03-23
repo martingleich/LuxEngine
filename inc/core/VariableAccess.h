@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VARIABLE_ACCESS_H
-#define INCLUDED_VARIABLE_ACCESS_H
+#ifndef INCLUDED_LUX_VARIABLE_ACCESS_H
+#define INCLUDED_LUX_VARIABLE_ACCESS_H
 #include "core/lxTypes.h"
 #include "core/lxFormat.h"
 #include "video/TextureLayer.h"
@@ -417,4 +417,4 @@ inline void fmtPrint(format::Context& ctx, const VariableAccess& access, format:
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_VARIABLE_ACCESS_H
+#endif // #ifndef INCLUDED_LUX_VARIABLE_ACCESS_H

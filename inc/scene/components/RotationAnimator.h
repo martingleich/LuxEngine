@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_ANIMATOR_ROTATION_H
-#define INCLUDED_SCENE_ANIMATOR_ROTATION_H
+#ifndef INCLUDED_LUX_SCENE_ANIMATOR_ROTATION_H
+#define INCLUDED_LUX_SCENE_ANIMATOR_ROTATION_H
 #include "scene/components/Animator.h"
 #include "math/Vector3.h"
 

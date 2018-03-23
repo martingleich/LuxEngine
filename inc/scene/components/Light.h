@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_LIGHT_H
-#define INCLUDED_SCENE_LIGHT_H
+#ifndef INCLUDED_LUX_SCENE_LIGHT_H
+#define INCLUDED_LUX_SCENE_LIGHT_H
 #include "scene/Component.h"
 #include "video/LightData.h"
 

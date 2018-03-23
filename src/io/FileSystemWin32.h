@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FILESYSTEM_WIN32_H
-#define INCLUDED_FILESYSTEM_WIN32_H
+#ifndef INCLUDED_LUX_FILESYSTEM_WIN32_H
+#define INCLUDED_LUX_FILESYSTEM_WIN32_H
 #ifdef LUX_WINDOWS
 #include "io/FileSystem.h"
 #include "core/lxArray.h"

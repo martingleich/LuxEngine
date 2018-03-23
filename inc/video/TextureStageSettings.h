@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TEXTURE_STAGE_SETTINGS_H
-#define INCLUDED_TEXTURE_STAGE_SETTINGS_H
+#ifndef INCLUDED_LUX_TEXTURE_STAGE_SETTINGS_H
+#define INCLUDED_LUX_TEXTURE_STAGE_SETTINGS_H
 #include "core/LuxBase.h"
 #include "video/VideoEnums.h"
 
@@ -75,4 +75,4 @@ public:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_TEXTURE_STAGE_SETTINGS_H
+#endif // #ifndef INCLUDED_LUX_TEXTURE_STAGE_SETTINGS_H

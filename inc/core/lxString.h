@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXSTRING_H
-#define INCLUDED_LXSTRING_H
+#ifndef INCLUDED_LUX_STRING_H
+#define INCLUDED_LUX_STRING_H
 #include "lxMemory.h"
 #include "lxUnicode.h"
 #include "lxUtil.h"

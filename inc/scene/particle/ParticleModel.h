@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLE_MODEL_H
-#define INCLUDED_PARTICLE_MODEL_H
+#ifndef INCLUDED_LUX_PARTICLE_MODEL_H
+#define INCLUDED_LUX_PARTICLE_MODEL_H
 #include "core/lxRandom.h"
 
 #include "video/Color.h"
@@ -243,4 +243,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_PARTICLE_MODEL_H
+#endif // !INCLUDED_LUX_PARTICLE_MODEL_H

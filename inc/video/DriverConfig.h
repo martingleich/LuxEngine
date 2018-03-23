@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DRIVER_CONFIG
-#define INCLUDED_DRIVER_CONFIG
+#ifndef INCLUDED_LUX_DRIVER_CONFIG
+#define INCLUDED_LUX_DRIVER_CONFIG
 #include "core/LuxBase.h"
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
@@ -107,4 +107,4 @@ public:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_DRIVER_CONFIG
+#endif // #ifndef INCLUDED_LUX_DRIVER_CONFIG

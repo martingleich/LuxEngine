@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ZONE_BOX_H
-#define INCLUDED_ZONE_BOX_H
+#ifndef INCLUDED_LUX_ZONE_BOX_H
+#define INCLUDED_LUX_ZONE_BOX_H
 #include "scene/Zone.h"
 #include "math/Transformation.h"
 #include "core/lxRandom.h"
@@ -76,4 +76,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_ZONE_BOX_H
+#endif // #ifndef INCLUDED_LUX_ZONE_BOX_H

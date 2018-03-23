@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXTYPES_H
-#define INCLUDED_LXTYPES_H
+#ifndef INCLUDED_LUX_TYPES_H
+#define INCLUDED_LUX_TYPES_H
 #include "LuxBase.h"
 #include "lxException.h"
 #include "lxUtil.h"
@@ -538,4 +538,4 @@ inline bool IsConvertible(Type fromType, Type toType)
 } // !namespace core
 } // !namespace lux
 
-#endif // !INCLUDED_LXTYPES_H
+#endif // !INCLUDED_LUX_TYPES_H

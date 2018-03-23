@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SMATERIALLAYER_H
-#define INCLUDED_SMATERIALLAYER_H
+#ifndef INCLUDED_LUX_SMATERIALLAYER_H
+#define INCLUDED_LUX_SMATERIALLAYER_H
 #include "core/lxTypes.h"
 #include "core/lxFormat.h"
 #include "video/BaseTexture.h"
@@ -87,4 +87,4 @@ template<> struct TemplType<video::TextureLayer> { static Type Get() { return Ty
 } // namespace core
 } // namespace lux
 
-#endif // !INCLUDED_SMATERIALLAYER_H
+#endif // !INCLUDED_LUX_SMATERIALLAYER_H

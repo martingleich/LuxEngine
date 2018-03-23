@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VIDEO_DRIVER_NULL_H
-#define INCLUDED_VIDEO_DRIVER_NULL_H
+#ifndef INCLUDED_LUX_VIDEO_DRIVER_NULL_H
+#define INCLUDED_LUX_VIDEO_DRIVER_NULL_H
 #include "video/VideoDriver.h"
 #include "video/DriverConfig.h"
 #include "gui/Window.h"
@@ -25,4 +25,4 @@ protected:
 }
 }
 
-#endif // #ifndef INCLUDED_VIDEO_DRIVER_NULL_H
+#endif // #ifndef INCLUDED_LUX_VIDEO_DRIVER_NULL_H

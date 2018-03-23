@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_ABSTRACT_BUTTON_H
-#define INCLUDED_GUI_ABSTRACT_BUTTON_H
+#ifndef INCLUDED_LUX_GUI_ABSTRACT_BUTTON_H
+#define INCLUDED_LUX_GUI_ABSTRACT_BUTTON_H
 #include "gui/GUIElement.h"
 #include "core/lxSignal.h"
 
@@ -31,4 +31,4 @@ protected:
 
 } // namespace gui
 } // namespace lux
-#endif // #ifndef INCLUDED_GUI_ABSTRACT_BUTTON_H
+#endif // #ifndef INCLUDED_LUX_GUI_ABSTRACT_BUTTON_H

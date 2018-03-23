@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ZONE_CYLINDER_H
-#define INCLUDED_ZONE_CYLINDER_H
+#ifndef INCLUDED_LUX_ZONE_CYLINDER_H
+#define INCLUDED_LUX_ZONE_CYLINDER_H
 #include "scene/Zone.h"
 
 namespace lux
@@ -85,4 +85,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_ZONE_POINT_H
+#endif // #ifndef INCLUDED_LUX_ZONE_POINT_H

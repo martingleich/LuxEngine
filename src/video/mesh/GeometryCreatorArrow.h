@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GEOMETRY_CREATOR_ARROW_H
-#define INCLUDED_GEOMETRY_CREATOR_ARROW_H
+#ifndef INCLUDED_LUX_GEOMETRY_CREATOR_ARROW_H
+#define INCLUDED_LUX_GEOMETRY_CREATOR_ARROW_H
 #include "video/mesh/GeometryCreator.h"
 #include "core/ParamPackage.h"
 

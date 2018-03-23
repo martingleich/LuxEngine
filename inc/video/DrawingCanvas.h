@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DRAWING_CANVAS_H
-#define INCLUDED_DRAWING_CANVAS_H
+#ifndef INCLUDED_LUX_DRAWING_CANVAS_H
+#define INCLUDED_LUX_DRAWING_CANVAS_H
 #include "math/Rect.h"
 #include "video/ColorFormat.h"
 #include "video/Color.h"
@@ -196,4 +196,4 @@ class DrawingCanvasAuto;
 }
 }
 
-#endif // !INCLUDED_DRAWING_CANVAS_H
+#endif // !INCLUDED_LUX_DRAWING_CANVAS_H

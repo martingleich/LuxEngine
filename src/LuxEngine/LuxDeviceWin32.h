@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LUXDEVICE_WIN32_H
-#define INCLUDED_LUXDEVICE_WIN32_H
+#ifndef INCLUDED_LUX_DEVICE_WIN32_H
+#define INCLUDED_LUX_DEVICE_WIN32_H
 #include "LuxConfig.h"
 #ifdef LUX_WINDOWS
 #include "LuxDeviceNull.h"

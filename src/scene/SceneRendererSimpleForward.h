@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENERENDERER_IMPL_H
-#define INCLUDED_SCENERENDERER_IMPL_H
+#ifndef INCLUDED_LUX_SCENERENDERER_IMPL_H
+#define INCLUDED_LUX_SCENERENDERER_IMPL_H
 #include "scene/SceneRenderer.h"
 
 #include "core/lxOrderedMap.h"

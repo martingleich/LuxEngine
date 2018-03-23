@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RENDERTARGET_D3D9_H
-#define INCLUDED_RENDERTARGET_D3D9_H
+#ifndef INCLUDED_LUX_RENDERTARGET_D3D9_H
+#define INCLUDED_LUX_RENDERTARGET_D3D9_H
 #include "video/RenderTarget.h"
 
 #include "LuxConfig.h"
@@ -91,4 +91,4 @@ private:
 #endif
 
 
-#endif // #ifndef INCLUDED_RENDERTARGET_D3D9_H
+#endif // #ifndef INCLUDED_LUX_RENDERTARGET_D3D9_H

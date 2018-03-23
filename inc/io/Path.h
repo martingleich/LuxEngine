@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PATH_H
-#define INCLUDED_PATH_H
+#ifndef INCLUDED_LUX_PATH_H
+#define INCLUDED_LUX_PATH_H
 
 #include "core/lxString.h"
 #include "core/DateAndTime.h"

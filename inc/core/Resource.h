@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RESOURCE_H
-#define INCLUDED_RESOURCE_H
+#ifndef INCLUDED_LUX_RESOURCE_H
+#define INCLUDED_LUX_RESOURCE_H
 #include "core/Referable.h"
 
 namespace lux
@@ -130,4 +130,4 @@ static ::lux::core::impl_referableRegister::ReferableRegisterBlock InternalRefer
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_RESOURCE_H
+#endif // #ifndef INCLUDED_LUX_RESOURCE_H

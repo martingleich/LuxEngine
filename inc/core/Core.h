@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CORE_H
-#define INCLUDED_CORE_H
+#ifndef INCLUDED_LUX_CORE_H
+#define INCLUDED_LUX_CORE_H
 
 #include "core/Attributes.h"
 #include "core/Clock.h"

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGESYSTEM_H
-#define INCLUDED_IMAGESYSTEM_H
+#ifndef INCLUDED_LUX_IMAGESYSTEM_H
+#define INCLUDED_LUX_IMAGESYSTEM_H
 #include "core/ReferenceCounted.h"
 #include "math/Dimension2.h"
 #include "video/Color.h"
@@ -59,5 +59,5 @@ private:
 }
 }
 
-#endif // !INCLUDED_IIMAGESYSTEM_H
+#endif // !INCLUDED_LUX_IIMAGESYSTEM_H
 

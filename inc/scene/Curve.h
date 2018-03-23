@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_ANIMATION_CURVE_H
-#define INCLUDED_SCENE_ANIMATION_CURVE_H
+#ifndef INCLUDED_LUX_SCENE_ANIMATION_CURVE_H
+#define INCLUDED_LUX_SCENE_ANIMATION_CURVE_H
 #include "core/ReferenceCounted.h"
 #include "math/CurveInterpolation.h"
 #include "math/Vector3.h"
@@ -152,4 +152,4 @@ inline StrongRef<KeyFrameCurve> MakeKeyFrameCurve(core::Type type)
 } // namespace scene
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SCENE_ANIMATION_CURVE_H
+#endif // #ifndef INCLUDED_LUX_SCENE_ANIMATION_CURVE_H

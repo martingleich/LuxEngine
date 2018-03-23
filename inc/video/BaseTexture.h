@@ -1,5 +1,5 @@
-#ifndef INCLUDED_BASETEXTURE_H
-#define INCLUDED_BASETEXTURE_H
+#ifndef INCLUDED_LUX_BASETEXTURE_H
+#define INCLUDED_LUX_BASETEXTURE_H
 #include "video/Color.h"
 #include "math/Dimension2.h"
 #include "core/Resource.h"

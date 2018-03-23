@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_UNICODE_H
-#define INCLUDED_LX_UNICODE_H
+#ifndef INCLUDED_LUX_UNICODE_H
+#define INCLUDED_LUX_UNICODE_H
 #include "LuxBase.h"
 #include "lxIterator.h"
 
@@ -272,4 +272,4 @@ private:
 
 }
 }
-#endif // #ifndef INCLUDED_LX_UNICODE_H
+#endif // #ifndef INCLUDED_LUX_UNICODE_H

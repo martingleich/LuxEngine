@@ -1,5 +1,5 @@
-#ifndef INCLUDED_HARDWAREBUFFERMANAGERNULL_H
-#define INCLUDED_HARDWAREBUFFERMANAGERNULL_H
+#ifndef INCLUDED_LUX_HARDWAREBUFFERMANAGERNULL_H
+#define INCLUDED_LUX_HARDWAREBUFFERMANAGERNULL_H
 #include "video/HardwareBufferManager.h"
 #include "core/lxArray.h"
 
@@ -36,4 +36,4 @@ protected:
 } // namespace video
 } // namespace lux
 
-#endif // !INCLUDED_HARDWAREBUFFERMANAGERNULL_H
+#endif // !INCLUDED_LUX_HARDWAREBUFFERMANAGERNULL_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SPHERE_COLLIDER_H
-#define INCLUDED_SPHERE_COLLIDER_H
+#ifndef INCLUDED_LUX_SPHERE_COLLIDER_H
+#define INCLUDED_LUX_SPHERE_COLLIDER_H
 #include "scene/Collider.h"
 
 namespace lux
@@ -77,4 +77,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_SPHERE_COLLIDER_H
+#endif // #ifndef INCLUDED_LUX_SPHERE_COLLIDER_H

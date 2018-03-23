@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_H
-#define INCLUDED_SCENE_H
+#ifndef INCLUDED_LUX_SCENE_H
+#define INCLUDED_LUX_SCENE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
 #include "core/lxOrderedSet.h"

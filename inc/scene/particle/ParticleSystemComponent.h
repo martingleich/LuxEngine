@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PARTICLESYSTEMNode_H
-#define INCLUDED_PARTICLESYSTEMNode_H
+#ifndef INCLUDED_LUX_PARTICLESYSTEMNode_H
+#define INCLUDED_LUX_PARTICLESYSTEMNode_H
 #include "scene/components/Animator.h"
 #include "scene/Renderable.h"
 
@@ -35,4 +35,4 @@ private:
 } // namespace scene
 } // namespace lux
 
-#endif // !INCLUDED_PARTICLESYSTEMNode_H
+#endif // !INCLUDED_LUX_PARTICLESYSTEMNode_H

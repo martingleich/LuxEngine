@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FONT_H
-#define INCLUDED_FONT_H
+#ifndef INCLUDED_LUX_FONT_H
+#define INCLUDED_LUX_FONT_H
 #include "core/Resource.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"

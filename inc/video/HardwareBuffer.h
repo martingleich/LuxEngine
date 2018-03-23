@@ -1,5 +1,5 @@
-#ifndef INCLUDED_HARDWAREBUFFER_H
-#define INCLUDED_HARDWAREBUFFER_H
+#ifndef INCLUDED_LUX_HARDWAREBUFFER_H
+#define INCLUDED_LUX_HARDWAREBUFFER_H
 #include "core/ReferenceCounted.h"
 #include "math/lxMath.h"
 
@@ -239,4 +239,4 @@ inline void HardwareBuffer::SetSize(int size, bool moveOld, void* init)
 }
 }
 
-#endif // !INCLUDED_HARDWAREBUFFER_H
+#endif // !INCLUDED_LUX_HARDWAREBUFFER_H

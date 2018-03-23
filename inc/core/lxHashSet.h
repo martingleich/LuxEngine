@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_HASH_SET_H
-#define INCLUDED_LX_HASH_SET_H
+#ifndef INCLUDED_LUX_LX_HASH_SET_H
+#define INCLUDED_LUX_LX_HASH_SET_H
 #include "core/lxUtil.h"
 #include "core/lxIterator.h"
 #include "math/lxMath.h"
@@ -570,4 +570,4 @@ typename HashSet<T, Hash, Compare>::ConstIterator end(const HashSet<T, Hash, Com
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LX_HASH_SET_H
+#endif // #ifndef INCLUDED_LUX_LX_HASH_SET_H

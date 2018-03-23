@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_STDIO_H
-#define INCLUDED_LX_STDIO_H
+#ifndef INCLUDED_LUX_STDIO_H
+#define INCLUDED_LUX_STDIO_H
 #include <cstdio>
 
 namespace lux
@@ -10,4 +10,4 @@ FILE* FOpenUTF8(const char* filename, const char* mode);
 }
 }
 
-#endif // #ifndef INCLUDED_LX_STDIO_H
+#endif // #ifndef INCLUDED_LUX_STDIO_H

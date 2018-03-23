@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CWINDOWBASE_H
-#define INCLUDED_CWINDOWBASE_H
+#ifndef INCLUDED_LUX_CWINDOWBASE_H
+#define INCLUDED_LUX_CWINDOWBASE_H
 #include "gui/Window.h"
 #include "gui/GUIEnvironment.h"
 
@@ -143,4 +143,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // !INCLUDED_WINDOWBASE_H
+#endif // !INCLUDED_LUX_WINDOWBASE_H

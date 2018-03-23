@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ICUBETEXTURE_H
-#define INCLUDED_ICUBETEXTURE_H
+#ifndef INCLUDED_LUX_ICUBETEXTURE_H
+#define INCLUDED_LUX_ICUBETEXTURE_H
 #include "video/BaseTexture.h"
 #include "video/DrawingCanvas.h"
 

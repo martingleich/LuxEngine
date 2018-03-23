@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXARRAY_H
-#define INCLUDED_LXARRAY_H
+#ifndef INCLUDED_LUX_LXARRAY_H
+#define INCLUDED_LUX_LXARRAY_H
 #include "math/lxMath.h"
 #include "core/lxSort.h"
 #include "core/lxMemory.h"

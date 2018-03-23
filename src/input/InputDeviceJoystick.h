@@ -1,5 +1,5 @@
-#ifndef INCLUDED_JOYSTICK_H
-#define INCLUDED_JOYSTICK_H
+#ifndef INCLUDED_LUX_JOYSTICK_H
+#define INCLUDED_LUX_JOYSTICK_H
 #include "input/InputDeviceNull.h"
 #include "core/lxArray.h"
 
@@ -55,4 +55,4 @@ private:
 }
 
 
-#endif // !INCLUDED_JOYSTICK_H
+#endif // !INCLUDED_LUX_JOYSTICK_H

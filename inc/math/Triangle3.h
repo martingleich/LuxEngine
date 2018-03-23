@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TRIANGLE3D_H
-#define INCLUDED_TRIANGLE3D_H
+#ifndef INCLUDED_LUX_TRIANGLE3D_H
+#define INCLUDED_LUX_TRIANGLE3D_H
 #include "math/AABBox.h"
 
 namespace lux

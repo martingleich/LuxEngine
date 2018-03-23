@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VIDEO_ENUMS_H
-#define INCLUDED_VIDEO_ENUMS_H
+#ifndef INCLUDED_LUX_VIDEO_ENUMS_H
+#define INCLUDED_LUX_VIDEO_ENUMS_H
 #include "core/LuxBase.h"
 
 namespace lux
@@ -366,4 +366,4 @@ struct AlphaBlendMode
 DECLARE_FLAG_CLASS(video::ELighting);
 } // namespace lux
 
-#endif // #ifndef INCLUDED_ALPHA_SETTINGS_H
+#endif // #ifndef INCLUDED_LUX_ALPHA_SETTINGS_H

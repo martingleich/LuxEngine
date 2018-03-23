@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MOUSE_H
-#define INCLUDED_MOUSE_H
+#ifndef INCLUDED_LUX_MOUSE_H
+#define INCLUDED_LUX_MOUSE_H
 #include "InputDeviceNull.h"
 #include "core/lxArray.h"
 
@@ -33,4 +33,4 @@ private:
 }
 }
 
-#endif // !INCLUDED_MOUSE_H
+#endif // !INCLUDED_LUX_MOUSE_H

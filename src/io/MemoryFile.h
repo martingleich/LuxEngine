@@ -1,5 +1,5 @@
-#ifndef INCLUDED_MEMORY_FILE_H
-#define INCLUDED_MEMORY_FILE_H
+#ifndef INCLUDED_LUX_MEMORY_FILE_H
+#define INCLUDED_LUX_MEMORY_FILE_H
 #include "io/File.h"
 
 namespace lux

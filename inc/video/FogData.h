@@ -1,5 +1,5 @@
-#ifndef INCLUDED_FOG_DATA_H
-#define INCLUDED_FOG_DATA_H
+#ifndef INCLUDED_LUX_FOG_DATA_H
+#define INCLUDED_LUX_FOG_DATA_H
 #include "video/Color.h"
 
 namespace lux
@@ -39,4 +39,4 @@ public:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_FOG_DATA_H
+#endif // #ifndef INCLUDED_LUX_FOG_DATA_H

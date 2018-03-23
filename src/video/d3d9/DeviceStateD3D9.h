@@ -1,5 +1,5 @@
-#ifndef INCLUDED_DEVICE_STATE_D3D9_H
-#define INCLUDED_DEVICE_STATE_D3D9_H
+#ifndef INCLUDED_LUX_DEVICE_STATE_D3D9_H
+#define INCLUDED_LUX_DEVICE_STATE_D3D9_H
 #include "LuxConfig.h"
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "math/Matrix4.h"
@@ -127,4 +127,4 @@ private:
 } // namespace lux
 
 #endif // LUX_COMPILE_WITH_D3D9
-#endif // #ifndef INCLUDED_DEVICE_STATE_D3D9_H
+#endif // #ifndef INCLUDED_LUX_DEVICE_STATE_D3D9_H

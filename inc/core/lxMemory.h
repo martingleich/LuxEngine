@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LXMEMORY_H
-#define INCLUDED_LXMEMORY_H
+#ifndef INCLUDED_LUX_LXMEMORY_H
+#define INCLUDED_LUX_LXMEMORY_H
 #include "LuxBase.h"
 #include <string.h>
 #include <memory>

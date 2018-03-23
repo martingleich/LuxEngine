@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LX_EXCEPTION_H
-#define INCLUDED_LX_EXCEPTION_H
+#ifndef INCLUDED_LUX_EXCEPTION_H
+#define INCLUDED_LUX_EXCEPTION_H
 #include "LuxBase.h"
 #include <cstring>
 #include <cstdlib>
@@ -257,4 +257,4 @@ struct FileFormatException : Exception
 } // namespace core
 } // namespace lux 
 
-#endif // #ifndef INCLUDED_LX_EXCEPTION_H
+#endif // #ifndef INCLUDED_LUX_EXCEPTION_H

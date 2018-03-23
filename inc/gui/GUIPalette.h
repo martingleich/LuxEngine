@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_PALETTE_H
-#define INCLUDED_GUI_PALETTE_H
+#ifndef INCLUDED_LUX_GUI_PALETTE_H
+#define INCLUDED_LUX_GUI_PALETTE_H
 #include "video/Color.h"
 #include "gui/GUIEnums.h"
 
@@ -186,4 +186,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_PALETTE_H
+#endif // #ifndef INCLUDED_LUX_GUI_PALETTE_H

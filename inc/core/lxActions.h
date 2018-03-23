@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ACTION_MAPPER_H
-#define INCLUDED_ACTION_MAPPER_H
+#ifndef INCLUDED_LUX_ACTION_MAPPER_H
+#define INCLUDED_LUX_ACTION_MAPPER_H
 #include "core/lxSignal.h"
 #include "core/lxEvent.h"
 #include "core/lxString.h"
@@ -144,4 +144,4 @@ private:
 } // namespace event
 } // namespace lux
 
-#endif // #ifndef INCLUDED_ACTION_MAPPER_H
+#endif // #ifndef INCLUDED_LUX_ACTION_MAPPER_H

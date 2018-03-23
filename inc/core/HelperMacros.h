@@ -1,5 +1,5 @@
-#ifndef INCLUDED_HELPER_MACROS_H
-#define INCLUDED_HELPER_MACROS_H
+#ifndef INCLUDED_LUX_HELPER_MACROS_H
+#define INCLUDED_LUX_HELPER_MACROS_H
 
 #define LX_DEFINE_COMPARE_FUNCTIONS_BY_SMALLER(class) \
 	bool operator==(const class& other) const { return !((*this < other) || (other < *this)); } \
@@ -20,4 +20,4 @@
 #define IMPL_LX_CONCAT(a, x) a##x
 #define LX_CONCAT(a, x) IMPL_LX_CONCAT(a, x)
 
-#endif // #ifndef INCLUDED_HELPER_MACROS_H
+#endif // #ifndef INCLUDED_LUX_HELPER_MACROS_H

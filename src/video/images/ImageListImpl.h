@@ -1,5 +1,5 @@
-#ifndef INCLUDED_IMAGELISTIMPL_H
-#define INCLUDED_IMAGELISTIMPL_H
+#ifndef INCLUDED_LUX_IMAGELISTIMPL_H
+#define INCLUDED_LUX_IMAGELISTIMPL_H
 #include "video/images/Image.h"
 #include "core/lxArray.h"
 #include "core/lxAlgorithm.h"
@@ -50,4 +50,4 @@ private:
 }
 }
 
-#endif // #ifndef INCLUDED_IMAGELISTIMPL_H
+#endif // #ifndef INCLUDED_LUX_IMAGELISTIMPL_H

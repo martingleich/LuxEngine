@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RENDERSTATISTICS_H
-#define INCLUDED_RENDERSTATISTICS_H
+#ifndef INCLUDED_LUX_RENDERSTATISTICS_H
+#define INCLUDED_LUX_RENDERSTATISTICS_H
 #include "core/ReferenceCounted.h"
 
 namespace lux

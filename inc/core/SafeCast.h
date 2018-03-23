@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SAFE_CAST_H
-#define INCLUDED_SAFE_CAST_H
+#ifndef INCLUDED_LUX_SAFE_CAST_H
+#define INCLUDED_LUX_SAFE_CAST_H
 #include <limits>
 #include "core/lxException.h"
 #include "core/HelperTemplates.h"
@@ -33,5 +33,5 @@ inline ToT SaturateCast(FromT from)
 } // namespace core
 } // namespace lux
 
-#endif // #ifndef INCLUDED_SAFE_CAST_H
+#endif // #ifndef INCLUDED_LUX_SAFE_CAST_H
 

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_ANGLE_H
-#define INCLUDED_ANGLE_H
+#ifndef INCLUDED_LUX_ANGLE_H
+#define INCLUDED_LUX_ANGLE_H
 #include "math/lxMath.h"
 
 namespace lux
@@ -250,4 +250,4 @@ typedef Angle<float> AngleF;
 } // namespace math
 } // namespace lux
 
-#endif // #ifndef INCLUDED_ANGLE_H
+#endif // #ifndef INCLUDED_LUX_ANGLE_H

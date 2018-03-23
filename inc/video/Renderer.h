@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RENDERER_H
-#define INCLUDED_RENDERER_H
+#ifndef INCLUDED_LUX_RENDERER_H
+#define INCLUDED_LUX_RENDERER_H
 #include "core/ReferenceCounted.h"
 
 #include "video/VideoEnums.h"
@@ -374,4 +374,4 @@ struct NormalizeNormalsToken : public VideoRendererToken
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_RENDERER_H
+#endif // #ifndef INCLUDED_LUX_RENDERER_H

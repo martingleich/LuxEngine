@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_IMAGE_DISPLAY_H
-#define INCLUDED_GUI_IMAGE_DISPLAY_H
+#ifndef INCLUDED_LUX_GUI_IMAGE_DISPLAY_H
+#define INCLUDED_LUX_GUI_IMAGE_DISPLAY_H
 #include "gui/GUIElement.h"
 #include "video/Texture.h"
 
@@ -38,4 +38,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_IMAGE_DISPLAY_H
+#endif // #ifndef INCLUDED_LUX_GUI_IMAGE_DISPLAY_H

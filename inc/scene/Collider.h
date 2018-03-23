@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SCENE_COLLIDER_H
-#define INCLUDED_SCENE_COLLIDER_H
+#ifndef INCLUDED_LUX_SCENE_COLLIDER_H
+#define INCLUDED_LUX_SCENE_COLLIDER_H
 #include "core/Referable.h"
 #include "math/AABBox.h"
 #include "math/Triangle3.h"
@@ -55,4 +55,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_SCENE_COLLIDER_H
+#endif // #ifndef INCLUDED_LUX_SCENE_COLLIDER_H

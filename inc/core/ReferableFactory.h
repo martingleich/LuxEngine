@@ -1,5 +1,5 @@
-#ifndef INCLUDED_REFERABLEFACTORY_H
-#define INCLUDED_REFERABLEFACTORY_H
+#ifndef INCLUDED_LUX_REFERABLEFACTORY_H
+#define INCLUDED_LUX_REFERABLEFACTORY_H
 #include "core/Referable.h"
 #include "core/lxHashMap.h"
 
@@ -90,4 +90,4 @@ private:
 }
 }
 
-#endif // !INCLUDED_IREFERABLEFACTORY_H
+#endif // !INCLUDED_LUX_IREFERABLEFACTORY_H

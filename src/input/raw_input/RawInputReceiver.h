@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RAW_INPUT_RECEIVER_H
-#define INCLUDED_RAW_INPUT_RECEIVER_H
+#ifndef INCLUDED_LUX_RAW_INPUT_RECEIVER_H
+#define INCLUDED_LUX_RAW_INPUT_RECEIVER_H
 #include "input/InputSystem.h"
 #include "core/lxHashMap.h"
 #include "core/lxArray.h"
@@ -84,4 +84,4 @@ private:
 
 #endif // LUX_COMPILE_WITH_RAW_INPUT
 
-#endif // !INCLUDED_RAW_INPUT_RECEIVER_H
+#endif // !INCLUDED_LUX_RAW_INPUT_RECEIVER_H

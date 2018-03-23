@@ -1,5 +1,5 @@
-#ifndef INCLUDED_REFERABLE_H
-#define INCLUDED_REFERABLE_H
+#ifndef INCLUDED_LUX_REFERABLE_H
+#define INCLUDED_LUX_REFERABLE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
 #include "core/lxTypes.h"
@@ -142,4 +142,4 @@ LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
 ::lux::StrongRef<::lux::Referable> class::CloneImpl() const { return LUX_NEW(class)(*this); } \
 ::lux::StrongRef<class> class::Clone() const { return CloneImpl().StaticCastStrong<class>(); }
 
-#endif // INCLUDED_REFERABLE_H
+#endif // INCLUDED_LUX_REFERABLE_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_RECT_H
-#define INCLUDED_RECT_H
+#ifndef INCLUDED_LUX_RECT_H
+#define INCLUDED_LUX_RECT_H
 #include "Dimension2.h"
 
 namespace lux
@@ -269,4 +269,4 @@ typedef Rect<int> RectI;
 } // !namespace math
 } // !namespace lux
 
-#endif // !INCLUDED_RECT2D_H
+#endif // !INCLUDED_LUX_RECT2D_H

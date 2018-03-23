@@ -1,5 +1,5 @@
-#ifndef INCLUDED_GUI_TEXT_BOX_H
-#define INCLUDED_GUI_TEXT_BOX_H
+#ifndef INCLUDED_LUX_GUI_TEXT_BOX_H
+#define INCLUDED_LUX_GUI_TEXT_BOX_H
 #include "gui/GUIElement.h"
 #include "gui/GUITextContainer.h"
 #include "core/lxSignal.h"
@@ -48,4 +48,4 @@ private:
 } // namespace gui
 } // namespace lux
 
-#endif // #ifndef INCLUDED_GUI_TEXT_BOX_H
+#endif // #ifndef INCLUDED_LUX_GUI_TEXT_BOX_H

@@ -1,5 +1,5 @@
-#ifndef INCLUDED_VIDEO_CANVAS3D_H
-#define INCLUDED_VIDEO_CANVAS3D_H
+#ifndef INCLUDED_LUX_VIDEO_CANVAS3D_H
+#define INCLUDED_LUX_VIDEO_CANVAS3D_H
 #include "core/ReferenceCounted.h"
 #include "video/Color.h"
 #include "video/Pass.h"
@@ -186,4 +186,4 @@ private:
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_VIDEO_CANVAS3D_H
+#endif // #ifndef INCLUDED_LUX_VIDEO_CANVAS3D_H

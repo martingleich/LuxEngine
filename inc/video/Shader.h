@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SHADER_H
-#define INCLUDED_SHADER_H
+#ifndef INCLUDED_LUX_SHADER_H
+#define INCLUDED_LUX_SHADER_H
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
 #include "core/Attributes.h"

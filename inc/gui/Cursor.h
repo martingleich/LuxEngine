@@ -1,5 +1,5 @@
-#ifndef INCLUDED_CURSOR_H
-#define INCLUDED_CURSOR_H
+#ifndef INCLUDED_LUX_CURSOR_H
+#define INCLUDED_LUX_CURSOR_H
 #include "core/ReferenceCounted.h"
 #include "math/Dimension2.h"
 #include "core/lxSignal.h"
@@ -144,4 +144,4 @@ public:
 } // namespace gui
 } // namespace lux
 
-#endif // !INCLUDED_CURSOR_H
+#endif // !INCLUDED_LUX_CURSOR_H

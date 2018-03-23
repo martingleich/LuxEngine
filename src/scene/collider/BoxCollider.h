@@ -1,5 +1,5 @@
-#ifndef INCLUDED_BOX_COLLIDER_H
-#define INCLUDED_BOX_COLLIDER_H
+#ifndef INCLUDED_LUX_BOX_COLLIDER_H
+#define INCLUDED_LUX_BOX_COLLIDER_H
 #include "scene/Collider.h"
 #include "math/Transformation.h"
 
@@ -75,4 +75,4 @@ public:
 }
 }
 
-#endif // #ifndef INCLUDED_BOX_COLLIDER_H
+#endif // #ifndef INCLUDED_LUX_BOX_COLLIDER_H

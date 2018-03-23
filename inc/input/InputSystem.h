@@ -1,5 +1,5 @@
-#ifndef INCLUDED_INPUT_SYSTEM_H
-#define INCLUDED_INPUT_SYSTEM_H
+#ifndef INCLUDED_LUX_INPUT_SYSTEM_H
+#define INCLUDED_LUX_INPUT_SYSTEM_H
 #include "core/ReferenceCounted.h"
 #include "input/InputEvent.h"
 #include "core/lxSignal.h"
@@ -78,4 +78,4 @@ public:
 } // namespace input
 } // namespace lux
 
-#endif // #ifndef INCLUDED_INPUT_SYSTE_H
+#endif // #ifndef INCLUDED_LUX_INPUT_SYSTE_H
