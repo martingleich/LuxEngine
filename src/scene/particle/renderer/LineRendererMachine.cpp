@@ -1,9 +1,9 @@
-#include "LineRendererMachine.h"
+#include "scene/particle/renderer/LineRendererMachine.h"
 #include "scene/particle/ParticleModel.h"
 #include "scene/particle/ParticleGroupData.h"
 #include "video/MaterialLibrary.h"
 
-LX_REGISTER_REFERABLE_CLASS(lux::scene::LineRendererMachine, "lux.particlerenderer.Line");
+LX_REGISTER_REFERABLE_CLASS(lux::scene::LineRendererMachine, "lux.particlerenderermachine.Line");
 
 namespace lux
 {
@@ -56,10 +56,10 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	ParticleModel* model = group->GetModel();
 	int cursor = 0;
 	for(auto& p : group->GetPool()) {
-		float alpha = model->ReadValue(p, Particle::EParameter::Alpha);
-		float red = model->ReadValue(p, Particle::EParameter::Red);
-		float green = model->ReadValue(p, Particle::EParameter::Green);
-		float blue = model->ReadValue(p, Particle::EParameter::Blue);
+		float alpha = model->ReadValue(p, ParticleParam::Alpha);
+		float red = model->ReadValue(p, ParticleParam::Red);
+		float green = model->ReadValue(p, ParticleParam::Green);
+		float blue = model->ReadValue(p, ParticleParam::Blue);
 
 		video::Color color;
 		color.SetF(alpha, red, green, blue);
@@ -70,7 +70,7 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 			delta = m_Data->DefaultDir;
 		else if(!m_Data->ScaleSpeed)
 			delta /= std::sqrt(lSq);
-		delta *= m_Data->Length * model->ReadValue(p, Particle::EParameter::Size);
+		delta *= m_Data->Length * model->ReadValue(p, ParticleParam::Size);
 
 		m_Vertices[cursor].position = p.position;
 		m_Vertices[cursor].color = color;
@@ -93,14 +93,9 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		m_VertexFormat);
 }
 
-StrongRef<ParticleRenderer> LineRendererMachine::CreateRenderer()
-{
-	return LUX_NEW(LineRenderer)(this);
-}
-
 core::Name LineRendererMachine::GetReferableType() const
 {
-	static const core::Name name("lux.particlerenderer.Line");
+	static const core::Name name("lux.particlerenderermachine.Line");
 	return name;
 }
 

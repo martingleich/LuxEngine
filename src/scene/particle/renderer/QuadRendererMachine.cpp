@@ -1,4 +1,4 @@
-#include "QuadRendererMachine.h"
+#include "scene/particle/renderer/QuadRendererMachine.h"
 #include "scene/particle/ParticleModel.h"
 #include "scene/particle/ParticleGroupData.h"
 
@@ -9,7 +9,7 @@
 
 #include "video/VideoDriver.h"
 
-LX_REGISTER_REFERABLE_CLASS(lux::scene::QuadRendererMachine, "lux.particlerenderer.Quad");
+LX_REGISTER_REFERABLE_CLASS(lux::scene::QuadRendererMachine, "lux.particlerenderermachine.Quad");
 
 namespace lux
 {
@@ -200,7 +200,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	{
 		video::Texture* texture;
 		math::RectF* rect;
-		int offset = m_Model->GetOffset(Particle::EParameter::Sprite);
+		int offset = m_Model->GetParamOffset(ParticleParam::Sprite);
 		video::SpriteBank::Sprite sprite;
 		if(offset < 0)
 			sprite = m_Data->DefaultSprite;
@@ -213,7 +213,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		if(m_Data->SpriteBank->GetSprite(sprite, 0, false, rect, texture))
 			particleTexture = video::TextureLayer(texture);
 
-		if(m_Model->IsEnabled(Particle::EParameter::Angle))
+		if(m_Model->IsEnabled(ParticleParam::Angle))
 			RenderQuad = &QuadRendererMachine::RenderQuad_ScaledRotated;
 		else
 			RenderQuad = &QuadRendererMachine::RenderQuad_Scaled;
@@ -249,7 +249,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 
 void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Particle& particle)
 {
-	float Size = m_Model->ReadValue(particle, Particle::EParameter::Size);
+	float Size = m_Model->ReadValue(particle, ParticleParam::Size);
 
 	math::Vector3F Side = m_Side * m_Data->Scaling.x * Size;
 	math::Vector3F Up = m_Up * m_Data->Scaling.y * Size;
@@ -261,14 +261,14 @@ void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Par
 	vertices[2].position = particle.position - (Up + Side)*Size;
 	vertices[3].position = particle.position - (Up - Side)*Size;
 
-	float alpha = m_Model->ReadValue(particle, Particle::EParameter::Alpha);
-	float red = m_Model->ReadValue(particle, Particle::EParameter::Red);
-	float green = m_Model->ReadValue(particle, Particle::EParameter::Green);
-	float blue = m_Model->ReadValue(particle, Particle::EParameter::Blue);
+	float alpha = m_Model->ReadValue(particle, ParticleParam::Alpha);
+	float red = m_Model->ReadValue(particle, ParticleParam::Red);
+	float green = m_Model->ReadValue(particle, ParticleParam::Green);
+	float blue = m_Model->ReadValue(particle, ParticleParam::Blue);
 	vertices[0].color.SetF(alpha, red, green, blue);
 	vertices[1].color = vertices[2].color = vertices[3].color = vertices[0].color;
 
-	int offset = m_Model->GetOffset(Particle::EParameter::Sprite);
+	int offset = m_Model->GetParamOffset(ParticleParam::Sprite);
 	video::SpriteBank::Sprite sprite;
 	if(offset < 0)
 		sprite = m_Data->DefaultSprite;
@@ -290,8 +290,8 @@ void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Par
 
 void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, const Particle& particle)
 {
-	float Size = m_Model->ReadValue(particle, Particle::EParameter::Size);
-	float angle = m_Model->ReadValue(particle, Particle::EParameter::Angle);
+	float Size = m_Model->ReadValue(particle, ParticleParam::Size);
+	float angle = m_Model->ReadValue(particle, ParticleParam::Angle);
 
 	float sa = std::sin(angle);
 	float ca = std::cos(angle);
@@ -306,14 +306,14 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 	vertices[2].position = particle.position - (Up + Side)*Size;
 	vertices[3].position = particle.position - (Up - Side)*Size;
 
-	float alpha = m_Model->ReadValue(particle, Particle::EParameter::Alpha);
-	float red = m_Model->ReadValue(particle, Particle::EParameter::Red);
-	float green = m_Model->ReadValue(particle, Particle::EParameter::Green);
-	float blue = m_Model->ReadValue(particle, Particle::EParameter::Blue);
+	float alpha = m_Model->ReadValue(particle, ParticleParam::Alpha);
+	float red = m_Model->ReadValue(particle, ParticleParam::Red);
+	float green = m_Model->ReadValue(particle, ParticleParam::Green);
+	float blue = m_Model->ReadValue(particle, ParticleParam::Blue);
 	vertices[0].color.SetF(alpha, red, green, blue);
 	vertices[1].color = vertices[2].color = vertices[3].color = vertices[0].color;
 
-	int offset = m_Model->GetOffset(Particle::EParameter::Sprite);
+	int offset = m_Model->GetParamOffset(ParticleParam::Sprite);
 	video::SpriteBank::Sprite sprite;
 	if(offset < 0)
 		sprite = m_Data->DefaultSprite;
@@ -369,14 +369,9 @@ void QuadRendererMachine::CreateBuffers(ParticleGroupData* group)
 	}
 }
 
-StrongRef<ParticleRenderer> QuadRendererMachine::CreateRenderer()
-{
-	return LUX_NEW(QuadRenderer(this));
-}
-
 core::Name QuadRendererMachine::GetReferableType() const
 {
-	static const core::Name name("lux.particlerenderer.Quad");
+	static const core::Name name("lux.particlerenderermachine.Quad");
 	return name;
 }
 

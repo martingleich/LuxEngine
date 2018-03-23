@@ -1,19 +1,17 @@
-#ifndef INCLUDED_PARTICLE_AFFECTOR_SWIRL_H
-#define INCLUDED_PARTICLE_AFFECTOR_SWIRL_H
-#include "ParticleAffector.h"
+#ifndef INCLUDED_BUILTIN_AFFECTORS_H
+#define INCLUDED_BUILTIN_AFFECTORS_H
+#include "scene/particle/ParticleAffector.h"
 
 namespace lux
 {
 namespace scene
 {
-class Node;
 
 class SwirlAffector : public ParticleAffector
 {
 	LX_REFERABLE_MEMBERS_API(SwirlAffector, LUX_API);
 public:
 	SwirlAffector() :
-		m_Axis(math::Vector3F::UNIT_Y),
 		m_FixedAttractionSpeed(true),
 		m_AttractionSpeed(1.0f),
 		m_FixedAngularSpeed(true),
@@ -24,10 +22,12 @@ public:
 	{
 	}
 
-	virtual void Begin(const math::Transformation& trans)
+	void Begin(const math::Transformation& trans)
 	{
-		m_TransCenter = trans.TransformPoint(m_Center);
-		m_TransAxis = trans.TransformDir(m_Axis) / trans.scale;
+		ParticleAffector::Begin(trans);
+
+		m_TransCenter = m_AbsTransform.TransformPoint(math::Vector3F::ZERO);
+		m_TransAxis = m_AbsTransform.TransformDir(math::Vector3F::UNIT_Y) / trans.scale;
 
 		if(m_KillRadius < m_EyeRadius || m_KillRadius <= 0)
 			m_KillRadius = m_EyeRadius;
@@ -35,7 +35,7 @@ public:
 		lxAssert(m_KillRadius >= m_EyeRadius);
 	}
 
-	virtual void Apply(Particle& particle, float secsPassed)
+	void Apply(Particle& particle, float secsPassed)
 	{
 		const math::Vector3F delta = particle.position - m_TransCenter;
 		const float planeDist = m_TransAxis.Dot(delta); // Distance to the main rotation plane.
@@ -72,8 +72,6 @@ public:
 		particle.velocity = orthoVelocity + newVelocity;
 	}
 
-	void SetCenter(const math::Vector3F& v) { m_Center = v; }
-	void SetAxis(const math::Vector3F& a) { m_Axis = a; }
 	void SetFixedAttractionSpeed(bool fixed) { m_FixedAttractionSpeed = fixed; }
 	void SetAttractionSpeed(float speed) { m_AttractionSpeed = speed; }
 	void SetFixedAngularSpeed(bool fixed) { m_FixedAngularSpeed = fixed; }
@@ -82,8 +80,6 @@ public:
 	void SetKillRadius(float radius) { m_KillRadius = radius; }
 	void SetParticleKilling(bool kill) { m_ParticleKilling = kill; }
 
-	const math::Vector3F& GetCenter() const { return m_Center; }
-	const math::Vector3F& GetAxis() const { return m_Axis; }
 	bool GetFixedAttractionSpeed() const { return m_FixedAttractionSpeed; }
 	float GetAttractionSpeed() const { return m_AttractionSpeed; }
 	bool GetFixedAngularSpeed() const { return m_FixedAngularSpeed; }
@@ -93,9 +89,6 @@ public:
 	bool GetParticleKilling() const { return m_ParticleKilling; }
 
 private:
-	math::Vector3F m_Center; // The center of the swirl
-	math::Vector3F m_Axis; // The axis of the swirl, normalized.
-
 	bool m_FixedAttractionSpeed; // Is the attraction speed always the same, other the speed is directly proportional to the distance to the eye of the swirl.
 	float m_AttractionSpeed; // The speed of attraction to the center, the number of units each particle get closer to the center per second.
 	bool m_FixedAngularSpeed; // Is the angular speed always the same, otherwise the speed is indirect proportional to the distance to the center.
@@ -109,7 +102,36 @@ private:
 	math::Vector3F m_TransAxis; // normalized
 };
 
+class LinearForceAffector : public ParticleAffector
+{
+	LX_REFERABLE_MEMBERS_API(LinearForceAffector, LUX_API);
+public:
+	LinearForceAffector() :
+		m_Direction(math::Vector3F::UNIT_Y)
+	{}
+
+	LinearForceAffector(const math::Vector3F& force) :
+		m_Direction(force)
+	{
+	}
+
+	void Begin(const math::Transformation& trans)
+	{
+		ParticleAffector::Begin(trans);
+		m_TransDirection = m_AbsTransform.TransformDir(m_Direction);
+	}
+
+	void Apply(Particle& particle, float secsPassed)
+	{
+		particle.velocity += m_TransDirection*secsPassed;
+	}
+
+private:
+	math::Vector3F m_Direction;
+	math::Vector3F m_TransDirection;
+};
+
 }
 }
 
-#endif // #ifndef INCLUDED_PARTICLE_AFFECTOR_H
+#endif // #ifndef INCLUDED_BUILTIN_AFFECTORS_H

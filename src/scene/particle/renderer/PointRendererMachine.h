@@ -5,14 +5,13 @@
 #include "video/Renderer.h"
 #include "video/Pass.h"
 
-#include "scene/particle/ParticleRenderer.h"
-#include "scene/particle/Particle.h"
+#include "scene/particle/BuiltinParticleRenderers.h"
+#include "scene/particle/ParticleModel.h"
 
 namespace lux
 {
 namespace scene
 {
-class ParticleModel;
 class ParticleGroupData;
 
 class PointRendererMachine : public RendererMachine
@@ -29,8 +28,6 @@ public:
 	~PointRendererMachine();
 
 	void Render(video::Renderer* videoRenderer, ParticleGroupData* group, ParticleRenderer* renderer);
-
-	StrongRef<ParticleRenderer> CreateRenderer();
 
 	core::Name GetReferableType() const;
 

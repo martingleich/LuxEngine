@@ -1,90 +1,110 @@
 #ifndef INCLUDED_PARTICLE_SYSTEM_TEMPLATE_H
 #define INCLUDED_PARTICLE_SYSTEM_TEMPLATE_H
-#include "affector/ParticleAffector.h"
-#include "emitter/ParticleEmitter.h"
-#include "emitter/StraightEmitter.h"
+#include "scene/particle/ParticleAffector.h"
+#include "scene/particle/ParticleEmitter.h"
 #include "scene/particle/ParticleModel.h"
+#include "core/lxOrderedMap.h"
+#include "core/ReferableFactory.h"
 
 namespace lux
 {
 namespace scene
 {
+class ParticleSystemTemplate;
+struct ParticleSystemTemplateBuilder
+{
+	core::Array<StrongRef<AbstractParticleAffector>> affectors;
+	core::Array<StrongRef<AbstractParticleEmitter>> emitters;
+	core::OrderedMap<ParticleModel*, int> capacities;
+	bool isGlobal = true;
+
+	StrongRef<ParticleModel> CreateModel()
+	{
+		return LUX_NEW(ParticleModel);
+	}
+
+	StrongRef<AbstractParticleEmitter> AddEmitter(AbstractParticleEmitter* emitter)
+	{
+		emitters.PushBack(emitter);
+		return emitter;
+	}
+	StrongRef<AbstractParticleEmitter> AddEmitter(core::Name name)
+	{
+		return AddEmitter(core::ReferableFactory::Instance()->Create(name).As<ParticleEmitter>());
+	}
+	StrongRef<AbstractParticleAffector> AddAffector(AbstractParticleAffector* affector)
+	{
+		affectors.PushBack(affector);
+		return affector;
+	}
+	StrongRef<AbstractParticleAffector> AddAffector(core::Name name)
+	{
+		return AddAffector(core::ReferableFactory::Instance()->Create(name).As<ParticleAffector>());
+	}
+
+	StrongRef<ParticleSystemTemplate> MakeTemplate();
+};
 
 class ParticleSystemTemplate : public Referable
 {
 	LX_REFERABLE_MEMBERS_API(ParticleSystemTemplate, LUX_API);
 public:
-	virtual ~ParticleSystemTemplate() {}
+	LUX_API ParticleSystemTemplate();
+	LUX_API ParticleSystemTemplate(
+		const core::Array<StrongRef<AbstractParticleAffector>>& affectors,
+		const core::Array<StrongRef<AbstractParticleEmitter>>& emitters,
+		const core::OrderedMap<ParticleModel*, int>& capacities,
+		bool isGlobal);
 
-	StrongRef<ParticleModel> AddModel()
-	{
-		return LUX_NEW(ParticleModel);
-	}
+	LUX_API int GetAffectorCount() const;
+	LUX_API StrongRef<AbstractParticleAffector> GetAffector(int i);
+	LUX_API StrongRef<AbstractParticleAffector>* GetAffectors();
 
-	StrongRef<ParticleAffector> AddAffector(ParticleAffector* affector)
-	{
-		m_Affectors.PushBack(affector);
-		return affector;
-	}
-	int GetAffectorCount() const
-	{
-		return m_Affectors.Size();
-	}
-	StrongRef<ParticleAffector> GetAffector(int i)
-	{
-		return m_Affectors.At(i);
-	}
-	void RemoveAffector(int i)
-	{
-		if(i >= m_Affectors.Size())
-			throw core::OutOfRangeException();
-		m_Affectors.Erase(m_Affectors.First() + i);
-	}
-	void ClearAffectors()
-	{
-		m_Affectors.Clear();
-	}
+	LUX_API int GetEmitterCount() const;
+	LUX_API StrongRef<AbstractParticleEmitter> GetEmitter(int i);
+	LUX_API StrongRef<AbstractParticleEmitter>* GetEmitters();
 
-	StrongRef<ParticleEmitter> AddEmitter(ParticleEmitter* emitter)
-	{
-		m_Emitters.PushBack(emitter);
-		return emitter;
-	}
+	LUX_API int GetModelCount();
+	LUX_API StrongRef<ParticleModel> GetModel(int modelId);
+	LUX_API int GetModelCapacity(int modelId);
+	LUX_API int GetModelFirstAffector(int modelId);
+	LUX_API int GetModelAffectorCount(int modelId);
 
-	StrongRef<StraightEmitter> AddStraightEmitter(const math::Vector3F& dir)
+	/**
+	Global particles move in the global coordinate system, they don't move with the component.
+	Non global particles move if the component is moved.
+	Default is global.
+	*/
+	bool IsGlobal() const
 	{
-		auto out = LUX_NEW(StraightEmitter)(dir);
-		AddEmitter(out);
-		return out;
-	}
-
-	int GetEmitterCount() const
-	{
-		return m_Emitters.Size();
-	}
-	StrongRef<ParticleEmitter> GetEmitter(int i)
-	{
-		return m_Emitters.At(i);
-	}
-	void RemoveEmitter(int i)
-	{
-		if(i >= m_Emitters.Size())
-			throw core::OutOfRangeException();
-		m_Emitters.Erase(m_Emitters.First() + i);
-	}
-	void ClearEmitters()
-	{
-		m_Emitters.Clear();
-	}
-
-	void Finalize()
-	{
+		return m_IsGlobal;
 	}
 
 private:
-	core::Array<StrongRef<ParticleAffector>> m_Affectors;
-	core::Array<StrongRef<ParticleEmitter>> m_Emitters;
+	// Sorted by group.
+	core::Array<StrongRef<AbstractParticleAffector>> m_Affectors;
+	core::Array<StrongRef<AbstractParticleEmitter>> m_Emitters;
+
+	struct Group
+	{
+		StrongRef<ParticleModel> model;
+		int capacity;
+		int firstAffector;
+		int affectorCount;
+	};
+
+	core::Array<Group> m_Groups;
+	bool m_IsGlobal;
 };
+
+inline StrongRef<ParticleSystemTemplate> ParticleSystemTemplateBuilder::MakeTemplate()
+{
+	return LUX_NEW(ParticleSystemTemplate)(
+		affectors,
+		emitters,
+		capacities,
+		isGlobal);
+}
 
 } // namespace scene
 } // namespace lux

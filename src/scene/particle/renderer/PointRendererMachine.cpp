@@ -1,10 +1,11 @@
-#include "PointRendererMachine.h"
+#include "scene/particle/renderer/PointRendererMachine.h"
+#include "scene/particle/BuiltinParticleRenderers.h"
 #include "scene/particle/ParticleModel.h"
 #include "scene/particle/ParticleGroupData.h"
 
 #include "video/MaterialLibrary.h"
 
-LX_REGISTER_REFERABLE_CLASS(lux::scene::PointRendererMachine, "lux.particlerenderer.Point");
+LX_REGISTER_REFERABLE_CLASS(lux::scene::PointRendererMachine, "lux.particlerenderermachine.Point");
 
 namespace lux
 {
@@ -58,10 +59,10 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 	int cursor = 0;
 	for(auto& p : group->GetPool()) {
 		video::Color color;
-		float alpha = model->ReadValue(p, Particle::EParameter::Alpha);
-		float red = model->ReadValue(p, Particle::EParameter::Red);
-		float green = model->ReadValue(p, Particle::EParameter::Green);
-		float blue = model->ReadValue(p, Particle::EParameter::Blue);
+		float alpha = model->ReadValue(p, ParticleParam::Alpha);
+		float red = model->ReadValue(p, ParticleParam::Red);
+		float green = model->ReadValue(p, ParticleParam::Green);
+		float blue = model->ReadValue(p, ParticleParam::Blue);
 		color.SetF(alpha, red, green, blue);
 
 		m_Vertices[cursor].position = p.position;
@@ -83,14 +84,9 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 		m_VertexFormat);
 }
 
-StrongRef<ParticleRenderer> PointRendererMachine::CreateRenderer()
-{
-	return LUX_NEW(PointRenderer)(this);
-}
-
 core::Name PointRendererMachine::GetReferableType() const
 {
-	static const core::Name name("lux.particlerenderer.Point");
+	static const core::Name name("lux.particlerenderermachine.Point");
 	return name;
 }
 

@@ -95,7 +95,7 @@ public:
 		if(probability <= 0.0f || probability > 1.0f)
 			return false;
 
-		float max = probability*0xFFFFFFFF;
+		float max = probability * 0xFFFFFFFF;
 		if((float)GetBits() <= max)
 			return true;
 		else
@@ -272,6 +272,175 @@ public:
 private:
 	mutable u32 m_State;
 };
+
+class Distribution
+{
+	enum class EDistribution
+	{
+		Uniform,
+	};
+public:
+	Distribution() :
+		distribution(EDistribution::Uniform),
+		min(0),
+		max(0)
+	{
+	}
+	Distribution(float f)
+	{
+		*this = Fixed(f);
+	}
+	static Distribution Fixed(float life)
+	{
+		Distribution time;
+		time.distribution = EDistribution::Uniform;
+		time.min = time.max = life;
+		return time;
+	}
+	static Distribution Uniform(float min, float max)
+	{
+		Distribution time;
+		time.distribution = EDistribution::Uniform;
+		time.min = min;
+		time.max = max;
+		return time;
+	}
+	static Distribution Infinite()
+	{
+		Distribution time;
+		time.distribution = EDistribution::Uniform;
+		time.min = INFINITY;
+		time.max = INFINITY;
+		return time;
+	}
+
+	bool IsInfinite() const
+	{
+		return (min == INFINITY);
+	}
+	float GetAverage() const
+	{
+		return (min + max) / 2;
+	}
+
+	float GetPercentile(float p)
+	{
+		switch(distribution) {
+		case EDistribution::Uniform:
+			if(min == max)
+				return min;
+			return (1 - p) * min + p * max;
+		default:
+			return 0;
+		}
+	}
+
+	float Sample(core::Randomizer& randomizer) const
+	{
+		switch(distribution) {
+		case EDistribution::Uniform:
+			if(min == max)
+				return min;
+			return randomizer.GetFloat(min, max);
+		default:
+			return 0;
+		}
+	}
+
+	Distribution& operator*=(float f)
+	{
+		switch(distribution) {
+		case EDistribution::Uniform:
+			min *= f;
+			max *= f;
+			break;
+		}
+
+		return *this;
+	}
+	Distribution& operator+=(float f)
+	{
+		switch(distribution) {
+		case EDistribution::Uniform:
+			min += f;
+			max += f;
+			break;
+		}
+
+		return *this;
+	}
+
+	Distribution& operator-=(float f)
+	{
+		return (*this += -f);
+	}
+
+	Distribution& operator/=(float f)
+	{
+		return (*this *= (1 / f));
+	}
+
+private:
+	EDistribution distribution;
+	float min;
+	float max;
+};
+
+inline Distribution operator+(const Distribution& a, float f)
+{
+	Distribution out(a);
+	out += f;
+	return out;
+}
+
+inline Distribution operator+(float f, const Distribution& a)
+{
+	Distribution out(a);
+	out += f;
+	return out;
+}
+
+inline Distribution operator*(const Distribution& a, float f)
+{
+	Distribution out(a);
+	out *= f;
+	return out;
+}
+
+inline Distribution operator/(const Distribution& a, float f)
+{
+	Distribution out(a);
+	out /= f;
+	return out;
+}
+
+inline Distribution operator*(float f, const Distribution& a)
+{
+	Distribution out(a);
+	out *= f;
+	return out;
+}
+
+inline Distribution operator-(const Distribution& a, float f)
+{
+	Distribution out(a);
+	out -= f;
+	return out;
+}
+
+inline Distribution operator-(float f, const Distribution& a)
+{
+	Distribution out;
+	out = -1 * (a - f);
+	return out;
+}
+
+inline Distribution operator-(const Distribution& a)
+{
+	Distribution out(a);
+	out *= -1;
+	return out;
+}
 
 } // namespace core
 } // namespace lux

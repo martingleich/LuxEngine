@@ -18,40 +18,18 @@ public:
 	LUX_API ParticleSystem();
 	LUX_API ~ParticleSystem();
 
-	LUX_API void AddTemplate(ParticleSystemTemplate* templ);
-	LUX_API void RemoveTemplate(ParticleSystemTemplate* templ);
-	LUX_API int GetTemplateCount() const;
-	LUX_API ParticleSystemTemplate* GetTemplate(int i);
-	LUX_API const ParticleSystemTemplate* GetTemplate(int i) const;
+	LUX_API void SetTemplate(ParticleSystemTemplate* templ);
+	LUX_API StrongRef<ParticleSystemTemplate> GetTemplate();
+
 	LUX_API void VisitRenderables(RenderableVisitor* visitor, scene::ERenderableTags tags);
 	LUX_API void Animate(float time);
 	LUX_API void Render(Node* node, video::Renderer* renderer, const SceneData& sceneData);
 	LUX_API ERenderPass GetRenderPass() const;
 	LUX_API const math::AABBoxF& GetBoundingBox() const;
-	LUX_API void UpdateGroups();
-	LUX_API StrongRef<ParticleSystemTemplate> ConvertToTemplate();
-	LUX_API void SetGlobalParticles(bool isGlobal);
-	LUX_API bool IsGlobalParticles() const;
-	LUX_API void SetSubtreeScanning(bool scanning);
-	LUX_API bool GetSubtreeScanning() const;
 
 private:
-	void CollectGroups(Node* n);
-	void CollectGroupsRec(Node* n);
-	void UpdateGroupData(Node* n);
-
-private:
-	core::Array<StrongRef<ParticleSystemTemplate>> m_Templates;
-
+	StrongRef<ParticleSystemTemplate> m_Template;
 	core::Array<StrongRef<ParticleGroupData>> m_GroupData;
-
-	core::Array<ParticleGroupData::AffectorEntry> m_GlobalAffectors;
-	core::Array<ParticleGroupData::AffectorEntry> m_Affectors; // Sorted by group/model
-	core::Array<ParticleGroupData::EmitterEntry> m_Emitters;
-
-	bool m_DirtyGroups = true;
-	bool m_UseSubtree = false;
-	bool m_IsGlobal = true;
 };
 
 } // namespace scene

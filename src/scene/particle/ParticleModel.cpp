@@ -1,12 +1,11 @@
 #include "scene/particle/ParticleModel.h"
-#include "scene/particle/ParticleInterpolator.h"
 
 namespace lux
 {
 namespace scene
 {
 
-const float ParticleModel::DEFAULT[(int)Particle::EParameter::COUNT] = {
+const float ParticleModel::DEFAULT[ParticleParam::EParameter::COUNT] = {
 	1.0f, // Red
 	1.0f, // Green
 	1.0f, // Blue
@@ -25,256 +24,127 @@ const float ParticleModel::DEFAULT[(int)Particle::EParameter::COUNT] = {
 };
 
 ParticleModel::ParticleModel() :
-	m_LifeTimeMin(0.0f),
-	m_LifeTimeMax(0.0f),
-	m_IsImmortal(false),
-	m_ParamCount(0),
-	m_StaticCount(0),
-	m_ChangingCount(0),
-	m_InterpolatedCount(0),
+	m_SmoothingModel(1),
 	m_ParticleDataSize(0),
-	m_Capacity(0)
+	m_ChangeId(0),
+	m_ParamTypeChangeId(0)
+{
+	SetRGB(video::ColorF(1, 1, 1));
+}
+
+ParticleModel::~ParticleModel()
 {
 }
 
-void ParticleModel::SetParamStates(const ParticleParamStates& states)
+void ParticleModel::SetLifetime(const core::Distribution& time)
 {
-	m_LifeTimeMin = 1.0f;
-	m_LifeTimeMax = 1.0f;
-
-	m_IsImmortal = false;
-
-	m_StaticCount = 0;
-	m_ChangingCount = 0;
-	u8 cur = 0;
-	const EParticleParamState* params = states.states;
-
-	for(int i = 0; i < PARAM_COUNT; ++i) {
-		m_Params[i].state = params[i];
-		if(i < 3 && params[i] == EParticleParamState::Disabled)
-			m_Params[i].state = EParticleParamState::Constant; // Force red, green and blue.
-
-		// Force angle when rot-speed is given.
-		if(i == (int)Particle::EParameter::Angle) {
-			if(states.states[(int)Particle::EParameter::RotSpeed] != EParticleParamState::Disabled && m_Params[i].state == EParticleParamState::Disabled)
-				m_Params[i].state = EParticleParamState::Fixed;
-		}
-
-		m_Params[i].param = Particle::EParameter(i);
-
-		if(m_Params[i].state == EParticleParamState::Fixed || m_Params[i].state == EParticleParamState::Random) {
-			++m_StaticCount;
-		} else if(m_Params[i].state == EParticleParamState::Changing || m_Params[i].state == EParticleParamState::ChangingRandom) {
-			m_BaseOffset[m_ChangingCount] = (u8)i;
-			++m_ChangingCount;
-		} else if(m_Params[i].state == EParticleParamState::Interpolated) {
-			m_BaseOffset[PARAM_COUNT - m_InterpolatedCount - 1] = (u8)i;
-			++m_InterpolatedCount;
-		}
-
-		if(m_Params[i].state != EParticleParamState::Disabled && m_Params[i].state != EParticleParamState::Constant) {
-			m_Params[i].offset = cur;
-			++cur;
-		} else {
-			m_Params[i].offset = -1;
-		}
-	}
-
-	m_ParamCount = (int)cur;
-	m_ParticleDataSize = m_StaticCount * sizeof(float) + m_ChangingCount * sizeof(float) * 2 + m_InterpolatedCount * sizeof(float) * 2;
-
-	ResetToDefault();
+	m_Lifetime = time;
+	++m_ChangeId;
 }
 
-void ParticleModel::ResetToDefault()
+const core::Distribution& ParticleModel::GetLifetime() const
 {
-	for(int i = 0; i < (int)Particle::EParameter::COUNT; ++i) {
-		for(int j = 0; j < 4; ++j)
-			m_Params[i].values[j] = DEFAULT[i];
+	return m_Lifetime;
+}
+
+static int GetParticleUpdateValues(ParticleParam::EState state)
+{
+	switch(state) {
+	case ParticleParam::EState::Disabled:
+	case ParticleParam::EState::Constant:
+	case ParticleParam::EState::Fixed:
+	case ParticleParam::EState::Random:
+	case ParticleParam::EState::Interpolated:
+		return 0;
+	case ParticleParam::EState::Changing:
+	case ParticleParam::EState::ChangingRandom:
+		return 1;
+	default:
+		return 0;
 	}
 }
 
-void ParticleModel::SetLifeTime(float min, float max)
+void ParticleModel::SetParam(ParticleParam::EParameter param, const ParticleParam& value)
 {
-	lxAssert(min <= max);
+	int paramId = (int)param;
+	if(m_Params[paramId].param.state != value.state)
+		++m_ParamTypeChangeId;
 
-	m_LifeTimeMin = min;
-	m_LifeTimeMax = max;
+	m_Params[paramId].param = value;
+	for(int i = paramId; i < PARAM_COUNT; ++i) {
+		m_Params[i].value_offset = (s8)(i ? m_Params[i - 1].value_offset + (m_Params[i - 1].param.IsEnabled() ? 1 : 0) : 0);
+		m_Params[i].update_offset = (s8)(i ? m_Params[i - 1].update_offset + GetParticleUpdateValues(m_Params[i - 1].param.state) : 0);
+	}
+
+	m_ParticleDataSize = m_Params[PARAM_COUNT - 1].value_offset + m_Params[PARAM_COUNT - 1].update_offset;
+
+	++m_ChangeId;
 }
 
-void ParticleModel::GetLifeTime(float& min, float& max)
+const ParticleParam& ParticleModel::GetParam(ParticleParam::EParameter param) const
 {
-	min = m_LifeTimeMin;
-	max = m_LifeTimeMax;
+	return GetInternalParam(param).param;
 }
 
-void ParticleModel::SetImmortal(bool immortal)
+float ParticleModel::ReadValue(const Particle& p, ParticleParam::EParameter param) const
 {
-	m_IsImmortal = immortal;
-}
-
-bool ParticleModel::IsImmortal() const
-{
-	return m_IsImmortal;
-}
-
-EParticleParamState ParticleModel::GetParamState(Particle::EParameter param) const
-{
-	return GetParam(param).state;
-}
-
-void ParticleModel::SetValues(Particle::EParameter param, const float* values)
-{
-	for(int i = 0; i < 4; ++i)
-		GetParam(param).values[i] = values[i];
-}
-
-void ParticleModel::GetValues(Particle::EParameter param, float* values) const
-{
-	for(int i = 0; i < 4; ++i)
-		values[i] = GetParam(param).values[i];
-}
-
-void ParticleModel::SetInterpolator(Particle::EParameter param, ParticleInterpolator* interpolator)
-{
-	GetParam(param).interpolator = interpolator;
-}
-
-StrongRef<ParticleInterpolator> ParticleModel::GetInterpolator(Particle::EParameter param) const
-{
-	if(GetParam(param).state == EParticleParamState::Interpolated)
-		return GetParam(param).interpolator;
+	int off = GetParamOffset(param);
+	if(off != -1)
+		return p.Param(off);
 	else
-		return nullptr;
-}
-
-int ParticleModel::GetOffset(Particle::EParameter param)
-{
-	return GetParam(param).offset;
-}
-
-float ParticleModel::GetDefaultValue(Particle::EParameter param) const
-{
-	return DEFAULT[(int)param];
-}
-
-int ParticleModel::GetBytesParticleParams() const
-{
-	return m_ParticleDataSize;
-}
-
-int ParticleModel::GetFloatParticleParams() const
-{
-	return m_ParticleDataSize / sizeof(float);
+		return DEFAULT[(int)param];
 }
 
 void ParticleModel::InitParticle(Particle& particle) const
 {
-	particle.age = 0.0f;
-	particle.life = m_Randomizer.GetFloat(m_LifeTimeMin, m_LifeTimeMax);
-	particle.velocity = math::Vector3F::ZERO;
+	particle.age = 0;
+	particle.life = m_Lifetime.Sample(m_Randomizer);
 
-	float* p_val = particle.params;
-	float* p_delta = p_val + m_StaticCount + m_ChangingCount;
-	float* p_inter = p_delta + m_ChangingCount;
-
-	for(int i = 0; i < (int)Particle::EParameter::COUNT; ++i) {
-		const Param& param = m_Params[i];
-
-		float value = 0, delta = 0, scaleX = 1;
-		bool is_delta = false, inter = false;
-		switch(param.state) {
-		case EParticleParamState::Disabled:
-		case EParticleParamState::Constant:
-			continue; // Abort for loop
-		case EParticleParamState::Fixed:
-			value = param.values[0];
+	const u8 end_values = m_Params[PARAM_COUNT - 1].value_offset;
+	for(auto& p : m_Params) {
+		switch(p.param.state) {
+		case ParticleParam::EState::Fixed:
+			particle.params[p.value_offset] = p.param.values[0];
 			break;
-		case EParticleParamState::Random:
-			value = m_Randomizer.GetFloat(param.values[0], param.values[1]);
+		case ParticleParam::EState::Random:
+			particle.params[p.value_offset] = m_Randomizer.GetFloat(p.param.values[0], p.param.values[1]);
 			break;
-
-		case EParticleParamState::Changing:
-			value = param.values[0];
-			delta = (param.values[1] - value) / particle.life;
-			is_delta = true;
+		case ParticleParam::EState::Changing:
+			particle.params[p.value_offset] = p.param.values[0];
+			particle.params[end_values + p.update_offset] = (p.param.values[1] - p.param.values[0]) / particle.life;
 			break;
-		case EParticleParamState::ChangingRandom:
-			value = m_Randomizer.GetFloat(param.values[0], param.values[1]);
-			delta = m_Randomizer.GetFloat(param.values[2], param.values[3]) - value;
-			is_delta = true;
+		case ParticleParam::EState::ChangingRandom:
+			particle.params[p.value_offset] = m_Randomizer.GetFloat(p.param.values[0], p.param.values[1]);
+			particle.params[end_values + p.update_offset] = (m_Randomizer.GetFloat(p.param.values[0], p.param.values[1]) - particle.params[p.value_offset]) / particle.life;
 			break;
-
-		case EParticleParamState::Interpolated:
-			auto interpolator = m_Params[i].interpolator;
-			lxAssert(interpolator);
-			value = interpolator->Interpolate(particle, 1.0f);
-			scaleX = 1.0f;
-			inter = true;
+		default:
 			break;
-		}
-
-		*p_val++ = value;
-		if(is_delta) {
-			is_delta = false;
-			*p_delta++ = delta;
-		}
-		if(inter) {
-			inter = false;
-			*p_inter++ = scaleX;
 		}
 	}
 }
 
 void ParticleModel::UpdateParticle(Particle& particle, float secsPassed) const
 {
-	if(!m_IsImmortal) {
-		const float* p_mut = particle.params + m_StaticCount + m_ChangingCount;
-		for(int i = 0; i < m_ChangingCount; ++i) {
-			const int off = m_Params[m_BaseOffset[i]].offset;
-			particle.Param(off) += *p_mut * secsPassed;
-			++p_mut;
+	const u8 end_values = m_Params[PARAM_COUNT - 1].value_offset;
+	for(auto& p : m_Params) {
+		switch(p.param.state) {
+		case ParticleParam::EState::Changing:
+		case ParticleParam::EState::ChangingRandom:
+			particle.Param(p.value_offset) += secsPassed * particle.Param(end_values + p.update_offset);
+			break;
+		case ParticleParam::EState::Interpolated:
+			particle.Param(p.value_offset) = p.param.curve->Evaluate<float>(particle.age);
+			break;
+		default:
+			break;
 		}
 	}
-
-	// Interpolation isn't based on percentage of used life
-	// so it can be used on immortal particles
-	const float* p_inter = particle.params + m_StaticCount + 2 * m_ChangingCount;
-	for(int i = 0; i < m_InterpolatedCount; ++i) {
-		const int index = m_BaseOffset[PARAM_COUNT - i - 1];
-		const int offset = m_Params[index].offset;
-		const float scaleX = *p_inter++;
-		const ParticleInterpolator* inter = m_Params[index].interpolator;
-
-		particle.Param(offset) = inter->Interpolate(particle, scaleX);
-	}
-}
-
-void ParticleModel::SetGravity(const math::Vector3F& v)
-{
-	m_Gravity = v;
-}
-
-const math::Vector3F& ParticleModel::GetGravity() const
-{
-	return m_Gravity;
-}
-
-StrongRef<ParticleRenderer> ParticleModel::SetRenderer(ParticleRenderer* r)
-{
-	m_Renderer = r;
-	return r;
-}
-
-StrongRef<ParticleRenderer> ParticleModel::GetRenderer()
-{
-	return m_Renderer;
 }
 
 StrongRef<ParticleRenderer> ParticleModel::SetRenderMode(core::Name type)
 {
-	if(m_Renderer == nullptr || type != m_Renderer->GetType())
-		m_Renderer = core::ReferableFactory::Instance()->CreateShared(type).AsStrong<RendererMachine>()->CreateRenderer();
+	if(m_Renderer == nullptr || type != m_Renderer->GetReferableType())
+		m_Renderer = core::ReferableFactory::Instance()->Create(type).AsStrong<ParticleRenderer>();
 	return m_Renderer;
 }
 

@@ -1,212 +1,243 @@
 #ifndef INCLUDED_PARTICLE_MODEL_H
 #define INCLUDED_PARTICLE_MODEL_H
+#include "core/lxRandom.h"
+
 #include "video/Color.h"
 #include "video/SpriteBank.h"
 
-#include "core/lxRandom.h"
-
-#include "Particle.h"
-#include "ParticleRenderer.h"
+#include "scene/particle/ParticleRenderer.h"
+#include "scene/Curve.h"
 
 namespace lux
 {
+
 namespace scene
 {
-class ParticleInterpolator;
-
-enum class EParticleParamState
+struct Particle
 {
-	Disabled,
-	Constant,
-	Fixed,
-	Random,
-	Changing,
-	ChangingRandom,
-	Interpolated
+	// Often accessed parameters(many times per frame)
+	math::Vector3F position;
+	math::Vector3F velocity;
+	float age;
+	float life;
+
+	// Rarely accessed parameters
+	float* params;
+
+	Particle() :
+		params(nullptr)
+	{
+	}
+
+	void Kill()
+	{
+		age += life;
+		life = 0.0f;
+	}
+
+	float& Param(int off)
+	{
+		return params[off];
+	}
+
+	const float& Param(int off) const
+	{
+		return params[off];
+	}
 };
 
-class ParticleParamStates
+class ParticleParam
 {
 public:
-	ParticleParamStates()
+	enum EParameter : u8
 	{
-		Clear();
+		Red = 0,
+		Green = 1,
+		Blue = 2,
+		Alpha = 3,
+
+		Size = 4,
+
+		Angle = 5,
+		RotSpeed = 6,
+
+		Sprite = 7,
+
+		Custom1 = 8,
+		Custom2 = 9,
+		Custom3 = 10,
+
+		COUNT = 11
+	};
+
+	enum class EState : u8
+	{
+		Disabled,
+		Constant,
+		Fixed,
+		Random,
+		Changing,
+		ChangingRandom,
+		Interpolated
+	};
+
+public:
+	ParticleParam() :
+		state(EState::Disabled)
+	{
+	}
+	ParticleParam(EState _state) :
+		state(_state)
+	{
 	}
 
-	void Clear()
+	static ParticleParam Disabled()
 	{
-		for(int i = 0; i < (int)Particle::EParameter::COUNT; ++i)
-			states[i] = EParticleParamState::Disabled;
+		return ParticleParam();
+	}
+	static ParticleParam Fixed(float value)
+	{
+		auto param = ParticleParam(EState::Fixed);
+		param.values[0] = value;
+		return param;
+	}
+	static ParticleParam Random(float min, float max)
+	{
+		auto param = ParticleParam(EState::Random);
+		param.values[0] = min;
+		param.values[1] = max;
+		return param;
+	}
+	static ParticleParam Changing(float from, float to)
+	{
+		auto param = ParticleParam(EState::Changing);
+		param.values[0] = from;
+		param.values[1] = to;
+		return param;
+	}
+	static ParticleParam ChangingRandom(float minFrom, float maxFrom, float minTo, float maxTo)
+	{
+		auto param = ParticleParam(EState::ChangingRandom);
+		param.values[0] = minFrom;
+		param.values[1] = maxFrom;
+		param.values[2] = minTo;
+		param.values[3] = maxTo;
+		return param;
 	}
 
-	ParticleParamStates& Disabled(Particle::EParameter p) { states[(int)p] = EParticleParamState::Disabled; return *this; }
-	ParticleParamStates& Fixed(Particle::EParameter p) { states[(int)p] = EParticleParamState::Constant; return *this; }
-	ParticleParamStates& Constant(Particle::EParameter p) { states[(int)p] = EParticleParamState::Fixed; return *this; }
-	ParticleParamStates& Random(Particle::EParameter p) { states[(int)p] = EParticleParamState::Random; return *this; }
-	ParticleParamStates& Changing(Particle::EParameter p) { states[(int)p] = EParticleParamState::Changing; return *this; }
-	ParticleParamStates& ChangingRandom(Particle::EParameter p) { states[(int)p] = EParticleParamState::ChangingRandom; return *this; }
-	ParticleParamStates& Interpolated(Particle::EParameter p) { states[(int)p] = EParticleParamState::Interpolated; return *this; }
+	bool IsEnabled() const
+	{
+		return state != EState::Disabled;
+	}
 
-	EParticleParamState states[(int)Particle::EParameter::COUNT];
+public:
+	EState state;
+	float values[4];
+
+	StrongRef<scene::Curve> curve;
 };
 
 class ParticleModel : public ReferenceCounted
 {
 public:
 	LUX_API ParticleModel();
-
-	LUX_API void SetParamStates(const ParticleParamStates& states);
-
-	LUX_API void ResetToDefault();
-
-	LUX_API void SetLifeTime(float min, float max);
-	LUX_API void GetLifeTime(float& min, float& max);
-
-	LUX_API void SetImmortal(bool immortal);
-	LUX_API bool IsImmortal() const;
-
-	bool IsEnabled(Particle::EParameter param) const
-	{
-		return ((int)GetParamState(param) > (int)EParticleParamState::Constant);
-	}
-
-	LUX_API EParticleParamState GetParamState(Particle::EParameter param) const;
-
-	float ReadValue(const Particle& p, Particle::EParameter param)
-	{
-		int off = GetOffset(param);
-		if(off != -1)
-			return p.Param(off);
-		else
-			return m_Params[(int)param].values[0];
-	}
-
-	/*
-	Enabled -> 1 Wert				Fixed
-	Mutable -> 2 Werte				Begin End
-	Random -> 2 Werte				Min	Max
-	Mutable & Random -> 4 Werte		BeginMin EndMin BeginMax EndMax
-	*/
-	void SetValues(Particle::EParameter param, float a, float b = 0.0f, float c = 0.0f, float d = 0.0f)
-	{
-		const float f[4] = {a, b, c, d};
-		SetValues(param, f);
-	}
-
-	void SetValues(Particle::EParameter param, int a, int b = 0, int c = 0, int d = 0)
-	{
-		const float f[4] = {float(a), float(b), float(c), float(d)};
-		SetValues(param, f);
-	}
-
-	void SetValues(Particle::EParameter param, video::SpriteBank::Sprite a, video::SpriteBank::Sprite b = 0, video::SpriteBank::Sprite c = 0, video::SpriteBank::Sprite d = 0)
-	{
-		SetValues(param, a.id, b.id, c.id, d.id);
-	}
-
-	void SetColor(
-		const video::ColorF& a,
-		const video::ColorF& b = video::ColorF(),
-		const video::ColorF& c = video::ColorF(),
-		const video::ColorF& d = video::ColorF())
-	{
-		SetValues(Particle::EParameter::Red, a.r, b.r, c.r, d.r);
-		SetValues(Particle::EParameter::Blue, a.b, b.b, c.b, d.b);
-		SetValues(Particle::EParameter::Green, a.g, b.g, c.g, d.g);
-	}
-
-	LUX_API void SetValues(Particle::EParameter param, const float* values);
-	LUX_API void GetValues(Particle::EParameter param, float* values) const;
-
-	LUX_API void SetInterpolator(Particle::EParameter param, ParticleInterpolator* interpolator);
-	LUX_API StrongRef<ParticleInterpolator> GetInterpolator(Particle::EParameter param) const;
-
-	LUX_API int GetOffset(Particle::EParameter param);
-	LUX_API float GetDefaultValue(Particle::EParameter param) const;
-	LUX_API int GetBytesParticleParams() const;
-	LUX_API int GetFloatParticleParams() const;
+	LUX_API ~ParticleModel();
 
 	LUX_API void InitParticle(Particle& particle) const;
 	LUX_API void UpdateParticle(Particle& particle, float secsPassed) const;
 
-	LUX_API void SetGravity(const math::Vector3F& v);
-	LUX_API const math::Vector3F& GetGravity() const;
+	LUX_API void SetLifetime(const core::Distribution& time);
+	LUX_API const core::Distribution& GetLifetime() const;
 
-	LUX_API StrongRef<ParticleRenderer> SetRenderer(ParticleRenderer* r);
-	LUX_API StrongRef<ParticleRenderer> GetRenderer();
+	LUX_API void SetParam(ParticleParam::EParameter param, const ParticleParam& value);
+	LUX_API const ParticleParam& GetParam(ParticleParam::EParameter param) const;
+
+	void SetRGB(const video::ColorF& color)
+	{
+		SetParam(ParticleParam::Red, ParticleParam::Fixed(color.r));
+		SetParam(ParticleParam::Green, ParticleParam::Fixed(color.g));
+		SetParam(ParticleParam::Blue, ParticleParam::Fixed(color.b));
+	}
+
+	int GetParamOffset(ParticleParam::EParameter param) const
+	{
+		return IsEnabled(param) ? GetInternalParam(param).value_offset : -1;
+	}
+	LUX_API float ReadValue(const Particle& p, ParticleParam::EParameter param) const;
+	bool IsEnabled(ParticleParam::EParameter param) const
+	{
+		return GetParam(param).IsEnabled();
+	}
+	u32 GetFloatParticleParams() const
+	{
+		return m_ParticleDataSize;
+	}
+
+	void SetGravity(const math::Vector3F& v)
+	{
+		m_Gravity = v;
+	}
+	const math::Vector3F& GetGravity() const
+	{
+		return m_Gravity;
+	}
 
 	LUX_API StrongRef<ParticleRenderer> SetRenderMode(core::Name type);
-
-	//! Set the maximal number of particles in this models
-	/**
-	Use 0 to enable automatic calculation of the particle count, based
-	on the emitters and the average lifetime.
-	*/
-	void SetCapacity(int capacity)
+	StrongRef<ParticleRenderer> SetRenderer(ParticleRenderer* r)
 	{
-		m_Capacity = capacity;
+		m_Renderer = r;
+		return m_Renderer;
+	}
+	StrongRef<ParticleRenderer> GetRenderer() const
+	{
+		return m_Renderer;
 	}
 
-	int GetCapacity() const
-	{
-		return m_Capacity;
-	}
+	void SetSmoothingModel(int model) { m_SmoothingModel = model; }
+	int GetSmoothingModel() const { return m_SmoothingModel; }
 
-	float GetAvgLifeTime() const
-	{
-		return 0.5f*(m_LifeTimeMax + m_LifeTimeMin);
-	}
+	int GetChangeId() const { return m_ChangeId; }
+	int GetParamStateChangeId() const { return m_ParamTypeChangeId; }
 
 private:
-	struct Param
+	struct InternalParam
 	{
-		Particle::EParameter param;
-		EParticleParamState state;
-		float values[4];
-		StrongRef<ParticleInterpolator> interpolator;
-		s8 offset;
+		ParticleParam param;
+		s8 value_offset; // The offset of the current value in the particle data.
+		s8 update_offset; // The offset of the update data int particle data.
 	};
 
 private:
-	Param& GetParam(Particle::EParameter param)
+	InternalParam& GetInternalParam(ParticleParam::EParameter param)
 	{
-		lxAssert((int)param < (int)Particle::EParameter::COUNT);
-		return m_Params[(int)param];
+		lxAssert((u32)param < (u32)ParticleParam::COUNT);
+		return m_Params[(u32)param];
 	}
 
-	const Param& GetParam(Particle::EParameter param) const
+	const InternalParam& GetInternalParam(ParticleParam::EParameter param) const
 	{
-		lxAssert((int)param < (int)Particle::EParameter::COUNT);
-		return m_Params[(int)param];
+		lxAssert((u32)param < (u32)ParticleParam::COUNT);
+		return m_Params[(u32)param];
 	}
 
 private:
-	static const int PARAM_COUNT = (int)Particle::EParameter::COUNT;
+	static const int PARAM_COUNT = ParticleParam::EParameter::COUNT;
 	static const float DEFAULT[PARAM_COUNT];
 
-	float m_LifeTimeMin;
-	float m_LifeTimeMax;
+	StrongRef<ParticleRenderer> m_Renderer; //!< The renderer used to display the particles
 
-	bool  m_IsImmortal;
+	InternalParam m_Params[PARAM_COUNT];
 
-	Param m_Params[PARAM_COUNT];
-	int m_ParamCount;
-	int m_StaticCount;
-	int m_ChangingCount;
-	int m_InterpolatedCount;
-
-	// Contains the base offset for the fixed value of a parameter.
-	// At first for the first, second, third ... changing parameter, then for the last, before-last, ..., second, first interpolated parameter.
-	u8 m_BaseOffset[PARAM_COUNT];
+	core::Distribution m_Lifetime;
+	int m_SmoothingModel;
+	math::Vector3F m_Gravity; //!< The gravity used by the group
 
 	int m_ParticleDataSize;
 
 	mutable core::Randomizer m_Randomizer;
 
-	StrongRef<ParticleRenderer> m_Renderer; //!< The renderer used to display the particles
-	math::Vector3F m_Gravity; //!< The gravity used by the group
-
-	int m_Capacity; //!< The maximal number of particles of this model or 0 to auto calculate the capacititys
+	int m_ChangeId;
+	int m_ParamTypeChangeId;
 };
 
 } // namespace scene
