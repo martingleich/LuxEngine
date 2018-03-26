@@ -29,11 +29,11 @@ public:
 		return FileLineIterator();
 	}
 
-	const core::String& operator*() const
+	core::String& operator*()
 	{
 		return m_Line;
 	}
-	const core::String* operator->() const
+	core::String* operator->()
 	{
 		return &m_Line;
 	}
@@ -80,7 +80,7 @@ private:
 			} else if(m_Ending == ELineEnding::Macintosh) {
 				if(c == '\r')
 					return;
-			} else if(m_Ending == ELineEnding::Window) {
+			} else if(m_Ending == ELineEnding::Windows) {
 				if(endCur == 0) {
 					if(c == '\r') {
 						++endCur;
@@ -105,10 +105,29 @@ private:
 	ELineEnding m_Ending;
 };
 
-inline core::Range<FileLineIterator> Lines(File* file, ELineEnding ending = ELineEnding::Unix)
+inline ELineEnding GetSystemLineEnding()
 {
-	auto it = FileLineIterator(file, ending);
-	return core::MakeRange(it, it.GetEnd());
+#ifdef _WIN32
+	return ELineEnding::Windows;
+#elif defined macintosh
+	return ELineEnding::Macintosh;
+#else
+	return ELineEnding::Unix;
+#endif
+}
+
+inline const char* GetLineEndingChars(ELineEnding ending)
+{
+	switch(ending) {
+	case ELineEnding::Windows:
+		return "\r\n";
+	case ELineEnding::Macintosh:
+		return "\r";
+	default:
+	case ELineEnding::Unknown:
+	case ELineEnding::Unix:
+		return "\n";
+	}
 }
 
 inline ELineEnding GetLineEnding(File* file, s64 readBytes = 128)
@@ -134,13 +153,21 @@ inline ELineEnding GetLineEnding(File* file, s64 readBytes = 128)
 	}
 	ELineEnding out;
 	if(winCount > rCount && winCount > nCount)
-		out = ELineEnding::Window;
+		out = ELineEnding::Windows;
 	else if(rCount > nCount)
 		out = ELineEnding::Macintosh;
 	else
 		out = ELineEnding::Unix;
 	file->Seek(cursor, io::ESeekOrigin::Start);
 	return out;
+}
+
+inline core::Range<FileLineIterator> Lines(File* file, ELineEnding ending = ELineEnding::Unknown)
+{
+	if(ending == ELineEnding::Unknown)
+		ending = GetLineEnding(file);
+	auto it = FileLineIterator(file, ending);
+	return core::MakeRange(it, it.GetEnd());
 }
 
 } // namespace io

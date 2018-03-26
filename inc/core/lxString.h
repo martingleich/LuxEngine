@@ -67,7 +67,7 @@ struct StringType
 	void EnsureSize() const
 	{
 		if(size < 0)
-			size = (int)strlen(data);
+			size = data ? (int)strlen(data) : 0;
 	}
 
 	//! The number of bytes in the string, without the NUL-Byte.
@@ -291,6 +291,11 @@ public:
 	inline ConstIterator First() const
 	{
 		return ConstIterator(Data_c(), Data_c());
+	}
+
+	inline core::Range<const char*> Bytes() const
+	{
+		return MakeRange(Data_c(), Data_c() + Size());
 	}
 
 	//! Iterator the the last character in the string.

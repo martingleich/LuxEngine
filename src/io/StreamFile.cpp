@@ -30,10 +30,7 @@ s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
 	if(numBytes > (s64)std::numeric_limits<size_t>::max())
 		throw io::FileException(io::FileException::ReadError);
 
-	if((s64)ftell(m_File) + numBytes > m_FileSize)
-		numBytes = m_FileSize - ftell(m_File);
-
-	s64 read = (s64)fread(out, (size_t)numBytes, 1, m_File)*numBytes;
+	s64 read = (s64)fread(out, 1, (size_t)numBytes, m_File);
 	if(read != numBytes) {
 		u8* cur = (u8*)out + read;
 		s64 count = numBytes - read;
@@ -97,6 +94,11 @@ s64 StreamFile::GetSize() const
 s64 StreamFile::GetCursor() const
 {
 	return ftell(m_File);
+}
+
+bool StreamFile::IsEOF() const
+{
+	return feof(m_File) == 1;
 }
 
 }

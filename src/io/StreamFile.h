@@ -23,6 +23,7 @@ public:
 	const void* GetBuffer() const;
 	s64 GetSize() const;
 	s64 GetCursor() const;
+	bool IsEOF() const;
 
 private:
 	FILE* m_File;

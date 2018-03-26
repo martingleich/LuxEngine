@@ -115,9 +115,8 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 		for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
 			if(filename.StartsWith(it->mountpoint)) {
 				Path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
-				if(it->archive->ExistFile(subPath)) {
+				if(it->archive->ExistFile(subPath))
 					return it->archive->OpenFile(subPath, mode);
-				}
 			}
 		}
 	}
@@ -257,12 +256,12 @@ FileDescription FileSystemWin32::GetFileDescription(const Path& name)
 
 StrongRef<INIFile> FileSystemWin32::CreateINIFile(const Path& filename)
 {
-	return LUX_NEW(INIFile)(this, filename);
+	return LUX_NEW(INIFile)(filename);
 }
 
 StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 {
-	return LUX_NEW(INIFile)(this, file);
+	return LUX_NEW(INIFile)(file);
 }
 
 StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, s64 start, s64 size, const core::String& name)

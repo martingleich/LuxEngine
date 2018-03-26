@@ -278,7 +278,7 @@ String::ConstIterator String::Insert(ConstIterator pos, ConstIterator first, Con
 	int count = IteratorDistance(first, end);
 
 	int newSize = m_Size + size;
-	int pos_off = static_cast<int>(Data() - pos.Pointer());
+	int pos_off = static_cast<int>(pos.Pointer() - Data());
 	Reserve(newSize);
 
 	// Move last part of string back, including NUL.
@@ -757,13 +757,13 @@ Array<String> String::Split(u32 ch, bool ignoreEmpty) const
 {
 	Array<String> out;
 	String buffer;
-	for(auto it = First(); it != End(); ++it) {
-		if(*it == ch) {
+	for(auto c : *this) {
+		if(c == ch) {
 			if(!(ignoreEmpty && buffer.IsEmpty()))
 				out.PushBack(std::move(buffer));
 			buffer.Clear();
 		} else {
-			buffer.Append(*it);
+			buffer.Append(c);
 		}
 	}
 
@@ -780,8 +780,7 @@ EStringClass String::Classify() const
 	int spaceCount = 0;
 	int upperCount = 0;
 	int lowerCount = 0;
-	for(auto it = First(); it != End(); ++it) {
-		uint32_t c = *it;
+	for(auto c : *this) {
 		if(IsLower(c))
 			++lowerCount;
 		else if(IsUpper(c))

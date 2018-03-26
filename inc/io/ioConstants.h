@@ -42,7 +42,7 @@ enum class EVirtualCreateFlag
 enum class ELineEnding
 {
 	Unix,
-	Window,
+	Windows,
 	Macintosh,
 
 	Unknown,
