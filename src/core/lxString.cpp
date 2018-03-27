@@ -21,16 +21,14 @@ const String String::EMPTY = String();
 String::String() :
 	m_Data({nullptr}),
 	m_Allocated(0),
-	m_Size(0),
-	m_Length(0)
+	m_Size(0)
 {
 }
 
 String::String(const char* data, int length) :
 	m_Data({nullptr}),
 	m_Allocated(0),
-	m_Size(0),
-	m_Length(0)
+	m_Size(0)
 {
 	if(!data || !length) {
 		Reserve(1);
@@ -40,30 +38,26 @@ String::String(const char* data, int length) :
 
 	int size;
 	if(length < 0) {
-		length = StringLengthUTF8(data, &size);
+		size = (size_t)strlen(data);
 	} else {
 		const char* cur = data;
 		int count = 0;
 		while(count < length && AdvanceCursorUTF8(cur))
 			++count;
 		size = static_cast<int>(cur - data);
-		if(count != length)
-			length = count;
 	}
 
 	Reserve(size);
 	memcpy(Data(), data, size);
 	Data()[size] = 0;
 
-	m_Length = length;
 	m_Size = size;
 }
 
-String::String(ConstIterator first, ConstIterator end) :
+String::String(ConstByteIterator first, ConstByteIterator end) :
 	m_Data({nullptr}),
 	m_Allocated(0),
-	m_Size(0),
-	m_Length(0)
+	m_Size(0)
 {
 	Append(first, end);
 }
@@ -71,32 +65,28 @@ String::String(ConstIterator first, ConstIterator end) :
 String::String(const String& other) :
 	m_Data({nullptr}),
 	m_Allocated(0),
-	m_Size(0),
-	m_Length(0)
+	m_Size(0)
 {
 	Reserve(other.m_Size);
 	memcpy(Data(), other.Data_c(), other.m_Size + 1);
 
-	m_Length = other.m_Length;
 	m_Size = other.m_Size;
 }
 
 String::String(String&& old) :
 	m_Data(old.m_Data),
 	m_Allocated(old.m_Allocated),
-	m_Size(old.m_Size),
-	m_Length(old.m_Length)
+	m_Size(old.m_Size)
 {
 	old.m_Data.ptr = nullptr;
 	old.m_Allocated = 0;
 	old.m_Size = 0;
-	old.m_Length = 0;
 }
 
 String::~String()
 {
 	if(!IsShortString())
-		delete[] m_Data.ptr;
+		LUX_FREE_RAW(m_Data.ptr);
 }
 
 String String::Copy()
@@ -116,12 +106,12 @@ void String::Reserve(int size)
 	if(willBeShort)
 		newData = m_Data.raw;
 	else
-		newData = LUX_NEW_ARRAY(char, newAlloc);
+		newData = (char*)LUX_NEW_RAW(newAlloc);
 
 	memcpy(newData, Data_c(), m_Size + 1);
 
 	if(!IsShortString())
-		LUX_FREE_ARRAY(m_Data.ptr);
+		LUX_FREE_RAW(m_Data.ptr);
 	if(!willBeShort)
 		m_Data.ptr = newData;
 
@@ -136,7 +126,6 @@ String& String::operator=(const String& other)
 	Reserve(other.m_Size);
 	memcpy(Data(), other.Data_c(), other.m_Size + 1);
 	m_Size = other.m_Size;
-	m_Length = other.m_Length;
 
 	return *this;
 }
@@ -150,12 +139,10 @@ String& String::operator=(const char* other)
 		return *this;
 	}
 
-	int size;
-	int length = StringLengthUTF8(other, &size);
+	int size = (int)strlen(other);
 	Reserve(size);
 	memcpy(Data(), other, size + 1);
 	m_Size = size;
-	m_Length = length;
 
 	return *this;
 }
@@ -166,10 +153,8 @@ String& String::operator=(String&& old)
 	m_Data = old.m_Data;
 	m_Allocated = old.m_Allocated;
 	m_Size = old.m_Size;
-	m_Length = old.m_Length;
 	old.m_Data.ptr = nullptr;
 	old.m_Allocated = 0;
-	old.m_Length = 0;
 	old.m_Size = 0;
 
 	return *this;
@@ -234,14 +219,11 @@ bool String::SmallerCaseInsensitive(const StringType& other) const
 	return (ac < bc);
 }
 
-String::ConstIterator String::Insert(ConstIterator pos, const StringType& other, int count)
+String::ConstIterator String::Insert(ConstByteIterator pos, const StringType& other, int count)
 {
-	lxAssert(pos.First() == Data());
-
 	other.EnsureSize();
 	int size;
 	if(count < 0) {
-		count = StringLengthUTF8(other.data);
 		size = other.size;
 	} else {
 		const char* cur = other.data;
@@ -253,7 +235,7 @@ String::ConstIterator String::Insert(ConstIterator pos, const StringType& other,
 	if(size == 0)
 		return pos;
 	int newSize = m_Size + size;
-	int pos_off = static_cast<int>(pos.Pointer() - Data());
+	int pos_off = static_cast<int>(pos - Data());
 	Reserve(newSize);
 
 	// Move last part of string back, including NUL.
@@ -264,21 +246,19 @@ String::ConstIterator String::Insert(ConstIterator pos, const StringType& other,
 	memcpy(data + pos_off, other.data, size);
 
 	m_Size += size;
-	m_Length += count;
 
 	return ConstIterator(data + pos_off + size, Data_c());
 }
 
-String::ConstIterator String::Insert(ConstIterator pos, ConstIterator first, ConstIterator end)
+String::ConstIterator String::Insert(ConstByteIterator pos, ConstByteIterator first, ConstByteIterator end)
 {
-	// This assumes, string::ConstIterator point to a continues block of memory until end.
-	// This is always the case for string::ConstIterator.
+	// This assumes, string::ConstByteIterator point to a continues block of memory until end.
+	// This is always the case for string::ConstByteIterator.
 
-	int size = static_cast<int>(end.Pointer() - first.Pointer());
-	int count = IteratorDistance(first, end);
+	int size = static_cast<int>(end - first);
 
 	int newSize = m_Size + size;
-	int pos_off = static_cast<int>(pos.Pointer() - Data());
+	int pos_off = static_cast<int>(pos - Data());
 	Reserve(newSize);
 
 	// Move last part of string back, including NUL.
@@ -286,10 +266,9 @@ String::ConstIterator String::Insert(ConstIterator pos, ConstIterator first, Con
 	memmove(data + pos_off + size, data + pos_off, m_Size - pos_off + 1);
 
 	// Place the insertion string.
-	memcpy(data + pos_off, first.Pointer(), size);
+	memcpy(data + pos_off, first, size);
 
 	m_Size += size;
-	m_Length += count;
 
 	return ConstIterator(data + pos_off + size, Data_c());
 }
@@ -304,7 +283,6 @@ String& String::AppendRaw(const char* data, int bytes)
 	cur[bytes] = 0;
 
 	// Calculate length and size
-	m_Length += StringLengthUTF8(cur);
 	m_Size += bytes;
 
 	return *this;
@@ -316,15 +294,15 @@ String& String::Append(const StringType& other, int count)
 	return *this;
 }
 
-String& String::Append(ConstIterator first, ConstIterator end)
+String& String::Append(ConstByteIterator first, ConstByteIterator end)
 {
 	Insert(End(), first, end);
 	return *this;
 }
 
-String& String::Append(ConstIterator character)
+String& String::Append(ConstByteIterator character)
 {
-	PushCharacter(character.Pointer());
+	PushCharacter(character);
 	return *this;
 }
 
@@ -339,22 +317,20 @@ String& String::Append(u32 character)
 	m_Size += size;
 	Data()[m_Size] = 0;
 
-	++m_Length;
-
 	return *this;
 }
 
 void String::Resize(int newLength, const StringType& filler)
 {
+	auto curLength = End() - First();
 	if(newLength == 0) {
-		m_Length = 0;
 		m_Size = 0;
-	} else if(newLength <= m_Length) {
+	} else if(newLength <= curLength) {
 		const char* data = Data();
 		const char* ptr = data + m_Size;
-		while(m_Length > newLength) {
+		while(curLength > newLength) {
 			RetractCursorUTF8(ptr);
-			--m_Length;
+			--curLength;
 		}
 
 		m_Size -= static_cast<int>((data + m_Size) - ptr);
@@ -364,7 +340,7 @@ void String::Resize(int newLength, const StringType& filler)
 			throw InvalidArgumentException("filler", "length(filler) > 0");
 
 		int fillerLength = filler.size == 1 ? 1 : StringLengthUTF8(filler.data);
-		int addLength = newLength - m_Length;
+		int addLength = newLength - curLength;
 
 		int elemCount = addLength / fillerLength;
 		int addBytes = elemCount*filler.size;
@@ -398,7 +374,6 @@ void String::Resize(int newLength, const StringType& filler)
 		}
 
 		m_Size += addBytes;
-		m_Length += addLength;
 	}
 
 	Data()[m_Size] = 0;
@@ -407,7 +382,6 @@ void String::Resize(int newLength, const StringType& filler)
 String& String::Clear()
 {
 	Data()[0] = 0;
-	m_Length = 0;
 	m_Size = 0;
 	return *this;
 }
@@ -445,21 +419,17 @@ void String::PushByte(u8 byte)
 	Data()[m_Size + 1] = 0;
 
 	++m_Size;
-	if((byte & 0xC0) != 0x80) // Bytes starting with b10 are continuation bytes.
-		++m_Length;
 }
 
-bool String::StartsWith(const StringType& data, ConstIterator first) const
+bool String::StartsWith(const StringType& data, ConstByteIterator first) const
 {
-	if(first == ConstIterator::Invalid())
-		first = First();
-
-	lxAssert(first.First() == Data());
+	if(first == nullptr)
+		first = Data();
 
 	if(data.data[0] == 0)
 		return true;
 
-	const char* strCur = first.Pointer();
+	auto strCur = first;
 	for(auto it = data.data; *it != 0; ++it, ++strCur) {
 		if(*it != *strCur)
 			return false;
@@ -468,19 +438,17 @@ bool String::StartsWith(const StringType& data, ConstIterator first) const
 	return true;
 }
 
-bool String::EndsWith(const StringType& data, ConstIterator end) const
+bool String::EndsWith(const StringType& data, ConstByteIterator end) const
 {
-	if(end == ConstIterator::Invalid())
+	if(end == nullptr)
 		end = End();
-
-	lxAssert(end.First() == Data());
 
 	if(data.data[0] == 0)
 		return true;
 
 	data.EnsureSize();
-	const char* dataCur = data.data + data.size - 1;
-	const char* strCur = end.Pointer() - 1;
+	auto dataCur = data.data + data.size - 1;
+	auto strCur = end - 1;
 	int i = 0;
 	for(auto it = dataCur; i < data.size; --it, --strCur, ++i) {
 		if(*it != *strCur)
@@ -490,19 +458,19 @@ bool String::EndsWith(const StringType& data, ConstIterator end) const
 	return (i == data.size);
 }
 
-int String::Replace(const StringType& replace, const StringType& search, ConstIterator first, ConstIterator end)
+int String::Replace(const StringType& replace, const StringType& search, ConstByteIterator first, ConstByteIterator end)
 {
-	if(end == ConstIterator::Invalid())
+	if(end == nullptr)
 		end = End();
 
-	if(first == ConstIterator::Invalid())
+	if(first == nullptr)
 		first = First();
 
 	int count = 0;
 	int length = StringLengthUTF8(search.data);
-	ConstIterator it = Find(search, first, end);
+	ConstByteIterator it = Find(search, first, end);
 	while(it != end) {
-		int endOffset = static_cast<int>(end.Pointer() - Data_c());
+		int endOffset = static_cast<int>(end - Data_c());
 		it = ReplaceRange(replace, it, length);
 		end = ConstIterator(Data_c() + endOffset, Data_c());
 		it = Find(search, it, end);
@@ -513,26 +481,24 @@ int String::Replace(const StringType& replace, const StringType& search, ConstIt
 	return count;
 }
 
-String::ConstIterator String::ReplaceRange(const StringType& replace, ConstIterator rangeFirst, ConstIterator rangeEnd)
+String::ConstIterator String::ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd)
 {
-	if(rangeEnd == ConstIterator::Invalid())
+	if(rangeEnd == nullptr)
 		rangeEnd = End();
 
 	return ReplaceRange(replace, rangeFirst, IteratorDistance(rangeFirst, rangeEnd));
 }
 
-String::ConstIterator String::ReplaceRange(const StringType& replace, ConstIterator rangeFirst, int count)
+String::ConstIterator String::ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, int count)
 {
-	lxAssert(rangeFirst.First() == Data());
-
 	replace.EnsureSize();
-	int replacedSize = static_cast<int>((rangeFirst + count).Pointer() - rangeFirst.Pointer());
+	int replacedSize = static_cast<int>((ConstIterator(rangeFirst) + count).Pointer() - rangeFirst);
 
 	if(m_Size + replace.size < replacedSize)
 		throw InvalidArgumentException("count", "count must not be to large.");
 
 	int newSize = m_Size - replacedSize + replace.size;
-	int replaceOffset = static_cast<int>(rangeFirst.Pointer() - Data_c());
+	int replaceOffset = static_cast<int>(rangeFirst - Data_c());
 	Reserve(newSize);
 
 	char* data = Data();
@@ -541,28 +507,24 @@ String::ConstIterator String::ReplaceRange(const StringType& replace, ConstItera
 	memcpy(data + replaceOffset, replace.data, replace.size);
 
 	m_Size = newSize;
-	m_Length = m_Length - count + StringLengthUTF8(replace.data);
 
 	return ConstIterator(data + replaceOffset + replacedSize, data);
 }
 
-String::ConstIterator String::Find(const StringType& search, ConstIterator first, ConstIterator end) const
+String::ConstIterator String::Find(const StringType& search, ConstByteIterator first, ConstByteIterator end) const
 {
-	if(first == ConstIterator::Invalid())
+	if(first == nullptr)
 		first = First();
-	if(end == ConstIterator::Invalid())
+	if(end == nullptr)
 		end = End();
-
-	lxAssert(first.First() == Data());
-	lxAssert(end.First() == Data());
 
 	search.EnsureSize();
 	if(search.size == 0)
 		return end;
 
 	const char* searchFirst = search.data;
-	while(first.Pointer() + search.size <= end.Pointer()) {
-		if(memcmp(searchFirst, first.Pointer(), search.size) == 0)
+	while(first + search.size <= end) {
+		if(memcmp(searchFirst, first, search.size) == 0)
 			return first;
 		++first;
 	}
@@ -570,15 +532,12 @@ String::ConstIterator String::Find(const StringType& search, ConstIterator first
 	return end;
 }
 
-String::ConstIterator String::FindReverse(const StringType& search, ConstIterator first, ConstIterator end) const
+String::ConstIterator String::FindReverse(const StringType& search, ConstByteIterator first, ConstByteIterator end) const
 {
-	if(first == ConstIterator::Invalid())
+	if(first == nullptr)
 		first = First();
-	if(end == ConstIterator::Invalid())
+	if(end == nullptr)
 		end = End();
-
-	lxAssert(first.First() == Data());
-	lxAssert(end.First() == Data());
 
 	if(first == end)
 		return end;
@@ -587,38 +546,26 @@ String::ConstIterator String::FindReverse(const StringType& search, ConstIterato
 	if(search.size == 0)
 		return end;
 
-	ConstIterator cur = end;
+	ConstByteIterator cur = end;
 	const char* searchFirst = search.data;
 
-	while(cur.Pointer() - search.size >= first.Pointer()) {
-		if(memcmp(cur.Pointer() - search.size, searchFirst, search.size) == 0)
-			return ConstIterator(cur.Pointer() - search.size, Data_c());
+	while(cur - search.size >= first) {
+		if(memcmp(cur - search.size, searchFirst, search.size) == 0)
+			return ConstIterator(cur - search.size, Data_c());
 		--cur;
 	}
 
 	return end;
 }
 
-String String::SubString(ConstIterator first, int count) const
+String String::SubString(ConstByteIterator first, int count) const
 {
-	lxAssert(first.First() == Data());
-
-	return String(first.Pointer(), count);
+	return String(first, count);
 }
 
-String String::SubString(ConstIterator first, ConstIterator end) const
+String String::SubString(ConstByteIterator first, ConstByteIterator end) const
 {
-	lxAssert(first.First() == Data());
-	lxAssert(end.First() == Data());
-
-	String out;
-	ConstIterator it = first;
-	while(it != end) {
-		out.Append(it);
-		++it;
-	}
-
-	return out;
+	return String(first, end);
 }
 
 int String::Pop(int count)
@@ -640,16 +587,12 @@ int String::Pop(int count)
 	Data()[newSize] = 0;
 	m_Size = newSize;
 	int removed = oldCount - count;
-	m_Length -= removed;
-
 	return removed;
 }
 
-String::ConstIterator String::Remove(ConstIterator pos, int count)
+String::ConstIterator String::Remove(ConstByteIterator pos, int count)
 {
-	lxAssert(pos.First() == Data());
-
-	int removeSize = static_cast<int>((pos + count).Pointer() - pos.Pointer());
+	int removeSize = static_cast<int>((ConstIterator(pos) + count).Pointer() - pos);
 
 	if(removeSize > m_Size)
 		throw InvalidArgumentException("count", "count must not be to large.");
@@ -657,35 +600,31 @@ String::ConstIterator String::Remove(ConstIterator pos, int count)
 	int newSize = m_Size - removeSize;
 
 	char* data = Data();
-	int removeOffset = static_cast<int>(pos.Pointer() - data);
+	int removeOffset = static_cast<int>(pos - data);
 	int restSize = m_Size - removeOffset - removeSize;
 	memmove(data + removeOffset, data + removeOffset + removeSize, restSize + 1); // Including NUL
 
 	m_Size = newSize;
-	m_Length = m_Length - count;
-
 	return ConstIterator(data + removeOffset, Data());
 }
 
-String::ConstIterator String::Remove(ConstIterator from, ConstIterator to)
+String::ConstIterator String::Remove(ConstByteIterator from, ConstByteIterator to)
 {
-	return Remove(from, IteratorDistance(from, to));
+	return Remove(from, to - from);
 }
 
-String& String::RStrip(ConstIterator end)
+String& String::RStrip(ConstByteIterator end)
 {
-	if(end == ConstIterator::Invalid())
+	if(end == nullptr)
 		end = End();
 
 	if(end == First())
 		return *this;
 
-	lxAssert(end.First() == Data());
-
 	char* data = Data();
 
-	ConstIterator last = end - 1;
-	int lastSize = (int)strlen(last.Pointer());
+	ConstIterator last = ConstIterator(end) - 1;
+	int lastSize = end - last.Pointer();
 	ConstIterator begin = Begin();
 	int removed = 0;
 	while(last != begin && IsSpace(*last)) {
@@ -698,20 +637,17 @@ String& String::RStrip(ConstIterator end)
 	else
 		m_Size = static_cast<int>(last.Pointer() - data) + lastSize;
 
-	m_Length -= removed;
 	data[m_Size] = 0;
 
 	return *this;
 }
 
-String& String::LStrip(ConstIterator first)
+String& String::LStrip(ConstByteIterator first)
 {
-	if(first == ConstIterator::Invalid())
+	if(first == nullptr)
 		first = First();
 
-	lxAssert(first.First() == Data());
-
-	auto offset = static_cast<int>(first.Pointer() - Data_c());
+	auto offset = static_cast<int>(first - Data_c());
 	auto end = End();
 	int count = 0;
 	while(first != end && IsSpace(*first)) {
@@ -720,11 +656,17 @@ String& String::LStrip(ConstIterator first)
 	}
 
 	char* base = Data() + offset;
-	auto removed = static_cast<int>(first.Pointer() - base);
-	memmove(base, first.Pointer(), m_Size - offset - removed);
+	auto removed = static_cast<int>(first - base);
+	memmove(base, first, m_Size - offset - removed);
 	m_Size -= removed;
-	m_Length -= count;
 
+	return *this;
+}
+
+String& String::Strip(ConstByteIterator first, ConstByteIterator end)
+{
+	RStrip(end);
+	LStrip(first);
 	return *this;
 }
 
@@ -780,6 +722,7 @@ EStringClass String::Classify() const
 	int spaceCount = 0;
 	int upperCount = 0;
 	int lowerCount = 0;
+	int count = 0;
 	for(auto c : *this) {
 		if(IsLower(c))
 			++lowerCount;
@@ -792,10 +735,11 @@ EStringClass String::Classify() const
 			++digitCount;
 		else if(IsSpace(c))
 			++spaceCount;
+		++count;
 	}
 
 	EStringClass out = (EStringClass)0;
-	if(m_Length == 0)
+	if(m_Size == 0)
 		out |= EStringClass::Empty;
 
 	if(lowerCount == alphaCount && alphaCount > 0)
@@ -803,13 +747,13 @@ EStringClass String::Classify() const
 	else if(upperCount == alphaCount && alphaCount > 0)
 		out |= EStringClass::Upper;
 
-	if(alphaCount == m_Length && alphaCount > 0)
+	if(alphaCount == count && alphaCount > 0)
 		out |= EStringClass::Alpha;
-	else if(digitCount == m_Length && digitCount > 0)
+	else if(digitCount == count && digitCount > 0)
 		out |= EStringClass::Digit;
-	else if(alphaCount + digitCount == m_Length && alphaCount > 0 && digitCount > 0)
+	else if(alphaCount + digitCount == count && alphaCount > 0 && digitCount > 0)
 		out |= EStringClass::AlphaNum;
-	else if(spaceCount == m_Length && spaceCount > 0)
+	else if(spaceCount == count && spaceCount > 0)
 		out |= EStringClass::Space;
 
 	return out;
@@ -825,8 +769,8 @@ String String::GetLower() const
 	String out;
 	out.Reserve(Size());
 
-	for(auto it = First(); it != End(); ++it) {
-		u32 c = ToLowerChar(*it);
+	for(auto c : *this) {
+		c = ToLowerChar(c);
 		out.Append(c);
 	}
 
@@ -838,8 +782,8 @@ String String::GetUpper() const
 	String out;
 	out.Reserve(Size());
 
-	for(auto it = First(); it != End(); ++it) {
-		u32 c = ToUpperChar(*it);
+	for(auto c : *this) {
+		c = ToUpperChar(c);
 		out.Append(c);
 	}
 
@@ -877,7 +821,6 @@ void String::PushCharacter(const char* ptr)
 	}
 
 	Data()[m_Size] = 0;
-	++m_Length;
 }
 
 } // namespace core

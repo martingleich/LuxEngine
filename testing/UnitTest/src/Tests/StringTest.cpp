@@ -7,7 +7,6 @@ UNIT_SUITE(String)
 	UNIT_TEST(empty_String)
 	{
 		core::String str;
-		UNIT_ASSERT_EQUAL(str.Length(), 0);
 		UNIT_ASSERT_EQUAL(str.Size(), 0);
 		UNIT_ASSERT_EQUAL(str.First(), str.End());
 	}
@@ -15,7 +14,7 @@ UNIT_SUITE(String)
 	UNIT_TEST(from_cstr)
 	{
 		core::String str("Tes☠t");
-		UNIT_ASSERT_EQUAL(str.Length(), 5);
+		UNIT_ASSERT_EQUAL(core::IteratorDistance(str.First(), str.End()), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
 		int i = 0;
@@ -26,7 +25,7 @@ UNIT_SUITE(String)
 	UNIT_TEST(from_cstr_partial)
 	{
 		core::String str("Tes☠ta☠", 5);
-		UNIT_ASSERT_EQUAL(str.Length(), 5);
+		UNIT_ASSERT_EQUAL(core::IteratorDistance(str.First(), str.End()), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
 		int i = 0;
@@ -39,7 +38,7 @@ UNIT_SUITE(String)
 		core::String base("Tes☠t");
 		core::String str(base);
 
-		UNIT_ASSERT_EQUAL(str.Length(), 5);
+		UNIT_ASSERT_EQUAL(core::IteratorDistance(str.First(), str.End()), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
 		int i = 0;
@@ -50,7 +49,7 @@ UNIT_SUITE(String)
 	UNIT_TEST(short_String)
 	{
 		core::String str("ab");
-		UNIT_ASSERT_EQUAL(str.Length(), 2);
+		UNIT_ASSERT_EQUAL(core::IteratorDistance(str.First(), str.End()), 2);
 		UNIT_ASSERT_EQUAL(str.Size(), 2);
 
 		u32 chars[5] = {'a', 'b'};
@@ -62,7 +61,7 @@ UNIT_SUITE(String)
 	{
 		const char* chars ="abcdefghijklmnopqr";
 		core::String str(chars);
-		UNIT_ASSERT_EQUAL(str.Length(), 18);
+		UNIT_ASSERT_EQUAL(core::IteratorDistance(str.First(), str.End()), 18);
 		UNIT_ASSERT_EQUAL(str.Size(), 18);
 
 		int i = 0;
@@ -75,7 +74,7 @@ UNIT_SUITE(String)
 		core::String str = "abc";
 		str = "Tes☠t";
 
-		UNIT_ASSERT_EQUAL(str.Length(), 5);
+		UNIT_ASSERT_EQUAL(core::IteratorDistance(str.First(), str.End()), 5);
 		UNIT_ASSERT_EQUAL(str.Size(), 7);
 		u32 chars[5] = {'T', 'e', 's', 0x2620, 't'};
 		int i = 0;

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_UNICODE_H
 #define INCLUDED_LUX_UNICODE_H
-#include "LuxBase.h"
-#include "lxIterator.h"
+#include "core/LuxBase.h"
+#include "core/lxIterator.h"
 
 namespace lux
 {
@@ -130,15 +130,25 @@ public:
 	\param ptr The character reference by the iterator.
 	\param first The first character of the string referenced.
 	*/
-	explicit ConstUTF8Iterator(const char* ptr, const char* first) :
+	ConstUTF8Iterator(const char* ptr, const char* first) :
 		m_Data(ptr),
 		m_First(first)
+	{
+	}
+	ConstUTF8Iterator(const char* ptr) :
+		m_Data(ptr),
+		m_First(nullptr)
 	{
 	}
 
 	static ConstUTF8Iterator Invalid()
 	{
 		return ConstUTF8Iterator();
+	}
+
+	operator const char*()
+	{
+		return m_Data;
 	}
 
 	ConstUTF8Iterator& operator++()

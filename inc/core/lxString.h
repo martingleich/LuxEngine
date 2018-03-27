@@ -1,13 +1,11 @@
 #ifndef INCLUDED_LUX_STRING_H
 #define INCLUDED_LUX_STRING_H
-#include "lxMemory.h"
-#include "lxUnicode.h"
-#include "lxUtil.h"
-#include "lxIterator.h"
-#include "lxException.h"
-#include "lxTypes.h"
-
-#include <limits>
+#include "core/lxMemory.h"
+#include "core/lxUnicode.h"
+#include "core/lxUtil.h"
+#include "core/lxIterator.h"
+#include "core/lxException.h"
+#include "core/lxTypes.h"
 
 namespace lux
 {
@@ -84,11 +82,15 @@ struct StringType
 /**
 All non-constant methods invalidate all iterators.
 No string can contain the NUL character.
+Length or Count refers to a number of codepoints.
+Size refers to number of bytes.
 */
 class String
 {
 public:
 	using ConstIterator = ConstUTF8Iterator;
+	using ConstByteIterator = const char*;
+	using ByteIterator = char*;
 
 public:
 	//! The empty string.
@@ -106,7 +108,7 @@ public:
 	\param length The number of character to copy from the string if -1 all characters a copied.
 	*/
 	LUX_API String(const char* data, int length = -1);
-	LUX_API String(ConstIterator first, ConstIterator end);
+	LUX_API String(ConstByteIterator first, ConstByteIterator end);
 
 	//! Copyconstructor
 	LUX_API String(const String& other);
@@ -166,7 +168,7 @@ public:
 	\param count The number of characters to insert, -1 to insert all characters.
 	\return A iterator to the first character after the inserted part of the string.
 	*/
-	LUX_API ConstIterator Insert(ConstIterator pos, const StringType& other, int count = -1);
+	LUX_API ConstIterator Insert(ConstByteIterator pos, const StringType& other, int count = -1);
 
 	//! Insert another string into this one.
 	/**
@@ -175,7 +177,7 @@ public:
 	\param end The end iterator of the range to insert.
 	\return A iterator to the first character after the inserted part of the string.
 	*/
-	LUX_API ConstIterator Insert(ConstIterator pos, ConstIterator first, ConstIterator end);
+	LUX_API ConstIterator Insert(ConstByteIterator pos, ConstByteIterator first, ConstByteIterator end);
 
 	//! Append a raw block of bytes
 	/**
@@ -200,14 +202,14 @@ public:
 	\param end The end iterator of the range to append.
 	\return selfreference
 	*/
-	LUX_API String& Append(ConstIterator first, ConstIterator end);
+	LUX_API String& Append(ConstByteIterator first, ConstByteIterator end);
 
 	//! Append a single character from a iterator.
 	/**
 	\param character The character referenced by this iterator is appended.
 	\return selfreference
 	*/
-	LUX_API String& Append(ConstIterator character);
+	LUX_API String& Append(ConstByteIterator character);
 
 	//! Append a single character.
 	/**
@@ -241,12 +243,6 @@ public:
 	inline int Allocated() const
 	{
 		return m_Allocated - 1;
-	}
-
-	//! The number of codepoints contained in the string, without NUL.
-	inline int Length() const
-	{
-		return m_Length;
 	}
 
 	//! Is the string empty.
@@ -293,9 +289,13 @@ public:
 		return ConstIterator(Data_c(), Data_c());
 	}
 
-	inline core::Range<const char*> Bytes() const
+	inline core::Range<ConstByteIterator> Bytes() const
 	{
-		return MakeRange(Data_c(), Data_c() + Size());
+		return MakeRange<ConstByteIterator>(Data(), Data() + Size());
+	}
+	inline core::Range<ByteIterator> Bytes()
+	{
+		return MakeRange<ByteIterator>(Data(), Data() + Size());
 	}
 
 	//! Iterator the the last character in the string.
@@ -322,7 +322,7 @@ public:
 	\param first The position from where the test is performed, if invalid the First() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool StartsWith(const StringType& data, ConstIterator first = ConstIterator::Invalid()) const;
+	LUX_API bool StartsWith(const StringType& data, ConstByteIterator first = nullptr) const;
 
 	//! Test if the string ends with a given string.
 	/**
@@ -330,7 +330,7 @@ public:
 	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool EndsWith(const StringType& data, ConstIterator end = ConstIterator::Invalid()) const;
+	LUX_API bool EndsWith(const StringType& data, ConstByteIterator end = nullptr) const;
 
 	//! Replace all occurences of a substring in this string.
 	/**
@@ -341,7 +341,7 @@ public:
 	\param end The iterator where the search is stopped, if invalid End() is used.
 	\return The number of occurences found and replaced.
 	*/
-	LUX_API int Replace(const StringType& replace, const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid());
+	LUX_API int Replace(const StringType& replace, const StringType& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr);
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -350,7 +350,7 @@ public:
 	\param rangeEnd the end of the replace range
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, ConstIterator rangeEnd = ConstIterator::Invalid());
+	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd = nullptr);
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -359,7 +359,7 @@ public:
 	\param count The number of characters to replace.
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstIterator rangeFirst, int count);
+	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, int count);
 
 	//! Find the first occurence of a substring in this string.
 	/**
@@ -368,7 +368,7 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	LUX_API ConstIterator Find(const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
+	LUX_API ConstIterator Find(const StringType& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
 
 	//! Find the last occurence of a substring in this string.
 	/**
@@ -377,7 +377,7 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	LUX_API ConstIterator FindReverse(const StringType& search, ConstIterator first = ConstIterator::Invalid(), ConstIterator end = ConstIterator::Invalid()) const;
+	LUX_API ConstIterator FindReverse(const StringType& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
 
 	//! Extract a substring from this string.
 	/**
@@ -385,7 +385,7 @@ public:
 	\param count The number of character to extract.
 	\return The extracted substring
 	*/
-	LUX_API String SubString(ConstIterator first, int count = 1) const;
+	LUX_API String SubString(ConstByteIterator first, int count = 1) const;
 
 	//! Extract a substring from this string.
 	/**
@@ -393,7 +393,7 @@ public:
 	\param end The character after the last one to extract.
 	\return The extracted substring
 	*/
-	LUX_API String SubString(ConstIterator first, ConstIterator end) const;
+	LUX_API String SubString(ConstByteIterator first, ConstByteIterator end) const;
 
 	//! Removes a number of characters from the back of string.
 	/**
@@ -408,7 +408,7 @@ public:
 	\param count The number of characters to remove.
 	\return A iterator to the first character after the deleted range.
 	*/
-	LUX_API ConstIterator Remove(ConstIterator pos, int count = 1);
+	LUX_API ConstIterator Remove(ConstByteIterator pos, int count = 1);
 
 	//! Removes characters from the string.
 	/**
@@ -416,25 +416,32 @@ public:
 	\param end Where to stop removing characters.
 	\return A iterator to the first character after the deleted range.
 	*/
-	LUX_API ConstIterator Remove(ConstIterator from, ConstIterator to);
+	LUX_API ConstIterator Remove(ConstByteIterator from, ConstByteIterator to);
 
 	//! Removes all whitespace from the right side of the string.
 	/**
-	Whitespace characters are: \t\n\r and space.
 	Character are removed from the back of the string, until a not space character is encountered.
 	\param end Where should the removing of characters start, if invalid End() is used.
 	\return selfreference
 	*/
-	LUX_API String& RStrip(ConstIterator end = ConstIterator::Invalid());
+	LUX_API String& RStrip(ConstByteIterator end = nullptr);
 
 	//! Removes all whitespace from the left side of the string.
 	/**
-	Whitespace characters are: \t\n\r and space.
 	Character are removed from the front of the string, until a not space character is encountered.
 	\param first Where should the removing of characters start, if invalid First() is used.
 	\return selfreference
 	*/
-	LUX_API String& LStrip(ConstIterator first = ConstIterator::Invalid());
+	LUX_API String& LStrip(ConstByteIterator first = nullptr);
+
+	//! Removes all whitespace from the left and right side of the string.
+	/**
+	Character are removed from either side of the string, until a not space character is encountered.
+	\param first Where should the removing of characters start, if invalid First() is used.
+	\param end Where should the removing of characters start, if invalid End() is used.
+	\return selfreference
+	*/
+	LUX_API String& Strip(ConstByteIterator first = nullptr, ConstByteIterator end = nullptr);
 
 	//! Split the string on a character.
 	/**
@@ -508,11 +515,6 @@ private:
 		Without NUL
 	*/
 	int m_Size;
-
-	/*
-	Contains the number of codepoints in the string.
-	*/
-	int m_Length;
 };
 
 //! Concat two strings.

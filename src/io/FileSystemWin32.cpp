@@ -114,7 +114,7 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, 
 	if(mode == EFileMode::Read || mode == EFileMode::ReadWrite) {
 		for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
 			if(filename.StartsWith(it->mountpoint)) {
-				Path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
+				Path subPath = filename.SubString(filename.Data() + it->mountpoint.Size(), filename.End());
 				if(it->archive->ExistFile(subPath))
 					return it->archive->OpenFile(subPath, mode);
 			}
@@ -182,11 +182,11 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, s64 size, c
 
 Path FileSystemWin32::GetAbsoluteFilename(const Path& filename) const
 {
-	for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
-		if(filename.StartsWith(it->mountpoint)) {
-			Path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
-			if(it->archive->ExistFile(subPath))
-				return it->archive->GetAbsolutePath(subPath);
+	for(auto& mount : m_Mounts) {
+		if(filename.StartsWith(mount.mountpoint)) {
+			Path subPath = filename.SubString(filename.Data() + mount.mountpoint.Size(), filename.End());
+			if(mount.archive->ExistFile(subPath))
+				return mount.archive->GetAbsolutePath(subPath);
 		}
 	}
 	return io::MakeAbsolutePath(m_WorkingDirectory, filename);
@@ -200,10 +200,10 @@ const Path& FileSystemWin32::GetWorkingDirectory() const
 bool FileSystemWin32::ExistFile(const Path& filename) const
 {
 	// Scan mount-list
-	for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
-		if(filename.StartsWith(it->mountpoint)) {
-			Path subPath = filename.SubString(filename.First() + it->mountpoint.Length(), filename.End());
-			if(it->archive->ExistFile(subPath))
+	for(auto& mount : m_Mounts) {
+		if(filename.StartsWith(mount.mountpoint)) {
+			Path subPath = filename.SubString(filename.Data() + mount.mountpoint.Size(), filename.End());
+			if(mount.archive->ExistFile(subPath))
 				return true;
 		}
 	}
