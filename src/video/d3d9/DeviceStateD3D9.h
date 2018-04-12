@@ -56,7 +56,7 @@ public:
 
 	void SetStencilMode(const StencilMode& mode);
 	void EnableLight(bool enable);
-	void SetLight(u32 id, const LightData& light, ELighting lighting);
+	void SetLight(u32 id, const LightData& light, ELightingFlag lighting);
 	void DisableLight(u32 id);
 
 	void EnableShader(Shader* s)

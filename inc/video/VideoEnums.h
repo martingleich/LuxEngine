@@ -7,7 +7,7 @@ namespace lux
 namespace video
 {
 
-enum class ELighting : u8
+enum class ELightingFlag : u8
 {
 	Disabled = 0,
 	AmbientEmit = 1,
@@ -363,7 +363,6 @@ struct AlphaBlendMode
 };
 
 } // namespace video
-DECLARE_FLAG_CLASS(video::ELighting);
 } // namespace lux
 
 #endif // #ifndef INCLUDED_LUX_ALPHA_SETTINGS_H

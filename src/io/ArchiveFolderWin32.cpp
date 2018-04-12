@@ -196,12 +196,12 @@ ArchiveFolderWin32::~ArchiveFolderWin32()
 	LUX_FREE(self);
 }
 
-StrongRef<File> ArchiveFolderWin32::OpenFile(const Path& p, EFileMode mode, bool createIfNotExist)
+StrongRef<File> ArchiveFolderWin32::OpenFile(const Path& p, EFileModeFlag mode, bool createIfNotExist)
 {
 	return self->fileSystem->OpenFile(self->path + p, mode, createIfNotExist);
 }
 
-StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileMode mode, bool createIfNotExist)
+StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileModeFlag mode, bool createIfNotExist)
 {
 	if(file.GetArchive() != this)
 		throw io::FileNotFoundException("");
@@ -227,9 +227,9 @@ core::Range<FileIterator> ArchiveFolderWin32::EnumerateFiles(const Path& subDir)
 	return core::MakeRange(FileIterator(enumerator), FileIterator(enumerator, -1));
 }
 
-EArchiveCapabilities ArchiveFolderWin32::GetCaps() const
+EArchiveCapFlag ArchiveFolderWin32::GetCaps() const
 {
-	return EArchiveCapabilities::Read | EArchiveCapabilities::Add | EArchiveCapabilities::Delete | EArchiveCapabilities::Change;
+	return EArchiveCapFlag::Read | EArchiveCapFlag::Add | EArchiveCapFlag::Delete | EArchiveCapFlag::Change;
 }
 
 Path ArchiveFolderWin32::GetAbsolutePath(const Path& p) const

@@ -3,7 +3,7 @@
 #include "core/lxString.h"
 #include "core/lxArray.h"
 
-#include "VariableAccess.h"
+#include "core/VariableAccess.h"
 
 namespace lux
 {
@@ -20,7 +20,7 @@ struct ParamDesc
 
 //! A collection of named variable.
 /**
-Can be compared with a class, this class contains members and types, bjt no values.
+Can be compared with a class, this class contains members and types, but no values.
 */
 class ParamPackage
 {

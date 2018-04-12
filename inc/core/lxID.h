@@ -2,6 +2,7 @@
 #define INCLUDED_LUX_ID_H
 #include "core/LuxBase.h"
 #include "core/lxFormat.h"
+#include "core/lxTypes.h"
 #include "core/ReferenceCounted.h"
 
 namespace lux
@@ -64,6 +65,15 @@ private:
 	IDList* m_List;
 };
 
+namespace Types
+{
+LUX_API Type StrongID();
+LUX_API Type WeakID();
+
+LUX_API bool IsIDType(Type t);
+}
+
+template <> struct TemplType<core::ID> { static Type Get() { return Types::StrongID(); } };
 }
 }
 

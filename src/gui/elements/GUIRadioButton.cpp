@@ -96,11 +96,11 @@ const core::String& RadioButton::GetText() const
 	return m_Text.GetText();
 }
 
-EGUIState RadioButton::GetState() const
+EGUIStateFlag RadioButton::GetState() const
 {
-	EGUIState state = Element::GetState();
+	EGUIStateFlag state = Element::GetState();
 	if(m_IsChecked)
-		state |= EGUIState::Sunken;
+		state |= EGUIStateFlag::Sunken;
 	return state;
 }
 

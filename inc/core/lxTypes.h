@@ -1,9 +1,9 @@
 #ifndef INCLUDED_LUX_TYPES_H
 #define INCLUDED_LUX_TYPES_H
-#include "LuxBase.h"
-#include "lxException.h"
-#include "lxUtil.h"
-#include <string.h>
+#include "core/LuxBase.h"
+#include "core/lxException.h"
+#include "core/lxUtil.h"
+#include <cstring>
 #include <new>
 
 namespace format

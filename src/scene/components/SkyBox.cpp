@@ -25,7 +25,7 @@ SkyBox::SkyBox() :
 		auto material = video::MaterialLibrary::Instance()->CloneMaterial("solid");
 		auto pass = material->GetPass();
 		pass.fogEnabled = false;
-		pass.lighting = video::ELighting::Disabled;
+		pass.lighting = video::ELightingFlag::Disabled;
 		material->SetPass(pass);
 		video::MaterialLibrary::Instance()->SetMaterial("skybox", material);
 		m_Material = material;

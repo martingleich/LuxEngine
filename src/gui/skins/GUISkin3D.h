@@ -25,7 +25,7 @@ public:
 		Element* elem,
 		const math::RectF& rect,
 		EGUIControl control,
-		EGUIState state,
+		EGUIStateFlag state,
 		const PaintOptions& data);
 
 	LUX_API void DrawFocus(

@@ -53,6 +53,74 @@ struct VertexElement
 		return EUsage((int)EUsage::Texcoord0 + i);
 	}
 
+	static int GetTypeSize(VertexElement::EType type)
+	{
+		switch(type) {
+		case VertexElement::EType::Float1:
+			return 4;
+		case VertexElement::EType::Float2:
+			return 8;
+		case VertexElement::EType::Float3:
+			return 12;
+		case VertexElement::EType::Float4:
+			return 16;
+		case VertexElement::EType::Color:
+			return 4;
+		case VertexElement::EType::Byte4:
+			return 4;
+		case VertexElement::EType::Short2:
+			return 4;
+		case VertexElement::EType::Short4:
+			return 8;
+		case VertexElement::EType::Unknown:
+			return 0;
+		}
+		return 0;
+	}
+
+	static VertexElement::EType GetSematicDefaultType(VertexElement::EUsage usage)
+	{
+		switch(usage) {
+		case VertexElement::EUsage::Position:
+			return VertexElement::EType::Float4;
+		case VertexElement::EUsage::PositionNT:
+			return VertexElement::EType::Float4;
+		case VertexElement::EUsage::Normal:
+			return VertexElement::EType::Float3;
+		case VertexElement::EUsage::Tangent:
+			return VertexElement::EType::Float3;
+
+		case VertexElement::EUsage::Binormal:
+			return VertexElement::EType::Float3;
+		case VertexElement::EUsage::Texcoord0:
+			return VertexElement::EType::Float2;
+		case VertexElement::EUsage::Texcoord1:
+			return VertexElement::EType::Float2;
+		case VertexElement::EUsage::Texcoord2:
+			return VertexElement::EType::Float2;
+		case VertexElement::EUsage::Texcoord3:
+			return VertexElement::EType::Float2;
+		case VertexElement::EUsage::Diffuse:
+			return VertexElement::EType::Color;
+		case VertexElement::EUsage::Specular:
+			return VertexElement::EType::Color;
+		case VertexElement::EUsage::BlendWeight:
+			return VertexElement::EType::Byte4;
+		case VertexElement::EUsage::BlendIndices:
+			return VertexElement::EType::Byte4;
+		case VertexElement::EUsage::Sample:
+			return VertexElement::EType::Byte4;
+		case VertexElement::EUsage::Unknown:
+			return VertexElement::EType::Unknown;
+		}
+		return VertexElement::EType::Unknown;
+	}
+
+	int Size() const
+	{
+		return GetTypeSize(type);
+	}
+
 	//! Stream id of this element.
 	int stream;
 	//! Offset of this element zu begin of stream.
@@ -94,7 +162,7 @@ struct VertexElement
 
 	bool operator==(const VertexElement& other) const
 	{
-		return 
+		return
 			stream == other.stream &&
 			offset == other.offset &&
 			type == other.type &&
@@ -179,7 +247,7 @@ public:
 		VertexElement::EType type = VertexElement::EType::Unknown)
 	{
 		if(type == VertexElement::EType::Unknown)
-			type = GetSematicDefaultType(usage);
+			type = VertexElement::GetSematicDefaultType(usage);
 
 		int offset;
 		if(m_CurrentStream->elemCount == 0)
@@ -188,7 +256,7 @@ public:
 			offset = m_CurrentStream->stride;
 
 		m_Data.PushBack(Element(offset, usage, type));
-		m_CurrentStream->stride = math::Max(m_CurrentStream->stride, offset) + GetTypeSize(type);
+		m_CurrentStream->stride = math::Max(m_CurrentStream->stride, offset) + VertexElement::GetTypeSize(type);
 		m_CurrentStream->elemCount += 1;
 
 		m_IsNormalized = false;
@@ -203,15 +271,15 @@ public:
 	\param type The type of the new element,
 		pass Unknown to select the default type for this usage.
 	*/
-	void AddElement(int offset, 
+	void AddElement(int offset,
 		VertexElement::EUsage usage,
 		VertexElement::EType type = VertexElement::EType::Unknown)
 	{
 		if(type == VertexElement::EType::Unknown)
-			type = GetSematicDefaultType(usage);
+			type = VertexElement::GetSematicDefaultType(usage);
 
 		m_Data.PushBack(Element(offset, usage, type));
-		m_CurrentStream->stride = math::Max(m_CurrentStream->stride, offset) + GetTypeSize(type);
+		m_CurrentStream->stride = math::Max(m_CurrentStream->stride, offset) + VertexElement::GetTypeSize(type);
 		m_CurrentStream->elemCount += 1;
 
 		m_IsNormalized = false;
@@ -340,69 +408,6 @@ public:
 	}
 
 private:
-	static u16 GetTypeSize(VertexElement::EType type)
-	{
-		switch(type) {
-		case VertexElement::EType::Float1:
-			return 4;
-		case VertexElement::EType::Float2:
-			return 8;
-		case VertexElement::EType::Float3:
-			return 12;
-		case VertexElement::EType::Float4:
-			return 16;
-		case VertexElement::EType::Color:
-			return 4;
-		case VertexElement::EType::Byte4:
-			return 4;
-		case VertexElement::EType::Short2:
-			return 4;
-		case VertexElement::EType::Short4:
-			return 8;
-		case VertexElement::EType::Unknown:
-			return 0;
-		default:
-			return 0;
-		}
-	}
-
-	static VertexElement::EType GetSematicDefaultType(VertexElement::EUsage usage)
-	{
-		switch(usage) {
-		case VertexElement::EUsage::Position:
-			return VertexElement::EType::Float4;
-		case VertexElement::EUsage::PositionNT:
-			return VertexElement::EType::Float4;
-		case VertexElement::EUsage::Normal:
-			return VertexElement::EType::Float3;
-		case VertexElement::EUsage::Tangent:
-			return VertexElement::EType::Float3;
-
-		case VertexElement::EUsage::Binormal:
-			return VertexElement::EType::Float3;
-		case VertexElement::EUsage::Texcoord0:
-			return VertexElement::EType::Float2;
-		case VertexElement::EUsage::Texcoord1:
-			return VertexElement::EType::Float2;
-		case VertexElement::EUsage::Texcoord2:
-			return VertexElement::EType::Float2;
-		case VertexElement::EUsage::Texcoord3:
-			return VertexElement::EType::Float2;
-		case VertexElement::EUsage::Diffuse:
-			return VertexElement::EType::Color;
-		case VertexElement::EUsage::Specular:
-			return VertexElement::EType::Color;
-		case VertexElement::EUsage::BlendWeight:
-			return VertexElement::EType::Byte4;
-		case VertexElement::EUsage::BlendIndices:
-			return VertexElement::EType::Byte4;
-		case VertexElement::EUsage::Sample:
-			return VertexElement::EType::Byte4;
-		default:
-			return VertexElement::EType::Unknown;
-		}
-	}
-
 private:
 	struct Element
 	{

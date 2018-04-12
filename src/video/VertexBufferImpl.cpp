@@ -20,7 +20,7 @@ VertexBufferImpl::~VertexBufferImpl()
 	m_Manager->RemoveBuffer(this);
 }
 
-void VertexBufferImpl::SetFormat(const VertexFormat& format, int stream, const void* init)
+void VertexBufferImpl::SetFormat(const VertexFormat& format, int stream, bool moveOld, const void* init)
 {
 	int stride = format.GetStride(stream);
 	if(!format.IsValid() || stride == 0)
@@ -30,6 +30,35 @@ void VertexBufferImpl::SetFormat(const VertexFormat& format, int stream, const v
 		if(init) {
 			for(int i = 0; i < m_Size; ++i)
 				memcpy(m_Data + i*stride, init, stride);
+		} else {
+			if(moveOld) {
+				auto newData = LUX_NEW_ARRAY(u8, m_Size*stride);
+				int elemCount = format.GetElemCount(stream);
+				struct CopyData { int newOff, oldOff, size;};
+				core::Array<CopyData> copyPos;
+				for(int i = 0; i < elemCount; ++i) {
+					auto elem = format.GetElement(stream, i);
+					auto oldElem = m_Format.GetElement(m_Stream, elem.sematic);
+					if(oldElem.IsValid() && oldElem.type == elem.type)
+						copyPos[i] = CopyData{elem.offset, oldElem.offset, elem.Size()};
+					else
+						copyPos[i] = CopyData{-1, -1, -1};
+				}
+
+				u8* newPtr = newData;
+				u8* oldPtr = m_Data;
+				for(int i = 0; i < m_Size; ++i) {
+					for(int j = 0; j < elemCount; ++j) {
+						if(copyPos[j].oldOff != -1)
+							memcpy(newPtr + copyPos[j].newOff, oldPtr + copyPos[j].oldOff, copyPos[j].size);
+					}
+					newPtr += stride;
+					oldPtr += m_Stride;
+				}
+
+				LUX_FREE_ARRAY(m_Data);
+				m_Data = newData;
+			}
 		}
 	}
 

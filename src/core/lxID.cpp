@@ -79,5 +79,26 @@ Referable* IDManager::LookUp(ID id)
 	return m_List->LookUp(id.GetValue());
 }
 
+namespace Types
+{
+
+Type StrongID()
+{
+	static Type strongRef(LUX_NEW(TypeInfoTemplate<core::ID>)("strong_id"));
+	return strongRef;
+}
+
+Type WeakID()
+{
+	static Type weakRef(LUX_NEW(TypeInfoTemplate<core::ID>)("weak_id"));
+	return weakRef;
+}
+
+bool IsIDType(Type t)
+{
+	return t == StrongID() || t == WeakID();
+}
+
+} // namespace Types
 } // namespace core
 } // namespace lux

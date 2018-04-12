@@ -19,11 +19,11 @@ class ArchiveFolderWin32 : public Archive
 public:
 	ArchiveFolderWin32(io::FileSystem* fileSystem, const Path& dir);
 	~ArchiveFolderWin32();
-	StrongRef<File> OpenFile(const Path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
+	StrongRef<File> OpenFile(const Path& p, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
+	StrongRef<File> OpenFile(const FileDescription& file, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
 	bool ExistFile(const Path& p) const;
 	core::Range<FileIterator> EnumerateFiles(const Path& subDir = core::String::EMPTY);
-	EArchiveCapabilities GetCaps() const;
+	EArchiveCapFlag GetCaps() const;
 	Path GetAbsolutePath(const Path& p) const;
 	const Path& GetPath() const;
 

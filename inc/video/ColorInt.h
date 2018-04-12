@@ -26,6 +26,11 @@ public:
 	{
 		return Color(f, f, f, alpha);
 	}
+	static Color Faded(Color c, u32 a)
+	{
+		return c.SetAlpha(a);
+	}
+
 	//! Construct from other color.
 	Color(const Color& _c) : c(_c.c)
 	{

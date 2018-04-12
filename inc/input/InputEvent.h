@@ -39,7 +39,8 @@ enum class EEventType
 	Button
 };
 
-enum class EElementType // Flag class
+//! Flag class
+enum class EElementType
 {
 	Input = 0x1,
 	Output = 0x2,
@@ -157,7 +158,6 @@ public:
 };
 
 } // namespace input
-DECLARE_FLAG_CLASS(input::EElementType);
 } // namespace lux
 
 

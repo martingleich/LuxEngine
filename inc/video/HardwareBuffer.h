@@ -22,9 +22,12 @@ public:
 	inline void ResetDirty();
 	inline void SetDirty(int begin, int end);
 	inline int GetChangeId() const;
+	inline void* Pointer();
 	inline void* Pointer(int n, int count);
+	inline const void* Pointer() const;
 	inline const void* Pointer(int n, int count) const;
 	inline const void* Pointer_c(int n, int count) const;
+	inline const void* Pointer_c() const;
 	inline int GetSize() const;
 	inline int GetAlloc() const;
 	inline void Update();
@@ -110,6 +113,11 @@ inline void HardwareBuffer::SetDirty(int begin, int end)
 	m_EndDirty = math::Min(m_Size-1, end);
 }
 
+inline void* HardwareBuffer::Pointer()
+{
+	return Pointer(0, m_Size);
+}
+
 inline void* HardwareBuffer::Pointer(int n, int count)
 {
 	lxAssert(n + count <= m_Size);
@@ -119,11 +127,21 @@ inline void* HardwareBuffer::Pointer(int n, int count)
 	return m_Data + n*m_Stride;
 }
 
+inline const void* HardwareBuffer::Pointer() const
+{
+	return Pointer(0, m_Size);
+}
+
 inline const void* HardwareBuffer::Pointer(int n, int count) const
 {
 	LUX_UNUSED(count);
 	lxAssert(n + count <= m_Size);
 	return m_Data + n*m_Stride;
+}
+
+inline const void* HardwareBuffer::Pointer_c() const
+{
+	return Pointer_c(0, m_Size);
 }
 
 inline const void* HardwareBuffer::Pointer_c(int n, int count) const

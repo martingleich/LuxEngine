@@ -20,13 +20,10 @@ BinarySerializer::BinarySerializer(const StructuralTable* inClass,
 
 void BinarySerializer::BeginStructure(u32 sid)
 {
-	lxAssert(m_Block.sid == 0);
-
 	auto& type = m_InClass->GetStructure(sid);
 	m_Block.sid = sid;
 	m_Block.start = GetCursor();
 	m_Block.end = m_Block.start + type.size;
-
 	m_DoneAll = false;
 }
 
@@ -77,6 +74,8 @@ void BinarySerializer::WriteArray(core::Type type, core::Type base, const void* 
 
 void BinarySerializer::WriteElement(const char* element, const void* elemAddr)
 {
+	if(m_Block.sid == 0)
+		return;
 	auto elem = m_InClass->GetStructureElement(m_Block.sid, element);
 	u32 pos = m_Block.start + elem->offset;
 	Seek(pos, io::ESeekOrigin::Start);
@@ -86,7 +85,7 @@ void BinarySerializer::WriteElement(const char* element, const void* elemAddr)
 
 void BinarySerializer::WriteType(core::Type type, const void* data)
 {
-	if(type.IsTrivial()) {
+	if(type.IsTrivial() && !core::Types::IsIDType(type) && !core::Types::IsRefType(type)) {
 		WriteBinary(data, type.GetSize());
 	} else {
 		if(type == core::Types::String()) {
@@ -98,6 +97,16 @@ void BinarySerializer::WriteType(core::Type type, const void* data)
 			WriteBinary(m_Block.start + addr, str.Data(), size);
 		} else if(core::Types::IsArray(type)) {
 			WriteArray(type, core::Types::GetArrayBase(type), data);
+		} else if(core::Types::IsIDType(type)) {
+			auto objectId = *((core::ID*)data);
+			u32 fileId = m_ObjectMap ? m_ObjectMap->OnIdWrite(objectId) : objectId.GetValue();
+			WriteBinary(&fileId, type.GetSize());
+		} else if(core::Types::IsRefType(type)) {
+			auto refInfo = dynamic_cast<const core::AbstractRefTypeInfo*>(type.GetInfo());
+			auto referable = dynamic_cast<Referable*>(refInfo->Get(data));
+			auto objectId = referable->GetUniqueId();
+			u32 fileId = m_ObjectMap->OnIdWrite(objectId);
+			WriteBinary(&fileId, type.GetSize());
 		} else {
 			lxAssertNeverReach("Unsupported type");
 		}
@@ -108,7 +117,7 @@ void BinarySerializer::WriteType(core::Type type, const void* data)
 // Desination: In-Class-Repr
 void BinarySerializer::ReadAll(void* baseAddr)
 {
-	if(m_DoneAll)
+	if(m_DoneAll || m_Block.sid == 0)
 		return;
 
 	auto& type = m_InClass->GetStructure(m_Block.sid);
@@ -144,6 +153,8 @@ void BinarySerializer::ReadArray(core::Type type, core::Type base, void* data)
 
 void BinarySerializer::ReadElement(const char* element, void* elemAddr)
 {
+	if(m_Block.sid == 0)
+		return;
 	auto elem = m_InClass->GetStructureElement(m_Block.sid, element);
 	u32 pos = m_Block.start + elem->offset;
 	Seek(pos, io::ESeekOrigin::Start);
@@ -154,7 +165,7 @@ void BinarySerializer::ReadElement(const char* element, void* elemAddr)
 void BinarySerializer::ReadType(core::Type type, void* data)
 {
 	// IDs are complex to read.
-	if(type.IsTrivial() && !core::Types::IsIDType(type)) {
+	if(type.IsTrivial() && !core::Types::IsIDType(type) && !core::Types::IsRefType(type)) {
 		ReadBinary(data, type.GetSize());
 	} else {
 		if(type == core::Types::String()) {
@@ -169,8 +180,14 @@ void BinarySerializer::ReadType(core::Type type, void* data)
 		} else if(core::Types::IsIDType(type)) {
 			u32 inFileId;
 			ReadBinary(&inFileId, type.GetSize());
-			auto objectId = m_ObjectMap->GetObject(inFileId);
+			auto objectId = m_ObjectMap ? m_ObjectMap->OnIdRead(inFileId) : core::ID(inFileId);
 			*((core::ID*)data) = objectId;
+		} else if(core::Types::IsRefType(type)) {
+			auto refInfo = dynamic_cast<const core::AbstractRefTypeInfo*>(type.GetInfo());
+			u32 inFileId;
+			ReadBinary(&inFileId, type.GetSize());
+			auto objectId = m_ObjectMap->OnIdRead(inFileId);
+			refInfo->Assign(data, core::IDManager::Instance()->LookUp(objectId));
 		} else if(core::Types::IsArray(type)) {
 			ReadArray(type, core::Types::GetArrayBase(type), data);
 		} else {

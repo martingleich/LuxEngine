@@ -1,9 +1,10 @@
 #ifndef INCLUDED_LUX_FONT_RASTER_H
 #define INCLUDED_LUX_FONT_RASTER_H
 #include "gui/Font.h"
-#include "video/Material.h"
 #include "core/lxHashMap.h"
+#include "video/Material.h"
 #include "video/images/Image.h"
+#include "video/Texture.h"
 
 namespace lux
 {

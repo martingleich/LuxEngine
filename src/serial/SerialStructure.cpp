@@ -48,6 +48,8 @@ void StructureBuilder::AddElement(
 			elem.size = 4 + 4;
 		else if(core::Types::IsArray(type))
 			elem.size = 4 + 4;
+		else if(core::Types::IsRefType(type))
+			elem.size = 4;
 		else
 			throw core::NotImplementedException();
 	}

@@ -327,10 +327,8 @@ StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(
 
 StrongRef<Geometry> VideoDriverD3D9::CreateGeometry(const VertexFormat& vertexFormat,
 	EPrimitiveType primitiveType,
-	int primitiveCount,
 	bool dynamic)
 {
-	LUX_UNUSED(primitiveCount);
 	return CreateGeometry(vertexFormat, dynamic ? EHardwareBufferMapping::Dynamic : EHardwareBufferMapping::Static, 0,
 		EIndexFormat::Bit16, EHardwareBufferMapping::Static, 0,
 		primitiveType);

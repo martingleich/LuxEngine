@@ -8,7 +8,7 @@ namespace io
 {
 
 //! The mode in which files are opend
-enum class EFileMode
+enum class EFileModeFlag
 {
 	Read = 1, //!< Read from the file
 	Write = 2, //!< Write to the file
@@ -22,7 +22,7 @@ enum class ESeekOrigin
 	Cursor, //!< from the current cursor
 };
 
-enum class EArchiveCapabilities
+enum class EArchiveCapFlag
 {
 	Read = 0x1,
 	Delete = 0x2,
@@ -49,10 +49,6 @@ enum class ELineEnding
 };
 
 } // namespace io
-
-DECLARE_FLAG_CLASS(io::EArchiveCapabilities);
-DECLARE_FLAG_CLASS(io::EVirtualCreateFlag);
-
 } // namespace lux
 
 #endif // #ifndef INCLUDED_LUX_IOCONSTANTS_H

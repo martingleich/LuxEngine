@@ -18,7 +18,7 @@ public:
 	LUX_API void Paint(Renderer* r);
 	LUX_API void SetText(const core::String& text);
 	LUX_API const core::String& GetText() const;
-	LUX_API EGUIState GetState() const;
+	LUX_API EGUIStateFlag GetState() const;
 
 private:
 	TextContainer m_Text;

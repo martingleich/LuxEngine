@@ -407,7 +407,7 @@ void SceneRendererSimpleForward::DrawScene()
 
 	if(drawStencilShadows) {
 		video::PipelineOverwrite illumOver;
-		illumOver.lighting = video::ELighting::AmbientEmit;
+		illumOver.lighting = video::ELightingFlag::AmbientEmit;
 		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 	} else {
 		for(auto& e : illuminating)
@@ -460,7 +460,7 @@ void SceneRendererSimpleForward::DrawScene()
 				Enable(video::EPipelineSetting::AlphaBlending).
 				Enable(video::EPipelineSetting::Stencil);
 			illumOver.zWriteEnabled = false;
-			illumOver.lighting = video::ELighting::DiffSpec;
+			illumOver.lighting = video::ELightingFlag::DiffSpec;
 			illumOver.alpha.blendOperator = video::EBlendOperator::Add;
 			illumOver.alpha.srcFactor = video::EBlendFactor::One;
 			illumOver.alpha.dstFactor = video::EBlendFactor::One;
@@ -492,7 +492,7 @@ void SceneRendererSimpleForward::DrawScene()
 				Enable(video::EPipelineSetting::Lighting).
 				Enable(video::EPipelineSetting::AlphaBlending);
 			illumOver.zWriteEnabled = false;
-			illumOver.lighting = video::ELighting::DiffSpec;
+			illumOver.lighting = video::ELightingFlag::DiffSpec;
 			illumOver.alpha.blendOperator = video::EBlendOperator::Add;
 			illumOver.alpha.srcFactor = video::EBlendFactor::One;
 			illumOver.alpha.dstFactor = video::EBlendFactor::One;

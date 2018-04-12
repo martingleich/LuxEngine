@@ -2,28 +2,38 @@
 
 namespace lux
 {
-namespace core
-{
-namespace Types
-{
 
-Type StrongID()
+void Referable::GetAttribute(const core::String& name, core::VariableAccess var)
 {
-	static Type strongRef(LUX_NEW(TypeInfoTemplate<core::ID>)("strong_id"));
-	return strongRef;
+	auto elem = serial::StructuralTable::EngineTable()->GetStructureElement(GetSerializerStructure(), name);
+	if(elem)
+		var.AssignData((u8*)((Serializable*)this) + elem->objectOffset);
 }
 
-Type WeakID()
+//! Retrieve value of a single attribute via name.
+/**
+\param name The name of the attribute.
+\return A variableAccess to the attribute.
+*/
+ core::VariableAccess Referable::GetAttribute(const core::String& name)
 {
-	static Type weakRef(LUX_NEW(TypeInfoTemplate<core::ID>)("weak_id"));
-	return weakRef;
+	auto elem = serial::StructuralTable::EngineTable()->GetStructureElement(GetSerializerStructure(), name);
+	if(elem)
+		return core::VariableAccess(elem->type.GetConstantType(), (u8*)((Serializable*)this) + elem->objectOffset);
+	else
+		return core::VariableAccess();
 }
 
-bool IsIDType(Type t)
+//! Set value of a single attribute via name.
+/**
+\param name The name of the attribute.
+\param var The attribute is from this VariableAccess, must be of the same type as the attribute.
+*/
+ void Referable::SetAttribute(const core::String& name, core::VariableAccess var)
 {
-	return t == StrongID() || t == WeakID();
+	auto elem = serial::StructuralTable::EngineTable()->GetStructureElement(GetSerializerStructure(), name);
+	if(elem)
+		var.CopyData((u8*)((Serializable*)this) + elem->objectOffset);
 }
 
-}
-}
-}
+} // namespace lux

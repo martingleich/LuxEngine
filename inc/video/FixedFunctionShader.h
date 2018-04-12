@@ -2,6 +2,7 @@
 #define INCLUDED_LUX_FIXED_FUNCTION_SHADER_H
 #include "video/Shader.h"
 #include "video/TextureStageSettings.h"
+#include "video/TextureLayer.h"
 
 namespace lux
 {

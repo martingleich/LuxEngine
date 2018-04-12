@@ -1,6 +1,5 @@
 #include "core/ParamPackage.h"
-#include "video/CubeTexture.h"
-#include "video/Texture.h"
+#include "video/TextureLayer.h"
 
 namespace lux
 {

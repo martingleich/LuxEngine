@@ -22,7 +22,7 @@ LineRendererMachine::LineRendererMachine()
 	m_DefaultPass.alpha.blendOperator = video::EBlendOperator::Add;
 	m_DefaultPass.zWriteEnabled = false;
 	m_DefaultPass.fogEnabled = false;
-	m_DefaultPass.lighting = video::ELighting::Disabled;
+	m_DefaultPass.lighting = video::ELightingFlag::Disabled;
 	video::FixedFunctionParameters paramsDiffuse({}, {}, true);
 	m_DefaultPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramsDiffuse);
 

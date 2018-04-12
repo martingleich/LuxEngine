@@ -265,6 +265,7 @@ void RendererD3D9::DrawPrimitiveList(
 		return;
 
 	u32 stride = vertexFormat.GetStride(0);
+	u32 indexStride = indexType == EIndexFormat::Bit16 ? 2 : 4;
 
 	D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
 	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(primitiveType);
@@ -317,11 +318,12 @@ void RendererD3D9::DrawPrimitiveList(
 			else
 				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
 		} else {
-			if(indexData) // Indexed from memory
+			if(indexData) { // Indexed from memory
 				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
-					indexData, d3dIndexFormat, vertexData, stride);
-			else // Not indexed from memory
-				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, vertexData, stride);
+					(u8*)indexData + indexOffset*indexStride, d3dIndexFormat, vertexData, stride);
+			} else { // Not indexed from memory
+				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, (u8*)vertexData + vertexOffset*stride, stride);
+			}
 		}
 		if(FAILED(hr)) {
 			log::Error("Error while drawing.");
@@ -417,7 +419,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 		dirtyPass = true;
 	}
 	if(m_RenderMode == ERenderMode::Mode2D) {
-		pass.lighting = ELighting::Disabled;
+		pass.lighting = ELightingFlag::Disabled;
 		pass.fogEnabled = false;
 		dirtyPass = true;
 	}
@@ -620,12 +622,12 @@ void RendererD3D9::LoadFogSettings(
 }
 
 void RendererD3D9::LoadLightSettings(
-	ELighting lighting,
+	ELightingFlag lighting,
 	bool fixedFunction,
 	bool changedShader,
 	bool changedLighting)
 {
-	bool useLights = (lighting != ELighting::Disabled);
+	bool useLights = (lighting != ELightingFlag::Disabled);
 
 	if(!fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
 		*m_ParamId.lighting = (float)lighting;

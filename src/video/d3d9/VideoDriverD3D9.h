@@ -41,7 +41,6 @@ public:
 
 	virtual StrongRef<Geometry> CreateGeometry(const VertexFormat& vertexFormat = VertexFormat::STANDARD,
 		EPrimitiveType primitiveType = EPrimitiveType::Triangles,
-		int primitiveCount = 0,
 		bool dynamic = false);
 
 	//------------------------------------------------------------------

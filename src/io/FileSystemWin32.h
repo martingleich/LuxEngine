@@ -14,8 +14,8 @@ class FileSystemWin32 : public FileSystem
 {
 public:
 	FileSystemWin32();
-	StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenFile(const Path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false);
+	StrongRef<File> OpenFile(const FileDescription& desc, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
+	StrongRef<File> OpenFile(const Path& filename, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenVirtualFile(void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
 	StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
 	bool ExistFile(const Path& filename) const;
@@ -45,7 +45,7 @@ public:
 	void RemoveMountPoint(const Path& point, Archive* archive = nullptr);
 
 private:
-	core::String GetFileOpenString(EFileMode mode) const;
+	core::String GetFileOpenString(EFileModeFlag mode) const;
 	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
 	DWORD GetWin32FileAttributes(const Path& p) const;
 

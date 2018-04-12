@@ -28,6 +28,7 @@ public:
 private:
 	FILE* m_File;
 	s64 m_FileSize;
+	s64 m_Cursor;
 };
 
 } //namespace io

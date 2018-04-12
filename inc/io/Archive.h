@@ -109,7 +109,7 @@ public:
 	\return The opend file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenFile(const Path& p, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
+	virtual StrongRef<File> OpenFile(const Path& p, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false) = 0;
 
 	//! Open a file inside the archive.
 	/**
@@ -119,7 +119,7 @@ public:
 	\return The opend file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenFile(const FileDescription& file, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
+	virtual StrongRef<File> OpenFile(const FileDescription& file, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false) = 0;
 
 	//! Check if a file exists
 	virtual bool ExistFile(const Path& p) const = 0;
@@ -128,7 +128,7 @@ public:
 	virtual core::Range<FileIterator> EnumerateFiles(const Path& subDir = core::String::EMPTY) = 0;
 
 	//! Get the capabilites of the archive
-	virtual EArchiveCapabilities GetCaps() const = 0;
+	virtual EArchiveCapFlag GetCaps() const = 0;
 
 	//! Convert a path inside the archive to an absolute path.
 	/**

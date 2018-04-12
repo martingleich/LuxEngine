@@ -112,8 +112,8 @@ public:
 		}
 	}
 
-	video::Color GetWindow(EGUIState state) const { return TestFlag(state, EGUIState::Enabled) ? GetWindow() : GetDisabledWindow(); }
-	video::Color GetWindowText(EGUIState state) const { return TestFlag(state, EGUIState::Enabled) ? GetWindowText() : GetDisabledWindowText(); }
+	video::Color GetWindow(EGUIStateFlag state) const { return TestFlag(state, EGUIStateFlag::Enabled) ? GetWindow() : GetDisabledWindow(); }
+	video::Color GetWindowText(EGUIStateFlag state) const { return TestFlag(state, EGUIStateFlag::Enabled) ? GetWindowText() : GetDisabledWindowText(); }
 	video::Color GetWindow() const { return GetColor(EColorGroup::Enabled, EColorRole::Window); }
 	video::Color GetDisabledWindow() const { return GetColor(EColorGroup::Disabled, EColorRole::Window); }
 	video::Color GetWindowText() const { return GetColor(EColorGroup::Enabled, EColorRole::WindowText); }

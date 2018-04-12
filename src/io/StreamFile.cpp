@@ -13,7 +13,8 @@ StreamFile::StreamFile(FILE* file,
 	const core::String& name) :
 	File(name, desc),
 	m_File(file),
-	m_FileSize(desc.GetSize())
+	m_FileSize(desc.GetSize()),
+	m_Cursor(0)
 {
 }
 
@@ -35,7 +36,7 @@ s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
 		u8* cur = (u8*)out + read;
 		s64 count = numBytes - read;
 		while(count > 0) {
-			s64 block = (s64)fread(cur, 1024, 1, m_File) * 1024;
+			s64 block = (s64)fread(cur, 1, 1024, m_File);
 			read += block;
 			if(block != 1024)
 				return read;
@@ -44,6 +45,7 @@ s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
 			count -= block;
 		}
 	}
+	m_Cursor += read;
 
 	return read;
 }
@@ -60,6 +62,7 @@ s64 StreamFile::WriteBinaryPart(const void* data, s64 numBytes)
 
 	if(fwrite(data, (size_t)numBytes, 1, m_File) != 1)
 		throw io::FileException(io::FileException::WriteError);
+	m_Cursor += numBytes;
 
 	return numBytes;
 }
@@ -74,6 +77,7 @@ void StreamFile::Seek(s64 offset, ESeekOrigin origin)
 
 	if(fseek(m_File, (long)newCursor, 0) != 0)
 		throw core::RuntimeException("fseek failed");
+	m_Cursor = newCursor;
 }
 
 void* StreamFile::GetBuffer()
@@ -93,12 +97,12 @@ s64 StreamFile::GetSize() const
 
 s64 StreamFile::GetCursor() const
 {
-	return ftell(m_File);
+	return m_Cursor;
 }
 
 bool StreamFile::IsEOF() const
 {
-	return feof(m_File) == 1;
+	return m_Cursor == m_FileSize;
 }
 
 }

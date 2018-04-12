@@ -12,7 +12,7 @@ namespace lux
 {
 namespace video
 {
-enum class EMaterialRequirement
+enum class EMaterialReqFlag
 {
 	None = 0,
 	Transparent = 1,
@@ -78,7 +78,7 @@ public:
 	EComparisonFunc zBufferFunc = EComparisonFunc::LessEqual;
 	u32 colorMask = 0xFFFFFFFF;
 	EDrawMode drawMode = EDrawMode::Fill;
-	ELighting lighting = ELighting::Enabled;
+	ELightingFlag lighting = ELightingFlag::Enabled;
 	EFaceSide culling = EFaceSide::Back;
 
 	bool fogEnabled : 1;
@@ -119,7 +119,7 @@ public:
 	EComparisonFunc zBufferFunc;
 	u32 colorMask;
 	EDrawMode drawMode;
-	ELighting lighting;
+	ELightingFlag lighting;
 	EFaceSide culling;
 
 	bool fogEnabled : 1;
@@ -217,10 +217,6 @@ public:
 };
 
 } // namespace video
-
-DECLARE_FLAG_CLASS(lux::video::EColorPlane);
-DECLARE_FLAG_CLASS(lux::video::EMaterialRequirement);
-
 } // namespace lux
 
 #endif // #ifndef INCLUDED_LUX_PASS_H

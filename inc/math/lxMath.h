@@ -373,9 +373,10 @@ If the value is outside the range [0;1] the result is undefined.
 template <typename type>
 inline type Lerp(const type& A, const type& B, float t)
 {
-	lxAssert(t >= 0.0f && t <= 1.0f);
+	// Catch some of the really bad errors. Without getting in way.
+	lxAssert(t >= -1 && t <= 2);
 
-	return (type)(A*(1.0f - t) + B*t);
+	return (type)(A*(1 - t) + B*t);
 }
 
 //! Interpolate cubic between two values, bound between other two values
@@ -447,18 +448,30 @@ T must be an unsigned integral type.
 */
 inline bool IsPrime(int x)
 {
-	int o = 4;
-	int i = 5;
-	while(true) {
-		int q = x / i;
-		if(q < i)
-			return true;
-		if(x == q * i)
+	/*
+	if(x < 2)
+		return false;
+	if(x == 2)
+		return true;
+	if(x % 2 == 0)
+		return false;
+	for(int i = 3; i*i <= x; i += 2) {
+		if(x % i == 0)
 			return false;
-		o ^= 6;
-		i += o;
 	}
-
+	*/
+	if(x == 2 || x == 3)
+		return true;
+	if(x % 2 == 0 || x % 3 == 0)
+		return false;
+	int divisor = 6;
+	while(divisor * divisor - 2 * divisor + 1 <= x) {
+		if(x % (divisor-1) == 0)
+			return false;
+		if(x % (divisor+1) == 0)
+			return false;
+		divisor += 6;
+	}
 	return true;
 }
 
@@ -479,14 +492,11 @@ inline int NextPrime(int x)
 	case 5:
 		return 5;
 	}
+	if(x % 2 == 0)
+		++x;
 
-	int k = x / 6;
-	int i = x - 6 * k;
-	int o = i < 2 ? 1 : 5;
-	x = 6 * k + o;
-
-	for(i = (3 + o) / 2; !IsPrime(x); x += i)
-		x ^= 6;
+	while(!IsPrime(x))
+		x += 2;
 
 	return x;
 }

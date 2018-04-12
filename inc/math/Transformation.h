@@ -70,6 +70,11 @@ public:
 		return GetInverted(out);
 	}
 
+	Transformation GetRelativeTo(const Transformation& other) const
+	{
+		return CombineLeft(other.GetInverted());
+	}
+
 	//! Transforms a single Point
 	/**
 	\param in: The point to transform
@@ -417,6 +422,14 @@ inline void fmtPrint(format::Context& ctx, const Transformation& t, format::Plac
 	ctx.AddTerminatedSlice("]");
 }
 
+template <>
+inline Transformation Lerp(const Transformation& a, const Transformation& b, float t)
+{
+	return Transformation(
+		math::Lerp(a.translation, b.translation, t),
+		math::Lerp(a.orientation, b.orientation, t),
+		math::Lerp(a.scale, b.scale, t));
+}
 } // namespace math
 
 namespace core

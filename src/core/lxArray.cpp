@@ -15,9 +15,5 @@ const char* MakeArrayTypeName(Type baseType)
 	return ptr;
 }
 
-Type TestCall()
-{
-	return TemplType<core::Array<u32>>::Get();
-}
 } // namespace core
 } // namespace lux

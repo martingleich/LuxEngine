@@ -401,6 +401,10 @@ void fmtPrint(format::Context& ctx, const Vector2<T>& v, format::Placeholder& pl
 	ctx.AddTerminatedSlice("]");
 }
 
+template <typename T> float* begin(math::Vector2<T>& v) { return &v.x; }
+template <typename T> float* end(math::Vector2<T>& v) { return (&v.y) + 1; }
+template <typename T> const float* begin(const math::Vector2<T>& v) { return &v.x; }
+template <typename T> const float* end(const math::Vector2<T>& v) { return (&v.y) + 1; }
 
 } // namespace math
 

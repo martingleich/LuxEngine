@@ -68,6 +68,7 @@ private:
 
 	core::Array<Entry> m_Entries;
 };
+}
 
 namespace impl_moduleRegister
 {
@@ -80,14 +81,14 @@ struct ModuleFactoryRegisterBlock
 	core::String module;
 	core::String name;
 
-	ModuleFactory::CreatorT creator;
+	core::ModuleFactory::CreatorT creator;
 
 	ModuleFactoryRegisterBlock* next;
 
 	ModuleFactoryRegisterBlock(
 		const core::String& _module,
 		const core::String& _name,
-		ModuleFactory::CreatorT _creator) :
+		core::ModuleFactory::CreatorT _creator) :
 		module(_module),
 		name(_name),
 		creator(_creator),
@@ -98,11 +99,10 @@ struct ModuleFactoryRegisterBlock
 };
 
 } // impl_moduleRegister
-} // namespace core
 } // namespace lux
 
 #define LUX_REGISTER_MODULE(module, name, class) \
 static ::lux::ReferenceCounted* InternalCreatorFunc(const ::lux::core::ModuleInitData& data) { return LUX_NEW(class)(data); } \
-static ::lux::core::impl_moduleRegister::ModuleFactoryRegisterBlock InternalModuleRegisterStaticObject(module, name, &InternalCreatorFunc);
+static ::lux::impl_moduleRegister::ModuleFactoryRegisterBlock InternalModuleRegisterStaticObject(module, name, &InternalCreatorFunc);
 
 #endif // #ifndef INCLUDED_LUX_MODULE_FACTORY_H

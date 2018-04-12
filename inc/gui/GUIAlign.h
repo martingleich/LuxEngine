@@ -25,11 +25,6 @@ enum class EAlign
 	TopRight = VTop | HRight, //!< Align to the top right
 };
 
-}
-DECLARE_FLAG_CLASS(lux::gui::EAlign);
-namespace gui
-{
-
 inline EAlign FlipAlign(EAlign in, bool flipH, bool flipV)
 {
 	if(flipH) {

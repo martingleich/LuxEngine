@@ -20,7 +20,7 @@ public:
 		Evaluate(time, core::VariableAccess(core::TemplType<T>::Get(), &var));
 		return var;
 	}
-	virtual void Evaluate(float time, core::VariableAccess access) const = 0;
+	virtual void Evaluate(float time, const core::VariableAccess& access) const = 0;
 
 	virtual float GetStart() const = 0;
 	virtual float GetEnd() const = 0;
@@ -96,7 +96,7 @@ public:
 		m_Type = core::TemplType<T>::Get();
 	}
 
-	void Evaluate(float time, core::VariableAccess access) const
+	void Evaluate(float time, const core::VariableAccess& access) const
 	{
 		access = math::CurveInterpolation(
 			m_Samples.Data(), m_Samples.Size(),

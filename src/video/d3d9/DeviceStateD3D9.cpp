@@ -32,15 +32,15 @@ DeviceStateD3D9::~DeviceStateD3D9()
 
 void DeviceStateD3D9::SetD3DColors(const Pass& pass)
 {
-	if(pass.lighting != ELighting::Disabled) {
+	if(pass.lighting != ELightingFlag::Disabled) {
 		D3DCOLORVALUE black = {0};
 		// Enable d3d material
 		D3DMATERIAL9 D3DMaterial = {
-			TestFlag(pass.lighting, ELighting::DiffSpec) ? SColorToD3DColor(pass.diffuse) : black,
-			TestFlag(pass.lighting, ELighting::AmbientEmit) ? SColorToD3DColor(pass.ambient*pass.diffuse) : black,
-			TestFlag(pass.lighting, ELighting::DiffSpec) ? SColorToD3DColor(pass.specular) : black,
-			TestFlag(pass.lighting, ELighting::AmbientEmit) ? SColorToD3DColor(pass.emissive) : black,
-			TestFlag(pass.lighting, ELighting::DiffSpec) ? pass.shininess : 0.0f
+			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(pass.diffuse) : black,
+			TestFlag(pass.lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(pass.ambient*pass.diffuse) : black,
+			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(pass.specular) : black,
+			TestFlag(pass.lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(pass.emissive) : black,
+			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? pass.shininess : 0.0f
 		};
 
 		m_D3DMaterial = D3DMaterial;
@@ -50,18 +50,18 @@ void DeviceStateD3D9::SetD3DColors(const Pass& pass)
 
 void DeviceStateD3D9::EnablePass(const Pass& p, const video::ColorF& ambient)
 {
-	m_UseLighting = (p.lighting != ELighting::Disabled);
+	m_UseLighting = (p.lighting != ELightingFlag::Disabled);
 
 	// Load material for fixed function
 	if(m_IsFixedShader) {
 		SetD3DColors(p);
 		m_Ambient = ambient;
-		if(TestFlag(p.lighting, ELighting::AmbientEmit))
+		if(TestFlag(p.lighting, ELightingFlag::AmbientEmit))
 			SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
 		else
 			SetRenderState(D3DRS_AMBIENT, 0);
 
-		if(TestFlag(p.lighting, ELighting::DiffSpec) && !math::IsZero(m_D3DMaterial.Power))
+		if(TestFlag(p.lighting, ELightingFlag::DiffSpec) && !math::IsZero(m_D3DMaterial.Power))
 			SetRenderState(D3DRS_SPECULARENABLE, 1);
 		else
 			SetRenderState(D3DRS_SPECULARENABLE, 0);
@@ -417,7 +417,7 @@ void DeviceStateD3D9::SetStencilMode(const StencilMode& mode)
 	}
 }
 
-void DeviceStateD3D9::SetLight(u32 id, const LightData& light, ELighting lighting)
+void DeviceStateD3D9::SetLight(u32 id, const LightData& light, ELightingFlag lighting)
 {
 	DWORD lightId = (DWORD)id;
 
@@ -444,9 +444,9 @@ void DeviceStateD3D9::SetLight(u32 id, const LightData& light, ELighting lightin
 	D3DCOLORVALUE specular = {1.0f, 1.0f, 1.0f, 1.0f};
 	D3DCOLORVALUE ambient = {0.0f, 0.0f, 0.0f, 0.0f};
 	D3DCOLORVALUE black = {0.0f, 0.0f, 0.0f, 0.0f};
-	D3DLight.Diffuse = TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(light.color) : black;
-	D3DLight.Specular = TestFlag(lighting, ELighting::DiffSpec) ? SColorToD3DColor(light.color) : black;
-	D3DLight.Ambient = TestFlag(lighting, ELighting::AmbientEmit) ? ambient : black;
+	D3DLight.Diffuse = TestFlag(lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(light.color) : black;
+	D3DLight.Specular = TestFlag(lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(light.color) : black;
+	D3DLight.Ambient = TestFlag(lighting, ELightingFlag::AmbientEmit) ? ambient : black;
 
 	D3DLight.Attenuation0 = 0.0f;
 	D3DLight.Attenuation1 = 1.0f;

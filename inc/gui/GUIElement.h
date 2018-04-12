@@ -149,7 +149,7 @@ public:
 	LUX_API virtual void SetTextColor(video::Color c);
 	LUX_API virtual void SetBackgroundColor(video::Color c);
 
-	LUX_API virtual EGUIState GetState() const;
+	LUX_API virtual EGUIStateFlag GetState() const;
 
 	LUX_API virtual bool IsPointInside(const math::Vector2F& point) const;
 

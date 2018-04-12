@@ -15,7 +15,7 @@ template <typename T>
 class Array;
 
 //! The type of characters a string contains.
-enum class EStringClass
+enum class EStringClassFlag
 {
 	Digit = 1,      //!< The string only contains digits.
 	Alpha = 2,      //!< The string only contains letters.
@@ -24,6 +24,12 @@ enum class EStringClass
 	Upper = 16,     //!< All the characters in the string are upper-case.
 	Lower = 32,     //!< All the characters in the string are lower-case.
 	Empty = 64,     //!< The string was empty
+};
+
+enum class EStringCompare
+{
+	CaseSensitive = 0,
+	CaseInsensitive = 1
 };
 
 class String;
@@ -147,19 +153,10 @@ public:
 	/*
 	No unicode normalization is performed
 	*/
-	LUX_API bool Equal(const StringType& other) const;
+	LUX_API bool Equal(const StringType& other, EStringCompare = EStringCompare::CaseSensitive) const;
 
-	//! Compare two strings for equality, case insensitive.
-	/*
-	No unicode normalization is performed
-	*/
-	LUX_API bool EqualCaseInsensitive(const StringType& other) const;
-
-	//! Compare two strings, case insensitive.
-	/*
-	No unicode normalization is performed
-	*/
-	LUX_API bool SmallerCaseInsensitive(const StringType& other) const;
+	//! Compare two strings.
+	LUX_API bool Smaller(const StringType& other, EStringCompare = EStringCompare::CaseSensitive) const;
 
 	//! Insert another string into this one.
 	/**
@@ -322,7 +319,7 @@ public:
 	\param first The position from where the test is performed, if invalid the First() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool StartsWith(const StringType& data, ConstByteIterator first = nullptr) const;
+	LUX_API bool StartsWith(const StringType& data, ConstByteIterator first = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
 
 	//! Test if the string ends with a given string.
 	/**
@@ -330,7 +327,7 @@ public:
 	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool EndsWith(const StringType& data, ConstByteIterator end = nullptr) const;
+	LUX_API bool EndsWith(const StringType& data, ConstByteIterator end = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
 
 	//! Replace all occurences of a substring in this string.
 	/**
@@ -467,7 +464,7 @@ public:
 	/**
 	See \ref{EStringType} for more information about string classification.
 	*/
-	LUX_API EStringClass Classify() const;
+	LUX_API EStringClassFlag Classify() const;
 
 	//! Contains the string only whitespace(or is empty)
 	LUX_API bool IsWhitespace() const;
@@ -583,20 +580,15 @@ This order doesn't have to be equal to the lexical order.
 */
 inline bool operator<(const String& a, const char* b)
 {
-	auto size = (int)strlen(b);
-	auto s = a.Size() < size ? a.Size() : size;
-	return (memcmp(a.Data(), b, s) < 0);
+	return a.Smaller(b);
 }
 inline bool operator<(const char* a, const String& b)
 {
-	auto size = (int)strlen(a);
-	auto s = size < b.Size() ? size : b.Size();
-	return (memcmp(a, b.Data(), s) < 0);
+	return core::String(a).Smaller(b);
 }
 inline bool operator<(const String& a, const String& b)
 {
-	auto s = a.Size() < b.Size() ? a.Size() : b.Size();
-	return (memcmp(a.Data(), b.Data(), s) < 0);
+	return a.Smaller(b);
 }
 
 class SharedString
@@ -781,9 +773,6 @@ namespace io
 {
 using Path = core::String;
 }
-
-DECLARE_FLAG_CLASS(core::EStringClass);
-
 } // namespace lux
 
 #endif

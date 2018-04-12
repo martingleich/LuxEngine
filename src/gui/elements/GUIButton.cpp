@@ -51,11 +51,11 @@ const core::String& Button::GetText() const
 	return m_Text.GetText();
 }
 
-EGUIState Button::GetState() const
+EGUIStateFlag Button::GetState() const
 {
-	EGUIState state = Element::GetState();
+	EGUIStateFlag state = Element::GetState();
 	if(m_IsPressed)
-		state |= EGUIState::Sunken;
+		state |= EGUIStateFlag::Sunken;
 	return state;
 }
 

@@ -20,7 +20,7 @@ public:
 	LUX_API const core::String& GetText() const;
 	LUX_API bool IsChecked() const;
 	LUX_API virtual void SetChecked(bool b);
-	LUX_API EGUIState GetState() const;
+	LUX_API EGUIStateFlag GetState() const;
 
 protected:
 	LUX_API void OnClick();

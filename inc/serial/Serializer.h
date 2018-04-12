@@ -1,9 +1,9 @@
 #ifndef INCLUDED_LUX_SERIAL_SERIALIZER_H
 #define INCLUDED_LUX_SERIAL_SERIALIZER_H
-#include "serial/StructuralTable.h"
-#include "core/Referable.h"
+#include "core/ReferenceCounted.h"
 #include "core/VariableAccess.h"
 #include "io/ioConstants.h"
+#include "serial/StructuralTable.h"
 
 namespace lux
 {
@@ -111,8 +111,8 @@ private:
 class ObjectMap : public ReferenceCounted
 {
 public:
-	virtual void AddObject(core::ID objectId, u32 fileId) = 0;
-	virtual core::ID GetObject(u32 fileId) = 0;
+	virtual u32 OnIdWrite(core::ID objectId) = 0;
+	virtual core::ID OnIdRead(u32 fileId) = 0;
 };
 
 class Serializer : public ReferenceCounted
@@ -129,26 +129,55 @@ public:
 
 	virtual ~Serializer() {}
 
+	//! Begins writing a structure.
+	/**
+	The structure is written at the current cursor position.
+	Calls to BeginStructure can't be nested, meaning BeginStructure can't be called before the previous Begin didn't end.
+	\param sid The structure index in the inClass
+	*/
 	virtual void BeginStructure(u32 sid) = 0;
+	//! Ends writing a structure.
+	/**
+	Must be called after each BeginStructure.
+	Places the cursor at the first byte after the written structure.
+	*/
 	virtual void EndStructure() = 0;
 
+	//! Write the complete structure
+	/**
+	If this function is called more then once, no additional data is written.
+	\param baseAddr The base addr given when creating the structure.
+	*/
 	virtual void WriteAll(const void* baseAddr) = 0;
+	//! Reads the complete structure
+	/**
+	If this function is called more then once, the data is not reread.
+	\param baseAddr The base addr given when creating the structure.
+	*/
 	virtual void ReadAll(void* baseAddr) = 0;
 
+	//! Write a single element of the structure.
 	virtual void WriteElement(const char* element, const void* elemAddr) = 0;
+	//! Write a single element of the structure.
 	virtual void ReadElement(const char* element, void* elemAddr) = 0;
 
+	//! Write a single object of some type.
 	virtual void WriteType(core::Type type, const void* data) = 0;
+	//! Read a single object of some type.
 	virtual void ReadType(core::Type type, void* data) = 0;
 
+	//! Moves the cursor.
 	virtual void Seek(u32 move, io::ESeekOrigin origin = io::ESeekOrigin::Cursor) = 0;
+	//! Gets the cursor position.
 	virtual u32 GetCursor() const = 0;
 
+	//! Get the structural table for the in-memory representation.
 	const StructuralTable* GetInClass() const
 	{
 		return m_InClass;
 	}
 
+	//! Get the structural table for the outoff-memory representation(i.e. In file)
 	const StructuralTable* GetOutClass() const
 	{
 		return m_OutClass;
@@ -158,6 +187,15 @@ protected:
 	const StructuralTable* m_InClass;
 	const StructuralTable* m_OutClass;
 	StrongRef<ObjectMap> m_ObjectMap;
+};
+
+class Serializable : public virtual ReferenceCounted
+{
+public:
+	virtual void Serialize(serial::Serializer* target) = 0;
+	virtual void DeSerialize(serial::Serializer* source) = 0;
+	virtual void InitSerializer(serial::StructureBuilder& builder) const = 0;
+	virtual u32 GetSerializerStructure() const = 0;
 };
 
 LUX_API StrongRef<Serializer> CreateBinaryMemorySerializer(core::RawMemory& destination, StructuralTable* table, ObjectMap* map);

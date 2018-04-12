@@ -33,7 +33,7 @@ void TextBox::Paint(Renderer* renderer, float secsPassed)
 	auto align = GetAlignment();
 	float caretToBorderDistance = 4.0f;
 	gui::FontRenderSettings settings;
-	settings.color = palette.GetColor(TestFlag(state, gui::EGUIState::Enabled) ?
+	settings.color = palette.GetColor(TestFlag(state, gui::EGUIStateFlag::Enabled) ?
 		gui::Palette::EColorGroup::Enabled : gui::Palette::EColorGroup::Disabled, gui::Palette::EColorRole::BaseText);
 
 	m_Container.Ensure(
@@ -72,7 +72,7 @@ void TextBox::Paint(Renderer* renderer, float secsPassed)
 	renderTextBox.bottom = final.bottom - 2;
 
 	renderer->DrawRectangle(final,
-		palette.GetColor(TestFlag(state, gui::EGUIState::Enabled) ?
+		palette.GetColor(TestFlag(state, gui::EGUIStateFlag::Enabled) ?
 			gui::Palette::EColorGroup::Enabled :
 			gui::Palette::EColorGroup::Disabled, gui::Palette::EColorRole::Base));
 	m_Container.Render(renderer, font, settings, false,

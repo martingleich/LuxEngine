@@ -56,8 +56,8 @@ LuxDeviceNull::LuxDeviceNull()
 	resourceSystem->SetCaching(core::ResourceType::Image, false);
 
 	// Register all referable object registers with LUX_REGISTER_REFERABLE_CLASS
-	lux::core::impl_referableRegister::RunAllRegisterReferableFunctions();
-	lux::core::impl_moduleRegister::RunAllModuleFactoryBlocks();
+	lux::impl_referableRegister::RunAllRegisterReferableFunctions();
+	lux::impl_moduleRegister::RunAllModuleFactoryBlocks();
 
 	log::Info("Lux core was built.");
 }

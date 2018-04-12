@@ -89,11 +89,11 @@ void CheckBox::SetChecked(bool b)
 	}
 }
 
-EGUIState CheckBox::GetState() const
+EGUIStateFlag CheckBox::GetState() const
 {
-	EGUIState state = Element::GetState();
+	EGUIStateFlag state = Element::GetState();
 	if(m_IsChecked)
-		state |= EGUIState::Sunken;
+		state |= EGUIStateFlag::Sunken;
 	return state;
 }
 

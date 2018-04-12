@@ -103,17 +103,6 @@ public:
 	//! Add a single element, type is inferred from template.
 	LUX_API void AddElement(core::Type type, const core::String& name, const void* ptr);
 
-	template <typename T>
-	void AddElement(const core::String& name, const T& addr)
-	{
-		AddElement(core::TemplType<T>::Get(), name, &addr);
-	}
-	template <typename T>
-	void AddElement(const core::String& name)
-	{
-		AddElement(core::TemplType<T>::Get(), name);
-	}
-
 	LX_STRUCTURE_BUILDER_ADD(Integer, s32);
 	LX_STRUCTURE_BUILDER_ADD(Float, float);
 	LX_STRUCTURE_BUILDER_ADD(Vector2F, math::Vector2F);
@@ -125,6 +114,24 @@ public:
 	LX_STRUCTURE_BUILDER_ADD(String, core::String);
 	LX_STRUCTURE_BUILDER_ADD(StrongID, core::ID);
 	LX_STRUCTURE_BUILDER_ADD(WeakID, core::ID);
+
+	template <typename T>
+	void AddStrongRef(const core::String& name, const StrongRef<T>& addr)
+	{
+		AddElement(core::TemplType<StrongRef<T>>::Get(), name, &addr);
+	}
+
+	template <typename T>
+	void AddWeakRef(const core::String& name, const WeakRef<T>& addr)
+	{
+		AddElement(core::TemplType<WeakRef<T>>::Get(), name, &addr);
+	}
+
+	template <typename T>
+	void AddArray(const core::String& name, const core::Array<T>& addr)
+	{
+		AddElement(core::TemplType<core::Array<T>>::Get(), name, &addr);
+	}
 
 	//! Finish the creation of the structure.
 	/**

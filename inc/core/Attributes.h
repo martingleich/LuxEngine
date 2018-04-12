@@ -1,5 +1,6 @@
 #ifndef INCLUDED_LUX_ATTRIBUTES_H
 #define INCLUDED_LUX_ATTRIBUTES_H
+#include "core/ReferenceCounted.h"
 #include "core/ParamPackage.h"
 #include "core/lxHashMap.h"
 #include "core/lxOrderedMap.h"

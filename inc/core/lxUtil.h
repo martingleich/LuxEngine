@@ -10,16 +10,41 @@ namespace core
 template <typename T>
 struct CompareType
 {
-	bool Equal(const T& a, const T& b) const
-	{
-		return a == b;
-	}
-
-	bool Smaller(const T& a, const T& b) const
-	{
-		return a < b;
-	}
+	bool Equal(const T& a, const T& b) const { return a == b; }
+	bool Smaller(const T& a, const T& b) const { return a < b; }
 };
+
+template <typename T, typename FuncT>
+struct CompareTypeFromSmallerT
+{
+	FuncT func;
+	CompareTypeFromSmallerT(const FuncT& smallerFunc) :
+		func(smallerFunc)
+	{}
+	bool Equal(const T& a, const T& b) const { return !func(a, b) && !func(b, a); }
+	bool Smaller(const T& a, const T& b) const { return func(a, b); }
+};
+template <typename T, typename FuncT>
+struct CompareTypeFromIntCompareT
+{
+	FuncT func;
+	CompareTypeFromIntCompareT(const FuncT& intFunc) :
+		func(intFunc)
+	{}
+	bool Equal(const T& a, const T& b) const { return func(a,b) == 0; }
+	bool Smaller(const T& a, const T& b) const { return func(a,b) < 0; }
+};
+
+template <typename T, typename FuncT>
+CompareTypeFromSmallerT<T, FuncT> CompareTypeFromSmaller(const FuncT& func)
+{
+	return CompareTypeFromSmallerT<T, FuncT>(func);
+}
+template <typename T, typename FuncT>
+CompareTypeFromIntCompareT<T, FuncT> CompareTypeFromInt(const FuncT& func)
+{
+	return CompareTypeFromIntCompareT<T, FuncT>(func);
+}
 
 inline int HashSequence(const u8* ptr, int size)
 {

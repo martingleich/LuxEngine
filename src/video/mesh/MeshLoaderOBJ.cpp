@@ -38,7 +38,7 @@ core::Name MeshLoaderOBJ::GetResourceType(io::File* file, core::Name requestedTy
 		return core::Name::INVALID;
 
 	core::String ext = io::GetFileExtension(file->GetDescription().GetName());
-	if(ext.EqualCaseInsensitive("obj"))
+	if(ext.Equal("obj", core::EStringCompare::CaseInsensitive))
 		return core::ResourceType::Mesh;
 	else
 		return core::Name::INVALID;

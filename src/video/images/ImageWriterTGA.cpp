@@ -33,7 +33,7 @@ struct destroyer
 
 bool ImageWriterTGA::CanWriteFile(const core::String& ext)
 {
-	return ext.IsEmpty() || ext.EqualCaseInsensitive("tga");
+	return ext.IsEmpty() || ext.Equal("tga", core::EStringCompare::CaseInsensitive);
 }
 
 static uint32_t tga_proc_write(tga_struct* tga, uint32_t size, void* buffer)

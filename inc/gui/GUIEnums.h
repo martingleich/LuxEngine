@@ -7,7 +7,7 @@ namespace lux
 namespace gui
 {
 
-enum class EGUIState
+enum class EGUIStateFlag
 {
 	None = 0,
 	Enabled = 0x1,
@@ -33,7 +33,6 @@ enum class ECursorState
 };
 
 }
-DECLARE_FLAG_CLASS(gui::EGUIState);
 }
 
 #endif // #ifndef INCLUDED_LUX_GUI_ENUMS_H

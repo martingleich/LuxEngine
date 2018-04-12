@@ -12,7 +12,7 @@ static StrongRef<Canvas3DSystem> g_Canvas3DSystem;
 
 Canvas3DSystem::Canvas3DSystem()
 {
-	m_PenPass.lighting = video::ELighting::Disabled;
+	m_PenPass.lighting = video::ELightingFlag::Disabled;
 	m_PenPass.fogEnabled = false;
 	m_PenPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader({}, {}, true);
 
@@ -21,7 +21,7 @@ Canvas3DSystem::Canvas3DSystem()
 	decl.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
 	m_PenFormat = video::VertexFormat("penVertex", decl);
 
-	m_BrushPass.lighting = video::ELighting::Disabled;
+	m_BrushPass.lighting = video::ELightingFlag::Disabled;
 	m_BrushPass.fogEnabled = false;
 	m_BrushPass.culling = video::EFaceSide::None;
 	m_BrushPass.zWriteEnabled = false;
@@ -182,9 +182,10 @@ void Canvas3D::DrawMarker(const math::Vector3F& pos, float size)
 	}
 }
 
-void Canvas3D::DrawCircle(const math::Vector3F& pos, const math::Vector3F& nor, float radius)
+void Canvas3D::DrawCircle(const math::Vector3F& pos, const math::Vector3F& _nor, float radius)
 {
 	int res = 32;
+	auto nor = _nor.Normal();
 	math::Vector3F ux = nor.GetOrthoNormal();
 	math::Vector3F uy = nor.Cross(ux);
 	math::Vector3F start = pos + radius*ux;

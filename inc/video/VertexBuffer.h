@@ -16,24 +16,34 @@ public:
 
 	//! Set the format of the vertexbuffer.
 	/**
-	All old data is deleted.
+	Data is copied only if init is null.<br>
+	Data is copied element wise.<br>
+	Element with same sematic and type are copied.<br>
+	New elements are not initialized.<br>
+	Missing elements are removed.<br>
 	\param format The format to set.
 	\param stream Which stream of the format to use
+	\param moveOld Should the old data be copied.
 	\param init Pointer to the default vertex, null if no default is used.
 	*/
-	virtual void SetFormat(const VertexFormat& format, int stream, const void* init = nullptr) = 0;
+	virtual void SetFormat(const VertexFormat& format, int stream, bool moveOld = true, const void* init = nullptr) = 0;
 
 	//! Set the format of the vertexbuffer.
 	/**
-	All old data is deleted.
+	Data is copied only if init is null.<br>
+	Data is copied element wise.<br>
+	Element with same sematic and type are copied.<br>
+	New elements are not initialized.<br>
+	Missing elements are removed.<br>
 	Uses the first stream of the format.
 	\param format The format to set.
 	\param stream Which stream of the format to use
+	\param moveOld Should the old data be copied.
 	\param init Pointer to the default vertex, null if no default is used.
 	*/
-	void SetFormat(const VertexFormat& format, void* init = nullptr)
+	void SetFormat(const VertexFormat& format, bool moveOld = true, void* init = nullptr)
 	{
-		SetFormat(format, 0, init);
+		SetFormat(format, 0, moveOld, init);
 	}
 
 	//! Get the used vertex format
@@ -64,18 +74,18 @@ public:
 	}
 
 	template <typename T>
-	core::StrideRange<T> ConstElements(VertexElement::EUsage element) const
+	core::ConstStrideRange<T> ConstElements(VertexElement::EUsage element) const
 	{
 		auto stream = GetStream();
 		auto elem = GetFormat().GetElement(stream, element);
 		if(!elem.IsValid()) {
 			core::ConstStrideIterator<T> p(nullptr, 0);
-			return core::StrideRange<T>(p, p);
+			return core::ConstStrideRange<T>(p, p);
 		}
 		auto data = Pointer_c(0, GetSize());
 		auto begin = core::ConstStrideIterator<T>(data, GetStride(), elem.offset);
 		auto end = begin + GetSize();
-		return core::StrideRange<T>(begin, end);
+		return core::ConstStrideRange<T>(begin, end);
 	}
 };
 

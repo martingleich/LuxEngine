@@ -509,7 +509,7 @@ bool FontWriter::CanWriteType(const core::String& ext, core::Name requestedType)
 	if(requestedType != core::ResourceType::Font)
 		return false;
 
-	return ext.IsEmpty() || ext.EqualCaseInsensitive("lxf") || ext.EqualCaseInsensitive("font");
+	return ext.IsEmpty() || ext.Equal("lxf", core::EStringCompare::CaseInsensitive) || ext.Equal("font", core::EStringCompare::CaseInsensitive);
 }
 
 void FontWriter::WriteResource(io::File* file, core::Resource* resource)

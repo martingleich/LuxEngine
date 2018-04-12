@@ -407,15 +407,15 @@ void Element::SetBackgroundColor(video::Color c)
 	SetPalette(p);
 }
 
-EGUIState Element::GetState() const
+EGUIStateFlag Element::GetState() const
 {
-	EGUIState state = EGUIState::None;
+	EGUIStateFlag state = EGUIStateFlag::None;
 	if(IsEnabled()) {
-		state |= EGUIState::Enabled;
+		state |= EGUIStateFlag::Enabled;
 		if(IsFocused())
-			state |= EGUIState::Focused;
+			state |= EGUIStateFlag::Focused;
 		if(IsHovered())
-			state |= EGUIState::Hovered;
+			state |= EGUIStateFlag::Hovered;
 	}
 
 	return state;

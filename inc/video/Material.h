@@ -91,7 +91,7 @@ public:
 
 	void SetTexture(u32 id, video::BaseTexture* texture)
 	{
-		m_ShaderValues.FromType(core::Types::Texture(), id, false) = texture;
+		m_ShaderValues.FromType(core::Types::Texture(), id, false) = video::TextureLayer(texture);
 	}
 
 	void SetDiffuse(const video::ColorF& color) { m_Pass.diffuse = color; }
@@ -108,12 +108,12 @@ public:
 	float GetAmbient() const { return m_Pass.ambient; }
 	float GetAlpha() const { return m_Pass.diffuse.GetAlpha(); }
 
-	void SetRequirements(EMaterialRequirement requirements)
+	void SetRequirements(EMaterialReqFlag requirements)
 	{
 		m_Requirement = requirements;
 	}
 
-	EMaterialRequirement GetRequirements() const
+	EMaterialReqFlag GetRequirements() const
 	{
 		return m_Requirement;
 	}
@@ -136,7 +136,7 @@ protected:
 
 private:
 	Pass m_Pass;
-	EMaterialRequirement m_Requirement;
+	EMaterialReqFlag m_Requirement;
 
 	core::PackagePuffer m_ShaderValues;
 };

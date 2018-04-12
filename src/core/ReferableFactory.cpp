@@ -4,9 +4,24 @@
 
 namespace lux
 {
+namespace impl_referableRegister
+{
+static ReferableRegisterBlock* g_FirstReferableBlock = nullptr;
+void RegisterReferableBlock(ReferableRegisterBlock* block)
+{
+	block->nextBlock = g_FirstReferableBlock;
+	g_FirstReferableBlock = block;
+}
+
+void RunAllRegisterReferableFunctions()
+{
+	for(auto block = g_FirstReferableBlock; block; block = block->nextBlock)
+		core::ReferableFactory::Instance()->RegisterType(block->type, block->creator);
+}
+} // namespace impl_referableRegister
+
 namespace core
 {
-
 static StrongRef<ReferableFactory> g_ReferableFactory;
 
 void ReferableFactory::Initialize()
@@ -24,21 +39,6 @@ void ReferableFactory::Destroy()
 	g_ReferableFactory.Reset();
 }
 
-namespace impl_referableRegister
-{
-static ReferableRegisterBlock* g_FirstReferableBlock = nullptr;
-void RegisterReferableBlock(ReferableRegisterBlock* block)
-{
-	block->nextBlock = g_FirstReferableBlock;
-	g_FirstReferableBlock = block;
-}
-
-void RunAllRegisterReferableFunctions()
-{
-	for(auto block = g_FirstReferableBlock; block; block = block->nextBlock)
-		ReferableFactory::Instance()->RegisterType(block->type, block->creator);
-}
-}
 
 ReferableFactory::ReferableFactory()
 {

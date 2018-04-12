@@ -936,8 +936,6 @@ struct HashType<Array<T>>
 	}
 };
 
-LUX_API Type TestCall();
-
 } // namespace core
 } // namespace lux
 

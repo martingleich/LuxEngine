@@ -165,58 +165,67 @@ String& String::operator+=(const StringType& str)
 	return Append(str);
 }
 
-bool String::Equal(const StringType& other) const
+bool String::Equal(const StringType& other, EStringCompare compare) const
 {
 	other.EnsureSize();
 	if(m_Size != other.size)
 		return false;
 
-	return (memcmp(Data(), other.data, m_Size) == 0);
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+		return (memcmp(Data(), other.data, m_Size) == 0);
+	case EStringCompare::CaseInsensitive:
+	{
+		const char* a = Data();
+		const char* b = other.data;
+		u32 ac;
+		u32 bc;
+		do {
+			ac = AdvanceCursorUTF8(a);
+			bc = AdvanceCursorUTF8(b);
+
+			if(!IsEqualCaseInsensitive(ac, bc))
+				return false;
+		} while(ac && bc);
+
+		return (ac == bc);
+	}
+	}
+	return false;
 }
 
-bool String::EqualCaseInsensitive(const StringType& other) const
+bool String::Smaller(const StringType& other, EStringCompare compare) const
 {
 	other.EnsureSize();
-	if(m_Size != other.size)
-		return false;
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+	{
+		auto size = other.size;
+		auto s = Size() < size ? Size() : size;
+		return (memcmp(Data(), other.data, s) < 0);
+	}
+	case EStringCompare::CaseInsensitive:
+	{
+		const char* a = Data();
+		const char* b = other.data;
+		u32 ac;
+		u32 bc;
+		do {
+			ac = AdvanceCursorUTF8(a);
+			bc = AdvanceCursorUTF8(b);
 
-	if(m_Size == 0)
-		return true;
+			u32 iac = ToLowerChar(ac);
+			u32 ibc = ToLowerChar(bc);
+			if(iac < ibc)
+				return true;
+			if(iac > ibc)
+				return false;
+		} while(ac && bc);
 
-	const char* a = Data();
-	const char* b = other.data;
-	u32 ac;
-	u32 bc;
-	do {
-		ac = AdvanceCursorUTF8(a);
-		bc = AdvanceCursorUTF8(b);
-
-		if(!IsEqualCaseInsensitive(ac, bc))
-			return false;
-	} while(ac && bc);
-
-	return (ac == bc);
-}
-
-bool String::SmallerCaseInsensitive(const StringType& other) const
-{
-	const char* a = Data();
-	const char* b = other.data;
-	u32 ac;
-	u32 bc;
-	do {
-		ac = AdvanceCursorUTF8(a);
-		bc = AdvanceCursorUTF8(b);
-
-		u32 iac = ToLowerChar(ac);
-		u32 ibc = ToLowerChar(bc);
-		if(iac < ibc)
-			return true;
-		if(iac > ibc)
-			return false;
-	} while(ac && bc);
-
-	return (ac < bc);
+		return (ac < bc);
+	}
+	}
+	return false;
 }
 
 String::ConstIterator String::Insert(ConstByteIterator pos, const StringType& other, int count)
@@ -421,7 +430,7 @@ void String::PushByte(u8 byte)
 	++m_Size;
 }
 
-bool String::StartsWith(const StringType& data, ConstByteIterator first) const
+bool String::StartsWith(const StringType& data, ConstByteIterator first, EStringCompare compare) const
 {
 	if(first == nullptr)
 		first = Data();
@@ -429,16 +438,32 @@ bool String::StartsWith(const StringType& data, ConstByteIterator first) const
 	if(data.data[0] == 0)
 		return true;
 
-	auto strCur = first;
-	for(auto it = data.data; *it != 0; ++it, ++strCur) {
-		if(*it != *strCur)
-			return false;
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+	{
+		auto strCur = first;
+		for(auto it = data.data; *it != 0; ++it, ++strCur) {
+			if(*it != *strCur)
+				return false;
+		}
+		return true;
+	}
+	case EStringCompare::CaseInsensitive:
+	{
+		ConstUTF8Iterator strCur = first;
+		for(auto c : *this) {
+			if(!IsEqualCaseInsensitive(c, *strCur))
+				return false;
+			++strCur;
+		}
+		return true;
+	}
 	}
 
 	return true;
 }
 
-bool String::EndsWith(const StringType& data, ConstByteIterator end) const
+bool String::EndsWith(const StringType& data, ConstByteIterator end, EStringCompare compare) const
 {
 	if(end == nullptr)
 		end = End();
@@ -447,15 +472,33 @@ bool String::EndsWith(const StringType& data, ConstByteIterator end) const
 		return true;
 
 	data.EnsureSize();
-	auto dataCur = data.data + data.size - 1;
-	auto strCur = end - 1;
-	int i = 0;
-	for(auto it = dataCur; i < data.size; --it, --strCur, ++i) {
-		if(*it != *strCur)
-			break;
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+	{
+		auto dataCur = data.data + data.size - 1;
+		auto strCur = end - 1;
+		int i = 0;
+		for(auto it = dataCur; i < data.size; --it, --strCur, ++i) {
+			if(*it != *strCur)
+				break;
+		}
+		return (i == data.size);
+	}
+	case EStringCompare::CaseInsensitive:
+	{
+		ConstUTF8Iterator dataCur = data.data + data.size - 1;
+		ConstUTF8Iterator strCur = end - 1;
+		int i = 0;
+		for(auto it = dataCur; i < data.size; --it, --strCur) {
+			if(!IsEqualCaseInsensitive(*it, *strCur))
+				break;
+			i = static_cast<int>((end - 1) - (const char*)strCur);
+		}
+		return (i == data.size);
+	}
 	}
 
-	return (i == data.size);
+	return false;
 }
 
 int String::Replace(const StringType& replace, const StringType& search, ConstByteIterator first, ConstByteIterator end)
@@ -715,7 +758,7 @@ Array<String> String::Split(u32 ch, bool ignoreEmpty) const
 	return out;
 }
 
-EStringClass String::Classify() const
+EStringClassFlag String::Classify() const
 {
 	int alphaCount = 0;
 	int digitCount = 0;
@@ -738,30 +781,30 @@ EStringClass String::Classify() const
 		++count;
 	}
 
-	EStringClass out = (EStringClass)0;
+	EStringClassFlag out = (EStringClassFlag)0;
 	if(m_Size == 0)
-		out |= EStringClass::Empty;
+		out |= EStringClassFlag::Empty;
 
 	if(lowerCount == alphaCount && alphaCount > 0)
-		out |= EStringClass::Lower;
+		out |= EStringClassFlag::Lower;
 	else if(upperCount == alphaCount && alphaCount > 0)
-		out |= EStringClass::Upper;
+		out |= EStringClassFlag::Upper;
 
 	if(alphaCount == count && alphaCount > 0)
-		out |= EStringClass::Alpha;
+		out |= EStringClassFlag::Alpha;
 	else if(digitCount == count && digitCount > 0)
-		out |= EStringClass::Digit;
+		out |= EStringClassFlag::Digit;
 	else if(alphaCount + digitCount == count && alphaCount > 0 && digitCount > 0)
-		out |= EStringClass::AlphaNum;
+		out |= EStringClassFlag::AlphaNum;
 	else if(spaceCount == count && spaceCount > 0)
-		out |= EStringClass::Space;
+		out |= EStringClassFlag::Space;
 
 	return out;
 }
 
 bool String::IsWhitespace() const
 {
-	return IsEmpty() || Classify() == EStringClass::Space;
+	return IsEmpty() || Classify() == EStringClassFlag::Space;
 }
 
 String String::GetLower() const

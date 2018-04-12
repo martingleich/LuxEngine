@@ -1,8 +1,9 @@
 #ifndef INCLUDED_LUX_REFERENCECOUNTED_H
 #define INCLUDED_LUX_REFERENCECOUNTED_H
-#include "LuxBase.h"
-#include "lxException.h"
-#include <cstddef>
+#include "core/LuxBase.h"
+#include "core/lxException.h"
+#include "core/lxTypes.h"
+#include "core/lxFormat.h"
 
 namespace lux
 {
@@ -514,6 +515,114 @@ inline bool ReferenceCounted::Drop() const
 	return false;
 }
 
+namespace core
+{
+class AbstractRefTypeInfo
+{
+public:
+	virtual void Assign(void* data, ReferenceCounted* ptr) const = 0;
+	virtual ReferenceCounted* Get(const void* data) const = 0;
+	virtual bool IsStrong() const = 0;
+};
+
+template <typename T, bool IsStrongTmpl>
+class RefTypeInfo : public TypeInfoTemplate<typename core::Choose<IsStrongTmpl, StrongRef<T>, WeakRef<T>>::type>, public AbstractRefTypeInfo
+{
+public:
+	using RefT = typename core::Choose<IsStrongTmpl, StrongRef<T>, WeakRef<T>>::type;
+	RefTypeInfo() :
+		TypeInfoTemplate(IsStrongTmpl ? "strong_ref" : "weak_ref")
+	{
+	}
+	void Assign(void* data, ReferenceCounted* ptr) const
+	{
+		((RefT*)data)->operator=(dynamic_cast<T*>(ptr));
+	}
+	ReferenceCounted* Get(const void* data) const
+	{
+		return *((RefT*)data);
+	}
+	bool IsStrong() const { return IsStrongTmpl; }
+};
+
+template <typename T>
+struct TemplType<StrongRef<T>>
+{
+	static RefTypeInfo<T, true> typeInfo;
+	static Type Get()
+	{
+		return Type(&typeInfo);
+	}
+};
+
+template <typename T>
+struct TemplType<WeakRef<T>>
+{
+	static RefTypeInfo<T, false> typeInfo;
+	static Type Get()
+	{
+		return Type(&typeInfo);
+	}
+};
+
+template <typename T>
+RefTypeInfo<T, true> TemplType<StrongRef<T>>::typeInfo = RefTypeInfo<T, true>();
+
+template <typename T>
+RefTypeInfo<T, false> TemplType<WeakRef<T>>::typeInfo = RefypeInfo<T, false>();
+
+namespace Types
+{
+template <typename T>
+Type StrongRef()
+{
+	return TemplType<StrongRef<T>>::Get();
 }
+template <typename T>
+Type WeakRef()
+{
+	return TemplType<WeakRef<T>>::Get();
+}
+
+inline bool IsWeakRefType(Type t)
+{
+	auto arti = dynamic_cast<const AbstractRefTypeInfo*>(t.GetInfo());
+	if(!arti)
+		return false;
+	return !arti->IsStrong();
+}
+inline bool IsStrongRefType(Type t)
+{
+	auto arti = dynamic_cast<const AbstractRefTypeInfo*>(t.GetInfo());
+	if(!arti)
+		return false;
+	return arti->IsStrong();
+}
+inline bool IsRefType(Type t)
+{
+	auto arti = dynamic_cast<const AbstractRefTypeInfo*>(t.GetInfo());
+	return (arti != nullptr);
+}
+} // namespace Types
+
+template <typename T>
+void fmtPrint(format::Context& ctx, const StrongRef<T>& ref, format::Placeholder& pl)
+{
+	format::fmtPrint(ctx, (void*)(T*)ref, pl);
+	ctx.AddTerminatedSlice(" strong[");
+	ctx.AddTerminatedSlice(typeid(T).name());
+	ctx.AddTerminatedSlice("]");
+}
+template <typename T>
+void fmtPrint(format::Context& ctx, const WeakRef<T>& ref, format::Placeholder& pl)
+{
+	format::fmtPrint(ctx, (void*)(T*)ref, pl);
+	ctx.AddTerminatedSlice(" weak[");
+	ctx.AddTerminatedSlice(typeid(T).name());
+	ctx.AddTerminatedSlice("]");
+}
+
+} // namespace core
+} // namespace lux
 
 #endif

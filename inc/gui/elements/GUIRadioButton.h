@@ -64,7 +64,7 @@ public:
 	LUX_API void SetText(const core::String& str);
 	LUX_API const core::String& GetText() const;
 
-	LUX_API EGUIState GetState() const;
+	LUX_API EGUIStateFlag GetState() const;
 
 	LUX_API RadioButton* GetRadioGroupChecked();
 	LUX_API void SetRadioGroup(RadioButton* group);

@@ -34,7 +34,7 @@ struct BITMAPINFOHEADER
 
 bool ImageWriterBMP::CanWriteFile(const core::String& ext)
 {
-	return ext.IsEmpty() || ext.EqualCaseInsensitive("bmp") || ext.EqualCaseInsensitive("dib");
+	return ext.IsEmpty() || ext.Equal("bmp", core::EStringCompare::CaseInsensitive) || ext.Equal("dib", core::EStringCompare::CaseInsensitive);
 }
 
 void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Format, math::Dimension2I Size, u32 Pitch, u32 WriterParam)

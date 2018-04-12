@@ -12,11 +12,11 @@ namespace lux
 namespace scene
 {
 
-static ERenderPass GetPassFromReq(video::EMaterialRequirement req)
+static ERenderPass GetPassFromReq(video::EMaterialReqFlag req)
 {
-	if(TestFlag(req, video::EMaterialRequirement::DeferredEffect))
+	if(TestFlag(req, video::EMaterialReqFlag::DeferredEffect))
 		return ERenderPass::DeferredEffect;
-	else if(TestFlag(req, video::EMaterialRequirement::Transparent))
+	else if(TestFlag(req, video::EMaterialReqFlag::Transparent))
 		return ERenderPass::Transparent;
 	else
 		return ERenderPass::Solid;
@@ -67,7 +67,7 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 		auto pass = GetPassFromReq(material->GetRequirements());
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
-		if(pass == sceneData.pass && firstPrimitive < lastPrimitive) {
+		if(pass == sceneData.pass && firstPrimitive <= lastPrimitive) {
 			renderer->SetMaterial(material);
 			renderer->DrawGeometry(
 				geo,

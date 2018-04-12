@@ -418,7 +418,7 @@ void ResourceSystem::WriteResource(Resource* resource, io::File* file, const Str
 
 void ResourceSystem::WriteResource(Resource* resource, const io::Path& path) const
 {
-	auto file = io::FileSystem::Instance()->OpenFile(path, io::EFileMode::Write, true);
+	auto file = io::FileSystem::Instance()->OpenFile(path, io::EFileModeFlag::Write, true);
 	auto ext = io::GetFileExtension(path);
 	WriteResource(resource, file, ext);
 }
@@ -478,12 +478,15 @@ StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name& type, io::File
 	auto fileCursor = file->GetCursor();
 	StrongRef<ResourceLoader> result;
 	for(auto it = self->loaders.Last(); it != self->loaders.Begin(); --it) {
-		Name fileType = it->loader->GetResourceType(file, type);
-		if(fileType != Name::INVALID) {
-			if(type == Name::INVALID || type == fileType) {
-				type = fileType;
-				result = it->loader;
+		try {
+			Name fileType = it->loader->GetResourceType(file, type);
+			if(fileType != Name::INVALID) {
+				if(type == Name::INVALID || type == fileType) {
+					type = fileType;
+					result = it->loader;
+				}
 			}
+		} catch(...) {
 		}
 
 		// Reset file

@@ -104,9 +104,9 @@ UNIT_SUITE(String)
 		core::String d = "tes☠T";
 		core::String e = "";
 
-		UNIT_ASSERT_TRUE(a.EqualCaseInsensitive(b) == false);
-		UNIT_ASSERT_TRUE(b.EqualCaseInsensitive(d) == true);
-		UNIT_ASSERT_TRUE(b.EqualCaseInsensitive(e) == false);
+		UNIT_ASSERT_TRUE(a.Equal(b, core::EStringCompare::CaseInsensitive) == false);
+		UNIT_ASSERT_TRUE(b.Equal(d, core::EStringCompare::CaseInsensitive) == true);
+		UNIT_ASSERT_TRUE(b.Equal(e, core::EStringCompare::CaseInsensitive) == false);
 	}
 
 	UNIT_TEST(sub_String_1)

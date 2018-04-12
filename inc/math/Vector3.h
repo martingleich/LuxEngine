@@ -510,10 +510,12 @@ public:
 	*/
 	Vector3 GetOrthoNormal() const
 	{
-		if(x == 0)
+		if(z != 0 && y != 0)
 			return Vector3(0, z, -y) / std::sqrt(z*z + y*y);
 		else if(z != 0 && x != 0)
 			return Vector3(z, 0, -x) / std::sqrt(z*z + x*x);
+		else if(x != 0 && y != 0)
+			return Vector3(y, -x, 0) / std::sqrt(y*y + x*x);
 		else
 			return Vector3(1, 0, 0);
 	}
@@ -594,6 +596,11 @@ bool IsZero(const Vector3<T>& v, const T tolerance = math::Constants<T>::roundin
 		math::IsZero(v.y, tolerance) &&
 		math::IsZero(v.z, tolerance);
 }
+
+template <typename T> float* begin(math::Vector3<T>& v) { return &v.x; }
+template <typename T> float* end(math::Vector3<T>& v) { return (&v.z) + 1; }
+template <typename T> const float* begin(const math::Vector3<T>& v) { return &v.x; }
+template <typename T> const float* end(const math::Vector3<T>& v) { return (&v.z) + 1; }
 
 } // namespace math
 

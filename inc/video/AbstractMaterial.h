@@ -14,7 +14,7 @@ public:
 	virtual const Pass& GetPass(u32 index) const = 0;
 	virtual u32 GetPassCount() const = 0;
 
-	virtual EMaterialRequirement GetRequirements() const = 0;
+	virtual EMaterialReqFlag GetRequirements() const = 0;
 
 	StrongRef<AbstractMaterial> Clone() const
 	{

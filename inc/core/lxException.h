@@ -192,6 +192,14 @@ struct InvalidArgumentException : ErrorException
 
 #define LX_CHECK_BOUNDS(arg, lo, hi) if(arg < lo || arg > hi) throw lux::core::InvalidArgumentException(#arg, "Is out of range.");
 
+struct InvalidOperationException : public ErrorException
+{
+	explicit InvalidOperationException(const char* _msg) :
+		ErrorException(_msg)
+	{
+	}
+};
+
 //! Exception while dealing with unicode strings or characters.
 struct UnicodeException : Exception
 {

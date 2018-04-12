@@ -50,14 +50,14 @@ void Skin3D::DrawControl(
 	Element* elem,
 	const math::RectF& rect,
 	EGUIControl control,
-	EGUIState state,
+	EGUIStateFlag state,
 	const PaintOptions& data)
 {
 	LUX_UNUSED(elem);
-	Palette::EColorGroup paletteState = TestFlag(state, EGUIState::Enabled) ? Palette::EColorGroup::Enabled : Palette::EColorGroup::Disabled;
+	Palette::EColorGroup paletteState = TestFlag(state, EGUIStateFlag::Enabled) ? Palette::EColorGroup::Enabled : Palette::EColorGroup::Disabled;
 	switch(control) {
 	case EGUIControl::Button:
-		DrawPane(r, TestFlag(state, EGUIState::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
+		DrawPane(r, TestFlag(state, EGUIStateFlag::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
 		break;
 	case EGUIControl::SliderBase:
 		DrawSliderBase(
@@ -67,13 +67,13 @@ void Skin3D::DrawControl(
 			data.palette.GetColor(paletteState, Palette::EColorRole::WindowBackground));
 		break;
 	case EGUIControl::SliderThumb:
-		DrawPane(r, TestFlag(state, EGUIState::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
+		DrawPane(r, TestFlag(state, EGUIStateFlag::Sunken), rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
 		break;
 	case EGUIControl::CheckBox:
-		DrawCheckBox(r, TestFlag(state, EGUIState::Sunken), rect, TestFlag(state, EGUIState::Enabled));
+		DrawCheckBox(r, TestFlag(state, EGUIStateFlag::Sunken), rect, TestFlag(state, EGUIStateFlag::Enabled));
 		break;
 	case EGUIControl::RadioButton:
-		DrawCheckBox(r, TestFlag(state, EGUIState::Sunken), rect, TestFlag(state, EGUIState::Enabled));
+		DrawCheckBox(r, TestFlag(state, EGUIStateFlag::Sunken), rect, TestFlag(state, EGUIStateFlag::Enabled));
 		break;
 	default:
 		r->DrawRectangle(rect, data.palette.GetColor(paletteState, Palette::EColorRole::Window));
@@ -93,7 +93,7 @@ void Skin3D::DrawFocus(
 	float selectOffset = 2.0f;
 	if(elem->GetReferableType() == "lux.gui.Button") {
 		selectOffset = -2.0f;
-		if(TestFlag(elem->GetState(), EGUIState::Sunken)) {
+		if(TestFlag(elem->GetState(), EGUIStateFlag::Sunken)) {
 			auto off = GetPropertyVector("lux.gui.sunkenOffset");
 			rect.left += off.x;
 			rect.right += off.x;

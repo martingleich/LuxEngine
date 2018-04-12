@@ -1,6 +1,6 @@
 #ifndef INCLUDED_LUX_STRING_TABLE_H
 #define INCLUDED_LUX_STRING_TABLE_H
-#include "lxMemory.h"
+#include "core/lxMemory.h"
 #include "core/lxString.h"
 
 namespace lux

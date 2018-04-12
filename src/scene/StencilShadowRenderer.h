@@ -76,7 +76,7 @@ public:
 		m_ShadowRenderPass.stencil = GetShadowStencilMode();
 		m_ShadowRenderPass.zBufferFunc = video::EComparisonFunc::Always;
 		m_ShadowRenderPass.zWriteEnabled = false;
-		m_ShadowRenderPass.lighting = video::ELighting::Disabled;
+		m_ShadowRenderPass.lighting = video::ELightingFlag::Disabled;
 		m_ShadowRenderPass.fogEnabled = false;
 		m_ShadowRenderPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 		m_ShadowRenderPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
@@ -97,7 +97,7 @@ public:
 		m_Silhouette.stencil.readMask = m_StencilBitMask;
 		m_Silhouette.zWriteEnabled = false;
 		m_Silhouette.culling = video::EFaceSide::None;
-		m_Silhouette.lighting = video::ELighting::Disabled;
+		m_Silhouette.lighting = video::ELightingFlag::Disabled;
 		m_Silhouette.fogEnabled = false;
 		m_Silhouette.polygonOffset = -100.0f;
 		m_Silhouette.shader = video::MaterialLibrary::Instance()->

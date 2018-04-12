@@ -52,7 +52,7 @@ MaterialLibrary::MaterialLibrary()
 	{
 		video::Pass pass;
 		pass.fogEnabled = false;
-		pass.lighting = video::ELighting::Disabled;
+		pass.lighting = video::ELightingFlag::Disabled;
 
 		video::TextureStageSettings tss;
 		tss.colorOperator = ETextureOperator::SelectArg1;
@@ -76,7 +76,7 @@ MaterialLibrary::MaterialLibrary()
 		pass.shader = GetFixedFunctionShader({"texture"}, {tss});
 
 		auto transparent = LUX_NEW(Material);
-		transparent->SetRequirements(video::EMaterialRequirement::Transparent);
+		transparent->SetRequirements(video::EMaterialReqFlag::Transparent);
 		transparent->SetPass(pass);
 		m_MaterialMap["transparent"] = 2;
 		m_MaterialList.PushBack(transparent);

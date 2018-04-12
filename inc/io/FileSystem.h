@@ -46,7 +46,7 @@ public:
 	\return The newly created file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenFile(const FileDescription& desc, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
+	virtual StrongRef<File> OpenFile(const FileDescription& desc, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false) = 0;
 
 	//! Open a new file
 	/**
@@ -56,7 +56,7 @@ public:
 	\return The newly created file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenFile(const Path& filename, EFileMode mode = EFileMode::Read, bool createIfNotExist = false) = 0;
+	virtual StrongRef<File> OpenFile(const Path& filename, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false) = 0;
 
 	//! Create a file from Memory for read and write
 	/**
@@ -209,9 +209,6 @@ public:
 };
 
 }
-
-DECLARE_FLAG_CLASS(io::EFileMode);
-
 }
 
 

@@ -58,7 +58,7 @@ bool INIFile::Commit()
 
 	if(!m_File) {
 		if(!m_FilePath.IsEmpty()) {
-			m_File = FileSystem::Instance()->OpenFile(m_FilePath, EFileMode::Write, true);
+			m_File = FileSystem::Instance()->OpenFile(m_FilePath, EFileModeFlag::Write, true);
 			if(!m_File) {
 				log::Error("Can't open file: ~s.", m_FilePath);
 				return false;

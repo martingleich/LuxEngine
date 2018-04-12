@@ -15,7 +15,7 @@ public:
 	VertexBufferImpl(BufferManager* mgr);
 	~VertexBufferImpl();
 
-	void SetFormat(const VertexFormat& format, int stream, const void* init = nullptr);
+	void SetFormat(const VertexFormat& format, int stream, bool moveOld, const void* init);
 
 	const VertexFormat& GetFormat() const;
 	int GetStream() const;

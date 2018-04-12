@@ -109,7 +109,7 @@ private:
 
 	void UpdateTransforms(float polygonOffset);
 	void LoadFogSettings(bool isFogActive, bool fixedFunction, bool changedShader, bool changedFogEnable);
-	void LoadLightSettings(ELighting lighting, bool fixedFunction, bool changedShader, bool changeLighting);
+	void LoadLightSettings(ELightingFlag lighting, bool fixedFunction, bool changedShader, bool changeLighting);
 
 	void SetVertexFormat(const VertexFormat& format);
 
@@ -127,7 +127,7 @@ private:
 	VertexFormat m_VertexFormat;
 
 	float m_PrevPolyOffset = 0.0f;
-	ELighting m_PrevLighting = ELighting::Disabled;
+	ELightingFlag m_PrevLighting = ELightingFlag::Disabled;
 	bool m_PrevFog = false;
 
 	u32 m_ActiveFixedLights;

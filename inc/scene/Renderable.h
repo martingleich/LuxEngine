@@ -53,6 +53,7 @@ public:
 class Renderable
 {
 public:
+	virtual ~Renderable() {}
 	virtual void Render(Node* node, video::Renderer* renderer, const SceneData& scene) = 0;
 	virtual ERenderPass GetRenderPass() const = 0;
 	
@@ -68,9 +69,6 @@ public:
 };
 
 } // namespace scene
-
-DECLARE_FLAG_CLASS(scene::ERenderableTags);
-
 } // namespace lux
 
 #endif // #ifndef INCLUDED_LUX_SCENE_RENDERABLE_H

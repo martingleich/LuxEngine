@@ -8,7 +8,7 @@ namespace video
 {
 
 Material::Material() :
-	m_Requirement(EMaterialRequirement::None)
+	m_Requirement(EMaterialReqFlag::None)
 {
 }
 

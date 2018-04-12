@@ -9,6 +9,8 @@
 
 #include "video/VideoDriver.h"
 
+#include "video/Texture.h"
+
 LX_REGISTER_REFERABLE_CLASS(lux::scene::QuadRendererMachine, "lux.particlerenderermachine.Quad");
 
 namespace lux
@@ -44,7 +46,7 @@ QuadRendererMachine::QuadRendererMachine() :
 	m_DefaultPass.alpha.blendOperator = video::EBlendOperator::Add;
 	m_DefaultPass.zWriteEnabled = false;
 	m_DefaultPass.fogEnabled = false;
-	m_DefaultPass.lighting = video::ELighting::Disabled;
+	m_DefaultPass.lighting = video::ELightingFlag::Disabled;
 	video::TextureStageSettings tss;
 	tss.alphaArg1 = video::ETextureArgument::Texture;
 	tss.alphaArg2 = video::ETextureArgument::Diffuse;

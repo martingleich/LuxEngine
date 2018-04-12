@@ -2,10 +2,14 @@
 #define INCLUDED_LUX_VARIABLE_ACCESS_H
 #include "core/lxTypes.h"
 #include "core/lxFormat.h"
+#include "core/lxArray.h"
+#include "video/Color.h"
+
+/*
 #include "video/TextureLayer.h"
 #include "video/Texture.h"
 #include "video/CubeTexture.h"
-#include "core/lxArray.h"
+*/
 
 namespace lux
 {
@@ -127,6 +131,7 @@ public:
 		m_Type.Assign(copyTo, m_Data);
 	}
 
+	/*
 	//! Access as texture
 	operator video::BaseTexture*() const
 	{
@@ -154,7 +159,7 @@ public:
 
 		return out;
 	}
-
+*/
 	//! Access as any type
 	template <typename T>
 	const VariableAccess& operator=(const T& varVal) const
@@ -180,6 +185,7 @@ public:
 		return *this;
 	}
 
+	/*
 	//! Access as texture
 	const VariableAccess& operator=(video::BaseTexture* texture) const
 	{
@@ -223,6 +229,7 @@ public:
 	{
 		return (*this = (video::BaseTexture*)texture);
 	}
+	*/
 
 	//! Copy data from other packge param
 	/**

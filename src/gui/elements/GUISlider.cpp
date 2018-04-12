@@ -60,9 +60,9 @@ void Slider::Paint(Renderer* renderer)
 		po);
 	auto thumbState = GetState();
 	if(m_IsPressed)
-		thumbState |= gui::EGUIState::Sunken;
+		thumbState |= gui::EGUIStateFlag::Sunken;
 	else
-		thumbState |= gui::EGUIState::Raised;
+		thumbState |= gui::EGUIStateFlag::Raised;
 	skin->DrawControl(renderer,
 		this,
 		po.thumbRect,

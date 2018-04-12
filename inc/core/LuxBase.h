@@ -28,6 +28,7 @@
 
 #include "lxAssert.h"
 #include <cstdint>
+#include <cstddef>
 
 namespace lux
 {

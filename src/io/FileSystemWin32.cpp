@@ -91,7 +91,7 @@ FileSystemWin32::FileSystemWin32()
 	m_RootArchive = LUX_NEW(ArchiveFolderWin32)(this, m_WorkingDirectory);
 }
 
-StrongRef<File> FileSystemWin32::OpenFile(const FileDescription& desc, EFileMode mode, bool createIfNotExist)
+StrongRef<File> FileSystemWin32::OpenFile(const FileDescription& desc, EFileModeFlag mode, bool createIfNotExist)
 {
 	if(desc.GetArchive())
 		return desc.GetArchive()->OpenFile(desc, mode, createIfNotExist);
@@ -106,12 +106,12 @@ StrongRef<File> FileSystemWin32::OpenFile(const FileDescription& desc, EFileMode
 	return OpenFile(desc.GetPath() + desc.GetName(), mode, createIfNotExist);
 }
 
-StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileMode mode, bool createIfNotExist)
+StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileModeFlag mode, bool createIfNotExist)
 {
 	// Scan mount list
 	// Found: Open file with archive.
 	// Else: Open as normal file.
-	if(mode == EFileMode::Read || mode == EFileMode::ReadWrite) {
+	if(mode == EFileModeFlag::Read || mode == EFileModeFlag::ReadWrite) {
 		for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
 			if(filename.StartsWith(it->mountpoint)) {
 				Path subPath = filename.SubString(filename.Data() + it->mountpoint.Size(), filename.End());
@@ -337,15 +337,15 @@ void FileSystemWin32::RemoveMountPoint(const Path& point, Archive* archive)
 	}
 }
 
-core::String FileSystemWin32::GetFileOpenString(EFileMode mode) const
+core::String FileSystemWin32::GetFileOpenString(EFileModeFlag mode) const
 {
-	if(mode == EFileMode::ReadWrite)
+	if(mode == EFileModeFlag::ReadWrite)
 		return "r+b";
 
-	if(TestFlag(mode, EFileMode::Read))
+	if(TestFlag(mode, EFileModeFlag::Read))
 		return "rb";
 
-	if(TestFlag(mode, EFileMode::Write))
+	if(TestFlag(mode, EFileModeFlag::Write))
 		return "wb";
 
 	return core::String::EMPTY;
