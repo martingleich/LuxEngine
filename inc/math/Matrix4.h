@@ -4,6 +4,7 @@
 #include "math/Plane.h"
 #include "math/Quaternion.h"
 #include "core/lxFormat.h"
+#include "core/lxArray.h"
 
 namespace lux
 {
@@ -481,6 +482,68 @@ inline bool IsEqual(const Matrix4& a, const Matrix4& b, float tolerance = math::
 }
 
 LUX_API void fmtPrint(format::Context& ctx, const Matrix4& m, format::Placeholder& placeholder);
+
+//! Matrixstack
+/**
+A matrixstack saves multiple matrices. It allows access to the product of
+all these matrices.
+*/
+class MatrixStack
+{
+public:
+	//! Add a new matrix to the stack.
+	void Push(const math::Matrix4& m)
+	{
+		auto abs = stack.IsEmpty() ? m : (m * stack.Back().abs);
+		stack.EmplaceBack(m, abs);
+	}
+	//! Remove the top matrix from the stack.
+	void Pop()
+	{
+		stack.PopBack();
+	}
+
+	//! Read a absolute matrix from the stack.
+	/**
+	The 0-th matrix is the one at the top, the first the one below and so on.
+	The Size()-th matrix is the identity matrix.
+	\param i The index of the matrix to access.
+	*/
+	const math::Matrix4& PeekAbs(int i = 0) const
+	{
+		return i >= stack.Size() ? math::Matrix4::IDENTITY : stack.Back(i).abs;
+	}
+	
+	//! Read a relative matrix from the stack.
+	/**
+	The 0-th matrix is the one at the top, the first the one below and so on.
+	The Size()-th matrix is the identity matrix.
+	\param i The index of the matrix to access.
+	*/
+	const math::Matrix4& PeekRel(int i = 0) const
+	{
+		return i >= stack.Size() ? math::Matrix4::IDENTITY : stack.Back(i).rel;
+	}
+
+	//! The number of matrices on the stack.
+	int Size() const
+	{
+		return stack.Size();
+	}
+
+private:
+	struct Entry
+	{
+		Entry(const math::Matrix4& _rel, const math::Matrix4& _abs) :
+			rel(_rel),
+			abs(_abs)
+		{
+		}
+		math::Matrix4 rel;
+		math::Matrix4 abs;
+	};
+	core::Array<Entry> stack;
+};
 
 } // namespace math
 

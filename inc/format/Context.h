@@ -173,8 +173,8 @@ public:
 				b->used = 0;
 				b->next = nullptr;
 
-				curBlock->next = b;
 				curBlock = b;
+				curBlock->next = b;
 			}
 			out = curBlock->data + curBlock->used;
 			curBlock->used += bytes;
@@ -258,7 +258,7 @@ public:
 	};
 	SlicesT Slices() const
 	{
-		return {m_SliceMemory.Begin(), m_SliceMemory.End()};
+		return{m_SliceMemory.Begin(), m_SliceMemory.End()};
 	}
 
 	FORMAT_API SubContext SaveSubContext(const char* newFmtString);

@@ -88,6 +88,7 @@ public:
 	\return True, if the file exists otherwise false
 	*/
 	virtual bool ExistFile(const Path& path) const = 0;
+	virtual bool ExistFile(const FileDescription& path) const = 0;
 
 	//! The if a directory exists
 	/**

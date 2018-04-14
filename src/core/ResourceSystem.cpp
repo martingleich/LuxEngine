@@ -325,13 +325,16 @@ StrongRef<Resource> ResourceSystem::GetResource(Name type, const String& name, b
 	return resource;
 }
 
-StrongRef<Resource> ResourceSystem::GetResource(Name type, io::File* file)
+StrongRef<Resource> ResourceSystem::GetResource(Name type, io::File* file, bool loadIfNotFound)
 {
 	if(!file)
 		throw InvalidArgumentException("file", "Must not be null");
 
-	StrongRef<Resource> resource = CreateResource(type, file);
-	AddResource(file->GetName(), resource);
+	auto resource = GetResource(type, file->GetName(), false);
+	if(!resource && loadIfNotFound) {
+		resource = CreateResource(type, file);
+		AddResource(file->GetName(), resource);
+	}
 
 	return resource;
 }
@@ -340,10 +343,6 @@ StrongRef<Resource> ResourceSystem::CreateResource(Name type, const String& name
 {
 	if(name.IsEmpty())
 		throw InvalidArgumentException("name", "Name may not be empty");
-
-	auto id = GetResourceIdUnsafe(type, name);
-	if(id != INVALID_ID)
-		return GetResource(type, id);
 
 	auto file = self->fileSystem->OpenFile(name);
 

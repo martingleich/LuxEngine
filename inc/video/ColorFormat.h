@@ -91,9 +91,9 @@ public:
 	{
 		static const char* STRINGS[] = {
 			"R8G8B8",
-			"X8R8G8B8"
+			"X8R8G8B8",
 			"A8R8G8B8",
-			"G16R16"
+			"G16R16",
 			"X1R5G5B5",
 			"A1R5G5B5",
 			"R5G6B5",
@@ -110,8 +110,7 @@ public:
 			"DXT5",
 			"UNKNOWN"
 		};
-
-		if(m_Format < sizeof(STRINGS))
+		if(m_Format < sizeof(STRINGS)/sizeof(*STRINGS))
 			return STRINGS[m_Format];
 		else
 			return STRINGS[UNKNOWN];

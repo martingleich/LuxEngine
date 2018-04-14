@@ -19,6 +19,7 @@ public:
 	StrongRef<File> OpenVirtualFile(void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
 	StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
 	bool ExistFile(const Path& filename) const;
+	bool ExistFile(const FileDescription& filename) const;
 	bool ExistDirectory(const Path& filename) const;
 	Path GetAbsoluteFilename(const Path& filename) const;
 	const Path& GetWorkingDirectory() const;

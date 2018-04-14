@@ -25,7 +25,7 @@ public:
 		Maybe empty to indicate any possible type.
 	\return The name of the resource type loaded by the file, return a empty name to indicate no loadable resource.
 	*/
-	virtual Name GetResourceType(io::File* file, Name requestedType = core::Name::INVALID) = 0;
+	virtual Name GetResourceType(io::File* file, Name requestedType = Name::INVALID) = 0;
 
 	//! Loads all resources from a file
 	/**

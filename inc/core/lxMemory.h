@@ -42,9 +42,9 @@ public:
 	{
 		SetMinSize(other.m_Size, NOOP);
 		if(other.m_Size) {
-			if(action == COPY)
+			if(action == COPY && m_Data)
 				memcpy(m_Data, other.m_Data, other.m_Size);
-			if(action == ZERO)
+			if(action == ZERO && m_Data)
 				memset(m_Data, 0, other.m_Size);
 		}
 	}

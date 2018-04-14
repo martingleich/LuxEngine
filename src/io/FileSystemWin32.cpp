@@ -216,6 +216,28 @@ bool FileSystemWin32::ExistFile(const Path& filename) const
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
+bool FileSystemWin32::ExistFile(const FileDescription& filename) const
+{
+	if(filename.GetArchive())
+		return filename.GetArchive()->ExistFile(filename.GetPath() + filename.GetName());
+
+	// Scan mount-list
+	for(auto& mount : m_Mounts) {
+		if(filename.GetPath().StartsWith(mount.mountpoint)) {
+			Path subPath = filename.GetPath().SubString(filename.GetPath().Data() + mount.mountpoint.Size(), filename.GetPath().End());
+			if(mount.archive->ExistFile(subPath + filename.GetName()))
+				return true;
+		}
+	}
+
+	// Scan filesystem
+	DWORD fatt = GetWin32FileAttributes(filename.GetPath() + filename.GetName());
+	if(fatt == INVALID_FILE_ATTRIBUTES)
+		return false;
+	else
+		return (fatt & FILE_ATTRIBUTE_DIRECTORY) == 0;
+}
+
 bool FileSystemWin32::ExistDirectory(const Path& filename) const
 {
 	DWORD fatt = GetWin32FileAttributes(filename);

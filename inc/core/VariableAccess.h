@@ -334,6 +334,8 @@ public:
 	{
 		m_ArrayInfo = dynamic_cast<const AbstractArrayTypeInfo*>(type.GetInfo());
 		lxAssert(m_ArrayInfo);
+		if(!m_ArrayInfo)
+			return;
 		m_BaseType = m_ArrayInfo->GetBaseType();
 #ifdef LUX_ENABLE_ASSERTS
 		m_IsConst = type.IsConstant();

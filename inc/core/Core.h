@@ -20,6 +20,7 @@
 #include "core/lxEvent.h"
 #include "core/lxException.h"
 #include "core/lxFormat.h"
+#include "core/lxGUID.h"
 #include "core/lxHashMap.h"
 #include "core/lxHashSet.h"
 #include "core/lxID.h"

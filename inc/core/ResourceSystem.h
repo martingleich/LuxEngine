@@ -123,7 +123,7 @@ public:
 	\param file The file from which to load the resource.
 	\return The resource.
 	*/
-	LUX_API StrongRef<Resource> GetResource(Name type, io::File* file);
+	LUX_API StrongRef<Resource> GetResource(Name type, io::File* file, bool loadIfNotFound = true);
 
 	//! Enabled or disables caching for a given resource type.
 	/**
@@ -175,7 +175,7 @@ public:
 	\throws FileFormatException
 	*/
 	LUX_API void WriteResource(Resource* resource, io::File* file, const String& ext)  const;
-	
+
 	//! Write a resource to a file
 	/**
 	\param resource The resource to write to the file.
@@ -219,7 +219,7 @@ public:
 	\param name The new type.
 	*/
 	LUX_API void AddType(Name name);
-	
+
 
 private:
 	StrongRef<Resource> CreateResource(Name type, const String& name);
