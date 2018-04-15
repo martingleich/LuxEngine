@@ -8,7 +8,8 @@ namespace UnitTesting
 
 ResultObject::ResultObject() :
 	m_TotalResult(Result::Success)
-{}
+{
+}
 
 Result ResultObject::GetTotalResult() const
 {
@@ -31,7 +32,8 @@ Info::Info() :
 	m_Name(""),
 	m_File(""),
 	m_Line(0)
-{}
+{
+}
 
 Info::Info(const std::string& name, const std::string& file, int line, int _flags) :
 	env(nullptr),
@@ -41,7 +43,8 @@ Info::Info(const std::string& name, const std::string& file, int line, int _flag
 	m_Name(name),
 	m_File(file),
 	m_Line(line)
-{}
+{
+}
 
 const std::string& Info::GetName() const
 {
@@ -66,10 +69,11 @@ int Info::GetLine() const
 ///////////////////////////////////////////////////////////////////////////////
 
 AssertResult::AssertResult()
-{}
+{
+}
 
 AssertResult::AssertResult(
-		const Info& inf, Result res, const std::string& msg) :
+	const Info& inf, Result res, const std::string& msg) :
 	message(msg),
 	info(inf)
 {
@@ -80,16 +84,17 @@ AssertResult::AssertResult(
 
 TestContext::TestContext(TestResult& r) :
 	m_Results(r)
-{}
+{
+}
 
 void TestContext::AddResult(const Info& info,
-		bool result, const std::string& msg)
+	bool result, const std::string& msg)
 {
 	Info i = info;
 	i.test = &m_Results.GetTest();
 	i.suite = &i.test->GetSuite();
 	i.env = &i.suite->GetEnvironment();
-	AssertResult assertResult(info, result?Result::Success:Result::Fail, msg);
+	AssertResult assertResult(info, result ? Result::Success : Result::Fail, msg);
 	i.test->GetSuite().GetEnvironment().GetControl()->OnAssert(assertResult);
 	m_Results.AddResult(assertResult);
 }
@@ -99,7 +104,8 @@ void TestContext::AddResult(const Info& info,
 TestResult::TestResult(Test* test) :
 	m_Test(test),
 	m_Milliseconds(0)
-{}
+{
+}
 
 void TestResult::AddResult(const AssertResult& result)
 {
@@ -141,13 +147,14 @@ Test::Test(Suite& s, TestFunction func, const Info& info) :
 	m_Info.test = this;
 	m_Info.suite = &s;
 	m_Info.env = &m_Info.suite->GetEnvironment();
-	
+
 	s.RegisterTest(this);
 }
 
 bool Test::Run(TestResult& result)
 {
 	TestContext ctx(result);
+	bool continueTests = true;
 	try {
 		auto begin = std::chrono::high_resolution_clock::now();
 		m_Func(ctx);
@@ -157,20 +164,15 @@ bool Test::Run(TestResult& result)
 		result.SetTime(elapsedMillis.count());
 	} catch(...) {
 		ControlCallback* callback =
-				m_Info.suite->GetEnvironment().GetControl();
+			m_Info.suite->GetEnvironment().GetControl();
 		ControlAction action = callback->OnException(GetInfo());
+		result.AddResult(AssertResult(GetInfo(),
+			Result::Fail, "Unknown Exception was thrown."));
 		if(action == ControlAction::Abort)
-			return false;
-		if(action == ControlAction::AbortCurrent)
-			return true;
-		if(action == ControlAction::Ignore)
-			(void)0;
-		if(action == ControlAction::Procceed)
-			result.AddResult(AssertResult(GetInfo(),
-					Result::Fail, "Unknown Exception was thrown."));
+			continueTests = false;
 	}
 
-	return true;
+	return continueTests;
 }
 
 const Info& Test::GetInfo() const
@@ -187,7 +189,8 @@ const Suite& Test::GetSuite() const
 
 SuiteResult::SuiteResult(Suite* suite) :
 	m_Suite(suite)
-{}
+{
+}
 
 void SuiteResult::AddResult(const TestResult& result)
 {
@@ -230,11 +233,13 @@ void SuiteResult::SetTotalResult(Result result)
 
 SuiteFunction::SuiteFunction() :
 	m_Func(nullptr)
-{}
+{
+}
 
 SuiteFunction::SuiteFunction(void(*f)(), const Info& info) :
 	m_Func(f), m_Info(info)
-{}
+{
+}
 
 const Info& SuiteFunction::GetInfo() const
 {
@@ -262,7 +267,7 @@ bool Suite::Run(SuiteResult& result)
 	bool procceed;
 	if(!ExecFunction(m_Init, procceed))
 		return procceed;
-	
+
 	for(auto it = m_Tests.begin(); it != m_Tests.end(); ++it) {
 		if(!GetEnvironment().AllowTest(*it))
 			continue;
@@ -273,7 +278,7 @@ bool Suite::Run(SuiteResult& result)
 			testResult = TestResult(*it);
 			if(!ExecFunction(m_Enter, procceed))
 				return procceed;
-		
+
 			procceed = (*it)->Run(testResult);
 			if(!procceed)
 				return procceed;
@@ -323,7 +328,7 @@ void Suite::RegisterTest(Test* t)
 
 void Suite::RegisterDependency(const std::string& name)
 {
-	m_Dependencies.push_back(name);		
+	m_Dependencies.push_back(name);
 }
 
 bool Suite::ExecFunction(const SuiteFunction& func, bool& procceed)
@@ -331,17 +336,17 @@ bool Suite::ExecFunction(const SuiteFunction& func, bool& procceed)
 	try {
 		func();
 	} catch(...) {
-		 ControlAction action = 
-				m_Info.env->GetControl()->OnException(func.GetInfo());
-		 if(action == ControlAction::Ignore || action == ControlAction::Procceed)
-			 (void)0;
-		 else if(action == ControlAction::AbortCurrent) {
-			 procceed = true;
-			 return false;
-		 } else {
-			 procceed = false;
-			 return false;
-		 }
+		ControlAction action =
+			m_Info.env->GetControl()->OnException(func.GetInfo());
+		if(action == ControlAction::Ignore || action == ControlAction::Procceed)
+			(void)0;
+		else if(action == ControlAction::AbortCurrent) {
+			procceed = true;
+			return false;
+		} else {
+			procceed = false;
+			return false;
+		}
 	}
 
 	return true;
@@ -357,28 +362,28 @@ bool Suite::CheckTag(const std::string& tag) const
 	return (m_Tags.find(tag) != m_Tags.end());
 }
 
-void Suite::RegisterInit(void (*func)(), Info info)
+void Suite::RegisterInit(void(*func)(), Info info)
 {
 	info.env = &GetEnvironment();
 	info.suite = this;
 	m_Init = SuiteFunction(func, info);
 }
 
-void Suite::RegisterExit(void (*func)(), Info info)
+void Suite::RegisterExit(void(*func)(), Info info)
 {
 	info.env = &GetEnvironment();
 	info.suite = this;
 	m_Exit = SuiteFunction(func, info);
 }
 
-void Suite::RegisterFixtureEnter(void (*func)(), Info info)
+void Suite::RegisterFixtureEnter(void(*func)(), Info info)
 {
 	info.env = &GetEnvironment();
 	info.suite = this;
 	m_Enter = SuiteFunction(func, info);
 }
 
-void Suite::RegisterFixtureLeave(void (*func)(), Info info)
+void Suite::RegisterFixtureLeave(void(*func)(), Info info)
 {
 	info.env = &GetEnvironment();
 	info.suite = this;
@@ -394,7 +399,8 @@ void Suite::AddTag(const std::string& tag)
 
 EnvironmentResult::EnvironmentResult(Environment* env) :
 	m_Environment(env)
-{}
+{
+}
 
 void EnvironmentResult::AddResult(const SuiteResult& result)
 {
@@ -433,7 +439,8 @@ const Environment& EnvironmentResult::GetEnvironment() const
 
 Environment::Environment() :
 	m_Callback(nullptr)
-{}
+{
+}
 
 Environment& Environment::Instance()
 {
@@ -503,16 +510,16 @@ void Environment::RegisterSuite(Suite* suite)
 }
 
 bool Environment::CheckDependencies(const Suite* s,
-		EnvironmentResult& result, bool& Procceed,
-		const std::vector<size_t>& resultConnector)
+	EnvironmentResult& result, bool& Procceed,
+	const std::vector<size_t>& resultConnector)
 {
-	for(size_t i = 0; i != s->GetDependencyCount(); ++i){
+	for(size_t i = 0; i != s->GetDependencyCount(); ++i) {
 		size_t suiteID = m_SuiteMap[s->GetDependency(i)];
 		size_t resultID = resultConnector[suiteID];
 		const SuiteResult& suiteRes = result.GetResult(resultID);
 		if(suiteRes.GetTotalResult() != Result::Success) {
 			ControlAction action = GetControl()->OnDependencyFail(
-					*s, suiteRes.GetSuite(), suiteRes);
+				*s, suiteRes.GetSuite(), suiteRes);
 			if(action == ControlAction::Ignore) {
 				(void)0;
 			} else if(action == ControlAction::AbortCurrent) {
@@ -529,11 +536,11 @@ bool Environment::CheckDependencies(const Suite* s,
 }
 
 bool Environment::RunSuites(const std::vector<Suite*>& suites,
-		EnvironmentResult& result)
+	EnvironmentResult& result)
 {
 	std::vector<size_t> resultConnector(m_Suites.size());
 
-	for(auto it= suites.begin(); it != suites.end(); ++it) {
+	for(auto it = suites.begin(); it != suites.end(); ++it) {
 		bool procceed = true;
 
 		SuiteResult suiteResult(*it);
@@ -547,7 +554,7 @@ bool Environment::RunSuites(const std::vector<Suite*>& suites,
 		}
 
 		GetControl()->OnSuiteEnd(suiteResult);
-		
+
 		size_t suiteID = m_SuiteMap[(*it)->GetInfo().GetName()];
 		size_t resultID = result.GetResultCount();
 		resultConnector[suiteID] = resultID;
@@ -562,8 +569,8 @@ bool Environment::RunSuites(const std::vector<Suite*>& suites,
 }
 
 int Environment::TopoVisit(size_t cur, std::vector<Suite*>& result,
-		std::vector<std::pair<bool, bool>>& mark,
-		std::vector<const Suite*>& unsolvable)
+	std::vector<std::pair<bool, bool>>& mark,
+	std::vector<const Suite*>& unsolvable)
 {
 	if(mark[cur].second)
 		return 1;
@@ -578,7 +585,7 @@ int Environment::TopoVisit(size_t cur, std::vector<Suite*>& result,
 			auto dep = m_SuiteMap.find(depName);
 			if(dep == m_SuiteMap.end()) {
 				ControlAction action = GetControl()->OnUnknownDependency(
-						*m_Suites[cur], depName);
+					*m_Suites[cur], depName);
 				if(action == ControlAction::Ignore)
 					(void)0;
 				else
@@ -604,7 +611,7 @@ int Environment::TopoVisit(size_t cur, std::vector<Suite*>& result,
 bool Environment::SolveDependencies(std::vector<Suite*>& result)
 {
 	std::vector<std::pair<bool, bool>> mark(m_Suites.size(),
-			std::pair<bool,bool>(false, false));
+		std::pair<bool, bool>(false, false));
 	std::vector<const Suite*> unsolvable;
 
 	bool succeded = true;

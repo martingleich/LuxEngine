@@ -36,6 +36,7 @@ void VertexBufferImpl::SetFormat(const VertexFormat& format, int stream, bool mo
 				int elemCount = format.GetElemCount(stream);
 				struct CopyData { int newOff, oldOff, size;};
 				core::Array<CopyData> copyPos;
+				copyPos.Resize(elemCount);
 				for(int i = 0; i < elemCount; ++i) {
 					auto elem = format.GetElement(stream, i);
 					auto oldElem = m_Format.GetElement(m_Stream, elem.sematic);

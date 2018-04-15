@@ -54,7 +54,7 @@ void INIFile::Reload()
 bool INIFile::Commit()
 {
 	const char* newline = GetLineEndingChars(m_LineEnding);
-	int newlineLen = strlen(newline) - 1;
+	int newlineLen = (int)strlen(newline) - 1;
 
 	if(!m_File) {
 		if(!m_FilePath.IsEmpty()) {
@@ -648,7 +648,7 @@ void INIFile::WriteComment(const core::String& comment, int identDepth)
 
 	static char TABS[] = "\t\t\t\t\t\t";
 	const char* newline = GetLineEndingChars(m_LineEnding);
-	int newlineLen = strlen(newline) - 1;
+	int newlineLen = (int)strlen(newline) - 1;
 
 	u8 utf8Buffer[6];
 	int utf8Size;

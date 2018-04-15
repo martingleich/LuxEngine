@@ -18,9 +18,6 @@ MouseDevice::MouseDevice(const DeviceCreationDesc* desc, InputSystem* system) :
 		auto elemDesc = desc->GetElementDesc(EEventType::Button, i);
 		button.type = EElementType::Input | EElementType::Button | EElementType::PushButton;
 		button.name = elemDesc.name;
-
-		if(button.name.IsEmpty())
-			button.name = "Button-" + core::StringConverter::ToString(i);
 	}
 
 	for(int i = 0; i < m_Axes.Size(); ++i) {
@@ -28,15 +25,10 @@ MouseDevice::MouseDevice(const DeviceCreationDesc* desc, InputSystem* system) :
 		auto elemDesc = desc->GetElementDesc(EEventType::Axis, i);
 		axis.type = EElementType::Input | EElementType::Axis | EElementType::Rel;
 		axis.name = elemDesc.name;
-
-		if(axis.name.IsEmpty())
-			axis.name = "Axis-" + core::StringConverter::ToString(i);
 	}
 
 	m_Pos.type = EElementType::Input | EElementType::Area | EElementType::Rel;
 	m_Pos.name = desc->GetElementDesc(EEventType::Area, 0).name;
-	if(m_Pos.name.IsEmpty())
-		m_Pos.name = "Position";
 
 	Reset();
 }

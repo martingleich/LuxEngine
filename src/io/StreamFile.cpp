@@ -28,10 +28,11 @@ s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
 {
 	LX_CHECK_NULL_ARG(out);
 	LX_CHECK_NULL_ARG(numBytes);
-	if(numBytes > (s64)std::numeric_limits<size_t>::max())
+	size_t numBytesSizeT;
+	if(!core::CheckedCast(numBytes, numBytesSizeT))
 		throw io::FileException(io::FileException::ReadError);
 
-	s64 read = (s64)fread(out, 1, (size_t)numBytes, m_File);
+	s64 read = (s64)fread(out, 1, numBytesSizeT, m_File);
 	if(read != numBytes) {
 		u8* cur = (u8*)out + read;
 		s64 count = numBytes - read;
@@ -54,13 +55,14 @@ s64 StreamFile::WriteBinaryPart(const void* data, s64 numBytes)
 {
 	LX_CHECK_NULL_ARG(data);
 	LX_CHECK_NULL_ARG(numBytes);
-	if(numBytes > (s64)std::numeric_limits<size_t>::max())
-		throw io::FileException(io::FileException::WriteError);
+	size_t numBytesSizeT;
+	if(!core::CheckedCast(numBytes, numBytesSizeT))
+		throw io::FileException(io::FileException::ReadError);
 
 	if((s64)ftell(m_File) > m_FileSize - numBytes)
 		m_FileSize = ftell(m_File) + numBytes;
 
-	if(fwrite(data, (size_t)numBytes, 1, m_File) != 1)
+	if(fwrite(data, numBytesSizeT, 1, m_File) != 1)
 		throw io::FileException(io::FileException::WriteError);
 	m_Cursor += numBytes;
 
@@ -107,4 +109,3 @@ bool StreamFile::IsEOF() const
 
 }
 }
-

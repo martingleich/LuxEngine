@@ -449,7 +449,7 @@ public:
 	}
 	int operator-(StrideBaseIterator& other) const
 	{
-		return (m_Ptr - other.m_Ptr) / m_Stride;
+		return (int)(m_Ptr - other.m_Ptr) / m_Stride;
 	}
 
 	StrideBaseIterator& operator++()

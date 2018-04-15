@@ -10,24 +10,44 @@ namespace core
 {
 
 template <typename ToT, typename FromT>
-inline ToT SafeCast(FromT from)
+inline bool CheckedCast(FromT from, ToT& to)
 {
-	using BiggerT = core::Choose<(sizeof(ToT) > sizeof(FromT)), ToT, FromT>::type;
-	if((BiggerT)from > (BiggerT)std::numeric_limits<ToT>::max())
-		throw core::Exception("Overflow");
-	if((BiggerT)from < (BiggerT)std::numeric_limits<ToT>::min())
-		throw core::Exception("Overflow");
-	return static_cast<ToT>(from);
+	static_assert(std::is_integral<FromT>::value && std::is_integral<ToT>::value, "Can only cast intergral types");
+	ifconst(std::is_unsigned<ToT>::value == std::is_unsigned<FromT>::value)
+	{
+		using BiggerT = core::Choose<sizeof(ToT) < sizeof(FromT), FromT, ToT>::type;
+		if((BiggerT)from > (BiggerT)std::numeric_limits<ToT>::max())
+			return false;
+		if((BiggerT)from < (BiggerT)std::numeric_limits<ToT>::min())
+			return false;
+	}
+	ifconst(std::is_unsigned<ToT>::value && std::is_signed<FromT>::value)
+	{
+		// signed to unsigend
+		if(from < 0)
+			return false;
+		using BiggerT = core::Choose<sizeof(ToT) < sizeof(FromT), std::make_unsigned<FromT>::type, ToT>::type;
+		if((BiggerT)from > (BiggerT)std::numeric_limits<ToT>::max())
+			return false;
+	}
+	ifconst(std::is_signed<ToT>::value && std::is_unsigned<FromT>::value) {
+
+		// unsigned to sigend
+		using BiggerT = core::Choose<sizeof(ToT) < sizeof(FromT), std::make_signed<FromT>::type, ToT>::type;
+		if((BiggerT)from > (BiggerT)std::numeric_limits<ToT>::max())
+			return false;
+	}
+	to = (ToT)from;
+	return true;
 }
 
 template <typename ToT, typename FromT>
-inline ToT SaturateCast(FromT from)
+inline ToT SafeCast(FromT from)
 {
-	if(from > std::numeric_limits<ToT>::max())
-		return std::numeric_limits<ToT>::max();
-	if(from < std::numeric_limits<ToT>::min())
-		return std::numeric_limits<ToT>::min();
-	return static_cast<ToT>(from);
+	ToT out;
+	if(!CheckedCast(from, out))
+		throw core::Exception("Overflow");
+	return out;
 }
 
 } // namespace core

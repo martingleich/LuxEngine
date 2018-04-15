@@ -48,7 +48,7 @@ void RawMouseDevice::HandleInput(RAWINPUT* input)
 	else if(mouse.usFlags == 0)
 		SendPosEvent(true, mouse.lLastX, mouse.lLastY);
 
-	for(int i = 0; i < MAX_MOUSE_BUTTONS; ++i) {
+	for(int i = 0; i < m_ButtonCount; ++i) {
 		int down_flag = (1 << (2 * i));
 		int up_flag = (1 << (2 * i + 1));
 
@@ -88,7 +88,12 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, int cod
 		"Right Button",
 		"Middle Button",
 		"X1 Button",
-		"X2 Button"};
+		"X2 Button",
+		"Button 6",
+		"Button 7",
+		"Button 8",
+		"Button 9",
+		"Button 10"};
 
 	static const core::String axis_names[] = {
 		"Wheel",
@@ -100,15 +105,15 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, int cod
 	static const core::String unknown = "(unknown)";
 
 	if(type == EEventType::Button) {
-		if(code >= ARRAYSIZE(button_names))
+		if(code >= m_ButtonCount)
 			throw core::OutOfRangeException();
 		return ElemDesc(button_names[code], 0, 0, EElementType::Other);
 	} else if(type == EEventType::Axis) {
-		if(code >= ARRAYSIZE(axis_names))
+		if(code >= 2)
 			throw core::OutOfRangeException();
 		return ElemDesc(axis_names[code], 0, 0, EElementType::Other);
 	} else if(type == EEventType::Area) {
-		if(code >= ARRAYSIZE(area_names))
+		if(code >= 1)
 			throw core::OutOfRangeException();
 		return ElemDesc(area_names[code], 0, 0, EElementType::Other);
 	} else {
@@ -118,7 +123,7 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, int cod
 
 void RawMouseDevice::SendButtonEvent(int button, bool state)
 {
-	lxAssert(button < MAX_MOUSE_BUTTONS);
+	lxAssert(button < m_ButtonCount);
 
 	Event event;
 	event.source = EEventSource::Mouse;

@@ -38,7 +38,7 @@ String::String(const char* data, int length) :
 
 	int size;
 	if(length < 0) {
-		size = (size_t)strlen(data);
+		size = (int)strlen(data);
 	} else {
 		const char* cur = data;
 		int count = 0;
@@ -349,7 +349,7 @@ void String::Resize(int newLength, const StringType& filler)
 			throw InvalidArgumentException("filler", "length(filler) > 0");
 
 		int fillerLength = filler.size == 1 ? 1 : StringLengthUTF8(filler.data);
-		int addLength = newLength - curLength;
+		int addLength = static_cast<int>(newLength - curLength);
 
 		int elemCount = addLength / fillerLength;
 		int addBytes = elemCount*filler.size;
@@ -653,7 +653,7 @@ String::ConstIterator String::Remove(ConstByteIterator pos, int count)
 
 String::ConstIterator String::Remove(ConstByteIterator from, ConstByteIterator to)
 {
-	return Remove(from, to - from);
+	return Remove(from, core::IteratorDistance(from, to));
 }
 
 String& String::RStrip(ConstByteIterator end)
@@ -667,7 +667,7 @@ String& String::RStrip(ConstByteIterator end)
 	char* data = Data();
 
 	ConstIterator last = ConstIterator(end) - 1;
-	int lastSize = end - last.Pointer();
+	int lastSize = core::IteratorDistance(last.Pointer(), end);
 	ConstIterator begin = Begin();
 	int removed = 0;
 	while(last != begin && IsSpace(*last)) {

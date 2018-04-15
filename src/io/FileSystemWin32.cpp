@@ -463,8 +463,6 @@ void FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 			subDirs.PopBack();
 		}
 	} while(!subDirs.IsEmpty() && path_ptr - path > 4 && !recursive);
-
-	throw core::RuntimeException("Filepath isn't a valid path");
 }
 
 } // namespace io
