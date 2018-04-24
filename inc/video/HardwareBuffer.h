@@ -90,7 +90,7 @@ inline HardwareBuffer::~HardwareBuffer()
 	Clear();
 }
 
- inline void HardwareBuffer::Clear()
+inline void HardwareBuffer::Clear()
 {
 	LUX_FREE_ARRAY(m_Data);
 	m_Data = nullptr;
@@ -109,8 +109,14 @@ inline void HardwareBuffer::ResetDirty()
 
 inline void HardwareBuffer::SetDirty(int begin, int end)
 {
-	m_BeginDirty = math::Min(m_Size-1, begin);
-	m_EndDirty = math::Min(m_Size-1, end);
+	if(begin > m_Size)
+		ResetDirty();
+	else if(end > m_Size)
+		m_EndDirty = math::Max(m_Size - 1, 0);
+	else {
+		m_BeginDirty = begin;
+		m_EndDirty = end;
+	}
 }
 
 inline void* HardwareBuffer::Pointer()
@@ -246,8 +252,9 @@ inline void HardwareBuffer::SetSize(int size, bool moveOld, void* init)
 	} else {
 		if(m_BeginDirty > m_EndDirty)
 			m_BeginDirty = 0;
-		m_BeginDirty = math::Min(m_BeginDirty, m_Size - 1);
-		m_EndDirty = size - 1;
+		if(m_BeginDirty >= m_Size)
+			m_BeginDirty = m_Size > 0 ? m_Size - 1 : INT_MAX;
+		m_EndDirty = size > 0 ? size - 1 : 0;
 	}
 
 	m_Size = size;

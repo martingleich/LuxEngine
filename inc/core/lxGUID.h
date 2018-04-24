@@ -26,9 +26,16 @@ public:
 		return out;
 	}
 
-	static GUID FromString(const char* str)
+	static GUID FromString(const core::String& str)
 	{
-		if(strlen(str) != 36)
+		return FromString(str.Data(), str.Size());
+	}
+
+	static GUID FromString(const char* str, int length = -1)
+	{
+		if(length < 0)
+			length = strlen(str);
+		if(length != 36)
 			return GUID::EMPTY;
 		GUID out;
 		u8* bytes = out.bytes;

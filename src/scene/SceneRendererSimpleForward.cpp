@@ -196,7 +196,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 			bool clearStencil = true;
 			if(!m_SkyBoxList.IsEmpty()) {
 				clearZ = true;
-				clearColor = true;
+				clearColor = false;
 			}
 			m_Renderer->Clear(clearColor, clearZ, clearStencil);
 			m_Renderer->BeginScene();

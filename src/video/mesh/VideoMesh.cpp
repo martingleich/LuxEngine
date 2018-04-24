@@ -2,6 +2,9 @@
 #include "video/Material.h"
 #include "video/mesh/Geometry.h"
 
+LX_REGISTER_RESOURCE_CLASS("lux.resource.Mesh", lux::video::Mesh);
+
+
 namespace lux
 {
 namespace video
@@ -18,7 +21,10 @@ Mesh::~Mesh()
 
 void Mesh::RecalculateBoundingBox()
 {
-	SetBoundingBox(GetGeometry()->GetBoundingBox());
+	if(m_Geometry)
+		m_BoundingBox = m_Geometry->GetBoundingBox();
+	else
+		m_BoundingBox.Set(0, 0, 0);
 }
 
 void Mesh::SetMaterial(Material* m)
@@ -85,7 +91,7 @@ void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 	int begin1 = 0;
 	int mid1 = 0, mid2 = 0;
 	for(int i = 0; i < m_Ranges.Size(); ++i) {
-		if(!inside && m_Ranges[i].begin <= firstPrimitive && (m_Ranges.Size() == i + 1 || firstPrimitive <= m_Ranges[i+1].begin)) {
+		if(!inside && m_Ranges[i].begin <= firstPrimitive && (m_Ranges.Size() == i + 1 || firstPrimitive <= m_Ranges[i + 1].begin)) {
 			insertAt = i;
 			inside = true;
 			begin1 = m_Ranges[i].begin;
@@ -189,6 +195,32 @@ core::Name Mesh::GetReferableType() const
 {
 	return core::ResourceType::Mesh;
 }
+
+const Geometry* Mesh::GetGeometry() const
+{
+	return m_Geometry;
+}
+
+StrongRef<Geometry> Mesh::GetGeometry()
+{
+	return m_Geometry;
+}
+
+void Mesh::SetGeometry(Geometry* geo)
+{
+	m_Geometry = geo;
+}
+
+const math::AABBoxF& Mesh::GetBoundingBox() const
+{
+	return m_BoundingBox;
+}
+
+void Mesh::SetBoundingBox(const math::AABBoxF& box)
+{
+	m_BoundingBox = box;
+}
+
 
 } // namespace video
 } // namespace lux

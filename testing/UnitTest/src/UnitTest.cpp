@@ -155,6 +155,8 @@ bool Test::Run(TestResult& result)
 {
 	TestContext ctx(result);
 	bool continueTests = true;
+	bool exception = false;
+	std::string exceptionText;
 	try {
 		auto begin = std::chrono::high_resolution_clock::now();
 		m_Func(ctx);
@@ -162,12 +164,22 @@ bool Test::Run(TestResult& result)
 		std::chrono::duration<double, std::ratio<1, 1000>> elapsedMillis = end - begin;
 
 		result.SetTime(elapsedMillis.count());
+	} catch(const std::exception& e) {
+		exceptionText = e.what();
+		exception = true;
+	} catch(const char* e) {
+		exceptionText = e;
+		exception = true;
 	} catch(...) {
+		exceptionText = "Unknown exception";
+		exception = true;
+	}
+	if(exception) {
 		ControlCallback* callback =
 			m_Info.suite->GetEnvironment().GetControl();
 		ControlAction action = callback->OnException(GetInfo());
 		result.AddResult(AssertResult(GetInfo(),
-			Result::Fail, "Unknown Exception was thrown."));
+			Result::Fail, exceptionText));
 		if(action == ControlAction::Abort)
 			continueTests = false;
 	}

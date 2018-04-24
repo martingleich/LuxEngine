@@ -8,7 +8,7 @@
 #include "video/VideoDriver.h"
 #include "video/Texture.h"
 #include "video/VertexTypes.h"
-#include "video/mesh/StaticMesh.h"
+#include "video/mesh/VideoMesh.h"
 #include "video/mesh/Geometry.h"
 
 #include "io/FileSystem.h"

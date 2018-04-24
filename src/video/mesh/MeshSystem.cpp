@@ -1,5 +1,5 @@
 #include "video/mesh/MeshSystem.h"
-#include "video/mesh/StaticMesh.h"
+#include "video/mesh/VideoMesh.h"
 
 #include "core/ReferableFactory.h"
 #include "core/ResourceSystem.h"
@@ -9,6 +9,7 @@
 #include "video/mesh/Geometry.h"
 
 #include "video/mesh/MeshLoaderOBJ.h"
+#include "video/mesh/MeshLoaderX.h"
 
 #include "video/mesh/GeometryCreatorPlane.h"
 #include "video/mesh/GeometryCreatorSphereUV.h"
@@ -50,6 +51,7 @@ MeshSystem::MeshSystem()
 	m_DefaultMaterial = m_MatLib->CloneMaterial("solid");
 
 	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderOBJ));
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(MeshLoaderX));
 
 	m_PlaneCreator = AddCreator(LUX_NEW(GeometryCreatorPlane));
 	m_SphereUVCreator = AddCreator(LUX_NEW(GeometryCreatorSphereUV));
