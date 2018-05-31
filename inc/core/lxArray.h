@@ -236,11 +236,18 @@ public:
 	*/
 	void Insert(const T& entry, Iterator before)
 	{
+		// Copy if reference point to inside the container.
+		auto ref = &entry;
+		alignas(alignof(T)) const char* copyData[sizeof(T)];
+		if(&entry >= Data() && &entry < Data() + m_Alloc) {
+			new (copyData) T(entry);
+			ref = (const T*)copyData;
+		}
 		auto ptr = GetInsertPointer(before);
 		if(ptr == Data() + Size() - 1)
-			new (ptr) T(entry);
+			new (ptr) T(*ref);
 		else
-			*ptr = entry;
+			*ptr = *ref;
 	}
 
 	//! Add a new entry at any position to the array(move version)
@@ -250,11 +257,18 @@ public:
 	*/
 	void Insert(T&& entry, Iterator before)
 	{
+		// Copy if reference point to inside the container.
+		auto ref = &entry;
+		alignas(alignof(T)) const char* copyData[sizeof(T)];
+		if(&entry >= Data() && &entry < Data() + m_Alloc) {
+			new (copyData) T(std::move(entry));
+			ref = (T*)copyData;
+		}
 		auto ptr = GetInsertPointer(before);
 		if(ptr == Data() + m_Used - 1)
-			new (ptr) T(std::move(entry));
+			new (ptr) T(std::move(*ref));
 		else
-			*ptr = std::move(entry);
+			*ptr = std::move(*ref);
 	}
 
 	template <typename... Ts>

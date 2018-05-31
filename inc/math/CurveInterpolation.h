@@ -34,7 +34,8 @@ struct Sample
 	Sample(float _x, const T& _value) :
 		x(_x),
 		value(_value)
-	{}
+	{
+	}
 	bool operator<(const Sample& other) const
 	{
 		if(x == other.x)
@@ -85,11 +86,15 @@ inline float MapToValidRange(float x, float minX, float maxX, EEdgeHandling edge
 
 //! The index of the next element >= x, to the right.
 template <typename T>
-int GetUpperBound(const Sample<T>* samples, int count, float x)
+int GetUpperBound(const Sample<T>* samples, int count, float x, int hint)
 {
 	const Sample<T>* n;
 	const Sample<T>* i;
 	auto range = core::MakeRange(samples, samples + count);
+	if(hint >= 1 && hint < count && samples[hint-1].x > x && samples[hint].x < x)
+		return hint;
+	else if(hint + 1 < count && samples[hint].x > x && samples[hint + 1].x < x)
+		return hint+1;
 	Sample<T> dummy;
 	dummy.x = x;
 	n = core::BinarySearch(dummy, range, &i);
@@ -100,9 +105,9 @@ int GetUpperBound(const Sample<T>* samples, int count, float x)
 }
 
 template <typename T>
-void GetBounds(const Sample<T>* samples, int count, float x, int& lower, int& upper)
+void GetBounds(const Sample<T>* samples, int count, float x, int& lower, int& upper, int upperHint)
 {
-	const int t = GetUpperBound(samples, count, x);
+	const int t = GetUpperBound(samples, count, x, upperHint);
 
 	if(t != 0) {
 		upper = t;
@@ -197,22 +202,27 @@ Addition, Subtraction, Postmultiplication with float.
 \param x The x value to interpolate.
 \param edgeHandling How are x values outside of the valid range handled(extrapolation).
 \param interpolate The used interpolation technique
+\param cacheData A pointer to data, which may be used by the implementation to speed up interpolation, can be null.
 */
 template <typename T>
 T CurveInterpolation(
 	const Sample<T>* samples, int count,
 	float x,
 	EEdgeHandling edgeHandling = EEdgeHandling::Clamp,
-	EInterpolation interpolate = EInterpolation::Smooth)
+	EInterpolation interpolate = EInterpolation::Smooth,
+	u32* cacheData = nullptr)
 {
 	if(count == 0)
 		return T();
 	if(count == 1)
 		return samples[0].value;
 
+	int upperHint = cacheData ? (int)*cacheData : 0;
 	x = CurveHelper::MapToValidRange(x, samples[0].x, samples[count - 1].x, edgeHandling); // x in [lower, upper]
 	int upper, lower;
-	CurveHelper::GetBounds(samples, count, x, lower, upper);
+	CurveHelper::GetBounds(samples, count, x, lower, upper, upperHint);
+	if(cacheData)
+		*cacheData = (u32)upperHint;
 	const float xl = samples[lower].x;
 	const T vl = samples[lower].value;
 	const float xu = samples[upper].x;

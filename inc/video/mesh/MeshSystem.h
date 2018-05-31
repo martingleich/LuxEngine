@@ -25,10 +25,17 @@ public:
 
 	//! Create a new unmanaged mesh
 	/**
+	The created mesh doens't have a geometry or material associated.
 	\return The new mesh
 	*/
 	LUX_API StrongRef<Mesh> CreateMesh();
 
+	//! Create a new unmanaged mesh
+	/**
+	The created mesh doens't have a material associated.
+	\param geo The geometry set in the mesh.
+	\return The new mesh
+	*/
 	LUX_API StrongRef<Mesh> CreateMesh(Geometry* geo);
 
 	//! Add a new geometry creator to the library.

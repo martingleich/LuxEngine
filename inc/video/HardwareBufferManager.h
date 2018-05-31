@@ -18,6 +18,17 @@ class BufferManager : public ReferenceCounted
 public:
 	virtual ~BufferManager() {}
 
+	//! Start deferring the following updates.
+	/**
+	Stops Hardwarebuffer updates from immediatly affecting the hardwarebuffer.
+	This allows to merge multiple changes to the same buffer and other optizations.
+	EndDeferred must be called after calling BeginDeferred.
+	*/
+	//virtual void BeginDeferred() = 0;
+
+	//! Stop deferring and flushes all deferred updates.
+	//virtual void EndDeferred() = 0;
+
 	//! Informs the buffermanager that a new buffer was created
 	/**
 	\param buffer The buffer which was created

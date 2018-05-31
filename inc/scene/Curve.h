@@ -36,7 +36,7 @@ public:
 	}
 
 protected:
-	math::EEdgeHandling m_EdgeHandling;
+	math::EEdgeHandling m_EdgeHandling = math::EEdgeHandling::Clamp;
 };
 
 class KeyFrameCurve : public Curve
@@ -84,7 +84,7 @@ protected:
 
 protected:
 	core::Type m_Type;
-	math::EInterpolation m_Interpolation;
+	math::EInterpolation m_Interpolation = math::EInterpolation::Smooth;
 };
 
 template <typename T>

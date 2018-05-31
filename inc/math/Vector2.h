@@ -209,7 +209,7 @@ public:
 		return Vector2<T>(x - v.x, y - v.y).GetLengthSq();
 	}
 
-	Vector2<T> Normal()
+	Vector2<T> Normal() const
 	{
 		Vector2<T> out(*this);
 		return out.Normalize();
