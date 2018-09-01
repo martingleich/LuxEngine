@@ -15,10 +15,6 @@
 #include "core/lxException.h"
 #include "core/lxGUID.h"
 
-#if 0
-#include "Armature.h"
-#endif
-
 // TODO: Merging of skinning data.
 
 namespace lux
@@ -1075,7 +1071,7 @@ public:
 			auto nWeights = parser->ReadDWORD();
 			buffer.Resize(nWeights * 4);
 			auto vertexIndices = parser->ReadDWORDArray(nWeights, buffer.Data());
-			const int MAX_BONES_PER_VERTEX = 1;
+			const int MAX_BONES_PER_VERTEX = 4;
 			for(u32 i = 0; i < nWeights; ++i) {
 				auto vid = vertexIndices[i];
 				auto id = m_Mesh.vertexBoneAffectCount[vid];
@@ -1104,12 +1100,6 @@ public:
 					m_Mesh.boneWeights[vid][id] = (u8)(f * 255);
 					++id;
 				}
-				/*
-				if(id < 3) {
-					m_Mesh.boneWeights[vid][id] = (u8)(f * 255);
-					++id;
-				}
-				*/
 				++i;
 			}
 
@@ -1402,78 +1392,6 @@ private:
 	core::String m_MeshToLoad;
 };
 
-#if 0
-class ArmatureLoadVisitor : public BaseVisitor
-{
-public:
-	ArmatureLoadVisitor(scene::Armature* dst, XFileTraverser* traverser) :
-		BaseVisitor(traverser),
-		m_Builder(scene::EArmatureExFlag::None, dst)
-	{
-		m_AbsBoneTransforms.EmplaceBack();
-	}
-
-	bool OnObject(const Scope& scope)
-	{
-		if(scope.type == g_GUIDFrame) {
-			/*
-			[...]
-			*/
-			int parent = -1;
-			if(m_BoneIdStack.Size())
-				parent = m_BoneIdStack.Back();
-			auto boneId = m_Builder.AddBone(scope.identName, -1);
-			m_BoneIdStack.PushBack(boneId);
-			traverser->ReadOpenObjectData();
-		} else if(scope.type == g_GUIDFrameTransformMatrix) {
-			/*
-			FrameTransformMatrix:
-				Matrix4x4 frameMatrix;
-			Matrix4x4:
-				array float values[16];
-			*/
-			if(!InScope(g_GUIDFrame))
-				throw XFileFormatException("FrameTransformMatrix only inside frame");
-			math::Matrix4 m;
-			parser->ReadFloatArray(16, m.DataRowMajor());
-			// Replace default identity matrix.
-			m_MatrixStack.Pop();
-			m_MatrixStack.Push(m);
-			parser->MatchTextOnly(TOKEN_SEMICOLON);
-			auto absMatrix = m_MatrixStack.PeekAbs();
-			auto parentMatrix = m_MatrixStack.PeekAbs(m_MatrixStack.Size());
-			// The bone in absolute coordinates
-			auto base = absMatrix.TransformVector({0, 0, 0});
-			auto tip = absMatrix.TransformVector({0, 0, 1});
-			auto baseParent = parentMatrix.TransformVector({0, 0, 0});
-			auto tipParent = parentMatrix.TransformVector({0, 0, 1});
-			auto quat = math::QuaternionF::FromTo(tipParent - baseParent, tip - base);
-			math::Transformation relTransform(quat.TransformInv(base) - baseParent, quat);
-			m_Builder.SetBoneTransformation(m_BoneIdStack.Back(), relTransform);
-		} else {
-			return false;
-		}
-
-		return true;
-	}
-
-	void LeaveScope(const Scope& scope)
-	{
-		if(scope.identGUID == g_GUIDFrame)
-			m_BoneIdStack.PopBack();
-		BaseVisitor::LeaveScope(scope);
-
-		if(m_Scope.IsEmpty())
-			m_Builder.GenerateArmature();
-	}
-
-private:
-	scene::ArmatureBuilder m_Builder;
-	core::Array<int> m_BoneIdStack;
-	core::Array<math::Transformation> m_AbsBoneTransforms;
-};
-#endif
-
 } //namespace xfile_loader_impl
 
 MeshLoaderX::MeshLoaderX()
@@ -1529,7 +1447,7 @@ MeshLoaderX::MeshLoaderX()
 core::Name MeshLoaderX::GetResourceType(io::File* file, core::Name requestedType)
 {
 	bool isSupportedType =
-		requestedType == core::ResourceType::Mesh;
+		requestedType == core::ResourceType::Mesh || requestedType == "armature";
 	if(requestedType && !isSupportedType)
 		return core::Name::INVALID;
 
@@ -1569,18 +1487,6 @@ void MeshLoaderX::LoadMesh(io::File* file, video::Mesh* dst, const core::String&
 				video::MaterialLibrary::EKnownMaterial::Solid));
 	}
 }
-
-#if 0
-void MeshLoaderX::LoadArmature(io::File* file, scene::Armature* dst)
-{
-	using namespace xfile_loader_impl;
-	XFileTraverser traverser;
-	ErrorReporter errReporter;
-
-	ArmatureLoadVisitor armLoader(dst, &traverser);
-	traverser.Traverse(&armLoader, file, &errReporter);
-}
-#endif
 
 const core::String& MeshLoaderX::GetName() const
 {
