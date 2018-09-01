@@ -16,6 +16,7 @@
 #include "core/lxArray.h"
 #include "core/lxAssert.h"
 #include "core/lxBinary.h"
+#include "core/lxBitSet.h"
 #include "core/lxDeque.h"
 #include "core/lxEvent.h"
 #include "core/lxException.h"
