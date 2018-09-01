@@ -24,6 +24,7 @@ struct CompareTypeFromSmallerT
 	bool Equal(const T& a, const T& b) const { return !func(a, b) && !func(b, a); }
 	bool Smaller(const T& a, const T& b) const { return func(a, b); }
 };
+
 template <typename T, typename FuncT>
 struct CompareTypeFromIntCompareT
 {
@@ -34,6 +35,7 @@ struct CompareTypeFromIntCompareT
 	bool Equal(const T& a, const T& b) const { return func(a,b) == 0; }
 	bool Smaller(const T& a, const T& b) const { return func(a,b) < 0; }
 };
+
 
 template <typename T, typename FuncT>
 CompareTypeFromSmallerT<T, FuncT> CompareTypeFromSmaller(const FuncT& func)

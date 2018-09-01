@@ -44,7 +44,7 @@ public:
 	virtual const core::String& GetName() const = 0;
 };
 
-}
-}
+} // namespace core
+} // namespace lux
 
 #endif // #ifndef INCLUDED_LUX_RESOURCE_LOADER_H

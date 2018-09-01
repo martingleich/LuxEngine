@@ -249,10 +249,10 @@ public:
 		return *this;
 	}
 
-	//! Clone from other param package
+	//! Clone from other access
 	/**
 	Shallow copy
-	\param otherParam The other package param
+	\param otherParam The other access
 	*/
 	VariableAccess& CopyAccess(const VariableAccess& otherParam)
 	{
