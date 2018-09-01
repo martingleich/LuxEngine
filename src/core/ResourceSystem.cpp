@@ -425,7 +425,7 @@ void ResourceSystem::WriteResource(Resource* resource, const io::Path& path) con
 Name ResourceSystem::GetFileType(io::File* file) const
 {
 	Name type;
-	if(GetResourceLoader(type, file))
+	if(GetResourceLoader(type, file, type))
 		return type;
 	else
 		return Name::INVALID;
@@ -472,7 +472,7 @@ int ResourceSystem::GetTypeID(Name type) const
 	return IteratorDistance(self->types.First(), it);
 }
 
-StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name& type, io::File* file) const
+StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name type, io::File* file, Name& typeToLoad) const
 {
 	auto fileCursor = file->GetCursor();
 	StrongRef<ResourceLoader> result;
@@ -481,7 +481,7 @@ StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name& type, io::File
 			Name fileType = it->loader->GetResourceType(file, type);
 			if(fileType != Name::INVALID) {
 				if(type == Name::INVALID || type == fileType) {
-					type = fileType;
+					typeToLoad = fileType;
 					result = it->loader;
 				}
 			}
@@ -504,7 +504,7 @@ void ResourceSystem::LoadResource(const ResourceOrigin& origin, Resource* dst) c
 	Name type = dst->GetReferableType();
 
 	// Get loader and correct resource type from file
-	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file);
+	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file, type);
 	if(!loader)
 		throw FileFormatException("File format not supported", type.c_str());
 
@@ -522,7 +522,7 @@ void ResourceSystem::LoadResource(const ResourceOrigin& origin, Resource* dst) c
 StrongRef<Resource> ResourceSystem::CreateResource(Name type, io::File* file, const ResourceOrigin* origin)
 {
 	// Get loader and correct resource type from file
-	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file);
+	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file, type);
 	if(!loader)
 		throw FileFormatException("File format not supported", type.c_str());
 

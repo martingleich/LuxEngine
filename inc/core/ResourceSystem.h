@@ -145,6 +145,15 @@ public:
 	*/
 	LUX_API StrongRef<ResourceLoader> GetResourceLoader(int id) const;
 
+	//! Get the resource loader matching a file.
+	/**
+	\param type The resourcetype to load from file, use autodetection if empty.
+	\param file The file to load data from.
+	\param out typeToLoad The type that will be loaded.
+	\return The Resourceloader to use.
+	*/
+	LUX_API StrongRef<ResourceLoader> GetResourceLoader(Name type, io::File* file, Name& typeToLoad) const;
+
 	//! Add a resource writer
 	LUX_API void AddResourceWriter(ResourceWriter* writer);
 
@@ -229,8 +238,6 @@ private:
 
 private:
 	int GetTypeID(Name type) const;
-
-	StrongRef<ResourceLoader> GetResourceLoader(Name& type, io::File* file) const;
 
 	int GetResourceIdUnsafe(Name type, const String& name) const;
 private:
