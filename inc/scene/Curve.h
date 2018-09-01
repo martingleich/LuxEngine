@@ -13,30 +13,40 @@ namespace scene
 class Curve : public ReferenceCounted
 {
 public:
+	//! Get value of the curve at some time.
+	/**
+	\param time The time to query, must be between start and end.
+	\param T Must be a class with the type of the curve.
+	\return The value of the curve.
+	*/
 	template <typename T>
-	T Evaluate(float time) const
+	T Evaluate(float time, u32* token = nullptr) const
 	{
 		T var;
-		Evaluate(time, core::VariableAccess(core::TemplType<T>::Get(), &var));
+		Evaluate(time, core::VariableAccess(core::TemplType<T>::Get(), &var), token);
 		return var;
 	}
-	virtual void Evaluate(float time, const core::VariableAccess& access) const = 0;
 
+	//! Get value of the curve at some time.
+	/**
+	\param time The time to query, must be between start and end.
+	\param access The variable where the data is written, must be of the correct type.
+	*/
+	virtual void Evaluate(float time, const core::VariableAccess& access, u32* token = nullptr) const = 0;
+
+	//! The first valid time of the curve.
+	/**
+	Might be infinite.
+	*/
 	virtual float GetStart() const = 0;
+	//! The last valid time of the curve.
+	/**
+	Might be infinite.
+	*/
 	virtual float GetEnd() const = 0;
 
+	//! The type of the elements of the curve.
 	virtual core::Type GetType() const = 0;
-	void SetEdgeHandling(math::EEdgeHandling handling)
-	{
-		m_EdgeHandling = handling;
-	}
-	math::EEdgeHandling GetEdgeHandling() const
-	{
-		return m_EdgeHandling;
-	}
-
-protected:
-	math::EEdgeHandling m_EdgeHandling = math::EEdgeHandling::Clamp;
 };
 
 class KeyFrameCurve : public Curve
@@ -49,6 +59,14 @@ public:
 	math::EInterpolation GetInterpolation() const
 	{
 		return m_Interpolation;
+	}
+	void SetEdgeHandling(math::EEdgeHandling handling)
+	{
+		m_EdgeHandling = handling;
+	}
+	math::EEdgeHandling GetEdgeHandling() const
+	{
+		return m_EdgeHandling;
 	}
 
 	template <typename T>
@@ -85,6 +103,7 @@ protected:
 protected:
 	core::Type m_Type;
 	math::EInterpolation m_Interpolation = math::EInterpolation::Smooth;
+	math::EEdgeHandling m_EdgeHandling = math::EEdgeHandling::Clamp;
 };
 
 template <typename T>
@@ -96,11 +115,11 @@ public:
 		m_Type = core::TemplType<T>::Get();
 	}
 
-	void Evaluate(float time, const core::VariableAccess& access) const
+	void Evaluate(float time, const core::VariableAccess& access, u32* token=nullptr) const
 	{
 		access = math::CurveInterpolation(
 			m_Samples.Data(), m_Samples.Size(),
-			time, m_EdgeHandling, m_Interpolation);
+			time, m_EdgeHandling, m_Interpolation, token);
 	}
 
 	float GetStart() const
