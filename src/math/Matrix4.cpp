@@ -417,13 +417,35 @@ Vector3F Matrix4::GetAxisX() const
 	return Vector3F(m[0][0], m[1][0], m[2][0]);
 }
 
+void Matrix4::SetAxisX(const math::Vector3F& axis)
+{
+	m[0][0] = axis.x;
+	m[1][0] = axis.y;
+	m[2][0] = axis.z;
+}
+
 Vector3F Matrix4::GetAxisY() const
 {
 	return Vector3F(m[0][1], m[1][1], m[2][1]);
 }
+
+void Matrix4::SetAxisY(const math::Vector3F& axis)
+{
+	m[0][1] = axis.x;
+	m[1][1] = axis.y;
+	m[2][1] = axis.z;
+}
+
 Vector3F Matrix4::GetAxisZ() const
 {
 	return Vector3F(m[0][2], m[1][2], m[2][2]);
+}
+
+void Matrix4::SetAxisZ(const math::Vector3F& axis)
+{
+	m[0][2] = axis.x;
+	m[1][2] = axis.y;
+	m[2][2] = axis.z;
 }
 
 Matrix4& Matrix4::BuildWorld(

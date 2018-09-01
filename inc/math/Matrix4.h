@@ -288,10 +288,13 @@ public:
 
 	//! Get the transformed x axis of the matrix
 	Vector3F GetAxisX() const;
+	void SetAxisX(const math::Vector3F& v);
 	//! Get the transformed y axis of the matrix
 	Vector3F GetAxisY() const;
+	void SetAxisY(const math::Vector3F& v);
 	//! Get the transformed z axis of the matrix
 	Vector3F GetAxisZ() const;
+	void SetAxisZ(const math::Vector3F& v);
 
 	//! Set this matrix to the product of two other matrices
 	/**
