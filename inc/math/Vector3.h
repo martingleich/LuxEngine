@@ -510,12 +510,12 @@ public:
 	*/
 	Vector3 GetOrthoNormal() const
 	{
-		if(z != 0 && y != 0)
-			return Vector3(0, z, -y) / std::sqrt(z*z + y*y);
-		else if(z != 0 && x != 0)
-			return Vector3(z, 0, -x) / std::sqrt(z*z + x*x);
-		else if(x != 0 && y != 0)
-			return Vector3(y, -x, 0) / std::sqrt(y*y + x*x);
+		if(Abs(x) + Abs(y) > 0)
+			return Vector3(-y, x, 0) / std::sqrt(y*y+x*x);
+		else if(Abs(y) + Abs(z) > 0)
+			return Vector3(0, -z, y) / std::sqrt(y*y+z*z);
+		else if(Abs(x) + Abs(z) > 0)
+			return Vector3(-x, 0, z) / std::sqrt(x*x+z*z);
 		else
 			return Vector3(1, 0, 0);
 	}
