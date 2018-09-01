@@ -115,22 +115,28 @@ const int Constants<int>::epsilon = 1;
 #undef min
 #endif
 
+static_assert(std::numeric_limits<double>::is_iec559 && std::numeric_limits<float>::is_iec559, "Floating point values must be ieee754");
+
 template <>
 struct Constants<float> : impl_math::BaseConstants<float>
 {
-	static float rounding_error()
+	constexpr static float infinity()
+	{
+		return std::numeric_limits<float>::infinity();
+	}
+	constexpr static float rounding_error()
 	{
 		return 0.000001f;
 	}
-	static float max()
+	constexpr static float max()
 	{
 		return FLT_MAX;
 	}
-	static float min()
+	constexpr static float min()
 	{
 		return FLT_MIN;
 	}
-	static float epsilon()
+	constexpr static float epsilon()
 	{
 		return FLT_EPSILON;
 	}
@@ -139,19 +145,23 @@ struct Constants<float> : impl_math::BaseConstants<float>
 template <>
 struct Constants<double> : impl_math::BaseConstants<double>
 {
-	static double rounding_error()
+	constexpr static double infinity()
+	{
+		return std::numeric_limits<double>::infinity();
+	}
+	constexpr static double rounding_error()
 	{
 		return 0.00000001f;
 	}
-	static double max()
+	constexpr static double max()
 	{
 		return DBL_MAX;
 	}
-	static double min()
+	constexpr static double min()
 	{
 		return DBL_MIN;
 	}
-	static double epsilon()
+	constexpr static double epsilon()
 	{
 		return DBL_EPSILON;
 	}
