@@ -190,7 +190,7 @@ public:
 	Array<T>& operator=(const Array<T>& other)
 	{
 		// Alte Einträge löschen
-		if(m_Data)
+		if(Data())
 			Clear();
 
 		// Neu reservieren
@@ -205,7 +205,7 @@ public:
 
 		lxAssert(m_Used <= m_Alloc);
 
-		if(m_Data) {
+		if(Data()) {
 			for(int i = 0; i < m_Used; ++i)
 				new (Data() + i) T(other.Data()[i]);
 		}
@@ -503,7 +503,7 @@ public:
 	{
 		T* newEntries = (T*)ArrayAllocate(newSize * sizeof(T));
 
-		if(m_Data) {
+		if(Data()) {
 			int end = m_Used < (int)(newSize) ? m_Used : (int)(newSize);
 			for(int i = 0; i < end; ++i) {
 				new ((void*)&newEntries[i])T(std::move(Data()[i]));
@@ -681,7 +681,7 @@ public:
 	*/
 	T* Data()
 	{
-		return (T*)m_Data;
+		return m_Data;
 	}
 
 	//! Get a pointer to the internal data(constant version)
@@ -690,7 +690,7 @@ public:
 	*/
 	const T* Data() const
 	{
-		return (const T*)m_Data;
+		return m_Data;
 	}
 
 	//! Get a pointer to the internal data(constant version)
@@ -699,7 +699,7 @@ public:
 	*/
 	const T* Data_c() const
 	{
-		return (const T*)m_Data;
+		return m_Data;
 	}
 	//! The number of used elements
 	/**
@@ -818,7 +818,7 @@ private:
 	}
 
 private:
-	void* m_Data = nullptr;
+	T* m_Data = nullptr;
 	int m_Used = 0;
 	int m_Alloc = 0;
 };
