@@ -16,6 +16,233 @@ Type String()
 }
 } // namespace Types
 
+bool StringView::Equal(const StringView& other, EStringCompare compare) const
+{
+	if(Size() != other.Size())
+		return false;
+
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+		return (memcmp(Data(), other.Data(), Size()) == 0);
+	case EStringCompare::CaseInsensitive:
+	{
+		const char* a = Data();
+		const char* b = other.Data();
+		u32 ac;
+		u32 bc;
+		do {
+			ac = AdvanceCursorUTF8(a);
+			bc = AdvanceCursorUTF8(b);
+
+			if(!IsEqualCaseInsensitive(ac, bc))
+				return false;
+		} while(ac && bc);
+
+		return (ac == bc);
+	}
+	}
+	return false;
+}
+
+bool StringView::Smaller(const StringView& other, EStringCompare compare) const
+{
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+	{
+		auto size = other.Size();
+		auto s = Size() < size ? Size() : size;
+		return (memcmp(Data(), other.Data(), s) < 0);
+	}
+	case EStringCompare::CaseInsensitive:
+	{
+		const char* a = Data();
+		const char* b = other.Data();
+		u32 ac;
+		u32 bc;
+		do {
+			ac = AdvanceCursorUTF8(a);
+			bc = AdvanceCursorUTF8(b);
+
+			u32 iac = ToLowerChar(ac);
+			u32 ibc = ToLowerChar(bc);
+			if(iac < ibc)
+				return true;
+			if(iac > ibc)
+				return false;
+		} while(ac && bc);
+
+		return (ac < bc);
+	}
+	}
+	return false;
+}
+
+bool StringView::StartsWith(const StringView& data, ConstByteIterator first, EStringCompare compare) const
+{
+	if(first == nullptr)
+		first = Data();
+
+	if(data.Data()[0] == 0)
+		return true;
+
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+	{
+		auto strCur = first;
+		for(auto it = data.Data(); *it != 0; ++it, ++strCur) {
+			if(*it != *strCur)
+				return false;
+		}
+		return true;
+	}
+	case EStringCompare::CaseInsensitive:
+	{
+		ConstUTF8Iterator strCur = first;
+		for(auto c : *this) {
+			if(!IsEqualCaseInsensitive(c, *strCur))
+				return false;
+			++strCur;
+		}
+		return true;
+	}
+	}
+
+	return true;
+}
+
+bool StringView::EndsWith(const StringView& data, ConstByteIterator end, EStringCompare compare) const
+{
+	if(end == nullptr)
+		end = End();
+
+	if(data.Data()[0] == 0)
+		return true;
+
+	switch(compare) {
+	case EStringCompare::CaseSensitive:
+	{
+		auto dataCur = data.Data() + data.Size() - 1;
+		auto strCur = end - 1;
+		int i = 0;
+		for(auto it = dataCur; i < data.Size(); --it, --strCur, ++i) {
+			if(*it != *strCur)
+				break;
+		}
+		return (i == data.Size());
+	}
+	case EStringCompare::CaseInsensitive:
+	{
+		ConstUTF8Iterator dataCur = data.Data() + data.Size() - 1;
+		ConstUTF8Iterator strCur = end - 1;
+		int i = 0;
+		for(auto it = dataCur; i < data.Size(); --it, --strCur) {
+			if(!IsEqualCaseInsensitive(*it, *strCur))
+				break;
+			i = static_cast<int>((end - 1) - (const char*)strCur);
+		}
+		return (i == data.Size());
+	}
+	}
+
+	return false;
+}
+
+StringView::ConstIterator StringView::Find(const StringView& search, ConstByteIterator first, ConstByteIterator end) const
+{
+	if(first == nullptr)
+		first = First();
+	if(end == nullptr)
+		end = End();
+
+	if(search.Size() == 0)
+		return end;
+
+	const char* searchFirst = search.Data();
+	while(first + search.Size() <= end) {
+		if(memcmp(searchFirst, first, search.Size()) == 0)
+			return first;
+		++first;
+	}
+
+	return end;
+}
+
+StringView::ConstIterator StringView::FindReverse(const StringView& search, ConstByteIterator first, ConstByteIterator end) const
+{
+	if(first == nullptr)
+		first = First();
+	if(end == nullptr)
+		end = End();
+
+	if(first == end)
+		return end;
+
+	if(search.Size() == 0)
+		return end;
+
+	ConstByteIterator cur = end;
+	const char* searchFirst = search.Data();
+
+	while(cur - search.Size() >= first) {
+		if(memcmp(cur - search.Size(), searchFirst, search.Size()) == 0)
+			return ConstIterator(cur - search.Size(), Data());
+		--cur;
+	}
+
+	return end;
+}
+
+EStringClassFlag StringView::Classify() const
+{
+	int alphaCount = 0;
+	int digitCount = 0;
+	int spaceCount = 0;
+	int upperCount = 0;
+	int lowerCount = 0;
+	int count = 0;
+	for(auto c : *this) {
+		if(IsLower(c))
+			++lowerCount;
+		else if(IsUpper(c))
+			++upperCount;
+
+		if(IsAlpha(c))
+			++alphaCount;
+		else if(IsDigit(c))
+			++digitCount;
+		else if(IsSpace(c))
+			++spaceCount;
+		++count;
+	}
+
+	EStringClassFlag out = (EStringClassFlag)0;
+	if(Size() == 0)
+		out |= EStringClassFlag::Empty;
+
+	if(lowerCount == alphaCount && alphaCount > 0)
+		out |= EStringClassFlag::Lower;
+	else if(upperCount == alphaCount && alphaCount > 0)
+		out |= EStringClassFlag::Upper;
+
+	if(alphaCount == count && alphaCount > 0)
+		out |= EStringClassFlag::Alpha;
+	else if(digitCount == count && digitCount > 0)
+		out |= EStringClassFlag::Digit;
+	else if(alphaCount + digitCount == count && alphaCount > 0 && digitCount > 0)
+		out |= EStringClassFlag::AlphaNum;
+	else if(spaceCount == count && spaceCount > 0)
+		out |= EStringClassFlag::Space;
+
+	return out;
+}
+
+bool StringView::IsWhitespace() const
+{
+	return IsEmpty() || Classify() == EStringClassFlag::Space;
+}
+
+////////////////////////////////////////////////////////////////////////////
+
 const String String::EMPTY = String();
 
 String::String() :
@@ -160,86 +387,22 @@ String& String::operator=(String&& old)
 	return *this;
 }
 
-String& String::operator+=(const StringType& str)
+String& String::operator+=(const StringView& str)
 {
 	return Append(str);
 }
 
-bool String::Equal(const StringType& other, EStringCompare compare) const
+String::ConstIterator String::Insert(ConstByteIterator pos, const StringView& other, int count)
 {
-	other.EnsureSize();
-	if(m_Size != other.size)
-		return false;
-
-	switch(compare) {
-	case EStringCompare::CaseSensitive:
-		return (memcmp(Data(), other.data, m_Size) == 0);
-	case EStringCompare::CaseInsensitive:
-	{
-		const char* a = Data();
-		const char* b = other.data;
-		u32 ac;
-		u32 bc;
-		do {
-			ac = AdvanceCursorUTF8(a);
-			bc = AdvanceCursorUTF8(b);
-
-			if(!IsEqualCaseInsensitive(ac, bc))
-				return false;
-		} while(ac && bc);
-
-		return (ac == bc);
-	}
-	}
-	return false;
-}
-
-bool String::Smaller(const StringType& other, EStringCompare compare) const
-{
-	other.EnsureSize();
-	switch(compare) {
-	case EStringCompare::CaseSensitive:
-	{
-		auto size = other.size;
-		auto s = Size() < size ? Size() : size;
-		return (memcmp(Data(), other.data, s) < 0);
-	}
-	case EStringCompare::CaseInsensitive:
-	{
-		const char* a = Data();
-		const char* b = other.data;
-		u32 ac;
-		u32 bc;
-		do {
-			ac = AdvanceCursorUTF8(a);
-			bc = AdvanceCursorUTF8(b);
-
-			u32 iac = ToLowerChar(ac);
-			u32 ibc = ToLowerChar(bc);
-			if(iac < ibc)
-				return true;
-			if(iac > ibc)
-				return false;
-		} while(ac && bc);
-
-		return (ac < bc);
-	}
-	}
-	return false;
-}
-
-String::ConstIterator String::Insert(ConstByteIterator pos, const StringType& other, int count)
-{
-	other.EnsureSize();
 	int size;
 	if(count < 0) {
-		size = other.size;
+		size = other.Size();
 	} else {
-		const char* cur = other.data;
+		const char* cur = other.Data();
 		int c = 0;
 		while(c < count && AdvanceCursorUTF8(cur))
 			++c;
-		size = static_cast<int>(cur - other.data);
+		size = static_cast<int>(cur - other.Data());
 	}
 	if(size == 0)
 		return pos;
@@ -252,7 +415,7 @@ String::ConstIterator String::Insert(ConstByteIterator pos, const StringType& ot
 	memmove(data + pos_off + size, data + pos_off, m_Size - pos_off + 1);
 
 	// Place the insertion string.
-	memcpy(data + pos_off, other.data, size);
+	memcpy(data + pos_off, other.Data(), size);
 
 	m_Size += size;
 
@@ -297,7 +460,7 @@ String& String::AppendRaw(const char* data, int bytes)
 	return *this;
 }
 
-String& String::Append(const StringType& other, int count)
+String& String::Append(const StringView& other, int count)
 {
 	Insert(End(), other, count);
 	return *this;
@@ -329,7 +492,7 @@ String& String::Append(u32 character)
 	return *this;
 }
 
-void String::Resize(int newLength, const StringType& filler)
+void String::Resize(int newLength, const StringView& filler)
 {
 	auto curLength = End() - First();
 	if(newLength == 0) {
@@ -344,32 +507,31 @@ void String::Resize(int newLength, const StringType& filler)
 
 		m_Size -= static_cast<int>((data + m_Size) - ptr);
 	} else {
-		filler.EnsureSize();
-		if(filler.size == 0)
+		if(filler.Size() == 0)
 			throw InvalidArgumentException("filler", "length(filler) > 0");
 
-		int fillerLength = filler.size == 1 ? 1 : StringLengthUTF8(filler.data);
+		int fillerLength = filler.Size() == 1 ? 1 : StringLengthUTF8(filler.Data());
 		int addLength = static_cast<int>(newLength - curLength);
 
 		int elemCount = addLength / fillerLength;
-		int addBytes = elemCount*filler.size;
+		int addBytes = elemCount*filler.Size();
 		int remCount = 0;
-		int neededBytes = elemCount * filler.size;
+		int neededBytes = elemCount * filler.Size();
 		if(addLength%fillerLength != 0) {
-			neededBytes += filler.size;
+			neededBytes += filler.Size();
 			remCount = addLength%fillerLength;
 		}
 
 		Reserve(m_Size + neededBytes);
-		if(filler.size != 1) {
+		if(filler.Size() != 1) {
 			char* cur = Data() + m_Size;
 			// Copy whole filler strings.
 			for(int i = 0; i < elemCount; ++i) {
-				memcpy(cur, filler.data, filler.size);
-				cur += filler.size;
+				memcpy(cur, filler.Data(), filler.Size());
+				cur += filler.Size();
 			}
 			// Copy the last partial string.
-			const char* fillCur = filler.data;
+			const char* fillCur = filler.Data();
 			int i = 0;
 			while(i < remCount) {
 				*cur++ = *fillCur;
@@ -379,7 +541,7 @@ void String::Resize(int newLength, const StringType& filler)
 			}
 		} else {
 			char* cur = Data() + m_Size;
-			memset(cur, *filler.data, elemCount);
+			memset(cur, *filler.Data(), elemCount);
 		}
 
 		m_Size += addBytes;
@@ -430,78 +592,7 @@ void String::PushByte(u8 byte)
 	++m_Size;
 }
 
-bool String::StartsWith(const StringType& data, ConstByteIterator first, EStringCompare compare) const
-{
-	if(first == nullptr)
-		first = Data();
-
-	if(data.data[0] == 0)
-		return true;
-
-	switch(compare) {
-	case EStringCompare::CaseSensitive:
-	{
-		auto strCur = first;
-		for(auto it = data.data; *it != 0; ++it, ++strCur) {
-			if(*it != *strCur)
-				return false;
-		}
-		return true;
-	}
-	case EStringCompare::CaseInsensitive:
-	{
-		ConstUTF8Iterator strCur = first;
-		for(auto c : *this) {
-			if(!IsEqualCaseInsensitive(c, *strCur))
-				return false;
-			++strCur;
-		}
-		return true;
-	}
-	}
-
-	return true;
-}
-
-bool String::EndsWith(const StringType& data, ConstByteIterator end, EStringCompare compare) const
-{
-	if(end == nullptr)
-		end = End();
-
-	if(data.data[0] == 0)
-		return true;
-
-	data.EnsureSize();
-	switch(compare) {
-	case EStringCompare::CaseSensitive:
-	{
-		auto dataCur = data.data + data.size - 1;
-		auto strCur = end - 1;
-		int i = 0;
-		for(auto it = dataCur; i < data.size; --it, --strCur, ++i) {
-			if(*it != *strCur)
-				break;
-		}
-		return (i == data.size);
-	}
-	case EStringCompare::CaseInsensitive:
-	{
-		ConstUTF8Iterator dataCur = data.data + data.size - 1;
-		ConstUTF8Iterator strCur = end - 1;
-		int i = 0;
-		for(auto it = dataCur; i < data.size; --it, --strCur) {
-			if(!IsEqualCaseInsensitive(*it, *strCur))
-				break;
-			i = static_cast<int>((end - 1) - (const char*)strCur);
-		}
-		return (i == data.size);
-	}
-	}
-
-	return false;
-}
-
-int String::Replace(const StringType& replace, const StringType& search, ConstByteIterator first, ConstByteIterator end)
+int String::Replace(const StringView& replace, const StringView& search, ConstByteIterator first, ConstByteIterator end)
 {
 	if(end == nullptr)
 		end = End();
@@ -510,7 +601,7 @@ int String::Replace(const StringType& replace, const StringType& search, ConstBy
 		first = First();
 
 	int count = 0;
-	int length = StringLengthUTF8(search.data);
+	int length = StringLengthUTF8(search.Data());
 	ConstByteIterator it = Find(search, first, end);
 	while(it != end) {
 		int endOffset = static_cast<int>(end - Data_c());
@@ -524,7 +615,7 @@ int String::Replace(const StringType& replace, const StringType& search, ConstBy
 	return count;
 }
 
-String::ConstIterator String::ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd)
+String::ConstIterator String::ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd)
 {
 	if(rangeEnd == nullptr)
 		rangeEnd = End();
@@ -532,83 +623,25 @@ String::ConstIterator String::ReplaceRange(const StringType& replace, ConstByteI
 	return ReplaceRange(replace, rangeFirst, IteratorDistance(rangeFirst, rangeEnd));
 }
 
-String::ConstIterator String::ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, int count)
+String::ConstIterator String::ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, int count)
 {
-	replace.EnsureSize();
 	int replacedSize = static_cast<int>((ConstIterator(rangeFirst) + count).Pointer() - rangeFirst);
 
-	if(m_Size + replace.size < replacedSize)
+	if(m_Size + replace.Size() < replacedSize)
 		throw InvalidArgumentException("count", "count must not be to large.");
 
-	int newSize = m_Size - replacedSize + replace.size;
+	int newSize = m_Size - replacedSize + replace.Size();
 	int replaceOffset = static_cast<int>(rangeFirst - Data_c());
 	Reserve(newSize);
 
 	char* data = Data();
 	int restSize = m_Size - replaceOffset - replacedSize;
-	memmove(data + replaceOffset + replace.size, data + replaceOffset + replacedSize, restSize + 1); // Including NUL
-	memcpy(data + replaceOffset, replace.data, replace.size);
+	memmove(data + replaceOffset + replace.Size(), data + replaceOffset + replacedSize, restSize + 1); // Including NUL
+	memcpy(data + replaceOffset, replace.Data(), replace.Size());
 
 	m_Size = newSize;
 
 	return ConstIterator(data + replaceOffset + replacedSize, data);
-}
-
-String::ConstIterator String::Find(const StringType& search, ConstByteIterator first, ConstByteIterator end) const
-{
-	if(first == nullptr)
-		first = First();
-	if(end == nullptr)
-		end = End();
-
-	search.EnsureSize();
-	if(search.size == 0)
-		return end;
-
-	const char* searchFirst = search.data;
-	while(first + search.size <= end) {
-		if(memcmp(searchFirst, first, search.size) == 0)
-			return first;
-		++first;
-	}
-
-	return end;
-}
-
-String::ConstIterator String::FindReverse(const StringType& search, ConstByteIterator first, ConstByteIterator end) const
-{
-	if(first == nullptr)
-		first = First();
-	if(end == nullptr)
-		end = End();
-
-	if(first == end)
-		return end;
-
-	search.EnsureSize();
-	if(search.size == 0)
-		return end;
-
-	ConstByteIterator cur = end;
-	const char* searchFirst = search.data;
-
-	while(cur - search.size >= first) {
-		if(memcmp(cur - search.size, searchFirst, search.size) == 0)
-			return ConstIterator(cur - search.size, Data_c());
-		--cur;
-	}
-
-	return end;
-}
-
-String String::SubString(ConstByteIterator first, int count) const
-{
-	return String(first, count);
-}
-
-String String::SubString(ConstByteIterator first, ConstByteIterator end) const
-{
-	return String(first, end);
 }
 
 int String::Pop(int count)
@@ -631,6 +664,16 @@ int String::Pop(int count)
 	m_Size = newSize;
 	int removed = oldCount - count;
 	return removed;
+}
+
+String String::SubString(ConstByteIterator first, int count) const
+{
+	return String(first, count);
+}
+
+String String::SubString(ConstByteIterator first, ConstByteIterator end) const
+{
+	return String(first, end);
 }
 
 String::ConstIterator String::Remove(ConstByteIterator pos, int count)
@@ -756,55 +799,6 @@ Array<String> String::Split(u32 ch, bool ignoreEmpty) const
 		out.PushBack(std::move(buffer));
 
 	return out;
-}
-
-EStringClassFlag String::Classify() const
-{
-	int alphaCount = 0;
-	int digitCount = 0;
-	int spaceCount = 0;
-	int upperCount = 0;
-	int lowerCount = 0;
-	int count = 0;
-	for(auto c : *this) {
-		if(IsLower(c))
-			++lowerCount;
-		else if(IsUpper(c))
-			++upperCount;
-
-		if(IsAlpha(c))
-			++alphaCount;
-		else if(IsDigit(c))
-			++digitCount;
-		else if(IsSpace(c))
-			++spaceCount;
-		++count;
-	}
-
-	EStringClassFlag out = (EStringClassFlag)0;
-	if(m_Size == 0)
-		out |= EStringClassFlag::Empty;
-
-	if(lowerCount == alphaCount && alphaCount > 0)
-		out |= EStringClassFlag::Lower;
-	else if(upperCount == alphaCount && alphaCount > 0)
-		out |= EStringClassFlag::Upper;
-
-	if(alphaCount == count && alphaCount > 0)
-		out |= EStringClassFlag::Alpha;
-	else if(digitCount == count && digitCount > 0)
-		out |= EStringClassFlag::Digit;
-	else if(alphaCount + digitCount == count && alphaCount > 0 && digitCount > 0)
-		out |= EStringClassFlag::AlphaNum;
-	else if(spaceCount == count && spaceCount > 0)
-		out |= EStringClassFlag::Space;
-
-	return out;
-}
-
-bool String::IsWhitespace() const
-{
-	return IsEmpty() || Classify() == EStringClassFlag::Space;
 }
 
 String String::GetLower() const

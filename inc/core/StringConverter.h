@@ -54,10 +54,10 @@ inline core::String& Append(core::String& str, short num) { return AppendIntToSt
 inline core::String& Append(core::String& str, char num) { return AppendIntToString(str, num); }
 
 template <typename... T>
-inline core::String& AppendFormat(core::String& str, core::StringType format, T... args)
+inline core::String& AppendFormat(core::String& str, core::StringView format, T... args)
 {
 	core::StringSink sink(str);
-	format::format(sink, format.data, args...);
+	format::format(sink, format.Data(), args...);
 	return str;
 }
 
@@ -107,7 +107,7 @@ inline core::String ToString(const T& value)
 }
 
 template <typename... T>
-inline core::String Format(core::StringType format, T... args)
+inline core::String Format(core::StringView format, T... args)
 {
 	core::String out;
 	AppendFormat(out, format, args...);

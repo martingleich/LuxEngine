@@ -54,7 +54,7 @@ void ParamPackage::Clear()
 	self->Params.Clear();
 }
 
-int ParamPackage::AddParam(core::Type type, const core::StringType& name, const void* defaultValue)
+int ParamPackage::AddParam(core::Type type, const core::StringView& name, const void* defaultValue)
 {
 	int id;
 	if(GetId(name, core::Type::Unknown, id)) {
@@ -64,7 +64,7 @@ int ParamPackage::AddParam(core::Type type, const core::StringType& name, const 
 	}
 
 	Entry entry;
-	entry.name = name.data;
+	entry.name = name;
 	const int size = type.GetSize();
 
 	// There are currently no types triggering this, just to be shure
@@ -161,7 +161,7 @@ VariableAccess ParamPackage::GetParam(int param, void* baseData, bool isConst) c
 	return VariableAccess(type, (u8*)baseData + p.offset);
 }
 
-VariableAccess ParamPackage::GetParamFromName(const core::StringType& name, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParamFromName(const core::StringView& name, void* baseData, bool isConst) const
 {
 	return GetParam(GetParamId(name), baseData, isConst);
 }
@@ -192,16 +192,16 @@ VariableAccess ParamPackage::DefaultValue(int param) const
 	return VariableAccess(p.type.GetConstantType(), (u8*)self->DefaultPackage + p.offset);
 }
 
-VariableAccess ParamPackage::DefaultValue(const core::StringType& param)
+VariableAccess ParamPackage::DefaultValue(const core::StringView& param)
 {
 	return DefaultValue(GetParamId(param));
 }
 
-int ParamPackage::GetParamId(const core::StringType& name, core::Type type) const
+int ParamPackage::GetParamId(const core::StringView& name, core::Type type) const
 {
 	int out;
 	if(!GetId(name, type, out))
-		throw ObjectNotFoundException(name.data);
+		throw ObjectNotFoundException(name.Data());
 
 	return out;
 }
@@ -253,10 +253,9 @@ int ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	return self->Params.Size() - 1;
 }
 
-bool ParamPackage::GetId(core::StringType name, core::Type t, int& outId) const
+bool ParamPackage::GetId(core::StringView name, core::Type t, int& outId) const
 {
-	core::StringType cname = name;
-	cname.EnsureSize();
+	core::StringView cname = name;
 	for(outId = 0; outId < self->Params.Size(); ++outId) {
 		if(self->Params[outId].name == cname) {
 			if(t == core::Type::Unknown || self->Params[outId].type == t)

@@ -51,9 +51,9 @@ public:
 		return (Size() != 0);
 	}
 
-	operator StringType() const
+	operator StringView() const
 	{
-		return StringType(c_str());
+		return StringView(c_str());
 	}
 
 	bool operator<(const Name& other) const;

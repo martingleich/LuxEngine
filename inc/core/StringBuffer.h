@@ -49,7 +49,7 @@ public:
 	}
 
 	template <typename... Ts>
-	StringBuffer& AppendFormat(core::StringType format, Ts... values)
+	StringBuffer& AppendFormat(core::StringView format, Ts... values)
 	{
 		StringConverter::AppendFormat(m_String, format, values...);
 		if(m_String.Size() == m_String.Allocated())
@@ -59,7 +59,7 @@ public:
 	}
 
 	template <typename... Ts>
-	StringBuffer& AppendFormatLine(core::StringType format, Ts... values)
+	StringBuffer& AppendFormatLine(core::StringView format, Ts... values)
 	{
 		StringConverter::AppendFormat(m_String, format, values...);
 		if(m_String.Size() == m_String.Allocated())

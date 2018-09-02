@@ -40,27 +40,30 @@ Alias type for full strings or character-arrays.
 Contains UTF8-Data.
 Can be used to speed up a function receiving character pointers and strings.
 */
-struct StringType
+class StringView
 {
+public:
+	using ConstIterator = ConstUTF8Iterator;
+	using ConstByteIterator = const char*;
+public:
 	//! Create a dummy string from c-string
 	/**
 	\param str A nul-terminated c-string, must not be null.
 	*/
-	StringType(const char* str) :
-		size(-1),
-		data(str)
+	StringView(const char* str) :
+		m_Size(str ? strlen(str) : 0),
+		m_Data(str)
 	{
 	}
-
 
 	//! Create a dummy string from a pointer
 	/**
 	\param str A nul-terminated c-string, must not be null.
 	\param s The number of bytes in the string, wihtout the NUL-Byte.
 	*/
-	StringType(const char* str, int s) :
-		size(s),
-		data(str)
+	StringView(const char* str, int s) :
+		m_Size(s),
+		m_Data(str)
 	{
 	}
 
@@ -68,20 +71,120 @@ struct StringType
 	/**
 	Should be called at least one before accessing the size property.
 	*/
-	void EnsureSize() const
+	int Size() const
 	{
-		if(size < 0)
-			size = data ? (int)strlen(data) : 0;
+		return m_Size;
 	}
 
+	const char* Data() const { return m_Data; }
+
+	//! Compare two strings for equality
+	/*
+	No unicode normalization is performed
+	*/
+	LUX_API bool Equal(const StringView& other, EStringCompare = EStringCompare::CaseSensitive) const;
+
+	//! Compare two strings.
+	LUX_API bool Smaller(const StringView& other, EStringCompare = EStringCompare::CaseSensitive) const;
+
+	//! Test if the string starts with a given string.
+	/**
+	\param data The string to test with.
+	\param first The position from where the test is performed, if invalid the First() iterator is used.
+	\param True, if this string starts with the given one, false otherwise
+	*/
+	LUX_API bool StartsWith(const StringView& data, ConstByteIterator first = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
+
+	//! Test if the string ends with a given string.
+	/**
+	\param data The string to test with.
+	\param first The position from where the test is performed, if invalid the End() iterator is used.
+	\param True, if this string starts with the given one, false otherwise
+	*/
+	LUX_API bool EndsWith(const StringView& data, ConstByteIterator end = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
+
+	//! Find the first occurence of a substring in this string.
+	/**
+	\param search The string to search for, the empty string is never found.
+	\param first The position where the search should begin, if invalid First() is used.
+	\param end The position where the search should end, if invalid End() is used.
+	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
+	*/
+	LUX_API ConstIterator Find(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
+
+	//! Find the last occurence of a substring in this string.
+	/**
+	\param search The string to search for, the empty string is never found.
+	\param first The position where the search should begin, if invalid First() is used.
+	\param end The position where the search should end, if invalid End() is used.
+	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
+	*/
+	LUX_API ConstIterator FindReverse(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
+
+	//! Classify the content of the string
+	/**
+	See \ref{EStringType} for more information about string classification.
+	*/
+	LUX_API EStringClassFlag Classify() const;
+
+	//! Contains the string only whitespace(or is empty)
+	LUX_API bool IsWhitespace() const;
+
+	inline bool IsEmpty() const
+	{
+		return (Size() == 0);
+	}
+
+	ConstIterator begin() const { return ConstIterator(Data(), Data()); }
+	ConstIterator end() const { return ConstIterator(Data()+Size(), Data()); }
+
+	//! Iterator the the character before the first in the string
+	/**
+	Can't be dereferenced.
+	*/
+	inline ConstIterator Begin() const
+	{
+		return ConstIterator(Data() - 1, Data());
+	}
+
+	//! Iterator the the first character in the string.
+	inline ConstIterator First() const
+	{
+		return ConstIterator(Data(), Data());
+	}
+
+	inline core::Range<ConstByteIterator> Bytes() const
+	{
+		return MakeRange<ConstByteIterator>(Data(), Data() + Size());
+	}
+
+	//! Iterator the the last character in the string.
+	inline ConstIterator Last() const
+	{
+		if(Size() > 0)
+			return End() - 1;
+		else
+			return End();
+	}
+
+	//! Iterator the the character after the last in the string
+	/**
+	Can't be dereferenced.
+	*/
+	inline ConstIterator End() const
+	{
+		return ConstIterator(Data() + Size(), Data());
+	}
+
+private:
 	//! The number of bytes in the string, without the NUL-Byte.
-	mutable int size;
+	const int m_Size;
 
 	//! Pointer to the string-data
 	/**
 	Nul-Terminated c-string.
 	*/
-	const char* data;
+	const char* m_Data;
 };
 
 //! A utf8-string
@@ -115,6 +218,10 @@ public:
 	*/
 	LUX_API String(const char* data, int length = -1);
 	LUX_API String(ConstByteIterator first, ConstByteIterator end);
+	String(const StringView& view) :
+		String(view.Bytes().First(), view.Bytes().End())
+	{
+	}
 
 	//! Copyconstructor
 	LUX_API String(const String& other);
@@ -127,9 +234,10 @@ public:
 	//! Creates a copy of this string.
 	LUX_API String Copy();
 
-	operator StringType() const
+	StringView AsView() const { return StringView(Data_c(), Size()); }
+	operator StringView() const
 	{
-		return StringType(Data_c(), Size());
+		return AsView();
 	}
 
 	//! Reserve size bytes for string memory.
@@ -147,16 +255,22 @@ public:
 	LUX_API String& operator=(String&& old);
 
 	//! Append another string
-	LUX_API String& operator+=(const StringType& str);
+	LUX_API String& operator+=(const StringView& str);
 
 	//! Compare two strings for equality
 	/*
 	No unicode normalization is performed
 	*/
-	LUX_API bool Equal(const StringType& other, EStringCompare = EStringCompare::CaseSensitive) const;
+	bool Equal(const StringView& other, EStringCompare compare = EStringCompare::CaseSensitive) const
+	{
+		return ((StringView)*this).Equal(other, compare);
+	}
 
 	//! Compare two strings.
-	LUX_API bool Smaller(const StringType& other, EStringCompare = EStringCompare::CaseSensitive) const;
+	bool Smaller(const StringView& other, EStringCompare compare = EStringCompare::CaseSensitive) const
+	{
+		return ((StringView)*this).Smaller(other, compare);
+	}
 
 	//! Insert another string into this one.
 	/**
@@ -165,7 +279,7 @@ public:
 	\param count The number of characters to insert, -1 to insert all characters.
 	\return A iterator to the first character after the inserted part of the string.
 	*/
-	LUX_API ConstIterator Insert(ConstByteIterator pos, const StringType& other, int count = -1);
+	LUX_API ConstIterator Insert(ConstByteIterator pos, const StringView& other, int count = -1);
 
 	//! Insert another string into this one.
 	/**
@@ -191,7 +305,7 @@ public:
 	\param count The number of characters to append, -1 to append all characters.
 	\return selfreference
 	*/
-	LUX_API String& Append(const StringType& other, int count = -1);
+	LUX_API String& Append(const StringView& other, int count = -1);
 
 	//! Append another string onto this one.
 	/**
@@ -225,7 +339,7 @@ public:
 	\param newLength The new lenght of the string.
 	\param filler The character to fill the newly created string with
 	*/
-	LUX_API void Resize(int newLength, const StringType& filler = " ");
+	LUX_API void Resize(int newLength, const StringView& filler = " ");
 
 	//! Clear the string contents, making the string empty.
 	LUX_API String& Clear();
@@ -319,7 +433,10 @@ public:
 	\param first The position from where the test is performed, if invalid the First() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool StartsWith(const StringType& data, ConstByteIterator first = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
+	bool StartsWith(const StringView& data, ConstByteIterator first = nullptr, EStringCompare cmp = EStringCompare::CaseSensitive) const
+	{
+		return ((StringView)*this).StartsWith(data, first, cmp);
+	}
 
 	//! Test if the string ends with a given string.
 	/**
@@ -327,7 +444,10 @@ public:
 	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool EndsWith(const StringType& data, ConstByteIterator end = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
+	bool EndsWith(const StringView& data, ConstByteIterator end = nullptr, EStringCompare cmp = EStringCompare::CaseSensitive) const
+	{
+		return ((StringView)*this).EndsWith(data, end, cmp);
+	}
 
 	//! Replace all occurences of a substring in this string.
 	/**
@@ -338,7 +458,7 @@ public:
 	\param end The iterator where the search is stopped, if invalid End() is used.
 	\return The number of occurences found and replaced.
 	*/
-	LUX_API int Replace(const StringType& replace, const StringType& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr);
+	LUX_API int Replace(const StringView& replace, const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr);
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -347,7 +467,7 @@ public:
 	\param rangeEnd the end of the replace range
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd = nullptr);
+	LUX_API ConstIterator ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd = nullptr);
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -356,7 +476,7 @@ public:
 	\param count The number of characters to replace.
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	LUX_API ConstIterator ReplaceRange(const StringType& replace, ConstByteIterator rangeFirst, int count);
+	LUX_API ConstIterator ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, int count);
 
 	//! Find the first occurence of a substring in this string.
 	/**
@@ -365,7 +485,10 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	LUX_API ConstIterator Find(const StringType& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
+	ConstIterator Find(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const
+	{
+		return ((StringView)*this).Find(search, first, end);
+	}
 
 	//! Find the last occurence of a substring in this string.
 	/**
@@ -374,7 +497,10 @@ public:
 	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	LUX_API ConstIterator FindReverse(const StringType& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
+	ConstIterator FindReverse(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const
+	{
+		return ((StringView)*this).FindReverse(search, first, end);
+	}
 
 	//! Extract a substring from this string.
 	/**
@@ -464,10 +590,16 @@ public:
 	/**
 	See \ref{EStringType} for more information about string classification.
 	*/
-	LUX_API EStringClassFlag Classify() const;
+	EStringClassFlag Classify() const
+	{
+		return ((StringView)*this).Classify();
+	}
 
 	//! Contains the string only whitespace(or is empty)
-	LUX_API bool IsWhitespace() const;
+	bool IsWhitespace() const
+	{
+		return ((StringView)*this).IsWhitespace();
+	}
 
 	//! Get a string in lower case
 	LUX_API String GetLower() const;
@@ -544,11 +676,11 @@ inline bool operator==(const String& a, const String& b)
 {
 	return a.Equal(b);
 }
-inline bool operator==(const String& a, const StringType& b)
+inline bool operator==(const String& a, const StringView& b)
 {
 	return a.Equal(b);
 }
-inline bool operator==(const StringType& a, const String& b)
+inline bool operator==(const StringView& a, const String& b)
 {
 	return b.Equal(a);
 }
@@ -564,11 +696,11 @@ inline bool operator!=(const String& a, const String& b)
 {
 	return !a.Equal(b);
 }
-inline bool operator!=(const StringType& a, const String& b)
+inline bool operator!=(const StringView& a, const String& b)
 {
 	return !b.Equal(a);
 }
-inline bool operator!=(const String& a, const StringType& b)
+inline bool operator!=(const String& a, const StringView& b)
 {
 	return !a.Equal(b);
 }

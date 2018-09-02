@@ -129,22 +129,19 @@ StringTable::~StringTable()
 	LUX_FREE(self);
 }
 
-StringTableHandle StringTable::FindString(const StringType& str)
+StringTableHandle StringTable::FindString(const StringView& str)
 {
-	return AddFindString(str.data, true);
+	return AddFindString(str, true);
 }
 
-StringTableHandle StringTable::AddString(const StringType& str)
+StringTableHandle StringTable::AddString(const StringView& str)
 {
-	return AddFindString(str.data, false);
+	return AddFindString(str, false);
 }
 
-StringTableHandle StringTable::AddFindString(const char* str, bool find)
+StringTableHandle StringTable::AddFindString(const StringView& str, bool find)
 {
-	if(!str)
-		throw InvalidArgumentException("str", "Entry in stringtable may not be empty.");
-
-	int strSize = (int)strlen(str);
+	int strSize = str.Size();
 	int size = strSize + 1 + sizeof(int);
 
 	MemBlock* block = GetMatchingPosition(size);
@@ -153,7 +150,7 @@ StringTableHandle StringTable::AddFindString(const char* str, bool find)
 
 	*reinterpret_cast<int*>(handle) = strSize;
 	char* strPos = reinterpret_cast<char*>(handle) + sizeof(int);
-	memcpy(strPos, str, strSize + 1);
+	memcpy(strPos, str.Data(), strSize + 1);
 
 	CheckEntry checkEntry(handle);
 	auto it = self->map.find(checkEntry);

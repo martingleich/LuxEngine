@@ -218,7 +218,7 @@ INIFile::Section INIFile::GetFirstSection()
 	return Section(this, 0);
 }
 
-INIFile::Section INIFile::GetSection(const core::StringType& section)
+INIFile::Section INIFile::GetSection(const core::StringView& section)
 {
 	auto sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
@@ -226,7 +226,7 @@ INIFile::Section INIFile::GetSection(const core::StringType& section)
 	return Section(this, sectionID);
 }
 
-int INIFile::GetSectionID(const core::StringType& section) const
+int INIFile::GetSectionID(const core::StringView& section) const
 {
 	if(m_Sections.Size() == 0)
 		return InvalidID;
@@ -386,7 +386,7 @@ const core::String& INIFile::GetElementValue(int sectionID, int elementID) const
 	return GetElement(sectionID, elementID).value;
 }
 
-INIFile::Element INIFile::GetElement(const core::StringType& section, const core::StringType& element)
+INIFile::Element INIFile::GetElement(const core::StringView& section, const core::StringView& element)
 {
 	int sectionID;
 	auto elementID = GetElemID(section, element, sectionID);
@@ -395,7 +395,7 @@ INIFile::Element INIFile::GetElement(const core::StringType& section, const core
 	return Element(this, sectionID, elementID);
 }
 
-int INIFile::GetElemID(const core::StringType& section, const core::StringType& element, int& outSection) const
+int INIFile::GetElemID(const core::StringView& section, const core::StringView& element, int& outSection) const
 {
 	outSection = GetSectionID(section);
 
@@ -405,7 +405,7 @@ int INIFile::GetElemID(const core::StringType& section, const core::StringType& 
 	return GetElemID(outSection, element);
 }
 
-int INIFile::GetElemID(int sectionID, const core::StringType& element) const
+int INIFile::GetElemID(int sectionID, const core::StringView& element) const
 {
 	if(sectionID == InvalidID)
 		return InvalidID;

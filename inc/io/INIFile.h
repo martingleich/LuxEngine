@@ -131,7 +131,7 @@ public:
 			return m_File != nullptr;
 		}
 
-		Element GetElement(const core::StringType& str)
+		Element GetElement(const core::StringView& str)
 		{
 			int elemID = m_File->GetElemID(m_ID, str);
 			if(elemID < 0)
@@ -202,8 +202,8 @@ public:
 	LUX_API const core::String& GetSectionName(int id) const;
 	LUX_API const core::String& GetSectionComment(int id) const;
 	LUX_API Section GetFirstSection();
-	LUX_API Section GetSection(const core::StringType& section);
-	LUX_API int GetSectionID(const core::StringType& name) const;
+	LUX_API Section GetSection(const core::StringView& section);
+	LUX_API int GetSectionID(const core::StringView& name) const;
 
 	LUX_API int GetElementCount(int sectionID) const;
 	LUX_API void SortElements(int sectionID, ESorting sorting);
@@ -215,9 +215,9 @@ public:
 	LUX_API const core::String& GetElementName(int section, int id) const;
 	LUX_API const core::String& GetElementComment(int section, int element) const;
 	LUX_API const core::String& GetElementValue(int section, int element) const;
-	LUX_API Element GetElement(const core::StringType& section, const core::StringType& element);
-	LUX_API int GetElemID(int sectionId, const core::StringType& element) const;
-	LUX_API int GetElemID(const core::StringType& section, const core::StringType& element, int& outSection) const;
+	LUX_API Element GetElement(const core::StringView& section, const core::StringView& element);
+	LUX_API int GetElemID(int sectionId, const core::StringView& element) const;
+	LUX_API int GetElemID(const core::StringView& section, const core::StringView& element, int& outSection) const;
 
 	LUX_API bool IsEmpty() const;
 

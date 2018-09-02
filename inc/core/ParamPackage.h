@@ -54,7 +54,7 @@ public:
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value, if null the param is default constructed.
 	*/
 	template <typename T>
-	int AddParam(const core::StringType& name, const T& defaultValue)
+	int AddParam(const core::StringView& name, const T& defaultValue)
 	{
 		core::Type type = core::TemplType<T>::Get();
 		if(type == core::Type::Unknown)
@@ -69,7 +69,7 @@ public:
 	\param name The name of the new Param(should be unique for package)
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	*/
-	LUX_API int AddParam(core::Type type, const core::StringType& name, const void* defaultValue = nullptr);
+	LUX_API int AddParam(core::Type type, const core::StringView& name, const void* defaultValue = nullptr);
 
 	//! Merges two packages
 	/**
@@ -127,7 +127,7 @@ public:
 	\return The found param
 	\exception Exception name does not exist
 	*/
-	LUX_API VariableAccess GetParamFromName(const core::StringType& name, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParamFromName(const core::StringView& name, void* baseData, bool isConst) const;
 
 	//! Get the n-th Param of a specific type
 	/**
@@ -153,7 +153,7 @@ public:
 	\param defaultValue A pointer to the new default value
 	\exception Exception name does not exist
 	*/
-	LUX_API VariableAccess DefaultValue(const core::StringType& param);
+	LUX_API VariableAccess DefaultValue(const core::StringView& param);
 
 	//! Get the id of a parameter by it's name.
 	/**
@@ -162,7 +162,7 @@ public:
 	\return The id of the parameter.
 	\exception Exception name does not exist
 	*/
-	LUX_API int GetParamId(const core::StringType& name, core::Type type = core::Type::Unknown) const;
+	LUX_API int GetParamId(const core::StringView& name, core::Type type = core::Type::Unknown) const;
 
 	//! The number of existing params in this package
 	LUX_API int GetParamCount() const;
@@ -175,7 +175,7 @@ public:
 
 private:
 	LUX_API int AddEntry(Entry& entry, const void* defaultValue);
-	LUX_API bool GetId(core::StringType name, core::Type t, int& outId) const;
+	LUX_API bool GetId(core::StringView name, core::Type t, int& outId) const;
 
 private:
 	struct SelfData;
@@ -282,7 +282,7 @@ public:
 	\param name The name of the param
 	\param isConst Should the param be constant
 	*/
-	VariableAccess FromName(const core::StringType& name, bool isConst) const
+	VariableAccess FromName(const core::StringView& name, bool isConst) const
 	{
 		if(!m_Pack)
 			throw Exception("No param pack set");
@@ -335,12 +335,12 @@ public:
 			return 0;
 	}
 
-	core::VariableAccess Param(const core::StringType& name)
+	core::VariableAccess Param(const core::StringView& name)
 	{
 		return FromName(name, false);
 	}
 
-	core::VariableAccess Param(const core::StringType& name) const
+	core::VariableAccess Param(const core::StringView& name) const
 	{
 		return FromName(name, true);
 	}

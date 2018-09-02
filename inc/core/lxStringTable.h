@@ -44,7 +44,7 @@ public:
 	\param str The string to check
 	\return The handle of the entry
 	*/
-	StringTableHandle FindString(const StringType& str);
+	StringTableHandle FindString(const StringView& str);
 
 	//! Add a string to the string table
 	/**
@@ -52,14 +52,14 @@ public:
 	\param str The string to add
 	\return The handle to the entry
 	*/
-	StringTableHandle AddString(const StringType& str);
+	StringTableHandle AddString(const StringView& str);
 
 private:
 	struct MemBlock;
 	MemBlock* GetMatchingPosition(int length);
 	MemBlock* AddNewMemBlock();
 
-	StringTableHandle AddFindString(const char* str, bool find);
+	StringTableHandle AddFindString(const StringView& str, bool find);
 
 private:
 	struct SelfType;
