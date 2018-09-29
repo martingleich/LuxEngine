@@ -1,5 +1,5 @@
-#ifndef INCLUDED_LUX_VIDEO_EXCEPTIONS_
-#define INCLUDED_LUX_VIDEO_EXCEPTIONS_
+#ifndef INCLUDED_LUX_VIDEO_EXCEPTIONS_H
+#define INCLUDED_LUX_VIDEO_EXCEPTIONS_H
 #include "core/lxException.h"
 
 namespace lux
@@ -7,14 +7,12 @@ namespace lux
 namespace video
 {
 
-struct ShaderCompileException : public core::Exception
+struct UnhandledShaderCompileErrorException : public core::RuntimeException
 {
-	explicit ShaderCompileException(const char* msg = "shader compile error") :
-		Exception(msg)
-	{}
+	core::ExceptionSafeString What() const { return "UnhandledShaderCompileErrorException"; }
 };
 
 } // namespace video
 } // namespace lux
 
-#endif // #ifndef INCLUDED_LUX_VIDEO_EXCEPTIONS_
+#endif // #ifndef INCLUDED_LUX_VIDEO_EXCEPTIONS_H

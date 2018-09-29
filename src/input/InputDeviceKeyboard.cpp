@@ -53,20 +53,18 @@ const core::Button* KeyboardDevice::GetButton(int buttonCode) const
 
 const core::Axis* KeyboardDevice::GetAxis(int axisCode) const
 {
-	LUX_UNUSED(axisCode);
-	throw core::OutOfRangeException();
+	throw core::ArgumentOutOfRangeException("axisCode", 0,0, axisCode);
 }
 
 const core::Area* KeyboardDevice::GetArea(int areaCode) const
 {
-	LUX_UNUSED(areaCode);
-	throw core::OutOfRangeException();
+	throw core::ArgumentOutOfRangeException("areaCode", 0,0, areaCode);
 }
 
 bool KeyboardDevice::Update(Event& event)
 {
 	if(event.type != EEventType::Button || (int)event.button.code >= m_Buttons.Size())
-		throw core::OutOfRangeException();
+		throw core::ArgumentOutOfRangeException("event.button.code", 0,m_Buttons.Size(), (int)event.button.code);
 
 	if(m_Buttons[event.button.code].state != event.button.state) {
 		m_Buttons[event.button.code].state = event.button.state;

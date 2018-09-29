@@ -256,7 +256,7 @@ namespace internal
 #endif
 			entry->Convert(ctx, placeholder);
 #if defined(FORMAT_ERROR_TEXT) && defined(FORMAT_NO_EXCEPTIONS)
-		} catch(...) {
+		} catch(format_exception&) {
 			ctx.AddTermiatedSlice("<FORMAT_ERROR>");
 		}
 #endif

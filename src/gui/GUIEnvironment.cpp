@@ -132,7 +132,7 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 		auto file = io::FileSystem::Instance()->OpenVirtualFile(
 			g_BuiltinFontData, g_BuiltinFontData_SIZE, "[builtin_font_file]", io::EVirtualCreateFlag::ReadOnly);
 		m_BuiltInFont = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Font, file).As<Font>();
-	} catch(...) {
+	} catch(core::FileFormatException&) {
 		log::Error("Can't load builtin font files");
 	}
 
@@ -317,9 +317,9 @@ void GUIEnvironment::SetRenderer(Renderer* r)
 void GUIEnvironment::SetKeyRepeat(float timeToStart, float timeToRepeat)
 {
 	if(timeToStart < 0)
-		throw core::InvalidArgumentException("timeToStart", "Must be non-negative");
+		throw core::GenericInvalidArgumentException("timeToStart", "Must be non-negative");
 	if(timeToRepeat < 0)
-		throw core::InvalidArgumentException("timeToRepeat", "Must be non-negative");
+		throw core::GenericInvalidArgumentException("timeToRepeat", "Must be non-negative");
 
 	m_KeyRepeatContext.keyRepeatStartTime = timeToStart;
 	m_KeyRepeatContext.keyRepeatTime = timeToRepeat;

@@ -51,13 +51,12 @@ ReferableFactory::~ReferableFactory()
 void ReferableFactory::RegisterType(Name type, CreationFunc create)
 {
 	if(type == Name::INVALID)
-		throw InvalidArgumentException("type", "An empty name is not allowed.");
-	if(!create)
-		throw InvalidArgumentException("create", "A creation function must be given.");
+		throw GenericInvalidArgumentException("type", "An empty name is not allowed.");
+	LX_CHECK_NULL_ARG(create);
 
 	bool set = m_Types.SetIfNotExist(type, ReferableType(create));
 	if(!set)
-		throw core::InvalidArgumentException("type", "Type name is already used");
+		throw core::GenericInvalidArgumentException("type", "Type name is already used");
 
 	log::Debug("Registered type ~s.", type);
 }
@@ -74,7 +73,7 @@ StrongRef<Referable> ReferableFactory::Create(Name type, const void* data)
 	CreationFunc create = entry.create;
 	StrongRef<Referable> r = create ? create(data) : nullptr;
 	if(!r)
-		throw Exception("Can't create new instance of given type.");
+		throw FactoryCreateException(type.c_str(), "Can't create instance of referable.");
 
 	return r;
 }
@@ -87,7 +86,7 @@ StrongRef<Referable> ReferableFactory::CreateShared(Name type, const void* data)
 	CreationFunc create = entry.create;
 	StrongRef<Referable> r = create ? create(data) : nullptr;
 	if(!r)
-		throw Exception("Can't create new instance of given type.");
+		throw FactoryCreateException(type.c_str(), "Can't create instance of referable.");
 
 	return r;
 }

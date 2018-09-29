@@ -99,7 +99,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////////
 	//! Creates a new shader from code
 	/**
-	\throws ShaderCompileException
+	\throws UnhandledShaderCompileErrorException
 	*/
 	virtual StrongRef<Shader> CreateShader(
 		EShaderLanguage language,

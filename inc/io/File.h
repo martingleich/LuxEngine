@@ -54,7 +54,7 @@ public:
 	{
 		s64 count = WriteBinaryPart(data, numBytes);
 		if(count != numBytes)
-			throw io::FileException(io::FileException::WriteError);
+			throw io::FileUsageException(io::FileUsageException::WriteError, GetName());
 	}
 
 	//! Write binary data to the file
@@ -75,7 +75,7 @@ public:
 	{
 		s64 count = ReadBinaryPart(numBytes, out);
 		if(count != numBytes)
-			throw io::FileException(io::FileException::ReadError);
+			throw io::FileUsageException(io::FileUsageException::ReadError, GetName());
 	}
 
 	//! Read binary data

@@ -72,7 +72,7 @@ core::String RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
 			return path.SubString(it.Next(), path.Last());
 	}
 
-	throw core::RuntimeException("Invalid device guid");
+	throw core::GenericRuntimeException("Invalid device guid");
 }
 
 RID_DEVICE_INFO RawInputDevice::GetDeviceInfo(HANDLE raw_handle)

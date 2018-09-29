@@ -97,7 +97,7 @@ void VideoDriverD3D9::CreateDevice(const DriverConfig& config, HWND windowHandle
 {
 	m_Adapter = config.adapter.As<AdapterD3D9>();
 	if(!m_Adapter)
-		throw core::InvalidArgumentException("config", "Contains invalid adapter");
+		throw core::GenericInvalidArgumentException("config", "Contains invalid adapter");
 
 	m_D3D = m_Adapter->GetD3D9();
 
@@ -171,7 +171,7 @@ bool VideoDriverD3D9::Reset(const DriverConfig& config)
 {
 	auto newAdapter = config.adapter.As<AdapterD3D9>();
 	if(newAdapter != nullptr && newAdapter->GetAdapter() != m_Adapter->GetAdapter())
-		throw core::RuntimeException("Driverreset must use same adapter.");
+		throw core::InvalidOperationException("Driverreset must use same adapter.");
 
 	// Release all data
 	if(!m_ReleasedUnmanagedData) {
@@ -456,7 +456,7 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	core::Array<core::String>* errorList)
 {
 	if(language != EShaderLanguage::HLSL)
-		throw core::InvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");
+		throw core::GenericInvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");
 
 	const char* vsProfile = GetD3DXShaderProfile(false,
 		vsMajorVersion, vsMinorVersion);
@@ -464,17 +464,18 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 		psMajorVersion, psMinorVersion);
 
 	if(!vsProfile)
-		throw core::InvalidArgumentException("vertex shader profile", "Invalid vertex shader profile(~d.~d).");
+		throw core::GenericInvalidArgumentException("vertex shader profile", "Invalid vertex shader profile(~d.~d).");
 
 	if(!psProfile)
-		throw core::InvalidArgumentException("pixel shader profile", "Invalid pixel shader profile(~d.~d).");
+		throw core::GenericInvalidArgumentException("pixel shader profile", "Invalid pixel shader profile(~d.~d).");
 
 	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this, m_DeviceState);
-	out->Init(
+	bool compiled = out->Init(
 		vsCode, vsEntryPoint, vsLength, vsProfile,
 		psCode, psEntryPoint, psLength, psProfile,
 		errorList);
-
+	if(!compiled)
+		return nullptr;
 	return out;
 }
 
@@ -513,22 +514,36 @@ UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::GetD3D9VertexDec
 	}
 }
 
+namespace
+{
+struct InvalidVertexElementError
+{
+	InvalidVertexElementError(int _id, const char* _message) :
+		id(_id),
+		message(_message)
+	{
+	}
+
+	core::ExceptionSafeString What() const { return core::ExceptionSafeString("InvalidVertexElementException: Element(").Append(id).Append(") ").Append(message); }
+	int id;
+	const char* message;
+};
+}
+
 UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::CreateVertexFormat(const VertexFormat& format)
 {
 	if(!format.IsValid())
-		throw core::InvalidArgumentException("format");
+		throw core::GenericInvalidArgumentException("format", "Invalid vertex format");
 
 	if(format.GetElement(0, VertexElement::EUsage::Position).sematic != VertexElement::EUsage::Position &&
 		format.GetElement(0, VertexElement::EUsage::PositionNT).sematic != VertexElement::EUsage::PositionNT)
-		throw core::InvalidArgumentException("format", "Missing position usage");
+		throw core::GenericInvalidArgumentException("format", "Missing position usage");
 
 	core::Array<D3DVERTEXELEMENT9> d3dElements;
 	d3dElements.Resize(format.GetElemCount() + 1);
 
 	for(int stream = 0; stream < format.GetStreamCount(); ++stream) {
 		for(int elem = 0; elem < format.GetElemCount(stream); ++elem) {
-			bool error = false;
-
 			auto element = format.GetElement(stream, elem);
 			d3dElements[elem].Stream = (WORD)element.stream;
 			d3dElements[elem].Offset = (WORD)element.offset;
@@ -549,14 +564,11 @@ UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::CreateVertexForm
 
 			d3dElements[elem].Type = (BYTE)GetD3DDeclType(element.type);
 			if(d3dElements[elem].Type == D3DDECLTYPE_UNUSED)
-				error = true;
+				throw InvalidVertexElementError(elem, "invalid type");
 
 			d3dElements[elem].Usage = GetD3DUsage(element.sematic);
 			if(d3dElements[elem].Usage == 0xFF)
-				error = true;
-
-			if(error)
-				throw core::Exception("Unknown vertex element type");
+				throw InvalidVertexElementError(elem, "invalid semantic");
 		}
 	}
 

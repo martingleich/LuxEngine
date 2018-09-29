@@ -38,14 +38,14 @@ void TextureD3D9::Init(
 	int mipCount, bool isRendertarget, bool isDynamic)
 {
 	if(!m_Device)
-		throw core::Exception("No driver available");
+		throw core::GenericRuntimeException("No driver available");
 
 	if(m_Texture)
 		m_Texture = nullptr;
 
 	D3DFORMAT format = GetD3DFormat(lxFormat);
 	if(format == D3DFMT_UNKNOWN)
-		throw core::ColorFormatException(lxFormat);
+		throw core::UnsupportedColorFormatException(lxFormat);
 
 	m_Levels = mipCount;
 	if(mipCount == 0)
@@ -80,7 +80,7 @@ void TextureD3D9::Init(
 BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 {
 	if(m_IsLocked)
-		throw core::Exception("Texture is already locked");
+		throw core::InvalidOperationException("Texture is already locked");
 
 	m_LockedLevel = mipLevel;
 	if(m_LockedLevel >= (int)m_Texture->GetLevelCount())
@@ -108,9 +108,9 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 				throw core::D3D9Exception(hr);
 			}
 		} else if(mode == ELockMode::ReadOnly && m_Desc.Usage == 0) {
-			throw core::Exception("Can't lock static texture in read mode");
+			throw core::InvalidOperationException("Can't lock static texture in read mode");
 		} else if(mode == ELockMode::ReadWrite && m_Desc.Usage == 0) {
-			throw core::Exception("Can't lock static texture in read mode");
+			throw core::InvalidOperationException("Can't lock static texture in read mode");
 		} else if(mode == ELockMode::ReadOnly && m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
 			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
 			if(m_TempSurface) {

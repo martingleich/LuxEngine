@@ -96,7 +96,7 @@ void RendererNull::UpdatePipelineOverwrite()
 void RendererNull::AddLight(const LightData& light)
 {
 	if(m_Lights.Size() == GetMaxLightCount())
-		throw core::ErrorException("Too many lights");
+		throw core::InvalidOperationException("Too many lights");
 
 	m_Lights.PushBack(light);
 	SetDirty(Dirty_Lights);
@@ -150,7 +150,7 @@ const math::Matrix4& RendererNull::GetTransform(ETransform transform) const
 	case ETransform::World: return m_TransformWorld;
 	case ETransform::View: return m_TransformView;
 	case ETransform::Projection: return m_TransformProj;
-	default: throw core::InvalidArgumentException("transform");
+	default: throw core::GenericInvalidArgumentException("transform", "Unknown transform");
 	}
 }
 
@@ -230,7 +230,7 @@ math::Matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool acti
 	else if(data.type == ELightType::Spot)
 		matrix(0, 3) = 3.0f;
 	else
-		throw core::Exception("Unknown data type");
+		throw core::GenericInvalidArgumentException("data.type", "Unknown data type");
 
 	matrix(0, 0) = data.color.r;
 	matrix(0, 1) = data.color.g;

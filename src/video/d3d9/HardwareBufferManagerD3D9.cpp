@@ -32,8 +32,8 @@ BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 
 BufferManagerD3D9::~BufferManagerD3D9()
 {
-	for(UINT i = 0; i < m_MaxStreamCount; ++i)
-		m_D3DDevice->SetStreamSource(i, nullptr, 0, 0);
+	for(int i = 0; i < m_MaxStreamCount; ++i)
+		m_D3DDevice->SetStreamSource((UINT)i, nullptr, 0, 0);
 	m_D3DDevice->SetIndices(nullptr);
 }
 
@@ -59,9 +59,8 @@ void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handl
 		if(d3dBuffer)
 			remaining = d3dBuffer->Release();
 	}
-	break;
 	default:
-		throw core::Exception("Unsupported hardwarebuffer type.");
+		throw core::GenericRuntimeException("Unsupported hardwarebuffer type.");
 	}
 	lxAssert(remaining == 0);
 }
@@ -215,14 +214,13 @@ void* BufferManagerD3D9::UpdateInternalBuffer(HardwareBuffer* buffer, void* hand
 			handle);
 
 	default:
-		throw core::Exception("Unsupported hardwarebuffer type.");
+		throw core::GenericRuntimeException("Unsupported hardwarebuffer type.");
 	}
 }
 
 void BufferManagerD3D9::EnableHardwareBuffer(int streamID, const HardwareBuffer* buffer, const void* handle)
 {
-	if((UINT)streamID > m_MaxStreamCount)
-		throw core::InvalidArgumentException("streamID");
+	LX_CHECK_BOUNDS(streamID, 0, m_MaxStreamCount);
 
 	switch(buffer->GetBufferType()) {
 	case EHardwareBufferType::Index:
@@ -299,8 +297,8 @@ void BufferManagerD3D9::ResetStreams()
 
 void BufferManagerD3D9::ReleaseHardwareBuffers()
 {
-	for(UINT i = 0; i < m_MaxStreamCount; ++i)
-		m_D3DDevice->SetStreamSource(i, nullptr, 0, 0);
+	for(int i = 0; i < m_MaxStreamCount; ++i)
+		m_D3DDevice->SetStreamSource((UINT)i, nullptr, 0, 0);
 	m_D3DDevice->SetIndices(nullptr);
 
 	for(auto hb : m_HardwareBuffers) {

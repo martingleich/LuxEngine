@@ -10,7 +10,7 @@ static StrongRef<VideoDriver> g_VideoDriver;
 void VideoDriver::Initialize(VideoDriver* driver)
 {
 	if(!driver)
-		throw core::ErrorException("No video driver available");
+		throw core::InvalidOperationException("No video driver available");
 	g_VideoDriver = driver;
 }
 

@@ -762,9 +762,7 @@ public:
 	*/
 	const T& At(int entry) const
 	{
-		if(entry < 0 || entry >= m_Used)
-			throw core::OutOfRangeException();
-
+		LX_CHECK_BOUNDS(entry, 0, m_Used);
 		return Data()[entry];
 	}
 
@@ -774,9 +772,7 @@ public:
 	*/
 	T& At(int entry)
 	{
-		if(entry < 0 || entry >= m_Used)
-			throw core::OutOfRangeException();
-
+		LX_CHECK_BOUNDS(entry, 0, m_Used);
 		return Data()[entry];
 	}
 

@@ -57,10 +57,10 @@ private:
 	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
 
 	core::Array<VertexStream> m_VStreams;
-	u32 m_UsedStreams;
+	int m_UsedStreams;
 	IndexStream m_IStream;
 	bool m_AllowStreamOffset;
-	UINT  m_MaxStreamCount;
+	int  m_MaxStreamCount;
 
 	core::Array<HardwareBuffer*> m_HardwareBuffers;
 };

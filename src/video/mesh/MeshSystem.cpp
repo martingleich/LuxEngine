@@ -31,7 +31,7 @@ void MeshSystem::Initialize(MeshSystem* system)
 		system = LUX_NEW(MeshSystem);
 
 	if(!system)
-		throw core::ErrorException("No mesh system available");
+		throw core::InvalidOperationException("No mesh system available");
 	g_MeshSystem = system;
 }
 
@@ -95,7 +95,7 @@ StrongRef<GeometryCreator> MeshSystem::AddCreator(GeometryCreator* creator)
 
 	auto it = m_Creators.Find(creator->GetName());
 	if(it != m_Creators.End())
-		throw core::ErrorException("Geometry creator already exists");
+		throw core::InvalidOperationException("Geometry creator already exists");
 
 	m_Creators.Set(creator->GetName(), creator);
 
@@ -115,9 +115,7 @@ int MeshSystem::GetCreatorCount() const
 
 StrongRef<GeometryCreator> MeshSystem::GetCreatorById(int id) const
 {
-	if(id < 0 && id >= m_Creators.Size())
-		throw core::OutOfRangeException();
-
+	LX_CHECK_BOUNDS(id, 0, m_Creators.Size());
 	return *core::AdvanceIterator(m_Creators.First(), id);
 }
 

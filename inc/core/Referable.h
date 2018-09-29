@@ -101,7 +101,7 @@ public:
 protected:
 	virtual StrongRef<Referable> CloneImpl() const
 	{
-		throw core::NotImplementedException();
+		throw core::NotImplementedException("Referable::CloneImpl");
 	}
 
 private:

@@ -48,7 +48,7 @@ void RendererD3D9::BeginScene()
 	HRESULT hr = m_Device->BeginScene();
 	if(FAILED(hr)) {
 		if(hr == D3DERR_INVALIDCALL)
-			throw core::Exception("Scene was already started");
+			throw core::InvalidOperationException("Scene was already started");
 		else
 			throw core::D3D9Exception(hr);
 	}
@@ -84,7 +84,7 @@ void RendererD3D9::EndScene()
 	HRESULT hr;
 	if(FAILED(hr = m_Device->EndScene())) {
 		if(hr == D3DERR_INVALIDCALL)
-			throw core::Exception("Scene was already started");
+			throw core::InvalidOperationException("Scene was already started");
 		else
 			throw core::D3D9Exception(hr);
 	}
@@ -113,9 +113,9 @@ void RendererD3D9::SetRenderTarget(const core::Array<RenderTarget>& targets)
 void RendererD3D9::SetRenderTarget(const RenderTarget* targets, int count, bool restore)
 {
 	if(count == 0)
-		throw core::InvalidArgumentException("count", "There must be at least one rendertarget.");
+		throw core::GenericInvalidArgumentException("count", "There must be at least one rendertarget.");
 	if(count > m_Driver->GetDeviceCapability(EDriverCaps::MaxSimultaneousRT))
-		throw core::InvalidArgumentException("count", "To many rendertargets.");
+		throw core::GenericInvalidArgumentException("count", "To many rendertargets.");
 
 	// Check if textures are valid
 	math::Dimension2I dim;
@@ -130,9 +130,9 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, int count, bool 
 		for(auto& t : core::MakeRange(targets, targets + count)) {
 			if(!t.IsBackbuffer()) {
 				if(t.GetSize() != dim)
-					throw core::InvalidArgumentException("target", "All rendertargets must have the same size");
+					throw core::GenericInvalidArgumentException("target", "All rendertargets must have the same size");
 				if(!t.GetTexture()->IsRendertarget())
-					throw core::InvalidArgumentException("target", "Must be a rendertarget texture");
+					throw core::GenericInvalidArgumentException("target", "Must be a rendertarget texture");
 			}
 			if(t.GetTexture() != m_CurrentRendertargets[i].GetTexture()) {
 				isSet = false;
@@ -155,7 +155,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, int count, bool 
 	// Generate depth buffer via video driver
 	auto depthStencil = m_Driver->GetD3D9MatchingDepthBuffer(newRendertarget.GetSurface());
 	if(depthStencil == nullptr)
-		throw core::Exception("Can't find matching depth buffer for rendertarget.");
+		throw core::GenericRuntimeException("Can't find matching depth buffer for rendertarget.");
 
 	HRESULT hr = S_OK;
 	for(int i = 0; i < count && !FAILED(hr); ++i) {
@@ -214,7 +214,7 @@ void RendererD3D9::SetScissorRect(const math::RectI& rect, ScissorRectToken* tok
 	math::RectI fittedRect = rect;
 	fittedRect.FitInto(math::RectI(0, 0, bufferSize.width, bufferSize.height));
 	if(!fittedRect.IsValid())
-		throw core::InvalidArgumentException("rect", "Rectangle is invalid");
+		throw core::GenericInvalidArgumentException("rect", "Rectangle is invalid");
 
 	if(fittedRect.IsEmpty() || rect.GetSize() == GetRenderTarget().GetSize()) {
 		m_DeviceState.SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);

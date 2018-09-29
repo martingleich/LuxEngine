@@ -350,7 +350,7 @@ void ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)
-		throw core::Exception("Passed wrong resource type to loader");
+		throw core::InvalidOperationException("Passed wrong resource type to loader");
 
 	Context ctx;
 	result = LoadImageFormat(ctx, file);

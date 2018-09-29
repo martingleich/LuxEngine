@@ -56,10 +56,12 @@ void ParamPackage::Clear()
 
 int ParamPackage::AddParam(core::Type type, const core::StringView& name, const void* defaultValue)
 {
+	if(type == core::Type::Unknown)
+		throw GenericInvalidArgumentException("type", "Unknown type is invalid");
 	int id;
 	if(GetId(name, core::Type::Unknown, id)) {
 		if(self->Params[id].type != type)
-			throw InvalidArgumentException("", "Param already exists with diffrent parameter.");
+			throw GenericInvalidArgumentException("name", "Param already exists with diffrent parameter.");
 		return id;
 	}
 
@@ -69,12 +71,10 @@ int ParamPackage::AddParam(core::Type type, const core::StringView& name, const 
 
 	// There are currently no types triggering this, just to be shure
 	if(size > 255)
-		throw Exception("Type is too big for param package");
+		throw InvalidOperationException("Type is too big for param package");
 
 	entry.size = (u8)size;
 	entry.type = type;
-	if(entry.type == core::Type::Unknown)
-		throw Exception("Type is not supported in param package");
 
 	return AddEntry(entry, defaultValue);
 }
@@ -87,7 +87,7 @@ void ParamPackage::MergePackage(const ParamPackage& other)
 		int id;
 		if(GetId(desc.name, core::Type::Unknown, id)) {
 			if(self->Params[id].type != desc.type)
-				throw Exception("Same name with diffrent types in package merge");
+				throw GenericInvalidArgumentException("other", "Same name with diffrent types in package merge");
 			continue;
 		}
 

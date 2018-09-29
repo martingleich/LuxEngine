@@ -24,14 +24,14 @@ CubeTextureD3D9::~CubeTextureD3D9()
 void CubeTextureD3D9::Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic)
 {
 	if(!m_D3DDevice)
-		throw core::Exception("No driver available");
+		throw core::GenericRuntimeException("No driver available");
 
 	if(m_Texture)
 		m_Texture = nullptr;
 
 	D3DFORMAT format = GetD3DFormat(lxFormat);
 	if(format == D3DFMT_UNKNOWN)
-		throw core::ColorFormatException(lxFormat);
+		throw core::UnsupportedColorFormatException(lxFormat);
 
 	DWORD usage = 0;
 	D3DPOOL pool = GetOrigin().loader ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
@@ -66,7 +66,7 @@ void CubeTextureD3D9::RegenerateMIPMaps()
 BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode mode, EFace face, int mipLevel)
 {
 	if(m_LockedLevel != 0xFFFFFFFF)
-		throw core::Exception("Texture is already locked");
+		throw core::InvalidOperationException("Texture is already locked");
 
 	m_LockedLevel = mipLevel;
 	m_LockedFace = GetD3DCubeMapFace(face);
@@ -89,9 +89,9 @@ BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode mode, EFace face, int mi
 				throw core::D3D9Exception(hr);
 			}
 		} else if(mode == ELockMode::ReadOnly && m_Desc.Usage == 0) {
-			throw core::Exception("Can't lock static texture in read mode");
+			throw core::InvalidOperationException("Can't lock static texture in read mode");
 		} else if(mode == ELockMode::ReadWrite && m_Desc.Usage == 0) {
-			throw core::Exception("Can't lock static texture in read mode");
+			throw core::InvalidOperationException("Can't lock static texture in read mode");
 		}
 	}
 	LockedRect locked;

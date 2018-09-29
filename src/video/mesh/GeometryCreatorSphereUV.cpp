@@ -54,19 +54,19 @@ StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(
 	bool inside)
 {
 	if(radius <= 0.0f)
-		throw core::InvalidArgumentException("radius", "Must be bigger than zero");
+		throw core::GenericInvalidArgumentException("radius", "Must be bigger than zero");
 
 	if(rings < 2)
-		throw core::InvalidArgumentException("rings", "Must be bigger than 1");
+		throw core::GenericInvalidArgumentException("rings", "Must be bigger than 1");
 
 	if(sectors < 3)
-		throw core::InvalidArgumentException("sectors", "Must be bigger than 2");
+		throw core::GenericInvalidArgumentException("sectors", "Must be bigger than 2");
 
 	const u32 vertexCount = (rings - 1) * (sectors + 1) + 2;
 	const u32 indexCount = 6 * sectors * (rings - 1);
 
 	if(vertexCount > 0xFFFF)
-		throw core::InvalidArgumentException("Too many arguments");
+		throw core::GenericInvalidArgumentException("sectors,rings", "Too many vertices.");
 
 	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
 		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,

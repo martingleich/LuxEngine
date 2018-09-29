@@ -281,7 +281,7 @@ AdapterListD3D9::AdapterListD3D9(const core::ModuleInitData& data)
 
 	m_D3D9.TakeOwnership(Direct3DCreate9(D3D_SDK_VERSION));
 	if(!m_D3D9)
-		throw core::RuntimeException("Couldn't create the Direct3D9 interface.");
+		throw core::GenericRuntimeException("Couldn't create the Direct3D9 interface.");
 
 	UINT count = m_D3D9->GetAdapterCount();
 	for(UINT i = 0; i < count; ++i)

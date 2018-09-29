@@ -170,7 +170,7 @@ StringTableHandle StringTable::AddFindString(const StringView& str, bool find)
 StringTable::MemBlock* StringTable::GetMatchingPosition(int length)
 {
 	if(length > MemBlock::DATA_SIZE)
-		throw Exception("String is to long for string table");
+		throw GenericInvalidArgumentException("length", "String is to long for string table(max size=4000)");
 
 	MemBlock* cur = self->first;
 	while(cur) {

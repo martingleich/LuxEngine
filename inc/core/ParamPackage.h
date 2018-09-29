@@ -4,6 +4,7 @@
 #include "core/lxArray.h"
 
 #include "core/VariableAccess.h"
+#include <typeinfo>
 
 namespace lux
 {
@@ -58,7 +59,7 @@ public:
 	{
 		core::Type type = core::TemplType<T>::Get();
 		if(type == core::Type::Unknown)
-			throw TypeException("Unsupported type used");
+			throw UnknownTypeException(typeid(T).name());
 
 		return AddParam(type, name, &defaultValue);
 	}
@@ -285,7 +286,7 @@ public:
 	VariableAccess FromName(const core::StringView& name, bool isConst) const
 	{
 		if(!m_Pack)
-			throw Exception("No param pack set");
+			throw InvalidOperationException("No param pack set");
 
 		return m_Pack->GetParamFromName(name, m_Data, isConst);
 	}
@@ -299,7 +300,7 @@ public:
 	VariableAccess FromType(core::Type type, int index, bool isConst) const
 	{
 		if(!m_Pack)
-			throw Exception("No param pack set");
+			throw InvalidOperationException("No param pack set");
 
 		return m_Pack->GetParamFromType(type, index, m_Data, isConst);
 	}
@@ -311,10 +312,10 @@ public:
 	*/
 	VariableAccess FromID(int id, bool isConst) const
 	{
-		if(m_Pack)
-			return m_Pack->GetParam(id, m_Data, isConst);
-		else
-			throw core::Exception("Not param pack set");
+		if(!m_Pack)
+			throw InvalidOperationException("Not param pack set");
+
+		return m_Pack->GetParam(id, m_Data, isConst);
 	}
 
 	//! The total number of parameters in the package

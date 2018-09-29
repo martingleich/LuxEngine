@@ -135,7 +135,7 @@ public:
 		auto it = m_ObjectMap.Find(name);
 		if(it != m_ObjectMap.End()) {
 			if((*it)->GetType() != type)
-				throw core::Exception("Attribute is already defined with diffrent type");
+				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
 			*it = attrb;
 		} else {
 			m_ObjectMap[name] = attrb;
@@ -150,7 +150,7 @@ public:
 		auto it = m_ObjectMap.Find(name);
 		if(it != m_ObjectMap.End()) {
 			if((*it)->GetType() != type)
-				throw core::Exception("Attribute is already defined with diffrent type");
+				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
 			(*it)->GetAccess().AssignData(value);
 			ptr = (Attribute*)(*it);
 		} else {

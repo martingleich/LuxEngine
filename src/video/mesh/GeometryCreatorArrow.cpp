@@ -52,18 +52,18 @@ StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(
 	s32 sectors)
 {
 	if(shaft_height <= 0.0f || head_height <= 0.0f || shaft_radius <= 0.0f || head_radius <= 0.0f)
-		throw core::InvalidArgumentException("shaftHeight, headHeight, shaftRadius, head_radius", "Must be bigger than zero");
+		throw core::GenericInvalidArgumentException("shaftHeight, headHeight, shaftRadius, head_radius", "Must be bigger than zero");
 
 	if(head_radius < shaft_radius)
-		throw core::InvalidArgumentException("headRadius, shaftRadius", "Head radius must be bigger than shaft_radius");
+		throw core::GenericInvalidArgumentException("headRadius, shaftRadius", "Head radius must be bigger than shaft_radius");
 
 	if(sectors < 3)
-		throw core::InvalidArgumentException("sectors", "Number of sectors must be bigger than 2");
+		throw core::GenericInvalidArgumentException("sectors", "Number of sectors must be bigger than 2");
 
 	// 6 Rings + 1 Arrowpoint
 	const u32 vertexCount = sectors * 6 + 1;
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
-		throw core::InvalidArgumentException("sectors", "Too many sectors");
+		throw core::GenericInvalidArgumentException("sectors", "Too many sectors");
 
 	// Circle + Pipe  + Ring  + Head
 	// sec-2  + sec*2 + sec*2 + sec Triangles

@@ -54,17 +54,17 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(
 	bool inside)
 {
 	if(radius <= 0.0f || height <= 0.0f)
-		throw core::InvalidArgumentException("radius, height", "Must be bigger than zero");
+		throw core::GenericInvalidArgumentException("radius, height", "Must be bigger than zero");
 
 	if(sectors < 3)
-		throw core::InvalidArgumentException("sectors", "Number of sectors must be bigger than 2");
+		throw core::GenericInvalidArgumentException("sectors", "Number of sectors must be bigger than 2");
 
 	if(planes < 2)
-		throw core::InvalidArgumentException("planes", "Number of planes must be bigger than 1");
+		throw core::GenericInvalidArgumentException("planes", "Number of planes must be bigger than 1");
 
 	const u32 vertexCount = (sectors + 1) * (planes + 2) + 2;
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
-		throw core::InvalidArgumentException("sectors, planes", "Too many sectors or planes");
+		throw core::GenericInvalidArgumentException("sectors, planes", "Too many sectors or planes");
 
 	const u32 indexCount = 3 * (2 * sectors + 2 * (planes - 1)*sectors);
 	StrongRef<Geometry> geo = VideoDriver::Instance()->CreateGeometry(

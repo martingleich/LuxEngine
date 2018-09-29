@@ -45,10 +45,10 @@ StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(
 	float(*function)(void* ctx, float x, float y), void* context)
 {
 	if(sizeX <= 0.0f || sizeY <= 0.0f)
-		throw core::InvalidArgumentException("sizeX, sizeY", "Must be bigger than zero");
+		throw core::GenericInvalidArgumentException("sizeX, sizeY", "Must be bigger than zero");
 
 	if(tesX <= 1 || tesY <= 1)
-		throw core::InvalidArgumentException("tesX, tesY", "Must be bigger than 1");
+		throw core::GenericInvalidArgumentException("tesX, tesY", "Must be bigger than 1");
 
 	const u32 vertexCount = tesX * tesY;
 	const u32 indexCount = (tesX - 1)*(tesY - 1) * 6;

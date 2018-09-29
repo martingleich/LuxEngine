@@ -120,7 +120,7 @@ int ImageImpl::GetPitch() const
 void* ImageImpl::Lock()
 {
 	if(m_Locked)
-		throw core::Exception("Image is already locked");
+		throw core::InvalidOperationException("Image is already locked");
 
 	m_Locked = true;
 	return m_Data;

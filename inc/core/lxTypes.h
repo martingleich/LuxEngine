@@ -276,27 +276,48 @@ LUX_API Type Float();
 LUX_API Type Boolean();
 }
 
-//! Exception thrown when a type mismatch occures.
-/**
-Some type is not valid in this place, or two types are not compatible.
-*/
-struct TypeException : ErrorException
+struct UnknownTypeException : ErrorException
 {
-	explicit TypeException(const char* _msg, Type _typeA = Type::Unknown, Type _typeB = Type::Unknown) :
-		ErrorException("type error"),
-		msg(_msg),
-		typeA(_typeA),
-		typeB(_typeB)
+	explicit UnknownTypeException(const char* symbol) :
+		m_TypeSymbol(symbol)
+	{}
+
+	ExceptionSafeString What() const { return ExceptionSafeString("UnknownTypeException: ").Append(m_TypeSymbol); }
+
+private:
+	ExceptionSafeString m_TypeSymbol;
+};
+
+struct TypeCastException : ErrorException
+{
+	explicit TypeCastException(Type fromType, Type toType) :
+		m_FromType(fromType),
+		m_ToType(toType)
 	{
 	}
 
-	ExceptionSafeString msg;
+	Type GetFromType() const { return m_FromType; }
+	Type GetToType() const { return m_ToType; }
+	ExceptionSafeString What() const { return ExceptionSafeString("TypeCastException: ").Append("From ").Append(m_FromType.GetName()).Append(" to ").Append(m_ToType.GetName()); }
+private:
+	Type m_FromType;
+	Type m_ToType;
+};
 
-	//! First type which was part of the problem
-	Type typeA;
+struct UnsupportedTypeException : ErrorException
+{
+	explicit UnsupportedTypeException(const char* context, Type type) :
+		m_Context(context),
+		m_Type(type)
+	{
+	}
 
-	//! Second type which was part of the porblem
-	Type typeB;
+	ExceptionSafeString GetContext() const { return m_Context; }
+	Type GetType() const { return m_Type; }
+	ExceptionSafeString What() const { return ExceptionSafeString("UnsupportedTypeExceptoin: ").Append(m_Context).Append(" ").Append(m_Type.GetName()); }
+private:
+	ExceptionSafeString m_Context;
+	Type m_Type;
 };
 
 //! Available Types for params

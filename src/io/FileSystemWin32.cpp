@@ -292,7 +292,7 @@ StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, s64 start, s64 size
 		throw io::FileNotFoundException("[Empty file]");
 
 	if(start + size > file->GetSize())
-		throw core::Exception("Limited file size is to big");
+		throw core::GenericRuntimeException("Limited file size is to big");
 
 	FileDescription desc(
 		core::String::EMPTY,
@@ -319,7 +319,7 @@ void FileSystemWin32::DeleteFile(const Path& path)
 {
 	Win32Path win32Path = ConvertPathToWin32WidePath(path);
 	if(win32Path.Back() == L'\\') {
-		throw core::RuntimeException("Can't remove directory");
+		throw core::GenericRuntimeException("Can't remove directory");
 	} else {
 		auto result = DeleteFileW((LPWSTR)win32Path.Data());
 		if(result == 0)
@@ -414,7 +414,7 @@ void FileSystemWin32::CreateWin32File(Win32Path& path, bool recursive)
 		if(recursive)
 			CreateWin32Directory(subPath, true);
 		else
-			throw core::RuntimeException("Path does not exists.");
+			throw core::GenericRuntimeException("Path does not exists.");
 	}
 
 	HANDLE file = CreateFileW((const wchar_t*)path.Data_c(),
@@ -452,7 +452,7 @@ void FileSystemWin32::CreateWin32Directory(Win32Path& _path, bool recursive)
 				if(path_ptr - path > 4)
 					subDirs.PushBack(path_ptr);
 				else
-					throw core::RuntimeException("Filepath isn't a valid path");
+					throw core::InvalidArgumentException("Filepath isn't a valid path");
 			} else {
 				throw core::Win32Exception(le);
 			}

@@ -180,7 +180,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 
 	if(!beginScene) {
 		if(m_Renderer->GetRenderTarget() != camList[0]->GetRenderTarget())
-			throw core::ErrorException("Already started scene uses diffrent rendertarget than first camera.");
+			throw core::GenericRuntimeException("Already started scene uses diffrent rendertarget than first camera.");
 	}
 
 	for(auto it = camList.First(); it != camList.End(); ++it) {

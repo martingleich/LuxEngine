@@ -45,7 +45,7 @@ void ImageWriterBMP::WriteFile(io::File* File, void* Data, video::ColorFormat Fo
 	LX_CHECK_NULL_ARG(Data);
 
 	if(Size.GetArea() == 0)
-		throw core::InvalidArgumentException("Size", "The size of the image must be greater than 0");
+		throw core::GenericInvalidArgumentException("Size", "The size of the image must be greater than 0");
 
 	BITMAPFILEHEADER Header;
 	Header.Type = 0x4D42;

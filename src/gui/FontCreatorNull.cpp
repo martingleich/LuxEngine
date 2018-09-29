@@ -60,7 +60,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromFile(io::File* file,
 	const core::Array<u32>& charSet)
 {
 	if(!file)
-		throw core::InvalidArgumentException("file", "File must not be null");
+		throw core::GenericInvalidArgumentException("file", "File must not be null");
 
 	core::Array<u32> realCharSet = CorrectCharSet(charSet);
 	void* creationContext = this->BeginFontCreation(file, desc, realCharSet);
@@ -93,7 +93,7 @@ StrongRef<Font> FontCreatorNull::CreateFont(
 StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Array<u32>& charSet)
 {
 	if(!ctx)
-		throw core::Exception("Font creation failed");
+		throw core::GenericRuntimeException("Font creation failed");
 
 	CharInfo info;
 	u8* image;

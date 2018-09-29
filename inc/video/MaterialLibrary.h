@@ -44,6 +44,11 @@ public:
 	LUX_API StrongRef<video::Material> GetMaterial(EKnownMaterial name);
 	LUX_API StrongRef<video::Material> CloneMaterial(EKnownMaterial name);
 
+	struct ShaderCompileInfo
+	{
+		bool failed;
+		core::Array<core::String> messages;
+	};
 	//! Create a shader from file
 	/**
 	\param VSPath The path of the vertex shader
@@ -55,7 +60,7 @@ public:
 	\param [out] errorList If not null, here a list of all errors/warning
 		while creating the shader is written.
 	\return The new shader
-	\throws ShaderCompileException
+	\throws UnhandledShaderCompileErrorException only if the error list if null
 	\throws FileNotFoundException
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromFile(
@@ -64,12 +69,11 @@ public:
 		int VSMajor, int VSMinor,
 		const io::Path& PSPath, const core::String& PSEntryPoint,
 		int PSMajor, int PSMinor,
-		core::Array<core::String>* errorList = nullptr);
-
+		ShaderCompileInfo* compileInfo = nullptr);
 
 	//! Creates a new shader from code
 	/**
-	\throws ShaderCompileException
+	\throws UnhandledShaderCompileErrorException only if the error list is null
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromMemory(
 		EShaderLanguage language,
@@ -77,7 +81,7 @@ public:
 		int VSmajorVersion, int VSminorVersion,
 		const core::String& PSCode, const char* PSEntryPoint,
 		int PSmajorVersion, int PSminorVersion,
-		core::Array<core::String>* errorList = nullptr);
+		ShaderCompileInfo* compileInfo = nullptr);
 
 	//! Retrieves a shader matching a fixed function description.
 	LUX_API StrongRef<Shader> GetFixedFunctionShader(

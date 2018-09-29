@@ -237,11 +237,11 @@ private:
 			}
 		}
 		if(real_count != 6)
-			throw core::InvalidArgumentException("images", "Must not be null");
+			throw core::GenericInvalidArgumentException("images", "Must not be null");
 
 		math::Dimension2I ds(size, size);
 		if(!VideoDriver::Instance()->GetFittingTextureFormat(format, ds, true, false))
-			throw core::ColorFormatException(format);
+			throw core::UnsupportedColorFormatException(format);
 
 		tex->Init(size, format, false, false);
 		for(int i = 0; i < 6; ++i) {
@@ -331,7 +331,7 @@ StrongRef<Texture> ImageSystem::CreateFittingTexture(const math::Dimension2I& si
 {
 	math::Dimension2I copy(size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, false, false))
-		throw core::RuntimeException("No matching texture format found");
+		throw core::GenericRuntimeException("No matching texture format found");
 
 	return m_Driver->CreateTexture(copy, format, mipCount, isDynamic);
 }
@@ -340,7 +340,7 @@ StrongRef<CubeTexture> ImageSystem::CreateFittingCubeTexture(u32 size, ColorForm
 {
 	math::Dimension2I copy(size, size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, true, false))
-		throw core::RuntimeException("No matching texture format found");
+		throw core::GenericRuntimeException("No matching texture format found");
 
 	return m_Driver->CreateCubeTexture(copy.width, format, isDynamic);
 }
@@ -349,7 +349,7 @@ StrongRef<Texture> ImageSystem::CreateFittingRendertargetTexture(const math::Dim
 {
 	math::Dimension2I copy(size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, false, true))
-		throw core::RuntimeException("No matching texture format found");
+		throw core::GenericRuntimeException("No matching texture format found");
 
 	return m_Driver->CreateRendertargetTexture(copy, format);
 }

@@ -38,11 +38,11 @@ struct D3D9Exception : RuntimeException
 	}
 
 	explicit D3D9Exception(HRESULT hr) :
-		RuntimeException(nullptr),
 		result(hr)
 	{
-		m_What = MakeErrorString(hr);
 	}
+
+	ExceptionSafeString What() const { return MakeErrorString(result); }
 
 	HRESULT result;
 };

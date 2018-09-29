@@ -46,7 +46,7 @@ inline ToT SafeCast(FromT from)
 {
 	ToT out;
 	if(!CheckedCast(from, out))
-		throw core::Exception("Overflow");
+		throw core::GenericRuntimeException("Overflow");
 	return out;
 }
 

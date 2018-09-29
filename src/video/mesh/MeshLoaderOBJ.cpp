@@ -116,7 +116,7 @@ public:
 
 		auto mesh = dynamic_cast<video::Mesh*>(resource);
 		if(!mesh)
-			throw core::Exception("Wrong resource type passed");
+			throw core::InvalidOperationException("Wrong resource type passed");
 		auto filesize = baseFileDesc.GetSize();
 		core::RawMemory memory(core::SafeCast<size_t>(filesize));
 		file->ReadBinary(filesize, memory);

@@ -193,10 +193,10 @@ StrongRef<Node> Node::AddChild(Node* child)
 {
 	LX_CHECK_NULL_ARG(child);
 	if(child == this)
-		throw core::InvalidArgumentException("child", "Child may not be the same node");
+		throw core::GenericInvalidArgumentException("child", "Child may not be the same node");
 
 	if(m_Scene != child->m_Scene)
-		throw core::InvalidArgumentException("child", "Child was created in diffrent scene manager");
+		throw core::GenericInvalidArgumentException("child", "Child was created in diffrent scene manager");
 
 	child->Grab();
 

@@ -18,7 +18,7 @@ MemoryFile::MemoryFile(void* buffer,
 	m_Flags(flags)
 {
 	if(!core::CheckedCast(desc.GetSize(), m_Size))
-		throw core::Exception("Memory file is too big.");
+		throw core::InvalidOperationException("Memory file is too big.");
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::Copy)) {
 		auto newData = LUX_NEW_RAW(m_Size);
@@ -44,7 +44,7 @@ s64 MemoryFile::ReadBinaryPart(s64 numBytes, void* out)
 	LX_CHECK_NULL_ARG(out);
 	size_t sizeBytes;
 	if(!core::CheckedCast(numBytes, sizeBytes))
-		throw io::FileException(io::FileException::ReadError);
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
 
 	if(m_Cursor + sizeBytes > m_Size) {
 		sizeBytes = m_Size - m_Cursor;
@@ -62,14 +62,14 @@ s64 MemoryFile::WriteBinaryPart(const void* data, s64 numBytes)
 	LX_CHECK_NULL_ARG(data);
 	size_t sizeBytes;
 	if(!core::CheckedCast(numBytes, sizeBytes))
-		throw io::FileException(io::FileException::ReadError);
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::ReadOnly))
-		throw io::FileException(io::FileException::WriteError);
+		throw io::FileUsageException(io::FileUsageException::WriteError, GetName().Data());
 
 	if(m_Cursor > m_Size - sizeBytes) {
 		if(!TestFlag(m_Flags, EVirtualCreateFlag::Expandable)) {
-			throw io::FileException(io::FileException::WriteError);
+			throw io::FileUsageException(io::FileUsageException::WriteError, GetName().Data());
 		} else {
 			u8* pNewData = LUX_NEW_RAW(((m_Cursor + sizeBytes) * 3) / 2);
 			if(m_Buffer)
@@ -95,7 +95,7 @@ void MemoryFile::Seek(s64 offset, ESeekOrigin origin)
 	size_t cursor = (origin == ESeekOrigin::Start) ? 0 : (size_t)GetCursor();
 	s64 newCursor64 = (s64)cursor + offset;
 	if(newCursor64 > GetSize())
-		throw io::FileException(io::FileException::OutsideFile);
+		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetName().Data());
 
 	size_t newCursor = core::SafeCast<size_t>(newCursor64);
 	m_Cursor = newCursor;

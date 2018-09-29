@@ -106,7 +106,7 @@ ShaderD3D9::~ShaderD3D9()
 {
 }
 
-void ShaderD3D9::Init(
+bool ShaderD3D9::Init(
 	const char* vsCode, const char* vsEntryPoint, int vsLength, const char* vsProfile,
 	const char* psCode, const char* psEntryPoint, int psLength, const char* psProfile,
 	core::Array<core::String>* errorList)
@@ -141,7 +141,7 @@ void ShaderD3D9::Init(
 	}
 
 	if(compileError)
-		throw video::ShaderCompileException();
+		return false;
 
 	// Load all shader parameters.
 	core::Array<HelperEntry> helper;
@@ -228,6 +228,8 @@ void ShaderD3D9::Init(
 
 		nameCursor += h.nameLength + 1;
 	}
+
+	return true;
 }
 
 void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<core::String>* errorList)
@@ -264,7 +266,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 		if((isParam || isScene) && !isValidType) {
 			if(errorList)
 				errorList->PushBack(core::StringConverter::Format("Shader has unsupported parameter type. (param: ~s).", name));
-			throw ShaderCompileException();
+			throw UnhandledShaderCompileErrorException();
 		}
 
 		if(!isParam && !isScene)
@@ -296,7 +298,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 			if(foundEntry->type != type) {
 				if(errorList)
 					errorList->PushBack(core::StringConverter::Format("Shader param in pixelshader and vertex shader has diffrent types. (param: ~s).", name));
-				throw ShaderCompileException();
+				throw UnhandledShaderCompileErrorException();
 			}
 		} else {
 			// Otherwise, create a new entry.

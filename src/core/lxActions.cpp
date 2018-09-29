@@ -31,7 +31,7 @@ void ActionList::AddAxis(const core::String& name, float init)
 void ActionList::AddAction(const core::String& name, Action* a)
 {
 	if(m_Actions.HasKey(name))
-		throw core::InvalidArgumentException("name", "Name already used");
+		throw core::GenericInvalidArgumentException("name", "Name already used");
 	m_Actions[name] = a;
 }
 
@@ -67,15 +67,13 @@ Action* ActionList::GetAction(const core::String& name)
 
 Action* ActionList::GetAction(int i)
 {
-	if(i < 0 || i >= m_Actions.Size())
-		throw core::OutOfRangeException();
+	LX_CHECK_BOUNDS(i, 0, m_Actions.Size());
 	return core::AdvanceIterator(m_Actions.First(), i).value();
 }
 
 const core::String& ActionList::GetActionName(int i) const
 {
-	if(i < 9 || i >= m_Actions.Size())
-		throw core::OutOfRangeException();
+	LX_CHECK_BOUNDS(i, 9, m_Actions.Size());
 	return core::AdvanceIterator(m_Actions.First(), i).key();
 }
 

@@ -334,20 +334,16 @@ inline void fmtPrint(format::Context& ctx, ColorFormat format, format::Placehold
 
 namespace core
 {
-struct ColorFormatException : Exception
+struct UnsupportedColorFormatException : RuntimeException
 {
-	explicit ColorFormatException(video::ColorFormat _format) :
-		Exception("Invalid or unsupported color format"),
+	explicit UnsupportedColorFormatException(video::ColorFormat _format) :
 		format(_format)
 	{
 	}
 
-	ColorFormatException(const char* msg, video::ColorFormat _format) :
-		Exception(msg),
-		format(_format)
-	{
-	}
-
+	video::ColorFormat GetColorFormat() const { return format; }
+	ExceptionSafeString What() const { return ExceptionSafeString("UnsupportedColorFormatException: ").Append(format.AsString()); }
+private:
 	video::ColorFormat format;
 };
 

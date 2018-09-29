@@ -55,14 +55,14 @@ StrongRef<Geometry> GeometryCreatorTorus::CreateGeometry(
 	bool inside)
 {
 	if(radiusMajor <= 0.0f || radiusMinor <= 0.0f)
-		throw core::InvalidArgumentException("radiusMajor, radiusMinor", "Must be bigger than zero");
+		throw core::GenericInvalidArgumentException("radiusMajor, radiusMinor", "Must be bigger than zero");
 
 	if(sectorsMajor < 3 || sectorsMinor < 3)
-		throw core::InvalidArgumentException("sectorsMajor, sectorsMinor", "Number of sectors must be bigger than 2");
+		throw core::GenericInvalidArgumentException("sectorsMajor, sectorsMinor", "Number of sectors must be bigger than 2");
 
 	const u32 vertexCount = (sectorsMinor + 1)*(sectorsMajor + 1);
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
-		throw core::InvalidArgumentException("sectorsMajor, sectorsMinor", "Too many sectors");
+		throw core::GenericInvalidArgumentException("sectorsMajor, sectorsMinor", "Too many sectors");
 
 	// two triangles per sector
 	const u32 indexCount = sectorsMinor*sectorsMajor * 2 * 3;

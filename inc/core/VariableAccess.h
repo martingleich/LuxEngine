@@ -84,7 +84,7 @@ public:
 		if(IsValid()) {
 			auto type = core::TemplType<T>::Get();
 			if(!IsConvertible(m_Type, type))
-				throw TypeException("Incompatible types used", m_Type, type);
+				throw TypeCastException(m_Type, type);
 
 			T out;
 			ConvertBaseType(m_Type, m_Data, type, &out);
@@ -112,11 +112,11 @@ public:
 
 	operator const char*() const
 	{
-		if(m_Type != core::Types::String())
-			throw TypeException("Incompatible types used", m_Type, core::Types::String());
-
 		if(!IsValid())
-			throw Exception("Accessed invalid package parameter");
+			throw InvalidOperationException("Accessed invalid package parameter");
+
+		if(m_Type != core::Types::String())
+			throw TypeCastException(m_Type, core::Types::String());
 
 		return ((core::String*)m_Data)->Data_c();
 	}
@@ -165,7 +165,7 @@ public:
 	const VariableAccess& operator=(const T& varVal) const
 	{
 		if(!core::IsConvertible(core::TemplType<T>::Get(), m_Type))
-			throw TypeException("Incompatible types used", core::TemplType<T>::Get(), m_Type);
+			throw TypeCastException(core::TemplType<T>::Get(), m_Type);
 		if(IsValid())
 			core::ConvertBaseType(core::TemplType<T>::Get(), &varVal, m_Type, m_Data);
 
@@ -174,11 +174,11 @@ public:
 
 	const VariableAccess& operator=(const char* string) const
 	{
-		if(m_Type != core::Types::String())
-			throw TypeException("Incompatible types used", m_Type, core::Types::String());
-
 		if(!IsValid())
-			throw Exception("Accessed invalid package parameter");
+			throw InvalidOperationException("Accessed invalid package parameter");
+
+		if(m_Type != core::Types::String())
+			throw TypeCastException(m_Type, core::Types::String());
 
 		(*(core::String*)m_Data) = string;
 
@@ -238,11 +238,11 @@ public:
 	*/
 	const VariableAccess& operator=(const VariableAccess& varVal) const
 	{
-		if(IsConvertible(m_Type, varVal.m_Type))
-			throw TypeException("Incompatible types used", m_Type, varVal.m_Type);
-
 		if(!IsValid())
-			throw Exception("Accessed invalid package parameter");
+			throw InvalidOperationException("Accessed invalid package parameter");
+
+		if(IsConvertible(m_Type, varVal.m_Type))
+			throw TypeCastException(m_Type, varVal.m_Type);
 
 		ConvertBaseType(varVal.m_Type, varVal.m_Data, m_Type, m_Data);
 
@@ -296,7 +296,7 @@ template <>
 inline const VariableAccess& VariableAccess::operator=(const video::Color& color) const
 {
 	if(m_Type != core::Types::Color() && m_Type != core::Types::ColorF())
-		throw TypeException("Incompatible types used", m_Type, core::Types::Color());
+		throw TypeCastException(m_Type, core::Types::Color());
 
 	if(m_Type == core::Types::Color())
 		*((video::Color*)m_Data) = color;
@@ -311,7 +311,7 @@ template <>
 inline const VariableAccess& VariableAccess::operator=(const video::Color::EPredefinedColors& color) const
 {
 	if(m_Type != core::Types::Color() && m_Type != core::Types::ColorF())
-		throw TypeException("Incompatible types used", m_Type, core::Types::Color());
+		throw TypeCastException(m_Type, core::Types::Color());
 
 	if(m_Type == core::Types::Color())
 		*((video::Color*)m_Data) = color;

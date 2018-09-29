@@ -11,7 +11,7 @@
 
 namespace lux
 {
-inline lux::core::String GetWin32ErrorString(DWORD error)
+inline core::String GetWin32ErrorString(DWORD error)
 {
 	lux::core::String out;
 	if(NOERROR != error) {
@@ -44,10 +44,10 @@ namespace core
 struct Win32Exception : RuntimeException
 {
 	explicit Win32Exception(DWORD _error) :
-		RuntimeException(GetWin32ErrorString(_error).Data()),
 		error(_error)
 	{
 	}
+	ExceptionSafeString What() const { return GetWin32ErrorString(error).Data(); }
 
 	DWORD error;
 };
@@ -59,34 +59,6 @@ struct LogWin32Error
 	{
 	}
 };
-
-inline core::String GetWin32ErrorString(DWORD error)
-{
-	core::String out;
-	if(NOERROR != error) {
-		const DWORD formatControl =
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_IGNORE_INSERTS |
-			FORMAT_MESSAGE_FROM_SYSTEM;
-
-		LPWSTR textBuffer = NULL;
-		DWORD count = FormatMessageW(formatControl,
-			NULL,
-			error,
-			0,
-			textBuffer,
-			0,
-			NULL);
-		const char* textBytes = (const char*)textBuffer;
-		if(count != 0)
-			out = lux::core::UTF16ToString(textBytes);
-		else
-			out = "Unknown error";
-		HeapFree(GetProcessHeap(), 0, textBuffer);
-	}
-
-	return out;
-}
 
 inline void fmtPrint(format::Context& ctx, const LogWin32Error& v, format::Placeholder& placeholder)
 {

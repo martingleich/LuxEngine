@@ -19,7 +19,7 @@ RawKeyboardDevice::RawKeyboardDevice(InputSystem* system, HANDLE rawHandle, HKL 
 
 	RID_DEVICE_INFO info = GetDeviceInfo(rawHandle);
 	if(info.dwType != RIM_TYPEKEYBOARD)
-		throw core::InvalidArgumentException("rawHandle", "Is not a keyboard");
+		throw core::GenericInvalidArgumentException("rawHandle", "Is not a keyboard");
 }
 
 void RawKeyboardDevice::HandleInput(RAWINPUT* input)

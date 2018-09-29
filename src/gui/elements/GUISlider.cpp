@@ -171,7 +171,7 @@ float Slider::GetRelThumbPos() const
 void Slider::SetRange(int min, int max)
 {
 	if(min >= max)
-		throw core::InvalidArgumentException("min, max", "Min must be smaller than max");
+		throw core::GenericInvalidArgumentException("min, max", "Min must be smaller than max");
 	m_MinValue = min;
 	m_MaxValue = max;
 	SetThumbPos(GetThumbPos());
@@ -185,7 +185,7 @@ void Slider::GetRange(int& min, int& max) const
 void Slider::SetStep(int step, int bigStep)
 {
 	if(step <= 0)
-		throw core::InvalidArgumentException("step", "Must be bigger than zero");
+		throw core::GenericInvalidArgumentException("step", "Must be bigger than zero");
 	m_StepSize = step;
 	m_BigStep = bigStep > 0 ? bigStep : step * 10;
 }

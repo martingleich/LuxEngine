@@ -154,7 +154,7 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	}
 
 	if(!m_Window->GetDeviceWindow())
-		throw core::ErrorException("Missing window");
+		throw core::InvalidOperationException("Missing window");
 
 	input::InputSystem::Initialize();
 	auto inputSys = input::InputSystem::Instance();
@@ -165,7 +165,7 @@ void LuxDeviceWin32::BuildInputSystem(bool isForeground)
 	m_RawInputReceiver = LUX_NEW(input::RawInputReceiver)(inputSys, (HWND)m_Window->GetDeviceWindow());
 	u32 keyboardCount = m_RawInputReceiver->DiscoverDevices(input::EEventSource::Keyboard);
 	if(keyboardCount == 0)
-		throw core::RuntimeException("No keyboard found on system.");
+		throw core::GenericRuntimeException("No keyboard found on system.");
 #else
 	throw core::NotImplementedException();
 #endif

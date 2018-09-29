@@ -27,7 +27,7 @@ void ModuleFactory::AddModuleFactory(const core::String& module, const core::Str
 
 	for(auto& e : m_Entries) {
 		if(e.module == module && e.name == name)
-			throw core::InvalidArgumentException("name", "Name already used");
+			throw core::GenericInvalidArgumentException("name", "Name already used");
 	}
 
 	m_Entries.PushBack(Entry(module, name, creator));
@@ -50,7 +50,7 @@ StrongRef<ReferenceCounted> ModuleFactory::CreateModule(const core::String& modu
 		if(e.module == module && e.name == name) {
 			StrongRef<ReferenceCounted> out = e.creator(data);
 			if(!out)
-				throw core::RuntimeException("Factory function failed");
+				throw core::FactoryCreateException(module.Data(), "Creation of module failed");
 			return out;
 		}
 	}

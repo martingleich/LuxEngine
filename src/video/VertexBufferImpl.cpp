@@ -24,7 +24,7 @@ void VertexBufferImpl::SetFormat(const VertexFormat& format, int stream, bool mo
 {
 	int stride = format.GetStride(stream);
 	if(!format.IsValid() || stride == 0)
-		throw core::InvalidArgumentException("format", "Format is invalid");
+		throw core::GenericInvalidArgumentException("format", "Format is invalid");
 
 	if(m_Data) {
 		if(init) {

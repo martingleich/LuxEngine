@@ -274,7 +274,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 	}
 
 	if(!buffer.ptr)
-		throw core::FileFormatException("Can't loader data from file");
+		throw core::FileFormatException("Can't loader data from file", "<unknown>");
 
 	D3DXIMAGE_INFO info;
 	hr = D3DXGetImageInfoFromFileInMemory(buffer.ptr, (UINT)buffer.size, &info);
@@ -321,7 +321,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 			orgTex->UnlockRect(0);
 			return;
 		} else {
-			throw core::FileFormatException("Can't load cube- and volumetexture as texture");
+			throw core::FileFormatException("Can't load cube- and volumetexture as texture", "<unknown>");
 		}
 	}
 }

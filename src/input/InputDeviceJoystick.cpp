@@ -91,15 +91,14 @@ const core::Axis* JoystickDevice::GetAxis(int axisCode) const
 
 const core::Area* JoystickDevice::GetArea(int areaCode) const
 {
-	LUX_UNUSED(areaCode);
-	throw core::OutOfRangeException();
+	throw core::ArgumentOutOfRangeException("areaCode", 0, 0, areaCode);
 }
 
 bool JoystickDevice::Update(Event& event)
 {
 	if(event.type == EEventType::Button) {
 		if((int)event.button.code >= m_Buttons.Size())
-			throw core::OutOfRangeException();
+			throw core::ArgumentOutOfRangeException("event.button.code", 0, m_Buttons.Size(), (int)event.button.code);
 
 		if(m_Buttons[event.button.code].state != event.button.state) {
 			m_Buttons[event.button.code].state = event.button.state;
@@ -110,7 +109,7 @@ bool JoystickDevice::Update(Event& event)
 
 	if(event.type == EEventType::Axis) {
 		if((int)event.axis.code >= m_Axes.Size())
-			throw core::OutOfRangeException();
+			throw core::ArgumentOutOfRangeException("event.axis.code", 0, m_Axes.Size(), (int)event.button.code);
 
 		if(event.internal_abs_only)
 			event.axis.rel = m_Axes[event.axis.code].state - event.axis.abs;

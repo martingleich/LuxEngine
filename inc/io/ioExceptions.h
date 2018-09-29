@@ -11,34 +11,54 @@ namespace io
 struct FileNotFoundException : core::Exception
 {
 	explicit FileNotFoundException(const char* _path) :
-		core::Exception(nullptr),
-		path(_path)
+		m_Path(_path)
 	{
-		m_What.Append("file_not_found(");
-		m_What.Append(_path);
-		m_What.Append(")");
 	}
 
-	//! The path to the invalid, only for debuging purposes.
-	core::ExceptionSafeString path;
+	core::ExceptionSafeString GetPath() const { return m_Path; }
+	core::ExceptionSafeString What() const { return core::ExceptionSafeString("FileNotFoundException: ").Append(m_Path); }
+private:
+	core::ExceptionSafeString m_Path;
 };
 
 //! Exception while using a file.
-struct FileException : core::Exception
+struct FileUsageException : core::Exception
 {
 	//! An error while writing to the file.
-	static const int WriteError = 0;
-	static const int ReadError = 1;
-	static const int OutsideFile = 2;
+	enum EError
+	{
+		WriteError,
+		ReadError,
+		CursorOutsideFile,
+	};
 
-	explicit FileException(int _type) :
-		core::Exception("file error"),
-		type(_type)
+	explicit FileUsageException(EError error, const core::String& path) :
+		m_Error(error),
+		m_Path(path.Data())
 	{
 	}
+	explicit FileUsageException(EError error, const char* path) :
+		m_Error(error),
+		m_Path(path)
+	{
+	}
+	EError GetError() const { return m_Error; }
+	core::ExceptionSafeString GetPath() const { return m_Path; }
+	core::ExceptionSafeString What() const {
+		core::ExceptionSafeString out("FileUsageException: ");
+		switch(m_Error) {
+		case WriteError: out.Append("WriteError "); break;
+		case ReadError: out.Append("ReadError "); break;
+		case CursorOutsideFile: out.Append("CursorOutsideFile "); break;
+		default: out.Append("UnknownError "); break;
+		}
+		out.Append(m_Path);
+		return out;
+	}
 
-	//! The type of error which occured.
-	int type;
+private:
+	EError m_Error;
+	core::ExceptionSafeString m_Path;
 };
 
 } // namespace io

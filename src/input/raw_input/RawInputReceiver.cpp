@@ -112,7 +112,7 @@ StrongRef<RawInputDevice> RawInputReceiver::CreateDevice(HANDLE rawHandle)
 	case RIM_TYPEHID:
 		return LUX_NEW(RawJoystickDevice)(m_InputSystem, rawHandle);
 	default:
-		throw core::RuntimeException("Unsupported device type");
+		throw core::GenericRuntimeException("Unsupported device type");
 	}
 }
 

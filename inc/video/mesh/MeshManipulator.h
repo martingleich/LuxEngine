@@ -263,7 +263,7 @@ public:
 
 		if(primType == EPrimitiveType::Lines ||
 			primType == EPrimitiveType::LineStrip) {
-			throw core::ErrorException("Unweld LineStrip not implemented");
+			throw core::InvalidOperationException("Unweld LineStrip not implemented");
 		}
 
 		if(primType == EPrimitiveType::TriangleStrip ||

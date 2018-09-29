@@ -275,7 +275,7 @@ inline DWORD GetD3DTextureFilter(BaseTexture::Filter::EFilter filter)
 		return D3DTEXF_POINT;
 	case BaseTexture::Filter::Anisotropic:
 		return D3DTEXF_ANISOTROPIC;
-	default: throw core::InvalidArgumentException("filter");
+	default: throw core::GenericInvalidArgumentException("filter", "Unknown filter");
 	};
 }
 
@@ -291,7 +291,7 @@ inline DWORD GetD3DStencilOperator(EStencilOperator op)
 	case EStencilOperator::IncrementSat: return D3DSTENCILOP_INCRSAT;
 	case EStencilOperator::DecrementSat: return D3DSTENCILOP_DECRSAT;
 	default:
-		throw core::InvalidArgumentException("op");
+		throw core::GenericInvalidArgumentException("op", "Unknown operand");
 	}
 }
 
@@ -369,8 +369,8 @@ inline DWORD GetD3DBlend(EBlendFactor factor)
 		return D3DBLEND_DESTALPHA;
 	case EBlendFactor::OneMinusDstAlpha:
 		return D3DBLEND_INVDESTALPHA;
-	default: throw core::InvalidArgumentException("factor");
 	}
+	throw core::GenericInvalidArgumentException("factor", "Unknown factor");
 }
 
 inline DWORD GetD3DComparisonFunc(EComparisonFunc func)
@@ -392,8 +392,8 @@ inline DWORD GetD3DComparisonFunc(EComparisonFunc func)
 		return D3DCMP_NEVER;
 	case EComparisonFunc::NotEqual:
 		return D3DCMP_NOTEQUAL;
-	default: throw core::InvalidArgumentException("func");
 	}
+	throw core::GenericInvalidArgumentException("func", "Unknown function");
 }
 
 inline D3DFORMAT GetD3DIndexFormat(EIndexFormat indexFormat)
@@ -401,8 +401,8 @@ inline D3DFORMAT GetD3DIndexFormat(EIndexFormat indexFormat)
 	switch(indexFormat) {
 	case EIndexFormat::Bit16: return D3DFMT_INDEX16;
 	case EIndexFormat::Bit32: return D3DFMT_INDEX32;
-	default: throw core::InvalidArgumentException("indexFormat");
 	}
+	throw core::GenericInvalidArgumentException("indexFormat", "Unknown indexformat");
 }
 
 inline D3DPRIMITIVETYPE GetD3DPrimitiveType(EPrimitiveType type)
@@ -420,8 +420,8 @@ inline D3DPRIMITIVETYPE GetD3DPrimitiveType(EPrimitiveType type)
 		return D3DPT_TRIANGLELIST;
 	case EPrimitiveType::TriangleStrip:
 		return D3DPT_TRIANGLESTRIP;
-	default: throw core::InvalidArgumentException("type");
 	}
+	throw core::GenericInvalidArgumentException("type", "Unknown primitive type");
 }
 
 inline DWORD GetD3DFogType(EFogType type)
@@ -430,8 +430,8 @@ inline DWORD GetD3DFogType(EFogType type)
 	case EFogType::Exp: return D3DFOG_EXP;
 	case EFogType::ExpSq: return D3DFOG_EXP2;
 	case EFogType::Linear: return D3DFOG_LINEAR;
-	default: throw core::InvalidArgumentException("type");
 	}
+	throw core::GenericInvalidArgumentException("type", "Unknown fogtype");
 }
 
 inline D3DCUBEMAP_FACES GetD3DCubeMapFace(CubeTexture::EFace face)
@@ -441,7 +441,7 @@ inline D3DCUBEMAP_FACES GetD3DCubeMapFace(CubeTexture::EFace face)
 		D3DCUBEMAP_FACE_POSITIVE_Z, D3DCUBEMAP_FACE_NEGATIVE_Z};
 	int i = (int)face;
 	if(i < 0 || i >= 6)
-		return D3DCUBEMAP_FACE_FORCE_DWORD;
+		throw core::GenericInvalidArgumentException("face", "Unknown cube map face");
 	else
 		return CONV[i];
 }

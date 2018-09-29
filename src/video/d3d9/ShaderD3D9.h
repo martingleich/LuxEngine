@@ -24,7 +24,7 @@ public:
 	ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& deviceState);
 	~ShaderD3D9();
 
-	void Init(
+	bool Init(
 		const char* vsCode, const char* vsEntryPoint, int vsLength, const char* vsProfile,
 		const char* psCode, const char* psEntryPoint, int psLength, const char* psProfile,
 		core::Array<core::String>* errorList);

@@ -91,7 +91,7 @@ const core::Axis* MouseDevice::GetAxis(int axisCode) const
 const core::Area* MouseDevice::GetArea(int areaCode) const
 {
 	if(areaCode != 0)
-		throw core::OutOfRangeException();
+		throw core::ArgumentOutOfRangeException("areaCode", 0, 1, areaCode);
 
 	return &m_Pos;
 }
@@ -172,8 +172,7 @@ EElementType MouseDevice::GetElementType(EEventType type, int id) const
 	} else if(type == EEventType::Axis) {
 		return m_Axes.At(id).type;
 	} else if(type == EEventType::Area) {
-		if(id != 0)
-			throw core::OutOfRangeException();
+		LX_CHECK_BOUNDS(id, 0, 1);
 		return m_Pos.type;
 	} else {
 		return EElementType::Other;

@@ -507,8 +507,8 @@ void String::Resize(int newLength, const StringView& filler)
 
 		m_Size -= static_cast<int>((data + m_Size) - ptr);
 	} else {
-		if(filler.Size() == 0)
-			throw InvalidArgumentException("filler", "length(filler) > 0");
+		if(filler.IsEmpty())
+			throw GenericInvalidArgumentException("filler", "Must not be empty");
 
 		int fillerLength = filler.Size() == 1 ? 1 : StringLengthUTF8(filler.Data());
 		int addLength = static_cast<int>(newLength - curLength);
@@ -584,7 +584,7 @@ void String::PushByte(u8 byte)
 		Reserve(GetAllocated() * 2 + 1);
 
 	if(byte == 0)
-		throw InvalidArgumentException("byte", "byte must not be null");
+		throw GenericInvalidArgumentException("byte", "byte must not be zero.");
 
 	Data()[m_Size] = byte;
 	Data()[m_Size + 1] = 0;
@@ -628,7 +628,7 @@ String::ConstIterator String::ReplaceRange(const StringView& replace, ConstByteI
 	int replacedSize = static_cast<int>((ConstIterator(rangeFirst) + count).Pointer() - rangeFirst);
 
 	if(m_Size + replace.Size() < replacedSize)
-		throw InvalidArgumentException("count", "count must not be to large.");
+		throw GenericInvalidArgumentException("count", "count must not be to large.");
 
 	int newSize = m_Size - replacedSize + replace.Size();
 	int replaceOffset = static_cast<int>(rangeFirst - Data_c());
@@ -681,7 +681,7 @@ String::ConstIterator String::Remove(ConstByteIterator pos, int count)
 	int removeSize = static_cast<int>((ConstIterator(pos) + count).Pointer() - pos);
 
 	if(removeSize > m_Size)
-		throw InvalidArgumentException("count", "count must not be to large.");
+		throw GenericInvalidArgumentException("count", "count must not be to large.");
 
 	int newSize = m_Size - removeSize;
 
@@ -848,7 +848,7 @@ void String::PushCharacter(const char* ptr)
 		Reserve(GetAllocated() * 2 + 6);
 
 	if(*ptr == 0)
-		throw InvalidArgumentException("byte", "byte must not be null");
+		throw GenericInvalidArgumentException("byte", "byte must not be null");
 
 	Data()[m_Size++] = *ptr;
 	if((*ptr & 0x80) != 0) {

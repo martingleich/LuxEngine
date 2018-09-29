@@ -14,7 +14,7 @@ MatrixTable::MatrixTable() :
 void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 {
 	if(type > MAT_PROJ)
-		throw core::InvalidArgumentException("type");
+		throw core::GenericInvalidArgumentException("type", "Can only set base matrices");
 
 	m_Matrices[type] = matrix;
 	switch(type) {

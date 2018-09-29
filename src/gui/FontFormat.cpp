@@ -483,7 +483,7 @@ void FontLoader::LoadResource(io::File* file, core::Resource* dst)
 {
 	auto font = dynamic_cast<gui::FontRaster*>(dst);
 	if(!font)
-		throw core::ErrorException("Passed wrong type to loader");
+		throw core::InvalidOperationException("Passed wrong type to loader");
 
 	Context ctx(file);
 	u32 version = ctx.ReadHeader();
@@ -516,7 +516,7 @@ void FontWriter::WriteResource(io::File* file, core::Resource* resource)
 {
 	auto font = dynamic_cast<gui::FontRaster*>(resource);
 	if(!font)
-		throw core::ErrorException("Passed wrong type to loader");
+		throw core::InvalidOperationException("Passed wrong type to loader");
 
 	Context ctx(file);
 	ctx.WriteHeader("0001");

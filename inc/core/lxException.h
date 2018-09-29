@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <stdarg.h>
+#include <cstdio>
 
 namespace lux
 {
@@ -41,12 +42,6 @@ public:
 		if(!s)
 			return *this;
 
-		if(!data) {
-			*this = s;
-			return *this;
-		}
-
-
 		size_t oldlen = strlen(Data());
 		size_t newlen = strlen(s) + oldlen;
 		char* newdata = (char*)std::malloc(newlen + 1 + 1);
@@ -62,6 +57,24 @@ public:
 		return *this;
 	}
 
+	ExceptionSafeString& Append(const ExceptionSafeString& str)
+	{
+		return Append(str.Data());
+	}
+
+	ExceptionSafeString& Append(int i)
+	{
+		char BUFFER[32];
+		snprintf(BUFFER, 32, "%d", i);
+		return Append(BUFFER);
+	}
+	ExceptionSafeString& Append(float i)
+	{
+		char BUFFER[32];
+		snprintf(BUFFER, 32, "%f", i);
+		return Append(BUFFER);
+	}
+	
 	ExceptionSafeString(const ExceptionSafeString& other) :
 		data(other.data)
 	{
@@ -96,11 +109,7 @@ public:
 			return "string_alloc_error";
 	}
 
-	operator const char*() const
-	{
-		return Data();
-	}
-
+	ExceptionSafeString Copy() const { return ExceptionSafeString(data+1); }
 private:
 	//! Contains a single byte reference count, followed by a null-terminated string.
 	char* data;
@@ -109,25 +118,13 @@ private:
 //! The exception baseclass
 struct Exception
 {
-	explicit Exception(const char* what) :
-		m_What(what)
-	{
-	}
-
-	const char* What() const noexcept
-	{
-		return m_What.Data();
-	}
-
-protected:
-	ExceptionSafeString m_What;
+	virtual ~Exception() {}
+	virtual ExceptionSafeString What() const = 0;
 };
 
 struct InvalidCastException : public Exception
 {
-	InvalidCastException() :
-		Exception("Invalid cast")
-	{}
+	virtual ExceptionSafeString What() const { return "InvalidCastException"; }
 };
 
 //! Exception which occured beyond the programmers control and most of the time can't be handled by him
@@ -135,94 +132,202 @@ struct InvalidCastException : public Exception
 Examples are OutOfMemory, Errors when creating hardware resources, errors from os calls, etc.
 These errors can't be handles by the programmer, except "this function call does not work."
 */
-struct RuntimeException : Exception
+struct RuntimeException : Exception {};
+
+struct GenericRuntimeException : RuntimeException
 {
-	explicit RuntimeException(const char* msg) :
-		Exception(msg)
+public:
+	explicit GenericRuntimeException(const char* message) :
+		m_Message(message)
+	{}
+
+	ExceptionSafeString What() const { return ExceptionSafeString("GenericRuntimeException: ").Append(m_Message); }
+
+private:
+	ExceptionSafeString m_Message;
+};
+
+struct FactoryCreateException : RuntimeException
+{
+	explicit FactoryCreateException(const char* name, const char* message) :
+		m_Name(name),
+		m_Message(message)
 	{
 	}
+
+	ExceptionSafeString GetName() const { return m_Name; }
+	ExceptionSafeString GetMessage() const { return m_Message; }
+	ExceptionSafeString What() const { return ExceptionSafeString("FactoryCreateException: ").Append(m_Name).Append(": ").Append(m_Message); }
+
+private:
+	ExceptionSafeString m_Name;
+	ExceptionSafeString m_Message;
 };
 
 //! Exception created by using a interface wrong
 /**
 Accessing arrays out of bound, calling unimplemented methods and so on.
 */
-struct ErrorException : Exception
-{
-	explicit ErrorException(const char* msg) :
-		Exception(msg)
-	{
-	}
-};
+struct ErrorException : Exception { };
 
 //! The requested thing is not implemented.
 struct NotImplementedException : ErrorException
 {
-	NotImplementedException() :
-		ErrorException("not implemented")
+	explicit NotImplementedException(const char* name="") :
+		m_Name(name)
 	{
 	}
+	ExceptionSafeString What() const
+	{
+		return ExceptionSafeString("NotImplementedException: ").Append(m_Name);
+	}
+	const char* GetName() const { return m_Name.Data(); }
+private:
+	ExceptionSafeString m_Name;
 };
 
 //! Thrown if invalid arguments where based to a function
 struct InvalidArgumentException : ErrorException
 {
-	explicit InvalidArgumentException(const char* _arg, const char* _assertion = "") :
-		ErrorException(nullptr),
-		arg(_arg),
-		assertion(_assertion)
+	explicit InvalidArgumentException(const char* _argName) :
+		m_ArgName(_argName)
 	{
-		m_What.Append("invalid_argument(");
-		m_What.Append(arg);
-		if(assertion) {
-			m_What.Append(", ");
-			m_What.Append(assertion);
-		}
-		m_What.Append(")");
+	}
+	ExceptionSafeString GetArgName() const { return m_ArgName; }
+	ExceptionSafeString What() const
+	{
+		return ExceptionSafeString("InvalidArgumentException: ").Append(m_ArgName);
 	}
 
-	//! The argument which was invalid
-	ExceptionSafeString arg;
-	//! Why was the argument invalid
-	ExceptionSafeString assertion;
+private:
+	ExceptionSafeString m_ArgName;
+};
+
+struct GenericInvalidArgumentException : InvalidArgumentException
+{
+	explicit GenericInvalidArgumentException(const char* _argName, const char* _message) :
+		InvalidArgumentException(_argName),
+		m_Message(_message)
+	{
+	}
+	ExceptionSafeString GetMessage() const { return m_Message; }
+	ExceptionSafeString What() const
+	{
+		return ExceptionSafeString("GenericInvalidArgumentException: ").Append(GetArgName()).Append(": ").Append(m_Message);
+	}
+
+private:
+	ExceptionSafeString m_Message;
+};
+
+//! An array was accessed out of its valid range.
+struct ArgumentOutOfRangeException : InvalidArgumentException
+{
+private:
+	static ExceptionSafeString MakeMessage(ExceptionSafeString arg, int lo, int hi, int val)
+	{
+		return ExceptionSafeString("ArgumentOfOfRangeException: ").
+			Append(arg).
+			Append(" should be in [").
+			Append(lo).
+			Append(", ").
+			Append(hi).
+			Append(" but was ").
+			Append(val);
+	}
+public:
+	ArgumentOutOfRangeException(const char* argName, int begin, int end, int val) :
+		InvalidArgumentException(argName),
+		m_Lo(begin),
+		m_Hi(end),
+		m_Val(val)
+	{
+	}
+	ExceptionSafeString What() const { return MakeMessage(GetArgName(), m_Lo, m_Hi, m_Val); }
+
+private:
+	int m_Lo;
+	int m_Hi;
+	int m_Val;
+};
+
+struct FloatArgumentOutOfRangeException : InvalidArgumentException
+{
+private:
+	static ExceptionSafeString MakeMessage(ExceptionSafeString arg, float lo, float hi, float val)
+	{
+		return ExceptionSafeString("FloatArgumentOfOfRangeException: ").
+			Append(arg).
+			Append(" should be in [").
+			Append(lo).
+			Append(", ").
+			Append(hi).
+			Append(" but was ").
+			Append(val);
+	}
+public:
+	FloatArgumentOutOfRangeException(const char* argName, float lo, float hi, float val) :
+		InvalidArgumentException(argName),
+		m_Lo(lo),
+		m_Hi(hi),
+		m_Val(val)
+	{
+	}
+	ExceptionSafeString What() const { return MakeMessage(GetArgName(), m_Lo, m_Hi, m_Val); }
+
+private:
+	float m_Lo;
+	float m_Hi;
+	float m_Val;
+};
+
+struct ArgumentNullException : InvalidArgumentException
+{
+private:
+	static ExceptionSafeString MakeMessage(ExceptionSafeString arg)
+	{
+		return ExceptionSafeString("ArgumentNullException: ").Append(arg);
+	}
+public:
+	explicit ArgumentNullException(const char* argName) :
+		InvalidArgumentException(argName)
+	{
+	}
+	ExceptionSafeString What() const { return MakeMessage(GetArgName()); }
 };
 
 //! Helper macro to check for not allowed NULL-Pointer arguments.
-#define LX_CHECK_NULL_ARG(arg) if(!(arg)) throw lux::core::InvalidArgumentException(#arg, "Must not be null");
+#define LX_CHECK_NULL_ARG(arg) if(!(arg)) throw lux::core::ArgumentNullException(#arg);
 
-#define LX_CHECK_BOUNDS(arg, lo, hi) if(arg < lo || arg > hi) throw lux::core::InvalidArgumentException(#arg, "Is out of range.");
+//! Each argument will be evaluated multiple times.
+#define LX_CHECK_BOUNDS(arg, lo, hi) if((arg) < (lo) || (arg) >= (hi)) throw lux::core::ArgumentOutOfRangeException(#arg, (lo), (hi), (arg));
 
 struct InvalidOperationException : public ErrorException
 {
-	explicit InvalidOperationException(const char* _msg) :
-		ErrorException(_msg)
+	explicit InvalidOperationException(const char* operation) :
+		m_Operation(operation)
 	{
 	}
+
+	ExceptionSafeString GetOperation() const { return m_Operation; }
+	ExceptionSafeString What() const { return ExceptionSafeString("InvalidOperationException: ").Append(m_Operation); }
+
+private:
+	ExceptionSafeString m_Operation;
 };
 
 //! Exception while dealing with unicode strings or characters.
 struct UnicodeException : Exception
 {
-	explicit UnicodeException(const char* _msg, u32 _codepoint = 0) :
-		Exception("unicode exception"),
-		msg(_msg),
+	explicit UnicodeException(u32 _codepoint) :
 		codepoint(_codepoint)
 	{
 	}
 
-	ExceptionSafeString msg;
-
-	//! The codepoint which generated the error, may be 0
+	u32 GetCodePoint() const { return codepoint; }
+	ExceptionSafeString What() const { return "UnicodeException"; }
+private:
 	u32 codepoint;
-};
-
-//! An array was accessed out of its valid range.
-struct OutOfRangeException : ErrorException
-{
-	OutOfRangeException() :
-		ErrorException("out of range")
-	{
-	}
 };
 
 //! A non existing object was queried.
@@ -232,32 +337,45 @@ For example a parameter in a ParamPackage
 struct ObjectNotFoundException : ErrorException
 {
 	explicit ObjectNotFoundException(const char* _object) :
-		ErrorException(nullptr),
-		object(_object)
+		m_Object(_object)
 	{
-		m_What.Append("object_not_found(");
-		m_What.Append(object);
-		m_What.Append(")");
 	}
 
-	//! The name of the queried object.
-	ExceptionSafeString object;
+	ExceptionSafeString GetObjectName() const { return m_Object; }
+	ExceptionSafeString What() const { return ExceptionSafeString("ObjectNotFoundException: ").Append(m_Object); }
+private:
+	ExceptionSafeString m_Object;
+};
+
+struct ObjectAlreadyExistsException : ErrorException
+{
+	explicit ObjectAlreadyExistsException(const char* _object) :
+		m_Object(_object)
+	{
+	}
+
+	ExceptionSafeString GetObjectName() const { return m_Object; }
+	ExceptionSafeString What() const { return ExceptionSafeString("ObjectAlreadyExists: ").Append(m_Object); }
+private:
+	ExceptionSafeString m_Object;
 };
 
 //! Exception dealing with a file format
 /**
-Thrown when a fileformat is not available or the contet is corrupted.
+Thrown when a fileformat is not available or the content is corrupted.
 */
 struct FileFormatException : Exception
 {
-	explicit FileFormatException(const char* _msg, const char* _format = "") :
-		Exception("Fileformat not known or not supported"),
+	explicit FileFormatException(const char* _msg, const char* _format) :
 		format(_format),
 		msg(_msg)
 	{
 	}
 
-	//! The name of the problematic format, may be empty
+	ExceptionSafeString GetFileFormat() const { return format; }
+	ExceptionSafeString GetMessage() const { return msg; }
+	ExceptionSafeString What() const { return ExceptionSafeString("FileFormatException: ").Append(format).Append(" :").Append(msg); }
+private:
 	ExceptionSafeString format;
 	ExceptionSafeString msg;
 };

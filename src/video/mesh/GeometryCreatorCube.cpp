@@ -57,14 +57,14 @@ StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(
 	bool inside)
 {
 	if(sizeX <= 0.0f || sizeY <= 0.0f || sizeZ <= 0.0f)
-		throw core::InvalidArgumentException("sizeX, sizeY, sizeZ", "Must be bigger than zero");
+		throw core::GenericInvalidArgumentException("sizeX, sizeY, sizeZ", "Must be bigger than zero");
 
 	if(tesX < 2 || tesY < 2 || tesZ < 2)
-		throw core::InvalidArgumentException("tesX, tesY, tesZ", "Must be bigger than 1");
+		throw core::GenericInvalidArgumentException("tesX, tesY, tesZ", "Must be bigger than 1");
 
 	const u32 vertexCount = tesX*tesY * 2 + tesX*tesZ * 2 + tesZ*tesY * 2;
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
-		throw core::InvalidArgumentException("Too many indices");
+		throw core::GenericInvalidArgumentException("tesX,tesY,tesZ", "Too many indices");
 
 	const u32 indexCount =
 		6 * ((tesX - 1)*(tesY - 1) * 2 +

@@ -35,7 +35,7 @@ public:
 	void SetPeriod(float period)
 	{
 		if(period < 0)
-			throw core::InvalidArgumentException("period", "Period mustn't be smaller than 0");
+			throw core::GenericInvalidArgumentException("period", "Period mustn't be smaller than 0");
 		m_Period = period;
 	}
 

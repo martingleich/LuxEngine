@@ -30,7 +30,7 @@ s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
 	LX_CHECK_NULL_ARG(numBytes);
 	size_t numBytesSizeT;
 	if(!core::CheckedCast(numBytes, numBytesSizeT))
-		throw io::FileException(io::FileException::ReadError);
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
 
 	s64 read = (s64)fread(out, 1, numBytesSizeT, m_File);
 	if(read != numBytes) {
@@ -57,13 +57,13 @@ s64 StreamFile::WriteBinaryPart(const void* data, s64 numBytes)
 	LX_CHECK_NULL_ARG(numBytes);
 	size_t numBytesSizeT;
 	if(!core::CheckedCast(numBytes, numBytesSizeT))
-		throw io::FileException(io::FileException::ReadError);
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
 
 	if((s64)ftell(m_File) > m_FileSize - numBytes)
 		m_FileSize = ftell(m_File) + numBytes;
 
 	if(fwrite(data, numBytesSizeT, 1, m_File) != 1)
-		throw io::FileException(io::FileException::WriteError);
+		throw io::FileUsageException(io::FileUsageException::WriteError, GetName().Data());
 	m_Cursor += numBytes;
 
 	return numBytes;
@@ -75,10 +75,10 @@ void StreamFile::Seek(s64 offset, ESeekOrigin origin)
 
 	s64 newCursor = cursor + offset;
 	if(newCursor < 0 || newCursor > GetSize())
-		throw io::FileException(io::FileException::OutsideFile);
+		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetName().Data());
 
 	if(fseek(m_File, (long)newCursor, 0) != 0)
-		throw core::RuntimeException("fseek failed");
+		throw core::GenericRuntimeException("fseek failed");
 	m_Cursor = newCursor;
 }
 

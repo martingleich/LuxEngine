@@ -125,26 +125,23 @@ struct ResourceBlock
 	void AddResource(const String& name, Resource* resource)
 	{
 		lxAssert(resource);
-		if(!resource)
-			throw InvalidArgumentException("resource", "Must not be null");
+		LX_CHECK_NULL_ARG(resource);
 
 		if(name.IsEmpty())
-			throw InvalidArgumentException("name", "Must not be empty");
+			throw GenericInvalidArgumentException("name", "Must not be empty");
 
 		Entry entry(name, resource);
 		Array<Entry>::Iterator n;
 		auto it = BinarySearch(entry, resources, &n);
 		if(it != resources.End())
-			throw Exception("Resource already exists");
+			throw ObjectAlreadyExistsException(name.Data());
 
 		resources.Insert(entry, n);
 	}
 
 	void RemoveResource(int id)
 	{
-		if(id >= resources.Size())
-			throw OutOfRangeException();
-
+		LX_CHECK_BOUNDS(id, 0, resources.Size());
 		resources.Erase(AdvanceIterator(resources.First(), id), true);
 	}
 
@@ -208,7 +205,7 @@ int ResourceSystem::GetResourceCount(Name type) const
 {
 	auto typeID = GetTypeID(type);
 	if(typeID == INVALID_ID)
-		throw InvalidArgumentException("type", "type does not exist");
+		throw GenericInvalidArgumentException("type", "Type wasn't registerd");
 
 	return self->resources[typeID].Size();
 }
@@ -217,21 +214,20 @@ const String& ResourceSystem::GetResourceName(Name type, int id) const
 {
 	auto typeId = GetTypeID(type);
 	if(typeId > GetTypeCount())
-		throw Exception("Type does not exist");
+		throw GenericInvalidArgumentException("type", "Type wasn't registerd");
 
 	return self->resources[typeId].GetName(id);
 }
 
 int ResourceSystem::GetResourceId(Resource* resource) const
 {
-	if(!resource)
-		throw InvalidArgumentException("resource", "Must not be null");
+	LX_CHECK_NULL_ARG(resource);
 
 	auto typeId = GetTypeID(resource->GetReferableType());
 
 	auto resId = self->resources[typeId].GetResourceId(resource);
 	if(resId == INVALID_ID)
-		throw Exception("Resource does not exist");
+		throw GenericInvalidArgumentException("resource", "Resource does not exist");
 
 	return resId;
 }
@@ -248,7 +244,7 @@ int ResourceSystem::GetResourceId(Name type, const String& name) const
 int ResourceSystem::GetResourceIdUnsafe(Name type, const String& name) const
 {
 	if(name.IsEmpty())
-		throw InvalidArgumentException("name", "Must not be empty");
+		throw GenericInvalidArgumentException("name", "Must not be empty");
 
 	auto typeId = GetTypeID(type);
 
@@ -265,8 +261,7 @@ int ResourceSystem::GetResourceIdUnsafe(Name type, const String& name) const
 
 void ResourceSystem::AddResource(const String& name, Resource* resource)
 {
-	if(!resource)
-		throw InvalidArgumentException("resource", "Must not be null");
+	LX_CHECK_NULL_ARG(resource);
 
 	auto typeId = GetTypeID(resource->GetReferableType());
 	if(self->types[typeId].isCached == false)
@@ -327,8 +322,7 @@ StrongRef<Resource> ResourceSystem::GetResource(Name type, const String& name, b
 
 StrongRef<Resource> ResourceSystem::GetResource(Name type, io::File* file, bool loadIfNotFound)
 {
-	if(!file)
-		throw InvalidArgumentException("file", "Must not be null");
+	LX_CHECK_NULL_ARG(file);
 
 	auto resource = GetResource(type, file->GetName(), false);
 	if(!resource && loadIfNotFound) {
@@ -342,7 +336,7 @@ StrongRef<Resource> ResourceSystem::GetResource(Name type, io::File* file, bool 
 StrongRef<Resource> ResourceSystem::CreateResource(Name type, const String& name)
 {
 	if(name.IsEmpty())
-		throw InvalidArgumentException("name", "Name may not be empty");
+		throw GenericInvalidArgumentException("name", "Name may not be empty");
 
 	auto file = self->fileSystem->OpenFile(name);
 
@@ -433,8 +427,7 @@ Name ResourceSystem::GetFileType(io::File* file) const
 
 void ResourceSystem::AddResourceLoader(ResourceLoader* loader)
 {
-	if(!loader)
-		throw InvalidArgumentException("loader", "Must not be null");
+	LX_CHECK_NULL_ARG(loader);
 
 	log::Debug("Registered resource loader: ~s.", loader->GetName());
 	self->loaders.PushBack(loader);
@@ -455,7 +448,7 @@ void ResourceSystem::AddType(Name name)
 	TypeEntry entry(name);
 	auto it = LinearSearch(entry, self->types);
 	if(it != self->types.End())
-		throw Exception("Resource type already exists");
+		throw ObjectAlreadyExistsException(name.c_str());
 
 	self->types.PushBack(entry);
 	self->resources.PushBack(ResourceBlock());
@@ -467,7 +460,7 @@ int ResourceSystem::GetTypeID(Name type) const
 	TypeEntry entry(type);
 	auto it = LinearSearch(entry, self->types);
 	if(it == self->types.End())
-		throw Exception("Resourcetype does not exist");
+		throw ObjectNotFoundException(type.c_str());
 
 	return IteratorDistance(self->types.First(), it);
 }
@@ -529,7 +522,7 @@ StrongRef<Resource> ResourceSystem::CreateResource(Name type, io::File* file, co
 	// Create the resource
 	StrongRef<Resource> resource = self->refFactory->Create(type, origin).As<Resource>();
 	if(!resource)
-		throw InvalidArgumentException("type", "Is no valid resource type");
+		throw GenericInvalidArgumentException("type", "Is no valid resource type");
 
 	// Load the resource
 	auto oldCursor = file->GetCursor();

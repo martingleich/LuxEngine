@@ -23,7 +23,7 @@ void MaterialLibrary::Initialize(MaterialLibrary* matLib)
 		matLib = LUX_NEW(MaterialLibrary);
 
 	if(!matLib)
-		throw core::ErrorException("No material library available");
+		throw core::InvalidOperationException("No material library available");
 	g_MaterialLibrary = matLib;
 }
 
@@ -212,7 +212,7 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 	int VSMajor, int VSMinor,
 	const io::Path& PSPath, const core::String& PSEntryPoint,
 	int PSMajor, int PSMinor,
-	core::Array<core::String>* errorList)
+	ShaderCompileInfo* outInfo)
 {
 	StrongRef<io::File> PSFile;
 	StrongRef<io::File> VSFile;
@@ -248,11 +248,16 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 		}
 	}
 
-	return video::VideoDriver::Instance()->CreateShader(
+	auto shader = video::VideoDriver::Instance()->CreateShader(
 		language,
 		vsCode, VSEntryPoint.Data(), vsCodeSize, VSMajor, VSMinor,
 		psCode, PSEntryPoint.Data(), psCodeSize, PSMajor, PSMinor,
-		errorList);
+		outInfo?&outInfo->messages:nullptr);
+	if(outInfo)
+		outInfo->failed = shader == nullptr;
+	else if(!shader)
+		throw UnhandledShaderCompileErrorException();
+	return shader;
 }
 
 StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
@@ -287,15 +292,20 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
 	int VSmajorVersion, int VSminorVersion,
 	const core::String& PSCode, const char* PSEntryPoint,
 	int PSmajorVersion, int PSminorVersion,
-	core::Array<core::String>* errorList)
+	ShaderCompileInfo* outInfo)
 {
-	return video::VideoDriver::Instance()->CreateShader(
+	auto shader = video::VideoDriver::Instance()->CreateShader(
 		language,
 		VSCode.Data_c(), VSEntryPoint, VSCode.Size(),
 		VSmajorVersion, VSminorVersion,
 		PSCode.Data_c(), PSEntryPoint, PSCode.Size(),
 		PSmajorVersion, PSminorVersion,
-		errorList);
+		outInfo ? &outInfo->messages:nullptr);
+	if(outInfo)
+		outInfo->failed = shader == nullptr;
+	else if(!shader)
+		throw UnhandledShaderCompileErrorException();
+	return shader;
 }
 
 bool MaterialLibrary::IsShaderSupported(

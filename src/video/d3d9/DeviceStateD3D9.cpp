@@ -302,8 +302,8 @@ u32 DeviceStateD3D9::GetFillMode(const Pass& p)
 		return D3DFILL_WIREFRAME;
 	case EDrawMode::Point:
 		return D3DFILL_POINT;
-	default: throw core::InvalidArgumentException("pipeline");
 	}
+	throw core::GenericInvalidArgumentException("p.drawmode", "Unknown draw mode");
 }
 
 u32 DeviceStateD3D9::GetCullMode(const Pass& p)
@@ -349,7 +349,7 @@ u32 DeviceStateD3D9::GetTextureOperator(ETextureOperator op)
 	case ETextureOperator::Dot:
 		return D3DTOP_DOTPRODUCT3;
 	}
-	throw core::InvalidArgumentException("operator");
+	throw core::GenericInvalidArgumentException("op", "Unknown texture operator");
 }
 
 u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
@@ -364,7 +364,7 @@ u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
 	case ETextureArgument::AlphaRep:
 		return D3DTA_ALPHAREPLICATE;
 	}
-	throw core::InvalidArgumentException("arg");
+	throw core::GenericInvalidArgumentException("arg", "Unknown texture argument");
 }
 
 void DeviceStateD3D9::SetFog(const FogData& fog)

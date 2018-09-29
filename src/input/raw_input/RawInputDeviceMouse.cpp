@@ -23,7 +23,7 @@ RawMouseDevice::RawMouseDevice(InputSystem* system, HANDLE rawHandle) :
 
 	RID_DEVICE_INFO info = GetDeviceInfo(rawHandle);
 	if(info.dwType != RIM_TYPEMOUSE)
-		throw core::InvalidArgumentException("rawHandle", "Is not a mouse");
+		throw core::GenericInvalidArgumentException("rawHandle", "Is not a mouse");
 
 	m_ButtonCount = info.mouse.dwNumberOfButtons;
 	// Force at least 3 buttons and a hwheel since windows is really bad at
@@ -105,16 +105,13 @@ RawInputDevice::ElemDesc RawMouseDevice::GetElementDesc(EEventType type, int cod
 	static const core::String unknown = "(unknown)";
 
 	if(type == EEventType::Button) {
-		if(code >= m_ButtonCount)
-			throw core::OutOfRangeException();
+		LX_CHECK_BOUNDS(code, 0, m_ButtonCount);
 		return ElemDesc(button_names[code], 0, 0, EElementType::Other);
 	} else if(type == EEventType::Axis) {
-		if(code >= 2)
-			throw core::OutOfRangeException();
+		LX_CHECK_BOUNDS(code, 0, 2);
 		return ElemDesc(axis_names[code], 0, 0, EElementType::Other);
 	} else if(type == EEventType::Area) {
-		if(code >= 1)
-			throw core::OutOfRangeException();
+		LX_CHECK_BOUNDS(code, 0, 1);
 		return ElemDesc(area_names[code], 0, 0, EElementType::Other);
 	} else {
 		return ElemDesc(unknown, 0, 0, EElementType::Other);

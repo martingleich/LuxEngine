@@ -111,7 +111,7 @@ u8* CodePointToUTF8(u32 c, u8* dst)
 		*dst++ = ((u8)(0x80 | ((c & (0x3F << 6)) >> 6)));
 		*dst++ = ((u8)(0x80 | ((c & 0x3F))));
 	} else {
-		throw UnicodeException("Invalid unicode codepoint.", c);
+		throw UnicodeException(c);
 	}
 
 	return dst;

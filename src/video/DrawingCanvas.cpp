@@ -17,7 +17,7 @@ DrawingCanvas::DrawingCanvas(void* d, ColorFormat f, const math::Dimension2I& di
 	m_Data((u8*)d), m_Format(f), m_Width(dim.width), m_Height(dim.height), m_Pitch(p)
 {
 	if(m_Format.IsCompressed())
-		throw core::ErrorException("Can't use DrawingCanvas with compressed formats");
+		throw core::InvalidOperationException("Can't use DrawingCanvas with compressed formats");
 
 	m_Rect.top = 0;
 	m_Rect.left = 0;
