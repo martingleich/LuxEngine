@@ -21,6 +21,16 @@ struct Choose<false, IsTrue, IsFalse>
 	typedef IsFalse type;
 };
 
+class Uncopyable
+{
+protected:
+	Uncopyable() = default;
+	Uncopyable(const Uncopyable&) = delete;
+	Uncopyable(Uncopyable&&) = delete;
+	Uncopyable& operator=(const Uncopyable&) = delete;
+	Uncopyable& operator=(Uncopyable&&) = delete;
+};
+
 } // namespace core
 } // namespace lux
 

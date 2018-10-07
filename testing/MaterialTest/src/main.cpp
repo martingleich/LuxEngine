@@ -19,8 +19,8 @@ private:
 public:
 	MaterialTest()
 	{
-		log::EngineLog.SetLogLevel(log::ELogLevel::Info);
-		log::EngineLog.SetPrinter(log::ConsolePrinter);
+		log::SetLogLevel(log::ELogLevel::Info);
+		log::SetPrinter(log::ConsolePrinter);
 
 		m_Device = CreateDevice();
 		auto adapter = m_Device->GetVideoAdapters(video::DriverType::Direct3D9)->GetAdapter(0);

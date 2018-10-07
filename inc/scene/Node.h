@@ -412,24 +412,30 @@ public:
 		return GetAbsoluteTransform().translation;
 	}
 
-	//! Set a new uniform scalation
+	//! Set a new uniform scale
 	/**
-	\param s The the scale
+	\param s The new scale, must be bigger than zero
 	*/
 	void SetScale(float s)
 	{
-		m_RelativeTrans.scale = s;
-		SetDirty();
+		lxAssert(s >= 0);
+		if(s >= 0) {
+			m_RelativeTrans.scale = s;
+			SetDirty();
+		}
 	}
 
 	//! Change the scale
 	/**
-	\param s The change of the scale
+	\param s The change of the scale, must be bigger than zero
 	*/
 	void Scale(float s)
 	{
-		m_RelativeTrans.scale *= s;
-		SetDirty();
+		lxAssert(s >= 0);
+		if(s >= 0) {
+			m_RelativeTrans.scale *= s;
+			SetDirty();
+		}
 	}
 
 	//! Set a new position

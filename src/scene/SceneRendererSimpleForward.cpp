@@ -149,7 +149,7 @@ struct CameraSortT
 {
 	bool Smaller(const AbstractCamera* a, const AbstractCamera* b) const
 	{
-		return a->GetRenderPriority() < b->GetRenderPriority();
+		return a->GetRenderPriority() > b->GetRenderPriority();
 	}
 };
 }

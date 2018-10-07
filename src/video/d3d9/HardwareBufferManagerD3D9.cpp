@@ -51,13 +51,14 @@ void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handl
 		IDirect3DIndexBuffer9* d3dBuffer = (IDirect3DIndexBuffer9*)handle;
 		if(d3dBuffer)
 			remaining = d3dBuffer->Release();
+		break;
 	}
-	break;
 	case EHardwareBufferType::Vertex:
 	{
 		IDirect3DVertexBuffer9* d3dBuffer = (IDirect3DVertexBuffer9*)handle;
 		if(d3dBuffer)
 			remaining = d3dBuffer->Release();
+		break;
 	}
 	default:
 		throw core::GenericRuntimeException("Unsupported hardwarebuffer type.");

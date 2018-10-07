@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_STRINGCONVERTER_H
 #define INCLUDED_LUX_STRINGCONVERTER_H
-#include "DateAndTime.h"
-#include "lxFormat.h"
+#include "core/Clock.h"
+#include "core/lxFormat.h"
 
 namespace lux
 {

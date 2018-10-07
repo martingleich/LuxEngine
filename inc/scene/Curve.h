@@ -80,7 +80,7 @@ public:
 	{
 		if(core::TemplType<T>::Get() == m_Type)
 			return *((core::Array<math::Sample<T>>*)SamplesPointer());
-		throw core::TypeException("Wrong type queried", core::TemplType<T>::Get(), m_Type);
+		throw core::TypeCastException(m_Type, core::TemplType<T>::Get());
 	}
 
 	template <typename T>
@@ -88,7 +88,7 @@ public:
 	{
 		if(core::TemplType<T>::Get() == m_Type)
 			return *((const core::Array<math::Sample<T>>*)SamplesPointer());
-		throw core::TypeException("Wrong type queried", core::TemplType<T>::Get(), m_Type);
+		throw core::TypeCastException(m_Type, core::TemplType<T>::Get());
 	}
 
 	core::Type GetType() const

@@ -4,6 +4,7 @@
 #include "core/lxAlgorithm.h"
 #include "core/lxName.h"
 #include "core/lxArray.h"
+#include "core/HelperTemplates.h"
 
 #include <mutex>
 
@@ -29,7 +30,7 @@ A printer describes how log messages are shown to the user.
 \ref FilePrinter
 \ref ConsolePrinter
 */
-class Printer
+class Printer : core::Uncopyable
 {
 public:
 	struct Settings
@@ -45,166 +46,76 @@ public:
 	};
 
 public:
-	Printer() : m_RefCount(1), m_IsInit(false), m_ContextLevel(ELogLevel::Warning)
-	{
-	}
-
 	virtual ~Printer() {}
 
-	void SetContextLevel(ELogLevel Level)
-	{
-		m_ContextLevel = Level;
-	}
-
-	ELogLevel GetContextLevel() const
-	{
-		return m_ContextLevel;
-	}
-
+	//! Set the configuration data for the logger.
+	/**
+	Must be done before first use. If used after first use the function might not have any effect.
+	*/
 	virtual void Configure(const Settings& data) { LUX_UNUSED(data); }
-	virtual void Init()
-	{
-		m_IsInit = true;
-	}
 
-	virtual void Exit()
-	{
-		m_IsInit = false;
-	}
+	//! Initialize the logger, happens automatically.
+	virtual void Init() = 0;
+	//! Exits the logger, happens automatically.
+	virtual void Exit() = 0;
 
-	bool IsInit()
+	//! Finish a entry and flush it.
+	/**
+	This function is threadsafe
+	*/
+	void PrintSync(const core::String& s, ELogLevel ll)
 	{
-		return m_IsInit;
-	}
-
-	void Drop()
-	{
-		--m_RefCount;
-		if(m_RefCount == 0)
-			Exit();
-	}
-	void Grab()
-	{
-		++m_RefCount;
-	}
-
-	virtual void Print(const core::String& s, ELogLevel ll) = 0;
-
-	void FinishEntry(const core::String& s, ELogLevel ll)
-	{
-		m_PrinterLock.lock();
+		std::lock_guard<std::mutex> _(m_PrinterLock);
 		Print(s, ll);
-		m_PrinterLock.unlock();
 	}
+protected:
+	virtual void Print(const core::String& s, ELogLevel ll) = 0;
 
 private:
 	std::mutex m_PrinterLock;
-	int m_RefCount;
-	bool m_IsInit;
-	ELogLevel m_ContextLevel;
 };
 
-class Logger;
+LUX_API void SetLogLevel(ELogLevel ll);
+LUX_API ELogLevel GetLogLevel();
+LUX_API void SetPrinter(Printer* p);
+LUX_API Printer* GetPrinter();
 
-class LogSystem
+/*
+Loggers are functors instead of pure function, to allow
+easier future extensions.
+*/
+
+//! The logger class.
+/**
+Each logger class represents a log level.
+All loggers can be used in diffrent threads.
+*/
+class Logger : core::Uncopyable
 {
-private:
-	core::Array<Logger*> m_Loggers;
-	ELogLevel m_LogLevel;
-
 public:
-	LogSystem(ELogLevel ll = ELogLevel::Info) : m_LogLevel(ll)
+	explicit Logger(const ELogLevel ll) :
+		m_MyLogLevel(ll)
 	{
-	}
-	void AddLogger(Logger* l)
-	{
-		m_Loggers.PushBack(l);
-	}
-
-	void RemoveLogger(Logger* l)
-	{
-		auto newEnd = core::Remove(m_Loggers, l);
-		m_Loggers.Resize(core::IteratorDistance(m_Loggers.First(), newEnd));
-	}
-
-	void SetLogLevel(ELogLevel ll)
-	{
-		m_LogLevel = ll;
-	}
-
-	ELogLevel GetLogLevel() const
-	{
-		return m_LogLevel;
-	}
-
-	LUX_API void Exit();
-	LUX_API bool HasUnsetLogs() const;
-	LUX_API void SetPrinter(Printer* p, bool OnlyIfNULL = false);
-};
-
-class Logger
-{
-private:
-	const ELogLevel m_MyLogLevel;
-	LogSystem& m_LogSystem;
-
-	Printer* m_Printer;
-
-public:
-	Logger(LogSystem& LogSystem, ELogLevel ll) :
-		m_MyLogLevel(ll),
-		m_LogSystem(LogSystem),
-		m_Printer(nullptr)
-	{
-		m_LogSystem.AddLogger(this);
-	}
-
-	Logger(const Logger& l) = delete;
-	Logger(Logger&& l) = delete;
-
-	~Logger()
-	{
-		m_LogSystem.RemoveLogger(this);
-		if(m_Printer)
-			m_Printer->Drop();
-		m_Printer = nullptr;
-	}
-
-	void SetPrinter(Printer* p)
-	{
-		if(m_Printer) {
-			m_Printer->Exit();
-			m_Printer->Drop();
-		}
-		m_Printer = p;
-		if(m_Printer) {
-			if(!m_Printer->IsInit())
-				m_Printer->Init();
-			m_Printer->Grab();
-		}
-	}
-
-	Printer* GetCurrentPrinter()
-	{
-		return m_Printer;
 	}
 
 	template <typename... T>
 	void Write(const char* format, const T&... data)
 	{
-		if(!m_Printer)
+		auto printer = GetPrinter();
+		auto curLogLevel = GetLogLevel();
+		if(!printer)
 			return;
 
-		if(m_LogSystem.GetLogLevel() <= m_MyLogLevel && m_LogSystem.GetLogLevel() != ELogLevel::None) {
+		if(curLogLevel <= m_MyLogLevel && curLogLevel != ELogLevel::None) {
 			ifconst(sizeof...(data))
 			{
 				core::String out;
 				core::StringSink sink(out);
 				format::format(sink, format, data...);
 
-				m_Printer->Print(out, m_MyLogLevel);
+				printer->PrintSync(out, m_MyLogLevel);
 			} else {
-				m_Printer->Print(format, m_MyLogLevel);
+				printer->PrintSync(format, m_MyLogLevel);
 			}
 		}
 	}
@@ -220,6 +131,9 @@ public:
 	{
 		Write(format.Data(), data...);
 	}
+
+private:
+	const ELogLevel m_MyLogLevel;
 };
 
 struct HTMLPrinterSettings : public Printer::Settings
@@ -245,15 +159,11 @@ struct FilePrinterSettings : public Printer::Settings
 struct ConsolePrinterSettings : public Printer::Settings
 {};
 
-extern LUX_API Printer* HTMLPrinter; //!< Prints the log into a html file
+extern LUX_API Printer* HTMLPrinter; //!< Prints the log into a html file(check for null before using)
 extern LUX_API Printer* FilePrinter; //!< Prints the log into a text file
 extern LUX_API Printer* ConsolePrinter; //!< Prints the log to stdout
+extern LUX_API Printer* Win32DebugPrinter; //!< Prints the log the the win32 debug server(check for null before using)
 
-#ifdef LUX_WINDOWS
-extern LUX_API Printer* Win32DebugPrinter;
-#endif
-
-extern LUX_API LogSystem EngineLog;
 extern LUX_API Logger Debug;
 extern LUX_API Logger Info;
 extern LUX_API Logger Warning;

@@ -16,47 +16,47 @@ struct is_flag_type
 	static const bool value = std::is_integral<T>::value || std::is_enum<T>::value;
 };
 
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type operator~ (T a)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, T>::type operator~ (T a)
 {
 	return static_cast<T>(~static_cast<int>(a));
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type operator| (T a, T b)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, T>::type operator| (T a, T b)
 {
 	return static_cast<T>(static_cast<int>(a) | static_cast<int>(b));
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type operator& (T a, T b)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, T>::type operator& (T a, T b)
 {
 	return static_cast<T>(static_cast<int>(a) & static_cast<int>(b));
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type operator^ (T a, T b)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, T>::type operator^ (T a, T b)
 {
 	return static_cast<T>(static_cast<int>(a) ^ static_cast<int>(b));
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type& operator|= (T& a, T b)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, T>::type& operator|= (T& a, T b)
 {
 	a = static_cast<T>(static_cast<int>(a) | static_cast<int>(b));
 	return a;
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type& operator&= (T& a, T b)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, T>::type& operator&= (T& a, T b)
 {
 	a = static_cast<T>(static_cast<int>(a) & static_cast<int>(b));
 	return a;
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type& operator^= (T& a, T b)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, T>::type& operator^= (T& a, T b)
 {
 	a = static_cast<T>(static_cast<int>(a) ^ static_cast<int>(b));
 	return a;
 }
 
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, bool>::type TestFlag(T a, T b)
+template<typename T> constexpr typename std::enable_if<is_flag_type<T>::value, bool>::type TestFlag(T a, T b)
 {
 	return (static_cast<int>(a&b) != 0);
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type& SetFlag(T& a, T b)
+template<typename T> typename std::enable_if<is_flag_type<T>::value, T>::type& SetFlag(T& a, T b)
 {
 	return (a |= b);
 }
-template<typename T> inline typename std::enable_if<is_flag_type<T>::value, T>::type& ClearFlag(T& a, T b)
+template<typename T> typename std::enable_if<is_flag_type<T>::value, T>::type& ClearFlag(T& a, T b)
 {
 	return (a &= ~b);
 }

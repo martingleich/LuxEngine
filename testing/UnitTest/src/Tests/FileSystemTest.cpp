@@ -43,7 +43,7 @@ UNIT_SUITE(FileSystem)
 
 	UNIT_SUITE_INIT()
 	{
-		log::EngineLog.SetLogLevel(log::ELogLevel::None);
+		log::SetLogLevel(log::ELogLevel::None);
 
 		io::FileSystem::Initialize();
 		g_FileSys = io::FileSystem::Instance();

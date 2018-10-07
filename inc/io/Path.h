@@ -2,7 +2,7 @@
 #define INCLUDED_LUX_PATH_H
 
 #include "core/lxString.h"
-#include "core/DateAndTime.h"
+#include "core/Clock.h"
 
 namespace lux
 {

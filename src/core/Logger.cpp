@@ -4,6 +4,7 @@
 #include "core/Clock.h"
 #include "core/StringConverter.h"
 #include "io/ioExceptions.h"
+#include <atomic>
 #ifdef LUX_WINDOWS
 #include "platform/StrippedWindows.h"
 #endif
@@ -17,48 +18,36 @@ namespace lux
 namespace log
 {
 
-LogSystem EngineLog(ELogLevel::Info);
-Logger Debug(EngineLog, ELogLevel::Debug);
-Logger Info(EngineLog, ELogLevel::Info);
-Logger Warning(EngineLog, ELogLevel::Warning);
-Logger Error(EngineLog, ELogLevel::Error);
-Logger Log(EngineLog, ELogLevel::None);
+Logger Debug(ELogLevel::Debug);
+Logger Info(ELogLevel::Info);
+Logger Warning(ELogLevel::Warning);
+Logger Error(ELogLevel::Error);
+Logger Log(ELogLevel::None);
+static std::atomic<ELogLevel> g_LogLevel;
+static Printer* g_Printer;
+static std::mutex g_PrinterLock;
 
-bool LogSystem::HasUnsetLogs() const
+void SetLogLevel(ELogLevel ll)
 {
-	bool result = false;
-	for(auto it = m_Loggers.First(); it != m_Loggers.End(); ++it) {
-		if((*it)->GetCurrentPrinter() == nullptr)
-			result = true;
-	}
-
-	return result;
+	g_LogLevel = ll;
 }
-
-void LogSystem::Exit()
+ELogLevel GetLogLevel()
 {
-	for(auto it = m_Loggers.First(); it != m_Loggers.End(); ++it) {
-		Logger* logger = *it;
-		logger->SetPrinter(nullptr);
-	}
-	m_Loggers.Clear();
+	return g_LogLevel;
 }
-
-void LogSystem::SetPrinter(Printer* p, bool OnlyIfNULL)
+void SetPrinter(Printer* p)
 {
-	if(OnlyIfNULL) {
-		for(auto it = m_Loggers.First(); it != m_Loggers.End(); ++it) {
-			Logger* logger = *it;
-			Printer* currentPrinter = logger->GetCurrentPrinter();
-			if(!currentPrinter)
-				logger->SetPrinter(p);
-		}
-	} else {
-		for(auto it = m_Loggers.First(); it != m_Loggers.End(); ++it) {
-			Logger* logger = *it;
-			logger->SetPrinter(p);
-		}
-	}
+	std::lock_guard<std::mutex> _(g_PrinterLock);
+	if(g_Printer)
+		g_Printer->Exit();
+	if(p)
+		p->Init();
+	g_Printer = p;
+}
+Printer* GetPrinter()
+{
+	std::lock_guard<std::mutex> _(g_PrinterLock);
+	return g_Printer;
 }
 
 namespace Impl
@@ -182,29 +171,40 @@ class FilePrinter : public Printer
 {
 public:
 	FilePrinter() :
-		m_Settings("Log.txt")
+		m_Settings("Log.txt"),
+		m_File(nullptr)
 	{
 	}
-	virtual void Configure(const Printer::Settings& settings)
+	~FilePrinter()
+	{
+		Exit();
+	}
+	void Configure(const Printer::Settings& settings)
 	{
 		const FilePrinterSettings* data = dynamic_cast<const FilePrinterSettings*>(&settings);
 		if(data)
 			m_Settings = *data;
 	}
 
-	virtual void Init()
+	void Init()
 	{
 		Exit();
-
 		m_File = core::FOpenUTF8(m_Settings.FilePath.Data(), "wb");
 		if(!m_File)
 			throw io::FileNotFoundException(m_Settings.FilePath.Data_c());
-
-		Printer::Init();
+	}
+	void Exit()
+	{
+		if(m_File) {
+			fclose(m_File);
+			m_File = nullptr;
+		}
 	}
 
 	void Print(const core::String& s, ELogLevel ll)
 	{
+		if(!m_File)
+			return;
 		if(ll != ELogLevel::None) {
 			fputs(GetLogLevelName(ll), m_File);
 			if(m_Settings.ShowTime) {
@@ -220,14 +220,6 @@ public:
 		fflush(m_File);
 	}
 
-	void Exit()
-	{
-		if(IsInit() == false)
-			return;
-		fclose(m_File);
-		Printer::Exit();
-	}
-
 private:
 	FILE* m_File;
 	FilePrinterSettings m_Settings;
@@ -236,13 +228,10 @@ private:
 class ConsolePrinter : public Printer
 {
 public:
-	void Init()
-	{
-		Exit();
-		Printer::Init();
-	}
+	void Init() {}
+	void Exit() {}
 
-	virtual void Configure(const Printer::Settings& settings)
+	void Configure(const Printer::Settings& settings)
 	{
 		const ConsolePrinterSettings* data = dynamic_cast<const ConsolePrinterSettings*>(&settings);
 		if(data)
@@ -261,6 +250,7 @@ public:
 			fputs(": ", stdout);
 		}
 
+		// Use puts instead of fputs, since it places a linebreak.
 		puts(s.Data());
 	}
 
@@ -275,39 +265,49 @@ class Win32DebugPrinter : public Printer
 public:
 	void Init()
 	{
-		Exit();
 #if WINVER >= 0x0A00
 		// Used to enable unicode support of OutputDebugStringW
 		DEBUG_EVENT event;
 		WaitForDebugEventEx(&event, 0);
 #else
-		// No unicode support available
+		// No unicode support available: not much for us to do about it.
 #endif
-
-		Printer::Init();
 	}
+	void Exit() {}
 
 	void Print(const core::String& s, ELogLevel ll)
 	{
-		static char BUFFER[100];
+		STR.Clear();
+		WSTR.Clear();
 
-		core::String out;
 		if(ll != ELogLevel::None) {
-			out += GetLogLevelName(ll);
+			STR += GetLogLevelName(ll);
 
 			auto time = core::Clock::GetDateAndTime();
 			sprintf(BUFFER, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
-			out += BUFFER;
+			STR += BUFFER;
 
-			out += ": ";
+			STR += ": ";
 		}
 
-		out += s;
-		out += "\n";
-		auto utf16 = core::UTF8ToUTF16(out.Data_c());
-
-		OutputDebugStringW((const wchar_t*)utf16.Data_c());
+		STR += s;
+		STR += "\n";
+		const char* data = (const char*)STR.Data_c();
+		while(u32 c = core::AdvanceCursorUTF8(data)) {
+			u16 buffer[2];
+			u16* cur = buffer;
+			u16* end = core::CodePointToUTF16(c, cur);
+			while(cur < end)
+				WSTR.PushBack(*cur++);
+		}
+		WSTR.PushBack(0);
+		OutputDebugStringW((const wchar_t*)WSTR.Data_c());
 	}
+
+private:
+	char BUFFER[100]; // Can be a member since, Print isn't threadsafe
+	core::String STR;
+	core::Array<u16> WSTR;
 };
 
 #endif // LUX_WINDOWS
@@ -323,6 +323,8 @@ Printer* ConsolePrinter = &realConsolePrinter;
 #ifdef LUX_HAS_WIN32_DEBUG_PRINTER
 static Impl::Win32DebugPrinter realWin32DebugPrinter;
 Printer* Win32DebugPrinter = &realWin32DebugPrinter;
+#else
+Printer* Win32DebugPrinter = nullptr;
 #endif
 
 }
