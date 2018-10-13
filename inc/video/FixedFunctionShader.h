@@ -53,7 +53,7 @@ public:
 	{
 		return m_TextureStages.Size();
 	}
-	virtual const TextureStageSettings& GetTextureStage(int id)
+	virtual const TextureStageSettings& GetTextureStage(int id) const
 	{
 		return m_TextureStages[id];
 	}

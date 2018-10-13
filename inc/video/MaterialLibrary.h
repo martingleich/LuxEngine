@@ -25,8 +25,8 @@ public:
 	enum EKnownMaterial
 	{
 		Solid,
+		DebugOverlay,
 		Transparent,
-		DebugOverlay
 	};
 
 	LUX_API MaterialLibrary();

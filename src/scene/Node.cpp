@@ -20,6 +20,9 @@ Node::Node(Scene* scene, bool isRoot) :
 	m_IsRoot(isRoot),
 	m_HasUserBoundingBox(false),
 	m_CastShadow(true),
+	m_InheritTranslation(true),
+	m_InheritRotation(true),
+	m_InheritScale(true),
 	m_IsDirty(true)
 {
 	UpdateAbsTransform();
@@ -149,10 +152,29 @@ bool Node::UpdateAbsTransform() const
 		return false;
 
 	Node* parent = GetParent();
-	if(parent && !parent->m_IsRoot)
-		m_AbsoluteTrans = parent->GetAbsoluteTransform().CombineLeft(m_RelativeTrans);
-	else
+	if(parent && !parent->m_IsRoot) {
+		auto& pt = parent->GetAbsoluteTransform();
+		math::Vector3F translation = m_RelativeTrans.translation;
+		if(IsInheritingScale()) {
+			m_AbsoluteTrans.scale = m_RelativeTrans.scale * pt.scale;
+			translation *= pt.scale;
+		} else {
+			m_AbsoluteTrans.scale = m_RelativeTrans.scale;
+		}
+		if(IsInheritingRotation()) {
+			m_AbsoluteTrans.orientation = m_RelativeTrans.orientation * pt.orientation;
+			pt.orientation.TransformInPlace(translation);
+		} else {
+			m_AbsoluteTrans.orientation = m_RelativeTrans.orientation;
+		}
+		if(IsInheritingTranslation()) {
+			m_AbsoluteTrans.translation = translation + pt.translation;
+		} else {
+			m_AbsoluteTrans.translation = translation;
+		}
+	} else {
 		m_AbsoluteTrans = m_RelativeTrans;
+	}
 
 	ClearDirty();
 	return true;

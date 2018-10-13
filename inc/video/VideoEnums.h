@@ -68,11 +68,17 @@ enum class EFaceWinding
 {
 	CCW,
 	CW,
+	ANY,
 };
 
 inline EFaceWinding FlipWinding(EFaceWinding winding)
 {
-	return winding == EFaceWinding::CCW ? EFaceWinding::CW : EFaceWinding::CCW;
+	switch(winding){
+	case EFaceWinding::CCW: return EFaceWinding::CW;
+	case EFaceWinding::CW: return EFaceWinding::CCW;
+	case EFaceWinding::ANY: return EFaceWinding::ANY;
+	}
+	return EFaceWinding::ANY;
 }
 
 enum class EFaceSide

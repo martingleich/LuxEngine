@@ -1,8 +1,7 @@
 #include "scene/Animation.h"
 #include "core/lxMemory.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::Animation, "lux.scene.Animation")
-LX_REGISTER_RESOURCE_CLASS("animation", lux::scene::Animation);
+LX_REGISTER_RESOURCE_CLASS("lux.resource.Animation", lux::scene::Animation);
 
 lux::scene::AnimatedObject::SharedAnimatedValueList lux::scene::AnimatedObject::s_SharedAnimatedValues;
 
@@ -266,6 +265,11 @@ float Animation::GetStart() const
 float Animation::GetEnd() const
 {
 	return m_End;
+}
+
+LUX_API core::Name Animation::GetReferableType() const
+{
+	return core::ResourceType::Animation;
 }
 
 } // namespace scene

@@ -18,37 +18,13 @@ public:
 	//! The available color formats
 	enum EColorFormat : u32
 	{
-		R8G8B8 = 0,    // 24 Bit
-
-		X8R8G8B8,
-		A8R8G8B8,    // 32 Bit
-		G16R16,
-
-		X1R5G5B5,
-		A1R5G5B5,    // 16 Bit
-		R5G6B5,        // 16 Bit
-
-		X8,
-		X16,
-
-		// Floating Point Formats
-		R16F,
-		G16R16F,
-		A16B16G16R16F,
-		R32F,
-		G32R32F,
-		A32B32G32R32F,
-
-		// Compressed formats
-		DXT1,
-		DXT3,
-		DXT5,
-
-		UNKNOWN,
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) name,
+#include "ColorFormat.def"
+#undef X
 	};
 
 	//! The number of available formats
-	static const u32 FORMAT_COUNT = 18;
+	static const u32 FORMAT_COUNT = 19;
 
 public:
 	//! Constructor from format
@@ -90,46 +66,22 @@ public:
 	const char* AsString() const
 	{
 		static const char* STRINGS[] = {
-			"R8G8B8",
-			"X8R8G8B8",
-			"A8R8G8B8",
-			"G16R16",
-			"X1R5G5B5",
-			"A1R5G5B5",
-			"R5G6B5",
-			"X8",
-			"X16",
-			"R16F",
-			"G16R16F",
-			"A16B16G16R16F",
-			"R32F",
-			"G32R32F",
-			"A32B32G32R32F",
-			"DXT1",
-			"DXT3",
-			"DXT5",
-			"UNKNOWN"
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) #name,
+#include "ColorFormat.def"
+#undef X
 		};
-		if(m_Format < sizeof(STRINGS)/sizeof(*STRINGS))
-			return STRINGS[m_Format];
-		else
-			return STRINGS[UNKNOWN];
+		return STRINGS[m_Format];
 	}
 
 	//! The number of bits in a pixel for this format
 	inline int GetBitsPerPixel() const
 	{
-		static const int BitPerPixel[FORMAT_COUNT] = {
-			24,
-			32, 32, 32,
-			16, 16, 16,
-			8, 16,
-			16, 32, 64, 32, 64, 128,
-			4, 8, 8};
-		if(m_Format < FORMAT_COUNT)
+		static int BitPerPixel[] = {
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) (size),
+#include "ColorFormat.def"
+#undef X
+		};
 			return BitPerPixel[(u32)m_Format];
-		else
-			return 0;
 	}
 
 	//! The number of bytes in a pixel for this format
@@ -145,13 +97,12 @@ public:
 	*/
 	inline u32 GetRedMask() const
 	{
-		static const u32 Mask[9] = {0xff0000, 0xff0000, 0xff0000, 0xffff0000, 0x7c00, 0x7c00, 0xf800, 0xff, 0xffff};
-		if(IsFloatingPoint() || IsCompressed())
-			return 0;
-		if(m_Format < 9)
-			return Mask[(u32)m_Format];
-		else
-			return 0;
+		static u32 Mask[] = {
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) (red_mask),
+#include "ColorFormat.def"
+#undef X
+		};
+		return Mask[(u32)m_Format];
 	}
 
 	//! The mask for the green channel
@@ -161,13 +112,12 @@ public:
 	*/
 	inline u32 GetGreenMask() const
 	{
-		static const u32 Mask[9] = {0xff00, 0xff00, 0xff00, 0xffff0000, 0x3e0, 0x3e0, 0x7e0, 0xff, 0xffff};
-		if(IsFloatingPoint() || IsCompressed())
-			return 0;
-		if(m_Format < 9)
-			return Mask[(u32)m_Format];
-		else
-			return 0;
+		static u32 Mask[] = {
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) (green_mask),
+#include "ColorFormat.def"
+#undef X
+		};
+		return Mask[(u32)m_Format];
 	}
 
 	//! The mask for the blue channel
@@ -177,13 +127,12 @@ public:
 	*/
 	inline u32 GetBlueMask() const
 	{
-		static const u32 Mask[9] = {0xff, 0xff, 0xff, 0, 0x1f, 0x1f, 0x1f, 0xff, 0xffff};
-		if(IsFloatingPoint() || IsCompressed())
-			return 0;
-		if(m_Format < 9)
-			return Mask[(u32)m_Format];
-		else
-			return 0;
+		static u32 Mask[] = {
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) (blue_mask),
+#include "ColorFormat.def"
+#undef X
+		};
+		return Mask[(u32)m_Format];
 	}
 
 	//! The mask for the alpha channel
@@ -193,41 +142,43 @@ public:
 	*/
 	inline u32 GetAlphaMask() const
 	{
-		static const u32 Mask[9] = {0x0, 0x0, 0xff000000, 0x0, 0x0, 0x8000, 0x0, 0x0, 0x0};
-		if(IsFloatingPoint() || IsCompressed())
-			return 0;
-		if(m_Format < 9)
-			return Mask[(u32)m_Format];
-		else
-			return 0;
+		static u32 Mask[] = {
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) (alpha_mask),
+#include "ColorFormat.def"
+#undef X
+		};
+		return Mask[(u32)m_Format];
 	}
 
 	//! Can this format contain a alpha value
 	inline bool HasAlpha() const
 	{
 		if(m_Format == A16B16G16R16F ||
-			m_Format == A1R5G5B5 ||
-			m_Format == A32B32G32R32F ||
-			m_Format == A8R8G8B8)
+			m_Format == A32B32G32R32F)
 			return true;
 		else
-			return false;
+			return GetAlphaMask() != 0;
+	}
+
+	inline int GetType() const
+	{
+		static u32 Type[] = {
+#define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) (type),
+#include "ColorFormat.def"
+#undef X
+		};
+		return Type[(u32)m_Format];
 	}
 
 	//! Is this format a floating point value
 	inline bool IsFloatingPoint() const
 	{
-		if(m_Format >= R16F && m_Format <= A32B32G32R32F)
-			return true;
-		else
-			return false;
+		return GetType() == 2;
 	}
+	//! Is this format compressed
 	inline bool IsCompressed() const
 	{
-		if(m_Format >= DXT1 && m_Format <= DXT5)
-			return true;
-		else
-			return false;
+		return GetType() == 3;
 	}
 
 	//! Convert a color in this format to A8R8G8B8

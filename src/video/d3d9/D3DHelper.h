@@ -71,6 +71,8 @@ inline D3DFORMAT GetD3DFormat(ColorFormat Format)
 		return D3DFMT_A1R5G5B5;
 	case ColorFormat::R5G6B5:
 		return D3DFMT_R5G6B5;
+	case ColorFormat::A2R10G10B10:
+		return D3DFMT_A2R10G10B10;
 
 	case ColorFormat::X8:
 		return D3DFMT_L8;

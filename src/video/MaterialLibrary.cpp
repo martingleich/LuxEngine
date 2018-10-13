@@ -45,7 +45,8 @@ MaterialLibrary::MaterialLibrary()
 		video::TextureStageSettings tss;
 		pass.shader = GetFixedFunctionShader({"texture"}, {tss});
 		solid->SetPass(pass);
-		m_MaterialMap["solid"] = 0;
+		m_MaterialMap["solid"] = (int)EKnownMaterial::Solid;
+		lxAssert(EKnownMaterial::Solid == m_MaterialList.Size());
 		m_MaterialList.PushBack(solid);
 	}
 
@@ -61,7 +62,8 @@ MaterialLibrary::MaterialLibrary()
 
 		auto debug = LUX_NEW(Material);
 		debug->SetPass(pass);
-		m_MaterialMap["debugOverlay"] = 1;
+		m_MaterialMap["debugOverlay"] = (int)EKnownMaterial::DebugOverlay;
+		lxAssert(EKnownMaterial::DebugOverlay == m_MaterialList.Size());
 		m_MaterialList.PushBack(debug);
 	}
 
@@ -78,7 +80,8 @@ MaterialLibrary::MaterialLibrary()
 		auto transparent = LUX_NEW(Material);
 		transparent->SetRequirements(video::EMaterialReqFlag::Transparent);
 		transparent->SetPass(pass);
-		m_MaterialMap["transparent"] = 2;
+		m_MaterialMap["transparent"] = (int)EKnownMaterial::Transparent;
+		lxAssert(EKnownMaterial::Transparent == m_MaterialList.Size());
 		m_MaterialList.PushBack(transparent);
 	}
 
@@ -149,7 +152,7 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 	return color;
 }
 )";
-		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude, sizeof(luxHLSLInclude));
+		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude, sizeof(luxHLSLInclude)-1);// No terminating null
 	}
 }
 

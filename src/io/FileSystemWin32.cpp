@@ -106,11 +106,12 @@ StrongRef<File> FileSystemWin32::OpenFile(const FileDescription& desc, EFileMode
 	return OpenFile(desc.GetPath() + desc.GetName(), mode, createIfNotExist);
 }
 
-StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileModeFlag mode, bool createIfNotExist)
+StrongRef<File> FileSystemWin32::OpenFile(const Path& _filename, EFileModeFlag mode, bool createIfNotExist)
 {
 	// Scan mount list
 	// Found: Open file with archive.
 	// Else: Open as normal file.
+	auto filename = io::NormalizePath(_filename);
 	if(mode == EFileModeFlag::Read || mode == EFileModeFlag::ReadWrite) {
 		for(auto it = m_Mounts.Last(); it != m_Mounts.Begin(); --it) {
 			if(filename.StartsWith(it->mountpoint)) {
@@ -180,8 +181,9 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, s64 size, c
 	return OpenVirtualFile(const_cast<void*>(memory), size, name, flags | EVirtualCreateFlag::ReadOnly);
 }
 
-Path FileSystemWin32::GetAbsoluteFilename(const Path& filename) const
+Path FileSystemWin32::GetAbsoluteFilename(const Path& _filename) const
 {
+	auto filename = io::NormalizePath(_filename);
 	for(auto& mount : m_Mounts) {
 		if(filename.StartsWith(mount.mountpoint)) {
 			Path subPath = filename.SubString(filename.Data() + mount.mountpoint.Size(), filename.End());
@@ -197,8 +199,9 @@ const Path& FileSystemWin32::GetWorkingDirectory() const
 	return m_WorkingDirectory;
 }
 
-bool FileSystemWin32::ExistFile(const Path& filename) const
+bool FileSystemWin32::ExistFile(const Path& _filename) const
 {
+	auto filename = io::NormalizePath(_filename);
 	// Scan mount-list
 	for(auto& mount : m_Mounts) {
 		if(filename.StartsWith(mount.mountpoint)) {

@@ -44,13 +44,14 @@ LuxDeviceNull::LuxDeviceNull()
 	log::Log("Starting time ~a", core::Clock::GetDateAndTime());
 
 	// Register resource types
-	resourceSystem->AddType(core::ResourceType::Mesh);
-	resourceSystem->AddType(core::ResourceType::Image);
-	resourceSystem->AddType(core::ResourceType::ImageList);
-	resourceSystem->AddType(core::ResourceType::Texture);
+	resourceSystem->AddType(core::ResourceType::Animation);
 	resourceSystem->AddType(core::ResourceType::CubeTexture);
 	resourceSystem->AddType(core::ResourceType::Font);
+	resourceSystem->AddType(core::ResourceType::Image);
+	resourceSystem->AddType(core::ResourceType::ImageList);
+	resourceSystem->AddType(core::ResourceType::Mesh);
 	resourceSystem->AddType(core::ResourceType::Sound);
+	resourceSystem->AddType(core::ResourceType::Texture);
 
 	resourceSystem->SetCaching(core::ResourceType::ImageList, false);
 	resourceSystem->SetCaching(core::ResourceType::Image, false);

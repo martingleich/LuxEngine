@@ -39,7 +39,7 @@ void TurntableCameraControl::Animate(float time)
 	if(math::IsZero(orbitVector.GetLengthSq()))
 		orbitVector = -minDistance * math::Vector3F::UNIT_Z;
 	auto orbitDistance = orbitVector.GetLength();
-	auto flank = node->FromRelativeDir(math::Vector3F::UNIT_X, node->GetParent());
+	auto flank = node->FromRelativeDir(math::Vector3F::UNIT_X, node->IsInheritingRotation() ? node->GetParent() : nullptr);
 
 	math::QuaternionF rotY(m_TableNormal, m_RotSpeed * math::AngleF(m_RotDelta.y + time*m_RotRate.y));
 	math::QuaternionF rotX(flank, m_RotSpeed * math::AngleF(m_RotDelta.x + time*m_RotRate.x));

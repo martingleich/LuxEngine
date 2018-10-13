@@ -66,6 +66,7 @@ public:
 	/**
 	Will be called for each object in a EQueryLevel::Collision query.
 	Defaults to all call to the OnObject method.
+	\return Return true if other found collision should be reported, otherwise false to abort reporting.
 	*/
 	virtual bool OnCollision(Node* node, const VolumeQueryResult& result)
 	{

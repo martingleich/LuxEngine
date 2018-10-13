@@ -901,10 +901,6 @@ struct CompareType<SharedString>
 };
 
 } // namespace core
-namespace io
-{
-using Path = core::String;
-}
 } // namespace lux
 
 #endif

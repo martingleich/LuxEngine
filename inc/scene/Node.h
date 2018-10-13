@@ -405,9 +405,16 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
+	void SetInheritScale(bool b) { m_InheritScale = b; }
+	void SetInheritRotation(bool b) { m_InheritRotation = b; }
+	void SetInheritTranslation(bool b) { m_InheritTranslation = b; }
+	bool IsInheritingScale() const { return m_InheritScale; }
+	bool IsInheritingRotation() const { return m_InheritRotation; }
+	bool IsInheritingTranslation() const { return m_InheritTranslation; }
+
 	LUX_API void SetRelativeTransform(const math::Transformation& t);
 	LUX_API const math::Transformation& GetAbsoluteTransform() const;
-	LUX_API const math::Vector3F& GetAbsolutePosition() const
+	const math::Vector3F& GetAbsolutePosition() const
 	{
 		return GetAbsoluteTransform().translation;
 	}
@@ -755,11 +762,15 @@ private:
 
 	math::AABBoxF m_BoundingBox;
 
+	// TODO: Merge all this into a single flag
 	bool m_IsVisible;
 	//! Is the current bounding box set by the user.
 	bool m_HasUserBoundingBox;
 	bool m_IsRoot;
 	bool m_CastShadow;
+	bool m_InheritTranslation;
+	bool m_InheritRotation;
+	bool m_InheritScale;
 	mutable bool m_IsDirty;
 };
 

@@ -1,6 +1,5 @@
 #ifndef INCLUDED_LUX_PATH_H
 #define INCLUDED_LUX_PATH_H
-
 #include "core/lxString.h"
 #include "core/Clock.h"
 
@@ -9,7 +8,7 @@ namespace lux
 namespace io
 {
 
-typedef core::String Path;
+using Path = core::String;
 
 LUX_API Path GetFileExtension(const Path& p);
 LUX_API Path GetFileDir(const Path& p);

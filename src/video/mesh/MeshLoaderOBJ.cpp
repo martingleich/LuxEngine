@@ -283,7 +283,7 @@ public:
 
 		if(!mat.diffuse_texname.empty()) {
 			io::Path texname = mat.diffuse_texname.data();
-			texname.Replace("\\", "/");
+			texname.Replace("/", "\\");
 
 			lxm->SetTexture(0, LoadTexture(texname));
 		}

@@ -4,6 +4,7 @@
 #include "scene/components/Camera.h"
 #include "scene/components/SceneMesh.h"
 #include "scene/components/FirstPersonCameraControl.h"
+#include "scene/SceneBuilder.h"
 
 #include "gui/elements/GUIStaticText.h"
 
@@ -41,16 +42,17 @@ public:
 	void LoadBase()
 	{
 		scene::Node* node;
+		scene::SceneBuilder sceneBuilder(Context.Scene);
 
-		m_Camera = Context.Scene->CreateCamera();
+		m_Camera = sceneBuilder.CreateCamera();
 		m_CameraNode = Context.Scene->AddNode(m_Camera);
 		m_CameraNode->SetPosition(0.0f, 0.0f, -15.0f);
 		m_CameraNode->SetDirectionUp(math::Vector3F(0.0f, 0.0f, 1.0f));
 
-		m_Light = Context.Scene->CreateLight();
+		m_Light = sceneBuilder.CreateLight();
 		m_Light->SetLightType(video::ELightType::Directional);
 		m_Light->SetColor(video::Color::White);
-		node = Context.Scene->AddNode(m_Light);
+		node = sceneBuilder.AddNode(m_Light);
 		node->SetDirection(math::Vector3F::UNIT_Z);
 
 		m_CheckerTexture = Context.ImgSys->CreateFittingTexture(math::Dimension2I(32, 32));
@@ -74,7 +76,7 @@ public:
 			}
 		}
 
-		node = Context.Scene->AddSkyBox();
+		node = sceneBuilder.AddSkyBox();
 		auto skyBox = node->GetComponent<scene::SkyBox>();
 		skyBox->UseCubeTexture(false);
 		skyBox->SetSkyTexture(m_CheckerTexture);
@@ -154,8 +156,9 @@ void MaterialTest::Load()
 	LoadBase();
 
 	StrongRef<scene::Node> node;
+	scene::SceneBuilder scenebuilder(Context.Scene);
 
-	m_CameraNode->AddComponent(Context.Scene->CreateFirstPersonCameraControl());
+	m_CameraNode->AddComponent(scenebuilder.CreateFirstPersonCameraControl());
 
 	auto font = Context.GUI->GetFontCreator()->CreateFont(
 		gui::FontDescription("Comic Sans MS", 40, gui::EFontWeight::Bolt),
@@ -174,7 +177,7 @@ void MaterialTest::Load()
 	size_t row = 0;
 	size_t col = 0;
 	for(auto it = materials.First(); it != materials.End(); ++it) {
-		auto comp = Context.Scene->CreateMesh(geo);
+		auto comp = scenebuilder.CreateMesh(geo);
 		comp->SetReadMaterialsOnly(false);
 		comp->SetMaterial(0, *it);
 

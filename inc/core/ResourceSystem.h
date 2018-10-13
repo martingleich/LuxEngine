@@ -5,6 +5,7 @@
 #include "core/ResourceLoader.h"
 #include "core/ResourceWriter.h"
 #include "core/lxName.h"
+#include "io/Path.h"
 
 namespace lux
 {

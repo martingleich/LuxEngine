@@ -14,12 +14,13 @@ namespace core
 namespace ResourceType
 {
 const Name Image("lux.resource.Image");
-const Name ImageList("lux.resouce.Imagelist");
+const Name ImageList("lux.resource.Imagelist");
 const Name Texture("lux.resource.Texture");
 const Name CubeTexture("lux.resource.CubeTexture");
 const Name Mesh("lux.resource.Mesh");
 const Name Font("lux.resource.Font");
 const Name Sound("lux.resource.Sound");
+const Name Animation("lux.resource.Animation");
 }
 
 static int INVALID_ID = -1;

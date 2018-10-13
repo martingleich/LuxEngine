@@ -5,6 +5,7 @@
 #include "core/lxName.h"
 #include "core/lxArray.h"
 #include "core/HelperTemplates.h"
+#include "io/Path.h"
 
 #include <mutex>
 

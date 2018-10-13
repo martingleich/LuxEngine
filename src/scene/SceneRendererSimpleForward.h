@@ -17,29 +17,9 @@ namespace lux
 namespace scene
 {
 class GlobalAmbientLight;
-class SceneDataCollector : public SceneObserver
-{
-public:
-	void OnAttach(Node* node);
-	void OnDetach(Node* node);
-
-	void OnAttach(Component* comp);
-	void OnDetach(Component* comp);
-
-	void RegisterCamera(AbstractCamera* camera);
-	void UnregisterCamera(AbstractCamera* camera);
-
-	void RegisterLight(Light* light);
-	void UnregisterLight(Light* light);
-
-	void RegisterFog(GlobalFog* fog);
-	void UnregisterFog(GlobalFog* fog);
-
-	core::Array<AbstractCamera*> cameraList; //!< The cameras of the graph
-	core::Array<Light*> lightList; //!< The lights of the graph
-	core::Array<GlobalFog*> fogList; //!< The fogs of the graph
-	GlobalAmbientLight* ambientLight = nullptr;
-};
+class GlobalFog;
+class Camera;
+class Mesh;
 
 class SceneRendererSimpleForward : public SceneRenderer
 {
@@ -67,13 +47,18 @@ public:
 		return m_PassSettings[pass];
 	}
 
-	virtual void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
-	virtual void DisableOverwrite(video::PipelineOverwriteToken& token);
+	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
+	void DisableOverwrite(video::PipelineOverwriteToken& token);
 
-	virtual void AddRenderEntry(Node* n, Renderable* r);
+	void AddRenderEntry(Node* n, Renderable* r);
+	void AddCameraEntry(AbstractCamera* cam);
 
-	virtual void DrawScene();
-	virtual bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
+	void AddLight(Light* l);
+	void AddFog(GlobalFog* l);
+	void AddAmbient(GlobalAmbientLight* l);
+
+	void DrawScene();
+	bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
 
 private:
 	struct RenderEntry
@@ -133,8 +118,6 @@ private:
 private:
 	StrongRef<Scene> m_Scene;
 
-	StrongRef<SceneDataCollector> m_SceneData;
-
 	/////////////////////////////////////////////////////////////////////////
 	// Caches and temporary values
 	/////////////////////////////////////////////////////////////////////////
@@ -143,6 +126,12 @@ private:
 	core::Array<RenderEntry> m_SolidNodeList;
 	core::Array<DistanceRenderEntry> m_TransparentNodeList;
 
+	core::Array<AbstractCamera*> m_Cameras;
+	core::Array<Light*> m_Lights;
+	core::Array<GlobalFog*> m_Fogs;
+	video::ColorF m_AmbientLight;
+
+	// The current root
 	Node* m_CollectedRoot;
 
 	// Information about the current camera

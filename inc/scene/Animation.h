@@ -205,7 +205,6 @@ private:
 
 class Animation : public core::Resource
 {
-	LX_REFERABLE_MEMBERS_API(Animation, LUX_API);
 	using TrackIterT = core::Array<StrongRef<AnimationTrack>>::Iterator;
 	using ConstTrackIterT = core::Array<StrongRef<AnimationTrack>>::ConstIterator;
 public:
@@ -225,6 +224,8 @@ public:
 	LUX_API float GetDuration() const;
 	LUX_API float GetStart() const;
 	LUX_API float GetEnd() const;
+
+	LUX_API core::Name GetReferableType() const;
 
 private:
 	core::Array<StrongRef<AnimationTrack>> m_Tracks;

@@ -29,6 +29,7 @@ enum class ERenderableTags
 {
 	None = 0,
 	EditView = 1,
+	Invisible = 2,
 };
 
 class Light;
@@ -64,7 +65,6 @@ class RenderableVisitor
 {
 public:
 	virtual ~RenderableVisitor() {}
-
 	virtual void Visit(Node* node, Renderable* r) = 0;
 };
 

@@ -423,8 +423,12 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 		pass.fogEnabled = false;
 		dirtyPass = true;
 	}
-	if(frontFace != EFaceWinding::CCW) {
+	if(frontFace == EFaceWinding::CCW) {
+	} else if(frontFace == EFaceWinding::CW) {
 		pass.culling = FlipFaceSide(pass.culling);
+		dirtyPass = true;
+	} else if(frontFace == EFaceWinding::ANY) {
+		pass.culling = EFaceSide::None;
 		dirtyPass = true;
 	}
 	if(pass.fogEnabled != m_IsFogActive && pass.fogEnabled) {

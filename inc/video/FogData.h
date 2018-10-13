@@ -24,7 +24,7 @@ public:
 
 	float density;
 
-	video::ColorF color;
+	ColorF color;
 
 	FogData() :
 		type(EFogType::Linear),
