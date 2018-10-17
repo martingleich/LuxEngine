@@ -75,22 +75,22 @@ struct LuxAppContext
 	gui::Cursor* Cursor = nullptr;
 	core::ReferableFactory* RefFactory = nullptr;
 
-	StrongRef<video::Mesh> GetMesh(const io::Path& path)
+	StrongRef<video::Mesh> GetMesh(core::StringView path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::Mesh, path).As<video::Mesh>();
 	}
 
-	StrongRef<video::Texture> GetTexture(const io::Path& path)
+	StrongRef<video::Texture> GetTexture(core::StringView path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::Texture, path).As<video::Texture>();
 	}
 
-	StrongRef<video::CubeTexture> GetCubeTexture(const io::Path& path)
+	StrongRef<video::CubeTexture> GetCubeTexture(core::StringView path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::CubeTexture, path).As<video::CubeTexture>();
 	}
 
-	StrongRef<video::Image> GetImage(const io::Path& path)
+	StrongRef<video::Image> GetImage(core::StringView path)
 	{
 		return ResourceSystem->GetResource(core::ResourceType::Image, path).As<video::Image>();
 	}

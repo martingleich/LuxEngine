@@ -32,7 +32,7 @@ struct FileUsageException : core::Exception
 		CursorOutsideFile,
 	};
 
-	explicit FileUsageException(EError error, const core::String& path) :
+	explicit FileUsageException(EError error, const io::Path& path) :
 		m_Error(error),
 		m_Path(path.Data())
 	{

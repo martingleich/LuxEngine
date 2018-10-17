@@ -11,10 +11,10 @@ class LimitedFile : public File
 {
 public:
 	LimitedFile(
-		StrongRef<File> Master,
+		StrongRef<File> master,
 		s64 offset,
-		const FileDescription& desc,
-		core::String name);
+		const FileInfo& info,
+		const Path& path);
 
 	s64 ReadBinaryPart(s64 numBytes, void* out);
 	s64 WriteBinaryPart(const void* data, s64 length);
@@ -23,10 +23,13 @@ public:
 	const void* GetBuffer() const;
 	s64 GetSize() const;
 	s64 GetCursor() const;
+	const FileInfo& GetInfo() const { return m_Info; }
+	const Path& GetPath() const { return m_Path; }
 
 private:
 	s64 m_StartOffset;
-	s64 m_FileSize;
+	FileInfo m_Info;
+	Path m_Path;
 	s64 m_Cursor;
 	
 	StrongRef<File> m_MasterFile;

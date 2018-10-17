@@ -56,8 +56,8 @@ core::String RawInputDevice::GetDevicePath(HANDLE raw_handle)
 	if(GetRawInputDeviceInfoW(raw_handle, RIDI_DEVICENAME, str.Data(), &bufferSize) == -1)
 		throw core::Win32Exception(GetLastError());
 
-	core::String path = core::UTF16ToString(str.Data_c());
-	path.ReplaceRange("\\", path.First() + 1, 1); // Old windows bug, sometimes the second character is not a backslash.
+	core::String path = core::UTF16ToString(str.Data(), -1);
+	path.ReplaceRange("\\", 1, 1); // Old windows bug, sometimes the second character is not a backslash.
 
 	return path;
 }
@@ -67,11 +67,9 @@ core::String RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
 	core::String path = GetDevicePath(raw_handle);
 
 	// A guid is build like: random_characters{<guid>}
-	for(auto it = path.First(); it != path.End(); ++it) {
-		if(*it == '{')
-			return path.SubString(it.Next(), path.Last());
-	}
-
+	int i = path.Find("{");
+	if(i >= 0)
+		return path.EndSubString(i+1);
 	throw core::GenericRuntimeException("Invalid device guid");
 }
 

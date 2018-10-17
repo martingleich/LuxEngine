@@ -5,7 +5,6 @@
 #include "core/lxName.h"
 #include "core/lxArray.h"
 #include "core/HelperTemplates.h"
-#include "io/Path.h"
 
 #include <mutex>
 
@@ -139,22 +138,22 @@ private:
 
 struct HTMLPrinterSettings : public Printer::Settings
 {
-	HTMLPrinterSettings(const io::Path& p) :
+	HTMLPrinterSettings(const core::String& p) :
 		FilePath(p)
 	{
 	}
 
-	io::Path FilePath;
+	core::String FilePath;
 };
 
 struct FilePrinterSettings : public Printer::Settings
 {
-	FilePrinterSettings(const io::Path& p) :
+	FilePrinterSettings(const core::String& p) :
 		FilePath(p)
 	{
 	}
 
-	io::Path FilePath;
+	core::String FilePath;
 };
 
 struct ConsolePrinterSettings : public Printer::Settings

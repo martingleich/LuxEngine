@@ -171,7 +171,7 @@ public:
 	{
 		auto it = m_ObjectMap.Find(name);
 		if(it == m_ObjectMap.End())
-			throw core::ObjectNotFoundException(name.Data_c());
+			throw core::ObjectNotFoundException(name.Data());
 		return (*it)->GetAccess(false);
 	}
 
@@ -179,7 +179,7 @@ public:
 	{
 		auto it = m_ObjectMap.Find(name);
 		if(it == m_ObjectMap.End())
-			throw core::ObjectNotFoundException(name.Data_c());
+			throw core::ObjectNotFoundException(name.Data());
 		return (*it)->GetAccess(true);
 	}
 

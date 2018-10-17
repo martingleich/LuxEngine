@@ -176,7 +176,7 @@ void BinarySerializer::ReadType(core::Type type, void* data)
 			ReadBinary(m_Block.start + addr, m_Buffer, size);
 			core::String& str = *((core::String*)data);
 			str.Clear();
-			str.AppendRaw(m_Buffer, size);
+			str.Append(m_Buffer, size);
 		} else if(core::Types::IsIDType(type)) {
 			u32 inFileId;
 			ReadBinary(&inFileId, type.GetSize());

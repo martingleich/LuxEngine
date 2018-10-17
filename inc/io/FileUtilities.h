@@ -88,14 +88,14 @@ private:
 					}
 				} else if(endCur == 1) {
 					if(c == '\r') {
-						m_Line.AppendRaw(&c, 1);
+						m_Line.Append(&c, 1);
 						endCur = 0;
 					}
 					if(c == '\n')
 						return;
 				}
 			}
-			m_Line.AppendRaw(&c, 1);
+			m_Line.Append(&c, 1);
 		}
 	}
 

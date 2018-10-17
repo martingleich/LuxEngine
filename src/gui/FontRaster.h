@@ -58,11 +58,11 @@ public:
 
 	void Init(const FontCreationData& data);
 
-	void Draw(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, const math::Vector2F& Position, const math::RectF* clip);
+	void Draw(const FontRenderSettings& settings, const core::StringView& text, const math::Vector2F& Position, const math::RectF* clip);
 
-	float GetTextWidth(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text);
-	int GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, float XPosition);
-	void GetTextCarets(const FontRenderSettings& settings, core::Range<core::ConstUTF8Iterator> text, core::Array<float>& carets);
+	float GetTextWidth(const FontRenderSettings& settings, const core::StringView& text);
+	int GetCaretFromOffset(const FontRenderSettings& settings, const core::StringView& text, float XPosition);
+	void GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<float>& carets);
 	const core::HashMap<u32, CharInfo>& GetCharMap() const;
 	const CharInfo& GetCharInfo(u32 c);
 
@@ -88,17 +88,16 @@ private:
 	template <typename FuncT>
 	void IterateCarets(
 		const FontRenderSettings& _settings,
-		core::Range<core::ConstUTF8Iterator> text,
+		const core::StringView& text,
 		FuncT callback)
 	{
 		auto settings = GetFinalFontSettings(_settings);
 		const float charSpace = settings.charDistance;
-
-		if(text.First() == text.End())
+		if(text.IsEmpty())
 			return;
 
 		float width = 0;
-		for(u32 c : text) {
+		for(u32 c : text.CodePoints()) {
 			if(callback(width * settings.scale) == false)
 				return;
 			const CharInfo& info = GetCharInfo(c);

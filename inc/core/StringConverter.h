@@ -115,6 +115,13 @@ inline core::String Format(core::StringView format, T... args)
 	return std::move(out);
 }
 
+enum class EParseError
+{
+	OK=0,
+	Error=1,
+	Overflow=2,
+	EmptyInput=3,
+};
 //! Create a float from a string
 /**
 \param str The string to convert
@@ -123,29 +130,31 @@ inline core::String Format(core::StringView format, T... args)
 \param [out] error Did an error occur, only written if not null
 \return The parsed float
 */
-inline float ParseFloat(const char* str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
+inline float ParseFloat(StringView str, float errorValue = 0.0f, int* nextChar = nullptr, EParseError* error = nullptr)
 {
 	int sign = 1;
 
-	if(!*str) {
+	if(str.IsEmpty()) {
 		if(nextChar)
-			*nextChar = str;
+			*nextChar = 0;
 		if(error)
-			*error = true;
+			*error = EParseError::EmptyInput;
 		return errorValue;
 	}
 
-	if(*str == '-') {
+	const char* p = str.Data();
+	const char* end = str.Data() + str.Size();
+	if(*p == '-') {
 		sign = -1;
-		++str;
-	} else if(*str == '+') {
+		++p;
+	} else if(*p == '+') {
 		sign = 1;
-		++str;
+		++p;
 	}
 
-	if(strcmp(str, "inf") == 0) {
+	if(end - p >= 3 && memcmp(p, "inf", 3) == 0) {
 		if(error)
-			*error = false;
+			*error = EParseError::Error;
 		return sign * std::numeric_limits<float>::infinity();
 	}
 
@@ -154,11 +163,12 @@ inline float ParseFloat(const char* str, float errorValue = 0.0f, const char** n
 
 	unsigned int* value = &pre;
 	int numDigits = 1;
-	while(*str) {
-		if(core::IsDigit(*str)) {
+	while(p != end) {
+		if(*p >= '0' && *p <= '9') {
 			unsigned int old = *value;
+			unsigned int dvalue = *p - '0';
 			*value *= 10;
-			*value += *str - '0';
+			*value += dvalue;
 			numDigits *= 10;
 			if(*value < old) {
 				if(value == &pre) {
@@ -168,12 +178,12 @@ inline float ParseFloat(const char* str, float errorValue = 0.0f, const char** n
 				} else if(value == &post)
 					break;
 			}
-			++str;
-		} else if(*str == '.') {
+			++p;
+		} else if(*p == '.') {
 			if(value == &pre) {
 				post = 0;
 				value = &post;
-				++str;
+				++p;
 				numDigits = 1;
 			} else if(value == &post)
 				break;
@@ -189,10 +199,10 @@ inline float ParseFloat(const char* str, float errorValue = 0.0f, const char** n
 	out *= sign;
 
 	if(nextChar)
-		*nextChar = str;
+		*nextChar = p - str.Data();
 
 	if(error)
-		*error = true;
+		*error = EParseError::Error;
 	return out;
 }
 
@@ -203,99 +213,75 @@ inline float ParseFloat(const char* str, float errorValue = 0.0f, const char** n
 \param [out] nextChar The first character after the number, only written when not null
 \return The parsed integer
 */
-inline int ParseInt(const char* str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
+inline int ParseInt(StringView str, int errorValue = 0, int* nextChar = nullptr, EParseError* error = nullptr)
 {
 	unsigned int value = 0;
 	int numDigits = 0;
 	int sign = 1;
 
-	if(!*str) {
+	if(str.IsEmpty()) {
 		if(nextChar)
-			*nextChar = str;
+			*nextChar = 0;
 		if(error)
-			*error = true;
+			*error = EParseError::EmptyInput;
 		return errorValue;
 	}
 
-	if(*str == '-') {
+	const char* p = str.Data();
+	const char* end = str.Data() + str.Size();
+	if(*p == '-') {
 		sign = -1;
-		++str;
-	} else if(*str == '+') {
+		++p;
+	} else if(*p == '+') {
 		sign = 1;
-		++str;
+		++p;
 	}
 
-	while(*str) {
-		if(core::IsDigit(*str)) {
-			value *= 10;
-			value += *str - '0';
-			numDigits++;
-			if((sign == 1 && value > (unsigned int)std::numeric_limits<int>::max())
-				|| (sign == -1 && value > (unsigned int)std::numeric_limits<int>::max())) {
+	unsigned int maxValue = sign==1 ? (unsigned int)std::numeric_limits<int>::max() : ((unsigned int)std::numeric_limits<int>::max()+1);
+	while(p != end) {
+		if(*p >= '0' && *p <= '9') {
+			unsigned int dvalue = *p - '0';
+			if(value > (maxValue-dvalue)/10) { 
 				if(nextChar)
-					*nextChar = str;
+					*nextChar = p - str.Data();
 				if(error)
-					*error = true;
+					*error = EParseError::Overflow;
 				return errorValue;
 			}
-			++str;
+			value = 10*value + dvalue;
+			numDigits++;
+			++p;
 		} else {
 			break;
 		}
 	}
 
 	if(nextChar)
-		*nextChar = str;
+		*nextChar = p - str.Data();
 
 	if(numDigits > 0) {
 		if(error)
-			*error = false;
+			*error = EParseError::OK;
 		return (int)value*sign;
 	} else {
 		if(error)
-			*error = true;
+			*error = EParseError::Error;
 		return errorValue;
 	}
 }
 
-//! Create a integer from a string
-/**
-\param str The string to convert
-\param errorValue The value which is returned if an error occurs
-\param [out] nextChar The first character after the number, only written if not null
-\param [out] error Did an error occur, only written if not null
-\return The parsed integer
-*/
-inline int ParseInt(const core::String& str, int errorValue = 0, const char** nextChar = nullptr, bool* error = nullptr)
-{
-	return ParseInt(str.Data(), errorValue, nextChar, error);
-}
-
-//! Create a float from a string
-/**
-\param str The string to convert
-\param errorValue The value which is returned if an error occurs
-\param [out] nextChar The first character after the number, only written if not null
-\param [out] error Did an error occur, only written if not null
-\return The parsed float
-*/
-inline float ParseFloat(const core::String& str, float errorValue = 0.0f, const char** nextChar = nullptr, bool* error = nullptr)
-{
-	return ParseFloat(str.Data(), errorValue, nextChar, error);
-}
-
-inline bool ParseBool(const core::String& str, bool errorValue = false, const char** nextChar = nullptr, bool* error = nullptr)
+inline bool ParseBool(core::StringView str, bool errorValue = false, int* nextChar = nullptr, EParseError* error = nullptr)
 {
 	LUX_UNUSED(str, nextChar, error);
-	bool isTrue = str.StartsWith(str, "true", EStringCompare::CaseInsensitive);
+	bool isTrue = str.StartsWith("true", EStringCompare::CaseInsensitive);
 	if(isTrue && nextChar)
-		*nextChar = (str.First() + 4);
-	bool isFalse = str.StartsWith(str, "false", EStringCompare::CaseInsensitive);
+		*nextChar = 4;
+	bool isFalse = str.StartsWith("false", EStringCompare::CaseInsensitive);
 	if(isTrue && nextChar)
-		*nextChar = (str.First() + 5);
+		*nextChar = 5;
 
 	if(error)
-		*error = !isTrue && !isFalse;
+		*error = !isTrue && !isFalse ? EParseError::Error : EParseError::OK;
 	if(isTrue)
 		return true;
 	if(isFalse)

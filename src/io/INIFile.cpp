@@ -21,7 +21,7 @@ INIFile::INIFile(File* f) :
 	m_File(f),
 	m_CurrentSection(0),
 	m_CurrentElement(0),
-	m_CommentChars(";#"),
+	m_CommentChars{';', '#'},
 	m_LineEnding(GetSystemLineEnding()),
 	m_SectionSorted(true),
 	m_SectionsAscending(true)
@@ -34,7 +34,7 @@ INIFile::INIFile(const Path& p) :
 	m_FilePath(p),
 	m_CurrentSection(0),
 	m_CurrentElement(0),
-	m_CommentChars(";#"),
+	m_CommentChars{';', '#'},
 	m_LineEnding(GetSystemLineEnding()),
 	m_SectionSorted(true),
 	m_SectionsAscending(true)
@@ -152,7 +152,7 @@ void INIFile::SortSections(INIFile::ESorting sorting, bool recursive)
 	}
 }
 
-INIFile::Section INIFile::AddSection(const core::String& name, const core::String& comment)
+INIFile::Section INIFile::AddSection(const core::StringView& name, const core::StringView& comment)
 {
 	int sectionID = GetSectionID(name);
 	if(sectionID != InvalidID) {
@@ -192,13 +192,13 @@ void INIFile::RemoveSection(int sectionID)
 	m_CurrentElement = 0;
 }
 
-void INIFile::SetSectionName(int sectionID, const core::String& name)
+void INIFile::SetSectionName(int sectionID, const core::StringView& name)
 {
 	m_Sections.At(sectionID).name = name;
 	m_SectionSorted = false;
 }
 
-void INIFile::SetSectionComment(int sectionID, const core::String& comment)
+void INIFile::SetSectionComment(int sectionID, const core::StringView& comment)
 {
 	m_Sections.At(sectionID).comment = comment;
 }
@@ -286,7 +286,7 @@ void INIFile::SortElements(int sectionID, INIFile::ESorting sorting)
 	section.sorting = sorting;
 }
 
-INIFile::Element INIFile::AddElement(int sectionID, const core::String& name, const core::String& value, const core::String& comment)
+INIFile::Element INIFile::AddElement(int sectionID, const core::StringView& name, const core::StringView& value, const core::StringView& comment)
 {
 	if(value.IsEmpty())
 		return Element();
@@ -355,18 +355,18 @@ void INIFile::RemoveElement(int sectionID, int elementID)
 		m_CurrentElement--;
 }
 
-void INIFile::SetElementName(int sectionID, int elementID, const core::String& name)
+void INIFile::SetElementName(int sectionID, int elementID, const core::StringView& name)
 {
 	GetElement(sectionID, elementID).name = name;
 	m_Sections[sectionID].sorted = false;
 }
 
-void INIFile::SetElementComment(int sectionID, int elementID, const core::String& comment)
+void INIFile::SetElementComment(int sectionID, int elementID, const core::StringView& comment)
 {
 	GetElement(sectionID, elementID).comment = comment;
 }
 
-void INIFile::SetElementValue(int sectionID, int elementID, const core::String& value)
+void INIFile::SetElementValue(int sectionID, int elementID, const core::StringView& value)
 {
 	GetElement(sectionID, elementID).value = value;
 }
@@ -440,9 +440,9 @@ bool INIFile::IsEmpty() const
 	return (m_Sections.Size() == 0);
 }
 
-u32 INIFile::GetCommentChar() const
+char INIFile::GetCommentChar() const
 {
-	return *m_CommentChars.First();
+	return m_CommentChars[0];
 }
 
 bool INIFile::LoadData()
@@ -473,13 +473,13 @@ bool INIFile::LoadData()
 bool INIFile::ParseSectionName(const core::String& work, core::String& out)
 {
 	out.Clear();
-	auto it = work.First();
+	auto it = work.Bytes().First();
 	if(*it == '[') {
-		for(it = it.Next(); it != work.End(); ++it) {
+		for(it++; it != work.Bytes().End(); ++it) {
 			if(*it == ']')
 				return true;
 			else
-				out.Append(it);
+				out.PushByte(*it);
 		}
 	}
 
@@ -493,7 +493,7 @@ bool INIFile::ReadSections()
 	core::String lastComment;
 	int sectionID = InvalidID;
 
-	core::String::ConstIterator commentBegin;
+	int commentBegin = 0;
 	m_LineEnding = GetLineEnding(m_File);
 	for(auto& line : Lines(m_File, m_LineEnding)) {
 		line.RStrip();
@@ -504,11 +504,11 @@ bool INIFile::ReadSections()
 		if(IsComment(line, commentBegin)) {
 			if(lastComment.IsEmpty() == false)
 				lastComment.Append("\n");
-			lastComment.Append(commentBegin, line.End());
+			lastComment.Append(line.SubString(commentBegin, line.Size()-1));
 			continue;
 		}
 
-		if(*line.First() == '[') {
+		if(line.Data()[0] == '[') {
 			// It's the name of the section
 			if(!ParseSectionName(line, sectionName)) {
 				log::Debug("Invalid INI-section name: ~s.", line);
@@ -566,7 +566,7 @@ bool INIFile::ReadElement(const core::String& work, SINIElement& element)
 	element.value.Clear();
 
 	int state = 0;
-	auto it = work.First();
+	auto it = work.Bytes().First();
 	for(state = 0; state < 5; ++state) {
 		switch(state) {
 		case 1:
@@ -615,24 +615,25 @@ bool INIFile::ReadElement(const core::String& work, SINIElement& element)
 	return false;
 }
 
-bool INIFile::IsComment(const core::String& work, core::String::ConstIterator& commentBegin)
+bool INIFile::IsComment(const core::String& work, int& commentBegin)
 {
 	if(work.IsEmpty())
 		return false;
 
 	bool isComment = false;
-	const u32 character = *work.First();
-	for(auto it = m_CommentChars.First(); it != m_CommentChars.End(); ++it) {
-		if(character == *it) {
+	auto wit = work.Bytes().First();
+	for(auto c : m_CommentChars) {
+		if(*wit == c) {
+			++wit;
 			isComment = true;
 			break;
 		}
 	}
 
 	if(isComment) {
-		for(auto it = work.First().Next(); it != work.End(); ++it) {
-			if(!core::IsSpace(*it)) {
-				commentBegin = it;
+		for(; wit != work.Bytes().End(); ++wit) {
+			if(!core::IsSpace(*wit)) {
+				commentBegin = wit-work.Bytes().First();
 				return true;
 			}
 		}
@@ -650,15 +651,12 @@ void INIFile::WriteComment(const core::String& comment, int identDepth)
 	const char* newline = GetLineEndingChars(m_LineEnding);
 	int newlineLen = (int)strlen(newline) - 1;
 
-	u8 utf8Buffer[6];
-	int utf8Size;
-	u32 commentChar = GetCommentChar();
-	utf8Size = static_cast<int>(core::CodePointToUTF8(commentChar, utf8Buffer) - utf8Buffer);
+	u8 commentChar = GetCommentChar();
 
 	if(identDepth)
 		m_File->WriteBinary(TABS, identDepth);
 
-	m_File->WriteBinary(utf8Buffer, utf8Size);
+	m_File->WriteBinary(&commentChar, 1);
 	m_File->WriteBinary(" ", 1);
 
 	int start = 0;
@@ -673,7 +671,7 @@ void INIFile::WriteComment(const core::String& comment, int identDepth)
 			if(identDepth)
 				m_File->WriteBinary(TABS, identDepth);
 			m_File->WriteBinary(newline, newlineLen);
-			m_File->WriteBinary(utf8Buffer, utf8Size);
+			m_File->WriteBinary(&commentChar, 1);
 			m_File->WriteBinary(" ", 1);
 		} else {
 			++count;

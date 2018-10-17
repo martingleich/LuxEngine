@@ -144,7 +144,7 @@ public:
 	*/
 	virtual void Draw(
 		const FontRenderSettings& settings,
-		core::Range<core::ConstUTF8Iterator> text,
+		const core::StringView& text,
 		const math::Vector2F& position,
 		const math::RectF* clip = nullptr) = 0;
 
@@ -154,8 +154,7 @@ public:
 	\param text The width of this text is calculated
 	\return The length of the text, ignores all boundaries like the end of screen
 	*/
-	virtual float GetTextWidth(const FontRenderSettings& settings,
-		core::Range<core::ConstUTF8Iterator> text) = 0;
+	virtual float GetTextWidth(const FontRenderSettings& settings, const core::StringView& text) = 0;
 
 	//! The text caret from a x position
 	/**
@@ -168,9 +167,7 @@ public:
 	\param xPosition The text position from the begin of the text, 0.0 is the left edge of the text box
 	\return The hit caret
 	*/
-	virtual int GetCaretFromOffset(const FontRenderSettings& settings,
-		core::Range<core::ConstUTF8Iterator> text,
-		float xPosition) = 0;
+	virtual int GetCaretFromOffset(const FontRenderSettings& settings, const core::StringView& text, float xPosition) = 0;
 
 	//! All text carets in a given text
 	/**
@@ -182,9 +179,7 @@ public:
 	\param text The used text
 	\param [out] carets Here the caret positions are written, it always writes exactly CharCount+1 Charrets
 	*/
-	virtual void GetTextCarets(const FontRenderSettings& settings,
-		core::Range<core::ConstUTF8Iterator> text,
-		core::Array<float>& carets) = 0;
+	virtual void GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<float>& carets) = 0;
 
 	//! Get a description of the font
 	virtual const FontDescription& GetDescription() const = 0;

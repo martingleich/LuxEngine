@@ -8,103 +8,97 @@ namespace lux
 namespace io
 {
 
-StreamFile::StreamFile(FILE* file,
-	const FileDescription& desc,
-	const core::String& name) :
-	File(name, desc),
-	m_File(file),
-	m_FileSize(desc.GetSize()),
+StreamFileWin32::StreamFileWin32(
+	Win32FileHandle file,
+	const FileInfo& info,
+	const Path& path) :
+	m_Path(path),
+	m_File(std::move(file)),
+	m_Info(info),
 	m_Cursor(0)
 {
 }
 
-StreamFile::~StreamFile()
+StreamFileWin32::~StreamFileWin32()
 {
-	if(m_File)
-		fclose(m_File);
 }
 
-s64 StreamFile::ReadBinaryPart(s64 numBytes, void* out)
+s64 StreamFileWin32::ReadBinaryPart(s64 numBytes, void* out)
 {
 	LX_CHECK_NULL_ARG(out);
 	LX_CHECK_NULL_ARG(numBytes);
-	size_t numBytesSizeT;
-	if(!core::CheckedCast(numBytes, numBytesSizeT))
-		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
+	DWORD numBytesDWORD;
+	if(!core::CheckedCast(numBytes, numBytesDWORD))
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath());
 
-	s64 read = (s64)fread(out, 1, numBytesSizeT, m_File);
-	if(read != numBytes) {
-		u8* cur = (u8*)out + read;
-		s64 count = numBytes - read;
-		while(count > 0) {
-			s64 block = (s64)fread(cur, 1, 1024, m_File);
-			read += block;
-			if(block != 1024)
-				return read;
-
-			cur += block;
-			count -= block;
-		}
-	}
+	DWORD read;
+	BOOL result = ReadFile(m_File, out, numBytesDWORD, &read, NULL);
+	if(!result)
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath());
 	m_Cursor += read;
 
 	return read;
 }
 
-s64 StreamFile::WriteBinaryPart(const void* data, s64 numBytes)
+s64 StreamFileWin32::WriteBinaryPart(const void* data, s64 numBytes)
 {
 	LX_CHECK_NULL_ARG(data);
 	LX_CHECK_NULL_ARG(numBytes);
-	size_t numBytesSizeT;
-	if(!core::CheckedCast(numBytes, numBytesSizeT))
-		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
 
-	if((s64)ftell(m_File) > m_FileSize - numBytes)
-		m_FileSize = ftell(m_File) + numBytes;
+	DWORD numBytesDWORD;
+	if(!core::CheckedCast(numBytes, numBytesDWORD))
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath());
 
-	if(fwrite(data, numBytesSizeT, 1, m_File) != 1)
-		throw io::FileUsageException(io::FileUsageException::WriteError, GetName().Data());
-	m_Cursor += numBytes;
+	DWORD written;
+	BOOL result = WriteFile(m_File, data, numBytesDWORD, &written, NULL);
+	if(!result && written != numBytesDWORD)
+		throw io::FileUsageException(io::FileUsageException::WriteError, GetPath());
 
-	return numBytes;
+	m_Cursor += written;
+	if(m_Cursor > GetSize())
+		m_Info.SetSize(m_Cursor);
+	return written;
 }
 
-void StreamFile::Seek(s64 offset, ESeekOrigin origin)
+void StreamFileWin32::Seek(s64 offset, ESeekOrigin origin)
 {
 	s64 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
-
 	s64 newCursor = cursor + offset;
-	if(newCursor < 0 || newCursor > GetSize())
-		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetName().Data());
+	s64 cursorOffset = newCursor - GetCursor();
+	if(newCursor < 0 || newCursor >= GetSize())
+		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetPath());
 
-	if(fseek(m_File, (long)newCursor, 0) != 0)
-		throw core::GenericRuntimeException("fseek failed");
+	LARGE_INTEGER lint;
+	lint.QuadPart = core::SafeCast<LONGLONG>(cursorOffset);
+	BOOL result = SetFilePointerEx(m_File, lint, NULL, FILE_CURRENT);
+	if(!result)
+		throw core::GenericRuntimeException("Seeking failed");
 	m_Cursor = newCursor;
 }
 
-void* StreamFile::GetBuffer()
+void* StreamFileWin32::GetBuffer()
 {
 	return nullptr;
 }
 
-const void* StreamFile::GetBuffer() const
+const void* StreamFileWin32::GetBuffer() const
 {
 	return nullptr;
 }
 
-s64 StreamFile::GetSize() const
+s64 StreamFileWin32::GetSize() const
 {
-	return m_FileSize;
+	return m_Info.GetSize();
 }
 
-s64 StreamFile::GetCursor() const
+s64 StreamFileWin32::GetCursor() const
 {
 	return m_Cursor;
 }
 
-bool StreamFile::IsEOF() const
+bool StreamFileWin32::IsEOF() const
 {
-	return m_Cursor == m_FileSize;
+	return m_Cursor == GetSize();
 }
 
 }

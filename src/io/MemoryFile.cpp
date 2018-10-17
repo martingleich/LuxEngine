@@ -7,17 +7,19 @@ namespace lux
 namespace io
 {
 
-MemoryFile::MemoryFile(void* buffer,
-	const FileDescription& desc,
-	const core::String& name,
+MemoryFile::MemoryFile(
+	void* buffer,
+	const FileInfo& info,
+	const Path& path,
 	EVirtualCreateFlag flags) :
-	File(name, desc),
 	m_Buffer((u8*)buffer),
+	m_Info(info),
+	m_Path(path),
 	m_Cursor(0),
 	m_IsEOF(false),
 	m_Flags(flags)
 {
-	if(!core::CheckedCast(desc.GetSize(), m_Size))
+	if(!core::CheckedCast(m_Info.GetSize(), m_Size))
 		throw core::InvalidOperationException("Memory file is too big.");
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::Copy)) {
@@ -44,7 +46,7 @@ s64 MemoryFile::ReadBinaryPart(s64 numBytes, void* out)
 	LX_CHECK_NULL_ARG(out);
 	size_t sizeBytes;
 	if(!core::CheckedCast(numBytes, sizeBytes))
-		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath().Data());
 
 	if(m_Cursor + sizeBytes > m_Size) {
 		sizeBytes = m_Size - m_Cursor;
@@ -62,14 +64,14 @@ s64 MemoryFile::WriteBinaryPart(const void* data, s64 numBytes)
 	LX_CHECK_NULL_ARG(data);
 	size_t sizeBytes;
 	if(!core::CheckedCast(numBytes, sizeBytes))
-		throw io::FileUsageException(io::FileUsageException::ReadError, GetName().Data());
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath().Data());
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::ReadOnly))
-		throw io::FileUsageException(io::FileUsageException::WriteError, GetName().Data());
+		throw io::FileUsageException(io::FileUsageException::WriteError, GetPath().Data());
 
 	if(m_Cursor > m_Size - sizeBytes) {
 		if(!TestFlag(m_Flags, EVirtualCreateFlag::Expandable)) {
-			throw io::FileUsageException(io::FileUsageException::WriteError, GetName().Data());
+			throw io::FileUsageException(io::FileUsageException::WriteError, GetPath().Data());
 		} else {
 			u8* pNewData = LUX_NEW_RAW(((m_Cursor + sizeBytes) * 3) / 2);
 			if(m_Buffer)
@@ -95,7 +97,7 @@ void MemoryFile::Seek(s64 offset, ESeekOrigin origin)
 	size_t cursor = (origin == ESeekOrigin::Start) ? 0 : (size_t)GetCursor();
 	s64 newCursor64 = (s64)cursor + offset;
 	if(newCursor64 > GetSize())
-		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetName().Data());
+		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetPath().Data());
 
 	size_t newCursor = core::SafeCast<size_t>(newCursor64);
 	m_Cursor = newCursor;
@@ -117,7 +119,7 @@ const void* MemoryFile::GetBuffer() const
 
 s64 MemoryFile::GetSize() const
 {
-	return (s64)m_Size;
+	return m_Info.GetSize();
 }
 
 s64 MemoryFile::GetCursor() const

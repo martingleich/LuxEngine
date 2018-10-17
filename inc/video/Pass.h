@@ -59,11 +59,10 @@ public:
 	}
 
 	// Material
-	float ambient = 1.0f;
 	ColorF diffuse = video::ColorF(1, 1, 1, 1);
-	ColorF emissive = video::ColorF(0, 0, 0, 0);
-	ColorF specular = video::ColorF(1, 1, 1, 1);
+	float emissive = 0;
 	float shininess = 0;
+	float specularIntensity = 1;
 
 	// Shader
 	StrongRef<Shader> shader;

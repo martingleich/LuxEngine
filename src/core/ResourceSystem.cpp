@@ -252,9 +252,9 @@ int ResourceSystem::GetResourceIdUnsafe(Name type, const String& name) const
 	if(self->types[typeId].isCached == false)
 		return INVALID_ID;
 
-	if(self->fileSystem->ExistFile(name)) {
-		const String abs_path = self->fileSystem->GetAbsoluteFilename(name);
-		return self->resources[typeId].GetResourceId(abs_path);
+	if(self->fileSystem->ExistFile(io::Path(name))) {
+		auto abs_path = self->fileSystem->GetAbsoluteFilename(io::Path(name));
+		return self->resources[typeId].GetResourceId(abs_path.AsView());
 	} else {
 		return self->resources[typeId].GetResourceId(name);
 	}
@@ -311,11 +311,11 @@ StrongRef<Resource> ResourceSystem::GetResource(Name type, const String& name, b
 
 	StrongRef<Resource> resource;
 	if(loadIfNotFound) {
-		auto file = self->fileSystem->OpenFile(name);
+		auto file = self->fileSystem->OpenFile(io::Path(name));
 
 		ResourceOrigin origin(this, name);
 		resource = CreateResource(type, file, &origin);
-		AddResource(file->GetName(), resource);
+		AddResource(file->GetPath().AsView(), resource);
 	}
 
 	return resource;
@@ -325,10 +325,10 @@ StrongRef<Resource> ResourceSystem::GetResource(Name type, io::File* file, bool 
 {
 	LX_CHECK_NULL_ARG(file);
 
-	auto resource = GetResource(type, file->GetName(), false);
+	auto resource = GetResource(type, file->GetPath().AsView(), false);
 	if(!resource && loadIfNotFound) {
 		resource = CreateResource(type, file);
-		AddResource(file->GetName(), resource);
+		AddResource(file->GetPath().AsView(), resource);
 	}
 
 	return resource;
@@ -339,7 +339,7 @@ StrongRef<Resource> ResourceSystem::CreateResource(Name type, const String& name
 	if(name.IsEmpty())
 		throw GenericInvalidArgumentException("name", "Name may not be empty");
 
-	auto file = self->fileSystem->OpenFile(name);
+	auto file = self->fileSystem->OpenFile(io::Path(name));
 
 	ResourceOrigin origin(this, name);
 	return CreateResource(type, file, &origin);
@@ -413,7 +413,7 @@ void ResourceSystem::WriteResource(Resource* resource, io::File* file, const Str
 void ResourceSystem::WriteResource(Resource* resource, const io::Path& path) const
 {
 	auto file = io::FileSystem::Instance()->OpenFile(path, io::EFileModeFlag::Write, true);
-	auto ext = io::GetFileExtension(path);
+	auto ext = path.GetFileExtension();
 	WriteResource(resource, file, ext);
 }
 
@@ -492,9 +492,9 @@ StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name type, io::File*
 	return result;
 }
 
-void ResourceSystem::LoadResource(const ResourceOrigin& origin, Resource* dst) const
+void ResourceSystem::LoadResource(const String& origin, Resource* dst) const
 {
-	StrongRef<io::File> file = io::FileSystem::Instance()->OpenFile(origin.str);
+	StrongRef<io::File> file = io::FileSystem::Instance()->OpenFile(io::Path(origin));
 	Name type = dst->GetReferableType();
 
 	// Get loader and correct resource type from file

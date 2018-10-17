@@ -3,7 +3,7 @@
 
 #ifdef LUX_WINDOWS
 
-#include "StrippedWindows.h"
+#include "platform/StrippedWindows.h"
 #include "core/lxFormat.h"
 #include "core/lxString.h"
 #include "core/lxUnicodeConversion.h"
@@ -30,7 +30,7 @@ inline core::String GetWin32ErrorString(DWORD error)
 			NULL);
 		const char* textBytes = (const char*)textBuffer;
 		if(count != 0)
-			out = lux::core::UTF16ToString(textBytes);
+			out = lux::core::UTF16ToString(textBytes, -1);
 		else
 			out = "Unknown error";
 		HeapFree(GetProcessHeap(), 0, textBuffer);

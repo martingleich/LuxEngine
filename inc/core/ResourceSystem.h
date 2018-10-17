@@ -235,7 +235,7 @@ private:
 	StrongRef<Resource> CreateResource(Name type, const String& name);
 	StrongRef<Resource> CreateResource(Name type, io::File* file);
 	StrongRef<Resource> CreateResource(Name type, io::File* file, const ResourceOrigin* origin);
-	void LoadResource(const ResourceOrigin& origin, Resource* dst) const;
+	void LoadResource(const String& origin, Resource* dst) const override;
 
 private:
 	int GetTypeID(Name type) const;

@@ -191,7 +191,7 @@ public:
 		Exit();
 		m_File = core::FOpenUTF8(m_Settings.FilePath.Data(), "wb");
 		if(!m_File)
-			throw io::FileNotFoundException(m_Settings.FilePath.Data_c());
+			throw io::FileNotFoundException(m_Settings.FilePath.Data());
 	}
 	void Exit()
 	{
@@ -292,14 +292,7 @@ public:
 
 		STR += s;
 		STR += "\n";
-		const char* data = (const char*)STR.Data_c();
-		while(u32 c = core::AdvanceCursorUTF8(data)) {
-			u16 buffer[2];
-			u16* cur = buffer;
-			u16* end = core::CodePointToUTF16(c, cur);
-			while(cur < end)
-				WSTR.PushBack(*cur++);
-		}
+		core::UTF8ToUTF16(STR.Data(), STR.Size(), WSTR);
 		WSTR.PushBack(0);
 		OutputDebugStringW((const wchar_t*)WSTR.Data_c());
 	}

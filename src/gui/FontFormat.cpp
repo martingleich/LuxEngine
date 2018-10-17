@@ -295,7 +295,7 @@ private:
 		if(nameLength > 0) {
 			rawData.Resize(nameLength);
 			ReadBytes(nameLength, rawData.Data());
-			out.name.AppendRaw((char*)rawData.Data_c(), rawData.Size());
+			out.name.Append((char*)rawData.Data_c(), rawData.Size());
 		} else {
 			out.name.Clear();
 		}
@@ -327,9 +327,9 @@ private:
 			Error("Font name is to long");
 		WriteU32((u32)info.name.Size());
 		if(!info.name.IsEmpty())
-			WriteBytes((u32)info.name.Size(), info.name.Data_c());
-		WriteU32(info.fontSize);
-		WriteU32(info.borderSize);
+			WriteBytes(info.name.Size(), info.name.Data());
+		WriteU32((u32)info.fontSize);
+		WriteU32((u32)info.borderSize);
 		WriteU32((u32)info.weight);
 		u32 flags = 0;
 		if(info.italic)
@@ -337,10 +337,10 @@ private:
 		if(info.antialiased)
 			flags |= FontFlagV1_Antialiased;
 		WriteU32(flags);
-		WriteU32(info.charCount);
-		WriteU32(info.channelCount);
-		WriteU32(info.imageWidth);
-		WriteU32(info.imageHeight);
+		WriteU32((u32)info.charCount);
+		WriteU32((u32)info.channelCount);
+		WriteU32((u32)info.imageWidth);
+		WriteU32((u32)info.imageHeight);
 		WriteU32((u32)info.imageCompression);
 
 		WriteFraction(info.charHeight);
@@ -414,7 +414,7 @@ private:
 		}
 	}
 
-	void WriteU32(int v)
+	void WriteU32(u32 v)
 	{
 		WriteBytes(4, &v);
 	}

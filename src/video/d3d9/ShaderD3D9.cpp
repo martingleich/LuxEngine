@@ -85,14 +85,14 @@ static core::String FormatD3DXShaderError(const core::String& input, bool isVert
 {
 	// File(line, col): error number: error-string
 	auto colon = input.FindReverse(":");
-	colon = input.FindReverse(":", input.First(), colon);
-	auto base_name = input.FindReverse("\\", input.First(), colon);
+	colon = colon + input.BeginSubStringView(colon).FindReverse(":");
+	auto base_name = colon + input.BeginSubStringView(colon).FindReverse("\\");
 	if(base_name == colon)
-		base_name = input.First();
+		base_name = 0;
 	else
 		base_name++;
 
-	return (isVertex ? "vs: " : "ps: ") + input.SubString(base_name, input.End());
+	return (isVertex ? "vs: " : "ps: ") + input.EndSubString(base_name);
 }
 
 ShaderD3D9::ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& state) :
@@ -340,7 +340,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	if(errors) {
 		if(errorList) {
 			core::String err = (const char*)errors->GetBufferPointer();
-			for(auto& str : err.Split('\n', true))
+			for(auto& str : err.Split("\n", true))
 				if(!str.IsWhitespace())
 					errorList->PushBack(FormatD3DXShaderError(str, true));
 		}
@@ -374,7 +374,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	if(errors) {
 		if(errorList) {
 			core::String err = (const char*)errors->GetBufferPointer();
-			for(auto& str : err.Split('\n', true))
+			for(auto& str : err.Split("\n", true))
 				if(!str.IsWhitespace())
 					errorList->PushBack(FormatD3DXShaderError(str, false));
 		}
@@ -446,18 +446,15 @@ void ShaderD3D9::LoadSceneParams(const Pass& pass)
 			case DefaultParam_Shininess:
 				f = pass.shininess;
 				SetShaderValue(*it, &f); break;
-			case DefaultParam_Ambient:
-				f = pass.ambient;
-				SetShaderValue(*it, &f); break;
 			case DefaultParam_Diffuse:
 				c = pass.diffuse;
 				SetShaderValue(*it, &c); break;
 			case DefaultParam_Emissive:
-				c = pass.emissive;
-				SetShaderValue(*it, &c); break;
+				f = pass.emissive;
+				SetShaderValue(*it, &f); break;
 			case DefaultParam_Specular:
-				c = pass.specular;
-				SetShaderValue(*it, &c); break;
+				f = pass.specularIntensity;
+				SetShaderValue(*it, &f); break;
 			default: continue;
 			}
 		}
@@ -673,7 +670,6 @@ int ShaderD3D9::GetDefaultId(const char* name)
 		"diffuse",
 		"emissive",
 		"specular",
-		"ambient"
 	};
 
 	for(int i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
@@ -688,10 +684,10 @@ ShaderD3D9::EType ShaderD3D9::GetDefaultType(u32 id)
 {
 	switch(id) {
 	case DefaultParam_Shininess:
-	case DefaultParam_Ambient:
-	case DefaultParam_Diffuse:
 	case DefaultParam_Emissive:
 	case DefaultParam_Specular:
+		return EType::Float;
+	case DefaultParam_Diffuse:
 		return EType::ColorF;
 	default:
 		return EType::Unknown;

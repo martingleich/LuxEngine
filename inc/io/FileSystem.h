@@ -1,8 +1,6 @@
 #ifndef INCLUDED_LUX_FILESYSTEM_H
 #define INCLUDED_LUX_FILESYSTEM_H
 #include "core/ReferenceCounted.h"
-
-#include "core/Clock.h"
 #include "io/ioConstants.h"
 #include "io/Path.h"
 
@@ -24,10 +22,7 @@ Get information, or do anything about files
 class FileSystem : public ReferenceCounted
 {
 public:
-	virtual ~FileSystem()
-	{
-	}
-
+	virtual ~FileSystem() {} 
 	//! Initialize the global filesystem
 	LUX_API static void Initialize(FileSystem* fileSys = nullptr);
 
@@ -36,17 +31,6 @@ public:
 
 	//! Destroys the global filesystem
 	LUX_API static void Destroy();
-
-	//! Open a new file from file description
-	/**
-	Will only open non virtual files.
-	\param desc The file description to open
-	\param mode The mode to open the file in
-	\param createIfNotExist If the file doesnt exist create it
-	\return The newly created file
-	\throws FileNotFoundException
-	*/
-	virtual StrongRef<File> OpenFile(const FileDescription& desc, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false) = 0;
 
 	//! Open a new file
 	/**
@@ -67,8 +51,8 @@ public:
 	\return The newly created file.
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenVirtualFile(void* memory, s64 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
-	virtual StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const core::String& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
+	virtual StrongRef<File> OpenVirtualFile(void* memory, s64 size, const Path& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
+	virtual StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const Path& name, EVirtualCreateFlag flags = EVirtualCreateFlag::None) = 0;
 
 	//! Create a limited file
 	/**
@@ -80,7 +64,7 @@ public:
 	\return The new file
 	\throws FileNotFoundException
 	*/
-	virtual StrongRef<File> OpenLimitedFile(File* file, s64 start, s64 size, const core::String& name) = 0;
+	virtual StrongRef<File> OpenLimitedFile(File* file, s64 start, s64 size, const Path& name) = 0;
 
 	//! Test if a file exist
 	/**
@@ -88,7 +72,6 @@ public:
 	\return True, if the file exists otherwise false
 	*/
 	virtual bool ExistFile(const Path& path) const = 0;
-	virtual bool ExistFile(const FileDescription& path) const = 0;
 
 	//! The if a directory exists
 	/**
@@ -126,7 +109,7 @@ public:
 	\return The information about the file is written here
 	\throws FileNotFoundException
 	*/
-	virtual FileDescription GetFileDescription(const Path& path) = 0;
+	virtual FileInfo GetFileInfo(const Path& path) = 0;
 
 	//! Create a ini file reader
 	/**
@@ -143,20 +126,32 @@ public:
 	*/
 	virtual StrongRef<INIFile> CreateINIFile(File* file) = 0;
 
-	//! Create a file or directory
+	//! Create a file.
 	/**
-	\param path The path of the new file if the file ends with a / its a directory
-	\param recursive If this parameter is true, and the subpath to the new file doesn't exist
-	it's created
+	\param path The path of the new file.
+	\param recursive If this parameter is true, and the subpath to the new file doesn't exist it's created
 	*/
 	virtual void CreateFile(const Path& path, bool recursive = false) = 0;
 
-	//! Delete a file or directory
+	//! Delete a file.
 	/**
-	If a directory is deleted each file and subfolder inside the directory is deleted.
-	\param path The path of the file or directory to delete, the path must end with / to delete a directory
+	\param path The path of the file to delete.
 	*/
 	virtual void DeleteFile(const Path& path) = 0;
+
+	//! Create a directory.
+	/**
+	\param path The path of the new file.
+	\param recursive If this parameter is true, and the subpath to the new file doesn't exist it's created
+	*/
+	virtual void CreateDirectory(const Path& path, bool recursive = false) = 0;
+
+	//! Delete a directory.
+	/**
+	All directories and files in the directory are deleted as well.
+	\param path The path of the directory to delete.
+	*/
+	virtual void DeleteDirectory(const Path& path) = 0;
 
 #if 0
 
@@ -211,6 +206,5 @@ public:
 
 }
 }
-
 
 #endif

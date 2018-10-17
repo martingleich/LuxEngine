@@ -126,7 +126,7 @@ void LuxDeviceWin32::BuildWindow(int width, int height, const core::String& titl
 
 	HWND handle = CreateWindowExW(0,
 		g_WindowClass->className,
-		core::StringToUTF16W(title),
+		core::UTF8ToWin32String(title),
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		GetSystemMetrics(SM_CXSCREEN) / 2 - realSize.width / 2,
 		GetSystemMetrics(SM_CYSCREEN) / 2 - realSize.height / 2,

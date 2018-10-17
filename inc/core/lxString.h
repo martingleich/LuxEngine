@@ -43,14 +43,13 @@ Can be used to speed up a function receiving character pointers and strings.
 class StringView
 {
 public:
-	using ConstIterator = ConstUTF8Iterator;
-	using ConstByteIterator = const char*;
-public:
+	LUX_API static const StringView EMPTY;
+
 	//! Create a dummy string from c-string
 	/**
 	\param str A nul-terminated c-string, must not be null.
 	*/
-	StringView(const char* str) :
+	constexpr StringView(const char* str) :
 		m_Size(str ? strlen(str) : 0),
 		m_Data(str)
 	{
@@ -61,11 +60,18 @@ public:
 	\param str A nul-terminated c-string, must not be null.
 	\param s The number of bytes in the string, wihtout the NUL-Byte.
 	*/
-	StringView(const char* str, int s) :
+	constexpr StringView(const char* str, int s) :
 		m_Size(s),
 		m_Data(str)
 	{
 	}
+	constexpr StringView(const char* b, const char* e) :
+		m_Size(e-b),
+		m_Data(b)
+	{
+	}
+
+	StringView(const StringView&) = default;
 
 	//! Ensures that the size of string is available
 	/**
@@ -77,6 +83,10 @@ public:
 	}
 
 	const char* Data() const { return m_Data; }
+
+	StringView SubString(int first, int size) const { return StringView(Data() + first, size); }
+	StringView EndSubString(int begin) const { return StringView(Data()+begin, Size()-begin); }
+	StringView BeginSubString(int end) const { return StringView(Data(), end); }
 
 	//! Compare two strings for equality
 	/*
@@ -90,36 +100,31 @@ public:
 	//! Test if the string starts with a given string.
 	/**
 	\param data The string to test with.
-	\param first The position from where the test is performed, if invalid the First() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool StartsWith(const StringView& data, ConstByteIterator first = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
+	LUX_API bool StartsWith(const StringView& data, EStringCompare = EStringCompare::CaseSensitive) const;
 
 	//! Test if the string ends with a given string.
 	/**
 	\param data The string to test with.
-	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	LUX_API bool EndsWith(const StringView& data, ConstByteIterator end = nullptr, EStringCompare = EStringCompare::CaseSensitive) const;
+	LUX_API bool EndsWith(const StringView& data, EStringCompare = EStringCompare::CaseSensitive) const;
 
 	//! Find the first occurence of a substring in this string.
 	/**
 	\param search The string to search for, the empty string is never found.
 	\param first The position where the search should begin, if invalid First() is used.
 	\param end The position where the search should end, if invalid End() is used.
-	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	LUX_API ConstIterator Find(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
+	LUX_API int Find(const StringView& search) const;
 
 	//! Find the last occurence of a substring in this string.
 	/**
 	\param search The string to search for, the empty string is never found.
-	\param first The position where the search should begin, if invalid First() is used.
-	\param end The position where the search should end, if invalid End() is used.
-	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
+	\return A iterator to the first codepoint of the searched string, or the used end if it couldn't be found.
 	*/
-	LUX_API ConstIterator FindReverse(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const;
+	LUX_API int FindReverse(const StringView& search) const;
 
 	//! Classify the content of the string
 	/**
@@ -135,10 +140,11 @@ public:
 		return (Size() == 0);
 	}
 
+#if 0
 	ConstIterator begin() const { return ConstIterator(Data(), Data()); }
 	ConstIterator end() const { return ConstIterator(Data()+Size(), Data()); }
 
-	//! Iterator the the character before the first in the string
+	//! Iterator the the codepoint before the first in the string
 	/**
 	Can't be dereferenced.
 	*/
@@ -147,18 +153,24 @@ public:
 		return ConstIterator(Data() - 1, Data());
 	}
 
-	//! Iterator the the first character in the string.
+	//! Iterator the the first codepoint in the string.
 	inline ConstIterator First() const
 	{
 		return ConstIterator(Data(), Data());
 	}
+#endif
 
-	inline core::Range<ConstByteIterator> Bytes() const
+	inline core::Range<const char*> Bytes() const
 	{
-		return MakeRange<ConstByteIterator>(Data(), Data() + Size());
+		return MakeRange<const char*>(Data(), Data() + Size());
+	}
+	inline core::Range<ConstUTF8Iterator> CodePoints() const
+	{
+		return MakeRange<ConstUTF8Iterator>(Data(), Data() + Size());
 	}
 
-	//! Iterator the the last character in the string.
+#if 0
+	//! Iterator the the last codepoint in the string.
 	inline ConstIterator Last() const
 	{
 		if(Size() > 0)
@@ -167,7 +179,7 @@ public:
 			return End();
 	}
 
-	//! Iterator the the character after the last in the string
+	//! Iterator the the codepoint after the last in the string
 	/**
 	Can't be dereferenced.
 	*/
@@ -175,10 +187,10 @@ public:
 	{
 		return ConstIterator(Data() + Size(), Data());
 	}
-
+#endif
 private:
 	//! The number of bytes in the string, without the NUL-Byte.
-	const int m_Size;
+	int m_Size;
 
 	//! Pointer to the string-data
 	/**
@@ -190,17 +202,12 @@ private:
 //! A utf8-string
 /**
 All non-constant methods invalidate all iterators.
-No string can contain the NUL character.
+No string can contain the NUL.
 Length or Count refers to a number of codepoints.
 Size refers to number of bytes.
 */
 class String
 {
-public:
-	using ConstIterator = ConstUTF8Iterator;
-	using ConstByteIterator = const char*;
-	using ByteIterator = char*;
-
 public:
 	//! The empty string.
 	/**
@@ -214,12 +221,11 @@ public:
 	//! Create a string from a c-string.
 	/**
 	\param data A pointer to nul-terminated string data, if null a empty string is created.
-	\param length The number of character to copy from the string if -1 all characters a copied.
+	\param size The number of bytes to copy from the string if -1 all bytes a copied.
 	*/
-	LUX_API String(const char* data, int length = -1);
-	LUX_API String(ConstByteIterator first, ConstByteIterator end);
+	LUX_API String(const char* data, int size = -1);
 	String(const StringView& view) :
-		String(view.Bytes().First(), view.Bytes().End())
+		String(view.Data(), view.Size())
 	{
 	}
 
@@ -234,7 +240,7 @@ public:
 	//! Creates a copy of this string.
 	LUX_API String Copy();
 
-	StringView AsView() const { return StringView(Data_c(), Size()); }
+	StringView AsView() const { return StringView(Data(), Size()); }
 	operator StringView() const
 	{
 		return AsView();
@@ -255,7 +261,7 @@ public:
 	LUX_API String& operator=(String&& old);
 
 	//! Append another string
-	LUX_API String& operator+=(const StringView& str);
+	String& operator+=(const StringView& str) { return Append(str); }
 
 	//! Compare two strings for equality
 	/*
@@ -274,72 +280,45 @@ public:
 
 	//! Insert another string into this one.
 	/**
-	\param pos The location of the first inserted character.
+	\param pos The location of the first inserted codepoint.
 	\param other The string to insert.
-	\param count The number of characters to insert, -1 to insert all characters.
-	\return A iterator to the first character after the inserted part of the string.
 	*/
-	LUX_API ConstIterator Insert(ConstByteIterator pos, const StringView& other, int count = -1);
-
-	//! Insert another string into this one.
-	/**
-	\param pos The location of the first inserted character.
-	\param first A iterator to the first character to insert.
-	\param end The end iterator of the range to insert.
-	\return A iterator to the first character after the inserted part of the string.
-	*/
-	LUX_API ConstIterator Insert(ConstByteIterator pos, ConstByteIterator first, ConstByteIterator end);
-
-	//! Append a raw block of bytes
-	/**
-	This method is used to create string from raw-data, read from files or other sources.
-	\param data Pointer to the raw data to append to the string, may not be null-terminated.
-	\param bytes The number of exact bytes to copy from the string
-	\return selfreference
-	*/
-	LUX_API String& AppendRaw(const char* data, int bytes);
+	LUX_API void Insert(int pos, const StringView& other);
+	LUX_API void InsertCodePoint(int pos, u32 value);
 
 	//! Append another string onto this one.
 	/**
 	\param other The string to append.
-	\param count The number of characters to append, -1 to append all characters.
 	\return selfreference
 	*/
-	LUX_API String& Append(const StringView& other, int count = -1);
+	String& Append(const StringView& other) { Insert(Size(), other); return *this; }
+	String& Append(const char* data, int size) { Insert(Size(), StringView(data, size)); return *this; }
 
-	//! Append another string onto this one.
+	//! Append a single codepoint from a iterator.
 	/**
-	\param first The first iterator of the range to append.
-	\param end The end iterator of the range to append.
+	\param codepoint The codepoint referenced by this iterator is appended.
 	\return selfreference
 	*/
-	LUX_API String& Append(ConstByteIterator first, ConstByteIterator end);
+	LUX_API String& AppendCodePoint(const char* codepoint);
 
-	//! Append a single character from a iterator.
+	//! Append a single codepoint.
 	/**
-	\param character The character referenced by this iterator is appended.
+	\param codepoint A unicode-codepoint to append
 	\return selfreference
 	*/
-	LUX_API String& Append(ConstByteIterator character);
-
-	//! Append a single character.
-	/**
-	\param character A unicode-codepoint to append
-	\return selfreference
-	*/
-	LUX_API String& Append(u32 character);
+	String& AppendCodePoint(u32 codepoint) { InsertCodePoint(Size(), codepoint); return *this; }
 
 	//! Resize this string
 	/**
-	If the new length is smaller of equal to the current length, the end of the string
-	is cut away so it's new Length is achived.
-	If the new length is biffer than the current length, character are read from filler
-	and added to the string until the new length is reached, if more character are needed than filler contains,
-	character are read from the start again.
-	\param newLength The new lenght of the string.
-	\param filler The character to fill the newly created string with
+	If the new size is smaller of equal to the current size, the end of the string
+	is cut away so it's new size is achived.
+	If the new size is bigger than the current size, bytes are read from filler
+	and added to the string until the new size is reached, if more bytes are needed than filler contains,
+	bytes are read from the start again.
+	\param newSize The new size of the string.
+	\param filler The string to fill the newly created string with
 	*/
-	LUX_API void Resize(int newLength, const StringView& filler = " ");
+	LUX_API void Resize(int newSize, const StringView& filler = " ");
 
 	//! Clear the string contents, making the string empty.
 	LUX_API String& Clear();
@@ -348,6 +327,12 @@ public:
 	inline int Size() const
 	{
 		return m_Size;
+	}
+
+	//! The number of codepoints in the string.
+	inline int CodePointCount() const
+	{
+		return CodePoints().End() - CodePoints().First();
 	}
 
 	//! The number of bytes allocated for the string.
@@ -369,7 +354,6 @@ public:
 	/**
 	A pointer to at least Size()+1 bytes of string data.
 	*/
-	LUX_API const char* Data_c() const;
 	LUX_API const char* Data() const;
 
 	//! Gives access to the raw string-data.
@@ -380,62 +364,47 @@ public:
 	LUX_API char* Data();
 
 	//! Add a single utf-8 byte to the string.
-	/**
-	Always call this method so often until a full codepoint was added.
-	*/
 	LUX_API void PushByte(u8 byte);
 
-	//! Iterator the the character before the first in the string
-	/**
-	Can't be dereferenced.
-	*/
-	inline ConstIterator Begin() const
-	{
-		return ConstIterator(Data_c() - 1, Data_c());
-	}
-
 	//! Iterator the the first character in the string.
-	inline ConstIterator First() const
+	inline const char* First() const
 	{
-		return ConstIterator(Data_c(), Data_c());
+		return Data();
 	}
 
-	inline core::Range<ConstByteIterator> Bytes() const
+	inline core::Range<ConstUTF8Iterator> CodePoints() const
 	{
-		return MakeRange<ConstByteIterator>(Data(), Data() + Size());
+		return MakeRange<ConstUTF8Iterator>(Data(), Data() + Size());
 	}
-	inline core::Range<ByteIterator> Bytes()
+	inline core::Range<const char*> Bytes() const
 	{
-		return MakeRange<ByteIterator>(Data(), Data() + Size());
+		return MakeRange<const char*>(Data(), Data() + Size());
+	}
+	inline core::Range<char*> Bytes()
+	{
+		return MakeRange<char*>(Data(), Data() + Size());
 	}
 
-	//! Iterator the the last character in the string.
-	inline ConstIterator Last() const
-	{
-		if(m_Size > 0)
-			return End() - 1;
-		else
-			return End();
-	}
+	char operator[](int i) const { return Data()[i]; }
+	char& operator[](int i) { return Data()[i]; }
 
 	//! Iterator the the character after the last in the string
 	/**
 	Can't be dereferenced.
 	*/
-	inline ConstIterator End() const
+	inline const char* End() const
 	{
-		return ConstIterator(Data_c() + m_Size, Data_c());
+		return Data() + m_Size;
 	}
 
 	//! Test if the string starts with a given string.
 	/**
 	\param data The string to test with.
-	\param first The position from where the test is performed, if invalid the First() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool StartsWith(const StringView& data, ConstByteIterator first = nullptr, EStringCompare cmp = EStringCompare::CaseSensitive) const
+	bool StartsWith(const StringView& data, EStringCompare cmp = EStringCompare::CaseSensitive) const
 	{
-		return ((StringView)*this).StartsWith(data, first, cmp);
+		return ((StringView)*this).StartsWith(data, cmp);
 	}
 
 	//! Test if the string ends with a given string.
@@ -444,9 +413,9 @@ public:
 	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool EndsWith(const StringView& data, ConstByteIterator end = nullptr, EStringCompare cmp = EStringCompare::CaseSensitive) const
+	bool EndsWith(const StringView& data, EStringCompare cmp = EStringCompare::CaseSensitive) const
 	{
-		return ((StringView)*this).EndsWith(data, end, cmp);
+		return ((StringView)*this).EndsWith(data, cmp);
 	}
 
 	//! Replace all occurences of a substring in this string.
@@ -458,114 +427,85 @@ public:
 	\param end The iterator where the search is stopped, if invalid End() is used.
 	\return The number of occurences found and replaced.
 	*/
-	LUX_API int Replace(const StringView& replace, const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr);
-
-	//! Replace a range of a string with a given string.
-	/**
-	\param replace The string to replace the range with
-	\param rangeFirst The first iterator of the replaced range
-	\param rangeEnd the end of the replace range
-	\return A iterator to the first character after the newly inserted string.
-	*/
-	LUX_API ConstIterator ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd = nullptr);
+	LUX_API int Replace(const StringView& replace, const StringView& search, int first = -1, int size = -1);
 
 	//! Replace a range of a string with a given string.
 	/**
 	\param replace The string to replace the range with.
 	\param rangeFirst The first iterator of the replaced range.
-	\param count The number of characters to replace.
+	\param size The number of bytes to replace.
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	LUX_API ConstIterator ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, int count);
+	LUX_API int ReplaceRange(const StringView& replace, int rangeFirst, int size = -1);
 
 	//! Find the first occurence of a substring in this string.
 	/**
 	\param search The string to search for, the empty string is never found.
-	\param first The position where the search should begin, if invalid First() is used.
-	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	ConstIterator Find(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const
+	int Find(const StringView& search) const
 	{
-		return ((StringView)*this).Find(search, first, end);
+		return ((StringView)*this).Find(search);
 	}
 
 	//! Find the last occurence of a substring in this string.
 	/**
 	\param search The string to search for, the empty string is never found.
-	\param first The position where the search should begin, if invalid First() is used.
-	\param end The position where the search should end, if invalid End() is used.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	ConstIterator FindReverse(const StringView& search, ConstByteIterator first = nullptr, ConstByteIterator end = nullptr) const
+	int FindReverse(const StringView& search) const
 	{
-		return ((StringView)*this).FindReverse(search, first, end);
+		return ((StringView)*this).FindReverse(search);
 	}
 
-	//! Extract a substring from this string.
-	/**
-	\param first The first character of the string to extract.
-	\param count The number of character to extract.
-	\return The extracted substring
-	*/
-	LUX_API String SubString(ConstByteIterator first, int count = 1) const;
+	String SubString(int first, int size) const { return SubStringView(first, size); }
+	String EndSubString(int begin) const { return EndSubStringView(begin); }
+	String BeginSubString(int end) const { return BeginSubStringView(end); }
 
-	//! Extract a substring from this string.
-	/**
-	\param first The first character of the string to extract.
-	\param end The character after the last one to extract.
-	\return The extracted substring
-	*/
-	LUX_API String SubString(ConstByteIterator first, ConstByteIterator end) const;
+	StringView SubStringView(int first, int size) const { return StringView(Data()+first, size); }
+	StringView EndSubStringView(int begin) const { return StringView(Data()+begin, Size()-begin); }
+	StringView BeginSubStringView(int end) const { return StringView(Data(), end); }
 
 	//! Removes a number of characters from the back of string.
 	/**
-	\param count The number of characters to remove, may be bigger than the number of characters in the string.
-	\return The actual number of characters removed, if not equal to count, the string will be empty.
+	\param size The number of characters to bytes, may be bigger than the number of bytes in the string.
+	\return The actual number of bytes removed, if not equal to count, the string will be empty.
 	*/
-	LUX_API int Pop(int count = 1);
+	LUX_API int Pop(int size = 1);
 
-	//! Removes characters from the string.
+	//! Removes bytes from the string.
 	/**
-	\param pos Where should the character be removed.
-	\param count The number of characters to remove.
-	\return A iterator to the first character after the deleted range.
+	\param pos Where should the byte be removed.
+	\param size The number of bytes to remove.
 	*/
-	LUX_API ConstIterator Remove(ConstByteIterator pos, int count = 1);
-
-	//! Removes characters from the string.
-	/**
-	\param from Where to start removing characters.
-	\param end Where to stop removing characters.
-	\return A iterator to the first character after the deleted range.
-	*/
-	LUX_API ConstIterator Remove(ConstByteIterator from, ConstByteIterator to);
+	LUX_API void Remove(int pos, int size);
 
 	//! Removes all whitespace from the right side of the string.
 	/**
-	Character are removed from the back of the string, until a not space character is encountered.
+	Codepoints are removed from the back of the string, until a not space character is encountered.
 	\param end Where should the removing of characters start, if invalid End() is used.
 	\return selfreference
 	*/
-	LUX_API String& RStrip(ConstByteIterator end = nullptr);
+	LUX_API String& RStrip(int end = -1);
 
 	//! Removes all whitespace from the left side of the string.
 	/**
-	Character are removed from the front of the string, until a not space character is encountered.
+	Codepoints are removed from the front of the string, until a not space character is encountered.
 	\param first Where should the removing of characters start, if invalid First() is used.
 	\return selfreference
 	*/
-	LUX_API String& LStrip(ConstByteIterator first = nullptr);
+	LUX_API String& LStrip(int first = -1);
 
 	//! Removes all whitespace from the left and right side of the string.
 	/**
-	Character are removed from either side of the string, until a not space character is encountered.
+	Codepoints are removed from either side of the string, until a not space character is encountered.
 	\param first Where should the removing of characters start, if invalid First() is used.
 	\param end Where should the removing of characters start, if invalid End() is used.
 	\return selfreference
 	*/
-	LUX_API String& Strip(ConstByteIterator first = nullptr, ConstByteIterator end = nullptr);
+	LUX_API String& Strip(int first = -1, int size = -1);
 
+	// TODO: Replace split character with string.
 	//! Split the string on a character.
 	/**
 	If the character isn't contained in the string, the original string is returned.
@@ -575,7 +515,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The number of written output strings.
 	*/
-	LUX_API int Split(u32 ch, String* outArray, int maxCount, bool ignoreEmpty = false) const;
+	LUX_API int Split(StringView split, String* outArray, int maxCount, bool ignoreEmpty = false) const;
 
 	//! Split the string on a character.
 	/**
@@ -584,7 +524,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The array of substrings
 	*/
-	LUX_API core::Array<String> Split(u32 ch, bool ignoreEmpty = false) const;
+	LUX_API core::Array<String> Split(StringView split, bool ignoreEmpty = false) const;
 
 	//! Classify the content of the string
 	/**
@@ -618,7 +558,7 @@ private:
 	LUX_API void SetAllocated(int a);
 
 	//! Push a single character to string, it's data is read from ptr.
-	LUX_API void PushCharacter(const char* ptr);
+	LUX_API void PushCodePoint(const char* ptr);
 
 private:
 	//! Contains the raw data of the string.
@@ -832,8 +772,10 @@ public:
 	}
 };
 
-inline String::ConstIterator begin(const String& str) { return str.First(); }
-inline String::ConstIterator end(const String& str) { return str.End(); }
+#if 0
+inline String::ConstByteIterator begin(const String& str) { return str.First(); }
+inline String::ConstByteIterator end(const String& str) { return str.End(); }
+#endif
 
 namespace Types
 {

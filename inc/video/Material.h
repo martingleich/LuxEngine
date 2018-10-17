@@ -51,32 +51,57 @@ public:
 
 	void SetValue(const core::String& name, const core::VariableAccess& data)
 	{
-		GetValue(name) = data;
+		Param(name) = data;
 	}
 	
-	core::VariableAccess GetValue(const core::String& name) const
+	core::VariableAccess Param(const core::String& name) const
 	{
 		return m_ShaderValues.FromName(name, true);
 	}
 	
-	core::VariableAccess GetValue(const core::String& name)
+	core::VariableAccess Param(const core::String& name)
 	{
 		return m_ShaderValues.FromName(name, false);
 	}
 	
 	void SetShaderValue(u32 id, const core::VariableAccess& data)
 	{
-		GetValue(id) = data;
+		Param(id) = data;
 	}
 	
-	core::VariableAccess GetValue(u32 id) const
+	core::VariableAccess Param(u32 id) const
 	{
 		return m_ShaderValues.FromID(id, true);
 	}
 	
-	core::VariableAccess GetValue(u32 id)
+	core::VariableAccess Param(u32 id)
 	{
 		return m_ShaderValues.FromID(id, false);
+	}
+
+	void SetTexture(u32 layer, video::BaseTexture* texture)
+	{
+		m_ShaderValues.FromType(core::Types::Texture(), layer, false) = video::TextureLayer(texture);
+	}
+	void SetTexture(core::StringView str, video::BaseTexture* texture)
+	{
+		m_ShaderValues.FromName(str, false) = video::TextureLayer(texture);
+	}
+	void SetColor(core::StringView str, const video::ColorF& color)
+	{
+		m_ShaderValues.FromName(str, false) = color;
+	}
+	video::ColorF GetColor(core::StringView str) const
+	{
+		return m_ShaderValues.FromName(str, true);
+	}
+	void SetFloat(core::StringView str, float f)
+	{
+		m_ShaderValues.FromName(str, false) = f;
+	}
+	float GetFloat(core::StringView str) const
+	{
+		return m_ShaderValues.FromName(str, true);
 	}
 
 	core::PackagePuffer& GetValues()
@@ -89,23 +114,16 @@ public:
 		return m_ShaderValues;
 	}
 
-	void SetTexture(u32 id, video::BaseTexture* texture)
-	{
-		m_ShaderValues.FromType(core::Types::Texture(), id, false) = video::TextureLayer(texture);
-	}
-
 	void SetDiffuse(const video::ColorF& color) { m_Pass.diffuse = color; }
-	void SetSpecular(const video::ColorF& color) { m_Pass.specular = color; }
-	void SetEmissive(const video::ColorF& color) { m_Pass.emissive = color; }
+	void SetEmissive(float emissive) { m_Pass.emissive = emissive; }
 	void SetShininess(float shininess) { m_Pass.shininess = shininess; }
-	void SetAmbient(float ambient) { m_Pass.ambient = ambient; }
+	void SetSpecularIntensity(float specular) { m_Pass.specularIntensity = specular; }
 	void SetAlpha(float alpha) { m_Pass.diffuse.SetAlpha(alpha); }
 
 	video::ColorF GetDiffuse() const { return m_Pass.diffuse; }
-	video::ColorF GetSpecular() const { return m_Pass.specular; }
-	video::ColorF GetEmissive() const { return m_Pass.emissive; }
+	float GetEmissive() const { return m_Pass.emissive; }
 	float GetShininess() const { return m_Pass.shininess; }
-	float GetAmbient() const { return m_Pass.ambient; }
+	float GetSpecularIntesity() const { return m_Pass.specularIntensity; }
 	float GetAlpha() const { return m_Pass.diffuse.GetAlpha(); }
 
 	void SetRequirements(EMaterialReqFlag requirements)

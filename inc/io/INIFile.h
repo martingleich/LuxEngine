@@ -195,10 +195,10 @@ public:
 
 	LUX_API int GetSectionCount() const;
 	LUX_API void SortSections(ESorting sorting, bool recursive = false);
-	LUX_API Section AddSection(const core::String& name, const core::String& comment = core::String::EMPTY);
+	LUX_API Section AddSection(const core::StringView& name, const core::StringView& comment = core::StringView::EMPTY);
 	LUX_API void RemoveSection(int sectionID);
-	LUX_API void SetSectionName(int sectionID, const core::String& name);
-	LUX_API void SetSectionComment(int sectionID, const core::String& comment);
+	LUX_API void SetSectionName(int sectionID, const core::StringView& name);
+	LUX_API void SetSectionComment(int sectionID, const core::StringView& comment);
 	LUX_API const core::String& GetSectionName(int id) const;
 	LUX_API const core::String& GetSectionComment(int id) const;
 	LUX_API Section GetFirstSection();
@@ -207,11 +207,11 @@ public:
 
 	LUX_API int GetElementCount(int sectionID) const;
 	LUX_API void SortElements(int sectionID, ESorting sorting);
-	LUX_API Element AddElement(int sectionID, const core::String& name, const core::String& value, const core::String& comment = nullptr);
+	LUX_API Element AddElement(int sectionID, const core::StringView& name, const core::StringView& value, const core::StringView& comment = nullptr);
 	LUX_API void RemoveElement(int section, int element);
-	LUX_API void SetElementName(int section, int element, const core::String& name);
-	LUX_API void SetElementComment(int section, int element, const core::String& comment);
-	LUX_API void SetElementValue(int section, int element, const core::String& value);
+	LUX_API void SetElementName(int section, int element, const core::StringView& name);
+	LUX_API void SetElementComment(int section, int element, const core::StringView& comment);
+	LUX_API void SetElementValue(int section, int element, const core::StringView& value);
 	LUX_API const core::String& GetElementName(int section, int id) const;
 	LUX_API const core::String& GetElementComment(int section, int element) const;
 	LUX_API const core::String& GetElementValue(int section, int element) const;
@@ -221,7 +221,7 @@ public:
 
 	LUX_API bool IsEmpty() const;
 
-	LUX_API u32 GetCommentChar() const;
+	LUX_API char GetCommentChar() const;
 
 private:
 	bool LoadData();
@@ -229,7 +229,7 @@ private:
 	bool ReadSections();
 	bool ReadElement(const core::String& work, SINIElement& element);
 
-	bool IsComment(const core::String& work, core::String::ConstIterator& CommentBegin);
+	bool IsComment(const core::String& work, int& CommentBegin);
 	void WriteComment(const core::String& comment, int identDepth);
 
 	SINIElement& GetElement(int sectionID, int elementID);
@@ -245,7 +245,7 @@ private:
 	mutable int m_CurrentSection;
 	mutable int m_CurrentElement;
 
-	core::String m_CommentChars;
+	core::Array<char> m_CommentChars;
 
 	ELineEnding m_LineEnding;
 

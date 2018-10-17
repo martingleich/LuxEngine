@@ -44,7 +44,7 @@ class Renderer : public ReferenceCounted
 public:
 	LUX_API Renderer(video::Renderer* r);
 	LUX_API void Begin();
-	LUX_API void DrawText(gui::Font* font, const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, const math::Vector2F& position, const math::RectF* clip);
+	LUX_API void DrawText(gui::Font* font, const FontRenderSettings& settings, const core::StringView& text, const math::Vector2F& position, const math::RectF* clip);
 
 	LUX_API void DrawRectangle(const math::RectF& rect, video::Color color, const math::RectF* clip = nullptr);
 	LUX_API void DrawRectangle(const math::RectF& rect, video::Texture* texture, const math::RectF& tCoord=math::RectF(0,0,1,1), video::Color color=video::Color::White, const math::RectF* clip = nullptr);

@@ -97,8 +97,7 @@ public:
 				utf16Buffer.Reserve(len / 2);
 				for(u32 j = 0; j < len / 2; ++j)
 					utf16Buffer.PushBack((u16)ReadUShort());
-				utf16Buffer.PushBack(0);
-				m_FontFamily = core::UTF16ToString(utf16Buffer.Data());
+				m_FontFamily = core::UTF16ToString(utf16Buffer.Data(), utf16Buffer.Size()*2);
 
 				return m_IsValid;
 			}

@@ -3,95 +3,33 @@
 #include "core/ReferenceCounted.h"
 #include "io/ioConstants.h"
 #include "io/Path.h"
-#include "core/lxIterator.h"
 
 namespace lux
 {
 namespace io
 {
-class File;
 class Archive;
 
 //! A file enumerator
 /**
 File enumerators iterate over some list of files.
-The list and order depends on the file enumerator i.e. The way it was created.
+After the enumerator is placed before the first file, i.e. Before accesing files a call to Advance is requiered
 */
 class AbstractFileEnumerator : public ReferenceCounted
 {
 public:
 	virtual ~AbstractFileEnumerator() {}
 
-	//! Points the enumerator to a valid file.
-	/**
-	If advanced over the last file this will always be false.
-	*/
-	virtual bool IsValid() const = 0;
-
 	//! Advance the enumerator to the next file.
 	/**
-	\return Is the file pointed after the Advance valid, i.e. the return value of IsValid
+	\return Was the enumerator advanced correctly
 	*/
 	virtual bool Advance() = 0;
 
-	//! The the description of the current file.
-	virtual const FileDescription& GetCurrent() const = 0;
-};
-
-class FileIterator : public core::BaseIterator<core::ForwardIteratorTag, FileDescription>
-{
-public:
-	FileIterator() :
-		m_Index(-1)
-	{
-	}
-	FileIterator(AbstractFileEnumerator* enumerator, int index = 0) :
-		m_Enumerator(enumerator),
-		m_Index(index)
-	{
-	}
-
-	FileIterator& operator++()
-	{
-		if(m_Enumerator->Advance())
-			++m_Index;
-		else
-			m_Index = -1;
-		return *this;
-	}
-	FileIterator operator++(int)
-	{
-		FileIterator tmp(*this);
-		++(*this);
-		return tmp;
-	}
-
-	bool operator==(const FileIterator& other) const
-	{
-		return m_Enumerator == other.m_Enumerator && m_Index == other.m_Index;
-	}
-	bool operator!=(const FileIterator& other) const
-	{
-		return !(*this == other);
-	}
-
-	const FileDescription& operator*() const
-	{
-		return m_Enumerator->GetCurrent();
-	}
-	const FileDescription* operator->() const
-	{
-		return &m_Enumerator->GetCurrent();
-	}
-
-	StrongRef<AbstractFileEnumerator> GetEnumerator() const
-	{
-		return m_Enumerator;
-	}
-
-private:
-	StrongRef<AbstractFileEnumerator> m_Enumerator;
-	int m_Index;
+	virtual const FileInfo& GetInfo() const = 0;
+	virtual const Path& GetBasePath() const = 0;
+	virtual const core::String& GetName() const = 0;
+	virtual const Path& GetFullPath() const = 0;
 };
 
 //! A file archive
@@ -111,21 +49,17 @@ public:
 	*/
 	virtual StrongRef<File> OpenFile(const Path& p, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false) = 0;
 
-	//! Open a file inside the archive.
-	/**
-	\param file The file descriptor of the file, must reference this archive.
-	\param mode The mode to open the file in.
-	\param createIfNotExist If the file doesn't already exists, should it be created.
-	\return The opend file
-	\throws FileNotFoundException
-	*/
-	virtual StrongRef<File> OpenFile(const FileDescription& file, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false) = 0;
-
 	//! Check if a file exists
 	virtual bool ExistFile(const Path& p) const = 0;
 
+	//! Check if a directory exists.
+	virtual bool ExistDirectory(const Path& p) const = 0;
+
+	//! Generate information for a file.
+	virtual FileInfo GetFileInfo(const Path& p) const = 0;
+
 	//! Create a enumerator for a subdirecorty in the archive.
-	virtual core::Range<FileIterator> EnumerateFiles(const Path& subDir = core::String::EMPTY) = 0;
+	virtual StrongRef<AbstractFileEnumerator> EnumerateFiles(const Path& subDir = io::Path::EMPTY) = 0;
 
 	//! Get the capabilites of the archive
 	virtual EArchiveCapFlag GetCaps() const = 0;
@@ -138,6 +72,11 @@ public:
 
 	//! Get the path of the archive, may be empty.
 	virtual const Path& GetPath() const = 0;
+
+	virtual void CreateFile(const Path& path, bool recursive) = 0;
+	virtual void DeleteFile(const Path& path) = 0;
+	virtual void CreateDirectory(const Path& path, bool recursive) = 0;
+	virtual void DeleteDirectory(const Path& path) = 0;
 };
 
 }

@@ -40,9 +40,9 @@ public:
 		return *this;
 	}
 
-	StringBuffer& AppendChar(u32 c)
+	StringBuffer& AppendCodePoint(u32 c)
 	{
-		m_String.Append(c);
+		m_String.AppendCodePoint(c);
 		if(m_String.Size() == m_String.Allocated())
 			m_String.Reserve(m_String.Allocated() * 2);
 		return *this;

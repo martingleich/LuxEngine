@@ -29,7 +29,8 @@ struct D3D9Exception : RuntimeException
 		}
 
 		const WCHAR* errstr = DXGetErrorStringW(hr);
-		auto utf8ErrStr = core::UTF16ToUTF8(errstr);
+		auto utf8ErrStr = core::UTF16ToUTF8(errstr, -1);
+		utf8ErrStr.PushBack(0);
 
 		str.Append(BUFFER);
 		str.Append("): ");

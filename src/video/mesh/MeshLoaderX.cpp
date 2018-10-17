@@ -842,7 +842,7 @@ class MeshLoadVisitor : public BaseVisitor
 	static const u32 INVALID_CORNERID = 0xFFFFFFFF;
 
 public:
-	MeshLoadVisitor(Mesh* dst, XFileTraverser* traverser, const io::FileDescription& baseDir, const core::String& meshToLoad, bool merge) :
+	MeshLoadVisitor(Mesh* dst, XFileTraverser* traverser, const io::Path& baseDir, const core::String& meshToLoad, bool merge) :
 		BaseVisitor(traverser),
 		m_BaseDir(baseDir)
 	{
@@ -1252,7 +1252,7 @@ public:
 	{
 		auto fileSys = io::FileSystem::Instance();
 
-		io::FileDescription relFile = io::ConcatFileDesc(m_BaseDir, path);
+		auto relFile = path.GetResolved(m_BaseDir);
 		if(fileSys->ExistFile(relFile))
 			return fileSys->OpenFile(relFile);
 		if(fileSys->ExistFile(path))
@@ -1278,8 +1278,8 @@ public:
 		}
 		material->SetDiffuse(xmat.faceColor);
 		material->SetShininess(xmat.power);
-		material->SetSpecular(xmat.specularColor);
-		material->SetEmissive(xmat.emmisiveColor);
+		material->SetSpecularIntensity(xmat.specularColor.GetLuminance());
+		material->SetEmissive(xmat.emmisiveColor.GetLuminance());
 		material->SetTexture(0, tex);
 		auto p = material->GetPass();
 		p.culling = video::EFaceSide::None;
@@ -1387,7 +1387,7 @@ private:
 
 	core::Array<u8> buffer;
 	XMeshData m_Mesh;
-	io::FileDescription m_BaseDir;
+	io::Path m_BaseDir;
 	bool m_MergeMeshes = true;
 	core::String m_MeshToLoad;
 };
@@ -1478,7 +1478,7 @@ void MeshLoaderX::LoadMesh(io::File* file, video::Mesh* dst, const core::String&
 	ErrorReporter errReporter;
 
 	dst->SetGeometry(nullptr);
-	MeshLoadVisitor meshLoader(dst, &traverser, file->GetDescription(), meshToLoad, mergeMeshes);
+	MeshLoadVisitor meshLoader(dst, &traverser, file->GetPath(), meshToLoad, mergeMeshes);
 	traverser.Traverse(&meshLoader, file, &errReporter);
 
 	if(dst->GetMaterialCount() == 0) {

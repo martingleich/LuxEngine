@@ -6,131 +6,104 @@ namespace lux
 namespace core
 {
 
-u16* CodePointToUTF16(u32 c, u16* dst)
-{	
-	u16* out = (u16*)dst;
-	if(c < 0xFFFF) {
-		*out++ = (u16)c;
-	} else {
-		c -= 0x10000;
-		u16 h = 0xD800 | (c & 0x3FF);
-		uint16_t l = 0xDC00 | ((c >> 10) & 0x3FF);
-		*out++ = h;
-		*out++= l;
-	}
-
-	return (u16*)out;
-}
-
-Array<u8> UTF16ToUTF8(const void* _data)
+Array<u8> UTF16ToUTF8(const void* _data, int size)
 {
-	const char* data = (const char*)_data;
+	auto data = (const char*)_data;
+	auto end = data+size;
 	Array<u8> out;
-	while(u32 c = AdvanceCursorUTF16(data)) {
-		u8 buffer[6];
+	u8 buffer[4];
+	while(data != end) {
+		u32 c = AdvanceCursorUTF16(data);
+		if(size == -1 && !c)
+			break;
 		u8* cur = buffer;
-		u8* end = CodePointToUTF8(c, cur);
-		while(cur < end)
+		int bytes = CodePointToUTF8(c, cur);
+		for(int i = 0; i < bytes; ++i)
 			out.PushBack(*cur++);
 	}
-
-	out.PushBack(0);
-
 	return out;
 }
 
-core::String UTF16ToString(const void* _data)
+core::String UTF16ToString(const void* _data, int size)
 {
-	const char* data = (const char*)_data;
+	auto data = (const char*)_data;
+	auto end = data+size;
 	core::String out;
-	while(u32 c = AdvanceCursorUTF16(data)) {
-		u8 buffer[6];
+	while(data != end) {
+		u32 c = AdvanceCursorUTF16(data);
+		if(size == -1 && !c)
+			break;
+		u8 buffer[4];
 		u8* cur = buffer;
-		u8* end = CodePointToUTF8(c, cur);
-		while(cur < end)
+		int bytes = CodePointToUTF8(c, cur);
+		for(int i = 0; i < bytes; ++i)
 			out.PushByte(*cur++);
 	}
 
 	return out;
 }
 
-Array<u16> UTF8ToUTF16(const void* _data)
+Array<u16>& UTF8ToUTF16(const void* _data, int size, Array<u16>& out)
 {
 	const char* data = (const char*)_data;
-	Array<u16> out;
-	while(u32 c = AdvanceCursorUTF8(data)) {
+	auto end = data+size;
+	while(data != end) {
+		u32 c = AdvanceCursorUTF8(data);
+		if(size == -1 && !c)
+			break;
 		u16 buffer[2];
-		u16* cur = buffer;
-		u16* end = CodePointToUTF16(c, cur);
-		while(cur < end)
-			out.PushBack(*cur++);
+		int bytes = CodePointToUTF16(c, buffer);
+		out.PushBack(buffer[0]);
+		if(bytes == 4)
+			out.PushBack(buffer[1]);
 	}
-
-	out.PushBack(0);
 
 	return out;
 }
 
-WCharAlias UTF8ToUTF16W(const void* data)
+int CodePointToUTF8(u32 c, void* _dst)
 {
-	return WCharAlias(UTF8ToUTF16(data));
-}
-
-WCharAlias StringToUTF16W(const core::String& data)
-{
-	return WCharAlias(UTF8ToUTF16(data.Data_c()));
-}
-
-u8* CodePointToUTF8(u32 c, u8* dst)
-{
+	u8* start = (u8*)_dst;
+	u8* dst = start;
 	if(c <= 0x7F) {
-		*dst++ = ((u8)c);
+		dst[0] = ((u8)c);
+		return 1;
 	} else if(c <= 0x7FF) {
-		*dst++ = ((u8)(0xC0 | ((c&(0x1F << 6)) >> 6)));
-		*dst++ = ((u8)(0x80 | ((c & 0x3F))));
+		dst[0] = ((u8)(0xC0 | ((c&(0x1F << 6)) >> 6)));
+		dst[1] = ((u8)(0x80 | ((c & 0x3F))));
+		return 2;
 	} else if(c <= 0xFFFF) {
-		*dst++ = ((u8)(0xE0 | ((c & (0xF << 12)) >> 12)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*dst++ = ((u8)(0x80 | ((c & 0x3F))));
+		dst[0] = ((u8)(0xE0 | ((c & (0xF << 12)) >> 12)));
+		dst[1] = ((u8)(0x80 | ((c & (0x3F << 6)) >> 6)));
+		dst[2] = ((u8)(0x80 | ((c & 0x3F))));
+		return 3;
 	} else if(c <= 0x1FFFFF) {
-		*dst++ = ((u8)(0xF0 | ((c&(0x7 << 18)) >> 18)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*dst++ = ((u8)(0x80 | ((c & 0x3f))));
-	} else if(c <= 0x3FFFFFF) {
-		*dst++ = ((u8)(0xF8 | ((c&(0x3 << 24)) >> 24)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 18)) >> 18)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*dst++ = ((u8)(0x80 | ((c & 0x3F))));
-	} else if(c <= 0x7FFFFFFF) {
-		*dst++ = ((u8)(0xFC | ((c&(0x1 << 30)) >> 30)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 24)) >> 24)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 18)) >> 18)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		*dst++ = ((u8)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*dst++ = ((u8)(0x80 | ((c & 0x3F))));
+		dst[0] = ((u8)(0xF0 | ((c&(0x7 << 18)) >> 18)));
+		dst[1] = ((u8)(0x80 | ((c & (0x3F << 12)) >> 12)));
+		dst[2] = ((u8)(0x80 | ((c & (0x3F << 6)) >> 6)));
+		dst[3] = ((u8)(0x80 | ((c & 0x3f))));
+		return 4;
 	} else {
 		throw UnicodeException(c);
 	}
-
-	return dst;
 }
 
-u8* CodePointToUTF16(u32 c, u8* dst)
+int CodePointToUTF16(u32 c, void* _dst)
 {	
-	u16* out = (u16*)dst;
+	u16* dst = (u16*)_dst;
 	if(c < 0xFFFF) {
-		*out++ = (u16)c;
-	} else {
+		dst[0] = (u16)c;
+		return 2;
+	} else if(c <= 0x1FFFFF) {
 		c -= 0x10000;
 		u16 h = 0xD800 | (c & 0x3FF);
 		uint16_t l = 0xDC00 | ((c >> 10) & 0x3FF);
-		*out++ = h;
-		*out++= l;
+		dst[0] = h;
+		dst[1]= l;
+		return 4;
+	} else {
+		throw UnicodeException(c);
 	}
-
-	return (u8*)out;
 }
 
 }

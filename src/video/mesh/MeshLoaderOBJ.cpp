@@ -37,7 +37,7 @@ core::Name MeshLoaderOBJ::GetResourceType(io::File* file, core::Name requestedTy
 	if(requestedType && requestedType != core::ResourceType::Mesh)
 		return core::Name::INVALID;
 
-	core::String ext = io::GetFileExtension(file->GetDescription().GetName());
+	core::String ext = file->GetPath().GetFileExtension();
 	if(ext.Equal("obj", core::EStringCompare::CaseInsensitive))
 		return core::ResourceType::Mesh;
 	else
@@ -53,7 +53,7 @@ const core::String& MeshLoaderOBJ::GetName() const
 class LuxObjMaterialReader : public tinyobj::MaterialReader
 {
 public:
-	LuxObjMaterialReader(const io::FileDescription& baseDir)
+	LuxObjMaterialReader(const io::Path& baseDir)
 		: m_BaseDir(baseDir)
 	{
 	}
@@ -69,7 +69,7 @@ public:
 		if(fileSys->ExistFile(matPath))
 			mtlFile = fileSys->OpenFile(matPath);
 		if(!mtlFile) {
-			io::FileDescription newFile = io::ConcatFileDesc(m_BaseDir, matPath);
+			auto newFile = matPath.GetResolved(m_BaseDir);
 			mtlFile = fileSys->OpenFile(newFile);
 		}
 
@@ -104,7 +104,7 @@ public:
 	}
 
 private:
-	io::FileDescription m_BaseDir;
+	io::Path m_BaseDir;
 };
 
 struct ObjLoader
@@ -112,18 +112,18 @@ struct ObjLoader
 public:
 	ObjLoader(io::File* file, core::Resource* resource)
 	{
-		baseFileDesc = file->GetDescription();
+		basePath = file->GetPath();
 
 		auto mesh = dynamic_cast<video::Mesh*>(resource);
 		if(!mesh)
 			throw core::InvalidOperationException("Wrong resource type passed");
-		auto filesize = baseFileDesc.GetSize();
+		auto filesize = file->GetSize();
 		core::RawMemory memory(core::SafeCast<size_t>(filesize));
 		file->ReadBinary(filesize, memory);
 		std::stringstream fileStream;
 		fileStream.write(memory, filesize);
 
-		LuxObjMaterialReader mtlReader(baseFileDesc);
+		LuxObjMaterialReader mtlReader(basePath);
 		std::string error;
 		bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &error, &fileStream, &mtlReader, true);
 		if(!result)
@@ -252,9 +252,9 @@ public:
 		StrongRef<video::Texture> texture;
 		if(io::FileSystem::Instance()->ExistFile(path)) {
 			texture = core::ResourceSystem::Instance()->GetResource(
-				core::ResourceType::Texture, path).AsStrong<video::Texture>();
+				core::ResourceType::Texture, path.AsView()).AsStrong<video::Texture>();
 		} else {
-			io::FileDescription texFile = io::ConcatFileDesc(baseFileDesc, path);
+			io::Path texFile = path.GetResolved(basePath);
 			texture = core::ResourceSystem::Instance()->GetResource(
 				core::ResourceType::Texture,
 				io::FileSystem::Instance()->OpenFile(texFile)).AsStrong<video::Texture>();
@@ -271,20 +271,18 @@ public:
 			lxm = video::MaterialLibrary::Instance()->CloneMaterial("solid");
 
 		lxm->SetDiffuse(video::ColorF(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], mat.dissolve));
-		lxm->SetEmissive(video::ColorF(mat.emission[0], mat.emission[1], mat.emission[2]));
+		lxm->SetEmissive(video::ColorF(mat.emission[0], mat.emission[1], mat.emission[2]).GetLuminance());
 		video::ColorF spec = video::ColorF(mat.specular[0], mat.specular[1], mat.specular[2]);
 		if(math::IsZero(spec.r) && math::IsZero(spec.g) && math::IsZero(spec.b)) {
-			lxm->SetSpecular(video::ColorF(1, 1, 1));
+			lxm->SetSpecularIntensity(1);
 			lxm->SetShininess(0);
 		} else {
-			lxm->SetSpecular(spec);
+			lxm->SetSpecularIntensity(spec.GetLuminance());
 			lxm->SetShininess(mat.shininess);
 		}
 
 		if(!mat.diffuse_texname.empty()) {
 			io::Path texname = mat.diffuse_texname.data();
-			texname.Replace("/", "\\");
-
 			lxm->SetTexture(0, LoadTexture(texname));
 		}
 
@@ -317,7 +315,7 @@ public:
 	IndexBuffer* indexBuffer;
 	VertexBuffer* vertexBuffer;
 
-	io::FileDescription baseFileDesc;
+	io::Path basePath;
 };
 
 void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)

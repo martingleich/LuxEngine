@@ -3,6 +3,7 @@
 #include "gui/GUIEvent.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::gui::TextBox, "lux.gui.TextBox")
+// TODO: Fix unicode handling.
 
 namespace lux
 {
@@ -44,11 +45,11 @@ void TextBox::Paint(Renderer* renderer, float secsPassed)
 	float caretOff;
 	if(m_Container.GetLineCount()) {
 		if(TestFlag(align, gui::EAlign::HLeft))
-			caretOff = font->GetTextWidth(settings, core::SliceRange(m_Container.GetLine(0), 0, m_Caret));
+			caretOff = font->GetTextWidth(settings, m_Container.GetLine(0).BeginSubString(m_Caret));
 		else if(TestFlag(align, gui::EAlign::HRight))
-			caretOff = final.GetWidth() - font->GetTextWidth(settings, core::SliceRange(m_Container.GetLine(0), 0, m_Caret));
+			caretOff = final.GetWidth() - font->GetTextWidth(settings, m_Container.GetLine(0).BeginSubString(m_Caret));
 		else
-			caretOff = final.GetWidth() / 2 - font->GetTextWidth(settings, core::SliceRange(m_Container.GetLine(0), 0, m_Caret)) / 2;
+			caretOff = final.GetWidth() / 2 - font->GetTextWidth(settings, m_Container.GetLine(0).BeginSubString(m_Caret)) / 2;
 	} else {
 		caretOff = 0;
 	}
@@ -131,7 +132,7 @@ bool TextBox::OnKeyboardEvent(const gui::KeyboardEvent& e)
 				newPos = BPos();
 			else
 				newPos = m_Caret - 1;
-			m_Container.Text().Remove(m_Container.Text().First() + newPos, m_Caret - newPos);
+			m_Container.Text().Remove(newPos, m_Caret - newPos);
 			m_Container.Rebreak();
 			m_Caret = newPos;
 			onTextChange.Broadcast(m_Container.GetText());
@@ -145,7 +146,7 @@ bool TextBox::OnKeyboardEvent(const gui::KeyboardEvent& e)
 				newPos = WPos();
 			else
 				newPos = m_Caret + 1;
-			m_Container.Text().Remove(m_Container.Text().First() + m_Caret, newPos - m_Caret);
+			m_Container.Text().Remove(m_Caret, newPos - m_Caret);
 			m_Container.Rebreak();
 			onTextChange.Broadcast(m_Container.GetText());
 			return true;
@@ -168,7 +169,7 @@ bool TextBox::OnMouseEvent(const gui::MouseEvent& e)
 			auto font = GetFont();
 			auto final = GetFinalRect();
 			gui::FontRenderSettings settings;
-			auto pos = font->GetCaretFromOffset(settings, core::MakeRange(m_Container.GetText()), e.pos.x - (final.left + m_Offset));
+			auto pos = font->GetCaretFromOffset(settings, m_Container.GetText(), e.pos.x - (final.left + m_Offset));
 			SetCursor(pos);
 		}
 
@@ -217,14 +218,9 @@ void TextBox::WriteCharacter(u32 character)
 {
 	if(character != 0) {
 		if(m_Caret == m_Container.Text().Size())
-			m_Container.Text().Append(character);
-		else {
-			core::String str;
-			str.Append(character);
-			m_Container.Text().Insert(
-				m_Container.Text().First() + m_Caret,
-				str);
-		}
+			m_Container.Text().AppendCodePoint(character);
+		else
+			m_Container.Text().InsertCodePoint(m_Caret, character);
 		m_Caret++;
 		m_Container.Rebreak();
 		onTextChange.Broadcast(m_Container.GetText());
@@ -242,18 +238,18 @@ void TextBox::SetCursor(int pos)
 int TextBox::BPos() const
 {
 	auto text = m_Container.GetText();
-	auto it = text.First() + m_Caret - 1;
+	auto it = text.Bytes().First() + m_Caret - 1;
 	int count = 1;
 	// Move until non space, Move until space
-	while(core::IsSpace(*it) && it != text.First()) {
+	while(core::IsSpace(*it) && it != text.Bytes().First()) {
 		--it;
 		++count;
 	}
-	while(!core::IsSpace(*it) && it != text.First()) {
+	while(!core::IsSpace(*it) && it != text.Bytes().First()) {
 		--it;
 		++count;
 	}
-	if(it != text.First())
+	if(it != text.Bytes().First())
 		--count;
 	return m_Caret - count;
 }
@@ -261,7 +257,7 @@ int TextBox::BPos() const
 int TextBox::WPos() const
 {
 	auto text = m_Container.GetText();
-	auto it = text.First() + m_Caret + 1;
+	auto it = text.Bytes().First() + m_Caret + 1;
 	int count = 1;
 	// Move until space, Move until non space
 	while(it != text.End() && !core::IsSpace(*it)) {

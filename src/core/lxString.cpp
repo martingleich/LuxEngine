@@ -16,6 +16,63 @@ Type String()
 }
 } // namespace Types
 
+const StringView StringView::EMPTY = StringView("", 0);
+
+template <typename AddResultT>
+static int BasicSplit(AddResultT&& outputter, StringView input, StringView split, int maxCount, bool ignoreEmpty)
+{
+	if(maxCount == 0)
+		return 0;
+	if(maxCount < 0)
+		maxCount = std::numeric_limits<int>::max();
+
+	int count = 0;
+	const char* inCur = input.Data();
+	const char* inEnd = inCur + input.Size();
+	const char* splitCur = inCur;
+	int splitSize = 0;
+	if(split.Size() == 1) {
+		while(inCur+1 <= inEnd) {
+			if(*inCur == *split.Data()) {
+				if(!(ignoreEmpty && splitSize == 0)) {
+					outputter(splitCur, splitSize);
+					++count;
+				}
+				++inCur;
+				splitCur = inCur;
+				splitSize = 0;
+				if(count == maxCount)
+					break;
+			} else {
+				++splitSize;
+				++inCur;
+			}
+		}
+	} else {
+		while(inCur+split.Size() <= inEnd) {
+			if(memcmp(inCur, split.Data(), split.Size()) == 0) {
+				if(!(ignoreEmpty && splitSize == 0)) {
+					outputter(splitCur, splitSize);
+					++count;
+					if(count == maxCount)
+						break;
+				}
+				splitCur = inCur + split.Size();
+				splitSize = 0;
+			} else {
+				++splitSize;
+				++inCur;
+			}
+		}
+	}
+
+	if(!(ignoreEmpty && splitSize == 0) && count != maxCount) {
+		outputter(splitCur, splitSize);
+		++count;
+	}
+	return count;
+}
+
 bool StringView::Equal(const StringView& other, EStringCompare compare) const
 {
 	if(Size() != other.Size())
@@ -77,119 +134,56 @@ bool StringView::Smaller(const StringView& other, EStringCompare compare) const
 	return false;
 }
 
-bool StringView::StartsWith(const StringView& data, ConstByteIterator first, EStringCompare compare) const
+bool StringView::StartsWith(const StringView& data, EStringCompare compare) const
 {
-	if(first == nullptr)
-		first = Data();
-
-	if(data.Data()[0] == 0)
+	if(data.IsEmpty())
 		return true;
-
-	switch(compare) {
-	case EStringCompare::CaseSensitive:
-	{
-		auto strCur = first;
-		for(auto it = data.Data(); *it != 0; ++it, ++strCur) {
-			if(*it != *strCur)
-				return false;
-		}
-		return true;
-	}
-	case EStringCompare::CaseInsensitive:
-	{
-		ConstUTF8Iterator strCur = first;
-		for(auto c : *this) {
-			if(!IsEqualCaseInsensitive(c, *strCur))
-				return false;
-			++strCur;
-		}
-		return true;
-	}
-	}
-
-	return true;
+	if(data.Size() > Size())
+		return false;
+	return StringView(Data(), data.Size()).Equal(data, compare);
 }
 
-bool StringView::EndsWith(const StringView& data, ConstByteIterator end, EStringCompare compare) const
+bool StringView::EndsWith(const StringView& data, EStringCompare compare) const
 {
-	if(end == nullptr)
-		end = End();
-
-	if(data.Data()[0] == 0)
+	if(data.IsEmpty())
 		return true;
-
-	switch(compare) {
-	case EStringCompare::CaseSensitive:
-	{
-		auto dataCur = data.Data() + data.Size() - 1;
-		auto strCur = end - 1;
-		int i = 0;
-		for(auto it = dataCur; i < data.Size(); --it, --strCur, ++i) {
-			if(*it != *strCur)
-				break;
-		}
-		return (i == data.Size());
-	}
-	case EStringCompare::CaseInsensitive:
-	{
-		ConstUTF8Iterator dataCur = data.Data() + data.Size() - 1;
-		ConstUTF8Iterator strCur = end - 1;
-		int i = 0;
-		for(auto it = dataCur; i < data.Size(); --it, --strCur) {
-			if(!IsEqualCaseInsensitive(*it, *strCur))
-				break;
-			i = static_cast<int>((end - 1) - (const char*)strCur);
-		}
-		return (i == data.Size());
-	}
-	}
-
-	return false;
+	if(data.Size() > Size())
+		return false;
+	return StringView(Data()+Size()-data.Size(), data.Size()).Equal(data, compare);
 }
 
-StringView::ConstIterator StringView::Find(const StringView& search, ConstByteIterator first, ConstByteIterator end) const
+int StringView::Find(const StringView& search) const
 {
-	if(first == nullptr)
-		first = First();
-	if(end == nullptr)
-		end = End();
+	if(search.IsEmpty())
+		return 0;
+	if(search.Size() > Size())
+		return -1;
 
-	if(search.Size() == 0)
-		return end;
-
-	const char* searchFirst = search.Data();
-	while(first + search.Size() <= end) {
-		if(memcmp(searchFirst, first, search.Size()) == 0)
-			return first;
-		++first;
+	const char* cur = Data();
+	while(cur + search.Size() <= Data() + Size()) {
+		if(memcmp(search.Data(), cur, search.Size()) == 0)
+			return cur-Data();
+		++cur;
 	}
 
-	return end;
+	return -1;
 }
 
-StringView::ConstIterator StringView::FindReverse(const StringView& search, ConstByteIterator first, ConstByteIterator end) const
+int StringView::FindReverse(const StringView& search) const
 {
-	if(first == nullptr)
-		first = First();
-	if(end == nullptr)
-		end = End();
+	if(search.IsEmpty())
+		return Size()-1;
+	if(search.Size() > Size())
+		return -1;
 
-	if(first == end)
-		return end;
-
-	if(search.Size() == 0)
-		return end;
-
-	ConstByteIterator cur = end;
-	const char* searchFirst = search.Data();
-
-	while(cur - search.Size() >= first) {
-		if(memcmp(cur - search.Size(), searchFirst, search.Size()) == 0)
-			return ConstIterator(cur - search.Size(), Data());
+	const char* cur = Data() + (Size() - search.Size());
+	while(cur >= Data()) {
+		if(memcmp(search.Data(), cur, search.Size()) == 0)
+			return cur-Data();
 		--cur;
 	}
 
-	return end;
+	return -1;
 }
 
 EStringClassFlag StringView::Classify() const
@@ -200,7 +194,7 @@ EStringClassFlag StringView::Classify() const
 	int upperCount = 0;
 	int lowerCount = 0;
 	int count = 0;
-	for(auto c : *this) {
+	for(auto c : CodePoints()) {
 		if(IsLower(c))
 			++lowerCount;
 		else if(IsUpper(c))
@@ -252,27 +246,19 @@ String::String() :
 {
 }
 
-String::String(const char* data, int length) :
+String::String(const char* data, int size) :
 	m_Data({nullptr}),
 	m_Allocated(0),
 	m_Size(0)
 {
-	if(!data || !length) {
+	if(!data || !size) {
 		Reserve(1);
 		Data()[0] = 0;
 		return;
 	}
 
-	int size;
-	if(length < 0) {
+	if(size < 0)
 		size = (int)strlen(data);
-	} else {
-		const char* cur = data;
-		int count = 0;
-		while(count < length && AdvanceCursorUTF8(cur))
-			++count;
-		size = static_cast<int>(cur - data);
-	}
 
 	Reserve(size);
 	memcpy(Data(), data, size);
@@ -281,21 +267,13 @@ String::String(const char* data, int length) :
 	m_Size = size;
 }
 
-String::String(ConstByteIterator first, ConstByteIterator end) :
-	m_Data({nullptr}),
-	m_Allocated(0),
-	m_Size(0)
-{
-	Append(first, end);
-}
-
 String::String(const String& other) :
 	m_Data({nullptr}),
 	m_Allocated(0),
 	m_Size(0)
 {
 	Reserve(other.m_Size);
-	memcpy(Data(), other.Data_c(), other.m_Size + 1);
+	memcpy(Data(), other.Data(), other.m_Size + 1);
 
 	m_Size = other.m_Size;
 }
@@ -335,7 +313,7 @@ void String::Reserve(int size)
 	else
 		newData = (char*)LUX_NEW_RAW(newAlloc);
 
-	memcpy(newData, Data_c(), m_Size + 1);
+	memcpy(newData, Data(), m_Size + 1);
 
 	if(!IsShortString())
 		LUX_FREE_RAW(m_Data.ptr);
@@ -351,7 +329,7 @@ String& String::operator=(const String& other)
 		return *this;
 
 	Reserve(other.m_Size);
-	memcpy(Data(), other.Data_c(), other.m_Size + 1);
+	memcpy(Data(), other.Data(), other.m_Size + 1);
 	m_Size = other.m_Size;
 
 	return *this;
@@ -359,7 +337,7 @@ String& String::operator=(const String& other)
 
 String& String::operator=(const char* other)
 {
-	if(Data_c() == other)
+	if(Data() == other)
 		return *this;
 	if(!other) {
 		Clear();
@@ -387,122 +365,48 @@ String& String::operator=(String&& old)
 	return *this;
 }
 
-String& String::operator+=(const StringView& str)
+void String::Insert(int pos, const StringView& other)
 {
-	return Append(str);
-}
-
-String::ConstIterator String::Insert(ConstByteIterator pos, const StringView& other, int count)
-{
-	int size;
-	if(count < 0) {
-		size = other.Size();
-	} else {
-		const char* cur = other.Data();
-		int c = 0;
-		while(c < count && AdvanceCursorUTF8(cur))
-			++c;
-		size = static_cast<int>(cur - other.Data());
-	}
-	if(size == 0)
-		return pos;
-	int newSize = m_Size + size;
-	int pos_off = static_cast<int>(pos - Data());
+	if(other.IsEmpty())
+		return;
+	int newSize = Size() + other.Size();
 	Reserve(newSize);
 
 	// Move last part of string back, including NUL.
 	char* data = Data();
-	memmove(data + pos_off + size, data + pos_off, m_Size - pos_off + 1);
+	memmove(data + pos + other.Size(), data + pos, Size() - pos + 1);
 
 	// Place the insertion string.
-	memcpy(data + pos_off, other.Data(), size);
+	memcpy(data + pos, other.Data(), other.Size());
 
-	m_Size += size;
-
-	return ConstIterator(data + pos_off + size, Data_c());
+	m_Size = newSize;
 }
 
-String::ConstIterator String::Insert(ConstByteIterator pos, ConstByteIterator first, ConstByteIterator end)
+void String::InsertCodePoint(int pos, u32 codepoint)
 {
-	// This assumes, string::ConstByteIterator point to a continues block of memory until end.
-	// This is always the case for string::ConstByteIterator.
-
-	int size = static_cast<int>(end - first);
-
-	int newSize = m_Size + size;
-	int pos_off = static_cast<int>(pos - Data());
-	Reserve(newSize);
-
-	// Move last part of string back, including NUL.
-	char* data = Data();
-	memmove(data + pos_off + size, data + pos_off, m_Size - pos_off + 1);
-
-	// Place the insertion string.
-	memcpy(data + pos_off, first, size);
-
-	m_Size += size;
-
-	return ConstIterator(data + pos_off + size, Data_c());
+	char buffer[4];
+	int bytes = CodePointToUTF8(codepoint, buffer);
+	Insert(pos, StringView(buffer, bytes));
 }
 
-String& String::AppendRaw(const char* data, int bytes)
+
+String& String::AppendCodePoint(const char* codepoint)
 {
-	Reserve(m_Size + bytes);
-	auto cur = Data() + m_Size;
-
-	// Copy and zero terminate string
-	memcpy(cur, data, bytes);
-	cur[bytes] = 0;
-
-	// Calculate length and size
-	m_Size += bytes;
-
+	PushCodePoint(codepoint);
 	return *this;
 }
 
-String& String::Append(const StringView& other, int count)
+void String::Resize(int newSize, const StringView& filler)
 {
-	Insert(End(), other, count);
-	return *this;
-}
-
-String& String::Append(ConstByteIterator first, ConstByteIterator end)
-{
-	Insert(End(), first, end);
-	return *this;
-}
-
-String& String::Append(ConstByteIterator character)
-{
-	PushCharacter(character);
-	return *this;
-}
-
-String& String::Append(u32 character)
-{
-	u8 buffer[6];
-	u8* end = CodePointToUTF8(character, buffer);
-	auto size = static_cast<int>(end - buffer);
-	Reserve(m_Size + size);
-
-	memcpy(Data() + m_Size, buffer, size);
-	m_Size += size;
-	Data()[m_Size] = 0;
-
-	return *this;
-}
-
-void String::Resize(int newLength, const StringView& filler)
-{
-	auto curLength = End() - First();
-	if(newLength == 0) {
+	int curSize = Size();
+	if(newSize == 0) {
 		m_Size = 0;
-	} else if(newLength <= curLength) {
+	} else if(newSize <= curSize) {
 		const char* data = Data();
 		const char* ptr = data + m_Size;
-		while(curLength > newLength) {
-			RetractCursorUTF8(ptr);
-			--curLength;
+		while(curSize > newSize) {
+			--ptr;
+			--curSize;
 		}
 
 		m_Size -= static_cast<int>((data + m_Size) - ptr);
@@ -510,19 +414,15 @@ void String::Resize(int newLength, const StringView& filler)
 		if(filler.IsEmpty())
 			throw GenericInvalidArgumentException("filler", "Must not be empty");
 
-		int fillerLength = filler.Size() == 1 ? 1 : StringLengthUTF8(filler.Data());
-		int addLength = static_cast<int>(newLength - curLength);
+		int fillerSize = filler.Size();
+		int addSize = static_cast<int>(newSize - curSize);
 
-		int elemCount = addLength / fillerLength;
-		int addBytes = elemCount*filler.Size();
+		int elemCount = addSize / fillerSize;
 		int remCount = 0;
-		int neededBytes = elemCount * filler.Size();
-		if(addLength%fillerLength != 0) {
-			neededBytes += filler.Size();
-			remCount = addLength%fillerLength;
-		}
+		if(addSize%fillerSize != 0)
+			remCount = addSize%fillerSize;
 
-		Reserve(m_Size + neededBytes);
+		Reserve(newSize);
 		if(filler.Size() != 1) {
 			char* cur = Data() + m_Size;
 			// Copy whole filler strings.
@@ -531,20 +431,13 @@ void String::Resize(int newLength, const StringView& filler)
 				cur += filler.Size();
 			}
 			// Copy the last partial string.
-			const char* fillCur = filler.Data();
-			int i = 0;
-			while(i < remCount) {
-				*cur++ = *fillCur;
-				if((*fillCur & 0xC0) != 0x80)
-					++i;
-				++addBytes;
-			}
+			memcpy(cur, filler.Data(), remCount);
 		} else {
 			char* cur = Data() + m_Size;
 			memset(cur, *filler.Data(), elemCount);
 		}
 
-		m_Size += addBytes;
+		m_Size = newSize;
 	}
 
 	Data()[m_Size] = 0;
@@ -555,11 +448,6 @@ String& String::Clear()
 	Data()[0] = 0;
 	m_Size = 0;
 	return *this;
-}
-
-const char* String::Data_c() const
-{
-	return Data();
 }
 
 const char* String::Data() const
@@ -592,212 +480,138 @@ void String::PushByte(u8 byte)
 	++m_Size;
 }
 
-int String::Replace(const StringView& replace, const StringView& search, ConstByteIterator first, ConstByteIterator end)
+int String::Replace(const StringView& replace, const StringView& search, int first, int size)
 {
-	if(end == nullptr)
-		end = End();
-
-	if(first == nullptr)
-		first = First();
+	if(first < 0)
+		first = 0;
+	if(size < 0)
+		size = Size()-first;
 
 	int count = 0;
-	int length = StringLengthUTF8(search.Data());
-	ConstByteIterator it = Find(search, first, end);
-	while(it != end) {
-		int endOffset = static_cast<int>(end - Data_c());
-		it = ReplaceRange(replace, it, length);
-		end = ConstIterator(Data_c() + endOffset, Data_c());
-		it = Find(search, it, end);
-
+	int id = StringView(Data() + first, size).Find(search);
+	while(id >= 0) {
 		++count;
+		first = ReplaceRange(replace, first + id, search.Size());
+		size = size - replace.Size();
+		id = StringView(Data() + first, size).Find(search);
 	}
 
 	return count;
 }
 
-String::ConstIterator String::ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, ConstByteIterator rangeEnd)
+int String::ReplaceRange(const StringView& replace, int first, int size)
 {
-	if(rangeEnd == nullptr)
-		rangeEnd = End();
+	if(first < 0)
+		first = 0;
+	if(size < 0)
+		size = Size()-first;
 
-	return ReplaceRange(replace, rangeFirst, IteratorDistance(rangeFirst, rangeEnd));
-}
+	if(m_Size + replace.Size() < size)
+		throw GenericInvalidArgumentException("size", "size must not be to large.");
 
-String::ConstIterator String::ReplaceRange(const StringView& replace, ConstByteIterator rangeFirst, int count)
-{
-	int replacedSize = static_cast<int>((ConstIterator(rangeFirst) + count).Pointer() - rangeFirst);
-
-	if(m_Size + replace.Size() < replacedSize)
-		throw GenericInvalidArgumentException("count", "count must not be to large.");
-
-	int newSize = m_Size - replacedSize + replace.Size();
-	int replaceOffset = static_cast<int>(rangeFirst - Data_c());
+	int newSize = m_Size - size + replace.Size();
 	Reserve(newSize);
 
 	char* data = Data();
-	int restSize = m_Size - replaceOffset - replacedSize;
-	memmove(data + replaceOffset + replace.Size(), data + replaceOffset + replacedSize, restSize + 1); // Including NUL
-	memcpy(data + replaceOffset, replace.Data(), replace.Size());
+	int restSize = m_Size - first - size;
+	memmove(data + first + replace.Size(), data + first + size, restSize + 1); // Including NUL
+	memcpy(data + first, replace.Data(), replace.Size());
 
 	m_Size = newSize;
 
-	return ConstIterator(data + replaceOffset + replacedSize, data);
+	return first + replace.Size();
 }
 
-int String::Pop(int count)
+int String::Pop(int size)
 {
-	ConstIterator it = Last();
-	int oldCount = count;
-	while(it != First() && count > 0) {
-		--it;
-		--count;
-	}
-
-	const char* last = (it + 1).Pointer();
-	int newSize = static_cast<int>(last - Data());
-	if(it == First() && count > 0) {
+	if(size <= 0)
+		return 0;
+	int newSize = m_Size - size;
+	if(newSize < 0)
 		newSize = 0;
-		--count;
-	}
-
 	Data()[newSize] = 0;
+	int removed = m_Size - newSize;
 	m_Size = newSize;
-	int removed = oldCount - count;
 	return removed;
 }
 
-String String::SubString(ConstByteIterator first, int count) const
+void String::Remove(int pos, int size)
 {
-	return String(first, count);
-}
+	if(size < 0)
+		size = 1;
+	if(pos + size > m_Size)
+		throw GenericInvalidArgumentException("size", "size must not be to large.");
 
-String String::SubString(ConstByteIterator first, ConstByteIterator end) const
-{
-	return String(first, end);
-}
-
-String::ConstIterator String::Remove(ConstByteIterator pos, int count)
-{
-	int removeSize = static_cast<int>((ConstIterator(pos) + count).Pointer() - pos);
-
-	if(removeSize > m_Size)
-		throw GenericInvalidArgumentException("count", "count must not be to large.");
-
-	int newSize = m_Size - removeSize;
+	int newSize = m_Size - size;
 
 	char* data = Data();
-	int removeOffset = static_cast<int>(pos - data);
-	int restSize = m_Size - removeOffset - removeSize;
-	memmove(data + removeOffset, data + removeOffset + removeSize, restSize + 1); // Including NUL
+	int restSize = m_Size - pos - size;
+	memmove(data + pos, data + pos + size, restSize + 1); // Including NUL
 
 	m_Size = newSize;
-	return ConstIterator(data + removeOffset, Data());
 }
 
-String::ConstIterator String::Remove(ConstByteIterator from, ConstByteIterator to)
+String& String::RStrip(int end)
 {
-	return Remove(from, core::IteratorDistance(from, to));
-}
-
-String& String::RStrip(ConstByteIterator end)
-{
-	if(end == nullptr)
-		end = End();
-
-	if(end == First())
-		return *this;
+	if(end < 0)
+		end = Size();
 
 	char* data = Data();
 
-	ConstIterator last = ConstIterator(end) - 1;
-	int lastSize = core::IteratorDistance(last.Pointer(), end);
-	ConstIterator begin = Begin();
+	// Find last element.
+	ConstUTF8Iterator begin = Data();
+	ConstUTF8Iterator last = ConstUTF8Iterator(data + end) - 1;;
+	ConstUTF8Iterator cur = last;
+	int lastSize = (data+end)-cur.Pointer();
 	int removed = 0;
-	while(last != begin && IsSpace(*last)) {
-		--last;
+	while(cur.Pointer() != begin && IsSpace(*cur)) {
+		--cur;
 		++removed;
 	}
 
-	if(last == begin)
+	if(cur == begin)
 		m_Size = 0;
 	else
-		m_Size = static_cast<int>(last.Pointer() - data) + lastSize;
+		m_Size = static_cast<int>(cur.Pointer() - data) + lastSize;
 
 	data[m_Size] = 0;
 
 	return *this;
 }
 
-String& String::LStrip(ConstByteIterator first)
+String& String::LStrip(int first)
 {
-	if(first == nullptr)
-		first = First();
+	if(first < 0)
+		first = 0;
 
-	auto offset = static_cast<int>(first - Data_c());
-	auto end = End();
-	int count = 0;
-	while(first != end && IsSpace(*first)) {
-		++first;
-		++count;
-	}
+	auto begin = ConstUTF8Iterator(Data()+first);
+	auto cur = begin;
+	while(cur.Pointer() != End() && IsSpace(*cur))
+		++cur;
 
-	char* base = Data() + offset;
-	auto removed = static_cast<int>(first - base);
-	memmove(base, first, m_Size - offset - removed);
-	m_Size -= removed;
-
+	auto removed = static_cast<int>(cur.Pointer() - begin.Pointer());
+	Remove(first, removed);
 	return *this;
 }
 
-String& String::Strip(ConstByteIterator first, ConstByteIterator end)
+String& String::Strip(int first, int end)
 {
 	RStrip(end);
 	LStrip(first);
 	return *this;
 }
 
-int String::Split(u32 ch, String* outArray, int maxCount, bool ignoreEmpty) const
+int String::Split(StringView split, String* outArray, int maxCount, bool ignoreEmpty) const
 {
-	if(maxCount == 0)
-		return 0;
-
-	String* cur = outArray;
-	int count = 1;
-	cur->Clear();
-	for(auto it = First(); it != End(); ++it) {
-		if(*it == ch) {
-			if(!(ignoreEmpty && cur->IsEmpty())) {
-				if(count == maxCount)
-					return maxCount;
-				++cur;
-				++count;
-			}
-			cur->Clear();
-		} else {
-			cur->Append(*it);
-		}
-	}
-
-	return count;
+	return BasicSplit([&outArray](const char* data, int size) { *outArray++ = StringView(data, size); },
+		(StringView)*this, split, maxCount, ignoreEmpty);
 }
 
-Array<String> String::Split(u32 ch, bool ignoreEmpty) const
+Array<String> String::Split(StringView split, bool ignoreEmpty) const
 {
 	Array<String> out;
-	String buffer;
-	for(auto c : *this) {
-		if(c == ch) {
-			if(!(ignoreEmpty && buffer.IsEmpty()))
-				out.PushBack(std::move(buffer));
-			buffer.Clear();
-		} else {
-			buffer.Append(c);
-		}
-	}
-
-	if(!(ignoreEmpty && buffer.IsEmpty()))
-		out.PushBack(std::move(buffer));
-
+	BasicSplit([&out](const char* data, int size) { out.EmplaceBack(data, size); },
+		(StringView)*this, split, -1, ignoreEmpty);
 	return out;
 }
 
@@ -806,9 +620,9 @@ String String::GetLower() const
 	String out;
 	out.Reserve(Size());
 
-	for(auto c : *this) {
+	for(auto c : CodePoints()) {
 		c = ToLowerChar(c);
-		out.Append(c);
+		out.AppendCodePoint(c);
 	}
 
 	return out;
@@ -819,9 +633,9 @@ String String::GetUpper() const
 	String out;
 	out.Reserve(Size());
 
-	for(auto c : *this) {
+	for(auto c : CodePoints()) {
 		c = ToUpperChar(c);
-		out.Append(c);
+		out.AppendCodePoint(c);
 	}
 
 	return out;
@@ -842,10 +656,10 @@ void String::SetAllocated(int a)
 	m_Allocated = a;
 }
 
-void String::PushCharacter(const char* ptr)
+void String::PushCodePoint(const char* ptr)
 {
-	if(m_Size + 6 >= GetAllocated()) // Maximal 6 utf-8 bytes
-		Reserve(GetAllocated() * 2 + 6);
+	if(m_Size + 4 >= GetAllocated()) // Maximal 4 utf-8 bytes
+		Reserve(GetAllocated() * 2 + 4);
 
 	if(*ptr == 0)
 		throw GenericInvalidArgumentException("byte", "byte must not be null");

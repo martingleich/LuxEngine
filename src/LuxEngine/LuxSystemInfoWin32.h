@@ -98,7 +98,7 @@ private:
 				size = (DWORD)nameBuffer.Size();
 				status = RegQueryValueExW(key, L"ProcessorNameString", NULL, &type, (LPBYTE)nameBuffer.Data(), &size);
 				if(status == ERROR_SUCCESS && type == REG_SZ) {
-					m_ProcessorName = core::UTF16ToString(nameBuffer.Data());
+					m_ProcessorName = core::UTF16ToString(nameBuffer.Data(), -1);
 					break;
 				}
 				if(status == ERROR_MORE_DATA)

@@ -12,8 +12,8 @@ class MemoryFile : public File
 public:
 	MemoryFile(
 		void* buffer,
-		const FileDescription& desc,
-		const core::String& name,
+		const FileInfo& desc,
+		const Path& path,
 		EVirtualCreateFlag flags);
 	~MemoryFile();
 	s64 ReadBinaryPart(s64 numBytes, void* out);
@@ -23,10 +23,14 @@ public:
 	const void* GetBuffer() const;
 	s64 GetSize() const;
 	s64 GetCursor() const;
+	const FileInfo& GetInfo() const { return m_Info; }
+	const Path& GetPath() const { return m_Path; }
 
 private:
 	u8* m_Buffer;
+	FileInfo m_Info;
 	size_t m_Size;
+	Path m_Path;
 	size_t m_Cursor;
 	bool m_IsEOF;
 

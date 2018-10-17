@@ -118,7 +118,7 @@ public:
 		if(m_Type != core::Types::String())
 			throw TypeCastException(m_Type, core::Types::String());
 
-		return ((core::String*)m_Data)->Data_c();
+		return ((core::String*)m_Data)->Data();
 	}
 
 	void AssignData(const void* data) const

@@ -154,7 +154,7 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 				axis.logicalCalibratedCenter = calibratedCenter;
 			}
 
-			axis.name = core::UTF16ToString(toName);
+			axis.name = core::UTF16ToString(toName, -1);
 
 			m_Axes.PushBack(axis);
 		}
@@ -182,7 +182,7 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 			button.usage = currentUsage;
 			button.reportID = it->ReportID;
 			button.index = currentIndex;
-			button.name = core::UTF16ToString(toName);
+			button.name = core::UTF16ToString(toName, -1);
 			button.isAbsolute = (it->IsAbsolute == TRUE);
 
 			m_Buttons.PushBack(button);
@@ -277,7 +277,7 @@ HANDLE RawJoystickDevice::GetDeviceHandle()
 {
 	core::String path = GetDevicePath(m_RawInputHandle);
 
-	HANDLE ntHandle = CreateFileW(core::StringToUTF16W(path), 0,
+	HANDLE ntHandle = CreateFileW(core::UTF8ToWin32String(path), 0,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL,
 		OPEN_EXISTING,
@@ -308,7 +308,7 @@ core::String RawJoystickDevice::GetDeviceName()
 	if(len == 0)
 		return "(unknown)";
 	else
-		return core::UTF16ToString(nameBuffer);
+		return core::UTF16ToString(nameBuffer, len*2);
 }
 
 void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, int& buttonCount)

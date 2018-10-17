@@ -7,176 +7,119 @@ namespace lux
 {
 namespace io
 {
-
-using Path = core::String;
-
-LUX_API Path GetFileExtension(const Path& p);
-LUX_API Path GetFileDir(const Path& p);
-LUX_API Path GetFilenameOnly(const Path& p, bool keepExtension = true);
-
-//! Normalizes a path
-/**
-A normalized path contains only / seperators.
-A normllaized directory path end with and / character
-\param p The path to normalize
-\param isDirectory Is the path a directory
-\return The normalized path
-*/
-LUX_API Path NormalizePath(const Path& p, bool isDirectory = false);
-
-//! Creates a new absolute path, concating a base path and a path relative to the base.
-/*
-REMARK:
-The returned path is normalized.
-
-\param base The base path, must be an absolute path.
-\param rel The path relative to base, can contain /../ segements
-\return The absolute path by concating base and rel
-*/
-LUX_API Path MakeAbsolutePath(const Path& base, const Path& rel);
-
-class FileSystem;
 class Archive;
+//! A Path
+/**
+Pathes identify objects in the virtual file-system.
+They remember the string and the archive.
+Pathes always are seperated by slashes.
+*/
+class Path
+{
+public:
+	static LUX_API Path EMPTY;
 
-class FileDescription
+	Path() = default;
+	Path(const char* str, Archive* archive=nullptr)
+	{
+		Set(str);
+		m_Archive = archive;
+	}
+	Path(const core::String& str, Archive* archive=nullptr)
+	{
+		Set(str);
+		m_Archive = archive;
+	}
+	Path(core::StringView str, Archive* archive=nullptr)
+	{
+		Set(str);
+		m_Archive = archive;
+	}
+	
+	Path(const Path&) = default;
+	Path(Path&&) = default;
+
+	Path& operator=(const Path&) = default;
+	Path& operator=(Path&&) = default;
+
+	LUX_API void Set(core::StringView str);
+	LUX_API Path GetFileDir() const;
+	LUX_API core::String GetFileName(bool keepExtension=true) const;
+	LUX_API core::String GetFileExtension() const;
+
+	/**
+	\param base The base path, must be an absolute path.
+	\param rel The path relative to base, can contain /../ segements
+	\return The absolute path by concating base and rel
+	*/
+	LUX_API Path GetResolved(const Path& base) const;
+
+	core::StringView AsView() const { return m_RawData.AsView(); }
+	const char* Data() const { return m_RawData.Data(); }
+	int Size() const { return m_RawData.Size(); }
+	bool IsEmpty() const { return m_RawData.IsEmpty(); }
+	Archive* GetArchive() const { return m_Archive; }
+
+	bool operator==(const Path& other) const { return m_RawData == other.m_RawData; }
+	bool operator!=(const Path& other) const { return m_RawData != other.m_RawData; }
+
+	core::String&& TakeString() { return std::move(m_RawData); }
+	const core::String& GetString() const { return m_RawData; }
+	void PutString(core::String&& str) { m_RawData = std::move(str); }
+private:
+	core::String m_RawData;
+	Archive* m_Archive;
+};
+
+struct FileInfo
 {
 public:
 	enum class EType
 	{
 		File,
 		Directory,
+		VirtualFile,
 		Other
 	};
 
 public:
-	FileDescription() :
-		m_Archive(nullptr)
-	{
-	}
-
-	FileDescription(const Path& path,
-		const core::String& name,
-		s64 size,
-		EType type,
-		const core::DateAndTime& creationDate,
-		bool isVirtual) :
-		m_Path(path),
-		m_Name(name),
-		m_Archive(nullptr),
+	FileInfo() :
+		m_Size(-1),
+		m_Type(EType::Other)
+	{}
+	FileInfo(s64 size, EType type) :
 		m_Size(size),
-		m_Type(type),
-		m_Creation(creationDate),
-		m_IsVirtual(isVirtual)
+		m_Type(type)
 	{
 	}
 
-	bool operator==(const FileDescription& other) const
-	{
-		return (m_Archive == other.m_Archive && m_Path == other.m_Path && m_Name == other.m_Name);
-	}
-
-	bool operator!=(const FileDescription& other) const
-	{
-		return !(*this == other);
-	}
-
-	void SetPath(const Path& p)
-	{
-		m_Path = NormalizePath(p, true);
-	}
-
-	void SetName(const core::String& n)
-	{
-		m_Name = n;
-	}
-
-	const Path& GetPath() const
-	{
-		return m_Path;
-	}
-
-	const core::String& GetName() const
-	{
-		return m_Name;
-	}
-
-	Archive* GetArchive() const
-	{
-		return m_Archive;
-	}
-
-	void SetArchive(Archive* a)
-	{
-		m_Archive = a;
-	}
-
-	void SetSize(s64 size)
-	{
-		m_Size = size;
-	}
-
-	s64 GetSize() const
-	{
-		return m_Size;
-	}
-
-	void SetType(EType type)
-	{
-		m_Type = type;
-	}
-
-	EType GetType() const
-	{
-		return m_Type;
-	}
-
-	void SetCreationDate(const core::DateAndTime& date)
-	{
-		m_Creation = date;
-	}
-
-	const core::DateAndTime& GetCreationDate() const
-	{
-		return m_Creation;
-	}
-
-	void SetIsVirtual(bool v)
-	{
-		m_IsVirtual = v;
-	}
-
-	bool GetIsVirtual() const
-	{
-		return m_IsVirtual;
-	}
+	s64 GetSize() const { return m_Size; }
+	void SetSize(s64 s) { m_Size = s; }
+	EType GetType() const { return m_Type; }
+	bool IsVirtual() const { return m_Type == EType::VirtualFile; }
+	bool IsFile() const { return m_Type == EType::VirtualFile || m_Type == EType::File; }
+	bool IsDirectory() const { return m_Type == EType::Directory; }
 
 private:
-	Path m_Path;
-	core::String m_Name;
-	Archive* m_Archive;
-
 	s64 m_Size;
 	EType m_Type;
-	core::DateAndTime m_Creation;
-	bool m_IsVirtual;
 };
 
-inline FileDescription ConcatFileDesc(const FileDescription& base, const io::Path& relative)
+void fmtPrint(format::Context& ctx, const Path& p, format::Placeholder&);
+} // namespace io
+namespace core
 {
-	Path absPath = MakeAbsolutePath(base.GetPath(), GetFileDir(relative));
-	core::String fileName = GetFilenameOnly(relative);
-
-	FileDescription out(absPath,
-		fileName,
-		0,
-		FileDescription::EType::Other,
-		core::DateAndTime(),
-		false);
-
-	return out;
+template <>
+struct HashType<io::Path>
+{
+	int operator()(const io::Path& path) const
+	{
+		auto view = path.AsView();
+		return HashType<String>()(view.Data(), view.Size());
+	}
+};
 }
 
-} // io
-} // lux
+} // namespace lux
 
 #endif

@@ -136,8 +136,8 @@ const core::Array<u32>& FontCreatorNull::GetDefaultCharset(const core::String& n
 void FontCreatorNull::AddDefaultCharSet(const core::String& name, const core::String& data)
 {
 	core::Array<u32> a;
-	for(auto it = data.First(); it != data.End(); ++it)
-		a.PushBack(*it);
+	for(auto c : data.CodePoints())
+		a.PushBack(c);
 
 	m_DefaultCharSets[name] = a;
 }

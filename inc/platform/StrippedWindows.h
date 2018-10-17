@@ -9,6 +9,7 @@
 #undef MoveFile
 #undef CopyFile
 #undef DeleteFile
+#undef CreateDirectory
 #undef Min
 #undef Max
 #undef min

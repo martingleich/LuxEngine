@@ -14,30 +14,21 @@ namespace io
 class File : public ReferenceCounted
 {
 public:
-	File(const core::String& name, const FileDescription& desc) : m_Name(name), m_Desc(desc)
-	{
-	}
 	virtual ~File() {}
 
-	//! Get the name of the file
+	//! Get the path of the file
 	/**
 	May be an empty string, must not be the path of the file
 	\return The name of the file
 	*/
-	virtual const core::String& GetName() const
-	{
-		return m_Name;
-	}
+	virtual const io::Path& GetPath() const = 0;
 
-	//! Get a full description of the file
+	//! Get a information about the file
 	/**
 	Including size, path, source archive etc.
 	\return The description of the file
 	*/
-	virtual const FileDescription& GetDescription() const
-	{
-		return m_Desc;
-	}
+	virtual const FileInfo& GetInfo() const = 0;
 
 	//! Is the filecursor at the end of the file
 	virtual bool IsEOF() const
@@ -54,7 +45,7 @@ public:
 	{
 		s64 count = WriteBinaryPart(data, numBytes);
 		if(count != numBytes)
-			throw io::FileUsageException(io::FileUsageException::WriteError, GetName());
+			throw io::FileUsageException(io::FileUsageException::WriteError, GetPath());
 	}
 
 	//! Write binary data to the file
@@ -75,7 +66,7 @@ public:
 	{
 		s64 count = ReadBinaryPart(numBytes, out);
 		if(count != numBytes)
-			throw io::FileUsageException(io::FileUsageException::ReadError, GetName());
+			throw io::FileUsageException(io::FileUsageException::ReadError, GetPath());
 	}
 
 	//! Read binary data
@@ -117,10 +108,6 @@ public:
 
 	//! The current cursor position in the file
 	virtual s64 GetCursor() const = 0;
-
-protected:
-	core::String m_Name;
-	FileDescription m_Desc;
 };
 
 }    //namespace io

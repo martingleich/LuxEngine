@@ -57,11 +57,11 @@ void Renderer::Begin()
 
 void Renderer::DrawText(gui::Font* font,
 	const FontRenderSettings& settings,
-	core::Range<core::String::ConstIterator> text,
+	const core::StringView& text,
 	const math::Vector2F& position,
 	const math::RectF* clip)
 {
-	if(font && text.First() != text.End())
+	if(font)
 		font->Draw(settings, text, position, clip);
 }
 

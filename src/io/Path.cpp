@@ -1,93 +1,98 @@
 #include "io/Path.h"
+#include "io/Archive.h"
 
 namespace lux
 {
 namespace io
 {
 
-Path GetFileExtension(const Path& filename)
-{
-	auto lastDot = filename.FindReverse(".");
-	if(lastDot == filename.End())
-		return Path::EMPTY;
-	else
-		return filename.SubString(lastDot.Next(), filename.End());
-}
+Path Path::EMPTY = Path();
 
-static Path::ConstIterator FindLastSlash(const Path& filename)
+void Path::Set(core::StringView str)
 {
-	auto it = filename.Last();
-	for(; it != filename.First(); --it) {
-		if(*it == '/' || *it == '\\')
-			return it;
+	m_RawData.Clear();
+	if(str.IsEmpty())
+		return;
+
+	m_RawData.Reserve(str.Size());
+	const char* data = str.Data();
+	const char* cur = str.Data();
+	int size = 0;
+	for(auto it = data; it != str.Data() + str.Size(); ++it) {
+		char c = *it;
+		if(c == '\\') {
+			m_RawData.Append(cur, size);
+			m_RawData.Append("/", 1);
+			cur = it+1;
+			size = 0;
+		} else {
+			++size;
+		}
 	}
-	if(*it == '/' || *it == '\\')
-		return it;
-	return filename.End();
+	m_RawData.Append(cur, size);
+
+	// Strip trailing slashes.
+	int i = m_RawData.Size()-1;
+	char* p = m_RawData.Data();
+	while(i > 0 && p[i] == '/')
+		--i;
+	m_RawData.Resize(i+1);
+
+	m_RawData.Strip();
 }
 
-Path GetFileDir(const Path& filename)
+Path Path::GetFileDir() const
 {
-	auto lastSlash = FindLastSlash(filename);
-	if(lastSlash == filename.End())
+	int lastSlash = m_RawData.FindReverse("/");
+	if(lastSlash == -1)
 		return Path::EMPTY;
 	else
-		return NormalizePath(filename.SubString(filename.First(), lastSlash), true);
+		return io::Path(m_RawData.BeginSubStringView(lastSlash), m_Archive);
 }
 
-core::String GetFilenameOnly(const Path& filename, bool keepExtension)
+core::String Path::GetFileName(bool keepExtension) const
 {
-	auto lastSlash = FindLastSlash(filename);
-	Path::ConstIterator cut;
-	if(lastSlash == filename.End())
-		cut = filename.First();
+	int lastSlash = m_RawData.FindReverse("/");
+	int begin = lastSlash+1; // 0 if couldn't be found.
+
+	if(keepExtension) {
+		return m_RawData.EndSubString(begin);
+	} else {
+		int lastDot = begin + m_RawData.EndSubStringView(begin).FindReverse(".");
+		return m_RawData.SubStringView(begin, lastDot-begin);
+	}
+}
+
+core::String Path::GetFileExtension() const
+{
+	int lastDot = m_RawData.FindReverse(".");
+	if(lastDot == -1)
+		return core::StringView::EMPTY;
 	else
-		cut = lastSlash+1;
-
-	auto lastDot = filename.FindReverse(".", cut);
-
-	if(keepExtension)
-		return filename.SubString(cut, filename.End());
-	else
-		return filename.SubString(cut, lastDot);
+		return m_RawData.EndSubString(lastDot+1);
 }
 
-Path NormalizePath(const Path& filename, bool isDirectory)
+Path Path::GetResolved(const Path& base) const
 {
-	if(filename.IsEmpty())
-		return Path::EMPTY;
-
-	Path out(filename);
-	out.Replace("/", "\\");
-	if(isDirectory && !out.EndsWith("/"))
-		out += "/";
-
-	return out;
-}
-
-io::Path MakeAbsolutePath(const io::Path& base, const io::Path& rel)
-{
-	if(rel.IsEmpty())
-		return base;
-
-	io::Path out;
-	auto first = rel.First();
-	auto second = first + 1;
-	if(*first == '/' || *first == '\\')
+	core::String out;
+	auto relP = m_RawData.Data();
+	auto relS = m_RawData.Size();
+	if(relS > 0 && relP[0] == '/')
 		(void)0; // rel is already absolute
-	else if(second != rel.End() && *second == ':')
+	else if(relS > 1 && relP[1] == ':')
 		(void)0; // rel is already absolute
-	else
-		out = NormalizePath(base, true);
+	else {
+		out = base.AsView();
+		out.Append("/");
+	}
 
 	// 0 = Empty Directory
 	// 1 = Dot - Directory
 	// 2 = Two - Dot - Directory
 	// 3 = Normal Directory
 	int state = 0;
-	for(auto it = rel.First(); it != rel.End(); ++it) {
-		u32 c = *it;
-		if(c == '/' || c == '\\') {
+	for(char c : m_RawData.Bytes()) {
+		if(c == '/') {
 			if(state == 0 || state == 3) // Empty or normal dictonary
 				out.Append("/");
 			else if(state == 1) // Single dot
@@ -96,10 +101,10 @@ io::Path MakeAbsolutePath(const io::Path& base, const io::Path& rel)
 				int removed = out.Pop(3); // Erase the two dots and the last slash
 				if(removed != 3)
 					return Path::EMPTY;
-				auto lastSlash = out.FindReverse("/"); // Find the last slash...
-				if(lastSlash == out.End())
+				int lastSlash = out.FindReverse("/"); // Find the last slash...
+				if(lastSlash == -1)
 					return Path::EMPTY;
-				out.Remove(lastSlash + 1, out.End()); //...and remove all after it.
+				out.Remove(lastSlash + 1, out.Size() - lastSlash - 1); //...and remove all after it.
 			}
 			state = 0;
 			continue;	// Don't append last character
@@ -113,11 +118,22 @@ io::Path MakeAbsolutePath(const io::Path& base, const io::Path& rel)
 		} else {
 			state = 3;
 		}
-		out.Append(it);
+		out.Append(&c, 1);
 	}
 
-	return out;
+	// out is always a valid path, so don't create a copy
+	Path pout("", base.GetArchive());
+	pout.PutString(std::move(out));
+	return pout;
 }
 
+void fmtPrint(format::Context& ctx, const Path& p, format::Placeholder& pl)
+{
+	ctx.AddSlice(p.Size(), p.Data());
+	if(p.GetArchive()) {
+		ctx.AddTerminatedSlice(" @");
+		fmtPrint(ctx, p.GetArchive()->GetPath(), pl);
+	}
+}
 }
 }

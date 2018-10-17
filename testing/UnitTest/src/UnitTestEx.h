@@ -81,7 +81,7 @@ void AssertString(const T* str1, const T* str2, const char* name1, const char* n
 #define Stringify(s) #s
 
 #define UNIT_ASSERT_CSTR(cstr1, cstr2) do{AssertString(cstr1, cstr2, expand_Stringify(cstr1), expand_Stringify(cstr2), __LINE__, ctx);}while(false)
-#define UNIT_ASSERT_STR(str1, cstr2) do{AssertString(str1.Data_c(), cstr2, expand_Stringify(str1), expand_Stringify(cstr2), __LINE__, ctx);}while(false)
+#define UNIT_ASSERT_STR(str1, cstr2) do{AssertString(str1.Data(), cstr2, expand_Stringify(str1), expand_Stringify(cstr2), __LINE__, ctx);}while(false)
 
 #define UNIT_ASSERT_APPROX(a, b) UNIT_ASSERT(math::IsEqual(a, b))
 

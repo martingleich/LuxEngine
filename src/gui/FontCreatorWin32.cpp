@@ -380,7 +380,8 @@ static bool DoesFontFamilyExist(impl_fontCreatorWin32::Context* ctx, const core:
 {
 	LOGFONTW logFont;
 	ZeroMemory(&logFont, sizeof(logFont));
-	auto utf16Buffer = core::UTF8ToUTF16(name.Data());
+	core::Array<u16> utf16Buffer;
+	core::UTF8ToUTF16(name.Data(), name.Size(), utf16Buffer);
 	int charCount = math::Min(LF_FACESIZE, utf16Buffer.Size());
 
 	memcpy(logFont.lfFaceName, utf16Buffer.Data(), charCount * 2);
@@ -482,7 +483,7 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 			ctx->italic != 0 ? TRUE : FALSE,
 			FALSE, FALSE, DEFAULT_CHARSET,
 			OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS,
-			ctx->antialiased ? ANTIALIASED_QUALITY : NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, core::StringToUTF16W(name));
+			ctx->antialiased ? ANTIALIASED_QUALITY : NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, core::UTF8ToWin32String(name));
 		if(!ctx->font) {
 			FreeDC(ctx);
 			return nullptr;

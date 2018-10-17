@@ -112,31 +112,32 @@ private:
 	};
 
 public:
-	static const char* GetName(int i)
+	static core::StringView GetName(int i)
 	{
-		static const char* NAMES[] = {"right", "left", "top", "bottom", "front", "back"};
+		static core::StringView NAMES[] = {"right", "left", "top", "bottom", "front", "back"};
 		return NAMES[i];
 	}
 
-	static const char* GetAxis(int i)
+	static core::StringView GetAxis(int i)
 	{
-		static const char* AXES[] = {"posx", "negx", "posy", "negy", "posz", "negz"};
+		static core::StringView AXES[] = {"posx", "negx", "posy", "negy", "posz", "negz"};
 		return AXES[i];
 	}
 
 	ENameScheme GetNameScheme(const io::Path& path, core::String& outBaseName, int& outId)
 	{
-		io::Path basePath = io::GetFileDir(path);
-		core::String nameonly = io::GetFilenameOnly(path, false);
-		core::String ext = io::GetFileExtension(path);
-		if(*nameonly.Last() > '1' && *nameonly.Last() <= '6') {
-			outBaseName = nameonly.SubString(nameonly.First(), nameonly.Last());
-			outId = *nameonly.Last() - '1';
+		io::Path basePath = path.GetFileDir();
+		core::String nameonly = path.GetFileName(false);
+		core::String ext = path.GetFileExtension();
+		char last = nameonly[nameonly.Size()];
+		if(last >= '1' && last <= '6') {
+			outBaseName = nameonly.BeginSubString(nameonly.Size()-1);
+			outId = last - '1';
 			return ENameScheme::Numeric;
 		}
 		for(int i = 0; i < 6; ++i) {
 			if(nameonly.EndsWith(GetName(i))) {
-				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetName(i)));
+				outBaseName = nameonly.BeginSubString(nameonly.Size() - GetName(i).Size());
 				outId = i;
 				return ENameScheme::Names;
 			}
@@ -144,7 +145,7 @@ public:
 
 		for(int i = 0; i < 6; ++i) {
 			if(nameonly.EndsWith(GetAxis(i))) {
-				outBaseName = nameonly.SubString(nameonly.First(), nameonly.End() - strlen(GetAxis(i)));
+				outBaseName = nameonly.BeginSubString(nameonly.Size() - GetAxis(i).Size());
 				outId = i;
 				return ENameScheme::Axes;
 			}
@@ -202,11 +203,11 @@ public:
 			}
 		}
 
-		auto baseDir = file->GetDescription();
+		auto baseDir = file->GetPath().GetFileDir();
 		auto fileSys = io::FileSystem::Instance();
 		for(i = 0; i < 6; ++i) {
-			auto& path = lines[i];
-			auto imgfile = fileSys->OpenFile(io::ConcatFileDesc(baseDir, path));
+			io::Path path(lines[i]);
+			auto imgfile = fileSys->OpenFile(path.GetResolved(baseDir));
 			if(imgfile)
 				images[order[i]] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, imgfile).AsStrong<Image>();
 		}

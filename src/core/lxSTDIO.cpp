@@ -13,8 +13,8 @@ FILE* FOpenUTF8(const char* filename, const char* mode)
 #endif
 
 #ifdef LUX_WINDOWS
-	auto path = UTF8ToUTF16(filename);
-	auto mod = UTF8ToUTF16(mode);
+	auto path = core::UTF8ToWin32String(filename);
+	auto mod = core::UTF8ToWin32String(mode);
 	return _wfopen((const wchar_t*)path.Data(), (const wchar_t*)mod.Data());
 #endif
 }

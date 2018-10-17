@@ -82,7 +82,6 @@ private:
 		DefaultParam_Diffuse = 1,
 		DefaultParam_Emissive = 2,
 		DefaultParam_Specular = 3,
-		DefaultParam_Ambient = 4,
 		DefaultParam_COUNT
 	};
 

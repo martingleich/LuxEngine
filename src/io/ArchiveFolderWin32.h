@@ -1,9 +1,9 @@
 #ifndef INCLUDED_LUX_ARCHIVEFOLDER_WIN32_H
 #define INCLUDED_LUX_ARCHIVEFOLDER_WIN32_H
+#ifdef LUX_WINDOWS
 #include "io/ArchiveLoader.h"
 #include "core/lxArray.h"
 
-#ifdef LUX_WINDOWS
 #include "platform/StrippedWindows.h"
 
 namespace lux
@@ -11,59 +11,45 @@ namespace lux
 namespace io
 {
 
-class FileSystem;
 using Win32Path = core::Array<u16>;
 
 class ArchiveFolderWin32 : public Archive
 {
 public:
-	ArchiveFolderWin32(io::FileSystem* fileSystem, const Path& dir);
+	ArchiveFolderWin32(const Path& dir);
 	~ArchiveFolderWin32();
-	StrongRef<File> OpenFile(const Path& p, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenFile(const FileDescription& file, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
-	bool ExistFile(const Path& p) const;
-	core::Range<FileIterator> EnumerateFiles(const Path& subDir = core::String::EMPTY);
-	EArchiveCapFlag GetCaps() const;
-	Path GetAbsolutePath(const Path& p) const;
-	const Path& GetPath() const;
+
+	StrongRef<File> OpenFile(const Path& p, EFileModeFlag mode, bool createIfNotExist) override;
+	bool ExistFile(const Path& p) const override;
+
+	bool ExistDirectory(const Path& p) const override;
+	FileInfo GetFileInfo(const Path& p) const override;
+
+	void CreateFile(const Path& path, bool recursive) override;
+	void DeleteFile(const Path& path) override;
+	void CreateDirectory(const Path& path, bool recursive) override;
+	void DeleteDirectory(const Path& path) override;
+
+	StrongRef<AbstractFileEnumerator> EnumerateFiles(const Path& subDir) override;
+	EArchiveCapFlag GetCaps() const override;
+	Path GetAbsolutePath(const Path& p) const override;
+	const Path& GetPath() const override;
 
 private:
-	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
-	DWORD GetWin32FileAttributes(const Path& p) const;
-
+	void CreateWin32File(Win32Path& win32Path, bool recursive);
+	void CreateWin32Directory(Win32Path& win32Path, bool recursive);
 private:
-	struct SelfData;
-	SelfData* self;
+	Path m_Path;
+	Win32Path m_Win32Path;
 };
 
 class ArchiveLoaderFolderWin32 : public ArchiveLoader
 {
 public:
-	ArchiveLoaderFolderWin32(FileSystem* fileSystem);
-	~ArchiveLoaderFolderWin32();
-
-	bool CanLoadFile(const Path& p)
-	{
-		LUX_UNUSED(p);
-		return true;
-	}
-
-	bool CanLoadFile(File* f)
-	{
-		LUX_UNUSED(f);
-		return false;
-	}
-
-	StrongRef<Archive> LoadArchive(const Path& p);
-	StrongRef<Archive> LoadArchive(File* f)
-	{
-		LUX_UNUSED(f);
-		return nullptr;
-	}
-
-public:
-	struct SelfData;
-	SelfData* self;
+	bool CanLoadFile(const Path&) {}
+	bool CanLoadFile(File*) {} 
+	StrongRef<Archive> LoadArchive(const Path& p) { return LUX_NEW(ArchiveFolderWin32)(p); }
+	StrongRef<Archive> LoadArchive(File*) { return nullptr; }
 };
 
 }

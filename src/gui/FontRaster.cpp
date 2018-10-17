@@ -38,7 +38,7 @@ VS_OUT mainVS(float3 position : POSITION, float2 uv : TEXCOORD0)
 const char* g_PSCode = R"(
 sampler2D param_texture;
 float4 param_diffuse; // font color
-float4 param_emissive; // border color
+float4 param_borderColor;
 
 float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 {
@@ -48,7 +48,7 @@ float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 
 	float alpha = value.a;
 	float inner = value.r;
-	float4 color = lerp(param_emissive, param_diffuse, inner);
+	float4 color = lerp(param_borderColor, param_diffuse, inner);
 
 	return float4(color.rgb, alpha*color.a);
 }
@@ -57,15 +57,23 @@ float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 class ShaderParamLoader : public video::ShaderParamSetCallback
 {
 public:
+	struct Data
+	{
+		video::TextureLayer texture;
+		video::ColorF borderColor;
+	};
 	int m_TexId;
+	int m_BorderColorId;
 	void Init(video::Shader* shader)
 	{
 		m_TexId = shader->GetParamId("texture");
+		m_BorderColorId = shader->GetParamId("borderColor");
 	}
 
-	void SendShaderSettings(const video::Pass& pass, void* texLayer) const
+	void SendShaderSettings(const video::Pass& pass, void* data) const
 	{
-		pass.shader->SetParam(m_TexId, texLayer);
+		pass.shader->SetParam(m_TexId, &((Data*)data)->texture);
+		pass.shader->SetParam(m_BorderColorId, &((Data*)data)->borderColor);
 	}
 };
 
@@ -124,7 +132,7 @@ void FontRaster::Init(const FontCreationData& data)
 
 	// Set replacement character.
 	core::String errorChars = "�? ";
-	for(auto it = errorChars.First(); it != errorChars.End(); ++it) {
+	for(auto it = errorChars.CodePoints().First(); it != errorChars.CodePoints().End(); ++it) {
 		auto jt = m_CharMap.Find(*it);
 		if(jt != m_CharMap.End()) {
 			m_ErrorChar = *jt;
@@ -139,11 +147,11 @@ void FontRaster::Init(const FontCreationData& data)
 
 void FontRaster::Draw(
 	const FontRenderSettings& _settings,
-	core::Range<core::ConstUTF8Iterator> text,
+	const core::StringView& text,
 	const math::Vector2F& position,
 	const math::RectF* userClip)
 {
-	if(text.First() == text.End())
+	if(text.IsEmpty())
 		return;
 
 	auto settings = GetFinalFontSettings(_settings);
@@ -172,10 +180,10 @@ void FontRaster::Draw(
 		renderer->SetScissorRect(clipRect, &tok);
 
 	m_Pass.diffuse = settings.color;
-	m_Pass.emissive = settings.borderColor;
-	video::TextureLayer texLayer;
-	texLayer.texture = m_Texture;
-	renderer->SetPass(m_Pass, false, &g_ParamLoader, &texLayer);
+	ShaderParamLoader::Data shaderData;
+	shaderData.texture = video::TextureLayer(m_Texture);
+	shaderData.borderColor = settings.borderColor;
+	renderer->SetPass(m_Pass, false, &g_ParamLoader, &shaderData);
 
 	if(!m_Pass.shader)
 		renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
@@ -183,7 +191,7 @@ void FontRaster::Draw(
 	math::Vector2F cursor = position;
 	video::Vertex2D vertices[600];
 	u32 vertexCursor = 0;
-	for(u32 character : text) {
+	for(u32 character : text.CodePoints()) {
 		const CharInfo& info = GetCharInfo(character);
 
 		if(character == ' ') {
@@ -258,7 +266,7 @@ void FontRaster::Draw(
 	}
 }
 
-float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text)
+float FontRaster::GetTextWidth(const FontRenderSettings& settings, const core::StringView& text)
 {
 	float width = 0;
 	IterateCarets(settings, text, [&](float f) -> bool {
@@ -268,11 +276,11 @@ float FontRaster::GetTextWidth(const FontRenderSettings& settings, core::Range<c
 	return width;
 }
 
-int FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, float XPosition)
+int FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, const core::StringView& text, float XPosition)
 {
 	if(XPosition < 0.0f)
 		return 0;
-	if(text.First() == text.End())
+	if(text.IsEmpty())
 		return 0;
 	float lastCaret = 0;
 	int counter = 0;
@@ -293,7 +301,7 @@ int FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, core::Ran
 	return counter;
 }
 
-void FontRaster::GetTextCarets(const FontRenderSettings& settings, core::Range<core::String::ConstIterator> text, core::Array<float>& carets)
+void FontRaster::GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<float>& carets)
 {
 	IterateCarets(settings, text, [&](float f)->bool
 	{

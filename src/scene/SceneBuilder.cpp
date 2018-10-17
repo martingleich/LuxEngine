@@ -80,7 +80,7 @@ StrongRef<Camera> SceneBuilder::CreateCamera() const
 
 StrongRef<Mesh> SceneBuilder::CreateMesh(const io::Path& path) const
 {
-	return CreateMesh(core::ResourceSystem::Instance()->GetResource(core::ResourceType::Mesh, path).As<video::Mesh>());
+	return CreateMesh(core::ResourceSystem::Instance()->GetResource(core::ResourceType::Mesh, path.AsView()).As<video::Mesh>());
 }
 
 StrongRef<Mesh> SceneBuilder::CreateMesh(video::Mesh* mesh) const

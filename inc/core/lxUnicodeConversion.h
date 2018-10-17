@@ -8,66 +8,60 @@ namespace lux
 namespace core
 {
 
-//! Helper type to cast from array<u16> to const wchar_t*
-struct WCharAlias
-{
-	WCharAlias(const Array<u16>& d) :
-		data(std::move(d))
-	{}
-	Array<u16> data;
+//! Convert a utf16-string to a array of utf8 elements.
+LUX_API Array<u8> UTF16ToUTF8(const void* data, int size);
 
-	operator const wchar_t*()
+//! Convert a utf16-string to a string.
+LUX_API core::String UTF16ToString(const void* data, int size);
+
+//! Convert a utf8-string to a array of utf16 elements
+LUX_API Array<u16>& UTF8ToUTF16(const void* data, int size, Array<u16>& dst);
+
+//! Convert a utf8-string to a array of utf16 elements
+LUX_API Array<u16>& UTF8ToUTF16(const void* data, int size, Array<u16>& dst);
+
+struct Win32String
+{
+public:
+	Win32String(Array<u16>&& old) :
+		data(old)
 	{
-		return (const wchar_t*)data.Data_c();
 	}
+
+	operator const wchar_t*() const { return (const wchar_t*)data.Data(); }
+	const void* Data() const { return data.Data(); }
+private:
+	Array<u16> data;
 };
 
-//! Convert a nulterminated utf16-string to a array of utf8 elements(nulterminated)
-LUX_API Array<u8> UTF16ToUTF8(const void* data);
+inline Win32String UTF8ToWin32String(const void* data, int size)
+{
+	Array<u16> out;
+	UTF8ToUTF16(data, size, out);
+	out.PushBack(0);
+	return Win32String(std::move(out));
+}
+inline Win32String UTF8ToWin32String(StringView view)
+{
+	return UTF8ToWin32String(view.Data(), view.Size());
+}
 
-//! Convert a nulterminated utf16-string to a string.
-LUX_API core::String UTF16ToString(const void* data);
-
-//! Convert a nulterminated utf8-string to a array of utf16 elements(nulterminated)
-LUX_API Array<u16> UTF8ToUTF16(const void* data);
-
-//! Convert a nulterminated utf8-string to a array of utf16 elements(nulterminated).
-/**
-The return value of this method can be cast to const wchar_t*.
-It can be used inside a funktion call, receiving a wchar_t* pointer.
-*/
-LUX_API WCharAlias UTF8ToUTF16W(const void* data);
-
-//! Convert a string to a array of utf16 elements(nulterminated).
-/**
-The return value of this method can be cast to const wchar_t*.
-It can be used inside a funktion call, receiving a wchar_t* pointer.
-*/
-LUX_API WCharAlias StringToUTF16W(const core::String& data);
 
 //! Convert a unicode codepoint to utf-8 data
 /*
 \param c The character to conver
 \param dst Here the utf8 data is written, must be at least 6 byte big.
-\return A pointer to the byte after the last one containing valid data.
+\return The numer of output bytes
 */
-LUX_API u8* CodePointToUTF8(u32 c, u8* dst);
+LUX_API int CodePointToUTF8(u32 c, void* dst);
 
 //! Convert a unicode codepoint to utf-16 data.
 /*
 \param c The character to conver
 \param dst Here the utf16 data is written, must be at least 4 byte big.
-\return A pointer to the byte after the last one containing valid data.
+\return The numer of output bytes
 */
-LUX_API u8* CodePointToUTF16(u32 c, u8* dst);
-
-//! Convert a unicode codepoint to utf-16 data.
-/*
-\param c The character to conver
-\param dst Here the utf16 data is written, must be at least 4 byte big.
-\return A pointer to the byte after the last one containing valid data.
-*/
-LUX_API u16* CodePointToUTF16(u32 c, u16* dst);
+LUX_API int CodePointToUTF16(u32 c, void* dst);
 
 }
 }

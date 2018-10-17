@@ -14,30 +14,27 @@ class FileSystemWin32 : public FileSystem
 {
 public:
 	FileSystemWin32();
-	StrongRef<File> OpenFile(const FileDescription& desc, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
 	StrongRef<File> OpenFile(const Path& filename, EFileModeFlag mode = EFileModeFlag::Read, bool createIfNotExist = false);
-	StrongRef<File> OpenVirtualFile(void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
-	StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const core::String& name, EVirtualCreateFlag flag);
+	StrongRef<File> OpenVirtualFile(void* memory, s64 size, const Path& name, EVirtualCreateFlag flag);
+	StrongRef<File> OpenVirtualFile(const void* memory, s64 size, const Path& name, EVirtualCreateFlag flag);
 	bool ExistFile(const Path& filename) const;
-	bool ExistFile(const FileDescription& filename) const;
 	bool ExistDirectory(const Path& filename) const;
 	Path GetAbsoluteFilename(const Path& filename) const;
+	FileInfo GetFileInfo(const Path& name);
+
 	const Path& GetWorkingDirectory() const;
 
 	File* CreateTemporaryFile(s64 Size);
-	FileDescription GetFileDescription(const Path& name);
 
 	StrongRef<INIFile> CreateINIFile(const Path& filename);
 	StrongRef<INIFile> CreateINIFile(File* file);
 
-	StrongRef<File> OpenLimitedFile(File* file, s64 start, s64 size, const core::String& name);
+	StrongRef<File> OpenLimitedFile(File* file, s64 start, s64 size, const Path& name);
 
-	void CreateFile(const Path& path, bool recursive = false);
+	void CreateFile(const Path& path, bool recursive);
 	void DeleteFile(const Path& path);
-	/*
-	void CopyFile(const Path& srcPath, const Path& dstPath, bool createDstPath=true, bool replace=true);
-	void MoveFile(const Path& srcPath, const Path& dstPath, bool createDstPath=true, bool replace=true);
-	*/
+	void CreateDirectory(const Path& path, bool recursive);
+	void DeleteDirectory(const Path& path);
 
 	StrongRef<Archive> GetRootArchive();
 	StrongRef<Archive> CreateArchive(const Path& path);
@@ -46,12 +43,7 @@ public:
 	void RemoveMountPoint(const Path& point, Archive* archive = nullptr);
 
 private:
-	core::String GetFileOpenString(EFileModeFlag mode) const;
-	Win32Path ConvertPathToWin32WidePath(const Path& p) const;
-	DWORD GetWin32FileAttributes(const Path& p) const;
-
-	void CreateWin32File(Win32Path& path, bool recursive = false);
-	void CreateWin32Directory(Win32Path& path, bool recursive = false);
+	Path ResolveMountPoints(const Path& p) const;
 
 private:
 	struct MountEntry
@@ -66,7 +58,6 @@ private:
 	StrongRef<ArchiveFolderWin32> m_RootArchive;
 	core::Array<MountEntry> m_Mounts;
 };
-
 }
 }
 

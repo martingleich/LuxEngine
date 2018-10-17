@@ -29,10 +29,10 @@ public:
 
 		m_Str.Reserve(m_Str.Size() + (int)size);
 		for(auto& s : slices)
-			m_Str.AppendRaw(s.data, (int)s.size);
+			m_Str.Append(StringView(s.data, (int)s.size));
 
 		if((flags & format::ESinkFlags::Newline) != 0)
-			m_Str.Append("\n");
+			m_Str.Append(StringView("\n", 1));
 
 		return size;
 	}

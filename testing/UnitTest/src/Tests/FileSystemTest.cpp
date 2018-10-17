@@ -7,12 +7,12 @@ UNIT_SUITE(FileSystem)
 	UNIT_SUITE_DEPEND_ON(String);
 
 	io::FileSystem* g_FileSys;
-	io::Path m_WorkingDir;
+	core::String m_WorkingDir;
 
 	void CreateTestDirectory()
 	{
 #ifdef LUX_WINDOWS
-		io::Path testDir = m_WorkingDir + "FileSystemTestDir";
+		core::String testDir = m_WorkingDir + "/FileSystemTestDir";
 		testDir.Replace("\\", "/");
 		core::String cmd = "if not exist \"" + testDir + "\" mkdir \"" + testDir + "\"";
 		system(cmd.Data());
@@ -24,7 +24,7 @@ UNIT_SUITE(FileSystem)
 	void RemoveTestDirectory()
 	{
 #ifdef LUX_WINDOWS
-		io::Path testDir = m_WorkingDir + "FileSystemTestDir";
+		core::String testDir = m_WorkingDir + "/FileSystemTestDir";
 		testDir.Replace("\\", "/");
 		core::String cmd = "if exist \"" + testDir + "\" rmdir \"" + testDir + "\" /s /q";
 		system(cmd.Data());
@@ -35,7 +35,7 @@ UNIT_SUITE(FileSystem)
 
 	bool CheckForFile(const char* p)
 	{
-		io::Path testDir = m_WorkingDir + p;
+		core::String testDir = m_WorkingDir + "\\" + p;
 
 		struct stat buffer;
 		return (stat(testDir.Data(), &buffer) == 0);
@@ -48,7 +48,7 @@ UNIT_SUITE(FileSystem)
 		io::FileSystem::Initialize();
 		g_FileSys = io::FileSystem::Instance();
 
-		m_WorkingDir = g_FileSys->GetWorkingDirectory();
+		m_WorkingDir = g_FileSys->GetWorkingDirectory().GetString();
 		
 		RemoveTestDirectory();
 		CreateTestDirectory();

@@ -28,8 +28,11 @@ LUX_API extern const Name Animation; //!< Resources of type \ref lux::scene::Ani
 }
 
 class Resource;
-class OriginResourceLoader;
-
+class OriginResourceLoader
+{
+public:
+	virtual void LoadResource(const core::String& origin, Resource* dst) const = 0;
+};
 struct ResourceOrigin
 {
 	ResourceOrigin() :
@@ -50,17 +53,10 @@ struct ResourceOrigin
 		return loader != nullptr;
 	}
 };
-
-class OriginResourceLoader
-{
-public:
-	virtual void LoadResource(const ResourceOrigin& origin, Resource* dst) const = 0;
-};
-
 void ResourceOrigin::Load(Resource* dst) const
 {
 	if(loader)
-		loader->LoadResource(*this, dst);
+		loader->LoadResource(str, dst);
 }
 
 //! A engine resource object

@@ -38,14 +38,14 @@ WindowWin32::WindowWin32(HWND window) :
 	if(!isZoomed && !isIconic)
 		this->OnStateChange(EStateChange::Normal);
 
-	u16 text[200];
+	wchar_t text[200];
 	int length;
 	DWORD_PTR result;
 	text[0] = 0;
 	length = (int)SendMessageTimeoutW(m_Window, WM_GETTEXT,
 		200, reinterpret_cast<LPARAM>(text),
 		SMTO_ABORTIFHUNG, 2000, &result);
-	core::String newTitle = core::UTF16ToString(text);
+	core::String newTitle = core::UTF16ToString(text, -1);
 
 	OnTitleChange(newTitle);
 }
@@ -116,10 +116,10 @@ void WindowWin32::Paint(Renderer* r)
 
 void WindowWin32::SetText(const core::String& text)
 {
-	auto data = core::UTF8ToUTF16(text.Data());
+	auto data = core::UTF8ToWin32String(text);
 	DWORD_PTR result;
 	SendMessageTimeoutW(m_Window, WM_SETTEXT, 0,
-		reinterpret_cast<LPARAM>(data.Data_c()),
+		reinterpret_cast<LPARAM>(data.Data()),
 		SMTO_ABORTIFHUNG, 500, &result);
 	LUX_UNUSED(result);
 }
@@ -401,7 +401,7 @@ bool WindowWin32::HandleMessages(UINT Message,
 		return true;
 		break;
 	case WM_SETTEXT:
-		OnTitleChange(core::UTF16ToString((void*)LParam));
+		OnTitleChange(core::UTF16ToString((void*)LParam, -1));
 		break;
 	case WM_SIZE:
 	{

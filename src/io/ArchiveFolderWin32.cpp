@@ -1,117 +1,79 @@
 #include "LuxConfig.h"
 #ifdef LUX_WINDOWS
-#include "ArchiveFolderWin32.h"
+#include "io/ArchiveFolderWin32.h"
 #include "io/FileSystem.h"
-#include "io/File.h"
+#include "io/StreamFile.h"
 #include "core/lxUnicodeConversion.h"
+#include "platform/WindowsUtils.h"
 
 namespace lux
 {
 namespace io
 {
 
-static bool ConvertWin32FileTimeToLuxTime(FILETIME Time, core::DateAndTime& out)
-{
-	SYSTEMTIME SysTime;
-	BOOL Result = FileTimeToSystemTime(&Time, &SysTime);
-	if(!Result)
-		return false;
-
-	out.dayOfMonth = SysTime.wDay;
-	out.hours = SysTime.wHour;
-	out.minutes = SysTime.wMinute;
-	out.month = SysTime.wMonth;
-	out.seconds = SysTime.wSecond;
-	out.weekDay = (core::DateAndTime::EWeekDay)SysTime.wDayOfWeek;
-	out.year = SysTime.wYear;
-	out.isDayLightSaving = false;
-
-	return true;
-}
-
-static FileDescription::EType GetFileTypeFromAttributes(DWORD attrib)
-{
-	if(attrib & FILE_ATTRIBUTE_DIRECTORY)
-		return FileDescription::EType::Directory;
-	else
-		return FileDescription::EType::File;
-}
-
-static bool IsFilenameValid(const wchar_t* filename)
-{
-	if(filename[0] == L'.') {
-		if(filename[1] == L'\0')
-			return false;
-		if(filename[1] == L'.' && filename[2] == L'\0')
-			return false;
-	}
-
-	return true;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace
 {
+core::Array<u16> ConvertPathToWin32WidePath(const Path& p)
+{
+	core::Array<u16> out;
+	for(auto c : p.AsView().CodePoints()) {
+		u16 buffer[2];
+		int bytes = core::CodePointToUTF16(c, buffer);
+		if(buffer[0] == '/')
+			buffer[0] = '\\';
+		out.PushBack(buffer[0]);
+		if(bytes == 4)
+			out.PushBack(buffer[1]);
+	}
+	out.PushBack(0);
+
+	return out;
+}
+
 class ArchiveFolderEnumerator : public AbstractFileEnumerator
 {
 public:
-	ArchiveFolderEnumerator(
-		Archive* archive,
-		const Path& basePath,
-		const Win32Path& win32Path);
-	~ArchiveFolderEnumerator();
-	bool IsValid() const;
-	bool Advance();
-	const FileDescription& GetCurrent() const;
+	ArchiveFolderEnumerator(const Path& basePath);
+
+	bool Advance() override;
+	const FileInfo& GetInfo() const override { return m_CurInfo; }
+	const Path& GetBasePath() const override { return m_CurBasePath; }
+	const core::String& GetName() const override { return m_CurName; }
+	const Path& GetFullPath() const override
+	{
+		m_CurFullPath = Path(core::String(m_CurBasePath.AsView()).Append(m_CurName), m_CurBasePath.GetArchive());
+		return m_CurFullPath;
+	}
+
+	static bool IsRealFile(const wchar_t* filename)
+	{
+		if(filename[0] == L'.') {
+			if(filename[1] == L'\0')
+				return false;
+			if(filename[1] == L'.' && filename[2] == L'\0')
+				return false;
+		}
+
+		return true;
+	}
 
 private:
-	HANDLE m_FindHandle;
+	static void WrapperCloseHandle(HANDLE h) { FindClose(h); }
+	HandleWrapper<WrapperCloseHandle> m_FindHandle;
 	WIN32_FIND_DATAW m_FindData;
+	FileInfo m_CurInfo;
+	Path m_CurBasePath;
+	mutable Path m_CurFullPath;
+	core::String m_CurName;
 	bool m_IsValid;
-
-	FileDescription m_Current;
 };
 
-ArchiveFolderEnumerator::ArchiveFolderEnumerator(
-	Archive* archive,
-	const Path& basePath,
-	const Win32Path& win32Path)
+ArchiveFolderEnumerator::ArchiveFolderEnumerator(const Path& basePath)
 {
-	Win32Path win32searchPath;
-	win32searchPath.Reserve(win32Path.Size() + 2);
-	win32searchPath.PushBack(win32Path.Data(), win32Path.Size() - 1);
-	win32searchPath.PushBack(L'*');
-	win32searchPath.PushBack(0);
-
-	m_FindHandle = FindFirstFileW((LPCWSTR)win32searchPath.Data_c(), &m_FindData);
-	m_IsValid = (m_FindHandle != INVALID_HANDLE_VALUE);
-
-	while(m_IsValid && !IsFilenameValid(m_FindData.cFileName))
-		m_IsValid = (FindNextFileW(m_FindHandle, &m_FindData) == TRUE);
-
-	if(m_IsValid) {
-		m_Current.SetIsVirtual(false);
-		m_Current.SetArchive(archive);
-		m_Current.SetPath(basePath);
-		m_Current.SetName(core::UTF16ToString(m_FindData.cFileName));
-		m_Current.SetSize(m_FindData.nFileSizeLow);
-		m_Current.SetType(GetFileTypeFromAttributes(m_FindData.dwFileAttributes));
-		core::DateAndTime date;
-		ConvertWin32FileTimeToLuxTime(m_FindData.ftCreationTime, date);
-		m_Current.SetCreationDate(date);
-	}
-}
-
-ArchiveFolderEnumerator::~ArchiveFolderEnumerator()
-{
-	if(m_FindHandle)
-		FindClose(m_FindHandle);
-}
-
-bool ArchiveFolderEnumerator::IsValid() const
-{
-	return m_IsValid;
+	m_CurBasePath = basePath;
+	m_IsValid = true;
 }
 
 bool ArchiveFolderEnumerator::Advance()
@@ -119,112 +81,146 @@ bool ArchiveFolderEnumerator::Advance()
 	if(!m_IsValid)
 		return false;
 
-	do {
+	if(m_FindHandle == INVALID_HANDLE_VALUE) {
+		Win32Path win32searchPath = ConvertPathToWin32WidePath(m_CurBasePath);
+		win32searchPath.PopBack();
+		win32searchPath.PushBack('\\');
+		win32searchPath.PushBack('*');
+		win32searchPath.PushBack(0);
+
+		m_FindHandle = FindFirstFileW((LPCWSTR)win32searchPath.Data_c(), &m_FindData);
+		m_IsValid = m_FindHandle == INVALID_HANDLE_VALUE;
+		if(!m_IsValid)
+			return false;
+	}
+
+	// Search until a valid filename is found.
+	while(m_IsValid && !IsRealFile(m_FindData.cFileName))
 		m_IsValid = (FindNextFileW(m_FindHandle, &m_FindData) == TRUE);
-	} while(m_IsValid && !IsFilenameValid(m_FindData.cFileName));
 
 	if(m_IsValid) {
-		m_Current.SetName(core::UTF16ToString(m_FindData.cFileName));
-		m_Current.SetSize(m_FindData.nFileSizeLow);
-		m_Current.SetType(GetFileTypeFromAttributes(m_FindData.dwFileAttributes));
-
-		core::DateAndTime date;
-		ConvertWin32FileTimeToLuxTime(m_FindData.ftCreationTime, date);
-		m_Current.SetCreationDate(date);
+		s64 size = (s64)m_FindData.nFileSizeHigh << 32 | m_FindData.nFileSizeLow;
+		auto type = FileInfo::EType::File;
+		if((m_FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+			type = FileInfo::EType::Directory;
+		m_CurInfo = FileInfo(size, type);
+		m_CurName = core::UTF16ToString(m_FindData.cFileName, -1);
 	}
 
 	return m_IsValid;
 }
-
-const FileDescription& ArchiveFolderEnumerator::GetCurrent() const
-{
-	return m_Current;
-}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ArchiveLoaderFolderWin32::SelfData
+ArchiveFolderWin32::ArchiveFolderWin32(const Path& path)
 {
-	WeakRef<FileSystem> fileSys;
-};
-
-ArchiveLoaderFolderWin32::ArchiveLoaderFolderWin32(FileSystem* fileSystem) :
-	self(LUX_NEW(SelfData))
-{
-	self->fileSys = fileSystem;
-}
-
-ArchiveLoaderFolderWin32::~ArchiveLoaderFolderWin32()
-{
-	LUX_FREE(self);
-}
-
-StrongRef<Archive> ArchiveLoaderFolderWin32::LoadArchive(const Path& p)
-{
-	return LUX_NEW(ArchiveFolderWin32)(self->fileSys, p);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-struct ArchiveFolderWin32::SelfData
-{
-	core::String name;
-	Path path;
-
-	Win32Path win32AbsPath;
-
-	WeakRef<io::FileSystem> fileSystem;
-};
-
-ArchiveFolderWin32::ArchiveFolderWin32(io::FileSystem* fileSystem, const Path& dir) :
-	self(LUX_NEW(SelfData))
-{
-	self->fileSystem = fileSystem;
-	if(dir.IsEmpty() || self->fileSystem->ExistDirectory(dir)) {
-		self->path = NormalizePath(dir, true);
-		core::String win32Path = "\\\\?\\" + self->path;
-		win32Path.Replace("\\", "/");
-		self->win32AbsPath = core::UTF8ToUTF16(win32Path.Data());
-	} else {
-		throw io::FileNotFoundException(dir.Data());
-	}
+	m_Path = path;
+	m_Win32Path = ConvertPathToWin32WidePath(path);
 }
 
 ArchiveFolderWin32::~ArchiveFolderWin32()
 {
-	LUX_FREE(self);
 }
 
-StrongRef<File> ArchiveFolderWin32::OpenFile(const Path& p, EFileModeFlag mode, bool createIfNotExist)
+StrongRef<File> ArchiveFolderWin32::OpenFile(const Path& path, EFileModeFlag mode, bool createIfNotExist)
 {
-	return self->fileSystem->OpenFile(self->path + p, mode, createIfNotExist);
-}
+	Win32Path winPath = ConvertPathToWin32WidePath(path.GetResolved(m_Path));
 
-StrongRef<File> ArchiveFolderWin32::OpenFile(const FileDescription& file, EFileModeFlag mode, bool createIfNotExist)
-{
-	if(file.GetArchive() != this)
-		throw io::FileNotFoundException("");
+	DWORD access = 0;
+	if(TestFlag(mode, EFileModeFlag::Read))
+		access |= GENERIC_READ;
+	if(TestFlag(mode, EFileModeFlag::Write))
+		access |= GENERIC_WRITE;
 
-	return OpenFile(file.GetPath() + file.GetName(), mode, createIfNotExist);
+	DWORD create = 0;
+	if(createIfNotExist)
+		create = OPEN_ALWAYS;
+	else
+		create = OPEN_EXISTING;
+
+	Win32FileHandle file = CreateFileW((LPCWSTR)winPath.Data(), access, FILE_SHARE_READ, NULL, create, FILE_ATTRIBUTE_NORMAL, NULL);
+	// TODO: Better error reporting.
+	if(file == INVALID_HANDLE_VALUE)
+		throw io::FileNotFoundException(path.Data());
+
+	LARGE_INTEGER size;
+	if(!GetFileSizeEx(file, &size))
+		size.QuadPart = 0;
+	FileInfo info((s64)size.QuadPart, FileInfo::EType::File);
+
+	return LUX_NEW(StreamFileWin32)(std::move(file), info, path);
 }
 
 bool ArchiveFolderWin32::ExistFile(const Path& p) const
 {
-	auto fatt = GetWin32FileAttributes(p);
+	auto winPath = ConvertPathToWin32WidePath(p.GetResolved(m_Path));
+	DWORD fatt = GetFileAttributesW((wchar_t*)winPath.Data_c());
 	if(fatt == INVALID_FILE_ATTRIBUTES)
 		return false;
 	else
 		return (fatt & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
-core::Range<FileIterator> ArchiveFolderWin32::EnumerateFiles(const Path& subDir)
+bool ArchiveFolderWin32::ExistDirectory(const Path& p) const
 {
-	Path correctedSubDir = NormalizePath(subDir, true);
-	Win32Path win32Path = ConvertPathToWin32WidePath(correctedSubDir);
+	auto winPath = ConvertPathToWin32WidePath(p.GetResolved(m_Path));
+	DWORD fatt = GetFileAttributesW((wchar_t*)winPath.Data_c());
+	if(fatt == INVALID_FILE_ATTRIBUTES)
+		return false;
+	else
+		return (fatt & FILE_ATTRIBUTE_DIRECTORY) != 0;
+}
 
-	StrongRef<AbstractFileEnumerator> enumerator = LUX_NEW(ArchiveFolderEnumerator)(this, correctedSubDir, win32Path);
-	return core::MakeRange(FileIterator(enumerator), FileIterator(enumerator, -1));
+FileInfo ArchiveFolderWin32::GetFileInfo(const Path& p) const
+{
+	auto winPath = ConvertPathToWin32WidePath(p.GetResolved(m_Path));
+	DWORD fatt = GetFileAttributesW((wchar_t*)winPath.Data_c());
+	if(fatt == INVALID_FILE_ATTRIBUTES) {
+		return FileInfo();
+	} else if((fatt & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+		return FileInfo(0, FileInfo::EType::Directory);
+	} else {
+		Win32FileHandle file = CreateFileW((LPCWSTR)winPath.Data(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		if(file == INVALID_HANDLE_VALUE)
+			return FileInfo();
+		LARGE_INTEGER size;
+		if(!GetFileSizeEx(file, &size))
+			size.QuadPart = 0;
+		return FileInfo((s64)size.QuadPart, FileInfo::EType::File);
+	}
+}
+
+void ArchiveFolderWin32::CreateFile(const Path& p, bool recursive)
+{
+	Win32Path win32Path = ConvertPathToWin32WidePath(p.GetResolved(m_Path));
+	CreateWin32File(win32Path, recursive);
+}
+
+void ArchiveFolderWin32::DeleteFile(const Path& p)
+{
+	Win32Path win32Path = ConvertPathToWin32WidePath(p.GetResolved(m_Path));
+	auto result = DeleteFileW((LPWSTR)win32Path.Data());
+	if(result == 0)
+		throw core::Win32Exception(GetLastError());
+}
+
+void ArchiveFolderWin32::CreateDirectory(const Path& p, bool recursive)
+{
+	Win32Path win32Path = ConvertPathToWin32WidePath(p.GetResolved(m_Path));
+	CreateWin32Directory(win32Path, recursive);
+}
+
+void ArchiveFolderWin32::DeleteDirectory(const Path& path)
+{
+	LUX_UNUSED(path);
+	throw core::NotImplementedException("DeleteDirectory");
+}
+
+StrongRef<AbstractFileEnumerator> ArchiveFolderWin32::EnumerateFiles(const Path& subDir)
+{
+	Path absPath = subDir.GetResolved(m_Path);
+	return LUX_NEW(ArchiveFolderEnumerator)(absPath);
 }
 
 EArchiveCapFlag ArchiveFolderWin32::GetCaps() const
@@ -234,35 +230,78 @@ EArchiveCapFlag ArchiveFolderWin32::GetCaps() const
 
 Path ArchiveFolderWin32::GetAbsolutePath(const Path& p) const
 {
-	return (self->path + p);
+	return p.GetResolved(m_Path);
 }
 
 const Path& ArchiveFolderWin32::GetPath() const
 {
-	return self->path;
+	return m_Path;
 }
 
-DWORD ArchiveFolderWin32::GetWin32FileAttributes(const Path& p) const
+void ArchiveFolderWin32::CreateWin32File(Win32Path& win32Path, bool recursive)
 {
-	Win32Path win32Path = ConvertPathToWin32WidePath(p);
-	return GetFileAttributesW((wchar_t*)win32Path.Data_c());
-}
+	Win32Path subPath = win32Path;
+	while(*subPath.Last() != '\\')
+		subPath.PopBack();
+	subPath.PushBack(0);
 
-core::Array<u16> ArchiveFolderWin32::ConvertPathToWin32WidePath(const Path& p) const
-{
-	core::Array<u16> out = self->win32AbsPath;
-	out.PopBack(); // Remove \0 
-	core::Array<u16> p2 = core::UTF8ToUTF16(p.Data());
-	out.Reserve(out.Size() + p2.Size() + 1);
-
-	for(auto it = p2.First(); it != p2.End(); ++it) {
-		if(*it == L'/')
-			out.PushBack(L'\\');
-		else
-			out.PushBack(*it);
+	DWORD attrb = GetFileAttributesW((const wchar_t*)subPath.Data_c());
+	bool subPathExists = false;
+	if(attrb != INVALID_FILE_ATTRIBUTES) {
+		if((attrb & FILE_ATTRIBUTE_DIRECTORY) != 0)
+			subPathExists = true;
 	}
 
-	return out;
+	if(!subPathExists) {
+		if(recursive)
+			CreateWin32Directory(subPath, true);
+		else
+			throw core::GenericRuntimeException("Path does not exists.");
+	}
+
+	Win32FileHandle handle = CreateFileW((const wchar_t*)win32Path.Data_c(),
+		0, 0, nullptr,
+		CREATE_NEW, FILE_ATTRIBUTE_NORMAL,
+		nullptr);
+	if(handle == INVALID_HANDLE_VALUE)
+		throw core::Win32Exception(GetLastError());
+}
+
+void ArchiveFolderWin32::CreateWin32Directory(Win32Path& win32Path, bool recursive)
+{
+	// Each patch starts with \\?\, meaning the first four charcters are not used.
+
+	wchar_t* path = (wchar_t*)win32Path.Data_c();
+	wchar_t* path_ptr = path + win32Path.Size();
+
+	core::Array<wchar_t*> subDirs;
+	subDirs.PushBack(path_ptr);
+	do {
+		**subDirs.Last() = L'\0';
+		BOOL result = CreateDirectoryW(path, nullptr);
+		if(!result) {
+			DWORD le = GetLastError();
+			if(le == ERROR_ALREADY_EXISTS) {
+				result = TRUE;
+			} else if(le == ERROR_PATH_NOT_FOUND) {
+				--path_ptr;
+				while(*path_ptr != L'\\' && path_ptr - path > 4)
+					--path_ptr;
+
+				if(path_ptr - path > 4)
+					subDirs.PushBack(path_ptr);
+				else
+					throw core::InvalidArgumentException("Filepath isn't a valid path");
+			} else {
+				throw core::Win32Exception(le);
+			}
+		}
+
+		if(result) {
+			**subDirs.Last() = L'\\';
+			subDirs.PopBack();
+		}
+	} while(!subDirs.IsEmpty() && path_ptr - path > 4 && !recursive);
 }
 
 }

@@ -79,7 +79,7 @@ public:
 		const math::RectF* clipBox=nullptr);
 
 	LUX_API int GetLineCount() const;
-	LUX_API core::Range<core::String::ConstIterator> GetLine(int i) const;
+	LUX_API core::StringView GetLine(int i) const;
 
 	LUX_API float GetLineWidth(int i) const;
 	LUX_API math::Dimension2F GetDimension() const;
@@ -96,13 +96,13 @@ public:
 private:
 	struct Line
 	{
-		Line() {}
-		Line(core::Range<core::String::ConstIterator> l, float w) :
+		Line() : line("", 0) {}
+		Line(const core::StringView& l, float w) :
 			line(l),
 			width(w)
 		{
 		}
-		core::Range<core::String::ConstIterator> line;
+		core::StringView line;
 		float width;
 	};
 	core::String m_Text;

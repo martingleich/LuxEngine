@@ -31,7 +31,7 @@ void TextContainer::Ensure(
 		return;
 	}
 	int rebreakText = m_Rebreak;
-	if(!m_BrokenText.IsEmpty() && m_Text.First() != m_BrokenText[0].line.First()) {
+	if(!m_BrokenText.IsEmpty() && m_Text.Data() != m_BrokenText[0].line.Data()) {
 		m_BrokenText.Clear();
 		rebreakText = 0;
 	}
@@ -67,9 +67,9 @@ void TextContainer::Ensure(
 	core::Array<float> carets;
 	bool keepBreaking = true;
 	int lineId = rebreakText;
-	auto AddBrokenLine = [&](core::Range<core::String::ConstIterator> str, float width) {
+	auto AddBrokenLine = [&](const core::StringView& str, float width) {
 		if(m_BrokenText.Size() > lineId) {
-			if(m_BrokenText[lineId].line == str && m_BrokenText[lineId].width == width)
+			if(m_BrokenText[lineId].line.Data() == str.Data() && m_BrokenText[lineId].width == width)
 				keepBreaking = false;
 			m_BrokenText[lineId] = Line(str, width);
 		} else {
@@ -78,45 +78,45 @@ void TextContainer::Ensure(
 		++lineId;
 		textDim.width = math::Max(textDim.width, width);
 	};
-	auto AddLine = [&](core::Range<core::String::ConstIterator> line) {
-		if(line.First() == line.End())
+	auto AddLine = [&](const core::StringView& line) {
+		if(line.IsEmpty())
 			return;
 		auto lineWidth = font->GetTextWidth(settings, line);
 		if(!wordWrap || lineWidth <= width) {
 			AddBrokenLine(line, lineWidth);
 		} else {
-			core::String::ConstIterator prevBreakPoint = line.End();
+			auto prevBreakPoint = line.CodePoints().End();
 			carets.Clear();
 			m_Font->GetTextCarets(settings, line, carets);
 			float offset = 0.0f;
-			core::String::ConstIterator lineFirst = line.First();
+			auto lineFirst = line.CodePoints().First();
 			int id = 0;
-			for(auto jt = line.First(); jt != line.End(); ++jt) {
+			for(auto jt = line.CodePoints().First(); jt != line.CodePoints().End(); ++jt) {
 				++id;
 				if(*jt == ' ') {
 					prevBreakPoint = jt;
-				} else if(carets[id] - offset > width && prevBreakPoint != line.End()) {
-					AddBrokenLine(core::MakeRange(lineFirst, prevBreakPoint), carets[id] - offset);
+				} else if(carets[id] - offset > width && prevBreakPoint != line.CodePoints().End()) {
+					AddBrokenLine(core::StringView(lineFirst.Pointer(), prevBreakPoint.Pointer()), carets[id] - offset);
 					offset = carets[id];
 					lineFirst = prevBreakPoint + 1;
-					prevBreakPoint = line.End();
+					prevBreakPoint = line.CodePoints().End();
 				}
 			}
-			if(lineFirst != line.End())
-				AddBrokenLine(core::MakeRange(lineFirst, line.End()), carets[id] - offset);
+			if(lineFirst != line.CodePoints().End())
+				AddBrokenLine(core::StringView(lineFirst.Pointer(), line.Bytes().End()), carets[id] - offset);
 		}
 
 		float lineHeight = settings.lineDistance*settings.scale*font->GetFontHeight();
 		textDim.height = lineHeight * m_BrokenText.Size();
 	};
 
-	auto textFirst = m_BrokenText.IsEmpty() ? m_Text.First() : m_BrokenText[rebreakText].line.First();
-	auto first = m_Text.First();
+	auto textFirst = m_BrokenText.IsEmpty() ? m_Text.CodePoints().First() : m_BrokenText[rebreakText].line.CodePoints().First();
+	auto first = m_Text.CodePoints().First();
 	auto end = first;
 	core::String line;
-	for(auto it = textFirst; it != m_Text.End() && keepBreaking;) {
+	for(auto it = textFirst; it != m_Text.CodePoints().End() && keepBreaking;) {
 		if(*it == '\n') {
-			AddLine(core::MakeRange(first, end));
+			AddLine(core::StringView(first.Pointer(), end.Pointer()));
 			++it;
 			end = first = it;
 		} else {
@@ -126,7 +126,7 @@ void TextContainer::Ensure(
 	}
 
 	if(keepBreaking)
-		AddLine(core::MakeRange(first, end));
+		AddLine(core::StringView(first.Pointer(), end.Pointer()));
 
 	if(keepBreaking)
 		m_BrokenText.Resize(lineId);
@@ -187,7 +187,7 @@ int TextContainer::GetLineCount() const
 	return m_BrokenText.Size();
 }
 
-core::Range<core::String::ConstIterator> TextContainer::GetLine(int i) const
+core::StringView TextContainer::GetLine(int i) const
 {
 	return m_BrokenText[i].line;
 }
