@@ -53,7 +53,7 @@ public:
 	\return The structure builder.
 	*/
 	LUX_API StructureBuilder AddStructure(
-		const core::String& name,
+		core::StringView name,
 		const Serializable* baseAddr,
 		u32 version = 0);
 

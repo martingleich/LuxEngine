@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_LXMEMORY_H
 #define INCLUDED_LUX_LXMEMORY_H
 #include "LuxBase.h"
-#include <string.h>
+#include <cstring>
 #include <memory>
 
 namespace lux
@@ -27,7 +27,7 @@ public:
 		m_Data(nullptr),
 		m_Size(0)
 	{
-		SetMinSize(size, action);
+		SetSize(size, action);
 	}
 
 	RawMemory(void* ptr, size_t size) :
@@ -40,12 +40,12 @@ public:
 		m_Data(nullptr),
 		m_Size(0)
 	{
-		SetMinSize(other.m_Size, NOOP);
+		SetSize(other.m_Size, NOOP);
 		if(other.m_Size) {
 			if(action == COPY && m_Data)
-				memcpy(m_Data, other.m_Data, other.m_Size);
+				std::memcpy(m_Data, other.m_Data, other.m_Size);
 			if(action == ZERO && m_Data)
-				memset(m_Data, 0, other.m_Size);
+				std::memset(m_Data, 0, other.m_Size);
 		}
 	}
 
@@ -57,11 +57,14 @@ public:
 		old.m_Data = nullptr;
 	}
 
+	void Set(const void* data, int size)
+	{
+		SetSize(size, NOOP);
+		std::memcpy(m_Data, data, size);
+	}
 	RawMemory& operator=(const RawMemory& other)
 	{
-		SetMinSize(other.m_Size, NOOP);
-		memcpy(m_Data, other.m_Data, other.m_Size);
-
+		Set(other.m_Data, other.m_Size);
 		return *this;
 	}
 
@@ -90,7 +93,7 @@ public:
 			} else if(action == NOOP) {
 				(void)0;
 			} else if(action == ZERO) {
-				memset(m_Data, 0, m_Size);
+				std::memset(m_Data, 0, m_Size);
 			}
 
 			return;
@@ -103,14 +106,14 @@ public:
 
 		u8* data = LUX_NEW_ARRAY(u8, newSize);
 		if(action == ZERO) {
-			memset(data, 0, newSize);
+			std::memset(data, 0, newSize);
 		} else if(action & COPY) {
 			if(m_Size) {
 				const size_t toCopy = m_Size < newSize ? m_Size : newSize;
-				memcpy(data, m_Data, toCopy);
+				std::memcpy(data, m_Data, toCopy);
 			}
 			if(action & ZERO) {
-				memset(data + m_Size, 0, newSize - m_Size);
+				std::memset(data + m_Size, 0, newSize - m_Size);
 			}
 		} else {
 			(void)0;
@@ -131,21 +134,9 @@ public:
 		SetSize(newSize, action);
 	}
 
-	void* Pointer()
-	{
-		return m_Data;
-	}
-
-	const void* Pointer() const
-	{
-		return m_Data;
-	}
-
-	const void* PointerC() const
-	{
-		return Pointer();
-	}
-
+	void* Pointer() { return m_Data; }
+	const void* Pointer() const { return m_Data; }
+	const void* PointerC() const { return Pointer(); }
 	template <typename T>
 	operator T*()
 	{

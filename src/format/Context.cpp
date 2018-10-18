@@ -10,7 +10,7 @@ Context::Context(
 	size_t startLine) :
 	fstrLastArgPos(0),
 	argId(0),
-	m_FmtString(nullptr),
+	m_FmtString(0, nullptr),
 	m_LastSlice(nullptr),
 	m_Line(startLine),
 	m_Collumn(startCollumn),
@@ -35,7 +35,7 @@ void Context::Reset(
 	m_SliceMemory.Clear();
 	m_LastSlice = nullptr;
 
-	m_FmtString = nullptr;
+	m_FmtString = Slice(0, nullptr);
 
 	m_Line = startLine;
 	m_Collumn = startCollumn;
@@ -103,7 +103,7 @@ size_t Context::GetCollumn() const
 	return m_Line;
 }
 
-Context::SubContext Context::SaveSubContext(const char* fmtString)
+Context::SubContext Context::SaveSubContext(Slice fmtString)
 {
 	SubContext out;
 	out.fstrLastArgPos = fstrLastArgPos;

@@ -62,11 +62,11 @@ namespace internal
 		static_assert(sizeof(RefFormatEntry<T>) <= sizeof(BaseFormatEntryType), "Big problem");
 	}
 
-	FORMAT_API void format(Context& ctx, const char* fmtStr, const BaseFormatEntryType* entries, int entryCount);
+	FORMAT_API void format(Context& ctx, Slice fmtStr, const BaseFormatEntryType* entries, int entryCount);
 }
 
 template <typename... Types>
-inline void vformat(Context& ctx, const char* str, const Types&... args)
+inline void vformat(Context& ctx, Slice str, const Types&... args)
 {
 	// Validate RefFormatEntry sizes
 	int unused1[] = {0, (internal::CheckRefEntryType<Types>(), 0)...};
@@ -85,10 +85,16 @@ inline void vformat(Context& ctx, const char* str, const Types&... args)
 	internal::format(ctx, str, entries, (int)sizeof...(Types));
 }
 
-template <typename SinkT, typename... Types>
-inline size_t formatEx(SinkT&& sink, const FormatExData& exData, const char* str, const Types&... args)
+template <typename... Types>
+inline void vformat(Context& ctx, const char* str, const Types&... args)
 {
-	if(!str)
+	vformat(ctx, Slice(strlen(str), str), args...);
+}
+
+template <typename SinkT, typename... Types>
+inline size_t formatEx(SinkT&& sink, const FormatExData& exData, Slice str, const Types&... args)
+{
+	if(!str.data)
 		return (size_t)-1;
 #ifdef FORMAT_NO_EXCEPTIONS
 	try {
@@ -115,17 +121,27 @@ inline size_t formatEx(SinkT&& sink, const FormatExData& exData, const char* str
 	}
 #endif
 	return outCharacters;
-	}
+}
 
 template <typename SinkT, typename... Types>
 inline size_t format(SinkT&& sink, const char* str, const Types&... args)
 {
 	FormatExData data;
+	return formatEx(sink, data, Slice(strlen(str), str), args...);
+}
+template <typename SinkT, typename... Types>
+inline size_t format(SinkT&& sink, Slice str, const Types&... args)
+{
+	FormatExData data;
 	return formatEx(sink, data, str, args...);
 }
-
 template <typename SinkT, typename... Types>
 inline size_t formatln(SinkT&& sink, const char* str, const Types&... args)
+{
+	return formatln(sink, data, Slice(strlen(str), str), args...);
+}
+template <typename SinkT, typename... Types>
+inline size_t formatln(SinkT&& sink, Slice str, const Types&... args)
 {
 	FormatExData data;
 	data.sinkFlags = ESinkFlags::Newline;

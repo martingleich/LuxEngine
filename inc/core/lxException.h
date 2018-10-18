@@ -1,6 +1,7 @@
 #ifndef INCLUDED_LUX_EXCEPTION_H
 #define INCLUDED_LUX_EXCEPTION_H
 #include "LuxBase.h"
+#include "core/lxStringView.h"
 #include <cstring>
 #include <cstdlib>
 #include <stdarg.h>
@@ -18,101 +19,107 @@ If the memory for the string can not be allocated, the string takes the value st
 */
 class ExceptionSafeString
 {
+	struct Data
+	{
+		int refCount;
+		int size;
+		char bytes[1];
+	};
+private:
+	static Data* Alloc(int size)
+	{
+		Data* out = (Data*)std::malloc(sizeof(Data) + size - 1);
+		out->refCount = 1;
+		out->size = size;
+		return out;
+	}
+
 public:
 	ExceptionSafeString() :
-		ExceptionSafeString("")
+		ExceptionSafeString(core::StringView::EMPTY)
 	{
 	}
 
-	ExceptionSafeString(const char* s)
+	ExceptionSafeString(core::StringView s)
 	{
-		if(!s)
-			s = "";
-
-		size_t len = strlen(s);
-		data = (char*)std::malloc(len + 1 + 1);
-		if(data) {
-			data[0] = 1;
-			memcpy(data + 1, s, len + 1);
-		}
-	}
-
-	ExceptionSafeString& Append(const char* s)
-	{
-		if(!s)
-			return *this;
-
-		size_t oldlen = strlen(Data());
-		size_t newlen = strlen(s) + oldlen;
-		char* newdata = (char*)std::malloc(newlen + 1 + 1);
-		if(newdata) {
-			newdata[0] = 1;
-			memcpy(newdata + 1, Data(), oldlen);
-			memcpy(newdata + 1 + oldlen, s, newlen - oldlen + 1);
-		}
-
-		this->~ExceptionSafeString();
-		data = newdata;
-
-		return *this;
-	}
-
-	ExceptionSafeString& Append(const ExceptionSafeString& str)
-	{
-		return Append(str.Data());
-	}
-
-	ExceptionSafeString& Append(int i)
-	{
-		char BUFFER[32];
-		snprintf(BUFFER, 32, "%d", i);
-		return Append(BUFFER);
-	}
-	ExceptionSafeString& Append(float i)
-	{
-		char BUFFER[32];
-		snprintf(BUFFER, 32, "%f", i);
-		return Append(BUFFER);
+		m_Data = Alloc(s.Size());
+		if(m_Data)
+			std::memcpy(m_Data->bytes, s.Data(), s.Size());
 	}
 	
 	ExceptionSafeString(const ExceptionSafeString& other) :
-		data(other.data)
+		m_Data(other.m_Data)
 	{
-		if(data)
-			++data[0];
+		if(m_Data)
+			++m_Data->refCount;
+	}
+
+	~ExceptionSafeString()
+	{
+		if(m_Data) {
+			--m_Data->refCount;
+			if(!m_Data->refCount)
+				std::free(m_Data);
+		}
 	}
 
 	ExceptionSafeString& operator=(const ExceptionSafeString& other)
 	{
 		this->~ExceptionSafeString();
-		data = other.data;
-		if(data)
-			++data[0];
+		m_Data = other.m_Data;
+		if(m_Data)
+			++m_Data->refCount;
 
 		return *this;
 	}
 
-	~ExceptionSafeString()
+	ExceptionSafeString& Append(core::StringView s)
 	{
-		if(data) {
-			--data[0];
-			if(!data[0])
-				std::free(data);
+		if(s.IsEmpty() || !m_Data)
+			return *this;
+
+		int newlen = s.Size() + m_Data->size;
+		Data* newdata = Alloc(newlen);
+		if(newdata) {
+			std::memcpy(newdata->bytes, m_Data->bytes, m_Data->size);
+			std::memcpy(newdata->bytes + m_Data->size, s.Data(), s.Size());
 		}
+		this->~ExceptionSafeString();
+		m_Data = newdata;
+		return *this;
 	}
 
-	const char* Data() const
+	ExceptionSafeString& Append(const ExceptionSafeString& str)
 	{
-		if(data)
-			return data + 1;
-		else
-			return "string_alloc_error";
+		return Append(str.AsView());
 	}
 
-	ExceptionSafeString Copy() const { return ExceptionSafeString(data+1); }
+	ExceptionSafeString& Append(int i)
+	{
+		char BUFFER[32];
+		int len = snprintf(BUFFER, 32, "%d", i);
+		return Append(StringView(BUFFER, len));
+	}
+	
+	ExceptionSafeString& Append(float i)
+	{
+		char BUFFER[32];
+		int len = snprintf(BUFFER, 32, "%f", i);
+		return Append(StringView(BUFFER, len));
+	}
+	
+	StringView AsView() const
+	{
+		if(!m_Data)
+			return StringView("string_alloc_error");
+		else
+			return StringView(m_Data->bytes, m_Data->size);
+	}
+	
+	ExceptionSafeString Copy() const { return ExceptionSafeString(AsView()); }
+
 private:
-	//! Contains a single byte reference count, followed by a null-terminated string.
-	char* data;
+	Data* m_Data;
 };
 
 //! The exception baseclass
@@ -137,7 +144,7 @@ struct RuntimeException : Exception {};
 struct GenericRuntimeException : RuntimeException
 {
 public:
-	explicit GenericRuntimeException(const char* message) :
+	explicit GenericRuntimeException(core::StringView message) :
 		m_Message(message)
 	{}
 
@@ -149,7 +156,7 @@ private:
 
 struct FactoryCreateException : RuntimeException
 {
-	explicit FactoryCreateException(const char* name, const char* message) :
+	explicit FactoryCreateException(core::StringView name, core::StringView message) :
 		m_Name(name),
 		m_Message(message)
 	{
@@ -173,7 +180,7 @@ struct ErrorException : Exception { };
 //! The requested thing is not implemented.
 struct NotImplementedException : ErrorException
 {
-	explicit NotImplementedException(const char* name="") :
+	explicit NotImplementedException(StringView name="") :
 		m_Name(name)
 	{
 	}
@@ -181,7 +188,7 @@ struct NotImplementedException : ErrorException
 	{
 		return ExceptionSafeString("NotImplementedException: ").Append(m_Name);
 	}
-	const char* GetName() const { return m_Name.Data(); }
+	ExceptionSafeString GetName() const { return m_Name; }
 private:
 	ExceptionSafeString m_Name;
 };
@@ -189,7 +196,7 @@ private:
 //! Thrown if invalid arguments where based to a function
 struct InvalidArgumentException : ErrorException
 {
-	explicit InvalidArgumentException(const char* _argName) :
+	explicit InvalidArgumentException(StringView _argName) :
 		m_ArgName(_argName)
 	{
 	}
@@ -205,7 +212,7 @@ private:
 
 struct GenericInvalidArgumentException : InvalidArgumentException
 {
-	explicit GenericInvalidArgumentException(const char* _argName, const char* _message) :
+	explicit GenericInvalidArgumentException(StringView _argName, StringView _message) :
 		InvalidArgumentException(_argName),
 		m_Message(_message)
 	{
@@ -236,7 +243,7 @@ private:
 			Append(val);
 	}
 public:
-	ArgumentOutOfRangeException(const char* argName, int begin, int end, int val) :
+	ArgumentOutOfRangeException(StringView argName, int begin, int end, int val) :
 		InvalidArgumentException(argName),
 		m_Lo(begin),
 		m_Hi(end),
@@ -266,7 +273,7 @@ private:
 			Append(val);
 	}
 public:
-	FloatArgumentOutOfRangeException(const char* argName, float lo, float hi, float val) :
+	FloatArgumentOutOfRangeException(StringView argName, float lo, float hi, float val) :
 		InvalidArgumentException(argName),
 		m_Lo(lo),
 		m_Hi(hi),
@@ -289,7 +296,7 @@ private:
 		return ExceptionSafeString("ArgumentNullException: ").Append(arg);
 	}
 public:
-	explicit ArgumentNullException(const char* argName) :
+	explicit ArgumentNullException(StringView argName) :
 		InvalidArgumentException(argName)
 	{
 	}
@@ -304,7 +311,7 @@ public:
 
 struct InvalidOperationException : public ErrorException
 {
-	explicit InvalidOperationException(const char* operation) :
+	explicit InvalidOperationException(StringView operation) :
 		m_Operation(operation)
 	{
 	}
@@ -336,7 +343,7 @@ For example a parameter in a ParamPackage
 */
 struct ObjectNotFoundException : ErrorException
 {
-	explicit ObjectNotFoundException(const char* _object) :
+	explicit ObjectNotFoundException(StringView _object) :
 		m_Object(_object)
 	{
 	}
@@ -349,7 +356,7 @@ private:
 
 struct ObjectAlreadyExistsException : ErrorException
 {
-	explicit ObjectAlreadyExistsException(const char* _object) :
+	explicit ObjectAlreadyExistsException(StringView _object) :
 		m_Object(_object)
 	{
 	}
@@ -366,7 +373,7 @@ Thrown when a fileformat is not available or the content is corrupted.
 */
 struct FileFormatException : Exception
 {
-	explicit FileFormatException(const char* _msg, const char* _format) :
+	explicit FileFormatException(StringView _msg, StringView _format) :
 		format(_format),
 		msg(_msg)
 	{

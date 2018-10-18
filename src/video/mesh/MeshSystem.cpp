@@ -84,7 +84,7 @@ StrongRef<GeometryCreator> MeshSystem::GetCreatorByName(
 {
 	auto it = m_Creators.Find(name);
 	if(it == m_Creators.End())
-		throw core::ObjectNotFoundException(name.Data());
+		throw core::ObjectNotFoundException(name);
 
 	return *it;
 }
@@ -123,7 +123,7 @@ core::PackagePuffer MeshSystem::GetCreatorParams(const core::String& name)
 {
 	auto it = m_Creators.Find(name);
 	if(it == m_Creators.End())
-		throw core::ObjectNotFoundException(name.Data());
+		throw core::ObjectNotFoundException(name);
 
 	return core::PackagePuffer(&((*it)->GetParams()));
 }

@@ -46,7 +46,7 @@ Type Boolean()
 void TypeInfo::FmtPrint(format::Context& ctx, const void* p, format::Placeholder& placeholder) const
 {
 	ctx.AddTerminatedSlice("<");
-	ctx.AddTerminatedSlice(GetName());
+	ctx.AddSlice(GetName().Size(), GetName().Data());
 	ctx.AddTerminatedSlice(":");
 	format::fmtPrint(ctx, p, placeholder);
 	ctx.AddTerminatedSlice(">");

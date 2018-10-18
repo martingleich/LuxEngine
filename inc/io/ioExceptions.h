@@ -10,7 +10,11 @@ namespace io
 //! A file couldn't be opend or doesn't exist.
 struct FileNotFoundException : core::Exception
 {
-	explicit FileNotFoundException(const char* _path) :
+	explicit FileNotFoundException(const io::Path& path) :
+		FileNotFoundException(path.AsView())
+	{
+	}
+	explicit FileNotFoundException(core::StringView _path) :
 		m_Path(_path)
 	{
 	}
@@ -33,11 +37,10 @@ struct FileUsageException : core::Exception
 	};
 
 	explicit FileUsageException(EError error, const io::Path& path) :
-		m_Error(error),
-		m_Path(path.Data())
+		FileUsageException(error, path.AsView())
 	{
 	}
-	explicit FileUsageException(EError error, const char* path) :
+	explicit FileUsageException(EError error, core::StringView path) :
 		m_Error(error),
 		m_Path(path)
 	{

@@ -49,17 +49,17 @@ public:
 		return m_Pass.shader;
 	}
 
-	void SetValue(const core::String& name, const core::VariableAccess& data)
+	void SetValue(core::StringView name, const core::VariableAccess& data)
 	{
 		Param(name) = data;
 	}
 	
-	core::VariableAccess Param(const core::String& name) const
+	core::VariableAccess Param(core::StringView name) const
 	{
 		return m_ShaderValues.FromName(name, true);
 	}
 	
-	core::VariableAccess Param(const core::String& name)
+	core::VariableAccess Param(core::StringView name)
 	{
 		return m_ShaderValues.FromName(name, false);
 	}

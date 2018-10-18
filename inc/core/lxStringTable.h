@@ -20,7 +20,7 @@ public:
 	StringTableHandle(const void* handle);
 	bool operator==(const StringTableHandle& other) const;
 	bool operator!=(const StringTableHandle& other) const;
-	const char* c_str() const;
+	const char* Data() const;
 	int Size() const;
 	int GetHash() const;
 

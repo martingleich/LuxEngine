@@ -96,14 +96,19 @@ void TextContainer::Ensure(
 				if(*jt == ' ') {
 					prevBreakPoint = jt;
 				} else if(carets[id] - offset > width && prevBreakPoint != line.CodePoints().End()) {
-					AddBrokenLine(core::StringView(lineFirst.Pointer(), prevBreakPoint.Pointer()), carets[id] - offset);
+					auto lineBegin = lineFirst.Pointer();
+					auto lineEnd = prevBreakPoint.Pointer();
+					AddBrokenLine(core::StringView(lineBegin, lineEnd-lineBegin), carets[id] - offset);
 					offset = carets[id];
 					lineFirst = prevBreakPoint + 1;
 					prevBreakPoint = line.CodePoints().End();
 				}
 			}
-			if(lineFirst != line.CodePoints().End())
-				AddBrokenLine(core::StringView(lineFirst.Pointer(), line.Bytes().End()), carets[id] - offset);
+			if(lineFirst != line.CodePoints().End()) {
+				auto lineBegin = lineFirst.Pointer();
+				auto lineEnd = line.Bytes().End();
+				AddBrokenLine(core::StringView(lineBegin, lineEnd-lineBegin), carets[id] - offset);
+			}
 		}
 
 		float lineHeight = settings.lineDistance*settings.scale*font->GetFontHeight();
@@ -116,7 +121,7 @@ void TextContainer::Ensure(
 	core::String line;
 	for(auto it = textFirst; it != m_Text.CodePoints().End() && keepBreaking;) {
 		if(*it == '\n') {
-			AddLine(core::StringView(first.Pointer(), end.Pointer()));
+			AddLine(core::StringView(first.Pointer(), end.Pointer()-first.Pointer()));
 			++it;
 			end = first = it;
 		} else {
@@ -126,7 +131,7 @@ void TextContainer::Ensure(
 	}
 
 	if(keepBreaking)
-		AddLine(core::StringView(first.Pointer(), end.Pointer()));
+		AddLine(core::StringView(first.Pointer(), end.Pointer()-first.Pointer()));
 
 	if(keepBreaking)
 		m_BrokenText.Resize(lineId);

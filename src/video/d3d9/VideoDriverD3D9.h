@@ -59,8 +59,8 @@ public:
 
 	StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
-		const char* VSCode, const char* VSEntryPoint, int VSLength, int VSmajorVersion, int VSminorVersion,
-		const char* PSCode, const char* PSEntryPoint, int PSLength, int PSmajorVersion, int PSminorVersion,
+		core::StringView VSCode, core::StringView VSEntryPoint, int VSmajorVersion, int VSminorVersion,
+		core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
 		core::Array<core::String>* errorList);
 
 	StrongRef<Shader> CreateFixedFunctionShader(const FixedFunctionParameters& params);

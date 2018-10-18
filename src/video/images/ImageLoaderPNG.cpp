@@ -198,7 +198,7 @@ const core::String& ImageLoaderPNG::GetName() const
 
 core::Name ImageLoaderPNG::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Image)
+	if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Image)
 		return core::Name::INVALID;
 
 	u8 bytes[8];

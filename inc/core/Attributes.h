@@ -21,7 +21,7 @@ public:
 class AttributeAnyImpl : public Attribute
 {
 public:
-	AttributeAnyImpl(const core::String& name, core::Type type, const void* init = nullptr) :
+	AttributeAnyImpl(core::StringView name, core::Type type, const void* init = nullptr) :
 		m_Any(type, init),
 		m_Name(name)
 	{
@@ -121,7 +121,7 @@ public:
 	using ConstIterator = core::HashMap<core::String, StrongRef<Attribute>>::ConstKeyIterator;
 public:
 	template <typename T>
-	AttributePtr AddAttribute(const core::String& name, const T& value)
+	AttributePtr AddAttribute(core::StringView name, const T& value)
 	{
 		return AddAttribute(name, core::TemplType<T>::Get(), &value);
 	}
@@ -130,7 +130,7 @@ public:
 	{
 		LX_CHECK_NULL_ARG(attrb);
 
-		auto name = attrb->GetName();
+		auto& name = attrb->GetName();
 		auto type = attrb->GetType();
 		auto it = m_ObjectMap.Find(name);
 		if(it != m_ObjectMap.End()) {
@@ -171,7 +171,7 @@ public:
 	{
 		auto it = m_ObjectMap.Find(name);
 		if(it == m_ObjectMap.End())
-			throw core::ObjectNotFoundException(name.Data());
+			throw core::ObjectNotFoundException(name);
 		return (*it)->GetAccess(false);
 	}
 
@@ -179,7 +179,7 @@ public:
 	{
 		auto it = m_ObjectMap.Find(name);
 		if(it == m_ObjectMap.End())
-			throw core::ObjectNotFoundException(name.Data());
+			throw core::ObjectNotFoundException(name);
 		return (*it)->GetAccess(true);
 	}
 

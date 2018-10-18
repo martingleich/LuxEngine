@@ -30,11 +30,10 @@ struct D3D9Exception : RuntimeException
 
 		const WCHAR* errstr = DXGetErrorStringW(hr);
 		auto utf8ErrStr = core::UTF16ToUTF8(errstr, -1);
-		utf8ErrStr.PushBack(0);
 
 		str.Append(BUFFER);
 		str.Append("): ");
-		str.Append((const char*)utf8ErrStr.Data());
+		str.Append(StringView((const char*)utf8ErrStr.Data(), (int)utf8ErrStr.Size()));
 		return str;
 	}
 

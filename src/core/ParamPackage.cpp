@@ -1,4 +1,5 @@
 #include "core/ParamPackage.h"
+#include "core/lxArray.h"
 #include "video/TextureLayer.h"
 
 namespace lux
@@ -54,12 +55,12 @@ void ParamPackage::Clear()
 	self->Params.Clear();
 }
 
-int ParamPackage::AddParam(core::Type type, const core::StringView& name, const void* defaultValue)
+int ParamPackage::AddParam(core::Type type, core::StringView name, const void* defaultValue)
 {
 	if(type == core::Type::Unknown)
 		throw GenericInvalidArgumentException("type", "Unknown type is invalid");
-	int id;
-	if(GetId(name, core::Type::Unknown, id)) {
+	int id = GetId(name, core::Type::Unknown);
+	if(id >= 0) {
 		if(self->Params[id].type != type)
 			throw GenericInvalidArgumentException("name", "Param already exists with diffrent parameter.");
 		return id;
@@ -67,7 +68,7 @@ int ParamPackage::AddParam(core::Type type, const core::StringView& name, const 
 
 	Entry entry;
 	entry.name = name;
-	const int size = type.GetSize();
+	int size = type.GetSize();
 
 	// There are currently no types triggering this, just to be shure
 	if(size > 255)
@@ -84,8 +85,8 @@ void ParamPackage::MergePackage(const ParamPackage& other)
 	for(int i = 0; i < other.GetParamCount(); ++i) {
 		auto desc = other.GetParamDesc(i);
 
-		int id;
-		if(GetId(desc.name, core::Type::Unknown, id)) {
+		int id = GetId(desc.name, core::Type::Unknown);
+		if(id >= 0) {
 			if(self->Params[id].type != desc.type)
 				throw GenericInvalidArgumentException("other", "Same name with diffrent types in package merge");
 			continue;
@@ -140,7 +141,7 @@ ParamDesc ParamPackage::GetParamDesc(int param) const
 {
 	auto& p = self->Params.At(param);
 	ParamDesc desc;
-	desc.name = p.name.Data();
+	desc.name = p.name;
 	desc.type = p.type;
 	desc.id = param;
 
@@ -161,7 +162,7 @@ VariableAccess ParamPackage::GetParam(int param, void* baseData, bool isConst) c
 	return VariableAccess(type, (u8*)baseData + p.offset);
 }
 
-VariableAccess ParamPackage::GetParamFromName(const core::StringView& name, void* baseData, bool isConst) const
+VariableAccess ParamPackage::GetParamFromName(core::StringView name, void* baseData, bool isConst) const
 {
 	return GetParam(GetParamId(name), baseData, isConst);
 }
@@ -192,17 +193,16 @@ VariableAccess ParamPackage::DefaultValue(int param) const
 	return VariableAccess(p.type.GetConstantType(), (u8*)self->DefaultPackage + p.offset);
 }
 
-VariableAccess ParamPackage::DefaultValue(const core::StringView& param)
+VariableAccess ParamPackage::DefaultValue(core::StringView param)
 {
 	return DefaultValue(GetParamId(param));
 }
 
-int ParamPackage::GetParamId(const core::StringView& name, core::Type type) const
+int ParamPackage::GetParamId(core::StringView name, core::Type type) const
 {
-	int out;
-	if(!GetId(name, type, out))
-		throw ObjectNotFoundException(name.Data());
-
+	int out = GetId(name, type);
+	if(out < 0)
+		throw ObjectNotFoundException(name);
 	return out;
 }
 
@@ -253,17 +253,17 @@ int ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
 	return self->Params.Size() - 1;
 }
 
-bool ParamPackage::GetId(core::StringView name, core::Type t, int& outId) const
+int ParamPackage::GetId(core::StringView name, core::Type t) const
 {
 	core::StringView cname = name;
-	for(outId = 0; outId < self->Params.Size(); ++outId) {
-		if(self->Params[outId].name == cname) {
-			if(t == core::Type::Unknown || self->Params[outId].type == t)
-				return true;
+	for(int i = 0; i < self->Params.Size(); ++i) {
+		if(self->Params[i].name == cname) {
+			if(t == core::Type::Unknown || self->Params[i].type == t)
+				return i;
 		}
 	}
 
-	return false;
+	return -1;
 }
 
 } // namespace core

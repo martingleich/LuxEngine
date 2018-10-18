@@ -25,13 +25,13 @@ public:
 	~ShaderD3D9();
 
 	bool Init(
-		const char* vsCode, const char* vsEntryPoint, int vsLength, const char* vsProfile,
-		const char* psCode, const char* psEntryPoint, int psLength, const char* psProfile,
+		core::StringView vsCode, core::StringView vsEntryPoint, core::StringView vsProfile,
+		core::StringView psCode, core::StringView psEntryPoint, core::StringView psProfile,
 		core::Array<core::String>* errorList);
 
 	void Enable();
 	void SetParam(int paramId, const void* data);
-	int GetParamId(const core::String& name) const;
+	int GetParamId(core::StringView name) const;
 	void LoadSceneParams(const Pass& pass);
 	void Render() {}
 	void Disable();
@@ -95,8 +95,7 @@ private:
 
 		EType type;
 		u8 typeSize;
-		const char* name;
-		u32 nameLength;
+		core::StringView name;
 		const void* defaultValue;
 
 		EParamType paramType;
@@ -109,8 +108,6 @@ private:
 			registerPSCount(0),
 			type(EType::Unknown),
 			typeSize(0),
-			name(nullptr),
-			nameLength(0),
 			defaultValue(nullptr),
 			paramType(ParamType_ParamMaterial),
 			samplerStage(0)
@@ -137,13 +134,13 @@ private:
 	};
 
 private:
-	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid);
+	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, core::StringView& name, const void*& defaultValue, bool& isValid);
 
 	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<core::String>* errorList);
 
-	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(const char* code, const char* entryPoint, int length, const char* profile,
+	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(core::StringView code, core::StringView entryPoint, core::StringView profile,
 		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
-	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(const char* code, const char* entryPoint, int length, const char* profile,
+	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(core::StringView code, core::StringView entryPoint, core::StringView profile,
 		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 
 	void SetShaderValue(const Param& p, const void* data);
@@ -151,7 +148,7 @@ private:
 	void CastTypeToShader(EType type, const void* in, void* out);
 	void CastShaderToType(EType type, const void* in, void* out);
 
-	static int GetDefaultId(const char* name);
+	static int GetDefaultId(core::StringView name);
 	static EType GetDefaultType(u32 id);
 
 	static bool IsTypeCompatible(EType a, EType b);

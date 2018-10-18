@@ -42,7 +42,7 @@ void LimitedFile::Seek(s64 offset, ESeekOrigin origin)
 
 	s64 newCursor = cursor + offset;
 	if(newCursor < 0 || newCursor > GetSize())
-		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetPath().Data());
+		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetPath());
 
 	m_MasterFile->Seek(newCursor, ESeekOrigin::Start);
 	m_Cursor = newCursor;

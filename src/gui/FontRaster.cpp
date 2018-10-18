@@ -16,7 +16,7 @@ namespace gui
 
 namespace
 {
-const char* g_VSCode =
+core::StringView g_VSCode =
 R"(
 struct VS_OUT
 {
@@ -35,7 +35,7 @@ VS_OUT mainVS(float3 position : POSITION, float2 uv : TEXCOORD0)
 	return Out;
 }
 )";
-const char* g_PSCode = R"(
+core::StringView g_PSCode = R"(
 sampler2D param_texture;
 float4 param_diffuse; // font color
 float4 param_borderColor;

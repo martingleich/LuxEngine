@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "LuxRebuiltMarker.h"
 #include <signal.h>
 
 using namespace UnitTesting;

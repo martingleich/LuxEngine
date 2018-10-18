@@ -40,7 +40,7 @@ video::VertexFormat g_VertexFormatSkinned;
 class XFileFormatException : public core::FileFormatException
 {
 public:
-	XFileFormatException(const char* _msg) :
+	XFileFormatException(core::StringView _msg) :
 		FileFormatException(_msg, "xfile")
 	{
 	}
@@ -1287,7 +1287,7 @@ public:
 		return material;
 	}
 
-	void Warning(const char* warning)
+	void Warning(core::StringView warning)
 	{
 		log::Warning(warning);
 	}
@@ -1448,10 +1448,10 @@ core::Name MeshLoaderX::GetResourceType(io::File* file, core::Name requestedType
 {
 	bool isSupportedType =
 		requestedType == core::ResourceType::Mesh || requestedType == "armature";
-	if(requestedType && !isSupportedType)
+	if(!requestedType.IsEmpty() && !isSupportedType)
 		return core::Name::INVALID;
 
-	if(!requestedType)
+	if(requestedType.IsEmpty())
 		requestedType = core::ResourceType::Mesh;
 
 	u8 magic[4];

@@ -47,7 +47,7 @@ struct Win32Exception : RuntimeException
 		error(_error)
 	{
 	}
-	ExceptionSafeString What() const { return GetWin32ErrorString(error).Data(); }
+	ExceptionSafeString What() const { return (StringView)GetWin32ErrorString(error); }
 
 	DWORD error;
 };

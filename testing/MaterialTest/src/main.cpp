@@ -1,4 +1,5 @@
 #include <Lux.h>
+#include <LuxRebuiltMarker.h>
 #include "scene/components/Light.h"
 #include "scene/components/SkyBox.h"
 #include "scene/components/Camera.h"

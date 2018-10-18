@@ -124,7 +124,7 @@ const core::String& ImageLoaderTGA::GetName() const
 
 core::Name ImageLoaderTGA::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Image)
+	if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Image)
 		return core::Name::INVALID;
 
 	Context ctx;

@@ -191,7 +191,7 @@ LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
 	if(SERIAL_TYPE_ID == (u32)-1) \
 		return 0; \
 	if(SERIAL_TYPE_ID == 0) { \
-		auto builder = ::lux::serial::StructuralTable::EngineTable()->AddStructure(GetReferableType().c_str(), this); \
+		auto builder = ::lux::serial::StructuralTable::EngineTable()->AddStructure(GetReferableType().AsView(), this); \
 		InitSerializer(builder); \
 		SERIAL_TYPE_ID = builder.Finalize(); \
 		if(SERIAL_TYPE_ID == 0) \

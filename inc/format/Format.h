@@ -24,7 +24,7 @@ Will perform normal formatting, but will write the result into a Context.<br>
 \param args The placeholder arguments
 */
 template <typename... Types>
-void vformat(Context& ctx, const char* str, const Types&... args);
+void vformat(Context& ctx, Slice str, const Types&... args);
 
 struct FormatExData
 {
@@ -47,7 +47,7 @@ struct FormatExData
 \throws format::exception When an error occured an FORMAT_EXCEPTIONS is set
 */
 template <typename SinkT, typename... Types>
-size_t formatEx(SinkT&& sink, const FormatExData& exData, const char* str, const Types&... args);
+size_t formatEx(SinkT&& sink, const FormatExData& exData, Slice str, const Types&... args);
 
 //! Format a string
 /**

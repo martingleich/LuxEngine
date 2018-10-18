@@ -15,30 +15,30 @@ void Path::Set(core::StringView str)
 		return;
 
 	m_RawData.Reserve(str.Size());
-	const char* data = str.Data();
-	const char* cur = str.Data();
+
+	int cur = 0;
 	int size = 0;
-	for(auto it = data; it != str.Data() + str.Size(); ++it) {
-		char c = *it;
+	for(int i = 0; i < str.Size(); ++i) {
+		char c = str[i];
 		if(c == '\\') {
-			m_RawData.Append(cur, size);
+			m_RawData.Append(str.SubString(cur, size));
 			m_RawData.Append("/", 1);
-			cur = it+1;
+			cur = i+1;
 			size = 0;
 		} else {
 			++size;
 		}
 	}
-	m_RawData.Append(cur, size);
+	m_RawData.Append(str.SubString(cur, size));
+
+	// Strips spaces
+	m_RawData.Strip();
 
 	// Strip trailing slashes.
 	int i = m_RawData.Size()-1;
-	char* p = m_RawData.Data();
-	while(i > 0 && p[i] == '/')
+	while(i > 0 && m_RawData[i] == '/')
 		--i;
 	m_RawData.Resize(i+1);
-
-	m_RawData.Strip();
 }
 
 Path Path::GetFileDir() const
@@ -129,7 +129,7 @@ Path Path::GetResolved(const Path& base) const
 
 void fmtPrint(format::Context& ctx, const Path& p, format::Placeholder& pl)
 {
-	ctx.AddSlice(p.Size(), p.Data());
+	ctx.AddSlice(p.AsView().Size(), p.AsView().Data());
 	if(p.GetArchive()) {
 		ctx.AddTerminatedSlice(" @");
 		fmtPrint(ctx, p.GetArchive()->GetPath(), pl);

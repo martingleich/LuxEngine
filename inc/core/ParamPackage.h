@@ -1,9 +1,8 @@
 #ifndef INCLUDED_LUX_PARAMPACKAGE_H
 #define INCLUDED_LUX_PARAMPACKAGE_H
 #include "core/lxString.h"
-#include "core/lxArray.h"
-
 #include "core/VariableAccess.h"
+
 #include <typeinfo>
 
 namespace lux
@@ -14,8 +13,8 @@ namespace core
 //! The description of a single parameter
 struct ParamDesc
 {
-	const char* name; //!< The name of the parameter
-	core::Type type; //!< The type of the parameter
+	StringView name; //!< The name of the parameter
+	Type type; //!< The type of the parameter
 	int id; //!< The id of the parameter
 };
 
@@ -28,8 +27,8 @@ class ParamPackage
 private:
 	struct Entry
 	{
-		core::String name;
-		core::Type type;
+		String name;
+		Type type;
 		u8 size;
 		u8 offset;
 
@@ -55,11 +54,11 @@ public:
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value, if null the param is default constructed.
 	*/
 	template <typename T>
-	int AddParam(const core::StringView& name, const T& defaultValue)
+	int AddParam(StringView name, const T& defaultValue)
 	{
-		core::Type type = core::TemplType<T>::Get();
-		if(type == core::Type::Unknown)
-			throw UnknownTypeException(typeid(T).name());
+		Type type = TemplType<T>::Get();
+		if(type == Type::Unknown)
+			throw UnknownTypeException(StringView(typeid(T).name(), strlen(typeid(T).name())));
 
 		return AddParam(type, name, &defaultValue);
 	}
@@ -70,7 +69,7 @@ public:
 	\param name The name of the new Param(should be unique for package)
 	\param defaultValue The default value for this Param, when a new material is created this is the used Value
 	*/
-	LUX_API int AddParam(core::Type type, const core::StringView& name, const void* defaultValue = nullptr);
+	LUX_API int AddParam(Type type, StringView name, const void* defaultValue = nullptr);
 
 	//! Merges two packages
 	/**
@@ -108,7 +107,7 @@ public:
 	\return The name of the param
 	\exception OutOfRange param is out of range
 	*/
-	LUX_API const core::String& GetParamName(int param) const;
+	LUX_API const String& GetParamName(int param) const;
 
 	//! Get a param from a id
 	/**
@@ -128,7 +127,7 @@ public:
 	\return The found param
 	\exception Exception name does not exist
 	*/
-	LUX_API VariableAccess GetParamFromName(const core::StringView& name, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParamFromName(StringView name, void* baseData, bool isConst) const;
 
 	//! Get the n-th Param of a specific type
 	/**
@@ -139,7 +138,7 @@ public:
 	\param isConst Should the package param be constant, i.e. can't be changed
 	\return The index of the found param, if no param could be found the invalid param is returned
 	*/
-	LUX_API VariableAccess GetParamFromType(core::Type type, int index, void* baseData, bool isConst) const;
+	LUX_API VariableAccess GetParamFromType(Type type, int index, void* baseData, bool isConst) const;
 
 	//! Access the default value of a param
 	/**
@@ -154,16 +153,16 @@ public:
 	\param defaultValue A pointer to the new default value
 	\exception Exception name does not exist
 	*/
-	LUX_API VariableAccess DefaultValue(const core::StringView& param);
+	LUX_API VariableAccess DefaultValue(StringView param);
 
 	//! Get the id of a parameter by it's name.
 	/**
 	\param name The name of the param.
-	\param type The type of the parameter, core::Type::Unknown if any type is ok.
+	\param type The type of the parameter, Type::Unknown if any type is ok.
 	\return The id of the parameter.
 	\exception Exception name does not exist
 	*/
-	LUX_API int GetParamId(const core::StringView& name, core::Type type = core::Type::Unknown) const;
+	LUX_API int GetParamId(StringView name, Type type = Type::Unknown) const;
 
 	//! The number of existing params in this package
 	LUX_API int GetParamCount() const;
@@ -176,7 +175,7 @@ public:
 
 private:
 	LUX_API int AddEntry(Entry& entry, const void* defaultValue);
-	LUX_API bool GetId(core::StringView name, core::Type t, int& outId) const;
+	LUX_API int GetId(StringView name, Type t) const;
 
 private:
 	struct SelfData;
@@ -283,7 +282,7 @@ public:
 	\param name The name of the param
 	\param isConst Should the param be constant
 	*/
-	VariableAccess FromName(const core::StringView& name, bool isConst) const
+	VariableAccess FromName(StringView name, bool isConst) const
 	{
 		if(!m_Pack)
 			throw InvalidOperationException("No param pack set");
@@ -297,7 +296,7 @@ public:
 	\param index Which param of this type
 	\param isConst Should the param be constant
 	*/
-	VariableAccess FromType(core::Type type, int index, bool isConst) const
+	VariableAccess FromType(Type type, int index, bool isConst) const
 	{
 		if(!m_Pack)
 			throw InvalidOperationException("No param pack set");
@@ -336,22 +335,22 @@ public:
 			return 0;
 	}
 
-	core::VariableAccess Param(const core::StringView& name)
+	VariableAccess Param(StringView name)
 	{
 		return FromName(name, false);
 	}
 
-	core::VariableAccess Param(const core::StringView& name) const
+	VariableAccess Param(StringView name) const
 	{
 		return FromName(name, true);
 	}
 
-	core::VariableAccess Param(int id)
+	VariableAccess Param(int id)
 	{
 		return FromID(id, false);
 	}
 
-	core::VariableAccess Param(int id) const
+	VariableAccess Param(int id) const
 	{
 		return FromID(id, true);
 	}

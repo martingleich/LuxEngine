@@ -34,6 +34,7 @@ public:
 	EArchiveCapFlag GetCaps() const override;
 	Path GetAbsolutePath(const Path& p) const override;
 	const Path& GetPath() const override;
+	void ReleaseHandles() override;
 
 private:
 	void CreateWin32File(Win32Path& win32Path, bool recursive);

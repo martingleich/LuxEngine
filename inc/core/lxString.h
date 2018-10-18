@@ -6,203 +6,20 @@
 #include "core/lxIterator.h"
 #include "core/lxException.h"
 #include "core/lxTypes.h"
+#include "core/lxStringView.h"
 
 namespace lux
 {
 namespace core
 {
-template <typename T>
+template <typename T> 
 class Array;
-
-//! The type of characters a string contains.
-enum class EStringClassFlag
-{
-	Digit = 1,      //!< The string only contains digits.
-	Alpha = 2,      //!< The string only contains letters.
-	AlphaNum = 4,   //!< The string only contains digits and letters.
-	Space = 8,      //!< The string only contains whitespace.
-	Upper = 16,     //!< All the characters in the string are upper-case.
-	Lower = 32,     //!< All the characters in the string are lower-case.
-	Empty = 64,     //!< The string was empty
-};
-
-enum class EStringCompare
-{
-	CaseSensitive = 0,
-	CaseInsensitive = 1
-};
-
-class String;
-
-//! Dummy string type
-/**
-Alias type for full strings or character-arrays.
-Contains UTF8-Data.
-Can be used to speed up a function receiving character pointers and strings.
-*/
-class StringView
-{
-public:
-	LUX_API static const StringView EMPTY;
-
-	//! Create a dummy string from c-string
-	/**
-	\param str A nul-terminated c-string, must not be null.
-	*/
-	constexpr StringView(const char* str) :
-		m_Size(str ? strlen(str) : 0),
-		m_Data(str)
-	{
-	}
-
-	//! Create a dummy string from a pointer
-	/**
-	\param str A nul-terminated c-string, must not be null.
-	\param s The number of bytes in the string, wihtout the NUL-Byte.
-	*/
-	constexpr StringView(const char* str, int s) :
-		m_Size(s),
-		m_Data(str)
-	{
-	}
-	constexpr StringView(const char* b, const char* e) :
-		m_Size(e-b),
-		m_Data(b)
-	{
-	}
-
-	StringView(const StringView&) = default;
-
-	//! Ensures that the size of string is available
-	/**
-	Should be called at least one before accessing the size property.
-	*/
-	int Size() const
-	{
-		return m_Size;
-	}
-
-	const char* Data() const { return m_Data; }
-
-	StringView SubString(int first, int size) const { return StringView(Data() + first, size); }
-	StringView EndSubString(int begin) const { return StringView(Data()+begin, Size()-begin); }
-	StringView BeginSubString(int end) const { return StringView(Data(), end); }
-
-	//! Compare two strings for equality
-	/*
-	No unicode normalization is performed
-	*/
-	LUX_API bool Equal(const StringView& other, EStringCompare = EStringCompare::CaseSensitive) const;
-
-	//! Compare two strings.
-	LUX_API bool Smaller(const StringView& other, EStringCompare = EStringCompare::CaseSensitive) const;
-
-	//! Test if the string starts with a given string.
-	/**
-	\param data The string to test with.
-	\param True, if this string starts with the given one, false otherwise
-	*/
-	LUX_API bool StartsWith(const StringView& data, EStringCompare = EStringCompare::CaseSensitive) const;
-
-	//! Test if the string ends with a given string.
-	/**
-	\param data The string to test with.
-	\param True, if this string starts with the given one, false otherwise
-	*/
-	LUX_API bool EndsWith(const StringView& data, EStringCompare = EStringCompare::CaseSensitive) const;
-
-	//! Find the first occurence of a substring in this string.
-	/**
-	\param search The string to search for, the empty string is never found.
-	\param first The position where the search should begin, if invalid First() is used.
-	\param end The position where the search should end, if invalid End() is used.
-	*/
-	LUX_API int Find(const StringView& search) const;
-
-	//! Find the last occurence of a substring in this string.
-	/**
-	\param search The string to search for, the empty string is never found.
-	\return A iterator to the first codepoint of the searched string, or the used end if it couldn't be found.
-	*/
-	LUX_API int FindReverse(const StringView& search) const;
-
-	//! Classify the content of the string
-	/**
-	See \ref{EStringType} for more information about string classification.
-	*/
-	LUX_API EStringClassFlag Classify() const;
-
-	//! Contains the string only whitespace(or is empty)
-	LUX_API bool IsWhitespace() const;
-
-	inline bool IsEmpty() const
-	{
-		return (Size() == 0);
-	}
-
-#if 0
-	ConstIterator begin() const { return ConstIterator(Data(), Data()); }
-	ConstIterator end() const { return ConstIterator(Data()+Size(), Data()); }
-
-	//! Iterator the the codepoint before the first in the string
-	/**
-	Can't be dereferenced.
-	*/
-	inline ConstIterator Begin() const
-	{
-		return ConstIterator(Data() - 1, Data());
-	}
-
-	//! Iterator the the first codepoint in the string.
-	inline ConstIterator First() const
-	{
-		return ConstIterator(Data(), Data());
-	}
-#endif
-
-	inline core::Range<const char*> Bytes() const
-	{
-		return MakeRange<const char*>(Data(), Data() + Size());
-	}
-	inline core::Range<ConstUTF8Iterator> CodePoints() const
-	{
-		return MakeRange<ConstUTF8Iterator>(Data(), Data() + Size());
-	}
-
-#if 0
-	//! Iterator the the last codepoint in the string.
-	inline ConstIterator Last() const
-	{
-		if(Size() > 0)
-			return End() - 1;
-		else
-			return End();
-	}
-
-	//! Iterator the the codepoint after the last in the string
-	/**
-	Can't be dereferenced.
-	*/
-	inline ConstIterator End() const
-	{
-		return ConstIterator(Data() + Size(), Data());
-	}
-#endif
-private:
-	//! The number of bytes in the string, without the NUL-Byte.
-	int m_Size;
-
-	//! Pointer to the string-data
-	/**
-	Nul-Terminated c-string.
-	*/
-	const char* m_Data;
-};
 
 //! A utf8-string
 /**
 All non-constant methods invalidate all iterators.
 No string can contain the NUL.
+These strings are always nullterminated
 Length or Count refers to a number of codepoints.
 Size refers to number of bytes.
 */
@@ -224,7 +41,7 @@ public:
 	\param size The number of bytes to copy from the string if -1 all bytes a copied.
 	*/
 	LUX_API String(const char* data, int size = -1);
-	String(const StringView& view) :
+	String(StringView view) :
 		String(view.Data(), view.Size())
 	{
 	}
@@ -241,10 +58,7 @@ public:
 	LUX_API String Copy();
 
 	StringView AsView() const { return StringView(Data(), Size()); }
-	operator StringView() const
-	{
-		return AsView();
-	}
+	operator StringView() const { return AsView(); }
 
 	//! Reserve size bytes for string memory.
 	/**
@@ -261,19 +75,19 @@ public:
 	LUX_API String& operator=(String&& old);
 
 	//! Append another string
-	String& operator+=(const StringView& str) { return Append(str); }
+	String& operator+=(StringView str) { return Append(str); }
 
 	//! Compare two strings for equality
 	/*
 	No unicode normalization is performed
 	*/
-	bool Equal(const StringView& other, EStringCompare compare = EStringCompare::CaseSensitive) const
+	bool Equal(StringView other, EStringCompare compare = EStringCompare::CaseSensitive) const
 	{
 		return ((StringView)*this).Equal(other, compare);
 	}
 
 	//! Compare two strings.
-	bool Smaller(const StringView& other, EStringCompare compare = EStringCompare::CaseSensitive) const
+	bool Smaller(StringView other, EStringCompare compare = EStringCompare::CaseSensitive) const
 	{
 		return ((StringView)*this).Smaller(other, compare);
 	}
@@ -283,7 +97,7 @@ public:
 	\param pos The location of the first inserted codepoint.
 	\param other The string to insert.
 	*/
-	LUX_API void Insert(int pos, const StringView& other);
+	LUX_API void Insert(int pos, StringView other);
 	LUX_API void InsertCodePoint(int pos, u32 value);
 
 	//! Append another string onto this one.
@@ -291,15 +105,15 @@ public:
 	\param other The string to append.
 	\return selfreference
 	*/
-	String& Append(const StringView& other) { Insert(Size(), other); return *this; }
-	String& Append(const char* data, int size) { Insert(Size(), StringView(data, size)); return *this; }
+	String& Append(StringView other) { Insert(Size(), other); return *this; }
+	String& Append(const char* data, int size) { return Append(StringView(data, size)); }
 
 	//! Append a single codepoint from a iterator.
 	/**
 	\param codepoint The codepoint referenced by this iterator is appended.
 	\return selfreference
 	*/
-	LUX_API String& AppendCodePoint(const char* codepoint);
+	LUX_API String& AppendCodePoint(const void* codepoint);
 
 	//! Append a single codepoint.
 	/**
@@ -318,7 +132,7 @@ public:
 	\param newSize The new size of the string.
 	\param filler The string to fill the newly created string with
 	*/
-	LUX_API void Resize(int newSize, const StringView& filler = " ");
+	LUX_API void Resize(int newSize, StringView filler = " ");
 
 	//! Clear the string contents, making the string empty.
 	LUX_API String& Clear();
@@ -366,12 +180,6 @@ public:
 	//! Add a single utf-8 byte to the string.
 	LUX_API void PushByte(u8 byte);
 
-	//! Iterator the the first character in the string.
-	inline const char* First() const
-	{
-		return Data();
-	}
-
 	inline core::Range<ConstUTF8Iterator> CodePoints() const
 	{
 		return MakeRange<ConstUTF8Iterator>(Data(), Data() + Size());
@@ -385,16 +193,15 @@ public:
 		return MakeRange<char*>(Data(), Data() + Size());
 	}
 
-	char operator[](int i) const { return Data()[i]; }
-	char& operator[](int i) { return Data()[i]; }
-
-	//! Iterator the the character after the last in the string
-	/**
-	Can't be dereferenced.
-	*/
-	inline const char* End() const
+	char operator[](int i) const
 	{
-		return Data() + m_Size;
+		lxAssert(i >= 0 && i < Size());
+		return Data()[i];
+	}
+	char& operator[](int i)
+	{
+		lxAssert(i >= 0 && i < Size());
+		return Data()[i];
 	}
 
 	//! Test if the string starts with a given string.
@@ -402,7 +209,7 @@ public:
 	\param data The string to test with.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool StartsWith(const StringView& data, EStringCompare cmp = EStringCompare::CaseSensitive) const
+	bool StartsWith(StringView data, EStringCompare cmp = EStringCompare::CaseSensitive) const
 	{
 		return ((StringView)*this).StartsWith(data, cmp);
 	}
@@ -413,7 +220,7 @@ public:
 	\param first The position from where the test is performed, if invalid the End() iterator is used.
 	\param True, if this string starts with the given one, false otherwise
 	*/
-	bool EndsWith(const StringView& data, EStringCompare cmp = EStringCompare::CaseSensitive) const
+	bool EndsWith(StringView data, EStringCompare cmp = EStringCompare::CaseSensitive) const
 	{
 		return ((StringView)*this).EndsWith(data, cmp);
 	}
@@ -427,7 +234,7 @@ public:
 	\param end The iterator where the search is stopped, if invalid End() is used.
 	\return The number of occurences found and replaced.
 	*/
-	LUX_API int Replace(const StringView& replace, const StringView& search, int first = -1, int size = -1);
+	LUX_API int Replace(StringView replace, StringView search, int first = -1, int size = -1);
 
 	//! Replace a range of a string with a given string.
 	/**
@@ -436,14 +243,14 @@ public:
 	\param size The number of bytes to replace.
 	\return A iterator to the first character after the newly inserted string.
 	*/
-	LUX_API int ReplaceRange(const StringView& replace, int rangeFirst, int size = -1);
+	LUX_API int ReplaceRange(StringView replace, int rangeFirst, int size = -1);
 
 	//! Find the first occurence of a substring in this string.
 	/**
 	\param search The string to search for, the empty string is never found.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	int Find(const StringView& search) const
+	int Find(StringView search) const
 	{
 		return ((StringView)*this).Find(search);
 	}
@@ -453,7 +260,7 @@ public:
 	\param search The string to search for, the empty string is never found.
 	\return A iterator to the first character of the searched string, or the used end if it couldn't be found.
 	*/
-	int FindReverse(const StringView& search) const
+	int FindReverse(StringView search) const
 	{
 		return ((StringView)*this).FindReverse(search);
 	}
@@ -462,9 +269,9 @@ public:
 	String EndSubString(int begin) const { return EndSubStringView(begin); }
 	String BeginSubString(int end) const { return BeginSubStringView(end); }
 
-	StringView SubStringView(int first, int size) const { return StringView(Data()+first, size); }
-	StringView EndSubStringView(int begin) const { return StringView(Data()+begin, Size()-begin); }
-	StringView BeginSubStringView(int end) const { return StringView(Data(), end); }
+	StringView SubStringView(int first, int size) const { return ((StringView)(*this)).SubString(first, size); }
+	StringView EndSubStringView(int begin) const { return SubStringView(begin, Size()-begin); }
+	StringView BeginSubStringView(int end) const { return SubStringView(0, end); }
 
 	//! Removes a number of characters from the back of string.
 	/**
@@ -557,9 +364,6 @@ private:
 	//! Set the number of allocated bytes, including NUL.
 	LUX_API void SetAllocated(int a);
 
-	//! Push a single character to string, it's data is read from ptr.
-	LUX_API void PushCodePoint(const char* ptr);
-
 private:
 	//! Contains the raw data of the string.
 	/**
@@ -586,6 +390,18 @@ private:
 	int m_Size;
 };
 
+class NulterminatedStringViewWrapper
+{
+public:
+	NulterminatedStringViewWrapper(StringView view) :
+		m_Str(view)
+	{
+	}
+	operator const char*() const { return m_Str.Data(); }
+private:
+	String m_Str;
+};
+
 //! Concat two strings.
 inline String operator+(const String& a, const String& b)
 {
@@ -606,11 +422,11 @@ inline String operator+(const String& string, const char* str)
 
 inline bool operator==(const char* other, const String& string)
 {
-	return string.Equal(other);
+	return string.Equal(StringView(other, strlen(other)));
 }
 inline bool operator==(const String& string, const char* other)
 {
-	return string.Equal(other);
+	return string.Equal(StringView(other, strlen(other)));
 }
 inline bool operator==(const String& a, const String& b)
 {
@@ -624,13 +440,14 @@ inline bool operator==(const StringView& a, const String& b)
 {
 	return b.Equal(a);
 }
+
 inline bool operator!=(const char* other, const String& string)
 {
-	return string.Equal(other);
+	return string.Equal(StringView(other, strlen(other)));
 }
 inline bool operator!=(const String& string, const char* other)
 {
-	return !string.Equal(other);
+	return !string.Equal(StringView(other, strlen(other)));
 }
 inline bool operator!=(const String& a, const String& b)
 {
@@ -652,11 +469,11 @@ This order doesn't have to be equal to the lexical order.
 */
 inline bool operator<(const String& a, const char* b)
 {
-	return a.Smaller(b);
+	return a.Smaller(StringView(b, strlen(b)));
 }
 inline bool operator<(const char* a, const String& b)
 {
-	return core::String(a).Smaller(b);
+	return StringView(a, strlen(a)).Smaller(b);
 }
 inline bool operator<(const String& a, const String& b)
 {
@@ -772,11 +589,6 @@ public:
 	}
 };
 
-#if 0
-inline String::ConstByteIterator begin(const String& str) { return str.First(); }
-inline String::ConstByteIterator end(const String& str) { return str.End(); }
-#endif
-
 namespace Types
 {
 LUX_API Type String();
@@ -785,11 +597,11 @@ LUX_API Type String();
 template<> struct TemplType<String> { static Type Get() { return Types::String(); } };
 
 template <>
-struct HashType<String>
+struct HashType<StringView>
 {
-	int operator()(const String& str) const
+	int operator()(StringView view) const
 	{
-		return (*this)(str.Data(), str.Size());
+		return (*this)(view.Data(), view.Size());
 	}
 	int operator()(const char* str, int size) const
 	{
@@ -797,10 +609,14 @@ struct HashType<String>
 			return 0;
 		return HashSequence(reinterpret_cast<const u8*>(str), size);
 	}
-	int operator()(const char* str) const
+};
+
+template <>
+struct HashType<String>
+{
+	int operator()(const String& str) const
 	{
-		int size = (int)strlen(str);
-		return (*this)(str, size);
+		return HashType<StringView>()(str.Data(), str.Size());
 	}
 };
 

@@ -110,7 +110,7 @@ public:
 			return defaultValue;
 	}
 
-	operator const char*() const
+	operator StringView() const
 	{
 		if(!IsValid())
 			throw InvalidOperationException("Accessed invalid package parameter");
@@ -118,7 +118,7 @@ public:
 		if(m_Type != core::Types::String())
 			throw TypeCastException(m_Type, core::Types::String());
 
-		return ((core::String*)m_Data)->Data();
+		return ((const core::String*)m_Data)->AsView();
 	}
 
 	void AssignData(const void* data) const
@@ -164,10 +164,11 @@ public:
 	template <typename T>
 	const VariableAccess& operator=(const T& varVal) const
 	{
-		if(!core::IsConvertible(core::TemplType<T>::Get(), m_Type))
-			throw TypeCastException(core::TemplType<T>::Get(), m_Type);
+		auto type = core::TemplType<T>::Get();
+		if(!core::IsConvertible(type, m_Type))
+			throw TypeCastException(type, m_Type);
 		if(IsValid())
-			core::ConvertBaseType(core::TemplType<T>::Get(), &varVal, m_Type, m_Data);
+			core::ConvertBaseType(type, &varVal, m_Type, m_Data);
 
 		return *this;
 	}
@@ -184,52 +185,6 @@ public:
 
 		return *this;
 	}
-
-	/*
-	//! Access as texture
-	const VariableAccess& operator=(video::BaseTexture* texture) const
-	{
-		if(m_Type != core::Types::Texture())
-			throw TypeException("Incompatible types used", m_Type, core::Types::Texture());
-
-		if(!IsValid())
-			throw Exception("Accessed invalid package parameter");
-
-		((video::TextureLayer*)m_Data)->texture = texture;
-
-		return *this;
-	}
-
-	//! Access as texture
-	const VariableAccess& operator=(video::Texture* texture) const
-	{
-		return (*this = (video::BaseTexture*)texture);
-	}
-
-	//! Access as texture
-	const VariableAccess& operator=(video::CubeTexture* texture) const
-	{
-		return (*this = (video::BaseTexture*)texture);
-	}
-
-	//! Access as texture
-	const VariableAccess& operator=(StrongRef<video::BaseTexture> texture) const
-	{
-		return (*this = (video::BaseTexture*)texture);
-	}
-
-	//! Access as texture
-	const VariableAccess& operator=(StrongRef<video::Texture> texture) const
-	{
-		return (*this = (video::BaseTexture*)texture);
-	}
-
-	//! Access as texture
-	const VariableAccess& operator=(StrongRef<video::CubeTexture> texture) const
-	{
-		return (*this = (video::BaseTexture*)texture);
-	}
-	*/
 
 	//! Copy data from other packge param
 	/**

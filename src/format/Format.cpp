@@ -160,6 +160,7 @@ namespace internal
 	static bool ParseUntilPlaceholder(
 		Context& ctx,
 		const char*& str,
+		const char* end,
 		Placeholder& outPlaceholder)
 	{
 		const char* cur = str;
@@ -171,19 +172,19 @@ namespace internal
 
 			// Advance cursor until ~ character.
 			const char* before = cur;
-			while(*cur && *cur != '~')
+			while(cur != end && *cur != '~')
 				++cur;
 			size = cur - before;
 
 			// The string ended before another placeholder.
-			if(*cur == 0)
+			if(cur == end)
 				break;
 
 			// Move to first character of placeholder
 			++cur;
 
 			// Remember offset of the current placeholder
-			ctx.fstrLastArgPos = cur - ctx.GetFormatString();
+			ctx.fstrLastArgPos = cur - ctx.GetFormatString().data;
 			++ctx.argId;
 
 			ParsePlaceholder(ctx, cur, outPlaceholder);
@@ -267,18 +268,19 @@ namespace internal
 		}
 	}
 
-	void format(Context& ctx, const char* fmtStr, const BaseFormatEntryType* rawEntries, int entryCount)
+	void format(Context& ctx, Slice fmtStr, const BaseFormatEntryType* rawEntries, int entryCount)
 	{
 		Context::AutoRestoreSubContext subCtx(ctx, fmtStr);
 
 		auto GetEntry = [&](int i) { return reinterpret_cast<const FormatEntry*>(rawEntries + i); };
-		const char* cur = ctx.GetFormatString();
+		const char* cur = ctx.GetFormatString().data;
+		const char* end = cur + ctx.GetFormatString().size;
 
 		// Go to placeholder, try arg free, fill subplaceholder, convert string
 		int curId = 0;
 		Placeholder pl;
 		while(true) {
-			if(!internal::ParseUntilPlaceholder(ctx, cur, pl))
+			if(!internal::ParseUntilPlaceholder(ctx, cur, end, pl))
 				break; // No more placeholders
 			bool isArgFree = IsArgFreePlaceholder(pl.type);
 			if(!isArgFree)

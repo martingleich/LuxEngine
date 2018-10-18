@@ -86,7 +86,7 @@ MaterialLibrary::MaterialLibrary()
 	}
 
 	{
-		const char luxHLSLInclude[] =
+		core::StringView luxHLSLInclude(
 R"(
 // d is the distance from the geomtry to the camera.
 // Returns 0 for minimal fog effect, 1 for maximal effect
@@ -151,8 +151,8 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 
 	return color;
 }
-)";
-		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude, sizeof(luxHLSLInclude)-1);// No terminating null
+)");
+		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude);// No terminating null
 	}
 }
 
@@ -161,7 +161,7 @@ MaterialLibrary::~MaterialLibrary()
 }
 
 void MaterialLibrary::SetMaterial(
-	const core::String& name, video::Material* material)
+	core::StringView name, video::Material* material)
 {
 	auto& key = m_MaterialMap.At(name, m_MaterialList.Size());
 	if(key == m_MaterialList.Size())
@@ -170,51 +170,46 @@ void MaterialLibrary::SetMaterial(
 		m_MaterialList[key] = material;
 }
 
-StrongRef<video::Material> MaterialLibrary::GetMaterial(
-	const core::String& name)
+StrongRef<video::Material> MaterialLibrary::GetMaterial(core::StringView name)
+{
+	auto it = m_MaterialMap.Find(name);
+	if(it == m_MaterialMap.End())
+		throw core::ObjectNotFoundException(name);
+	return m_MaterialList[*it];
+}
+
+StrongRef<video::Material> MaterialLibrary::TryGetMaterial(core::StringView name)
 {
 	auto it = m_MaterialMap.Find(name);
 	if(it == m_MaterialMap.End())
 		return nullptr;
-	else
-		return m_MaterialList[*it];
+	return m_MaterialList[*it];
 }
 
-StrongRef<video::Material> MaterialLibrary::CloneMaterial(
-	const core::String& name)
+StrongRef<video::Material> MaterialLibrary::CloneMaterial(core::StringView name)
 {
-	auto m = GetMaterial(name);
-	if(m)
-		return m->Clone();
-	else
-		return nullptr;
+	return GetMaterial(name)->Clone();
 }
 
 void MaterialLibrary::SetMaterial(EKnownMaterial name, Material* material)
 {
-	m_MaterialList.At((u32)name) = material;
+	m_MaterialList.At((int)name) = material;
 }
 
 StrongRef<video::Material> MaterialLibrary::GetMaterial(EKnownMaterial name)
 {
-	return m_MaterialList.At((u32)name);
+	return m_MaterialList.At((int)name);
 }
 
 StrongRef<video::Material> MaterialLibrary::CloneMaterial(EKnownMaterial name)
 {
-	auto m = GetMaterial(name);
-	if(m)
-		return m->Clone();
-	else
-		return nullptr;
+	return GetMaterial(name)->Clone();
 }
 
 StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 	video::EShaderLanguage language,
-	const io::Path& VSPath, const core::String& VSEntryPoint,
-	int VSMajor, int VSMinor,
-	const io::Path& PSPath, const core::String& PSEntryPoint,
-	int PSMajor, int PSMinor,
+	const io::Path& VSPath, core::StringView VSEntryPoint, int VSMajor, int VSMinor,
+	const io::Path& PSPath, core::StringView PSEntryPoint, int PSMajor, int PSMinor,
 	ShaderCompileInfo* outInfo)
 {
 	StrongRef<io::File> PSFile;
@@ -227,34 +222,36 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 	}
 
 	core::RawMemory vsCodeBuffer;
-	char* vsCode = (char*)VSFile->GetBuffer();
+	char* vsCodePtr = (char*)VSFile->GetBuffer();
 	int vsCodeSize = core::SafeCast<int>(VSFile->GetSize());
-	if(!vsCode) {
+	if(!vsCodePtr) {
 		vsCodeBuffer.SetSize((size_t)vsCodeSize);
-		vsCode = vsCodeBuffer;
-		VSFile->ReadBinary(VSFile->GetSize(), vsCode);
+		vsCodePtr = vsCodeBuffer;
+		VSFile->ReadBinary(VSFile->GetSize(), vsCodePtr);
 	}
+	core::StringView vsCode(vsCodePtr, vsCodeSize);
 
 	core::RawMemory psCodeBuffer;
-	char* psCode;
+	char* psCodePtr;
 	int psCodeSize = 0;
 	if(PSFile == VSFile) {
-		psCode = vsCode;
+		psCodePtr = vsCodePtr;
 		psCodeSize = vsCodeSize;
 	} else {
-		psCode = (char*)PSFile->GetBuffer();
-		if(!psCode) {
+		psCodePtr = (char*)PSFile->GetBuffer();
+		if(!psCodePtr) {
 			psCodeSize = core::SafeCast<int>(VSFile->GetSize());
 			psCodeBuffer.SetSize((size_t)psCodeSize);
-			psCode = psCodeBuffer;
-			PSFile->ReadBinary(PSFile->GetSize(), psCode);
+			psCodePtr = psCodeBuffer;
+			PSFile->ReadBinary(PSFile->GetSize(), psCodePtr);
 		}
 	}
+	core::StringView psCode(psCodePtr, psCodeSize);
 
 	auto shader = video::VideoDriver::Instance()->CreateShader(
 		language,
-		vsCode, VSEntryPoint.Data(), vsCodeSize, VSMajor, VSMinor,
-		psCode, PSEntryPoint.Data(), psCodeSize, PSMajor, PSMinor,
+		vsCode, VSEntryPoint, VSMajor, VSMinor,
+		psCode, PSEntryPoint, PSMajor, PSMinor,
 		outInfo?&outInfo->messages:nullptr);
 	if(outInfo)
 		outInfo->failed = shader == nullptr;
@@ -274,6 +271,7 @@ StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
 StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
 	const FixedFunctionParameters& params)
 {
+	// Why only use the cache sometimes.
 	bool useCache = params.textures.Size() <= 1;
 	if(useCache) {
 		for(auto& p : m_FixedFunctionShaders) {
@@ -283,31 +281,27 @@ StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
 	}
 
 	auto shader = video::VideoDriver::Instance()->CreateFixedFunctionShader(params);
-	if(shader)
-		m_FixedFunctionShaders.EmplaceBack(params, shader);
-
+	m_FixedFunctionShaders.EmplaceBack(params, shader);
 	return shader;
 }
 
 StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
 	EShaderLanguage language,
-	const core::String& VSCode, const char* VSEntryPoint,
-	int VSmajorVersion, int VSminorVersion,
-	const core::String& PSCode, const char* PSEntryPoint,
-	int PSmajorVersion, int PSminorVersion,
+	core::StringView VSCode, core::StringView VSEntryPoint, int VSmajorVersion, int VSminorVersion,
+	core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
 	ShaderCompileInfo* outInfo)
 {
 	auto shader = video::VideoDriver::Instance()->CreateShader(
 		language,
-		VSCode.Data(), VSEntryPoint, VSCode.Size(),
-		VSmajorVersion, VSminorVersion,
-		PSCode.Data(), PSEntryPoint, PSCode.Size(),
-		PSmajorVersion, PSminorVersion,
-		outInfo ? &outInfo->messages:nullptr);
+		VSCode, VSEntryPoint, VSmajorVersion, VSminorVersion,
+		PSCode, PSEntryPoint, PSmajorVersion, PSminorVersion,
+		outInfo ? &outInfo->messages : nullptr);
+
 	if(outInfo)
 		outInfo->failed = shader == nullptr;
 	else if(!shader)
 		throw UnhandledShaderCompileErrorException();
+
 	return shader;
 }
 
@@ -323,26 +317,23 @@ bool MaterialLibrary::IsShaderSupported(
 }
 
 bool MaterialLibrary::GetShaderInclude(
-	EShaderLanguage language, const core::String& name,
-	const void*& outData, int& outBytes)
+	EShaderLanguage language, core::StringView name,
+	core::StringView& outData)
 {
 	ShaderInclude search(language, name);
 	auto it = m_ShaderIncludes.Find(search);
 	if(it == m_ShaderIncludes.End())
 		return false;
-	outData = it->PointerC();
-	outBytes = (int)it->GetSize();
+	outData = core::StringView((const char*)it->Pointer(), (int)it->GetSize());
 	return true;
 }
 
 void MaterialLibrary::SetShaderInclude(
-	EShaderLanguage language, const core::String& name,
-	const void* data, int bytes)
+	EShaderLanguage language, core::StringView name,
+	core::StringView data)
 {
 	ShaderInclude search(language, name);
-	auto& mem = m_ShaderIncludes.At(search);
-	mem.SetMinSize(bytes);
-	memcpy(mem, data, bytes);
+	m_ShaderIncludes.At(search).Set(data.Data(), data.Size());
 }
 
 } // namespace video

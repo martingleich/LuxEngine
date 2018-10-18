@@ -34,7 +34,7 @@ namespace video
 
 core::Name MeshLoaderOBJ::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Mesh)
+	if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Mesh)
 		return core::Name::INVALID;
 
 	core::String ext = file->GetPath().GetFileExtension();
@@ -112,11 +112,11 @@ struct ObjLoader
 public:
 	ObjLoader(io::File* file, core::Resource* resource)
 	{
-		basePath = file->GetPath();
-
 		auto mesh = dynamic_cast<video::Mesh*>(resource);
 		if(!mesh)
 			throw core::InvalidOperationException("Wrong resource type passed");
+
+		basePath = file->GetPath().GetFileDir();
 		auto filesize = file->GetSize();
 		core::RawMemory memory(core::SafeCast<size_t>(filesize));
 		file->ReadBinary(filesize, memory);
@@ -129,7 +129,7 @@ public:
 		if(!result)
 			throw core::FileFormatException("Invalid file format", "obj");
 
-		if(shapes.size() == 0)
+		if(shapes.empty())
 			throw core::FileFormatException("File contains no geometry", "obj");
 
 		ConvertMaterials();

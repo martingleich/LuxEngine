@@ -51,11 +51,10 @@ public:
 				return Open(D3DXINC_SYSTEM, pFileName, pParentData, ppData, pBytes);
 			}
 		} else if(IncludeType == D3DXINC_SYSTEM) {
-			const void* data;
-			int bytes;
-			if(MaterialLibrary::Instance()->GetShaderInclude(EShaderLanguage::HLSL, pFileName, data, bytes)) {
-				*ppData = data;
-				*pBytes = (UINT)bytes;
+			core::StringView data;
+			if(MaterialLibrary::Instance()->GetShaderInclude(EShaderLanguage::HLSL, core::StringView(pFileName, strlen(pFileName)), data)) {
+				*ppData = data.Data();
+				*pBytes = (UINT)data.Size();
 				return S_OK;
 			} else {
 				return E_FAIL;
@@ -107,35 +106,25 @@ ShaderD3D9::~ShaderD3D9()
 }
 
 bool ShaderD3D9::Init(
-	const char* vsCode, const char* vsEntryPoint, int vsLength, const char* vsProfile,
-	const char* psCode, const char* psEntryPoint, int psLength, const char* psProfile,
+	core::StringView vsCode, core::StringView vsEntryPoint, core::StringView vsProfile,
+	core::StringView psCode, core::StringView psEntryPoint, core::StringView psProfile,
 	core::Array<core::String>* errorList)
 {
-	LX_CHECK_NULL_ARG(vsCode);
-	LX_CHECK_NULL_ARG(psCode);
-	LX_CHECK_NULL_ARG(vsProfile);
-	LX_CHECK_NULL_ARG(psProfile);
-
-	if(vsLength == 0)
-		vsLength = (int)strlen(vsCode);
-	if(psLength == 0)
-		psLength = (int)strlen(psCode);
-
-	if(!vsEntryPoint)
+	if(vsEntryPoint.IsEmpty())
 		vsEntryPoint = "mainVS";
-	if(!psEntryPoint)
+	if(psEntryPoint.IsEmpty())
 		psEntryPoint = "mainPS";
 
 	UnknownRefCounted<ID3DXConstantTable> vertexShaderConstants;
 	UnknownRefCounted<ID3DXConstantTable> pixelShaderConstants;
 
 	bool compileError = false;
-	m_VertexShader = CreateVertexShader(vsCode, vsEntryPoint, vsLength, vsProfile, errorList, vertexShaderConstants);
+	m_VertexShader = CreateVertexShader(vsCode, vsEntryPoint, vsProfile, errorList, vertexShaderConstants);
 	if(!m_VertexShader)
 		compileError = true;
 
-	if(psCode) {
-		m_PixelShader = CreatePixelShader(psCode, psEntryPoint, psLength, psProfile, errorList, pixelShaderConstants);
+	if(!psCode.IsEmpty()) {
+		m_PixelShader = CreatePixelShader(psCode, psEntryPoint, psProfile, errorList, pixelShaderConstants);
 		if(!m_PixelShader)
 			compileError = true;
 	}
@@ -213,7 +202,8 @@ bool ShaderD3D9::Init(
 		}
 
 		// Put name into namelist.
-		memcpy((char*)m_Names + nameCursor, helper[i].name, helper[i].nameLength + 1);
+		memcpy((char*)m_Names + nameCursor, helper[i].name.Data(), helper[i].name.Size());
+		((char*)m_Names)[nameCursor + helper[i].name.Size()] = 0;
 
 		entry.registerPS = h.registerPS;
 		entry.registerPSCount = h.registerPSCount;
@@ -226,7 +216,7 @@ bool ShaderD3D9::Init(
 		else
 			m_Params.PushBack(std::move(entry));
 
-		nameCursor += h.nameLength + 1;
+		nameCursor += h.name.Size() + 1;
 	}
 
 	return true;
@@ -247,7 +237,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 
 		u32 size, regId, regCount, samplerStage;
 		EType type;
-		const char* name;
+		core::StringView name;
 		const void* defaultValue;
 		bool isValidType;
 		if(!GetStructureElemType(handle, table, samplerStage, type, size, regId, regCount, name, defaultValue, isValidType))
@@ -255,11 +245,11 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 
 		bool isParam = false;
 		bool isScene = false;
-		if(strncmp(name, "param_", 6) == 0) {
-			name += 6;
+		if(name.StartsWith("param_")) {
+			name = name.EndSubString(6);
 			isParam = true;
-		} else if(strncmp(name, "scene_", 6) == 0) {
-			name += 6;
+		} else if(name.StartsWith("scene_")) {
+			name = name.EndSubString(6);
 			isScene = true;
 		}
 
@@ -278,7 +268,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 				((it->paramType == ParamType_DefaultMaterial || it->paramType == ParamType_ParamMaterial) && isParam) ||
 				(it->paramType == ParamType_Scene && !isParam);
 			if(isSameStruct) {
-				if(strcmp(it->name, name) == 0) {
+				if(it->name.Equal(name)) {
 					foundEntry = &*it;
 					break;
 				}
@@ -303,7 +293,6 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 		} else {
 			// Otherwise, create a new entry.
 			HelperEntry HEntry;
-			HEntry.nameLength = (u32)strlen(name);
 			HEntry.name = name;
 			HEntry.type = type;
 			HEntry.typeSize = (u8)size;
@@ -318,13 +307,13 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 			}
 			HEntry.paramType = isParam ? ParamType_ParamMaterial : ParamType_Scene;
 			outParams.PushBack(HEntry);
-			outStringSize += HEntry.nameLength + 1;
+			outStringSize += HEntry.name.Size() + 1;
 		}
 	}
 }
 
 UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
-	const char* code, const char* entryPoint, int length, const char* profile,
+	core::StringView code, core::StringView entryPoint, core::StringView profile,
 	core::Array<core::String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
@@ -332,9 +321,9 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	UnknownRefCounted<ID3DXBuffer> errors;
 	UnknownRefCounted<IDirect3DVertexShader9> shader;
 
-	HRESULT hr = D3DXCompileShader(code, (UINT)length,
-		NULL, &g_luxD3DXShaderIncludes, entryPoint,
-		profile,
+	HRESULT hr = D3DXCompileShader(code.Data(), (UINT)code.Size(),
+		NULL, &g_luxD3DXShaderIncludes, core::NulterminatedStringViewWrapper(entryPoint),
+		core::NulterminatedStringViewWrapper(profile),
 		0, output.Access(), errors.Access(),
 		outTable.Access());
 	if(errors) {
@@ -356,7 +345,7 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 }
 
 UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
-	const char* code, const char* entryPoint, int length, const char* profile,
+	core::StringView code, core::StringView entryPoint, core::StringView profile,
 	core::Array<core::String>* errorList,
 	UnknownRefCounted<ID3DXConstantTable>& outTable)
 {
@@ -365,9 +354,9 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	UnknownRefCounted<IDirect3DPixelShader9> shader;
 
 	HRESULT hr;
-	hr = D3DXCompileShader(code, (UINT)length,
-		NULL, &g_luxD3DXShaderIncludes, entryPoint,
-		profile,
+	hr = D3DXCompileShader(code.Data(), (UINT)code.Size(),
+		NULL, &g_luxD3DXShaderIncludes, core::NulterminatedStringViewWrapper(entryPoint),
+		core::NulterminatedStringViewWrapper(profile),
 		0, output.Access(), errors.Access(),
 		outTable.Access());
 
@@ -426,7 +415,7 @@ void ShaderD3D9::SetParam(int paramId, const void* data)
 	SetShaderValue(m_Params[realId], data);
 }
 
-int ShaderD3D9::GetParamId(const core::String& name) const
+int ShaderD3D9::GetParamId(core::StringView name) const
 {
 	return m_ParamPackage.GetParamId(name);
 }
@@ -467,7 +456,7 @@ void ShaderD3D9::Disable()
 	m_D3DDevice->SetPixelShader(NULL);
 }
 
-bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, const char*& name, const void*& defaultValue, bool& isValid)
+bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, core::StringView& name, const void*& defaultValue, bool& isValid)
 {
 	D3DXCONSTANT_DESC desc;
 	UINT count = 1;
@@ -507,7 +496,7 @@ bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* tab
 	outSize = desc.Bytes;
 	registerID = desc.RegisterIndex;
 	regCount = desc.RegisterCount;
-	name = desc.Name;
+	name = core::StringView(desc.Name, strlen(desc.Name));
 	defaultValue = desc.DefaultValue;
 
 	isValid = (outType != EType::Unknown);
@@ -663,9 +652,9 @@ const core::ParamPackage& ShaderD3D9::GetParamPackage() const
 	return m_ParamPackage;
 }
 
-int ShaderD3D9::GetDefaultId(const char* name)
+int ShaderD3D9::GetDefaultId(core::StringView name)
 {
-	static const char* NAMES[DefaultParam_COUNT] = {
+	static const core::StringView NAMES[DefaultParam_COUNT] = {
 		"shininess",
 		"diffuse",
 		"emissive",
@@ -673,7 +662,7 @@ int ShaderD3D9::GetDefaultId(const char* name)
 	};
 
 	for(int i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
-		if(strcmp(NAMES[i], name) == 0)
+		if(NAMES[i].Equal(name))
 			return (int)i;
 	}
 

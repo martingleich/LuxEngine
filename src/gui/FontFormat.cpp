@@ -352,7 +352,7 @@ private:
 		WriteFraction(info.slanting);
 	}
 
-	[[noreturn]] void Error(const char* message = "format is invalid")
+	[[noreturn]] void Error(core::StringView message = "format is invalid")
 	{
 		throw core::FileFormatException(message, "lxf");
 	}
@@ -468,7 +468,7 @@ private:
 
 core::Name FontLoader::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Font)
+	if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Font)
 		return core::Name::INVALID;
 
 	u32 magic = 0;

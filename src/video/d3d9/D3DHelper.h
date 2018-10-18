@@ -297,7 +297,7 @@ inline DWORD GetD3DStencilOperator(EStencilOperator op)
 	}
 }
 
-inline const char* GetD3DXShaderProfile(
+inline core::StringView GetD3DXShaderProfile(
 	bool isPixel,
 	int major, int minor)
 {
@@ -353,7 +353,7 @@ inline const char* GetD3DXShaderProfile(
 		}
 	}
 
-	return nullptr;
+	return core::StringView::EMPTY;
 }
 
 inline DWORD GetD3DBlend(EBlendFactor factor)

@@ -22,12 +22,12 @@ public:
 	Path() = default;
 	Path(const char* str, Archive* archive=nullptr)
 	{
-		Set(str);
+		Set(core::StringView(str, strlen(str)));
 		m_Archive = archive;
 	}
 	Path(const core::String& str, Archive* archive=nullptr)
 	{
-		Set(str);
+		Set((core::StringView)(str));
 		m_Archive = archive;
 	}
 	Path(core::StringView str, Archive* archive=nullptr)
@@ -55,8 +55,6 @@ public:
 	LUX_API Path GetResolved(const Path& base) const;
 
 	core::StringView AsView() const { return m_RawData.AsView(); }
-	const char* Data() const { return m_RawData.Data(); }
-	int Size() const { return m_RawData.Size(); }
 	bool IsEmpty() const { return m_RawData.IsEmpty(); }
 	Archive* GetArchive() const { return m_Archive; }
 
@@ -66,6 +64,7 @@ public:
 	core::String&& TakeString() { return std::move(m_RawData); }
 	const core::String& GetString() const { return m_RawData; }
 	void PutString(core::String&& str) { m_RawData = std::move(str); }
+
 private:
 	core::String m_RawData;
 	Archive* m_Archive;
@@ -114,8 +113,7 @@ struct HashType<io::Path>
 {
 	int operator()(const io::Path& path) const
 	{
-		auto view = path.AsView();
-		return HashType<String>()(view.Data(), view.Size());
+		return HashType<String>()(path.AsView());
 	}
 };
 }

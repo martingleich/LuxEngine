@@ -20,15 +20,17 @@ namespace scene
 SkyBox::SkyBox() :
 	m_UseCubeTexture(true)
 {
-	m_Material = video::MaterialLibrary::Instance()->CloneMaterial("skybox");
-	if(!m_Material) {
-		auto material = video::MaterialLibrary::Instance()->CloneMaterial("solid");
-		auto pass = material->GetPass();
+	auto mat = video::MaterialLibrary::Instance()->TryGetMaterial("skybox");
+	if(mat) {
+		m_Material = mat->Clone();
+	} else {
+		mat = video::MaterialLibrary::Instance()->CloneMaterial("solid");
+		auto pass = mat->GetPass();
 		pass.fogEnabled = false;
 		pass.lighting = video::ELightingFlag::Disabled;
-		material->SetPass(pass);
-		video::MaterialLibrary::Instance()->SetMaterial("skybox", material);
-		m_Material = material;
+		mat->SetPass(pass);
+		video::MaterialLibrary::Instance()->SetMaterial("skybox", mat);
+		m_Material = mat;
 	}
 }
 

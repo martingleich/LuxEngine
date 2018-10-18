@@ -50,12 +50,12 @@ StrongRef<ReferenceCounted> ModuleFactory::CreateModule(const core::String& modu
 		if(e.module == module && e.name == name) {
 			StrongRef<ReferenceCounted> out = e.creator(data);
 			if(!out)
-				throw core::FactoryCreateException(module.Data(), "Creation of module failed");
+				throw core::FactoryCreateException(module, "Creation of module failed");
 			return out;
 		}
 	}
 
-	throw core::ObjectNotFoundException((module + "." + name).Data());
+	throw core::ObjectNotFoundException(module + "." + name);
 }
 
 } // namespace core

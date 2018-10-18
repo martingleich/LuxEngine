@@ -125,7 +125,8 @@ ArchiveFolderWin32::~ArchiveFolderWin32()
 
 StrongRef<File> ArchiveFolderWin32::OpenFile(const Path& path, EFileModeFlag mode, bool createIfNotExist)
 {
-	Win32Path winPath = ConvertPathToWin32WidePath(path.GetResolved(m_Path));
+	auto absDir = path.GetResolved(m_Path);
+	Win32Path winPath = ConvertPathToWin32WidePath(absDir);
 
 	DWORD access = 0;
 	if(TestFlag(mode, EFileModeFlag::Read))
@@ -142,14 +143,14 @@ StrongRef<File> ArchiveFolderWin32::OpenFile(const Path& path, EFileModeFlag mod
 	Win32FileHandle file = CreateFileW((LPCWSTR)winPath.Data(), access, FILE_SHARE_READ, NULL, create, FILE_ATTRIBUTE_NORMAL, NULL);
 	// TODO: Better error reporting.
 	if(file == INVALID_HANDLE_VALUE)
-		throw io::FileNotFoundException(path.Data());
+		throw io::FileNotFoundException(absDir);
 
 	LARGE_INTEGER size;
 	if(!GetFileSizeEx(file, &size))
 		size.QuadPart = 0;
 	FileInfo info((s64)size.QuadPart, FileInfo::EType::File);
 
-	return LUX_NEW(StreamFileWin32)(std::move(file), info, path);
+	return LUX_NEW(StreamFileWin32)(std::move(file), info, absDir);
 }
 
 bool ArchiveFolderWin32::ExistFile(const Path& p) const
@@ -302,6 +303,10 @@ void ArchiveFolderWin32::CreateWin32Directory(Win32Path& win32Path, bool recursi
 			subDirs.PopBack();
 		}
 	} while(!subDirs.IsEmpty() && path_ptr - path > 4 && !recursive);
+}
+
+void ArchiveFolderWin32::ReleaseHandles()
+{
 }
 
 }

@@ -42,7 +42,7 @@ public:
 		ScaleLengthSpeedSq(0.0f),
 		EmitLight(false)
 	{
-		m_Machine = core::ReferableFactory::Instance()->CreateShared("lux.particlerenderermachine.Quad").StaticCastStrong<RendererMachine>();
+		m_Machine = core::ReferableFactory::Instance()->CreateShared(core::Name("lux.particlerenderermachine.Quad")).StaticCastStrong<RendererMachine>();
 	}
 
 	StrongRef<RendererMachine> GetMachine() const
@@ -80,7 +80,7 @@ public:
 		EmitLight(false),
 		DefaultDir(math::Vector3F::UNIT_Y)
 	{
-		m_Machine = core::ReferableFactory::Instance()->CreateShared("lux.particlerenderermachine.Line").StaticCastStrong<RendererMachine>();
+		m_Machine = core::ReferableFactory::Instance()->CreateShared(core::Name("lux.particlerenderermachine.Line")).StaticCastStrong<RendererMachine>();
 	}
 
 	StrongRef<RendererMachine> GetMachine() const
@@ -105,7 +105,7 @@ class PointRenderer : public ParticleRenderer
 public:
 	PointRenderer()
 	{
-		m_Machine = core::ReferableFactory::Instance()->CreateShared("lux.particlerenderermachine.Point").StaticCastStrong<RendererMachine>();
+		m_Machine = core::ReferableFactory::Instance()->CreateShared(core::Name("lux.particlerenderermachine.Point")).StaticCastStrong<RendererMachine>();
 	}
 
 	StrongRef<RendererMachine> GetMachine() const

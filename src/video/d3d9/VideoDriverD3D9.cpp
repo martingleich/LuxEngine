@@ -442,37 +442,35 @@ bool VideoDriverD3D9::IsShaderSupported(EShaderLanguage lang, int vsMajor, int v
 {
 	if(lang != EShaderLanguage::HLSL)
 		return false;
-	const char* vsProfile = GetD3DXShaderProfile(false, vsMajor, vsMinor);
-	const char* psProfile = GetD3DXShaderProfile(true, psMajor, psMinor);
-	return vsProfile != nullptr && psProfile != nullptr;
+	auto vsProfile = GetD3DXShaderProfile(false, vsMajor, vsMinor);
+	auto psProfile = GetD3DXShaderProfile(true, psMajor, psMinor);
+	return !vsProfile.IsEmpty() && !psProfile.IsEmpty();
 }
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
-	const char* vsCode, const char* vsEntryPoint, int vsLength,
-	int vsMajorVersion, int vsMinorVersion,
-	const char* psCode, const char* psEntryPoint, int psLength,
-	int psMajorVersion, int psMinorVersion,
+	core::StringView vsCode, core::StringView vsEntryPoint, int vsMajorVersion, int vsMinorVersion,
+	core::StringView psCode, core::StringView psEntryPoint, int psMajorVersion, int psMinorVersion,
 	core::Array<core::String>* errorList)
 {
 	if(language != EShaderLanguage::HLSL)
 		throw core::GenericInvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");
 
-	const char* vsProfile = GetD3DXShaderProfile(false,
+	auto vsProfile = GetD3DXShaderProfile(false,
 		vsMajorVersion, vsMinorVersion);
-	const char* psProfile = GetD3DXShaderProfile(true,
+	auto psProfile = GetD3DXShaderProfile(true,
 		psMajorVersion, psMinorVersion);
 
-	if(!vsProfile)
+	if(vsProfile.IsEmpty())
 		throw core::GenericInvalidArgumentException("vertex shader profile", "Invalid vertex shader profile(~d.~d).");
 
-	if(!psProfile)
+	if(psProfile.IsEmpty())
 		throw core::GenericInvalidArgumentException("pixel shader profile", "Invalid pixel shader profile(~d.~d).");
 
 	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this, m_DeviceState);
 	bool compiled = out->Init(
-		vsCode, vsEntryPoint, vsLength, vsProfile,
-		psCode, psEntryPoint, psLength, psProfile,
+		vsCode, vsEntryPoint, vsProfile,
+		psCode, psEntryPoint, psProfile,
 		errorList);
 	if(!compiled)
 		return nullptr;
@@ -518,7 +516,7 @@ namespace
 {
 struct InvalidVertexElementError
 {
-	InvalidVertexElementError(int _id, const char* _message) :
+	InvalidVertexElementError(int _id, core::StringView _message) :
 		id(_id),
 		message(_message)
 	{
@@ -526,7 +524,7 @@ struct InvalidVertexElementError
 
 	core::ExceptionSafeString What() const { return core::ExceptionSafeString("InvalidVertexElementException: Element(").Append(id).Append(") ").Append(message); }
 	int id;
-	const char* message;
+	core::StringView message;
 };
 }
 

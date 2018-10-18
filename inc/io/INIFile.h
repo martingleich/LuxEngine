@@ -131,7 +131,7 @@ public:
 			return m_File != nullptr;
 		}
 
-		Element GetElement(const core::StringView& str)
+		Element GetElement(core::StringView str)
 		{
 			int elemID = m_File->GetElemID(m_ID, str);
 			if(elemID < 0)
@@ -150,7 +150,7 @@ public:
 
 		Element GetFirstElement()
 		{
-			return GetElement(0);
+			return GetElementByID(0);
 		}
 
 		bool IsValid() const
@@ -195,29 +195,29 @@ public:
 
 	LUX_API int GetSectionCount() const;
 	LUX_API void SortSections(ESorting sorting, bool recursive = false);
-	LUX_API Section AddSection(const core::StringView& name, const core::StringView& comment = core::StringView::EMPTY);
+	LUX_API Section AddSection(core::StringView name, core::StringView comment = core::StringView::EMPTY);
 	LUX_API void RemoveSection(int sectionID);
-	LUX_API void SetSectionName(int sectionID, const core::StringView& name);
-	LUX_API void SetSectionComment(int sectionID, const core::StringView& comment);
+	LUX_API void SetSectionName(int sectionID, core::StringView name);
+	LUX_API void SetSectionComment(int sectionID, core::StringView comment);
 	LUX_API const core::String& GetSectionName(int id) const;
 	LUX_API const core::String& GetSectionComment(int id) const;
 	LUX_API Section GetFirstSection();
-	LUX_API Section GetSection(const core::StringView& section);
-	LUX_API int GetSectionID(const core::StringView& name) const;
+	LUX_API Section GetSection(core::StringView section);
+	LUX_API int GetSectionID(core::StringView name) const;
 
 	LUX_API int GetElementCount(int sectionID) const;
 	LUX_API void SortElements(int sectionID, ESorting sorting);
-	LUX_API Element AddElement(int sectionID, const core::StringView& name, const core::StringView& value, const core::StringView& comment = nullptr);
+	LUX_API Element AddElement(int sectionID, core::StringView name, core::StringView value, core::StringView comment = core::StringView::EMPTY);
 	LUX_API void RemoveElement(int section, int element);
-	LUX_API void SetElementName(int section, int element, const core::StringView& name);
-	LUX_API void SetElementComment(int section, int element, const core::StringView& comment);
-	LUX_API void SetElementValue(int section, int element, const core::StringView& value);
+	LUX_API void SetElementName(int section, int element, core::StringView name);
+	LUX_API void SetElementComment(int section, int element, core::StringView comment);
+	LUX_API void SetElementValue(int section, int element, core::StringView value);
 	LUX_API const core::String& GetElementName(int section, int id) const;
 	LUX_API const core::String& GetElementComment(int section, int element) const;
 	LUX_API const core::String& GetElementValue(int section, int element) const;
-	LUX_API Element GetElement(const core::StringView& section, const core::StringView& element);
-	LUX_API int GetElemID(int sectionId, const core::StringView& element) const;
-	LUX_API int GetElemID(const core::StringView& section, const core::StringView& element, int& outSection) const;
+	LUX_API Element GetElement(core::StringView section, core::StringView element);
+	LUX_API int GetElemID(int sectionId, core::StringView element) const;
+	LUX_API int GetElemID(core::StringView section, core::StringView element, int& outSection) const;
 
 	LUX_API bool IsEmpty() const;
 

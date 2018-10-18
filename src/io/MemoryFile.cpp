@@ -46,7 +46,7 @@ s64 MemoryFile::ReadBinaryPart(s64 numBytes, void* out)
 	LX_CHECK_NULL_ARG(out);
 	size_t sizeBytes;
 	if(!core::CheckedCast(numBytes, sizeBytes))
-		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath().Data());
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath());
 
 	if(m_Cursor + sizeBytes > m_Size) {
 		sizeBytes = m_Size - m_Cursor;
@@ -64,14 +64,14 @@ s64 MemoryFile::WriteBinaryPart(const void* data, s64 numBytes)
 	LX_CHECK_NULL_ARG(data);
 	size_t sizeBytes;
 	if(!core::CheckedCast(numBytes, sizeBytes))
-		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath().Data());
+		throw io::FileUsageException(io::FileUsageException::ReadError, GetPath());
 
 	if(TestFlag(m_Flags, EVirtualCreateFlag::ReadOnly))
-		throw io::FileUsageException(io::FileUsageException::WriteError, GetPath().Data());
+		throw io::FileUsageException(io::FileUsageException::WriteError, GetPath());
 
 	if(m_Cursor > m_Size - sizeBytes) {
 		if(!TestFlag(m_Flags, EVirtualCreateFlag::Expandable)) {
-			throw io::FileUsageException(io::FileUsageException::WriteError, GetPath().Data());
+			throw io::FileUsageException(io::FileUsageException::WriteError, GetPath());
 		} else {
 			u8* pNewData = LUX_NEW_RAW(((m_Cursor + sizeBytes) * 3) / 2);
 			if(m_Buffer)
@@ -97,7 +97,7 @@ void MemoryFile::Seek(s64 offset, ESeekOrigin origin)
 	size_t cursor = (origin == ESeekOrigin::Start) ? 0 : (size_t)GetCursor();
 	s64 newCursor64 = (s64)cursor + offset;
 	if(newCursor64 > GetSize())
-		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetPath().Data());
+		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetPath());
 
 	size_t newCursor = core::SafeCast<size_t>(newCursor64);
 	m_Cursor = newCursor;

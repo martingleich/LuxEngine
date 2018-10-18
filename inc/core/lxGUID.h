@@ -26,40 +26,34 @@ public:
 		return out;
 	}
 
-	static GUID FromString(const core::String& str)
+	static GUID FromString(StringView str)
 	{
-		return FromString(str.Data(), str.Size());
-	}
-
-	static GUID FromString(const char* str, int length = -1)
-	{
-		if(length < 0)
-			length = strlen(str);
-		if(length != 36)
+		if(str.Size() != 36)
 			return GUID::EMPTY;
 		GUID out;
 		u8* bytes = out.bytes;
+		int cur = 0;
 		for(int i = 0; i < 4; ++i) {
-			*bytes++ = GetByte(str);
-			str += 2;
+			*bytes++ = GetByte(str[cur], str[cur+1]);
+			cur += 2;
 		}
 
 		for(int j = 0; j < 3; ++j) {
-			if(*str != '-')
+			if(str[cur] != '-')
 				return GUID::EMPTY;
-			++str;
+			++cur;
 			for(int i = 0; i < 2; ++i) {
-				*bytes++ = GetByte(str);
-				str += 2;
+				*bytes++ = GetByte(str[cur], str[cur+1]);
+				cur += 2;
 			}
 		}
 
-		if(*str != '-')
+		if(str[cur] != '-')
 			return GUID::EMPTY;
-		++str;
+		++cur;
 		for(int i = 0; i < 6; ++i) {
-			*bytes++ = GetByte(str);
-			str += 2;
+			*bytes++ = GetByte(str[cur], str[cur+1]);
+			cur += 2;
 		}
 		return out;
 	}
@@ -89,9 +83,9 @@ private:
 			return c - 'A' + 10;
 		return 0;
 	}
-	static u8 GetByte(const char* str)
+	static u8 GetByte(const char a, const char b)
 	{
-		return (GetNibble(str[0]) << 4) | GetNibble(str[1]);
+		return (GetNibble(a) << 4) | GetNibble(b);
 	}
 
 private:

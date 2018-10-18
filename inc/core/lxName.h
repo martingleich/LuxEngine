@@ -29,62 +29,44 @@ public:
 	\param findOnly If the name isn't already in the table and this is true, the string isn't put in the table
 		and a empty name is returned, if it's false, the string is added into the table
 	*/
-	Name(const char* str, int action = ADD, StringTable* table = nullptr);
-	Name(const String& str, int action = ADD, StringTable* table = nullptr);
+	explicit Name(StringView str, int action = ADD, StringTable* table = nullptr);
+	explicit Name(const char* str, int action = ADD, StringTable* table = nullptr) :
+		Name(StringView(str, strlen(str)), action, table)
+	{}
 
 	void SetHandle(StringTableHandle handle);
+	StringTableHandle GetHandle() const;
 	Name& operator=(const Name& other);
-	Name& operator=(const char* str);
-	Name& operator=(const String& str);
+	Name& operator=(StringView str);
 
-	const char* c_str() const;
-	int GetHash() const;
 	bool operator==(const Name& other) const;
-	bool operator==(const char* str) const;
-	bool operator==(const String& str) const;
+	bool operator==(StringView other) const;
 	bool operator!=(const Name& other) const;
-	bool operator!=(const char* str) const;
-	bool operator!=(const String& str) const;
+	bool operator!=(StringView other) const;
 
-	operator bool() const
+	StringView AsView() const
 	{
-		return (Size() != 0);
-	}
-
-	operator StringView() const
-	{
-		return StringView(c_str());
+		return StringView(m_Handle.Data(), Size());
 	}
 
 	bool operator<(const Name& other) const;
 	int Size() const;
 	bool IsEmpty() const;
 
-	void Set(const char* str, int action = ADD, StringTable* table = nullptr);
-	void Set(const String& str, int action = ADD, StringTable* table = nullptr);
+	void Set(StringView str, int action = ADD, StringTable* table = nullptr);
 
 private:
 	StringTableHandle m_Handle;
 };
 
-inline bool operator==(const char* cstr, const Name& namestring)
-{
-	return (namestring == cstr);
-}
-
-inline bool operator==(const String& str, const Name& namestring)
+inline bool operator==(StringView str, const Name& namestring)
 {
 	return (namestring == str);
 }
 
-inline bool operator!=(const char* cstr, const Name& namestring)
+inline bool operator!=(StringView str, const Name& namestring)
 {
-	return (namestring != cstr);
-}
-
-inline bool operator!=(const String& cstr, const Name& namestring)
-{
-	return (namestring != cstr);
+	return (namestring != str);
 }
 
 template <>
@@ -92,14 +74,15 @@ struct HashType<Name>
 {
 	int operator()(const Name& n) const
 	{
-		return n.GetHash();
+		return n.GetHandle().GetHash();
 	}
 };
 
 inline void fmtPrint(format::Context& ctx, Name name, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
-	ctx.AddSlice(name.Size(), name.c_str());
+	auto view = name.AsView();
+	ctx.AddSlice(view.Size(), view.Data());
 }
 
 }

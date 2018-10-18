@@ -83,7 +83,7 @@ public:
 				return x;
 			}
 		}
-		throw core::ObjectNotFoundException(name.Data());
+		throw core::ObjectNotFoundException(name);
 	}
 	virtual core::Range<DescIter> GetAnimatedValueDescs() const
 	{

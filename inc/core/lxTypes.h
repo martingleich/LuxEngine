@@ -20,7 +20,7 @@ namespace core
 class TypeInfo
 {
 public:
-	TypeInfo(const char* name, int size, int align, bool isTrivial) :
+	TypeInfo(StringView name, int size, int align, bool isTrivial) :
 		m_Name(name),
 		m_Size(size),
 		m_Align(align),
@@ -36,7 +36,7 @@ public:
 	LUX_API virtual void FmtPrint(format::Context& ctx, const void* p, format::Placeholder& placeholder) const;
 
 	//! Unique name of the type
-	inline const char* GetName() const
+	inline StringView GetName() const
 	{
 		return m_Name;
 	}
@@ -61,7 +61,7 @@ public:
 
 
 private:
-	const char* const m_Name;
+	const StringView m_Name;
 	const int m_Size;
 	const int m_Align;
 	const bool m_IsTrivial;
@@ -71,7 +71,7 @@ template <typename T>
 class TypeInfoTemplate : public TypeInfo
 {
 public:
-	TypeInfoTemplate(const char* name, bool trivial = std::is_trivial<T>::value) :
+	TypeInfoTemplate(StringView name, bool trivial = std::is_trivial<T>::value) :
 		TypeInfo(name, sizeof(T), alignof(T), trivial)
 	{
 	}
@@ -112,7 +112,7 @@ public:
 class TypeInfoVirtual : public TypeInfo
 {
 public:
-	TypeInfoVirtual(const char* name, int size, int align, bool isTrivial) :
+	TypeInfoVirtual(StringView name, int size, int align, bool isTrivial) :
 		TypeInfo(name, size, align, isTrivial)
 	{
 	}
@@ -164,7 +164,7 @@ public:
 	{
 		if(m_Info == other.m_Info)
 			return true;
-		return strcmp(m_Info->GetName(), other.m_Info->GetName()) == 0;
+		return m_Info->GetName().Equal(other.m_Info->GetName());
 	}
 
 	bool operator!=(const Type& other) const
@@ -177,7 +177,7 @@ public:
 		return m_Info;
 	}
 
-	const char* GetName() const
+	StringView GetName() const
 	{
 		return m_Info->GetName();
 	}
@@ -278,7 +278,7 @@ LUX_API Type Boolean();
 
 struct UnknownTypeException : ErrorException
 {
-	explicit UnknownTypeException(const char* symbol) :
+	explicit UnknownTypeException(StringView symbol) :
 		m_TypeSymbol(symbol)
 	{}
 
@@ -306,7 +306,7 @@ private:
 
 struct UnsupportedTypeException : ErrorException
 {
-	explicit UnsupportedTypeException(const char* context, Type type) :
+	explicit UnsupportedTypeException(StringView context, Type type) :
 		m_Context(context),
 		m_Type(type)
 	{

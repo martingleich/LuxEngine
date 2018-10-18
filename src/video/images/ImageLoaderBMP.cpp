@@ -326,7 +326,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 
 core::Name ImageLoaderBMP::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Image)
+	if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Image)
 		return core::Name::INVALID;
 
 	u16 data;

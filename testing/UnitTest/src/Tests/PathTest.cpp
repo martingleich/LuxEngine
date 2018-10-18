@@ -6,7 +6,7 @@ UNIT_SUITE(path)
 	{
 		io::Path p = "folder1/folder2\\file.jpg";
 		io::Path dir = p.GetFileDir();
-		UNIT_ASSERT_STR(dir, "folder1/folder2");
+		UNIT_ASSERT_STR(dir.AsView(), "folder1/folder2");
 	}
 
 	UNIT_TEST(GetFileExtension)
@@ -42,7 +42,7 @@ UNIT_SUITE(path)
 		io::Path abs = "C:/Folder1/Folder2";
 		io::Path rel = "../file";
 
-		UNIT_ASSERT_STR(abs.GetResolved(abs), "C:/Folder1/Folder2");
-		UNIT_ASSERT_STR(rel.GetResolved(abs), "C:/Folder1/file");
+		UNIT_ASSERT_STR(abs.GetResolved(abs).AsView(), "C:/Folder1/Folder2");
+		UNIT_ASSERT_STR(rel.GetResolved(abs).AsView(), "C:/Folder1/file");
 	}
 }

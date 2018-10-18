@@ -118,3 +118,9 @@ endfunction(assign_source_group)
 # Create the filters for visual studio
 assign_source_group(${SRCS})
 assign_source_group(${INCS})
+
+# Touch RebuiltMarker
+add_custom_command(
+	TARGET LuxEngine
+	POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E touch "${PROJECT_SOURCE_DIR}/inc/LuxRebuiltMarker.h")

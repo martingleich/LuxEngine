@@ -829,7 +829,7 @@ inline typename Array<T>::ConstIterator begin(const Array<T>& array) { return ar
 template <typename T>
 inline typename Array<T>::ConstIterator end(const Array<T>& array) { return array.End(); }
 
-LUX_API const char* MakeArrayTypeName(Type baseType);
+LUX_API StringView MakeArrayTypeName(Type baseType);
 
 template <typename T>
 void fmtPrint(format::Context& ctx, const core::Array<T>& array, format::Placeholder& placeholder)

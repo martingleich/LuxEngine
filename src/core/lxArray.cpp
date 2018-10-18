@@ -5,14 +5,14 @@ namespace lux
 namespace core
 {
 
-const char* MakeArrayTypeName(Type baseType)
+StringView MakeArrayTypeName(Type baseType)
 {
 	auto baseName = baseType.GetName();
-	auto length = strlen(baseName);
+	auto length = baseName.Size();
 	char* ptr = LUX_NEW_ARRAY(char, length + 3);
-	strcpy(ptr, baseName);
-	strcpy(ptr + length, "[]");
-	return ptr;
+	memcpy(ptr, baseName.Data(), baseName.Size());
+	memcpy(ptr + baseName.Size(), "[]", 3);
+	return StringView(ptr, length+2);
 }
 
 } // namespace core

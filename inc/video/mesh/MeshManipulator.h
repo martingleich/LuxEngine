@@ -308,21 +308,21 @@ public:
 					a = b = c = 0;
 				}
 				int index = 3 * i + 0;
-				memcpy(dstV + index*strideV, srcV + a*strideV, strideV);
+				std::memcpy(dstV + index*strideV, srcV + a*strideV, strideV);
 				index = 3 * i + 1;
-				memcpy(dstV + index*strideV, srcV + b*strideV, strideV);
+				std::memcpy(dstV + index*strideV, srcV + b*strideV, strideV);
 				index = 3 * i + 2;
-				memcpy(dstV + index*strideV, srcV + c*strideV, strideV);
+				std::memcpy(dstV + index*strideV, srcV + c*strideV, strideV);
 			}
 
 			targetVertices->Update();
 
 			if(targetIndices->GetFormat() == EIndexFormat::Bit32) {
 				for(u32 i = 0; i < 3 * (u32)primCount; ++i)
-					memcpy(dstI + i * 4, &i, 4);
+					std::memcpy(dstI + i * 4, &i, 4);
 			} else {
 				for(u16 i = 0; i < 3 * (u16)primCount; ++i)
-					memcpy(dstI + i * 2, &i, 2);
+					std::memcpy(dstI + i * 2, &i, 2);
 			}
 			targetIndices->Update();
 		}

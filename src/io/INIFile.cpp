@@ -152,7 +152,7 @@ void INIFile::SortSections(INIFile::ESorting sorting, bool recursive)
 	}
 }
 
-INIFile::Section INIFile::AddSection(const core::StringView& name, const core::StringView& comment)
+INIFile::Section INIFile::AddSection(core::StringView name, core::StringView comment)
 {
 	int sectionID = GetSectionID(name);
 	if(sectionID != InvalidID) {
@@ -192,13 +192,13 @@ void INIFile::RemoveSection(int sectionID)
 	m_CurrentElement = 0;
 }
 
-void INIFile::SetSectionName(int sectionID, const core::StringView& name)
+void INIFile::SetSectionName(int sectionID, core::StringView name)
 {
 	m_Sections.At(sectionID).name = name;
 	m_SectionSorted = false;
 }
 
-void INIFile::SetSectionComment(int sectionID, const core::StringView& comment)
+void INIFile::SetSectionComment(int sectionID, core::StringView comment)
 {
 	m_Sections.At(sectionID).comment = comment;
 }
@@ -218,7 +218,7 @@ INIFile::Section INIFile::GetFirstSection()
 	return Section(this, 0);
 }
 
-INIFile::Section INIFile::GetSection(const core::StringView& section)
+INIFile::Section INIFile::GetSection(core::StringView section)
 {
 	auto sectionID = GetSectionID(section);
 	if(sectionID == InvalidID)
@@ -226,7 +226,7 @@ INIFile::Section INIFile::GetSection(const core::StringView& section)
 	return Section(this, sectionID);
 }
 
-int INIFile::GetSectionID(const core::StringView& section) const
+int INIFile::GetSectionID(core::StringView section) const
 {
 	if(m_Sections.Size() == 0)
 		return InvalidID;
@@ -286,7 +286,7 @@ void INIFile::SortElements(int sectionID, INIFile::ESorting sorting)
 	section.sorting = sorting;
 }
 
-INIFile::Element INIFile::AddElement(int sectionID, const core::StringView& name, const core::StringView& value, const core::StringView& comment)
+INIFile::Element INIFile::AddElement(int sectionID, core::StringView name, core::StringView value, core::StringView comment)
 {
 	if(value.IsEmpty())
 		return Element();
@@ -355,18 +355,18 @@ void INIFile::RemoveElement(int sectionID, int elementID)
 		m_CurrentElement--;
 }
 
-void INIFile::SetElementName(int sectionID, int elementID, const core::StringView& name)
+void INIFile::SetElementName(int sectionID, int elementID, core::StringView name)
 {
 	GetElement(sectionID, elementID).name = name;
 	m_Sections[sectionID].sorted = false;
 }
 
-void INIFile::SetElementComment(int sectionID, int elementID, const core::StringView& comment)
+void INIFile::SetElementComment(int sectionID, int elementID, core::StringView comment)
 {
 	GetElement(sectionID, elementID).comment = comment;
 }
 
-void INIFile::SetElementValue(int sectionID, int elementID, const core::StringView& value)
+void INIFile::SetElementValue(int sectionID, int elementID, core::StringView value)
 {
 	GetElement(sectionID, elementID).value = value;
 }
@@ -386,7 +386,7 @@ const core::String& INIFile::GetElementValue(int sectionID, int elementID) const
 	return GetElement(sectionID, elementID).value;
 }
 
-INIFile::Element INIFile::GetElement(const core::StringView& section, const core::StringView& element)
+INIFile::Element INIFile::GetElement(core::StringView section, core::StringView element)
 {
 	int sectionID;
 	auto elementID = GetElemID(section, element, sectionID);
@@ -395,7 +395,7 @@ INIFile::Element INIFile::GetElement(const core::StringView& section, const core
 	return Element(this, sectionID, elementID);
 }
 
-int INIFile::GetElemID(const core::StringView& section, const core::StringView& element, int& outSection) const
+int INIFile::GetElemID(core::StringView section, core::StringView element, int& outSection) const
 {
 	outSection = GetSectionID(section);
 
@@ -405,7 +405,7 @@ int INIFile::GetElemID(const core::StringView& section, const core::StringView& 
 	return GetElemID(outSection, element);
 }
 
-int INIFile::GetElemID(int sectionID, const core::StringView& element) const
+int INIFile::GetElemID(int sectionID, core::StringView element) const
 {
 	if(sectionID == InvalidID)
 		return InvalidID;
@@ -508,14 +508,14 @@ bool INIFile::ReadSections()
 			continue;
 		}
 
-		if(line.Data()[0] == '[') {
+		if(line[0] == '[') {
 			// It's the name of the section
 			if(!ParseSectionName(line, sectionName)) {
 				log::Debug("Invalid INI-section name: ~s.", line);
 				continue;
 			}
 
-			sectionID = GetSectionID(sectionName.Data());
+			sectionID = GetSectionID(sectionName);
 			if(sectionID != InvalidID) {
 				if(!lastComment.IsEmpty() && !m_Sections[sectionID].comment.IsEmpty())
 					m_Sections[sectionID].comment.Append("\n");
@@ -566,23 +566,27 @@ bool INIFile::ReadElement(const core::String& work, SINIElement& element)
 	element.value.Clear();
 
 	int state = 0;
-	auto it = work.Bytes().First();
+	int i = 0;
+	char c;
+	//auto it = work.Bytes().First();
 	for(state = 0; state < 5; ++state) {
 		switch(state) {
 		case 1:
 		case 3:
-			while(it != work.End() && (*it == ' ' || *it == '\t'))
-				it++;
+			while(i < work.Size() && (work[i] == ' ' || work[i] == '\t'))
+				i++;
 			break;
 
 		case 0:
 			// Read name
-			if(*it != '=' && !core::IsSpace(*it)) {
-				element.name.Append(it);
-				++it;
-				while(it != work.End() && (*it != '=' && !core::IsSpace(*it))) {
-					element.name.Append(it);
-					++it;
+			if(work[i] != '=' && !core::IsSpace(work[i])) {
+				c = work[i];
+				element.name.Append(&c, 1);
+				++i;
+				while(i < work.Size() && (work[i] != '=' && !core::IsSpace(work[i]))) {
+					c = work[i];
+					element.name.Append(&c, 1);
+					++i;
 				}
 			} else {
 				log::Debug("Invalid INI element name.");
@@ -591,22 +595,23 @@ bool INIFile::ReadElement(const core::String& work, SINIElement& element)
 			break;
 		case 2:
 			// Check for assingment
-			if(*it != '=') {
+			if(work[i] != '=') {
 				log::Debug("Missing INI assingment.");
 				return false;
 			}
-			++it;
+			++i;
 			break;
 		case 4:
 			// Read value
-			for(; it != work.End(); ++it)
-				element.value.Append(it);
-
+			while(i < work.Size()) {
+				c = work[i];
+				element.value.Append(&c, 1);
+				++i;
+			}
 			return true;
-			break;
 		}
 
-		if(it == work.End()) {
+		if(i == work.Size()) {
 			log::Debug("Unexpected end of INI line.");
 			return false;
 		}

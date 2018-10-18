@@ -19,43 +19,43 @@ public:
 		m_Layers.Resize(params.textures.Size());
 	}
 
-	void Enable()
+	void Enable() override
 	{
 		m_IsDirty = true;
 	}
 
-	void SetParam(int paramId, const void* data)
+	void SetParam(int paramId, const void* data) override
 	{
 		m_Layers[paramId] = *(video::TextureLayer*)data;
 		m_IsDirty = true;
 	}
 
-	int GetParamId(const core::String& name) const
+	int GetParamId(core::StringView name) const override
 	{
 		return m_ParamPackage.GetParamId(name);
 	}
 
-	void LoadSceneParams(const Pass& pass)
+	void LoadSceneParams(const Pass& pass) override
 	{
 		LUX_UNUSED(pass);
 	}
 
-	void Render()
+	void Render() override
 	{
 		m_DeviceState.EnableFixedFunctionShader(m_Layers, m_TextureStages, m_UseVertexColors);
 		m_IsDirty = false;
 	}
 
-	void Disable()
+	void Disable() override
 	{
 	}
 
-	int GetSceneParamCount() const
+	int GetSceneParamCount() const override
 	{
 		return 0;
 	}
 
-	core::AttributePtr GetSceneParam(int id) const
+	core::AttributePtr GetSceneParam(int id) const override
 	{
 		LUX_UNUSED(id);
 		return nullptr;

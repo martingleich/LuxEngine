@@ -48,8 +48,8 @@ inline void fmtPrint(format::Context& ctx, const DateAndTime& date, format::Plac
 {
 	LUX_UNUSED(placeholder);
 
-	static const char wday_name[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-	static const char mon_name[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	static const StringView wday_name[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	static const StringView mon_name[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 	if(!date.IsValid()) {

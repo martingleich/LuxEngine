@@ -25,8 +25,8 @@ StructuralTable::~StructuralTable()
 {
 }
 
-StructureBuilder StructuralTable::AddStructure(const core::String& name,
-	const Serializable* baseAddr, u32 version)
+StructureBuilder StructuralTable::AddStructure(
+	core::StringView name, const Serializable* baseAddr, u32 version)
 {
 	return StructureBuilder(this, baseAddr, name, version);
 }

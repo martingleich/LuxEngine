@@ -53,7 +53,7 @@ Printer* GetPrinter()
 namespace Impl
 {
 
-static const char* GetLogLevelName(ELogLevel ll)
+static core::StringView GetLogLevelName(ELogLevel ll)
 {
 	switch(ll) {
 	case ELogLevel::Debug:
@@ -191,7 +191,7 @@ public:
 		Exit();
 		m_File = core::FOpenUTF8(m_Settings.FilePath.Data(), "wb");
 		if(!m_File)
-			throw io::FileNotFoundException(m_Settings.FilePath.Data());
+			throw io::FileNotFoundException(m_Settings.FilePath.AsView());
 	}
 	void Exit()
 	{
@@ -206,7 +206,8 @@ public:
 		if(!m_File)
 			return;
 		if(ll != ELogLevel::None) {
-			fputs(GetLogLevelName(ll), m_File);
+			auto lln = GetLogLevelName(ll);
+			fwrite(lln.Data(), 1, lln.Size(), m_File);
 			if(m_Settings.ShowTime) {
 				auto time = core::Clock::GetDateAndTime();
 				fprintf(m_File, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
@@ -214,7 +215,7 @@ public:
 			fputs(": ", m_File);
 		}
 
-		fputs(s.Data(), m_File);
+		fwrite(s.Data(), 1, s.Size(), m_File);
 		fputs("\n", m_File);
 
 		fflush(m_File);
@@ -241,7 +242,8 @@ public:
 	void Print(const core::String& s, ELogLevel ll)
 	{
 		if(ll != ELogLevel::None) {
-			fputs(GetLogLevelName(ll), stdout);
+			auto lln = GetLogLevelName(ll);
+			fwrite(lln.Data(), 1, lln.Size(), stdout);
 			if(m_Settings.ShowTime) {
 				auto time = core::Clock::GetDateAndTime();
 				fprintf(stdout, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
@@ -250,8 +252,8 @@ public:
 			fputs(": ", stdout);
 		}
 
-		// Use puts instead of fputs, since it places a linebreak.
-		puts(s.Data());
+		fwrite(s.Data(), 1, s.Size(), stdout);
+		fputs("\n", stdout);
 	}
 
 private:
@@ -284,8 +286,8 @@ public:
 			STR += GetLogLevelName(ll);
 
 			auto time = core::Clock::GetDateAndTime();
-			sprintf(BUFFER, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
-			STR += BUFFER;
+			int size = sprintf(BUFFER, "(%.2d.%.2d.%.4d %.2d:%.2d:%.2d'%.3d)", time.dayOfMonth, time.month, time.year, time.hours, time.minutes, time.seconds, time.milliseconds);
+			STR += core::StringView(BUFFER, size);
 
 			STR += ": ";
 		}

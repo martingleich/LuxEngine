@@ -92,9 +92,8 @@ StrongRef<File> FileSystemWin32::OpenFile(const Path& filename, EFileModeFlag mo
 
 StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, s64 size, const Path& name, EVirtualCreateFlag flags)
 {
-	if(!memory || size == 0)
-		throw io::FileNotFoundException("[Empty Memory file]");
-
+	LX_CHECK_NULL_ARG(memory);
+	LX_CHECK_NULL_ARG(size);
 	FileInfo desc(size, FileInfo::EType::Other);
 	return LUX_NEW(MemoryFile)(memory, desc, name, flags);
 }
@@ -131,7 +130,7 @@ bool FileSystemWin32::ExistDirectory(const Path& filename) const
 File* FileSystemWin32::CreateTemporaryFile(s64 size)
 {
 	void* ptr = LUX_NEW_RAW(core::SafeCast<size_t>(size));
-	return OpenVirtualFile(ptr, size, core::String::EMPTY, EVirtualCreateFlag::DeleteOnDrop);
+	return OpenVirtualFile(ptr, size, io::Path::EMPTY, EVirtualCreateFlag::DeleteOnDrop);
 }
 
 FileInfo FileSystemWin32::GetFileInfo(const Path& filename)
@@ -152,8 +151,7 @@ StrongRef<INIFile> FileSystemWin32::CreateINIFile(File* file)
 
 StrongRef<File> FileSystemWin32::OpenLimitedFile(File* file, s64 start, s64 size, const Path& name)
 {
-	if(!file)
-		throw io::FileNotFoundException("[Empty file]");
+	LX_CHECK_NULL_ARG(file);
 
 	if(start + size > file->GetSize())
 		throw core::GenericRuntimeException("Limited file size is to big");

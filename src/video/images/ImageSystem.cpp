@@ -59,7 +59,7 @@ public:
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType)
 	{
-		if(requestedType && requestedType != core::ResourceType::Texture)
+		if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Texture)
 			return core::Name::INVALID;
 
 		auto type = GetFileType(file);
@@ -129,7 +129,7 @@ public:
 		io::Path basePath = path.GetFileDir();
 		core::String nameonly = path.GetFileName(false);
 		core::String ext = path.GetFileExtension();
-		char last = nameonly[nameonly.Size()];
+		char last = nameonly[nameonly.Size()-1];
 		if(last >= '1' && last <= '6') {
 			outBaseName = nameonly.BeginSubString(nameonly.Size()-1);
 			outId = last - '1';
@@ -156,7 +156,7 @@ public:
 
 	core::Name GetResourceType(io::File* file, core::Name requestedType)
 	{
-		if(requestedType && requestedType != core::ResourceType::CubeTexture)
+		if(!requestedType.IsEmpty() && requestedType != core::ResourceType::CubeTexture)
 			return core::Name::INVALID;
 
 		auto lineEnding = io::GetLineEnding(file);

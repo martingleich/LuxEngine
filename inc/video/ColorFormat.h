@@ -63,9 +63,9 @@ public:
 	}
 
 	//! Get the string repersenting this colorformat
-	const char* AsString() const
+	core::StringView AsString() const
 	{
-		static const char* STRINGS[] = {
+		static const core::StringView STRINGS[] = {
 #define X(name, alpha_mask, red_mask, green_mask, blue_mask, type, size) #name,
 #include "ColorFormat.def"
 #undef X
@@ -278,7 +278,8 @@ private:
 inline void fmtPrint(format::Context& ctx, ColorFormat format, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
-	ctx.AddTerminatedSlice(format.AsString());
+	auto str =format.AsString();
+	ctx.AddSlice(str.Size(), str.Data());
 }
 
 }

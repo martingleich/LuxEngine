@@ -31,7 +31,7 @@ public:
 	virtual void Disable() = 0;
 
 	virtual const core::ParamPackage& GetParamPackage() const = 0;
-	virtual int GetParamId(const core::String& name) const = 0;
+	virtual int GetParamId(core::StringView name) const = 0;
 
 	virtual int GetSceneParamCount() const = 0;
 	virtual core::AttributePtr GetSceneParam(int id) const = 0;

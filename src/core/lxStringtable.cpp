@@ -30,7 +30,7 @@ bool StringTableHandle::operator!=(const StringTableHandle& other) const
 	return !(*this == other);
 }
 
-const char* StringTableHandle::c_str() const
+const char* StringTableHandle::Data() const
 {
 	static const char null = '\0';
 	if(!m_Handle)
@@ -150,7 +150,8 @@ StringTableHandle StringTable::AddFindString(const StringView& str, bool find)
 
 	*reinterpret_cast<int*>(handle) = strSize;
 	char* strPos = reinterpret_cast<char*>(handle) + sizeof(int);
-	memcpy(strPos, str.Data(), strSize + 1);
+	memcpy(strPos, str.Data(), strSize);
+	strPos[strSize] = 0;
 
 	CheckEntry checkEntry(handle);
 	auto it = self->map.find(checkEntry);

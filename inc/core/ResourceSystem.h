@@ -37,55 +37,6 @@ public:
 	LUX_API ResourceSystem();
 	LUX_API ~ResourceSystem();
 
-	//! Query the number of loaded resources of a given type.
-	/**
-	\param type The resource type for which to query the number of resources.
-	\return The number of loaded resources
-	*/
-	LUX_API int GetResourceCount(Name type) const;
-
-	//! Query the name of a resource
-	/**
-	\param type The type of the resource.
-	\param id The index of the resource.
-		The index must be a number between 0 and the number of loaded resources
-		of the type.
-	\return The name of the resource.
-	*/
-	LUX_API const String& GetResourceName(Name type, int id) const;
-
-	//! Query the index of a resource
-	/**
-	Remark: The id is only valid until resources are added or removed from the system.
-	It's best to use an id immeditly after getting it.
-	\param resource The resource to query the name from.
-	\return The index of the resource.
-	*/
-	LUX_API int GetResourceId(Resource* resource) const;
-
-	//! Query the index of a resource.
-	/**
-	\param type The type of the resource to query.
-	\param name The name of the resource to query.
-	\return The index of the resource.
-	*/
-	LUX_API int GetResourceId(Name type, const String& name) const;
-
-	//! Add a resource to the system
-	/**
-	The name of resource must be unique for each type.
-	\param name The name of the resource.
-	\param resource The resource to add to the system.
-	*/
-	LUX_API void AddResource(const String& name, Resource* resource);
-
-	//! Remove a resource from the cache
-	/**
-	\param type The type of the resource to remove.
-	\param id The id of the resource to remove.
-	*/
-	LUX_API void RemoveResource(Name type, int id);
-
 	//! Remove unused resources from the system
 	/**
 	Unused resources are resources which are only referenced by the resource system.
@@ -96,14 +47,6 @@ public:
 	*/
 	LUX_API int FreeUnusedResources(Name type = Name::INVALID);
 
-	//! Get a resource based on a id.
-	/**
-	\param type The type of the resource.
-	\param id The index of the resource.
-	\return A resource.
-	*/
-	LUX_API StrongRef<Resource> GetResource(Name type, int id);
-
 	//! Get a resource based on a name.
 	/**
 	\param type The type of the resource, can be empty to indicate any resourcetype matching name.
@@ -113,7 +56,7 @@ public:
 	\throws FileNotFoundException
 	\throws FileFormatException
 	*/
-	LUX_API StrongRef<Resource> GetResource(Name type, const String& name, bool loadIfNotFound = true);
+	LUX_API StrongRef<Resource> GetResource(Name type, const io::Path& name, bool loadIfNotFound = true);
 
 	//! Get a resources based on a file.
 	/**
@@ -175,7 +118,7 @@ public:
 	/**
 	Returns null if the resource writer does not exist
 	*/
-	LUX_API StrongRef<ResourceWriter> GetResourceWriter(Name resourceType, const String& ext) const;
+	LUX_API StrongRef<ResourceWriter> GetResourceWriter(Name resourceType, StringView ext) const;
 
 	//! Write a resource to a file
 	/**
@@ -184,7 +127,7 @@ public:
 	\param ext The extension(i.e. filetype) of the resource
 	\throws FileFormatException
 	*/
-	LUX_API void WriteResource(Resource* resource, io::File* file, const String& ext)  const;
+	LUX_API void WriteResource(Resource* resource, io::File* file, StringView ext)  const;
 
 	//! Write a resource to a file
 	/**
@@ -232,15 +175,15 @@ public:
 
 
 private:
-	StrongRef<Resource> CreateResource(Name type, const String& name);
-	StrongRef<Resource> CreateResource(Name type, io::File* file);
-	StrongRef<Resource> CreateResource(Name type, io::File* file, const ResourceOrigin* origin);
+	StrongRef<Resource> CreateResource(int typeId, const io::Path& path);
+	StrongRef<Resource> CreateResource(int typeId, io::File* file);
+	StrongRef<Resource> CreateResource(int typeId, io::File* file, const ResourceOrigin& origin);
 	void LoadResource(const String& origin, Resource* dst) const override;
 
 private:
 	int GetTypeID(Name type) const;
+	bool IsBasePath(const io::Path& path) const;
 
-	int GetResourceIdUnsafe(Name type, const String& name) const;
 private:
 	struct SelfType;
 	SelfType* self;

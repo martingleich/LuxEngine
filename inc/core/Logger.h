@@ -99,7 +99,7 @@ public:
 	}
 
 	template <typename... T>
-	void Write(const char* format, const T&... data)
+	void Write(core::StringView format, const T&... data)
 	{
 		auto printer = GetPrinter();
 		auto curLogLevel = GetLogLevel();
@@ -111,7 +111,7 @@ public:
 			{
 				core::String out;
 				core::StringSink sink(out);
-				format::format(sink, format, data...);
+				format::format(sink, format::Slice((size_t)format.Size(), format.Data()), data...);
 
 				printer->PrintSync(out, m_MyLogLevel);
 			} else {
@@ -121,15 +121,9 @@ public:
 	}
 
 	template <typename... T>
-	void operator()(const char* format, const T&... data)
+	void operator()(core::StringView format, const T&... data)
 	{
 		Write(format, data...);
-	}
-
-	template <typename... T>
-	void operator()(const core::String& format, const T&... data)
-	{
-		Write(format.Data(), data...);
 	}
 
 private:

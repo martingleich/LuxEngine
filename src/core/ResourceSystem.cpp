@@ -5,6 +5,7 @@
 
 #include "io/FileSystem.h"
 #include "io/File.h"
+#include "io/Archive.h"
 
 namespace lux
 {
@@ -27,24 +28,24 @@ static int INVALID_ID = -1;
 
 struct Entry
 {
-	String name;
+	core::String path;
 	StrongRef<Resource> resource;
 
 	Entry()
 	{
 	}
-	Entry(const String& n, Resource* r) : name(n), resource(r)
+	Entry(const core::String& n, Resource* r) : path(n), resource(r)
 	{
 	}
 
 	bool operator<(const Entry& other) const
 	{
-		return name < other.name;
+		return path < other.path;
 	}
 
 	bool operator==(const Entry& other) const
 	{
-		return name == other.name;
+		return path == other.path;
 	}
 };
 
@@ -95,21 +96,6 @@ struct ResourceBlock
 		return resources.At(id).resource;
 	}
 
-	const String& GetName(int id) const
-	{
-		return resources.At(id).name;
-	}
-
-	int GetResourceId(Resource* resource) const
-	{
-		for(auto it = resources.First(); it != resources.End(); ++it) {
-			if(it->resource == resource)
-				return IteratorDistance(resources.First(), it);
-		}
-
-		return INVALID_ID;
-	}
-
 	int GetResourceId(const String& name) const
 	{
 		if(name.IsEmpty())
@@ -135,15 +121,9 @@ struct ResourceBlock
 		Array<Entry>::Iterator n;
 		auto it = BinarySearch(entry, resources, &n);
 		if(it != resources.End())
-			throw ObjectAlreadyExistsException(name.Data());
+			throw ObjectAlreadyExistsException(name.AsView());
 
 		resources.Insert(entry, n);
-	}
-
-	void RemoveResource(int id)
-	{
-		LX_CHECK_BOUNDS(id, 0, resources.Size());
-		resources.Erase(AdvanceIterator(resources.First(), id), true);
 	}
 
 	int RemoveUnused()
@@ -182,6 +162,7 @@ void ResourceSystem::Initialize()
 
 ResourceSystem* ResourceSystem::Instance()
 {
+	lxAssert(g_ResourceSystem);
 	return g_ResourceSystem;
 }
 
@@ -202,82 +183,6 @@ ResourceSystem::~ResourceSystem()
 	LUX_FREE(self);
 }
 
-int ResourceSystem::GetResourceCount(Name type) const
-{
-	auto typeID = GetTypeID(type);
-	if(typeID == INVALID_ID)
-		throw GenericInvalidArgumentException("type", "Type wasn't registerd");
-
-	return self->resources[typeID].Size();
-}
-
-const String& ResourceSystem::GetResourceName(Name type, int id) const
-{
-	auto typeId = GetTypeID(type);
-	if(typeId > GetTypeCount())
-		throw GenericInvalidArgumentException("type", "Type wasn't registerd");
-
-	return self->resources[typeId].GetName(id);
-}
-
-int ResourceSystem::GetResourceId(Resource* resource) const
-{
-	LX_CHECK_NULL_ARG(resource);
-
-	auto typeId = GetTypeID(resource->GetReferableType());
-
-	auto resId = self->resources[typeId].GetResourceId(resource);
-	if(resId == INVALID_ID)
-		throw GenericInvalidArgumentException("resource", "Resource does not exist");
-
-	return resId;
-}
-
-int ResourceSystem::GetResourceId(Name type, const String& name) const
-{
-	int id = GetResourceIdUnsafe(type, name);
-	if(id == INVALID_ID)
-		throw ObjectNotFoundException(name.Data());
-
-	return id;
-}
-
-int ResourceSystem::GetResourceIdUnsafe(Name type, const String& name) const
-{
-	if(name.IsEmpty())
-		throw GenericInvalidArgumentException("name", "Must not be empty");
-
-	auto typeId = GetTypeID(type);
-
-	if(self->types[typeId].isCached == false)
-		return INVALID_ID;
-
-	if(self->fileSystem->ExistFile(io::Path(name))) {
-		auto abs_path = self->fileSystem->GetAbsoluteFilename(io::Path(name));
-		return self->resources[typeId].GetResourceId(abs_path.AsView());
-	} else {
-		return self->resources[typeId].GetResourceId(name);
-	}
-}
-
-void ResourceSystem::AddResource(const String& name, Resource* resource)
-{
-	LX_CHECK_NULL_ARG(resource);
-
-	auto typeId = GetTypeID(resource->GetReferableType());
-	if(self->types[typeId].isCached == false)
-		return;
-
-	self->resources[typeId].AddResource(name, resource);
-}
-
-void ResourceSystem::RemoveResource(Name type, int id)
-{
-	auto typeId = GetTypeID(type);
-
-	self->resources[typeId].RemoveResource(id);
-}
-
 int ResourceSystem::FreeUnusedResources(Name type)
 {
 	int count = 0;
@@ -293,29 +198,27 @@ int ResourceSystem::FreeUnusedResources(Name type)
 
 	return count;
 }
-StrongRef<Resource> ResourceSystem::GetResource(Name type, int id)
+
+StrongRef<Resource> ResourceSystem::GetResource(Name type, const io::Path& path, bool loadIfNotFound)
 {
 	auto typeId = GetTypeID(type);
-
-	return self->resources[typeId].GetResource(id);
-}
-
-StrongRef<Resource> ResourceSystem::GetResource(Name type, const String& name, bool loadIfNotFound)
-{
-	if(name.IsEmpty())
-		return nullptr;
-
-	auto id = GetResourceIdUnsafe(type, name);
-	if(id != INVALID_ID)
-		return GetResource(type, id);
+	if(self->types[typeId].isCached) {
+		auto absPath = self->fileSystem->GetAbsoluteFilename(path);
+		if(IsBasePath(absPath)) {
+			auto id = self->resources[typeId].GetResourceId(absPath.GetString().AsView());
+			if(id != INVALID_ID)
+				return self->resources[typeId].GetResource(id);
+		}
+	}
 
 	StrongRef<Resource> resource;
 	if(loadIfNotFound) {
-		auto file = self->fileSystem->OpenFile(io::Path(name));
+		auto file = self->fileSystem->OpenFile(path);
+		resource = CreateResource(typeId, file);
 
-		ResourceOrigin origin(this, name);
-		resource = CreateResource(type, file, &origin);
-		AddResource(file->GetPath().AsView(), resource);
+		// Add to cache
+		if(self->types[typeId].isCached && resource->GetOrigin().loader == this)
+			self->resources[typeId].AddResource(resource->GetOrigin().str, resource);
 	}
 
 	return resource;
@@ -325,29 +228,69 @@ StrongRef<Resource> ResourceSystem::GetResource(Name type, io::File* file, bool 
 {
 	LX_CHECK_NULL_ARG(file);
 
-	auto resource = GetResource(type, file->GetPath().AsView(), false);
-	if(!resource && loadIfNotFound) {
-		resource = CreateResource(type, file);
-		AddResource(file->GetPath().AsView(), resource);
+	auto& path = file->GetPath();
+	auto typeId = GetTypeID(type);
+	if(self->types[typeId].isCached && IsBasePath(path)) {
+		auto id = self->resources[typeId].GetResourceId(path.AsView());
+		if(id != INVALID_ID)
+			return self->resources[typeId].GetResource(id);
 	}
 
-	return resource;
+	if(loadIfNotFound) {
+		auto resource = CreateResource(typeId, file);
+
+		// Add to cache
+		if(self->types[typeId].isCached && resource->GetOrigin().loader == this)
+			self->resources[typeId].AddResource(resource->GetOrigin().str, resource);
+		return resource;
+	}
+
+	return nullptr;
 }
 
-StrongRef<Resource> ResourceSystem::CreateResource(Name type, const String& name)
+StrongRef<Resource> ResourceSystem::CreateResource(int typeId, const io::Path& name)
 {
 	if(name.IsEmpty())
 		throw GenericInvalidArgumentException("name", "Name may not be empty");
 
-	auto file = self->fileSystem->OpenFile(io::Path(name));
-
-	ResourceOrigin origin(this, name);
-	return CreateResource(type, file, &origin);
+	auto file = self->fileSystem->OpenFile(name);
+	return CreateResource(typeId, file);
 }
 
-StrongRef<Resource> ResourceSystem::CreateResource(Name type, io::File* file)
+StrongRef<Resource> ResourceSystem::CreateResource(int typeId, io::File* file)
 {
-	return CreateResource(type, file, nullptr);
+	auto& path = file->GetPath();
+	ResourceOrigin origin;
+	if(IsBasePath(path))
+		origin = ResourceOrigin(this, path.GetString());
+	return CreateResource(typeId, file, origin);
+}
+
+StrongRef<Resource> ResourceSystem::CreateResource(int typeId, io::File* file, const ResourceOrigin& origin)
+{
+	// Get loader and correct resource type from file
+	auto type = self->types[typeId].name;
+	core::Name typeToLoad;
+	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file, typeToLoad);
+	if(!loader)
+		throw FileFormatException("File format not supported", type.AsView());
+
+	// Create the resource
+	StrongRef<Resource> resource = self->refFactory->Create(type, &origin).As<Resource>();
+	if(!resource)
+		throw GenericInvalidArgumentException("type", "Is no valid resource type");
+
+	// Load the resource
+	auto oldCursor = file->GetCursor();
+	try {
+		loader->LoadResource(file, resource);
+		resource->SetLoaded(true);
+	} catch(...) {
+		file->Seek(oldCursor, io::ESeekOrigin::Start);
+		throw;
+	}
+
+	return resource;
 }
 
 void ResourceSystem::SetCaching(Name type, bool caching)
@@ -385,7 +328,7 @@ int ResourceSystem::GetResourceWriterCount() const
 	return self->writers.Size();
 }
 
-StrongRef<ResourceWriter> ResourceSystem::GetResourceWriter(Name resourceType, const String& ext) const
+StrongRef<ResourceWriter> ResourceSystem::GetResourceWriter(Name resourceType, StringView ext) const
 {
 	for(auto it = self->writers.Last(); it != self->writers.Begin(); --it) {
 		bool canWrite = (*it)->CanWriteType(ext, resourceType);
@@ -401,11 +344,11 @@ StrongRef<ResourceWriter> ResourceSystem::GetResourceWriter(int id) const
 	return self->writers.At(id);
 }
 
-void ResourceSystem::WriteResource(Resource* resource, io::File* file, const String& ext)  const
+void ResourceSystem::WriteResource(Resource* resource, io::File* file, StringView ext)  const
 {
 	auto writer = GetResourceWriter(resource->GetReferableType(), ext);
 	if(!writer)
-		throw FileFormatException("File format not supported", ext.Data());
+		throw FileFormatException("File format not supported", ext);
 
 	writer->WriteResource(file, resource);
 }
@@ -449,21 +392,11 @@ void ResourceSystem::AddType(Name name)
 	TypeEntry entry(name);
 	auto it = LinearSearch(entry, self->types);
 	if(it != self->types.End())
-		throw ObjectAlreadyExistsException(name.c_str());
+		throw ObjectAlreadyExistsException(name.AsView());
 
 	self->types.PushBack(entry);
 	self->resources.PushBack(ResourceBlock());
 	log::Debug("New resource type \"~s\".", name);
-}
-
-int ResourceSystem::GetTypeID(Name type) const
-{
-	TypeEntry entry(type);
-	auto it = LinearSearch(entry, self->types);
-	if(it == self->types.End())
-		throw ObjectNotFoundException(type.c_str());
-
-	return IteratorDistance(self->types.First(), it);
 }
 
 StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name type, io::File* file, Name& typeToLoad) const
@@ -473,8 +406,8 @@ StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name type, io::File*
 	for(auto it = self->loaders.Last(); it != self->loaders.Begin(); --it) {
 		try {
 			Name fileType = it->loader->GetResourceType(file, type);
-			if(fileType != Name::INVALID) {
-				if(type == Name::INVALID || type == fileType) {
+			if(!fileType.IsEmpty()) {
+				if(!type.IsEmpty() || type == fileType) {
 					typeToLoad = fileType;
 					result = it->loader;
 				}
@@ -500,7 +433,7 @@ void ResourceSystem::LoadResource(const String& origin, Resource* dst) const
 	// Get loader and correct resource type from file
 	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file, type);
 	if(!loader)
-		throw FileFormatException("File format not supported", type.c_str());
+		throw FileFormatException("File format not supported", type.AsView());
 
 	// Load the resource
 	auto oldCursor = file->GetCursor();
@@ -513,30 +446,19 @@ void ResourceSystem::LoadResource(const String& origin, Resource* dst) const
 	}
 }
 
-StrongRef<Resource> ResourceSystem::CreateResource(Name type, io::File* file, const ResourceOrigin* origin)
+int ResourceSystem::GetTypeID(Name type) const
 {
-	// Get loader and correct resource type from file
-	StrongRef<ResourceLoader> loader = GetResourceLoader(type, file, type);
-	if(!loader)
-		throw FileFormatException("File format not supported", type.c_str());
+	TypeEntry entry(type);
+	auto it = LinearSearch(entry, self->types);
+	if(it == self->types.End())
+		throw ObjectNotFoundException(type.AsView());
 
-	// Create the resource
-	StrongRef<Resource> resource = self->refFactory->Create(type, origin).As<Resource>();
-	if(!resource)
-		throw GenericInvalidArgumentException("type", "Is no valid resource type");
-
-	// Load the resource
-	auto oldCursor = file->GetCursor();
-	try {
-		loader->LoadResource(file, resource);
-		resource->SetLoaded(true);
-	} catch(...) {
-		file->Seek(oldCursor, io::ESeekOrigin::Start);
-		throw;
-	}
-
-	return resource;
+	return IteratorDistance(self->types.First(), it);
 }
 
+bool ResourceSystem::IsBasePath(const io::Path& path) const
+{
+	return path.GetArchive() == nullptr || path.GetArchive() == self->fileSystem->GetRootArchive();
+}
 }
 }

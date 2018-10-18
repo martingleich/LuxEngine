@@ -77,6 +77,8 @@ public:
 	virtual void DeleteFile(const Path& path) = 0;
 	virtual void CreateDirectory(const Path& path, bool recursive) = 0;
 	virtual void DeleteDirectory(const Path& path) = 0;
+
+	virtual void ReleaseHandles() = 0;
 };
 
 }

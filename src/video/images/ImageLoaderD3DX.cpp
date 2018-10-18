@@ -27,7 +27,7 @@ ImageLoaderD3DX::~ImageLoaderD3DX()
 
 core::Name ImageLoaderD3DX::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Image &&
+	if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Image &&
 		requestedType != core::ResourceType::Texture)
 		return core::Name::INVALID;
 
@@ -47,7 +47,7 @@ core::Name ImageLoaderD3DX::GetResourceType(io::File* file, core::Name requested
 		u32 flags = (flagptr[3] << 24) | (flagptr[2] << 16) | (flagptr[1] << 8) | flagptr[0];
 		if(flags & 0x4) {
 			// Compressed data, can only be loaded as texture
-			if(requestedType && requestedType != core::ResourceType::Texture)
+			if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Texture)
 				return core::Name::INVALID;
 			return core::ResourceType::Texture;
 		}
@@ -279,7 +279,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 	D3DXIMAGE_INFO info;
 	hr = D3DXGetImageInfoFromFileInMemory(buffer.ptr, (UINT)buffer.size, &info);
 	if(FAILED(hr))
-		throw core::FileFormatException("Corrupted or not supported", file->GetPath().GetFileExtension().Data());
+		throw core::FileFormatException("Corrupted or not supported", file->GetPath().GetFileExtension());
 
 	auto loadFormat = GetD3DFormat(ConvertD3DToLuxFormat(info.Format));
 	D3DSURFACE_DESC desc;
@@ -290,11 +290,11 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 		desc);
 
 	if(!d3dTexture)
-		throw core::FileFormatException("Corrupted or not supported", file->GetPath().GetFileExtension().Data());
+		throw core::FileFormatException("Corrupted or not supported", file->GetPath().GetFileExtension());
 
 	auto lxFormat = ConvertD3DToLuxFormat(desc.Format);
 	if(lxFormat == video::ColorFormat::UNKNOWN)
-		throw core::FileFormatException("Unsupported color format", file->GetPath().GetFileExtension().Data());
+		throw core::FileFormatException("Unsupported color format", file->GetPath().GetFileExtension());
 
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(img) {

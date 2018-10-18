@@ -46,6 +46,11 @@ inline void fmtPrint(format::Context& ctx, const core::String& s, format::Placeh
 	LUX_UNUSED(placeholder);
 	ctx.AddSlice(s.Size(), s.Data());
 }
+inline void fmtPrint(format::Context& ctx, core::StringView s, format::Placeholder& placeholder)
+{
+	LUX_UNUSED(placeholder);
+	ctx.AddSlice(s.Size(), s.Data());
+}
 
 } // namespace core
 } // namespace lux

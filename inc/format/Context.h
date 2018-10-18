@@ -46,13 +46,13 @@ public:
 	{
 		size_t fstrLastArgPos;
 		size_t argId;
-		const char* fstr;
+		Slice fstr;
 	};
 
 	struct AutoRestoreSubContext : public SubContext
 	{
 		Context& _ctx;
-		AutoRestoreSubContext(Context& ctx, const char* fmtString) :
+		AutoRestoreSubContext(Context& ctx, Slice fmtString) :
 			_ctx(ctx)
 		{
 			*(SubContext*)this = ctx.SaveSubContext(fmtString);
@@ -261,10 +261,10 @@ public:
 		return{m_SliceMemory.Begin(), m_SliceMemory.End()};
 	}
 
-	FORMAT_API SubContext SaveSubContext(const char* newFmtString);
+	FORMAT_API SubContext SaveSubContext(Slice newFmtString);
 	FORMAT_API void RestoreSubContext(const SubContext& ctx);
 
-	const char* GetFormatString() const
+	Slice GetFormatString() const
 	{
 		return m_FmtString;
 	}
@@ -283,7 +283,7 @@ private:
 	void EnsureCursor() const;
 
 private:
-	const char* m_FmtString;
+	Slice m_FmtString;
 
 	// Memory information
 	internal::FormatMemory m_Memory;

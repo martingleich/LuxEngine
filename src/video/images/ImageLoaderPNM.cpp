@@ -173,7 +173,7 @@ struct Context
 
 core::Name ImageLoaderPNM::GetResourceType(io::File* file, core::Name requestedType)
 {
-	if(requestedType && requestedType != core::ResourceType::Image)
+	if(!requestedType.IsEmpty() && requestedType != core::ResourceType::Image)
 		return core::Name::INVALID;
 
 	if(Context::ReadMagic(file) < 0)

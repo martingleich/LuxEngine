@@ -31,7 +31,7 @@ static ReferableRegisterBlock* SortReferableBlocks(ReferableRegisterBlock* start
 	int cl = 0;
 	int cr = 0;
 	ReferableRegisterBlock* newStart;
-	if(((core::StringView)start->type).Smaller(half->type, core::EStringCompare::CaseInsensitive)) {
+	if((start->type.AsView()).Smaller(half->type.AsView(), core::EStringCompare::CaseInsensitive)) {
 		++cl;
 		newStart = start;
 		start = start->nextBlock;
@@ -43,7 +43,7 @@ static ReferableRegisterBlock* SortReferableBlocks(ReferableRegisterBlock* start
 	ReferableRegisterBlock* cur = newStart;
 
 	while(cl < count/2 && cr < count-count/2) {
-		if(((core::StringView)start->type).Smaller(half->type, core::EStringCompare::CaseInsensitive)) {
+		if(start->type.AsView().Smaller(half->type.AsView(), core::EStringCompare::CaseInsensitive)) {
 			++cl;
 			cur->nextBlock = start;
 			start = start->nextBlock;
@@ -144,7 +144,7 @@ StrongRef<Referable> ReferableFactory::Create(Name type, const void* data)
 	CreationFunc create = entry.create;
 	StrongRef<Referable> r = create ? create(data) : nullptr;
 	if(!r)
-		throw FactoryCreateException(type.c_str(), "Can't create instance of referable.");
+		throw FactoryCreateException(type.AsView(), "Can't create instance of referable.");
 
 	return r;
 }
@@ -157,7 +157,7 @@ StrongRef<Referable> ReferableFactory::CreateShared(Name type, const void* data)
 	CreationFunc create = entry.create;
 	StrongRef<Referable> r = create ? create(data) : nullptr;
 	if(!r)
-		throw FactoryCreateException(type.c_str(), "Can't create instance of referable.");
+		throw FactoryCreateException(type.AsView(), "Can't create instance of referable.");
 
 	return r;
 }

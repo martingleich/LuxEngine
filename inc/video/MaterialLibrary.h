@@ -36,9 +36,10 @@ public:
 	LUX_API static MaterialLibrary* Instance();
 	LUX_API static void Destroy();
 
-	LUX_API void SetMaterial(const core::String& name, Material* material);
-	LUX_API StrongRef<video::Material> GetMaterial(const core::String& name);
-	LUX_API StrongRef<video::Material> CloneMaterial(const core::String& name);
+	LUX_API void SetMaterial(core::StringView name, Material* material);
+	LUX_API StrongRef<video::Material> GetMaterial(core::StringView name);
+	LUX_API StrongRef<video::Material> TryGetMaterial(core::StringView name);
+	LUX_API StrongRef<video::Material> CloneMaterial(core::StringView name);
 
 	LUX_API void SetMaterial(EKnownMaterial name, Material* material);
 	LUX_API StrongRef<video::Material> GetMaterial(EKnownMaterial name);
@@ -65,9 +66,9 @@ public:
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromFile(
 		video::EShaderLanguage language,
-		const io::Path& VSPath, const core::String& VSEntryPoint,
+		const io::Path& VSPath, core::StringView VSEntryPoint,
 		int VSMajor, int VSMinor,
-		const io::Path& PSPath, const core::String& PSEntryPoint,
+		const io::Path& PSPath, core::StringView PSEntryPoint,
 		int PSMajor, int PSMinor,
 		ShaderCompileInfo* compileInfo = nullptr);
 
@@ -77,9 +78,9 @@ public:
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromMemory(
 		EShaderLanguage language,
-		const core::String& VSCode, const char* VSEntryPoint,
+		core::StringView VSCode, core::StringView VSEntryPoint,
 		int VSmajorVersion, int VSminorVersion,
-		const core::String& PSCode, const char* PSEntryPoint,
+		core::StringView PSCode, core::StringView PSEntryPoint,
 		int PSmajorVersion, int PSminorVersion,
 		ShaderCompileInfo* compileInfo = nullptr);
 
@@ -99,11 +100,11 @@ public:
 		int psMajor, int psMinor);
 
 	LUX_API bool GetShaderInclude(
-		EShaderLanguage language, const core::String& name,
-		const void*& outData, int& outBytes);
+		EShaderLanguage language, core::StringView name,
+		core::StringView& outData);
 	LUX_API void SetShaderInclude(
-		EShaderLanguage language, const core::String& name,
-		const void* data, int bytes);
+		EShaderLanguage language, core::StringView name,
+		core::StringView data);
 
 private:
 	struct ShaderInclude
@@ -130,7 +131,6 @@ private:
 			return language == other.language && name == other.name;
 		}
 	};
-
 	struct FixedFunctionEntry
 	{
 		FixedFunctionEntry(

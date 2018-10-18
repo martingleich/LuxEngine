@@ -256,16 +256,16 @@ int TextBox::BPos() const
 
 int TextBox::WPos() const
 {
-	auto text = m_Container.GetText();
-	auto it = text.Bytes().First() + m_Caret + 1;
+	auto& text = m_Container.GetText();
+	int i = m_Caret + 1;
 	int count = 1;
 	// Move until space, Move until non space
-	while(it != text.End() && !core::IsSpace(*it)) {
-		++it;
+	while(i < text.Size() && !core::IsSpace(text[i])) {
+		++i;
 		++count;
 	}
-	while(it != text.End() && core::IsSpace(*it)) {
-		++it;
+	while(i < text.Size()&& core::IsSpace(text[i])) {
+		++i;
 		++count;
 	}
 	return m_Caret + count;
