@@ -56,6 +56,25 @@ public:
 		return x != other.x || y != other.y || z != other.z || x != other.w;
 	}
 
+	Vector3<T> GetImag() const
+	{
+		return Vector3<T>(x, y, z);
+	}
+	T GetReal() const
+	{
+		return w;
+	}
+	void SetImag(Vector3<T> v) const
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+	}
+	void GetReal(T _w) const
+	{
+		w = _w;
+	}
+
 	//! Assignment
 	Quaternion<T>& operator=(const Quaternion<T>& other)
 	{
@@ -74,6 +93,7 @@ public:
 		y += other.y;
 		z += other.z;
 		w += other.w;
+		return *this;
 	}
 
 	//! Addition
@@ -307,22 +327,33 @@ public:
 	/**
 	The Eulerrotation is specified in (XYZ) and rad
 	\param euler The euler rotation
-	\return Selfreference
 	*/
 	static Quaternion<T> FromEuler(const Vector3<T>& euler)
 	{
+		return FromEuler(euler.x, euler.y, euler.z);
+	}
+
+	//! Make this quaternion from a Eulerrotation
+	/**
+	The Eulerrotation is specified in (XYZ) and rad
+	\param x The rotation around x.
+	\param y The rotation around y.
+	\param z The rotation around z.
+	*/
+	static Quaternion<T> FromEuler(float x, float y, float z)
+	{
 		T angle;
-		angle = euler.x / 2;
-		const T sr = sin(angle);
-		const T cr = cos(angle);
+		angle = x / 2;
+		const T sr = std::sin(angle);
+		const T cr = std::cos(angle);
 
-		angle = euler.y / 2;
-		const T sp = sin(angle);
-		const T cp = cos(angle);
+		angle = y / 2;
+		const T sp = std::sin(angle);
+		const T cp = std::cos(angle);
 
-		angle = euler.z / 2;
-		const T sy = sin(angle);
-		const T cy = cos(angle);
+		angle = z / 2;
+		const T sy = std::sin(angle);
+		const T cy = std::cos(angle);
 
 		const T cpcy = cp * cy;
 		const T spcy = sp * cy;
@@ -338,8 +369,9 @@ public:
 		// An sich sollte, die Länge 1 sein, aber weil Rundungsfehler
 		// (sin(a)*cos(b)*cos(c)-cos(a)*sin(b)*sin(c))² + (cos(a)*sin(b)*cos(c)+sin(a)*cos(b)*sin(c))²+(cos(a)*cos(b)*sin(c)-sin(a)*sin(b)*cos(c))²+(cos(a)*cos(b)*cos(c)+sin(a)*sin(b)*sin(c))² = 1
 		return out.Normal();
-	}
 
+	}
+	
 	//! Get the Eulerrotation from this quaternion
 	/**
 	The rotation is specified in XYZ and rad
@@ -380,7 +412,7 @@ public:
 	Vector3<T> Transform(const Vector3<T>& v) const
 	{
 		Vector3<T> uv, uuv;
-		math::Vector3<T> imag(x, y, z);
+		Vector3<T> imag = GetImag();
 		uv = imag.Cross(v);
 		uuv = imag.Cross(uv);
 		uv *= 2 * w;

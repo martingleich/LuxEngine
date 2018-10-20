@@ -275,10 +275,10 @@ public:
 		video::ColorF spec = video::ColorF(mat.specular[0], mat.specular[1], mat.specular[2]);
 		if(math::IsZero(spec.r) && math::IsZero(spec.g) && math::IsZero(spec.b)) {
 			lxm->SetSpecularIntensity(1);
-			lxm->SetShininess(0);
+			lxm->SetSpecularHardness(0);
 		} else {
 			lxm->SetSpecularIntensity(spec.GetLuminance());
-			lxm->SetShininess(mat.shininess);
+			lxm->SetSpecularHardness(mat.shininess);
 		}
 
 		if(!mat.diffuse_texname.empty()) {

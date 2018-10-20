@@ -93,10 +93,10 @@ String::String(const char* data, int size) :
 	}
 
 	if(size < 0)
-		size = (int)strlen(data);
+		size = core::SafeCast<int>(std::strlen(data));
 
 	Reserve(size);
-	memcpy(Data(), data, size);
+	std::memcpy(Data(), data, size);
 	Data()[size] = 0;
 
 	m_Size = size;
@@ -108,7 +108,7 @@ String::String(const String& other) :
 	m_Size(0)
 {
 	Reserve(other.m_Size);
-	memcpy(Data(), other.Data(), other.m_Size + 1);
+	std::memcpy(Data(), other.Data(), other.m_Size + 1);
 
 	m_Size = other.m_Size;
 }
@@ -148,7 +148,7 @@ void String::Reserve(int size)
 	else
 		newData = (char*)LUX_NEW_RAW(newAlloc);
 
-	memcpy(newData, Data(), m_Size + 1);
+	std::memcpy(newData, Data(), m_Size + 1);
 
 	if(!IsShortString())
 		LUX_FREE_RAW(m_Data.ptr);
@@ -164,7 +164,7 @@ String& String::operator=(const String& other)
 		return *this;
 
 	Reserve(other.m_Size);
-	memcpy(Data(), other.Data(), other.m_Size + 1);
+	std::memcpy(Data(), other.Data(), other.m_Size + 1);
 	m_Size = other.m_Size;
 
 	return *this;
@@ -179,9 +179,9 @@ String& String::operator=(const char* other)
 		return *this;
 	}
 
-	int size = (int)strlen(other);
+	int size = core::SafeCast<int>(std::strlen(other));
 	Reserve(size);
-	memcpy(Data(), other, size + 1);
+	std::memcpy(Data(), other, size + 1);
 	m_Size = size;
 
 	return *this;
@@ -209,10 +209,10 @@ void String::Insert(int pos, StringView other)
 
 	// Move last part of string back, including NUL.
 	char* data = Data();
-	memmove(data + pos + other.Size(), data + pos, Size() - pos + 1);
+	std::memmove(data + pos + other.Size(), data + pos, Size() - pos + 1);
 
 	// Place the insertion string.
-	memcpy(data + pos, other.Data(), other.Size());
+	std::memcpy(data + pos, other.Data(), other.Size());
 
 	m_Size = newSize;
 }
@@ -273,11 +273,11 @@ void String::Resize(int newSize, StringView filler)
 			char* cur = Data() + m_Size;
 			// Copy whole filler strings.
 			for(int i = 0; i < elemCount; ++i) {
-				memcpy(cur, filler.Data(), filler.Size());
+				std::memcpy(cur, filler.Data(), filler.Size());
 				cur += filler.Size();
 			}
 			// Copy the last partial string.
-			memcpy(cur, filler.Data(), remCount);
+			std::memcpy(cur, filler.Data(), remCount);
 		} else {
 			char* cur = Data() + m_Size;
 			memset(cur, *filler.Data(), elemCount);
@@ -312,18 +312,16 @@ char* String::Data()
 		return m_Data.ptr;
 }
 
-void String::PushByte(u8 byte)
+String& String::AppendByte(u8 byte)
 {
 	if(m_Size + 1 >= GetAllocated())
 		Reserve(GetAllocated() * 2 + 1);
-
-	if(byte == 0)
-		throw GenericInvalidArgumentException("byte", "byte must not be zero.");
 
 	Data()[m_Size] = byte;
 	Data()[m_Size + 1] = 0;
 
 	++m_Size;
+	return *this;
 }
 
 int String::Replace(StringView replace, StringView search, int first, int size)
@@ -360,8 +358,8 @@ int String::ReplaceRange(StringView replace, int first, int size)
 
 	char* data = Data();
 	int restSize = m_Size - first - size;
-	memmove(data + first + replace.Size(), data + first + size, restSize + 1); // Including NUL
-	memcpy(data + first, replace.Data(), replace.Size());
+	std::memmove(data + first + replace.Size(), data + first + size, restSize + 1); // Including NUL
+	std::memcpy(data + first, replace.Data(), replace.Size());
 
 	m_Size = newSize;
 
@@ -392,7 +390,7 @@ void String::Remove(int pos, int size)
 
 	char* data = Data();
 	int restSize = m_Size - pos - size;
-	memmove(data + pos, data + pos + size, restSize + 1); // Including NUL
+	std::memmove(data + pos, data + pos + size, restSize + 1); // Including NUL
 
 	m_Size = newSize;
 }

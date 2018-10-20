@@ -433,7 +433,7 @@ void ShaderD3D9::LoadSceneParams(const Pass& pass)
 			video::ColorF c;
 			switch(it->index) {
 			case DefaultParam_Shininess:
-				f = pass.shininess;
+				f = pass.specularHardness;
 				SetShaderValue(*it, &f); break;
 			case DefaultParam_Diffuse:
 				c = pass.diffuse;
@@ -655,10 +655,10 @@ const core::ParamPackage& ShaderD3D9::GetParamPackage() const
 int ShaderD3D9::GetDefaultId(core::StringView name)
 {
 	static const core::StringView NAMES[DefaultParam_COUNT] = {
-		"shininess",
+		"specularHardness",
 		"diffuse",
 		"emissive",
-		"specular",
+		"specularIntensity",
 	};
 
 	for(int i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {

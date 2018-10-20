@@ -53,8 +53,7 @@ void INIFile::Reload()
 
 bool INIFile::Commit()
 {
-	const char* newline = GetLineEndingChars(m_LineEnding);
-	int newlineLen = (int)strlen(newline) - 1;
+	auto newline = GetLineEndingChars(m_LineEnding);
 
 	if(!m_File) {
 		if(!m_FilePath.IsEmpty()) {
@@ -76,23 +75,23 @@ bool INIFile::Commit()
 
 		if(section.firstElem == i) {
 			if(i != 0)
-				m_File->WriteBinary(newline, newlineLen);
+				m_File->WriteBinary(newline.Data(), newline.Size());
 
 			// Write section
 			WriteComment(section.comment, 0);
 			m_File->WriteBinary("[", 1);
-			m_File->WriteBinary(section.name.Data(), (u32)section.name.Size());
+			m_File->WriteBinary(section.name.Data(), section.name.Size());
 			m_File->WriteBinary("]", 1);
-			m_File->WriteBinary(newline, newlineLen);
+			m_File->WriteBinary(newline.Data(), newline.Size());
 		}
 
 		// Write element
 		WriteComment(element.comment, 1);
 		m_File->WriteBinary("\t", 1);
-		m_File->WriteBinary(element.name.Data(), (u32)element.name.Size());
+		m_File->WriteBinary(element.name.Data(), element.name.Size());
 		m_File->WriteBinary("=", 1);
-		m_File->WriteBinary(element.value.Data(), (u32)element.value.Size());
-		m_File->WriteBinary(newline, newlineLen);
+		m_File->WriteBinary(element.value.Data(), element.value.Size());
+		m_File->WriteBinary(newline.Data(), newline.Size());
 	}
 
 	if(!m_FilePath.IsEmpty())
@@ -479,7 +478,7 @@ bool INIFile::ParseSectionName(const core::String& work, core::String& out)
 			if(*it == ']')
 				return true;
 			else
-				out.PushByte(*it);
+				out.AppendByte(*it);
 		}
 	}
 
@@ -652,14 +651,20 @@ void INIFile::WriteComment(const core::String& comment, int identDepth)
 	if(comment.IsEmpty())
 		return;
 
-	static char TABS[] = "\t\t\t\t\t\t";
-	const char* newline = GetLineEndingChars(m_LineEnding);
-	int newlineLen = (int)strlen(newline) - 1;
+	auto writeTabs = [this](int depth) {
+		static constexpr core::StringView TABS="\t\t\t\t\t\t";
+		while(depth > TABS.Size()) {
+			m_File->WriteBinary(TABS.Data(), TABS.Size());
+			depth -= TABS.Size();
+		}
+		if(depth > 0)
+			m_File->WriteBinary(TABS.Data(), depth);
+	};
+	auto newline = GetLineEndingChars(m_LineEnding);
 
 	u8 commentChar = GetCommentChar();
 
-	if(identDepth)
-		m_File->WriteBinary(TABS, identDepth);
+	writeTabs(identDepth);
 
 	m_File->WriteBinary(&commentChar, 1);
 	m_File->WriteBinary(" ", 1);
@@ -673,9 +678,8 @@ void INIFile::WriteComment(const core::String& comment, int identDepth)
 				start += count + 1;
 				count = 0;
 			}
-			if(identDepth)
-				m_File->WriteBinary(TABS, identDepth);
-			m_File->WriteBinary(newline, newlineLen);
+			writeTabs(identDepth);
+			m_File->WriteBinary(newline.Data(), newline.Size());
 			m_File->WriteBinary(&commentChar, 1);
 			m_File->WriteBinary(" ", 1);
 		} else {
@@ -683,7 +687,7 @@ void INIFile::WriteComment(const core::String& comment, int identDepth)
 		}
 	}
 
-	m_File->WriteBinary(newline, newlineLen);
+	m_File->WriteBinary(newline.Data(), newline.Size());
 }
 
 INIFile::SINIElement& INIFile::GetElement(int sectionID, int elementID)

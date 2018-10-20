@@ -61,7 +61,7 @@ public:
 	// Material
 	ColorF diffuse = video::ColorF(1, 1, 1, 1);
 	float emissive = 0;
-	float shininess = 0;
+	float specularHardness = 0;
 	float specularIntensity = 1;
 
 	// Shader

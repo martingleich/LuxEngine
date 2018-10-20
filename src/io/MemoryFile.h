@@ -15,6 +15,16 @@ public:
 		const FileInfo& desc,
 		const Path& path,
 		EVirtualCreateFlag flags);
+	MemoryFile(
+		const void* buffer,
+		const FileInfo& desc,
+		const Path& path,
+		EVirtualCreateFlag flags) :
+		MemoryFile(const_cast<void*>(buffer),
+			desc,
+			path,
+			flags | EVirtualCreateFlag::ReadOnly)
+	{}
 	~MemoryFile();
 	s64 ReadBinaryPart(s64 numBytes, void* out);
 	s64 WriteBinaryPart(const void* data, s64 length);

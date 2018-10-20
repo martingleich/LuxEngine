@@ -15,6 +15,7 @@ inline bool CheckedCast(FromT from, ToT& to)
 	static_assert(std::is_integral<FromT>::value && std::is_integral<ToT>::value, "Can only cast intergral types");
 	ifconst(std::is_unsigned<ToT>::value == std::is_unsigned<FromT>::value)
 	{
+		// unsigned to unsigned
 		using BiggerT = core::Choose<sizeof(ToT) < sizeof(FromT), FromT, ToT>::type;
 		if((BiggerT)from > (BiggerT)std::numeric_limits<ToT>::max())
 			return false;
@@ -23,7 +24,7 @@ inline bool CheckedCast(FromT from, ToT& to)
 	}
 	ifconst(std::is_unsigned<ToT>::value && std::is_signed<FromT>::value)
 	{
-		// signed to unsigend
+		// signed to unsigned
 		if(from < 0)
 			return false;
 		using BiggerT = core::Choose<sizeof(ToT) < sizeof(FromT), std::make_unsigned<FromT>::type, ToT>::type;
@@ -32,7 +33,7 @@ inline bool CheckedCast(FromT from, ToT& to)
 	}
 	ifconst(std::is_signed<ToT>::value && std::is_unsigned<FromT>::value) {
 
-		// unsigned to sigend
+		// unsigned to signed
 		using BiggerT = core::Choose<sizeof(ToT) < sizeof(FromT), std::make_signed<FromT>::type, ToT>::type;
 		if((BiggerT)from > (BiggerT)std::numeric_limits<ToT>::max())
 			return false;

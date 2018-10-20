@@ -116,14 +116,14 @@ public:
 
 	void SetDiffuse(const video::ColorF& color) { m_Pass.diffuse = color; }
 	void SetEmissive(float emissive) { m_Pass.emissive = emissive; }
-	void SetShininess(float shininess) { m_Pass.shininess = shininess; }
-	void SetSpecularIntensity(float specular) { m_Pass.specularIntensity = specular; }
+	void SetSpecularHardness(float hardness) { m_Pass.specularHardness = hardness; }
+	void SetSpecularIntensity(float intensity) { m_Pass.specularIntensity = intensity; }
 	void SetAlpha(float alpha) { m_Pass.diffuse.SetAlpha(alpha); }
 
 	video::ColorF GetDiffuse() const { return m_Pass.diffuse; }
 	float GetEmissive() const { return m_Pass.emissive; }
-	float GetShininess() const { return m_Pass.shininess; }
-	float GetSpecularIntesity() const { return m_Pass.specularIntensity; }
+	float GetSpecuularHardness() const { return m_Pass.specularHardness; }
+	float GetSpecularIntensity() const { return m_Pass.specularIntensity; }
 	float GetAlpha() const { return m_Pass.diffuse.GetAlpha(); }
 
 	void SetRequirements(EMaterialReqFlag requirements)

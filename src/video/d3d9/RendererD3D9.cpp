@@ -13,8 +13,8 @@
 
 #include "video/d3d9/VideoDriverD3D9.h"
 #include "video/d3d9/HardwareBufferManagerD3D9.h"
+#include "video/d3d9/FixedFunctionShaderD3D9.h"
 #include "platform/D3D9Exception.h"
-#include "video/FixedFunctionShader.h"
 
 namespace lux
 {
@@ -439,7 +439,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 	bool changedFogEnable = false;
 	bool changedLighting = false;
 	bool changedShader = false;
-	bool useFixedPipeline = (pass.shader.As<FixedFunctionShader>() != nullptr);
+	bool useFixedPipeline = (pass.shader.As<FixedFunctionShaderD3D9>() != nullptr);
 	if(dirtyPass) {
 		if(pass.fogEnabled != m_PrevFog) {
 			changedFogEnable = true;

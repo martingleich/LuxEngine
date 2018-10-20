@@ -8,37 +8,44 @@ namespace io
 
 Path Path::EMPTY = Path();
 
-void Path::Set(core::StringView str)
+core::String Path::MakeStringCanonic(const core::StringView& str)
 {
-	m_RawData.Clear();
+	core::String out;
 	if(str.IsEmpty())
-		return;
+		return out;
 
-	m_RawData.Reserve(str.Size());
+	out.Reserve(str.Size());
 
 	int cur = 0;
 	int size = 0;
 	for(int i = 0; i < str.Size(); ++i) {
 		char c = str[i];
 		if(c == '\\') {
-			m_RawData.Append(str.SubString(cur, size));
-			m_RawData.Append("/", 1);
+			out.Append(str.SubString(cur, size));
+			out.Append("/");
 			cur = i+1;
 			size = 0;
 		} else {
 			++size;
 		}
 	}
-	m_RawData.Append(str.SubString(cur, size));
+	out.Append(str.SubString(cur, size));
 
 	// Strips spaces
-	m_RawData.Strip();
+	out.Strip();
 
 	// Strip trailing slashes.
-	int i = m_RawData.Size()-1;
-	while(i > 0 && m_RawData[i] == '/')
+	int i = out.Size()-1;
+	while(i > 0 && out[i] == '/')
 		--i;
-	m_RawData.Resize(i+1);
+	out.Resize(i+1);
+
+	return out;
+}
+
+void Path::Set(core::StringView str)
+{
+	m_RawData = MakeStringCanonic(str);
 }
 
 Path Path::GetFileDir() const
@@ -72,18 +79,23 @@ core::String Path::GetFileExtension() const
 		return m_RawData.EndSubString(lastDot+1);
 }
 
+bool Path::IsAbsolute() const
+{
+	return (m_RawData.Size() > 0 && m_RawData[0] == '/') || (m_RawData.Size() > 1 && m_RawData[1] == ':');
+}
+
 Path Path::GetResolved(const Path& base) const
 {
-	core::String out;
-	auto relP = m_RawData.Data();
-	auto relS = m_RawData.Size();
-	if(relS > 0 && relP[0] == '/')
-		(void)0; // rel is already absolute
-	else if(relS > 1 && relP[1] == ':')
-		(void)0; // rel is already absolute
-	else {
-		out = base.AsView();
-		out.Append("/");
+	// Copy the base path to the output.
+	Path out;
+	auto& outStr = out.m_RawData;
+	if(!IsAbsolute()) {
+		outStr.Reserve(base.AsView().Size() + 1);
+		outStr.Append(base.AsView());
+		outStr.Append("/");
+		out.m_Archive = base.m_Archive;
+	} else {
+		out.m_Archive = m_Archive;
 	}
 
 	// 0 = Empty Directory
@@ -94,17 +106,17 @@ Path Path::GetResolved(const Path& base) const
 	for(char c : m_RawData.Bytes()) {
 		if(c == '/') {
 			if(state == 0 || state == 3) // Empty or normal dictonary
-				out.Append("/");
+				outStr.Append("/");
 			else if(state == 1) // Single dot
-				out.Pop(); // Erase the dot
+				outStr.Pop(); // Erase the dot
 			else if(state == 2) { // Two dots
-				int removed = out.Pop(3); // Erase the two dots and the last slash
+				int removed = outStr.Pop(3); // Erase the two dots and the last slash
 				if(removed != 3)
 					return Path::EMPTY;
-				int lastSlash = out.FindReverse("/"); // Find the last slash...
+				int lastSlash = outStr.FindReverse("/"); // Find the last slash...
 				if(lastSlash == -1)
 					return Path::EMPTY;
-				out.Remove(lastSlash + 1, out.Size() - lastSlash - 1); //...and remove all after it.
+				outStr.Remove(lastSlash + 1, outStr.Size() - lastSlash - 1); //...and remove all after it.
 			}
 			state = 0;
 			continue;	// Don't append last character
@@ -118,13 +130,13 @@ Path Path::GetResolved(const Path& base) const
 		} else {
 			state = 3;
 		}
-		out.Append(&c, 1);
+		outStr.Append(&c, 1);
 	}
 
-	// out is always a valid path, so don't create a copy
-	Path pout("", base.GetArchive());
-	pout.PutString(std::move(out));
-	return pout;
+	if(outStr[outStr.Size()-1] == '/')
+		outStr.Pop();
+
+	return out;
 }
 
 void fmtPrint(format::Context& ctx, const Path& p, format::Placeholder& pl)
@@ -135,5 +147,6 @@ void fmtPrint(format::Context& ctx, const Path& p, format::Placeholder& pl)
 		fmtPrint(ctx, p.GetArchive()->GetPath(), pl);
 	}
 }
+
 }
 }

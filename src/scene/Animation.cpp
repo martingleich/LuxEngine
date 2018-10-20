@@ -69,7 +69,7 @@ void AnimationController::Tick(float secsPassed)
 
 	int id = 0;
 	for(auto& track : m_Animation->Tracks()) {
-		core::VariableAccess access(track->GetType(), m_Buffer);
+		core::VariableAccess access(track->GetType(), m_Buffer.Pointer());
 		track->Evaluate(*this, access, &m_AnimationToken);
 		m_Object->SetAnimatedValue(m_HandleCache[id], access);
 		++id;

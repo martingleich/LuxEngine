@@ -106,7 +106,7 @@ float lxFog(float d, float4 fog1, float4 fog2)
 		return 0;
 }
 
-float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, float emissive, float4 diffuse, float specular, float shininess, float lighting, float4x4 light)
+float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, float emissive, float4 diffuse, float specular, float specularHardness, float lighting, float4x4 light)
 {
 	float4 color = float4(0,0,0,0);
 	int iLighting = (int)lighting;
@@ -141,9 +141,9 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 			illumFactor = spotFactor / lightDistance;
 			illumCol = max(dot(normal, lightVector),0) * diffuse * lightDiffuse;
 		}
-		if(shininess > 0) {
+		if(specularHardness > 0) {
 			float3 h = normalize(normalize(camPos - pos) + lightVector);
-			float sf = pow(dot(h, normal), shininess);
+			float sf = pow(dot(h, normal), specularHardness);
 			illumCol += lightDiffuse * specular * sf;
 		}
 		color += illumFactor * illumCol;

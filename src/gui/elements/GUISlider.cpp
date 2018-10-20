@@ -103,6 +103,7 @@ bool Slider::OnMouseEvent(const gui::MouseEvent& e)
 
 			if(pressed) {
 				m_IsPressed = true;
+				onSliderPressed.Broadcast();
 				m_Environment->CaptureCursor(this);
 			}
 		}
@@ -110,6 +111,7 @@ bool Slider::OnMouseEvent(const gui::MouseEvent& e)
 	}
 	if(e.type == gui::MouseEvent::LUp) {
 		m_IsPressed = false;
+		onSliderReleased.Broadcast();
 		m_Environment->ReleaseCursor();
 	}
 	if(e.type == gui::MouseEvent::Move && m_IsPressed) {

@@ -62,7 +62,7 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(
 	if(planes < 2)
 		throw core::GenericInvalidArgumentException("planes", "Number of planes must be bigger than 1");
 
-	const u32 vertexCount = (sectors + 1) * (planes + 2) + 2;
+	const u32 vertexCount = 2*(sectors + 1) +  planes*(sectors + 1);
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
 		throw core::GenericInvalidArgumentException("sectors, planes", "Too many sectors or planes");
 

@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LUX_PATH_H
 #define INCLUDED_LUX_PATH_H
 #include "core/lxString.h"
-#include "core/Clock.h"
 
 namespace lux
 {
@@ -11,41 +10,47 @@ class Archive;
 //! A Path
 /**
 Pathes identify objects in the virtual file-system.
-They remember the string and the archive.
-Pathes always are seperated by slashes.
+They remember the path and the archive.
+This class saves the path in a canonic representation, the canoic representation uses slashes to seperate folders and never ends in a slash.
 */
 class Path
 {
 public:
 	static LUX_API Path EMPTY;
 
-	Path() = default;
-	Path(const char* str, Archive* archive=nullptr)
+	Path() :
+		m_Archive(nullptr)
+	{
+	}
+	Path(const char* str, Archive* archive = nullptr)
 	{
 		Set(core::StringView(str, strlen(str)));
 		m_Archive = archive;
 	}
-	Path(const core::String& str, Archive* archive=nullptr)
+	Path(const core::String& str, Archive* archive = nullptr)
 	{
 		Set((core::StringView)(str));
 		m_Archive = archive;
 	}
-	Path(core::StringView str, Archive* archive=nullptr)
+	Path(core::StringView str, Archive* archive = nullptr)
 	{
 		Set(str);
 		m_Archive = archive;
 	}
-	
+
 	Path(const Path&) = default;
 	Path(Path&&) = default;
 
 	Path& operator=(const Path&) = default;
 	Path& operator=(Path&&) = default;
 
+	LUX_API static core::String MakeStringCanonic(const core::StringView& view);
+
 	LUX_API void Set(core::StringView str);
 	LUX_API Path GetFileDir() const;
-	LUX_API core::String GetFileName(bool keepExtension=true) const;
+	LUX_API core::String GetFileName(bool keepExtension = true) const;
 	LUX_API core::String GetFileExtension() const;
+	LUX_API bool IsAbsolute() const;
 
 	/**
 	\param base The base path, must be an absolute path.
@@ -85,7 +90,8 @@ public:
 	FileInfo() :
 		m_Size(-1),
 		m_Type(EType::Other)
-	{}
+	{
+	}
 	FileInfo(s64 size, EType type) :
 		m_Size(size),
 		m_Type(type)

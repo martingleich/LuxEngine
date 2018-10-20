@@ -47,7 +47,7 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 core::VariableAccess MatrixTable::GetParamById(int id) const
 {
 	const math::Matrix4& m = GetMatrix((EMatrixType)id);
-	return core::VariableAccess(core::Types::Matrix().GetConstantType(), const_cast<float*>(m.DataRowMajor()));
+	return core::VariableAccess(core::Types::Matrix().GetConstantType(), m.DataRowMajor());
 }
 
 const math::Matrix4& MatrixTable::GetMatrix(EMatrixType type) const

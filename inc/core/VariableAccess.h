@@ -39,8 +39,13 @@ public:
 		m_Data(const_cast<void*>(data)),
 		m_Type(type)
 	{
+		m_Type = m_Type.GetConstantType();
 	}
-
+	VariableAccess(core::Type type, void* data) :
+		m_Data(data),
+		m_Type(type)
+	{
+	}
 	//! Construct from any object
 	explicit VariableAccess(const AnyObject& any, bool isConst = false) :
 		m_Data(const_cast<void*>(any.Data())),

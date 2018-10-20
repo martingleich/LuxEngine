@@ -46,28 +46,25 @@ public:
 		{
 			return m_File->GetElementComment(m_Section, m_Element);
 		}
-		void SetName(const core::String& name)
-		{
-			return m_File->SetElementName(m_Section, m_Element, name);
-		}
-		void SetComment(const core::String& comment)
-		{
-			return m_File->SetElementComment(m_Section, m_Element, comment);
-		}
-
 		const core::String& Value() const
 		{
 			return m_File->GetElementValue(m_Section, m_Element);
 		}
-		void SetValue(const core::String& value) const
+		void SetName(core::StringView name)
+		{
+			return m_File->SetElementName(m_Section, m_Element, name);
+		}
+		void SetComment(core::StringView comment)
+		{
+			return m_File->SetElementComment(m_Section, m_Element, comment);
+		}
+		void SetValue(core::StringView value) const
 		{
 			m_File->SetElementValue(m_Section, m_Element, value);
 		}
-
-		operator int() const
-		{
-			return m_Element;
-		}
+		
+		int GetSectionId() const { return m_Section; }
+		int GetElementId() const { return m_Element; }
 
 		bool Next()
 		{
@@ -76,10 +73,8 @@ public:
 				m_File = nullptr;
 			return m_File != nullptr;
 		}
-		bool IsValid() const
-		{
-			return m_File != nullptr;
-		}
+		
+		bool IsValid() const { return m_File != nullptr; }
 
 	private:
 		INIFile* m_File;
@@ -99,6 +94,8 @@ public:
 			m_File(file),
 			m_ID(ID)
 		{
+			if(ID < 0)
+				m_File = nullptr;
 		}
 
 		const core::String& Name() const
@@ -109,20 +106,16 @@ public:
 		{
 			return m_File->GetSectionComment(m_ID);
 		}
-		void SetName(const core::String& name)
+		void SetName(core::StringView name)
 		{
 			return m_File->SetSectionName(m_ID, name);
 		}
-		void SetComment(const core::String& comment)
+		void SetComment(core::StringView comment)
 		{
 			return m_File->SetSectionComment(m_ID, comment);
 		}
 
-		operator int() const
-		{
-			return m_ID;
-		}
-
+		int GetSectionId() const { return m_ID; }
 		bool Next()
 		{
 			++m_ID;
@@ -153,10 +146,7 @@ public:
 			return GetElementByID(0);
 		}
 
-		bool IsValid() const
-		{
-			return m_File != nullptr;
-		}
+		bool IsValid() const { return m_File != nullptr; }
 
 	private:
 		INIFile* m_File;
@@ -187,10 +177,10 @@ public:
 	LUX_API INIFile(const io::Path& p);
 	LUX_API ~INIFile();
 
-	// Reload the data from the file
+	//! Reload the data from the file
 	LUX_API void Reload();
 
-	// Commit all changes to the file.
+	//! Commit all changes to the file.
 	LUX_API bool Commit();
 
 	LUX_API int GetSectionCount() const;
@@ -242,6 +232,7 @@ private:
 	core::Array<SINISection> m_Sections;
 	core::Array<SINIElement> m_Elements;
 
+	// The last accessed section and element.
 	mutable int m_CurrentSection;
 	mutable int m_CurrentElement;
 

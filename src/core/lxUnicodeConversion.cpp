@@ -37,7 +37,7 @@ core::String UTF16ToString(const void* _data, int size)
 		u8* cur = buffer;
 		int bytes = CodePointToUTF8(c, cur);
 		for(int i = 0; i < bytes; ++i)
-			out.PushByte(*cur++);
+			out.AppendByte(*cur++);
 	}
 
 	return out;

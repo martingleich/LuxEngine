@@ -427,7 +427,7 @@ inline Transformation Lerp(const Transformation& a, const Transformation& b, flo
 {
 	return Transformation(
 		math::Lerp(a.translation, b.translation, t),
-		math::Lerp(a.orientation, b.orientation, t),
+		math::Lerp(a.orientation, b.orientation, t).Normal(),
 		math::Lerp(a.scale, b.scale, t));
 }
 } // namespace math

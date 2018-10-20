@@ -40,7 +40,7 @@ void DeviceStateD3D9::SetD3DColors(const Pass& pass)
 			TestFlag(pass.lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(pass.diffuse) : black,
 			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(video::ColorF(pass.specularIntensity, pass.specularIntensity, pass.specularIntensity)) : black,
 			TestFlag(pass.lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(pass.emissive * pass.diffuse) : black,
-			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? pass.shininess : 0.0f
+			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? pass.specularHardness : 0.0f
 		};
 
 		m_D3DMaterial = D3DMaterial;

@@ -493,7 +493,7 @@ private:
 			m_CurToken.type = TOKEN_OANGLE;
 			c = ReadChar();
 			while(c != '>' && c != -1) {
-				m_DataString.PushByte((u8)c);
+				m_DataString.AppendByte((u8)c);
 				c = ReadChar();
 			}
 			if(m_DataString.Size() != 36) {
@@ -511,7 +511,7 @@ private:
 			c = ReadChar();
 			m_DataString.Clear();
 			while(c != '"' && c != -1) {
-				m_DataString.PushByte((u8)c);
+				m_DataString.AppendByte((u8)c);
 				c = ReadChar();
 			}
 			m_CurToken.type = TOKEN_STRING;
@@ -524,7 +524,7 @@ private:
 			}
 			m_DataString.Clear();
 			while((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
-				m_DataString.PushByte((u8)c);
+				m_DataString.AppendByte((u8)c);
 				c = ReadChar();
 			}
 			PushChar(c);
@@ -1277,7 +1277,7 @@ public:
 			tex = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Texture, texFile).StaticCastStrong<video::Texture>();
 		}
 		material->SetDiffuse(xmat.faceColor);
-		material->SetShininess(xmat.power);
+		material->SetSpecularHardness(xmat.power);
 		material->SetSpecularIntensity(xmat.specularColor.GetLuminance());
 		material->SetEmissive(xmat.emmisiveColor.GetLuminance());
 		material->SetTexture(0, tex);

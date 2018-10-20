@@ -6,7 +6,7 @@
 
 #include "video/Color.h"
 #include "video/TextureStageSettings.h"
-#include "video/FixedFunctionShader.h"
+#include "video/d3d9/FixedFunctionShaderD3D9.h"
 
 #include "platform/StrippedD3D9.h"
 #include "platform/UnknownRefCounted.h"
@@ -65,7 +65,7 @@ public:
 			m_Shader->Disable();
 		if(s) {
 			s->Enable();
-			m_IsFixedShader = (dynamic_cast<FixedFunctionShader*>(s) != nullptr);
+			m_IsFixedShader = (dynamic_cast<FixedFunctionShaderD3D9*>(s) != nullptr);
 		}
 
 		m_Shader = s;

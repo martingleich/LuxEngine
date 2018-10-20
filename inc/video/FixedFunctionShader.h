@@ -38,37 +38,6 @@ struct FixedFunctionParameters
 	}
 };
 
-class FixedFunctionShader : public Shader
-{
-public:
-	FixedFunctionShader(const FixedFunctionParameters& params) :
-		m_TextureStages(params.stages),
-		m_UseVertexColors(params.useVertexColors)
-	{
-		for(auto& s : params.textures)
-			m_ParamPackage.AddParam(s, TextureLayer());
-	}
-
-	virtual int GetTextureStageCount() const
-	{
-		return m_TextureStages.Size();
-	}
-	virtual const TextureStageSettings& GetTextureStage(int id) const
-	{
-		return m_TextureStages[id];
-	}
-
-	const core::ParamPackage& GetParamPackage() const
-	{
-		return m_ParamPackage;
-	}
-
-protected:
-	core::Array<TextureStageSettings> m_TextureStages;
-	core::ParamPackage m_ParamPackage;
-	bool m_UseVertexColors;
-};
-
 } // namespace video
 } // namespace lux
 

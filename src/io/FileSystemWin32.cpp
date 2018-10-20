@@ -94,14 +94,16 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(void* memory, s64 size, const P
 {
 	LX_CHECK_NULL_ARG(memory);
 	LX_CHECK_NULL_ARG(size);
-	FileInfo desc(size, FileInfo::EType::Other);
+	FileInfo desc(size, FileInfo::EType::VirtualFile);
 	return LUX_NEW(MemoryFile)(memory, desc, name, flags);
 }
 
 StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, s64 size, const Path& name, EVirtualCreateFlag flags)
 {
-	// File is set to read only in last parameter
-	return OpenVirtualFile(const_cast<void*>(memory), size, name, flags | EVirtualCreateFlag::ReadOnly);
+	LX_CHECK_NULL_ARG(memory);
+	LX_CHECK_NULL_ARG(size);
+	FileInfo desc(size, FileInfo::EType::VirtualFile);
+	return LUX_NEW(MemoryFile)(memory, desc, name, flags | EVirtualCreateFlag::ReadOnly);
 }
 
 Path FileSystemWin32::GetAbsoluteFilename(const Path& filename) const

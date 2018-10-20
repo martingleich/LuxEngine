@@ -116,7 +116,7 @@ inline ELineEnding GetSystemLineEnding()
 #endif
 }
 
-inline const char* GetLineEndingChars(ELineEnding ending)
+inline core::StringView GetLineEndingChars(ELineEnding ending)
 {
 	switch(ending) {
 	case ELineEnding::Windows:

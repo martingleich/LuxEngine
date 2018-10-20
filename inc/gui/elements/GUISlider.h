@@ -50,6 +50,8 @@ public:
 	LUX_API void SetHorizontal(bool isHorizontal);
 
 	core::Signal<int> onPosChange;
+	core::Signal<> onSliderPressed;
+	core::Signal<> onSliderReleased;
 
 protected:
 	LUX_API int GetThumbPos(const math::Vector2F& curPos, int offset = 0) const;

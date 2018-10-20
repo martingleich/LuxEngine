@@ -1,9 +1,6 @@
 #ifndef INCLUDED_LUX_STRING_H
 #define INCLUDED_LUX_STRING_H
-#include "core/lxMemory.h"
-#include "core/lxUnicode.h"
 #include "core/lxUtil.h"
-#include "core/lxIterator.h"
 #include "core/lxException.h"
 #include "core/lxTypes.h"
 #include "core/lxStringView.h"
@@ -108,7 +105,10 @@ public:
 	String& Append(StringView other) { Insert(Size(), other); return *this; }
 	String& Append(const char* data, int size) { return Append(StringView(data, size)); }
 
-	//! Append a single codepoint from a iterator.
+	//! Append a single byte
+	LUX_API String& AppendByte(u8 byte);
+
+	//! Append a single utf8-encoded codepoint from a address.
 	/**
 	\param codepoint The codepoint referenced by this iterator is appended.
 	\return selfreference
@@ -176,9 +176,6 @@ public:
 	Can be used to manipulate the string, use with care.
 	*/
 	LUX_API char* Data();
-
-	//! Add a single utf-8 byte to the string.
-	LUX_API void PushByte(u8 byte);
 
 	inline core::Range<ConstUTF8Iterator> CodePoints() const
 	{
