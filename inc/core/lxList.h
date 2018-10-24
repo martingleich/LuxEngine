@@ -104,7 +104,7 @@ private:
 		{
 			return m_Current->data;
 		}
-		const T* operator->()
+		const T* operator->() const
 		{
 			return &m_Current->data;
 		}
@@ -198,7 +198,7 @@ public:
 		while(m_First) {
 			Entry* next = m_First->next;
 			m_First->data.~T();
-			Entry::Free(m_First);
+			LUX_FREE(m_First);
 			m_First = next;
 		}
 
@@ -314,7 +314,7 @@ public:
 		--m_Size;
 
 		ptr->data.~T();
-		Entry::Free(ptr);
+		LUX_FREE(ptr);
 
 		return out;
 	}
@@ -359,7 +359,7 @@ public:
 private:
 	T* GetInsertPointer(Iterator pos)
 	{
-		Entry* entry = Entry::Alloc();
+		Entry* entry = LUX_NEW(Entry);
 		auto ptr = pos.m_Current;
 		if(ptr == nullptr) { // Push back
 			entry->next = nullptr;

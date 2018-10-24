@@ -6,7 +6,6 @@
 
 namespace lux
 {
-
 namespace scene
 {
 class Scene;
@@ -18,6 +17,10 @@ namespace gui
 class Window;
 class Cursor;
 class GUIEnvironment;
+}
+namespace core
+{
+class TimerManager;
 }
 class LuxSystemInfo;
 
@@ -56,7 +59,7 @@ public:
 	*/
 	virtual void BuildVideoDriver(const video::DriverConfig& config, void* user = nullptr) = 0;
 	//! Get available driver types.
-	virtual core::Array<core::String> GetDriverTypes() = 0;
+	virtual core::Array<core::String> GetVideoDriverTypes() = 0;
 	//! Get available adapters for a driver type.
 	virtual StrongRef<video::AdapterList> GetVideoAdapters(const core::String& driver) = 0;
 

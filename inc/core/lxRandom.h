@@ -34,9 +34,10 @@ public:
 	//! Seed the random number generator, with the current time
 	void ReSeed()
 	{
-		u64 ticks = core::Clock::GetTicks();
-		u32 seed = (u32)((ticks >> 32) ^ ticks);
-		ReSeed(seed);
+		auto ticks = core::Clock::GetTicks().Count();
+		m_State = (u32)core::HashSequence(&ticks, sizeof(ticks));
+		if(m_State == 0)
+			m_State = 0x3412353f; // This number is absolutly random.
 	}
 
 	//! Seed the random number generator.

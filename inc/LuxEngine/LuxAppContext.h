@@ -58,6 +58,10 @@ struct LuxAppContext
 			Renderer = nullptr;
 	}
 
+	// Don't save StrongReferences here.
+	/*
+	This structure is most often used globally and doesn't really own all these objects.
+	*/
 	LuxDevice* Device = nullptr;
 	video::VideoDriver* Driver = nullptr;
 	video::Renderer* Renderer = nullptr;

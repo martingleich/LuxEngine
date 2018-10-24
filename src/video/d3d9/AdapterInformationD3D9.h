@@ -46,8 +46,9 @@ class AdapterListD3D9 : public AdapterList
 {
 public:
 	AdapterListD3D9(const core::ModuleInitData& data);
-	u32 GetAdapterCount() const;
-	StrongRef<Adapter> GetAdapter(u32 idx) const;
+	int GetCount() const override;
+	StrongRef<Adapter> GetAdapter(int idx) const override;
+	StrongRef<Adapter> GetDefaultAdapter() const override;
 
 private:
 	UnknownRefCounted<IDirect3D9> m_D3D9;

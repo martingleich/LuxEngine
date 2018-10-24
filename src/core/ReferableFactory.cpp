@@ -162,11 +162,6 @@ StrongRef<Referable> ReferableFactory::CreateShared(Name type, const void* data)
 	return r;
 }
 
-int ReferableFactory::GetTypeCount() const
-{
-	return m_Types.Size();
-}
-
 core::Array<core::Name> ReferableFactory::GetTypeNames() const
 {
 	core::Array<core::Name> names;

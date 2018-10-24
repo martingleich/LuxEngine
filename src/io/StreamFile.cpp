@@ -65,7 +65,7 @@ void StreamFileWin32::Seek(s64 offset, ESeekOrigin origin)
 	s64 cursor = (origin == ESeekOrigin::Start) ? 0 : GetCursor();
 	s64 newCursor = cursor + offset;
 	s64 cursorOffset = newCursor - GetCursor();
-	if(newCursor < 0 || newCursor >= GetSize())
+	if(newCursor < 0 || newCursor > GetSize())
 		throw io::FileUsageException(io::FileUsageException::CursorOutsideFile, GetPath());
 
 	LARGE_INTEGER lint;

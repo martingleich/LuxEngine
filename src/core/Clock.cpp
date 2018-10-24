@@ -1,5 +1,6 @@
 #include "core/Clock.h"
 #include <chrono>
+#include <thread>
 
 namespace lux
 {
@@ -40,16 +41,88 @@ DateAndTime Clock::GetDateAndTime()
 	return out;
 }
 
-u64 Clock::GetTicks()
+Duration Clock::GetTicks()
 {
-	auto time = std::chrono::high_resolution_clock::now();
-	return (time.time_since_epoch() / 10000).count();
+	return Duration(std::chrono::high_resolution_clock::now().time_since_epoch());
 }
 
-u64 Clock::TicksPerSecond()
+TimerManager::~TimerManager()
 {
-	return 100000;
+	while(m_FirstTimer) {
+		auto next = m_FirstTimer->next;
+		delete m_FirstTimer;
+		m_FirstTimer = next;
+	}
 }
 
+void TimerManager::RunLoop(Duration stepSize)
+{
+	m_AbortLoop = false;
+	Duration passed;
+	auto start = Clock::GetTicks();
+	Duration waitTime;
+	while(true) {
+		start = Clock::GetTicks();
+
+		waitTime += (stepSize - passed) / 2;
+
+		// Take a step.
+		if(stepSize < passed) {
+			passed -= stepSize;
+			Tick(stepSize);
+		}
+		// Abort if there are no more timers.
+		if(!m_FirstTimer || m_AbortLoop)
+			return;
+
+		// Wait.
+		if(waitTime.Count() > 0)
+			std::this_thread::sleep_for(waitTime.AsStdDuration());
+
+		Duration end = Clock::GetTicks();
+		passed += end - start;
+		start = end;
+	}
 }
+
+Timer TimerManager::CreateTimer(const TimerSettings& settings)
+{
+	return Timer(CreateInternalTimer(settings));
 }
+
+Timer TimerManager::CreateTimer(Duration period)
+{
+	TimerSettings settings(period);
+	return Timer(CreateInternalTimer(settings));
+}
+
+InternalTimer* TimerManager::CreateInternalTimer(const TimerSettings& settings)
+{
+	auto t = new InternalTimer;
+	t->repeatCount = settings.count;
+	t->period = settings.period;
+	t->remain = settings.start;
+	t->paused = false;
+	t->next = m_FirstTimer;
+	t->prev = nullptr;
+	m_FirstTimer = t;
+	++m_TimerCount;
+	return m_FirstTimer;
+}
+
+InternalTimer* TimerManager::DestroyInternalTimer(InternalTimer* t)
+{
+	auto next = t->next;
+	if(t->next)
+		t->next->prev = t->prev;
+	if(t->prev)
+		t->prev->next = t->next;
+	if(t == m_FirstTimer)
+		m_FirstTimer = nullptr;
+	--m_TimerCount;
+	delete t;
+	return next;
+}
+
+} // namespace core
+} // namespce lux

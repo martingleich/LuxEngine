@@ -23,8 +23,8 @@ struct RenderStatistics::SelfT
 	core::HashMap<core::String, Group*> groups;
 	core::Array<Group*> groupStack;
 
-	u64 duration = 0;
-	u64 frameStart;
+	core::Duration duration;
+	core::Duration frameStart;
 };
 
 RenderStatistics::RenderStatistics() :
@@ -72,7 +72,7 @@ u32 RenderStatistics::GetPrimitivesDrawn() const
 
 float RenderStatistics::GetDuration() const
 {
-	return self->duration / (float)core::Clock::TicksPerSecond();
+	return self->duration.AsSeconds();
 }
 
 void RenderStatistics::PushGroup(const char* name)

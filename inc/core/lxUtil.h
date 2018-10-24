@@ -48,9 +48,10 @@ CompareTypeFromIntCompareT<T, FuncT> CompareTypeFromInt(const FuncT& func)
 	return CompareTypeFromIntCompareT<T, FuncT>(func);
 }
 
-inline int HashSequence(const u8* ptr, int size)
+inline int HashSequence(const void* _ptr, int size)
 {
 	int out = 7;
+	const u8* ptr = (u8*)_ptr;
 	const u8* end = ptr + size;
 	for(; ptr != end; ++ptr)
 		out = 31 * out + *ptr;

@@ -288,14 +288,18 @@ AdapterListD3D9::AdapterListD3D9(const core::ModuleInitData& data)
 		m_Adapters.PushBack(LUX_NEW(AdapterD3D9)(m_D3D9, i));
 }
 
-u32 AdapterListD3D9::GetAdapterCount() const
+int AdapterListD3D9::GetCount() const
 {
 	return m_Adapters.Size();
 }
 
-StrongRef<Adapter> AdapterListD3D9::GetAdapter(u32 idx) const
+StrongRef<Adapter> AdapterListD3D9::GetAdapter(int idx) const
 {
 	return m_Adapters.At(idx);
+}
+StrongRef<Adapter> AdapterListD3D9::GetDefaultAdapter() const
+{
+	return m_Adapters.At(0);
 }
 
 } // namespace video

@@ -116,7 +116,7 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 	video::Canvas3DSystem::Initialize();
 }
 
-core::Array<core::String> LuxDeviceNull::GetDriverTypes()
+core::Array<core::String> LuxDeviceNull::GetVideoDriverTypes()
 {
 	return core::ModuleFactory::Instance()->GetModuleFactories("VideoDriver");
 }
@@ -380,10 +380,10 @@ void LuxDeviceNull::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 {
 	DefaultSimpleFrameLoop defLoop(this, frameLoop);
 
-	u64 startTime;
-	u64 endTime;
+	core::Duration startTime;
+	core::Duration endTime;
+	core::Duration passedTime;
 	startTime = core::Clock::GetTicks();
-	float invTicksPerSecond = 1.0f / core::Clock::TicksPerSecond();
 	float secsPassed = 0;
 	float minSecsPassed = 1.0f / frameLoop.maxFrameRate;
 	int runWaitTime = 1;
@@ -397,7 +397,8 @@ void LuxDeviceNull::RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop)
 			defLoop.CallDoFrame(secsPassed);
 
 		endTime = core::Clock::GetTicks();
-		secsPassed = (endTime - startTime)*invTicksPerSecond;
+		passedTime = (endTime - startTime);
+		secsPassed = passedTime.AsSeconds();
 		if(secsPassed > minSecsPassed)
 			startTime = endTime;
 	}

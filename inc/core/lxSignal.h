@@ -160,7 +160,7 @@ struct SignalStaticFunc : SignalFunc<Args...>
 template <typename FunctorT, typename... Args>
 struct SignalFunctor : SignalFunc<Args...>
 {
-	FunctorT proc;
+	mutable FunctorT proc;
 
 	SignalFunctor(FunctorT p) :
 		proc(p)
@@ -318,10 +318,10 @@ public:
 	Signal& operator=(Signal&& old);
 
 	template <typename... Args2>
-	void Connect(Args2... args)
+	void Connect(Args2&&... args)
 	{
 		SingleSignal<Args...> signal;
-		signal.Connect(args...);
+		signal.Connect(std::forward<Args2>(args)...);
 		m_Callfuncs.PushBack(std::move(signal));
 		if(m_ConnectEvent.IsBound())
 			m_ConnectEvent.Call(*m_Callfuncs.Back().GetFunc());

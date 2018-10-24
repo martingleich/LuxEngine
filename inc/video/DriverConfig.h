@@ -99,9 +99,9 @@ struct AdapterListInitData : public core::ModuleInitData
 class AdapterList : public ReferenceCounted
 {
 public:
-	virtual ~AdapterList() {}
-	virtual u32 GetAdapterCount() const = 0;
-	virtual StrongRef<Adapter> GetAdapter(u32 idx) const = 0;
+	virtual int GetCount() const = 0;
+	virtual StrongRef<Adapter> GetAdapter(int idx) const = 0;
+	virtual StrongRef<Adapter> GetDefaultAdapter() const = 0;
 };
 
 } // namespace video
