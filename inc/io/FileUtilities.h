@@ -29,21 +29,14 @@ public:
 		return FileLineIterator();
 	}
 
-	core::String& operator*()
-	{
-		return m_Line;
-	}
-	core::String* operator->()
-	{
-		return &m_Line;
-	}
+	core::String& operator*() const { return m_Line; }
+	core::String* operator->() const { return &m_Line; }
 
 	FileLineIterator& operator++()
 	{
 		Next();
 		return *this;
 	}
-
 	FileLineIterator operator++(int)
 	{
 		FileLineIterator tmp(*this);
@@ -101,7 +94,7 @@ private:
 
 private:
 	io::File* m_File;
-	core::String m_Line;
+	mutable core::String m_Line;
 	ELineEnding m_Ending;
 };
 

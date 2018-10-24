@@ -344,6 +344,7 @@ public:
 
 	int operator-(IndexIter other) { return value - other.value; }
 
+	const BaseT* operator->() const { return &value; }
 	BaseT operator*() const { return value; }
 
 private:
@@ -398,6 +399,126 @@ auto IndexedRange(RangeT&& range)
 	auto a = ZipIter(begin(std::forward<RangeT>(range)), indexRange.begin());
 	auto b = ZipIter(end(std::forward<RangeT>(range)), indexRange.end());
 	return MakeRange(a, b);
+}
+
+template <typename T>
+class AbstractConstIterator
+{
+public:
+	virtual ~AbstractConstIterator() {}
+	virtual void Next() = 0;
+	virtual bool Equal(const AbstractConstIterator* other) const = 0;
+	virtual const T* GetPtr() const = 0;
+	virtual AbstractConstIterator* Clone() const = 0;
+};
+
+template <typename BaseIterT>
+class AbstractConstIteratorImplementation : public AbstractConstIterator<typename BaseIterT::ValueType>
+{
+public:
+	using ValueType = typename BaseIterT::ValueType;
+	explicit AbstractConstIteratorImplementation(BaseIterT base) :
+		m_BaseIter(base)
+	{
+	}
+	void Next() { ++m_BaseIter; }
+	bool Equal(const AbstractConstIterator* other) const
+	{
+		return Equal(dynamic_cast<const AbstractConstIteratorImplementation*>(other));
+	}
+	bool Equal(const AbstractConstIteratorImplementation* other) const
+	{
+		return other && m_BaseIter == other->m_BaseIter;
+	}
+	const ValueType* GetPtr() const { return m_BaseIter.operator->(); }
+	AbstractConstIterator* Clone() const { return new AbstractConstIteratorImplementation(m_BaseIter); }
+
+private:
+	BaseIterT m_BaseIter;
+};
+
+template <typename T>
+class AnyBaseConstIterator : public core::BaseIterator<core::ForwardIteratorTag, T>
+{
+public:
+	using AbstractType = AbstractConstIterator<T>;
+	AnyBaseConstIterator() :
+		m_Iter(nullptr)
+	{
+	}
+	AnyBaseConstIterator(const AnyBaseConstIterator& other) :
+		m_Iter(other.m_Iter ? other.m_Iter->Clone() : nullptr)
+	{
+	}
+	AnyBaseConstIterator(AnyBaseConstIterator&& old) :
+		m_Iter(old.m_Iter)
+	{
+		old.m_Iter = nullptr;
+	}
+	explicit AnyBaseConstIterator(AbstractType* ptr) :
+		m_Iter(ptr)
+	{
+	}
+	~AnyBaseConstIterator()
+	{
+		if(m_Iter)
+			delete m_Iter;
+	}
+	AnyBaseConstIterator& operator=(const AnyBaseConstIterator& other)
+	{
+		this->~AnyBaseConstIterator();
+		m_Iter = other.m_Iter ? other.m_Iter->Clone() : nullptr;
+		return *this;
+	}
+	AnyBaseConstIterator& operator=(AnyBaseConstIterator&& old)
+	{
+		this->~AnyBaseIterator();
+		m_Iter = old.m_Iter;
+		old.m_Iter = nullptr;
+		return *this;
+	}
+	AnyBaseConstIterator& operator++()
+	{
+		m_Iter->Next();
+		return *this;
+	}
+	AnyBaseConstIterator operator++(int)
+	{
+		auto tmp = *this;
+		++*this;
+		return tmp;
+	}
+
+	bool operator==(const AnyBaseConstIterator& other) const
+	{
+		return m_Iter->Equal(other.m_Iter);
+	}
+
+	bool operator!=(const AnyBaseConstIterator& other) const
+	{
+		return !(*this == other);
+	}
+
+	const T& operator*() const { return *(m_Iter->GetPtr()); }
+	const T* operator->() const { return m_Iter->GetPtr(); }
+
+private:
+	AbstractType* m_Iter;
+};
+
+template <typename IterT>
+inline AnyBaseConstIterator<typename IterT::ValueType> MakeAnyConstIter(IterT it)
+{
+	return AnyBaseConstIterator<typename IterT::ValueType>(new AbstractConstIteratorImplementation<IterT>(it));
+}
+
+template <typename T>
+using AnyRange = Range<AnyBaseConstIterator<T>>;
+
+template <typename IterT>
+inline AnyRange<typename IterT::ValueType> MakeAnyRange(IterT first, IterT end)
+{
+	return AnyRange<typename IterT::ValueType>(MakeAnyConstIter(first), MakeAnyConstIter(end));
 }
 
 template <typename T, bool IsConst>
@@ -488,24 +609,26 @@ public:
 		return !(*this == other);
 	}
 
+	template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 	const T& operator*() const
 	{
 		return *((ElemPtrT)m_Ptr);
 	}
 
+	template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 	const T* operator->() const
 	{
 		return ((ElemPtrT)m_Ptr);
 	}
 
 	template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-	T& operator*()
+	T& operator*() const
 	{
 		return *((ElemPtrT)m_Ptr);
 	}
 
 	template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-	T* operator->()
+	T* operator->() const
 	{
 		return ((ElemPtrT)m_Ptr);
 	}

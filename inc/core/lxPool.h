@@ -81,14 +81,8 @@ public:
 			return m_Current != other.m_Current;
 		}
 
-		T& operator*()
-		{
-			return *m_Current;
-		}
-		T* operator->()
-		{
-			return m_Current;
-		}
+		T& operator*() const { return *m_Current; }
+		T* operator->() const { return m_Current; }
 
 	private:
 		explicit Iterator(T* _current) : m_Current(_current)
@@ -168,14 +162,8 @@ public:
 			return m_Current != other.m_Current;
 		}
 
-		const T& operator*()
-		{
-			return *m_Current;
-		}
-		const T* operator->()
-		{
-			return m_Current;
-		}
+		const T& operator*() const { return *m_Current; }
+		const T* operator->() const { return m_Current; }
 
 		ConstIterator& operator=(const Iterator& iter)
 		{

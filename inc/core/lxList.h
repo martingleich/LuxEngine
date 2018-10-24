@@ -100,25 +100,15 @@ private:
 			return !(*this == other);
 		}
 
-		const T& operator*() const
-		{
-			return m_Current->data;
-		}
-		const T* operator->() const
-		{
-			return &m_Current->data;
-		}
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
+		const T& operator*() const { return m_Current->data; }
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
+		const T* operator->() const { return &m_Current->data; }
 
 		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T& operator*()
-		{
-			return m_Current->data;
-		}
+		T& operator*() const { return m_Current->data; }
 		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T* operator->()
-		{
-			return &m_Current->data;
-		}
+		T* operator->() const { return &m_Current->data; }
 
 	private:
 		EntryPtr m_Current;

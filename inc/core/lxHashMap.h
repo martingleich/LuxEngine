@@ -130,19 +130,23 @@ public:
 		}
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V& value() { return m_Iterator->value; }
+		V& value() const { return m_Iterator->value; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const V& value() const { return m_Iterator->value; }
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K& key() { return m_Iterator->key; }
+		K& key() const { return m_Iterator->key; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const K& key() const { return m_Iterator->key; }
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V& operator*() { return m_Iterator->value; }
+		V& operator*() const { return m_Iterator->value; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const V& operator*() const { return m_Iterator->value; }
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V* operator->() { return &m_Iterator->value; }
+		V* operator->() const { return &m_Iterator->value; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const V* operator->() const { return &m_Iterator->value; }
 
 	private:
@@ -200,19 +204,23 @@ public:
 		}
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V& value() { return m_Iterator->value; }
+		V& value() const { return m_Iterator->value; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const V& value() const { return m_Iterator->value; }
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K& key() { return m_Iterator->key; }
+		K& key() const { return m_Iterator->key; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const K& key() const { return m_Iterator->key; }
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K& operator*() { return m_Iterator->key; }
+		K& operator*() const { return m_Iterator->key; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const K& operator*() const { return m_Iterator->key; }
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K* operator->() { return &m_Iterator->key; }
+		K* operator->() const { return &m_Iterator->key; }
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const K* operator->() const { return &m_Iterator->key; }
 
 	private:

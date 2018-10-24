@@ -81,19 +81,10 @@ public:
 			return m_Current != other.m_Current;
 		}
 
-		Component* operator*()
-		{
-			return Pointer();
-		}
-		Component* operator->()
-		{
-			return Pointer();
-		}
+		Component* operator*() const { return Pointer(); }
+		Component* operator->() const { return Pointer(); }
 
-		Component* Pointer()
-		{
-			return m_Current->comp;
-		}
+		Component* Pointer() const { return m_Current->comp; }
 
 	private:
 		SceneNodeComponentList::Iterator m_Current;
@@ -153,16 +144,10 @@ public:
 		{
 			return m_Current != other.m_Current;
 		}
-		const Component* operator*()
-		{
-			return Pointer();
-		}
-		const Component* operator->()
-		{
-			return Pointer();
-		}
+		const Component* operator*() const { return Pointer(); }
+		const Component* operator->() const { return Pointer(); }
 
-		const Component* Pointer()
+		const Component* Pointer() const
 		{
 			return m_Current->comp;
 		}
@@ -217,14 +202,8 @@ public:
 			return m_Current != other.m_Current;
 		}
 
-		Node* operator*()
-		{
-			return m_Current;
-		}
-		Node* operator->()
-		{
-			return m_Current;
-		}
+		Node* operator*() const { return m_Current; }
+		Node* operator->() const { return m_Current; }
 
 		Node* Pointer()
 		{

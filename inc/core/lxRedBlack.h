@@ -187,15 +187,8 @@ public:
 			return !(*this == other);
 		}
 
-		T* operator->()
-		{
-			return &m_Cur->GetValue();
-		}
-
-		T& operator*()
-		{
-			return m_Cur->GetValue();
-		}
+		T* operator->() const { return &m_Cur->GetValue(); }
+		T& operator*() const { return m_Cur->GetValue(); }
 
 		Node* GetNode() const
 		{
@@ -327,15 +320,8 @@ public:
 			return !(*this == other);
 		}
 
-		const T* operator->()
-		{
-			return &m_Cur->GetValue();
-		}
-
-		const T& operator*()
-		{
-			return m_Cur->GetValue();
-		}
+		const T* operator->() const { return &m_Cur->GetValue(); }
+		const T& operator*() const { return m_Cur->GetValue(); }
 
 	private:
 		const Node* GetMin(const Node* n)

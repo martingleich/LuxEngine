@@ -267,22 +267,24 @@ private:
 			return !(*this == other);
 		}
 
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
 		const T& operator*() const
 		{
 			return (*block)->data[id];
 		}
-		const T* operator->()
+		template <bool U = isConst, std::enable_if_t<U, int> = 0>
+		const T* operator->() const
 		{
 			return &((*block)->data[id]);
 		}
 
 		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T& operator*()
+		T& operator*() const
 		{
 			return (*block)->data[id];
 		}
 		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T* operator->()
+		T* operator->() const
 		{
 			return &((*block)->data[id]);
 		}

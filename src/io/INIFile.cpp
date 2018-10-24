@@ -494,7 +494,7 @@ bool INIFile::ReadSections()
 
 	int commentBegin = 0;
 	m_LineEnding = GetLineEnding(m_File);
-	for(auto& line : Lines(m_File, m_LineEnding)) {
+	for(auto line : Lines(m_File, m_LineEnding)) {
 		line.RStrip();
 		line.LStrip();
 		if(line.IsWhitespace())

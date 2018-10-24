@@ -85,22 +85,24 @@ public:
 		}
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		T& operator*()
+		T& operator*() const
 		{
 			return m_Current->value;
 		}
 
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const T& operator*() const
 		{
 			return m_Current->value;
 		}
 
 		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		T* operator->()
+		T* operator->() const
 		{
 			return &m_Current->value;
 		}
 
+		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
 		const T* operator->() const
 		{
 			return &m_Current->value;

@@ -51,6 +51,7 @@ class AnimatedObject : public virtual ReferenceCounted
 			return *this;
 		}
 		DescIter operator++(int) { DescIter tmp(*this); ref++; return tmp; }
+		const AnimatedValueDesc* operator->() const { return ref; }
 		const AnimatedValueDesc& operator*() const { return *ref; }
 	private:
 		DescIter(
