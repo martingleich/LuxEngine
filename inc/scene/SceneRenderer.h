@@ -2,7 +2,6 @@
 #define INCLUDED_LUX_SCENE_RENDERER_H
 #include "core/ReferenceCounted.h"
 #include "core/Attributes.h"
-#include "core/ModuleFactory.h"
 
 #include "scene/Renderable.h"
 
@@ -20,7 +19,7 @@ namespace scene
 class Scene;
 
 //! Data passed to module factory to create a scene renderer.
-class SceneRendererInitData : public core::ModuleInitData
+class SceneRendererInitData
 {
 public:
 	StrongRef<Scene> scene;

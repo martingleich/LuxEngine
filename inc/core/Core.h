@@ -43,7 +43,6 @@
 #include "core/lxUnicode.h"
 #include "core/lxUnicodeConversion.h"
 #include "core/lxUtil.h"
-#include "core/ModuleFactory.h"
 #include "core/ParamPackage.h"
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"

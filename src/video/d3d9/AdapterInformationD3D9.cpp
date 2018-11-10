@@ -6,10 +6,6 @@
 #include "platform/D3D9Exception.h"
 #include "D3DHelper.h"
 
-#include "core/ModuleFactory.h"
-
-LUX_REGISTER_MODULE("AdapterList", "Direct3D9", lux::video::AdapterListD3D9);
-
 namespace lux
 {
 namespace video
@@ -47,7 +43,7 @@ u32 AdapterD3D9::GetDevice() const
 	return m_Device;
 }
 
-const core::String& AdapterD3D9::GetDriverType() const
+core::Name AdapterD3D9::GetDriverType() const
 {
 	return DriverType::Direct3D9;
 }
@@ -275,10 +271,8 @@ int AdapterD3D9::GetNumMultisampleQualities(const DisplayMode& mode, bool window
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AdapterListD3D9::AdapterListD3D9(const core::ModuleInitData& data)
+AdapterListD3D9::AdapterListD3D9()
 {
-	LUX_UNUSED(data);
-
 	m_D3D9.TakeOwnership(Direct3DCreate9(D3D_SDK_VERSION));
 	if(!m_D3D9)
 		throw core::GenericRuntimeException("Couldn't create the Direct3D9 interface.");

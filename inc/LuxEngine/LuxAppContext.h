@@ -20,7 +20,7 @@ struct LuxAppContext
 	{
 	}
 
-	LuxAppContext(LuxDevice* device)
+	LuxAppContext(LuxDevice* device, scene::Scene* scene, scene::SceneRenderer* sceneRenderer)
 	{
 		if(!device)
 			return;
@@ -32,9 +32,9 @@ struct LuxAppContext
 		MatLib = video::MaterialLibrary::Instance();
 		MeshSystem = video::MeshSystem::Instance();
 
-		Scene = Device->GetScene();
-		SceneRenderer = Device->GetSceneRenderer();
-		GUI = Device->GetGUIEnvironment();
+		Scene = scene;
+		SceneRenderer = sceneRenderer;
+		GUI = gui::GUIEnvironment::Instance();
 
 		Input = input::InputSystem::Instance();
 

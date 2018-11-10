@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LUX_VIDEODRIVER_H
 #define INCLUDED_LUX_VIDEODRIVER_H
 #include "core/ReferenceCounted.h"
-#include "core/ModuleFactory.h"
 
 #include "math/Rect.h"
 #include "math/AABBox.h"
@@ -38,7 +37,7 @@ enum class EDeviceState
 	Error,
 };
 
-class VideoDriverInitData : public core::ModuleInitData
+class VideoDriverInitData
 {
 public:
 	DriverConfig config;
@@ -123,7 +122,7 @@ public:
 	virtual EDeviceState GetDeviceState() const = 0;
 
 	virtual int GetDeviceCapability(EDriverCaps capability) const = 0;
-	virtual const core::String& GetVideoDriverType() const = 0;
+	virtual core::Name GetVideoDriverType() const = 0;
 	virtual void* GetLowLevelDevice() const = 0;
 };
 

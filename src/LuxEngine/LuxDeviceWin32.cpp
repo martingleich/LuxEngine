@@ -13,10 +13,13 @@
 #include "input/raw_input/RawInputReceiver.h"
 #endif
 
-#include "LuxSystemInfoWin32.h"
-
 #include <WinUser.h>
 #include "platform/Win32Exception.h"
+
+#ifdef LUX_COMPILE_WITH_D3D9
+#include "video/d3d9/VideoDriverD3D9.h"
+#include "video/d3d9/AdapterInformationD3D9.h"
+#endif
 
 namespace lux
 {
@@ -42,47 +45,36 @@ static LRESULT WINAPI WindowProc(HWND wnd,
 	return result;
 }
 
-namespace
+Win32WindowClass::Win32WindowClass()
 {
-struct Win32WindowClass
-{
-public:
-	HINSTANCE instance;
-	const wchar_t* className;
+	instance = lux::GetLuxModule();
+	className = L"Lux Window Class";
+	WNDCLASSEXW wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WindowProc, 0, 0,
+		instance, nullptr, NULL, nullptr, nullptr,
+		className, nullptr};
 
-	Win32WindowClass()
-	{
-		instance = lux::GetLuxModule();
-		className = L"Lux Window Class";
-		WNDCLASSEXW wc = {sizeof(WNDCLASSEX), CS_CLASSDC, WindowProc, 0, 0,
-			instance, nullptr, NULL, nullptr, nullptr,
-			className, nullptr};
-
-		if(!RegisterClassExW(&wc))
-			throw core::Win32Exception(GetLastError());
-	}
-
-	~Win32WindowClass()
-	{
-		UnregisterClassW(className, instance);
-	}
-};
+	if(!RegisterClassExW(&wc))
+		throw core::Win32Exception(GetLastError());
 }
-
-StrongRef<LuxSystemInfo> g_SystemInfo;
-Win32WindowClass* g_WindowClass;
+Win32WindowClass::~Win32WindowClass()
+{
+	UnregisterClassW(className, instance);
+}
 
 LUX_API StrongRef<LuxDevice> CreateDevice()
 {
-	g_WindowClass = LUX_NEW(Win32WindowClass);
-	g_SystemInfo = LUX_NEW(LuxSystemInfoWin32);
-
 	return LUX_NEW(LuxDeviceWin32);
 }
 
 LuxDeviceWin32::LuxDeviceWin32()
 {
+	m_SysInfo = LUX_NEW(LuxSystemInfoWin32);
 	m_NeverSetEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
+#ifdef LUX_COMPILE_WITH_D3D9
+	m_VideoDrivers[video::DriverType::Direct3D9] = VideoDriverEntry(
+		[](const video::VideoDriverInitData& data) -> video::VideoDriver* { return LUX_NEW(video::VideoDriverD3D9)(data); },
+		[]()                                       -> video::AdapterList* { return LUX_NEW(video::AdapterListD3D9); });
+#endif
 }
 
 LuxDeviceWin32::~LuxDeviceWin32()
@@ -98,12 +90,10 @@ LuxDeviceWin32::~LuxDeviceWin32()
 
 	m_Window.Reset();
 
-	delete g_WindowClass;
-
 	log::Info("Shutdown complete.");
 }
 
-void LuxDeviceWin32::BuildWindow(int width, int height, const core::String& title)
+void LuxDeviceWin32::BuildWindow(int width, int height, core::StringView title)
 {
 	if(m_Window) {
 		log::Warning("Window already built.");
@@ -125,7 +115,7 @@ void LuxDeviceWin32::BuildWindow(int width, int height, const core::String& titl
 	realSize.height = rect.bottom - rect.top;
 
 	HWND handle = CreateWindowExW(0,
-		g_WindowClass->className,
+		m_WindowClass.className,
 		core::UTF8ToWin32String(title),
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		GetSystemMetrics(SM_CXSCREEN) / 2 - realSize.width / 2,
@@ -134,7 +124,7 @@ void LuxDeviceWin32::BuildWindow(int width, int height, const core::String& titl
 		realSize.height,
 		nullptr,
 		nullptr,
-		g_WindowClass->instance,
+		m_WindowClass.instance,
 		this);
 	if(!handle)
 		throw core::Win32Exception(GetLastError());
@@ -241,9 +231,14 @@ void LuxDeviceWin32::Sleep(int millis)
 	::Sleep((DWORD)millis);
 }
 
+StrongRef<gui::Window> LuxDeviceWin32::GetWindow() const
+{
+	return m_Window;
+}
+
 StrongRef<LuxSystemInfo> LuxDeviceWin32::GetSystemInfo() const
 {
-	return g_SystemInfo;
+	return m_SysInfo;
 }
 
 StrongRef<gui::Cursor> LuxDeviceWin32::GetCursor() const

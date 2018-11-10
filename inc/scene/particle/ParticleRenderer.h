@@ -12,24 +12,14 @@ class Renderer;
 }
 namespace scene
 {
-
-class RendererMachine;
 class ParticleGroupData;
 
 class ParticleRenderer : public Referable
 {
 public:
-	StrongRef<ParticleRenderer> Clone()
-	{
-		return CloneImpl().StaticCastStrong<ParticleRenderer>();
-	}
-	virtual StrongRef<RendererMachine> GetMachine() const = 0;
-};
+	StrongRef<ParticleRenderer> Clone() { return CloneImpl().StaticCastStrong<ParticleRenderer>(); }
+	virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group) = 0;
 
-class RendererMachine : public Referable
-{
-public:
-	virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, ParticleRenderer* renderer = nullptr) = 0;
 };
 
 } // namespace scene

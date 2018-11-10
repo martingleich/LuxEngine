@@ -2,7 +2,6 @@
 #include "core/Clock.h"
 #include "core/Logger.h"
 
-#include "core/ModuleFactory.h"
 #include "core/ReferableFactory.h"
 #include "core/ResourceSystem.h"
 
@@ -20,6 +19,7 @@
 
 #include "scene/Scene.h"
 #include "scene/SceneRenderer.h"
+#include "scene/SceneRendererSimpleForward.h"
 
 #include "gui/GUIEnvironment.h"
 #include "gui/Window.h"
@@ -34,7 +34,6 @@ LuxDeviceNull::LuxDeviceNull()
 		log::SetPrinter(log::FilePrinter);
 
 	// Create the singleton classes
-	core::ModuleFactory::Initialize();
 	io::FileSystem::Initialize();
 	core::ReferableFactory::Initialize();
 	core::ResourceSystem::Initialize();
@@ -58,7 +57,10 @@ LuxDeviceNull::LuxDeviceNull()
 
 	// Register all referable object registers with LUX_REGISTER_REFERABLE_CLASS
 	lux::impl_referableRegister::RunAllRegisterReferableFunctions();
-	lux::impl_moduleRegister::RunAllModuleFactoryBlocks();
+
+	AddSceneRenderer(core::Name("SimpleForward"), [](const scene::SceneRendererInitData& data) -> scene::SceneRenderer* {
+		return LUX_NEW(scene::SceneRendererSimpleForward)(data);
+	});
 
 	log::Info("Lux core was built.");
 }
@@ -69,9 +71,7 @@ LuxDeviceNull::~LuxDeviceNull()
 
 void LuxDeviceNull::ReleaseModules()
 {
-	m_GUIEnv.Reset();
-	m_Scene.Reset();
-	m_SceneRenderer.Reset();
+	gui::GUIEnvironment::Destroy();
 
 	video::MeshSystem::Destroy();
 	video::ImageSystem::Destroy();
@@ -83,10 +83,9 @@ void LuxDeviceNull::ReleaseModules()
 
 	io::FileSystem::Destroy();
 	core::ReferableFactory::Destroy();
-	core::ModuleFactory::Destroy();
 }
 
-void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* user)
+void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config)
 {
 	// If system already build -> no op
 	if(video::VideoDriver::Instance()) {
@@ -102,41 +101,30 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config, void* us
 	video::VideoDriverInitData init;
 	init.config = config;
 	init.destHandle = GetWindow()->GetDeviceWindow();
-	init.user = user;
-	auto driver = core::ModuleFactory::Instance()->CreateModule(
-		"VideoDriver", config.adapter->GetDriverType(), init).AsStrong<video::VideoDriver>();
+	auto driverEntry = m_VideoDrivers.Get(config.adapter->GetDriverType());
+	auto driver = driverEntry.driverCreateFunc(init);
+	if(!driver)
+		throw core::NotImplementedException(config.adapter->GetDriverType().AsView());
 
 	video::VideoDriver::Initialize(driver);
-
 	video::MaterialLibrary::Initialize();
-
 	BuildImageSystem();
-
 	video::MeshSystem::Initialize();
 	video::Canvas3DSystem::Initialize();
 }
 
-core::Array<core::String> LuxDeviceNull::GetVideoDriverTypes()
+core::Array<core::Name> LuxDeviceNull::GetVideoDriverTypes()
 {
-	return core::ModuleFactory::Instance()->GetModuleFactories("VideoDriver");
+	core::Array<core::Name> names;
+	for(auto& v : m_VideoDrivers.Keys())
+		names.PushBack(v);
+	return names;
 }
 
-StrongRef<video::AdapterList> LuxDeviceNull::GetVideoAdapters(const core::String& driver)
+StrongRef<video::AdapterList> LuxDeviceNull::GetVideoAdapters(core::Name driver)
 {
-	return core::ModuleFactory::Instance()->CreateModule("AdapterList", driver, core::ModuleInitData()).As<video::AdapterList>();
-}
-
-void LuxDeviceNull::BuildScene(const core::String& name, void* user)
-{
-	// If system already build -> no op
-	if(m_Scene) {
-		log::Warning("Scene already built.");
-		return;
-	}
-
-	log::Info("Building Scene.");
-	m_Scene = CreateScene();
-	m_SceneRenderer = CreateSceneRenderer(name.IsEmpty() ? "SimpleForward" : name, m_Scene, user);
+	auto driverEntry = m_VideoDrivers.Get(driver);
+	return driverEntry.adapterListCreateFunc();
 }
 
 StrongRef<scene::Scene> LuxDeviceNull::CreateScene()
@@ -144,12 +132,12 @@ StrongRef<scene::Scene> LuxDeviceNull::CreateScene()
 	return LUX_NEW(scene::Scene);
 }
 
-StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(const core::String& name, scene::Scene* scene, void* user)
+StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(core::Name name, scene::Scene* scene)
 {
 	scene::SceneRendererInitData init;
 	init.scene = scene;
-	init.user = user;
-	return core::ModuleFactory::Instance()->CreateModule("SceneRenderer", name, init).As<scene::SceneRenderer>();
+	auto rendererEntry = m_SceneRenderers.Get(name);
+	return rendererEntry.sceneRendererCreateFunc(init);
 }
 
 void LuxDeviceNull::BuildImageSystem()
@@ -165,13 +153,14 @@ void LuxDeviceNull::BuildImageSystem()
 
 void LuxDeviceNull::BuildGUIEnvironment()
 {
-	if(m_GUIEnv != nullptr) {
+	if(gui::GUIEnvironment::Instance() != nullptr) {
 		log::Warning("Gui environment already built.");
 		return;
 	}
 
 	log::Info("Building GUI-Environment.");
-	m_GUIEnv = LUX_NEW(gui::GUIEnvironment)(GetWindow(), GetCursor());
+	auto env = LUX_NEW(gui::GUIEnvironment)(GetWindow(), GetCursor());
+	gui::GUIEnvironment::Initialize(env);
 }
 
 void LuxDeviceNull::BuildAll(const video::DriverConfig& config)
@@ -179,21 +168,7 @@ void LuxDeviceNull::BuildAll(const video::DriverConfig& config)
 	BuildWindow(config.display.width, config.display.height, "Window");
 	BuildInputSystem();
 	BuildVideoDriver(config);
-	BuildScene("SimpleForward");
 	BuildGUIEnvironment();
-}
-
-StrongRef<scene::Scene> LuxDeviceNull::GetScene() const
-{
-	return m_Scene;
-}
-StrongRef<scene::SceneRenderer> LuxDeviceNull::GetSceneRenderer() const
-{
-	return m_SceneRenderer;
-}
-StrongRef<gui::GUIEnvironment> LuxDeviceNull::GetGUIEnvironment() const
-{
-	return m_GUIEnv;
 }
 
 namespace
@@ -206,9 +181,9 @@ public:
 		m_Device(device)
 	{
 		m_Window = m_Device->GetWindow();
-		m_GUIEnv = m_Device->GetGUIEnvironment();
-		m_Scene = m_Device->GetScene();
-		m_SceneRenderer = m_Device->GetSceneRenderer();
+		m_GUIEnv = gui::GUIEnvironment::Instance();
+		m_Scene = loop.scene;
+		m_SceneRenderer = loop.sceneRenderer;
 		m_Driver = video::VideoDriver::Instance();
 		m_Renderer = m_Driver->GetRenderer();
 

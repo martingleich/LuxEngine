@@ -83,7 +83,7 @@ void ParticleSystem::Render(Node* node, video::Renderer* renderer, const SceneDa
 
 	for(auto& g : m_GroupData) {
 		auto r = g->GetModel()->GetRenderer();
-		r->GetMachine()->Render(renderer, g, r);
+		r->Render(renderer, g);
 	}
 }
 

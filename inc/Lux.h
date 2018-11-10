@@ -150,8 +150,6 @@ namespace input
 #include "core/Referable.h"
 #include "core/ReferableFactory.h"
 
-#include "core/ModuleFactory.h"
-
 #include "core/Resource.h"
 #include "core/ResourceSystem.h"
 

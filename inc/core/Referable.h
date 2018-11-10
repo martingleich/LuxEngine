@@ -13,9 +13,9 @@ namespace lux
 //! A referable object
 /**
 Referable objects can be cloned from older instances.
-They also can be used with the \ref ReferableFactory and created there my name or id
+They also can be used with the \ref ReferableFactory and created there my name.
 */
-class Referable : public virtual ReferenceCounted, public serial::Serializable
+class Referable : public serial::Serializable
 {
 public:
 	Referable() :

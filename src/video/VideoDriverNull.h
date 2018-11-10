@@ -14,8 +14,8 @@ class VideoDriverNull : public VideoDriver
 public:
 	VideoDriverNull(const VideoDriverInitData& data);
 
-	virtual const DriverConfig& GetConfig() const;
-	virtual int GetDeviceCapability(EDriverCaps Capability) const;
+	virtual const DriverConfig& GetConfig() const override;
+	virtual int GetDeviceCapability(EDriverCaps Capability) const override;
 
 protected:
 	DriverConfig m_Config;

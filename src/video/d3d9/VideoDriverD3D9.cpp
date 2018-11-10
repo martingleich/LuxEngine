@@ -18,10 +18,6 @@
 #include "platform/D3D9Exception.h"
 #include "video/d3d9/AuxiliaryTextureD3D9.h"
 
-#include "core/ModuleFactory.h"
-
-LUX_REGISTER_MODULE("VideoDriver", "Direct3D9", lux::video::VideoDriverD3D9);
-
 namespace lux
 {
 namespace video
@@ -43,14 +39,14 @@ VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(UnknownRefCounted<IDirect3DS
 static IDirect3DDevice9* g_D3DDevice9 = nullptr;
 static VideoDriverD3D9* g_Driver = nullptr;
 
-Referable* CreateTexture(const void* origin)
+static Referable* CreateTexture(const void* origin)
 {
 	auto out = LUX_NEW(TextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
 	g_Driver->AddTextureToList(out);
 	return out;
 }
 
-Referable* CreateCubeTexture(const void* origin)
+static Referable* CreateCubeTexture(const void* origin)
 {
 	auto out = LUX_NEW(CubeTextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
 	g_Driver->AddTextureToList(out);
@@ -59,13 +55,12 @@ Referable* CreateCubeTexture(const void* origin)
 
 //////////////////////////////////////////////////////////////////////
 
-VideoDriverD3D9::VideoDriverD3D9(const core::ModuleInitData& data) :
-	VideoDriverNull(dynamic_cast<const VideoDriverInitData&>(data)),
+VideoDriverD3D9::VideoDriverD3D9(const VideoDriverInitData& data) :
+	VideoDriverNull(data),
 	m_ReleasedUnmanagedData(false)
 {
-	auto initData = dynamic_cast<const VideoDriverInitData&>(data);
-	m_Window = (HWND)initData.destHandle;
-	CreateDevice(initData.config, m_Window);
+	m_Window = (HWND)data.destHandle;
+	CreateDevice(data.config, m_Window);
 
 	m_BufferManager = LUX_NEW(BufferManagerD3D9)(this);
 	m_Renderer = LUX_NEW(RendererD3D9)(this, m_DeviceState);

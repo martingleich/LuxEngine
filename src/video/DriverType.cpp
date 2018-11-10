@@ -7,7 +7,7 @@ namespace video
 namespace DriverType
 {
 
-const core::String Direct3D9("Direct3D9");
+const core::Name Direct3D9("Direct3D9");
 
 } // namespace DriverType
 } // namespace video

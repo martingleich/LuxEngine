@@ -10,7 +10,7 @@ namespace video
 
 namespace DriverType
 {
-LUX_API extern const core::String Direct3D9;
+LUX_API extern const core::Name Direct3D9;
 }
 
 } // namespace video

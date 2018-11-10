@@ -87,6 +87,23 @@ private:
 	bool m_VirtualVisible;
 };
 
+static StrongRef<GUIEnvironment> g_GUIEnv;
+
+void GUIEnvironment::Initialize(GUIEnvironment* gui)
+{
+	g_GUIEnv = gui;
+}
+
+GUIEnvironment* GUIEnvironment::Instance()
+{
+	return g_GUIEnv;
+}
+
+void GUIEnvironment::Destroy()
+{
+	g_GUIEnv.Reset();
+}
+
 GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	m_OSCursor(osCursor),
 	m_OSWindow(osWindow),

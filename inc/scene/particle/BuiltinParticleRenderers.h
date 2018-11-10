@@ -34,20 +34,15 @@ class QuadRenderer : public ParticleRenderer
 {
 	LX_REFERABLE_MEMBERS_API(QuadRenderer, LUX_API);
 public:
-	QuadRenderer() :
-		LookOrient(ELookOrientation::CameraPlane),
-		UpOrient(EUpOrientation::Direction),
-		LockedAxis(ELockedAxis::Look),
-		Scaling(1.0f, 1.0f),
-		ScaleLengthSpeedSq(0.0f),
-		EmitLight(false)
+	class Machine : public ReferenceCounted
 	{
-		m_Machine = core::ReferableFactory::Instance()->CreateShared(core::Name("lux.particlerenderermachine.Quad")).StaticCastStrong<RendererMachine>();
-	}
-
-	StrongRef<RendererMachine> GetMachine() const
+	public:
+		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadRenderer* renderer) = 0;
+	};
+	QuadRenderer();
+	void Render(video::Renderer* videoRenderer, ParticleGroupData* group) override
 	{
-		return m_Machine;
+		m_Machine->Render(videoRenderer, group, this);
 	}
 
 public:
@@ -67,25 +62,22 @@ public:
 	bool EmitLight;
 
 private:
-	StrongRef<RendererMachine> m_Machine;
+	StrongRef<Machine> m_Machine;
 };
 
 class LineRenderer : public ParticleRenderer
 {
 	LX_REFERABLE_MEMBERS_API(LineRenderer, LUX_API);
 public:
-	LineRenderer() :
-		ScaleSpeed(false),
-		Length(1.0f),
-		EmitLight(false),
-		DefaultDir(math::Vector3F::UNIT_Y)
+	class Machine : public ReferenceCounted
 	{
-		m_Machine = core::ReferableFactory::Instance()->CreateShared(core::Name("lux.particlerenderermachine.Line")).StaticCastStrong<RendererMachine>();
-	}
-
-	StrongRef<RendererMachine> GetMachine() const
+	public:
+		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, LineRenderer* renderer) = 0;
+	};
+	LineRenderer();
+	void Render(video::Renderer* videoRenderer, ParticleGroupData* group) override
 	{
-		return m_Machine;
+		m_Machine->Render(videoRenderer, group, this);
 	}
 
 public:
@@ -96,26 +88,28 @@ public:
 	math::Vector3F DefaultDir;
 
 private:
-	StrongRef<RendererMachine> m_Machine;
+	StrongRef<Machine> m_Machine;
 };
 
 class PointRenderer : public ParticleRenderer
 {
 	LX_REFERABLE_MEMBERS_API(PointRenderer, LUX_API);
 public:
-	PointRenderer()
+	class Machine : public ReferenceCounted
 	{
-		m_Machine = core::ReferableFactory::Instance()->CreateShared(core::Name("lux.particlerenderermachine.Point")).StaticCastStrong<RendererMachine>();
+	public:
+		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, PointRenderer* renderer) = 0;
+	};
+	PointRenderer();
+	void Render(video::Renderer* videoRenderer, ParticleGroupData* group) override
+	{
+		m_Machine->Render(videoRenderer, group, this);
 	}
 
-	StrongRef<RendererMachine> GetMachine() const
-	{
-		return m_Machine;
-	}
 public:
 	bool EmitLight = false;
 private:
-	StrongRef<RendererMachine> m_Machine;
+	StrongRef<Machine> m_Machine;
 };
 
 } // namespace scene

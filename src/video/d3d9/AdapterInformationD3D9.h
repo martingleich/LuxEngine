@@ -18,18 +18,18 @@ class AdapterD3D9 : public Adapter
 {
 public:
 	AdapterD3D9(UnknownRefCounted<IDirect3D9> d3d9, UINT adapter);
-	const core::String& GetName() const;
-	u32 GetVendor() const;
-	u32 GetDevice() const;
-	const core::String& GetDriverType() const;
+	const core::String& GetName() const override;
+	u32 GetVendor() const override;
+	u32 GetDevice() const override;
+	core::Name GetDriverType() const override;
+	core::Array<DisplayMode> GenerateDisplayModes(bool windowed) override;
+	core::Array<ColorFormat> GenerateBackbufferFormats(const DisplayMode& mode, bool windowed) override;
+	core::Array<ZStencilFormat> GenerateZStencilFormats(const DisplayMode& mode, bool windowed, ColorFormat backBuffer) override;
+	core::Array<int> GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat) override;
+	int GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, int level) override;
+
 	UINT GetAdapter() const;
 	UnknownRefCounted<IDirect3D9> GetD3D9() const;
-	core::Array<DisplayMode> GenerateDisplayModes(bool windowed);
-	core::Array<ColorFormat> GenerateBackbufferFormats(const DisplayMode& mode, bool windowed);
-	core::Array<ZStencilFormat> GenerateZStencilFormats(const DisplayMode& mode, bool windowed, ColorFormat backBuffer);
-	core::Array<int> GenerateMultisampleLevels(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat);
-	int GetNumMultisampleQualities(const DisplayMode& mode, bool windowed, ColorFormat backBuffer, ZStencilFormat zsFormat, int level);
-
 private:
 	UnknownRefCounted<IDirect3D9> m_D3D9;
 
@@ -45,7 +45,7 @@ private:
 class AdapterListD3D9 : public AdapterList
 {
 public:
-	AdapterListD3D9(const core::ModuleInitData& data);
+	AdapterListD3D9();
 	int GetCount() const override;
 	StrongRef<Adapter> GetAdapter(int idx) const override;
 	StrongRef<Adapter> GetDefaultAdapter() const override;

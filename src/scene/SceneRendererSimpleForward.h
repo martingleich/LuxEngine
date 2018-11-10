@@ -24,7 +24,7 @@ class Mesh;
 class SceneRendererSimpleForward : public SceneRenderer
 {
 public:
-	SceneRendererSimpleForward(const core::ModuleInitData& data);
+	SceneRendererSimpleForward(const scene::SceneRendererInitData& data);
 	SceneRendererSimpleForward(const SceneRendererSimpleForward&) = delete;
 	~SceneRendererSimpleForward();
 

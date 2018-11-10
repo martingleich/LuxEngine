@@ -25,7 +25,7 @@ class TextureD3D9;
 class VideoDriverD3D9 : public VideoDriverNull
 {
 public:
-	VideoDriverD3D9(const core::ModuleInitData& data);
+	VideoDriverD3D9(const video::VideoDriverInitData& data);
 	~VideoDriverD3D9();
 
 	void CreateDevice(const DriverConfig& config, HWND window);
@@ -69,7 +69,7 @@ public:
 
 	//------------------------------------------------------------------
 	EDeviceState GetDeviceState() const;
-	const core::String& GetVideoDriverType() const
+	core::Name GetVideoDriverType() const
 	{
 		return m_Config.adapter->GetDriverType();
 	}

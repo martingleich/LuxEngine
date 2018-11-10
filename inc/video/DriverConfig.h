@@ -3,7 +3,6 @@
 #include "core/LuxBase.h"
 #include "core/ReferenceCounted.h"
 #include "core/lxString.h"
-#include "core/ModuleFactory.h"
 
 #include "math/Dimension2.h"
 
@@ -56,7 +55,7 @@ public:
 	virtual const core::String& GetName() const = 0;
 	virtual u32 GetVendor() const = 0;
 	virtual u32 GetDevice() const = 0;
-	virtual const core::String& GetDriverType() const = 0;
+	virtual core::Name GetDriverType() const = 0;
 
 	virtual core::Array<DisplayMode> GenerateDisplayModes(bool windowed) = 0;
 	virtual core::Array<ColorFormat> GenerateBackbufferFormats(const DisplayMode& mode, bool windowed) = 0;
@@ -90,10 +89,6 @@ public:
 		int minDepth = 24,
 		int minStencil = 8,
 		int multiSample = 2);
-};
-
-struct AdapterListInitData : public core::ModuleInitData
-{
 };
 
 class AdapterList : public ReferenceCounted

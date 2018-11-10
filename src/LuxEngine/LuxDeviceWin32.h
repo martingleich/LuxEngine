@@ -4,6 +4,7 @@
 #ifdef LUX_WINDOWS
 #include "LuxDeviceNull.h"
 #include "gui/WindowWin32.h"
+#include "LuxSystemInfoWin32.h"
 
 namespace lux
 {
@@ -14,27 +15,34 @@ class RawInputReceiver;
 #endif
 }
 
+struct Win32WindowClass : core::Uncopyable
+{
+public:
+	HINSTANCE instance;
+	const wchar_t* className;
+
+	Win32WindowClass();
+	~Win32WindowClass();
+};
+
 class LuxDeviceWin32 : public LuxDeviceNull
 {
 public:
 	LuxDeviceWin32();
 	~LuxDeviceWin32();
 
-	void BuildWindow(int width, int height, const core::String& title);
-	void BuildInputSystem(bool isForeground = true);
-	bool WaitForWindowChange();
-	bool Run(int waitTime);
+	void BuildWindow(int width, int height, core::StringView title) override;
+	void BuildInputSystem(bool isForeground) override;
+	bool WaitForWindowChange() override;
+	bool Run(int waitTime) override;
 
-	void Sleep(int millis);
+	void Sleep(int millis) override;
 
-	StrongRef<gui::Window> GetWindow() const
-	{
-		return m_Window;
-	}
+	StrongRef<gui::Window> GetWindow() const override;
+	StrongRef<LuxSystemInfo> GetSystemInfo() const override;
+	StrongRef<gui::Cursor> GetCursor() const override;
 
-	StrongRef<LuxSystemInfo> GetSystemInfo() const;
-	StrongRef<gui::Cursor> GetCursor() const;
-
+public:
 	bool RunMessageQueue(int waitTime);
 	bool HandleMessages(
 		HWND wnd,
@@ -44,6 +52,8 @@ public:
 		LRESULT& result);
 
 private:
+	Win32WindowClass m_WindowClass;
+	StrongRef<LuxSystemInfoWin32> m_SysInfo;
 	StrongRef<gui::WindowWin32> m_Window;
 
 #ifdef LUX_COMPILE_WITH_RAW_INPUT

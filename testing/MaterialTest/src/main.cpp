@@ -17,6 +17,8 @@ class MaterialTest : public input::EventHandler, public LuxDevice::SimpleFrameLo
 {
 private:
 	StrongRef<LuxDevice> m_Device;
+	StrongRef<scene::Scene> m_Scene;
+	StrongRef<scene::SceneRenderer> m_SceneRenderer;
 
 public:
 	MaterialTest()
@@ -34,8 +36,10 @@ public:
 			8,
 			5);
 		m_Device->BuildAll(config);
+		m_Scene = m_Device->CreateScene();
+		m_SceneRenderer = m_Device->CreateSceneRenderer(core::Name("SimpleForward"), m_Scene);
 
-		Context = LuxAppContext(m_Device);
+		Context = LuxAppContext(m_Device, m_Scene, m_SceneRenderer);
 
 		Context.Input->GetEventSignal().Connect(this, &MaterialTest::OnEvent);
 	}
