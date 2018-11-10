@@ -11,8 +11,8 @@ namespace video
 class AbstractMaterial : public ShaderParamSetCallback, public Referable
 {
 public:
-	virtual const Pass& GetPass(u32 index) const = 0;
-	virtual u32 GetPassCount() const = 0;
+	virtual const Pass& GetPass(int index) const = 0;
+	virtual int GetPassCount() const = 0;
 
 	virtual EMaterialReqFlag GetRequirements() const = 0;
 

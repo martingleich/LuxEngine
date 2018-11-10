@@ -11,8 +11,6 @@
 
 #include "video/Texture.h"
 
-LX_REGISTER_REFERABLE_CLASS(lux::scene::QuadRendererMachine, "lux.particlerenderermachine.Quad");
-
 namespace lux
 {
 namespace scene
@@ -35,6 +33,16 @@ public:
 };
 
 ShaderParamLoader g_ParamLoader;
+}
+
+static WeakRef<QuadRendererMachine> g_SharedInstance;
+StrongRef<QuadRendererMachine> QuadRendererMachine::GetShared()
+{
+	if(g_SharedInstance)
+		return g_SharedInstance.GetStrong();
+	StrongRef<QuadRendererMachine> out = LUX_NEW(QuadRendererMachine);
+	g_SharedInstance = out.GetWeak();;
+	return out;
 }
 
 QuadRendererMachine::QuadRendererMachine() :
@@ -178,7 +186,7 @@ void QuadRendererMachine::ComputeLocalOrientation(const Particle& particle)
 	m_Side.SetLength(0.5f);
 }
 
-void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, ParticleRenderer* renderer)
+void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadRenderer* renderer)
 {
 	if(group->GetParticleCount() == 0)
 		return;
@@ -188,7 +196,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	StrongRef<video::VertexBuffer> vertexBuffer = m_Buffer->GetVertices();
 	const core::Pool<Particle>& pool = group->GetPool();
 
-	m_Data = dynamic_cast<QuadRenderer*>(renderer);
+	m_Data = renderer;
 	if(!m_Data)
 		return;
 
@@ -369,12 +377,6 @@ void QuadRendererMachine::CreateBuffers(ParticleGroupData* group)
 		m_Buffer->GetIndices()->SetSize(maxParticleCount * 6);
 		SetIndexBuffer(m_Buffer->GetIndices(), From, maxParticleCount * 6);
 	}
-}
-
-core::Name QuadRendererMachine::GetReferableType() const
-{
-	static const core::Name name("lux.particlerenderermachine.Quad");
-	return name;
 }
 
 } // namespace scene

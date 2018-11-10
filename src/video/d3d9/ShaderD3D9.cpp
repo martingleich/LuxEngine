@@ -143,6 +143,7 @@ bool ShaderD3D9::Init(
 	lxAssert(materialParamCount <= 0xFFFF);
 
 	u32 nameCursor = 0;
+	core::ParamPackageBuilder ppb;
 	m_Params.Reserve(helper.Size());
 	m_Names.SetMinSize(nameMemoryNeeded);
 	u32 paramId = 0;
@@ -168,7 +169,8 @@ bool ShaderD3D9::Init(
 					CastShaderToType(h.type, h.defaultValue, tempMemory);
 				else
 					memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
-				entry.index = DefaultParam_COUNT + m_ParamPackage.AddParam(GetCoreType(h.type), h.name, tempMemory);
+				entry.index = DefaultParam_COUNT + ppb.GetParamCount();
+				ppb.AddParam(h.name, GetCoreType(h.type), tempMemory);
 				entry.paramType = ParamType_ParamMaterial;
 			}
 
@@ -218,6 +220,8 @@ bool ShaderD3D9::Init(
 
 		nameCursor += h.name.Size() + 1;
 	}
+
+	m_ParamPackage = ppb.BuildAndReset();
 
 	return true;
 }
@@ -417,7 +421,7 @@ void ShaderD3D9::SetParam(int paramId, const void* data)
 
 int ShaderD3D9::GetParamId(core::StringView name) const
 {
-	return m_ParamPackage.GetParamId(name);
+	return m_ParamPackage.GetParamIdByName(name);
 }
 
 void ShaderD3D9::LoadSceneParams(const Pass& pass)

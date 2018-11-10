@@ -13,9 +13,11 @@ namespace video
 
 GeometryCreatorPlane::GeometryCreatorPlane()
 {
-	m_Params.AddParam("size", math::Vector2F(1.0f, 1.0f));
-	m_Params.AddParam("tes", math::Vector2I(1, 1));
-	m_Params.AddParam("tex", math::Vector2F(1, 1));
+	core::ParamPackageBuilder ppb;
+	ppb.AddParam("size", math::Vector2F(1.0f, 1.0f));
+	ppb.AddParam("tes", math::Vector2I(1, 1));
+	ppb.AddParam("tex", math::Vector2F(1, 1));
+	m_Params = ppb.BuildAndReset();
 }
 
 const core::ParamPackage& GeometryCreatorPlane::GetParams() const

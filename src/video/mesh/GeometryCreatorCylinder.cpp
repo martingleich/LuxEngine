@@ -12,12 +12,14 @@ namespace video
 {
 GeometryCreatorCylinder::GeometryCreatorCylinder()
 {
-	m_Package.AddParam("radius", 0.5f);
-	m_Package.AddParam("height", 1.0f);
-	m_Package.AddParam("sectors", 16);
-	m_Package.AddParam("planes", 2);
-	m_Package.AddParam("tex", math::Vector2I(1, 1));
-	m_Package.AddParam("inside", false);
+	core::ParamPackageBuilder ppb;
+	ppb.AddParam("radius", 0.5f);
+	ppb.AddParam("height", 1.0f);
+	ppb.AddParam("sectors", 16);
+	ppb.AddParam("planes", 2);
+	ppb.AddParam("tex", math::Vector2I(1, 1));
+	ppb.AddParam("inside", false);
+	m_Package = ppb.BuildAndReset();
 }
 
 StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(const core::PackagePuffer& params)
@@ -62,7 +64,7 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(
 	if(planes < 2)
 		throw core::GenericInvalidArgumentException("planes", "Number of planes must be bigger than 1");
 
-	const u32 vertexCount = 2*(sectors + 1) +  planes*(sectors + 1);
+	const u32 vertexCount = 2 * (sectors + 1) + planes * (sectors + 1);
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
 		throw core::GenericInvalidArgumentException("sectors, planes", "Too many sectors or planes");
 
@@ -121,7 +123,7 @@ StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(
 
 	// Top and bottom rings
 	for(s32 i = 0; i < 2; ++i) {
-		float y = height*i - height / 2;
+		float y = height * i - height / 2;
 		float ny = i == 0 ? -1.0f : 1.0f;
 
 		u16 baseId = (u16)vertexBuffer->GetCursor();

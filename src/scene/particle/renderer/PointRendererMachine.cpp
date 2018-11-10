@@ -5,12 +5,20 @@
 
 #include "video/MaterialLibrary.h"
 
-LX_REGISTER_REFERABLE_CLASS(lux::scene::PointRendererMachine, "lux.particlerenderermachine.Point");
-
 namespace lux
 {
 namespace scene
 {
+
+static WeakRef<PointRendererMachine> g_SharedInstance;
+StrongRef<PointRendererMachine> PointRendererMachine::GetShared()
+{
+	if(g_SharedInstance)
+		return g_SharedInstance.GetStrong();
+	StrongRef<PointRendererMachine> out = LUX_NEW(PointRendererMachine);
+	g_SharedInstance = out.GetWeak();
+	return out;
+}
 
 PointRendererMachine::PointRendererMachine()
 {
@@ -34,22 +42,18 @@ PointRendererMachine::PointRendererMachine()
 	m_EmitPass.alpha.blendOperator = video::EBlendOperator::Add;
 }
 
-PointRendererMachine::~PointRendererMachine()
-{
-}
-
 void PointRendererMachine::CreateBuffer(ParticleGroupData* group)
 {
 	if(m_Vertices.Size() < group->GetParticleCount())
 		m_Vertices.Resize(group->GetParticleCount());
 }
 
-void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, ParticleRenderer* renderer)
+void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, PointRenderer* renderer)
 {
 	if(group->GetParticleCount() == 0)
 		return;
 
-	auto data = dynamic_cast<PointRenderer*>(renderer);
+	auto data = renderer;
 	if(!data)
 		return;
 
@@ -82,12 +86,6 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 		m_Vertices.Data_c(),
 		group->GetParticleCount(),
 		m_VertexFormat);
-}
-
-core::Name PointRendererMachine::GetReferableType() const
-{
-	static const core::Name name("lux.particlerenderermachine.Point");
-	return name;
 }
 
 } // namespace scene

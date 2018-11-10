@@ -19,10 +19,12 @@ static void Swap(u16& a, u16& b)
 
 GeometryCreatorCube::GeometryCreatorCube()
 {
-	m_Package.AddParam("size", math::Vector3F(1.0f, 1.0f, 1.0f));
-	m_Package.AddParam("tes", math::Vector3I(2, 2, 2));
-	m_Package.AddParam("tex", math::Vector3F(1.0f, 1.0f, 1.0f));
-	m_Package.AddParam("inside", false);
+	core::ParamPackageBuilder ppb;
+	ppb.AddParam("size", math::Vector3F(1.0f, 1.0f, 1.0f));
+	ppb.AddParam("tes", math::Vector3I(2, 2, 2));
+	ppb.AddParam("tex", math::Vector3F(1.0f, 1.0f, 1.0f));
+	ppb.AddParam("inside", false);
+	m_Package = ppb.BuildAndReset();
 }
 
 const core::String& GeometryCreatorCube::GetName() const
@@ -62,14 +64,14 @@ StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(
 	if(tesX < 2 || tesY < 2 || tesZ < 2)
 		throw core::GenericInvalidArgumentException("tesX, tesY, tesZ", "Must be bigger than 1");
 
-	const u32 vertexCount = tesX*tesY * 2 + tesX*tesZ * 2 + tesZ*tesY * 2;
+	const u32 vertexCount = tesX * tesY * 2 + tesX * tesZ * 2 + tesZ * tesY * 2;
 	if(vertexCount > 0xFFFF) // 16 Bit indices.
 		throw core::GenericInvalidArgumentException("tesX,tesY,tesZ", "Too many indices");
 
 	const u32 indexCount =
 		6 * ((tesX - 1)*(tesY - 1) * 2 +
 		(tesX - 1)*(tesZ - 1) * 2 +
-		(tesY - 1)*(tesZ - 1) * 2);
+			(tesY - 1)*(tesZ - 1) * 2);
 
 	const math::Vector3F tex(texX, texY, texZ);
 	const math::Vector3I tes(tesX, tesY, tesZ);

@@ -358,8 +358,14 @@ int String::ReplaceRange(StringView replace, int first, int size)
 
 	char* data = Data();
 	int restSize = m_Size - first - size;
-	std::memmove(data + first + replace.Size(), data + first + size, restSize + 1); // Including NUL
-	std::memcpy(data + first, replace.Data(), replace.Size());
+
+	// Make room for the replace string.
+	if(replace.Size() != size)
+		std::memmove(data + first + replace.Size(), data + first + size, restSize + 1); // Including NUL
+
+	// Copy the replace string.
+	if(replace.Size() > 0)
+		std::memcpy(data + first, replace.Data(), replace.Size());
 
 	m_Size = newSize;
 

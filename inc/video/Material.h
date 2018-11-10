@@ -15,7 +15,7 @@ public:
 	LUX_API Material();
 	LUX_API ~Material();
 
-	u32 GetPassCount() const
+	int GetPassCount() const
 	{
 		return 1;
 	}
@@ -30,9 +30,7 @@ public:
 		lxAssert(pass.shader != nullptr);
 
 		m_Pass = pass;
-
-		if(m_ShaderValues.GetType() != &m_Pass.shader->GetParamPackage())
-			m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
+		m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
 	}
 
 	void SetShader(Shader* shader)
@@ -40,8 +38,7 @@ public:
 		lxAssert(shader != nullptr);
 
 		m_Pass.shader = shader;
-		if(m_ShaderValues.GetType() != &m_Pass.shader->GetParamPackage())
-			m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
+		m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
 	}
 	
 	StrongRef<Shader> GetShader() const
@@ -69,23 +66,38 @@ public:
 		Param(id) = data;
 	}
 	
-	core::VariableAccess Param(u32 id) const
+	core::VariableAccess Param(int id) const
 	{
 		return m_ShaderValues.FromID(id, true);
 	}
 	
-	core::VariableAccess Param(u32 id)
+	core::VariableAccess Param(int id)
 	{
 		return m_ShaderValues.FromID(id, false);
 	}
 
-	void SetTexture(u32 layer, video::BaseTexture* texture)
+	void SetTexture(int layer, video::BaseTexture* texture)
 	{
-		m_ShaderValues.FromType(core::Types::Texture(), layer, false) = video::TextureLayer(texture);
+		auto type = m_ShaderValues.GetType();
+		int l = 0;
+		int i = 0;
+		for(; i < type->GetParamCount(); ++i) {
+			if(type->GetParamType(i) == core::Types::Texture()) {
+				if(l == layer)
+					break;
+				++l;
+			}
+		}
+		if(i != type->GetParamCount())
+			m_ShaderValues.FromID(i, false) = video::TextureLayer(texture);
 	}
 	void SetTexture(core::StringView str, video::BaseTexture* texture)
 	{
 		m_ShaderValues.FromName(str, false) = video::TextureLayer(texture);
+	}
+	video::TextureLayer GetTexture(core::StringView str) const
+	{
+		return m_ShaderValues.FromName(str, true);
 	}
 	void SetColor(core::StringView str, const video::ColorF& color)
 	{
@@ -147,7 +159,7 @@ public:
 	}
 
 protected:
-	const Pass& GetPass(u32) const
+	const Pass& GetPass(int) const
 	{
 		return m_Pass;
 	}

@@ -149,17 +149,9 @@ StrongRef<Referable> ReferableFactory::Create(Name type, const void* data)
 	return r;
 }
 
-StrongRef<Referable> ReferableFactory::CreateShared(Name type, const void* data)
+int ReferableFactory::GetTypeCount() const
 {
-	auto& entry = m_Types.Get(type, ReferableType());
-	if(entry.sharedInstance)
-		return entry.sharedInstance;
-	CreationFunc create = entry.create;
-	StrongRef<Referable> r = create ? create(data) : nullptr;
-	if(!r)
-		throw FactoryCreateException(type.AsView(), "Can't create instance of referable.");
-
-	return r;
+	return m_Types.Size();
 }
 
 core::Array<core::Name> ReferableFactory::GetTypeNames() const

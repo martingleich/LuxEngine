@@ -1,266 +1,201 @@
 #include "core/ParamPackage.h"
-#include "core/lxArray.h"
-#include "video/TextureLayer.h"
 
 namespace lux
 {
 namespace core
 {
 
-struct ParamPackage::SelfData
-{
-	core::Array<Entry> Params;
-
-	int TotalSize;
-	int TextureCount;
-
-	core::RawMemory DefaultPackage;
-};
+const ParamPackage ParamPackage::EMPTY;
 
 ParamPackage::ParamPackage() :
-	self(LUX_NEW(SelfData))
+	m_IsTrivial(true)
 {
-	self->TextureCount = 0;
-	self->TotalSize = 0;
 }
+ParamPackage::ParamPackage(const CreateEntry* createEntries, int paramCount)
+{
+	if(paramCount == 0)
+		return;
+	m_Params.Resize(paramCount);
 
+	int stringSize = 0;
+	int defaultSize = 0;
+	bool isTrivial = true;
+	for(int i = 0; i < paramCount; ++i) {
+		lxAssert(!createEntries[i].type.IsUnknown());
+
+		isTrivial &= createEntries[i].type.IsTrivial();
+		int align = createEntries[i].type.GetAlign();
+		lxAssert(align <= alignof(std::max_align_t));
+
+		int size = createEntries[i].type.GetSize();
+		defaultSize = (defaultSize + align - 1) / align * align;
+		defaultSize += size;
+
+		stringSize += createEntries[i].name.Size();
+	}
+	m_IsTrivial = isTrivial;
+	m_Strings.SetSize(stringSize);
+	m_DefaultData.SetSize(defaultSize);
+
+	// Copy the data.
+	int valueCursor = 0;
+	int strCursor = 0;
+	for(int i = 0; i < paramCount; ++i) {
+		ParamEntry& outParam = m_Params[i];
+		outParam.strEntry = strCursor;
+		outParam.strLength = createEntries[i].name.Size();
+		std::memcpy(
+			(char*)m_Strings + strCursor,
+			createEntries[i].name.Data(),
+			createEntries[i].name.Size());
+		strCursor += outParam.strLength;
+
+		int align = createEntries[i].type.GetAlign();
+		int size = createEntries[i].type.GetSize();
+		valueCursor = (valueCursor + align - 1) / align * align;
+		outParam.valueOffset = valueCursor;
+		valueCursor += size;
+		outParam.type = createEntries[i].type;
+		lxAssert((int)createEntries[i].defaultValue.GetSize() >= size);
+		outParam.type.CopyConstruct(
+			(u8*)m_DefaultData + outParam.valueOffset,
+			createEntries[i].defaultValue);
+	}
+}
 ParamPackage::~ParamPackage()
 {
-	LUX_FREE(self);
+	if(!m_IsTrivial) {
+		// Release default values
+		for(int i = 0; i < GetParamCount(); ++i) {
+			auto& param = m_Params[i];
+			param.type.Destruct((u8*)m_DefaultData + param.valueOffset);
+		}
+	}
 }
-
-ParamPackage::ParamPackage(const ParamPackage& other) :
-	self(LUX_NEW(SelfData))
+ParamPackage::ParamPackage(const ParamPackage& other)
 {
-	self->TextureCount = other.self->TextureCount;
-	self->TotalSize = other.self->TotalSize;
-	self->Params = other.self->Params;
-	self->DefaultPackage = other.self->DefaultPackage;
+	*this = other;
 }
-
+ParamPackage::ParamPackage(ParamPackage&& old)
+{
+	*this = std::move(old);
+}
 ParamPackage& ParamPackage::operator=(const ParamPackage& other)
 {
-	self->TextureCount = other.self->TextureCount;
-	self->TotalSize = other.self->TotalSize;
-	self->Params = other.self->Params;
-	self->DefaultPackage = other.self->DefaultPackage;
+	lxAssertEx(m_Params.IsEmpty(), "Can only assign to empty param package.");
+	if(!m_IsTrivial) {
+		// Release default values
+		for(int i = 0; i < GetParamCount(); ++i) {
+			auto& param = m_Params[i];
+			param.type.Destruct((u8*)m_DefaultData + param.valueOffset);
+		}
+	}
+
+	m_Params = other.m_Params;
+	m_IsTrivial = other.m_IsTrivial;
+
+	m_Strings = other.m_Strings;
+	m_DefaultData.SetSize(other.m_DefaultData.GetSize());
+
+	// Copy paramdata and default values.
+	for(int i = 0; i < GetParamCount(); ++i) {
+		ParamEntry& outParam = m_Params[i];
+		outParam = other.m_Params[i];
+
+		outParam.type.CopyConstruct(
+			(u8*)m_DefaultData + outParam.valueOffset,
+			(const u8*)other.m_DefaultData + outParam.valueOffset);
+	}
 
 	return *this;
 }
 
-void ParamPackage::Clear()
+ParamPackage& ParamPackage::operator=(ParamPackage&& old)
 {
-	self->TotalSize = 0;
-	self->TextureCount = 0;
-	self->Params.Clear();
-}
-
-int ParamPackage::AddParam(core::Type type, core::StringView name, const void* defaultValue)
-{
-	if(type == core::Type::Unknown)
-		throw GenericInvalidArgumentException("type", "Unknown type is invalid");
-	int id = GetId(name, core::Type::Unknown);
-	if(id >= 0) {
-		if(self->Params[id].type != type)
-			throw GenericInvalidArgumentException("name", "Param already exists with diffrent parameter.");
-		return id;
-	}
-
-	Entry entry;
-	entry.name = name;
-	int size = type.GetSize();
-
-	// There are currently no types triggering this, just to be shure
-	if(size > 255)
-		throw InvalidOperationException("Type is too big for param package");
-
-	entry.size = (u8)size;
-	entry.type = type;
-
-	return AddEntry(entry, defaultValue);
-}
-
-void ParamPackage::MergePackage(const ParamPackage& other)
-{
-	for(int i = 0; i < other.GetParamCount(); ++i) {
-		auto desc = other.GetParamDesc(i);
-
-		int id = GetId(desc.name, core::Type::Unknown);
-		if(id >= 0) {
-			if(self->Params[id].type != desc.type)
-				throw GenericInvalidArgumentException("other", "Same name with diffrent types in package merge");
-			continue;
+	lxAssertEx(m_Params.IsEmpty(), "Can only assign to empty param package.");
+	if(!m_IsTrivial) {
+		// Release default values
+		for(int i = 0; i < GetParamCount(); ++i) {
+			auto& param = m_Params[i];
+			param.type.Destruct((u8*)m_DefaultData + param.valueOffset);
 		}
-
-		auto defaultValue = other.DefaultValue(i);
-		Entry entry;
-		entry.name = desc.name;
-		entry.type = desc.type;
-		entry.size = (u8)entry.type.GetSize();
-		AddEntry(entry, defaultValue.Pointer());
 	}
+
+	m_Params = std::move(old.m_Params);
+	m_IsTrivial = old.m_IsTrivial;
+
+	m_Strings = std::move(old.m_Strings);
+
+	// This will reuse the old memory, so no individual moves are necessary.
+	auto oldMem = old.m_DefaultData.Pointer();
+	m_DefaultData = std::move(old.m_DefaultData);
+	lxAssert(oldMem == m_DefaultData.Pointer());
+	return *this;
 }
 
 void* ParamPackage::CreatePackage() const
 {
-	u8* out = LUX_NEW_ARRAY(u8, self->TotalSize);
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it)
-		it->type.CopyConstruct(out + it->offset, (u8*)self->DefaultPackage + it->offset);
-
+	if(GetPackSize() == 0)
+		return nullptr;
+	u8* out = LUX_NEW_ARRAY(u8, GetPackSize());
+	if(m_IsTrivial) {
+		std::memcpy(out, m_DefaultData, GetPackSize());
+	} else {
+		for(int i = 0; i < GetParamCount(); ++i) {
+			auto& param = m_Params[i];
+			param.type.CopyConstruct(
+				out + param.valueOffset,
+				(const u8*)m_DefaultData + param.valueOffset);
+		}
+	}
 	return out;
 }
-
-void ParamPackage::DestroyPackage(void* p) const
+void ParamPackage::DestroyPackage(void* data) const
 {
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it)
-		it->type.Destruct((u8*)p + it->offset);
-
-	LUX_FREE_ARRAY((u8*)p);
+	if(GetPackSize() == 0)
+		return;
+	if(!m_IsTrivial) {
+		for(int i = 0; i < GetParamCount(); ++i) {
+			auto& param = m_Params[i];
+			param.type.Destruct(((u8*)data) + param.valueOffset);
+		}
+	}
+	LUX_FREE_ARRAY((u8*)data);
 }
-
 bool ParamPackage::ComparePackage(const void* a, const void* b) const
 {
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
-		if(!it->type.Compare((const u8*)a + it->offset, (const u8*)b + it->offset))
+	for(int i = 0; i < GetParamCount(); ++i) {
+		auto& param = m_Params[i];
+		if(param.type.Compare((const u8*)a + param.valueOffset, (const u8*)b + param.valueOffset))
 			return false;
 	}
 
 	return true;
 }
-
 void* ParamPackage::CopyPackage(const void* b) const
 {
-	u8* out = LUX_NEW_ARRAY(u8, self->TotalSize);
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it)
-		it->type.CopyConstruct(out + it->offset, (u8*)b + it->offset);
-
+	u8* out = LUX_NEW_ARRAY(u8, GetPackSize());
+	for(int i = 0; i < GetParamCount(); ++i) {
+		auto& param = m_Params[i];
+		param.type.CopyConstruct(out + param.valueOffset, (u8*)b + param.valueOffset);
+	}
 	return out;
 }
-
-ParamDesc ParamPackage::GetParamDesc(int param) const
+void ParamPackage::AssignPackage(void* a, const void* b) const
 {
-	auto& p = self->Params.At(param);
-	ParamDesc desc;
-	desc.name = p.name;
-	desc.type = p.type;
-	desc.id = param;
-
-	return desc;
-}
-
-const core::String& ParamPackage::GetParamName(int param) const
-{
-	return self->Params.At(param).name;
-}
-
-VariableAccess ParamPackage::GetParam(int param, void* baseData, bool isConst) const
-{
-	auto& p = self->Params.At(param);
-
-	core::Type type = isConst ? p.type.GetConstantType() : p.type;
-
-	return VariableAccess(type, (u8*)baseData + p.offset);
-}
-
-VariableAccess ParamPackage::GetParamFromName(core::StringView name, void* baseData, bool isConst) const
-{
-	return GetParam(GetParamId(name), baseData, isConst);
-}
-
-VariableAccess ParamPackage::GetParamFromType(core::Type type, int index, void* baseData, bool isConst) const
-{
-	int id = 0;
-	for(int i = 0; i < self->Params.Size(); ++i) {
-		if(self->Params[i].type == type) {
-			if(id == index)
-				return GetParam(i, baseData, isConst);
-			id++;
-		}
+	for(int i = 0; i < GetParamCount(); ++i) {
+		auto& param = m_Params[i];
+		param.type.Assign((u8*)a + param.valueOffset, (u8*)b + param.valueOffset);
 	}
-
-	throw core::ObjectNotFoundException("param_by_type");
 }
 
-VariableAccess ParamPackage::DefaultValue(int param)
+int ParamPackage::GetParamIdByName(StringView name) const
 {
-	auto& p = self->Params.At(param);
-	return VariableAccess(p.type, (u8*)self->DefaultPackage + p.offset);
-}
-
-VariableAccess ParamPackage::DefaultValue(int param) const
-{
-	auto& p = self->Params.At(param);
-	return VariableAccess(p.type.GetConstantType(), (u8*)self->DefaultPackage + p.offset);
-}
-
-VariableAccess ParamPackage::DefaultValue(core::StringView param)
-{
-	return DefaultValue(GetParamId(param));
-}
-
-int ParamPackage::GetParamId(core::StringView name, core::Type type) const
-{
-	int out = GetId(name, type);
-	if(out < 0)
-		throw ObjectNotFoundException(name);
-	return out;
-}
-
-int ParamPackage::GetParamCount() const
-{
-	return self->Params.Size();
-}
-
-int ParamPackage::GetTextureCount() const
-{
-	return self->TextureCount;
-}
-
-int ParamPackage::GetTotalSize() const
-{
-	return self->TotalSize;
-}
-
-int ParamPackage::AddEntry(Entry& entry, const void* defaultValue)
-{
-	if(self->Params.Size() > 0)
-		entry.offset = self->Params.Last()->offset + self->Params.Last()->size;
-	else
-		entry.offset = 0;
-
-	// Move offset to next aligned point
-	if(entry.offset % entry.type.GetAlign() != 0)
-		entry.offset += (u8)(entry.type.GetAlign() - (entry.offset % entry.type.GetAlign()));
-
-	self->TotalSize += entry.size;
-	if(entry.type == core::Types::Texture())
-		self->TextureCount++;
-
-	core::RawMemory newBlock(entry.offset + entry.size);
-	for(auto it = self->Params.First(); it != self->Params.End(); ++it) {
-		it->type.CopyConstruct((u8*)newBlock + it->offset, (u8*)self->DefaultPackage + it->offset);
-		it->type.Destruct((u8*)self->DefaultPackage + it->offset);
-	}
-
-	if(defaultValue)
-		entry.type.CopyConstruct((u8*)newBlock + entry.offset, defaultValue);
-	else
-		entry.type.Construct((u8*)newBlock + entry.offset);
-
-	self->Params.PushBack(entry);
-	self->DefaultPackage = std::move(newBlock);
-
-	return self->Params.Size() - 1;
-}
-
-int ParamPackage::GetId(core::StringView name, core::Type t) const
-{
-	core::StringView cname = name;
-	for(int i = 0; i < self->Params.Size(); ++i) {
-		if(self->Params[i].name == cname) {
-			if(t == core::Type::Unknown || self->Params[i].type == t)
-				return i;
-		}
+	for(int i = 0; i < GetParamCount(); ++i) {
+		auto& param = m_Params[i];
+		auto str = GetStr(param.strEntry);
+		if(param.strLength == name.Size() && std::memcmp(str, name.Data(), param.strLength) == 0)
+			return i;
 	}
 
 	return -1;

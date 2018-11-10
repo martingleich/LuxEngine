@@ -5,12 +5,6 @@
 #include "core/lxArray.h"
 #include "video/Color.h"
 
-/*
-#include "video/TextureLayer.h"
-#include "video/Texture.h"
-#include "video/CubeTexture.h"
-*/
-
 namespace lux
 {
 namespace core

@@ -48,16 +48,6 @@ public:
 	*/
 	LUX_API StrongRef<Referable> Create(Name type, const void* data = nullptr);
 
-	//! Returns an instance of a type.
-	/**
-	If another shared instance was already created it is returned. Otherwise it's created.
-	This method can be used with any type.
-	\param type The type
-	\param data Additinal data to pass to constructor, depends on type.
-	\return The new object
-	*/
-	LUX_API StrongRef<Referable> CreateShared(Name type, const void* data = nullptr);
-
 	//! The total number of types
 	/**
 	\return The total number of types
@@ -71,7 +61,6 @@ private:
 	struct ReferableType
 	{
 		CreationFunc create;
-		StrongRef<Referable> sharedInstance;
 
 		ReferableType() :
 			create(nullptr)

@@ -3,183 +3,217 @@
 #include "core/lxString.h"
 #include "core/VariableAccess.h"
 
-#include <typeinfo>
-
 namespace lux
 {
 namespace core
 {
 
-//! The description of a single parameter
-struct ParamDesc
-{
-	StringView name; //!< The name of the parameter
-	Type type; //!< The type of the parameter
-	int id; //!< The id of the parameter
-};
-
-//! A collection of named variable.
-/**
-Can be compared with a class, this class contains members and types, but no values.
-*/
 class ParamPackage
 {
-private:
-	struct Entry
+	struct ParamEntry
 	{
-		String name;
+		int strEntry;
+		int strLength;
+		int valueOffset;
 		Type type;
-		u8 size;
-		u8 offset;
-
-		bool operator<(const Entry& other) const
-		{
-			return name < other.name;
-		}
 	};
 
 public:
+	struct CreateEntry : public core::Uncopyable
+	{
+		core::String name;
+		core::Type type;
+		core::RawMemory defaultValue;
+		CreateEntry(core::StringView _name, core::Type _type, const void* _defaultValue)
+		{
+			name = _name;
+			type = _type;
+			defaultValue.SetMinSize(type.GetSize());
+			type.CopyConstruct(defaultValue, _defaultValue);
+		}
+		template <typename T>
+		CreateEntry(core::StringView _name, const T& value) :
+			CreateEntry(_name, core::TemplType<T>::Get(), &value)
+		{
+		}
+		CreateEntry(CreateEntry&& old) :
+			name(std::move(old.name)),
+			type(std::move(old.type)),
+			defaultValue(std::move(old.defaultValue))
+		{
+		}
+		~CreateEntry()
+		{
+			type.Destruct(defaultValue);
+		}
+		CreateEntry& operator=(CreateEntry&& old)
+		{
+			name = std::move(old.name);
+			type = std::move(old.type);
+			defaultValue = std::move(old.defaultValue);
+			return *this;
+		}
+	};
+
+	LUX_API static const ParamPackage EMPTY;
+
 	LUX_API ParamPackage();
+	LUX_API ParamPackage(const CreateEntry* createEntries, int paramCount);
 	LUX_API ~ParamPackage();
 	LUX_API ParamPackage(const ParamPackage& other);
+	LUX_API ParamPackage(ParamPackage&& old);
 	LUX_API ParamPackage& operator=(const ParamPackage& other);
+	LUX_API ParamPackage& operator=(ParamPackage&& old);
 
-	//! Clears the param package
-	LUX_API void Clear();
+	LUX_API void* CreatePackage() const;
+	LUX_API void DestroyPackage(void* data) const;
+	LUX_API bool ComparePackage(const void* a, const void* b) const;
+	LUX_API void* CopyPackage(const void* b) const;
+	LUX_API void AssignPackage(void* a, const void* b) const;
 
-	//! Creates a new Param
-	/**
-	\param T: The type of the param
-	\param name The name of the new Param(should be unique for package)
-	\param defaultValue The default value for this Param, when a new material is created this is the used Value, if null the param is default constructed.
-	*/
-	template <typename T>
-	int AddParam(StringView name, const T& defaultValue)
+	LUX_API int GetParamIdByName(StringView name) const;
+	
+	core::StringView GetParamName(int id) const
 	{
-		Type type = TemplType<T>::Get();
-		if(type == Type::Unknown)
-			throw UnknownTypeException(StringView(typeid(T).name(), strlen(typeid(T).name())));
-
-		return AddParam(type, name, &defaultValue);
+		auto& param = m_Params.At(id);
+		return core::StringView(GetStr(param.strEntry), param.strLength);
+	}
+	core::Type GetParamType(int id) const
+	{
+		return m_Params.At(id).type;
+	}
+	core::VariableAccess GetParamDefaultValue(int id) const
+	{
+		auto& param = m_Params.At(id);
+		return core::VariableAccess(param.type.GetConstantType(), (const u8*)m_DefaultData + param.valueOffset);
+	}
+	core::VariableAccess GetParam(int id, void* baseData, bool constAccess) const
+	{
+		auto& param = m_Params.At(id);
+		return core::VariableAccess(
+			constAccess ? param.type.GetConstantType() : param.type,
+			(u8*)baseData + param.valueOffset);
+	}
+	int GetParamCount() const
+	{
+		return m_Params.Size();
 	}
 
-	//! Creates a new Param
-	/**
-	\param type: The type of the param
-	\param name The name of the new Param(should be unique for package)
-	\param defaultValue The default value for this Param, when a new material is created this is the used Value
-	*/
-	LUX_API int AddParam(Type type, StringView name, const void* defaultValue = nullptr);
-
-	//! Merges two packages
-	/**
-	Objects with the same name and type will be combined into one parameters.
-	Combination of objects with the same name and diffrent types will fail.
-	*/
-	LUX_API void MergePackage(const ParamPackage& other);
-
-	//! Creates a new ParamPackage
-	/**
-	\return A pointer to the newly created paramblock
-	*/
-	LUX_API void* CreatePackage() const;
-
-	//! Destroys a with CreatePackage created ParamBlock
-	LUX_API void DestroyPackage(void* p) const;
-
-	//! Compare the data of two packages
-	LUX_API bool ComparePackage(const void* a, const void* b) const;
-
-	//! Create a new package with the same content as an other one
-	LUX_API void* CopyPackage(const void* b) const;
-
-	//! Retrieves Information about the Param from a index
-	/**
-	\param param The index of the param from which information is loaded
-	\param [out] desc The description of the parameter
-	\exception OutOfRange param is out of range
-	*/
-	LUX_API ParamDesc GetParamDesc(int param) const;
-
-	//! Retrieve the name of a param
-	/**
-	\param Param index of Param
-	\return The name of the param
-	\exception OutOfRange param is out of range
-	*/
-	LUX_API const String& GetParamName(int param) const;
-
-	//! Get a param from a id
-	/**
-	\param Param id of the param
-	\param baseData The base pointer of the data block which belongs to the param
-	\param isConst Should the package param be constant, i.e. can't be changed
-	\return The found param
-	\exception OutOfRange param is out of range
-	*/
-	LUX_API VariableAccess GetParam(int param, void* baseData, bool isConst) const;
-
-	//! Get a param from a name
-	/**
-	\param name name of the param to found
-	\param baseData The base pointer of the data block which belongs to the param
-	\param isConst Should the package param be constant, i.e. can't be changed
-	\return The found param
-	\exception Exception name does not exist
-	*/
-	LUX_API VariableAccess GetParamFromName(StringView name, void* baseData, bool isConst) const;
-
-	//! Get the n-th Param of a specific type
-	/**
-	The index is 0 for the first Layer, 1 for the second and so on
-	\param type Which type to look for
-	\param index The number of which layer should be searched
-	\param baseData The base pointer of the data block which belongs to the param
-	\param isConst Should the package param be constant, i.e. can't be changed
-	\return The index of the found param, if no param could be found the invalid param is returned
-	*/
-	LUX_API VariableAccess GetParamFromType(Type type, int index, void* baseData, bool isConst) const;
-
-	//! Access the default value of a param
-	/**
-	\param param The id of the Param, which default value should be changed
-	*/
-	LUX_API VariableAccess DefaultValue(int param);
-	LUX_API VariableAccess DefaultValue(int param) const;
-
-	//! Set a new default value for a param
-	/**
-	\param param The name of the Param, which default value should be changed
-	\param defaultValue A pointer to the new default value
-	\exception Exception name does not exist
-	*/
-	LUX_API VariableAccess DefaultValue(StringView param);
-
-	//! Get the id of a parameter by it's name.
-	/**
-	\param name The name of the param.
-	\param type The type of the parameter, Type::Unknown if any type is ok.
-	\return The id of the parameter.
-	\exception Exception name does not exist
-	*/
-	LUX_API int GetParamId(StringView name, Type type = Type::Unknown) const;
-
-	//! The number of existing params in this package
-	LUX_API int GetParamCount() const;
-
-	//! The number of texturelayers in this package
-	LUX_API int GetTextureCount() const;
-
-	//! The size of the allocated data, in bytes
-	LUX_API int GetTotalSize() const;
+private:
+	const char* GetStr(int i) const
+	{
+		lxAssert(i >= 0 && i <= (int)m_Strings.GetSize());
+		return (const char*)m_Strings + i;
+	}
+	int GetPackSize() const
+	{
+		return m_DefaultData.GetSize();
+	}
 
 private:
-	LUX_API int AddEntry(Entry& entry, const void* defaultValue);
-	LUX_API int GetId(StringView name, Type t) const;
+	core::Array<ParamEntry> m_Params;
+	core::RawMemory m_Strings;
+	core::RawMemory m_DefaultData;
+	bool m_IsTrivial;
+};
+
+class ParamPackageBuilder : core::Uncopyable
+{
+public:
+	void AddParamSet(const ParamPackage& other)
+	{
+		for(int i = 0; i < other.GetParamCount(); ++i)
+			AddParam(other.GetParamName(i), other.GetParamType(i), other.GetParamDefaultValue(i).Pointer());
+	}
+	void MergeParamSet(const ParamPackage& other)
+	{
+		for(int i = 0; i < other.GetParamCount(); ++i)
+			MergeParam(other.GetParamName(i), other.GetParamType(i), other.GetParamDefaultValue(i).Pointer());
+	}
+	template <typename T>
+	void AddParam(StringView name, const T& defaultValue)
+	{
+		AddParam(name, core::TemplType<T>::Get(), &defaultValue);
+	}
+
+	int GetParamCount()
+	{
+		return m_Params.Size();
+	}
+	//! Add a new parameter
+	/*
+	Adds a new parameter to the pack.
+	The id of the parameter is continuos.
+	If a parameter with the same name already exists, a exception is thrown.
+	*/
+	void AddParam(StringView name, core::Type type, const void* defaultValue)
+	{
+		LX_CHECK_NULL_ARG(defaultValue);
+		if(type.IsUnknown())
+			throw core::GenericInvalidArgumentException("type", "Invalid type passed");
+
+		// Check if it already exists.
+		for(auto& p : m_Params) {
+			if(p.name == name)
+				throw core::GenericInvalidArgumentException("name", "Parameter already exists.");
+		}
+		AddUnsafe(name, type, defaultValue);
+	}
+
+	template <typename T>
+	void MergeParam(StringView name, const T& defaultValue)
+	{
+		MergeParam(name, core::TemplType<T>::Get(), &defaultValue);
+	}
+
+	//! Merge a parameter.
+	/**
+	If a parameter with the same name and same type already exists, nothing happens.
+	If a parameter with the same name and diffrent type already exists, a exception is thrown.
+	Otherwise the parameter is added.
+	\return true if a new parameter was added, false if a merge happend
+	*/
+	bool MergeParam(StringView name, core::Type type, const void* defaultValue)
+	{
+		LX_CHECK_NULL_ARG(defaultValue);
+		if(type.IsUnknown())
+			throw core::GenericInvalidArgumentException("type", "Invalid type passed");
+
+		// Check if it already exists.
+		for(auto& p : m_Params) {
+			if(p.name == name) {
+				if(p.type != type)
+					throw core::GenericInvalidArgumentException("name", "Parameter already exists, with diffrent type.");
+				return false;
+			}
+		}
+
+		AddUnsafe(name, type, defaultValue);
+		return true;
+	}
+
+	ParamPackage Build()
+	{
+		return ParamPackage(m_Params.Data(), m_Params.Size());
+	}
+	ParamPackage BuildAndReset()
+	{
+		ParamPackage out(m_Params.Data(), m_Params.Size());
+		Reset();
+		return out;
+	}
+	void Reset()
+	{
+		m_Params.Clear();
+	}
 
 private:
-	struct SelfData;
-	SelfData* self; // PIMPL: To make the dll-interface independent
+	void AddUnsafe(StringView name, core::Type type, const void* defaultValue)
+	{
+		m_Params.EmplaceBack(name, type, defaultValue);
+	}
+private:
+	core::Array<ParamPackage::CreateEntry> m_Params;
 };
 
 //! Contains the values for a parameter Package
@@ -187,7 +221,7 @@ class PackagePuffer
 {
 public:
 	PackagePuffer() :
-		m_Pack(nullptr)
+		PackagePuffer(&ParamPackage::EMPTY)
 	{
 	}
 
@@ -195,34 +229,33 @@ public:
 	/**
 	\param pack The parameter package on which the data builds up
 	*/
-	PackagePuffer(const ParamPackage* pack) :
-		m_Pack(nullptr)
+	explicit PackagePuffer(const ParamPackage* pack)
 	{
-		SetType(pack);
+		LX_CHECK_NULL_ARG(pack);
+		m_Pack = pack;
+		m_Data = m_Pack->CreatePackage();
 	}
 
 	PackagePuffer(const PackagePuffer& other) :
 		m_Pack(other.m_Pack)
 	{
-		if(m_Pack)
-			m_Data = m_Pack->CopyPackage(other.m_Data);
+		m_Data = m_Pack->CopyPackage(other.m_Data);
 	}
 
 	~PackagePuffer()
 	{
-		if(m_Pack)
-			m_Pack->DestroyPackage(m_Data);
+		m_Pack->DestroyPackage(m_Data);
 	}
 
 	PackagePuffer& operator=(const PackagePuffer& other)
 	{
-		if(m_Pack)
+		if(m_Pack == other.m_Pack) {
+			m_Pack->AssignPackage(m_Data, other.m_Data);
+		} else {
 			m_Pack->DestroyPackage(m_Data);
-
-		m_Pack = other.m_Pack;
-
-		if(m_Pack)
+			m_Pack = other.m_Pack;
 			m_Data = m_Pack->CopyPackage(other.m_Data);
+		}
 
 		return *this;
 	}
@@ -232,8 +265,6 @@ public:
 	{
 		if(m_Pack != other.m_Pack)
 			return false;
-		if(m_Pack == nullptr)
-			return true;
 
 		return m_Pack->ComparePackage(m_Data, other.m_Data);
 	}
@@ -250,31 +281,20 @@ public:
 	*/
 	void SetType(const ParamPackage* pack)
 	{
+		LX_CHECK_NULL_ARG(pack);
 		if(m_Pack == pack)
 			return;
 
-		if(m_Pack)
-			m_Pack->DestroyPackage(m_Data);
-
+		m_Pack->DestroyPackage(m_Data);
 		m_Pack = pack;
-
-		if(m_Pack)
-			m_Data = pack->CreatePackage();
-	}
-
-	//! Get the type of the puffer
-	const ParamPackage* GetType() const
-	{
-		return m_Pack;
+		m_Data = pack->CreatePackage();
 	}
 
 	//! Reset the puffer to its default state
 	void Reset()
 	{
-		if(m_Pack) {
-			m_Pack->DestroyPackage(m_Data);
-			m_Data = m_Pack->CreatePackage();
-		}
+		m_Pack->DestroyPackage(m_Data);
+		m_Data = m_Pack->CreatePackage();
 	}
 
 	//! Get a param from its name
@@ -284,24 +304,10 @@ public:
 	*/
 	VariableAccess FromName(StringView name, bool isConst) const
 	{
-		if(!m_Pack)
-			throw InvalidOperationException("No param pack set");
-
-		return m_Pack->GetParamFromName(name, m_Data, isConst);
-	}
-
-	//! Get a param from its type
-	/**
-	\param type The type of the param
-	\param index Which param of this type
-	\param isConst Should the param be constant
-	*/
-	VariableAccess FromType(Type type, int index, bool isConst) const
-	{
-		if(!m_Pack)
-			throw InvalidOperationException("No param pack set");
-
-		return m_Pack->GetParamFromType(type, index, m_Data, isConst);
+		int i = m_Pack->GetParamIdByName(name);
+		if(i < 0)
+			throw ObjectNotFoundException(name);
+		return m_Pack->GetParam(i, m_Data, isConst);
 	}
 
 	//! Get a param from its id
@@ -311,49 +317,18 @@ public:
 	*/
 	VariableAccess FromID(int id, bool isConst) const
 	{
-		if(!m_Pack)
-			throw InvalidOperationException("Not param pack set");
-
 		return m_Pack->GetParam(id, m_Data, isConst);
 	}
 
 	//! The total number of parameters in the package
-	int GetParamCount() const
-	{
-		if(m_Pack)
-			return m_Pack->GetParamCount();
-		else
-			return 0;
-	}
+	int GetParamCount() const { return m_Pack->GetParamCount(); }
+	//! Get the type of the puffer
+	const ParamPackage* GetType() const { return m_Pack; }
 
-	//! The total number of textures in the package
-	int GetTextureCount() const
-	{
-		if(m_Pack)
-			return m_Pack->GetTextureCount();
-		else
-			return 0;
-	}
-
-	VariableAccess Param(StringView name)
-	{
-		return FromName(name, false);
-	}
-
-	VariableAccess Param(StringView name) const
-	{
-		return FromName(name, true);
-	}
-
-	VariableAccess Param(int id)
-	{
-		return FromID(id, false);
-	}
-
-	VariableAccess Param(int id) const
-	{
-		return FromID(id, true);
-	}
+	VariableAccess Param(StringView name) { return FromName(name, false); }
+	VariableAccess Param(StringView name) const { return FromName(name, true); }
+	VariableAccess Param(int id) { return FromID(id, false); } 
+	VariableAccess Param(int id) const { return FromID(id, true); }
 
 private:
 	const ParamPackage* m_Pack;

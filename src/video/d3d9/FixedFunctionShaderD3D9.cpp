@@ -12,8 +12,10 @@ FixedFunctionShaderD3D9::FixedFunctionShaderD3D9(DeviceStateD3D9& deviceState, c
 	m_UseVertexColors(params.useVertexColors)
 {
 	m_Layers.Resize(params.textures.Size());
+	core::ParamPackageBuilder ppb;
 	for(auto& s : params.textures)
-		m_ParamPackage.AddParam(s, TextureLayer());
+		ppb.AddParam(s, TextureLayer());
+	m_ParamPackage = std::move(ppb.Build());
 }
 
 void FixedFunctionShaderD3D9::Enable()
@@ -29,7 +31,7 @@ void FixedFunctionShaderD3D9::SetParam(int paramId, const void* data)
 
 int FixedFunctionShaderD3D9::GetParamId(core::StringView name) const
 {
-	return m_ParamPackage.GetParamId(name);
+	return m_ParamPackage.GetParamIdByName(name);
 }
 
 void FixedFunctionShaderD3D9::LoadSceneParams(const Pass& pass)

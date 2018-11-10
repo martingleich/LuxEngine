@@ -14,11 +14,13 @@ namespace video
 
 GeometryCreatorArrow::GeometryCreatorArrow()
 {
-	m_Package.AddParam("shaftHeight", 2.0f);
-	m_Package.AddParam("headHeigth", 1.0f);
-	m_Package.AddParam("shaftRadius", 0.5f);
-	m_Package.AddParam("headRadius", 0.75f);
-	m_Package.AddParam("sectors", 8);
+	core::ParamPackageBuilder ppb;
+	ppb.AddParam("shaftHeight", 2.0f);
+	ppb.AddParam("headHeigth", 1.0f);
+	ppb.AddParam("shaftRadius", 0.5f);
+	ppb.AddParam("headRadius", 0.75f);
+	ppb.AddParam("sectors", 8);
+	m_Package = ppb.BuildAndReset();
 }
 
 const core::String& GeometryCreatorArrow::GetName() const

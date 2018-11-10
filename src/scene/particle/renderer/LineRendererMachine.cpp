@@ -3,13 +3,20 @@
 #include "scene/particle/ParticleGroupData.h"
 #include "video/MaterialLibrary.h"
 
-LX_REGISTER_REFERABLE_CLASS(lux::scene::LineRendererMachine, "lux.particlerenderermachine.Line");
-
 namespace lux
 {
 namespace scene
 {
 
+static WeakRef<LineRendererMachine> g_SharedInstance;
+StrongRef<LineRendererMachine> LineRendererMachine::GetShared()
+{
+	if(g_SharedInstance)
+		return g_SharedInstance.GetStrong();
+	StrongRef<LineRendererMachine> out = LUX_NEW(LineRendererMachine);
+	g_SharedInstance = out.GetWeak();
+	return out;
+}
 LineRendererMachine::LineRendererMachine()
 {
 	video::VertexDeclaration decl;
@@ -32,24 +39,18 @@ LineRendererMachine::LineRendererMachine()
 	m_EmitPass.alpha.blendOperator = video::EBlendOperator::Add;
 }
 
-LineRendererMachine::~LineRendererMachine()
-{
-}
-
 void LineRendererMachine::CreateBuffer(ParticleGroupData* group)
 {
 	if(m_Vertices.Size() < group->GetParticleCount() * 2)
 		m_Vertices.Resize(group->GetParticleCount() * 2);
 }
 
-void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, ParticleRenderer* renderer)
+void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, LineRenderer* renderer)
 {
 	if(group->GetParticleCount() == 0)
 		return;
 
-	m_Data = dynamic_cast<LineRenderer*>(renderer);
-	if(!m_Data)
-		return;
+	m_Data = renderer;
 
 	CreateBuffer(group);
 
@@ -91,12 +92,6 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 		m_Vertices.Data_c(),
 		group->GetParticleCount() * 2,
 		m_VertexFormat);
-}
-
-core::Name LineRendererMachine::GetReferableType() const
-{
-	static const core::Name name("lux.particlerenderermachine.Line");
-	return name;
 }
 
 } // namespace scene

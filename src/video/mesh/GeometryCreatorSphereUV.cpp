@@ -19,11 +19,13 @@ static void Swap(u16& a, u16& b)
 
 GeometryCreatorSphereUV::GeometryCreatorSphereUV()
 {
-	m_Params.AddParam("radius", 1.0f);
-	m_Params.AddParam("rings", 16);
-	m_Params.AddParam("sectors", 32);
-	m_Params.AddParam("tex", math::Vector2F(1, 1));
-	m_Params.AddParam("inside", false);
+	core::ParamPackageBuilder ppb;
+	ppb.AddParam("radius", 1.0f);
+	ppb.AddParam("rings", 16);
+	ppb.AddParam("sectors", 32);
+	ppb.AddParam("tex", math::Vector2F(1, 1));
+	ppb.AddParam("inside", false);
+	m_Params = ppb.BuildAndReset();
 }
 
 const core::String& GeometryCreatorSphereUV::GetName() const

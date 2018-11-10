@@ -13,12 +13,14 @@ namespace video
 
 GeometryCreatorTorus::GeometryCreatorTorus()
 {
-	m_Package.AddParam("radius_major", 1.0f);
-	m_Package.AddParam("radius_minor", 0.5f);
-	m_Package.AddParam("sectors_major", 48);
-	m_Package.AddParam("sectors_minor", 12);
-	m_Package.AddParam("tex", math::Vector2I(1, 1));
-	m_Package.AddParam("inside", false);
+	core::ParamPackageBuilder ppb;
+	ppb.AddParam("radius_major", 1.0f);
+	ppb.AddParam("radius_minor", 0.5f);
+	ppb.AddParam("sectors_major", 48);
+	ppb.AddParam("sectors_minor", 12);
+	ppb.AddParam("tex", math::Vector2I(1, 1));
+	ppb.AddParam("inside", false);
+	m_Package = ppb.BuildAndReset();
 }
 
 StrongRef<Geometry> GeometryCreatorTorus::CreateGeometry(const core::PackagePuffer& params)
