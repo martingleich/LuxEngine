@@ -81,9 +81,8 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Color color, const 
 	};
 
 	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
-	m_Renderer->Draw2DPrimitiveList(
-		video::EPrimitiveType::TriangleStrip,
-		2, quad, 4, video::VertexFormat::STANDARD_2D);
+	m_Renderer->Draw(video::RenderRequest::FromMemory2D(
+		video::EPrimitiveType::TriangleStrip, 2, quad, 4, video::VertexFormat::STANDARD_2D));
 }
 
 void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, const math::RectF& tCoord, video::Color color, const math::RectF* clip)
@@ -102,9 +101,9 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, c
 	};
 	video::TextureLayer layer(texture);
 	m_Renderer->SetPass(m_TexturePass, false, &g_ShaderParamSet, &layer);
-	m_Renderer->Draw2DPrimitiveList(
+	m_Renderer->Draw(video::RenderRequest::FromMemory2D(
 		video::EPrimitiveType::TriangleStrip,
-		2, quad, 4, video::VertexFormat::STANDARD_2D);
+		2, quad, 4, video::VertexFormat::STANDARD_2D));
 }
 
 void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, const math::Vector2F& c, video::Color color, const math::RectF* clip)
@@ -116,9 +115,9 @@ void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, co
 	};
 
 	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
-	m_Renderer->Draw2DPrimitiveList(
+	m_Renderer->Draw(video::RenderRequest::FromMemory2D(
 		video::EPrimitiveType::Triangles,
-		1, tri, 3, video::VertexFormat::STANDARD_2D);
+		1, tri, 3, video::VertexFormat::STANDARD_2D));
 }
 
 namespace
@@ -158,11 +157,11 @@ struct LineBuffer
 	{
 		if(!cursor)
 			return;
-		renderer->Draw2DPrimitiveList(
+		renderer->Draw(video::RenderRequest::FromMemory2D(
 			video::EPrimitiveType::Lines,
 			(u32)cursor / 2,
 			&BUFFER, (u32)cursor,
-			video::VertexFormat::STANDARD_2D);
+			video::VertexFormat::STANDARD_2D));
 		cursor = 0;
 	}
 };

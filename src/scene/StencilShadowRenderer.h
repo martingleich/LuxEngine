@@ -120,11 +120,12 @@ public:
 		if(!shadowVolume.points.IsEmpty()) {
 			m_Renderer->SetTransform(video::ETransform::World, transform.ToMatrix());
 			m_Renderer->SetPass(m_Silhouette);
-			m_Renderer->Draw3DPrimitiveList(video::EPrimitiveType::Triangles,
+			m_Renderer->Draw(video::RenderRequest::FromMemory3D(
+				video::EPrimitiveType::Triangles,
 				shadowVolume.points.Size() / 3,
 				shadowVolume.points.Data(),
 				shadowVolume.points.Size(),
-				video::VertexFormat::POS_ONLY);
+				video::VertexFormat::POS_ONLY));
 		}
 	}
 
@@ -229,10 +230,10 @@ public:
 		};
 
 		m_Renderer->SetPass(m_ShadowRenderPass);
-		m_Renderer->Draw3DPrimitiveList(
+		m_Renderer->Draw(video::RenderRequest::FromMemory3D(
 			video::EPrimitiveType::TriangleStrip,
 			2, &points, 4,
-			video::VertexFormat::STANDARD_2D);
+			video::VertexFormat::STANDARD_2D));
 	}
 
 private:

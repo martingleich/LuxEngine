@@ -255,53 +255,65 @@ int RendererD3D9::GetMaxLightCount() const
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererD3D9::DrawPrimitiveList(
-	EPrimitiveType primitiveType, u32 firstPrimitive, u32 primitiveCount,
-	const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-	const void* indexData, EIndexFormat indexType,
-	bool is3D, EFaceWinding frontFace, bool user)
+void RendererD3D9::Draw(const RenderRequest& rq)
 {
-	if(primitiveCount == 0)
-		return;
-
-	u32 stride = vertexFormat.GetStride(0);
-	u32 indexStride = indexType == EIndexFormat::Bit16 ? 2 : 4;
-
-	D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(indexType);
-	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(primitiveType);
-
-	u32 vertexOffset = 0;
-	u32 indexOffset = 0;
-	if(!user) {
-		if(indexData) {
-			// Indexed from stream
-			auto d3d9Manager = m_Driver->GetBufferManager().StaticCastStrong<BufferManagerD3D9>();
-
-			BufferManagerD3D9::VertexStream vs;
-			BufferManagerD3D9::IndexStream is;
-
-			if(d3d9Manager->GetVertexStream(0, vs))
-				vertexOffset = vs.offset;
-
-			if(d3d9Manager->GetIndexStream(is))
-				indexOffset = is.offset;
-		} else {
-			// Not indexed from stream
-			auto d3d9Manager = m_Driver->GetBufferManager().StaticCastStrong<BufferManagerD3D9>();
-
-			BufferManagerD3D9::VertexStream vs;
-			if(d3d9Manager->GetVertexStream(0, vs))
-				vertexOffset = vs.offset;
-		}
+	bool validateRequest = false;
+	if(validateRequest) {
 	}
 
-	if(indexData)
-		indexOffset += video::GetPointCount(primitiveType, firstPrimitive);
-	else
-		vertexOffset += video::GetPointCount(primitiveType, firstPrimitive);
+	if(rq.primitiveCount == 0)
+		return;
 
-	SetVertexFormat(vertexFormat);
-	SwitchRenderMode(is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
+	u32 vertexCount;
+	u32 vertexOffset;
+	u32 indexOffset;
+	const VertexFormat* vformat;
+	EIndexFormat iformat;
+	// Enable buffers and calculate offsets.
+	if(!rq.userPointer) {
+		// Rendering from hardwarebuffer
+		auto bufferManager = m_Driver->GetBufferManager();
+
+		bufferManager->EnableBuffer(rq.bufferData.vb, 0);
+
+		BufferManagerD3D9* d3d9Manager = bufferManager.As<BufferManagerD3D9>();
+		vformat = &rq.bufferData.vb->GetFormat();
+		vertexCount = rq.bufferData.vb->GetSize();
+
+		BufferManagerD3D9::VertexStream vs;
+		if(d3d9Manager->GetVertexStream(0, vs))
+			vertexOffset = vs.offset;
+		else
+			vertexOffset = 0;
+		if(rq.indexed) {
+			iformat = rq.bufferData.ib->GetFormat();
+			BufferManagerD3D9::IndexStream is;
+			bufferManager->EnableBuffer(rq.bufferData.ib, 0);
+			if(d3d9Manager->GetIndexStream(is))
+				indexOffset = is.offset;
+			else
+				indexOffset = 0;
+		} else {
+			iformat = EIndexFormat::Bit16;
+			indexOffset = 0;
+		}
+	} else {
+		vertexOffset = 0;
+		indexOffset = 0;
+		vformat = rq.userData.vertexFormat;
+		iformat = rq.userData.indexFormat;
+		vertexCount = rq.userData.vertexCount;
+	}
+
+	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(rq.primitiveType);
+
+	if(rq.indexed)
+		indexOffset += video::GetPointCount(rq.primitiveType, rq.firstPrimitive);
+	else
+		vertexOffset += video::GetPointCount(rq.primitiveType, rq.firstPrimitive);
+
+	SetVertexFormat(*vformat);
+	SwitchRenderMode(rq.is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 
 	u32 passCount = m_Material ? m_Material->GetPassCount() : 1;
 	for(u32 pass = 0; pass < passCount; ++pass) {
@@ -310,20 +322,23 @@ void RendererD3D9::DrawPrimitiveList(
 			SetDirty(Dirty_Material);
 		}
 
-		SetupRendering(frontFace, pass);
+		SetupRendering(rq.frontFace, pass);
 		HRESULT hr = E_FAIL;
-		if(!user) {
-			if(indexData)
-				hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, primitiveCount);
-			else
-				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, primitiveCount);
-		} else {
-			if(indexData) { // Indexed from memory
-				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, primitiveCount,
-					(u8*)indexData + indexOffset*indexStride, d3dIndexFormat, vertexData, stride);
+		if(rq.userPointer) {
+			u32 stride = vformat->GetStride(0);
+			if(rq.indexed) { // Indexed from memory
+				u32 indexStride = iformat == EIndexFormat::Bit16 ? 2 : 4;
+				D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(iformat);
+				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, rq.primitiveCount,
+					(u8*)rq.userData.indexData + indexOffset*indexStride, d3dIndexFormat, rq.userData.vertexData, stride);
 			} else { // Not indexed from memory
-				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, primitiveCount, (u8*)vertexData + vertexOffset*stride, stride);
+				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, rq.primitiveCount, (u8*)rq.userData.vertexData + vertexOffset*stride, stride);
 			}
+		} else {
+			if(rq.indexed)
+				hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, rq.primitiveCount);
+			else
+				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, rq.primitiveCount);
 		}
 		if(FAILED(hr)) {
 			log::Error("Error while drawing.");
@@ -337,55 +352,7 @@ void RendererD3D9::DrawPrimitiveList(
 	}
 
 	if(m_RenderStatistics)
-		m_RenderStatistics->AddPrimitives(primitiveCount);
-}
-
-void RendererD3D9::DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D)
-{
-	LX_CHECK_NULL_ARG(geo);
-
-	if(primitiveCount == 0xFFFFFFFF)
-		primitiveCount = geo->GetPrimitiveCount();
-
-	if(primitiveCount == 0)
-		return;
-
-	auto bufferManager = m_Driver->GetBufferManager();
-
-	bufferManager->EnableBuffer(geo->GetVertices());
-	bufferManager->EnableBuffer(geo->GetIndices());
-
-	BufferManagerD3D9* d3d9Manager = bufferManager.As<BufferManagerD3D9>();
-
-	BufferManagerD3D9::VertexStream vs;
-	BufferManagerD3D9::IndexStream is;
-	d3d9Manager->GetVertexStream(0, vs);
-	d3d9Manager->GetIndexStream(is);
-
-	const EPrimitiveType pt = geo->GetPrimitiveType();
-	const u32 vertexCount = geo->GetVertexCount();
-	const VertexFormat& vertexFormat = geo->GetVertexFormat();
-	const EIndexFormat indexFormat = geo->GetIndices() ?
-		geo->GetIndexFormat() :
-		EIndexFormat::Bit16;
-
-	if(vs.data) {
-		DrawPrimitiveList(
-			pt,
-			firstPrimitive, primitiveCount,
-			vs.data, vertexCount, vertexFormat,
-			is.data, indexFormat,
-			is3D, geo->GetFrontFaceWinding(),
-			true);
-	} else {
-		DrawPrimitiveList(
-			pt,
-			firstPrimitive, primitiveCount,
-			geo->GetVertices(), vertexCount, vertexFormat,
-			geo->GetIndices(), indexFormat,
-			is3D, geo->GetFrontFaceWinding(),
-			false);
-	}
+		m_RenderStatistics->AddPrimitives(rq.primitiveCount);
 }
 
 ///////////////////////////////////////////////////////////////////////////

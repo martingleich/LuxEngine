@@ -1,11 +1,77 @@
 #include "RendererNull.h"
 #include "core/Logger.h"
 #include "video/RenderTarget.h"
+#include "video/mesh/Geometry.h"
 
 namespace lux
 {
 namespace video
 {
+
+RenderRequest RenderRequest::Geometry3D(const Geometry* geo)
+{
+	LX_CHECK_NULL_ARG(geo);
+
+	RenderRequest rq;
+	rq.userPointer = false;
+	rq.is3D = true;
+	rq.bufferData.ib = geo->GetIndices();
+	rq.bufferData.vb = geo->GetVertices();
+	rq.indexed = geo->GetIndices();
+	rq.firstPrimitive = 0;
+	rq.primitiveCount = geo->GetPrimitiveCount();
+	rq.primitiveType = geo->GetPrimitiveType();
+	rq.frontFace = geo->GetFrontFaceWinding();
+	return rq;
+}
+RenderRequest RenderRequest::Geometry2D(const Geometry* geo)
+{
+	LX_CHECK_NULL_ARG(geo);
+
+	RenderRequest rq;
+	rq.userPointer = false;
+	rq.is3D = false;
+	rq.bufferData.ib = geo->GetIndices();
+	rq.bufferData.vb = geo->GetVertices();
+	rq.indexed = geo->GetIndices();
+	rq.firstPrimitive = 0;
+	rq.primitiveCount = geo->GetPrimitiveCount();
+	rq.primitiveType = geo->GetPrimitiveType();
+	rq.frontFace = geo->GetFrontFaceWinding();
+	return rq;
+}
+RenderRequest RenderRequest::Geometry3D(const Geometry* geo, int first, int count)
+{
+	LX_CHECK_NULL_ARG(geo);
+
+	RenderRequest rq;
+	rq.userPointer = false;
+	rq.is3D = true;
+	rq.bufferData.ib = geo->GetIndices();
+	rq.bufferData.vb = geo->GetVertices();
+	rq.indexed = geo->GetIndices();
+	rq.firstPrimitive = first;
+	rq.primitiveCount = count;
+	rq.primitiveType = geo->GetPrimitiveType();
+	rq.frontFace = geo->GetFrontFaceWinding();
+	return rq;
+}
+RenderRequest RenderRequest::Geometry2D(const Geometry* geo, int first, int count)
+{
+	LX_CHECK_NULL_ARG(geo);
+
+	RenderRequest rq;
+	rq.userPointer = false;
+	rq.is3D = false;
+	rq.bufferData.ib = geo->GetIndices();
+	rq.bufferData.vb = geo->GetVertices();
+	rq.indexed = geo->GetIndices();
+	rq.firstPrimitive = first;
+	rq.primitiveCount = count;
+	rq.primitiveType = geo->GetPrimitiveType();
+	rq.frontFace = geo->GetFrontFaceWinding();
+	return rq;
+}
 
 RendererNull::RendererNull(VideoDriver* driver) :
 	m_RenderMode(ERenderMode::None),

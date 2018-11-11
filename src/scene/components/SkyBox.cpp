@@ -166,22 +166,14 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 
 	renderer->SetMaterial(m_Material);
 	if(m_UseCubeTexture) {
-		renderer->DrawIndexedPrimitiveList(
-			video::EPrimitiveType::Triangles,
-			12,
-			g_Vertices3D,
-			8,
-			video::VertexFormat::TEXTURE_3D,
-			g_Indices,
-			video::EIndexFormat::Bit16,
-			true);
+		renderer->Draw(video::RenderRequest::IndexedFromMemory3D(
+			video::EPrimitiveType::Triangles, 12,
+			g_Vertices3D, 8, video::VertexFormat::TEXTURE_3D,
+			g_Indices, video::EIndexFormat::Bit16));
 	} else {
-		renderer->Draw3DPrimitiveList(
-			video::EPrimitiveType::Triangles,
-			12,
-			g_Vertices2D,
-			36,
-			video::VertexFormat::STANDARD);
+		renderer->Draw(video::RenderRequest::FromMemory3D(
+			video::EPrimitiveType::Triangles, 12,
+			g_Vertices2D, 36, video::VertexFormat::STANDARD));
 	}
 }
 

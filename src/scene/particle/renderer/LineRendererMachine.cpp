@@ -86,12 +86,9 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	else
 		videoRenderer->SetPass(m_DefaultPass, true);
 
-	videoRenderer->Draw3DPrimitiveList(
-		video::EPrimitiveType::Lines,
-		group->GetParticleCount(),
-		m_Vertices.Data_c(),
-		group->GetParticleCount() * 2,
-		m_VertexFormat);
+	videoRenderer->Draw(video::RenderRequest::FromMemory3D(
+		video::EPrimitiveType::Lines, group->GetParticleCount(),
+		m_Vertices.Data_c(), group->GetParticleCount() * 2, m_VertexFormat));
 }
 
 } // namespace scene

@@ -34,6 +34,8 @@ class PipelineSettings;
 class PipelineOverwrite;
 class VertexFormat;
 class VideoDriver;
+class VertexBuffer;
+class IndexBuffer;
 
 //! The diffrent transforms which can be set in the renderer
 enum class ETransform
@@ -46,6 +48,119 @@ enum class ETransform
 struct PipelineOverwriteToken;
 struct ScissorRectToken;
 struct NormalizeNormalsToken;
+
+struct RenderRequest
+{
+	union
+	{
+		struct UserDataT
+		{
+			const void* vertexData;
+			const void* indexData;
+			const VertexFormat* vertexFormat;
+			u32 vertexCount;
+			EIndexFormat indexFormat;
+		} userData;
+		struct BufferDataT
+		{
+			const VertexBuffer* vb;
+			const IndexBuffer* ib;
+		} bufferData;
+	};
+	u32 firstPrimitive;
+	u32 primitiveCount;
+
+	EFaceWinding frontFace;
+	EPrimitiveType primitiveType;
+
+	bool is3D;
+	bool userPointer;
+	bool indexed;
+
+	static RenderRequest IndexedFromMemory3D(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		const void* indexData, EIndexFormat indexType,
+		EFaceWinding frontFace = EFaceWinding::CCW)
+	{
+		RenderRequest rq;
+		rq.userPointer = true;
+		rq.is3D = true;
+		rq.userData.vertexData = vertexData;
+		rq.userData.vertexCount = vertexCount;
+		rq.userData.vertexFormat = &vertexFormat;
+		rq.userData.indexData = indexData;
+		rq.userData.indexFormat = indexType;
+		rq.indexed = true;
+		rq.firstPrimitive = 0;
+		rq.primitiveCount = primitiveCount;
+		rq.primitiveType = primitiveType;
+		rq.frontFace = frontFace;
+		return rq;
+	}
+	static RenderRequest IndexedFromMemory2D(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		const void* indexData, EIndexFormat indexType,
+		EFaceWinding frontFace = EFaceWinding::CCW)
+	{
+		RenderRequest rq;
+		rq.userPointer = true;
+		rq.is3D = false;
+		rq.userData.vertexData = vertexData;
+		rq.userData.vertexCount = vertexCount;
+		rq.userData.vertexFormat = &vertexFormat;
+		rq.userData.indexData = indexData;
+		rq.userData.indexFormat = indexType;
+		rq.indexed = true;
+		rq.firstPrimitive = 0;
+		rq.primitiveCount = primitiveCount;
+		rq.primitiveType = primitiveType;
+		rq.frontFace = frontFace;
+		return rq;
+	}
+	static RenderRequest FromMemory3D(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		EFaceWinding frontFace = EFaceWinding::CCW)
+	{
+		RenderRequest rq;
+		rq.userPointer = true;
+		rq.is3D = true;
+		rq.userData.vertexData = vertexData;
+		rq.userData.vertexCount = vertexCount;
+		rq.userData.vertexFormat = &vertexFormat;
+		rq.indexed = false;
+		rq.firstPrimitive = 0;
+		rq.primitiveCount = primitiveCount;
+		rq.primitiveType = primitiveType;
+		rq.frontFace = frontFace;
+		return rq;
+	}
+	static RenderRequest FromMemory2D(
+		EPrimitiveType primitiveType, u32 primitiveCount,
+		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
+		EFaceWinding frontFace = EFaceWinding::CCW)
+	{
+		RenderRequest rq;
+		rq.userPointer = true;
+		rq.is3D = false;
+		rq.userData.vertexData = vertexData;
+		rq.userData.vertexCount = vertexCount;
+		rq.userData.vertexFormat = &vertexFormat;
+		rq.indexed = false;
+		rq.firstPrimitive = 0;
+		rq.primitiveCount = primitiveCount;
+		rq.primitiveType = primitiveType;
+		rq.frontFace = frontFace;
+		return rq;
+	}
+
+	LUX_API static RenderRequest Geometry3D(const Geometry* geo);
+	LUX_API static RenderRequest Geometry2D(const Geometry* geo);
+	LUX_API static RenderRequest Geometry3D(const Geometry* geo, int first, int count);
+	LUX_API static RenderRequest Geometry2D(const Geometry* geo, int first, int count);
+};
 
 /**
 Rendering 2d or 3d data:
@@ -203,106 +318,9 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	//! Draw a indexed primitive list from memory
-	/**
-	\param primitiveType The primitive type to draw
-	\param primitiveCount The number of primitives to draw
-	\param vertexData The vertices to draw
-	\param vertexCount The nuumber of vertices to draw
-	\param vertexFormat The format of the vertices
-	\param indexData The indices to draw
-	\param indexType The format of the indices
-	\param is3D Is the 2D or 3D pipeline used
-	\param frontFace Clockwise or counter clockwise
-	*/
-	virtual void DrawIndexedPrimitiveList(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		const void* indexData, EIndexFormat indexType,
-		bool is3D,
-		EFaceWinding frontFace = EFaceWinding::CCW) = 0;
-
-	void DrawIndexed3DPrimitiveList(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		const void* indexData, EIndexFormat indexType,
-		EFaceWinding frontFace = EFaceWinding::CCW)
-	{
-		DrawIndexedPrimitiveList(primitiveType, primitiveCount,
-			vertexData, vertexCount, vertexFormat,
-			indexData, indexType,
-			true,
-			frontFace);
-	}
-
-	void DrawIndexed2DPrimitiveList(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		const void* indexData, EIndexFormat indexType,
-		EFaceWinding frontFace = EFaceWinding::CCW)
-	{
-		DrawIndexedPrimitiveList(primitiveType, primitiveCount,
-			vertexData, vertexCount, vertexFormat,
-			indexData, indexType,
-			false,
-			frontFace);
-	}
-
-	//! Draw a primitive list from memory
-	/**
-	\param primitiveType The primitive type to draw
-	\param primitiveCount The number of primitives to draw
-	\param vertexData The vertices to draw
-	\param vertexCount The nuumber of vertices to draw
-	\param vertexFormat The format of the vertices
-	\param is3D Is the 3d or the 2d pipeline used
-	\param frontFace Clockwise or counter clockwise
-	*/
-	virtual void DrawPrimitiveList(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		bool is3D,
-		EFaceWinding frontFace = EFaceWinding::CCW) = 0;
-
-	void Draw2DPrimitiveList(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		EFaceWinding frontFace = EFaceWinding::CCW)
-	{
-		DrawPrimitiveList(
-			primitiveType, primitiveCount,
-			vertexData, vertexCount, vertexFormat,
-			false, frontFace);
-	}
-
-	void Draw3DPrimitiveList(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		EFaceWinding frontFace = EFaceWinding::CCW)
-	{
-		DrawPrimitiveList(
-			primitiveType, primitiveCount,
-			vertexData, vertexCount, vertexFormat,
-			true, frontFace);
-	}
-
-	//! Draw some geometry
-	/**
-	\param geo The geometry to draw
-	\param primitiveCount The number of primitives to draw
-	\param is3D Is the 3d or the 2d pipeline used
-	*/
-	virtual void DrawGeometry(const Geometry* geo, u32 firstPrimitive, u32 primitiveCount, bool is3D = true) = 0;
-
-	//! Draw some geometry
-	/**
-	\param geo The geometry to draw
-	\param is3D Is the 3d or the 2d pipeline used
-	*/
-	virtual void DrawGeometry(const Geometry* geo, bool is3D = true) = 0;
+	virtual void Draw(const RenderRequest& rq) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
-
 
 	//! Retrieve the driver owning this renderer
 	virtual VideoDriver* GetDriver() const = 0;
