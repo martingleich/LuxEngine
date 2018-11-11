@@ -37,7 +37,7 @@ VS_OUT mainVS(float3 position : POSITION, float2 uv : TEXCOORD0)
 )";
 core::StringView g_PSCode = R"(
 sampler2D param_texture;
-float4 param_diffuse; // font color
+float4 param_fontColor;
 float4 param_borderColor;
 
 float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
@@ -48,7 +48,7 @@ float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 
 	float alpha = value.a;
 	float inner = value.r;
-	float4 color = lerp(param_borderColor, param_diffuse, inner);
+	float4 color = lerp(param_borderColor, param_fontColor, inner);
 
 	return float4(color.rgb, alpha*color.a);
 }
@@ -61,19 +61,23 @@ public:
 	{
 		video::TextureLayer texture;
 		video::ColorF borderColor;
+		video::ColorF fontColor;
 	};
 	int m_TexId;
 	int m_BorderColorId;
+	int m_FontColorId;
 	void Init(video::Shader* shader)
 	{
 		m_TexId = shader->GetParamId("texture");
 		m_BorderColorId = shader->GetParamId("borderColor");
+		m_FontColorId = shader->GetParamId("fontColor");
 	}
 
 	void SendShaderSettings(const video::Pass& pass, void* data) const
 	{
 		pass.shader->SetParam(m_TexId, &((Data*)data)->texture);
 		pass.shader->SetParam(m_BorderColorId, &((Data*)data)->borderColor);
+		pass.shader->SetParam(m_FontColorId, &((Data*)data)->fontColor);
 	}
 };
 
@@ -179,10 +183,10 @@ void FontRaster::Draw(
 	if(userClip)
 		renderer->SetScissorRect(clipRect, &tok);
 
-	m_Pass.diffuse = settings.color;
 	ShaderParamLoader::Data shaderData;
 	shaderData.texture = video::TextureLayer(m_Texture);
 	shaderData.borderColor = settings.borderColor;
+	shaderData.fontColor = settings.color;
 	renderer->SetPass(m_Pass, false, &g_ParamLoader, &shaderData);
 
 	if(!m_Pass.shader)

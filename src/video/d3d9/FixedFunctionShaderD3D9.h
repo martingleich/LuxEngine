@@ -8,10 +8,11 @@ namespace video
 {
 
 class DeviceStateD3D9;
+class Renderer;
 class FixedFunctionShaderD3D9 : public Shader
 {
 public:
-	FixedFunctionShaderD3D9(DeviceStateD3D9& deviceState, const FixedFunctionParameters& params);
+	FixedFunctionShaderD3D9(Renderer* r, DeviceStateD3D9& deviceState, const FixedFunctionParameters& params);
 	void Enable() override;
 	void SetParam(int paramId, const void* data) override;
 	int GetParamId(core::StringView name) const override;
@@ -30,8 +31,15 @@ public:
 	core::Array<TextureLayer> m_Layers;
 	core::Array<TextureStageSettings> m_TextureStages;
 	core::ParamPackage m_ParamPackage;
+	video::ColorF m_Diffuse = video::ColorF(1,1,1,1);
+	float m_Emissive = 0.0f;
+	float m_SpecularHardness = 0.0f;
+	float m_SpecularIntensity = 1.0f;
+	video::ELightingFlag m_Lighting;
+	video::ColorF m_Ambient;
 	bool m_UseVertexColors;
 	bool m_IsDirty;
+	core::AttributePtr m_AmbientPtr;
 };
 
 } // namespace video

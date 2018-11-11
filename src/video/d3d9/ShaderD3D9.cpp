@@ -151,28 +151,16 @@ bool ShaderD3D9::Init(
 		Param entry;
 		const HelperEntry& h = helper[i];
 		switch(h.paramType) {
-		case ParamType_DefaultMaterial:
 		case ParamType_ParamMaterial:
 		{
-			int defId = GetDefaultId(h.name);
-			if(defId >= 0) {
-				if(GetDefaultType((u32)defId) != h.type) {
-					if(errorList)
-						errorList->PushBack(core::StringConverter::Format("Warning: Wrong type for default material param in shader: ~s.", h.name));
-					continue;
-				}
-				entry.index = (u32)defId;
-				entry.paramType = ParamType_DefaultMaterial;
-			} else {
-				u8 tempMemory[sizeof(float) * 16]; // Matrix is the biggest type.
-				if(h.defaultValue)
-					CastShaderToType(h.type, h.defaultValue, tempMemory);
-				else
-					memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
-				entry.index = DefaultParam_COUNT + ppb.GetParamCount();
-				ppb.AddParam(h.name, GetCoreType(h.type), tempMemory);
-				entry.paramType = ParamType_ParamMaterial;
-			}
+			u8 tempMemory[sizeof(float) * 16]; // Matrix is the biggest type.
+			if(h.defaultValue)
+				CastShaderToType(h.type, h.defaultValue, tempMemory);
+			else
+				std::memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
+			entry.index = DefaultParam_COUNT + ppb.GetParamCount();
+			ppb.AddParam(h.name, GetCoreType(h.type), tempMemory);
+			entry.paramType = ParamType_ParamMaterial;
 
 			++paramId;
 		}
@@ -269,7 +257,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 		HelperEntry* foundEntry = nullptr;
 		for(auto it = outParams.First(); it != outParams.End(); ++it) {
 			bool isSameStruct =
-				((it->paramType == ParamType_DefaultMaterial || it->paramType == ParamType_ParamMaterial) && isParam) ||
+				(it->paramType == ParamType_ParamMaterial && isParam) ||
 				(it->paramType == ParamType_Scene && !isParam);
 			if(isSameStruct) {
 				if(it->name.Equal(name)) {
@@ -426,31 +414,10 @@ int ShaderD3D9::GetParamId(core::StringView name) const
 
 void ShaderD3D9::LoadSceneParams(const Pass& pass)
 {
+	LUX_UNUSED(pass);
 	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
 		if(it->sceneValue)
 			SetShaderValue(*it, (*it->sceneValue).Pointer());
-	}
-
-	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
-		if(it->paramType == ParamType_DefaultMaterial) {
-			float f;
-			video::ColorF c;
-			switch(it->index) {
-			case DefaultParam_Shininess:
-				f = pass.specularHardness;
-				SetShaderValue(*it, &f); break;
-			case DefaultParam_Diffuse:
-				c = pass.diffuse;
-				SetShaderValue(*it, &c); break;
-			case DefaultParam_Emissive:
-				f = pass.emissive;
-				SetShaderValue(*it, &f); break;
-			case DefaultParam_Specular:
-				f = pass.specularIntensity;
-				SetShaderValue(*it, &f); break;
-			default: continue;
-			}
-		}
 	}
 }
 
@@ -654,37 +621,6 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 const core::ParamPackage& ShaderD3D9::GetParamPackage() const
 {
 	return m_ParamPackage;
-}
-
-int ShaderD3D9::GetDefaultId(core::StringView name)
-{
-	static const core::StringView NAMES[DefaultParam_COUNT] = {
-		"specularHardness",
-		"diffuse",
-		"emissive",
-		"specularIntensity",
-	};
-
-	for(int i = 0; i < sizeof(NAMES) / sizeof(*NAMES); ++i) {
-		if(NAMES[i].Equal(name))
-			return (int)i;
-	}
-
-	return -1;
-}
-
-ShaderD3D9::EType ShaderD3D9::GetDefaultType(u32 id)
-{
-	switch(id) {
-	case DefaultParam_Shininess:
-	case DefaultParam_Emissive:
-	case DefaultParam_Specular:
-		return EType::Float;
-	case DefaultParam_Diffuse:
-		return EType::ColorF;
-	default:
-		return EType::Unknown;
-	}
 }
 
 bool ShaderD3D9::IsTypeCompatible(EType a, EType b)

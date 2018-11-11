@@ -34,20 +34,6 @@ enum class EPipelineSetting
 	Culling,
 };
 
-enum class EOptionId
-{
-	Layer0,
-	Layer1,
-	Layer2,
-	Layer3,
-	Layer4,
-	Layer5,
-	Layer6,
-	Layer7,
-};
-
-#define EOptionId_Layer(n) EOptionId((int)EOptionId::Layer0+n)
-
 class Pass
 {
 public:
@@ -57,12 +43,6 @@ public:
 		gouraudShading(true)
 	{
 	}
-
-	// Material
-	ColorF diffuse = video::ColorF(1, 1, 1, 1);
-	float emissive = 0;
-	float specularHardness = 0;
-	float specularIntensity = 1;
 
 	// Shader
 	StrongRef<Shader> shader;
@@ -94,11 +74,6 @@ public:
 	{
 		LUX_UNUSED(pass);
 		LUX_UNUSED(userParam);
-	}
-	virtual void SendShaderSettings(u32 passId, const Pass& pass, void* userParam) const
-	{
-		LUX_UNUSED(passId);
-		SendShaderSettings(pass, userParam);
 	}
 };
 
@@ -193,26 +168,6 @@ public:
 		if(IsEnabled(EPipelineSetting::Culling))
 			pass.culling = culling;
 	}
-
-	/*
-	bool operator==(const PipelineOverwrite& other) const
-	{
-		return
-			polygonOffset == other.polygonOffset &&
-			lighting == other.lighting &&
-			disableFog == other.disableFog &&
-			drawMode == other.drawMode &&
-			disableZWrite == other.disableZWrite &&
-			normalizeNormals == other.normalizeNormals &&
-			disableBackfaceCulling == other.disableBackfaceCulling &&
-			enableFrontfaceCulling == other.enableFrontfaceCulling;
-	}
-
-	bool operator!=(const PipelineOverwrite& other) const
-	{
-		return !(*this == other);
-	}
-	*/
 };
 
 } // namespace video

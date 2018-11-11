@@ -54,13 +54,9 @@ public:
 	void Reset();
 
 private:
-	void SetupRendering(EFaceWinding frontFace, u32 passId);
+	void SetupRendering(EFaceWinding frontFace);
 
 	void SwitchRenderMode(ERenderMode mode);
-	void EnterRenderMode3D();
-	void LeaveRenderMode3D();
-	void EnterRenderMode2D();
-	void LeaveRenderMode2D();
 
 	void UpdateTransforms(float polygonOffset);
 	void LoadFogSettings(bool isFogActive, bool fixedFunction, bool changedShader, bool changedFogEnable);

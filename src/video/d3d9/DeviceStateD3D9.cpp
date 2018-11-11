@@ -30,57 +30,15 @@ DeviceStateD3D9::~DeviceStateD3D9()
 	ReleaseUnmanaged();
 }
 
-void DeviceStateD3D9::SetD3DColors(const Pass& pass)
+void DeviceStateD3D9::EnablePass(const Pass& p)
 {
-	if(pass.lighting != ELightingFlag::Disabled) {
-		D3DCOLORVALUE black = {0};
-		// Enable d3d material
-		D3DMATERIAL9 D3DMaterial = {
-			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(pass.diffuse) : black,
-			TestFlag(pass.lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(pass.diffuse) : black,
-			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(video::ColorF(pass.specularIntensity, pass.specularIntensity, pass.specularIntensity)) : black,
-			TestFlag(pass.lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(pass.emissive * pass.diffuse) : black,
-			TestFlag(pass.lighting, ELightingFlag::DiffSpec) ? pass.specularHardness : 0.0f
-		};
-
-		m_D3DMaterial = D3DMaterial;
-		m_Device->SetMaterial(&m_D3DMaterial);
-	}
-}
-
-void DeviceStateD3D9::EnablePass(const Pass& p, const video::ColorF& ambient)
-{
-	m_UseLighting = (p.lighting != ELightingFlag::Disabled);
-
-	// Load material for fixed function
-	if(m_IsFixedShader) {
-		SetD3DColors(p);
-		m_Ambient = ambient;
-		if(TestFlag(p.lighting, ELightingFlag::AmbientEmit))
-			SetRenderState(D3DRS_AMBIENT, m_Ambient.ToHex());
-		else
-			SetRenderState(D3DRS_AMBIENT, 0);
-
-		if(TestFlag(p.lighting, ELightingFlag::DiffSpec) && !math::IsZero(m_D3DMaterial.Power))
-			SetRenderState(D3DRS_SPECULARENABLE, 1);
-		else
-			SetRenderState(D3DRS_SPECULARENABLE, 0);
-		if(!m_UseLighting)
-			SetRenderState(D3DRS_TEXTUREFACTOR, p.diffuse.ToHex());
-	}
-
-
-	// Apply overwrite and enable pipeline settings.
+	// Enable pipeline settings.
 	EnableAlpha(p.alpha);
-
 	SetStencilMode(p.stencil);
-
-	// Set Material parameters
 	SetRenderState(D3DRS_COLORWRITEENABLE, p.colorMask);
 
 	SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(p.zBufferFunc));
 	SetRenderState(D3DRS_ZWRITEENABLE, p.zWriteEnabled ? TRUE : FALSE);
-	//SetRenderState(D3DRS_NORMALIZENORMALS, p.normalizeNormals ? TRUE : FALSE);
 	SetRenderState(D3DRS_FILLMODE, GetFillMode(p));
 	SetRenderState(D3DRS_SHADEMODE, p.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
 	SetRenderState(D3DRS_CULLMODE, GetCullMode(p));
@@ -91,8 +49,36 @@ void DeviceStateD3D9::EnablePass(const Pass& p, const video::ColorF& ambient)
 void DeviceStateD3D9::EnableFixedFunctionShader(
 	const core::Array<TextureLayer>& layers,
 	const core::Array<TextureStageSettings>& stages,
-	bool useVertexColors)
+	bool useVertexColors,
+	ColorF diffuse, float emissive, float specularHardness, float specularIntensity,
+	ColorF ambient, ELightingFlag lighting)
 {
+	if(lighting != ELightingFlag::Disabled) {
+		D3DCOLORVALUE black = {0};
+		// Enable d3d material
+		D3DMATERIAL9 D3DMaterial = {
+			TestFlag(lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(diffuse) : black,
+			TestFlag(lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(diffuse) : black,
+			TestFlag(lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(video::ColorF(specularIntensity, specularIntensity, specularIntensity)) : black,
+			TestFlag(lighting, ELightingFlag::AmbientEmit) ? SColorToD3DColor(emissive * diffuse) : black,
+			TestFlag(lighting, ELightingFlag::DiffSpec) ? specularHardness : 0.0f
+		};
+
+		m_D3DMaterial = D3DMaterial;
+		m_Device->SetMaterial(&m_D3DMaterial);
+	}
+	if(TestFlag(lighting, ELightingFlag::AmbientEmit))
+		SetRenderState(D3DRS_AMBIENT, ambient.ToHex());
+	else
+		SetRenderState(D3DRS_AMBIENT, 0);
+
+	if(TestFlag(lighting, ELightingFlag::DiffSpec) && !math::IsZero(m_D3DMaterial.Power))
+		SetRenderState(D3DRS_SPECULARENABLE, 1);
+	else
+		SetRenderState(D3DRS_SPECULARENABLE, 0);
+	if(lighting == ELightingFlag::Disabled)
+		SetRenderState(D3DRS_TEXTUREFACTOR, diffuse.ToHex());
+
 	SetRenderState(D3DRS_COLORVERTEX, useVertexColors ? TRUE : FALSE);
 
 	int layerCount = layers.Size();
@@ -119,11 +105,11 @@ void DeviceStateD3D9::EnableFixedFunctionShader(
 		else
 			settings = i < stages.Size() ? &stages[i] : &DEFAULT_STAGE;
 
-		EnableTextureStage(i, *settings, useVertexColors);
+		EnableTextureStage(i, *settings, useVertexColors, lighting);
 	}
 
 	for(int i = layerCount; i < stages.Size(); ++i)
-		EnableTextureStage(i, stages[i], useVertexColors);
+		EnableTextureStage(i, stages[i], useVertexColors, lighting);
 
 	auto newUsed = math::Max(layerCount, stages.Size());
 	for(int i = newUsed; i < m_ActiveTextureLayers; ++i)
@@ -183,18 +169,18 @@ void DeviceStateD3D9::EnableTextureLayer(u32 stage, const TextureLayer& layer)
 }
 
 void DeviceStateD3D9::EnableTextureStage(
-	u32 stage,
+	u32 stage, 
 	const TextureStageSettings& settings,
-	bool useVertexData)
+	bool useVertexData, ELightingFlag lighting)
 {
-	if(!m_UseLighting && settings.colorArg1 == ETextureArgument::Diffuse && !useVertexData) {
+	if(lighting == ELightingFlag::Disabled && settings.colorArg1 == ETextureArgument::Diffuse && !useVertexData) {
 		SetTextureStageState(stage, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 		SetTextureStageState(stage, D3DTSS_ALPHAARG1, D3DTA_TFACTOR);
 	} else {
 		SetTextureStageState(stage, D3DTSS_COLORARG1, GetTextureArgument(settings.colorArg1));
 		SetTextureStageState(stage, D3DTSS_ALPHAARG1, GetTextureArgument(settings.alphaArg1));
 	}
-	if(!m_UseLighting && settings.colorArg2 == ETextureArgument::Diffuse && !useVertexData) {
+	if(lighting == ELightingFlag::Disabled && settings.colorArg2 == ETextureArgument::Diffuse && !useVertexData) {
 		SetTextureStageState(stage, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 		SetTextureStageState(stage, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 	} else {
@@ -384,7 +370,6 @@ void DeviceStateD3D9::SetFog(const FogData& fog)
 void DeviceStateD3D9::EnableLight(bool enable)
 {
 	SetRenderState(D3DRS_LIGHTING, enable ? TRUE : FALSE);
-	m_UseLighting = enable;
 }
 
 void DeviceStateD3D9::DisableLight(u32 id)

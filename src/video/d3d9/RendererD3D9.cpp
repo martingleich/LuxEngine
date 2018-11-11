@@ -69,7 +69,7 @@ void RendererD3D9::Clear(
 	HRESULT hr = S_OK;
 
 	if(flags) {
-		const D3DCOLOR d3dClear = color.ToDWORD();
+		D3DCOLOR d3dClear = color.ToDWORD();
 		if(FAILED(hr = m_Device->Clear(
 			0, nullptr,
 			flags,
@@ -257,10 +257,6 @@ int RendererD3D9::GetMaxLightCount() const
 
 void RendererD3D9::Draw(const RenderRequest& rq)
 {
-	bool validateRequest = false;
-	if(validateRequest) {
-	}
-
 	if(rq.primitiveCount == 0)
 		return;
 
@@ -305,50 +301,41 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 		vertexCount = rq.userData.vertexCount;
 	}
 
-	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(rq.primitiveType);
-
+	// Calculate offsets for first primitive.
 	if(rq.indexed)
 		indexOffset += video::GetPointCount(rq.primitiveType, rq.firstPrimitive);
 	else
 		vertexOffset += video::GetPointCount(rq.primitiveType, rq.firstPrimitive);
 
+	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(rq.primitiveType);
+	DWORD stride = (DWORD)vformat->GetStride(0);
+	DWORD indexStride = iformat == EIndexFormat::Bit16 ? 2 : 4;
+	D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(iformat);
+
 	SetVertexFormat(*vformat);
 	SwitchRenderMode(rq.is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 
-	u32 passCount = m_Material ? m_Material->GetPassCount() : 1;
-	for(u32 pass = 0; pass < passCount; ++pass) {
-		if(pass > 0) {
-			// For the first pass it was set in SetMaterial
-			SetDirty(Dirty_Material);
-		}
-
-		SetupRendering(rq.frontFace, pass);
-		HRESULT hr = E_FAIL;
-		if(rq.userPointer) {
-			u32 stride = vformat->GetStride(0);
-			if(rq.indexed) { // Indexed from memory
-				u32 indexStride = iformat == EIndexFormat::Bit16 ? 2 : 4;
-				D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(iformat);
-				hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, rq.primitiveCount,
-					(u8*)rq.userData.indexData + indexOffset*indexStride, d3dIndexFormat, rq.userData.vertexData, stride);
-			} else { // Not indexed from memory
-				hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, rq.primitiveCount, (u8*)rq.userData.vertexData + vertexOffset*stride, stride);
-			}
+	SetupRendering(rq.frontFace);
+	HRESULT hr = E_FAIL;
+	if(rq.userPointer) {
+		if(rq.indexed) {
+			auto indexData = (u8*)rq.userData.indexData + indexOffset * indexStride;
+			hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, rq.primitiveCount, indexData, d3dIndexFormat, rq.userData.vertexData, stride);
 		} else {
-			if(rq.indexed)
-				hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, rq.primitiveCount);
-			else
-				hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, rq.primitiveCount);
+			auto vertexData = (u8*)rq.userData.vertexData + vertexOffset * stride;
+			hr = m_Device->DrawPrimitiveUP(d3dPrimitiveType, rq.primitiveCount, vertexData, stride);
 		}
-		if(FAILED(hr)) {
-			log::Error("Error while drawing.");
-			return;
-		}
+	} else {
+		if(rq.indexed)
+			hr = m_Device->DrawIndexedPrimitive(d3dPrimitiveType, 0, 0, vertexCount, indexOffset, rq.primitiveCount);
+		else
+			hr = m_Device->DrawPrimitive(d3dPrimitiveType, vertexOffset, rq.primitiveCount);
 	}
 
-	if(passCount > 1) {
-		// The next rendercall will start with another pass.
-		SetDirty(Dirty_Material);
+	if(FAILED(hr)) {
+		auto err = core::D3D9Exception::MakeErrorString(hr);
+		log::Error("Error while drawing: ~s.", err.AsView());
+		return;
 	}
 
 	if(m_RenderStatistics)
@@ -374,13 +361,14 @@ void RendererD3D9::Reset()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
+void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 {
 	bool dirtyPass = IsDirty(Dirty_Pass | Dirty_Material);
-	auto pass = m_Material ? m_Material->GetPass(passId) : m_Pass;
+	auto pass = m_Material ? m_Material->GetPass() : m_Pass;
 
 	lxAssert(pass.shader != nullptr);
 
+	// Update the pipelineSettings to fit with the configuration.
 	if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty()) {
 		m_FinalOverwrite.Apply(pass);
 		dirtyPass = true;
@@ -391,6 +379,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 		dirtyPass = true;
 	}
 	if(frontFace == EFaceWinding::CCW) {
+		(void)0;
 	} else if(frontFace == EFaceWinding::CW) {
 		pass.culling = FlipFaceSide(pass.culling);
 		dirtyPass = true;
@@ -422,7 +411,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 		// Enable pass settings
 		// First enable shader to mimize stage changes.
 		auto oldShader = m_DeviceState.GetShader();
-		auto oldUseFixedPipeline = m_DeviceState.IsFixedShader();
+		auto oldUseFixedPipeline = dynamic_cast<FixedFunctionShaderD3D9*>(oldShader) != nullptr;
 		if(pass.shader != oldShader) {
 			m_DeviceState.EnableShader(pass.shader);
 
@@ -433,7 +422,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 			else
 				changedShader = true;
 		}
-		m_DeviceState.EnablePass(pass, *m_ParamId.ambient);
+		m_DeviceState.EnablePass(pass);
 	}
 
 	m_DeviceState.SetRenderState(D3DRS_NORMALIZENORMALS, m_NormalizeNormals ? TRUE : FALSE);
@@ -464,8 +453,8 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace, u32 passId)
 	// Only if scene or shader changed.
 	pass.shader->LoadSceneParams(pass);
 
-	if(m_ParamSetCallback && pass.shader)
-		m_ParamSetCallback->SendShaderSettings(passId, pass, m_UserParam);
+	if(m_ParamSetCallback)
+		m_ParamSetCallback->SendShaderSettings(pass, m_UserParam);
 
 	// Start rendering with this shader
 	pass.shader->Render();
@@ -485,38 +474,7 @@ void RendererD3D9::SwitchRenderMode(ERenderMode mode)
 		return;
 
 	SetDirty(Dirty_RenderMode);
-
-	// Leave the old mode
-	switch(m_RenderMode) {
-	case ERenderMode::None: /*nothing to do*/break;
-	case ERenderMode::Mode2D: LeaveRenderMode2D(); break;
-	case ERenderMode::Mode3D: LeaveRenderMode3D(); break;
-	}
-
-	// Enter the new mode
-	switch(mode) {
-	case ERenderMode::None: /*nothing to do*/break;
-	case ERenderMode::Mode2D: EnterRenderMode2D(); break;
-	case ERenderMode::Mode3D: EnterRenderMode3D(); break;
-	}
-
 	m_RenderMode = mode;
-}
-
-void RendererD3D9::EnterRenderMode3D()
-{
-}
-
-void RendererD3D9::LeaveRenderMode3D()
-{
-}
-
-void RendererD3D9::EnterRenderMode2D()
-{
-}
-
-void RendererD3D9::LeaveRenderMode2D()
-{
 }
 
 void RendererD3D9::UpdateTransforms(float polygonOffset)

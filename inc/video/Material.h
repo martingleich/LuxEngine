@@ -15,14 +15,9 @@ public:
 	LUX_API Material();
 	LUX_API ~Material();
 
-	int GetPassCount() const
-	{
-		return 1;
-	}
-
 	const Pass& GetPass() const
 	{
-		return GetPass(0);
+		return m_Pass;
 	}
 
 	void SetPass(const Pass& pass)
@@ -30,7 +25,7 @@ public:
 		lxAssert(pass.shader != nullptr);
 
 		m_Pass = pass;
-		m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
+		OnUpdateShader();
 	}
 
 	void SetShader(Shader* shader)
@@ -38,7 +33,7 @@ public:
 		lxAssert(shader != nullptr);
 
 		m_Pass.shader = shader;
-		m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
+		OnUpdateShader();
 	}
 	
 	StrongRef<Shader> GetShader() const
@@ -103,17 +98,35 @@ public:
 	{
 		m_ShaderValues.FromName(str, false) = color;
 	}
+	void SetColor(int id, const video::ColorF& color)
+	{
+		m_ShaderValues.FromID(id, false) = color;
+	}
 	video::ColorF GetColor(core::StringView str) const
 	{
 		return m_ShaderValues.FromName(str, true);
 	}
+	
+	video::ColorF GetColor(int id) const
+	{
+		return m_ShaderValues.FromID(id, true);
+	}
+	
 	void SetFloat(core::StringView str, float f)
 	{
 		m_ShaderValues.FromName(str, false) = f;
 	}
+	void SetFloat(int id, float f)
+	{
+		m_ShaderValues.FromID(id, false) = f;
+	}
 	float GetFloat(core::StringView str) const
 	{
 		return m_ShaderValues.FromName(str, true);
+	}
+	float GetFloat(int id) const
+	{
+		return m_ShaderValues.FromID(id, true);
 	}
 
 	core::PackagePuffer& GetValues()
@@ -126,17 +139,17 @@ public:
 		return m_ShaderValues;
 	}
 
-	void SetDiffuse(const video::ColorF& color) { m_Pass.diffuse = color; }
-	void SetEmissive(float emissive) { m_Pass.emissive = emissive; }
-	void SetSpecularHardness(float hardness) { m_Pass.specularHardness = hardness; }
-	void SetSpecularIntensity(float intensity) { m_Pass.specularIntensity = intensity; }
-	void SetAlpha(float alpha) { m_Pass.diffuse.SetAlpha(alpha); }
+	void SetDiffuse(const video::ColorF& color) { SetColor(m_DiffuseId, color); }
+	void SetEmissive(float emissive) { SetFloat(m_EmissiveId, emissive); }
+	void SetSpecularHardness(float hardness) { SetFloat(m_SpecularHardnessId, hardness); }
+	void SetSpecularIntensity(float intensity) { SetFloat(m_SpecularIntensityId, intensity); }
+	void SetAlpha(float alpha) { auto c = GetDiffuse(); c.SetAlpha(alpha); SetDiffuse(c); }
 
-	video::ColorF GetDiffuse() const { return m_Pass.diffuse; }
-	float GetEmissive() const { return m_Pass.emissive; }
-	float GetSpecuularHardness() const { return m_Pass.specularHardness; }
-	float GetSpecularIntensity() const { return m_Pass.specularIntensity; }
-	float GetAlpha() const { return m_Pass.diffuse.GetAlpha(); }
+	video::ColorF GetDiffuse() const { return GetColor(m_DiffuseId); }
+	float GetEmissive() const { return GetFloat(m_EmissiveId); }
+	float GetSpecuularHardness() const { return GetFloat(m_SpecularHardnessId); }
+	float GetSpecularIntensity() const { return GetFloat(m_SpecularIntensityId); }
+	float GetAlpha() const { return GetDiffuse().GetAlpha(); }
 
 	void SetRequirements(EMaterialReqFlag requirements)
 	{
@@ -159,9 +172,13 @@ public:
 	}
 
 protected:
-	const Pass& GetPass(int) const
+	void OnUpdateShader()
 	{
-		return m_Pass;
+		m_ShaderValues.SetType(&m_Pass.shader->GetParamPackage());
+		m_DiffuseId = m_ShaderValues.GetType()->GetParamIdByName("diffuse");
+		m_EmissiveId = m_ShaderValues.GetType()->GetParamIdByName("emissive");
+		m_SpecularHardnessId = m_ShaderValues.GetType()->GetParamIdByName("specularHardness");
+		m_SpecularIntensityId = m_ShaderValues.GetType()->GetParamIdByName("specularIntensity");
 	}
 
 private:
@@ -169,6 +186,10 @@ private:
 	EMaterialReqFlag m_Requirement;
 
 	core::PackagePuffer m_ShaderValues;
+	int m_DiffuseId;
+	int m_EmissiveId;
+	int m_SpecularHardnessId;
+	int m_SpecularIntensityId;
 };
 
 } // namespace video

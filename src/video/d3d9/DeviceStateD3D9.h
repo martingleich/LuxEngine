@@ -28,16 +28,17 @@ public:
 
 	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
-	void SetD3DColors(const Pass& pass);
-	void EnablePass(const Pass& p, const video::ColorF& ambient);
+	void EnablePass(const Pass& p);
 
 	void EnableFixedFunctionShader(
 		const core::Array<TextureLayer>& layer,
 		const core::Array<TextureStageSettings>& settings,
-		bool useVertexColor);
+		bool useVertexColor,
+		ColorF diffuse, float emissive, float specularHardness, float specularIntensity,
+		ColorF ambient, ELightingFlag lighting);
 
 	void EnableTextureLayer(u32 stage, const TextureLayer& layer);
-	void EnableTextureStage(u32 stage, const TextureStageSettings& settings, bool useVertexData);
+	void EnableTextureStage(u32 stage, const TextureStageSettings& settings, bool useVertexData, ELightingFlag lighting);
 
 	void DisableTexture(u32 stage);
 
@@ -51,7 +52,6 @@ public:
 	void SetTexture(u32 stage, IDirect3DBaseTexture9* tex);
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matrix4& m);
 
-	void EnableFog(bool enable);
 	void SetFog(const FogData& fog);
 
 	void SetStencilMode(const StencilMode& mode);
@@ -65,21 +65,12 @@ public:
 			m_Shader->Disable();
 		if(s) {
 			s->Enable();
-			m_IsFixedShader = (dynamic_cast<FixedFunctionShaderD3D9*>(s) != nullptr);
 		}
 
 		m_Shader = s;
 	}
 
-	Shader* GetShader() 
-	{
-		return m_Shader;
-	}
-
-	bool IsFixedShader()
-	{
-		return m_IsFixedShader;
-	}
+	Shader* GetShader() { return m_Shader; }
 
 	void ReleaseUnmanaged();
 	void Reset();
@@ -95,14 +86,10 @@ private:
 private:
 	const D3DCAPS9* m_Caps;
 	D3DMATERIAL9 m_D3DMaterial;
-	video::ColorF m_Ambient;
 
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
 
-	bool m_UseLighting;
-
 	WeakRef<video::Shader> m_Shader;
-	bool m_IsFixedShader = false;
 
 	int m_ActiveTextureLayers;
 

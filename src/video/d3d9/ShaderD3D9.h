@@ -49,7 +49,6 @@ public:
 private:
 	enum EParamType
 	{
-		ParamType_DefaultMaterial,
 		ParamType_ParamMaterial,
 		ParamType_Scene,
 	};
@@ -148,11 +147,7 @@ private:
 	void CastTypeToShader(EType type, const void* in, void* out);
 	void CastShaderToType(EType type, const void* in, void* out);
 
-	static int GetDefaultId(core::StringView name);
-	static EType GetDefaultType(u32 id);
-
 	static bool IsTypeCompatible(EType a, EType b);
-
 	static core::Type GetCoreType(EType type);
 
 private:
