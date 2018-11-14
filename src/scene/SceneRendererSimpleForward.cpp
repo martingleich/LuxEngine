@@ -198,13 +198,11 @@ void SceneRendererSimpleForward::EnableOverwrite(ERenderPass pass, video::Pipeli
 	bool useOverwrite = false;
 	video::PipelineOverwrite overwrite;
 	if(settings.wireframe) {
-		overwrite.Enable(video::EPipelineSetting::DrawMode);
-		overwrite.drawMode = video::EDrawMode::Wire;
+		overwrite.OverwriteDrawMode(video::EDrawMode::Wire);
 		useOverwrite = true;
 	}
 	if(settings.disableCulling) {
-		overwrite.Enable(video::EPipelineSetting::Culling);
-		overwrite.culling = video::EFaceSide::None;
+		overwrite.OverwriteCulling(video::EFaceSide::None);
 		useOverwrite = true;
 	}
 	if(useOverwrite)
@@ -353,8 +351,7 @@ void SceneRendererSimpleForward::DrawScene()
 
 	if(drawStencilShadows) {
 		video::PipelineOverwrite illumOver;
-		illumOver.Enable(video::EPipelineSetting::Lighting);
-		illumOver.lighting = video::ELightingFlag::AmbientEmit;
+		illumOver.OverwriteLighting(video::ELightingFlag::AmbientEmit);
 		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 	} else {
 		for(auto& e : illuminating)
@@ -408,18 +405,10 @@ void SceneRendererSimpleForward::DrawScene()
 			m_StencilShadowRenderer.End();
 
 			video::PipelineOverwrite illumOver;
-			illumOver.
-				Enable(video::EPipelineSetting::ZWrite).
-				Enable(video::EPipelineSetting::Lighting).
-				Enable(video::EPipelineSetting::AlphaBlending).
-				Enable(video::EPipelineSetting::Stencil);
-			illumOver.zWriteEnabled = false;
-			illumOver.lighting = video::ELightingFlag::DiffSpec;
-			illumOver.alpha.blendOperator = video::EBlendOperator::Add;
-			illumOver.alpha.srcFactor = video::EBlendFactor::One;
-			illumOver.alpha.dstFactor = video::EBlendFactor::One;
-			illumOver.stencil = m_StencilShadowRenderer.GetIllumniatedStencilMode();
-
+			illumOver.OverwriteZWrite(false);
+			illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
+			illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
+			illumOver.OverwriteStencil(m_StencilShadowRenderer.GetIllumniatedStencilMode());
 			EnableOverwrite(ERenderPass::Solid, pot);
 			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 
@@ -440,17 +429,12 @@ void SceneRendererSimpleForward::DrawScene()
 			for(auto illum : nonShadowCasting)
 				m_Renderer->AddLight(illum->GetLightData());
 
-			video::PipelineOverwrite illumOver;
-			illumOver.
-				Enable(video::EPipelineSetting::ZWrite).
-				Enable(video::EPipelineSetting::Lighting).
-				Enable(video::EPipelineSetting::AlphaBlending);
-			illumOver.zWriteEnabled = false;
-			illumOver.lighting = video::ELightingFlag::DiffSpec;
-			illumOver.alpha.blendOperator = video::EBlendOperator::Add;
-			illumOver.alpha.srcFactor = video::EBlendFactor::One;
-			illumOver.alpha.dstFactor = video::EBlendFactor::One;
 			EnableOverwrite(ERenderPass::Solid, pot);
+
+			video::PipelineOverwrite illumOver;
+			illumOver.OverwriteZWrite(false);
+			illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
+			illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
 			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 
 			sceneData.pass = ERenderPass::Solid;

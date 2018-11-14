@@ -24,11 +24,11 @@ SkyBox::SkyBox() :
 	if(mat) {
 		m_Material = mat->Clone();
 	} else {
-		mat = video::MaterialLibrary::Instance()->CloneMaterial("solid");
-		auto pass = mat->GetPass();
+		auto solid = video::MaterialLibrary::Instance()->GetMaterial("solid");
+		video::Pass pass = solid->GetPass();
 		pass.fogEnabled = false;
 		pass.lighting = video::ELightingFlag::Disabled;
-		mat->SetPass(pass);
+		mat = video::MaterialLibrary::Instance()->CreateMaterial(pass);
 		video::MaterialLibrary::Instance()->SetMaterial("skybox", mat);
 		m_Material = mat;
 	}
@@ -38,8 +38,7 @@ SkyBox::SkyBox(const SkyBox& other) :
 	m_SkyTexture(other.m_SkyTexture),
 	m_UseCubeTexture(other.m_UseCubeTexture)
 {
-	if(other.m_Material)
-		m_Material = other.m_Material->Clone().As<video::Material>();
+	m_Material = other.m_Material->Clone();
 }
 
 SkyBox::~SkyBox()
@@ -156,8 +155,7 @@ void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data
 
 	// Disable z comparison for sky box renderering
 	video::PipelineOverwrite over;
-	over.Enable(video::EPipelineSetting::ZWrite);
-	over.zWriteEnabled = false;
+	over.OverwriteZWrite(false);
 	video::PipelineOverwriteToken token;
 	renderer->PushPipelineOverwrite(over, &token);
 
@@ -204,7 +202,7 @@ StrongRef<video::BaseTexture> SkyBox::GetSkyTexture() const
 
 video::Material* SkyBox::GetMaterial()
 {
-		return m_Material;
+	return m_Material;
 }
 
 const video::Material* SkyBox::GetMaterial() const

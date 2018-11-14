@@ -40,6 +40,9 @@ public:
 	LUX_API StrongRef<video::Material> GetMaterial(core::StringView name);
 	LUX_API StrongRef<video::Material> TryGetMaterial(core::StringView name);
 	LUX_API StrongRef<video::Material> CloneMaterial(core::StringView name);
+	LUX_API StrongRef<video::Material> CreateMaterial(video::Pass pass, EMaterialReqFlag reqs = EMaterialReqFlag::None);
+	LUX_API StrongRef<video::Material> CreateSolidMaterial(video::Shader* shader);
+	LUX_API StrongRef<video::Material> CreateTransparentMaterial(video::Shader* shader);
 
 	LUX_API void SetMaterial(EKnownMaterial name, Material* material);
 	LUX_API StrongRef<video::Material> GetMaterial(EKnownMaterial name);

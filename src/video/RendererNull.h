@@ -28,7 +28,6 @@ class RendererNull : public Renderer
 protected:
 	enum EDirtyFlags
 	{
-		Dirty_Material,
 		Dirty_Pass,
 		Dirty_World,
 		Dirty_ViewProj,
@@ -47,7 +46,6 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	void SetPass(const Pass& pass, bool useOverwrite = false, ShaderParamSetCallback* paramSetCallback = nullptr, void* userParam=nullptr);
-	void SetMaterial(AbstractMaterial* material);
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -129,7 +127,6 @@ protected:
 	ShaderParamSetCallback* m_ParamSetCallback;
 	void* m_UserParam;
 	Pass m_Pass;
-	AbstractMaterial* m_Material;
 
 	core::Array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
 	PipelineOverwrite m_FinalOverwrite;

@@ -21,7 +21,6 @@ enum class ERenderPass
 
 	Transparent,
 	Solid,
-	DeferredEffect,
 	Any,
 };
 

@@ -12,13 +12,6 @@ namespace lux
 {
 namespace video
 {
-enum class EMaterialReqFlag
-{
-	None = 0,
-	Transparent = 1,
-	DeferredEffect = 2,
-};
-
 enum class EPipelineSetting
 {
 	Stencil,
@@ -80,41 +73,17 @@ public:
 class PipelineOverwrite
 {
 public:
-	// Bitset for enabled flags.
-	u32 enabledOverwrites;
-
-	// Pipelinesettings.
-	StencilMode stencil;
-
-	float polygonOffset;
-
-	AlphaBlendMode alpha;
-
-	EComparisonFunc zBufferFunc;
-	u32 colorMask;
-	EDrawMode drawMode;
-	ELightingFlag lighting;
-	EFaceSide culling;
-
-	bool fogEnabled : 1;
-	bool zWriteEnabled : 1;
-	bool gouraudShading : 1;
-
 	PipelineOverwrite() :
 		enabledOverwrites(0)
 	{
 	}
 
-	PipelineOverwrite& Enable(EPipelineSetting setting)
-	{
-		enabledOverwrites |= 1 << ((u32)setting);
-		return *this;
-	}
 	PipelineOverwrite& Disable(EPipelineSetting setting)
 	{
 		enabledOverwrites &= ~(1 << ((u32)setting));
 		return *this;
 	}
+	
 	bool IsEnabled(EPipelineSetting setting) const
 	{
 		return (enabledOverwrites & (1 << (u32)setting)) != 0;
@@ -168,6 +137,78 @@ public:
 		if(IsEnabled(EPipelineSetting::Culling))
 			pass.culling = culling;
 	}
+
+	void OverwriteStencil(StencilMode v) {
+		stencil = v;
+		Enable(EPipelineSetting::Stencil);
+	}
+	void OverwritePolygonOffset(float v) {
+		polygonOffset = v;
+		Enable(EPipelineSetting::PolygonOffset);
+	}
+	void OverwriteAlpha(AlphaBlendMode v) {
+		alpha = v;
+		Enable(EPipelineSetting::AlphaBlending);
+	}
+	void OverwriteZBufferFunc(EComparisonFunc v) {
+		zBufferFunc = v;
+		Enable(EPipelineSetting::ZBufferFunc);
+	}
+	void OverwriteColorMask(u32 v) {
+		colorMask = v;
+		Enable(EPipelineSetting::ColorMask);
+	}
+	void OverwriteDrawMode(EDrawMode v) {
+		drawMode = v;
+		Enable(EPipelineSetting::DrawMode);
+	}
+	void OverwriteLighting(ELightingFlag v) {
+		lighting = v;
+		Enable(EPipelineSetting::Lighting);
+	}
+	void OverwriteCulling(EFaceSide v) {
+		culling = v;
+		Enable(EPipelineSetting::Culling);
+	}
+	void OverwriteFog(bool v) {
+		fogEnabled = v;
+		Enable(EPipelineSetting::Fog);
+	}
+	void OverwriteZWrite(bool v) {
+		zWriteEnabled = v;
+		Enable(EPipelineSetting::ZWrite);
+	}
+	void OverwriteGourandShading(bool v) {
+		gouraudShading = v;
+		Enable(EPipelineSetting::GourandShading);
+	}
+private:
+	PipelineOverwrite& Enable(EPipelineSetting setting)
+	{
+		enabledOverwrites |= 1 << ((u32)setting);
+		return *this;
+	}
+
+private:
+	// Bitset for enabled flags.
+	u32 enabledOverwrites;
+
+	// Pipelinesettings.
+	StencilMode stencil;
+
+	float polygonOffset;
+
+	AlphaBlendMode alpha;
+
+	EComparisonFunc zBufferFunc;
+	u32 colorMask;
+	EDrawMode drawMode;
+	ELightingFlag lighting;
+	EFaceSide culling;
+
+	bool fogEnabled : 1;
+	bool zWriteEnabled : 1;
+	bool gouraudShading : 1;
 };
 
 } // namespace video

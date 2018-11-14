@@ -12,6 +12,7 @@
 #include "core/Attributes.h"
 
 #include "video/RenderStatistics.h"
+#include "video/Material.h"
 
 namespace lux
 {
@@ -246,7 +247,10 @@ public:
 	virtual void SetPass(const Pass& pass, bool useOverwrite = false, ShaderParamSetCallback* paramSetCallback = nullptr, void* userParam = nullptr) = 0;
 
 	//! Set the active material
-	virtual void SetMaterial(AbstractMaterial* material) = 0;
+	void SetMaterial(AbstractMaterial* material)
+	{
+		SetPass(material->GetPass(), true, material);
+	}
 
 	///////////////////////////////////////////////////////////////////////////
 

@@ -1281,9 +1281,6 @@ public:
 		material->SetSpecularIntensity(xmat.specularColor.GetLuminance());
 		material->SetEmissive(xmat.emmisiveColor.GetLuminance());
 		material->SetTexture(0, tex);
-		auto p = material->GetPass();
-		p.culling = video::EFaceSide::None;
-		material->SetPass(p);
 		return material;
 	}
 

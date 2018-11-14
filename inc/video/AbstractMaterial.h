@@ -8,17 +8,17 @@ namespace lux
 namespace video
 {
 
-class AbstractMaterial : public ShaderParamSetCallback, public Referable
+enum class EMaterialReqFlag
+{
+	None = 0,
+	Transparent = 1,
+};
+
+class AbstractMaterial : public ShaderParamSetCallback, public ReferenceCounted
 {
 public:
-	virtual const Pass& GetPass() const = 0;
-
 	virtual EMaterialReqFlag GetRequirements() const = 0;
-
-	StrongRef<AbstractMaterial> Clone() const
-	{
-		return CloneImpl().StaticCastStrong<AbstractMaterial>();
-	}
+	virtual const Pass& GetPass() const = 0;
 };
 
 } // namespace video

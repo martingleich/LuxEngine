@@ -40,11 +40,8 @@ void MaterialLibrary::Destroy()
 MaterialLibrary::MaterialLibrary()
 {
 	{
-		auto solid = LUX_NEW(Material);
-		video::Pass pass;
-		video::TextureStageSettings tss;
-		pass.shader = GetFixedFunctionShader({"texture"}, {tss});
-		solid->SetPass(pass);
+		auto shader = GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
+		auto solid = CreateSolidMaterial(shader);
 		m_MaterialMap["solid"] = (int)EKnownMaterial::Solid;
 		lxAssert(EKnownMaterial::Solid == m_MaterialList.Size());
 		m_MaterialList.PushBack(solid);
@@ -60,26 +57,15 @@ MaterialLibrary::MaterialLibrary()
 		tss.colorArg1 = ETextureArgument::Diffuse;
 		pass.shader = GetFixedFunctionShader({"texture"}, {tss}, true);
 
-		auto debug = LUX_NEW(Material);
-		debug->SetPass(pass);
+		auto debug = CreateMaterial(pass);
 		m_MaterialMap["debugOverlay"] = (int)EKnownMaterial::DebugOverlay;
 		lxAssert(EKnownMaterial::DebugOverlay == m_MaterialList.Size());
 		m_MaterialList.PushBack(debug);
 	}
 
 	{
-		video::Pass pass;
-		pass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
-		pass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
-		pass.alpha.blendOperator = video::EBlendOperator::Add;
-		pass.zWriteEnabled = false;
-		pass.fogEnabled = false;
-		video::TextureStageSettings tss;
-		pass.shader = GetFixedFunctionShader({"texture"}, {tss});
-
-		auto transparent = LUX_NEW(Material);
-		transparent->SetRequirements(video::EMaterialReqFlag::Transparent);
-		transparent->SetPass(pass);
+		auto shader = GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
+		auto transparent = CreateTransparentMaterial(shader);
 		m_MaterialMap["transparent"] = (int)EKnownMaterial::Transparent;
 		lxAssert(EKnownMaterial::Transparent == m_MaterialList.Size());
 		m_MaterialList.PushBack(transparent);
@@ -189,6 +175,29 @@ StrongRef<video::Material> MaterialLibrary::TryGetMaterial(core::StringView name
 StrongRef<video::Material> MaterialLibrary::CloneMaterial(core::StringView name)
 {
 	return GetMaterial(name)->Clone();
+}
+
+StrongRef<video::Material> MaterialLibrary::CreateMaterial(video::Pass pass, EMaterialReqFlag reqs)
+{
+	return LUX_NEW(Material)(pass, reqs);
+}
+StrongRef<video::Material> MaterialLibrary::CreateSolidMaterial(video::Shader* shader)
+{
+	video::Pass p;
+	p.shader = shader;
+	return CreateMaterial(p, EMaterialReqFlag::None);
+}
+
+StrongRef<video::Material> MaterialLibrary::CreateTransparentMaterial(video::Shader* shader)
+{
+	video::Pass p;
+	p.shader = shader;
+	p.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
+	p.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
+	p.alpha.blendOperator = video::EBlendOperator::Add;
+	p.zWriteEnabled = false;
+	p.fogEnabled = false;
+	return CreateMaterial(p, EMaterialReqFlag::Transparent);
 }
 
 void MaterialLibrary::SetMaterial(EKnownMaterial name, Material* material)

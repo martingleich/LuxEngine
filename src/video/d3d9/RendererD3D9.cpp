@@ -308,9 +308,6 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 		vertexOffset += video::GetPointCount(rq.primitiveType, rq.firstPrimitive);
 
 	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(rq.primitiveType);
-	DWORD stride = (DWORD)vformat->GetStride(0);
-	DWORD indexStride = iformat == EIndexFormat::Bit16 ? 2 : 4;
-	D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(iformat);
 
 	SetVertexFormat(*vformat);
 	SwitchRenderMode(rq.is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
@@ -318,7 +315,10 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 	SetupRendering(rq.frontFace);
 	HRESULT hr = E_FAIL;
 	if(rq.userPointer) {
+		DWORD stride = (DWORD)vformat->GetStride(0);
 		if(rq.indexed) {
+			DWORD indexStride = iformat == EIndexFormat::Bit16 ? 2 : 4;
+			D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(iformat);
 			auto indexData = (u8*)rq.userData.indexData + indexOffset * indexStride;
 			hr = m_Device->DrawIndexedPrimitiveUP(d3dPrimitiveType, 0, vertexCount, rq.primitiveCount, indexData, d3dIndexFormat, rq.userData.vertexData, stride);
 		} else {
@@ -363,8 +363,8 @@ void RendererD3D9::Reset()
 ///////////////////////////////////////////////////////////////////////////
 void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 {
-	bool dirtyPass = IsDirty(Dirty_Pass | Dirty_Material);
-	auto pass = m_Material ? m_Material->GetPass() : m_Pass;
+	bool dirtyPass = IsDirty(Dirty_Pass);
+	auto pass = m_Pass;
 
 	lxAssert(pass.shader != nullptr);
 
@@ -460,7 +460,6 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 	pass.shader->Render();
 
 	ClearDirty(Dirty_Rendertarget);
-	ClearDirty(Dirty_Material);
 	ClearDirty(Dirty_RenderMode);
 	ClearDirty(Dirty_Overwrites);
 	m_PrevFog = pass.fogEnabled;

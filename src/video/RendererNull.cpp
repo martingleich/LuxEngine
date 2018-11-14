@@ -103,21 +103,10 @@ void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ShaderParamSetCa
 {
 	SetDirty(Dirty_Pass);
 
-	m_Material = nullptr;
 	m_Pass = pass;
 	m_ParamSetCallback = paramSetCallback;
 	m_UserParam = userParam;
 	m_UseOverwrite = useOverwrite;
-}
-
-void RendererNull::SetMaterial(AbstractMaterial* material)
-{
-	SetDirty(Dirty_Material);
-
-	m_Material = material;
-	m_ParamSetCallback = material;
-	m_UserParam = material;
-	m_UseOverwrite = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
