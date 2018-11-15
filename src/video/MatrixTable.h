@@ -48,17 +48,17 @@ public:
 		{
 		}
 
-		core::VariableAccess GetAccess(bool)
+		core::VariableAccess GetAccess(bool) override
 		{
 			return table->GetParamById(id);
 		}
 
-		const core::String& GetName() const
+		const core::String& GetName() const override
 		{
 			return table->GetMatrixName(id);
 		}
 
-		core::Type GetType() const
+		core::Type GetType() const override
 		{
 			return core::Types::Matrix();
 		}

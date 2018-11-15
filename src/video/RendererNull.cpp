@@ -80,19 +80,21 @@ RendererNull::RendererNull(VideoDriver* driver) :
 	m_DirtyFlags(0xFFFFFFFF), // Set all dirty flags at start
 	m_Driver(driver)
 {
-	m_Params.AddAttribute("camPos", math::Vector3F(0, 0, 0));
-	m_ParamId.lighting = m_Params.AddAttribute("lighting", (float)video::ELightingFlag::Enabled);
-	m_ParamId.ambient = m_Params.AddAttribute("ambient", video::ColorF(0, 0, 0));
-	m_ParamId.time = m_Params.AddAttribute("time", 0.0f);
+	core::AttributeListBuilder alb;
+	m_ParamIds.lighting = alb.AddAttribute("lighting", (float)video::ELightingFlag::Enabled);
+	m_ParamIds.ambient = alb.AddAttribute("ambient", video::ColorF(0, 0, 0));
+	m_ParamIds.time = alb.AddAttribute("time", 0.0f);
 
-	m_ParamId.fog1 = m_Params.AddAttribute("fog1", video::ColorF(1, 1, 1, 0));
-	m_ParamId.fog2 = m_Params.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
+	m_ParamIds.fog1 = alb.AddAttribute("fog1", video::ColorF(1, 1, 1, 0));
+	m_ParamIds.fog2 = alb.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
 
 	for(int i = 0; i < m_MatrixTable.GetCount(); ++i)
-		m_Params.AddAttribute(m_MatrixTable.CreateAttribute(i));
+		alb.AddAttribute(m_MatrixTable.CreateAttribute(i));
 
 	for(int i = 0; i < 16; ++i)
-		m_ParamId.lights.PushBack(m_Params.AddAttribute("light" + core::StringConverter::ToString(i), math::Matrix4::ZERO));
+		m_ParamIds.lights.PushBack(alb.AddAttribute("light" + core::StringConverter::ToString(i), math::Matrix4::ZERO));
+
+	m_Params = m_BaseParams = alb.BuildAndReset();
 
 	m_RenderStatistics = RenderStatistics::Instance();
 }
@@ -226,17 +228,24 @@ bool RendererNull::GetNormalizeNormals() const
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::AddParam(const core::String& name, core::Type type, const void* value)
+core::AttributeList RendererNull::GetBaseParams() const
 {
-	m_Params.AddAttribute(name, type, value);
+	return m_BaseParams;
 }
 
-core::AttributePtr RendererNull::GetParam(const core::String& name) const
+void RendererNull::SetParams(core::AttributeList attributes)
 {
-	return m_Params.Pointer(name);
+	if(m_Params != attributes) {
+		auto p = m_Params;
+		while(p.IsValid() && p != m_BaseParams)
+			p = p.GetBase();
+		if(!p.IsValid())
+			throw core::GenericInvalidArgumentException("attributes", "UserParams must inherit from BaseParams.");
+	}
+	m_Params = attributes;
 }
 
-const core::Attributes& RendererNull::GetParams() const
+core::AttributeList RendererNull::GetParams() const
 {
 	return m_Params;
 }

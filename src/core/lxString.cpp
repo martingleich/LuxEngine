@@ -15,61 +15,6 @@ Type String()
 }
 } // namespace Types
 
-template <typename AddResultT>
-static int BasicSplit(AddResultT&& outputter, StringView input, StringView split, int maxCount, bool ignoreEmpty)
-{
-	if(maxCount == 0)
-		return 0;
-	if(maxCount < 0)
-		maxCount = std::numeric_limits<int>::max();
-
-	int count = 0;
-	const char* inCur = input.Data();
-	const char* inEnd = inCur + input.Size();
-	const char* splitCur = inCur;
-	int splitSize = 0;
-	if(split.Size() == 1) {
-		while(inCur+1 <= inEnd) {
-			if(*inCur == *split.Data()) {
-				if(!(ignoreEmpty && splitSize == 0)) {
-					outputter(splitCur, splitSize);
-					++count;
-				}
-				++inCur;
-				splitCur = inCur;
-				splitSize = 0;
-				if(count == maxCount)
-					break;
-			} else {
-				++splitSize;
-				++inCur;
-			}
-		}
-	} else {
-		while(inCur+split.Size() <= inEnd) {
-			if(memcmp(inCur, split.Data(), split.Size()) == 0) {
-				if(!(ignoreEmpty && splitSize == 0)) {
-					outputter(splitCur, splitSize);
-					++count;
-					if(count == maxCount)
-						break;
-				}
-				splitCur = inCur + split.Size();
-				splitSize = 0;
-			} else {
-				++splitSize;
-				++inCur;
-			}
-		}
-	}
-
-	if(!(ignoreEmpty && splitSize == 0) && count != maxCount) {
-		outputter(splitCur, splitSize);
-		++count;
-	}
-	return count;
-}
-
 ////////////////////////////////////////////////////////////////////////////
 
 const String String::EMPTY = String();
@@ -454,15 +399,13 @@ String& String::Strip(int first, int end)
 
 int String::Split(StringView split, String* outArray, int maxCount, bool ignoreEmpty) const
 {
-	return BasicSplit([&outArray](const char* data, int size) { *outArray++ = StringView(data, size); },
-		(StringView)*this, split, maxCount, ignoreEmpty);
+	return AsView().BasicSplit(split, maxCount, ignoreEmpty, [&outArray](core::StringView view) { *outArray++ = view; });
 }
 
 Array<String> String::Split(StringView split, bool ignoreEmpty) const
 {
 	Array<String> out;
-	BasicSplit([&out](const char* data, int size) { out.EmplaceBack(data, size); },
-		(StringView)*this, split, -1, ignoreEmpty);
+	AsView().BasicSplit(split, -1, ignoreEmpty, [&out] (core::StringView view) { out.EmplaceBack(view); });
 	return out;
 }
 

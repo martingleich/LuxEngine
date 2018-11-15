@@ -475,7 +475,7 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 StrongRef<Shader> VideoDriverD3D9::CreateFixedFunctionShader(
 	const FixedFunctionParameters& params)
 {
-	return LUX_NEW(FixedFunctionShaderD3D9)(m_Renderer, m_DeviceState, params);
+	return LUX_NEW(FixedFunctionShaderD3D9)(m_DeviceState, params);
 }
 
 const RendertargetD3D9& VideoDriverD3D9::GetBackbufferTarget()

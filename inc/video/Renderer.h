@@ -302,23 +302,9 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	//! Add a new scene parameter
-	/**
-	Scene parameters can be accessed from shaders of material renderers.
-	\param name The name of the new parameter
-	\param type The type of the new parameter
-	\throws InvalidArgumentException If the name is already in use
-	*/
-	virtual void AddParam(const core::String& name, core::Type type, const void* value = nullptr) = 0;
-
-	template <typename T>
-	void AddParam(const core::String& name, const T& value)
-	{
-		AddParam(name, core::TemplType<T>::Get(), &value);
-	}
-
-	virtual core::AttributePtr GetParam(const core::String& name) const = 0;
-	virtual const core::Attributes& GetParams() const = 0;
+	virtual core::AttributeList GetBaseParams() const = 0;
+	virtual void SetParams(core::AttributeList attributes) = 0;
+	virtual core::AttributeList GetParams() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

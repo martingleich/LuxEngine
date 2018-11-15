@@ -74,10 +74,9 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void AddParam(const core::String& name, core::Type type, const void* value);
-
-	core::AttributePtr GetParam(const core::String& name) const;
-	const core::Attributes& GetParams() const;
+	core::AttributeList GetBaseParams() const;
+	void SetParams(core::AttributeList attributes);
+	core::AttributeList GetParams() const;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -141,9 +140,10 @@ protected:
 	math::Matrix4 m_TransformView;
 	math::Matrix4 m_TransformProj;
 
-	MatrixTable m_MatrixTable; //! The currently set matrices, these are used as arguments for shaders and other rendercomponents
-	core::Attributes m_Params;
-	ParamIdCollection m_ParamId;
+	MatrixTable m_MatrixTable; //!< The currently set matrices, these are used as arguments for shaders and other rendercomponents
+	core::AttributeList m_BaseParams;
+	core::AttributeList m_Params;
+	ParamIdCollection m_ParamIds;
 
 	u32 m_DirtyFlags; //!< The flag list of changed user parameters, see \ref EDirtyFlags
 

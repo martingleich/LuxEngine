@@ -21,6 +21,8 @@ namespace lux
 namespace video
 {
 
+namespace
+{
 class luxD3DXShaderIncludes : public ID3DXInclude
 {
 public:
@@ -78,14 +80,14 @@ private:
 	core::Array<const void*> m_Allocated;
 };
 
-static luxD3DXShaderIncludes g_luxD3DXShaderIncludes;
+luxD3DXShaderIncludes g_luxD3DXShaderIncludes;
 
-static core::String FormatD3DXShaderError(const core::String& input, bool isVertex)
+core::String FormatD3DXShaderError(core::StringView input, bool isVertex)
 {
 	// File(line, col): error number: error-string
 	auto colon = input.FindReverse(":");
-	colon = colon + input.BeginSubStringView(colon).FindReverse(":");
-	auto base_name = colon + input.BeginSubStringView(colon).FindReverse("\\");
+	colon = colon + input.BeginSubString(colon).FindReverse(":");
+	auto base_name = colon + input.BeginSubString(colon).FindReverse("\\");
 	if(base_name == colon)
 		base_name = 0;
 	else
@@ -94,10 +96,25 @@ static core::String FormatD3DXShaderError(const core::String& input, bool isVert
 	return (isVertex ? "vs: " : "ps: ") + input.EndSubString(base_name);
 }
 
+void WriteErrors(core::Array<core::String>* outList, UnknownRefCounted<ID3DXBuffer> errors, bool isVertex)
+{
+	if(errors) {
+		if(outList) {
+			const char* perr = (const char*)errors->GetBufferPointer();
+			core::StringView str(perr, std::strlen(perr));
+			str.BasicSplit("\n", -1, true, [&](core::StringView str) {
+				if(!str.IsWhitespace())
+					outList->PushBack(FormatD3DXShaderError(str, isVertex));
+			});
+		}
+	}
+}
+}
+
 ShaderD3D9::ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& state) :
 	m_D3DDevice((IDirect3DDevice9*)driver->GetLowLevelDevice()),
-	m_Renderer(driver->GetRenderer()),
-	m_DeviceState(state)
+	m_DeviceState(state),
+	m_CurAttributes(nullptr)
 {
 }
 
@@ -110,11 +127,6 @@ bool ShaderD3D9::Init(
 	core::StringView psCode, core::StringView psEntryPoint, core::StringView psProfile,
 	core::Array<core::String>* errorList)
 {
-	if(vsEntryPoint.IsEmpty())
-		vsEntryPoint = "mainVS";
-	if(psEntryPoint.IsEmpty())
-		psEntryPoint = "mainPS";
-
 	UnknownRefCounted<ID3DXConstantTable> vertexShaderConstants;
 	UnknownRefCounted<ID3DXConstantTable> pixelShaderConstants;
 
@@ -133,80 +145,55 @@ bool ShaderD3D9::Init(
 		return false;
 
 	// Load all shader parameters.
-	core::Array<HelperEntry> helper;
 	u32 nameMemoryNeeded = 0;
-	LoadAllParams(true, vertexShaderConstants, helper, nameMemoryNeeded, errorList);
-	LoadAllParams(false, pixelShaderConstants, helper, nameMemoryNeeded, errorList);
-
-	u32 materialParamCount = (u32)helper.Size();
-	// Param ids are saved as 16-Bit integer
-	lxAssert(materialParamCount <= 0xFFFF);
+	core::Array<Param> unsortedParams;
+	LoadAllParams(true, vertexShaderConstants, unsortedParams, nameMemoryNeeded, errorList);
+	LoadAllParams(false, pixelShaderConstants, unsortedParams, nameMemoryNeeded, errorList);
 
 	u32 nameCursor = 0;
 	core::ParamPackageBuilder ppb;
-	m_Params.Reserve(helper.Size());
 	m_Names.SetMinSize(nameMemoryNeeded);
-	u32 paramId = 0;
-	for(u32 i = 0; i < materialParamCount; ++i) {
-		Param entry;
-		const HelperEntry& h = helper[i];
-		switch(h.paramType) {
-		case ParamType_ParamMaterial:
+
+	// Create param package and fill in additional data.
+	for(int i = 0; i < unsortedParams.Size(); ++i) {
+		Param& p = unsortedParams[i];
+		switch(p.paramType) {
+		case EParamType::Param:
 		{
+			// Add to param package.
 			u8 tempMemory[sizeof(float) * 16]; // Matrix is the biggest type.
-			if(h.defaultValue)
-				CastShaderToType(h.type, h.defaultValue, tempMemory);
+			if(p.defaultValue)
+				CastShaderToType(p.type, p.defaultValue, tempMemory);
 			else
-				std::memset(tempMemory, 0, sizeof(tempMemory)); // Set's integers and float to zero.
-			entry.index = DefaultParam_COUNT + ppb.GetParamCount();
-			ppb.AddParam(h.name, GetCoreType(h.type), tempMemory);
-			entry.paramType = ParamType_ParamMaterial;
-
-			++paramId;
+				std::memset(tempMemory, 0, sizeof(tempMemory)); // Sets integers and float to zero.
+			ppb.AddParam(p.name, GetCoreType(p.type), tempMemory);
 		}
 		break;
-		case ParamType_Scene:
+		case EParamType::Scene:
 		{
-			core::AttributePtr ptr;
-			bool jumpToNext = false;
-			ptr = m_Renderer->GetParam(h.name);
-			if(!ptr) {
-				if(errorList)
-					errorList->PushBack(core::StringConverter::Format("Warning: Unknown scene value in shader: ~s.", h.name));
-				jumpToNext = true;
-			}
-
-			if(jumpToNext)
-				continue;
-
-			if(GetCoreType(h.type) != ptr->GetType()) {
-				if(errorList)
-					errorList->PushBack(core::StringConverter::Format("Warning: Incompatible scene value type in shader: ~s.", h.name));
-				continue;
-			}
-
-			entry.sceneValue = ptr;
-			entry.paramType = ParamType_Scene;
 		}
 		break;
+		default:
+			lxAssertNeverReach("");
 		}
 
-		// Put name into namelist.
-		memcpy((char*)m_Names + nameCursor, helper[i].name.Data(), helper[i].name.Size());
-		((char*)m_Names)[nameCursor + helper[i].name.Size()] = 0;
+		// Backup name into namelist, and change the name location.
+		// The namelist is used, so the D3DXConstantTable can be released.
+		std::memcpy((char*)m_Names + nameCursor, p.name.Data(), p.name.Size());
+		((char*)m_Names)[nameCursor + p.name.Size()] = 0;
+		core::StringView newName((char*)m_Names + nameCursor, p.name.Size());
+		p.name = newName;
 
-		entry.registerPS = h.registerPS;
-		entry.registerPSCount = h.registerPSCount;
-		entry.registerVS = h.registerVS;
-		entry.registerVSCount = h.registerVSCount;
-		entry.samplerStage = h.samplerStage;
-		entry.type = h.type;
-		if(entry.paramType == ParamType_Scene)
-			m_SceneValues.PushBack(std::move(entry));
+		nameCursor += p.name.Size() + 1;
+
+		// Release the defaultValue as well.
+		p.defaultValue = nullptr;
+
+		// Place the value in the correct list.
+		if(p.paramType == EParamType::Scene)
+			m_SceneValues.PushBack(std::move(p));
 		else
-			m_Params.PushBack(std::move(entry));
-
-		nameCursor += h.name.Size() + 1;
+			m_Params.PushBack(std::move(p));
 	}
 
 	m_ParamPackage = ppb.BuildAndReset();
@@ -214,94 +201,49 @@ bool ShaderD3D9::Init(
 	return true;
 }
 
-void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<core::String>* errorList)
+void ShaderD3D9::Enable()
 {
-	D3DXCONSTANTTABLE_DESC tableDesc;
 	HRESULT hr;
-	hr = table->GetDesc(&tableDesc);
-	if(FAILED(hr))
+
+	if(FAILED(hr = m_D3DDevice->SetVertexShader(m_VertexShader)))
 		throw core::D3D9Exception(hr);
 
-	for(UINT i = 0; i < tableDesc.Constants; ++i) {
-		D3DXHANDLE handle = table->GetConstant(NULL, i);
-		if(handle == NULL)
-			continue;
+	if(FAILED(hr = m_D3DDevice->SetPixelShader(m_PixelShader)))
+		throw core::D3D9Exception(hr);
+}
 
-		u32 size, regId, regCount, samplerStage;
-		EType type;
-		core::StringView name;
-		const void* defaultValue;
-		bool isValidType;
-		if(!GetStructureElemType(handle, table, samplerStage, type, size, regId, regCount, name, defaultValue, isValidType))
-			continue;
+void ShaderD3D9::SetParam(int paramId, const void* data)
+{
+	SetShaderValue(m_Params.At(paramId), data);
+}
 
-		bool isParam = false;
-		bool isScene = false;
-		if(name.StartsWith("param_")) {
-			name = name.EndSubString(6);
-			isParam = true;
-		} else if(name.StartsWith("scene_")) {
-			name = name.EndSubString(6);
-			isScene = true;
-		}
+void ShaderD3D9::LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass)
+{
+	if(m_CurAttributes != sceneAttributes) {
+		m_CurAttributes = sceneAttributes;
+		// Link with scene values.
+		for(auto& sv : m_SceneValues) {
+			core::AttributePtr ptr;
+			ptr = sceneAttributes.Pointer(sv.name);
 
-		if((isParam || isScene) && !isValidType) {
-			if(errorList)
-				errorList->PushBack(core::StringConverter::Format("Shader has unsupported parameter type. (param: ~s).", name));
-			throw UnhandledShaderCompileErrorException();
-		}
+			if(ptr && GetCoreType(sv.type) != ptr->GetType())
+				ptr = nullptr;
 
-		if(!isParam && !isScene)
-			continue;
-
-		HelperEntry* foundEntry = nullptr;
-		for(auto it = outParams.First(); it != outParams.End(); ++it) {
-			bool isSameStruct =
-				(it->paramType == ParamType_ParamMaterial && isParam) ||
-				(it->paramType == ParamType_Scene && !isParam);
-			if(isSameStruct) {
-				if(it->name.Equal(name)) {
-					foundEntry = &*it;
-					break;
-				}
-			}
-		}
-
-		if(foundEntry) {
-			// If entry already available just update it's data
-			if(isVertex) {
-				foundEntry->registerVS = regId;
-				foundEntry->registerVSCount = regCount;
-			} else {
-				foundEntry->registerPS = regId;
-				foundEntry->registerPSCount = regCount;
-			}
-			foundEntry->samplerStage = samplerStage;
-			if(foundEntry->type != type) {
-				if(errorList)
-					errorList->PushBack(core::StringConverter::Format("Shader param in pixelshader and vertex shader has diffrent types. (param: ~s).", name));
-				throw UnhandledShaderCompileErrorException();
-			}
-		} else {
-			// Otherwise, create a new entry.
-			HelperEntry HEntry;
-			HEntry.name = name;
-			HEntry.type = type;
-			HEntry.typeSize = (u8)size;
-			HEntry.defaultValue = defaultValue;
-			HEntry.samplerStage = samplerStage;
-			if(isVertex) {
-				HEntry.registerVS = regId;
-				HEntry.registerVSCount = regCount;
-			} else {
-				HEntry.registerPS = regId;
-				HEntry.registerPSCount = regCount;
-			}
-			HEntry.paramType = isParam ? ParamType_ParamMaterial : ParamType_Scene;
-			outParams.PushBack(HEntry);
-			outStringSize += HEntry.name.Size() + 1;
+			sv.sceneValue = ptr;
 		}
 	}
+
+	LUX_UNUSED(pass);
+	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
+		if(it->sceneValue)
+			SetShaderValue(*it, (*it->sceneValue).Pointer());
+	}
+}
+
+void ShaderD3D9::Disable()
+{
+	m_D3DDevice->SetVertexShader(NULL);
+	m_D3DDevice->SetPixelShader(NULL);
 }
 
 UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
@@ -318,14 +260,8 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 		core::NulterminatedStringViewWrapper(profile),
 		0, output.Access(), errors.Access(),
 		outTable.Access());
-	if(errors) {
-		if(errorList) {
-			core::String err = (const char*)errors->GetBufferPointer();
-			for(auto& str : err.Split("\n", true))
-				if(!str.IsWhitespace())
-					errorList->PushBack(FormatD3DXShaderError(str, true));
-		}
-	}
+
+	WriteErrors(errorList, errors, true);
 
 	if(SUCCEEDED(hr)) {
 		hr = m_D3DDevice->CreateVertexShader((DWORD*)output->GetBufferPointer(), shader.Access());
@@ -352,14 +288,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 		0, output.Access(), errors.Access(),
 		outTable.Access());
 
-	if(errors) {
-		if(errorList) {
-			core::String err = (const char*)errors->GetBufferPointer();
-			for(auto& str : err.Split("\n", true))
-				if(!str.IsWhitespace())
-					errorList->PushBack(FormatD3DXShaderError(str, false));
-		}
-	}
+	WriteErrors(errorList, errors, false);
 
 	if(SUCCEEDED(hr)) {
 		DWORD* data = (DWORD*)output->GetBufferPointer();
@@ -371,106 +300,100 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	return shader;
 }
 
-int ShaderD3D9::GetSceneParamCount() const
+void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<Param>& outParams, u32& outStringSize, core::Array<core::String>* errorList)
 {
-	return m_SceneValues.Size();
-}
-
-core::AttributePtr ShaderD3D9::GetSceneParam(int id) const
-{
-	return m_SceneValues.At(id).sceneValue;
-}
-
-void ShaderD3D9::Enable()
-{
+	D3DXCONSTANTTABLE_DESC tableDesc;
 	HRESULT hr;
-
-	if(FAILED(hr = m_D3DDevice->SetVertexShader(m_VertexShader)))
+	if(FAILED(hr = table->GetDesc(&tableDesc)))
 		throw core::D3D9Exception(hr);
 
-	if(FAILED(hr = m_D3DDevice->SetPixelShader(m_PixelShader)))
-		throw core::D3D9Exception(hr);
-}
+	for(UINT i = 0; i < tableDesc.Constants; ++i) {
+		D3DXHANDLE handle = table->GetConstant(NULL, i);
+		if(handle == NULL)
+			continue;
 
-void ShaderD3D9::SetParam(int paramId, const void* data)
-{
-	int realId = -1;
-	for(auto it = m_Params.First(); it != m_Params.End(); ++it) {
-		++realId;
-		if(it->index == paramId + DefaultParam_COUNT)
-			break;
+		RegisterLocation location;
+		u32 samplerStage;
+		EType type;
+		core::StringView name;
+		const void* defaultValue;
+		EParamType paramType;
+		if(!GetParamInfo(handle, table, samplerStage, type, location, name, defaultValue, paramType))
+			continue;
+
+		if(paramType == EParamType::Other || type == EType::Unknown) {
+			if(errorList)
+				errorList->PushBack(core::StringConverter::Format("Shader has unsupported parameter type. (param: ~s).", name));
+			throw UnhandledShaderCompileErrorException();
+		}
+
+		Param* foundEntry = nullptr;
+		for(auto it = outParams.First(); it != outParams.End(); ++it) {
+			if(it->paramType == paramType && it->name.Equal(name)) {
+				foundEntry = &*it;
+				break;
+			}
+		}
+
+		if(!foundEntry) {
+			// If the entry doesn't exist, create it.
+			Param entry;
+			entry.name = name;
+			entry.type = type;
+			entry.defaultValue = defaultValue;
+			entry.paramType = paramType;
+
+			outParams.PushBack(entry);
+			outStringSize += entry.name.Size() + 1;
+			foundEntry = &outParams.Back();
+		}
+
+		if(foundEntry->type != type) {
+			if(errorList)
+				errorList->PushBack(core::StringConverter::Format("Shader param in pixelshader and vertex shader has diffrent types. (param: ~s).", name));
+			throw UnhandledShaderCompileErrorException();
+		}
+
+		if(isVertex)
+			foundEntry->vsLocation = location;
+		else
+			foundEntry->psLocation = location;
+		foundEntry->samplerStage = samplerStage;
 	}
-
-	if(realId < 0)
-		throw core::ObjectNotFoundException("paramId");
-
-	SetShaderValue(m_Params[realId], data);
 }
 
-int ShaderD3D9::GetParamId(core::StringView name) const
-{
-	return m_ParamPackage.GetParamIdByName(name);
-}
-
-void ShaderD3D9::LoadSceneParams(const Pass& pass)
-{
-	LUX_UNUSED(pass);
-	for(auto it = m_SceneValues.First(); it != m_SceneValues.End(); ++it) {
-		if(it->sceneValue)
-			SetShaderValue(*it, (*it->sceneValue).Pointer());
-	}
-}
-
-void ShaderD3D9::Disable()
-{
-	m_D3DDevice->SetVertexShader(NULL);
-	m_D3DDevice->SetPixelShader(NULL);
-}
-
-bool ShaderD3D9::GetStructureElemType(D3DXHANDLE handle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, core::StringView& name, const void*& defaultValue, bool& isValid)
+bool ShaderD3D9::GetParamInfo(
+	D3DXHANDLE handle,
+	ID3DXConstantTable* table,
+	u32& samplerStage,
+	EType& outType,
+	RegisterLocation& location,
+	core::StringView& name,
+	const void*& defaultValue,
+	EParamType& paramType)
 {
 	D3DXCONSTANT_DESC desc;
 	UINT count = 1;
 	if(FAILED(table->GetConstantDesc(handle, &desc, &count)))
 		return false;
 
-	outType = EType::Unknown;
-	if(desc.Class == D3DXPC_SCALAR) {
-		if(desc.Type == D3DXPT_BOOL)
-			outType = EType::Boolean;
-		else if(desc.Type == D3DXPT_INT)
-			outType = EType::Integer;
-		else if(desc.Type == D3DXPT_FLOAT)
-			outType = EType::Float;
-	} else if(desc.Class == D3DXPC_VECTOR) {
-		if(desc.Type == D3DXPT_FLOAT) {
-			if(desc.Columns == 2)
-				outType = EType::Vector2;
-			else if(desc.Columns == 3)
-				outType = EType::Vector3;
-			else if(desc.Columns == 4)
-				outType = EType::ColorF;
-		}
-	} else if(desc.Class == D3DXPC_MATRIX_ROWS && desc.Rows == 4 && desc.Columns == 4) {
-		if(desc.Type == D3DXPT_FLOAT)
-			outType = EType::Matrix;
-	} else if(desc.Class == D3DXPC_MATRIX_COLUMNS && desc.Rows == 4 && desc.Columns == 4) {
-		if(desc.Type == D3DXPT_FLOAT)
-			outType = EType::Matrix_ColMajor;
-	} else if(desc.Class == D3DXPC_OBJECT) {
-		if(desc.Type == D3DXPT_SAMPLER || desc.Type == D3DXPT_SAMPLER2D || desc.Type == D3DXPT_SAMPLER3D || desc.Type == D3DXPT_SAMPLERCUBE) {
-			samplerStage = table->GetSamplerIndex(handle);
-			outType = EType::Texture;
-		}
-	}
+	outType = GetTypeFromD3DXDesc(desc);
+	if(outType == EType::Texture)
+		samplerStage = table->GetSamplerIndex(handle);
 
-	outSize = desc.Bytes;
-	registerID = desc.RegisterIndex;
-	regCount = desc.RegisterCount;
+	location.id = desc.RegisterIndex;
+	location.count = desc.RegisterCount;
 	name = core::StringView(desc.Name, strlen(desc.Name));
 	defaultValue = desc.DefaultValue;
-
-	isValid = (outType != EType::Unknown);
+	if(name.StartsWith("param_")) {
+		name = name.EndSubString(6);
+		paramType = EParamType::Param;
+	} else if(name.StartsWith("scene_")) {
+		name = name.EndSubString(6);
+		paramType = EParamType::Scene;
+	} else {
+		paramType = EParamType::Other;
+	}
 	return true;
 }
 
@@ -548,7 +471,7 @@ void ShaderD3D9::CastShaderToType(EType type, const void* in, void* out)
 
 void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 {
-	if((param.registerVS == 0xFFFFFFFF && param.registerPS == 0xFFFFFFFF) || param.type == EType::Unknown)
+	if(param.vsLocation.count == 0 && param.psLocation.count == 0)
 		return;
 
 	static u32 v[16];
@@ -558,8 +481,8 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 
 	u32 regId;
 	HRESULT hr;
-	if(param.registerVS != 0xFFFFFFFF) {
-		regId = param.registerVS;
+	if(param.vsLocation.count != 0) {
+		regId = param.vsLocation.id;
 		switch(param.type) {
 		case EType::Boolean:
 			hr = m_D3DDevice->SetVertexShaderConstantB(regId, (BOOL*)v, 1);
@@ -581,15 +504,14 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 			break;
 		case EType::Matrix:
 		case EType::Matrix_ColMajor:
-			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, param.registerVSCount);
+			hr = m_D3DDevice->SetVertexShaderConstantF(regId, (float*)v, param.vsLocation.count);
 			break;
-
 		default:
 			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	}
-	if(param.registerPS != 0xFFFFFFFF) {
-		regId = param.registerPS;
+	if(param.psLocation.count != 0) {
+		regId = param.psLocation.id;
 		switch(param.type) {
 		case EType::Boolean:
 			hr = m_D3DDevice->SetPixelShaderConstantB(regId, (BOOL*)v, 1);
@@ -609,9 +531,8 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 
 		case EType::Matrix:
 		case EType::Matrix_ColMajor:
-			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, param.registerPSCount);
+			hr = m_D3DDevice->SetPixelShaderConstantF(regId, (float*)v, param.psLocation.count);
 			break;
-
 		default:
 			lxAssertNeverReach("Unsupported shader variable type.");
 		}
@@ -621,16 +542,6 @@ void ShaderD3D9::SetShaderValue(const Param& param, const void* data)
 const core::ParamPackage& ShaderD3D9::GetParamPackage() const
 {
 	return m_ParamPackage;
-}
-
-bool ShaderD3D9::IsTypeCompatible(EType a, EType b)
-{
-	if(a == b)
-		return true;
-	if((a == EType::Matrix_ColMajor && b == EType::Matrix) || (a == EType::Matrix && b == EType::Matrix_ColMajor))
-		return true;
-
-	return false;
 }
 
 core::Type ShaderD3D9::GetCoreType(EType type)
@@ -653,6 +564,38 @@ core::Type ShaderD3D9::GetCoreType(EType type)
 	case EType::Structure: return core::Types::Unknown();
 	default: return core::Type::Unknown;
 	}
+}
+
+ShaderD3D9::EType ShaderD3D9::GetTypeFromD3DXDesc(const D3DXCONSTANT_DESC& desc)
+{
+	if(desc.Class == D3DXPC_SCALAR) {
+		if(desc.Type == D3DXPT_BOOL)
+			return EType::Boolean;
+		else if(desc.Type == D3DXPT_INT)
+			return EType::Integer;
+		else if(desc.Type == D3DXPT_FLOAT)
+			return EType::Float;
+	} else if(desc.Class == D3DXPC_VECTOR) {
+		if(desc.Type == D3DXPT_FLOAT) {
+			if(desc.Columns == 2)
+				return EType::Vector2;
+			else if(desc.Columns == 3)
+				return EType::Vector3;
+			else if(desc.Columns == 4)
+				return EType::ColorF;
+		}
+	} else if(desc.Class == D3DXPC_MATRIX_ROWS && desc.Rows == 4 && desc.Columns == 4) {
+		if(desc.Type == D3DXPT_FLOAT)
+			return EType::Matrix;
+	} else if(desc.Class == D3DXPC_MATRIX_COLUMNS && desc.Rows == 4 && desc.Columns == 4) {
+		if(desc.Type == D3DXPT_FLOAT)
+			return EType::Matrix_ColMajor;
+	} else if(desc.Class == D3DXPC_OBJECT) {
+		if(desc.Type == D3DXPT_SAMPLER || desc.Type == D3DXPT_SAMPLER2D || desc.Type == D3DXPT_SAMPLER3D || desc.Type == D3DXPT_SAMPLERCUBE) {
+			return EType::Texture;
+		}
+	}
+	return EType::Unknown;
 }
 
 } // namespace video

@@ -24,17 +24,17 @@ public:
 	//! Load a param into an active shader
 	virtual void SetParam(int paramId, const void* data) = 0;
 	//! Load all scene params into an active shader.
-	virtual void LoadSceneParams(const Pass& pass) = 0;
+	virtual void LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass) = 0;
 	//! Called each time before the shader is rendererd.
 	virtual void Render() = 0;
 	//! Make shader inactive
 	virtual void Disable() = 0;
 
 	virtual const core::ParamPackage& GetParamPackage() const = 0;
-	virtual int GetParamId(core::StringView name) const = 0;
-
-	virtual int GetSceneParamCount() const = 0;
-	virtual core::AttributePtr GetSceneParam(int id) const = 0;
+	int GetParamId(core::StringView name) const
+	{
+		return GetParamPackage().GetParamIdByName(name);
+	}
 };
 
 } // namespace video

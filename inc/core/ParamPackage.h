@@ -146,7 +146,7 @@ public:
 	The id of the parameter is continuos.
 	If a parameter with the same name already exists, a exception is thrown.
 	*/
-	void AddParam(StringView name, core::Type type, const void* defaultValue)
+	int AddParam(StringView name, core::Type type, const void* defaultValue)
 	{
 		LX_CHECK_NULL_ARG(defaultValue);
 		if(type.IsUnknown())
@@ -157,7 +157,9 @@ public:
 			if(p.name == name)
 				throw core::GenericInvalidArgumentException("name", "Parameter already exists.");
 		}
+		auto id = m_Params.Size();
 		AddUnsafe(name, type, defaultValue);
+		return id;
 	}
 
 	template <typename T>

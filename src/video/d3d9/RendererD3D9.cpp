@@ -451,7 +451,7 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 
 	// Send the generated data to the shader
 	// Only if scene or shader changed.
-	pass.shader->LoadSceneParams(pass);
+	pass.shader->LoadSceneParams(GetParams(), pass);
 
 	if(m_ParamSetCallback)
 		m_ParamSetCallback->SendShaderSettings(pass, m_UserParam);
@@ -482,10 +482,10 @@ void RendererD3D9::UpdateTransforms(float polygonOffset)
 		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode) || IsDirty(Dirty_ViewProj)) {
 			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
 			if(polygonOffset) {
-				const u32 zBits = m_Driver->GetConfig().zsFormat.zBits;
+				const u8 zBits = m_Driver->GetConfig().zsFormat.zBits;
 				const u32 values = 1 << zBits;
 				const float min = 1.0f / values;
-				projCopy.AddTranslation(math::Vector3F(0.0f, 0.0f, -min * polygonOffset));
+				projCopy.AddTranslation(math::Vector3F(0, 0, -min * polygonOffset));
 			}
 			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, projCopy);
 			SetDirty(Dirty_ViewProj);
@@ -494,14 +494,14 @@ void RendererD3D9::UpdateTransforms(float polygonOffset)
 		if(IsDirty(Dirty_Rendertarget) || IsDirty(Dirty_RenderMode) || IsDirty(Dirty_ViewProj)) {
 			auto ssize = GetRenderTarget().GetSize();
 			math::Matrix4 view = math::Matrix4(
-				1.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, -1.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 1.0f, 0.0f,
-				-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 + 0.5f, 0.0f, 1.0f);
+				1,  0, 0, 0,
+				0, -1, 0, 0,
+				0,  0, 1, 0,
+				-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 + 0.5f, 0, 1);
 
 			math::Matrix4 proj = math::Matrix4(
-				2.0f / ssize.width, 0.0f, 0.0f, 0.0f,
-				0.0f, 2.0f / ssize.height, 0.0f, 0.0f,
+				2.0f / (float)ssize.width, 0.0f, 0.0f, 0.0f,
+				0.0f, 2.0f / (float)ssize.height, 0.0f, 0.0f,
 				0.0f, 0.0f, 1.0f, 0.0f,
 				0.0f, 0.0f, 0.0f, 1.0f);
 

@@ -25,9 +25,20 @@ SceneRendererSimpleForward::SceneRendererSimpleForward(const scene::SceneRendere
 	m_Renderer = video::VideoDriver::Instance()->GetRenderer();
 	m_Scene = data.scene;
 
-	m_Attributes.AddAttribute("drawStencilShadows", false);
-	m_Attributes.AddAttribute("maxShadowCasters", 1);
-	m_Attributes.AddAttribute("culling", true);
+	{
+	core::AttributeListBuilder alb;
+	alb.AddAttribute("drawStencilShadows", false);
+	alb.AddAttribute("maxShadowCasters", 1);
+	alb.AddAttribute("culling", true);
+	m_Attributes = alb.BuildAndReset();
+	}
+
+	{
+	core::AttributeListBuilder alb;
+	alb.SetBase(m_Renderer->GetBaseParams());
+	alb.AddAttribute("camPos", math::Vector3F(0,0,0));
+	m_RendererAttributes = alb.BuildAndReset();
+	}
 }
 
 SceneRendererSimpleForward::~SceneRendererSimpleForward()
@@ -112,6 +123,8 @@ struct CameraSortT
 
 void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 {
+	m_Renderer->SetParams(m_RendererAttributes);
+
 	video::RenderStatistics::GroupScope grpScope("scene");
 
 	CameraCollector camCollector(this);
@@ -294,11 +307,11 @@ void SceneRendererSimpleForward::DrawScene()
 	sceneData.activeCamera = m_ActiveCamera;
 	sceneData.activeCameraNode = m_ActiveCameraNode;
 
-	*m_Renderer->GetParam("camPos") = m_ActiveCameraNode->GetAbsolutePosition();
+	m_Renderer->GetParams()["camPos"] = m_ActiveCameraNode->GetAbsolutePosition();
 
 	//-------------------------------------------------------------------------
 	// The lights
-	*m_Renderer->GetParam("ambient") = m_AmbientLight;
+	m_Renderer->GetParams()["ambient"] = m_AmbientLight;
 	m_Renderer->ClearLights();
 
 	int maxLightCount = m_Renderer->GetMaxLightCount();

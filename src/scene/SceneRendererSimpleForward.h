@@ -29,11 +29,11 @@ public:
 	~SceneRendererSimpleForward();
 
 	void DrawScene(bool beginScene, bool endScene);
-	core::VariableAccess Attribute(const core::String& str)
+	core::VariableAccess Attribute(core::StringView str)
 	{
 		return m_Attributes[str];
 	}
-	const core::Attributes& Attributes() const
+	core::AttributeList AttributeList() const
 	{
 		return m_Attributes;
 	}
@@ -143,7 +143,8 @@ private:
 	// Settings and parameters
 	/////////////////////////////////////////////////////////////////////////
 	bool m_Culling; // Read from m_Attributes
-	core::Attributes m_Attributes;
+	core::AttributeList m_Attributes;
+	core::AttributeList m_RendererAttributes;
 	core::HashMap<ERenderPass, SceneRendererPassSettings> m_PassSettings;
 
 	bool m_SettingsActive;

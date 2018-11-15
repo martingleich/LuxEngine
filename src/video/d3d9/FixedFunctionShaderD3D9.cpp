@@ -8,12 +8,11 @@ namespace lux
 namespace video
 {
 
-FixedFunctionShaderD3D9::FixedFunctionShaderD3D9(Renderer* r, DeviceStateD3D9& deviceState, const FixedFunctionParameters& params) :
+FixedFunctionShaderD3D9::FixedFunctionShaderD3D9(DeviceStateD3D9& deviceState, const FixedFunctionParameters& params) :
 	m_DeviceState(deviceState),
 	m_TextureStages(params.stages),
 	m_UseVertexColors(params.useVertexColors)
 {
-	m_AmbientPtr = r->GetParam("ambient");
 	m_Layers.Resize(params.textures.Size());
 	core::ParamPackageBuilder ppb;
 	ppb.AddParam("diffuse", video::ColorF(1,1,1,1));
@@ -38,18 +37,18 @@ void FixedFunctionShaderD3D9::SetParam(int paramId, const void* data)
 	case 2: m_SpecularHardness = *(float*)data; break;
 	case 3: m_SpecularIntensity = *(float*)data; break;
 	default:
-		m_Layers[paramId-4] = *(video::TextureLayer*)data;
+		m_Layers.At(paramId-4) = *(video::TextureLayer*)data;
 	}
 	m_IsDirty = true;
 }
 
-int FixedFunctionShaderD3D9::GetParamId(core::StringView name) const
+void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass)
 {
-	return m_ParamPackage.GetParamIdByName(name);
-}
+	if(m_CurAttributes != sceneAttributes) {
+		m_CurAttributes = sceneAttributes;
+		m_AmbientPtr = m_CurAttributes.Pointer("ambient");
+	}
 
-void FixedFunctionShaderD3D9::LoadSceneParams(const Pass& pass)
-{
 	m_Lighting = pass.lighting;
 	m_Ambient = m_AmbientPtr->GetAccess(true).As<video::ColorF>();
 }
@@ -67,27 +66,6 @@ void FixedFunctionShaderD3D9::Render()
 
 void FixedFunctionShaderD3D9::Disable()
 {
-}
-
-int FixedFunctionShaderD3D9::GetSceneParamCount() const
-{
-	return 1;
-}
-
-core::AttributePtr FixedFunctionShaderD3D9::GetSceneParam(int id) const
-{
-	LX_CHECK_BOUNDS(id, 0, 1);
-	return m_AmbientPtr;
-}
-
-int FixedFunctionShaderD3D9::GetTextureStageCount() const
-{
-	return m_TextureStages.Size();
-}
-
-const TextureStageSettings& FixedFunctionShaderD3D9::GetTextureStage(int id) const
-{
-	return m_TextureStages[id];
 }
 
 const core::ParamPackage& FixedFunctionShaderD3D9::GetParamPackage() const

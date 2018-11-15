@@ -173,8 +173,8 @@ public:
 				b->used = 0;
 				b->next = nullptr;
 
-				curBlock = b;
 				curBlock->next = b;
+				curBlock = b;
 			}
 			out = curBlock->data + curBlock->used;
 			curBlock->used += bytes;

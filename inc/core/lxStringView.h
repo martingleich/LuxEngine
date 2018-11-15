@@ -168,6 +168,64 @@ public:
 		return MakeRange<ConstUTF8Iterator>(m_Data, m_Data + m_Size);
 	}
 
+	/*
+	Set maxCount to a negative number to ignore maxCount
+	*/
+	template <typename AddResultT>
+	int BasicSplit(StringView split, int maxCount, bool ignoreEmpty, AddResultT&& outputter)
+	{
+		if(maxCount == 0)
+			return 0;
+		if(maxCount < 0)
+			maxCount = std::numeric_limits<int>::max();
+
+		int count = 0;
+		const char* inCur = this->Data();
+		const char* inEnd = inCur + this->Size();
+		const char* splitCur = inCur;
+		int splitSize = 0;
+		if(split.Size() == 1) {
+			while(inCur+1 <= inEnd) {
+				if(*inCur == *split.Data()) {
+					if(!(ignoreEmpty && splitSize == 0)) {
+						outputter(StringView(splitCur, splitSize));
+						++count;
+					}
+					++inCur;
+					splitCur = inCur;
+					splitSize = 0;
+					if(count == maxCount)
+						break;
+				} else {
+					++splitSize;
+					++inCur;
+				}
+			}
+		} else {
+			while(inCur+split.Size() <= inEnd) {
+				if(std::memcmp(inCur, split.Data(), split.Size()) == 0) {
+					if(!(ignoreEmpty && splitSize == 0)) {
+						outputter(StringView(splitCur, splitSize));
+						++count;
+						if(count == maxCount)
+							break;
+					}
+					splitCur = inCur + split.Size();
+					splitSize = 0;
+				} else {
+					++splitSize;
+					++inCur;
+				}
+			}
+		}
+
+		if(!(ignoreEmpty && splitSize == 0) && count != maxCount) {
+			outputter(StringView(splitCur, splitSize));
+			++count;
+		}
+		return count;
+	}
+
 private:
 	//! The number of bytes in the string, without the NUL-Byte.
 	int m_Size;

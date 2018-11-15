@@ -20,37 +20,12 @@ class DeviceStateD3D9;
 
 class ShaderD3D9 : public Shader
 {
-public:
-	ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& deviceState);
-	~ShaderD3D9();
-
-	bool Init(
-		core::StringView vsCode, core::StringView vsEntryPoint, core::StringView vsProfile,
-		core::StringView psCode, core::StringView psEntryPoint, core::StringView psProfile,
-		core::Array<core::String>* errorList);
-
-	void Enable();
-	void SetParam(int paramId, const void* data);
-	int GetParamId(core::StringView name) const;
-	void LoadSceneParams(const Pass& pass);
-	void Render() {}
-	void Disable();
-
-	int GetSceneParamCount() const;
-	core::AttributePtr GetSceneParam(int id) const;
-
-	const core::ParamPackage& GetParamPackage() const;
-
-	bool IsFixedFunction() const
-	{
-		return false;
-	}
-
 private:
-	enum EParamType
+	enum class EParamType
 	{
-		ParamType_ParamMaterial,
-		ParamType_Scene,
+		Other,
+		Param,
+		Scene,
 	};
 
 	enum class EType
@@ -75,84 +50,81 @@ private:
 		Structure,
 	};
 
-	enum EDefaultParam
+	struct RegisterLocation
 	{
-		DefaultParam_Shininess = 0,
-		DefaultParam_Diffuse = 1,
-		DefaultParam_Emissive = 2,
-		DefaultParam_Specular = 3,
-		DefaultParam_COUNT
-	};
-
-	struct HelperEntry
-	{
-		u32 registerVS;
-		u32 registerPS;
-
-		u32 registerVSCount;
-		u32 registerPSCount;
-
-		EType type;
-		u8 typeSize;
-		core::StringView name;
-		const void* defaultValue;
-
-		EParamType paramType;
-		u32 samplerStage;
-
-		HelperEntry() :
-			registerVS(0xFFFFFFFF),
-			registerPS(0xFFFFFFFF),
-			registerVSCount(0),
-			registerPSCount(0),
-			type(EType::Unknown),
-			typeSize(0),
-			defaultValue(nullptr),
-			paramType(ParamType_ParamMaterial),
-			samplerStage(0)
-		{
-		}
+		u32 id;
+		u32 count = 0;
 	};
 
 	struct Param
 	{
 		Param() {}
 
-		u32 registerVS;
-		u32 registerPS;
+		RegisterLocation vsLocation;
+		RegisterLocation psLocation;
 
-		u32 registerVSCount;
-		u32 registerPSCount;
+		EType type = EType::Unknown;
 
-		EType type;
+		EParamType paramType = EParamType::Other;
 
-		EParamType paramType;
-		int index;
 		u32 samplerStage;
+
+		core::StringView name;
+		const void* defaultValue = nullptr;
+
 		core::AttributePtr sceneValue;
 	};
 
+public:
+	ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& deviceState);
+	~ShaderD3D9();
+
+	bool Init(
+		core::StringView vsCode, core::StringView vsEntryPoint, core::StringView vsProfile,
+		core::StringView psCode, core::StringView psEntryPoint, core::StringView psProfile,
+		core::Array<core::String>* errorList);
+
+	void Enable() override;
+	void SetParam(int paramId, const void* data) override;
+	void LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass) override;
+	void Render() override {}
+	void Disable() override;
+
+	const core::ParamPackage& GetParamPackage() const;
+
 private:
-	bool GetStructureElemType(D3DXHANDLE structHandle, ID3DXConstantTable* table, u32& samplerStage, EType& outType, u32& outSize, u32& registerID, u32& regCount, core::StringView& name, const void*& defaultValue, bool& isValid);
-
-	void LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<HelperEntry>& outParams, u32& outStringSize, core::Array<core::String>* errorList);
-
 	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(core::StringView code, core::StringView entryPoint, core::StringView profile,
 		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(core::StringView code, core::StringView entryPoint, core::StringView profile,
 		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
+
+	void LoadAllParams(
+		bool isVertex,
+		ID3DXConstantTable* table,
+		core::Array<Param>& outParams,
+		u32& outStringSize,
+		core::Array<core::String>* errorList);
+
+	bool GetParamInfo(
+		D3DXHANDLE structHandle,
+		ID3DXConstantTable* table,
+		u32& samplerStage,
+		EType& outType,
+		RegisterLocation& location,
+		core::StringView& name,
+		const void*& defaultValue,
+		EParamType& paramType);
 
 	void SetShaderValue(const Param& p, const void* data);
 
 	void CastTypeToShader(EType type, const void* in, void* out);
 	void CastShaderToType(EType type, const void* in, void* out);
 
-	static bool IsTypeCompatible(EType a, EType b);
 	static core::Type GetCoreType(EType type);
+	static EType GetTypeFromD3DXDesc(const D3DXCONSTANT_DESC& desc);
 
 private:
 	IDirect3DDevice9* m_D3DDevice;
-	Renderer* m_Renderer;
 	DeviceStateD3D9& m_DeviceState;
 
 	UnknownRefCounted<IDirect3DVertexShader9> m_VertexShader;
@@ -163,6 +135,8 @@ private:
 
 	core::RawMemory m_Names;
 	core::ParamPackage m_ParamPackage;
+
+	mutable core::AttributeList m_CurAttributes;
 };
 
 } // namespace video

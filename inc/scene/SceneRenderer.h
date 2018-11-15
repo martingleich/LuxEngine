@@ -56,13 +56,13 @@ public:
 	/**
 	Attributes are options to change the behaviour of the renderer, see the renderer documentaions for available options.
 	*/
-	virtual core::VariableAccess Attribute(const core::String& str) = 0;
+	virtual core::VariableAccess Attribute(core::StringView str) = 0;
 
 	//! Get the list of attributes of the scene renderer.
 	/**
 	Attributes are options to change the behaviour of the renderer, see the renderer documentaions for available options.
 	*/
-	virtual const core::Attributes& Attributes() const = 0;
+	virtual core::AttributeList AttributeList() const = 0;
 
 	virtual void SetPassSettings(ERenderPass pass, const SceneRendererPassSettings& settings) = 0;
 	virtual const SceneRendererPassSettings& GetPassSettings(ERenderPass pass ) = 0;

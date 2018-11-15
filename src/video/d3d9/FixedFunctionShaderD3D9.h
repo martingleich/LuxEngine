@@ -12,19 +12,14 @@ class Renderer;
 class FixedFunctionShaderD3D9 : public Shader
 {
 public:
-	FixedFunctionShaderD3D9(Renderer* r, DeviceStateD3D9& deviceState, const FixedFunctionParameters& params);
+	FixedFunctionShaderD3D9(DeviceStateD3D9& deviceState, const FixedFunctionParameters& params);
 	void Enable() override;
 	void SetParam(int paramId, const void* data) override;
-	int GetParamId(core::StringView name) const override;
-	void LoadSceneParams(const Pass& pass) override;
+	void LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass) override;
 	void Render() override;
 	void Disable() override;
-	int GetSceneParamCount() const override;
-	core::AttributePtr GetSceneParam(int id) const override;
 
-	int GetTextureStageCount() const;
-	const TextureStageSettings& GetTextureStage(int id) const;
-	const core::ParamPackage& GetParamPackage() const;
+	const core::ParamPackage& GetParamPackage() const override;
 
 public:
 	DeviceStateD3D9& m_DeviceState;
@@ -40,6 +35,8 @@ public:
 	bool m_UseVertexColors;
 	bool m_IsDirty;
 	core::AttributePtr m_AmbientPtr;
+
+	mutable core::AttributeList m_CurAttributes;
 };
 
 } // namespace video
