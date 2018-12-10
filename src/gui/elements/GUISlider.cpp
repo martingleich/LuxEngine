@@ -71,7 +71,13 @@ void Slider::Paint(Renderer* renderer)
 		po);
 }
 
-math::Dimension2F Slider::GetThumbSize() const { return m_ThumbSize; }
+math::Dimension2F Slider::GetThumbSize() const
+{
+	if(IsHorizontal())
+		return m_ThumbSize;
+	else
+		return math::Dimension2F(m_ThumbSize.height, m_ThumbSize.width);
+}
 
 bool Slider::IsPointOnThumb(const math::Vector2F& point) const
 {
@@ -89,10 +95,11 @@ bool Slider::OnMouseEvent(const gui::MouseEvent& e)
 				m_GrabOffset = 0;
 			} else if((m_Settings & StepOnClick) && !IsPointOnThumb(e.pos)) {
 				auto p = GetThumbPos(e.pos);
+				auto step = e.shift ? m_BigStep : m_StepSize;
 				if(p < GetThumbPos())
-					SetThumbPos(GetThumbPos() - m_StepSize);
+					SetThumbPos(GetThumbPos() - step);
 				else
-					SetThumbPos(GetThumbPos() + m_StepSize);
+					SetThumbPos(GetThumbPos() + step);
 			} else {
 				pressed = true;
 				if(m_Settings & CenterThumb)
@@ -137,6 +144,19 @@ bool Slider::OnKeyboardEvent(const gui::KeyboardEvent& e)
 				SetThumbPos(GetThumbPos() - step);
 			if(e.key == input::EKeyCode::KEY_UP)
 				SetThumbPos(GetThumbPos() + step);
+		}
+		switch(e.key) {
+		case input::EKeyCode::KEY_KEY_0: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*0)/100); break;
+		case input::EKeyCode::KEY_KEY_1: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*10)/100); break;
+		case input::EKeyCode::KEY_KEY_2: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*20)/100); break;
+		case input::EKeyCode::KEY_KEY_3: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*30)/100); break;
+		case input::EKeyCode::KEY_KEY_4: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*40)/100); break;
+		case input::EKeyCode::KEY_KEY_5: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*50)/100); break;
+		case input::EKeyCode::KEY_KEY_6: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*60)/100); break;
+		case input::EKeyCode::KEY_KEY_7: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*70)/100); break;
+		case input::EKeyCode::KEY_KEY_8: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*80)/100); break;
+		case input::EKeyCode::KEY_KEY_9: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*90)/100); break;
+		default: (void)0;
 		}
 	}
 	return false;
@@ -209,7 +229,7 @@ void Slider::SetSettings(int settings) { m_Settings = settings; }
 bool Slider::IsFlipped() const { return (m_Settings&Flipped) != 0; }
 void Slider::SetFlipped(bool isFlipped)
 {
-	if(!isFlipped)
+	if(isFlipped)
 		AddSettings(Flipped);
 	else
 		RemoveSettings(Flipped);
@@ -218,7 +238,7 @@ void Slider::SetFlipped(bool isFlipped)
 bool Slider::IsHorizontal() const { return (m_Settings & Horizontal) != 0; }
 void Slider::SetHorizontal(bool isHorizontal)
 {
-	if(!isHorizontal)
+	if(isHorizontal)
 		AddSettings(Horizontal);
 	else
 		RemoveSettings(Horizontal);
@@ -261,8 +281,8 @@ math::RectF Slider::GetThumbRect() const
 		float linePos = rect.GetCenter().x;
 		float thumbPos = math::Lerp(rect.bottom - thumbSize.height / 2, rect.top + thumbSize.height / 2, relThumbPos);
 		return math::RectF(
-			linePos - thumbSize.height / 2, thumbPos - thumbSize.width / 2,
-			linePos + thumbSize.height / 2, thumbPos + thumbSize.width / 2);
+			linePos - thumbSize.width / 2, thumbPos - thumbSize.height / 2,
+			linePos + thumbSize.width / 2, thumbPos + thumbSize.height / 2);
 	}
 }
 

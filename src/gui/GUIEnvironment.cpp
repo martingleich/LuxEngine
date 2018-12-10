@@ -385,8 +385,10 @@ void GUIEnvironment::SendUserInputEvent(const input::Event& event)
 		}
 	}
 	if(event.source == input::EEventSource::Keyboard) {
-		m_ControlState = event.control;
-		m_ShiftState = event.shift;
+		if(event.button.code == input::EKeyCode::KEY_LSHIFT || event.button.code == input::EKeyCode::KEY_RSHIFT)
+			m_ShiftState += event.button.pressedDown ? 1 : -1;
+		if(event.button.code == input::EKeyCode::KEY_LCONTROL || event.button.code == input::EKeyCode::KEY_RCONTROL)
+			m_ControlState += event.button.pressedDown ? 1 : -1;
 		KeyboardEvent e;
 		e.autoRepeat = false;
 		memcpy(e.character, event.keyInput.character, sizeof(e.character));

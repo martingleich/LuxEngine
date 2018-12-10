@@ -167,7 +167,7 @@ bool WindowWin32::UpdateFinalRect()
 	plc.rcNormalPosition.right = plc.rcNormalPosition.left + (LONG)m_FinalRect.GetWidth();
 	plc.rcNormalPosition.bottom = plc.rcNormalPosition.top + (LONG)m_FinalRect.GetHeight();
 	SetWindowPlacement(m_Window, &plc);
-	return memcmp(&m_WindowScreenRect, &oldRect, sizeof(RECT)) != 0;
+	return std::memcmp(&m_WindowScreenRect, &oldRect, sizeof(RECT)) != 0;
 }
 
 bool WindowWin32::UpdateInnerRect()

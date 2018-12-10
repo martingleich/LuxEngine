@@ -537,8 +537,8 @@ void RendererD3D9::LoadFogSettings(
 		fog2.b = m_Fog.end;
 		fog2.a = m_Fog.density;
 
-		*m_ParamId.fog1 = fog1;
-		*m_ParamId.fog2 = fog2;
+		*m_ParamIds.fog1 = fog1;
+		*m_ParamIds.fog2 = fog2;
 	}
 	// Change if using fixed function, and the fog or shader changed
 	if(fixedFunction && (IsDirty(Dirty_Fog) || changedShader || changedFogState)) {
@@ -558,7 +558,7 @@ void RendererD3D9::LoadLightSettings(
 	bool useLights = (lighting != ELightingFlag::Disabled);
 
 	if(!fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
-		*m_ParamId.lighting = (float)lighting;
+		*m_ParamIds.lighting = (float)lighting;
 	}
 	if(fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
 		m_DeviceState.EnableLight(useLights);
@@ -579,7 +579,7 @@ void RendererD3D9::LoadLightSettings(
 			if(IsDirty(Dirty_Lights)) {
 				// Generate light matrices and set as param.
 				for(int i = 0; i < m_Lights.Size(); ++i)
-					*m_ParamId.lights[i] = GenerateLightMatrix(m_Lights[i], true);
+					*m_ParamIds.lights[i] = GenerateLightMatrix(m_Lights[i], true);
 			}
 		}
 		ClearDirty(Dirty_Lights);

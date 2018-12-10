@@ -28,6 +28,9 @@ enum class EGUIControl
 	SliderBase,
 	SliderThumb,
 
+	ScrollbarBase,
+	ScrollbarThumb,
+
 	Tooltip,
 };
 

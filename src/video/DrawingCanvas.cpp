@@ -88,7 +88,7 @@ void DrawingCanvas::DrawHLine(int y, int left, int right, Color color)
 	u8* cur = m_Data + y*m_Pitch + left*bytes;
 
 	for(int i = 0; i < width; ++i) {
-		memcpy(cur, native_color, bytes);
+		std::memcpy(cur, native_color, bytes);
 		cur += bytes;
 	}
 }
@@ -112,7 +112,7 @@ void DrawingCanvas::DrawVLine(int x, int top, int bottom, Color color)
 
 	u8* cur = m_Data + top*m_Pitch + x*bytes;
 	for(int i = 0; i < height; ++i) {
-		memcpy(cur, native_color, bytes);
+		std::memcpy(cur, native_color, bytes);
 		cur += m_Pitch;
 	}
 }
@@ -195,7 +195,7 @@ void DrawingCanvas::FillRectangle(int left, int top, int right, int bottom, Colo
 
 	// Write first line
 	for(int i = 0; i < width; ++i) {
-		memcpy(cur, native_color, bytes);
+		std::memcpy(cur, native_color, bytes);
 		cur += bytes;
 	}
 
@@ -203,7 +203,7 @@ void DrawingCanvas::FillRectangle(int left, int top, int right, int bottom, Colo
 
 	// Copy lines
 	for(int i = 1; i < height; ++i) {
-		memcpy(cur, base, width*bytes);
+		std::memcpy(cur, base, width*bytes);
 		cur += m_Pitch;
 	}
 }

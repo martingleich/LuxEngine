@@ -8,7 +8,9 @@ namespace lux
 namespace impl_assert
 {
 
-static bool DefaultHandler(const char* file, int line, const char* assert_str, const char* msg)
+namespace
+{
+bool DefaultHandler(const char* file, int line, const char* assert_str, const char* msg)
 {
 	if(file)
 		std::printf("%s (%d)", file, line);
@@ -30,8 +32,6 @@ static bool DefaultHandler(const char* file, int line, const char* assert_str, c
 	return true;
 }
 
-namespace
-{
 struct HandlingData
 {
 	AssertHandler handler;
@@ -39,9 +39,10 @@ struct HandlingData
 		handler(&DefaultHandler)
 	{}
 };
+
+HandlingData g_HandlingData;
 }
 
-static HandlingData g_HandlingData;
 
 AssertHandler SetHandler(AssertHandler newHandler)
 {

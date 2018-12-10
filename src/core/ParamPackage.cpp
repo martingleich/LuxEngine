@@ -130,6 +130,7 @@ ParamPackage& ParamPackage::operator=(ParamPackage&& old)
 	auto oldMem = old.m_DefaultData.Pointer();
 	m_DefaultData = std::move(old.m_DefaultData);
 	lxAssert(oldMem == m_DefaultData.Pointer());
+	(void)oldMem;
 	return *this;
 }
 

@@ -162,8 +162,8 @@ private:
 	math::Vector2F m_CursorPos;
 	bool m_LeftState;
 	bool m_RightState;
-	bool m_ControlState;
-	bool m_ShiftState;
+	int m_ControlState;
+	int m_ShiftState;
 
 	bool m_IgnoreMouse;
 	bool m_IgnoreKeyboard;

@@ -17,8 +17,8 @@ const ScalarDistanceF Element::AUTO_OUT_MARGIN(-INFINITY);
 
 Element::Element() :
 	m_Align(EAlign::Centered),
+	m_Environment(nullptr),
 	m_Parent(nullptr),
-	m_Window(nullptr),
 	m_Margin(0, 0, 0, 0),
 	m_Size(10, 10),
 	m_MinSize(1, 1),
@@ -41,9 +41,11 @@ Element* Element::GetParent() const
 	return m_Parent;
 }
 
-Window* Element::GetWindow() const
+Window* Element::GetWindow()
 {
-	return m_Window;
+	if(m_Parent)
+		return m_Parent->GetWindow();
+	return nullptr;
 }
 
 GUIEnvironment* Element::GetEnvironment() const
@@ -54,6 +56,10 @@ GUIEnvironment* Element::GetEnvironment() const
 void Element::SetEnvironment(GUIEnvironment* env)
 {
 	m_Environment = env;
+	if(env) {
+		for(auto& e : Elements())
+			e->SetEnvironment(env);
+	}
 }
 
 void Element::SetTabId(int tabId)
@@ -339,7 +345,14 @@ bool Element::OnEvent(const Event& e)
 void Element::SetOverwriteSkin(Skin* s)
 {
 	m_OverwriteSkin = s;
-	SetSkin(s);
+	if(!s) {
+		if(!m_Parent)
+			s = m_Environment->GetSkin();
+		else
+			s = m_Parent->GetSkin();
+	}
+	if(s)
+		SetSkin(s);
 }
 Skin* Element::GetOverwriteSkin() const
 {
@@ -388,7 +401,7 @@ const Palette& Element::GetPalette() const
 
 Palette Element::GetFinalPalette() const
 {
-	return Palette(m_Palette, m_Skin->GetDefaultPalette(GetReferableType()));
+	return Palette(m_Palette, GetSkin()->GetDefaultPalette(GetReferableType()));
 }
 
 void Element::SetTextColor(video::Color c)
@@ -428,13 +441,6 @@ bool Element::IsPointInside(const math::Vector2F& point) const
 
 void Element::SetSkin(Skin* s)
 {
-	if(!s) {
-		if(!m_Parent)
-			s = m_Environment->GetSkin();
-		else
-			s = m_Parent->GetSkin();
-	}
-
 	m_Skin = s;
 	for(auto& e : Elements())
 		e->SetSkin(s);
@@ -442,12 +448,11 @@ void Element::SetSkin(Skin* s)
 
 void Element::OnAdd(Element* p)
 {
-	m_Window = p->GetWindow();
-	m_Environment = p->GetEnvironment();
+	SetEnvironment(p->GetEnvironment());
 	m_Parent = p;
 
 	UpdateRect();
-	SetSkin(m_OverwriteSkin);
+	SetOverwriteSkin(m_OverwriteSkin);
 
 	m_Environment->OnElementAdded(this);
 }
@@ -458,8 +463,7 @@ void Element::OnRemove(Element* p)
 
 	m_Environment->OnElementRemoved(this);
 
-	m_Window = nullptr;
-	m_Environment = nullptr;
+	SetEnvironment(nullptr);
 	m_Parent = nullptr;
 }
 

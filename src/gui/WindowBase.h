@@ -65,6 +65,11 @@ public:
 		return m_ClearBackground;
 	}
 
+	gui::Window* GetWindow() override
+	{
+		return this;
+	}
+
 protected:
 	void OnStateChange(Window::EStateChange newState)
 	{

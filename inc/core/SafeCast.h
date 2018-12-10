@@ -19,8 +19,6 @@ inline bool CheckedCast(FromT from, ToT& to)
 		using BiggerT = core::Choose<sizeof(ToT) < sizeof(FromT), FromT, ToT>::type;
 		if((BiggerT)from > (BiggerT)std::numeric_limits<ToT>::max())
 			return false;
-		if((BiggerT)from < (BiggerT)std::numeric_limits<ToT>::min())
-			return false;
 	}
 	ifconst(std::is_unsigned<ToT>::value && std::is_signed<FromT>::value)
 	{

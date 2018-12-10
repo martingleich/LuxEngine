@@ -174,19 +174,8 @@ Use in global namespace in a source file.
 static ::lux::Referable* LX_CONCAT(InternalCreatorFunc_, __LINE__)(const void*) { return LUX_NEW(class); } \
 static ::lux::impl_referableRegister::ReferableRegisterBlock LX_CONCAT(InternalReferableRegisterStaticObject_, __LINE__)(::lux::core::Name(ref_name), &LX_CONCAT(InternalCreatorFunc_, __LINE__));
 
-//! Helper macro to declare all members for Referable classes
-/**
-Must be placed in the global namespace in the source file.
-\param class The fully qualified name of the class.
-\param ref_name The refereable type name for this class.
-*/
-#define LX_REFERABLE_MEMBERS_SRC(class, ref_name) \
-LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
-::lux::core::Name class::REFERABLE_TYPE_NAME = ::lux::core::Name(ref_name); \
+#define LX_REFERABLE_MEMBERS_SRC_SERIAL(class, ref_name) \
 ::lux::u32 class::SERIAL_TYPE_ID = 0; \
-::lux::core::Name class::GetReferableType() const { return REFERABLE_TYPE_NAME;} \
-::lux::StrongRef<::lux::Referable> class::CloneImpl() const { return LUX_NEW(class)(*this); } \
-::lux::StrongRef<class> class::Clone() const { return CloneImpl().StaticCastStrong<class>(); } \
 ::lux::u32 class::GetSerializerStructure() const { \
 	if(SERIAL_TYPE_ID == (u32)-1) \
 		return 0; \
@@ -199,6 +188,20 @@ LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
 	} \
 	return SERIAL_TYPE_ID; \
 }
+
+//! Helper macro to declare all members for Referable classes
+/**
+Must be placed in the global namespace in the source file.
+\param class The fully qualified name of the class.
+\param ref_name The refereable type name for this class.
+*/
+#define LX_REFERABLE_MEMBERS_SRC(class, ref_name) \
+LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
+::lux::core::Name class::REFERABLE_TYPE_NAME = ::lux::core::Name(ref_name); \
+::lux::core::Name class::GetReferableType() const { return REFERABLE_TYPE_NAME;} \
+::lux::StrongRef<::lux::Referable> class::CloneImpl() const { return LUX_NEW(class)(*this); } \
+::lux::StrongRef<class> class::Clone() const { return CloneImpl().StaticCastStrong<class>(); } \
+LX_REFERABLE_MEMBERS_SRC_SERIAL(class, ref_name)
 
 } // namespace lux
 

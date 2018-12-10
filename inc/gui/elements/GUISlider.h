@@ -27,7 +27,7 @@ public:
 
 	LUX_API void SetSkin(Skin* skin);
 	LUX_API void Paint(Renderer* renderer);
-	LUX_API math::Dimension2F GetThumbSize() const;
+	LUX_API virtual math::Dimension2F GetThumbSize() const;
 	LUX_API virtual bool IsPointOnThumb(const math::Vector2F& point) const;
 	LUX_API bool OnMouseEvent(const gui::MouseEvent& e);
 	LUX_API bool OnKeyboardEvent(const gui::KeyboardEvent& e);

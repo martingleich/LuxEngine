@@ -237,6 +237,30 @@ private:
 	const char* m_Data;
 };
 
+template <int MAX_SIZE>
+class FixedString
+{
+public:
+	FixedString()
+	{
+		m_Size = 0;
+	}
+	FixedString(const char* str, int size)
+	{
+		lxAssert(size <= MAX_SIZE);
+		std::memcpy(m_Data, str, size);
+		m_Size = size;
+	}
+	FixedString(const FixedString& other) = default;
+	FixedString& operator=(const FixedString& other) = default;
+
+	StringView AsView() const { return StringView(m_Data, m_Size); }
+
+private:
+	char m_Data[MAX_SIZE];
+	int m_Size;
+};
+
 }
 }
 

@@ -43,7 +43,7 @@ public:
 
 	LUX_API Element* GetParent() const;
 
-	LUX_API Window* GetWindow() const;
+	LUX_API virtual Window* GetWindow();
 	LUX_API GUIEnvironment* GetEnvironment() const;
 	LUX_API virtual void SetEnvironment(GUIEnvironment* env);
 
@@ -176,6 +176,9 @@ protected:
 	LUX_API void OnInnerRectChange();
 
 protected:
+	GUIEnvironment* m_Environment;
+	Element* m_Parent;
+
 	ElementList m_Elements;
 
 	EAlign m_Align;
@@ -184,10 +187,6 @@ protected:
 
 	StrongRef<Font> m_OverwriteFont;
 	Palette m_Palette;
-
-	GUIEnvironment* m_Environment;
-	Element* m_Parent;
-	Window* m_Window;
 
 	core::String m_ToolTip;
 

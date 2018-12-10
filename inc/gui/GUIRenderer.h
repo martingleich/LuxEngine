@@ -3,6 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "math/Rect.h"
 #include "math/Triangle3.h"
+#include "math/PixelTransformation.h"
 #include "video/Color.h"
 #include "video/Texture.h"
 #include "video/Renderer.h"
@@ -53,7 +54,6 @@ public:
 	LUX_API void DrawLine(const math::Vector2F& start, const math::Vector2F& end, video::Color color, float thickness = 1.0f, const LineStyle& style = LineStyle::Solid());
 	LUX_API void Flush();
 	LUX_API video::Renderer* GetRenderer() const;
-
 private:
 	video::Renderer* m_Renderer;
 	video::Pass m_TexturePass;
