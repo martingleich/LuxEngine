@@ -309,7 +309,6 @@ public:
 	*/
 	LUX_API String& Strip(int first = -1, int size = -1);
 
-	// TODO: Replace split character with string.
 	//! Split the string on a character.
 	/**
 	If the character isn't contained in the string, the original string is returned.

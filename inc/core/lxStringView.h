@@ -174,17 +174,24 @@ public:
 	template <typename AddResultT>
 	int BasicSplit(StringView split, int maxCount, bool ignoreEmpty, AddResultT&& outputter)
 	{
-		if(maxCount == 0)
+		if(maxCount == 0) == 0)
 			return 0;
-		if(maxCount < 0)
-			maxCount = std::numeric_limits<int>::max();
 
 		int count = 0;
 		const char* inCur = this->Data();
 		const char* inEnd = inCur + this->Size();
 		const char* splitCur = inCur;
 		int splitSize = 0;
-		if(split.Size() == 1) {
+		if(split.Size() == 0) {
+			while(inCur != inEnd) {
+				if(count == maxCount)
+					break;
+				outputter(StringView(inCur, 1));
+				++count;
+				++inCur;
+			}
+			return count;
+		} else if(split.Size() == 1) {
 			while(inCur+1 <= inEnd) {
 				if(*inCur == *split.Data()) {
 					if(!(ignoreEmpty && splitSize == 0)) {
