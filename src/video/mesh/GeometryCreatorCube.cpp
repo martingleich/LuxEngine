@@ -40,10 +40,10 @@ const core::ParamPackage& GeometryCreatorCube::GetParams() const
 
 StrongRef<Geometry> GeometryCreatorCube::CreateGeometry(const core::PackagePuffer& params)
 {
-	const math::Vector3F size = params.FromID(0, true);
-	const math::Vector3I tes = params.FromID(1, true);
-	const math::Vector3F tex = params.FromID(2, true);
-	const bool inside = params.FromID(3, true);
+	const math::Vector3F size = params.FromID(0, true).Get<math::Vector3F>();
+	const math::Vector3I tes = params.FromID(1, true).Get<math::Vector3I>();
+	const math::Vector3F tex = params.FromID(2, true).Get<math::Vector3F>();
+	const bool inside = params.FromID(3, true).Get<bool>();
 
 	return CreateGeometry(
 		size.x, size.y, size.z,

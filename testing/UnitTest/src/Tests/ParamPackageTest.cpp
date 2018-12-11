@@ -15,10 +15,10 @@ UNIT_SUITE(algorithm)
 	UNIT_TEST(default_values_and_access)
 	{
 		core::PackagePuffer puffer(&pack);
-		UNIT_ASSERT((int)puffer.FromName("arg1_int", true) == 1);
-		UNIT_ASSERT((float)puffer.FromName("arg2_float", true) == 1.0f);
-		UNIT_ASSERT((bool)puffer.FromName("arg3_bool", true) == false);
-		UNIT_ASSERT(((core::StringView)puffer.FromName("arg4_string", true)).Equal("Hello"));
+		UNIT_ASSERT(puffer.FromName("arg1_int", true).Get<int>() == 1);
+		UNIT_ASSERT(puffer.FromName("arg2_float", true).Get<float>() == 1.0f);
+		UNIT_ASSERT(puffer.FromName("arg3_bool", true).Get<bool>() == false);
+		UNIT_ASSERT(puffer.FromName("arg4_string", true).Get<core::StringView>().Equal("Hello"));
 	}
 }
 

@@ -188,44 +188,34 @@ public:
 	*/
 	inline u32 FormatToA8R8G8B8(const u8* in) const
 	{
-		u32 out;
 		u32 in16;
 
 		switch(m_Format) {
 		case R8G8B8:
-			out = 0xFF000000 | (in[0] << 16) | (in[1] << 8) | (in[2] << 0);
-			break;
+			return 0xFF000000 | (in[0] << 16) | (in[1] << 8) | (in[2] << 0);
 		case X8R8G8B8:
 		case A8R8G8B8:
-			out = *((u32*)(in));
-			break;
+			return *((u32*)(in));
 		case X1R5G5B5:
 		case A1R5G5B5:
 			in16 = *((u16*)in);
-			out = ((((u32)in16 & 0x8000) >> 31) & 0xFF00) |
+			return ((((u32)in16 & 0x8000) >> 31) & 0xFF00) |
 				((in16 & 0x7C00) << 9) | ((in16 & 0x7000) << 4) |
 				((in16 & 0x03E0) << 6) | ((in16 & 0x0380) << 1) |
 				((in16 & 0x001F) << 3) | ((in16 & 0x001C) >> 2);
-			break;
 		case R5G6B5:
 			in16 = *((u16*)in);
-			out =
-				((in16 & 0xF800) << 8) |
+			return ((in16 & 0xF800) << 8) |
 				((in16 & 0x07E0) << 5) |
 				((in16 & 0x001F) << 3);
-			break;
 		case X8:
-			out = 0xFF000000 | (*in << 16) | (*in << 8) << (*in << 0);
-			break;
+			return 0xFF000000 | (*in << 16) | (*in << 8) << (*in << 0);
 		case X16:
-			out = 0xFF000000 | (in[1] << 16) | (in[1] << 8) << (in[1] << 0);
-			break;
+			return 0xFF000000 | (in[1] << 16) | (in[1] << 8) << (in[1] << 0);
 		default:
-			lxAssertNeverReach("Colorformat not implemented.");
-			out = 0;
+			break;
 		}
-
-		return out;
+			throw core::NotImplementedException("Colorformat not implemented.");
 	}
 
 	//! Convert a pixel from A8R8G8B8 to this format
@@ -266,8 +256,7 @@ public:
 				((in & 0x000000F8) >> 3));
 			break;
 		default:
-			lxAssertNeverReach("Colorformat not implemented.");
-			memset(out, 0, GetBytePerPixel());
+		throw core::NotImplementedException("Colorformat not implemented.");
 		}
 	}
 

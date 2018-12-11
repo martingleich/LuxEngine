@@ -204,7 +204,7 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 				}
 			}
 		} catch(core::RuntimeException& e) {
-			log::Debug("Detected unsupported device(~a): ~s", hDevice, e.What());
+			log::Debug("Detected unsupported device(~a): ~s", hDevice, e.What().AsView());
 		}
 		result = S_OK;
 		ret = true;
@@ -266,7 +266,7 @@ int RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 				real_device->Disconnect();
 				++count;
 			} catch(core::RuntimeException& e) {
-				log::Debug("Detected unsupported device(~a): ~s", device_info.hDevice, e.What());
+				log::Debug("Detected unsupported device(~a): ~s", device_info.hDevice, e.What().AsView());
 				break;
 			}
 		}

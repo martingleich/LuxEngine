@@ -287,7 +287,7 @@ namespace math
 template <>
 inline video::Color Lerp(const video::Color& a, const video::Color& b, float t)
 {
-	lxAssert(t >= 0.0f && t <= 1.0f);
+	t = math::Clamp<float>(t, 0, 1);
 
 	s32 aRed = a.GetRed();
 	s32 bRed = b.GetRed();

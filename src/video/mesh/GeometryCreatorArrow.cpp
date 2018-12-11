@@ -36,11 +36,11 @@ const core::ParamPackage& GeometryCreatorArrow::GetParams() const
 
 StrongRef<Geometry> GeometryCreatorArrow::CreateGeometry(const core::PackagePuffer& params)
 {
-	const float shaft_height = params.Param(0).Default(2.0f);
-	const float head_height = params.Param(1).Default(1.0f);
-	const float shaft_radius = params.Param(2).Default(0.5f);
-	const float head_radius = params.Param(3).Default(0.75f);
-	const s32 sectors = params.Param(4).Default(8);
+	const float shaft_height = params.Param(0).GetDefault(2.0f);
+	const float head_height = params.Param(1).GetDefault(1.0f);
+	const float shaft_radius = params.Param(2).GetDefault(0.5f);
+	const float head_radius = params.Param(3).GetDefault(0.75f);
+	const s32 sectors = params.Param(4).GetDefault(8);
 
 	return CreateGeometry(
 		shaft_height, head_height,

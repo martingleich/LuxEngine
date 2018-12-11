@@ -41,11 +41,11 @@ const core::ParamPackage& GeometryCreatorSphereUV::GetParams() const
 
 StrongRef<Geometry> GeometryCreatorSphereUV::CreateGeometry(const core::PackagePuffer& params)
 {
-	const float radius = params.Param(0);
-	const s32 rings = params.Param(1);
-	const s32 sectors = params.Param(2);
-	const math::Vector2F tex = params.Param(3);
-	const bool inside = params.Param(4);
+	const float radius = params.Param(0).Get<float>();
+	const s32 rings = params.Param(1).Get<s32>();
+	const s32 sectors = params.Param(2).Get<s32>();
+	const math::Vector2F tex = params.Param(3).Get<math::Vector2F>();
+	const bool inside = params.Param(4).Get<bool>();
 
 	return CreateGeometry(radius, rings, sectors, tex.x, tex.y, inside);
 }

@@ -50,7 +50,7 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 	}
 
 	m_Lighting = pass.lighting;
-	m_Ambient = m_AmbientPtr->GetAccess(true).As<video::ColorF>();
+	m_Ambient = m_AmbientPtr->GetAccess(true).Get<video::ColorF>();
 }
 
 void FixedFunctionShaderD3D9::Render()

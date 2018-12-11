@@ -105,7 +105,6 @@ public:
 				return GetColor(state, EColorRole::Base).GetInverted();
 			if(role == EColorRole::BaseHightlightText)
 				return GetColor(state, EColorRole::BaseText).GetInverted();
-			lxAssertNeverReach("Can't get not set color");
 			return video::Color::Black;
 		} else {
 			return m_Data->colors[GetId(state, role)];

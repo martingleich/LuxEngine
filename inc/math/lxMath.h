@@ -383,9 +383,7 @@ If the value is outside the range [0;1] the result is undefined.
 template <typename type>
 inline type Lerp(const type& A, const type& B, float t)
 {
-	// Catch some of the really bad errors. Without getting in way.
-	lxAssert(t >= -1 && t <= 2);
-
+	t = math::Clamp<float>(t, 0, 1);
 	return (type)(A*(1 - t) + B*t);
 }
 

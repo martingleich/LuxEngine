@@ -31,21 +31,17 @@ public:
 	*/
 	VariableAccess(core::Type type, const void* data) :
 		m_Data(const_cast<void*>(data)),
-		m_Type(type)
+		m_Type(type.GetConstantType())
 	{
-		m_Type = m_Type.GetConstantType();
+		if(m_Type.IsUnknown())
+			throw core::GenericInvalidArgumentException("type", "Type can't be unknown.");
 	}
 	VariableAccess(core::Type type, void* data) :
 		m_Data(data),
 		m_Type(type)
 	{
-	}
-	//! Construct from any object
-	explicit VariableAccess(const AnyObject& any, bool isConst = false) :
-		m_Data(const_cast<void*>(any.Data())),
-		m_Type(isConst ? any.GetType().GetConstantType() : any.GetType())
-	{
-		lxAssert(!m_Type.IsUnknown());
+		if(m_Type.IsUnknown())
+			throw core::GenericInvalidArgumentException("type", "Type can't be unknown.");
 	}
 
 	VariableAccess(VariableAccess&& old)
@@ -56,68 +52,66 @@ public:
 
 	VariableAccess(const VariableAccess&) = delete;
 
-	template <typename T, bool U = !std::is_same<T, VariableAccess>::value, std::enable_if_t<U, int> = 0>
-	constexpr VariableAccess(const T& value) :
-		m_Data(const_cast<void*>((const void*)&value)),
-		m_Type(core::TemplType<T>::Get().GetConstantType())
-	{
-		lxAssert(!m_Type.IsUnknown());
-	}
-
 	template <typename T>
 	static VariableAccess Constant(const T& value)
 	{
-		return VariableAccess(value);
+		return VariableAccess(core::TemplType<T>::Get().GetConstantType(), const_cast<void*>((const void*)&value));
 	}
-
-	template <typename T, bool U = !std::is_same<T, VariableAccess>::value, std::enable_if_t<U, int> = 0>
-	constexpr VariableAccess(T& value) :
-		m_Data(&value),
-		m_Type(core::TemplType<T>::Get())
+	template <typename T>
+	static VariableAccess Referable(T& value)
 	{
+		return VariableAccess(core::TemplType<T>::Get(), &value);
 	}
 
 	template <typename T>
-	T As() const
+	struct VariableGetter
 	{
-		if(IsValid()) {
-			auto type = core::TemplType<T>::Get();
-			if(!IsConvertible(m_Type, type))
-				throw TypeCastException(m_Type, type);
+		static T Get(Type t, const void* data)
+		{
+			auto dest = core::TemplType<T>::Get();
+			if(!IsConvertible(t, dest))
+				throw TypeCastException(t, dest);
 
 			T out;
-			ConvertBaseType(m_Type, m_Data, type, &out);
+			ConvertBaseType(t, data, dest, &out);
 			return out;
 		}
+	};
 
-		return T();
-	}
-
-	//! Access as any type
 	template <typename T>
-	operator T() const
-	{
-		return As<T>();
+	T Get() const {
+		if(!IsValid())
+			throw InvalidOperationException("Accessed invalid variable access.");
+		return VariableGetter<T>::Get(m_Type, m_Data);
 	}
 
 	template <typename T>
-	T Default(const T& defaultValue) const
+	struct VariableSetter
 	{
-		if(IsConvertible(m_Type, core::TemplType<T>::Get()) && IsValid())
-			return As<T>();
-		else
-			return defaultValue;
-	}
+		static void Set(Type t, void* data, const T& value)
+		{
+			auto source = core::TemplType<T>::Get();
+			if(!IsConvertible(source, t))
+				throw TypeCastException(source, t);
 
-	operator StringView() const
+			ConvertBaseType(t, &value, t, data);
+		}
+	};
+	template <typename T>
+	void Set(const T& value) const
 	{
 		if(!IsValid())
-			throw InvalidOperationException("Accessed invalid package parameter");
+			throw InvalidOperationException("Accessed invalid variable access.");
+		VariableSetter<T>::Set(m_Type, m_Data, value);
+	}
 
-		if(m_Type != core::Types::String())
-			throw TypeCastException(m_Type, core::Types::String());
-
-		return ((const core::String*)m_Data)->AsView();
+	template <typename T>
+	T GetDefault(const T& defaultValue) const
+	{
+		if(IsConvertible(m_Type, core::TemplType<T>::Get()) && IsValid())
+			return Get<T>();
+		else
+			return defaultValue;
 	}
 
 	void AssignData(const void* data) const
@@ -128,48 +122,6 @@ public:
 	void CopyData(void* copyTo) const
 	{
 		m_Type.Assign(copyTo, m_Data);
-	}
-
-	/*
-	//! Access as texture
-	operator video::BaseTexture*() const
-	{
-		return As<video::TextureLayer>().texture;
-	}
-
-	//! Access as texture
-	operator video::Texture*() const
-	{
-		auto base = As<video::BaseTexture*>();
-		auto out = dynamic_cast<video::Texture*>(base);
-		if(!out)
-			throw core::Exception("Invalid cast");
-
-		return out;
-	}
-
-	//! Access as texture
-	operator video::CubeTexture*() const
-	{
-		auto base = As<video::BaseTexture*>();
-		auto out = dynamic_cast<video::CubeTexture*>(base);
-		if(!out)
-			throw core::Exception("Invalid cast");
-
-		return out;
-	}
-*/
-	//! Access as any type
-	template <typename T>
-	const VariableAccess& operator=(const T& varVal) const
-	{
-		auto type = core::TemplType<T>::Get();
-		if(!core::IsConvertible(type, m_Type))
-			throw TypeCastException(type, m_Type);
-		if(IsValid())
-			core::ConvertBaseType(type, &varVal, m_Type, m_Data);
-
-		return *this;
 	}
 
 	const VariableAccess& operator=(const char* string) const
@@ -245,36 +197,33 @@ private:
 	Type m_Type;
 };
 
-//! Casting from color to colorf
 template <>
-inline const VariableAccess& VariableAccess::operator=(const video::Color& color) const
+struct VariableAccess::VariableGetter<StringView>
 {
-	if(m_Type != core::Types::Color() && m_Type != core::Types::ColorF())
-		throw TypeCastException(m_Type, core::Types::Color());
+	static core::StringView Get(Type t, const void* data)
+	{
+		if(t != core::Types::String())
+			throw TypeCastException(t, core::Types::String());
 
-	if(m_Type == core::Types::Color())
-		*((video::Color*)m_Data) = color;
-
-	if(m_Type == core::Types::ColorF())
-		*((video::ColorF*)m_Data) = video::ColorF(color);
-
-	return *this;
-}
+		return ((const core::String*)data)->AsView();
+	}
+};
 
 template <>
-inline const VariableAccess& VariableAccess::operator=(const video::Color::EPredefinedColors& color) const
+struct VariableAccess::VariableSetter<video::Color::EPredefinedColors>
 {
-	if(m_Type != core::Types::Color() && m_Type != core::Types::ColorF())
-		throw TypeCastException(m_Type, core::Types::Color());
+	static void Get(Type t, void* data, video::Color::EPredefinedColors color)
+	{
+		if(t != core::Types::Color() && t != core::Types::ColorF())
+			throw TypeCastException(t, core::Types::Color());
 
-	if(m_Type == core::Types::Color())
-		*((video::Color*)m_Data) = color;
+		if(t == core::Types::Color())
+			*((video::Color*)data) = color;
 
-	if(m_Type == core::Types::ColorF())
-		*((video::ColorF*)m_Data) = video::ColorF(color);
-
-	return *this;
-}
+		if(t == core::Types::ColorF())
+			*((video::ColorF*)data) = video::ColorF(color);
+	}
+};
 
 class VariableArrayAccess
 {
@@ -287,9 +236,8 @@ public:
 	VariableArrayAccess(const void* ptr, Type type)
 	{
 		m_ArrayInfo = dynamic_cast<const AbstractArrayTypeInfo*>(type.GetInfo());
-		lxAssert(m_ArrayInfo);
 		if(!m_ArrayInfo)
-			return;
+			throw core::GenericInvalidArgumentException("type", "type is not an array");
 		m_BaseType = m_ArrayInfo->GetBaseType();
 #ifdef LUX_ENABLE_ASSERTS
 		m_IsConst = type.IsConstant();
@@ -304,12 +252,14 @@ public:
 	}
 	void Resize(int used)
 	{
-		lxAssert(m_IsConst == false);
+		if(m_IsConst)
+			throw core::InvalidOperationException("Can't resize constant array.");
 		m_ArrayInfo->Resize(m_ArrayPtr, used);
 	}
 	VariableAccess operator[](int i)
 	{
-		lxAssert(m_IsConst == false);
+		if(m_IsConst)
+			throw core::InvalidOperationException("Can't change constant array.");
 		return VariableAccess(m_BaseType, m_ArrayInfo->At(m_ArrayPtr, i));
 	}
 

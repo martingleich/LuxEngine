@@ -25,12 +25,12 @@ GeometryCreatorTorus::GeometryCreatorTorus()
 
 StrongRef<Geometry> GeometryCreatorTorus::CreateGeometry(const core::PackagePuffer& params)
 {
-	float radiusMajor = params.Param(0);
-	float radiusMinor = params.Param(1);
-	s32 sectorsMajor = params.Param(2);
-	s32 sectorsMinor = params.Param(3);
-	math::Vector2I tex = params.Param(4);
-	bool inside = params.Param(5);
+	float radiusMajor = params.Param(0).Get<float>();
+	float radiusMinor = params.Param(1).Get<float>();
+	s32 sectorsMajor = params.Param(2).Get<s32>();
+	s32 sectorsMinor = params.Param(3).Get<s32>();
+	math::Vector2I tex = params.Param(4).Get<math::Vector2I>();
+	bool inside = params.Param(5).Get<bool>();
 
 	return CreateGeometry(radiusMajor, radiusMinor, sectorsMajor, sectorsMinor, tex.x, tex.y, inside);
 

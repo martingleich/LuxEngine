@@ -214,8 +214,6 @@ public:
 				m_Planes[b],
 				m_Planes[c], point);
 			lxAssert(intersect);
-			if(!intersect)
-				point = math::Vector3F::ZERO;
 			m_Points[i] = point;
 		}
 		

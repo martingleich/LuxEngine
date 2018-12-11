@@ -117,9 +117,10 @@ public:
 
 	void Evaluate(float time, const core::VariableAccess& access, u32* token=nullptr) const
 	{
-		access = math::CurveInterpolation(
+		T value= math::CurveInterpolation(
 			m_Samples.Data(), m_Samples.Size(),
 			time, m_EdgeHandling, m_Interpolation, token);
+		access.Set(value);
 	}
 
 	float GetStart() const

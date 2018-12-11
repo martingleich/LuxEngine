@@ -24,12 +24,12 @@ GeometryCreatorCylinder::GeometryCreatorCylinder()
 
 StrongRef<Geometry> GeometryCreatorCylinder::CreateGeometry(const core::PackagePuffer& params)
 {
-	float radius = params.Param(0);
-	float height = params.Param(1);
-	s32 sectors = params.Param(2);
-	s32 planes = params.Param(3);
-	math::Vector2I tex = params.Param(4);
-	bool inside = params.Param(5);
+	float radius = params.Param(0).Get<float>();
+	float height = params.Param(1).Get<float>();
+	s32 sectors = params.Param(2).Get<s32>();
+	s32 planes = params.Param(3).Get<s32>();
+	math::Vector2I tex = params.Param(4).Get<math::Vector2I>();
+	bool inside = params.Param(5).Get<bool>();
 
 	return CreateGeometry(radius, height, sectors, planes, tex.x, tex.y, inside);
 

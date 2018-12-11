@@ -289,16 +289,16 @@ bool SceneRendererSimpleForward::IsCulled(Node* node, Renderable* r, const math:
 void SceneRendererSimpleForward::DrawScene()
 {
 	// Check if a stencil buffer is available for shadow rendering
-	bool drawStencilShadows = m_Attributes["drawStencilShadows"];
+	bool drawStencilShadows = m_Attributes["drawStencilShadows"].Get<bool>();
 	if(drawStencilShadows) {
 		if(m_Renderer->GetDriver()->GetConfig().zsFormat.sBits == 0) {
 			log::Warning("Scene: Can't draw stencil shadows without stencilbuffer(Disabled shadow rendering).");
 			drawStencilShadows = false;
-			m_Attributes["drawStencilShadows"] = false;
+			m_Attributes["drawStencilShadows"].Set(false);
 		}
 	}
 
-	m_Culling = m_Attributes["culling"];
+	m_Culling = m_Attributes["culling"].Get<bool>();
 
 	core::Array<Light*> illuminating;
 	core::Array<Light*> shadowCasting;
@@ -307,15 +307,15 @@ void SceneRendererSimpleForward::DrawScene()
 	sceneData.activeCamera = m_ActiveCamera;
 	sceneData.activeCameraNode = m_ActiveCameraNode;
 
-	m_Renderer->GetParams()["camPos"] = m_ActiveCameraNode->GetAbsolutePosition();
+	m_Renderer->GetParams()["camPos"].Set(m_ActiveCameraNode->GetAbsolutePosition());
 
 	//-------------------------------------------------------------------------
 	// The lights
-	m_Renderer->GetParams()["ambient"] = m_AmbientLight;
+	m_Renderer->GetParams()["ambient"].Set(m_AmbientLight);
 	m_Renderer->ClearLights();
 
 	int maxLightCount = m_Renderer->GetMaxLightCount();
-	int maxShadowCastingCount = m_Attributes["maxShadowCasters"];
+	int maxShadowCastingCount = m_Attributes["maxShadowCasters"].Get<int>();
 	if(!drawStencilShadows)
 		maxShadowCastingCount = 0;
 

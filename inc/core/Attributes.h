@@ -40,7 +40,10 @@ public:
 
 	virtual VariableAccess GetAccess(bool isConst = false)
 	{
-		return VariableAccess(m_Any, isConst);
+		auto type = m_Any.GetType();
+		if(isConst)
+			type = type.GetConstantType();
+		return VariableAccess(type, (void*)m_Any.Data());
 	}
 
 private:

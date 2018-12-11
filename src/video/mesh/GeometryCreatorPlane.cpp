@@ -33,9 +33,9 @@ const core::String& GeometryCreatorPlane::GetName() const
 
 StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(const core::PackagePuffer& params)
 {
-	const math::Vector2F size = params.FromID(0, true);
-	const math::Vector2I tesselation = params.FromID(1, true);
-	const math::Vector2F textureRepeat = params.FromID(2, true);
+	const math::Vector2F size = params.FromID(0, true).Get<math::Vector2F>();
+	const math::Vector2I tesselation = params.FromID(1, true).Get<math::Vector2I>();
+	const math::Vector2F textureRepeat = params.FromID(2, true).Get<math::Vector2F>();
 
 	return CreateGeometry(size.x, size.y, tesselation.x, tesselation.y, textureRepeat.x, textureRepeat.y, nullptr, nullptr);
 }

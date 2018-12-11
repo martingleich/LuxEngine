@@ -74,53 +74,53 @@ public:
 			}
 		}
 		if(i != type->GetParamCount())
-			m_Params.FromID(i, false) = video::TextureLayer(texture);
+			m_Params.FromID(i, false).Set(video::TextureLayer(texture));
 	}
 	void SetTexture(core::StringView str, video::BaseTexture* texture)
 	{
-		m_Params.FromName(str, false) = video::TextureLayer(texture);
+		m_Params.FromName(str, false).Set(video::TextureLayer(texture));
 	}
 	video::TextureLayer GetTexture(core::StringView str) const
 	{
-		return m_Params.FromName(str, true);
+		return m_Params.FromName(str, true).Get<video::TextureLayer>();
 	}
 	video::TextureLayer GetTexture(int id) const
 	{
-		return m_Params.FromID(id, true);
+		return m_Params.FromID(id, true).Get<video::TextureLayer>();
 	}
 	
 	void SetColor(core::StringView str, const video::ColorF& color)
 	{
-		m_Params.FromName(str, false) = color;
+		m_Params.FromName(str, false).Set(color);
 	}
 	void SetColor(int id, const video::ColorF& color)
 	{
-		m_Params.FromID(id, false) = color;
+		m_Params.FromID(id, false).Set(color);
 	}
 	video::ColorF GetColor(core::StringView str) const
 	{
-		return m_Params.FromName(str, true);
+		return m_Params.FromName(str, true).Get<video::ColorF>();
 	}
 	video::ColorF GetColor(int id) const
 	{
-		return m_Params.FromID(id, true);
+		return m_Params.FromID(id, true).Get<video::ColorF>();
 	}
 
 	void SetFloat(core::StringView str, float f)
 	{
-		m_Params.FromName(str, false) = f;
+		m_Params.FromName(str, false).Set(f);
 	}
 	void SetFloat(int id, float f)
 	{
-		m_Params.FromID(id, false) = f;
+		m_Params.FromID(id, false).Set(f);
 	}
 	float GetFloat(core::StringView str) const
 	{
-		return m_Params.FromName(str, true);
+		return m_Params.FromName(str, true).Get<float>();
 	}
 	float GetFloat(int id) const
 	{
-		return m_Params.FromID(id, true);
+		return m_Params.FromID(id, true).Get<float>();
 	}
 	
 	bool HasDiffuse() const { return m_DiffuseId > 0; }
