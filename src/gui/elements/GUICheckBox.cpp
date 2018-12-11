@@ -15,7 +15,7 @@ CheckBox::CheckBox() :
 	m_IsChecked = false;
 	onStateChange.SetConnectEvent([this](const core::SignalFunc<bool>& f) { f.Call(m_IsChecked); });
 	SetMinSize(DEFAULT_CHECKBOX_SIZE);
-	SetAlignment(EAlign::VCenter | EAlign::HLeft);
+	SetAlignment(CombineFlags(EAlign::VCenter, EAlign::HLeft));
 }
 
 CheckBox::~CheckBox()
@@ -93,7 +93,7 @@ EGUIStateFlag CheckBox::GetState() const
 {
 	EGUIStateFlag state = Element::GetState();
 	if(m_IsChecked)
-		state |= EGUIStateFlag::Sunken;
+		SetFlag(state, EGUIStateFlag::Sunken);
 	return state;
 }
 

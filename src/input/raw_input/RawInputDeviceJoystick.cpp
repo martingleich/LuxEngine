@@ -542,13 +542,13 @@ RawJoystickDevice::ElemDesc RawJoystickDevice::GetElementDesc(EEventType type, i
 {
 	if(type == EEventType::Button) {
 		const Button& button = m_Buttons[m_CodeHIDMapping[code]];
-		EElementType elem_type = EElementType::Input | EElementType::Button | (button.isAbsolute ? EElementType::PushButton : EElementType::ToggleButton);
+		EElementType elem_type = CombineFlags(EElementType::Input, EElementType::Button, button.isAbsolute ? EElementType::PushButton : EElementType::ToggleButton);
 		return ElemDesc(button.name, button.usagePage, button.usage, elem_type);
 	} else if(type == EEventType::Axis) {
 		const Axis& axis = m_Axes[m_CodeHIDMapping[m_Buttons.Size() + code]];
-		EElementType elem_type = EElementType::Input | EElementType::Axis | (axis.isAbsolute ? EElementType::Abs : EElementType::Rel);
+		EElementType elem_type = CombineFlags(EElementType::Input, EElementType::Axis, axis.isAbsolute ? EElementType::Abs : EElementType::Rel);
 		if(axis.usagePage == 1 && axis.usage == 0x39)
-			elem_type = EElementType::Input | EElementType::Axis | EElementType::POV;
+			elem_type = CombineFlags(EElementType::Input, EElementType::Axis, EElementType::POV);
 		return ElemDesc(axis.name, axis.usagePage, axis.usage, elem_type);
 	} else {
 		static const core::String name = "(unknown)";

@@ -29,20 +29,20 @@ inline EAlign FlipAlign(EAlign in, bool flipH, bool flipV)
 {
 	if(flipH) {
 		if(TestFlag(in, EAlign::HLeft)) {
-			in |= EAlign::HRight;
-			in &= ~EAlign::HLeft;
+			SetFlag(in, EAlign::HRight);
+			ClearFlag(in, EAlign::HLeft);
 		} else if(TestFlag(in, EAlign::HRight)) {
-			in |= EAlign::HLeft;
-			in &= ~EAlign::HRight;
+			SetFlag(in, EAlign::HLeft);
+			ClearFlag(in, EAlign::HRight);
 		}
 	}
 	if(flipV) {
 		if(TestFlag(in, EAlign::VTop)) {
-			in |= EAlign::VBottom;
-			in &= ~EAlign::VTop;
+			SetFlag(in, EAlign::VBottom);
+			ClearFlag(in, EAlign::VTop);
 		} else if(TestFlag(in, EAlign::VBottom)) {
-			in |= EAlign::VTop;
-			in &= ~EAlign::VBottom;
+			SetFlag(in, EAlign::VTop);
+			ClearFlag(in, EAlign::VBottom);
 		}
 	}
 	return in;

@@ -30,8 +30,10 @@ MemoryFile::MemoryFile(
 			LUX_FREE_RAW(m_Buffer);
 
 		m_Buffer = newData;
-		SetFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop | EVirtualCreateFlag::Expandable);
-		ClearFlag(m_Flags, EVirtualCreateFlag::Copy | EVirtualCreateFlag::ReadOnly);
+		SetFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop);
+		SetFlag(m_Flags, EVirtualCreateFlag::Expandable);
+		ClearFlag(m_Flags, EVirtualCreateFlag::Copy);
+		ClearFlag(m_Flags, EVirtualCreateFlag::ReadOnly);
 	}
 }
 
@@ -78,8 +80,11 @@ s64 MemoryFile::WriteBinaryPart(const void* data, s64 numBytes)
 				memcpy(pNewData, m_Buffer, m_Size);
 			if(TestFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop))
 				LUX_FREE_RAW(m_Buffer);
-			SetFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop | EVirtualCreateFlag::Expandable);
-			ClearFlag(m_Flags, EVirtualCreateFlag::Copy | EVirtualCreateFlag::ReadOnly);
+			SetFlag(m_Flags, EVirtualCreateFlag::DeleteOnDrop);
+			SetFlag(m_Flags, EVirtualCreateFlag::Expandable);
+
+			ClearFlag(m_Flags, EVirtualCreateFlag::Copy);
+			ClearFlag(m_Flags, EVirtualCreateFlag::ReadOnly);
 
 			m_Buffer = pNewData;
 			m_Size = (3 * (m_Cursor + sizeBytes)) / 2;

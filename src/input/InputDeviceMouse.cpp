@@ -16,18 +16,20 @@ MouseDevice::MouseDevice(const DeviceCreationDesc* desc, InputSystem* system) :
 	for(int i = 0; i < m_Buttons.Size(); ++i) {
 		auto& button = m_Buttons[i];
 		auto elemDesc = desc->GetElementDesc(EEventType::Button, i);
-		button.type = EElementType::Input | EElementType::Button | EElementType::PushButton;
+		button.type = CombineFlags(EElementType::Input, EElementType::Button, EElementType::PushButton);
 		button.name = elemDesc.name;
 	}
 
 	for(int i = 0; i < m_Axes.Size(); ++i) {
 		auto& axis = m_Axes[i];
 		auto elemDesc = desc->GetElementDesc(EEventType::Axis, i);
-		axis.type = EElementType::Input | EElementType::Axis | EElementType::Rel;
+		axis.type = CombineFlags(EElementType::Input, EElementType::Axis, EElementType::Rel);
 		axis.name = elemDesc.name;
 	}
 
-	m_Pos.type = EElementType::Input | EElementType::Area | EElementType::Rel;
+	m_Pos.type = EElementType::Input;
+	SetFlag(m_Pos.type, EElementType::Area);
+	SetFlag(m_Pos.type, EElementType::Rel);
 	m_Pos.name = desc->GetElementDesc(EEventType::Area, 0).name;
 
 	Reset();

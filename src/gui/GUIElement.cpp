@@ -424,11 +424,11 @@ EGUIStateFlag Element::GetState() const
 {
 	EGUIStateFlag state = EGUIStateFlag::None;
 	if(IsEnabled()) {
-		state |= EGUIStateFlag::Enabled;
+		SetFlag(state, EGUIStateFlag::Enabled);
 		if(IsFocused())
-			state |= EGUIStateFlag::Focused;
+			SetFlag(state, EGUIStateFlag::Focused);
 		if(IsHovered())
-			state |= EGUIStateFlag::Hovered;
+			SetFlag(state, EGUIStateFlag::Hovered);
 	}
 
 	return state;

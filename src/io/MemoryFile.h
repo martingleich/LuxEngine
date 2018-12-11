@@ -23,7 +23,7 @@ public:
 		MemoryFile(const_cast<void*>(buffer),
 			desc,
 			path,
-			flags | EVirtualCreateFlag::ReadOnly)
+			CombineFlags(flags, EVirtualCreateFlag::ReadOnly))
 	{}
 	~MemoryFile();
 	s64 ReadBinaryPart(s64 numBytes, void* out);

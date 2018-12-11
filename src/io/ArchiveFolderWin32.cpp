@@ -226,7 +226,7 @@ StrongRef<AbstractFileEnumerator> ArchiveFolderWin32::EnumerateFiles(const Path&
 
 EArchiveCapFlag ArchiveFolderWin32::GetCaps() const
 {
-	return EArchiveCapFlag::Read | EArchiveCapFlag::Add | EArchiveCapFlag::Delete | EArchiveCapFlag::Change;
+	return CombineFlags(EArchiveCapFlag::Read, EArchiveCapFlag::Add, EArchiveCapFlag::Delete, EArchiveCapFlag::Change);
 }
 
 Path ArchiveFolderWin32::GetAbsolutePath(const Path& p) const

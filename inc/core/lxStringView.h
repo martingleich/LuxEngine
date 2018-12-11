@@ -22,8 +22,8 @@ enum class EStringClassFlag
 
 enum class EStringCompare
 {
-	CaseSensitive = 0,
-	CaseInsensitive = 1
+	CaseSensitive,
+	CaseInsensitive,
 };
 
 //! Dummy string type

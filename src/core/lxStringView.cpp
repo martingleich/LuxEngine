@@ -146,21 +146,21 @@ EStringClassFlag StringView::Classify() const
 
 	EStringClassFlag out = (EStringClassFlag)0;
 	if(Size() == 0)
-		out |= EStringClassFlag::Empty;
+		SetFlag(out, EStringClassFlag::Empty);
 
 	if(lowerCount == alphaCount && alphaCount > 0)
-		out |= EStringClassFlag::Lower;
+		SetFlag(out, EStringClassFlag::Lower);
 	else if(upperCount == alphaCount && alphaCount > 0)
-		out |= EStringClassFlag::Upper;
+		SetFlag(out, EStringClassFlag::Upper);
 
 	if(alphaCount == count && alphaCount > 0)
-		out |= EStringClassFlag::Alpha;
+		SetFlag(out, EStringClassFlag::Alpha);
 	else if(digitCount == count && digitCount > 0)
-		out |= EStringClassFlag::Digit;
+		SetFlag(out, EStringClassFlag::Digit);
 	else if(alphaCount + digitCount == count && alphaCount > 0 && digitCount > 0)
-		out |= EStringClassFlag::AlphaNum;
+		SetFlag(out, EStringClassFlag::AlphaNum);
 	else if(spaceCount == count && spaceCount > 0)
-		out |= EStringClassFlag::Space;
+		SetFlag(out, EStringClassFlag::Space);
 
 	return out;
 }

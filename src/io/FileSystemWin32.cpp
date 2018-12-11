@@ -103,7 +103,7 @@ StrongRef<File> FileSystemWin32::OpenVirtualFile(const void* memory, s64 size, c
 	LX_CHECK_NULL_ARG(memory);
 	LX_CHECK_NULL_ARG(size);
 	FileInfo desc(size, FileInfo::EType::VirtualFile);
-	return LUX_NEW(MemoryFile)(memory, desc, name, flags | EVirtualCreateFlag::ReadOnly);
+	return LUX_NEW(MemoryFile)(memory, desc, name, CombineFlags(flags, EVirtualCreateFlag::ReadOnly));
 }
 
 Path FileSystemWin32::GetAbsoluteFilename(const Path& filename) const

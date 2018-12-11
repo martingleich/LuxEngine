@@ -55,7 +55,7 @@ EGUIStateFlag Button::GetState() const
 {
 	EGUIStateFlag state = Element::GetState();
 	if(m_IsPressed)
-		state |= EGUIStateFlag::Sunken;
+		SetFlag(state, EGUIStateFlag::Sunken);
 	return state;
 }
 

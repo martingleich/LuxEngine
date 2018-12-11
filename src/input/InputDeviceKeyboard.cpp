@@ -12,7 +12,7 @@ KeyboardDevice::KeyboardDevice(const DeviceCreationDesc* desc, InputSystem* syst
 	m_Buttons.Resize(143);
 
 	for(auto it = m_Buttons.First(); it != m_Buttons.End(); ++it)
-		it->type = EElementType::Input | EElementType::Button | EElementType::PushButton;
+		it->type = CombineFlags(EElementType::Input, EElementType::Button, EElementType::PushButton);
 
 	Reset();
 }

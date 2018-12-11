@@ -12,7 +12,7 @@ namespace gui
 
 TextBox::TextBox()
 {
-	SetAlignment(gui::EAlign::HLeft | gui::EAlign::VCenter);
+	SetAlignment(CombineFlags(gui::EAlign::HLeft, gui::EAlign::VCenter));
 
 	onTextChange.SetConnectEvent([this]
 	(const core::SignalFunc<const core::String&>& func) {

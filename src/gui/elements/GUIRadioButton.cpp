@@ -17,7 +17,7 @@ RadioButton::RadioButton() :
 
 	onStateChange.SetConnectEvent([this](const core::SignalFunc<bool>& f) { f.Call(m_IsChecked); });
 	SetMinSize(DEFAULT_RADIOBUTTON_SIZE);
-	SetAlignment(EAlign::VCenter | EAlign::HLeft);
+	SetAlignment(CombineFlags(EAlign::VCenter, EAlign::HLeft));
 	m_IsChecked = true;
 }
 
@@ -100,7 +100,7 @@ EGUIStateFlag RadioButton::GetState() const
 {
 	EGUIStateFlag state = Element::GetState();
 	if(m_IsChecked)
-		state |= EGUIStateFlag::Sunken;
+		SetFlag(state, EGUIStateFlag::Sunken);
 	return state;
 }
 
