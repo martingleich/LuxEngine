@@ -151,6 +151,8 @@ private:
 	core::Array<StrongRef<Material>> m_MaterialList;
 
 	core::Array<FixedFunctionEntry> m_FixedFunctionShaders;
+
+	VideoDriver* m_Driver;
 };
 
 } // namespace video

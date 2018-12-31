@@ -23,7 +23,9 @@ public:
 	//! Add a rotation in 90 degree steps counter clockwise.
 	PixelFlipRot& Rotate(int i)
 	{
-		switch(((i%4)+4)%4) {
+		// Positive modulo 4
+		i = (i%4+4)%4;
+		switch(i) {
 		case 1: return Append(PixelFlipRot(true, true, false));
 		case 2: return Append(PixelFlipRot(false, true, true));
 		case 3: return Append(PixelFlipRot(true, false, true));

@@ -174,7 +174,7 @@ public:
 	template <typename AddResultT>
 	int BasicSplit(StringView split, int maxCount, bool ignoreEmpty, AddResultT&& outputter)
 	{
-		if(maxCount == 0) == 0)
+		if(maxCount == 0)
 			return 0;
 
 		int count = 0;

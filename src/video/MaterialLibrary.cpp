@@ -39,6 +39,8 @@ void MaterialLibrary::Destroy()
 
 MaterialLibrary::MaterialLibrary()
 {
+	m_Driver = video::VideoDriver::Instance();
+
 	{
 		auto shader = GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
 		auto solid = CreateSolidMaterial(shader);
@@ -257,7 +259,7 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
 	}
 	core::StringView psCode(psCodePtr, psCodeSize);
 
-	auto shader = video::VideoDriver::Instance()->CreateShader(
+	auto shader = m_Driver->CreateShader(
 		language,
 		vsCode, VSEntryPoint, VSMajor, VSMinor,
 		psCode, PSEntryPoint, PSMajor, PSMinor,
@@ -289,7 +291,7 @@ StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
 		}
 	}
 
-	auto shader = video::VideoDriver::Instance()->CreateFixedFunctionShader(params);
+	auto shader = m_Driver->CreateFixedFunctionShader(params);
 	m_FixedFunctionShaders.EmplaceBack(params, shader);
 	return shader;
 }
@@ -300,7 +302,7 @@ StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
 	core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
 	ShaderCompileInfo* outInfo)
 {
-	auto shader = video::VideoDriver::Instance()->CreateShader(
+	auto shader = m_Driver->CreateShader(
 		language,
 		VSCode, VSEntryPoint, VSmajorVersion, VSminorVersion,
 		PSCode, PSEntryPoint, PSmajorVersion, PSminorVersion,
@@ -319,7 +321,7 @@ bool MaterialLibrary::IsShaderSupported(
 	int vsMajor, int vsMinor,
 	int psMajor, int psMinor)
 {
-	return video::VideoDriver::Instance()->IsShaderSupported(
+	return m_Driver->IsShaderSupported(
 		lang,
 		vsMajor, vsMinor,
 		psMajor, psMinor);

@@ -93,6 +93,8 @@ public:
 
 		LuxDevice::SimpleFrameLoop floop;
 		floop.callback = this;
+		floop.scene = m_Scene;
+		floop.sceneRenderer = m_SceneRenderer;
 		Context.Device->RunSimpleFrameLoop(floop);
 	}
 
