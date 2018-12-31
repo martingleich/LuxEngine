@@ -18,7 +18,7 @@ struct format_exception : std::exception
 
 struct syntax_exception : public format_exception
 {
-	syntax_exception(const char* msg = "format_syntax_exception", size_t pos = -1) :
+	syntax_exception(const char* msg, size_t pos) :
 		format_exception(msg),
 		position(pos)
 	{
@@ -29,20 +29,15 @@ struct syntax_exception : public format_exception
 
 struct invalid_placeholder_type : public syntax_exception
 {
-	invalid_placeholder_type(const char* msg = "invalid_placeholder_type", size_t pos = -1, size_t argPos = -1, char place = 0) :
-		syntax_exception(msg, pos),
-		argPosition(argPos),
-		placeholder(place)
+	invalid_placeholder_type(const char* msg, size_t pos) :
+		syntax_exception(msg, pos)
 	{
 	}
-
-	size_t argPosition;
-	char placeholder;
 };
 
 struct invalid_placeholder_value : public syntax_exception
 {
-	invalid_placeholder_value(const char* msg = "invalid_placeholder_type", size_t pos = -1, int v = 0) :
+	invalid_placeholder_value(const char* msg, size_t pos, int v) :
 		syntax_exception(msg, pos),
 		value(v)
 	{
@@ -51,17 +46,15 @@ struct invalid_placeholder_value : public syntax_exception
 	int value;
 };
 
-struct value_exception : public format_exception
+struct invalid_argument : public format_exception
 {
-	value_exception(const char* msg = "format_value_exception", size_t pos = -1, size_t argPos = -1) :
+	invalid_argument(const char* msg, size_t _argId) :
 		format_exception(msg),
-		position(pos),
-		argPosition(argPos)
+		argId(_argId)
 	{
 	}
 
-	size_t position;
-	size_t argPosition;
+	size_t argId;
 };
 
 /** @}*/

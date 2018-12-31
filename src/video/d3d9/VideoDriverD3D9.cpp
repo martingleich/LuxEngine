@@ -457,10 +457,10 @@ StrongRef<Shader> VideoDriverD3D9::CreateShader(
 		psMajorVersion, psMinorVersion);
 
 	if(vsProfile.IsEmpty())
-		throw core::GenericInvalidArgumentException("vertex shader profile", "Invalid vertex shader profile(~d.~d).");
+		throw core::GenericInvalidArgumentException("vertex shader profile", "Invalid vertex shader profile.");
 
 	if(psProfile.IsEmpty())
-		throw core::GenericInvalidArgumentException("pixel shader profile", "Invalid pixel shader profile(~d.~d).");
+		throw core::GenericInvalidArgumentException("pixel shader profile", "Invalid pixel shader profile.");
 
 	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this, m_DeviceState);
 	bool compiled = out->Init(

@@ -623,21 +623,9 @@ bool IsZero(const Quaternion<T>& v, const T tolerance = math::Constants<T>::roun
 }
 
 template <typename T>
-void fmtPrint(format::Context& ctx, const Quaternion<T>& v, format::Placeholder& placeholder)
+void fmtPrint(format::Context& ctx, const Quaternion<T>& v, format::Placeholder&)
 {
-	using namespace format;
-	placeholder.type = 'a';
-	placeholder.hash.Disable();
-
-	ctx.AddTerminatedSlice("[x=");
-	fmtPrint(ctx, v.x, placeholder);
-	ctx.AddTerminatedSlice(" y=");
-	fmtPrint(ctx, v.y, placeholder);
-	ctx.AddTerminatedSlice(" z=");
-	fmtPrint(ctx, v.z, placeholder);
-	ctx.AddTerminatedSlice(" w=");
-	fmtPrint(ctx, v.w, placeholder);
-	ctx.AddTerminatedSlice("]");
+	format::vformat(ctx, "[x={} y={} z={}, w={}]", v.x, v.y, v.z, v.w);
 }
 
 } // !namespace math

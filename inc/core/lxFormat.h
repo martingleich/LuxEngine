@@ -1,9 +1,9 @@
 #ifndef INCLUDED_LUX_FORMAT_H
 #define INCLUDED_LUX_FORMAT_H
-#include "format/ConvInternal.h"
 #include "format/Format.h"
 #include "format/Sink.h"
 #include "format/Converters.h"
+#include "format/ConvertersHelper.h"
 #include "core/lxString.h"
 
 namespace lux
@@ -19,7 +19,7 @@ public:
 	{
 	}
 
-	virtual size_t Write(format::Context& ctx, const format::Context::SlicesT& slices, int flags)
+	int Write(format::Context& ctx, const format::Context::SlicesT& slices, int flags) override
 	{
 		(void)ctx;
 
@@ -41,6 +41,7 @@ private:
 	core::String& m_Str;
 };
 
+
 inline void fmtPrint(format::Context& ctx, const core::String& s, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
@@ -54,5 +55,14 @@ inline void fmtPrint(format::Context& ctx, core::StringView s, format::Placehold
 
 } // namespace core
 } // namespace lux
+
+namespace format
+{
+template <>
+struct sink_access<lux::core::String>
+{
+	static lux::core::StringSink Get(lux::core::String& x) { return lux::core::StringSink(x); }
+};
+}
 
 #endif // #ifndef INCLUDED_LUX_FORMAT_H

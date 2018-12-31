@@ -323,7 +323,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 
 		if(paramType == EParamType::Other || type == EType::Unknown) {
 			if(errorList)
-				errorList->PushBack(core::StringConverter::Format("Shader has unsupported parameter type. (param: ~s).", name));
+				errorList->PushBack(core::StringConverter::Format("Shader has unsupported parameter type. (param: {}).", name));
 			throw UnhandledShaderCompileErrorException();
 		}
 
@@ -350,7 +350,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 
 		if(foundEntry->type != type) {
 			if(errorList)
-				errorList->PushBack(core::StringConverter::Format("Shader param in pixelshader and vertex shader has diffrent types. (param: ~s).", name));
+				errorList->PushBack(core::StringConverter::Format("Shader param in pixelshader and vertex shader has diffrent types. (param: {}).", name));
 			throw UnhandledShaderCompileErrorException();
 		}
 

@@ -1,8 +1,8 @@
 #ifndef INCLUDED_FORMAT_FORMAT_H
 #define INCLUDED_FORMAT_FORMAT_H
-#include "format/Placeholder.h"
 #include "format/Context.h"
 #include "format/Sink.h"
+#include "format/FormatLocale.h"
 
 //! Contains all format functionality
 namespace format
@@ -28,13 +28,8 @@ void vformat(Context& ctx, Slice str, const Types&... args);
 
 struct FormatExData
 {
-	size_t startCollumn = 0;
-	size_t startLine = 0;
 	const Locale* locale = nullptr;
 	int sinkFlags = 0;
-
-	size_t* outCollumn = nullptr;
-	size_t* outLine = nullptr;
 };
 
 //! Format a string
@@ -47,7 +42,7 @@ struct FormatExData
 \throws format::exception When an error occured an FORMAT_EXCEPTIONS is set
 */
 template <typename SinkT, typename... Types>
-size_t formatEx(SinkT&& sink, const FormatExData& exData, Slice str, const Types&... args);
+int formatEx(SinkT&& sink, const FormatExData& exData, Slice str, const Types&... args);
 
 //! Format a string
 /**
@@ -60,7 +55,7 @@ Per default the sink is not flushed
 \throws format::exception When an error occured an FORMAT_EXCEPTIONS is set
 */
 template <typename SinkT, typename... Types>
-size_t format(SinkT&& sink, const char* str, const Types&... args);
+int format(SinkT&& sink, const char* str, const Types&... args);
 
 //! Format a string and write a newline character into the sink and flush the sink
 /**
@@ -72,9 +67,10 @@ The output and input types default to FORMAT_STRING_TYPE
 \throws format::exception When an error occured an FORMAT_EXCEPTIONS is set
 */
 template <typename SinkT, typename... Types>
-size_t formatln(SinkT&& sink, const char* str, const Types&... args);
+int formatln(SinkT&& sink, const char* str, const Types&... args);
 
 /** @}*/
+
 }
 
 #include "Format.inl"

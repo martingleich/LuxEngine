@@ -59,7 +59,7 @@ bool INIFile::Commit()
 		if(!m_FilePath.IsEmpty()) {
 			m_File = FileSystem::Instance()->OpenFile(m_FilePath, EFileModeFlag::Write, true);
 			if(!m_File) {
-				log::Error("Can't open file: ~s.", m_FilePath);
+				log::Error("Can't open file: {}.", m_FilePath);
 				return false;
 			}
 		} else {
@@ -450,7 +450,7 @@ bool INIFile::LoadData()
 		if(!m_FilePath.IsEmpty()) {
 			m_File = FileSystem::Instance()->OpenFile(m_FilePath);
 			if(!m_File) {
-				log::Error("Can't open file: ~s.", m_FilePath);
+				log::Error("Can't open file: {}.", m_FilePath);
 				return false;
 			}
 		} else {
@@ -510,7 +510,7 @@ bool INIFile::ReadSections()
 		if(line[0] == '[') {
 			// It's the name of the section
 			if(!ParseSectionName(line, sectionName)) {
-				log::Debug("Invalid INI-section name: ~s.", line);
+				log::Debug("Invalid INI-section name: {}.", line);
 				continue;
 			}
 
@@ -532,7 +532,7 @@ bool INIFile::ReadSections()
 			lastComment.Clear();
 		} else if(sectionID != InvalidID) {
 			if(!ReadElement(line, element)) {
-				log::Debug("Invalid INI-element name: ~s.", line);
+				log::Debug("Invalid INI-element name: {}.", line);
 				continue;
 			}
 			element.comment = lastComment;

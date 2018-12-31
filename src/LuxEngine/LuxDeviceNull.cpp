@@ -40,7 +40,7 @@ LuxDeviceNull::LuxDeviceNull()
 
 	auto resourceSystem = core::ResourceSystem::Instance();
 
-	log::Log("Starting time ~a", core::Clock::GetDateAndTime());
+	log::Log("Starting time {}", core::Clock::GetDateAndTime());
 
 	// Register resource types
 	resourceSystem->AddType(core::ResourceType::Animation);

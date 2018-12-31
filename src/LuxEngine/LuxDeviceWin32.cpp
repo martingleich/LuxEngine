@@ -100,7 +100,7 @@ void LuxDeviceWin32::BuildWindow(int width, int height, core::StringView title)
 		return;
 	}
 
-	log::Info("Create new Lux window \"~s\".", title);
+	log::Info("Create new Lux window \"{}\".", title);
 
 	math::Dimension2I realSize(width, height);
 	if(realSize.width > GetSystemMetrics(SM_CXSCREEN))

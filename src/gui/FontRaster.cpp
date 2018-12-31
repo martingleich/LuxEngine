@@ -89,6 +89,8 @@ StrongRef<video::Shader> EnsureFontShader()
 	if(g_FontShader)
 		return g_FontShader;
 
+	video::VideoDriver::Instance()->CreateShader(
+	video::VideoDriver::Instance()->CreateFixedFunctionShader(
 	auto matLib = video::MaterialLibrary::Instance();
 	StrongRef<video::Shader> shader;
 	if(matLib->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {

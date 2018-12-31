@@ -1,151 +1,130 @@
 #include "format/Context.h"
-#include "format/StringBasics.h"
+#include "format/FormatMemory.h"
+#include "format/UnicodeConversion.h"
 #include "format/FormatLocale.h"
 
 namespace format
 {
-Context::Context(
-	const Locale* locale,
-	size_t startCollumn,
-	size_t startLine) :
-	fstrLastArgPos(0),
-	argId(0),
-	m_FmtString(0, nullptr),
-	m_LastSlice(nullptr),
-	m_Line(startLine),
-	m_Collumn(startCollumn),
-	m_CharacterCount(0),
-	m_Counting(0),
+
+static thread_local FormatMemory g_threadMemory;
+static Slice g_EmptySlice(0, "");
+
+Context::OutputStateContext::OutputStateContext(Context& _ctx) :
+	memState(_ctx.m_Memory.GetState()),
+	ctx(_ctx),
+	m_CurSlice(_ctx.m_Memory.LastSlice())
+{
+	ctx.m_LastSlice = &g_EmptySlice;
+}
+
+Slice Context::OutputStateContext::CreateSlice()
+{
+	SlicesT slices = ctx.Slices();
+	slices._begin = m_CurSlice;
+	slices._begin++;
+	int length = 0;
+	for(auto s : slices)
+		length += s.size;
+	ctx.m_Memory.RestoreState(memState);
+	// Unsafe access to old memory.
+	auto bytes = ctx.AllocByte(length);
+	auto cur = bytes;
+	for(auto s : slices) {
+		std::memmove(cur, s.data, s.size);
+		cur += s.size;
+	}
+	return Slice(length, bytes);
+}
+
+Context::OutputStateContext::~OutputStateContext()
+{
+}
+
+Context::Context(const Locale& locale) :
+	m_Memory(g_threadMemory),
+	m_MemoryRestoreState(m_Memory.GetState()),
+	m_LastSlice(&g_EmptySlice),
 	m_Size(0),
-	m_CursorSlice(m_SliceMemory.Last()),
-	m_Locale(locale ? locale : format::GetLocale()),
-	m_ForceSlice(true)
+	m_Locale(locale),
+	m_HasWorkingSlice(false)
 {
 }
 
-void Context::Reset(
-	const Locale* locale,
-	size_t startCollumn,
-	size_t startLine)
+Context::~Context()
 {
-	fstrLastArgPos = 0;
-	argId = 0;
-
-	m_Memory.Clear();
-	m_SliceMemory.Clear();
-	m_LastSlice = nullptr;
-
-	m_FmtString = Slice(0, nullptr);
-
-	m_Line = startLine;
-	m_Collumn = startCollumn;
-	m_CharacterCount = 0;
-	m_Counting = 0;
-	m_Size = 0;
-
-	m_CursorSlice = m_SliceMemory.Last();
-	m_CursorPos = 0;
-
-	if(locale)
-		m_Locale = locale;
-
-	m_ForceSlice = false;
+	m_Memory.RestoreState(m_MemoryRestoreState);
 }
 
-void Context::AddSlice(size_t size, const char* data, bool forceCopy)
+void Context::AddSlice(int size, const char* data, bool forceCopy)
 {
+	assert(!m_HasWorkingSlice);
 	if(size == 0)
 		return;
 
-	if(!m_ForceSlice && m_LastSlice && (size < sizeof(Slice) || forceCopy) && m_Memory.TryExpand(m_LastSlice->data, size)) {
+	forceCopy |= m_ForceCopy;
+
+	if((size < sizeof(Slice) || forceCopy) && m_Memory.TryExpand(m_LastSlice->data, size)) {
 		// If copying the data of the slice is less memory than a new slice or we must copy the data.
 		// And we can expand the last slice.
 		// We expand the last slice and copy the new data at it's end.
-		memcpy(const_cast<char*>(m_LastSlice->data) + m_LastSlice->size, data, size);
+		auto dst = const_cast<char*>(m_LastSlice->data) + m_LastSlice->size;
+		for(int i = 0; i < size; ++i)
+			dst[i] = data[i];
 		m_LastSlice->size += size;
 	} else {
-		m_LastSlice = m_SliceMemory.Alloc();
 		if(forceCopy) {
 			char* newData = AllocByte(size);
-			memcpy(newData, data, size);
+			for(int i = 0; i < size; ++i)
+				newData[i] = data[i];
 			data = newData;
 		}
-		m_LastSlice->size = size;
-		m_LastSlice->data = data;
-		m_ForceSlice = false;
+		m_LastSlice = m_Memory.AllocSlice(size, data);
 	}
 
 	m_Size += size;
-
-	// Update cursor.
-	if(m_Counting)
-		m_CharacterCount += StringLength(data, data + size);
 }
 
-Slice* Context::AddLockedSlice()
+Slice Context::AddWorkingSlice(int size)
 {
-	m_ForceSlice = true;
-	Slice* out = m_SliceMemory.Alloc();
-	out->data = nullptr;
-	out->size = 0;
-	return out;
-}
+	assert(!m_HasWorkingSlice);
+	m_HasWorkingSlice = true;
 
-size_t Context::GetLine() const
-{
-	EnsureCursor();
-	return m_Line;
-}
+	if(size == 0)
+		return g_EmptySlice;
 
-size_t Context::GetCollumn() const
-{
-	EnsureCursor();
-	return m_Line;
-}
-
-Context::SubContext Context::SaveSubContext(Slice fmtString)
-{
-	SubContext out;
-	out.fstrLastArgPos = fstrLastArgPos;
-	out.fstr = m_FmtString;
-	out.argId = argId;
-
-	m_FmtString = fmtString;
-	fstrLastArgPos = 0;
-	argId = 0;
-
-	return out;
-}
-
-void Context::RestoreSubContext(const SubContext& ctx)
-{
-	fstrLastArgPos = ctx.fstrLastArgPos;
-	m_FmtString = ctx.fstr;
-	argId = ctx.argId;
-}
-
-void Context::EnsureCursor() const
-{
-	auto last = m_SliceMemory.Last();
-	if(m_CursorSlice == last && m_CursorPos == last->size)
-		return;
-
-	while(true) {
-		const char* cur = m_CursorSlice->data + m_CursorPos;
-		for(size_t i = m_CursorPos; i < m_CursorSlice->size; ++i) {
-			uint32_t c = AdvanceCursor(cur);
-			if(c == '\n') {
-				m_Collumn = 0;
-				++m_Line;
-			} else {
-				++m_Collumn;
-			}
-		}
-		if(m_CursorSlice == last)
-			break;
-		++m_CursorSlice;
-		m_CursorPos = 0;
+	if(m_Memory.TryExpand(m_LastSlice->data, size)) {
+		Slice out(size, m_LastSlice->data + m_LastSlice->size);
+		m_LastSlice->size += size;
+		return out;
+	} else {
+		m_LastSlice = m_Memory.AllocSlice(size, AllocByte(size));
+		return *m_LastSlice;
 	}
+}
+
+void Context::EndWorkingSlice(Slice slice, int usedSize)
+{
+	assert(m_HasWorkingSlice);
+	m_HasWorkingSlice = false;
+	m_LastSlice->size -= slice.size - usedSize;
+	m_Size += usedSize;
+}
+
+FormatEntry* Context::GetFormatEntry(int id)
+{
+	if(id > m_FormatEntriesCount)
+		throw syntax_exception("Not enough arguments", size_t(id));
+	return (FormatEntry*)((char*)m_FormatEntries + m_FormatEntryStride * id);
+}
+
+char* Context::AllocByte(int len, int align)
+{
+	return (char*)m_Memory.AllocBytes(len, align);
+}
+
+Context::SlicesT Context::Slices() const
+{
+	return {m_Memory.BeginSlice(), m_Memory.EndSlice()};
 }
 
 }

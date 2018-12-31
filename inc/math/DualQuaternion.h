@@ -132,29 +132,17 @@ inline DualQuaternion operator*(float f, const DualQuaternion& dq)
 	return DualQuaternion(dq) *= f;
 }
 
-void fmtPrint(format::Context& ctx, const DualQuaternion& v, format::Placeholder& placeholder)
+void fmtPrint(format::Context& ctx, const DualQuaternion& v, format::Placeholder&)
 {
-	using namespace format;
-	placeholder.type = 'a';
-	placeholder.hash.Disable();
-
-	ctx.AddTerminatedSlice("[x=");
-	fmtPrint(ctx, v.q.x, placeholder);
-	ctx.AddTerminatedSlice(" y=");
-	fmtPrint(ctx, v.q.y, placeholder);
-	ctx.AddTerminatedSlice(" z=");
-	fmtPrint(ctx, v.q.z, placeholder);
-	ctx.AddTerminatedSlice(" w=");
-	fmtPrint(ctx, v.q.w, placeholder);
-	ctx.AddTerminatedSlice(" dual_x=");
-	fmtPrint(ctx, v.qe.x, placeholder);
-	ctx.AddTerminatedSlice(" dual_y=");
-	fmtPrint(ctx, v.qe.y, placeholder);
-	ctx.AddTerminatedSlice(" dual_z=");
-	fmtPrint(ctx, v.qe.z, placeholder);
-	ctx.AddTerminatedSlice(" dual_w=");
-	fmtPrint(ctx, v.qe.w, placeholder);
-	ctx.AddTerminatedSlice("]");
+	format::vformat(ctx, "[x={} y={} z={} w={} dual_x={} dual_y={} dual_z={} dual_w={}]",
+		v.q.x, 
+		v.q.y, 
+		v.q.z, 
+		v.q.w, 
+		v.qe.x, 
+		v.qe.y, 
+		v.qe.z, 
+		v.qe.w);
 }
 
 }

@@ -1,10 +1,33 @@
 #ifndef INCLUDED_FORMAT_UNICODE_CONVERSION_H
 #define INCLUDED_FORMAT_UNICODE_CONVERSION_H
-#include "format/StringBasics.h"
 #include <vector>
 
 namespace format
 {
+
+//! Advance a string cursor and return current codepoint.
+/**
+\param [inout] ptr The pointer to string data, is advanced one character
+\return The character the cursor was pointing to beforce advancing
+*/
+inline uint32_t AdvanceCursor(const char*& ptr)
+{
+	uint8_t u0 = *ptr++;
+	if((u0 & 0x80) == 0) // 0xxxxxxx 
+		return (uint32_t)u0;
+	uint8_t u1 = *ptr++;
+	if((u0 & 0xE0) == 0xC0) // 110xxxxx 10xxxxxx
+		return (u0&~0xE0) << 6 | (u1&~0xC0);
+	uint8_t u2 = *ptr++;
+	if((u0 & 0xF0) == 0xE0) // 1110xxxx 10xxxxxx 10xxxxxx
+		return (u0&~0xF0) << 12 | (u1&~0xC0) << 6 | (u2&~0xC0) << 0;
+	uint8_t u3 = *ptr++;
+	if((u0 & 0xF8) == 0xF0) // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+		return (u0&~0xF8) << 18 | (u1&~0xC0) << 12 | (u2&~0xC0) << 6 | (u3 &~0xC0) << 0;
+
+	return 0;
+}
+
 inline void CodePointToUtf16(uint32_t c, std::vector<uint16_t>& out)
 {
 	if(c < 0xFFFF) {
@@ -16,84 +39,6 @@ inline void CodePointToUtf16(uint32_t c, std::vector<uint16_t>& out)
 		out.push_back(c1);
 		out.push_back(c2);
 	}
-}
-
-inline void CodePointToUtf8(uint32_t c, std::vector<uint8_t>& out)
-{
-	if(c <= 0x7F) {
-		out.push_back((uint8_t)c);
-	} else if(c <= 0x7FF) {
-		out.push_back((uint8_t)(0xC0 | ((c&(0x1F << 6)) >> 6)));
-		out.push_back((uint8_t)(0x80 | ((c & 0x3F))));
-	} else if(c <= 0xFFFF) {
-		out.push_back((uint8_t)(0xE0 | ((c & (0xF << 12)) >> 12)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		out.push_back((uint8_t)(0x80 | ((c & 0x3F))));
-	} else if(c <= 0x1FFFFF) {
-		out.push_back((uint8_t)(0xF0 | ((c&(0x7 << 18)) >> 18)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		out.push_back((uint8_t)(0x80 | ((c & 0x3f))));
-	} else if(c <= 0x3FFFFFF) {
-		out.push_back((uint8_t)(0xF8 | ((c&(0x3 << 24)) >> 24)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 18)) >> 18)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		out.push_back((uint8_t)(0x80 | ((c & 0x3F))));
-	} else if(c <= 0x7FFFFFFF) {
-		out.push_back((uint8_t)(0xFC | ((c&(0x1 << 30)) >> 30)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 24)) >> 24)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 18)) >> 18)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		out.push_back((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		out.push_back((uint8_t)(0x80 | ((c & 0x3F))));
-	}
-}
-
-inline int CodePointToUtf8(uint32_t c, uint8_t* out)
-{
-	uint8_t* orig = out;
-	if(c <= 0x7F) {
-		*out++ = ((uint8_t)c);
-	} else if(c <= 0x7FF) {
-		*out++ = ((uint8_t)(0xC0 | ((c&(0x1F << 6)) >> 6)));
-		*out++ = ((uint8_t)(0x80 | ((c & 0x3F))));
-	} else if(c <= 0xFFFF) {
-		*out++ = ((uint8_t)(0xE0 | ((c & (0xF << 12)) >> 12)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*out++ = ((uint8_t)(0x80 | ((c & 0x3F))));
-	} else if(c <= 0x1FFFFF) {
-		*out++ = ((uint8_t)(0xF0 | ((c&(0x7 << 18)) >> 18)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*out++ = ((uint8_t)(0x80 | ((c & 0x3f))));
-	} else if(c <= 0x3FFFFFF) {
-		*out++ = ((uint8_t)(0xF8 | ((c&(0x3 << 24)) >> 24)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 18)) >> 18)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*out++ = ((uint8_t)(0x80 | ((c & 0x3F))));
-	} else if(c <= 0x7FFFFFFF) {
-		*out++ = ((uint8_t)(0xFC | ((c&(0x1 << 30)) >> 30)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 24)) >> 24)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 18)) >> 18)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 12)) >> 12)));
-		*out++ = ((uint8_t)(0x80 | ((c & (0x3F << 6)) >> 6)));
-		*out++ = ((uint8_t)(0x80 | ((c & 0x3F))));
-	} else {
-		*out++ = 0;
-	}
-
-	return (int)(out - orig);
-}
-
-inline void CodePointsToUtf16(const uint32_t* data, size_t count, std::vector<uint16_t>& out)
-{
-	out.reserve(out.size() + count);
-
-	const uint32_t* end = data + count;
-	for(auto it = data; *it && it != end; ++it)
-		CodePointToUtf16(*it, out);
 }
 
 inline void Utf8ToUtf16(const char* data, size_t size, std::vector<uint16_t>& out)

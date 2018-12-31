@@ -1,7 +1,7 @@
 #ifndef INCLUDED_FORMAT_CONTEXT_H
 #define INCLUDED_FORMAT_CONTEXT_H
 #include "format/FormatConfig.h"
-#include "format/FormatMemory.h"
+#include "format/FormatMemoryFwd.h"
 #include <string>
 
 namespace format
@@ -9,300 +9,170 @@ namespace format
 class Sink;
 class Locale;
 
-struct Cursor
+struct Placeholder
 {
-	size_t line;
-	size_t collumn;
+	int argId;
+	Slice type;
+	Slice format;
 };
 
-//! A string in the format system.
-/**
-slices are the fundamental element of the format system.
-Slices just contain normal stringdata, and a pointer to the next slice in the output
-All the connected slices of a series create a full output string.
-*/
-struct Slice
+class Context;
+class FormatEntry
 {
-	size_t size;  //!< Number of bytes in the string
-	const char* data; //!< Data of the string, is not null-termainted
-
-	Slice() :
-		size(0),
-		data(nullptr)
-	{
-	}
-
-	Slice(size_t len, const char* d) :
-		size(len),
-		data(d)
-	{
-	}
+public:
+	virtual void Convert(Context& ctx, Placeholder& placeholder) const = 0;
+	virtual int AsInteger() const = 0;
 };
 
 class Context
 {
 public:
+	struct SubContext;
+	friend struct SubContext;
 	struct SubContext
 	{
-		size_t fstrLastArgPos;
-		size_t argId;
-		Slice fstr;
-	};
-
-	struct AutoRestoreSubContext : public SubContext
-	{
+		int curPlaceholderOffset;
+		int curArgId;
 		Context& _ctx;
-		AutoRestoreSubContext(Context& ctx, Slice fmtString) :
+		SubContext(SubContext&) = delete;
+		SubContext& operator=(SubContext&) = delete;
+
+		explicit SubContext(Context& ctx) :
 			_ctx(ctx)
 		{
-			*(SubContext*)this = ctx.SaveSubContext(fmtString);
+			curPlaceholderOffset = _ctx.m_CurPlaceholderOffset;
+			curArgId = _ctx.m_CurArgId;
+			_ctx.m_CurPlaceholderOffset = 0;
+			_ctx.m_CurArgId = 0;
 		}
-		~AutoRestoreSubContext()
+		~SubContext()
 		{
-			_ctx.RestoreSubContext(*this);
+			_ctx.m_CurPlaceholderOffset = curPlaceholderOffset;
+			_ctx.m_CurArgId = curArgId;
 		}
 	};
 
-	struct SliceMemory
+	struct OutputStateContext;
+	friend struct OutputStateContext;
+	struct OutputStateContext
 	{
-		static const size_t BLOCK_SIZE = 64;
+		FormatMemoryState memState;
+		Context& ctx;
+		SliceMemoryIterator m_CurSlice;
+		FORMAT_API OutputStateContext(Context& _ctx);
+		FORMAT_API Slice CreateSlice();
+		FORMAT_API ~OutputStateContext();
+	};
 
-		struct Block
-		{
-			Block* next;
-			size_t used;
-
-			char data[BLOCK_SIZE];
-		};
-
-		class Iterator
-		{
-		public:
-			Iterator() :
-				ptr(nullptr)
-			{
-			}
-			Iterator(const Slice* _ptr, const Block* b) :
-				ptr(_ptr),
-				block(b)
-			{
-			}
-
-			void Next()
-			{
-				if((void*)(ptr + 1) < (void*)(block->data + BLOCK_SIZE)) {
-					++ptr;
-					return;
-				} else {
-					block = block->next;
-					ptr = (Slice*)block->data;
-				}
-			}
-
-			Iterator& operator++()
-			{
-				Next();
-				return *this;
-			}
-			Iterator operator++(int)
-			{
-				Iterator tmp(*this);
-				this->Next();
-				return tmp;
-			}
-
-			const Slice& operator*()
-			{
-				return *ptr;
-			}
-
-			const Slice* operator->()
-			{
-				return ptr;
-			}
-			bool operator==(const Iterator& other) const
-			{
-				return ptr == other.ptr;
-			}
-			bool operator!=(const Iterator& other) const
-			{
-				return ptr != other.ptr;
-			}
-
-		private:
-			const Slice* ptr;
-			const Block* block;
-		};
-
-		Block firstBlock;
-		Block* curBlock;
-
-		SliceMemory()
-		{
-			firstBlock.next = 0;
-			firstBlock.used = 0;
-			curBlock = &firstBlock;
-		}
-
-		~SliceMemory()
-		{
-			Clear();
-		}
-
-		void Clear()
-		{
-			Block* b = firstBlock.next;
-			while(b) {
-				Block* next = b->next;
-				free(b);
-				b = next;
-			}
-			firstBlock.used = 0;
-			firstBlock.next = nullptr;
-			curBlock = &firstBlock;
-		}
-
-		Slice* Alloc()
-		{
-			const size_t bytes = sizeof(Slice);
-			void* out;
-			if(!curBlock || curBlock->used + bytes > BLOCK_SIZE) {
-				Block* b = (Block*)malloc(sizeof(Block));
-				if(!b)
-					throw std::bad_alloc();
-				b->used = 0;
-				b->next = nullptr;
-
-				curBlock->next = b;
-				curBlock = b;
-			}
-			out = curBlock->data + curBlock->used;
-			curBlock->used += bytes;
-
-			return (Slice*)out;
-		}
-
-		Iterator Begin() const
-		{
-			return Iterator((Slice*)firstBlock.data, &firstBlock);
-		}
-		Iterator End() const
-		{
-			auto it = Last();
-			++it;
-			return it;
-		}
-		Iterator Last() const
-		{
-			return Iterator((Slice*)(curBlock->data + curBlock->used - sizeof(Slice)), curBlock);
-		}
+	struct SlicesT
+	{
+		SliceMemoryIterator _begin;
+		SliceMemoryIterator _end;
+		SliceMemoryIterator begin() const { return _begin; }
+		SliceMemoryIterator end() const { return _end; }
 	};
 
 public:
-	// Parsing information, for error reporting
-	size_t fstrLastArgPos; // Position of the last parsed argument
-	size_t argId; // Index of the current arguments
+	Context(const Context& other) = delete;
+	Context& operator=(const Context& other) = delete;
+	FORMAT_API Context(const Locale& locale);
+	FORMAT_API ~Context();
 
-public:
-	FORMAT_API Context(
-		const Locale* locale = nullptr,
-		size_t startCollum = 0,
-		size_t startLine = 0);
-
-	FORMAT_API void Reset(
-		const Locale* locale = nullptr,
-		size_t startCollumn = 0,
-		size_t startLine = 0);
-
-	FORMAT_API void AddSlice(size_t size, const char* data, bool forceCopy = false);
+	// Add string data to the context.
+	FORMAT_API void AddSlice(int size, const char* data, bool forceCopy = false);
 	void AddSlice(Slice s, bool forceCopy = false)
 	{
 		AddSlice(s.size, s.data, forceCopy);
 	}
-	void AddSlice(const std::string& str, bool forceCopy = false)
+	void AddSlice(const std::string& str, bool forceCopy = true)
 	{
-		AddSlice(str.size(), str.data(), forceCopy);
+		AddSlice(int(str.size()), str.data(), forceCopy);
 	}
 	void AddTerminatedSlice(const char* data, bool forceCopy = false)
 	{
-		AddSlice(strlen(data), data, forceCopy);
-	}
-	FORMAT_API Slice* AddLockedSlice();
-
-	FORMAT_API size_t GetLine() const;
-	FORMAT_API size_t GetCollumn() const;
-
-	size_t StartCounting()
-	{
-		++m_Counting;
-		return m_CharacterCount;
+		AddSlice(int(std::strlen(data)), data, forceCopy);
 	}
 
-	size_t StopCounting()
+	Slice CreateFreeSlice(int size, const char* data, bool forceCopy = false)
 	{
-		--m_Counting;
-		return m_CharacterCount;
+		if(forceCopy) {
+			char* newData = AllocByte(size);
+			for(int i = 0; i < size; ++i)
+				newData[i] = data[i];
+			data = newData;
+		}
+		return Slice(size, data);
 	}
 
-	char* AllocByte(size_t len)
+	Slice CreateFreeTerminatedSlice(const char* data, bool forceCopy = false)
 	{
-		return (char*)m_Memory.Alloc(len);
+		return CreateFreeSlice(int(std::strlen(data)), data, forceCopy);
+	}
+	Slice CreateFreeSlice(const std::string& str, bool forceCopy = true)
+	{
+		return CreateFreeSlice(int(str.size()), str.data(), forceCopy);
 	}
 
-	struct SlicesT
+	FORMAT_API Slice AddWorkingSlice(int size);
+	FORMAT_API void EndWorkingSlice(Slice slice, int usedSize);
+
+	FORMAT_API char* AllocByte(int len, int align = 1);
+
+	FORMAT_API SlicesT Slices() const;
+
+	const Locale* GetLocale() const { return &m_Locale; }
+	int GetSize() const { return m_Size; }
+
+	void SetCurPlaceholderOffset(int placeholderOffset)
 	{
-		SliceMemory::Iterator _begin;
-		SliceMemory::Iterator _end;
-		SliceMemory::Iterator begin() const { return _begin; }
-		SliceMemory::Iterator end() const { return _end; }
-	};
-	SlicesT Slices() const
+		m_CurPlaceholderOffset = placeholderOffset;
+	}
+	int GetCurPlaceholderOffset() const
 	{
-		return{m_SliceMemory.Begin(), m_SliceMemory.End()};
+		return m_CurPlaceholderOffset;
 	}
 
-	FORMAT_API SubContext SaveSubContext(Slice newFmtString);
-	FORMAT_API void RestoreSubContext(const SubContext& ctx);
-
-	Slice GetFormatString() const
+	void SetCurArgId(int argId)
 	{
-		return m_FmtString;
+		m_CurArgId = argId;
+	}
+	int GetCurArgId() const
+	{
+		return m_CurArgId;
 	}
 
-	const Locale* GetLocale() const
+	void SetFormatEntries(void* base, int count, int stride)
 	{
-		return m_Locale;
+		m_FormatEntries = base;
+		m_FormatEntriesCount = count;
+		m_FormatEntryStride = stride;
 	}
+	FormatEntry* GetFormatEntry(int id);
 
-	size_t GetSize() const
-	{
-		return m_Size;
-	}
+	// TODO: Add memory save/restore functions.
 
 private:
-	void EnsureCursor() const;
-
-private:
-	Slice m_FmtString;
-
 	// Memory information
-	internal::FormatMemory m_Memory;
-	SliceMemory m_SliceMemory;
+	FormatMemory& m_Memory;
+	FormatMemoryState m_MemoryRestoreState;
+
 	Slice* m_LastSlice;
 
 	// Output information
-	mutable size_t m_Line;
-	mutable size_t m_Collumn;
-	size_t m_CharacterCount;
-	int m_Counting;
-	size_t m_Size;
+	int m_Size;
 
-	mutable SliceMemory::Iterator m_CursorSlice;
-	mutable size_t m_CursorPos;
+	// Current state
+	void* m_FormatEntries;
+	int m_FormatEntriesCount;
+	int m_FormatEntryStride;
 
-	const Locale* m_Locale;
+	const Locale& m_Locale;
 
-	bool m_ForceSlice;
+	int m_CurPlaceholderOffset;
+	int m_CurArgId;
+
+	bool m_HasWorkingSlice;
+	bool m_ForceCopy=false;
 };
 
 }

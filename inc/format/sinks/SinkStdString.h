@@ -14,12 +14,12 @@ namespace format
 class stdstring_sink : public Sink
 {
 public:
-	stdstring_sink(std::string& s) :
+	explicit stdstring_sink(std::string& s) :
 		m_Str(s)
 	{
 	}
 
-	FORMAT_API virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
+	FORMAT_API int Write(Context& ctx, const Context::SlicesT& slices, int flags) override;
 
 private:
 	std::string& m_Str;

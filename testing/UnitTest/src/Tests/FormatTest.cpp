@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "format/sinks/SinkStdString.h"
+#include "format/sinks/SinkCString.h"
 
 UNIT_SUITE(format)
 {
@@ -11,48 +12,48 @@ UNIT_SUITE(format)
 	UNIT_TEST(IntPrecision)
 	{
 		std::string str;
-		format::format(str, "~.3d", 3);
+		format::format(str, "{d:.3}", 3);
 		UNIT_ASSERT_EQUAL(str, "003");
 
-		format::format(str, "~.3d", 7532);
+		format::format(str, "{d:.3}", 7532);
 		UNIT_ASSERT_EQUAL(str, "7532");
 	}
 
 	UNIT_TEST(IntToString)
 	{
 		char buffer[32];
-		format::IntToString(0, buffer);
+		format::format(buffer, "{}", 0);
 		UNIT_ASSERT_CSTR(buffer, "0");
 
-		format::IntToString(2341, buffer);
+		format::format(buffer, "{}", 2341);
 		UNIT_ASSERT_CSTR(buffer, "2341");
 
-		format::IntToString(-321, buffer);
+		format::format(buffer, "{}", -321);
 		UNIT_ASSERT_CSTR(buffer, "-321");
 	}
 
 	UNIT_TEST(FloatToString)
 	{
 		char buffer[32];
-		format::FloatToString(0, buffer);
+		format::format(buffer, "{}", 0.0f);
 		UNIT_ASSERT_CSTR(buffer, "0");
 
-		format::FloatToString(2341, buffer);
+		format::format(buffer, "{}", 2341.0f);
 		UNIT_ASSERT_CSTR(buffer, "2341");
 
-		format::FloatToString(-321.233, buffer);
+		format::format(buffer, "{}", -321.233f);
 		UNIT_ASSERT_CSTR(buffer, "-321.233");
 
-		format::FloatToString(321.003, buffer);
+		format::format(buffer, "{}", 321.003f);
 		UNIT_ASSERT_CSTR(buffer, "321.003");
 
-		format::FloatToString(0.003, buffer);
+		format::format(buffer, "{}", 0.003f);
 		UNIT_ASSERT_CSTR(buffer, "0.003");
 
-		format::FloatToString(-std::numeric_limits<double>::infinity(), buffer);
+		format::format(buffer, "{}", -std::numeric_limits<double>::infinity());
 		UNIT_ASSERT_CSTR(buffer, "-inf");
 
-		format::FloatToString(nan(""), buffer);
+		format::format(buffer, "{}", nan(""));
 		UNIT_ASSERT_CSTR(buffer, "nan");
 	}
 }

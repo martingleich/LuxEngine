@@ -34,12 +34,12 @@ void DebugFree(const void* ptr, const MemoryDebugInfo& info)
 	auto it = g_MemoryMap->find(ptr);
 
 	if(it == g_MemoryMap->end()) {
-		log::Error("~s:~d: ERROR: Free called on not allocated pointer. (~p)", info.file, info.line, ptr);
+		log::Error("{}:{}: ERROR: Free called on not allocated pointer. ({})", info.file, info.line, ptr);
 		return;
 	}
 
 	if(info.array != it->second.array) {
-		log::Error("~s:~d: ERROR: Mismatching free and allocate. (~p)", info.file, info.line, ptr);
+		log::Error("{}:{}: ERROR: Mismatching free and allocate. ({})", info.file, info.line, ptr);
 		return;
 	}
 

@@ -9,18 +9,12 @@ namespace format
 static std::string GetDefaultTitle(EIcon icon)
 {
 	switch(icon) {
-	case EIcon::Error:
-		return u8"Error";
-	case EIcon::Warning:
-		return u8"Warning";
-	case EIcon::Information:
-		return u8"Information";
-	case EIcon::Question:
-		return u8"Question";
-	case EIcon::None:
-		return u8"MsgBox";
-	default:
-		return nullptr;
+	case EIcon::Error: return "Error";
+	case EIcon::Warning: return "Warning";
+	case EIcon::Information: return "Information";
+	case EIcon::Question: return "Question";
+	case EIcon::None: return "MsgBox";
+	default: return "Title";
 	}
 }
 
@@ -45,22 +39,14 @@ static UINT GetIconFlags(EIcon icon)
 static UINT GetButtonsFlags(EButtons buttons)
 {
 	switch(buttons) {
-	case EButtons::AbortRetryIgnore:
-		return MB_ABORTRETRYIGNORE;
-	case EButtons::CancleTryContinue:
-		return MB_CANCELTRYCONTINUE;
-	case EButtons::Ok:
-		return MB_OK;
-	case EButtons::OkCancel:
-		return MB_OKCANCEL;
-	case EButtons::RetryCancel:
-		return MB_RETRYCANCEL;
-	case EButtons::YesNo:
-		return MB_YESNO;
-	case EButtons::YesNoCancel:
-		return MB_YESNOCANCEL;
-	default:
-		return 0;
+	case EButtons::AbortRetryIgnore: return MB_ABORTRETRYIGNORE;
+	case EButtons::CancleTryContinue: return MB_CANCELTRYCONTINUE;
+	case EButtons::Ok: return MB_OK;
+	case EButtons::OkCancel: return MB_OKCANCEL;
+	case EButtons::RetryCancel: return MB_RETRYCANCEL;
+	case EButtons::YesNo: return MB_YESNO;
+	case EButtons::YesNoCancel: return MB_YESNOCANCEL;
+	default: return MB_OK;
 	}
 }
 
@@ -72,26 +58,16 @@ static UINT GetFlags(EButtons buttons, EIcon icon)
 static EButton GetButton(int i)
 {
 	switch(i) {
-	case IDABORT:
-		return EButton::Abort;
-	case IDCANCEL:
-		return EButton::Cancel;
-	case IDCONTINUE:
-		return EButton::Continue;
-	case IDIGNORE:
-		return EButton::Ignore;
-	case IDNO:
-		return EButton::No;
-	case IDOK:
-		return EButton::Ok;
-	case IDRETRY:
-		return EButton::Retry;
-	case IDTRYAGAIN:
-		return EButton::TryAgain;
-	case IDYES:
-		return EButton::Yes;
-	default:
-		return EButton::Invalid;
+	case IDABORT: return EButton::Abort;
+	case IDCANCEL: return EButton::Cancel;
+	case IDCONTINUE: return EButton::Continue;
+	case IDIGNORE: return EButton::Ignore;
+	case IDNO: return EButton::No;
+	case IDOK: return EButton::Ok;
+	case IDRETRY: return EButton::Retry;
+	case IDTRYAGAIN: return EButton::TryAgain;
+	case IDYES: return EButton::Yes;
+	default: return EButton::Invalid;
 	}
 }
 
@@ -105,11 +81,11 @@ MsgBox_sink::MsgBox_sink(EIcon icon, const std::string& caption, EButtons button
 	m_Caption.push_back(0);
 }
 
-size_t MsgBox_sink::Write(Context& ctx, const Context::SlicesT& slices, int flags)
+int MsgBox_sink::Write(Context& ctx, const Context::SlicesT& slices, int flags)
 {
 	(void)flags;
 
-	size_t size = ctx.GetSize();
+	int size = ctx.GetSize();
 	std::vector<uint16_t> utf16Msg;
 	utf16Msg.reserve(size + 1);
 	for(auto& s : slices)

@@ -27,7 +27,7 @@ public:
 	\param flags The flags to used while writing
 	\return The number of characters written
 	*/
-	virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags) = 0;
+	virtual int Write(Context& ctx, const Context::SlicesT& slices, int flags) = 0;
 };
 
 //! Wrapper around a sink reference
@@ -41,7 +41,7 @@ public:
 		m_Ref(r)
 	{
 	}
-	virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags)
+	virtual int Write(Context& ctx, const Context::SlicesT& slices, int flags)
 	{
 		return m_Ref.Write(ctx, slices, flags);
 	}

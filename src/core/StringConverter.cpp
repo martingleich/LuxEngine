@@ -9,53 +9,41 @@ namespace StringConverter
 
 String IntToString(intmax_t num)
 {
-	char buffer[22]; // See format::IntToString for size reasoning
-	size_t size = format::IntToString(num, buffer);
-	return String(buffer, (int)size);
+	String out;
+	format::format(out, "{}", num);
+	return out;
 }
 
 String UIntToString(intmax_t num)
 {
-	char buffer[22]; // See format::IntToString for size reasoning
-	size_t size = format::UIntToString(num, buffer);
-	return String(buffer, (int)size);
+	String out;
+	format::format(out, "{}", num);
+	return out;
 }
 
-String& AppendIntToString(String& str, intmax_t num)
+String& AppendIntToString(String& str, intmax_t value)
 {
-	char buffer[22]; // See format::IntToString for size reasoning
-	size_t size = format::IntToString(num, buffer);
-	str.Append(StringView(buffer, (int)size));
-	return str;
+	return AppendFormat(str, "{}", value);
 }
 
-String& AppendUIntToString(String& str, uintmax_t num)
+String& AppendUIntToString(String& str, uintmax_t value)
 {
-	char buffer[22]; // See format::UIntToString for size reasoning
-	size_t size = format::UIntToString(num, buffer);
-	str.Append(StringView(buffer, (int)size));
-	return str;
+	return AppendFormat(str, "{}", value);
 }
 
 String& Append(String& str, float value)
 {
-	char buffer[43]; // See format::FloatToString for size reasoning
-	size_t len = format::FloatToString(value, buffer);
-	str.Append(StringView(buffer, (int)len));
-	return str;
+	return AppendFormat(str, "{}", value);
 }
 
 String& Append(String& str, double value)
 {
-	char buffer[43]; // See format::FloatToString for size reasoning
-	size_t len = format::FloatToString(value, buffer);
-	str.Append(StringView(buffer, (int)len));
-	return str;
+	return AppendFormat(str, "{}", value);
 }
 
 String& Append(String& str, const DateAndTime& value)
 {
-	return AppendFormat(str, "~a", value);
+	return AppendFormat(str, "{}", value);
 }
 
 String& Append(String& str, const StringView& value)

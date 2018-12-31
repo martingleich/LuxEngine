@@ -560,23 +560,11 @@ const Vector3<T> Vector3<T>::UNIT_scale = math::Vector3<T>(1, 1, 1);
 template <typename T>
 void fmtPrint(format::Context& ctx, const Vector3<T>& v, format::Placeholder& placeholder)
 {
-	using namespace format;
-	placeholder.type = 'a';
-	bool printLength = placeholder.hash.IsEnabled();
-	placeholder.hash.Disable();
-
-	ctx.AddTerminatedSlice("[");
-	fmtPrint(ctx, v.x, placeholder);
-	ctx.AddTerminatedSlice(" ");
-	fmtPrint(ctx, v.y, placeholder);
-	ctx.AddTerminatedSlice(" ");
-	fmtPrint(ctx, v.z, placeholder);
-	if(printLength) {
-		ctx.AddTerminatedSlice(" len=");
-		fmtPrint(ctx, v.GetLength(), placeholder);
-	}
-
-	ctx.AddTerminatedSlice("]");
+	auto pl = format::parser::BasicPlaceholder::Parse(placeholder.format, ctx, placeholder.argId);
+	if(pl.hash.IsEnabled())
+		format::vformat(ctx, "[x={} y={} z={} len={}]", v.x, v.y, v.z, v.GetLength());
+	else
+		format::vformat(ctx, "[x={} y={} z={}]", v.x, v.y, v.z);
 }
 
 template <typename T>

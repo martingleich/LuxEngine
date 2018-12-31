@@ -319,7 +319,7 @@ void ResourceSystem::AddResourceWriter(ResourceWriter* writer)
 {
 	LX_CHECK_NULL_ARG(writer);
 
-	log::Debug("Registered resource writer: ~s.", writer->GetName());
+	log::Debug("Registered resource writer: {0}.", writer->GetName());
 	self->writers.PushBack(writer);
 }
 
@@ -373,7 +373,7 @@ void ResourceSystem::AddResourceLoader(ResourceLoader* loader)
 {
 	LX_CHECK_NULL_ARG(loader);
 
-	log::Debug("Registered resource loader: ~s.", loader->GetName());
+	log::Debug("Registered resource loader: {0}.", loader->GetName());
 	self->loaders.PushBack(loader);
 }
 
@@ -396,7 +396,7 @@ void ResourceSystem::AddType(Name name)
 
 	self->types.PushBack(entry);
 	self->resources.PushBack(ResourceBlock());
-	log::Debug("New resource type \"~s\".", name);
+	log::Debug("New resource type \"{0}\".", name);
 }
 
 StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name type, io::File* file, Name& typeToLoad) const

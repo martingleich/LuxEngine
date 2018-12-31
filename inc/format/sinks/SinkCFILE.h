@@ -14,12 +14,12 @@ namespace format
 class cfile_sink : public Sink
 {
 public:
-	cfile_sink(FILE* f) :
+	explicit cfile_sink(FILE* f) :
 		m_File(f)
 	{
 	}
 
-	FORMAT_API virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
+	FORMAT_API int Write(Context& ctx, const Context::SlicesT& slices, int flags) override;
 
 private:
 	FILE* m_File;

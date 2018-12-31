@@ -16,26 +16,26 @@ Can and should be used as sink-type to access c-strings.
 */
 struct SafeCString
 {
-	SafeCString(char* ptr, size_t _maxSize) :
+	SafeCString(char* ptr, int _maxSize) :
 		string(ptr),
 		maxSize(_maxSize)
 	{
 	}
 
 	char* string; // The address where the string data is written.
-	size_t maxSize; // The maximal number of bytes available, including the NUL Character.
+	int maxSize; // The maximal number of bytes available, including the NUL Character.
 };
 
 //! Allows to write to char*
 class cstring_sink : public Sink
 {
 public:
-	cstring_sink(SafeCString s) :
+	explicit cstring_sink(SafeCString s) :
 		m_Str(s)
 	{
 	}
 
-	FORMAT_API size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
+	FORMAT_API int Write(Context& ctx, const Context::SlicesT& slices, int flags) override;
 
 private:
 	SafeCString m_Str;
@@ -51,18 +51,12 @@ struct sink_access<SafeCString>
 template <>
 struct sink_access<char*>
 {
-	static cstring_sink Get(char* x)
-	{
-		return cstring_sink(SafeCString(x, SIZE_MAX));
-	}
+	static cstring_sink Get(char* x) { return cstring_sink(SafeCString(x, INT_MAX)); }
 };
-template <size_t SIZE>
+template <int SIZE>
 struct sink_access<char[SIZE]>
 {
-	static cstring_sink Get(char* x)
-	{
-		return cstring_sink(SafeCString(x, SIZE));
-	}
+	static cstring_sink Get(char* x) { return cstring_sink(SafeCString(x, SIZE)); }
 };
 /** \endcond */
 

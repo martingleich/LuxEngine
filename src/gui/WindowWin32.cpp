@@ -288,7 +288,7 @@ bool WindowWin32::Present(
 		NO OP
 		*/
 	} else {
-		log::Error("Can't display image in this format.(~a)", format);
+		log::Error("Can't display image in this format.({})", format);
 		return false;
 	}
 

@@ -13,12 +13,12 @@ namespace format
 class ostream_sink : public Sink
 {
 public:
-	ostream_sink(std::ostream& o) :
+	explicit ostream_sink(std::ostream& o) :
 		m_Stream(o)
 	{
 	}
 
-	FORMAT_API virtual size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
+	FORMAT_API int Write(Context& ctx, const Context::SlicesT& slices, int flags) override;
 
 private:
 	std::ostream& m_Stream;

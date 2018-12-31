@@ -268,7 +268,7 @@ inline Color operator*(const float f, Color a)
 inline void fmtPrint(format::Context& ctx, Color format, format::Placeholder& placeholder)
 {
 	LUX_UNUSED(placeholder);
-	format::vformat(ctx, "~h", format.ToDWORD());
+	format::vformat(ctx, "{!h}", format.ToDWORD());
 }
 
 } // namespace video

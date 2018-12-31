@@ -334,7 +334,7 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 
 	if(FAILED(hr)) {
 		auto err = core::D3D9Exception::MakeErrorString(hr);
-		log::Error("Error while drawing: ~s.", err.AsView());
+		log::Error("Error while drawing: {}.", err.AsView());
 		return;
 	}
 

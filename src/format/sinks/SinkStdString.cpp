@@ -3,9 +3,9 @@
 
 namespace format
 {
-size_t stdstring_sink::Write(Context& ctx, const Context::SlicesT& slices, int flags)
+int stdstring_sink::Write(Context& ctx, const Context::SlicesT& slices, int flags)
 {
-	size_t size = ctx.GetSize();
+	int size = ctx.GetSize();
 	if((flags & ESinkFlags::Newline) != 0)
 		++size;
 

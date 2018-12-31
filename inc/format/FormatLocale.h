@@ -2,7 +2,9 @@
 #define INCLUDED_FORMAT_FORMAT_LOCALE_H
 #include "format/FormatConfig.h"
 #include "format/Exception.h"
+#include "format/Context.h"
 #include <string>
+#include <type_traits>
 
 namespace format
 {
@@ -11,73 +13,28 @@ namespace format
 @{
 */
 
-//! Marker type for diffrent facet-types
-/**
-You should never need to create an instance of this class
-*/
-struct FacetType
+struct locale_exception : public format_exception
 {
-public:
-	FacetType()
+	explicit locale_exception(const char* msg) :
+		format_exception(msg)
 	{
 	}
-
-	FacetType(const FacetType&) = delete;
-	FacetType& operator=(const FacetType&) = delete;
 };
-
-extern FORMAT_API FacetType NumericalFormat; //!< The marker of the numerical facet
-extern FORMAT_API FacetType BooleanFormat; //!< The marker of the boolean facet
 
 //! A facet represents an aspect of localication
 /**
-For example how to write number or booleans or dates and so on.
-A concrete facets describes how this is handled for some concrete language.
+Examples for facets how to write number or booleans or dates and so on.
+A concrete facets describes how this is handled for some concrete locale.
+Facets are identified by their typeid
 Each type of facet(number, boolean, etc.) is associated with a single facet type
 */
 class Facet
 {
 public:
-	Facet(const FacetType& type) :
-		m_Type(type)
-	{
-	}
-
-	virtual ~Facet() {}
-
-	//! Cast the facet to a given type, and throw an exception if it fails
-	template <typename T>
-	T& As()
-	{
-		T* out = dynamic_cast<T*>(this);
-		if(!out)
-			throw format_exception("Bad locale facet cast.");
-
-		return *out;
-	}
-
-	//! Cast the facet to a given type, and throw an exception if it fails
-	template <typename T>
-	const T& As() const
-	{
-		const T* out = dynamic_cast<const T*>(this);
-		if(!out)
-			throw format_exception("Bad locale facet cast.");
-
-		return *out;
-	}
-
-	//! Get the type of the facet
-	const FacetType& GetType() const
-	{
-		return m_Type;
-	}
+	virtual ~Facet() = default;
 
 	//! Create a copy of the facet
 	virtual Facet* Clone() const = 0;
-
-private:
-	const FacetType& m_Type;
 };
 
 //! The facet describing the number format
@@ -87,33 +44,25 @@ All facet string are null-terminated utf8-strings of any lenght
 class Facet_NumericalFormat : public Facet
 {
 public:
-	Facet_NumericalFormat() :
-		Facet(NumericalFormat)
-	{
-	}
-
 	Facet_NumericalFormat(
-		const char* sep = "\'",
-		const char* com = ".",
-		const char* _plus = "+",
-		const char* _minus = "-",
-		const char* _NaN = "nan",
-		const char* _Inf = "inf") :
-		Facet(NumericalFormat),
+		const char* sep,
+		const char* com,
+		const char* _plus,
+		const char* _minus,
+		const char* _NaN,
+		const char* _Inf,
+		int digitCount) :
 		Seperator(sep),
 		Comma(com),
 		Plus(_plus),
 		Minus(_minus),
 		NaN(_NaN),
 		Inf(_Inf),
-		DefaultDigitCount(4)
+		DefaultDigitCount(digitCount)
 	{
 	}
 
-	virtual Facet_NumericalFormat* Clone() const
-	{
-		return new Facet_NumericalFormat(*this);
-	}
+	Facet_NumericalFormat* Clone() const override { return new Facet_NumericalFormat(*this); }
 
 public:
 	std::string Seperator; //! Seperator of thousands
@@ -135,24 +84,13 @@ All facet string are null-terminated utf8-strings of any lenght
 class Facet_BooleanFormat : public Facet
 {
 public:
-	Facet_BooleanFormat() :
-		Facet(BooleanFormat),
-		True("true"),
-		False("false")
-	{
-	}
-
 	Facet_BooleanFormat(const char* t, const char* f) :
-		Facet(BooleanFormat),
 		True(t),
 		False(f)
 	{
 	}
 
-	virtual Facet_BooleanFormat* Clone() const
-	{
-		return new Facet_BooleanFormat(*this);
-	}
+	Facet_BooleanFormat* Clone() const override { return new Facet_BooleanFormat(*this); }
 
 public:
 	std::string True; //!< Null-terminated utf8-string to represent <true>
@@ -163,7 +101,54 @@ extern FORMAT_API Facet_BooleanFormat BooleanFormat_English; //!< Boolean format
 extern FORMAT_API Facet_BooleanFormat BooleanFormat_German; //!< Boolean format for german language
 extern FORMAT_API Facet_BooleanFormat BooleanFormat_Digit; //!< Boolean format to write boolean values as digits 0 and 1
 
-//! A locale is a collection of facets, describing a whole language
+class Facet_Functions : public Facet
+{
+public:
+	enum class EValueKind
+	{
+		Integer,
+		String,
+		Placeholder,
+	};
+	struct Value
+	{
+		int iValue;
+		Slice sValue;
+		FormatEntry* pValue;
+	};
+
+	typedef Value(*FormatFunctionPtr)(Context& ctx, Value* args);
+
+	using InitList = std::initializer_list<std::pair<const char*, FormatFunctionPtr>>;
+
+public:
+	explicit Facet_Functions(const InitList& init) :
+		Facet_Functions(nullptr, init)
+	{
+	}
+	Facet_Functions(const Facet_Functions* base, const InitList& init);
+
+	virtual ~Facet_Functions() = default;
+
+	// TODO: Faster lookup.
+	FormatFunctionPtr GetFunction(
+		Slice name,
+		int& args,
+		const EValueKind*& outArgs,
+		EValueKind& outRetType) const;
+
+	Facet_Functions* Clone() const override { return new Facet_Functions(*this); }
+
+private:
+	int LookUp(Slice name) const;
+	void AddFunction(Slice interface, FormatFunctionPtr function);
+
+private:
+	struct SelfData;
+	std::shared_ptr<SelfData> self;
+};
+
+//! A locale is a collection of facets.
 class Locale
 {
 public:
@@ -175,36 +160,65 @@ public:
 	FORMAT_API ~Locale();
 
 	FORMAT_API Locale& operator=(const Locale& other);
-	FORMAT_API const Facet& GetFacet(const FacetType& type) const;
-	FORMAT_API Facet& GetFacet(const FacetType& type);
+
+	//! Retrieve a facet from the locale.
+	/**
+	A locale_exception is thrown if the facet is not available.
+	*/
+	template <typename T>
+	const T& GetFacet() const
+	{
+		static_assert(std::is_base_of<Facet, T>::value, "T must inherit from Facet");
+		return static_cast<const T&>(GetFacet(typeid(T)));
+	}
+	//! Retrieve a modifiable facet from the locale.
+	/**
+	A locale_exception is thrown if the facet is not available.
+	*/
+	template <typename T>
+	T& GetFacet()
+	{
+		static_assert(std::is_base_of<Facet, T>::value, "T must inherit from Facet");
+		return static_cast<T&>(GetFacet(typeid(T)));
+	}
 
 	//! Change the value of an existing facet, or add a new facet type to the locale
 	/**
-	The value of the facet is copied from the passed facet
+	The facet is copied.
 	*/
-	FORMAT_API void SetFacet(const FacetType& type, const Facet& f);
+	template <typename T>
+	void SetFacet(const T& facet)
+	{
+		static_assert(std::is_base_of<Facet, T>::value, "T must inherit from Facet");
+		SetFacet(typeid(T), facet);
+	}
 
+	//! These facets are always available.
 	FORMAT_API const Facet_NumericalFormat& GetNumericalFacet() const;
 	FORMAT_API const Facet_BooleanFormat& GetBooleanFacet() const;
+	FORMAT_API const Facet_Functions& GetFunctionsFacet() const;
 
-	FORMAT_API Facet_NumericalFormat& GetNumericalFacet();
-	FORMAT_API Facet_BooleanFormat& GetBooleanFacet();
+private:
+	FORMAT_API const Facet& GetFacet(const std::type_info& type) const;
+	FORMAT_API Facet& GetFacet(const std::type_info& type);
+
+	FORMAT_API void SetFacet(const std::type_info& type, const Facet& f);
 
 private:
 	struct SelfData;
-	SelfData* self;
+	std::unique_ptr<SelfData> self;
 };
 
-extern Locale English; //!< Default locale for english language
-extern Locale German; //!< Default locale for german language
+extern Locale English; //!< Default locale for the english language
+extern Locale German; //!< Default locale for the german language
 
-//! Set the default locale for format calls
+//! Set the default locale for all format calls.
 /**
-The locale is not copied and must exist until another locale is set
+The locale is not copied and must exist until another locale is set.
 */
 FORMAT_API void SetLocale(Locale* l);
 
-//! Get the current default locale
+//! Get the current default locale.
 FORMAT_API Locale* GetLocale();
 
 /** @}*/

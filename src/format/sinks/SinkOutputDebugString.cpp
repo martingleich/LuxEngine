@@ -7,9 +7,9 @@
 namespace format
 {
 
-size_t OutputDebugString_sink::Write(Context& ctx, const Context::SlicesT& slices, int flags)
+int OutputDebugString_sink::Write(Context& ctx, const Context::SlicesT& slices, int flags)
 {
-	size_t size = 1 + ctx.GetSize();
+	int size = 1 + ctx.GetSize();
 	if((flags & ESinkFlags::Newline) != 0)
 		++size;
 

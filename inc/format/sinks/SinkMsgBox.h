@@ -2,6 +2,7 @@
 #define INCLUDED_FORMAT_SINK_MSGBOX_H
 #include "../Sink.h"
 #include <string>
+#include <vector>
 #ifdef FORMAT_WINDOWS
 
 namespace format
@@ -57,7 +58,7 @@ class MsgBox_sink : public Sink
 {
 public:
 	FORMAT_API MsgBox_sink(EIcon icon = EIcon::None, const std::string& caption = "", EButtons button = EButtons::Ok);
-	FORMAT_API size_t Write(Context& ctx, const Context::SlicesT& slices, int flags);
+	FORMAT_API int Write(Context& ctx, const Context::SlicesT& slices, int flags);
 
 	//! Get the pressed button of the message, only available after showing it to the user
 	EButton GetPressedButton() const;

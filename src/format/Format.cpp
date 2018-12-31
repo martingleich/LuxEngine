@@ -1,310 +1,338 @@
 #include "format/Format.h"
-#include "format/ConvInternal.h"
+#include "format/ConvertersHelper.h"
+#include "format/GeneralParsing.h"
 #include <climits>
+#include <cassert>
 
 namespace format
 {
+namespace
+{
+enum class EParseResult
+{
+	SimplePlaceholder,
+	FunctionPlaceholder
+};
+
+void ParsePlaceholderOptions(parser::SaveStringReader& reader, Placeholder& outPlaceholder)
+{
+	if(reader.Peek() == '!') {
+		reader.Get();
+		auto start = reader.str;
+		int brace_level = 0;
+		while(true) {
+			char c = reader.Get();
+			if(c == '{')
+				++brace_level;
+			if(c == '}')
+				--brace_level;
+
+			if(reader.IsEnd())
+				break;
+			if(reader.Peek() == '}' && brace_level == 0)
+				break;
+			if(reader.Peek() == ':')
+				break;
+		}
+		outPlaceholder.type = Slice(int(reader.str - start), start);
+	} else {
+		outPlaceholder.type = Slice();
+	}
+
+	if(reader.Peek() == ':') {
+		reader.Get();
+		auto start = reader.str;
+		int brace_level = 0;
+		while(true) {
+			char c = reader.Get();
+			if(c == '{')
+				++brace_level;
+			if(c == '}')
+				--brace_level;
+
+			if(reader.IsEnd())
+				break;
+			if(reader.Peek() == '}' && brace_level == 0)
+				break;
+		}
+		outPlaceholder.format = Slice(int(reader.str - start), start);
+	} else {
+		outPlaceholder.format = Slice();
+	}
+}
+
+// Begins on opening brace
+// Ends after closing brace
+EParseResult ParsePlaceholder(parser::SaveStringReader& reader, Placeholder& outPlaceholder)
+{
+	int value;
+	SkipSpace(reader);
+	if(TryReadInteger(reader, value))
+		outPlaceholder.argId = value;
+	else if(reader.Peek() == '}' || reader.Peek() == ':' || reader.Peek() == '!')
+		outPlaceholder.argId = -1;
+	else
+		return EParseResult::FunctionPlaceholder;
+
+	SkipSpace(reader);
+	ParsePlaceholderOptions(reader, outPlaceholder);
+	SkipSpace(reader);
+
+	if(!reader.CheckAndGet('}'))
+		throw format_exception("Missing closing brace for placeholder");
+
+	return EParseResult::SimplePlaceholder;
+}
+
+bool ParseUntilPlaceholder(Context& ctx, parser::SaveStringReader& reader)
+{
+	auto before = reader.str;
+START:
+	// Advance cursor until brace character.
+	while(!reader.IsEnd() && reader.Peek() != '{')
+		reader.Get();
+	// Flush output
+	if(reader.str != before)
+		ctx.AddSlice(int(reader.str - before), before);
+	// The string ended before another placeholder.
+	if(reader.IsEnd())
+		return false;
+	// Move to first character of placeholder
+	reader.Get();
+
+	// Double brace escape -> Try again
+	if(!reader.IsEnd() && reader.Peek() == '{') {
+		before = reader.str;
+		reader.Get();
+		goto START;
+	}
+
+	ctx.SetCurPlaceholderOffset(int(reader.str - reader.begin));
+
+	return true;
+}
+
+void WriteSimplePlaceholder(Context& ctx, Placeholder& pl)
+{
+	auto entry = ctx.GetFormatEntry(pl.argId);
+	entry->Convert(ctx, pl);
+}
+
+class PlaceholderId
+{
+public:
+	PlaceholderId(Context& _ctx) :
+		ctx(_ctx),
+		value(-1)
+	{
+	}
+	int RetrieveNextValue(int arg)
+	{
+		value = arg + 1;
+		ctx.SetCurArgId(arg);
+		return arg;
+	}
+	int RetrieveNextValue()
+	{
+		++value;
+		ctx.SetCurArgId(value);
+		return value;
+	}
+
+private:
+	Context& ctx;
+	int value;
+};
+
+class FunctionParser
+{
+private:
+	Context& ctx;
+	parser::SaveStringReader& reader;
+	PlaceholderId& id;
+
+public:
+	FunctionParser(Context& _ctx, parser::SaveStringReader& _reader, PlaceholderId& _id) :
+		ctx(_ctx),
+		reader(_reader),
+		id(_id)
+	{
+	}
+
+	int ParsePlaceholderValue()
+	{
+		format_exception error("invalid_format_function_call: value");
+		if(!reader.CheckAndGet('{'))
+			throw error;
+		int value;
+		if(parser::TryReadInteger(reader, value))
+			value = id.RetrieveNextValue(value);
+		else
+			value = id.RetrieveNextValue();
+		return value;
+	}
+
+	Facet_Functions::Value ParseValue(Facet_Functions::EValueKind kind)
+	{
+		Facet_Functions::Value out;
+		format_exception error("invalid_format_function_call: value");
+		if(kind == Facet_Functions::EValueKind::Integer) {
+			int value;
+			if(reader.Peek() == '{') {
+				// Placeholder entry.
+				value = ParsePlaceholderValue();
+				if(!reader.CheckAndGet('}'))
+					throw error;
+				value = ctx.GetFormatEntry(value)->AsInteger();
+				out.iValue = value;
+			} else {
+				// Literal value.
+				if(!parser::TryReadInteger(reader, value))
+					throw error;
+			}
+		} else if(kind == Facet_Functions::EValueKind::Placeholder) {
+			int value = ParsePlaceholderValue();
+			out.pValue = ctx.GetFormatEntry(value);
+		} else if(kind == Facet_Functions::EValueKind::String) {
+			if(reader.Peek() == '{') {
+				// Placeholder entry.
+				int value = ParsePlaceholderValue();
+				SkipSpace(reader);
+				Placeholder pl;
+				ParsePlaceholderOptions(reader, pl);
+				if(!reader.CheckAndGet('}'))
+					throw error;
+				auto entry = ctx.GetFormatEntry(value);
+				Slice result;
+				{
+					Context::OutputStateContext osc(ctx);
+					entry->Convert(ctx, pl);
+					result = osc.CreateSlice();
+				}
+				out.sValue = result;
+			} else if(reader.Peek() == '\'') {
+				reader.Get();
+				auto start = reader.str;
+				while(!reader.IsEnd() && reader.Peek() != '\'')
+					reader.Get();
+				if(reader.IsEnd())
+					throw error;
+				int length = int(reader.str - start);
+				out.sValue = Slice(length, start);
+				if(!reader.CheckAndGet('\''))
+					throw error;
+			} else {
+				throw error;
+			}
+		} else {
+			throw error;
+		}
+		return out;
+	}
+
+	void WriteAndParseFunctionPlaceholder()
+	{
+		/*
+		Some functions must be implemented in here for example if.
+		A few basic operators would be nice as well(
+			comparision for int(relational and equality) and string(only equality), result is integer(0 or 1).
+			for integers some operators(add sub mul div negate) and brackets.
+			The parser must be pretty damn fast(test recursive vs shunting yard)
+			Allow inner functions calls.
+			All kinds of returns should be handled.
+		*/
+		format_exception error("invalid_format_function_call");
+		parser::SkipSpace(reader);
+		auto func_name = parser::ReadWord(reader);
+		int argCount;
+		const Facet_Functions::EValueKind* argTypes;
+		Facet_Functions::EValueKind retType;
+		auto& functions = ctx.GetLocale()->GetFunctionsFacet();
+		auto func = functions.GetFunction(func_name, argCount, argTypes, retType);
+		if(!func)
+			throw format_exception("Unknown function");
+		if(!reader.CheckAndGet('('))
+			throw format_exception("Missing opening parenthesis from function call");
+
+		Facet_Functions::Value args[10];
+		int arg_id = 0;
+		while(arg_id < argCount) {
+			if(arg_id >= 10)
+				throw format_exception("Only 10 functions arguments allowed");
+			parser::SkipSpace(reader);
+			args[arg_id] = ParseValue(argTypes[arg_id]);
+			++arg_id;
+			parser::SkipSpace(reader);
+			if(arg_id != argCount) {
+				if(!reader.CheckAndGet(','))
+					throw format_exception("Missing comma between function arguments");
+			}
+		}
+
+		parser::SkipSpace(reader);
+
+		if(!reader.CheckAndGet(')'))
+			throw format_exception("Missing closing parenthesis from function call");
+
+		Placeholder pl;
+		ParsePlaceholderOptions(reader, pl);
+		pl.argId = -1;
+
+		if(!reader.CheckAndGet('}'))
+			throw error;
+
+		auto retValue = func(ctx, args);
+		if(retType == Facet_Functions::EValueKind::String)
+			ctx.AddSlice(retValue.sValue);
+		else if(retType == Facet_Functions::EValueKind::Integer)
+			throw format_exception("Can't handle function return type."); // TODO: How to print the integer???
+		else if(retType == Facet_Functions::EValueKind::Placeholder)
+			retValue.pValue->Convert(ctx, pl);
+		else
+			throw format_exception("Can't handle function return type.");
+	}
+};
+} // end anynmous namespace
+
 namespace internal
 {
-	static void FormatTilde(Context& ctx, const Placeholder& placeholder)
-	{
-		static const char* TILDES = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"; // 32 Tildes
+void format(Context& ctx, Slice fmtStr)
+{
+	Context::SubContext subCtx(ctx);
+	parser::SaveStringReader reader(fmtStr);
 
-		const int count = placeholder.master.GetValue(0);
+	PlaceholderId plId(ctx);
+	Placeholder pl;
 
-		if(count == 0)
-			return;
-
-		if(count < 0)
-			throw invalid_placeholder_value("Number of tildes must be bigger than zero.", ctx.fstrLastArgPos, count);
-
-		PutCount(ctx, count, TILDES, sizeof(TILDES));
-	}
-
-	static void FormatTab(Context& ctx, const Placeholder& placeholder)
-	{
-		if(!placeholder.master.HasValue())
-			throw value_exception("Tab placeholder requires argument.");
-		const int tab_stop = placeholder.master.GetValue();
-
-		if(placeholder.hash) {
-			if(tab_stop < 0)
-				throw value_exception("Tab placeholder value must be bigger than 0.");
-
-			PutSpaces(ctx, tab_stop);
-		} else {
-			if(tab_stop < 1)
-				throw value_exception("Tab placeholder value must be bigger than 0.");
-			if(tab_stop == 1)
-				return;
-
-			size_t p = ctx.GetCollumn() + 1;
-			if(!placeholder.plus && p == 1)
-				return;
-			if(p%tab_stop == 0)
-				return;
-
-			size_t count = ((p / tab_stop + 1)*tab_stop - p);
-
-			PutSpaces(ctx, count);
-		}
-	}
-
-	static bool TryFormatArgFree(Context& ctx, Placeholder& placeholder)
-	{
-		switch(placeholder.type) {
-		case '~':
-			FormatTilde(ctx, placeholder);
-			break;
-		case 't':
-			FormatTab(ctx, placeholder);
-			break;
-		default:
-			return false;
-		}
-
-		return true;
-	}
-
-	static bool TryReadInteger(const char*& cur, int& out)
-	{
-		uint32_t c = *cur;
-		if(c < '0' || c > '9')
-			return false;
-		++cur;
-
-		const char* backtrack = cur;
-		out = 0;
-
-		while(c >= '0' && c <= '9') {
-			if(out > (INT_MAX - (int)c + '0') / 10)
-				throw syntax_exception("Integer literal is too big.");
-			out *= 10;
-			out += c - '0';
-			backtrack = cur;
-			c = *cur++;
-		}
-
-		cur = backtrack;
-
-		return true;
-	}
-
-	// Parse placeholder from string
-	/**
-	Will throw a syntax_exception on invalid placeholder
-	\param str The input string must be located on the first character of the placeholder, and will be moved onto the next character after it
-	\param [out] outPlaceholder The parsed placeholder.
-	*/
-	static void ParsePlaceholder(Context& ctx, const char*& str, Placeholder& outPlaceholder)
-	{
-		outPlaceholder.Reset();
-
-		const char* cur = str;
-		char c = *cur;
-		int value;
-		int placeholderId = 0;
-		int subPlaceholderId = 0;
-		if(c == '?') {
-			outPlaceholder.master.SetPlaceholder();
-			outPlaceholder.placeholderOrder[subPlaceholderId++] = ' ';
-			++cur;
-		} else if(c >= '0' && c <= '9' && TryReadInteger(cur, value)) {
-			outPlaceholder.master.SetValue(value);
-		}
-		c = *cur;
-
-		while(c && !IsValidPlaceholder(c)) {
-			Placeholder::Option* op = outPlaceholder.GetOption(c);
-			if(!op)
-				throw syntax_exception("unknown placeholder option", ctx.argId);
-
-			outPlaceholder.order[placeholderId++] = (char)c;
-			op->Enable();
-
-			++cur;
-			c = *cur; // Character after placeholder
-			if(c == '?') {
-				++cur;
-				op->SetPlaceholder();
-				outPlaceholder.placeholderOrder[subPlaceholderId++] = outPlaceholder.order[placeholderId - 1];
-				c = *cur;
-			} else if(TryReadInteger(cur, value)) {
-				op->SetValue(value);
-				c = *cur;
-			}
-		}
-
-		// Cursor is on first character after placeholder
-		outPlaceholder.order[placeholderId] = 0;
-		outPlaceholder.placeholderOrder[subPlaceholderId] = 0;
-		if(IsValidPlaceholder(c))
-			outPlaceholder.type = (char)c;
-		else
-			outPlaceholder.type = 0;
-
-		if(c)
-			cur++;
-
-		str = cur;
-	}
-
-	//! Read until placeholder.
-	/**
-	Will read until a placeholder is encounterd.
-	\param ctx The format context.
-	\param str The input string, will be put on the first character after the placeholder
-	\param outPlaceholder The placeholder which was read last
-	\return True if a placeholder was found, otherwise false
-	*/
-	static bool ParseUntilPlaceholder(
-		Context& ctx,
-		const char*& str,
-		const char* end,
-		Placeholder& outPlaceholder)
-	{
-		const char* cur = str;
-		size_t size;
-
-		while(true) {
-			size = 0;
-			outPlaceholder.type = 0;
-
-			// Advance cursor until ~ character.
-			const char* before = cur;
-			while(cur != end && *cur != '~')
-				++cur;
-			size = cur - before;
-
-			// The string ended before another placeholder.
-			if(cur == end)
-				break;
-
-			// Move to first character of placeholder
-			++cur;
-
-			// Remember offset of the current placeholder
-			ctx.fstrLastArgPos = cur - ctx.GetFormatString().data;
-			++ctx.argId;
-
-			ParsePlaceholder(ctx, cur, outPlaceholder);
-
-			// If a argument free placeholder without subplaceholders is found.
-			if(!outPlaceholder.HasSubPlaceholder() && IsArgFreePlaceholder(outPlaceholder.type)) {
-				ctx.AddSlice(size, str);
-				TryFormatArgFree(ctx, outPlaceholder);
-			} else {
-				break;
-			}
-		}
-
-		// Write remaining text
-		if(size)
-			ctx.AddSlice(size, str);
-
-		str = cur;
-		return (outPlaceholder.type != 0);
-	}
-
-	static void AlignString(Context& ctx, Slice* rightAlignSlice, size_t length, const Placeholder& placeholder)
-	{
-		static const char* SPACES = "                                "; // 32 Spaces
-
-		// Align content
-		if(placeholder.left_align) {
-			if(!placeholder.left_align.HasValue())
-				return;
-
-			int width = placeholder.left_align.GetValue(0);
-			if(width < 0)
-				throw syntax_exception("Width of align must be positive.");
-			if((size_t)width <= length)
-				return;
-
-			const size_t count = (size_t)width - length;
-			PutSpaces(ctx, count);
-		} else if(placeholder.right_align) {
-			if(!placeholder.right_align.HasValue())
-				return;
-
-			int width = placeholder.right_align.GetValue(0);
-			if(width < 0)
-				throw syntax_exception("Width of align must be positive.");
-			if((size_t)width <= length)
-				return;
-
-			const size_t maxCount = 32;
-			size_t count = (size_t)width - length;
-			if(count > maxCount)
-				throw syntax_exception("Width of align must be smaller than 32.");
-			rightAlignSlice->data = SPACES;
-			rightAlignSlice->size = count;
-		}
-	}
-
-	static void WriteData(Context& ctx, const FormatEntry* entry, Placeholder& placeholder)
-	{
-		size_t beforeLength = 0;
-		Slice* alignSlice = nullptr;
-		if(placeholder.left_align || placeholder.right_align) {
-			beforeLength = ctx.StartCounting();
-			if(placeholder.right_align)
-				alignSlice = ctx.AddLockedSlice();
-		}
+	while(ParseUntilPlaceholder(ctx, reader)) {
+		auto result = ParsePlaceholder(reader, pl);
 
 #if defined(FORMAT_ERROR_TEXT) && defined(FORMAT_NO_EXCEPTIONS)
 		try {
 #endif
-			entry->Convert(ctx, placeholder);
+			if(result == EParseResult::SimplePlaceholder) {
+				int id;
+				if(pl.argId >= 0)
+					id = plId.RetrieveNextValue(pl.argId);
+				else
+					id = plId.RetrieveNextValue();
+				pl.argId = id;
+				WriteSimplePlaceholder(ctx, pl);
+			} else if(result == EParseResult::FunctionPlaceholder) {
+				FunctionParser parser(ctx, reader, plId);
+				parser.WriteAndParseFunctionPlaceholder();
+			} else {
+				throw format_exception("invalid_placeholder_type");
+			}
 #if defined(FORMAT_ERROR_TEXT) && defined(FORMAT_NO_EXCEPTIONS)
-		} catch(format_exception&) {
-			ctx.AddTermiatedSlice("<FORMAT_ERROR>");
+		} catch(const format_exception& exp) {
+			ctx.AddTerminatedSlice("<FORMAT_ERROR:");
+			ctx.AddTerminatedSlice(exp.msg);
+			ctx.AddTerminatedSlice(">");
 		}
 #endif
-
-		if(placeholder.left_align || placeholder.right_align) {
-			auto newLength = ctx.StopCounting();
-			AlignString(ctx, alignSlice, newLength - beforeLength - 1, placeholder);
-		}
 	}
+}
 
-	void format(Context& ctx, Slice fmtStr, const BaseFormatEntryType* rawEntries, int entryCount)
-	{
-		Context::AutoRestoreSubContext subCtx(ctx, fmtStr);
-
-		auto GetEntry = [&](int i) { return reinterpret_cast<const FormatEntry*>(rawEntries + i); };
-		const char* cur = ctx.GetFormatString().data;
-		const char* end = cur + ctx.GetFormatString().size;
-
-		// Go to placeholder, try arg free, fill subplaceholder, convert string
-		int curId = 0;
-		Placeholder pl;
-		while(true) {
-			if(!internal::ParseUntilPlaceholder(ctx, cur, end, pl))
-				break; // No more placeholders
-			bool isArgFree = IsArgFreePlaceholder(pl.type);
-			if(!isArgFree)
-				curId = pl.master.GetValue(curId);
-
-			// Replace subplaceholders
-			for(char* sub = pl.placeholderOrder; *sub; ++sub) {
-				if(curId >= entryCount)
-					throw syntax_exception("Not enough arguments");
-				if(*sub == ' ')
-					pl.master.SetValue(GetEntry(curId)->AsInteger());
-				else
-					pl.GetOption(*sub)->SetValue(GetEntry(curId)->AsInteger());
-				++curId;
-			}
-			if(isArgFree) {
-				internal::TryFormatArgFree(ctx, pl);
-			} else {
-				if(curId >= entryCount)
-					throw syntax_exception("Not enough arguments");
-				internal::WriteData(ctx, GetEntry(curId), pl);
-				++curId;
-			}
-		}
-	}
 }
 }

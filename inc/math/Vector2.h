@@ -383,22 +383,11 @@ bool IsZero(const Vector2<T>& v, T tolerance = math::Constants<T>::rounding_erro
 template <typename T>
 void fmtPrint(format::Context& ctx, const Vector2<T>& v, format::Placeholder& placeholder)
 {
-	using namespace format;
-
-	placeholder.type = 'a';
-	bool printLength = placeholder.hash.IsEnabled();
-	placeholder.hash.Disable();
-
-	ctx.AddTerminatedSlice("[x=");
-	fmtPrint(ctx, v.x, placeholder);
-	ctx.AddTerminatedSlice(" y=");
-	fmtPrint(ctx, v.y, placeholder);
-	if(printLength) {
-		ctx.AddTerminatedSlice(" len=");
-		fmtPrint(ctx, v.GetLength(), placeholder);
-	}
-
-	ctx.AddTerminatedSlice("]");
+	auto pl = format::parser::BasicPlaceholder::Parse(placeholder.format, ctx, placeholder.argId);
+	if(pl.hash.IsEnabled())
+		format::vformat(ctx, "[x={} y={} len={}]", v.x, v.y, v.GetLength());
+	else
+		format::vformat(ctx, "[x={} y={}]", v.x, v.y);
 }
 
 template <typename T> float* begin(math::Vector2<T>& v) { return &v.x; }

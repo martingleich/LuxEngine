@@ -15,6 +15,8 @@ namespace lux
 namespace video
 {
 
+class VideoDriver;
+
 //! The material library
 /**
 Caches materialsrenders and is used to created new ones.

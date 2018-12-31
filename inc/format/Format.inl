@@ -5,13 +5,6 @@ namespace format
 {
 namespace internal
 {
-	class FormatEntry
-	{
-	public:
-		virtual void Convert(Context& ctx, Placeholder& placeholder) const = 0;
-		virtual int AsInteger() const = 0;
-	};
-
 	struct null_type {};
 	inline void fmtPrint(Context&, null_type, Placeholder&) {}
 
@@ -20,7 +13,7 @@ namespace internal
 		AsInteger(T arg)
 	{
 		if(arg > (T)INT_MAX)
-			throw value_exception("Passed integer value is to big.");
+			throw invalid_argument("Passed integer value is to big.", size_t(-1));
 		return (int)arg;
 	}
 
@@ -28,7 +21,7 @@ namespace internal
 	typename std::enable_if<!std::is_integral<T>::value, int>::type
 		AsInteger(const T&)
 	{
-		throw value_exception("Passed placeholder value must be an integer.");
+		throw invalid_argument("Passed placeholder value must be an integer.", size_t(-1));
 	}
 
 	template <typename T>
@@ -59,10 +52,10 @@ namespace internal
 	template <typename T>
 	void CheckRefEntryType()
 	{
-		static_assert(sizeof(RefFormatEntry<T>) <= sizeof(BaseFormatEntryType), "Big problem");
+		static_assert(sizeof(RefFormatEntry<T>) == sizeof(BaseFormatEntryType), "Big problem");
 	}
 
-	FORMAT_API void format(Context& ctx, Slice fmtStr, const BaseFormatEntryType* entries, int entryCount);
+	FORMAT_API void format(Context& ctx, Slice fmtStr);
 }
 
 template <typename... Types>
@@ -74,74 +67,66 @@ inline void vformat(Context& ctx, Slice str, const Types&... args)
 
 	// Allocate stack memory for RefEntries
 	internal::BaseFormatEntryType entries[sizeof...(Types) ? sizeof...(Types) : 1]; // Arrays of size 0 are forbidden.
-	void* ptr = entries;
+	char* ptr = (char*)entries;
 	(void)ptr; // Fixed warning if entryCount is zero.
 	int unused2[] = {0, 
 		// Perform calls directly to reduce compile file size.
-		(new (ptr) internal::RefFormatEntry<Types>(&args), ptr = (char*)ptr + sizeof(internal::BaseFormatEntryType), 0)...
+		(new (ptr) internal::RefFormatEntry<Types>(&args), ptr += sizeof(internal::BaseFormatEntryType), 0)...
 	};
 	(void)unused2;
 
-	internal::format(ctx, str, entries, (int)sizeof...(Types));
+	ctx.SetFormatEntries(entries, (int)sizeof...(Types), sizeof(internal::BaseFormatEntryType));
+	internal::format(ctx, str);
 }
 
 template <typename... Types>
 inline void vformat(Context& ctx, const char* str, const Types&... args)
 {
-	vformat(ctx, Slice(strlen(str), str), args...);
+	vformat(ctx, Slice(std::strlen(str), str), args...);
 }
 
 template <typename SinkT, typename... Types>
-inline size_t formatEx(SinkT&& sink, const FormatExData& exData, Slice str, const Types&... args)
+inline int formatEx(SinkT&& sink, const FormatExData& exData, Slice str, const Types&... args)
 {
 	if(!str.data)
-		return (size_t)-1;
+		return -1;
 #ifdef FORMAT_NO_EXCEPTIONS
 	try {
 #endif
-		Context ctx(exData.locale, exData.startCollumn, exData.startLine);
+		Context ctx(exData.locale ? *exData.locale : *GetLocale());
 		vformat(ctx, str, args...);
 
 		using CleanSinkT =
 			typename std::remove_cv<
 			typename std::remove_reference<SinkT>::type>::type;
 		auto real_sink = sink_access<CleanSinkT>::Get(sink);
-		size_t outCharacters = real_sink.Write(ctx, ctx.Slices(), exData.sinkFlags);
-		if(exData.outCollumn) {
-			if(exData.sinkFlags & ESinkFlags::Newline)
-				*exData.outCollumn = 0;
-			else
-				*exData.outCollumn = ctx.GetCollumn();
-		}
-		if(exData.outLine)
-			*exData.outLine = ctx.GetLine();
+		return (int)real_sink.Write(ctx, ctx.Slices(), exData.sinkFlags);
 #ifdef FORMAT_NO_EXCEPTIONS
 	} catch(...) {
-		outCharacters = (size_t)-1;
+		return -1;
 	}
 #endif
-	return outCharacters;
 }
 
 template <typename SinkT, typename... Types>
-inline size_t format(SinkT&& sink, const char* str, const Types&... args)
+inline int format(SinkT&& sink, const char* str, const Types&... args)
 {
 	FormatExData data;
 	return formatEx(sink, data, Slice(strlen(str), str), args...);
 }
 template <typename SinkT, typename... Types>
-inline size_t format(SinkT&& sink, Slice str, const Types&... args)
+inline int format(SinkT&& sink, Slice str, const Types&... args)
 {
 	FormatExData data;
 	return formatEx(sink, data, str, args...);
 }
 template <typename SinkT, typename... Types>
-inline size_t formatln(SinkT&& sink, const char* str, const Types&... args)
+inline int formatln(SinkT&& sink, const char* str, const Types&... args)
 {
-	return formatln(sink, data, Slice(strlen(str), str), args...);
+	return formatln(sink, Slice(std::strlen(str), str), args...);
 }
 template <typename SinkT, typename... Types>
-inline size_t formatln(SinkT&& sink, Slice str, const Types&... args)
+inline int formatln(SinkT&& sink, Slice str, const Types&... args)
 {
 	FormatExData data;
 	data.sinkFlags = ESinkFlags::Newline;

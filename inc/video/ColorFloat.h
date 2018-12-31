@@ -280,20 +280,9 @@ inline ColorF operator*(const float f, const ColorF& a)
 	ColorF out(a); out *= f; return out;
 }
 
-inline void fmtPrint(format::Context& ctx, ColorF format, format::Placeholder& placeholder)
+inline void fmtPrint(format::Context& ctx, ColorF col, format::Placeholder&)
 {
-	using namespace format;
-	placeholder.type = 'a';
-
-	ctx.AddSlice(3, "[r=");
-	fmtPrint(ctx, format.r, placeholder);
-	ctx.AddSlice(3, " g=");
-	fmtPrint(ctx, format.g, placeholder);
-	ctx.AddSlice(3, " b=");
-	fmtPrint(ctx, format.b, placeholder);
-	ctx.AddSlice(3, " a=");
-	fmtPrint(ctx, format.a, placeholder);
-	ctx.AddSlice(1, "]");
+	format::vformat(ctx, "[r={} g={} b={} a={}]", col.r, col.g, col.b, col.a);
 }
 
 }

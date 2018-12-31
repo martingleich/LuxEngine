@@ -2,9 +2,9 @@
 
 namespace format
 {
-size_t ostream_sink::Write(Context&, const Context::SlicesT& slices, int flags)
+int ostream_sink::Write(Context&, const Context::SlicesT& slices, int flags)
 {
-	size_t size = 0;
+	int size = 0;
 	for(auto& s : slices) {
 		m_Stream.write(s.data, s.size);
 		size += s.size;

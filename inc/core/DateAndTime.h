@@ -56,7 +56,7 @@ inline void fmtPrint(format::Context& ctx, const DateAndTime& date, format::Plac
 		ctx.AddTerminatedSlice("[invalid date]");
 	} else {
 		format::vformat(ctx,
-			"~s ~s ~d ~.2d:~.2d:~.2d ~d",
+			"{} {} {} {:.2}:{:.2}:{:.2} {}",
 			wday_name[(int)date.weekDay],
 			mon_name[date.month - 1],
 			date.dayOfMonth, date.hours,

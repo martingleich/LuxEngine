@@ -129,13 +129,13 @@ void ReferableFactory::RegisterType(Name type, CreationFunc create)
 	if(!set)
 		throw core::GenericInvalidArgumentException("type", "Type name is already used");
 
-	log::Debug("Registered type ~s.", type);
+	log::Debug("Registered type {0}.", type);
 }
 
 void ReferableFactory::UnregisterType(Name type)
 {
 	if(m_Types.Erase(type))
-		log::Debug("Unregistered type ~s.", type);
+		log::Debug("Unregistered type {0}.", type);
 }
 
 StrongRef<Referable> ReferableFactory::Create(Name type, const void* data)
