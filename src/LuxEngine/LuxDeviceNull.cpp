@@ -21,6 +21,21 @@
 #include "scene/SceneRenderer.h"
 #include "scene/SceneRendererSimpleForward.h"
 
+#include "video/mesh/MeshLoaderOBJ.h"
+#include "video/mesh/MeshLoaderX.h"
+
+#include "video/images/ImageLoaderBMP.h"
+#include "video/images/ImageLoaderPNM.h"
+#include "video/images/ImageLoaderTGA.h"
+#include "video/images/ImageLoaderPNG.h"
+
+#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
+#include "video/images/ImageLoaderD3DX.h"
+#endif
+
+#include "video/images/ImageWriterBMP.h"
+#include "video/images/ImageWriterTGA.h"
+
 #include "gui/GUIEnvironment.h"
 #include "gui/Window.h"
 #include "gui/Cursor.h"
@@ -75,10 +90,12 @@ void LuxDeviceNull::ReleaseModules()
 
 	video::MeshSystem::Destroy();
 	video::ImageSystem::Destroy();
+
 	video::MaterialLibrary::Destroy();
 	core::ResourceSystem::Destroy();
 
 	video::Canvas3DSystem::Destroy();
+	video::ShaderFactory::Destroy();
 	video::VideoDriver::Destroy();
 
 	io::FileSystem::Destroy();
@@ -107,10 +124,73 @@ void LuxDeviceNull::BuildVideoDriver(const video::DriverConfig& config)
 		throw core::NotImplementedException(config.adapter->GetDriverType().AsView());
 
 	video::VideoDriver::Initialize(driver);
+
+}
+
+void LuxDeviceNull::BuildVideoDriverHelpers()
+{
+	if(!video::ShaderFactory::Instance())
+		video::ShaderFactory::Initialize();
+
+	if(!video::Canvas3DSystem::Instance())
+		video::Canvas3DSystem::Initialize();
+}
+
+void LuxDeviceNull::BuildMaterialLibrary()
+{
+	if(video::MaterialLibrary::Instance())
+		return;
 	video::MaterialLibrary::Initialize();
-	BuildImageSystem();
-	video::MeshSystem::Initialize();
-	video::Canvas3DSystem::Initialize();
+}
+
+void LuxDeviceNull::BuildMeshSystem(video::Material* defaultMaterial)
+{
+	if(video::MeshSystem::Instance())
+		return;
+
+	if(!defaultMaterial)
+		defaultMaterial = video::MaterialLibrary::Instance()->GetMaterial(video::MaterialLibrary::EKnownMaterial::Solid);
+	video::MeshSystem::Initialize(defaultMaterial);
+
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(video::MeshLoaderOBJ));
+	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(video::MeshLoaderX));
+}
+
+void LuxDeviceNull::BuildImageSystem()
+{
+	if(video::ImageSystem::Instance())
+		return;
+
+	video::ImageSystem::Initialize();
+
+	auto resSys = core::ResourceSystem::Instance();
+#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
+	auto driver = video::VideoDriver::Instance();
+	if(driver && driver->GetVideoDriverType() == video::DriverType::Direct3D9) {
+		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(driver->GetLowLevelDevice());
+		resSys->AddResourceLoader(LUX_NEW(video::ImageLoaderD3DX)(d3dDevice));
+	}
+#endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
+
+	resSys->AddResourceLoader(LUX_NEW(video::ImageLoaderBMP));
+	resSys->AddResourceLoader(LUX_NEW(video::ImageLoaderPNM));
+	resSys->AddResourceLoader(LUX_NEW(video::ImageLoaderTGA));
+	resSys->AddResourceLoader(LUX_NEW(video::ImageLoaderPNG));
+
+	resSys->AddResourceWriter(LUX_NEW(video::ImageWriterBMP));
+	resSys->AddResourceWriter(LUX_NEW(video::ImageWriterTGA));
+}
+
+void LuxDeviceNull::BuildGUIEnvironment()
+{
+	if(gui::GUIEnvironment::Instance() != nullptr) {
+		log::Warning("Gui environment already built.");
+		return;
+	}
+
+	log::Info("Building GUI-Environment.");
+	auto env = LUX_NEW(gui::GUIEnvironment)(GetWindow(), GetCursor());
+	gui::GUIEnvironment::Initialize(env);
 }
 
 core::Array<core::Name> LuxDeviceNull::GetVideoDriverTypes()
@@ -138,37 +218,6 @@ StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(core::Name na
 	init.scene = scene;
 	auto rendererEntry = m_SceneRenderers.Get(name);
 	return rendererEntry.sceneRendererCreateFunc(init);
-}
-
-void LuxDeviceNull::BuildImageSystem()
-{
-	if(video::ImageSystem::Instance()) {
-		log::Warning("Image system already built.");
-		return;
-	}
-
-	log::Info("Building ImageSystem.");
-	video::ImageSystem::Initialize();
-}
-
-void LuxDeviceNull::BuildGUIEnvironment()
-{
-	if(gui::GUIEnvironment::Instance() != nullptr) {
-		log::Warning("Gui environment already built.");
-		return;
-	}
-
-	log::Info("Building GUI-Environment.");
-	auto env = LUX_NEW(gui::GUIEnvironment)(GetWindow(), GetCursor());
-	gui::GUIEnvironment::Initialize(env);
-}
-
-void LuxDeviceNull::BuildAll(const video::DriverConfig& config)
-{
-	BuildWindow(config.display.width, config.display.height, "Window");
-	BuildInputSystem();
-	BuildVideoDriver(config);
-	BuildGUIEnvironment();
 }
 
 namespace

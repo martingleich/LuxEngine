@@ -12,9 +12,8 @@ class GeometryCreatorCylinder : public GeometryCreator
 {
 public:
 	GeometryCreatorCylinder();
-	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
-	const core::String& GetName() const;
-	const core::ParamPackage& GetParams() const;
+	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params) override;
+	const core::ParamPackage& GetParams() const override;
 	StrongRef<Geometry> CreateGeometry(
 		float radius = 0.5f,
 		float height = 1.0f,

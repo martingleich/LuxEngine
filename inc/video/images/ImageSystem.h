@@ -18,12 +18,12 @@ class Image;
 //! Manage images and textures
 class ImageSystem : public ReferenceCounted
 {
+	ImageSystem();
 public:
-	LUX_API static void Initialize(ImageSystem* system = nullptr);
+	LUX_API static void Initialize();
 	LUX_API static ImageSystem* Instance();
 	LUX_API static void Destroy();
 
-	LUX_API ImageSystem();
 	LUX_API ~ImageSystem();
 
 	//! Create a new empty image
@@ -38,19 +38,33 @@ public:
 	/**
 	\param size The size of the new image in pixel
 	\param format The colorformat of the new image
-	\param data The imagedata of the image, the size and the format must be euqal to the previouse params
+	\param data The imagedata of the image, the size and the format must be euqal to the previous params
 	\param copyMem Should the data from the original location be copied or only referenced
 	\param deleteOnDrop Only if copyMem=true. Should the referenced memory be deleted if the image is destructed(memory is freed via delete[](u8*) operator)
 	\return The newly created image
 	*/
-	LUX_API StrongRef<Image> CreateImage(const math::Dimension2I& size, ColorFormat format, void* data, bool copyMem, bool deleteOnDrop);
+	LUX_API StrongRef<Image> CreateImage(
+		const math::Dimension2I& size,
+		ColorFormat format,
+		void* data,
+		bool copyMem,
+		bool deleteOnDrop);
 
-	//! Create s new sprite bank
+	//! Create new sprite bank
 	LUX_API StrongRef<SpriteBank> CreateSpriteBank();
 
-	LUX_API StrongRef<Texture> CreateFittingTexture(const math::Dimension2I& size, ColorFormat format=ColorFormat::R8G8B8, u32 mipCount=0, bool isDynamic=false);
-	LUX_API StrongRef<CubeTexture> CreateFittingCubeTexture(u32 size, ColorFormat format=ColorFormat::R8G8B8, bool isDynamic=false);
-	LUX_API StrongRef<Texture> CreateFittingRendertargetTexture(const math::Dimension2I& size, ColorFormat format);
+	LUX_API StrongRef<Texture> CreateFittingTexture(
+		const math::Dimension2I& size,
+		ColorFormat format = ColorFormat::R8G8B8,
+		int mipCount = 0,
+		bool isDynamic = false);
+	LUX_API StrongRef<CubeTexture> CreateFittingCubeTexture(
+		int size,
+		ColorFormat format = ColorFormat::R8G8B8,
+		bool isDynamic = false);
+	LUX_API StrongRef<Texture> CreateFittingRendertargetTexture(
+		const math::Dimension2I& size,
+		ColorFormat format);
 
 private:
 	VideoDriver* m_Driver;

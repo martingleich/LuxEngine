@@ -33,6 +33,7 @@ public:
 
 	void BuildWindow(int width, int height, core::StringView title) override;
 	void BuildInputSystem(bool isForeground) override;
+
 	bool WaitForWindowChange() override;
 	bool Run(int waitTime) override;
 

@@ -23,12 +23,6 @@ GeometryCreatorArrow::GeometryCreatorArrow()
 	m_Package = ppb.BuildAndReset();
 }
 
-const core::String& GeometryCreatorArrow::GetName() const
-{
-	static const core::String name = "arrow";
-	return name;
-}
-
 const core::ParamPackage& GeometryCreatorArrow::GetParams() const
 {
 	return m_Package;

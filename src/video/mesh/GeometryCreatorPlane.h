@@ -12,10 +12,8 @@ class GeometryCreatorPlane : public GeometryCreator
 {
 public:
 	GeometryCreatorPlane();
-	const core::ParamPackage& GetParams() const;
-	const core::String& GetName() const;
-
-	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
+	const core::ParamPackage& GetParams() const override;
+	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params) override;
 
 	//! Create a tesselated plane
 	/**

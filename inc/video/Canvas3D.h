@@ -99,7 +99,7 @@ class Canvas3D
 	};
 
 public:
-	LUX_API Canvas3D(const math::Matrix4& transform = math::Matrix4::IDENTITY, float polyOffset = 0.0f, video::Renderer* renderer = nullptr);
+	LUX_API Canvas3D(const math::Matrix4& transform = math::Matrix4::IDENTITY, float polyOffset = 0.0f);
 
 	Canvas3D(const Canvas3D& other) = delete;
 	Canvas3D& operator=(const Canvas3D& other) = delete;

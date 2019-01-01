@@ -307,6 +307,9 @@ public:
 #define LX_CHECK_NULL_ARG(arg) if(!(arg)) throw lux::core::ArgumentNullException(#arg);
 
 //! Each argument will be evaluated multiple times.
+/*
+arg must be in lo <= arg < hi
+*/
 #define LX_CHECK_BOUNDS(arg, lo, hi) if((arg) < (lo) || (arg) >= (hi)) throw lux::core::ArgumentOutOfRangeException(#arg, (lo), (hi), (arg));
 
 struct InvalidOperationException : public ErrorException

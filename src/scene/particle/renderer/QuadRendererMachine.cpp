@@ -63,7 +63,7 @@ QuadRendererMachine::QuadRendererMachine() :
 	tss.colorArg2 = video::ETextureArgument::Diffuse;
 	tss.colorOperator = video::ETextureOperator::Modulate;
 	video::FixedFunctionParameters paramDefault({"texture"}, {tss}, true);
-	m_DefaultPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramDefault);
+	m_DefaultPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramDefault);
 
 	m_EmitPass = m_DefaultPass;
 	m_EmitPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;

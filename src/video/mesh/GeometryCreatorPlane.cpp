@@ -25,12 +25,6 @@ const core::ParamPackage& GeometryCreatorPlane::GetParams() const
 	return m_Params;
 }
 
-const core::String& GeometryCreatorPlane::GetName() const
-{
-	static const core::String name = "plane";
-	return name;
-}
-
 StrongRef<Geometry> GeometryCreatorPlane::CreateGeometry(const core::PackagePuffer& params)
 {
 	const math::Vector2F size = params.FromID(0, true).Get<math::Vector2F>();

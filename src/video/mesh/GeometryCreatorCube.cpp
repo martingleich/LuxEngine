@@ -27,12 +27,6 @@ GeometryCreatorCube::GeometryCreatorCube()
 	m_Package = ppb.BuildAndReset();
 }
 
-const core::String& GeometryCreatorCube::GetName() const
-{
-	static const core::String name = "cube";
-	return name;
-}
-
 const core::ParamPackage& GeometryCreatorCube::GetParams() const
 {
 	return m_Package;

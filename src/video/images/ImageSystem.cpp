@@ -10,20 +10,10 @@
 #include "io/FileUtilities.h"
 #include "io/FileSystem.h"
 
+#include "video/Texture.h"
 #include "video/CubeTexture.h"
-#include "video/SpriteBankImpl.h"
-
-#include "video/images/ImageLoaderBMP.h"
-#include "video/images/ImageLoaderPNM.h"
-#include "video/images/ImageLoaderTGA.h"
-#include "video/images/ImageLoaderPNG.h"
-
-#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
-#include "video/images/ImageLoaderD3DX.h"
-#endif
-
-#include "video/images/ImageWriterBMP.h"
-#include "video/images/ImageWriterTGA.h"
+#include "video/SpriteBank.h"
+#include "video/images/Image.h"
 
 namespace lux
 {
@@ -71,7 +61,8 @@ public:
 
 	void LoadResource(io::File* file, core::Resource* dst)
 	{
-		auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image, nullptr).StaticCastStrong<video::Image>();
+		auto img = core::ReferableFactory::Instance()->Create(
+			core::ResourceType::Image).StaticCastStrong<video::Image>();
 		m_ResourceLoader->LoadResource(file, img);
 		Texture* texture = dynamic_cast<Texture*>(dst);
 		ColorFormat format = img->GetColorFormat();
@@ -209,7 +200,8 @@ public:
 			io::Path path(lines[i]);
 			auto imgfile = fileSys->OpenFile(path.GetResolved(baseDir));
 			if(imgfile)
-				images[order[i]] = core::ResourceSystem::Instance()->GetResource(core::ResourceType::Image, imgfile).AsStrong<Image>();
+				images[order[i]] = core::ResourceSystem::Instance()->GetResource(
+					core::ResourceType::Image, imgfile).AsStrong<Image>();
 		}
 
 		InitCubeTexture(images, (CubeTexture*)dst);
@@ -261,11 +253,9 @@ private:
 
 static StrongRef<ImageSystem> g_ImageSystem;
 
-void ImageSystem::Initialize(ImageSystem* system)
+void ImageSystem::Initialize()
 {
-	if(!system)
-		system = LUX_NEW(ImageSystem);
-	g_ImageSystem = system;
+	g_ImageSystem = LUX_NEW(ImageSystem);
 }
 
 ImageSystem* ImageSystem::Instance()
@@ -278,31 +268,16 @@ void ImageSystem::Destroy()
 	g_ImageSystem.Reset();
 }
 
-ImageSystem::ImageSystem()
+ImageSystem::ImageSystem() :
+	m_Driver(VideoDriver::Instance())
 {
-	auto resSys = core::ResourceSystem::Instance();
-	m_Driver = VideoDriver::Instance();
+	LX_CHECK_NULL_ARG(m_Driver);
 
 	// Register before image loaders, to make default load type images, instead of textures.
 	// These both are always the last option to try and load.
+	auto resSys = core::ResourceSystem::Instance();
 	resSys->AddResourceLoader(LUX_NEW(ImageToTextureLoader));
 	resSys->AddResourceLoader(LUX_NEW(MultiImageToCubeTextureLoader));
-
-#ifdef LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
-	auto driver = VideoDriver::Instance();
-	if(driver && driver->GetVideoDriverType() == video::DriverType::Direct3D9) {
-		IDirect3DDevice9* d3dDevice = reinterpret_cast<IDirect3DDevice9*>(driver->GetLowLevelDevice());
-		resSys->AddResourceLoader(LUX_NEW(ImageLoaderD3DX)(d3dDevice));
-	}
-#endif // LUX_COMPILE_WITH_D3DX_IMAGE_LOADER
-
-	resSys->AddResourceLoader(LUX_NEW(ImageLoaderBMP));
-	resSys->AddResourceLoader(LUX_NEW(ImageLoaderPNM));
-	resSys->AddResourceLoader(LUX_NEW(ImageLoaderTGA));
-	resSys->AddResourceLoader(LUX_NEW(ImageLoaderPNG));
-
-	resSys->AddResourceWriter(LUX_NEW(ImageWriterBMP));
-	resSys->AddResourceWriter(LUX_NEW(ImageWriterTGA));
 }
 
 ImageSystem::~ImageSystem()
@@ -311,24 +286,31 @@ ImageSystem::~ImageSystem()
 
 StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2I& size, ColorFormat format)
 {
-	auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image).AsStrong<Image>();
+	auto img = core::ReferableFactory::Instance()->Create(
+		core::ResourceType::Image).AsStrong<Image>();
 	img->Init(size, format);
 	return img;
 }
 
-StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2I& size, ColorFormat format, void* data, bool CopyMem, bool deleteOnDrop)
+StrongRef<Image> ImageSystem::CreateImage(
+	const math::Dimension2I& size,
+	ColorFormat format,
+	void* data, bool CopyMem, bool deleteOnDrop)
 {
-	auto img = core::ReferableFactory::Instance()->Create(core::ResourceType::Image).AsStrong<Image>();
+	auto img = core::ReferableFactory::Instance()->Create(
+		core::ResourceType::Image).AsStrong<Image>();
 	img->Init(size, format, data, CopyMem, deleteOnDrop);
 	return img;
 }
 
 StrongRef<SpriteBank> ImageSystem::CreateSpriteBank()
 {
-	return LUX_NEW(SpriteBankImpl);
+	return LUX_NEW(SpriteBank);
 }
 
-StrongRef<Texture> ImageSystem::CreateFittingTexture(const math::Dimension2I& size, ColorFormat format, u32 mipCount, bool isDynamic)
+StrongRef<Texture> ImageSystem::CreateFittingTexture(
+	const math::Dimension2I& size,
+	ColorFormat format, int mipCount, bool isDynamic)
 {
 	math::Dimension2I copy(size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, false, false))
@@ -337,7 +319,8 @@ StrongRef<Texture> ImageSystem::CreateFittingTexture(const math::Dimension2I& si
 	return m_Driver->CreateTexture(copy, format, mipCount, isDynamic);
 }
 
-StrongRef<CubeTexture> ImageSystem::CreateFittingCubeTexture(u32 size, ColorFormat format, bool isDynamic)
+StrongRef<CubeTexture> ImageSystem::CreateFittingCubeTexture(
+	int size, ColorFormat format, bool isDynamic)
 {
 	math::Dimension2I copy(size, size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, true, false))
@@ -346,7 +329,8 @@ StrongRef<CubeTexture> ImageSystem::CreateFittingCubeTexture(u32 size, ColorForm
 	return m_Driver->CreateCubeTexture(copy.width, format, isDynamic);
 }
 
-StrongRef<Texture> ImageSystem::CreateFittingRendertargetTexture(const math::Dimension2I& size, ColorFormat format)
+StrongRef<Texture> ImageSystem::CreateFittingRendertargetTexture(
+	const math::Dimension2I& size, ColorFormat format)
 {
 	math::Dimension2I copy(size);
 	if(!m_Driver->GetFittingTextureFormat(format, copy, false, true))

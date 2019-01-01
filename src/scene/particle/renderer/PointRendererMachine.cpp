@@ -34,7 +34,7 @@ PointRendererMachine::PointRendererMachine()
 	m_DefaultPass.fogEnabled = false;
 	m_DefaultPass.lighting = video::ELightingFlag::Disabled;
 	video::FixedFunctionParameters paramsDiffuse({}, {}, true);
-	m_DefaultPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramsDiffuse);
+	m_DefaultPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramsDiffuse);
 
 	m_EmitPass = m_DefaultPass;
 	m_EmitPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;

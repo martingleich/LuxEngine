@@ -89,13 +89,11 @@ StrongRef<video::Shader> EnsureFontShader()
 	if(g_FontShader)
 		return g_FontShader;
 
-	video::VideoDriver::Instance()->CreateShader(
-	video::VideoDriver::Instance()->CreateFixedFunctionShader(
-	auto matLib = video::MaterialLibrary::Instance();
+	auto shaderFactory = video::ShaderFactory::Instance();
 	StrongRef<video::Shader> shader;
-	if(matLib->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {
+	if(shaderFactory->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {
 		// Use real shader
-		shader = video::MaterialLibrary::Instance()->CreateShaderFromMemory(
+		shader = shaderFactory->CreateShaderFromMemory(
 			video::EShaderLanguage::HLSL,
 			g_VSCode, "mainVS", 2, 0,
 			g_PSCode, "mainPS", 2, 0);
@@ -109,7 +107,7 @@ StrongRef<video::Shader> EnsureFontShader()
 		tss.colorArg2 = video::ETextureArgument::Diffuse;
 		tss.colorOperator = video::ETextureOperator::Modulate;
 		video::FixedFunctionParameters params({"textures"}, {tss}, true);
-		shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(params);
+		shader = shaderFactory->GetFixedFunctionShader(params);
 	}
 	g_ParamLoader.Init(shader);
 	g_FontShader = shader.GetWeak();

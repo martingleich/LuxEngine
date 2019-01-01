@@ -36,12 +36,6 @@ StrongRef<Geometry> GeometryCreatorTorus::CreateGeometry(const core::PackagePuff
 
 }
 
-const core::String& GeometryCreatorTorus::GetName() const
-{
-	static core::String name = "torus";
-	return name;
-}
-
 const core::ParamPackage& GeometryCreatorTorus::GetParams() const
 {
 	return m_Package;

@@ -14,7 +14,7 @@ Canvas3DSystem::Canvas3DSystem()
 {
 	m_PenPass.lighting = video::ELightingFlag::Disabled;
 	m_PenPass.fogEnabled = false;
-	m_PenPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader({}, {}, true);
+	m_PenPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader({}, {}, true);
 
 	video::VertexDeclaration decl;
 	decl.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
@@ -28,7 +28,7 @@ Canvas3DSystem::Canvas3DSystem()
 	m_BrushPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_BrushPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_BrushPass.alpha.blendOperator = video::EBlendOperator::Add;
-	m_BrushPass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader({}, {}, true);
+	m_BrushPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader({}, {}, true);
 }
 
 Canvas3DSystem::~Canvas3DSystem()
@@ -72,14 +72,16 @@ const VertexFormat& Canvas3DSystem::GetBrushVertexFormat() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Canvas3D::Canvas3D(const math::Matrix4& transform, float polyOffset, video::Renderer* renderer) :
+Canvas3D::Canvas3D(const math::Matrix4& transform, float polyOffset) :
 	m_Transform(transform),
 	m_PolyOffset(polyOffset),
 	m_TriBufferCursor(0),
 	m_LineBufferCursor(0),
-	m_Renderer(renderer ? renderer : (video::Renderer*)video::VideoDriver::Instance()->GetRenderer()),
+	m_Renderer(video::VideoDriver::Instance()->GetRenderer()),
 	m_LastPass(NonePass)
 {
+	if(g_Canvas3DSystem)
+		throw core::InvalidOperationException("Canvas3D System isn't initialized");
 }
 
 Canvas3D::~Canvas3D()

@@ -15,67 +15,33 @@ namespace lux
 namespace video
 {
 
-static StrongRef<MaterialLibrary> g_MaterialLibrary;
+static StrongRef<ShaderFactory> g_ShaderFactory;
 
-void MaterialLibrary::Initialize(MaterialLibrary* matLib)
+void ShaderFactory::Initialize()
 {
-	if(!matLib)
-		matLib = LUX_NEW(MaterialLibrary);
-
-	if(!matLib)
-		throw core::InvalidOperationException("No material library available");
-	g_MaterialLibrary = matLib;
+	if(g_ShaderFactory)
+		throw core::InvalidOperationException("Shader factory already initialized.");
+	g_ShaderFactory = LUX_NEW(ShaderFactory);
 }
 
-MaterialLibrary* MaterialLibrary::Instance()
+ShaderFactory* ShaderFactory::Instance()
 {
-	return g_MaterialLibrary;
+	return g_ShaderFactory;
 }
 
-void MaterialLibrary::Destroy()
+void ShaderFactory::Destroy()
 {
-	g_MaterialLibrary.Reset();
+	g_ShaderFactory.Reset();
 }
 
-MaterialLibrary::MaterialLibrary()
+ShaderFactory::ShaderFactory() :
+	m_Driver(video::VideoDriver::Instance())
 {
-	m_Driver = video::VideoDriver::Instance();
+	LX_CHECK_NULL_ARG(m_Driver);
 
-	{
-		auto shader = GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
-		auto solid = CreateSolidMaterial(shader);
-		m_MaterialMap["solid"] = (int)EKnownMaterial::Solid;
-		lxAssert(EKnownMaterial::Solid == m_MaterialList.Size());
-		m_MaterialList.PushBack(solid);
-	}
-
-	{
-		video::Pass pass;
-		pass.fogEnabled = false;
-		pass.lighting = video::ELightingFlag::Disabled;
-
-		video::TextureStageSettings tss;
-		tss.colorOperator = ETextureOperator::SelectArg1;
-		tss.colorArg1 = ETextureArgument::Diffuse;
-		pass.shader = GetFixedFunctionShader({"texture"}, {tss}, true);
-
-		auto debug = CreateMaterial(pass);
-		m_MaterialMap["debugOverlay"] = (int)EKnownMaterial::DebugOverlay;
-		lxAssert(EKnownMaterial::DebugOverlay == m_MaterialList.Size());
-		m_MaterialList.PushBack(debug);
-	}
-
-	{
-		auto shader = GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
-		auto transparent = CreateTransparentMaterial(shader);
-		m_MaterialMap["transparent"] = (int)EKnownMaterial::Transparent;
-		lxAssert(EKnownMaterial::Transparent == m_MaterialList.Size());
-		m_MaterialList.PushBack(transparent);
-	}
-
-	{
-		core::StringView luxHLSLInclude(
-R"(
+	// TODO: Move into dependency injection.
+	core::StringView luxHLSLInclude(
+		R"(
 // d is the distance from the geomtry to the camera.
 // Returns 0 for minimal fog effect, 1 for maximal effect
 float lxFog(float d, float4 fog1, float4 fog2) 
@@ -140,8 +106,205 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 	return color;
 }
 )");
-		SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude);// No terminating null
+	SetShaderInclude(EShaderLanguage::HLSL, "lux", luxHLSLInclude);// No terminating null
+}
+
+ShaderFactory::~ShaderFactory()
+{
+}
+
+
+StrongRef<Shader> ShaderFactory::CreateShaderFromFile(
+	video::EShaderLanguage language,
+	const io::Path& VSPath, core::StringView VSEntryPoint, int VSMajor, int VSMinor,
+	const io::Path& PSPath, core::StringView PSEntryPoint, int PSMajor, int PSMinor,
+	ShaderCompileInfo* outInfo)
+{
+	StrongRef<io::File> PSFile;
+	StrongRef<io::File> VSFile;
+	if(VSPath == PSPath) {
+		PSFile = VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
+	} else {
+		PSFile = io::FileSystem::Instance()->OpenFile(PSPath);
+		VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
 	}
+
+	core::RawMemory vsCodeBuffer;
+	char* vsCodePtr = (char*)VSFile->GetBuffer();
+	int vsCodeSize = core::SafeCast<int>(VSFile->GetSize());
+	if(!vsCodePtr) {
+		vsCodeBuffer.SetSize((size_t)vsCodeSize);
+		vsCodePtr = vsCodeBuffer;
+		VSFile->ReadBinary(VSFile->GetSize(), vsCodePtr);
+	}
+	core::StringView vsCode(vsCodePtr, vsCodeSize);
+
+	core::RawMemory psCodeBuffer;
+	char* psCodePtr;
+	int psCodeSize = 0;
+	if(PSFile == VSFile) {
+		psCodePtr = vsCodePtr;
+		psCodeSize = vsCodeSize;
+	} else {
+		psCodePtr = (char*)PSFile->GetBuffer();
+		if(!psCodePtr) {
+			psCodeSize = core::SafeCast<int>(VSFile->GetSize());
+			psCodeBuffer.SetSize((size_t)psCodeSize);
+			psCodePtr = psCodeBuffer;
+			PSFile->ReadBinary(PSFile->GetSize(), psCodePtr);
+		}
+	}
+	core::StringView psCode(psCodePtr, psCodeSize);
+
+	auto shader = m_Driver->CreateShader(
+		language,
+		vsCode, VSEntryPoint, VSMajor, VSMinor,
+		psCode, PSEntryPoint, PSMajor, PSMinor,
+		outInfo ? &outInfo->messages : nullptr);
+	if(outInfo)
+		outInfo->failed = shader == nullptr;
+	else if(!shader)
+		throw UnhandledShaderCompileErrorException();
+	return shader;
+}
+
+StrongRef<Shader> ShaderFactory::GetFixedFunctionShader(
+	const core::Array<core::String>& textures,
+	const core::Array<TextureStageSettings>& stages,
+	bool useVertexColors)
+{
+	return GetFixedFunctionShader(FixedFunctionParameters(textures, stages, useVertexColors));
+}
+
+StrongRef<Shader> ShaderFactory::GetFixedFunctionShader(
+	const FixedFunctionParameters& params)
+{
+	// Why only use the cache sometimes.
+	bool useCache = params.textures.Size() <= 1;
+	if(useCache) {
+		for(auto& p : m_FixedFunctionShaders) {
+			if(p.params == params)
+				return p.shader;
+		}
+	}
+
+	auto shader = m_Driver->CreateFixedFunctionShader(params);
+	m_FixedFunctionShaders.EmplaceBack(params, shader);
+	return shader;
+}
+
+StrongRef<Shader> ShaderFactory::CreateShaderFromMemory(
+	EShaderLanguage language,
+	core::StringView VSCode, core::StringView VSEntryPoint, int VSmajorVersion, int VSminorVersion,
+	core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
+	ShaderCompileInfo* outInfo)
+{
+	auto shader = m_Driver->CreateShader(
+		language,
+		VSCode, VSEntryPoint, VSmajorVersion, VSminorVersion,
+		PSCode, PSEntryPoint, PSmajorVersion, PSminorVersion,
+		outInfo ? &outInfo->messages : nullptr);
+
+	if(outInfo)
+		outInfo->failed = shader == nullptr;
+	else if(!shader)
+		throw UnhandledShaderCompileErrorException();
+
+	return shader;
+}
+
+bool ShaderFactory::IsShaderSupported(
+	EShaderLanguage lang,
+	int vsMajor, int vsMinor,
+	int psMajor, int psMinor)
+{
+	return m_Driver->IsShaderSupported(
+		lang,
+		vsMajor, vsMinor,
+		psMajor, psMinor);
+}
+
+bool ShaderFactory::GetShaderInclude(
+	EShaderLanguage language, core::StringView name,
+	core::StringView& outData)
+{
+	ShaderInclude search(language, name);
+	auto it = m_ShaderIncludes.Find(search);
+	if(it == m_ShaderIncludes.End())
+		return false;
+	outData = core::StringView((const char*)it->Pointer(), (int)it->GetSize());
+	return true;
+}
+
+void ShaderFactory::SetShaderInclude(
+	EShaderLanguage language, core::StringView name,
+	core::StringView data)
+{
+	ShaderInclude search(language, name);
+	m_ShaderIncludes.At(search).Set(data.Data(), data.Size());
+}
+
+/////////////////////////////////////////////////////////////////////
+
+static StrongRef<MaterialLibrary> g_MaterialLibrary;
+
+void MaterialLibrary::Initialize()
+{
+	if(g_MaterialLibrary)
+		throw core::InvalidOperationException("Material library already initialized.");
+	g_MaterialLibrary = LUX_NEW(MaterialLibrary);
+}
+
+MaterialLibrary* MaterialLibrary::Instance()
+{
+	return g_MaterialLibrary;
+}
+
+void MaterialLibrary::Destroy()
+{
+	g_MaterialLibrary.Reset();
+}
+
+MaterialLibrary::MaterialLibrary() :
+	m_Driver(video::VideoDriver::Instance()),
+	m_ShaderFactory(video::ShaderFactory::Instance())
+{
+	LX_CHECK_NULL_ARG(m_Driver);
+	LX_CHECK_NULL_ARG(m_ShaderFactory);
+
+	// TODO: Move into dependency injection.
+	{
+		auto shader = m_ShaderFactory->GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
+		auto solid = CreateSolidMaterial(shader);
+		m_MaterialMap["solid"] = (int)EKnownMaterial::Solid;
+		lxAssert(EKnownMaterial::Solid == m_MaterialList.Size());
+		m_MaterialList.PushBack(solid);
+	}
+
+	{
+		video::Pass pass;
+		pass.fogEnabled = false;
+		pass.lighting = video::ELightingFlag::Disabled;
+
+		video::TextureStageSettings tss;
+		tss.colorOperator = ETextureOperator::SelectArg1;
+		tss.colorArg1 = ETextureArgument::Diffuse;
+		pass.shader = m_ShaderFactory->GetFixedFunctionShader({"texture"}, {tss}, true);
+
+		auto debug = CreateMaterial(pass);
+		m_MaterialMap["debugOverlay"] = (int)EKnownMaterial::DebugOverlay;
+		lxAssert(EKnownMaterial::DebugOverlay == m_MaterialList.Size());
+		m_MaterialList.PushBack(debug);
+	}
+
+	{
+		auto shader = m_ShaderFactory->GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
+		auto transparent = CreateTransparentMaterial(shader);
+		m_MaterialMap["transparent"] = (int)EKnownMaterial::Transparent;
+		lxAssert(EKnownMaterial::Transparent == m_MaterialList.Size());
+		m_MaterialList.PushBack(transparent);
+	}
+
 }
 
 MaterialLibrary::~MaterialLibrary()
@@ -217,135 +380,6 @@ StrongRef<video::Material> MaterialLibrary::CloneMaterial(EKnownMaterial name)
 	return GetMaterial(name)->Clone();
 }
 
-StrongRef<Shader> MaterialLibrary::CreateShaderFromFile(
-	video::EShaderLanguage language,
-	const io::Path& VSPath, core::StringView VSEntryPoint, int VSMajor, int VSMinor,
-	const io::Path& PSPath, core::StringView PSEntryPoint, int PSMajor, int PSMinor,
-	ShaderCompileInfo* outInfo)
-{
-	StrongRef<io::File> PSFile;
-	StrongRef<io::File> VSFile;
-	if(VSPath == PSPath) {
-		PSFile = VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
-	} else {
-		PSFile = io::FileSystem::Instance()->OpenFile(PSPath);
-		VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
-	}
-
-	core::RawMemory vsCodeBuffer;
-	char* vsCodePtr = (char*)VSFile->GetBuffer();
-	int vsCodeSize = core::SafeCast<int>(VSFile->GetSize());
-	if(!vsCodePtr) {
-		vsCodeBuffer.SetSize((size_t)vsCodeSize);
-		vsCodePtr = vsCodeBuffer;
-		VSFile->ReadBinary(VSFile->GetSize(), vsCodePtr);
-	}
-	core::StringView vsCode(vsCodePtr, vsCodeSize);
-
-	core::RawMemory psCodeBuffer;
-	char* psCodePtr;
-	int psCodeSize = 0;
-	if(PSFile == VSFile) {
-		psCodePtr = vsCodePtr;
-		psCodeSize = vsCodeSize;
-	} else {
-		psCodePtr = (char*)PSFile->GetBuffer();
-		if(!psCodePtr) {
-			psCodeSize = core::SafeCast<int>(VSFile->GetSize());
-			psCodeBuffer.SetSize((size_t)psCodeSize);
-			psCodePtr = psCodeBuffer;
-			PSFile->ReadBinary(PSFile->GetSize(), psCodePtr);
-		}
-	}
-	core::StringView psCode(psCodePtr, psCodeSize);
-
-	auto shader = m_Driver->CreateShader(
-		language,
-		vsCode, VSEntryPoint, VSMajor, VSMinor,
-		psCode, PSEntryPoint, PSMajor, PSMinor,
-		outInfo?&outInfo->messages:nullptr);
-	if(outInfo)
-		outInfo->failed = shader == nullptr;
-	else if(!shader)
-		throw UnhandledShaderCompileErrorException();
-	return shader;
-}
-
-StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
-	const core::Array<core::String>& textures,
-	const core::Array<TextureStageSettings>& stages,
-	bool useVertexColors)
-{
-	return GetFixedFunctionShader(FixedFunctionParameters(textures, stages, useVertexColors));
-}
-
-StrongRef<Shader> MaterialLibrary::GetFixedFunctionShader(
-	const FixedFunctionParameters& params)
-{
-	// Why only use the cache sometimes.
-	bool useCache = params.textures.Size() <= 1;
-	if(useCache) {
-		for(auto& p : m_FixedFunctionShaders) {
-			if(p.params == params)
-				return p.shader;
-		}
-	}
-
-	auto shader = m_Driver->CreateFixedFunctionShader(params);
-	m_FixedFunctionShaders.EmplaceBack(params, shader);
-	return shader;
-}
-
-StrongRef<Shader> MaterialLibrary::CreateShaderFromMemory(
-	EShaderLanguage language,
-	core::StringView VSCode, core::StringView VSEntryPoint, int VSmajorVersion, int VSminorVersion,
-	core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
-	ShaderCompileInfo* outInfo)
-{
-	auto shader = m_Driver->CreateShader(
-		language,
-		VSCode, VSEntryPoint, VSmajorVersion, VSminorVersion,
-		PSCode, PSEntryPoint, PSmajorVersion, PSminorVersion,
-		outInfo ? &outInfo->messages : nullptr);
-
-	if(outInfo)
-		outInfo->failed = shader == nullptr;
-	else if(!shader)
-		throw UnhandledShaderCompileErrorException();
-
-	return shader;
-}
-
-bool MaterialLibrary::IsShaderSupported(
-	EShaderLanguage lang,
-	int vsMajor, int vsMinor,
-	int psMajor, int psMinor)
-{
-	return m_Driver->IsShaderSupported(
-		lang,
-		vsMajor, vsMinor,
-		psMajor, psMinor);
-}
-
-bool MaterialLibrary::GetShaderInclude(
-	EShaderLanguage language, core::StringView name,
-	core::StringView& outData)
-{
-	ShaderInclude search(language, name);
-	auto it = m_ShaderIncludes.Find(search);
-	if(it == m_ShaderIncludes.End())
-		return false;
-	outData = core::StringView((const char*)it->Pointer(), (int)it->GetSize());
-	return true;
-}
-
-void MaterialLibrary::SetShaderInclude(
-	EShaderLanguage language, core::StringView name,
-	core::StringView data)
-{
-	ShaderInclude search(language, name);
-	m_ShaderIncludes.At(search).Set(data.Data(), data.Size());
-}
 
 } // namespace video
 } // namespace lux

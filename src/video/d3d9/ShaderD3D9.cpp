@@ -54,7 +54,7 @@ public:
 			}
 		} else if(IncludeType == D3DXINC_SYSTEM) {
 			core::StringView data;
-			if(MaterialLibrary::Instance()->GetShaderInclude(EShaderLanguage::HLSL, core::StringView(pFileName, strlen(pFileName)), data)) {
+			if(ShaderFactory::Instance()->GetShaderInclude(EShaderLanguage::HLSL, core::StringView(pFileName, std::strlen(pFileName)), data)) {
 				*ppData = data.Data();
 				*pBytes = (UINT)data.Size();
 				return S_OK;

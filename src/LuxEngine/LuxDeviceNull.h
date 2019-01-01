@@ -14,14 +14,19 @@ public:
 
 	core::Array<core::Name> GetVideoDriverTypes() override;
 	StrongRef<video::AdapterList> GetVideoAdapters(core::Name driver) override;
-	void BuildVideoDriver(const video::DriverConfig& config) override;
 
 	StrongRef<scene::SceneRenderer> CreateSceneRenderer(core::Name name, scene::Scene* scene) override;
 	StrongRef<scene::Scene> CreateScene() override;
 
+	void BuildVideoDriver(const video::DriverConfig& config) override;
+	// Canvas3DSystem, ShaderFactory
+	void BuildVideoDriverHelpers() override;
+
 	void BuildImageSystem() override;
 	void BuildGUIEnvironment() override;
-	void BuildAll(const video::DriverConfig& config) override;
+
+	void BuildMaterialLibrary() override;
+	void BuildMeshSystem(video::Material* defaultMaterial) override;
 
 	void RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop) override;
 

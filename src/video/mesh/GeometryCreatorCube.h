@@ -12,11 +12,8 @@ class GeometryCreatorCube : public GeometryCreator
 {
 public:
 	GeometryCreatorCube();
-
-	const core::String& GetName() const;
-	const core::ParamPackage& GetParams() const;
-
-	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
+	const core::ParamPackage& GetParams() const override;
+	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params) override;
 
 	//! Create a cube
 	/**

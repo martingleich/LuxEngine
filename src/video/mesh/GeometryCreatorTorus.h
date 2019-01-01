@@ -12,9 +12,8 @@ class GeometryCreatorTorus : public GeometryCreator
 {
 public:
 	GeometryCreatorTorus();
-	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params);
-	const core::String& GetName() const;
-	const core::ParamPackage& GetParams() const;
+	StrongRef<Geometry> CreateGeometry(const core::PackagePuffer& params) override;
+	const core::ParamPackage& GetParams() const override;
 	StrongRef<Geometry> CreateGeometry(
 		float radiusMajor = 1.0f,
 		float radiusMinor = 0.5f,

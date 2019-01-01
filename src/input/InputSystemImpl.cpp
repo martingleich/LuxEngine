@@ -55,8 +55,15 @@ void InputSystemImpl::Update(Event& event)
 {
 	if(event.device) {
 		event.device->Connect();
-		if(m_KeyboardDevice && !m_KeyboardDevice->IsConnected() && event.device->GetType() == EEventSource::Keyboard) {
-			m_KeyboardDevice = event.device;
+
+		// If there is no default mouse or keyboard device, and the event was sent
+		// from a mouse or keyboard use them as default device.
+		if(event.device->GetType() == EEventSource::Keyboard) {
+			if(!m_KeyboardDevice || !m_KeyboardDevice->IsConnected())
+				m_KeyboardDevice = event.device;
+		} else if(event.device->GetType() == EEventSource::Mouse) {
+			if(!m_MouseDevice || !m_MouseDevice->IsConnected())
+				m_MouseDevice = event.device;
 		}
 
 		if(event.device->Update(event) && event.device->IsAquired())

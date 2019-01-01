@@ -81,7 +81,7 @@ public:
 		m_ShadowRenderPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 		m_ShadowRenderPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 		m_ShadowRenderPass.alpha.blendOperator = video::EBlendOperator::Add;
-		m_ShadowRenderPass.shader = video::MaterialLibrary::Instance()->
+		m_ShadowRenderPass.shader = video::ShaderFactory::Instance()->
 			GetFixedFunctionShader({}, {}, true);
 
 		m_Silhouette.colorMask = 0;
@@ -100,7 +100,7 @@ public:
 		m_Silhouette.lighting = video::ELightingFlag::Disabled;
 		m_Silhouette.fogEnabled = false;
 		m_Silhouette.polygonOffset = -100.0f;
-		m_Silhouette.shader = video::MaterialLibrary::Instance()->
+		m_Silhouette.shader = video::ShaderFactory::Instance()->
 			GetFixedFunctionShader({}, {}, false);
 	}
 

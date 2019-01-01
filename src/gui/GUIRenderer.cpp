@@ -38,7 +38,7 @@ Renderer::Renderer(video::Renderer* r)
 		video::ETextureArgument::Texture,
 		video::ETextureOperator::Modulate);
 	video::FixedFunctionParameters paramsTexture({"textures"}, {tss}, true);
-	m_TexturePass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramsTexture);
+	m_TexturePass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramsTexture);
 
 	m_DiffusePass.culling = video::EFaceSide::None;
 	m_DiffusePass.zWriteEnabled = false;
@@ -47,7 +47,7 @@ Renderer::Renderer(video::Renderer* r)
 	m_DiffusePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_DiffusePass.alpha.blendOperator = video::EBlendOperator::Add;
 	video::FixedFunctionParameters paramsDiffuse({}, {}, true);
-	m_DiffusePass.shader = video::MaterialLibrary::Instance()->GetFixedFunctionShader(paramsDiffuse);
+	m_DiffusePass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramsDiffuse);
 }
 
 void Renderer::Begin()

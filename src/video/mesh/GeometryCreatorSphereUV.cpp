@@ -28,12 +28,6 @@ GeometryCreatorSphereUV::GeometryCreatorSphereUV()
 	m_Params = ppb.BuildAndReset();
 }
 
-const core::String& GeometryCreatorSphereUV::GetName() const
-{
-	static const core::String name = "sphereUV";
-	return name;
-}
-
 const core::ParamPackage& GeometryCreatorSphereUV::GetParams() const
 {
 	return m_Params;

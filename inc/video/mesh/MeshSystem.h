@@ -3,6 +3,7 @@
 #include "video/mesh/GeometryCreator.h"
 #include "core/lxHashMap.h"
 #include "io/Path.h"
+#include "core/lxIterator.h"
 
 namespace lux
 {
@@ -16,16 +17,17 @@ class Material;
 //! Class todo mesh related things
 class MeshSystem : public ReferenceCounted
 {
+	MeshSystem(Material* defaultMaterial);
 public:
 	LUX_API ~MeshSystem();
 
-	LUX_API static void Initialize(MeshSystem* system = nullptr);
+	LUX_API static void Initialize(Material* defaultMaterial);
 	LUX_API static MeshSystem* Instance();
 	LUX_API static void Destroy();
 
 	//! Create a new unmanaged mesh
 	/**
-	The created mesh doens't have a geometry or material associated.
+	The created mesh doesn't have a geometry or material associated.
 	\return The new mesh
 	*/
 	LUX_API StrongRef<Mesh> CreateMesh();
@@ -40,30 +42,20 @@ public:
 
 	//! Add a new geometry creator to the library.
 	/**
-	The library takes ownege of the creator.
+	The library takes ownership of the creator.
+	\param name The name of the creator.
 	\param creator The creator to add.
 	*/
-	LUX_API StrongRef<GeometryCreator> AddCreator(GeometryCreator* creator);
+	LUX_API StrongRef<GeometryCreator> AddCreator(core::StringView name, GeometryCreator* creator);
 
 	//! Removes a creator from the library.
-	LUX_API void RemoveCreator(GeometryCreator* creator);
-
-	//! Returns the total number of available creators.
-	LUX_API int GetCreatorCount() const;
+	LUX_API void RemoveCreator(core::StringView name);
 
 	//! Retrieve a geometry creator based on it's name.
-	LUX_API StrongRef<GeometryCreator> GetCreatorByName(
-		const core::String& name) const;
+	LUX_API StrongRef<GeometryCreator> GetCreatorByName(core::StringView name) const;
 
-	//! Returns a creator by it's index.
-	LUX_API StrongRef<GeometryCreator> GetCreatorById(int id) const;
-
-	//! Creates a new param package puffer for a given creator.
-	/**
-	\param name The name of the geometry creator.
-	\return A param package puffer matching the geometry creator
-	*/
-	LUX_API core::PackagePuffer GetCreatorParams(const core::String& name);
+	//! The names of all available creators.
+	LUX_API core::AnyRange<core::String> GetCreatorNames() const;
 
 	//! Create a new mesh
 	/**
@@ -73,8 +65,7 @@ public:
 	retrieved by \ref GetCreatorParams
 	\return A newly created mesh
 	*/
-	LUX_API StrongRef<Mesh> CreateMesh(
-		const core::String& name, const core::PackagePuffer& params);
+	LUX_API StrongRef<Mesh> CreateMesh(core::StringView name, const core::PackagePuffer& params);
 
 	//! Create a new sub mesh.
 	/**
@@ -83,8 +74,7 @@ public:
 		retrieved by \ref GetCreatorParams
 	\return A newly created sub mesh.
 	*/
-	LUX_API StrongRef<Geometry> CreateGeometry(
-		const core::String& name, const core::PackagePuffer& params);
+	LUX_API StrongRef<Geometry> CreateGeometry(core::StringView name, const core::PackagePuffer& params);
 
 	//! Create a new plane mesh.
 	/**
@@ -191,24 +181,11 @@ public:
 		s32 texX = 1, s32 texY = 1,
 		bool inside = false);
 
-	LUX_API StrongRef<Material> GetDefaultMaterial();
-	LUX_API void SetDefaultMaterial(Material* m);
+	void SetDefaultMaterial(Material* mat) { m_DefaultMaterial=mat; }
 
 private:
-	LUX_API MeshSystem();
-
-private:
-	StrongRef<MaterialLibrary> m_MatLib;
 	StrongRef<Material> m_DefaultMaterial;
-
 	core::HashMap<core::String, StrongRef<GeometryCreator>> m_Creators;
-
-	StrongRef<GeometryCreator> m_PlaneCreator;
-	StrongRef<GeometryCreator> m_SphereUVCreator;
-	StrongRef<GeometryCreator> m_ArrowCreator;
-	StrongRef<GeometryCreator> m_CubeGenerator;
-	StrongRef<GeometryCreator> m_TorusGenerator;
-	StrongRef<GeometryCreator> m_CylinderGenerator;
 };
 
 } // namespace scene
