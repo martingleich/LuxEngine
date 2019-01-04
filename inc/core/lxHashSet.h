@@ -488,11 +488,9 @@ private:
 	bool BaseInsert(T&& value, Iterator* it = nullptr, bool replace = true)
 	{
 		auto pureHash = unsigned int(m_Hasher(value));
-		unsigned int hash = 0;
 		int id = 0;
 		if(m_Size != 0) {
-			hash = pureHash % m_BucketCount;
-			id = GetId<T>(hash, value);
+			id = GetId<T>(pureHash % m_BucketCount, value);
 			if(id != INVALID_ID) {
 				if(replace)
 					m_Entries[id].value = (core::Choose<Copy, const T&, T&&>::type)value;
@@ -502,15 +500,13 @@ private:
 			}
 		}
 
-		int oldBucketSize = m_BucketCount;
 		if(m_Size == m_Allocated)
 			Reserve(NewSize(Size()));
 		if(double(m_Size + 1) / m_BucketCount > GetMaxLoadFactor())
 			Reserve(NewSize(Size()));
 
 		// If rehash happened => Recalculate hash.
-		if(oldBucketSize != m_BucketCount)
-			hash = pureHash % m_BucketCount;
+		unsigned int hash = pureHash % m_BucketCount;
 		id = m_Buckets[hash];
 		if(id == INVALID_ID) {
 			m_Buckets[hash] = m_Size;
