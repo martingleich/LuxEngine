@@ -62,7 +62,7 @@ public:
 
 	float GetTextWidth(const FontRenderSettings& settings, const core::StringView& text);
 	int GetCaretFromOffset(const FontRenderSettings& settings, const core::StringView& text, float XPosition);
-	void GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<float>& carets);
+	void GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<FontCaret>& carets);
 	const core::HashMap<u32, CharInfo>& GetCharMap() const;
 	const CharInfo& GetCharInfo(u32 c);
 
@@ -97,8 +97,11 @@ private:
 			return;
 
 		float width = 0;
-		for(u32 c : text.CodePoints()) {
-			if(callback(width * settings.scale) == false)
+		auto codepoints = text.CodePoints();
+		for(auto it = codepoints.First(); it != codepoints.End(); ++it) {
+			auto c = *it;
+			auto offset = int(it.Pointer() - text.Data());
+			if(callback(width * settings.scale, offset) == false)
 				return;
 			const CharInfo& info = GetCharInfo(c);
 			if(c == ' ')
@@ -109,7 +112,7 @@ private:
 			width += charSpace*settings.scale;
 		}
 
-		callback(width);
+		callback(width, text.Size());
 	}
 
 private:

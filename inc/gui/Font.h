@@ -115,6 +115,18 @@ struct FontRenderSettings
 	video::Color borderColor = video::Color::Black;
 };
 
+struct FontCaret
+{
+	FontCaret() = default;
+	FontCaret(float d, int o) :
+		distance(d),
+		offset(o)
+	{
+	}
+	float distance;
+	int offset;
+};
+
 //! A font object
 /**
 Render lines of text with this object, or get information about
@@ -158,14 +170,14 @@ public:
 
 	//! The text caret from a x position
 	/**
-	in a text are len(Text)+1 Carets
+	Between a grapheme-clusters in the text carets are placed.
 	|H|e|l|l|o| |W|o|r|l|d|
-	each | is a caret, this method returns the id of the nearest caret in the text
+	each | is a caret, this method returns the offset in bytes of the nearest caret in the text
 	The first caret is the left edge of the text box, the last carret the right edge
 	\param settings Font render settings
 	\param text The used text
 	\param xPosition The text position from the begin of the text, 0.0 is the left edge of the text box
-	\return The hit caret
+	\return The offset of the hit caret
 	*/
 	virtual int GetCaretFromOffset(const FontRenderSettings& settings, const core::StringView& text, float xPosition) = 0;
 
@@ -177,9 +189,9 @@ public:
 	The first caret is the left edge of the text box, the last carret the right edge
 	\param settings Font render settings
 	\param text The used text
-	\param [out] carets Here the caret positions are written, it always writes exactly CharCount+1 Charrets
+	\param [out] carets Here the caret positions are added, it always writes exactly CharCount+1 Charrets. The list isn't cleared.
 	*/
-	virtual void GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<float>& carets) = 0;
+	virtual void GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<FontCaret>& carets) = 0;
 
 	//! Get a description of the font
 	virtual const FontDescription& GetDescription() const = 0;

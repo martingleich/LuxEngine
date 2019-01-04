@@ -273,7 +273,8 @@ void FontRaster::Draw(
 float FontRaster::GetTextWidth(const FontRenderSettings& settings, const core::StringView& text)
 {
 	float width = 0;
-	IterateCarets(settings, text, [&](float f) -> bool {
+	IterateCarets(settings, text, [&](float f, int byte) -> bool {
+		LUX_UNUSED(byte);
 		width = f;
 		return true;
 	});
@@ -287,29 +288,29 @@ int FontRaster::GetCaretFromOffset(const FontRenderSettings& settings, const cor
 	if(text.IsEmpty())
 		return 0;
 	float lastCaret = 0;
-	int counter = 0;
-	IterateCarets(settings, text, [&](float f)->bool
+	int finalByte;
+	IterateCarets(settings, text, [&](float f, int byte)->bool
 	{
 		if(XPosition >= lastCaret && XPosition <= f) {
 			const float d1 = XPosition - lastCaret;
 			const float d2 = f - XPosition;
 			if(d1 > d2)
-				++counter;
+				finalByte = byte;
 			return false;
 		}
 		lastCaret = f;
-		++counter;
+		finalByte = byte;
 		return true;
 	});
 
-	return counter;
+	return finalByte;
 }
 
-void FontRaster::GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<float>& carets)
+void FontRaster::GetTextCarets(const FontRenderSettings& settings, const core::StringView& text, core::Array<FontCaret>& carets)
 {
-	IterateCarets(settings, text, [&](float f)->bool
+	IterateCarets(settings, text, [&](float f, int byte)->bool
 	{
-		carets.PushBack(f);
+		carets.EmplaceBack(f, byte);
 		return true;
 	});
 }

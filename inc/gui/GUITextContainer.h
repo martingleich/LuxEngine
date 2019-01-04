@@ -24,9 +24,8 @@ public:
 	/**
 	Must only be called when the text is changed via the Text() method,
 	in all other cases called automatically.
-	\param firstLine All lines before this one didn't change.
 	*/
-	LUX_API void Rebreak(int firstLine = 0);
+	LUX_API void Rebreak();
 
 	//! Update all data for the text
 	/**
@@ -96,21 +95,21 @@ public:
 private:
 	struct Line
 	{
-		Line() : line("", 0) {}
-		Line(const core::StringView& l, float w) :
-			line(l),
+		Line() = default;
+		Line(core::StringView l, float w) :
+			text(l),
 			width(w)
 		{
 		}
-		core::StringView line;
+		core::StringView text;
 		float width;
 	};
 	core::String m_Text;
-	int m_Rebreak;
 
 	// Cached data
 	WeakRef<Font> m_Font;
 	bool m_Wrap;
+	bool m_Update;
 	math::Dimension2F m_TextBoxSize;
 	gui::FontRenderSettings m_FontSettings;
 

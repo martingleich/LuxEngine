@@ -8,16 +8,16 @@ namespace gui
 
 TextContainer::TextContainer()
 {
-	m_Rebreak = 0;
+	m_Update = true;
 }
 
 TextContainer::~TextContainer()
 {
 }
 
-void TextContainer::Rebreak(int firstLine)
+void TextContainer::Rebreak()
 {
-	m_Rebreak = firstLine;
+	m_Update = true;
 }
 
 void TextContainer::Ensure(
@@ -30,111 +30,77 @@ void TextContainer::Ensure(
 		m_BrokenText.Clear();
 		return;
 	}
-	int rebreakText = m_Rebreak;
-	if(!m_BrokenText.IsEmpty() && m_Text.Data() != m_BrokenText[0].line.Data()) {
-		m_BrokenText.Clear();
-		rebreakText = 0;
-	}
 
+	bool update = m_Update;
 	if(font != m_Font) {
-		rebreakText = 0;
+		update = true;
 		m_Font = font;
 	}
 	if(wordWrap != m_Wrap) {
-		rebreakText = 0;
+		update = true;
 		m_Wrap = wordWrap;
 	}
 	if(textBoxSize != m_TextBoxSize) {
-		rebreakText = 0;
+		update = true;
 		m_TextBoxSize = textBoxSize;
 	}
 	if(m_FontSettings.charDistance != settings.charDistance ||
 		m_FontSettings.lineDistance != settings.lineDistance ||
 		m_FontSettings.scale != settings.scale ||
 		m_FontSettings.wordDistance != settings.wordDistance) {
-		rebreakText = 0;
+		update = true;
 	}
 	m_FontSettings = settings; // Copy outside of it, to get non-geometric member(for example color)
 
-	if(rebreakText == std::numeric_limits<int>::max())
+	if(!update)
 		return;
+	m_BrokenText.Clear();
+	m_Update = false;
 
-	m_Rebreak = std::numeric_limits<int>::max();
+	float textBoxWidth = m_TextBoxSize.width;
+	float maxWidth = 0;
+	core::Array<FontCaret> carets;
 
-	auto width = m_TextBoxSize.width;
-	auto& textDim = m_TextDim;
-	textDim = math::Dimension2F(0, 0);
-	core::Array<float> carets;
-	bool keepBreaking = true;
-	int lineId = rebreakText;
-
-	auto AddBrokenLine = [&](const core::StringView& str, float width) {
-		if(m_BrokenText.Size() > lineId) {
-			m_BrokenText[lineId] = Line(str, width);
-		} else {
-			m_BrokenText.EmplaceBack(str, width);
-		}
-		++lineId;
-		textDim.width = math::Max(textDim.width, width);
+	auto AddBrokenLine = [&](core::StringView line, float width) {
+		m_BrokenText.EmplaceBack(line, width);
+		maxWidth = math::Max(maxWidth, width);
 	};
 
-	auto AddLine = [&](const core::StringView& line) {
-		if(line.IsEmpty())
-			return;
+	auto AddWordWrapedLine = [&](core::StringView line) {
+		carets.Clear();
+		m_Font->GetTextCarets(settings, line, carets);
+
+		int lastBreakpoint = -1; // Last breakpoint in bytes
+		float lastLineDistance = 0.0f; // Distance from the start of line to the end of the last line.
+		int lineBegin = 0;
+		for(auto& car : core::SliceRange(carets, 0, -2)) {
+			if(line[car.offset] == ' ') { // Possible break point. (Access as byte is possible since <space> is a ascii character)
+				lastBreakpoint = car.offset;
+			} else if(car.distance - lastLineDistance > textBoxWidth && lastBreakpoint != -1) {
+				// If the line overflows and a breakpoint is availble.
+				// Break the line at the lastBreakpoint.
+				AddBrokenLine(line.SubString(lineBegin, lastBreakpoint - lineBegin), car.distance - lastLineDistance);
+				lastLineDistance = car.distance;
+				lineBegin = lastBreakpoint + 1; // Add 1 for the 1 Byte size of <space>
+				lastBreakpoint = -1;
+			}
+		}
+
+		if(lineBegin != line.Size())
+			AddBrokenLine(line.SubString(lineBegin, line.Size() - lineBegin), carets.Back().distance - lastLineDistance);
+	};
+
+	m_Text.AsView().BasicSplit("\n", -1, false, [&](core::StringView line) {
 		auto lineWidth = font->GetTextWidth(settings, line);
-		if(!wordWrap || lineWidth <= width) {
+		if(!wordWrap || lineWidth <= textBoxWidth)
 			AddBrokenLine(line, lineWidth);
-		} else {
-			auto prevBreakPoint = line.CodePoints().End();
-			carets.Clear();
-			m_Font->GetTextCarets(settings, line, carets);
-			float offset = 0.0f;
-			auto lineFirst = line.CodePoints().First();
-			int id = 0;
-			for(auto jt = line.CodePoints().First(); jt != line.CodePoints().End(); ++jt) {
-				++id;
-				if(*jt == ' ') {
-					prevBreakPoint = jt;
-				} else if(carets[id] - offset > width && prevBreakPoint != line.CodePoints().End()) {
-					auto lineBegin = lineFirst.Pointer();
-					auto lineEnd = prevBreakPoint.Pointer();
-					AddBrokenLine(core::StringView(lineBegin, lineEnd-lineBegin), carets[id] - offset);
-					offset = carets[id];
-					lineFirst = prevBreakPoint + 1;
-					prevBreakPoint = line.CodePoints().End();
-				}
-			}
-			if(lineFirst != line.CodePoints().End()) {
-				auto lineBegin = lineFirst.Pointer();
-				auto lineEnd = line.Bytes().End();
-				AddBrokenLine(core::StringView(lineBegin, lineEnd-lineBegin), carets[id] - offset);
-			}
-		}
+		else
+			AddWordWrapedLine(line);
+	});
 
-		float lineHeight = settings.lineDistance*settings.scale*font->GetFontHeight();
-		textDim.height = lineHeight * m_BrokenText.Size();
-	};
-
-	auto textFirst = m_BrokenText.IsEmpty() ? m_Text.CodePoints().First() : m_BrokenText[rebreakText].line.CodePoints().First();
-	auto first = m_Text.CodePoints().First();
-	auto end = first;
-	core::String line;
-	for(auto it = textFirst; it != m_Text.CodePoints().End() && keepBreaking;) {
-		if(*it == '\n') {
-			AddLine(core::StringView(first.Pointer(), end.Pointer()-first.Pointer()));
-			++it;
-			end = first = it;
-		} else {
-			++it;
-			end = it;
-		}
-	}
-
-	if(keepBreaking)
-		AddLine(core::StringView(first.Pointer(), end.Pointer()-first.Pointer()));
-
-	if(keepBreaking)
-		m_BrokenText.Resize(lineId);
+	float lineHeight = settings.lineDistance*settings.scale*font->GetFontHeight();
+	m_TextDim.height = lineHeight * m_BrokenText.Size();
+	m_TextDim.width = maxWidth;
 }
 
 void TextContainer::Render(
@@ -157,7 +123,6 @@ void TextContainer::Render(
 		cursor.y = textBox.bottom - totalHeight;
 
 	for(auto line : m_BrokenText) {
-		auto lineRange = line.line;
 		auto lineWidth = line.width;
 		if(TestFlag(align, EAlign::HLeft))
 			cursor.x = textBox.left;
@@ -167,7 +132,7 @@ void TextContainer::Render(
 			cursor.x = textBox.right - lineWidth;
 
 		if(!clipBox || cursor.y + lineHeight >= clipBox->top)
-			r->DrawText(m_Font, m_FontSettings, lineRange, cursor, clipBox);
+			r->DrawText(m_Font, m_FontSettings, line.text, cursor, clipBox);
 		cursor.y += lineHeight;
 		if(clipBox && cursor.y > clipBox->bottom)
 			break;
@@ -194,16 +159,19 @@ int TextContainer::GetLineCount() const
 
 core::StringView TextContainer::GetLine(int i) const
 {
-	return m_BrokenText[i].line;
+	lxAssert(!m_Update);
+	return m_BrokenText[i].text;
 }
 
 float TextContainer::GetLineWidth(int i) const
 {
+	lxAssert(!m_Update);
 	return m_BrokenText[i].width;
 }
 
 math::Dimension2F TextContainer::GetDimension() const
 {
+	lxAssert(!m_Update);
 	return m_TextDim;
 }
 
