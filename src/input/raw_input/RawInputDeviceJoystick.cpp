@@ -339,6 +339,8 @@ core::Array<RawJoystickDevice::AxisCaps> RawJoystickDevice::GetAxesCaps(
 		ac.usagePage = c.UsagePage;
 		ac.isAbsolute = c.IsAbsolute;
 
+		ac.logicalMin = c.LogicalMin;
+		ac.logicalMax = c.LogicalMax;
 		if(c.LogicalMax < c.LogicalMin) {
 			ac.logicalMin = c.LogicalMin > 0 ? c.LogicalMin : 0;
 			ac.logicalMax = (1 << c.BitSize);
