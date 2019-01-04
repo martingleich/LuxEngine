@@ -1,4 +1,4 @@
-#include "InputDeviceJoystick.h"
+#include "input/InputDeviceJoystick.h"
 #include "input/InputSystem.h"
 #include "core/StringConverter.h"
 
@@ -8,14 +8,15 @@ namespace input
 {
 
 JoystickDevice::JoystickDevice(const DeviceCreationDesc* desc, InputSystem* system) :
-	InputDeviceNull(desc->GetName(), system)
+	m_Name(desc->GetName()),
+	m_System(system)
 {
-	m_Buttons.Resize(desc->GetElementCount(EEventType::Button));
-	m_Axes.Resize(desc->GetElementCount(EEventType::Axis));
+	m_Buttons.Resize(desc->GetElementCount(EDeviceEventType::Button));
+	m_Axes.Resize(desc->GetElementCount(EDeviceEventType::Axis));
 
 	for(int i = 0; i < m_Buttons.Size(); ++i) {
 		auto& button = m_Buttons[i];
-		auto elemDesc = desc->GetElementDesc(EEventType::Button, i);
+		auto elemDesc = desc->GetElementDesc(EDeviceEventType::Button, i);
 		button.name = elemDesc.name;
 		button.type = elemDesc.type;
 
@@ -25,7 +26,7 @@ JoystickDevice::JoystickDevice(const DeviceCreationDesc* desc, InputSystem* syst
 
 	for(int i = 0; i < m_Axes.Size(); ++i) {
 		auto& axis = m_Axes[i];
-		auto elemDesc = desc->GetElementDesc(EEventType::Axis, i);
+		auto elemDesc = desc->GetElementDesc(EDeviceEventType::Axis, i);
 		axis.name = elemDesc.name;
 		axis.type = elemDesc.type;
 
@@ -33,11 +34,6 @@ JoystickDevice::JoystickDevice(const DeviceCreationDesc* desc, InputSystem* syst
 			axis.name = "Axis-" + core::StringConverter::ToString(i);
 	}
 
-	Reset();
-}
-
-void JoystickDevice::Reset()
-{
 	for(auto it = m_Buttons.First(); it != m_Buttons.End(); ++it)
 		it->state = false;
 
@@ -45,79 +41,84 @@ void JoystickDevice::Reset()
 		it->state = 0;
 }
 
-void JoystickDevice::DisconnectReporting(InputSystem* system)
+void JoystickDevice::Reset()
 {
-	Event event;
-	event.device = this;
-	event.source = EEventSource::Joystick;
-	event.internal_abs_only = false;
-	event.internal_rel_only = false;
-
-	event.type = EEventType::Button;
-	event.button.pressedDown = false;
-	event.button.state = false;
+	ButtonEvent buttonEvent;
+	buttonEvent.device = this;
 	for(int i = 0; i < m_Buttons.Size(); ++i) {
-		if(m_Buttons[i].state && !TestFlag(m_Buttons[i].type, EElementType::Rel)) {
-			event.button.code = static_cast<EKeyCode>(i);
-			system->SendUserEvent(event);
+		if(m_Buttons[i].state && !TestFlag(m_Buttons[i].type, EDeviceElementType::Rel)) {
+			buttonEvent.code = static_cast<EKeyCode>(i);
+			m_System->SendUserEvent(buttonEvent);
+			m_Buttons[i].state = false;
 		}
 	}
 
-	event.type = EEventType::Axis;
-	event.axis.abs = 0;
+	AxisEvent axisEvent;
+	axisEvent.device = this;
+	axisEvent.abs = 0;
 	for(int i = 0; i < m_Axes.Size(); ++i) {
-		if(m_Axes[i].state && !TestFlag(m_Axes[i].type, EElementType::Rel)) {
-			event.axis.code = static_cast<EAxisCode>(i);
-			event.axis.rel = -m_Axes[i].state;
-			system->SendUserEvent(event);
+		if(m_Axes[i].state && !TestFlag(m_Axes[i].type, EDeviceElementType::Rel)) {
+			axisEvent.code = static_cast<EAxisCode>(i);
+			axisEvent.rel = -m_Axes[i].state;
+			m_System->SendUserEvent(buttonEvent);
+			m_Buttons[i].state = false;
 		}
 	}
 }
 
-EEventSource JoystickDevice::GetType() const
+void JoystickDevice::Disconnect(bool reset)
 {
-	return EEventSource::Joystick;
+	if(reset)
+		Reset();
 }
 
-const core::Button* JoystickDevice::GetButton(int buttonCode) const
+void JoystickDevice::Connect()
 {
-	return &m_Buttons.At(buttonCode);
+	m_IsConnected = true;
 }
 
-const core::Axis* JoystickDevice::GetAxis(int axisCode) const
+bool JoystickDevice::IsConnected() const 
 {
-	return &m_Axes.At(axisCode);
+	return m_IsConnected;
 }
 
-const core::Area* JoystickDevice::GetArea(int areaCode) const
+EDeviceType JoystickDevice::GetType() const
+{
+	return EDeviceType::Joystick;
+}
+
+bool JoystickDevice::GetButton(int buttonCode) const
+{
+	return m_Buttons.At(buttonCode).state;
+}
+
+float JoystickDevice::GetAxis(int axisCode) const
+{
+	return m_Axes.At(axisCode).state;
+}
+
+math::Vector2F JoystickDevice::GetArea(int areaCode) const
 {
 	throw core::ArgumentOutOfRangeException("areaCode", 0, 0, areaCode);
 }
 
 bool JoystickDevice::Update(Event& event)
 {
-	if(event.type == EEventType::Button) {
-		if((int)event.button.code >= m_Buttons.Size())
-			throw core::ArgumentOutOfRangeException("event.button.code", 0, m_Buttons.Size(), (int)event.button.code);
-
-		if(m_Buttons[event.button.code].state != event.button.state) {
-			m_Buttons[event.button.code].state = event.button.state;
+	if(auto button = event.TryAs<ButtonEvent>()) {
+		if(m_Buttons[button->code].state != button->pressedDown) {
+			m_Buttons[button->code].state = button->pressedDown;
 			return true;
 		}
 		return false;
-	}
-
-	if(event.type == EEventType::Axis) {
-		if((int)event.axis.code >= m_Axes.Size())
-			throw core::ArgumentOutOfRangeException("event.axis.code", 0, m_Axes.Size(), (int)event.button.code);
-
+	} 
+	if(auto axis = event.TryAs<AxisEvent>()) {
 		if(event.internal_abs_only)
 			event.axis.rel = m_Axes[event.axis.code].state - event.axis.abs;
 		else if(event.internal_rel_only)
 			event.axis.abs = m_Axes[event.axis.code].state + event.axis.rel;
 
-		if(m_Axes[event.axis.code].state != event.axis.abs) {
-			m_Axes[event.axis.code].state = event.axis.abs;
+		if(m_Axes[axis->code].state != axis->abs) {
+			m_Axes[axis->code].state = axis->abs;
 			return true;
 		}
 
@@ -127,36 +128,36 @@ bool JoystickDevice::Update(Event& event)
 	return false;
 }
 
-const core::String& JoystickDevice::GetElementName(EEventType type, int code) const
+const core::String& JoystickDevice::GetElementName(EDeviceEventType type, int code) const
 {
 	static core::String unknown = "(unknown)";
-	if(type == EEventType::Button && code < m_Buttons.Size())
+	if(type == EDeviceEventType::Button && code < m_Buttons.Size())
 		return m_Buttons[code].name;
 
-	if(type == EEventType::Axis && code < m_Axes.Size())
+	if(type == EDeviceEventType::Axis && code < m_Axes.Size())
 		return m_Axes[code].name;
 
 	return unknown;
 }
 
-EElementType JoystickDevice::GetElementType(EEventType type, int id) const
+EDeviceElementType JoystickDevice::GetElementType(EDeviceEventType type, int id) const
 {
-	if(type == EEventType::Button) {
+	if(type == EDeviceEventType::Button) {
 		if(id < m_Buttons.Size())
 			return m_Buttons[id].type;
-	} else if(type == EEventType::Axis) {
+	} else if(type == EDeviceEventType::Axis) {
 		if(id < m_Axes.Size())
 			return m_Axes[id].type;
 	}
 
-	return EElementType::Other;
+	return EDeviceElementType::Other;
 }
 
-int JoystickDevice::GetElementCount(EEventType type) const
+int JoystickDevice::GetElementCount(EDeviceEventType type) const
 {
-	if(type == EEventType::Button)
+	if(type == EDeviceEventType::Button)
 		return m_Buttons.Size();
-	else if(type == EEventType::Axis)
+	else if(type == EDeviceEventType::Axis)
 		return m_Axes.Size();
 
 	return 0;

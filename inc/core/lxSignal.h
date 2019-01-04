@@ -366,7 +366,7 @@ public:
 	}
 
 	template <typename... Args2>
-	void Broadcast(Args2... args) const
+	void Broadcast(Args2&&... args) const
 	{
 		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End();) {
 			if(it->GetFunc()->IsDestroyed()) {
@@ -374,7 +374,7 @@ public:
 				continue;
 			}
 
-			it->Call(args...);
+			it->Call(std::forward<Args2>(args)...);
 			++it;
 		}
 	}

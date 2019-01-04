@@ -14,24 +14,24 @@ class RawKeyboardDevice : public RawInputDevice
 {
 public:
 	RawKeyboardDevice(InputSystem* system, HANDLE rawHandle, HKL keyboardLayout);
-	void HandleInput(RAWINPUT* input);
-	EEventSource GetType() const;
-	int GetElementCount(EEventType type) const;
-	ElemDesc GetElementDesc(EEventType type, int code) const;
+	void HandleInput(RAWINPUT* input) override;
 
-	void SetKeyboardLayout(HKL hkl);
+	StrongRef<InputDeviceDesc> GetDescription() override { return m_Desc; }
+	void SetKeyboardLayout(HKL hkl) { m_KeyboardLayout = hkl; }
 
 private:
-	EKeyCode VKeyCodeToKeyCode(u16 code);
 	void GetKeyCharacter(RAWKEYBOARD& input, wchar_t* character, u32 maxSize);
 	void TranslateCharacter(wchar_t c1, wchar_t c2, wchar_t* out, u32 maxSize);
 
 	static const int MAX_KEY_COUNT = 256; //!< There are only 256 virtual keys.
+
 private:
 	BYTE m_Win32KeyStates[MAX_KEY_COUNT];
 	wchar_t m_DeadKey;
 
 	HKL m_KeyboardLayout;
+
+	StrongRef<RawInputDeviceDescription> m_Desc;
 };
 
 }

@@ -132,17 +132,16 @@ StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle, int devi
 	if(!rawHandle) {
 		// Seems to happen for some inputs, for example Mouse-Scrolling via Touchpad.
 		// We look if there is a default device of the given type.
-		EEventSource deviceType;
+		EDeviceType deviceType;
 		if(deviceHint == RIM_TYPEKEYBOARD)
-			deviceType = EEventSource::Keyboard;
+			deviceType = EDeviceType::Keyboard;
 		else if(deviceHint == RIM_TYPEMOUSE)
-			deviceType = EEventSource::Mouse;
+			deviceType = EDeviceType::Mouse;
 		else
 			return nullptr; // It's quite possible for many HID's to be active at the same time, so don't take risk
 
-
 		for(auto& d : m_DeviceMap.Values()) {
-			if(d->GetType() == deviceType) {
+			if(d->GetDescription()->GetType() == deviceType) {
 				out = d;
 				break;
 			}
@@ -197,8 +196,12 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 				if(wParam == GIDC_REMOVAL) {
 					InputDevice* userDevice = device->GetDevice();
 
-					if(userDevice)
-						userDevice->Disconnect();
+					if(userDevice) {
+						/*
+						TODO: Handle disconnect;
+						*/
+						(void)0;
+					}
 
 					DestroyDevice(device);
 				}
@@ -213,7 +216,7 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 	case WM_INPUTLANGCHANGE:
 		m_KeyboardLayout = reinterpret_cast<HKL>(lParam);
 		for(auto& device : m_DeviceMap.Values()) {
-			if(device->GetType() == EEventSource::Keyboard) {
+			if(device->GetDescription()->GetType() == EDeviceType::Keyboard) {
 				auto keyboard = device.AsStrong<RawKeyboardDevice>();
 				if(keyboard)
 					keyboard->SetKeyboardLayout(m_KeyboardLayout);
@@ -234,14 +237,14 @@ bool RawInputReceiver::HandleMessage(UINT msg,
 	return ret;
 }
 
-int RawInputReceiver::DiscoverDevices(EEventSource deviceType)
+int RawInputReceiver::DiscoverDevices(EDeviceType deviceType)
 {
 	DWORD win32DeviceType;
-	if(deviceType == EEventSource::Keyboard)
+	if(deviceType == EDeviceType::Keyboard)
 		win32DeviceType = RIM_TYPEKEYBOARD;
-	else if(deviceType == EEventSource::Mouse)
+	else if(deviceType == EDeviceType::Mouse)
 		win32DeviceType = RIM_TYPEMOUSE;
-	else if(deviceType == EEventSource::Joystick)
+	else if(deviceType == EDeviceType::Joystick)
 		win32DeviceType = RIM_TYPEHID;
 	else
 		return 0;
@@ -261,9 +264,10 @@ int RawInputReceiver::DiscoverDevices(EEventSource deviceType)
 		RAWINPUTDEVICELIST& device_info = device_list[i];
 		if(device_info.dwType == win32DeviceType) {
 			try {
+				// Force creation of device.
 				StrongRef<RawInputDevice> device = GetDevice(device_info.hDevice);
-				StrongRef<InputDevice> real_device = m_InputSystem->CreateDevice(device);
-				real_device->Disconnect();
+				StrongRef<InputDevice> real_device = m_InputSystem->FindDevice(device->GetDescription());
+				LUX_UNUSED(real_device);
 				++count;
 			} catch(core::RuntimeException& e) {
 				log::Debug("Detected unsupported device({}): {}", device_info.hDevice, e.What().AsView());

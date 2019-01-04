@@ -133,7 +133,6 @@ namespace input
 #include "scene/Curve.h"
 
 #include "core/lxSignal.h"
-#include "core/lxActions.h"
 
 #include "video/mesh/Geometry.h"
 #include "video/mesh/VideoMesh.h"

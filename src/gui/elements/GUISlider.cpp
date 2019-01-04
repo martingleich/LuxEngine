@@ -135,27 +135,27 @@ bool Slider::OnKeyboardEvent(const gui::KeyboardEvent& e)
 		auto step = e.shift ? m_BigStep : m_StepSize;
 		step = IsFlipped() ? -step : step;
 		if(IsHorizontal()) {
-			if(e.key == input::EKeyCode::KEY_LEFT)
+			if(e.key == input::KEY_LEFT)
 				SetThumbPos(GetThumbPos() - step);
-			if(e.key == input::EKeyCode::KEY_RIGHT)
+			if(e.key == input::KEY_RIGHT)
 				SetThumbPos(GetThumbPos() + step);
 		} else {
-			if(e.key == input::EKeyCode::KEY_DOWN)
+			if(e.key == input::KEY_DOWN)
 				SetThumbPos(GetThumbPos() - step);
-			if(e.key == input::EKeyCode::KEY_UP)
+			if(e.key == input::KEY_UP)
 				SetThumbPos(GetThumbPos() + step);
 		}
 		switch(e.key) {
-		case input::EKeyCode::KEY_KEY_0: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*0)/100); break;
-		case input::EKeyCode::KEY_KEY_1: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*10)/100); break;
-		case input::EKeyCode::KEY_KEY_2: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*20)/100); break;
-		case input::EKeyCode::KEY_KEY_3: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*30)/100); break;
-		case input::EKeyCode::KEY_KEY_4: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*40)/100); break;
-		case input::EKeyCode::KEY_KEY_5: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*50)/100); break;
-		case input::EKeyCode::KEY_KEY_6: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*60)/100); break;
-		case input::EKeyCode::KEY_KEY_7: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*70)/100); break;
-		case input::EKeyCode::KEY_KEY_8: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*80)/100); break;
-		case input::EKeyCode::KEY_KEY_9: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*90)/100); break;
+		case input::KEY_KEY_0: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*0)/100); break;
+		case input::KEY_KEY_1: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*10)/100); break;
+		case input::KEY_KEY_2: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*20)/100); break;
+		case input::KEY_KEY_3: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*30)/100); break;
+		case input::KEY_KEY_4: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*40)/100); break;
+		case input::KEY_KEY_5: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*50)/100); break;
+		case input::KEY_KEY_6: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*60)/100); break;
+		case input::KEY_KEY_7: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*70)/100); break;
+		case input::KEY_KEY_8: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*80)/100); break;
+		case input::KEY_KEY_9: SetThumbPos(m_MinValue + ((m_MaxValue-m_MinValue)*90)/100); break;
 		default: (void)0;
 		}
 	}

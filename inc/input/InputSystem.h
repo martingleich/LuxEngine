@@ -1,22 +1,24 @@
 #ifndef INCLUDED_LUX_INPUT_SYSTEM_H
 #define INCLUDED_LUX_INPUT_SYSTEM_H
 #include "core/ReferenceCounted.h"
-#include "input/InputEvent.h"
 #include "core/lxSignal.h"
-#include "InputDevice.h"
+#include "input/InputEvent.h"
+#include "input/InputDevice.h"
+
+#include "core/lxHashMap.h"
+#include "core/lxString.h"
 
 namespace lux
 {
 namespace input
 {
-class DeviceCreationDesc;
 
 //! The input system of the lux engine.
 class InputSystem : public ReferenceCounted
 {
 public:
 	//! Initialize the global referable factory
-	LUX_API static void Initialize(InputSystem* inputSystem=nullptr);
+	LUX_API static void Initialize();
 
 	//! Access the global referable factory
 	LUX_API static InputSystem* Instance();
@@ -24,31 +26,32 @@ public:
 	//! Destroys the global referable factory
 	LUX_API static void Destroy();
 
+	LUX_API InputSystem();
+	LUX_API ~InputSystem();
+
 	//! Get the event signal
 	/**
 	All input events created by the system are broadcast to this event
 	*/
-	virtual core::Signal<const Event&>& GetEventSignal() = 0;
+	LUX_API core::Signal<const Event&>& GetEventSignal();
 
 	//! Set the current foreground state of the active window
 	/**
 	This method is called automaically by the engine.
 	*/
-	virtual void SetForegroundState(bool isForeground) = 0;
+	LUX_API void SetForegroundState(bool isForeground);
 
 	//! Get the current foreground state of the input system.
-	virtual bool IsForeground() const = 0;
+	LUX_API bool IsForeground() const;
 
-	//! Set the default foreground handling for devices.
+	//! Set the foreground handling for devices.
 	/**
-	Newly created devices will have the default foreground handling.
-	All currenltly created devices which are in default state are changed to the new handling.
 	\param isForeground The new foreground handling state.
 	*/
-	virtual void SetDefaultForegroundHandling(bool isForeground) = 0;
+	LUX_API void SetForegroundHandling(bool isForeground);
 
 	//! Get the current default foreground handling state.
-	virtual bool GetDefaultForegroundHandling() const = 0;
+	LUX_API bool GetForegroundHandling() const;
 
 	//! Sent a input event.
 	/**
@@ -56,23 +59,30 @@ public:
 	This method can be used to emulate inputs.
 	\param [in] [out] The event to send. If there is data missing in the event it will be filled if possible.
 	*/
-	virtual void Update(Event& event) = 0;
+	LUX_API void Update(Event& event);
 
-	//! Send a event directly to the user, without updating the devices.
-	virtual void SendUserEvent(const Event& event) = 0;
-
-	//! Create a new input device.
+	//! Find the device belonging to a device description.
 	/**
 	\param desc The description of the input device
 	\return The new input device.
 	*/
-	virtual StrongRef<InputDevice> CreateDevice(const DeviceCreationDesc* desc) = 0;
+	LUX_API StrongRef<InputDevice> FindDevice(InputDeviceDesc* desc);
 
 	//! Get the primary keyboard
-	virtual StrongRef<InputDevice> GetKeyboard() = 0;
+	LUX_API StrongRef<InputDevice> GetKeyboard();
 
 	//! Get the primary mouse
-	virtual StrongRef<InputDevice> GetMouse() = 0;
+	LUX_API StrongRef<InputDevice> GetMouse();
+
+private:
+	core::HashMap<core::String, StrongRef<InputDevice>> m_GUIDMap;
+	WeakRef<InputDevice> m_KeyboardDevice;
+	WeakRef<InputDevice> m_MouseDevice;
+
+	core::Signal<const input::Event&> m_EventSignal;
+
+	bool m_IsForeground;
+	bool m_ForegroundHandling;
 };
 
 } // namespace input

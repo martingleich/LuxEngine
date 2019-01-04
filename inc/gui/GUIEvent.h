@@ -39,6 +39,7 @@ public:
 			throw core::InvalidCastException();
 		return *ptr;
 	}
+
 };
 
 class MouseEvent : public Event

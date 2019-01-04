@@ -7,253 +7,158 @@ namespace lux
 namespace input
 {
 
-RawKeyboardDevice::RawKeyboardDevice(InputSystem* system, HANDLE rawHandle, HKL keyboardLayout) :
-	RawInputDevice(system),
-	m_DeadKey(0),
-	m_KeyboardLayout(keyboardLayout)
+static int VKeyCodeToKeyCode(const RAWKEYBOARD& keyboard)
 {
-	memset(m_Win32KeyStates, 0, sizeof(m_Win32KeyStates));
-
-	m_Name = "GenericKeyboard";
-	m_GUID = GetDeviceGUID(rawHandle);
-
-	RID_DEVICE_INFO info = GetDeviceInfo(rawHandle);
-	if(info.dwType != RIM_TYPEKEYBOARD)
-		throw core::GenericInvalidArgumentException("rawHandle", "Is not a keyboard");
-}
-
-void RawKeyboardDevice::HandleInput(RAWINPUT* input)
-{
-	Event event;
-	event.type = EEventType::Button;
-	event.source = EEventSource::Keyboard;
-	event.button.code = VKeyCodeToKeyCode(input->data.keyboard.VKey);
-	event.button.state = ((input->data.keyboard.Flags & 1) == 0);
-	event.button.pressedDown = event.button.state;
-	event.internal_abs_only = false;
-	event.internal_rel_only = false;
-
-	if(event.button.code == -1)
-		return;
-
-	bool isControl = false;
-	if(event.button.code == EKeyCode::KEY_SHIFT) {
-		if(input->data.keyboard.MakeCode == 0x2a)
-			event.button.code = EKeyCode::KEY_LSHIFT;
-		else
-			event.button.code = EKeyCode::KEY_RSHIFT;
-		isControl = true;
+	bool right = ((keyboard.Flags & 2) != 0);
+	switch(keyboard.VKey) {
+	case 0x07: return KEY_CANCEL;
+	case 0x08: return KEY_BACK;
+	case 0x09: return KEY_TAB;
+	case 0x0C: return KEY_CLEAR;
+	case 0x0D: return KEY_RETURN;
+	case 0x10: return keyboard.MakeCode == 0x2a ? KEY_LSHIFT : KEY_RSHIFT;
+	case 0x11: return right ? KEY_RCONTROL : KEY_LCONTROL;
+	case 0x12: return right ? KEY_RMENU : KEY_LMENU;
+	case 0x13: return KEY_PAUSE;
+	case 0x14: return KEY_CAPITAL;
+	case 0x15: return KEY_HANGUL;
+	case 0x17: return KEY_JUNJA;
+	case 0x18: return KEY_FINAL;
+	case 0x19: return KEY_HANJA;
+	case 0x1B: return KEY_ESCAPE;
+	case 0x1C: return KEY_CONVERT;
+	case 0x1D: return KEY_NONCONVERT;
+	case 0x1E: return KEY_ACCEPT;
+	case 0x1F: return KEY_MODECHANGE;
+	case 0x20: return KEY_SPACE;
+	case 0x21: return KEY_PRIOR;
+	case 0x22: return KEY_NEXT;
+	case 0x23: return KEY_END;
+	case 0x24: return KEY_HOME;
+	case 0x25: return KEY_LEFT;
+	case 0x26: return KEY_UP;
+	case 0x27: return KEY_RIGHT;
+	case 0x28: return KEY_DOWN;
+	case 0x29: return KEY_SELECT;
+	case 0x2A: return KEY_PRINT;
+	case 0x2B: return KEY_EXECUT;
+	case 0x2C: return KEY_SNAPSHOT;
+	case 0x2D: return KEY_INSERT;
+	case 0x2E: return KEY_DELETE;
+	case 0x2F: return KEY_HELP;
+	case 0x30: return KEY_KEY_0;
+	case 0x31: return KEY_KEY_1;
+	case 0x32: return KEY_KEY_2;
+	case 0x33: return KEY_KEY_3;
+	case 0x34: return KEY_KEY_4;
+	case 0x35: return KEY_KEY_5;
+	case 0x36: return KEY_KEY_6;
+	case 0x37: return KEY_KEY_7;
+	case 0x38: return KEY_KEY_8;
+	case 0x39: return KEY_KEY_9;
+	case 0x41: return KEY_KEY_A;
+	case 0x42: return KEY_KEY_B;
+	case 0x43: return KEY_KEY_C;
+	case 0x44: return KEY_KEY_D;
+	case 0x45: return KEY_KEY_E;
+	case 0x46: return KEY_KEY_F;
+	case 0x47: return KEY_KEY_G;
+	case 0x48: return KEY_KEY_H;
+	case 0x49: return KEY_KEY_I;
+	case 0x4A: return KEY_KEY_J;
+	case 0x4B: return KEY_KEY_K;
+	case 0x4C: return KEY_KEY_L;
+	case 0x4D: return KEY_KEY_M;
+	case 0x4E: return KEY_KEY_N;
+	case 0x4F: return KEY_KEY_O;
+	case 0x50: return KEY_KEY_P;
+	case 0x51: return KEY_KEY_Q;
+	case 0x52: return KEY_KEY_R;
+	case 0x53: return KEY_KEY_S;
+	case 0x54: return KEY_KEY_T;
+	case 0x55: return KEY_KEY_U;
+	case 0x56: return KEY_KEY_V;
+	case 0x57: return KEY_KEY_W;
+	case 0x58: return KEY_KEY_X;
+	case 0x59: return KEY_KEY_Y;
+	case 0x5A: return KEY_KEY_Z;
+	case 0x5B: return KEY_LWIN;
+	case 0x5C: return KEY_RWIN;
+	case 0x5D: return KEY_APPS;
+	case 0x5F: return KEY_SLEEP;
+	case 0x60: return KEY_NUMPAD0;
+	case 0x61: return KEY_NUMPAD1;
+	case 0x62: return KEY_NUMPAD2;
+	case 0x63: return KEY_NUMPAD3;
+	case 0x64: return KEY_NUMPAD4;
+	case 0x65: return KEY_NUMPAD5;
+	case 0x66: return KEY_NUMPAD6;
+	case 0x67: return KEY_NUMPAD7;
+	case 0x68: return KEY_NUMPAD8;
+	case 0x69: return KEY_NUMPAD9;
+	case 0x6A: return KEY_MULTIPLY;
+	case 0x6B: return KEY_ADD;
+	case 0x6C: return KEY_SEPARATOR;
+	case 0x6D: return KEY_SUBTRACT;
+	case 0x6E: return KEY_DECIMAL;
+	case 0x6F: return KEY_DIVIDE;
+	case 0x70: return KEY_F1;
+	case 0x71: return KEY_F2;
+	case 0x72: return KEY_F3;
+	case 0x73: return KEY_F4;
+	case 0x74: return KEY_F5;
+	case 0x75: return KEY_F6;
+	case 0x76: return KEY_F7;
+	case 0x77: return KEY_F8;
+	case 0x78: return KEY_F9;
+	case 0x79: return KEY_F10;
+	case 0x7A: return KEY_F11;
+	case 0x7B: return KEY_F12;
+	case 0x7C: return KEY_F13;
+	case 0x7D: return KEY_F14;
+	case 0x7E: return KEY_F15;
+	case 0x7F: return KEY_F16;
+	case 0x80: return KEY_F17;
+	case 0x81: return KEY_F18;
+	case 0x82: return KEY_F19;
+	case 0x83: return KEY_F20;
+	case 0x84: return KEY_F21;
+	case 0x85: return KEY_F22;
+	case 0x86: return KEY_F23;
+	case 0x87: return KEY_F24;
+	case 0x90: return KEY_NUMLOCK;
+	case 0x91: return KEY_SCROLL;
+	case 0xA0: return KEY_LSHIFT;
+	case 0xA1: return KEY_RSHIFT;
+	case 0xA2: return KEY_LCONTROL;
+	case 0xA3: return KEY_RCONTROL;
+	case 0xA4: return KEY_LMENU;
+	case 0xA5: return KEY_RMENU;
+	case 0xBA: return KEY_OEM_1;
+	case 0xBB: return KEY_PLUS;
+	case 0xBC: return KEY_COMMA;
+	case 0xBD: return KEY_MINUS;
+	case 0xBE: return KEY_PERIOD;
+	case 0xBF: return KEY_OEM_2;
+	case 0xC0: return KEY_OEM_3;
+	case 0xDB: return KEY_OEM_4;
+	case 0xDC: return KEY_OEM_5;
+	case 0xDD: return KEY_OEM_6;
+	case 0xDE: return KEY_OEM_7;
+	case 0xDF: return KEY_OEM_8;
+	case 0xE1: return KEY_OEM_AX;
+	case 0xE2: return KEY_OEM_102;
+	case 0xF6: return KEY_ATTN;
+	case 0xF7: return KEY_CRSEL;
+	case 0xF8: return KEY_EXSEL;
+	case 0xF9: return KEY_EREOF;
+	case 0xFA: return KEY_PLAY;
+	case 0xFB: return KEY_ZOOM;
+	case 0xFD: return KEY_PA1;
+	case 0xFE: return KEY_OEM_CLEAR;
 	}
 
-	if(event.button.code == EKeyCode::KEY_SHIFT ||
-		event.button.code == EKeyCode::KEY_CONTROL ||
-		event.button.code == EKeyCode::KEY_MENU) {
-		bool right = ((input->data.keyboard.Flags & 2) != 0);
-		if(event.button.code == EKeyCode::KEY_SHIFT)
-			event.button.code = right ? EKeyCode::KEY_RSHIFT : EKeyCode::KEY_LSHIFT;
-		if(event.button.code == EKeyCode::KEY_CONTROL)
-			event.button.code = right ? EKeyCode::KEY_RCONTROL : EKeyCode::KEY_LCONTROL;
-		if(event.button.code == EKeyCode::KEY_MENU)
-			event.button.code = right ? EKeyCode::KEY_RMENU : EKeyCode::KEY_LMENU;
-		isControl = true;
-	}
-
-	if(!isControl) {
-		wchar_t BUFFER[10];
-		GetKeyCharacter(input->data.keyboard, BUFFER, 10);
-		if(BUFFER[0] != 0) {
-			const char* cur = (const char*)BUFFER;
-			event.keyInput.character[0] = core::AdvanceCursorUTF16(cur);
-			event.keyInput.character[1] = core::AdvanceCursorUTF16(cur);
-			event.keyInput.character[2] = 0;
-		} else {
-			event.keyInput.character[0] = 0;
-		}
-	} else {
-		event.keyInput.character[0] = 0;
-	}
-
-	SendInputEvent(event);
-}
-
-EEventSource RawKeyboardDevice::GetType() const
-{
-	return EEventSource::Keyboard;
-}
-
-int RawKeyboardDevice::GetElementCount(EEventType type) const
-{
-	if(type == EEventType::Button)
-		return MAX_KEY_COUNT;
-	else
-		return 0;
-}
-
-RawInputDevice::ElemDesc RawKeyboardDevice::GetElementDesc(EEventType type, int code) const
-{
-	LUX_UNUSED(code);
-	LUX_UNUSED(type);
-	static const core::String name = "(unknown)";
-
-	return ElemDesc(name, 0, 0, EElementType::Other);
-}
-
-void RawKeyboardDevice::SetKeyboardLayout(HKL hkl)
-{
-	m_KeyboardLayout = hkl;
-}
-
-EKeyCode RawKeyboardDevice::VKeyCodeToKeyCode(u16 code)
-{
-	switch(code) {
-	case 0x07: return EKeyCode::KEY_CANCEL;
-	case 0x08: return EKeyCode::KEY_BACK;
-	case 0x09: return EKeyCode::KEY_TAB;
-	case 0x0C: return EKeyCode::KEY_CLEAR;
-	case 0x0D: return EKeyCode::KEY_RETURN;
-	case 0x10: return EKeyCode::KEY_SHIFT;
-	case 0x11: return EKeyCode::KEY_CONTROL;
-	case 0x12: return EKeyCode::KEY_MENU;
-	case 0x13: return EKeyCode::KEY_PAUSE;
-	case 0x14: return EKeyCode::KEY_CAPITAL;
-	case 0x15: return EKeyCode::KEY_HANGUL;
-	case 0x17: return EKeyCode::KEY_JUNJA;
-	case 0x18: return EKeyCode::KEY_FINAL;
-	case 0x19: return EKeyCode::KEY_HANJA;
-	case 0x1B: return EKeyCode::KEY_ESCAPE;
-	case 0x1C: return EKeyCode::KEY_CONVERT;
-	case 0x1D: return EKeyCode::KEY_NONCONVERT;
-	case 0x1E: return EKeyCode::KEY_ACCEPT;
-	case 0x1F: return EKeyCode::KEY_MODECHANGE;
-	case 0x20: return EKeyCode::KEY_SPACE;
-	case 0x21: return EKeyCode::KEY_PRIOR;
-	case 0x22: return EKeyCode::KEY_NEXT;
-	case 0x23: return EKeyCode::KEY_END;
-	case 0x24: return EKeyCode::KEY_HOME;
-	case 0x25: return EKeyCode::KEY_LEFT;
-	case 0x26: return EKeyCode::KEY_UP;
-	case 0x27: return EKeyCode::KEY_RIGHT;
-	case 0x28: return EKeyCode::KEY_DOWN;
-	case 0x29: return EKeyCode::KEY_SELECT;
-	case 0x2A: return EKeyCode::KEY_PRINT;
-	case 0x2B: return EKeyCode::KEY_EXECUT;
-	case 0x2C: return EKeyCode::KEY_SNAPSHOT;
-	case 0x2D: return EKeyCode::KEY_INSERT;
-	case 0x2E: return EKeyCode::KEY_DELETE;
-	case 0x2F: return EKeyCode::KEY_HELP;
-	case 0x30: return EKeyCode::KEY_KEY_0;
-	case 0x31: return EKeyCode::KEY_KEY_1;
-	case 0x32: return EKeyCode::KEY_KEY_2;
-	case 0x33: return EKeyCode::KEY_KEY_3;
-	case 0x34: return EKeyCode::KEY_KEY_4;
-	case 0x35: return EKeyCode::KEY_KEY_5;
-	case 0x36: return EKeyCode::KEY_KEY_6;
-	case 0x37: return EKeyCode::KEY_KEY_7;
-	case 0x38: return EKeyCode::KEY_KEY_8;
-	case 0x39: return EKeyCode::KEY_KEY_9;
-	case 0x41: return EKeyCode::KEY_KEY_A;
-	case 0x42: return EKeyCode::KEY_KEY_B;
-	case 0x43: return EKeyCode::KEY_KEY_C;
-	case 0x44: return EKeyCode::KEY_KEY_D;
-	case 0x45: return EKeyCode::KEY_KEY_E;
-	case 0x46: return EKeyCode::KEY_KEY_F;
-	case 0x47: return EKeyCode::KEY_KEY_G;
-	case 0x48: return EKeyCode::KEY_KEY_H;
-	case 0x49: return EKeyCode::KEY_KEY_I;
-	case 0x4A: return EKeyCode::KEY_KEY_J;
-	case 0x4B: return EKeyCode::KEY_KEY_K;
-	case 0x4C: return EKeyCode::KEY_KEY_L;
-	case 0x4D: return EKeyCode::KEY_KEY_M;
-	case 0x4E: return EKeyCode::KEY_KEY_N;
-	case 0x4F: return EKeyCode::KEY_KEY_O;
-	case 0x50: return EKeyCode::KEY_KEY_P;
-	case 0x51: return EKeyCode::KEY_KEY_Q;
-	case 0x52: return EKeyCode::KEY_KEY_R;
-	case 0x53: return EKeyCode::KEY_KEY_S;
-	case 0x54: return EKeyCode::KEY_KEY_T;
-	case 0x55: return EKeyCode::KEY_KEY_U;
-	case 0x56: return EKeyCode::KEY_KEY_V;
-	case 0x57: return EKeyCode::KEY_KEY_W;
-	case 0x58: return EKeyCode::KEY_KEY_X;
-	case 0x59: return EKeyCode::KEY_KEY_Y;
-	case 0x5A: return EKeyCode::KEY_KEY_Z;
-	case 0x5B: return EKeyCode::KEY_LWIN;
-	case 0x5C: return EKeyCode::KEY_RWIN;
-	case 0x5D: return EKeyCode::KEY_APPS;
-	case 0x5F: return EKeyCode::KEY_SLEEP;
-	case 0x60: return EKeyCode::KEY_NUMPAD0;
-	case 0x61: return EKeyCode::KEY_NUMPAD1;
-	case 0x62: return EKeyCode::KEY_NUMPAD2;
-	case 0x63: return EKeyCode::KEY_NUMPAD3;
-	case 0x64: return EKeyCode::KEY_NUMPAD4;
-	case 0x65: return EKeyCode::KEY_NUMPAD5;
-	case 0x66: return EKeyCode::KEY_NUMPAD6;
-	case 0x67: return EKeyCode::KEY_NUMPAD7;
-	case 0x68: return EKeyCode::KEY_NUMPAD8;
-	case 0x69: return EKeyCode::KEY_NUMPAD9;
-	case 0x6A: return EKeyCode::KEY_MULTIPLY;
-	case 0x6B: return EKeyCode::KEY_ADD;
-	case 0x6C: return EKeyCode::KEY_SEPARATOR;
-	case 0x6D: return EKeyCode::KEY_SUBTRACT;
-	case 0x6E: return EKeyCode::KEY_DECIMAL;
-	case 0x6F: return EKeyCode::KEY_DIVIDE;
-	case 0x70: return EKeyCode::KEY_F1;
-	case 0x71: return EKeyCode::KEY_F2;
-	case 0x72: return EKeyCode::KEY_F3;
-	case 0x73: return EKeyCode::KEY_F4;
-	case 0x74: return EKeyCode::KEY_F5;
-	case 0x75: return EKeyCode::KEY_F6;
-	case 0x76: return EKeyCode::KEY_F7;
-	case 0x77: return EKeyCode::KEY_F8;
-	case 0x78: return EKeyCode::KEY_F9;
-	case 0x79: return EKeyCode::KEY_F10;
-	case 0x7A: return EKeyCode::KEY_F11;
-	case 0x7B: return EKeyCode::KEY_F12;
-	case 0x7C: return EKeyCode::KEY_F13;
-	case 0x7D: return EKeyCode::KEY_F14;
-	case 0x7E: return EKeyCode::KEY_F15;
-	case 0x7F: return EKeyCode::KEY_F16;
-	case 0x80: return EKeyCode::KEY_F17;
-	case 0x81: return EKeyCode::KEY_F18;
-	case 0x82: return EKeyCode::KEY_F19;
-	case 0x83: return EKeyCode::KEY_F20;
-	case 0x84: return EKeyCode::KEY_F21;
-	case 0x85: return EKeyCode::KEY_F22;
-	case 0x86: return EKeyCode::KEY_F23;
-	case 0x87: return EKeyCode::KEY_F24;
-	case 0x90: return EKeyCode::KEY_NUMLOCK;
-	case 0x91: return EKeyCode::KEY_SCROLL;
-	case 0xA0: return EKeyCode::KEY_LSHIFT;
-	case 0xA1: return EKeyCode::KEY_RSHIFT;
-	case 0xA2: return EKeyCode::KEY_LCONTROL;
-	case 0xA3: return EKeyCode::KEY_RCONTROL;
-	case 0xA4: return EKeyCode::KEY_LMENU;
-	case 0xA5: return EKeyCode::KEY_RMENU;
-	case 0xBA: return EKeyCode::KEY_OEM_1;
-	case 0xBB: return EKeyCode::KEY_PLUS;
-	case 0xBC: return EKeyCode::KEY_COMMA;
-	case 0xBD: return EKeyCode::KEY_MINUS;
-	case 0xBE: return EKeyCode::KEY_PERIOD;
-	case 0xBF: return EKeyCode::KEY_OEM_2;
-	case 0xC0: return EKeyCode::KEY_OEM_3;
-	case 0xDB: return EKeyCode::KEY_OEM_4;
-	case 0xDC: return EKeyCode::KEY_OEM_5;
-	case 0xDD: return EKeyCode::KEY_OEM_6;
-	case 0xDE: return EKeyCode::KEY_OEM_7;
-	case 0xDF: return EKeyCode::KEY_OEM_8;
-	case 0xE1: return EKeyCode::KEY_OEM_AX;
-	case 0xE2: return EKeyCode::KEY_OEM_102;
-	case 0xF6: return EKeyCode::KEY_ATTN;
-	case 0xF7: return EKeyCode::KEY_CRSEL;
-	case 0xF8: return EKeyCode::KEY_EXSEL;
-	case 0xF9: return EKeyCode::KEY_EREOF;
-	case 0xFA: return EKeyCode::KEY_PLAY;
-	case 0xFB: return EKeyCode::KEY_ZOOM;
-	case 0xFD: return EKeyCode::KEY_PA1;
-	case 0xFE: return EKeyCode::KEY_OEM_CLEAR;
-	}
-
-	return EKeyCode::KEY_NONE;
+	return -1;
 }
 
 static u32 KeyToComb(u32 c)
@@ -276,6 +181,59 @@ static u32 CombToKey(u32 c)
 	else if(c == 0x300)
 		return '`';
 	return c;
+}
+
+RawKeyboardDevice::RawKeyboardDevice(InputSystem* system, HANDLE rawHandle, HKL keyboardLayout) :
+	RawInputDevice(system),
+	m_DeadKey(0),
+	m_KeyboardLayout(keyboardLayout)
+{
+	std::memset(m_Win32KeyStates, 0, sizeof(m_Win32KeyStates));
+
+	m_Desc = LUX_NEW(RawInputDeviceDescription);
+	m_Desc->type = EDeviceType::Keyboard;
+	m_Desc->name = "GenericKeyboard";
+	m_Desc->guid = GetDeviceGUID(rawHandle);
+
+	m_Desc->buttonCount = MAX_KEY_COUNT;
+	for(int i = 0; i < m_Desc->buttonCount; ++i) {
+		m_Desc->desc.EmplaceBack(
+			"", CombineFlags(EDeviceElementType::Input, EDeviceElementType::Button));
+	}
+
+	m_Desc->axesCount = 0;
+	m_Desc->areasCount = 0;
+}
+
+void RawKeyboardDevice::HandleInput(RAWINPUT* input)
+{
+	KeyboardButtonEvent event;
+	event.code = VKeyCodeToKeyCode(input->data.keyboard);
+	event.pressedDown = ((input->data.keyboard.Flags & 1) == 0);
+	if(event.code < 0)
+		return;
+
+	bool isControl = 
+		event.code == KEY_LSHIFT || event.code == KEY_RSHIFT ||
+		event.code == KEY_LCONTROL || event.code == KEY_RCONTROL ||
+		event.code == KEY_LMENU || event.code == KEY_RMENU;
+
+	if(!isControl) {
+		wchar_t BUFFER[10];
+		GetKeyCharacter(input->data.keyboard, BUFFER, 10);
+		if(BUFFER[0] != 0) {
+			const char* cur = (const char*)BUFFER;
+			event.character[0] = core::AdvanceCursorUTF16(cur);
+			event.character[1] = core::AdvanceCursorUTF16(cur);
+			event.character[2] = 0;
+		} else {
+			event.character[0] = 0;
+		}
+	} else {
+		event.character[0] = 0;
+	}
+
+	SendInputEvent(event);
 }
 
 void RawKeyboardDevice::GetKeyCharacter(RAWKEYBOARD& input,

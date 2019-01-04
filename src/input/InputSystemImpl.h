@@ -18,7 +18,6 @@ public:
 	core::Signal<const Event&>& GetEventSignal();
 
 	void Update(Event& event);
-	void SendUserEvent(const Event& event);
 
 	StrongRef<InputDevice> CreateDevice(const DeviceCreationDesc* desc);
 
@@ -30,16 +29,6 @@ public:
 
 	StrongRef<InputDevice> GetKeyboard();
 	StrongRef<InputDevice> GetMouse();
-
-private:
-	core::HashMap<core::String, StrongRef<InputDevice>> m_GUIDMap;
-	WeakRef<InputDevice> m_KeyboardDevice;
-	WeakRef<InputDevice> m_MouseDevice;
-
-	core::Signal<const input::Event&> m_EventSignal;
-
-	bool m_IsForeground;
-	bool m_DefaultForegroundHandling;
 };
 
 }

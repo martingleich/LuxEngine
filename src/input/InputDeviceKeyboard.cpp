@@ -12,7 +12,7 @@ KeyboardDevice::KeyboardDevice(const DeviceCreationDesc* desc, InputSystem* syst
 	m_Buttons.Resize(143);
 
 	for(auto it = m_Buttons.First(); it != m_Buttons.End(); ++it)
-		it->type = CombineFlags(EElementType::Input, EElementType::Button, EElementType::PushButton);
+		it->type = CombineFlags(EDeviceElementType::Input, EDeviceElementType::Button, EDeviceElementType::PushButton);
 
 	Reset();
 }
@@ -27,10 +27,10 @@ void KeyboardDevice::DisconnectReporting(InputSystem* system)
 {
 	Event event;
 	event.device = this;
-	event.source = EEventSource::Keyboard;
+	event.source = EDeviceType::Keyboard;
 	event.internal_abs_only = false;
 	event.internal_rel_only = false;
-	event.type = EEventType::Button;
+	event.type = EDeviceEventType::Button;
 	event.button.pressedDown = false;
 	event.button.state = false;
 	for(int i = 0; i < m_Buttons.Size(); ++i) {
@@ -41,9 +41,9 @@ void KeyboardDevice::DisconnectReporting(InputSystem* system)
 	}
 }
 
-EEventSource KeyboardDevice::GetType() const
+EDeviceType KeyboardDevice::GetType() const
 {
-	return EEventSource::Keyboard;
+	return EDeviceType::Keyboard;
 }
 
 const core::Button* KeyboardDevice::GetButton(int buttonCode) const
@@ -63,7 +63,7 @@ const core::Area* KeyboardDevice::GetArea(int areaCode) const
 
 bool KeyboardDevice::Update(Event& event)
 {
-	if(event.type != EEventType::Button || (int)event.button.code >= m_Buttons.Size())
+	if(event.type != EDeviceEventType::Button || (int)event.button.code >= m_Buttons.Size())
 		throw core::ArgumentOutOfRangeException("event.button.code", 0,m_Buttons.Size(), (int)event.button.code);
 
 	if(m_Buttons[event.button.code].state != event.button.state) {
@@ -74,7 +74,7 @@ bool KeyboardDevice::Update(Event& event)
 	return false;
 }
 
-const core::String& KeyboardDevice::GetElementName(EEventType type, int code) const
+const core::String& KeyboardDevice::GetElementName(EDeviceEventType type, int code) const
 {
 	LUX_UNUSED(type);
 	LUX_UNUSED(code);
@@ -83,19 +83,19 @@ const core::String& KeyboardDevice::GetElementName(EEventType type, int code) co
 	return unknown;
 }
 
-EElementType KeyboardDevice::GetElementType(EEventType type, int id) const
+EDeviceElementType KeyboardDevice::GetElementType(EDeviceEventType type, int id) const
 {
-	if(type == EEventType::Button) {
+	if(type == EDeviceEventType::Button) {
 		if(id < m_Buttons.Size())
 			return m_Buttons[id].type;
 	}
 
-	return EElementType::Other;
+	return EDeviceElementType::Other;
 }
 
-int KeyboardDevice::GetElementCount(EEventType type) const
+int KeyboardDevice::GetElementCount(EDeviceEventType type) const
 {
-	if(type == EEventType::Button)
+	if(type == EDeviceEventType::Button)
 		return m_Buttons.Size();
 	return 0;
 }

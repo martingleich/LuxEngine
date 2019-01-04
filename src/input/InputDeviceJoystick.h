@@ -8,47 +8,41 @@ namespace lux
 namespace input
 {
 
-class JoystickDevice : public InputDeviceNull
+class JoystickDevice : public InputDevice
 {
 public:
 	JoystickDevice(const DeviceCreationDesc* desc, InputSystem* system);
+
+	EDeviceType GetType() const override;
+
+	bool GetButton(int buttonCode) const override;
+	float GetAxis(int axisCode) const override;
+	math::Vector2F GetArea(int areaCode) const override;
+
+	const core::String& GetName() const { return m_Name; }
+
+	void Connect() override;
+	void Disconnect(bool reset) override;
+	bool IsConnected() const override;
+
+	bool Update(Event& event) override;
+
+	const core::String& GetElementName(EDeviceEventType type, int code) const override;
+
+	EDeviceElementType GetElementType(EDeviceEventType type, int id) const override;
+	int GetElementCount(EDeviceEventType type) const override;
+
+protected:
 	void Reset();
-	void DisconnectReporting(InputSystem* system);
-	EEventSource GetType() const;
-	const core::Button* GetButton(int buttonCode) const;
-	const core::Axis* GetAxis(int axisCode) const;
-	const core::Area* GetArea(int areaCode) const;
-	bool Update(Event& event);
-
-	const core::String& GetElementName(EEventType type, int code) const;
-
-	EElementType GetElementType(EEventType type, int id) const;
-	int GetElementCount(EEventType type) const;
-	
-	// TODO:
-	/*
-	struct Calibration
-	{
-		int min;
-		int max;
-		int deadZone;
-		int saturation;
-		
-		static int DEFAULT_RANGE=1;
-	};
-	
-	void SetCalibration(const Calibration& c, int mode=0);
-	const Calibration& GetCalibration();
-	
-	void SetCalibration(ElementId axis, const Calibration& c, int mode=0).
-	const Calibration& GetCalibration(ElementId axis);
-	*/
 
 private:
 	core::Array<ButtonElement> m_Buttons;
 	core::Array<AxisElement> m_Axes;
-	
-	//std::vector<Calibration> m_Calibration(m_Axes.size());
+
+	bool m_IsConnected;
+
+	core::String m_Name;
+	StrongRef<InputSystem> m_System;
 };
 
 }

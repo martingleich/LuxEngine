@@ -19,27 +19,14 @@ StrongRef<InputDevice> RawInputDevice::GetDevice() const
 	return m_Device;
 }
 
-const core::String& RawInputDevice::GetName() const
-{
-	return m_Name;
-}
-
-const core::String& RawInputDevice::GetGUID() const
-{
-	return m_GUID;
-}
-
 void RawInputDevice::SendInputEvent(Event& event)
 {
-	if(!m_Device)
-		m_Device = m_System->CreateDevice(this);
+	if(!m_Device) {
+		auto desc = this->GetDescription();
+		m_Device = m_System->FindDevice(desc);
+	}
 
 	event.device = m_Device;
-	event.source = m_Device->GetType();
-
-	event.shift = (GetKeyState(VK_SHIFT)&0x8000) != 0;
-	event.control = (GetKeyState(VK_CONTROL)&0x8000) != 0;
-
 	m_System->Update(event);
 }
 
@@ -69,7 +56,7 @@ core::String RawInputDevice::GetDeviceGUID(HANDLE raw_handle)
 	// A guid is build like: random_characters{<guid>}
 	int i = path.Find("{");
 	if(i >= 0)
-		return path.EndSubString(i+1);
+		return path.EndSubString(i);
 	throw core::GenericRuntimeException("Invalid device guid");
 }
 

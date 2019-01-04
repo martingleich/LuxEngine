@@ -8,186 +8,41 @@
 #include "core/lxUnicodeConversion.h"
 #include "platform/Win32Exception.h"
 
-#ifdef BREAK_ON_FAIL
-#error BREAK_ON_FAIL makro already defined
-#endif
-
-#ifdef BREAK_ON_NULL
-#error BREAK_ON_NULL makro already defined
-#endif
-
-#ifdef _DEBUG
-#define BREAK_ON_FAIL(result, action) if(Failed(result = ((action)?EResult::Succeeded:EResult::Failed))) { printf("%s(%d) \"%s\" failed.\n", __FUNCTION__, __LINE__, #action); break;}
-#define BREAK_ON_NULL(result, value, failError) if(!(value)) { printf("%s(%d) \"%s\" is invalid.\n", __FUNCTION__, __LINE__, #value); result = failError; break;}
-#else
-#define BREAK_ON_FAIL(result, action) if(Failed(result = ((action)?EResult::Succeeded:EResult::Failed))) { break;}
-#define BREAK_ON_NULL(result, value, failError) if(!value) { result = failError; break;}
-#endif
-
 namespace lux
 {
 namespace input
 {
 
+/*
+Cleanup this whole class it seem quite instable.
+Remove the m_CodeHIDMapping array
+	and just place the elements in the correct order.
+Cleanup mapping of buttons to names and calibrations.
+	Use a HashMap to get the mapping instead of some random sized array.
+	Get the existing elements in the registry in a smarter way.
+Change buttonCaps AxisCaps to only contain single elements.
+*/
 RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 	RawInputDevice(system),
-	m_RawInputHandle(NULL),
-	m_NtHandle(NULL),
-	m_ReportSize(0),
-	m_InputReportProtocol(NULL)
+	m_RawInputHandle(rawHandle)
 {
-	m_InputReportProtocol = NULL;
-	m_NtHandle = NULL;
-	m_RawInputHandle = rawHandle;
+	log::Warning("RawJoystickDevice is still in work and might be unstable.");
 
-	// If the nt handle can't retrieved the device is likely not connected.
-	// Has to be handled further up.
-	m_NtHandle = GetDeviceHandle();
+	m_NtHandle = GetDeviceHandle(rawHandle);
 
-	m_Name = GetDeviceName();
-
-	m_GUID = GetDeviceGUID(rawHandle);
-
-	if(!HidD_GetPreparsedData(m_NtHandle, &m_InputReportProtocol))
+	if(!HidD_GetPreparsedData(m_NtHandle, m_InputReportProtocol.Access()))
 		throw core::Win32Exception(GetLastError());
 
 	HIDP_CAPS caps;
 	if(HIDP_STATUS_SUCCESS != HidP_GetCaps(m_InputReportProtocol, &caps))
 		throw core::Win32Exception(GetLastError());
 
-	m_ReportSize = caps.InputReportByteLength;
-
-	core::Array<HIDP_BUTTON_CAPS> buttonCaps;
-	int buttonCount = 0;
-	GetButtonCaps(caps, buttonCaps, buttonCount);
-
-	core::Array<HIDP_VALUE_CAPS> axesCaps;
-	int axesCount = 0;
-	GetAxesCaps(caps, axesCaps, axesCount);
-
-	MappingAndCalibration directInputAxisMapping[7] = {};
-	Mapping directInputButtonMapping[128] = {};
-
-	for(auto it = axesCaps.First(); it != axesCaps.End(); ++it) {
-		if(it->UsagePage == HID_USAGE_PAGE_GENERIC) {
-			USAGE firstUsage = it->Range.UsageMin;
-			USAGE lastUsage = it->Range.UsageMax;
-			for(USAGE currentUsage = firstUsage; currentUsage <= lastUsage; ++currentUsage) {
-				int index = currentUsage - HID_USAGE_GENERIC_X;
-				if(index >= 0 && index < 7) {
-					directInputAxisMapping[index].usagePage = HID_USAGE_PAGE_GENERIC;
-					directInputAxisMapping[index].usage = currentUsage;
-				}
-			}
-
-			if(directInputAxisMapping[2].usagePage == 0) {
-				// Remap Slider to Z if Z is unused
-				// Ref: msdn.microsoft.com/en-us/library/windows/hardware/ff543445
-				directInputAxisMapping[2] = directInputAxisMapping[6];
-				// Invalidate old slider
-				directInputAxisMapping[6].usage = 0;
-				directInputAxisMapping[6].usagePage = 0;
-			}
-		}
-	}
-
-	for(auto it = buttonCaps.First(); it != buttonCaps.End(); ++it) {
-		if(it->UsagePage == HID_USAGE_PAGE_BUTTON) {
-			USAGE firstUsage = it->Range.UsageMin;
-			USAGE lastUsage = it->Range.UsageMax;
-			for(USAGE currentUsage = firstUsage; currentUsage <= lastUsage; ++currentUsage) {
-				directInputButtonMapping[currentUsage - 1].usagePage = HID_USAGE_PAGE_BUTTON;
-				directInputButtonMapping[currentUsage - 1].usage = currentUsage;
-			}
-		}
-	}
-
 	HIDD_ATTRIBUTES deviceAttributes;
-	if(FALSE != HidD_GetAttributes(m_NtHandle, &deviceAttributes)) {
-		LoadDirectInputMapping(true, (Mapping*)directInputAxisMapping, 7, sizeof(directInputAxisMapping[0]), deviceAttributes);
-		LoadDirectInputMapping(false, directInputButtonMapping, 128, sizeof(directInputButtonMapping[0]), deviceAttributes);
+	BOOL hasDeviceAttributes = HidD_GetAttributes(m_NtHandle, &deviceAttributes);
+	auto deviceAttributesPointer = hasDeviceAttributes ? &deviceAttributes : nullptr;
 
-		LoadDirectInputAxisCalibration(directInputAxisMapping, 7, deviceAttributes);
-	}
-
-	for(auto it = axesCaps.First(); it != axesCaps.End(); ++it) {
-		USAGE firstUsage = it->Range.UsageMin;
-		USAGE lastUsage = it->Range.UsageMax;
-		for(USAGE currentUsage = firstUsage; currentUsage <= lastUsage; ++currentUsage) {
-			WORD currentIndex = it->Range.DataIndexMin + (currentUsage - firstUsage);
-
-			bool isCalibrated = false;
-			int32_t calibratedMin = 0;
-			int32_t calibratedMax = 0;
-			int32_t calibratedCenter = 0;
-			wchar_t const *toName = L"";
-
-			for(int i = 0; i < ARRAYSIZE(directInputAxisMapping); ++i) {
-				auto& mapping = directInputAxisMapping[i];
-
-				if(it->UsagePage == mapping.usagePage && currentUsage == mapping.usage) {
-					toName = mapping.name;
-					isCalibrated = mapping.isCalibrated;
-					if(isCalibrated) {
-						calibratedMin = mapping.calibration.lMin;
-						calibratedMax = mapping.calibration.lMax;
-						calibratedCenter = mapping.calibration.lCenter;
-					}
-
-					mapping.usage = 0;
-					break;
-				}
-			}
-
-			Axis axis;
-			axis.usagePage = it->UsagePage;
-			axis.usage = currentUsage;
-			axis.index = currentIndex;
-			axis.reportID = it->ReportID;
-			axis.logicalMin = it->LogicalMin;
-			axis.logicalMax = it->LogicalMax;
-			axis.isCalibrated = isCalibrated;
-			axis.isAbsolute = (it->IsAbsolute == TRUE);
-			if(axis.isCalibrated) {
-				axis.logicalCalibratedMin = calibratedMin;
-				axis.logicalCalibratedMax = calibratedMax;
-				axis.logicalCalibratedCenter = calibratedCenter;
-			}
-
-			axis.name = core::UTF16ToString(toName, -1);
-
-			m_Axes.PushBack(axis);
-		}
-	}
-
-	for(auto it = buttonCaps.First(); it != buttonCaps.End(); ++it) {
-		USAGE firstUsage = it->Range.UsageMin;
-		USAGE lastUsage = it->Range.UsageMax;
-		for(USAGE currentUsage = firstUsage; currentUsage <= lastUsage; ++currentUsage) {
-			WORD currentIndex = it->Range.DataIndexMin + (currentUsage - firstUsage);
-			wchar_t const* toName = L"";
-			for(int i = 0; i < ARRAYSIZE(directInputButtonMapping); ++i) {
-				auto& mapping = directInputButtonMapping[i];
-
-				if(it->UsagePage == mapping.usagePage && currentUsage == mapping.usage) {
-					toName = mapping.name;
-
-					mapping.usage = 0;
-					break;
-				}
-			}
-
-			Button button;
-			button.usagePage = it->UsagePage;
-			button.usage = currentUsage;
-			button.reportID = it->ReportID;
-			button.index = currentIndex;
-			button.name = core::UTF16ToString(toName, -1);
-			button.isAbsolute = (it->IsAbsolute == TRUE);
-
-			m_Buttons.PushBack(button);
-		}
-	}
+	CreateButtons(caps, deviceAttributesPointer);
+	CreateAxes(caps, deviceAttributesPointer);
 
 	struct HIDObjectWrapper
 	{
@@ -260,24 +115,139 @@ RawJoystickDevice::RawJoystickDevice(InputSystem* system, HANDLE rawHandle) :
 		++code;
 	}
 
+	// Create buttons states to detect changes.
 	m_ButtonStates.Resize(m_Buttons.Size(), false);
 	m_NewButtonStates.Resize(m_Buttons.Size(), false);
+
+	InitDeviceDescription();
+}
+
+void RawJoystickDevice::CreateAxes(const HIDP_CAPS &caps, const HIDD_ATTRIBUTES* deviceAttributes)
+{
+	// Direct input only supporte 7 axes.
+	MappingAndCalibration directInputAxisMapping[7] = {};
+	auto axesCaps = GetAxesCaps(caps, m_InputReportProtocol);
+
+	// Default initilize mappings.
+	for(auto it = axesCaps.First(); it != axesCaps.End(); ++it) {
+		int index = it->usage - HID_USAGE_GENERIC_X;
+		if(index >= 0 && index < 7) {
+			directInputAxisMapping[index].usagePage = it->usagePage;
+			directInputAxisMapping[index].usage = it->usage;
+		}
+
+		if(directInputAxisMapping[2].usagePage == 0) {
+			// Remap Slider to Z if Z is unused
+			// Ref: msdn.microsoft.com/en-us/library/windows/hardware/ff543445
+			directInputAxisMapping[2] = directInputAxisMapping[6];
+			// Invalidate old slider
+			directInputAxisMapping[6].usage = 0;
+			directInputAxisMapping[6].usagePage = 0;
+		}
+	}
+
+	if(deviceAttributes) {
+		LoadDirectInputMapping(true, directInputAxisMapping, 7, sizeof(directInputAxisMapping[0]), *deviceAttributes);
+		LoadDirectInputAxisCalibration(directInputAxisMapping, 7, *deviceAttributes);
+	}
+
+	for(auto it = axesCaps.First(); it != axesCaps.End(); ++it) {
+		bool isCalibrated = false;
+		int32_t calibratedMin = 0;
+		int32_t calibratedMax = 0;
+		int32_t calibratedCenter = 0;
+		wchar_t const *toName = L"";
+
+		for(int i = 0; i < ARRAYSIZE(directInputAxisMapping); ++i) {
+			auto& mapping = directInputAxisMapping[i];
+
+			if(it->usagePage == mapping.usagePage && it->usage == mapping.usage) {
+				toName = mapping.name;
+				isCalibrated = mapping.isCalibrated;
+				if(isCalibrated) {
+					calibratedMin = mapping.calibration.lMin;
+					calibratedMax = mapping.calibration.lMax;
+					calibratedCenter = mapping.calibration.lCenter;
+				}
+
+				mapping.usage = 0;
+				break;
+			}
+		}
+
+		Axis axis;
+		axis.usagePage = it->usagePage;
+		axis.usage = it->usage;
+		axis.index = it->dataIndex;
+		axis.reportID = it->reportId;
+		axis.logicalMin = it->logicalMin;
+		axis.logicalMax = it->logicalMax;
+		axis.isCalibrated = isCalibrated;
+		axis.isAbsolute = it->isAbsolute;
+		if(axis.isCalibrated) {
+			axis.logicalCalibratedMin = calibratedMin;
+			axis.logicalCalibratedMax = calibratedMax;
+			axis.logicalCalibratedCenter = calibratedCenter;
+		}
+
+		axis.name = core::UTF16ToString(toName, -1);
+		m_Axes.PushBack(axis);
+	}
+}
+
+void RawJoystickDevice::CreateButtons(const HIDP_CAPS& caps, const HIDD_ATTRIBUTES* deviceAttributes)
+{
+	// Direct input only supporte 128 buttons.
+	Mapping directInputButtonMapping[128];
+	auto buttonCaps = GetButtonCaps(caps, m_InputReportProtocol);
+
+	// Default initialize directInputButtonMapping
+	for(auto& b : buttonCaps) {
+		directInputButtonMapping[b.usage - 1].usagePage = b.usagePage;
+		directInputButtonMapping[b.usage - 1].usage = b.usage;
+		directInputButtonMapping[b.usage - 1].name[0] = 0;
+	}
+
+	// Load configuration from registry, if available.
+	// And overwrite default values.
+	if(deviceAttributes)
+		LoadDirectInputMapping(false, directInputButtonMapping, 128, sizeof(directInputButtonMapping[0]), *deviceAttributes);
+
+	// Create button objects from description and mapping.
+	for(auto& b : buttonCaps) {
+		wchar_t const* toName = L"";
+		// Find the corresponding mapping, and get it's name.
+		for(int i = 0; i < 128; ++i) {
+			auto& mapping = directInputButtonMapping[i];
+
+			if(b.usagePage == mapping.usagePage && b.usage == mapping.usage) {
+				toName = mapping.name;
+				break;
+			}
+		}
+
+		// Create the new button.
+		Button button;
+		button.usagePage = b.usagePage;
+		button.usage = b.usage;
+		button.reportID = b.reportId;
+		button.index = b.dataIndex;
+		button.name = core::UTF16ToString(toName, -1);
+		button.isAbsolute = b.isAbsolute;
+
+		m_Buttons.PushBack(button);
+	}
 }
 
 RawJoystickDevice::~RawJoystickDevice()
 {
-	if(m_InputReportProtocol)
-		HidD_FreePreparsedData(m_InputReportProtocol);
-
-	if(m_NtHandle)
-		CloseHandle(m_NtHandle);
 }
 
-HANDLE RawJoystickDevice::GetDeviceHandle()
+Win32FileHandle RawJoystickDevice::GetDeviceHandle(HANDLE rawHandle)
 {
-	core::String path = GetDevicePath(m_RawInputHandle);
+	core::String path = GetDevicePath(rawHandle);
 
-	HANDLE ntHandle = CreateFileW(core::UTF8ToWin32String(path), 0,
+	Win32FileHandle ntHandle = CreateFileW(core::UTF8ToWin32String(path), 0,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL,
 		OPEN_EXISTING,
@@ -289,87 +259,109 @@ HANDLE RawJoystickDevice::GetDeviceHandle()
 	return ntHandle;
 }
 
-core::String RawJoystickDevice::GetDeviceName()
+core::String RawJoystickDevice::GetDeviceName(const Win32FileHandle& fileHandle)
 {
 	const int max_size = 127;
 
 	wchar_t nameBuffer[max_size];
 
 	int len = 0;
-	if(HidD_GetManufacturerString(m_NtHandle, nameBuffer, max_size * 2)) {
+	if(HidD_GetManufacturerString(fileHandle, nameBuffer, max_size * 2)) {
 		len = (int)wcslen(nameBuffer);
 		nameBuffer[len++] = ' ';
 	}
 
-	if(HidD_GetProductString(m_NtHandle, nameBuffer + len, ULONG(max_size - len) * 2)) {
+	if(HidD_GetProductString(fileHandle, nameBuffer + len, ULONG(max_size - len) * 2)) {
 		len = (int)wcslen(nameBuffer);
 	}
 
 	if(len == 0)
 		return "(unknown)";
 	else
-		return core::UTF16ToString(nameBuffer, len*2);
+		return core::UTF16ToString(nameBuffer, len * 2);
 }
 
-void RawJoystickDevice::GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, int& buttonCount)
+core::Array<RawJoystickDevice::ButtonCaps> RawJoystickDevice::GetButtonCaps(
+	const HIDP_CAPS& deviceCaps, PHIDP_PREPARSED_DATA inputReportProtocol)
 {
-	buttonCaps.Clear();
-	buttonCaps.Resize(deviceCaps.NumberInputButtonCaps);
-	buttonCount = 0;
-
 	USHORT numberInputButtonCaps = deviceCaps.NumberInputButtonCaps;
-	if(HIDP_STATUS_SUCCESS != HidP_GetButtonCaps(HidP_Input,
-		&*buttonCaps.First(),
-		&numberInputButtonCaps,
-		m_InputReportProtocol))
+	core::Array<HIDP_BUTTON_CAPS> caps;
+	caps.Resize(deviceCaps.NumberInputButtonCaps);
+	auto result = HidP_GetButtonCaps(HidP_Input, caps.Data(), &numberInputButtonCaps, inputReportProtocol);
+	if(result != HIDP_STATUS_SUCCESS)
 		throw core::Win32Exception(GetLastError());
+	caps.Resize(numberInputButtonCaps);
 
-	for(auto it = buttonCaps.First(); it != buttonCaps.End(); ++it) {
-		if(it->IsRange) {
-			buttonCount += it->Range.UsageMax - it->Range.UsageMin + 1;
+	core::Array<ButtonCaps> out;
+	for(auto& c : caps) {
+		if(c.UsagePage != HID_USAGE_PAGE_BUTTON)
+			continue;
+
+		ButtonCaps bc;
+		bc.reportId = c.ReportID;
+		bc.usagePage = c.UsagePage;
+		bc.isAbsolute = c.IsAbsolute;
+		if(c.IsRange) {
+			USAGE curUsage = c.Range.UsageMin;
+			USHORT curDataIndex = c.Range.DataIndexMin;
+			for(; curUsage < c.Range.UsageMax; ++curUsage, ++curDataIndex) {
+				bc.usage = curUsage;
+				bc.dataIndex = curDataIndex;
+				out.PushBack(bc);
+			}
 		} else {
-			it->Range.UsageMin = it->NotRange.Usage;
-			it->Range.UsageMax = it->NotRange.Usage;
-			it->Range.DataIndexMin = it->NotRange.DataIndex;
-			it->Range.DataIndexMax = it->NotRange.DataIndex;
-			it->IsRange = 1;
-			++buttonCount;
+			bc.usage = c.NotRange.Usage;
+			bc.dataIndex = c.NotRange.DataIndex;
 		}
 	}
+
+	return out;
 }
 
-void RawJoystickDevice::GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, int& valueCount)
+core::Array<RawJoystickDevice::AxisCaps> RawJoystickDevice::GetAxesCaps(
+	const HIDP_CAPS& deviceCaps, PHIDP_PREPARSED_DATA inputReportProtocol)
 {
-	valueCaps.Clear();
-	valueCaps.Resize(deviceCaps.NumberInputValueCaps);
-	valueCount = 0;
-
+	core::Array<HIDP_VALUE_CAPS> valueCaps;
 	USHORT numberInputValueCaps = deviceCaps.NumberInputValueCaps;
-	if(HIDP_STATUS_SUCCESS != HidP_GetValueCaps(HidP_Input,
-		&*valueCaps.First(),
-		&numberInputValueCaps,
-		m_InputReportProtocol))
+	valueCaps.Resize(numberInputValueCaps);
+	auto result = HidP_GetValueCaps(HidP_Input, valueCaps.Data(), &numberInputValueCaps, inputReportProtocol);
+	valueCaps.Resize(numberInputValueCaps);
+	if(result != HIDP_STATUS_SUCCESS)
 		throw core::Win32Exception(GetLastError());
 
-	for(auto it = valueCaps.First(); it != valueCaps.End(); ++it) {
-		if(it->IsRange) {
-			valueCount += it->Range.UsageMax - it->Range.UsageMin + 1;
-		} else {
-			it->Range.UsageMin = it->NotRange.Usage;
-			it->Range.UsageMax = it->NotRange.Usage;
-			it->Range.DataIndexMin = it->NotRange.DataIndex;
-			it->Range.DataIndexMax = it->NotRange.DataIndex;
-			if(it->LogicalMax < it->LogicalMin) {
-				it->LogicalMin = it->LogicalMin > 0 ? it->LogicalMin : 0;
-				it->LogicalMax = (1 << it->BitSize);
-			}
-			if((1 << it->BitSize) < it->LogicalMax)
-				it->LogicalMax = (1 << it->BitSize);
+	core::Array<AxisCaps> out;
+	for(auto& c : valueCaps) {
+		if(c.UsagePage != HID_USAGE_PAGE_GENERIC)
+			break;
 
-			it->IsRange = 1;
-			++valueCount;
+		AxisCaps ac;
+		ac.reportId = c.ReportID;
+		ac.usagePage = c.UsagePage;
+		ac.isAbsolute = c.IsAbsolute;
+
+		if(c.LogicalMax < c.LogicalMin) {
+			ac.logicalMin = c.LogicalMin > 0 ? c.LogicalMin : 0;
+			ac.logicalMax = (1 << c.BitSize);
+		}
+		if((1 << c.BitSize) < c.LogicalMax)
+			ac.logicalMax = (1 << c.BitSize);
+
+		if(c.IsRange) {
+			USAGE curUsage = c.Range.UsageMin;
+			USHORT curDataIndex = c.Range.DataIndexMin;
+			for(; curUsage < c.Range.UsageMax; ++curUsage, ++curDataIndex) {
+				ac.usage = curUsage;
+				ac.dataIndex = curDataIndex;
+				out.PushBack(ac);
+			}
+		} else {
+			ac.usage = c.NotRange.Usage;
+			ac.dataIndex = c.NotRange.DataIndex;
+			out.PushBack(ac);
 		}
 	}
+
+	return out;
 }
 
 void RawJoystickDevice::LoadDirectInputMapping(bool isAxis, Mapping* mappings, int mappingCount, int offset, const HIDD_ATTRIBUTES& attribs)
@@ -390,7 +382,7 @@ void RawJoystickDevice::LoadDirectInputMapping(bool isAxis, Mapping* mappings, i
 		DWORD valueType;
 		DWORD valueSize;
 
-		Mapping& curMap = *(Mapping*)((char*)mappings + i*offset);
+		Mapping& curMap = *(Mapping*)((char*)mappings + i * offset);
 
 		valueType = REG_NONE;
 		valueSize = 0;
@@ -466,12 +458,8 @@ void RawJoystickDevice::HandleInput(RAWINPUT* input)
 			}
 
 			if(axisCur < m_Axes.Size() && m_Axes[axisCur].index == dataIndex) {
-				Event event;
-				event.source = EEventSource::Joystick;
-				event.type = EEventType::Axis;
-				event.internal_abs_only = true;
-				event.internal_rel_only = false;
-				event.axis.code = (EAxisCode)m_Axes[axisCur].code;
+				AxisEvent event;
+				event.code = m_Axes[axisCur].code;
 
 				int32_t min = m_Axes[axisCur].isCalibrated ? m_Axes[axisCur].logicalCalibratedMin : m_Axes[axisCur].logicalMin;
 				int32_t max = m_Axes[axisCur].isCalibrated ? m_Axes[axisCur].logicalCalibratedMax : m_Axes[axisCur].logicalMax;
@@ -482,11 +470,11 @@ void RawJoystickDevice::HandleInput(RAWINPUT* input)
 					data[i].RawValue = max;
 
 				if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x39) // Hat switch
-					event.axis.abs = float(data[i].RawValue - m_Axes[axisCur].logicalMin) / float(m_Axes[axisCur].logicalMax - m_Axes[axisCur].logicalMin + 1); // Map to [0, 1]
+					event.abs = float(data[i].RawValue - m_Axes[axisCur].logicalMin) / float(m_Axes[axisCur].logicalMax - m_Axes[axisCur].logicalMin + 1); // Map to [0, 1]
 				else if(m_Axes[axisCur].usagePage == 1 && m_Axes[axisCur].usage == 0x36) // Slider
-					event.axis.abs = float(data[i].RawValue - min) / float(max - min); // Map to [0, 1]
+					event.abs = float(data[i].RawValue - min) / float(max - min); // Map to [0, 1]
 				else // All the other things
-					event.axis.abs = (float(data[i].RawValue - min) * 2) / float(max - min) - 1.0f; // Map to [-1, 1]
+					event.abs = (float(data[i].RawValue - min) * 2) / float(max - min) - 1.0f; // Map to [-1, 1]
 
 				SendInputEvent(event);
 
@@ -508,52 +496,52 @@ void RawJoystickDevice::HandleInput(RAWINPUT* input)
 	}
 
 	for(int i = 0; i < m_Buttons.Size(); ++i) {
-		if(m_NewButtonStates[i] != m_ButtonStates[i]) {
-			Event event;
-			event.source = EEventSource::Joystick;
-			event.type = EEventType::Button;
-			event.internal_abs_only = false;
-			event.internal_rel_only = false;
-			event.button.code = (EKeyCode)(u32)i;
-			event.button.pressedDown = m_NewButtonStates[i];
-			event.button.state = m_NewButtonStates[i];
-			SendInputEvent(event);
-			m_ButtonStates[i] = m_NewButtonStates[i];
-		}
+		if(m_NewButtonStates[i] == m_ButtonStates[i])
+			continue;
+		m_ButtonStates[i] = m_NewButtonStates[i];
+
+		ButtonEvent event;
+		event.code = i;
+		event.pressedDown = m_NewButtonStates[i];
+		SendInputEvent(event);
 	}
 }
 
-EEventSource RawJoystickDevice::GetType() const
+void RawJoystickDevice::InitDeviceDescription()
 {
-	return EEventSource::Joystick;
-}
+	// Only assign pointer at end of function.
+	// So if a exception is thrown no partial desciption is created.
+	auto desc = LUX_NEW(RawInputDeviceDescription);
 
-int RawJoystickDevice::GetElementCount(EEventType type) const
-{
-	if(type == EEventType::Button)
-		return m_Buttons.Size();
-	else if(type == EEventType::Axis)
-		return m_Axes.Size();
-	else
-		return 0;
-}
+	desc->name = GetDeviceName(m_NtHandle);
+	desc->guid = GetDeviceGUID(m_RawInputHandle);
+	desc->type = EDeviceType::Joystick;
 
-RawJoystickDevice::ElemDesc RawJoystickDevice::GetElementDesc(EEventType type, int code) const
-{
-	if(type == EEventType::Button) {
-		const Button& button = m_Buttons[m_CodeHIDMapping[code]];
-		EElementType elem_type = CombineFlags(EElementType::Input, EElementType::Button, button.isAbsolute ? EElementType::PushButton : EElementType::ToggleButton);
-		return ElemDesc(button.name, button.usagePage, button.usage, elem_type);
-	} else if(type == EEventType::Axis) {
-		const Axis& axis = m_Axes[m_CodeHIDMapping[m_Buttons.Size() + code]];
-		EElementType elem_type = CombineFlags(EElementType::Input, EElementType::Axis, axis.isAbsolute ? EElementType::Abs : EElementType::Rel);
+	desc->buttonCount = m_Buttons.Size();
+	for(int i = 0; i < desc->buttonCount; ++i) {
+		const Button& button = m_Buttons[m_CodeHIDMapping[i]];
+		EDeviceElementType elem_type = CombineFlags(
+			EDeviceElementType::Input,
+			EDeviceElementType::Button,
+			button.isAbsolute ? EDeviceElementType::PushButton : EDeviceElementType::ToggleButton);
+		desc->desc.EmplaceBack(button.name, elem_type);
+	}
+
+	desc->axesCount = m_Axes.Size();
+	for(int i = 0; i < desc->axesCount; ++i) {
+		const Axis& axis = m_Axes[m_CodeHIDMapping[m_Buttons.Size() + i]];
+		EDeviceElementType elem_type = CombineFlags(
+			EDeviceElementType::Input,
+			EDeviceElementType::Axis,
+			axis.isAbsolute ? EDeviceElementType::Abs : EDeviceElementType::Rel);
 		if(axis.usagePage == 1 && axis.usage == 0x39)
-			elem_type = CombineFlags(EElementType::Input, EElementType::Axis, EElementType::POV);
-		return ElemDesc(axis.name, axis.usagePage, axis.usage, elem_type);
-	} else {
-		static const core::String name = "(unknown)";
-		return ElemDesc(name, 0, 0, EElementType::Other);
+			elem_type = CombineFlags(EDeviceElementType::Input, EDeviceElementType::Axis, EDeviceElementType::POV);
+		desc->desc.EmplaceBack(axis.name, elem_type);
 	}
+
+	desc->areasCount = 0;
+
+	m_Desc = desc;
 }
 
 }

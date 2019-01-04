@@ -5,26 +5,20 @@ namespace lux
 {
 namespace input
 {
+
 //! Predefinend key codes
-enum EKeyCode
+enum EKeyCode : int
 {
-	KEY_NONE = 0xFFFFFFFF,  //!< Not defined
-
-	KEY_LBUTTON = 0,  //!< Left mousebutton
-	KEY_RBUTTON,  //!< Right mousebutton
-	KEY_MBUTTON,  //!< Middle mousebutton
-	KEY_X1BUTTON,  //!< X1 Mausknopf
-	KEY_X2BUTTON,  //!< X2 Mausknopf
-	KEY_MOUSECOUNT,
-
 	KEY_CANCEL = 0,  //!< Cancel
 	KEY_BACK,  //!< Back
 	KEY_TAB,  //!< Tabulator
 	KEY_CLEAR,  //!< CLEAR key
 	KEY_RETURN,  //!< Enter
+
 	KEY_SHIFT,  //!< shift
 	KEY_CONTROL,  //!< control
 	KEY_MENU,  //!< Alternativ(Alt)
+
 	KEY_PAUSE,  //!< Pause
 	KEY_CAPITAL,  //!< Caps lock
 	KEY_KANA,  //!< IME Kana Modus
@@ -168,19 +162,25 @@ enum EKeyCode
 	KEY_KEYBOARD_COUNT,
 };
 
-//! Possible areas to send events
-enum EAreaCode
+enum EMouseButtonCode : int
 {
-	AREA_FORCE_32_BIT = 0xFFFFFFFF,
-	AREA_MOUSE = 0,    //!< The mouse position
+	MOUSE_BUTTON_LEFT = 0,  //!< Left mousebutton
+	MOUSE_BUTTON_RIGHT,  //!< Right mousebutton
+	MOUSE_BUTTON_MIDDLE,  //!< Middle mousebutton
+	MOUSE_BUTTON_X1,  //!< X1 Mausknopf
+	MOUSE_BUTTON_X2,  //!< X2 Mausknopf
+};
+
+enum EMouseAreaCode
+{
+	MOUSE_AREA = 0,    //!< The mouse position
 };
 
 //! Possible axis to send events
-enum EAxisCode
+enum EMouseAxisCode : int
 {
-	AXIS_FORCE_32_BIT = 0xFFFFFFFF,
-	AXIS_MOUSE_WHEEL = 0,  //! The mouse wheel
-	AXIS_MOUSE_HWHEEL, //! The horizontal mouse wheel
+	MOUSE_AXIS_WHEEL = 0,  //! The mouse wheel
+	MOUSE_AXIS_HWHEEL, //! The horizontal mouse wheel
 };
 
 }

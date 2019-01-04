@@ -15,35 +15,38 @@ public:
 
 	virtual const core::String& GetName() const;
 
-	virtual bool Connect();
-	virtual void Disconnect();
-	virtual bool IsConnected() const;
-	virtual bool Aquire();
-	virtual void UnAquire();
-	virtual bool IsAquired() const;
-	virtual bool IsForeground() const;
-	virtual void Configure(bool isForeground);
+	virtual void Connect() override;
+	virtual void Disconnect(bool reset) override;
+	virtual bool IsConnected() const override;
+
+protected:
+	//! Is called when the device is disconnected from the input system
+	virtual void DisconnectReporting(InputSystem* system) = 0;
 
 protected:
 	struct ElementData
 	{
 		core::String name;
-		EElementType type;
+		EDeviceElementType type;
 	};
 
-	struct ButtonElement : core::Button, ElementData {};
+	struct ButtonElement : ElementData
+	{
+		bool state;
+	};
 
-	struct AxisElement : core::Axis, ElementData {};
+	struct AxisElement : ElementData
+	{
+		float state;
+	};
 
-	struct AreaElement : core::Area, ElementData {};
+	struct AreaElement : ElementData
+	{
+		math::Vector2F state;
+	};
 
 private:
 	core::String m_Name;
-	bool m_Connected;
-	bool m_Aquired;
-
-	bool m_Foreground;
-
 	StrongRef<InputSystem> m_System;
 };
 

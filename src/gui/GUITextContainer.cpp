@@ -67,10 +67,9 @@ void TextContainer::Ensure(
 	core::Array<float> carets;
 	bool keepBreaking = true;
 	int lineId = rebreakText;
+
 	auto AddBrokenLine = [&](const core::StringView& str, float width) {
 		if(m_BrokenText.Size() > lineId) {
-			if(m_BrokenText[lineId].line.Data() == str.Data() && m_BrokenText[lineId].width == width)
-				keepBreaking = false;
 			m_BrokenText[lineId] = Line(str, width);
 		} else {
 			m_BrokenText.EmplaceBack(str, width);
@@ -78,6 +77,7 @@ void TextContainer::Ensure(
 		++lineId;
 		textDim.width = math::Max(textDim.width, width);
 	};
+
 	auto AddLine = [&](const core::StringView& line) {
 		if(line.IsEmpty())
 			return;

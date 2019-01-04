@@ -23,13 +23,13 @@ FirstPersonCameraControl::FirstPersonCameraControl(float moveSpeed, math::AngleF
 	m_Fast(false)
 {
 	EnableInput();
-	m_Controls.forward = input::EKeyCode::KEY_KEY_W;
-	m_Controls.backward = input::EKeyCode::KEY_KEY_S;
-	m_Controls.left = input::EKeyCode::KEY_KEY_A;
-	m_Controls.right = input::EKeyCode::KEY_KEY_D;
-	m_Controls.up = input::EKeyCode::KEY_KEY_Q;
-	m_Controls.down = input::EKeyCode::KEY_KEY_E;
-	m_Controls.fast = input::EKeyCode::KEY_LSHIFT;
+	m_Controls.forward = input::KEY_KEY_W;
+	m_Controls.backward = input::KEY_KEY_S;
+	m_Controls.left = input::KEY_KEY_A;
+	m_Controls.right = input::KEY_KEY_D;
+	m_Controls.up = input::KEY_KEY_Q;
+	m_Controls.down = input::KEY_KEY_E;
+	m_Controls.fast = input::KEY_LSHIFT;
 	m_Controls.invertX = false;
 	m_Controls.invertY = false;
 
@@ -183,23 +183,24 @@ bool FirstPersonCameraControl::IsInputActive()
 
 void FirstPersonCameraControl::HandleInput(const input::Event& event)
 {
-	if(event.type == input::EEventType::Button && event.source == input::EEventSource::Keyboard) {
-		float value = event.button.state ? 1.0f : -1.0f;
+	if(event.device->GetType() == input::EDeviceType::Keyboard && event.Is<input::ButtonEvent>()) {
+		auto& button = event.As<input::ButtonEvent>();
+		float value = button.pressedDown ? 1.0f : -1.0f;
 		bool changed = true;
-		if(event.button.code == m_Controls.forward)
+		if(button.code == m_Controls.forward)
 			m_KeyboardMouseMove.z += value;
-		else if(event.button.code == m_Controls.backward)
+		else if(button.code == m_Controls.backward)
 			m_KeyboardMouseMove.z -= value;
-		else if(event.button.code == m_Controls.left)
+		else if(button.code == m_Controls.left)
 			m_KeyboardMouseMove.x -= value;
-		else if(event.button.code == m_Controls.right)
+		else if(button.code == m_Controls.right)
 			m_KeyboardMouseMove.x += value;
-		else if(event.button.code == m_Controls.up)
+		else if(button.code == m_Controls.up)
 			m_KeyboardMouseMove.y += value;
-		else if(event.button.code == m_Controls.down)
+		else if(button.code == m_Controls.down)
 			m_KeyboardMouseMove.y -= value;
-		else if(event.button.code == m_Controls.fast)
-			SetFast(event.button.state);
+		else if(button.code == m_Controls.fast)
+			SetFast(button.pressedDown);
 		else
 			changed = false;
 		if(changed && m_IsControlActive) {
@@ -207,10 +208,13 @@ void FirstPersonCameraControl::HandleInput(const input::Event& event)
 			FlankSpeed(m_KeyboardMouseMove.x);
 			UpSpeed(m_KeyboardMouseMove.y);
 		}
-	} else if(event.type == input::EEventType::Area && event.source == input::EEventSource::Mouse) {
+	} else if(event.device->GetType() == input::EDeviceType::Mouse && event.Is<input::AreaEvent>()) {
 		if(m_IsControlActive) {
-			RotX((m_Controls.invertY ? -1 : 1) * event.area.relY);
-			RotY((m_Controls.invertX ? -1 : 1) * event.area.relX);
+			auto& area = event.As<input::AreaEvent>();
+			if(area.code == input::MOUSE_AREA) {
+				RotX((m_Controls.invertY ? -1 : 1) * area.rel.y);
+				RotY((m_Controls.invertX ? -1 : 1) * area.rel.x);
+			}
 		}
 	}
 }

@@ -316,7 +316,7 @@ public:
 	virtual VideoDriver* GetDriver() const = 0;
 };
 
-struct VideoRendererToken
+struct VideoRendererToken : core::Uncopyable
 {
 	Renderer* renderer = nullptr;
 	void Unlock()

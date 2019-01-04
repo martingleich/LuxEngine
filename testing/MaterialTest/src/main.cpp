@@ -102,7 +102,7 @@ public:
 
 	void OnEvent(const input::Event& e)
 	{
-		if(m_RButton || e.source == input::EEventSource::Keyboard)
+		if(m_RButton || e.device->GetType() == input::EDeviceType::Keyboard)
 			m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->HandleInput(e);
 		EventHandler::OnEvent(e);
 	}

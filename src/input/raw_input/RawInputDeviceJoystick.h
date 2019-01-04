@@ -7,6 +7,7 @@
 #include "RawInputDevice.h"
 #include "core/lxArray.h"
 #include <hidsdi.h>
+#include "platform/WindowsUtils.h"
 
 struct DIOBJECTATTRIBUTES
 {
@@ -61,17 +62,13 @@ private:
 
 	struct Mapping
 	{
-		WORD usagePage;
-		WORD usage;
+		WORD usagePage = 0;
+		WORD usage = 0;
 		wchar_t name[32];
 	};
 
-	struct MappingAndCalibration
+	struct MappingAndCalibration : Mapping
 	{
-		WORD usagePage;
-		WORD usage;
-		wchar_t name[32];
-
 		bool isCalibrated;
 		DIOBJECTCALIBRATION calibration;
 	};
@@ -79,24 +76,53 @@ private:
 public:
 	RawJoystickDevice(InputSystem* system, HANDLE rawHandle);
 	~RawJoystickDevice();
-	HANDLE GetDeviceHandle();
-	core::String GetDeviceName();
-	void GetButtonCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_BUTTON_CAPS>& buttonCaps, int& buttonCount);
-	void GetAxesCaps(const HIDP_CAPS& deviceCaps, core::Array<HIDP_VALUE_CAPS>& valueCaps, int& valueCount);
-	void LoadDirectInputMapping(bool isAxis, Mapping* mappings, int mappingCount, int offset, const HIDD_ATTRIBUTES& attribs);
-	void LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, int mappingCount, const HIDD_ATTRIBUTES& attribs);
+
+	StrongRef<InputDeviceDesc> GetDescription() override { return m_Desc; }
 	void HandleInput(RAWINPUT* input);
-	EEventSource GetType() const;
-	int GetElementCount(EEventType type) const;
-	ElemDesc GetElementDesc(EEventType type, int code) const;
 
 private:
+	void CreateAxes(const HIDP_CAPS& caps, const HIDD_ATTRIBUTES* deviceAttributes);
+	void CreateButtons(const HIDP_CAPS& caps, const HIDD_ATTRIBUTES* deviceAttributes);
+	static Win32FileHandle GetDeviceHandle(HANDLE rawHandle);
+	static core::String GetDeviceName(const Win32FileHandle& fileHandle);
+
+	struct ButtonCaps
+	{
+		CHAR reportId;
+		bool isAbsolute;
+		USAGE usagePage;
+		USAGE usage;
+		USHORT dataIndex;
+	};
+	struct AxisCaps
+	{
+		CHAR reportId;
+		bool isAbsolute;
+		USAGE usagePage;
+		USAGE usage;
+		USHORT dataIndex;
+
+		LONG logicalMin;
+		LONG logicalMax;
+	};
+
+	static core::Array<ButtonCaps> GetButtonCaps(const HIDP_CAPS& deviceCaps, PHIDP_PREPARSED_DATA inputReportProtocol);
+	static core::Array<AxisCaps> GetAxesCaps(const HIDP_CAPS& deviceCaps, PHIDP_PREPARSED_DATA inputReportProtocol);
+
+	static void LoadDirectInputMapping(bool isAxis, Mapping* mappings, int mappingCount, int offset, const HIDD_ATTRIBUTES& attribs);
+	static void LoadDirectInputAxisCalibration(MappingAndCalibration* calibrationMapping, int mappingCount, const HIDD_ATTRIBUTES& attribs);
+
+	void InitDeviceDescription();
+
+	static void FreePreparsedData(PHIDP_PREPARSED_DATA ptr)
+	{
+		HidD_FreePreparsedData(ptr);
+	}
+private:
 	HANDLE m_RawInputHandle;
-	HANDLE m_NtHandle;
+	Win32FileHandle m_NtHandle;
 
-	int m_ReportSize;
-
-	PHIDP_PREPARSED_DATA m_InputReportProtocol;
+	PointerWrapper<PHIDP_PREPARSED_DATA, FreePreparsedData> m_InputReportProtocol;
 
 	core::Array<Axis> m_Axes;
 	core::Array<Button> m_Buttons;
@@ -105,6 +131,8 @@ private:
 
 	core::Array<bool> m_ButtonStates;
 	core::Array<bool> m_NewButtonStates;
+
+	StrongRef<RawInputDeviceDescription> m_Desc;
 };
 
 }

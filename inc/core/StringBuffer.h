@@ -64,7 +64,7 @@ public:
 		StringConverter::AppendFormat(m_String, format, values...);
 		if(m_String.Size() == m_String.Allocated())
 			m_String.Reserve(m_String.Allocated() * 2);
-		m_String.Append('\n');
+		m_String.Append("\n");
 
 		return *this;
 	}

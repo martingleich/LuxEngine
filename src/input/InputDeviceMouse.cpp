@@ -10,27 +10,27 @@ namespace input
 MouseDevice::MouseDevice(const DeviceCreationDesc* desc, InputSystem* system) :
 	InputDeviceNull(desc->GetName(), system)
 {
-	m_Buttons.Resize(desc->GetElementCount(EEventType::Button));
-	m_Axes.Resize(desc->GetElementCount(EEventType::Axis));
+	m_Buttons.Resize(desc->GetElementCount(EDeviceEventType::Button));
+	m_Axes.Resize(desc->GetElementCount(EDeviceEventType::Axis));
 
 	for(int i = 0; i < m_Buttons.Size(); ++i) {
 		auto& button = m_Buttons[i];
-		auto elemDesc = desc->GetElementDesc(EEventType::Button, i);
-		button.type = CombineFlags(EElementType::Input, EElementType::Button, EElementType::PushButton);
+		auto elemDesc = desc->GetElementDesc(EDeviceEventType::Button, i);
+		button.type = CombineFlags(EDeviceElementType::Input, EDeviceElementType::Button, EDeviceElementType::PushButton);
 		button.name = elemDesc.name;
 	}
 
 	for(int i = 0; i < m_Axes.Size(); ++i) {
 		auto& axis = m_Axes[i];
-		auto elemDesc = desc->GetElementDesc(EEventType::Axis, i);
-		axis.type = CombineFlags(EElementType::Input, EElementType::Axis, EElementType::Rel);
+		auto elemDesc = desc->GetElementDesc(EDeviceEventType::Axis, i);
+		axis.type = CombineFlags(EDeviceElementType::Input, EDeviceElementType::Axis, EDeviceElementType::Rel);
 		axis.name = elemDesc.name;
 	}
 
-	m_Pos.type = EElementType::Input;
-	SetFlag(m_Pos.type, EElementType::Area);
-	SetFlag(m_Pos.type, EElementType::Rel);
-	m_Pos.name = desc->GetElementDesc(EEventType::Area, 0).name;
+	m_Pos.type = EDeviceElementType::Input;
+	SetFlag(m_Pos.type, EDeviceElementType::Area);
+	SetFlag(m_Pos.type, EDeviceElementType::Rel);
+	m_Pos.name = desc->GetElementDesc(EDeviceEventType::Area, 0).name;
 
 	Reset();
 }
@@ -48,11 +48,11 @@ void MouseDevice::DisconnectReporting(InputSystem* system)
 {
 	Event event;
 	event.device = this;
-	event.source = EEventSource::Mouse;
+	event.source = EDeviceType::Mouse;
 	event.internal_abs_only = false;
 	event.internal_rel_only = false;
 
-	event.type = EEventType::Button;
+	event.type = EDeviceEventType::Button;
 	event.button.pressedDown = false;
 	event.button.state = false;
 	for(int i = 0; i < m_Buttons.Size(); ++i) {
@@ -62,10 +62,10 @@ void MouseDevice::DisconnectReporting(InputSystem* system)
 		}
 	}
 
-	event.type = EEventType::Axis;
+	event.type = EDeviceEventType::Axis;
 	event.axis.abs = 0;
 	for(int i = 0; i < m_Axes.Size(); ++i) {
-		if(m_Axes[i].state && !TestFlag(m_Axes[i].type, EElementType::Rel)) {
+		if(m_Axes[i].state && !TestFlag(m_Axes[i].type, EDeviceElementType::Rel)) {
 			event.axis.code = EAxisCode(i);
 			event.axis.rel = -m_Axes[i].state;
 			system->SendUserEvent(event);
@@ -75,9 +75,9 @@ void MouseDevice::DisconnectReporting(InputSystem* system)
 	// Don't reset the relative mouse-position.
 }
 
-EEventSource MouseDevice::GetType() const
+EDeviceType MouseDevice::GetType() const
 {
-	return EEventSource::Mouse;
+	return EDeviceType::Mouse;
 }
 
 const core::Button* MouseDevice::GetButton(int buttonCode) const
@@ -100,7 +100,7 @@ const core::Area* MouseDevice::GetArea(int areaCode) const
 
 bool MouseDevice::Update(Event& event)
 {
-	if(event.type == EEventType::Button) {
+	if(event.type == EDeviceEventType::Button) {
 		if((int)event.button.code >= m_Buttons.Size())
 			return false; // Silent ignore
 
@@ -111,7 +111,7 @@ bool MouseDevice::Update(Event& event)
 		return false;
 	}
 
-	if(event.type == EEventType::Axis) {
+	if(event.type == EDeviceEventType::Axis) {
 		if((int)event.axis.code >= m_Axes.Size())
 			return false; // Silent ignore
 
@@ -128,7 +128,7 @@ bool MouseDevice::Update(Event& event)
 		return false;
 	}
 
-	if(event.type == EEventType::Area) {
+	if(event.type == EDeviceEventType::Area) {
 		if(event.area.code != 0)
 			return false; // Silent ignore
 
@@ -152,42 +152,42 @@ bool MouseDevice::Update(Event& event)
 	return false;
 }
 
-const core::String& MouseDevice::GetElementName(EEventType type, int code) const
+const core::String& MouseDevice::GetElementName(EDeviceEventType type, int code) const
 {
 	static core::String unknown = "(unknown)";
-	if(type == EEventType::Button && code < m_Buttons.Size())
+	if(type == EDeviceEventType::Button && code < m_Buttons.Size())
 		return m_Buttons[code].name;
 
-	if(type == EEventType::Axis && code < m_Axes.Size())
+	if(type == EDeviceEventType::Axis && code < m_Axes.Size())
 		return m_Axes[code].name;
 
-	if(type == EEventType::Area && code == 0)
+	if(type == EDeviceEventType::Area && code == 0)
 		return m_Pos.name;
 
 	return unknown;
 }
 
-EElementType MouseDevice::GetElementType(EEventType type, int id) const
+EDeviceElementType MouseDevice::GetElementType(EDeviceEventType type, int id) const
 {
-	if(type == EEventType::Button) {
+	if(type == EDeviceEventType::Button) {
 		return m_Buttons.At(id).type;
-	} else if(type == EEventType::Axis) {
+	} else if(type == EDeviceEventType::Axis) {
 		return m_Axes.At(id).type;
-	} else if(type == EEventType::Area) {
+	} else if(type == EDeviceEventType::Area) {
 		LX_CHECK_BOUNDS(id, 0, 1);
 		return m_Pos.type;
 	} else {
-		return EElementType::Other;
+		return EDeviceElementType::Other;
 	}
 }
 
-int MouseDevice::GetElementCount(EEventType type) const
+int MouseDevice::GetElementCount(EDeviceEventType type) const
 {
-	if(type == EEventType::Button)
+	if(type == EDeviceEventType::Button)
 		return m_Buttons.Size();
-	else if(type == EEventType::Axis)
+	else if(type == EDeviceEventType::Axis)
 		return m_Axes.Size();
-	else if(type == EEventType::Area)
+	else if(type == EDeviceEventType::Area)
 		return 1;
 	else
 		return 0;

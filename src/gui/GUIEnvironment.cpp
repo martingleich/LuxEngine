@@ -360,40 +360,38 @@ void GUIEnvironment::IgnoreMouse(bool b)
 
 void GUIEnvironment::SendUserInputEvent(const input::Event& event)
 {
-	if(event.source == input::EEventSource::Mouse) {
-		MouseEvent e;
-		if(event.type == input::EEventType::Button) {
-			if(event.button.code == input::EKeyCode::KEY_LBUTTON) {
-				if(m_LeftState != event.button.state) {
-					m_LeftState = event.button.state;
-					e.type = event.button.pressedDown ? MouseEvent::LDown : MouseEvent::LUp;
+	if(event.device->GetType() == input::EDeviceType::Mouse) {
+		if(auto area = event.TryAs<input::AreaEvent>()) {
+			if(m_Cursor == m_LuxCursor)
+				m_LuxCursor.As<CursorLux>()->Move(area->rel);
+		}
+		if(auto button = event.TryAs<input::ButtonEvent>()) {
+			MouseEvent e;
+			if(button->code == input::MOUSE_BUTTON_LEFT) {
+				if(m_LeftState != button->pressedDown) {
+					m_LeftState = button->pressedDown;
+					e.type = button->pressedDown ? MouseEvent::LDown : MouseEvent::LUp;
 					SendMouseEvent(e);
 				}
-			}
-			if(event.button.code == input::EKeyCode::KEY_RBUTTON) {
-				if(m_RightState != event.button.state) {
-					m_RightState = event.button.state;
-					e.type = event.button.pressedDown ? MouseEvent::RDown : MouseEvent::RUp;
+			} else if(button->code == input::MOUSE_BUTTON_RIGHT) {
+				if(m_RightState != button->pressedDown) {
+					m_RightState = button->pressedDown;
+					e.type = button->pressedDown ? MouseEvent::RDown : MouseEvent::RUp;
 					SendMouseEvent(e);
 				}
 			}
 		}
-
-		if(m_Cursor == m_LuxCursor) {
-			if(event.type == input::EEventType::Area)
-				m_LuxCursor.As<CursorLux>()->Move(math::Vector2F(event.area.relX, event.area.relY));
-		}
-	}
-	if(event.source == input::EEventSource::Keyboard) {
-		if(event.button.code == input::EKeyCode::KEY_LSHIFT || event.button.code == input::EKeyCode::KEY_RSHIFT)
-			m_ShiftState += event.button.pressedDown ? 1 : -1;
-		if(event.button.code == input::EKeyCode::KEY_LCONTROL || event.button.code == input::EKeyCode::KEY_RCONTROL)
-			m_ControlState += event.button.pressedDown ? 1 : -1;
+	} else if(event.device->GetType() == input::EDeviceType::Keyboard) {
+		auto button = event.As<input::KeyboardButtonEvent>();
+		if(button.code == input::KEY_LSHIFT || button.code == input::KEY_RSHIFT)
+			m_ShiftState += button.pressedDown ? 1 : -1;
+		if(button.code == input::KEY_LCONTROL || button.code == input::KEY_RCONTROL)
+			m_ControlState += button.pressedDown ? 1 : -1;
 		KeyboardEvent e;
 		e.autoRepeat = false;
-		memcpy(e.character, event.keyInput.character, sizeof(e.character));
-		e.key = event.button.code;
-		e.down = event.button.state;
+		std::memcpy(e.character, button.character, sizeof(e.character));
+		e.key = input::EKeyCode(button.code);
+		e.down = button.pressedDown;
 		SendKeyboardEvent(e);
 
 		if(e.down) {
@@ -603,8 +601,7 @@ void GUIEnvironment::OnCursorMove(const math::Vector2F& newPos)
 
 void GUIEnvironment::OnEvent(const input::Event& event)
 {
-	if((event.source == input::EEventSource::Mouse && !m_IgnoreMouse) ||
-		(event.source == input::EEventSource::Keyboard && !m_IgnoreKeyboard))
+	if((!m_IgnoreMouse && event.device->GetType() == input::EDeviceType::Mouse) || (!m_IgnoreKeyboard && event.device->GetType() == input::EDeviceType::Keyboard))
 		SendUserInputEvent(event);
 }
 

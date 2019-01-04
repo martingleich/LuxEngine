@@ -6,26 +6,11 @@ namespace lux
 {
 namespace core
 {
-	struct Button
-	{
-		bool state;
-	};
-
-	struct Axis
-	{
-		float state;
-	};
-
-	struct Area
-	{
-		math::Vector2F state;
-	};
-
-	class Event
-	{
-	public:
-		virtual ~Event() {}
-	};
+class Event
+{
+public:
+	virtual ~Event() {}
+};
 
 } // namespace event
 } // namespace lux

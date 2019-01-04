@@ -66,7 +66,7 @@ public:
 		LPARAM lParam,
 		LRESULT& result);
 
-	int DiscoverDevices(EEventSource deviceType);
+	int DiscoverDevices(EDeviceType deviceType);
 
 private:
 	HWND m_Window;

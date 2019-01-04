@@ -31,13 +31,13 @@ StrongRef<InputDevice> InputSystemImpl::CreateDevice(const DeviceCreationDesc* d
 	}
 
 	switch(desc->GetType()) {
-	case EEventSource::Keyboard:
+	case EDeviceType::Keyboard:
 		device = LUX_NEW(KeyboardDevice)(desc, this);
 		break;
-	case EEventSource::Mouse:
+	case EDeviceType::Mouse:
 		device = LUX_NEW(MouseDevice)(desc, this);
 		break;
-	case EEventSource::Joystick:
+	case EDeviceType::Joystick:
 		device = LUX_NEW(JoystickDevice)(desc, this);
 		break;
 	default:
@@ -58,10 +58,10 @@ void InputSystemImpl::Update(Event& event)
 
 		// If there is no default mouse or keyboard device, and the event was sent
 		// from a mouse or keyboard use them as default device.
-		if(event.device->GetType() == EEventSource::Keyboard) {
+		if(event.device->GetType() == EDeviceType::Keyboard) {
 			if(!m_KeyboardDevice || !m_KeyboardDevice->IsConnected())
 				m_KeyboardDevice = event.device;
-		} else if(event.device->GetType() == EEventSource::Mouse) {
+		} else if(event.device->GetType() == EDeviceType::Mouse) {
 			if(!m_MouseDevice || !m_MouseDevice->IsConnected())
 				m_MouseDevice = event.device;
 		}
@@ -69,11 +69,6 @@ void InputSystemImpl::Update(Event& event)
 		if(event.device->Update(event) && event.device->IsAquired())
 			m_EventSignal.Broadcast(event);
 	}
-}
-
-void InputSystemImpl::SendUserEvent(const Event& event)
-{
-	m_EventSignal.Broadcast(event);
 }
 
 void InputSystemImpl::SetForegroundState(bool isForeground)
@@ -119,7 +114,7 @@ StrongRef<InputDevice> InputSystemImpl::GetKeyboard()
 
 	InputDevice* firstNotConnected = nullptr;
 	for(auto it = m_GUIDMap.First(); it != m_GUIDMap.End(); ++it) {
-		if((*it)->GetType() == EEventSource::Keyboard) {
+		if((*it)->GetType() == EDeviceType::Keyboard) {
 			firstNotConnected = *it;
 			if((*it)->IsConnected()) {
 				m_KeyboardDevice = it->GetWeak();
@@ -141,7 +136,7 @@ StrongRef<InputDevice> InputSystemImpl::GetMouse()
 
 	InputDevice* firstNotConnected = nullptr;
 	for(auto it = m_GUIDMap.First(); it != m_GUIDMap.End(); ++it) {
-		if((*it)->GetType() == EEventSource::Mouse) {
+		if((*it)->GetType() == EDeviceType::Mouse) {
 			firstNotConnected = *it;
 			if((*it)->IsConnected()) {
 				m_MouseDevice = it->GetWeak();
