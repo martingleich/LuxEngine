@@ -12,10 +12,16 @@ namespace
 {
 class ParamSetCallback : public video::ShaderParamSetCallback
 {
+public:
+	int texId;
+	void Init(video::Shader* shader)
+	{
+		texId = shader->GetParamId("texture");
+	}
 	void SendShaderSettings(const video::Pass& pass, void* userParam) const
 	{
 		if(userParam)
-			pass.shader->SetParam(0, userParam);
+			pass.shader->SetParam(texId, userParam);
 	}
 } g_ShaderParamSet;
 }
@@ -37,8 +43,9 @@ Renderer::Renderer(video::Renderer* r)
 		video::ETextureArgument::Diffuse,
 		video::ETextureArgument::Texture,
 		video::ETextureOperator::Modulate);
-	video::FixedFunctionParameters paramsTexture({"textures"}, {tss}, true);
+	video::FixedFunctionParameters paramsTexture({"texture"}, {tss}, true);
 	m_TexturePass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramsTexture);
+	g_ShaderParamSet.Init(m_TexturePass.shader);
 
 	m_DiffusePass.culling = video::EFaceSide::None;
 	m_DiffusePass.zWriteEnabled = false;

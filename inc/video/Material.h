@@ -123,12 +123,16 @@ public:
 		return m_Params.FromID(id, true).Get<float>();
 	}
 	
-	bool HasDiffuse() const { return m_DiffuseId > 0; }
-	bool HasEmissive() const { return m_EmissiveId > 0; }
-	bool HasSpecularHardness() const { return m_SpecularHardnessId > 0; }
-	bool HasSpecularIntensity() const { return m_SpecularIntensityId > 0; }
+	bool HasDiffuse() const { return m_DiffuseId >= 0; }
+	bool HasEmissive() const { return m_EmissiveId >= 0; }
+	bool HasSpecularHardness() const { return m_SpecularHardnessId >= 0; }
+	bool HasSpecularIntensity() const { return m_SpecularIntensityId >= 0; }
 
-	void SetDiffuse(const video::ColorF& color) { if(HasDiffuse()) SetColor(m_DiffuseId, color); }
+	void SetDiffuse(const video::ColorF& color)
+	{
+		if(HasDiffuse())
+			SetColor(m_DiffuseId, color);
+	}
 	void SetEmissive(float emissive) { if(HasEmissive()) SetFloat(m_EmissiveId, emissive); }
 	void SetSpecularHardness(float hardness) { if(HasSpecularHardness()) SetFloat(m_SpecularHardnessId, hardness); }
 	void SetSpecularIntensity(float intensity) { if(HasSpecularIntensity()) SetFloat(m_SpecularIntensityId, intensity); }

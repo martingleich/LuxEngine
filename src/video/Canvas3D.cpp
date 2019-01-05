@@ -80,7 +80,7 @@ Canvas3D::Canvas3D(const math::Matrix4& transform, float polyOffset) :
 	m_Renderer(video::VideoDriver::Instance()->GetRenderer()),
 	m_LastPass(NonePass)
 {
-	if(g_Canvas3DSystem)
+	if(!g_Canvas3DSystem)
 		throw core::InvalidOperationException("Canvas3D System isn't initialized");
 }
 
