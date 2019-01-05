@@ -16,10 +16,10 @@ Canvas3DSystem::Canvas3DSystem()
 	m_PenPass.fogEnabled = false;
 	m_PenPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader({}, {}, true);
 
-	video::VertexDeclaration decl;
-	decl.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
-	decl.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
-	m_PenFormat = video::VertexFormat("penVertex", decl);
+	video::VertexFormatBuilder builder;
+	builder.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
+	builder.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
+	m_PenFormat = builder.Build("pen_vertex");
 
 	m_BrushPass.lighting = video::ELightingFlag::Disabled;
 	m_BrushPass.fogEnabled = false;

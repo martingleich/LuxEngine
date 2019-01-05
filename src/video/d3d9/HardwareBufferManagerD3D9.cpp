@@ -19,21 +19,16 @@ BufferManagerD3D9::BufferManagerD3D9(VideoDriver* driver) :
 {
 	m_D3DDevice = reinterpret_cast<IDirect3DDevice9*>(m_Driver->GetLowLevelDevice());
 
-	m_UsedStreams = 0;
-	m_MaxStreamCount = (UINT)m_Driver->GetDeviceCapability(EDriverCaps::MaxStreams);
 	VideoDriverD3D9* drv = reinterpret_cast<VideoDriverD3D9*>(driver);
 	if((drv->GetCaps().Caps2 & D3DDEVCAPS2_STREAMOFFSET) != 0)
 		m_AllowStreamOffset = true;
 	else
 		m_AllowStreamOffset = false;
-
-	m_VStreams.Resize(m_MaxStreamCount);
 }
 
 BufferManagerD3D9::~BufferManagerD3D9()
 {
-	for(int i = 0; i < m_MaxStreamCount; ++i)
-		m_D3DDevice->SetStreamSource((UINT)i, nullptr, 0, 0);
+	m_D3DDevice->SetStreamSource(0, nullptr, 0, 0);
 	m_D3DDevice->SetIndices(nullptr);
 }
 
@@ -219,10 +214,8 @@ void* BufferManagerD3D9::UpdateInternalBuffer(HardwareBuffer* buffer, void* hand
 	}
 }
 
-void BufferManagerD3D9::EnableHardwareBuffer(int streamID, const HardwareBuffer* buffer, const void* handle)
+void BufferManagerD3D9::EnableHardwareBuffer(const HardwareBuffer* buffer, const void* handle)
 {
-	LX_CHECK_BOUNDS(streamID, 0, m_MaxStreamCount);
-
 	switch(buffer->GetBufferType()) {
 	case EHardwareBufferType::Index:
 	{
@@ -242,38 +235,32 @@ void BufferManagerD3D9::EnableHardwareBuffer(int streamID, const HardwareBuffer*
 	case EHardwareBufferType::Vertex:
 	{
 		IDirect3DVertexBuffer9* d3dBuffer = (IDirect3DVertexBuffer9*)handle;
-		VertexStream& vs = m_VStreams[streamID];
 		if(handle) {
-			vs.data = nullptr;
-			vs.offset = 0;
+			m_VStream.data = nullptr;
+			m_VStream.offset = 0;
 
 			HRESULT hr;
 			if(m_AllowStreamOffset) {
-				hr = m_D3DDevice->SetStreamSource(streamID, d3dBuffer, vs.offset, buffer->GetStride());
-				vs.offset = 0;
+				hr = m_D3DDevice->SetStreamSource(0, d3dBuffer, m_VStream.offset, buffer->GetStride());
+				m_VStream.offset = 0;
 			} else {
-				hr = m_D3DDevice->SetStreamSource(streamID, d3dBuffer, 0, buffer->GetStride());
+				hr = m_D3DDevice->SetStreamSource(0, d3dBuffer, 0, buffer->GetStride());
 			}
 
 			if(FAILED(hr))
 				throw core::D3D9Exception(hr);
 		} else {
-			vs.data = buffer->Pointer_c(0, buffer->GetSize());
-			vs.offset = 0;
+			m_VStream.data = buffer->Pointer_c(0, buffer->GetSize());
+			m_VStream.offset = 0;
 		}
-
-		m_UsedStreams |= (1 << streamID);
 	}
 	break;
 	}
 }
 
-bool BufferManagerD3D9::GetVertexStream(int streamID, VertexStream& vs) const
+bool BufferManagerD3D9::GetVertexStream(VertexStream& vs) const
 {
-	if((m_UsedStreams & (1 << streamID)) == 0)
-		return false;
-
-	vs = m_VStreams[streamID];
+	vs = m_VStream;
 	return true;
 }
 
@@ -286,20 +273,12 @@ bool BufferManagerD3D9::GetIndexStream(IndexStream& is) const
 void BufferManagerD3D9::ResetStreams()
 {
 	m_D3DDevice->SetIndices(nullptr);
-
-	int i = 0;
-	while(m_UsedStreams & (1 << i)) {
-		m_D3DDevice->SetStreamSource(i, nullptr, 0, 0);
-		++i;
-	}
-
-	m_UsedStreams = 0;
+	m_D3DDevice->SetStreamSource(0, nullptr, 0, 0);
 }
 
 void BufferManagerD3D9::ReleaseHardwareBuffers()
 {
-	for(int i = 0; i < m_MaxStreamCount; ++i)
-		m_D3DDevice->SetStreamSource((UINT)i, nullptr, 0, 0);
+	m_D3DDevice->SetStreamSource(0, nullptr, 0, 0);
 	m_D3DDevice->SetIndices(nullptr);
 
 	for(auto hb : m_HardwareBuffers) {

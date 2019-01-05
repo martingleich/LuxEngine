@@ -30,7 +30,7 @@ MeshCollider::MeshCollider(video::Mesh* mesh)
 	auto sub = mesh->GetGeometry();
 	auto indices = sub->GetIndices();
 	auto vertices = sub->GetVertices();
-	int offset = sub->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;
+	int offset = sub->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).GetOffset();
 	int stride = sub->GetVertexFormat().GetStride();
 	const u8* data = (const u8*)vertices->Pointer_c(0, vertices->GetSize());
 	for(int j = 0; j < indices->GetSize(); j += 3) {

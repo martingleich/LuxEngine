@@ -7,107 +7,54 @@ namespace lux
 namespace video
 {
 
-static VertexDeclaration VertexDeclaration_STANDARD;
-static VertexDeclaration VertexDeclaration_POS_ONLY;
-static VertexDeclaration VertexDeclaration_POSW_ONLY;
-static VertexDeclaration VertexDeclaration_TRANSFORMED;
-static VertexDeclaration VertexDeclaration_TWO_TEXTURE;
-static VertexDeclaration VertexDeclaration_TANGENTS;
-static VertexDeclaration VertexDeclaration_TEXTURE_3D;
-static VertexDeclaration VertexDeclaration_STANDARD_2D;
+const VertexFormat VertexFormat::STANDARD("Standard", {
+	{offsetof(video::Vertex3D, position), VertexElement::EType::Float3, VertexElement::EUsage::Position},
+	{offsetof(video::Vertex3D, normal), VertexElement::EType::Float3, VertexElement::EUsage::Normal},
+	{offsetof(video::Vertex3D, color), VertexElement::EType::Color, VertexElement::EUsage::Diffuse},
+	{offsetof(video::Vertex3D, texture), VertexElement::EType::Float2, VertexElement::EUsage::Texcoord0}});
+const VertexFormat VertexFormat::POS_ONLY("PosOnly", {
+	{offsetof(video::VertexPosOnly, position), VertexElement::EType::Float3, VertexElement::EUsage::Position}});
+const VertexFormat VertexFormat::POSW_ONLY("PosWOnly", {
+	{offsetof(video::VertexPosOnly, position), VertexElement::EType::Float4, VertexElement::EUsage::PositionNT}});
+const VertexFormat VertexFormat::TRANSFORMED("Transformed", {
+	{offsetof(video::VertexTransformed, position), VertexElement::EType::Float4, VertexElement::EUsage::PositionNT},
+	{offsetof(video::VertexTransformed, color), VertexElement::EType::Color, VertexElement::EUsage::Diffuse},
+	{offsetof(video::VertexTransformed, texture), VertexElement::EType::Float2, VertexElement::EUsage::Texcoord0}});
+const VertexFormat VertexFormat::TWO_TEXTURE("Two_Texture", {
+	{offsetof(video::Vertex2TCoords, position), VertexElement::EType::Float3, VertexElement::EUsage::Position},
+	{offsetof(video::Vertex2TCoords, normal), VertexElement::EType::Float3, VertexElement::EUsage::Normal},
+	{offsetof(video::Vertex2TCoords, color), VertexElement::EType::Color, VertexElement::EUsage::Diffuse},
+	{offsetof(video::Vertex2TCoords, texture), VertexElement::EType::Float2, VertexElement::EUsage::Texcoord0},
+	{offsetof(video::Vertex2TCoords, texture2), VertexElement::EType::Float2, VertexElement::EUsage::Texcoord1}});
+const VertexFormat VertexFormat::TANGENTS("Tangents", {
+	{offsetof(video::VertexTangents, position), VertexElement::EType::Float3, VertexElement::EUsage::Position},
+	{offsetof(video::VertexTangents, normal), VertexElement::EType::Float3, VertexElement::EUsage::Normal},
+	{offsetof(video::VertexTangents, color), VertexElement::EType::Color, VertexElement::EUsage::Diffuse},
+	{offsetof(video::VertexTangents, texture), VertexElement::EType::Float2, VertexElement::EUsage::Texcoord0},
+	{offsetof(video::VertexTangents, tangent), VertexElement::EType::Float3, VertexElement::EUsage::Tangent},
+	{offsetof(video::VertexTangents, binormal), VertexElement::EType::Float3, VertexElement::EUsage::Binormal}});
+const VertexFormat VertexFormat::TEXTURE_3D("Texture_3D", {
+	{offsetof(video::Vertex3DTCoord, position), VertexElement::EType::Float3, VertexElement::EUsage::Position},
+	{offsetof(video::Vertex3DTCoord, texture), VertexElement::EType::Float3, VertexElement::EUsage::Texcoord0}});
+const VertexFormat VertexFormat::STANDARD_2D("Standard_2D", {
+	{offsetof(video::Vertex2D, position), VertexElement::EType::Float2, VertexElement::EUsage::Position},
+	{offsetof(video::Vertex2D, color), VertexElement::EType::Color, VertexElement::EUsage::Diffuse},
+	{offsetof(video::Vertex2D, texture), VertexElement::EType::Float2, VertexElement::EUsage::Texcoord0}});
 
-struct VertexDeclInitType
+static_assert(sizeof(video::Vertex3D) == 36, "Bad size");
+static_assert(sizeof(video::VertexPosOnly) == 12, "Bad size");
+static_assert(sizeof(video::VertexPosWOnly) == 16, "Bad size");
+static_assert(sizeof(video::VertexTransformed) == 28, "Bad size");
+static_assert(sizeof(video::Vertex2TCoords) == 44, "Bad size");
+static_assert(sizeof(video::VertexTangents) == 60, "Bad size");
+static_assert(sizeof(video::Vertex3DTCoord) == 24, "Bad size");
+static_assert(sizeof(video::Vertex2D) == 20, "Bad size");
+
+VertexFormat::VertexFormat()
 {
-	VertexDeclInitType()
-	{
-		VertexDeclaration_STANDARD.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
-		VertexDeclaration_STANDARD.AddElement(VertexElement::EUsage::Normal, VertexElement::EType::Float3);
-		VertexDeclaration_STANDARD.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
-		VertexDeclaration_STANDARD.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
-		lxAssert(VertexDeclaration_STANDARD.IsValid());
-		static_assert(offsetof(video::Vertex3D, position) == 0, "Bad offset");
-		static_assert(offsetof(video::Vertex3D, normal) == 12, "Bad offset");
-		static_assert(offsetof(video::Vertex3D, color) == 24, "Bad offset");
-		static_assert(offsetof(video::Vertex3D, texture) == 28, "Bad offset");
-		static_assert(sizeof(video::Vertex3D) == 36, "Bad size");
-
-		VertexDeclaration_POS_ONLY.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
-		lxAssert(VertexDeclaration_POS_ONLY.IsValid());
-		static_assert(offsetof(video::VertexPosOnly, position) == 0, "Bad offset");
-		static_assert(sizeof(video::VertexPosOnly) == 12, "Bad size");
-
-		VertexDeclaration_POSW_ONLY.AddElement(VertexElement::EUsage::PositionNT, VertexElement::EType::Float4);
-		lxAssert(VertexDeclaration_POSW_ONLY.IsValid());
-		static_assert(offsetof(video::VertexPosWOnly, position) == 0, "Bad offset");
-		static_assert(offsetof(video::VertexPosWOnly, rhw) == 12, "Bad offset");
-		static_assert(sizeof(video::VertexPosWOnly) == 16, "Bad size");
-
-		VertexDeclaration_TRANSFORMED.AddElement(VertexElement::EUsage::PositionNT, VertexElement::EType::Float4);
-		VertexDeclaration_TRANSFORMED.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
-		VertexDeclaration_TRANSFORMED.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
-		lxAssert(VertexDeclaration_TRANSFORMED.IsValid());
-		static_assert(offsetof(video::VertexTransformed, position) == 0, "Bad offset");
-		static_assert(offsetof(video::VertexTransformed, RHW) == 12, "Bad offset");
-		static_assert(offsetof(video::VertexTransformed, color) == 16, "Bad offset");
-		static_assert(offsetof(video::VertexTransformed, texture) == 20, "Bad offset");
-		static_assert(sizeof(video::VertexTransformed) == 28, "Bad size");
-
-		VertexDeclaration_TWO_TEXTURE.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
-		VertexDeclaration_TWO_TEXTURE.AddElement(VertexElement::EUsage::Normal, VertexElement::EType::Float3);
-		VertexDeclaration_TWO_TEXTURE.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
-		VertexDeclaration_TWO_TEXTURE.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
-		VertexDeclaration_TWO_TEXTURE.AddElement(VertexElement::EUsage::Texcoord1, VertexElement::EType::Float2);
-		lxAssert(VertexDeclaration_TWO_TEXTURE.IsValid());
-		static_assert(offsetof(video::Vertex2TCoords, position) == 0, "Bad offset");
-		static_assert(offsetof(video::Vertex2TCoords, normal) == 12, "Bad offset");
-		static_assert(offsetof(video::Vertex2TCoords, color) == 24, "Bad offset");
-		static_assert(offsetof(video::Vertex2TCoords, texture) == 28, "Bad offset");
-		static_assert(offsetof(video::Vertex2TCoords, texture2) == 36, "Bad offset");
-		static_assert(sizeof(video::Vertex2TCoords) == 44, "Bad size");
-
-		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
-		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Normal, VertexElement::EType::Float3);
-		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
-		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
-		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Tangent, VertexElement::EType::Float3);
-		VertexDeclaration_TANGENTS.AddElement(VertexElement::EUsage::Binormal, VertexElement::EType::Float3);
-		lxAssert(VertexDeclaration_TANGENTS.IsValid());
-		static_assert(offsetof(video::VertexTangents, position) == 0, "Bad offset");
-		static_assert(offsetof(video::VertexTangents, normal) == 12, "Bad offset");
-		static_assert(offsetof(video::VertexTangents, color) == 24, "Bad offset");
-		static_assert(offsetof(video::VertexTangents, texture) == 28, "Bad offset");
-		static_assert(offsetof(video::VertexTangents, tangent) == 36, "Bad offset");
-		static_assert(offsetof(video::VertexTangents, binormal) == 48, "Bad offset");
-		static_assert(sizeof(video::VertexTangents) == 60, "Bad size");
-
-		VertexDeclaration_TEXTURE_3D.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
-		VertexDeclaration_TEXTURE_3D.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float3);
-		lxAssert(VertexDeclaration_TEXTURE_3D.IsValid());
-		static_assert(offsetof(video::Vertex3DTCoord, position) == 0, "Bad offset");
-		static_assert(offsetof(video::Vertex3DTCoord, texture) == 12, "Bad offset");
-		static_assert(sizeof(video::Vertex3DTCoord) == 24, "Bad size");
-
-		VertexDeclaration_STANDARD_2D.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float2);
-		VertexDeclaration_STANDARD_2D.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
-		VertexDeclaration_STANDARD_2D.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
-		lxAssert(VertexDeclaration_STANDARD_2D.IsValid());
-		static_assert(offsetof(video::Vertex2D, position) == 0, "Bad offset");
-		static_assert(offsetof(video::Vertex2D, color) == 8, "Bad offset");
-		static_assert(offsetof(video::Vertex2D, texture) == 12, "Bad offset");
-		static_assert(sizeof(video::Vertex2D) == 20, "Bad size");
-	}
-};
-
-static VertexDeclInitType VertexDeclInitInstance;
-
-const VertexFormat VertexFormat::STANDARD("Standard", VertexDeclaration_STANDARD);
-const VertexFormat VertexFormat::POS_ONLY("PosOnly", VertexDeclaration_POS_ONLY);
-const VertexFormat VertexFormat::POSW_ONLY("PosWOnly", VertexDeclaration_POSW_ONLY);
-const VertexFormat VertexFormat::TRANSFORMED("Transformed", VertexDeclaration_TRANSFORMED);
-const VertexFormat VertexFormat::TWO_TEXTURE("Two_Texture", VertexDeclaration_TWO_TEXTURE);
-const VertexFormat VertexFormat::TANGENTS("Tangents", VertexDeclaration_TANGENTS);
-const VertexFormat VertexFormat::TEXTURE_3D("Texture_3D", VertexDeclaration_TEXTURE_3D);
-const VertexFormat VertexFormat::STANDARD_2D("Standard_2D", VertexDeclaration_STANDARD_2D);
+	static StrongRef<SharedData> shared = LUX_NEW(SharedData)("", {}, 0);
+	m_Data = shared;
+}
 
 }
 }

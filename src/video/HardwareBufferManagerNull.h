@@ -13,21 +13,20 @@ class BufferManagerNull : public BufferManager
 public:
 	BufferManagerNull(VideoDriver* driver);
 
-	VideoDriver* GetDriver();
-	void AddBuffer(HardwareBuffer* buffer);
-	void RemoveBuffer(HardwareBuffer* buffer);
-	void UpdateBuffer(HardwareBuffer* buffer);
-	void ForceBufferUpdate(HardwareBuffer* buffer);
-	StrongRef<IndexBuffer> CreateIndexBuffer();
-	StrongRef<VertexBuffer> CreateVertexBuffer();
-	void EnableBuffer(const HardwareBuffer* buffer, int streamID);
+	void AddBuffer(HardwareBuffer* buffer) override;
+	void RemoveBuffer(HardwareBuffer* buffer) override;
+	void UpdateBuffer(HardwareBuffer* buffer) override;
+	void EnableBuffer(const HardwareBuffer* buffer) override;
+	StrongRef<IndexBuffer> CreateIndexBuffer() override;
+	StrongRef<VertexBuffer> CreateVertexBuffer() override;
 
+protected:
 	virtual void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
 	virtual void RemoveInternalBuffer(HardwareBuffer* buffer, void* handle) = 0;
-	virtual void EnableHardwareBuffer(
-		int streamID,
-		const HardwareBuffer* buffer,
-		const void* handle) = 0;
+	virtual void EnableHardwareBuffer(const HardwareBuffer* buffer, const void* handle) = 0;
+
+private:
+	void ForceBufferUpdate(HardwareBuffer* buffer);
 
 protected:
 	VideoDriver* m_Driver;

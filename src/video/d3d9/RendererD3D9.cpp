@@ -270,21 +270,21 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 		// Rendering from hardwarebuffer
 		auto bufferManager = m_Driver->GetBufferManager();
 
-		bufferManager->EnableBuffer(rq.bufferData.vb, 0);
+		bufferManager->EnableBuffer(rq.bufferData.vb);
 
 		BufferManagerD3D9* d3d9Manager = bufferManager.As<BufferManagerD3D9>();
 		vformat = &rq.bufferData.vb->GetFormat();
 		vertexCount = rq.bufferData.vb->GetSize();
 
 		BufferManagerD3D9::VertexStream vs;
-		if(d3d9Manager->GetVertexStream(0, vs))
+		if(d3d9Manager->GetVertexStream(vs))
 			vertexOffset = vs.offset;
 		else
 			vertexOffset = 0;
 		if(rq.indexed) {
 			iformat = rq.bufferData.ib->GetFormat();
 			BufferManagerD3D9::IndexStream is;
-			bufferManager->EnableBuffer(rq.bufferData.ib, 0);
+			bufferManager->EnableBuffer(rq.bufferData.ib);
 			if(d3d9Manager->GetIndexStream(is))
 				indexOffset = is.offset;
 			else
@@ -315,7 +315,7 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 	SetupRendering(rq.frontFace);
 	HRESULT hr = E_FAIL;
 	if(rq.userPointer) {
-		DWORD stride = (DWORD)vformat->GetStride(0);
+		DWORD stride = (DWORD)vformat->GetStride();
 		if(rq.indexed) {
 			DWORD indexStride = iformat == EIndexFormat::Bit16 ? 2 : 4;
 			D3DFORMAT d3dIndexFormat = GetD3DIndexFormat(iformat);

@@ -122,7 +122,7 @@ void Geometry::RecalculateBoundingBox()
 	if(GetVertexCount() == 0) {
 		m_BoundingBox.Set(0.0f, 0.0f, 0.0f);
 	} else {
-		const int posOffset = GetVertexFormat().GetElement(0, video::VertexElement::EUsage::Position).offset;
+		const int posOffset = GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).GetOffset();
 
 		const u8* vertex = reinterpret_cast<const u8*>(m_Vertices->Pointer_c(0, 1));
 		m_BoundingBox.Set(*reinterpret_cast<const math::Vector3F*>(vertex + posOffset));

@@ -10,20 +10,25 @@ namespace video
 class IndexBuffer : public HardwareBuffer
 {
 public:
-	IndexBuffer() : HardwareBuffer(EHardwareBufferType::Index) {}
+	LUX_API IndexBuffer(BufferManager* mgr);
+	LUX_API ~IndexBuffer();
 
-	virtual void SetFormat(EIndexFormat format, bool moveOld = true, void* init = nullptr) = 0;
-	virtual EIndexFormat GetFormat() const = 0;
+	LUX_API void SetFormat(EIndexFormat type, bool moveOld = true, void* init = nullptr);
+	LUX_API EIndexFormat GetFormat() const { return m_Format; }
 
-	virtual int AddIndex(const void* index) = 0;
-	virtual int AddIndices(const void* indices, int count) = 0;
-	virtual int AddIndices32(const u32* indices, int count) = 0;
-	virtual void SetIndex(const void* index, int n) = 0;
-	virtual void SetIndices(const void* indices, int count, int n) = 0;
-	virtual void SetIndices32(const u32* indices, int count, int n) = 0;
-	virtual void GetIndex(void* ptr, int n) const = 0;
-	virtual void GetIndices(void* ptr, int count, int n) const = 0;
-	virtual int GetIndex(int n) const = 0;
+	LUX_API int AddIndex(const void* index);
+	LUX_API int AddIndices(const void* indices, int count);
+	LUX_API int AddIndices32(const u32* indices, int count);
+	LUX_API void SetIndex(const void* index, int n);
+	LUX_API void SetIndices(const void* indices, int count, int n);
+	LUX_API void SetIndices32(const u32* indices, int count, int n);
+	LUX_API void GetIndex(void* ptr, int n) const;
+	LUX_API void GetIndices(void* ptr, int count, int n) const;
+
+	LUX_API int GetIndex(int n) const;
+
+private:
+	EIndexFormat m_Format;
 };
 
 }    //namespace video

@@ -53,12 +53,8 @@ public:
 	Calls to IVideoDriver::DrawPrimitiveList must used the buffer used here
 	for rendering.
 	\param buffer The buffer to set
-	\param streamID The stream where the buffer is set
 	*/
-	virtual void EnableBuffer(const HardwareBuffer* buffer, int streamID) = 0;
-
-	//! The driver which uses this buffermanager
-	virtual VideoDriver* GetDriver() = 0;
+	virtual void EnableBuffer(const HardwareBuffer* buffer) = 0;
 
 	//! Create a new index buffer
 	virtual StrongRef<IndexBuffer> CreateIndexBuffer() = 0;

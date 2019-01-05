@@ -22,10 +22,10 @@ StrongRef<PointRendererMachine> PointRendererMachine::GetShared()
 
 PointRendererMachine::PointRendererMachine()
 {
-	video::VertexDeclaration decl;
-	decl.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
-	decl.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
-	m_VertexFormat = video::VertexFormat("particle_point_renderer", decl);
+	video::VertexFormatBuilder builder;
+	builder.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
+	builder.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
+	m_VertexFormat = builder.Build("particle_point_renderer");
 
 	m_DefaultPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_DefaultPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;

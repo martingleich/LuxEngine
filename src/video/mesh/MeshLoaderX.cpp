@@ -1431,14 +1431,14 @@ MeshLoaderX::MeshLoaderX()
 	g_KeywordMap["UNICODE"] = TOKEN_UNICODE;
 	g_KeywordMap["WORD"] = TOKEN_WORD;
 
-	video::VertexDeclaration decl;
-	decl.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
-	decl.AddElement(VertexElement::EUsage::Normal, VertexElement::EType::Float3);
-	decl.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
-	decl.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
-	decl.AddElement(VertexElement::EUsage::BlendIndices, VertexElement::EType::Byte4);
-	decl.AddElement(VertexElement::EUsage::BlendWeight, VertexElement::EType::Byte4);
-	g_VertexFormatSkinned = VertexFormat("BoneFormat", decl);
+	video::VertexFormatBuilder builder;
+	builder.AddElement(VertexElement::EUsage::Position, VertexElement::EType::Float3);
+	builder.AddElement(VertexElement::EUsage::Normal, VertexElement::EType::Float3);
+	builder.AddElement(VertexElement::EUsage::Diffuse, VertexElement::EType::Color);
+	builder.AddElement(VertexElement::EUsage::Texcoord0, VertexElement::EType::Float2);
+	builder.AddElement(VertexElement::EUsage::BlendIndices, VertexElement::EType::Byte4);
+	builder.AddElement(VertexElement::EUsage::BlendWeight, VertexElement::EType::Byte4);
+	g_VertexFormatSkinned = builder.Build("BoneFormat");
 }
 
 core::Name MeshLoaderX::GetResourceType(io::File* file, core::Name requestedType)

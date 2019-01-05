@@ -19,10 +19,10 @@ StrongRef<LineRendererMachine> LineRendererMachine::GetShared()
 }
 LineRendererMachine::LineRendererMachine()
 {
-	video::VertexDeclaration decl;
-	decl.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
-	decl.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
-	m_VertexFormat = video::VertexFormat("particleLine", decl);
+	video::VertexFormatBuilder builder;
+	builder.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
+	builder.AddElement(video::VertexElement::EUsage::Diffuse, video::VertexElement::EType::Color);
+	m_VertexFormat = builder.Build("particleLine");
 
 	m_DefaultPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_DefaultPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;

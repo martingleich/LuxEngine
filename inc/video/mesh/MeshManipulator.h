@@ -273,7 +273,7 @@ public:
 			targetIndices->SetFormat(indexType, false);
 			targetIndices->SetSize(primCount * 3, false);
 			targetVertices->SetSize(primCount * 3, false);
-			targetVertices->SetFormat(vertices->GetFormat(), vertices->GetStream());
+			targetVertices->SetFormat(vertices->GetFormat());
 
 			auto strideV = vertices->GetStride();
 			auto srcV = (u8*)vertices->Pointer_c(0, vertices->GetSize());

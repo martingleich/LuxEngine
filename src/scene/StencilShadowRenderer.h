@@ -256,7 +256,7 @@ private:
 		auto vertexCount = info.geo->GetVertexCount();
 		info.points.Reserve(vertexCount);
 		auto vb = info.geo->GetVertices();
-		auto poff = info.geo->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).offset;
+		auto poff = info.geo->GetVertexFormat().GetElement(video::VertexElement::EUsage::Position).GetOffset();
 		for(int i = 0; i < vertexCount; ++i) {
 			auto pos = *(math::Vector3F*)((u8*)vb->Pointer_c(i, 1) + poff);
 			info.points.PushBack(pos);

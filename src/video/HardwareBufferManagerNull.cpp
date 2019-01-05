@@ -1,6 +1,6 @@
 #include "HardwareBufferManagerNull.h"
-#include "video/IndexBufferImpl.h"
-#include "video/VertexBufferImpl.h"
+#include "video/IndexBuffer.h"
+#include "video/VertexBuffer.h"
 
 namespace lux
 {
@@ -10,11 +10,6 @@ namespace video
 BufferManagerNull::BufferManagerNull(VideoDriver* driver) :
 	m_Driver(driver)
 {
-}
-
-VideoDriver* BufferManagerNull::GetDriver()
-{
-	return m_Driver;
 }
 
 void BufferManagerNull::AddBuffer(HardwareBuffer* buffer)
@@ -46,20 +41,20 @@ void BufferManagerNull::ForceBufferUpdate(HardwareBuffer* buffer)
 
 StrongRef<IndexBuffer> BufferManagerNull::CreateIndexBuffer()
 {
-	return LUX_NEW(IndexBufferImpl)(this);
+	return LUX_NEW(IndexBuffer)(this);
 }
 
 StrongRef<VertexBuffer> BufferManagerNull::CreateVertexBuffer()
 {
-	return LUX_NEW(VertexBufferImpl)(this);
+	return LUX_NEW(VertexBuffer)(this);
 }
 
-void BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer, int streamID)
+void BufferManagerNull::EnableBuffer(const HardwareBuffer* buffer)
 {
 	if(!buffer)
 		return;
 	void* handle = buffer->GetHandle();
-	EnableHardwareBuffer(streamID, buffer, handle);
+	EnableHardwareBuffer(buffer, handle);
 }
 
 } // namespace video

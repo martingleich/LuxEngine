@@ -523,55 +523,49 @@ struct InvalidVertexElementError
 };
 }
 
+static BYTE GetD3DUsageIndex(VertexElement::EUsage usage)
+{
+	switch(usage) {
+	case VertexElement::EUsage::Texcoord0: return 0;
+	case VertexElement::EUsage::Texcoord1: return 1;
+	case VertexElement::EUsage::Texcoord2: return 2;
+	case VertexElement::EUsage::Texcoord3: return 3;
+	case VertexElement::EUsage::Specular: return 1;
+	default: return 0;
+	}
+}
 UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::CreateVertexFormat(const VertexFormat& format)
 {
-	if(!format.IsValid())
-		throw core::GenericInvalidArgumentException("format", "Invalid vertex format");
-
-	if(format.GetElement(0, VertexElement::EUsage::Position).sematic != VertexElement::EUsage::Position &&
-		format.GetElement(0, VertexElement::EUsage::PositionNT).sematic != VertexElement::EUsage::PositionNT)
+	if(!format.GetElement(VertexElement::EUsage::Position).IsValid() &&
+		!format.GetElement(VertexElement::EUsage::PositionNT).IsValid())
 		throw core::GenericInvalidArgumentException("format", "Missing position usage");
 
 	core::Array<D3DVERTEXELEMENT9> d3dElements;
 	d3dElements.Resize(format.GetElemCount() + 1);
 
-	for(int stream = 0; stream < format.GetStreamCount(); ++stream) {
-		for(int elem = 0; elem < format.GetElemCount(stream); ++elem) {
-			auto element = format.GetElement(stream, elem);
-			d3dElements[elem].Stream = (WORD)element.stream;
-			d3dElements[elem].Offset = (WORD)element.offset;
-			d3dElements[elem].Method = D3DDECLMETHOD_DEFAULT;
+	for(int elem = 0; elem < format.GetElemCount(); ++elem) {
+		auto element = format.GetElement(elem);
+		d3dElements[elem].Stream = 0;
+		d3dElements[elem].Offset = (WORD)element.GetOffset();
+		d3dElements[elem].Method = D3DDECLMETHOD_DEFAULT;
+		d3dElements[elem].UsageIndex = GetD3DUsageIndex(element.GetUsage());
 
-			if(element.sematic == VertexElement::EUsage::Texcoord0)
-				d3dElements[elem].UsageIndex = 0;
-			else if(element.sematic == VertexElement::EUsage::Texcoord1)
-				d3dElements[elem].UsageIndex = 1;
-			else if(element.sematic == VertexElement::EUsage::Texcoord2)
-				d3dElements[elem].UsageIndex = 2;
-			else if(element.sematic == VertexElement::EUsage::Texcoord3)
-				d3dElements[elem].UsageIndex = 3;
-			else if(element.sematic == VertexElement::EUsage::Specular)
-				d3dElements[elem].UsageIndex = 1;
-			else
-				d3dElements[elem].UsageIndex = 0;
+		d3dElements[elem].Type = (BYTE)GetD3DDeclType(element.GetType());
+		if(d3dElements[elem].Type == D3DDECLTYPE_UNUSED)
+			throw InvalidVertexElementError(elem, "invalid type");
 
-			d3dElements[elem].Type = (BYTE)GetD3DDeclType(element.type);
-			if(d3dElements[elem].Type == D3DDECLTYPE_UNUSED)
-				throw InvalidVertexElementError(elem, "invalid type");
-
-			d3dElements[elem].Usage = GetD3DUsage(element.sematic);
-			if(d3dElements[elem].Usage == 0xFF)
-				throw InvalidVertexElementError(elem, "invalid semantic");
-		}
+		d3dElements[elem].Usage = GetD3DUsage(element.GetUsage());
+		if(d3dElements[elem].Usage == 0xFF)
+			throw InvalidVertexElementError(elem, "invalid semantic");
 	}
 
-	auto size = format.GetElemCount();
-	d3dElements[size].Stream = 0xFF;
-	d3dElements[size].Offset = 0;
-	d3dElements[size].Type = D3DDECLTYPE_UNUSED;
-	d3dElements[size].Method = 0;
-	d3dElements[size].Usage = 0;
-	d3dElements[size].UsageIndex = 0;
+	auto count = format.GetElemCount();
+	d3dElements[count].Stream = 0xFF;
+	d3dElements[count].Offset = 0;
+	d3dElements[count].Type = D3DDECLTYPE_UNUSED;
+	d3dElements[count].Method = 0;
+	d3dElements[count].Usage = 0;
+	d3dElements[count].UsageIndex = 0;
 
 	UnknownRefCounted<IDirect3DVertexDeclaration9> d3dDecl;
 	HRESULT hr;

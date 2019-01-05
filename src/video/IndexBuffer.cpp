@@ -1,4 +1,5 @@
-#include "video/IndexBufferImpl.h"
+#include "video/IndexBuffer.h"
+#include "video/HardwareBufferManager.h"
 
 namespace lux
 {
@@ -15,26 +16,19 @@ static int CalcStride(EIndexFormat type)
 	return 0;
 }
 
-IndexBufferImpl::IndexBufferImpl(BufferManager* mgr) :
-	m_Manager(mgr),
+IndexBuffer::IndexBuffer(BufferManager* mgr) :
+	HardwareBuffer(mgr, EHardwareBufferType::Index),
 	m_Format(EIndexFormat::Bit16)
 {
 	m_Stride = CalcStride(m_Format);
-
-	m_Manager->AddBuffer(this);
 }
 
-IndexBufferImpl::~IndexBufferImpl()
+IndexBuffer::~IndexBuffer()
 {
 	m_Manager->RemoveBuffer(this);
 }
 
-EIndexFormat IndexBufferImpl::GetFormat() const
-{
-	return m_Format;
-}
-
-void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
+void IndexBuffer::SetFormat(EIndexFormat type, bool moveOld, void* init)
 {
 	int stride = CalcStride(type);
 
@@ -52,7 +46,7 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 
 		if(init)
 			for(int i = 0; i < m_Size; ++i)
-				memcpy(m_Data + i*m_Stride, init, m_Stride);
+				memcpy(m_Data + i * m_Stride, init, m_Stride);
 		return;
 	}
 
@@ -62,11 +56,11 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 
 		if(moveOld) {
 			for(int i = 0; i < m_Size; ++i)
-				*((int*)m_Data + i*stride) = *((u16*)old + i*m_Stride);
+				*((int*)m_Data + i * stride) = *((u16*)old + i * m_Stride);
 		} else {
 			if(init) {
 				for(int i = 0; i < m_Size; ++i)
-					memcpy(m_Data + i*stride, init, stride);
+					memcpy(m_Data + i * stride, init, stride);
 			}
 		}
 
@@ -77,11 +71,11 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 
 		if(moveOld) {
 			for(int i = 0; i < m_Size; ++i)
-				*((u16*)m_Data + i*stride) = (u16)*((int*)old + i*m_Stride);
+				*((u16*)m_Data + i * stride) = (u16)*((int*)old + i * m_Stride);
 		} else {
 			if(init) {
 				for(int i = 0; i < m_Size; ++i)
-					memcpy(m_Data + i*stride, init, stride);
+					memcpy(m_Data + i * stride, init, stride);
 			}
 		}
 
@@ -92,11 +86,12 @@ void IndexBufferImpl::SetFormat(EIndexFormat type, bool moveOld, void* init)
 	m_Stride = stride;
 }
 
-int IndexBufferImpl::AddIndex(const void* index)
+int IndexBuffer::AddIndex(const void* index)
 {
 	return AddIndices(index, 1);
 }
-int IndexBufferImpl::AddIndices(const void* indices, int count)
+
+int IndexBuffer::AddIndices(const void* indices, int count)
 {
 	if(m_Cursor + count - 1 >= m_Size) {
 		Reserve(m_Cursor + count);
@@ -108,7 +103,8 @@ int IndexBufferImpl::AddIndices(const void* indices, int count)
 	m_Cursor += count;
 	return ret;
 }
-int IndexBufferImpl::AddIndices32(const u32* indices, int count)
+
+int IndexBuffer::AddIndices32(const u32* indices, int count)
 {
 	if(m_Cursor + count - 1 >= m_Size) {
 		Reserve(m_Cursor + count);
@@ -121,15 +117,17 @@ int IndexBufferImpl::AddIndices32(const u32* indices, int count)
 	return ret;
 }
 
-void IndexBufferImpl::SetIndex(const void* index, int n)
+void IndexBuffer::SetIndex(const void* index, int n)
 {
 	SetIndices(index, 1, n);
 }
-void IndexBufferImpl::SetIndices(const void* indices, int count, int n)
+
+void IndexBuffer::SetIndices(const void* indices, int count, int n)
 {
 	memcpy(Pointer(n, count), indices, count*m_Stride);
 }
-void IndexBufferImpl::SetIndices32(const u32* indices, int count, int n)
+
+void IndexBuffer::SetIndices32(const u32* indices, int count, int n)
 {
 	if(m_Format == EIndexFormat::Bit16) {
 		u16* ptr = (u16*)Pointer(n, count);
@@ -142,13 +140,29 @@ void IndexBufferImpl::SetIndices32(const u32* indices, int count, int n)
 	}
 }
 
-void IndexBufferImpl::GetIndex(void* ptr, int n) const
+void IndexBuffer::GetIndex(void* ptr, int n) const
 {
 	GetIndices(ptr, 1, n);
 }
-void IndexBufferImpl::GetIndices(void* ptr, int count, int n) const
+
+void IndexBuffer::GetIndices(void* ptr, int count, int n) const
 {
 	memcpy(ptr, Pointer(n, count), count*m_Stride);
+}
+
+int IndexBuffer::GetIndex(int n) const
+{
+	if(GetFormat() == EIndexFormat::Bit32) {
+		u32 data;
+		GetIndex(&data, n);
+		return data;
+	} else if(GetFormat() == EIndexFormat::Bit16) {
+		u16 data;
+		GetIndex(&data, n);
+		return data;
+	}
+	lxAssertNeverReach("Unknown index format.");
+	return 0;
 }
 
 }

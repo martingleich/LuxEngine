@@ -45,8 +45,8 @@ public:
 	void* UpdateVertexBuffer(VertexBuffer* buffer, void* handle);
 	void* UpdateIndexBuffer(IndexBuffer* buffer, void* handle);
 	void* UpdateInternalBuffer(HardwareBuffer* buffer, void* handle);
-	void EnableHardwareBuffer(int streamID, const HardwareBuffer* buffer, const void* handle);
-	bool GetVertexStream(int streamID, VertexStream& vs) const;
+	void EnableHardwareBuffer(const HardwareBuffer* buffer, const void* handle);
+	bool GetVertexStream(VertexStream& vs) const;
 	bool GetIndexStream(IndexStream& is) const;
 	void ResetStreams();
 
@@ -56,11 +56,9 @@ public:
 private:
 	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
 
-	core::Array<VertexStream> m_VStreams;
-	int m_UsedStreams;
+	VertexStream m_VStream;
 	IndexStream m_IStream;
 	bool m_AllowStreamOffset;
-	int  m_MaxStreamCount;
 
 	core::Array<HardwareBuffer*> m_HardwareBuffers;
 };
