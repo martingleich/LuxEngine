@@ -102,8 +102,8 @@ public:
 
 	void OnEvent(const input::Event& e)
 	{
-		if(m_RButton || e.device->GetType() == input::EDeviceType::Keyboard)
-			m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->HandleInput(e);
+		//if(m_RButton)
+			//m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->HandleInput(e);
 		EventHandler::OnEvent(e);
 	}
 
@@ -122,13 +122,18 @@ public:
 	void OnRButton(bool isDown, const input::Event& event)
 	{
 		m_RButton = isDown;
-		if(isDown)
+		if(isDown) {
+			m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->EnableInput();
+			m_OldMousePos = Context.Cursor->GetPosition();
 			Context.Cursor->Disable();
-		else
-			Context.Cursor->Enable();
+		} else {
+			m_CameraNode->GetComponent<scene::FirstPersonCameraControl>()->DisableInput();
+			Context.Cursor->Enable(m_OldMousePos);
+		}
 	}
 
 	core::Array<StrongRef<video::Material>> GenMaterialList();
+	math::Vector2F m_OldMousePos;
 
 private:
 	bool m_RButton = false;
@@ -165,7 +170,9 @@ void MaterialTest::Load()
 	StrongRef<scene::Node> node;
 	scene::SceneBuilder scenebuilder(Context.Scene);
 
-	m_CameraNode->AddComponent(scenebuilder.CreateFirstPersonCameraControl());
+	auto camControl = scenebuilder.CreateFirstPersonCameraControl();
+	camControl->DisableInput();
+	m_CameraNode->AddComponent(camControl);
 
 	auto font = Context.GUI->GetFontCreator()->CreateFont(
 		gui::FontDescription("Comic Sans MS", 40, gui::EFontWeight::Bolt),
@@ -191,8 +198,8 @@ void MaterialTest::Load()
 		node = Context.Scene->AddNode(comp);
 
 		math::Vector3F pos(
-			startPoint.x + col*delta,
-			startPoint.y + row*delta,
+			startPoint.x + col * delta,
+			startPoint.y + row * delta,
 			0.0f);
 		node->SetPosition(pos);
 

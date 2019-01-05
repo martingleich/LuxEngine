@@ -357,7 +357,7 @@ bool WindowWin32::HandleMessages(UINT Message,
 	case WM_MOUSEMOVE:
 		if(m_Cursor->IsGrabbing()) {
 			POINTS p = MAKEPOINTS(LParam);
-			math::Vector2F pos = m_Cursor->GetGrabbingPosition();
+			math::Vector2F pos = m_Cursor->m_GrabbingPosition;
 			if(p.x != pos.x || p.y != pos.y)
 				m_Cursor->SetPosition(pos.x, pos.y);
 

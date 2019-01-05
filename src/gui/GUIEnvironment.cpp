@@ -71,8 +71,10 @@ public:
 	}
 
 	bool IsGrabbing() const { return m_Cursor->IsGrabbing(); }
-	void SetGrabbing(bool grab) { m_Cursor->SetGrabbing(grab); }
-	const math::Vector2F& GetGrabbingPosition() const { return m_Cursor->GetGrabbingPosition(); }
+	void GrabCursor(const math::Vector2F& pos) { m_Cursor->GrabCursor(pos); }
+	void GrabCursor() { m_Cursor->GrabCursor(); }
+	void UnGrabCursor() { m_Cursor->UnGrabCursor(); }
+	void UnGrabCursor(const math::Vector2F& pos) { m_Cursor->UnGrabCursor(pos); }
 
 	void SetVirtualDraw(bool b)
 	{
@@ -189,25 +191,32 @@ void GUIEnvironment::UseVirtualCursor(bool useVirtual)
 	if(useVirtual) {
 		if(m_Cursor) {
 			m_LuxCursor->SetVisible(m_OSCursor->IsVisible());
-			m_LuxCursor->SetGrabbing(m_OSCursor->IsGrabbing());
+			if(m_OSCursor->IsGrabbing())
+				m_LuxCursor->GrabCursor();
+			else
+				m_LuxCursor->UnGrabCursor();
 			m_LuxCursor->SetPosition(m_OSCursor->GetPosition());
 			if(!m_Root->GetFinalInnerRect().IsInside(m_LuxCursor->GetPosition())) {
 				m_LuxCursor->SetRelPosition(0.5f, 0.5f);
 			}
 		} else {
 			m_LuxCursor->SetVisible(true);
-			m_LuxCursor->SetGrabbing(false);
+			m_LuxCursor->UnGrabCursor();
 		}
-		m_OSCursor->SetGrabbing(true);
+		m_OSCursor->Grab();
 		m_OSCursor->SetVisible(false);
 		m_Cursor = m_LuxCursor;
 	} else {
 		if(m_Cursor) {
 			m_OSCursor->SetVisible(m_LuxCursor->IsVisible());
-			m_OSCursor->SetGrabbing(m_LuxCursor->IsGrabbing());
+			if(m_LuxCursor->IsGrabbing()) {
+				m_OSCursor->GrabCursor(m_LuxCursor->GetPosition());
+			} else {
+				m_LuxCursor->UnGrabCursor();
+			}
 			m_OSCursor->SetPosition(m_LuxCursor->GetPosition());
 		}
-		m_LuxCursor->SetGrabbing(true);
+		m_LuxCursor->GrabCursor();
 		m_LuxCursor->SetVisible(false);
 		m_Cursor = m_OSCursor;
 	}

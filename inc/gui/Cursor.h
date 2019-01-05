@@ -105,17 +105,20 @@ public:
 
 	//! Set the cursor to grabbing mode
 	/**
-	Grabbing fixes the cursor to one fixed position, but still post mouse move events
-	Of course with fixed absolute coordinates
-	Manual calls to SetPosition/SetRelPosition are still executed
 	\param Grab True to grab the cursor, false to ungrab
 
 	\ref IsGrabbing
 	*/
-	virtual void SetGrabbing(bool grab) = 0;
-
-	//! Get the current grabbing position
-	virtual const math::Vector2F& GetGrabbingPosition() const = 0;
+	virtual void GrabCursor(const math::Vector2F& pos) = 0;
+	virtual void GrabCursor()
+	{
+		GrabCursor(GetPosition());
+	}
+	virtual void UnGrabCursor(const math::Vector2F& pos) = 0;
+	virtual void UnGrabCursor()
+	{
+		UnGrabCursor(GetPosition());
+	}
 
 	//! Disables the cursor.
 	/**
@@ -124,8 +127,8 @@ public:
 	virtual void Disable()
 	{
 		this->SetVisible(false);
-		this->SetRelPosition(0.5f, 0.5f);
-		this->SetGrabbing(true);
+		auto size = GetScreenSize();
+		this->GrabCursor(math::Vector2F(size.width/2, size.height/2));
 	}
 
 	//! Enables the cursor
@@ -134,8 +137,13 @@ public:
 	*/
 	virtual void Enable()
 	{
+		this->UnGrabCursor();
 		this->SetVisible(true);
-		this->SetGrabbing(false);
+	}
+	virtual void Enable(const math::Vector2F& pos)
+	{
+		this->UnGrabCursor(pos);
+		this->SetVisible(true);
 	}
 
 	core::Signal<const math::Vector2F&> onCursorMove;

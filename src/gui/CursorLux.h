@@ -78,14 +78,15 @@ public:
 		return m_IsGrabbing;
 	}
 
-	void SetGrabbing(bool grab)
+	void GrabCursor(const math::Vector2F& pos)
 	{
-		m_IsGrabbing = grab;
+		m_IsGrabbing = true;
+		m_Position = pos;
 	}
-
-	const math::Vector2F& GetGrabbingPosition() const
+	void UnGrabCursor(const math::Vector2F& pos)
 	{
-		return m_Position;
+		m_Position = pos;
+		m_IsGrabbing = false;
 	}
 
 private:
