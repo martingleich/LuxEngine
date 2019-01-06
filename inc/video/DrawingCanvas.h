@@ -3,6 +3,8 @@
 #include "math/Rect.h"
 #include "video/ColorFormat.h"
 #include "video/Color.h"
+#include "video/Texture.h"
+#include "video/CubeTexture.h"
 
 namespace lux
 {
@@ -36,17 +38,17 @@ public:
 	void SetFastPixel(int x, int y, u8 native_color[4])
 	{
 		int b = m_Format.GetBytePerPixel();
-		std::memcpy(m_Data + y*m_Pitch + b * x, native_color, b);
+		std::memcpy(m_Data + y * m_Pitch + b * x, native_color, b);
 	}
 
 	void SetPixelUnchecked(int x, int y, Color color)
 	{
-		m_Format.A8R8G8B8ToFormat(color.ToDWORD(), m_Data + y*m_Pitch + x*m_Format.GetBytePerPixel());
+		m_Format.A8R8G8B8ToFormat(color.ToDWORD(), m_Data + y * m_Pitch + x * m_Format.GetBytePerPixel());
 	}
 
 	Color GetPixelUnchecked(int x, int y)
 	{
-		return m_Format.FormatToA8R8G8B8(m_Data + y*m_Pitch + x*m_Format.GetBytePerPixel());
+		return m_Format.FormatToA8R8G8B8(m_Data + y * m_Pitch + x * m_Format.GetBytePerPixel());
 	}
 
 	void DrawAlphaPixel(int x, int y, int blend, Color color)
@@ -71,9 +73,9 @@ public:
 		int g1 = color.GetGreen();
 		int b1 = color.GetBlue();
 
-		int r = (r1*blend + r0*(255 - blend)) / 255;
-		int g = (g1*blend + g0*(255 - blend)) / 255;
-		int b = (b1*blend + b0*(255 - blend)) / 255;
+		int r = (r1*blend + r0 * (255 - blend)) / 255;
+		int g = (g1*blend + g0 * (255 - blend)) / 255;
+		int b = (b1*blend + b0 * (255 - blend)) / 255;
 		SetPixelUnchecked(x, y, Color(r, g, b));
 	}
 
@@ -82,7 +84,7 @@ public:
 	{
 		if(m_Format == ColorFormat::A8R8G8B8) {
 			for(int y = 0; y < m_Height; ++y) {
-				u8* cur = m_Data + y*m_Pitch;
+				u8* cur = m_Data + y * m_Pitch;
 				for(int x = 0; x < m_Width; ++x) {
 					func(cur[3], cur[2], cur[1], cur[0]);
 					cur += 4;
@@ -90,19 +92,19 @@ public:
 			}
 		} else if(m_Format == ColorFormat::R8G8B8) {
 			for(int y = 0; y < m_Height; ++y) {
-				u8* cur = m_Data + y*m_Pitch;
+				u8* cur = m_Data + y * m_Pitch;
 				for(int x = 0; x < m_Width; ++x) {
-					u8 dummyAlpha=0;
+					u8 dummyAlpha = 0;
 					func(dummyAlpha, cur[2], cur[1], cur[0]);
 					cur += 3;
 				}
 			}
 		} else {
 			for(int y = 0; y < m_Height; ++y) {
-				u8* cur = m_Data + y*m_Pitch;
+				u8* cur = m_Data + y * m_Pitch;
 				for(int x = 0; x < m_Width; ++x) {
 					Color px = m_Format.FormatToA8R8G8B8(cur);
-					u8 data[4]={
+					u8 data[4] = {
 						px.GetAlpha(),
 						px.GetRed(),
 						px.GetGreen(),
@@ -188,6 +190,122 @@ private:
 
 template <typename T>
 class DrawingCanvasAuto;
+
+template <>
+class DrawingCanvasAuto<Texture> : public DrawingCanvas, public core::Uncopyable
+{
+public:
+	DrawingCanvasAuto(Texture* tex, const Texture::LockedRect& r, bool _regenMipMaps) :
+		DrawingCanvas(r.bits, tex->GetColorFormat(), tex->GetSize(), r.pitch),
+		texture(tex),
+		regenMipMaps(_regenMipMaps)
+	{
+	}
+
+	DrawingCanvasAuto(Texture* tex, Texture::ELockMode mode, int level, bool _regenMipMaps) :
+		DrawingCanvasAuto(tex, tex->Lock(mode, level), _regenMipMaps)
+	{
+	}
+
+	DrawingCanvasAuto(DrawingCanvasAuto&& old)
+	{
+		(DrawingCanvas&)*this = std::move(old);
+
+		texture = old.texture;
+		regenMipMaps = old.regenMipMaps;
+		old.texture = nullptr;
+	}
+
+	DrawingCanvasAuto& operator=(DrawingCanvasAuto&& old)
+	{
+		Unlock();
+		(DrawingCanvas&)*this = std::move(old);
+		texture = old.texture;
+		regenMipMaps = old.regenMipMaps;
+		old.texture = nullptr;
+		return *this;
+	}
+	~DrawingCanvasAuto()
+	{
+		Unlock();
+	}
+
+	void Unlock()
+	{
+		if(texture) {
+			texture->Unlock(regenMipMaps);
+			texture = nullptr;
+		}
+	}
+
+	Texture* texture;
+	bool regenMipMaps;
+};
+
+inline DrawingCanvasAuto<Texture> GetCanvas(Texture* texture, BaseTexture::ELockMode mode, int mipLevel = 0, bool regenMipMaps = true)
+{
+	return DrawingCanvasAuto<Texture>(texture, mode, mipLevel, regenMipMaps);
+}
+
+template <>
+class DrawingCanvasAuto<CubeTexture> : public DrawingCanvas
+{
+public:
+	DrawingCanvasAuto(CubeTexture* tex, const CubeTexture::LockedRect& r, bool _regenMipMaps) :
+		DrawingCanvas(r.bits, tex->GetColorFormat(), tex->GetSize(), r.pitch),
+		texture(tex),
+		regenMipMaps(_regenMipMaps)
+	{
+	}
+
+	DrawingCanvasAuto(CubeTexture* tex, CubeTexture::ELockMode mode, CubeTexture::EFace face, int level, bool _regenMipMaps) :
+		DrawingCanvasAuto(tex, tex->Lock(mode, face, level), _regenMipMaps)
+	{
+	}
+
+	DrawingCanvasAuto(const DrawingCanvasAuto& other) = delete;
+
+	DrawingCanvasAuto(DrawingCanvasAuto&& old)
+	{
+		(DrawingCanvas&)*this = std::move(old);
+		texture = old.texture;
+		regenMipMaps = old.regenMipMaps;
+		old.texture = nullptr;
+	}
+
+	~DrawingCanvasAuto()
+	{
+		Unlock();
+	}
+
+	void Unlock()
+	{
+		if(texture) {
+			texture->Unlock(regenMipMaps);
+			texture = nullptr;
+		}
+	}
+
+	DrawingCanvasAuto& operator=(const DrawingCanvasAuto& other) = delete;
+
+	DrawingCanvasAuto& operator=(DrawingCanvasAuto&& old)
+	{
+		Unlock();
+		(DrawingCanvas&)*this = std::move(old);
+		texture = old.texture;
+		regenMipMaps = old.regenMipMaps;
+		old.texture = nullptr;
+		return *this;
+	}
+
+	CubeTexture* texture;
+	bool regenMipMaps;
+};
+
+inline DrawingCanvasAuto<CubeTexture> GetCanvas(CubeTexture* texture, BaseTexture::ELockMode mode, CubeTexture::EFace face, int mipLevel = 0, bool regenMipMaps = true)
+{
+	return DrawingCanvasAuto<CubeTexture>(texture, mode, face, mipLevel, regenMipMaps);
+}
 
 }
 }
