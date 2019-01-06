@@ -63,7 +63,7 @@ public:
 		m_CheckerTexture = Context.ImgSys->CreateFittingTexture(math::Dimension2I(32, 32));
 		m_CheckerTexture->SetFiltering(video::BaseTexture::Filter::Point);
 		{
-			auto canvas = std::move(m_CheckerTexture->GetCanvas(video::BaseTexture::ELockMode::Overwrite));
+			auto&& canvas = video::GetCanvas(m_CheckerTexture, video::BaseTexture::ELockMode::Overwrite);
 			bool black = false;
 			core::Randomizer rand(123456);
 			for(int r = 0; r < canvas.GetHeight(); ++r) {
