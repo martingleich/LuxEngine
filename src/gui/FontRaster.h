@@ -66,7 +66,6 @@ public:
 	const core::HashMap<u32, CharInfo>& GetCharMap() const;
 	const CharInfo& GetCharInfo(u32 c);
 
-	void SetBaseFontSettings(const FontRenderSettings& settings);
 	const FontRenderSettings& GetBaseFontSettings();
 
 	const FontDescription& GetDescription() const;

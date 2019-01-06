@@ -201,12 +201,6 @@ public:
 	//! Get the height of the font in pixels.
 	virtual float GetFontHeight() const = 0;
 
-	//! Set base values for font render settings.
-	/**
-	These settings are combined with the passed setting for each rendercall
-	*/
-	virtual void SetBaseFontSettings(const FontRenderSettings& settings) = 0;
-
 	//! Get base values for font render settings.
 	virtual const FontRenderSettings& GetBaseFontSettings() = 0;
 };

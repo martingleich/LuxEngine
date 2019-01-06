@@ -402,19 +402,14 @@ void FontRaster::GetRawData(const void*& ptr, int& width, int& height, int& chan
 	channels = m_ChannelCount;
 }
 
-void FontRaster::SetBaseFontSettings(const FontRenderSettings& settings)
+const FontDescription& FontRaster::GetDescription() const
 {
-	m_BaseSettings = settings;
+	return m_Desc;
 }
 
 const FontRenderSettings& FontRaster::GetBaseFontSettings()
 {
 	return m_BaseSettings;
-}
-
-const FontDescription& FontRaster::GetDescription() const
-{
-	return m_Desc;
 }
 
 float FontRaster::GetBaseLine() const

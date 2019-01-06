@@ -117,11 +117,8 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	data.channelCount = channelCount;
 
 	StrongRef<FontRaster> font = LUX_NEW(FontRaster)(core::ResourceOrigin());
+	data.baseSettings.charDistance -= 2 * data.desc.borderSize;
 	font->Init(data);
-	auto settings = font->GetBaseFontSettings();
-	settings.charDistance -= 2 * data.desc.borderSize;
-	font->SetBaseFontSettings(settings);
-
 	return font;
 }
 
