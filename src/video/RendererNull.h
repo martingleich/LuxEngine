@@ -34,7 +34,6 @@ protected:
 		Dirty_Lights,
 		Dirty_Rendertarget,
 		Dirty_RenderMode,
-		Dirty_Fog,
 		Dirty_PolygonOffset,
 		Dirty_Overwrites,
 	};
@@ -61,9 +60,6 @@ public:
 
 	void AddLight(const LightData& light);
 	void ClearLights();
-
-	void SetFog(const FogData& fog);
-	void ClearFog();
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -109,6 +105,8 @@ protected:
 	struct ParamIdCollection
 	{
 		core::AttributePtr lighting;
+		core::AttributePtr fogEnabled;
+
 		core::AttributePtr ambient;
 		core::AttributePtr time;
 
@@ -131,9 +129,6 @@ protected:
 	PipelineOverwrite m_FinalOverwrite;
 
 	core::Array<LightData> m_Lights; //!< User set lights
-
-	bool m_IsFogActive;
-	FogData m_Fog; //!< User set fog data
 
 	bool m_NormalizeNormals;
 	math::Matrix4 m_TransformWorld;

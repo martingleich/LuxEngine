@@ -8,9 +8,45 @@ namespace lux
 namespace scene
 {
 
-class GlobalFog : public Component
+class FogDescription
+{
+public:
+	virtual ~FogDescription() {}
+	virtual video::EFogType GetType() = 0;
+	virtual float GetStart() = 0;
+	virtual float GetEnd() = 0;
+	virtual float GetDensity() = 0;
+	virtual video::ColorF GetColor() = 0;
+};
+
+class Fog : public Component
+{
+public:
+	virtual FogDescription* GetFogDescription() = 0;
+};
+
+class GlobalFog : public Fog
 {
 	LX_REFERABLE_MEMBERS_API(GlobalFog, LUX_API);
+	class GlobalFogDescription : public FogDescription
+	{
+	public:
+		video::EFogType GetType() { return type; }
+		float GetStart() { return start; }
+		float GetEnd() { return end; }
+		float GetDensity() { return density; }
+		video::ColorF GetColor() { return color; }
+
+		video::EFogType type;
+
+		float start;
+		float end;
+
+		float density;
+
+		video::ColorF color;
+	};
+
 public:
 	LUX_API GlobalFog();
 	LUX_API virtual ~GlobalFog();
@@ -30,10 +66,10 @@ public:
 	LUX_API virtual void SetColor(const video::ColorF& color);
 	LUX_API virtual const video::ColorF& GetColor() const;
 
-	LUX_API virtual video::FogData GetFogData() const;
+	LUX_API FogDescription* GetFogDescription();
 
 private:
-	video::FogData m_Data;
+	GlobalFogDescription m_Data;
 };
 
 } // namespace scene

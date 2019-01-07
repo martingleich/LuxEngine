@@ -2,6 +2,7 @@
 #include "video/d3d9/DeviceStateD3D9.h"
 #include "video/Pass.h"
 #include "video/Renderer.h"
+#include "video/FogData.h"
 
 namespace lux
 {
@@ -15,7 +16,7 @@ FixedFunctionShaderD3D9::FixedFunctionShaderD3D9(DeviceStateD3D9& deviceState, c
 {
 	m_Layers.Resize(params.textures.Size());
 	core::ParamPackageBuilder ppb;
-	ppb.AddParam("diffuse", video::ColorF(1,1,1,1));
+	ppb.AddParam("diffuse", video::ColorF(1, 1, 1, 1));
 	ppb.AddParam("emissive", 0.0f);
 	ppb.AddParam("specularHardness", 0.0f);
 	ppb.AddParam("specularIntensity", 1.0f);
@@ -37,7 +38,7 @@ void FixedFunctionShaderD3D9::SetParam(int paramId, const void* data)
 	case 2: m_SpecularHardness = *(float*)data; break;
 	case 3: m_SpecularIntensity = *(float*)data; break;
 	default:
-		m_Layers.At(paramId-4) = *(video::TextureLayer*)data;
+		m_Layers.At(paramId - 4) = *(video::TextureLayer*)data;
 	}
 	m_IsDirty = true;
 }
@@ -47,10 +48,34 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 	if(m_CurAttributes != sceneAttributes) {
 		m_CurAttributes = sceneAttributes;
 		m_AmbientPtr = m_CurAttributes.Pointer("ambient");
+		m_Fog1Ptr = m_CurAttributes.Pointer("fog1");
+		m_Fog2Ptr = m_CurAttributes.Pointer("fog2");
 	}
 
 	m_Lighting = pass.lighting;
-	m_Ambient = m_AmbientPtr->GetAccess(true).Get<video::ColorF>();
+	if(m_AmbientPtr)
+		m_Ambient = m_AmbientPtr->GetAccess(true).Get<video::ColorF>();
+	else
+		m_Ambient = video::ColorF(0,0,0,0);
+
+	if(m_Fog1Ptr && m_Fog2Ptr) {
+		auto fog2 = m_Fog2Ptr->GetAccess(true).Get<video::ColorF>();
+
+		bool enableFog = pass.fogEnabled && fog2.r != 0.0f;
+		m_DeviceState.EnableFixedFog(enableFog);
+		if(enableFog) {
+			auto fog1 = m_Fog1Ptr->GetAccess(true).Get<video::ColorF>();
+			auto type =
+				fog2.r == 1.0f ? EFogType::Linear :
+				fog2.r == 2.0f ? EFogType::Exp :
+				fog2.r == 3.0f ? EFogType::ExpSq : EFogType::Linear;
+			m_DeviceState.ConfigureFixedFog(
+				type, video::ColorF(fog1.r, fog1.g, fog1.b),
+				fog2.g, fog2.b, fog2.a);
+		}
+	} else {
+		m_DeviceState.EnableFixedFog(false);
+	}
 }
 
 void FixedFunctionShaderD3D9::Render()

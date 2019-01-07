@@ -17,7 +17,7 @@ namespace lux
 namespace scene
 {
 class GlobalAmbientLight;
-class GlobalFog;
+class Fog;
 class Camera;
 class Mesh;
 
@@ -54,7 +54,7 @@ public:
 	void AddCameraEntry(AbstractCamera* cam);
 
 	void AddLight(Light* l);
-	void AddFog(GlobalFog* l);
+	void AddFog(Fog* l);
 	void AddAmbient(GlobalAmbientLight* l);
 
 	void DrawScene();
@@ -128,7 +128,7 @@ private:
 
 	core::Array<AbstractCamera*> m_Cameras;
 	core::Array<Light*> m_Lights;
-	core::Array<GlobalFog*> m_Fogs;
+	core::Array<Fog*> m_Fogs;
 	video::ColorF m_AmbientLight;
 
 	// The current root

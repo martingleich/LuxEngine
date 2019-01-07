@@ -7,6 +7,7 @@
 #include "video/Color.h"
 #include "video/TextureStageSettings.h"
 #include "video/d3d9/FixedFunctionShaderD3D9.h"
+#include "video/FogData.h"
 
 #include "platform/StrippedD3D9.h"
 #include "platform/UnknownRefCounted.h"
@@ -16,7 +17,6 @@ namespace lux
 namespace video
 {
 class Material;
-class FogData;
 class LightData;
 class BaseTexture;
 class Pass;
@@ -52,7 +52,8 @@ public:
 	void SetTexture(u32 stage, IDirect3DBaseTexture9* tex);
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matrix4& m);
 
-	void SetFog(const FogData& fog);
+	void EnableFixedFog(bool enable);
+	void ConfigureFixedFog(EFogType type, const ColorF& color, float start, float end, float density);
 
 	void SetStencilMode(const StencilMode& mode);
 	void EnableLight(bool enable);

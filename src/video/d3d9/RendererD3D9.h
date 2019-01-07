@@ -59,7 +59,6 @@ private:
 	void SwitchRenderMode(ERenderMode mode);
 
 	void UpdateTransforms(float polygonOffset);
-	void LoadFogSettings(bool isFogActive, bool fixedFunction, bool changedShader, bool changedFogEnable);
 	void LoadLightSettings(ELightingFlag lighting, bool fixedFunction, bool changedShader, bool changeLighting);
 
 	void SetVertexFormat(const VertexFormat& format);

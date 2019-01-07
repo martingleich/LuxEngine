@@ -353,18 +353,23 @@ u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
 	throw core::GenericInvalidArgumentException("arg", "Unknown texture argument");
 }
 
-void DeviceStateD3D9::SetFog(const FogData& fog)
+void DeviceStateD3D9::EnableFixedFog(bool enabled)
 {
-	DWORD type = GetD3DFogType(fog.type);
+	SetRenderState(D3DRS_FOGENABLE, enabled ? TRUE : FALSE);
+}
+
+void DeviceStateD3D9::ConfigureFixedFog(EFogType type, const ColorF& color, float start, float end, float density)
+{
+	DWORD d3dType = GetD3DFogType(type);
 
 	// TODO: Handle per pixel fog
-	SetRenderState(D3DRS_FOGVERTEXMODE, type);
+	SetRenderState(D3DRS_FOGVERTEXMODE, d3dType);
 	SetRenderState(D3DRS_RANGEFOGENABLE, TRUE);
 
-	SetRenderState(D3DRS_FOGCOLOR, ColorFToColor(fog.color).ToDWORD());
-	SetRenderStateF(D3DRS_FOGSTART, fog.start);
-	SetRenderStateF(D3DRS_FOGEND, fog.end);
-	SetRenderStateF(D3DRS_FOGDENSITY, fog.density);
+	SetRenderState(D3DRS_FOGCOLOR, ColorFToColor(color).ToDWORD());
+	SetRenderStateF(D3DRS_FOGSTART, start);
+	SetRenderStateF(D3DRS_FOGEND, end);
+	SetRenderStateF(D3DRS_FOGDENSITY, density);
 }
 
 void DeviceStateD3D9::EnableLight(bool enable)

@@ -14,28 +14,6 @@ enum class EFogType
 	ExpSq,
 };
 
-class FogData
-{
-public:
-	EFogType type;
-
-	float start;
-	float end;
-
-	float density;
-
-	ColorF color;
-
-	FogData() :
-		type(EFogType::Linear),
-		start(0.0f),
-		end(100.0f),
-		density(0.0f),
-		color(0.1f, 0.1f, 0.1f)
-	{
-	}
-};
-
 } // namespace video
 } // namespace lux
 

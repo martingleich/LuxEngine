@@ -34,7 +34,10 @@ public:
 	video::ColorF m_Ambient;
 	bool m_UseVertexColors;
 	bool m_IsDirty;
+
 	core::AttributePtr m_AmbientPtr;
+	core::AttributePtr m_Fog1Ptr;
+	core::AttributePtr m_Fog2Ptr;
 
 	mutable core::AttributeList m_CurAttributes;
 };

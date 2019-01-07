@@ -98,11 +98,6 @@ public:
 		return (m_Weak != nullptr);
 	}
 
-	VariableAccess operator*() const
-	{
-		return m_Weak->GetAccess();
-	}
-
 	Attribute* operator->() const
 	{
 		return m_Weak;

@@ -26,18 +26,21 @@ SceneRendererSimpleForward::SceneRendererSimpleForward(const scene::SceneRendere
 	m_Scene = data.scene;
 
 	{
-	core::AttributeListBuilder alb;
-	alb.AddAttribute("drawStencilShadows", false);
-	alb.AddAttribute("maxShadowCasters", 1);
-	alb.AddAttribute("culling", true);
-	m_Attributes = alb.BuildAndReset();
+		core::AttributeListBuilder alb;
+		alb.AddAttribute("drawStencilShadows", false);
+		alb.AddAttribute("maxShadowCasters", 1);
+		alb.AddAttribute("culling", true);
+		m_Attributes = alb.BuildAndReset();
 	}
 
 	{
-	core::AttributeListBuilder alb;
-	alb.SetBase(m_Renderer->GetBaseParams());
-	alb.AddAttribute("camPos", math::Vector3F(0,0,0));
-	m_RendererAttributes = alb.BuildAndReset();
+		core::AttributeListBuilder alb;
+		alb.SetBase(m_Renderer->GetBaseParams());
+		alb.AddAttribute("camPos", math::Vector3F(0, 0, 0));
+		alb.AddAttribute("fog1", video::ColorF(0, 0, 0, 0));
+		alb.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
+
+		m_RendererAttributes = alb.BuildAndReset();
 	}
 }
 
@@ -98,7 +101,7 @@ public:
 			AbortChildren();
 			return;
 		}
-		auto fog = dynamic_cast<GlobalFog*>(comp);
+		auto fog = dynamic_cast<Fog*>(comp);
 		if(fog)
 			sr->AddFog(fog);
 		auto light = dynamic_cast<Light*>(comp);
@@ -148,7 +151,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 			m_Renderer->EndScene();
 		return;
 	}
-
+	
 	if(!beginScene) {
 		if(m_Renderer->GetRenderTarget() != m_Cameras[0]->GetRenderTarget())
 			throw core::GenericRuntimeException("Already started scene uses diffrent rendertarget than first camera.");
@@ -193,7 +196,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 		m_SolidNodeList.Clear();
 		m_TransparentNodeList.Clear();
 		m_Lights.Clear();
-		m_AmbientLight = video::ColorF(0,0,0);
+		m_AmbientLight = video::ColorF(0, 0, 0);
 		m_Fogs.Clear();
 	}
 
@@ -266,7 +269,7 @@ void SceneRendererSimpleForward::AddLight(Light* l)
 {
 	m_Lights.PushBack(l);
 }
-void SceneRendererSimpleForward::AddFog(GlobalFog* l)
+void SceneRendererSimpleForward::AddFog(Fog* l)
 {
 	m_Fogs.PushBack(l);
 }
@@ -284,6 +287,29 @@ bool SceneRendererSimpleForward::IsCulled(Node* node, Renderable* r, const math:
 	if(node->GetBoundingBox().IsEmpty())
 		return false;
 	return !frustum.IsBoxVisible(node->GetBoundingBox(), node->GetAbsoluteTransform());
+}
+
+static void SetFogData(video::Renderer* renderer, FogDescription* desc, video::ColorF* overwriteColor=nullptr)
+{
+	if(desc) {
+		video::ColorF fog2;
+		video::ColorF fog1;
+		fog1 = overwriteColor ? *overwriteColor : desc->GetColor();
+		renderer->GetParams()["fog1"].Set(fog1);
+		auto type = desc->GetType();
+		fog2.r =
+			type == video::EFogType::Linear ? 1.0f :
+			type == video::EFogType::Exp ? 2.0f :
+			type == video::EFogType::ExpSq ? 3.0f : 0.0f;
+		fog2.g = desc->GetStart();
+		fog2.b = desc->GetEnd();
+		fog2.a = desc->GetDensity();
+		renderer->GetParams()["fog2"].Set(fog2);
+	} else {
+		video::ColorF fog2;
+		fog2.r = 0.0f;
+		renderer->GetParams()["fog2"].Set(fog2);
+	}
 }
 
 void SceneRendererSimpleForward::DrawScene()
@@ -337,13 +363,10 @@ void SceneRendererSimpleForward::DrawScene()
 	//-------------------------------------------------------------------------
 	// The fog
 	bool correctFogForStencilShadows = true;
-	m_Renderer->ClearFog();
-	if(m_Fogs.Size() > 0) {
-		auto fog = m_Fogs[0]->GetFogData();
-		m_Renderer->SetFog(fog);
-	}
+	auto fog = m_Fogs.Size() > 0 ? m_Fogs[0]->GetFogDescription() : nullptr;
 	if(m_Fogs.Size() > 1)
 		log::Warning("Simple Forward Scene Renderer: Only support one fog element per scene.(all but one fog disabled)");
+	SetFogData(m_Renderer, fog);
 
 	video::PipelineOverwriteToken pot;
 
@@ -383,9 +406,9 @@ void SceneRendererSimpleForward::DrawScene()
 	if(drawStencilShadows) {
 		// To renderer correct fog, render black fog.
 		if(correctFogForStencilShadows && m_Fogs.Size() > 0) {
-			auto data = m_Fogs[0]->GetFogData();
-			data.color = video::ColorF(0,0,0,0);
-			m_Renderer->SetFog(data);
+			fog = m_Fogs[0]->GetFogDescription();
+			auto overwriteColor = video::ColorF(0, 0, 0, 0);
+			SetFogData(m_Renderer, fog, &overwriteColor);
 		}
 
 		m_Renderer->PopPipelineOverwrite(&pot);
@@ -466,8 +489,8 @@ void SceneRendererSimpleForward::DrawScene()
 
 		// Restore correct fog
 		if(correctFogForStencilShadows && m_Fogs.Size() > 0) {
-			auto data = m_Fogs[0]->GetFogData();
-			m_Renderer->SetFog(data);
+			fog = m_Fogs[0]->GetFogDescription();
+			SetFogData(m_Renderer, fog);
 		}
 	}
 

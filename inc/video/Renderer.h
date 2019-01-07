@@ -26,7 +26,6 @@ namespace video
 {
 class Geometry;
 class LightData;
-class FogData;
 class RenderTarget;
 class AbstractMaterial;
 class Pass;
@@ -281,12 +280,6 @@ public:
 
 	//! The maximal number of lights which can be active at once
 	virtual int GetMaxLightCount() const = 0;
-
-	//! Set and enable fog
-	virtual void SetFog(const FogData& fog) = 0;
-
-	//! Disable the fog
-	virtual void ClearFog() = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

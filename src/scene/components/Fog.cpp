@@ -66,9 +66,9 @@ const video::ColorF& GlobalFog::GetColor() const
 	return m_Data.color;
 }
 
-video::FogData GlobalFog::GetFogData() const
+FogDescription* GlobalFog::GetFogDescription()
 {
-	return m_Data;
+	return &m_Data;
 }
 
 } // namespace scene

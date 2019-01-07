@@ -75,18 +75,16 @@ RenderRequest RenderRequest::Geometry2D(const Geometry* geo, int first, int coun
 
 RendererNull::RendererNull(VideoDriver* driver) :
 	m_RenderMode(ERenderMode::None),
-	m_IsFogActive(false),
 	m_NormalizeNormals(true),
 	m_DirtyFlags(0xFFFFFFFF), // Set all dirty flags at start
 	m_Driver(driver)
 {
 	core::AttributeListBuilder alb;
 	m_ParamIds.lighting = alb.AddAttribute("lighting", (float)video::ELightingFlag::Enabled);
+	m_ParamIds.fogEnabled = alb.AddAttribute("fogEnabled", 1.0f);
+
 	m_ParamIds.ambient = alb.AddAttribute("ambient", video::ColorF(0, 0, 0));
 	m_ParamIds.time = alb.AddAttribute("time", 0.0f);
-
-	m_ParamIds.fog1 = alb.AddAttribute("fog1", video::ColorF(1, 1, 1, 0));
-	m_ParamIds.fog2 = alb.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
 
 	for(int i = 0; i < m_MatrixTable.GetCount(); ++i)
 		alb.AddAttribute(m_MatrixTable.CreateAttribute(i));
@@ -163,19 +161,6 @@ void RendererNull::ClearLights()
 {
 	m_Lights.Clear();
 	SetDirty(Dirty_Lights);
-}
-
-void RendererNull::SetFog(const FogData& fog)
-{
-	m_IsFogActive = true;
-	m_Fog = fog;
-	SetDirty(Dirty_Fog);
-}
-
-void RendererNull::ClearFog()
-{
-	m_IsFogActive = false;
-	SetDirty(Dirty_Fog);
 }
 
 ///////////////////////////////////////////////////////////////////////////

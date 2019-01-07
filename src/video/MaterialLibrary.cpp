@@ -49,13 +49,12 @@ float lxFog(float d, float4 fog1, float4 fog2)
 	float start = fog2.g;
 	float end = fog2.b;
 	float dens = fog2.a;
-	float enabled = fog1.a;
 	if(fog2.r == 1)
-		return clamp((d-start) / (end - start), 0, 1) * enabled;
+		return clamp((d-start) / (end - start), 0, 1);
 	else if(fog2.r == 2)
-		return clamp(1-exp(-d*dens), 0, 1) * enabled;
+		return clamp(1-exp(-d*dens), 0, 1);
 	else if(fog2.r == 3)
-		return clamp(1-exp(-pow(d*dens,2)), 0, 1) * enabled;
+		return clamp(1-exp(-pow(d*dens,2)), 0, 1);
 	else
 		return 0;
 }

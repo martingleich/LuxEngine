@@ -1,0 +1,16 @@
+Material reworks:
+	It should be possible to replace all material parameters with textures.
+		-> Add texture arguments for emmisivity, specular hardness, specular intensity, and just use the sum of both.
+	
+	Seperate better between shader and fixed function shader.
+		-> Handle scene parameters directly in shader, i.e. Set matrizes directly in the shader, via DeviceStateD3D9
+		
+	Better caching for shader parameters.
+		->? Save state of some registers in DeviceStateD3D9, for the matrizes since these are the biggerst memory users.
+		
+	Generell system, make meshes, texture, kind of constant.
+		Currently most system can't handle if meshes are changed while holding pointers to them.
+		Maybe constant marker for some classes(mesh, geometry, etc.), which says this object will never change again.
+		
+	
+	

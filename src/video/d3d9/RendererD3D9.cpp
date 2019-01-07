@@ -387,10 +387,6 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 		pass.culling = EFaceSide::None;
 		dirtyPass = true;
 	}
-	if(pass.fogEnabled != m_IsFogActive && pass.fogEnabled) {
-		pass.fogEnabled = m_IsFogActive && pass.fogEnabled;
-		dirtyPass = true;
-	}
 
 	bool changedFogEnable = false;
 	bool changedLighting = false;
@@ -446,7 +442,8 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 	ClearDirty(Dirty_ViewProj);
 
 	// Generate data for fog and light
-	LoadFogSettings(pass.fogEnabled, useFixedPipeline, changedShader, changedFogEnable);
+	if(changedFogEnable)
+		m_ParamIds.fogEnabled->GetAccess().Set(pass.fogEnabled ? 1.0f : 0.0f);
 	LoadLightSettings(pass.lighting, useFixedPipeline, changedShader, changedLighting);
 
 	// Send the generated data to the shader
@@ -513,42 +510,6 @@ void RendererD3D9::UpdateTransforms(float polygonOffset)
 	}
 }
 
-void RendererD3D9::LoadFogSettings(
-	bool isFogActive,
-	bool fixedFunction,
-	bool changedShader,
-	bool changedFogState)
-{
-	bool useFixedFog = fixedFunction && isFogActive;
-
-	// Change if not using fixed function, and the fog or shader changed
-	if(!fixedFunction && (IsDirty(Dirty_Fog) || changedShader || changedFogState)) {
-		// Set shader fog state.
-		video::ColorF fog1, fog2;
-		fog1.r = m_Fog.color.r;
-		fog1.g = m_Fog.color.g;
-		fog1.b = m_Fog.color.b;
-		fog1.a = isFogActive ? 1.0f : 0.0f;
-		fog2.r =
-			m_Fog.type == EFogType::Linear ? 1.0f :
-			m_Fog.type == EFogType::Exp ? 2.0f :
-			m_Fog.type == EFogType::ExpSq ? 3.0f : 1.0f;
-		fog2.g = m_Fog.start;
-		fog2.b = m_Fog.end;
-		fog2.a = m_Fog.density;
-
-		(*m_ParamIds.fog1).Set(fog1);
-		(*m_ParamIds.fog2).Set(fog2);
-	}
-	// Change if using fixed function, and the fog or shader changed
-	if(fixedFunction && (IsDirty(Dirty_Fog) || changedShader || changedFogState)) {
-		m_DeviceState.SetRenderState(D3DRS_FOGENABLE, useFixedFog ? TRUE : FALSE);
-		m_DeviceState.SetFog(m_Fog);
-	}
-
-	ClearDirty(Dirty_Fog);
-}
-
 void RendererD3D9::LoadLightSettings(
 	ELightingFlag lighting,
 	bool fixedFunction,
@@ -558,7 +519,7 @@ void RendererD3D9::LoadLightSettings(
 	bool useLights = (lighting != ELightingFlag::Disabled);
 
 	if(!fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
-		(*m_ParamIds.lighting).Set((float)lighting);
+		m_ParamIds.lighting->GetAccess().Set((float)lighting);
 	}
 	if(fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
 		m_DeviceState.EnableLight(useLights);
@@ -579,7 +540,7 @@ void RendererD3D9::LoadLightSettings(
 			if(IsDirty(Dirty_Lights)) {
 				// Generate light matrices and set as param.
 				for(int i = 0; i < m_Lights.Size(); ++i)
-					(*m_ParamIds.lights[i]).Set(GenerateLightMatrix(m_Lights[i], true));
+					m_ParamIds.lights[i]->GetAccess().Set(GenerateLightMatrix(m_Lights[i], true));
 			}
 		}
 		ClearDirty(Dirty_Lights);

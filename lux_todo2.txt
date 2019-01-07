@@ -1,0 +1,91 @@
+﻿Making things more constant.
+	Scene: Handle all topological changes to scenegraph via queue.
+		QueueEntry:
+			type : {Add,Remove}
+			AddEntry:
+				child : Node*
+				newParent : Node*
+			RemoveEntry:
+				node : Node*
+				
+		Remove all public possiblities to change the topology of nodes directly.
+		Even if this all isn't used to optimize the system, it fixes the interface and reduces unneccesary methods
+		which makes future changes much easier.
+		
+Es ist ein Problem wenn Objekte sich Zeiger speichern und basierend darauf neue Daten erstellen, sobald die Zugrunde liegenden Objekte verändert werden ist
+das komplette System widersprüchlich.
+Verschiedene Lösungen sind möglich:
+1) Möglichsts Viele Daten müssen Konstant sein.
+	Objekte müssen via builder erstellt werden.
+2) Funktional, Daten bei jeder Verwendung neu erstellen.
+	Trivial, aber meist impervormant
+3) Daten cachen, bei Veränderung neu erstellen.
+	Changes müssen erkannt werden und changes müssen korrekt behandelt werden.
+	
+	
+Es ist generell sinnvoll die Möglichkeiten Objekte zu manipulieren minimal zu Halten.
+Alle Resourcen sollten eine ChangeId erhalten, um veränderungen zu beobachten.
+
+Prüfe welche Resourcen komplett konstant gemacht werden können und erstelle Builder bzw. komplexe Init funktionen für Sie.
+Ideen: Font
+Erlaube das Verändern von Geometry nur mittels funktionen aus der Geometry-Klasse selbst. Entferne möglichst Viele Funktionen von Vertex und IndexBuffer.
+Erstelle GeometryBuilder-Klasse um Geometry einfach und sicher zu erstellen.	
+
+
+RenderPipeline:
+	Move more FixedFunctionPipelineShaderThings to the FixedFunctionShader(Lighting, Fog, Transformation)
+	
+A shader is a programm that is executed on the gpu.
+A pass is a shader and pipeline settings.
+A techinque are multiple passes.
+A materialtype are multiple techniques
+A material is a materialtype and its parameters.
+
+// Klasse ist konstant.
+// Klasse ist virtuell.
+Shader:
+	Argument[]
+	
+PipelineSettings
+	...
+
+// Klass ist intern.
+Pass:
+	Shader
+	ShaderArgumentLoader
+	PipelineSettings
+	
+// Klasse ist konstant.
+// Klasse ist intern.
+Technique
+	Pass <- Kein Multipass
+	
+// Klasse ist konstant.
+// Klasse ist intern.
+MaterialType
+	Technique[]
+	# Die Verschiedenen Shadervariants dieses Materials
+	Argument[]*
+	# Die Argumente sind die Hülle um alle Argumente der Techniken.
+	# Die einzelnen Argumentelisten der Techinken müssen vollständig innenander enthalten sein, d.h. Es existiert eine Argumentliste, die die Argumente aller anderen Liste enthält
+	# Kann also elegant als Zeiger implementiert werden.
+	
+Material
+	MaterialType
+	ArgumentValue[]
+	# ArgumentValues müssen zum MaterialType passen.
+
+MaterialType kann ohne öffentliche sichtbarkeit implementiert werden.
+Technique sollte gar nicht implementiert werden, solange kein Multipass existiert.
+
+Changes:
+	The obious changes at the intern classes.
+	
+	
+Theoretische Ideen:
+	Light and Fog:
+		The light and fog matrizes should be placed at a higher level.
+		If placed at such a low level it makes changing the lighting and fog modell impossible.
+		Same goes for most scene parameters.
+				
+		
