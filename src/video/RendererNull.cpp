@@ -89,9 +89,6 @@ RendererNull::RendererNull(VideoDriver* driver) :
 	for(int i = 0; i < m_MatrixTable.GetCount(); ++i)
 		alb.AddAttribute(m_MatrixTable.CreateAttribute(i));
 
-	for(int i = 0; i < 16; ++i)
-		m_ParamIds.lights.PushBack(alb.AddAttribute("light" + core::StringConverter::ToString(i), math::Matrix4::ZERO));
-
 	m_Params = m_BaseParams = alb.BuildAndReset();
 
 	m_RenderStatistics = RenderStatistics::Instance();
@@ -144,23 +141,6 @@ void RendererNull::UpdatePipelineOverwrite()
 	m_FinalOverwrite = m_PipelineOverwrites[0];
 	for(int i = 1; i < m_PipelineOverwrites.Size(); ++i)
 		m_FinalOverwrite.Append(m_PipelineOverwrites[i]);
-}
-
-///////////////////////////////////////////////////////////////////////////
-
-void RendererNull::AddLight(const LightData& light)
-{
-	if(m_Lights.Size() == GetMaxLightCount())
-		throw core::InvalidOperationException("Too many lights");
-
-	m_Lights.PushBack(light);
-	SetDirty(Dirty_Lights);
-}
-
-void RendererNull::ClearLights()
-{
-	m_Lights.Clear();
-	SetDirty(Dirty_Lights);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -240,68 +220,6 @@ core::AttributeList RendererNull::GetParams() const
 VideoDriver* RendererNull::GetDriver() const
 {
 	return m_Driver;
-}
-
-///////////////////////////////////////////////////////////////////////////
-/*
-Lux illumination matrix.
-Only the location of the t value is fixed, all other values depend on the light
-type, for built-in point/directonal and spot light the matrix is build as
-following:
-
- r  g  b t
-px py pz 0
-dx dy dz 0
-ra ic oc 0
-
-t = Type of light (0 = Disabled, 1 = Directional, 2 = Point, 3 = Spot)
-
-(r,g,b) = Diffuse color of light
-(px,py,pz) = Position of light
-
-fa = Falloff for spotlight
-ic = Cosine of half inner cone for spotlight
-oc = Cosine of half outer cone for spotlight
-*/
-math::Matrix4 RendererNull::GenerateLightMatrix(const LightData& data, bool active)
-{
-	math::Matrix4 matrix;
-
-	if(!active) {
-		matrix(0, 3) = 0.0f;
-		return matrix;
-	}
-
-	if(data.type == ELightType::Directional)
-		matrix(0, 3) = 1.0f;
-	else if(data.type == ELightType::Point)
-		matrix(0, 3) = 2.0f;
-	else if(data.type == ELightType::Spot)
-		matrix(0, 3) = 3.0f;
-	else
-		throw core::GenericInvalidArgumentException("data.type", "Unknown data type");
-
-	matrix(0, 0) = data.color.r;
-	matrix(0, 1) = data.color.g;
-	matrix(0, 2) = data.color.b;
-
-	matrix(1, 0) = data.position.x;
-	matrix(1, 1) = data.position.y;
-	matrix(1, 2) = data.position.z;
-
-	matrix(2, 0) = data.direction.x;
-	matrix(2, 1) = data.direction.y;
-	matrix(2, 2) = data.direction.z;
-
-	matrix(3, 0) = data.falloff;
-	matrix(3, 1) = cos(data.innerCone);
-	matrix(3, 2) = cos(data.outerCone);
-	matrix(3, 3) = 0.0f;
-
-	matrix(1, 3) = 0.0f;
-	matrix(2, 3) = 0.0f;
-
-	return matrix;
 }
 
 } // namespace video

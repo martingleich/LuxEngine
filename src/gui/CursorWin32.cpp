@@ -90,9 +90,10 @@ void CursorWin32::GrabCursor(const math::Vector2F& pos)
 	if(m_Grabbing)
 		return;
 
+	m_GrabbingPosition = math::Vector2F(pos.x, pos.y);
+
 	POINT p = {(LONG)pos.x, (LONG)pos.y};
 	ClientToScreen((HWND)m_Window->GetDeviceWindow(), &p);
-	m_GrabbingPosition = math::Vector2F((float)p.x, (float)p.y);
 	RECT clip;
 	clip.left = (LONG)p.x;
 	clip.right= (LONG)p.x;

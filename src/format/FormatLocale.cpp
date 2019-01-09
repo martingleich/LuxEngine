@@ -11,6 +11,7 @@ Facet_BooleanFormat BooleanFormat_English("true", "false");
 Facet_BooleanFormat BooleanFormat_German("wahr", "falsch");
 Facet_BooleanFormat BooleanFormat_Digit("1", "0");
 
+Locale InvariantLocale(NumericalFormat_English, BooleanFormat_Digit);
 Locale English(NumericalFormat_English, BooleanFormat_English);
 Locale German(NumericalFormat_German, BooleanFormat_German);
 

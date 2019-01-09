@@ -2,7 +2,9 @@
 #include "scene/Node.h"
 #include "video/Renderer.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::Light, "lux.comp.Light");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::PointLight, "lux.comp.PointLight");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::DirectionalLight, "lux.comp.DirectionalLight");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::SpotLight, "lux.comp.SpotLight");
 LX_REFERABLE_MEMBERS_SRC(lux::scene::GlobalAmbientLight, "lux.comp.GlobalAmbientLight");
 
 namespace lux
@@ -10,114 +12,91 @@ namespace lux
 namespace scene
 {
 
-Light::Light() :
+ClassicalLight::ClassicalLight(video::ELightType type) :
 	m_Power(1.0f),
-	m_Range(FLT_MAX),
-	m_IsShadowCasting(true)
+	m_Color(1,1,1)
 {
+	m_Desc.type = type;
 }
 
-Light::~Light()
+void ClassicalLight::SetRange(float range) { m_Desc.range = range >= 0 ? range : 0; }
+float ClassicalLight::GetRange() const { return m_Desc.range; }
+void ClassicalLight::SetPower(float power) { m_Power = power; }
+float ClassicalLight::GetPower() const { return m_Power; }
+void ClassicalLight::SetColor(const video::ColorF& color) { m_Color = color; }
+const video::ColorF& ClassicalLight::GetColor() const { return m_Color; }
+bool ClassicalLight::IsShadowCasting() const { return m_Desc.isShadowCasting; }
+void ClassicalLight::SetShadowCasting(bool b) { m_Desc.isShadowCasting = b; }
+
+static bool IsValidLightType(video::ELightType type)
 {
+	return type == video::ELightType::Point || type == video::ELightType::Spot || type == video::ELightType::Directional;
 }
 
-video::LightData Light::GetLightData() const
+ClassicalLightDescription* ClassicalLight::GetLightDescription()
 {
 	auto node = GetParent();
 
-	auto data = m_LightData;
-	data.color *= m_Power;
-	if(data.type == video::ELightType::Spot ||
-		data.type == video::ELightType::Directional) {
-		data.direction = node->FromRelativeDir(math::Vector3F::UNIT_Z);
+	lxAssert(IsValidLightType(m_Desc.type));
+
+	m_Desc.finalColor = m_Color * m_Power;
+	if(m_Desc.type == video::ELightType::Spot ||
+		m_Desc.type == video::ELightType::Directional) {
+		m_Desc.direction = node->FromRelativeDir(math::Vector3F::UNIT_Z);
 	}
 
-	if(data.type == video::ELightType::Spot ||
-		data.type == video::ELightType::Point) {
-		data.position = node->GetAbsolutePosition();
+	if(m_Desc.type == video::ELightType::Spot ||
+		m_Desc.type == video::ELightType::Point) {
+		m_Desc.position = node->GetAbsolutePosition();
 	}
 
-	return data;;
+	return &m_Desc;
 }
 
-void Light::SetRange(float range)
+
+DirectionalLight::DirectionalLight() :
+	ClassicalLight(video::ELightType::Directional)
 {
-	m_Range = range;
+}
+PointLight::PointLight() :
+	ClassicalLight(video::ELightType::Point)
+{
+}
+SpotLight::SpotLight() :
+	ClassicalLight(video::ELightType::Spot)
+{
+	m_Desc.innerCone = m_Desc.outerCone = math::AngleF::Degree(45.0f).Radian();
+	m_Desc.falloff = 0.0f;
 }
 
-float Light::GetRange() const
+void SpotLight::SetInnerCone(math::AngleF angle)
 {
-	return m_Range;
+	m_Desc.innerCone = angle.Radian();
 }
 
-void Light::SetInnerCone(math::AngleF angle)
+math::AngleF SpotLight::GetInnerCone() const
 {
-	m_LightData.innerCone = angle.Radian();
+	return math::AngleF::Radian(m_Desc.innerCone);
 }
 
-math::AngleF Light::GetInnerCone() const
+void SpotLight::SetOuterCone(math::AngleF angle)
 {
-	return math::AngleF::Radian(m_LightData.innerCone);
+	m_Desc.outerCone = angle.Radian();
 }
 
-void Light::SetOuterCone(math::AngleF angle)
+math::AngleF SpotLight::GetOuterCone() const
 {
-	m_LightData.outerCone = angle.Radian();
+	return math::AngleF::Radian(m_Desc.outerCone);
 }
 
-math::AngleF Light::GetOuterCone() const
+void SpotLight::SetFalloff(float falloff)
 {
-	return math::AngleF::Radian(m_LightData.outerCone);
+	m_Desc.falloff = falloff;
 }
 
-void Light::SetSpotFalloff(float falloff)
+float SpotLight::GetFalloff() const
 {
-	m_LightData.falloff = falloff;
-}
-
-float Light::GetSpotFalloff() const
-{
-	return m_LightData.falloff;
-}
-
-void Light::SetColor(const video::ColorF& color)
-{
-	m_LightData.color = color;
-}
-
-const video::ColorF& Light::GetColor() const
-{
-	return m_LightData.color;
-}
-
-void Light::SetPower(float power)
-{
-	m_Power = power;
-}
-
-float Light::GetPower() const
-{
-	return m_Power;
-}
-
-void Light::SetLightType(video::ELightType type)
-{
-	m_LightData.type = type;
-}
-
-video::ELightType Light::GetLightType() const
-{
-	return m_LightData.type;
-}
-
-bool Light::IsShadowCasting() const
-{
-	return m_IsShadowCasting;
-}
-
-void Light::SetShadowCasting(bool b)
-{
-	m_IsShadowCasting = b;
+	return m_Desc.falloff;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -132,12 +111,17 @@ GlobalAmbientLight::~GlobalAmbientLight()
 
 void GlobalAmbientLight::SetColor(const video::ColorF& color)
 {
-	m_Color = color;
+	m_Desc.color = color;
 }
 
 video::ColorF GlobalAmbientLight::GetColor() const
 {
-	return m_Color;
+	return m_Desc.color;
+}
+
+AmbientLightDescription* GlobalAmbientLight::GetLightDescription()
+{
+	return &m_Desc;
 }
 
 }

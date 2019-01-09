@@ -430,6 +430,12 @@ bool WindowWin32::HandleMessages(UINT Message,
 	}
 	break;
 	case WM_SETFOCUS:
+		if(m_Cursor->IsGrabbing()) {
+			// Regrab the cursor.
+			auto grabPos = m_Cursor->m_GrabbingPosition;
+			m_Cursor->UnGrabCursor();
+			m_Cursor->GrabCursor(grabPos);
+		}
 		OnStateChange(EStateChange::FocusGained);
 		break;
 

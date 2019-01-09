@@ -145,6 +145,72 @@ inline DWORD GetD3DBlendFunc(EBlendOperator op)
 	}
 }
 
+inline DWORD GetD3DFillMode(EDrawMode mode)
+{
+	switch(mode) {
+	case EDrawMode::Fill:
+		return D3DFILL_SOLID;
+	case EDrawMode::Wire:
+		return D3DFILL_WIREFRAME;
+	case EDrawMode::Point:
+		return D3DFILL_POINT;
+	default:
+		throw core::GenericInvalidArgumentException("mode", "Unknown draw mode");
+	}
+}
+
+inline DWORD GetD3DCullMode(EFaceSide side)
+{
+	if(side == video::EFaceSide::Back)
+		return D3DCULL_CCW;
+	else if(side == video::EFaceSide::Front)
+		return D3DCULL_CW;
+	else
+		return D3DCULL_NONE;
+}
+
+inline DWORD GetD3DTextureOperator(ETextureOperator op)
+{
+	switch(op) {
+	case ETextureOperator::Disable:
+		return D3DTOP_DISABLE;
+	case ETextureOperator::SelectArg1:
+		return D3DTOP_SELECTARG1;
+	case ETextureOperator::SelectArg2:
+		return D3DTOP_SELECTARG2;
+	case ETextureOperator::Modulate:
+		return D3DTOP_MODULATE;
+	case ETextureOperator::Add:
+		return D3DTOP_ADD;
+	case ETextureOperator::AddSigned:
+		return D3DTOP_ADDSIGNED;
+	case ETextureOperator::AddSmoth:
+		return D3DTOP_ADDSMOOTH;
+	case ETextureOperator::Subtract:
+		return D3DTOP_SUBTRACT;
+	case ETextureOperator::Blend:
+		return D3DTOP_BLENDDIFFUSEALPHA;
+	case ETextureOperator::Dot:
+		return D3DTOP_DOTPRODUCT3;
+	}
+	throw core::GenericInvalidArgumentException("op", "Unknown texture operator");
+}
+
+inline  DWORD GetD3DTextureArgument(ETextureArgument arg)
+{
+	switch(arg) {
+	case ETextureArgument::Current:
+		return D3DTA_CURRENT;
+	case ETextureArgument::Texture:
+		return D3DTA_TEXTURE;
+	case ETextureArgument::Diffuse:
+		return D3DTA_DIFFUSE;
+	case ETextureArgument::AlphaRep:
+		return D3DTA_ALPHAREPLICATE;
+	}
+	throw core::GenericInvalidArgumentException("arg", "Unknown texture argument");
+}
+
 inline ColorFormat GetLuxFormat(D3DFORMAT Format)
 {
 	switch(Format) {

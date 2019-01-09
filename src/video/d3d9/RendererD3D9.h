@@ -43,10 +43,6 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	int GetMaxLightCount() const;
-
-	///////////////////////////////////////////////////////////////////////////
-
 	void Draw(const RenderRequest& rq);
 
 	///////////////////////////////////////////////////////////////////////////
@@ -59,7 +55,6 @@ private:
 	void SwitchRenderMode(ERenderMode mode);
 
 	void UpdateTransforms(float polygonOffset);
-	void LoadLightSettings(ELightingFlag lighting, bool fixedFunction, bool changedShader, bool changeLighting);
 
 	void SetVertexFormat(const VertexFormat& format);
 

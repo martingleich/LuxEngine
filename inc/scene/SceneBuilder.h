@@ -26,7 +26,9 @@ namespace scene
 {
 class Camera;
 class Mesh;
-class Light;
+class DirectionalLight;
+class PointLight;
+class SpotLight;
 class GlobalFog;
 class SkyBox;
 
@@ -53,7 +55,9 @@ public:
 	LUX_API StrongRef<Node> AddMesh(video::Mesh* mesh);
 	LUX_API StrongRef<Node> AddSkyBox(const video::ColorF& color);
 	LUX_API StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr);
-	LUX_API StrongRef<Node> AddLight(video::ELightType lightType = video::ELightType::Point, video::Color color = video::Color::White);
+	LUX_API StrongRef<Node> AddDirectionalLight(video::Color color = video::Color::White);
+	LUX_API StrongRef<Node> AddPointLight(video::Color color = video::Color::White);
+	LUX_API StrongRef<Node> AddSpotLight(video::Color color = video::Color::White);
 	LUX_API StrongRef<Node> AddFog(const video::ColorF& color = video::Color::White, float start = 10.0f, float end = 100.0f);
 	LUX_API StrongRef<Node> AddCamera();
 
@@ -63,7 +67,9 @@ public:
 	LUX_API StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr) const;
 	LUX_API StrongRef<SkyBox> CreateSkyBox(const video::ColorF& color) const;
 	LUX_API StrongRef<SkyBox> CreateSkyBox(video::CubeTexture* skyTexture = nullptr) const;
-	LUX_API StrongRef<Light> CreateLight(video::ELightType lightType = video::ELightType::Point, video::Color color = video::Color::White) const;
+	LUX_API StrongRef<DirectionalLight> CreateDirectionalLight(video::ColorF color = video::Color::White) const;
+	LUX_API StrongRef<PointLight> CreatePointLight(video::ColorF color = video::Color::White) const;
+	LUX_API StrongRef<SpotLight> CreateSpotLight(video::ColorF color = video::Color::White) const;
 	LUX_API StrongRef<GlobalFog> CreateFog(const video::ColorF& color = video::Color::White, float start = 10.0f, float end = 100.0f) const;
 
 	// Animatoren

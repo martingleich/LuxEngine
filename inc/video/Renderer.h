@@ -25,7 +25,6 @@ class VariableAccess;
 namespace video
 {
 class Geometry;
-class LightData;
 class RenderTarget;
 class AbstractMaterial;
 class Pass;
@@ -269,17 +268,6 @@ public:
 
 	virtual void SetScissorRect(const math::RectI& rect, ScissorRectToken* token = nullptr) = 0;
 	virtual const math::RectI& GetScissorRect() const = 0;
-
-	///////////////////////////////////////////////////////////////////////////
-
-	//! Add a new active light
-	virtual void AddLight(const LightData& light) = 0;
-
-	//! Remove all lights from the scene
-	virtual void ClearLights() = 0;
-
-	//! The maximal number of lights which can be active at once
-	virtual int GetMaxLightCount() const = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

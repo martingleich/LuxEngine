@@ -39,6 +39,9 @@ public:
 	core::AttributePtr m_Fog1Ptr;
 	core::AttributePtr m_Fog2Ptr;
 
+	static const int LIGHT_COUNT = 4;
+	core::AttributePtr m_LightPtrs[4];
+
 	mutable core::AttributeList m_CurAttributes;
 };
 

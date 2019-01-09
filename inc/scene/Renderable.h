@@ -41,13 +41,7 @@ public:
 
 	ERenderPass pass;
 
-	const core::Array<Light*> illuminatingLights;
-	const core::Array<Light*> shadowCastingLights;
-
-	SceneData(const core::Array<Light*>& ill, const core::Array<Light*>& shadowing) :
-		illuminatingLights(ill),
-		shadowCastingLights(shadowing)
-	{}
+	SceneData() {}
 };
 
 class Renderable

@@ -8,7 +8,10 @@
 
 #include "scene/Scene.h"
 #include "scene/Node.h"
+
 #include "scene/components/Camera.h"
+#include "scene/components/Fog.h"
+#include "scene/components/Light.h"
 
 #include "scene/StencilShadowRenderer.h"
 
@@ -55,7 +58,6 @@ public:
 
 	void AddLight(Light* l);
 	void AddFog(Fog* l);
-	void AddAmbient(GlobalAmbientLight* l);
 
 	void DrawScene();
 	bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
@@ -115,6 +117,9 @@ private:
 		}
 	};
 
+	void ClearLightData(video::Renderer* renderer);
+	void AddLightData(video::Renderer* renderer, ClassicalLightDescription* desc);
+
 private:
 	StrongRef<Scene> m_Scene;
 
@@ -129,7 +134,6 @@ private:
 	core::Array<AbstractCamera*> m_Cameras;
 	core::Array<Light*> m_Lights;
 	core::Array<Fog*> m_Fogs;
-	video::ColorF m_AmbientLight;
 
 	// The current root
 	Node* m_CollectedRoot;
@@ -139,10 +143,13 @@ private:
 	WeakRef<AbstractCamera> m_ActiveCamera;
 	math::Vector3F m_AbsoluteCamPos;
 
+	int m_CurLightId;
+
 	/////////////////////////////////////////////////////////////////////////
 	// Settings and parameters
 	/////////////////////////////////////////////////////////////////////////
-	bool m_Culling; // Read from m_Attributes
+	bool m_Culling; // Cached: Read from m_Attributes
+	int m_MaxLightsPerDraw = 4;
 	core::AttributeList m_Attributes;
 	core::AttributeList m_RendererAttributes;
 	core::HashMap<ERenderPass, SceneRendererPassSettings> m_PassSettings;

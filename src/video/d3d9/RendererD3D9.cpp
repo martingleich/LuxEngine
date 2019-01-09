@@ -248,13 +248,6 @@ const math::RectI& RendererD3D9::GetScissorRect() const
 
 ///////////////////////////////////////////////////////////////////////////
 
-int RendererD3D9::GetMaxLightCount() const
-{
-	return m_Driver->GetDeviceCapability(EDriverCaps::MaxLights);
-}
-
-///////////////////////////////////////////////////////////////////////////
-
 void RendererD3D9::Draw(const RenderRequest& rq)
 {
 	if(rq.primitiveCount == 0)
@@ -418,7 +411,17 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 			else
 				changedShader = true;
 		}
-		m_DeviceState.EnablePass(pass);
+		
+		// Enable pass
+		m_DeviceState.EnableAlpha(pass.alpha);
+		m_DeviceState.SetStencilMode(pass.stencil);
+		m_DeviceState.SetRenderState(D3DRS_COLORWRITEENABLE, pass.colorMask);
+
+		m_DeviceState.SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(pass.zBufferFunc));
+		m_DeviceState.SetRenderState(D3DRS_ZWRITEENABLE, pass.zWriteEnabled ? TRUE : FALSE);
+		m_DeviceState.SetRenderState(D3DRS_FILLMODE, GetD3DFillMode(pass.drawMode));
+		m_DeviceState.SetRenderState(D3DRS_SHADEMODE, pass.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
+		m_DeviceState.SetRenderState(D3DRS_CULLMODE, GetD3DCullMode(pass.culling));
 	}
 
 	m_DeviceState.SetRenderState(D3DRS_NORMALIZENORMALS, m_NormalizeNormals ? TRUE : FALSE);
@@ -444,7 +447,9 @@ void RendererD3D9::SetupRendering(EFaceWinding frontFace)
 	// Generate data for fog and light
 	if(changedFogEnable)
 		m_ParamIds.fogEnabled->GetAccess().Set(pass.fogEnabled ? 1.0f : 0.0f);
-	LoadLightSettings(pass.lighting, useFixedPipeline, changedShader, changedLighting);
+
+	if(changedLighting)
+		m_ParamIds.lighting->GetAccess().Set((float)pass.lighting);
 
 	// Send the generated data to the shader
 	// Only if scene or shader changed.
@@ -507,43 +512,6 @@ void RendererD3D9::UpdateTransforms(float polygonOffset)
 
 			SetDirty(Dirty_ViewProj);
 		}
-	}
-}
-
-void RendererD3D9::LoadLightSettings(
-	ELightingFlag lighting,
-	bool fixedFunction,
-	bool changedShader,
-	bool changedLighting)
-{
-	bool useLights = (lighting != ELightingFlag::Disabled);
-
-	if(!fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
-		m_ParamIds.lighting->GetAccess().Set((float)lighting);
-	}
-	if(fixedFunction && (IsDirty(Dirty_Lights) || changedShader || changedLighting)) {
-		m_DeviceState.EnableLight(useLights);
-	}
-
-	if(IsDirty(Dirty_Lights) || changedLighting) {
-		if(fixedFunction) {
-			if(useLights) {
-				u32 i = 0;
-				for(auto& l : m_Lights)
-					m_DeviceState.SetLight(i++, l, lighting);
-				u32 newLightCount = i;
-				for(; i < m_ActiveFixedLights; ++i)
-					m_DeviceState.DisableLight(i);
-				m_ActiveFixedLights = newLightCount;
-			}
-		} else {
-			if(IsDirty(Dirty_Lights)) {
-				// Generate light matrices and set as param.
-				for(int i = 0; i < m_Lights.Size(); ++i)
-					m_ParamIds.lights[i]->GetAccess().Set(GenerateLightMatrix(m_Lights[i], true));
-			}
-		}
-		ClearDirty(Dirty_Lights);
 	}
 }
 

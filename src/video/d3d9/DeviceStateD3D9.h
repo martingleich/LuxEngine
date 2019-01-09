@@ -8,6 +8,7 @@
 #include "video/TextureStageSettings.h"
 #include "video/d3d9/FixedFunctionShaderD3D9.h"
 #include "video/FogData.h"
+#include "video/LightData.h"
 
 #include "platform/StrippedD3D9.h"
 #include "platform/UnknownRefCounted.h"
@@ -17,9 +18,62 @@ namespace lux
 namespace video
 {
 class Material;
-class LightData;
 class BaseTexture;
 class Pass;
+
+//! Contains all data needed to represent a light
+class LightData
+{
+public:
+	LightData() :
+		type(ELightType::Point),
+		color(1.0f, 1.0f, 1.0f),
+		position(0.0f, 0.0f, 0.0f),
+		direction(0.0f, 0.0f, 1.0f),
+		innerCone(math::DegToRad(10.0f)),
+		outerCone(math::DegToRad(45.0f)),
+		falloff(2.0f)
+	{
+	}
+
+	//! The light type
+	ELightType type;
+
+	//! The color of the light
+	/**
+	Default: White
+	*/
+	ColorF color;
+
+	//! The lightposition in world coordinates
+	math::Vector3F position;
+
+	//! The lightdirection in world coordinates
+	math::Vector3F direction;
+
+	//! The inner lightcone of a spotlight
+	/**
+	Must be between zero and outerCone
+	*/
+	float innerCone;
+
+	//! The outer lightcone of a spotlight
+	/**
+	Must be between innerCone and 2 pi
+	*/
+	float outerCone;
+
+	//! The falloff between inner and outer light cone
+	/**
+	Only for spotlights.
+	=1: linear falloff
+	<1: starts falling slow, becoming faster
+	>1: start falling fast, becoming slower
+	exact: intensity factor = ((cos a - cos (outerCone/2)) / (cos (innerCone/2) - cos(outerCone/2))) ^ falloff.
+	a = Angle between vertex and light direction
+	*/
+	float falloff;
+};
 
 class DeviceStateD3D9
 {
@@ -27,8 +81,6 @@ public:
 	~DeviceStateD3D9();
 
 	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
-
-	void EnablePass(const Pass& p);
 
 	void EnableFixedFunctionShader(
 		const core::Array<TextureLayer>& layer,
@@ -77,12 +129,7 @@ public:
 	void Reset();
 
 private:
-	static u32 GetFillMode(const Pass& p);
-	static u32 GetCullMode(const Pass& p);
 	static u32 Float2U32(float f);
-
-	static u32 GetTextureOperator(ETextureOperator op);
-	static u32 GetTextureArgument(ETextureArgument arg);
 
 private:
 	const D3DCAPS9* m_Caps;
@@ -98,8 +145,6 @@ private:
 
 	int m_MaxTextureCount;
 	int m_MaxVSTextureCount;
-
-	bool m_ResetAll;
 
 	static const int CACHED_TEXTURES = 8;
 	static const int RENDERSTATE_COUNT = 210;

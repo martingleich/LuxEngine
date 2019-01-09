@@ -112,7 +112,14 @@ template <typename SinkT, typename... Types>
 inline int format(SinkT&& sink, const char* str, const Types&... args)
 {
 	FormatExData data;
-	return formatEx(sink, data, Slice(strlen(str), str), args...);
+	return formatEx(sink, data, Slice(std::strlen(str), str), args...);
+}
+template <typename SinkT, typename... Types>
+inline int format(SinkT&& sink, Locale* locale, const char* str, const Types&... args)
+{
+	FormatExData data;
+	data.locale = locale;
+	return formatEx(sink, data, Slice(std::strlen(str), str), args...);
 }
 template <typename SinkT, typename... Types>
 inline int format(SinkT&& sink, Slice str, const Types&... args)

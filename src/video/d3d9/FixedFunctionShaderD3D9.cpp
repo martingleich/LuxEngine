@@ -3,6 +3,7 @@
 #include "video/Pass.h"
 #include "video/Renderer.h"
 #include "video/FogData.h"
+#include "video/LightData.h"
 
 namespace lux
 {
@@ -43,6 +44,51 @@ void FixedFunctionShaderD3D9::SetParam(int paramId, const void* data)
 	m_IsDirty = true;
 }
 
+static video::ELightType FloatToLightType(float type, bool& success)
+{
+	success = true;
+	if(type == 1.0f)
+		return video::ELightType::Directional;
+	else if(type == 2.0f)
+		return video::ELightType::Point;
+	else if(type == 3.0f)
+		return video::ELightType::Spot;
+	else {
+		success = false;
+		return video::ELightType::Point;
+	}
+}
+
+static void ParseLightMatrix(const math::Matrix4& mat,
+	video::LightData& data,
+	bool& active)
+{
+	active = (mat(0, 3) != 0.0f);
+	bool success;
+	data.type = FloatToLightType(mat(0, 3), success);
+	if(!success)
+		active = false;
+
+	if(!active)
+		return;
+
+	data.color.r = mat(0, 0);
+	data.color.g = mat(0, 1);
+	data.color.b = mat(0, 2);
+
+	data.position.x = mat(1, 0);
+	data.position.y = mat(1, 1);
+	data.position.z = mat(1, 2);
+
+	data.direction.x = mat(2, 0);
+	data.direction.y = mat(2, 1);
+	data.direction.z = mat(2, 2);
+
+	data.falloff = mat(3, 0);
+	data.innerCone = std::acos(mat(3, 1));
+	data.outerCone = std::acos(mat(3, 2));
+}
+
 void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass)
 {
 	if(m_CurAttributes != sceneAttributes) {
@@ -50,13 +96,18 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 		m_AmbientPtr = m_CurAttributes.Pointer("ambient");
 		m_Fog1Ptr = m_CurAttributes.Pointer("fog1");
 		m_Fog2Ptr = m_CurAttributes.Pointer("fog2");
+
+		m_LightPtrs[0] = m_CurAttributes.Pointer("light0");
+		m_LightPtrs[1] = m_CurAttributes.Pointer("light1");
+		m_LightPtrs[2] = m_CurAttributes.Pointer("light2");
+		m_LightPtrs[3] = m_CurAttributes.Pointer("light3");
 	}
 
 	m_Lighting = pass.lighting;
 	if(m_AmbientPtr)
 		m_Ambient = m_AmbientPtr->GetAccess(true).Get<video::ColorF>();
 	else
-		m_Ambient = video::ColorF(0,0,0,0);
+		m_Ambient = video::ColorF(0, 0, 0, 0);
 
 	if(m_Fog1Ptr && m_Fog2Ptr) {
 		auto fog2 = m_Fog2Ptr->GetAccess(true).Get<video::ColorF>();
@@ -75,6 +126,23 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 		}
 	} else {
 		m_DeviceState.EnableFixedFog(false);
+	}
+
+	m_DeviceState.EnableLight(m_Lighting != ELightingFlag::Disabled);
+	for(int i = 0; i < LIGHT_COUNT; ++i) {
+		if(m_LightPtrs[i]) {
+			video::LightData data;
+			bool active;
+			ParseLightMatrix(
+				m_LightPtrs[i]->GetAccess().Get<math::Matrix4>(),
+				data, active);
+			if(active)
+				m_DeviceState.SetLight(i, data, pass.lighting);
+			else
+				m_DeviceState.DisableLight(i);
+		} else {
+			m_DeviceState.DisableLight(i);
+		}
 	}
 }
 

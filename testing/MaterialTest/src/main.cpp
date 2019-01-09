@@ -54,9 +54,7 @@ public:
 		m_CameraNode->SetPosition(0.0f, 0.0f, -15.0f);
 		m_CameraNode->SetDirectionUp(math::Vector3F(0.0f, 0.0f, 1.0f));
 
-		m_Light = sceneBuilder.CreateLight();
-		m_Light->SetLightType(video::ELightType::Directional);
-		m_Light->SetColor(video::Color::White);
+		m_Light = sceneBuilder.CreateDirectionalLight();
 		node = sceneBuilder.AddNode(m_Light);
 		node->SetDirection(math::Vector3F::UNIT_Z);
 

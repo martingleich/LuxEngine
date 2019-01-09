@@ -58,9 +58,17 @@ StrongRef<Node> SceneBuilder::AddSkyBox(video::CubeTexture* skyTexture)
 	return m_Scene->AddNode(CreateSkyBox(skyTexture));
 }
 
-StrongRef<Node> SceneBuilder::AddLight(video::ELightType lightType, video::Color color)
+StrongRef<Node> SceneBuilder::AddDirectionalLight(video::Color color)
 {
-	return m_Scene->AddNode(CreateLight(lightType, color));
+	return m_Scene->AddNode(CreateDirectionalLight(color));
+}
+StrongRef<Node> SceneBuilder::AddPointLight(video::Color color)
+{
+	return m_Scene->AddNode(CreatePointLight(color));
+}
+StrongRef<Node> SceneBuilder::AddSpotLight(video::Color color)
+{
+	return m_Scene->AddNode(CreateSpotLight(color));
 }
 
 StrongRef<Node> SceneBuilder::AddFog(const video::ColorF& color, float start, float end)
@@ -106,10 +114,23 @@ StrongRef<SkyBox> SceneBuilder::CreateSkyBox(video::CubeTexture* skyTexture) con
 	return out;
 }
 
-StrongRef<Light> SceneBuilder::CreateLight(video::ELightType lightType, video::Color color) const
+StrongRef<DirectionalLight> SceneBuilder::CreateDirectionalLight(video::ColorF color) const
 {
-	auto light = CreateComponent(SceneComponentType::Light).AsStrong<Light>();
-	light->SetLightType(lightType);
+	auto light = CreateComponent(SceneComponentType::DirLight).AsStrong<DirectionalLight>();
+	light->SetColor(color);
+	return light;
+}
+
+StrongRef<PointLight> SceneBuilder::CreatePointLight(video::ColorF color) const
+{
+	auto light = CreateComponent(SceneComponentType::PointLight).AsStrong<PointLight>();
+	light->SetColor(color);
+	return light;
+}
+
+StrongRef<SpotLight> SceneBuilder::CreateSpotLight(video::ColorF color) const
+{
+	auto light = CreateComponent(SceneComponentType::SpotLight).AsStrong<SpotLight>();
 	light->SetColor(color);
 	return light;
 }

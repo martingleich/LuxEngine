@@ -5,8 +5,6 @@
 #include "core/ParamPackage.h"
 
 #include "video/AbstractMaterial.h"
-#include "video/LightData.h"
-#include "video/FogData.h"
 #include "video/RenderStatistics.h"
 #include "video/MatrixTable.h"
 #include "video/Pass.h"
@@ -31,7 +29,6 @@ protected:
 		Dirty_Pass,
 		Dirty_World,
 		Dirty_ViewProj,
-		Dirty_Lights,
 		Dirty_Rendertarget,
 		Dirty_RenderMode,
 		Dirty_PolygonOffset,
@@ -55,11 +52,6 @@ private:
 	void UpdatePipelineOverwrite();
 
 public:
-
-	///////////////////////////////////////////////////////////////////////////
-
-	void AddLight(const LightData& light);
-	void ClearLights();
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -99,8 +91,6 @@ protected:
 		m_DirtyFlags = 0;
 	}
 
-	math::Matrix4 GenerateLightMatrix(const LightData& data, bool active);
-
 protected:
 	struct ParamIdCollection
 	{
@@ -109,11 +99,6 @@ protected:
 
 		core::AttributePtr ambient;
 		core::AttributePtr time;
-
-		core::AttributePtr fog1;
-		core::AttributePtr fog2;
-
-		core::Array<core::AttributePtr> lights;
 	};
 
 protected:
@@ -127,8 +112,6 @@ protected:
 
 	core::Array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
 	PipelineOverwrite m_FinalOverwrite;
-
-	core::Array<LightData> m_Lights; //!< User set lights
 
 	bool m_NormalizeNormals;
 	math::Matrix4 m_TransformWorld;

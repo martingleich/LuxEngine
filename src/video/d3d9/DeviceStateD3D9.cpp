@@ -30,22 +30,6 @@ DeviceStateD3D9::~DeviceStateD3D9()
 	ReleaseUnmanaged();
 }
 
-void DeviceStateD3D9::EnablePass(const Pass& p)
-{
-	// Enable pipeline settings.
-	EnableAlpha(p.alpha);
-	SetStencilMode(p.stencil);
-	SetRenderState(D3DRS_COLORWRITEENABLE, p.colorMask);
-
-	SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(p.zBufferFunc));
-	SetRenderState(D3DRS_ZWRITEENABLE, p.zWriteEnabled ? TRUE : FALSE);
-	SetRenderState(D3DRS_FILLMODE, GetFillMode(p));
-	SetRenderState(D3DRS_SHADEMODE, p.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
-	SetRenderState(D3DRS_CULLMODE, GetCullMode(p));
-
-	m_ResetAll = false;
-}
-
 void DeviceStateD3D9::EnableFixedFunctionShader(
 	const core::Array<TextureLayer>& layers,
 	const core::Array<TextureStageSettings>& stages,
@@ -177,19 +161,19 @@ void DeviceStateD3D9::EnableTextureStage(
 		SetTextureStageState(stage, D3DTSS_COLORARG1, D3DTA_TFACTOR);
 		SetTextureStageState(stage, D3DTSS_ALPHAARG1, D3DTA_TFACTOR);
 	} else {
-		SetTextureStageState(stage, D3DTSS_COLORARG1, GetTextureArgument(settings.colorArg1));
-		SetTextureStageState(stage, D3DTSS_ALPHAARG1, GetTextureArgument(settings.alphaArg1));
+		SetTextureStageState(stage, D3DTSS_COLORARG1, GetD3DTextureArgument(settings.colorArg1));
+		SetTextureStageState(stage, D3DTSS_ALPHAARG1, GetD3DTextureArgument(settings.alphaArg1));
 	}
 	if(lighting == ELightingFlag::Disabled && settings.colorArg2 == ETextureArgument::Diffuse && !useVertexData) {
 		SetTextureStageState(stage, D3DTSS_COLORARG2, D3DTA_TFACTOR);
 		SetTextureStageState(stage, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
 	} else {
-		SetTextureStageState(stage, D3DTSS_COLORARG2, GetTextureArgument(settings.colorArg2));
-		SetTextureStageState(stage, D3DTSS_ALPHAARG2, GetTextureArgument(settings.alphaArg2));
+		SetTextureStageState(stage, D3DTSS_COLORARG2, GetD3DTextureArgument(settings.colorArg2));
+		SetTextureStageState(stage, D3DTSS_ALPHAARG2, GetD3DTextureArgument(settings.alphaArg2));
 	}
 
-	SetTextureStageState(stage, D3DTSS_COLOROP, GetTextureOperator(settings.colorOperator));
-	SetTextureStageState(stage, D3DTSS_ALPHAOP, GetTextureOperator(settings.alphaOperator));
+	SetTextureStageState(stage, D3DTSS_COLOROP, GetD3DTextureOperator(settings.colorOperator));
+	SetTextureStageState(stage, D3DTSS_ALPHAOP, GetD3DTextureOperator(settings.alphaOperator));
 
 	if(settings.HasAlternateCoordSource())
 		SetTextureStageState(stage, D3DTSS_TEXCOORDINDEX, settings.coordSource);
@@ -205,7 +189,7 @@ void DeviceStateD3D9::DisableTexture(u32 stage)
 
 void DeviceStateD3D9::EnableAlpha(AlphaBlendMode mode)
 {
-	if(m_AlphaMode == mode && !m_ResetAll)
+	if(m_AlphaMode == mode)
 		return;
 
 	if(mode.blendOperator == EBlendOperator::None) {
@@ -264,7 +248,7 @@ void DeviceStateD3D9::SetSamplerState(u32 stage, D3DSAMPLERSTATETYPE state, DWOR
 
 void DeviceStateD3D9::SetTexture(u32 stage, IDirect3DBaseTexture9* tex)
 {
-	if(stage >= CACHED_TEXTURES || tex != m_Textures[stage] || m_ResetAll) {
+	if(stage >= CACHED_TEXTURES || tex != m_Textures[stage]) {
 		HRESULT hr = m_Device->SetTexture(stage, tex);
 		if(FAILED(hr))
 			throw core::D3D9Exception(hr);
@@ -279,29 +263,6 @@ void DeviceStateD3D9::SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matri
 	m_Device->SetTransform(type, (D3DMATRIX*)m.DataRowMajor());
 }
 
-u32 DeviceStateD3D9::GetFillMode(const Pass& p)
-{
-	switch(p.drawMode) {
-	case EDrawMode::Fill:
-		return D3DFILL_SOLID;
-	case EDrawMode::Wire:
-		return D3DFILL_WIREFRAME;
-	case EDrawMode::Point:
-		return D3DFILL_POINT;
-	}
-	throw core::GenericInvalidArgumentException("p.drawmode", "Unknown draw mode");
-}
-
-u32 DeviceStateD3D9::GetCullMode(const Pass& p)
-{
-	if(p.culling == video::EFaceSide::Back)
-		return D3DCULL_CCW;
-	else if(p.culling == video::EFaceSide::Front)
-		return D3DCULL_CW;
-	else
-		return D3DCULL_NONE;
-}
-
 u32 DeviceStateD3D9::Float2U32(float f)
 {
 	u32 out;
@@ -309,48 +270,6 @@ u32 DeviceStateD3D9::Float2U32(float f)
 	memcpy(&out, &f, 4);
 
 	return out;
-}
-
-u32 DeviceStateD3D9::GetTextureOperator(ETextureOperator op)
-{
-	switch(op) {
-	case ETextureOperator::Disable:
-		return D3DTOP_DISABLE;
-	case ETextureOperator::SelectArg1:
-		return D3DTOP_SELECTARG1;
-	case ETextureOperator::SelectArg2:
-		return D3DTOP_SELECTARG2;
-	case ETextureOperator::Modulate:
-		return D3DTOP_MODULATE;
-	case ETextureOperator::Add:
-		return D3DTOP_ADD;
-	case ETextureOperator::AddSigned:
-		return D3DTOP_ADDSIGNED;
-	case ETextureOperator::AddSmoth:
-		return D3DTOP_ADDSMOOTH;
-	case ETextureOperator::Subtract:
-		return D3DTOP_SUBTRACT;
-	case ETextureOperator::Blend:
-		return D3DTOP_BLENDDIFFUSEALPHA;
-	case ETextureOperator::Dot:
-		return D3DTOP_DOTPRODUCT3;
-	}
-	throw core::GenericInvalidArgumentException("op", "Unknown texture operator");
-}
-
-u32 DeviceStateD3D9::GetTextureArgument(ETextureArgument arg)
-{
-	switch(arg) {
-	case ETextureArgument::Current:
-		return D3DTA_CURRENT;
-	case ETextureArgument::Texture:
-		return D3DTA_TEXTURE;
-	case ETextureArgument::Diffuse:
-		return D3DTA_DIFFUSE;
-	case ETextureArgument::AlphaRep:
-		return D3DTA_ALPHAREPLICATE;
-	}
-	throw core::GenericInvalidArgumentException("arg", "Unknown texture argument");
 }
 
 void DeviceStateD3D9::EnableFixedFog(bool enabled)
@@ -468,7 +387,6 @@ void DeviceStateD3D9::Reset()
 {
 	m_Shader = nullptr;
 	m_ActiveTextureLayers = 0;
-	m_ResetAll = true;
 
 	for(auto i = 0; i < RENDERSTATE_COUNT; ++i)
 		m_Device->GetRenderState((D3DRENDERSTATETYPE)i, m_RenderStates + i);

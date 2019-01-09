@@ -9,10 +9,28 @@
 
 #include "core/lxAlgorithm.h"
 
-#include "scene/components/Fog.h"
-#include "scene/components/Light.h"
 #include "scene/components/SceneMesh.h"
 
+/*
+Lux illumination matrix.
+Only the location of the t value is fixed, all other values depend on the light
+type, for built-in point/directonal and spot light the matrix is build as
+following:
+
+ r  g  b t
+px py pz 0
+dx dy dz 0
+ra ic oc 0
+
+t = Type of light (0 = Disabled, 1 = Directional, 2 = Point, 3 = Spot)
+
+(r,g,b) = Diffuse color of light
+(px,py,pz) = Position of light
+
+fa = Falloff for spotlight
+ic = Cosine of half inner cone for spotlight
+oc = Cosine of half outer cone for spotlight
+*/
 namespace lux
 {
 namespace scene
@@ -39,6 +57,10 @@ SceneRendererSimpleForward::SceneRendererSimpleForward(const scene::SceneRendere
 		alb.AddAttribute("camPos", math::Vector3F(0, 0, 0));
 		alb.AddAttribute("fog1", video::ColorF(0, 0, 0, 0));
 		alb.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
+		alb.AddAttribute("light0", math::Matrix4());
+		alb.AddAttribute("light1", math::Matrix4());
+		alb.AddAttribute("light2", math::Matrix4());
+		alb.AddAttribute("light3", math::Matrix4());
 
 		m_RendererAttributes = alb.BuildAndReset();
 	}
@@ -107,9 +129,6 @@ public:
 		auto light = dynamic_cast<Light*>(comp);
 		if(light)
 			sr->AddLight(light);
-		auto ambient = dynamic_cast<GlobalAmbientLight*>(comp);
-		if(ambient)
-			sr->AddAmbient(ambient);
 	}
 
 	SceneRendererSimpleForward* sr;
@@ -151,7 +170,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 			m_Renderer->EndScene();
 		return;
 	}
-	
+
 	if(!beginScene) {
 		if(m_Renderer->GetRenderTarget() != m_Cameras[0]->GetRenderTarget())
 			throw core::GenericRuntimeException("Already started scene uses diffrent rendertarget than first camera.");
@@ -196,7 +215,6 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 		m_SolidNodeList.Clear();
 		m_TransparentNodeList.Clear();
 		m_Lights.Clear();
-		m_AmbientLight = video::ColorF(0, 0, 0);
 		m_Fogs.Clear();
 	}
 
@@ -274,11 +292,6 @@ void SceneRendererSimpleForward::AddFog(Fog* l)
 	m_Fogs.PushBack(l);
 }
 
-void SceneRendererSimpleForward::AddAmbient(GlobalAmbientLight* l)
-{
-	m_AmbientLight += l->GetColor();
-}
-
 bool SceneRendererSimpleForward::IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum)
 {
 	LUX_UNUSED(r);
@@ -289,7 +302,7 @@ bool SceneRendererSimpleForward::IsCulled(Node* node, Renderable* r, const math:
 	return !frustum.IsBoxVisible(node->GetBoundingBox(), node->GetAbsoluteTransform());
 }
 
-static void SetFogData(video::Renderer* renderer, FogDescription* desc, video::ColorF* overwriteColor=nullptr)
+static void SetFogData(video::Renderer* renderer, FogDescription* desc, video::ColorF* overwriteColor = nullptr)
 {
 	if(desc) {
 		video::ColorF fog2;
@@ -312,6 +325,73 @@ static void SetFogData(video::Renderer* renderer, FogDescription* desc, video::C
 	}
 }
 
+static float LightTypeToFloat(video::ELightType type)
+{
+	switch(type) {
+	case video::ELightType::Directional: return 1;
+	case video::ELightType::Point: return 2;
+	case video::ELightType::Spot: return 3;
+	default:
+		throw core::GenericInvalidArgumentException("type", "Unknown light data type");
+	}
+}
+
+
+static math::Matrix4 GenerateLightMatrix(ClassicalLightDescription* desc)
+{
+	math::Matrix4 matrix;
+
+	if(!desc) {
+		matrix(0, 3) = 0.0f;
+		return matrix;
+	}
+	matrix(0, 3) = LightTypeToFloat(desc->GetType());
+
+	auto color = desc->GetColor();
+	matrix(0, 0) = color.r;
+	matrix(0, 1) = color.g;
+	matrix(0, 2) = color.b;
+
+	auto position = desc->GetPosition();
+	matrix(1, 0) = position.x;
+	matrix(1, 1) = position.y;
+	matrix(1, 2) = position.z;
+
+	auto direction = desc->GetDirection();
+	matrix(2, 0) = direction.x;
+	matrix(2, 1) = direction.y;
+	matrix(2, 2) = direction.z;
+
+	matrix(3, 0) = desc->GetFalloff();
+	matrix(3, 1) = cos(desc->GetInnerCone());
+	matrix(3, 2) = cos(desc->GetOuterCone());
+	matrix(3, 3) = 0.0f;
+
+	matrix(1, 3) = 0.0f;
+	matrix(2, 3) = 0.0f;
+
+	return matrix;
+}
+
+void SceneRendererSimpleForward::ClearLightData(video::Renderer* renderer)
+{
+	m_CurLightId = 0;
+	renderer->GetParams()["light0"].Set(GenerateLightMatrix(nullptr));
+	renderer->GetParams()["light1"].Set(GenerateLightMatrix(nullptr));
+	renderer->GetParams()["light2"].Set(GenerateLightMatrix(nullptr));
+	renderer->GetParams()["light3"].Set(GenerateLightMatrix(nullptr));
+}
+
+void SceneRendererSimpleForward::AddLightData(video::Renderer* renderer, ClassicalLightDescription* desc)
+{
+	if(m_CurLightId < m_MaxLightsPerDraw) {
+		core::String name;
+		format::format(name, &format::InvariantLocale, "light{}", m_CurLightId);
+		renderer->GetParams()[name].Set(GenerateLightMatrix(desc));
+	}
+	++m_CurLightId;
+}
+
 void SceneRendererSimpleForward::DrawScene()
 {
 	// Check if a stencil buffer is available for shadow rendering
@@ -326,10 +406,15 @@ void SceneRendererSimpleForward::DrawScene()
 
 	m_Culling = m_Attributes["culling"].Get<bool>();
 
-	core::Array<Light*> illuminating;
-	core::Array<Light*> shadowCasting;
-	core::Array<Light*> nonShadowCasting;
-	SceneData sceneData(illuminating, shadowCasting);
+	struct LightEntry
+	{
+		ClassicalLightDescription* desc;
+		Node* node;
+	};
+	core::Array<LightEntry> illuminating;
+	core::Array<LightEntry> shadowCasting;
+	core::Array<LightEntry> nonShadowCasting;
+	SceneData sceneData;
 	sceneData.activeCamera = m_ActiveCamera;
 	sceneData.activeCameraNode = m_ActiveCameraNode;
 
@@ -337,28 +422,34 @@ void SceneRendererSimpleForward::DrawScene()
 
 	//-------------------------------------------------------------------------
 	// The lights
-	m_Renderer->GetParams()["ambient"].Set(m_AmbientLight);
-	m_Renderer->ClearLights();
-
-	int maxLightCount = m_Renderer->GetMaxLightCount();
+	ClearLightData(m_Renderer);
+	video::ColorF totalAmbientLight;
 	int maxShadowCastingCount = m_Attributes["maxShadowCasters"].Get<int>();
 	if(!drawStencilShadows)
 		maxShadowCastingCount = 0;
+	maxShadowCastingCount = math::Clamp(maxShadowCastingCount, 0, m_MaxLightsPerDraw);
 
 	int count = 0;
 	int shadowCount = 0;
 	for(auto& e : m_Lights) {
-		illuminating.PushBack(e);
-		if(e->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
-			shadowCasting.PushBack(e);
-			++shadowCount;
-		} else {
-			nonShadowCasting.PushBack(e);
+		auto descBase = e->GetLightDescription();
+		if(auto desc = dynamic_cast<ClassicalLightDescription*>(descBase)) {
+			LightEntry entry{desc, e->GetParent()};
+			illuminating.PushBack(entry);
+			if(desc->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
+				shadowCasting.PushBack(entry);
+				++shadowCount;
+			} else {
+				nonShadowCasting.PushBack(entry);
+			}
+			++count;
+			if(count >= m_MaxLightsPerDraw)
+				break;
+		} else if(auto desc = dynamic_cast<AmbientLightDescription*>(descBase)) {
+			totalAmbientLight += desc->GetColor();
 		}
-		++count;
-		if(count >= maxLightCount)
-			break;
 	}
+	m_Renderer->GetParams()["ambient"].Set(totalAmbientLight);
 
 	//-------------------------------------------------------------------------
 	// The fog
@@ -391,7 +482,7 @@ void SceneRendererSimpleForward::DrawScene()
 		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 	} else {
 		for(auto& e : illuminating)
-			m_Renderer->AddLight(e->GetLightData());
+			AddLightData(m_Renderer, e.desc);
 	}
 
 	// Ambient pass for shadows, otherwise the normal renderpass
@@ -414,10 +505,11 @@ void SceneRendererSimpleForward::DrawScene()
 		m_Renderer->PopPipelineOverwrite(&pot);
 
 		// Shadow pass for each shadow casting light
-		for(auto shadowLight : shadowCasting) {
-			auto shadowNode = shadowLight->GetParent();
-			m_Renderer->ClearLights();
-			m_Renderer->AddLight(shadowLight->GetLightData());
+		for(auto shadowEntry : shadowCasting) {
+			auto shadowLight = shadowEntry.desc;
+			auto shadowNode = shadowEntry.node;
+			ClearLightData(m_Renderer);
+			AddLightData(m_Renderer, shadowLight);
 
 			m_StencilShadowRenderer.Begin(m_ActiveCameraNode->GetAbsolutePosition(), m_ActiveCameraNode->GetAbsoluteTransform().TransformDir(math::Vector3F::UNIT_Y));
 			for(auto& e : m_SolidNodeList) {
@@ -426,7 +518,7 @@ void SceneRendererSimpleForward::DrawScene()
 					if(mesh && mesh->GetMesh()) {
 						bool isInfinite;
 						math::Vector3F lightPos;
-						if(shadowLight->GetLightType() == video::ELightType::Directional) {
+						if(shadowLight->GetType() == video::ELightType::Directional) {
 							isInfinite = true;
 							lightPos = e.node->ToRelativeDir(shadowNode->FromRelativeDir(math::Vector3F::UNIT_Z));
 						} else {
@@ -460,10 +552,10 @@ void SceneRendererSimpleForward::DrawScene()
 		}
 
 		if(!nonShadowCasting.IsEmpty()) {
-			m_Renderer->ClearLights();
+			ClearLightData(m_Renderer);
 			// Draw with remaining non shadow casting lights
 			for(auto illum : nonShadowCasting)
-				m_Renderer->AddLight(illum->GetLightData());
+				AddLightData(m_Renderer, illum.desc);
 
 			EnableOverwrite(ERenderPass::Solid, pot);
 
@@ -485,7 +577,7 @@ void SceneRendererSimpleForward::DrawScene()
 
 		// Add shadow casting lights for remaining render jobs
 		for(auto illum : shadowCasting)
-			m_Renderer->AddLight(illum->GetLightData());
+			AddLightData(m_Renderer, illum.desc);
 
 		// Restore correct fog
 		if(correctFogForStencilShadows && m_Fogs.Size() > 0) {
