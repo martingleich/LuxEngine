@@ -86,8 +86,8 @@ core::String FormatD3DXShaderError(core::StringView input, bool isVertex)
 {
 	// File(line, col): error number: error-string
 	auto colon = input.FindReverse(":");
-	colon = colon + input.BeginSubString(colon).FindReverse(":");
-	auto base_name = colon + input.BeginSubString(colon).FindReverse("\\");
+	colon = input.BeginSubString(colon).FindReverse(":");
+	auto base_name = input.BeginSubString(colon).FindReverse("\\");
 	if(base_name == colon)
 		base_name = 0;
 	else
@@ -147,8 +147,10 @@ bool ShaderD3D9::Init(
 	// Load all shader parameters.
 	u32 nameMemoryNeeded = 0;
 	core::Array<Param> unsortedParams;
-	LoadAllParams(true, vertexShaderConstants, unsortedParams, nameMemoryNeeded, errorList);
-	LoadAllParams(false, pixelShaderConstants, unsortedParams, nameMemoryNeeded, errorList);
+	if(!LoadAllParams(true, vertexShaderConstants, unsortedParams, nameMemoryNeeded, errorList))
+		return false;
+	if(!LoadAllParams(false, pixelShaderConstants, unsortedParams, nameMemoryNeeded, errorList))
+		return false;
 
 	u32 nameCursor = 0;
 	core::ParamPackageBuilder ppb;
@@ -300,7 +302,7 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	return shader;
 }
 
-void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<Param>& outParams, u32& outStringSize, core::Array<core::String>* errorList)
+bool ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::Array<Param>& outParams, u32& outStringSize, core::Array<core::String>* errorList)
 {
 	D3DXCONSTANTTABLE_DESC tableDesc;
 	HRESULT hr;
@@ -320,11 +322,13 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 		EParamType paramType;
 		if(!GetParamInfo(handle, table, samplerStage, type, location, name, defaultValue, paramType))
 			continue;
+		if(paramType == EParamType::Other)
+			continue;
 
-		if(paramType == EParamType::Other || type == EType::Unknown) {
+		if(type == EType::Unknown) {
 			if(errorList)
 				errorList->PushBack(core::StringConverter::Format("Shader has unsupported parameter type. (param: {}).", name));
-			throw UnhandledShaderCompileErrorException();
+			return false;
 		}
 
 		Param* foundEntry = nullptr;
@@ -351,7 +355,7 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 		if(foundEntry->type != type) {
 			if(errorList)
 				errorList->PushBack(core::StringConverter::Format("Shader param in pixelshader and vertex shader has diffrent types. (param: {}).", name));
-			throw UnhandledShaderCompileErrorException();
+			return false;
 		}
 
 		if(isVertex)
@@ -360,6 +364,8 @@ void ShaderD3D9::LoadAllParams(bool isVertex, ID3DXConstantTable* table, core::A
 			foundEntry->psLocation = location;
 		foundEntry->samplerStage = samplerStage;
 	}
+
+	return true;
 }
 
 bool ShaderD3D9::GetParamInfo(

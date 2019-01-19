@@ -71,9 +71,14 @@ StrongRef<Node> SceneBuilder::AddSpotLight(video::Color color)
 	return m_Scene->AddNode(CreateSpotLight(color));
 }
 
-StrongRef<Node> SceneBuilder::AddFog(const video::ColorF& color, float start, float end)
+StrongRef<Node> SceneBuilder::AddLinearFog(float start, float end, const video::ColorF& color)
 {
-	return m_Scene->AddNode(CreateFog(color, start, end));
+	return m_Scene->AddNode(CreateLinearFog(start, end, color));
+}
+
+StrongRef<Node> SceneBuilder::AddExponentialFog(float density, const video::ColorF& color)
+{
+	return m_Scene->AddNode(CreateExponentialFog(density, color));
 }
 
 StrongRef<Node> SceneBuilder::AddCamera()
@@ -135,16 +140,25 @@ StrongRef<SpotLight> SceneBuilder::CreateSpotLight(video::ColorF color) const
 	return light;
 }
 
-StrongRef<GlobalFog> SceneBuilder::CreateFog(const video::ColorF& color, float start, float end) const
+StrongRef<LinearFog> SceneBuilder::CreateLinearFog(float start, float end, const video::ColorF& color)
 {
-	auto fog = CreateComponent(SceneComponentType::GlobalFog).AsStrong<GlobalFog>();
-	fog->SetFogType(video::EFogType::Linear);
+	auto fog = CreateComponent(SceneComponentType::LinearFog).AsStrong<LinearFog>();
 	fog->SetStart(start);
 	fog->SetEnd(end);
 	fog->SetColor(color);
 
 	return fog;
 }
+
+StrongRef<ExponentialFog> SceneBuilder::CreateExponentialFog(float density, const video::ColorF& color)
+{
+	auto fog = CreateComponent(SceneComponentType::ExponentialFog).AsStrong<ExponentialFog>();
+	fog->SetDensity(density);
+	fog->SetColor(color);
+
+	return fog;
+}
+
 
 StrongRef<RotationAnimator> SceneBuilder::CreateRotator(const math::Vector3F& axis, math::AngleF rotSpeed) const
 {

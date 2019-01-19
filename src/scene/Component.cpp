@@ -16,7 +16,8 @@ const core::Name Mesh("lux.comp.Mesh");
 const core::Name SpotLight("lux.comp.SpotLight");
 const core::Name PointLight("lux.comp.PointLight");
 const core::Name DirLight("lux.comp.DirectionalLight");
-const core::Name GlobalFog("lux.comp.GlobalFog");
+const core::Name LinearFog("lux.comp.LinearFog");
+const core::Name ExponentialFog("lux.comp.ExpFog");
 const core::Name SkyBox("lux.comp.SkyBox");
 
 }

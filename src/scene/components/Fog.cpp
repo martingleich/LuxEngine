@@ -1,72 +1,88 @@
 #include "scene/components/Fog.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::GlobalFog, "lux.comp.GlobalFog");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::LinearFog, "lux.comp.LinearFog");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::ExponentialFog, "lux.comp.ExpFog");
 
 namespace lux
 {
 namespace scene
 {
 
-GlobalFog::GlobalFog()
+LinearFog::LinearFog()
 {
 	m_Data.color = video::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Data.type = video::EFogType::Linear;
 	m_Data.start = 0;
 	m_Data.end = 0;
-	m_Data.density = 1;
 }
 
-GlobalFog::~GlobalFog()
+LinearFog::~LinearFog()
 {
 }
 
-void GlobalFog::SetFogType(video::EFogType type)
-{
-	m_Data.type = type;
-}
-video::EFogType GlobalFog::GetFogType() const
-{
-	return m_Data.type;
-}
-
-void GlobalFog::SetDensity(float density)
-{
-	m_Data.density = density;
-}
-float GlobalFog::GetDensity() const
-{
-	return m_Data.density;
-}
-
-void GlobalFog::SetStart(float start)
+void LinearFog::SetStart(float start)
 {
 	m_Data.start = start;
 }
-float GlobalFog::GetStart() const
+float LinearFog::GetStart() const
 {
 	return m_Data.start;
 }
 
-void GlobalFog::SetEnd(float end)
+void LinearFog::SetEnd(float end)
 {
 	m_Data.end = end;
 }
-float GlobalFog::GetEnd() const
+float LinearFog::GetEnd() const
 {
 	return m_Data.end;
 }
 
-void GlobalFog::SetColor(const video::ColorF& color)
+void LinearFog::SetColor(const video::ColorF& color)
 {
 	m_Data.color = color;
 }
 
-const video::ColorF& GlobalFog::GetColor() const
+const video::ColorF& LinearFog::GetColor() const
 {
 	return m_Data.color;
 }
 
-FogDescription* GlobalFog::GetFogDescription()
+FogDescription* LinearFog::GetFogDescription()
+{
+	return &m_Data;
+}
+
+ExponentialFog::ExponentialFog()
+{
+	m_Data.color = video::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Data.density = 0;
+}
+
+ExponentialFog::~ExponentialFog()
+{
+}
+
+void ExponentialFog::SetDensity(float density)
+{
+	m_Data.density = density;
+}
+
+float ExponentialFog::GetDensity() const
+{
+	return m_Data.density;
+}
+
+void ExponentialFog::SetColor(const video::ColorF& color)
+{
+	m_Data.color = color;
+}
+
+const video::ColorF& ExponentialFog::GetColor() const
+{
+	return m_Data.color;
+}
+
+FogDescription* ExponentialFog::GetFogDescription()
 {
 	return &m_Data;
 }

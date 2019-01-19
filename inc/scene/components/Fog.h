@@ -12,6 +12,11 @@ class FogDescription
 {
 public:
 	virtual ~FogDescription() {}
+};
+
+class ClassicalFogDescription : public FogDescription
+{
+public:
 	virtual video::EFogType GetType() = 0;
 	virtual float GetStart() = 0;
 	virtual float GetEnd() = 0;
@@ -25,51 +30,72 @@ public:
 	virtual FogDescription* GetFogDescription() = 0;
 };
 
-class GlobalFog : public Fog
+class LinearFog : public Fog
 {
-	LX_REFERABLE_MEMBERS_API(GlobalFog, LUX_API);
-	class GlobalFogDescription : public FogDescription
+	LX_REFERABLE_MEMBERS_API(LinearFog, LUX_API);
+	class LinearFogDescription : public  ClassicalFogDescription
 	{
 	public:
-		video::EFogType GetType() { return type; }
-		float GetStart() { return start; }
+		video::EFogType GetType() { return video::EFogType::Linear; }
+		float GetStart()  { return start; }
 		float GetEnd() { return end; }
-		float GetDensity() { return density; }
+		float GetDensity() { return 0.0f; }
 		video::ColorF GetColor() { return color; }
-
-		video::EFogType type;
 
 		float start;
 		float end;
-
-		float density;
-
 		video::ColorF color;
 	};
 
 public:
-	LUX_API GlobalFog();
-	LUX_API virtual ~GlobalFog();
+	LUX_API LinearFog();
+	LUX_API ~LinearFog();
 
-	LUX_API virtual void SetFogType(video::EFogType type);
-	LUX_API virtual video::EFogType GetFogType() const;
+	LUX_API void SetStart(float start);
+	LUX_API float GetStart() const;
 
-	LUX_API virtual void SetDensity(float density);
-	LUX_API virtual float GetDensity() const;
+	LUX_API void SetEnd(float end);
+	LUX_API float GetEnd() const;
 
-	LUX_API virtual void SetStart(float start);
-	LUX_API virtual float GetStart() const;
-
-	LUX_API virtual void SetEnd(float end);
-	LUX_API virtual float GetEnd() const;
-
-	LUX_API virtual void SetColor(const video::ColorF& color);
-	LUX_API virtual const video::ColorF& GetColor() const;
+	LUX_API void SetColor(const video::ColorF& color);
+	LUX_API const video::ColorF& GetColor() const;
 
 	LUX_API FogDescription* GetFogDescription();
 
 private:
-	GlobalFogDescription m_Data;
+	LinearFogDescription m_Data;
+};
+
+class ExponentialFog : public Fog
+{
+	LX_REFERABLE_MEMBERS_API(ExponentialFog, LUX_API);
+	class ExponentialFogDescription : public  ClassicalFogDescription
+	{
+	public:
+		video::EFogType GetType() { return video::EFogType::Exp; }
+		float GetStart()  { return 0; }
+		float GetEnd() { return 0; }
+		float GetDensity() { return density; }
+		video::ColorF GetColor() { return color; }
+
+		float density;
+		video::ColorF color;
+	};
+
+public:
+	LUX_API ExponentialFog();
+	LUX_API ~ExponentialFog();
+
+	LUX_API void SetColor(const video::ColorF& color);
+	LUX_API const video::ColorF& GetColor() const;
+
+	LUX_API void SetDensity(float f);
+	LUX_API float GetDensity() const;
+
+	LUX_API FogDescription* GetFogDescription();
+
+private:
+	ExponentialFogDescription m_Data;
 };
 
 } // namespace scene

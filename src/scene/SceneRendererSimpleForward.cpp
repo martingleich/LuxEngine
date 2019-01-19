@@ -55,8 +55,8 @@ SceneRendererSimpleForward::SceneRendererSimpleForward(const scene::SceneRendere
 		core::AttributeListBuilder alb;
 		alb.SetBase(m_Renderer->GetBaseParams());
 		alb.AddAttribute("camPos", math::Vector3F(0, 0, 0));
-		alb.AddAttribute("fog1", video::ColorF(0, 0, 0, 0));
-		alb.AddAttribute("fog2", video::ColorF(0, 0, 0, 0));
+		alb.AddAttribute("fogA", video::ColorF(0, 0, 0, 0));
+		alb.AddAttribute("fogB", video::ColorF(0, 0, 0, 0));
 		alb.AddAttribute("light0", math::Matrix4());
 		alb.AddAttribute("light1", math::Matrix4());
 		alb.AddAttribute("light2", math::Matrix4());
@@ -302,26 +302,26 @@ bool SceneRendererSimpleForward::IsCulled(Node* node, Renderable* r, const math:
 	return !frustum.IsBoxVisible(node->GetBoundingBox(), node->GetAbsoluteTransform());
 }
 
-static void SetFogData(video::Renderer* renderer, FogDescription* desc, video::ColorF* overwriteColor = nullptr)
+static void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc, video::ColorF* overwriteColor = nullptr)
 {
 	if(desc) {
-		video::ColorF fog2;
-		video::ColorF fog1;
-		fog1 = overwriteColor ? *overwriteColor : desc->GetColor();
-		renderer->GetParams()["fog1"].Set(fog1);
+		video::ColorF fogB;
+		video::ColorF fogA;
+		fogA = overwriteColor ? *overwriteColor : desc->GetColor();
+		renderer->GetParams()["fogA"].Set(fogA);
 		auto type = desc->GetType();
-		fog2.r =
+		fogB.r =
 			type == video::EFogType::Linear ? 1.0f :
 			type == video::EFogType::Exp ? 2.0f :
 			type == video::EFogType::ExpSq ? 3.0f : 0.0f;
-		fog2.g = desc->GetStart();
-		fog2.b = desc->GetEnd();
-		fog2.a = desc->GetDensity();
-		renderer->GetParams()["fog2"].Set(fog2);
+		fogB.g = desc->GetStart();
+		fogB.b = desc->GetEnd();
+		fogB.a = desc->GetDensity();
+		renderer->GetParams()["fogB"].Set(fogB);
 	} else {
-		video::ColorF fog2;
-		fog2.r = 0.0f;
-		renderer->GetParams()["fog2"].Set(fog2);
+		video::ColorF fogB;
+		fogB.r = 0.0f;
+		renderer->GetParams()["fogB"].Set(fogB);
 	}
 }
 
@@ -433,10 +433,10 @@ void SceneRendererSimpleForward::DrawScene()
 	int shadowCount = 0;
 	for(auto& e : m_Lights) {
 		auto descBase = e->GetLightDescription();
-		if(auto desc = dynamic_cast<ClassicalLightDescription*>(descBase)) {
-			LightEntry entry{desc, e->GetParent()};
+		if(auto descC = dynamic_cast<ClassicalLightDescription*>(descBase)) {
+			LightEntry entry{descC, e->GetParent()};
 			illuminating.PushBack(entry);
-			if(desc->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
+			if(descC->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
 				shadowCasting.PushBack(entry);
 				++shadowCount;
 			} else {
@@ -445,8 +445,8 @@ void SceneRendererSimpleForward::DrawScene()
 			++count;
 			if(count >= m_MaxLightsPerDraw)
 				break;
-		} else if(auto desc = dynamic_cast<AmbientLightDescription*>(descBase)) {
-			totalAmbientLight += desc->GetColor();
+		} else if(auto descA = dynamic_cast<AmbientLightDescription*>(descBase)) {
+			totalAmbientLight += descA->GetColor();
 		}
 	}
 	m_Renderer->GetParams()["ambient"].Set(totalAmbientLight);
@@ -454,10 +454,18 @@ void SceneRendererSimpleForward::DrawScene()
 	//-------------------------------------------------------------------------
 	// The fog
 	bool correctFogForStencilShadows = true;
-	auto fog = m_Fogs.Size() > 0 ? m_Fogs[0]->GetFogDescription() : nullptr;
-	if(m_Fogs.Size() > 1)
-		log::Warning("Simple Forward Scene Renderer: Only support one fog element per scene.(all but one fog disabled)");
-	SetFogData(m_Renderer, fog);
+	ClassicalFogDescription* fog = nullptr;
+	for(auto& f : m_Fogs) {
+		auto fogDesc = dynamic_cast<ClassicalFogDescription*>(f->GetFogDescription());
+		if(fogDesc) {
+			if(!fog)
+				fog = fogDesc;
+			else
+				log::Warning("Simple Forward Scene Renderer: Only support one fog element per scene.(all but one fog disabled)");
+		}
+	}
+	if(fog)
+		SetFogData(m_Renderer, fog);
 
 	video::PipelineOverwriteToken pot;
 
@@ -495,9 +503,9 @@ void SceneRendererSimpleForward::DrawScene()
 
 	// Stencil shadow rendering
 	if(drawStencilShadows) {
+
 		// To renderer correct fog, render black fog.
-		if(correctFogForStencilShadows && m_Fogs.Size() > 0) {
-			fog = m_Fogs[0]->GetFogDescription();
+		if(correctFogForStencilShadows && fog) {
 			auto overwriteColor = video::ColorF(0, 0, 0, 0);
 			SetFogData(m_Renderer, fog, &overwriteColor);
 		}
@@ -580,10 +588,8 @@ void SceneRendererSimpleForward::DrawScene()
 			AddLightData(m_Renderer, illum.desc);
 
 		// Restore correct fog
-		if(correctFogForStencilShadows && m_Fogs.Size() > 0) {
-			fog = m_Fogs[0]->GetFogDescription();
+		if(correctFogForStencilShadows && fog)
 			SetFogData(m_Renderer, fog);
-		}
 	}
 
 	//-------------------------------------------------------------------------

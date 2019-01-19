@@ -98,7 +98,7 @@ private:
 	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(core::StringView code, core::StringView entryPoint, core::StringView profile,
 		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
 
-	void LoadAllParams(
+	bool LoadAllParams(
 		bool isVertex,
 		ID3DXConstantTable* table,
 		core::Array<Param>& outParams,

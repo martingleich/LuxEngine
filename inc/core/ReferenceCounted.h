@@ -21,11 +21,6 @@ public:
 		m_Prev(nullptr)
 	{
 	}
-	RefCountedObserver(RefCountedObserver* n, RefCountedObserver* p) :
-		m_Next(n),
-		m_Prev(p)
-	{
-	}
 
 	virtual ~RefCountedObserver()
 	{
@@ -38,7 +33,7 @@ protected:
 	void AssignTo(ReferenceCounted* from, ReferenceCounted* to);
 	void RemoveFrom(ReferenceCounted* obj);
 
-protected:
+private:
 	RefCountedObserver* m_Next;
 	RefCountedObserver* m_Prev;
 };

@@ -398,13 +398,17 @@ public:
 	template <typename K2 = K>
 	const V& At(const K2& key) const
 	{
-		return m_Set.Find(key)->value;
+		auto it = m_Set.Find(key);
+		lxAssert(it != m_Set.End());
+		return it->value;
 	}
 
 	template <typename K2 = K>
 	const V& Get(const K2& key) const
 	{
-		return m_Set.Find(key)->value;
+		auto it = m_Set.Find(key);
+		lxAssert(it != m_Set.End());
+		return it->value;
 	}
 
 	template <typename K2 = K>

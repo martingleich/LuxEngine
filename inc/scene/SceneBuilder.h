@@ -6,8 +6,6 @@
 #include "math/Line3.h"
 
 #include "video/Color.h"
-#include "video/LightData.h"
-#include "video/FogData.h"
 
 #include "io/Path.h"
 
@@ -29,7 +27,8 @@ class Mesh;
 class DirectionalLight;
 class PointLight;
 class SpotLight;
-class GlobalFog;
+class LinearFog;
+class ExponentialFog;
 class SkyBox;
 
 class Animator;
@@ -58,7 +57,8 @@ public:
 	LUX_API StrongRef<Node> AddDirectionalLight(video::Color color = video::Color::White);
 	LUX_API StrongRef<Node> AddPointLight(video::Color color = video::Color::White);
 	LUX_API StrongRef<Node> AddSpotLight(video::Color color = video::Color::White);
-	LUX_API StrongRef<Node> AddFog(const video::ColorF& color = video::Color::White, float start = 10.0f, float end = 100.0f);
+	LUX_API StrongRef<Node> AddLinearFog(float start, float end, const video::ColorF& color = video::Color::White);
+	LUX_API StrongRef<Node> AddExponentialFog(float density, const video::ColorF& color = video::Color::White);
 	LUX_API StrongRef<Node> AddCamera();
 
 	// Object components
@@ -70,7 +70,8 @@ public:
 	LUX_API StrongRef<DirectionalLight> CreateDirectionalLight(video::ColorF color = video::Color::White) const;
 	LUX_API StrongRef<PointLight> CreatePointLight(video::ColorF color = video::Color::White) const;
 	LUX_API StrongRef<SpotLight> CreateSpotLight(video::ColorF color = video::Color::White) const;
-	LUX_API StrongRef<GlobalFog> CreateFog(const video::ColorF& color = video::Color::White, float start = 10.0f, float end = 100.0f) const;
+	LUX_API StrongRef<LinearFog> CreateLinearFog(float start, float end, const video::ColorF& color = video::Color::White);
+	LUX_API StrongRef<ExponentialFog> CreateExponentialFog(float density, const video::ColorF& color = video::Color::White);
 
 	// Animatoren
 	LUX_API StrongRef<RotationAnimator> CreateRotator(const math::Vector3F& axis = math::Vector3F::UNIT_Y, math::AngleF rotSpeed = math::AngleF::Degree(45.0f)) const;

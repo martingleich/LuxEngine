@@ -94,8 +94,8 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 	if(m_CurAttributes != sceneAttributes) {
 		m_CurAttributes = sceneAttributes;
 		m_AmbientPtr = m_CurAttributes.Pointer("ambient");
-		m_Fog1Ptr = m_CurAttributes.Pointer("fog1");
-		m_Fog2Ptr = m_CurAttributes.Pointer("fog2");
+		m_FogAPtr = m_CurAttributes.Pointer("fogA");
+		m_FogBPtr = m_CurAttributes.Pointer("fogB");
 
 		m_LightPtrs[0] = m_CurAttributes.Pointer("light0");
 		m_LightPtrs[1] = m_CurAttributes.Pointer("light1");
@@ -109,20 +109,20 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 	else
 		m_Ambient = video::ColorF(0, 0, 0, 0);
 
-	if(m_Fog1Ptr && m_Fog2Ptr) {
-		auto fog2 = m_Fog2Ptr->GetAccess(true).Get<video::ColorF>();
+	if(m_FogAPtr && m_FogBPtr) {
+		auto fogB = m_FogBPtr->GetAccess(true).Get<video::ColorF>();
 
-		bool enableFog = pass.fogEnabled && fog2.r != 0.0f;
+		bool enableFog = pass.fogEnabled && fogB.r != 0.0f;
 		m_DeviceState.EnableFixedFog(enableFog);
 		if(enableFog) {
-			auto fog1 = m_Fog1Ptr->GetAccess(true).Get<video::ColorF>();
+			auto fogA = m_FogAPtr->GetAccess(true).Get<video::ColorF>();
 			auto type =
-				fog2.r == 1.0f ? EFogType::Linear :
-				fog2.r == 2.0f ? EFogType::Exp :
-				fog2.r == 3.0f ? EFogType::ExpSq : EFogType::Linear;
+				fogB.r == 1.0f ? EFogType::Linear :
+				fogB.r == 2.0f ? EFogType::Exp :
+				fogB.r == 3.0f ? EFogType::ExpSq : EFogType::Linear;
 			m_DeviceState.ConfigureFixedFog(
-				type, video::ColorF(fog1.r, fog1.g, fog1.b),
-				fog2.g, fog2.b, fog2.a);
+				type, video::ColorF(fogA.r, fogA.g, fogA.b),
+				fogB.g, fogB.b, fogB.a);
 		}
 	} else {
 		m_DeviceState.EnableFixedFog(false);

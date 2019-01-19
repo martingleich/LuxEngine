@@ -44,16 +44,16 @@ ShaderFactory::ShaderFactory() :
 		R"(
 // d is the distance from the geomtry to the camera.
 // Returns 0 for minimal fog effect, 1 for maximal effect
-float lxFog(float d, float4 fog1, float4 fog2) 
+float lxFog(float d, float4 fogA, float4 fogB) 
 {
-	float start = fog2.g;
-	float end = fog2.b;
-	float dens = fog2.a;
-	if(fog2.r == 1)
+	float start = fogB.g;
+	float end = fogB.b;
+	float dens = fogB.a;
+	if(fogB.r == 1)
 		return clamp((d-start) / (end - start), 0, 1);
-	else if(fog2.r == 2)
+	else if(fogB.r == 2)
 		return clamp(1-exp(-d*dens), 0, 1);
-	else if(fog2.r == 3)
+	else if(fogB.r == 3)
 		return clamp(1-exp(-pow(d*dens,2)), 0, 1);
 	else
 		return 0;
@@ -64,9 +64,9 @@ float4 lxIlluminate(float3 camPos, float3 pos, float3 normal, float4 ambient, fl
 	float4 color = float4(0,0,0,0);
 	int iLighting = (int)lighting;
 
-	if(iLighting % 2 != 0) { // AmbientEmissive
+	if(iLighting % 2 != 0) // Ambient Emissive
 		color += ambient + emissive*diffuse;
-	}
+	
 	if((iLighting / 2) % 2 != 0) { // Diffuse Specular
 		float4 lightDiffuse = float4(light._m00_m01_m02, 1);
 		float3 lightDir = -light._m20_m21_m22;

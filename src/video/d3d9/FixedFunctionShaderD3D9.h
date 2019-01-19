@@ -36,8 +36,8 @@ public:
 	bool m_IsDirty;
 
 	core::AttributePtr m_AmbientPtr;
-	core::AttributePtr m_Fog1Ptr;
-	core::AttributePtr m_Fog2Ptr;
+	core::AttributePtr m_FogAPtr;
+	core::AttributePtr m_FogBPtr;
 
 	static const int LIGHT_COUNT = 4;
 	core::AttributePtr m_LightPtrs[4];
