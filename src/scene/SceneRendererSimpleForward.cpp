@@ -308,9 +308,9 @@ static void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc,
 		renderer->GetParams()["fogA"].Set(fogA);
 		auto type = desc->GetType();
 		fogB.r =
-			type == video::EFogType::Linear ? 1.0f :
-			type == video::EFogType::Exp ? 2.0f :
-			type == video::EFogType::ExpSq ? 3.0f : 0.0f;
+			type == EFogType::Linear ? 1.0f :
+			type == EFogType::Exp ? 2.0f :
+			type == EFogType::ExpSq ? 3.0f : 0.0f;
 		fogB.g = desc->GetStart();
 		fogB.b = desc->GetEnd();
 		fogB.a = desc->GetDensity();
@@ -322,12 +322,12 @@ static void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc,
 	}
 }
 
-static float LightTypeToFloat(video::ELightType type)
+static float LightTypeToFloat(scene::ELightType type)
 {
 	switch(type) {
-	case video::ELightType::Directional: return 1;
-	case video::ELightType::Point: return 2;
-	case video::ELightType::Spot: return 3;
+	case scene::ELightType::Directional: return 1;
+	case scene::ELightType::Point: return 2;
+	case scene::ELightType::Spot: return 3;
 	default:
 		throw core::GenericInvalidArgumentException("type", "Unknown light data type");
 	}
@@ -523,7 +523,7 @@ void SceneRendererSimpleForward::DrawScene()
 					if(mesh && mesh->GetMesh()) {
 						bool isInfinite;
 						math::Vector3F lightPos;
-						if(shadowLight->GetType() == video::ELightType::Directional) {
+						if(shadowLight->GetType() == scene::ELightType::Directional) {
 							isInfinite = true;
 							lightPos = e.node->ToRelativeDir(shadowNode->FromRelativeDir(math::Vector3F::UNIT_Z));
 						} else {

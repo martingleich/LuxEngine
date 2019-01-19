@@ -111,9 +111,6 @@ namespace input
 #include "video/Material.h"
 #include "video/MaterialLibrary.h"
 
-#include "video/LightData.h"
-#include "video/FogData.h"
-
 #include "video/SpriteBank.h"
 
 #include "video/images/Image.h"

@@ -17,142 +17,34 @@ namespace core
 template <typename T>
 class Array
 {
-private:
-	template <bool isConst>
-	class ArrayIterator : public BaseIterator<RandomAccessIteratorTag, T>
-	{
-		friend class Array<T>;
-		using PtrT = typename core::Choose<isConst, const T*, T*>::type;
-		static const bool IS_CONST = isConst;
-	public:
-		ArrayIterator() : m_Current(nullptr)
-		{
-		}
-		explicit ArrayIterator(PtrT ptr) : m_Current(ptr)
-		{
-		}
-		ArrayIterator(const ArrayIterator<isConst>& iter) :
-			m_Current(iter.m_Current)
-		{
-		}
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		ArrayIterator(const ArrayIterator<!U>& iter) :
-			m_Current(iter.m_Current)
-		{
-		}
-
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		ArrayIterator& operator=(const ArrayIterator<!U>& iter)
-		{
-			m_Current = iter.m_Current;
-			return *this;
-		}
-		ArrayIterator& operator=(const ArrayIterator<isConst>& iter)
-		{
-			m_Current = iter.m_Current;
-			return *this;
-		}
-
-		ArrayIterator& operator++() { ++m_Current; return *this; }
-		ArrayIterator& operator--() { --m_Current; return *this; }
-		ArrayIterator operator++(int)
-		{
-			ArrayIterator tmp(*this); ++m_Current; return tmp;
-		}
-		ArrayIterator operator--(int)
-		{
-			ArrayIterator tmp = *this; --m_Current; return tmp;
-		}
-
-		ArrayIterator& operator+=(int num)
-		{
-			m_Current += num;
-			return *this;
-		}
-
-		ArrayIterator operator+(int num) const
-		{
-			ArrayIterator temp = *this; return temp += num;
-		}
-		ArrayIterator& operator-=(int num)
-		{
-			return (*this) += (-num);
-		}
-		ArrayIterator operator-(int num) const
-		{
-			return (*this) + (-num);
-		}
-
-		int operator-(ArrayIterator other) const
-		{
-			return static_cast<int>(m_Current - other.m_Current);
-		}
-
-		template <bool isConst2>
-		bool operator==(const ArrayIterator<isConst2>& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		template <bool isConst2>
-		bool operator!=(const ArrayIterator<isConst2>& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-
-		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T& operator*() const
-		{
-			return *m_Current;
-		}
-
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		const T& operator*() const
-		{
-			return *m_Current;
-		}
-
-		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T* operator->() const
-		{
-			return m_Current;
-		}
-
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		const T* operator->() const
-		{
-			return m_Current;
-		}
-	private:
-		PtrT m_Current;
-	};
-
 public:
-	using Iterator = ArrayIterator<false>;
-	using ConstIterator = ArrayIterator<true>;
+	using Iterator = T*;
+	using ConstIterator = const T*;
 
 public:
 	//! Constructor
 	/**
 	Create an empty array
 	*/
-	Array() :
-		m_Data(nullptr),
-		m_Used(0),
-		m_Alloc(0)
+	Array()
 	{
 	}
 
-	Array(std::initializer_list<T> init) :
-		Array()
+	Array(std::initializer_list<T> init)
 	{
-		Reserve((int)init.size());
-		PushBack(init.begin(), (int)init.size());
+		*this = init;
 	}
 
 	//! Destruktor
 	~Array()
 	{
 		Destroy();
+	}
+
+	//! Copyconstructor
+	Array(const Array<T>& other)
+	{
+		*this = other;
 	}
 
 	//! Move constructor
@@ -162,30 +54,20 @@ public:
 		m_Used = old.m_Used;
 		m_Alloc = old.m_Alloc;
 		old.m_Data = nullptr;
+		old.m_Used = 0;
+		old.m_Alloc = 0;
 	}
 
 	//! Move assignment 
 	Array<T>& operator=(Array<T>&& old)
 	{
-		if(this == &old)
-			return *this;
-
-		Destroy();
-
-		m_Data = old.m_Data;
-		m_Used = old.m_Used;
-		m_Alloc = old.m_Alloc;
-		old.m_Data = nullptr;
-		old.m_Used = 0;
-		old.m_Alloc = 0;
+		if(this != &old) {
+			std::swap(m_Data, old.m_Data);
+			std::swap(m_Used, old.m_Used);
+			std::swap(m_Alloc, old.m_Alloc);
+		}
 
 		return *this;
-	}
-
-	//! Copyconstructor
-	Array(const Array<T>& other)
-	{
-		*this = other;
 	}
 
 	//! Assignment
@@ -205,6 +87,17 @@ public:
 
 		for(int i = 0; i < m_Used; ++i)
 			new (m_Data + i) T(other.m_Data[i]);
+
+		return *this;
+	}
+
+	Array<T>& operator=(std::initializer_list<T> init)
+	{
+		Clear();
+		Reserve((int)init.size());
+		for(int i = 0; i < (int)init.size(); ++i)
+			new (m_Data + i) T(init.begin()[i]);
+		m_Used = (int)init.size();
 
 		return *this;
 	}
@@ -334,47 +227,6 @@ public:
 		PushBack(entries.Data_c(), entries.Size());
 	}
 
-	//! Add multiple entries to the end of the array
-	/**
-	More efficent than multiple call to PushBack
-	\param entries A pointer to then entries to add
-	\param numEntries The number of entries to add
-	*/
-	void PushBack(const T* entries, int numEntries)
-	{
-		if(m_Used + numEntries > m_Alloc)
-			Reserve(m_Alloc + numEntries);
-
-		for(int entry = 0; entry < numEntries; ++entry)
-			new ((void*)(Data() + m_Used + entry))T(entries[entry]);
-
-		m_Used += numEntries;
-	}
-
-	//! Add multiple entries to the end of the array(move version)
-	/**
-	More efficent than multiple call to PushBack
-	\param entries A pointer to then entries to add
-	\param numEntries The number of entries to add
-	*/
-	void PushBack(T* entries, int numEntries)
-	{
-		// Wenn kein Platz mehr ist welchen machen
-		if(m_Used + numEntries > m_Alloc) {
-			// Mit den Plätzen auf Nummer sicher gehen
-			Reserve(m_Alloc + numEntries);
-		}
-
-		for(int entry = 0; entry < numEntries; ++entry) {
-			// Listeneintrag erzeugen
-			new ((void*)(Data() + m_Used + entry))T(std::move(entries[entry]));
-		}
-
-		// Vieleicht soll das Feld, nie sortiert werden und definiert keinen Vergleichsoperator,
-		// dann müsste jeder Typ den Vergleichsoperator implementieren
-		m_Used += numEntries;
-	}
-
 	//! Remove the last element in the array
 	void PopBack()
 	{
@@ -422,11 +274,7 @@ public:
 			m_Data[m_Used - 1 - i].~T();
 
 		m_Used -= count;
-
-		if(m_Used * 2 <= m_Alloc)
-			ShrinkToFit();
 	}
-
 
 	//! Remove all elements from the list
 	void Clear()
@@ -687,13 +535,20 @@ private:
 	{
 		::operator delete(ptr);
 	}
-
+	
+	int GetNextSize(int minSize)
+	{
+		int next = (m_Alloc*3)/2;
+		if(next > minSize)
+			return next;
+		return minSize;
+	}
 	T* GetInsertPointer(int before, bool destroy = false)
 	{
 		lxAssert(before >= 0 && before <= m_Used);
 
 		if(m_Used == m_Alloc)
-			Reserve((m_Used * 3) / 2 + 1);
+			Reserve(GetNextSize(m_Used+1));
 
 		// Shift each element, after the insert one back
 		// Starting at the last element.
@@ -736,9 +591,9 @@ private:
 
 
 private:
-	T* m_Data;
-	int m_Used;
-	int m_Alloc;
+	T* m_Data = nullptr;
+	int m_Used = 0;
+	int m_Alloc = 0;
 };
 
 template <typename T>

@@ -8,7 +8,6 @@
 #include "video/TextureStageSettings.h"
 #include "video/d3d9/FixedFunctionShaderD3D9.h"
 #include "video/FogData.h"
-#include "video/LightData.h"
 
 #include "platform/StrippedD3D9.h"
 #include "platform/UnknownRefCounted.h"
@@ -21,12 +20,24 @@ class Material;
 class BaseTexture;
 class Pass;
 
+enum class EFixedFogType
+{
+	Linear,
+	Exp,
+	ExpSq,
+};
+enum class EFixedLightType
+{
+	Point,
+	Directional,
+	Spot,
+};
 //! Contains all data needed to represent a light
 class LightData
 {
 public:
 	LightData() :
-		type(ELightType::Point),
+		type(EFixedLightType::Point),
 		color(1.0f, 1.0f, 1.0f),
 		position(0.0f, 0.0f, 0.0f),
 		direction(0.0f, 0.0f, 1.0f),
@@ -37,7 +48,7 @@ public:
 	}
 
 	//! The light type
-	ELightType type;
+	EFixedLightType type;
 
 	//! The color of the light
 	/**
@@ -105,7 +116,7 @@ public:
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matrix4& m);
 
 	void EnableFixedFog(bool enable);
-	void ConfigureFixedFog(EFogType type, const ColorF& color, float start, float end, float density);
+	void ConfigureFixedFog(EFixedFogType type, const ColorF& color, float start, float end, float density);
 
 	void SetStencilMode(const StencilMode& mode);
 	void EnableLight(bool enable);

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_SCENE_FOG_H
 #define INCLUDED_LUX_SCENE_FOG_H
 #include "scene/Component.h"
-#include "video/FogData.h"
+#include "video/Color.h"
 
 namespace lux
 {
@@ -14,10 +14,16 @@ public:
 	virtual ~FogDescription() {}
 };
 
+enum class EFogType
+{
+	Linear,
+	Exp,
+	ExpSq,
+};
 class ClassicalFogDescription : public FogDescription
 {
 public:
-	virtual video::EFogType GetType() = 0;
+	virtual EFogType GetType() = 0;
 	virtual float GetStart() = 0;
 	virtual float GetEnd() = 0;
 	virtual float GetDensity() = 0;
@@ -36,7 +42,7 @@ class LinearFog : public Fog
 	class LinearFogDescription : public  ClassicalFogDescription
 	{
 	public:
-		video::EFogType GetType() { return video::EFogType::Linear; }
+		EFogType GetType() { return EFogType::Linear; }
 		float GetStart()  { return start; }
 		float GetEnd() { return end; }
 		float GetDensity() { return 0.0f; }
@@ -72,7 +78,7 @@ class ExponentialFog : public Fog
 	class ExponentialFogDescription : public  ClassicalFogDescription
 	{
 	public:
-		video::EFogType GetType() { return video::EFogType::Exp; }
+		EFogType GetType() { return EFogType::Exp; }
 		float GetStart()  { return 0; }
 		float GetEnd() { return 0; }
 		float GetDensity() { return density; }

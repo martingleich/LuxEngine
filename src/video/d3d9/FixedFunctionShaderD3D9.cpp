@@ -2,8 +2,6 @@
 #include "video/d3d9/DeviceStateD3D9.h"
 #include "video/Pass.h"
 #include "video/Renderer.h"
-#include "video/FogData.h"
-#include "video/LightData.h"
 
 namespace lux
 {
@@ -44,18 +42,18 @@ void FixedFunctionShaderD3D9::SetParam(int paramId, const void* data)
 	m_IsDirty = true;
 }
 
-static video::ELightType FloatToLightType(float type, bool& success)
+static EFixedLightType FloatToLightType(float type, bool& success)
 {
 	success = true;
 	if(type == 1.0f)
-		return video::ELightType::Directional;
+		return EFixedLightType::Directional;
 	else if(type == 2.0f)
-		return video::ELightType::Point;
+		return EFixedLightType::Point;
 	else if(type == 3.0f)
-		return video::ELightType::Spot;
+		return EFixedLightType::Spot;
 	else {
 		success = false;
-		return video::ELightType::Point;
+		return EFixedLightType::Point;
 	}
 }
 
@@ -117,9 +115,9 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 		if(enableFog) {
 			auto fogA = m_FogAPtr->GetAccess(true).Get<video::ColorF>();
 			auto type =
-				fogB.r == 1.0f ? EFogType::Linear :
-				fogB.r == 2.0f ? EFogType::Exp :
-				fogB.r == 3.0f ? EFogType::ExpSq : EFogType::Linear;
+				fogB.r == 1.0f ? EFixedFogType::Linear :
+				fogB.r == 2.0f ? EFixedFogType::Exp :
+				fogB.r == 3.0f ? EFixedFogType::ExpSq : EFixedFogType::Linear;
 			m_DeviceState.ConfigureFixedFog(
 				type, video::ColorF(fogA.r, fogA.g, fogA.b),
 				fogB.g, fogB.b, fogB.a);

@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LUX_SCENE_LIGHT_H
 #define INCLUDED_LUX_SCENE_LIGHT_H
 #include "scene/Component.h"
-#include "video/LightData.h"
 
 namespace lux
 {
@@ -22,10 +21,17 @@ public:
 
 /////////////////////////////////////////////////////////////////////
 
+enum class ELightType
+{
+	Point,
+	Directional,
+	Spot,
+};
+
 class ClassicalLightDescription : public LightDescription
 {
 public:
-	virtual video::ELightType GetType() = 0;
+	virtual ELightType GetType() = 0;
 	virtual const video::ColorF& GetColor() = 0;
 	virtual const math::Vector3F& GetPosition() = 0;
 	virtual const math::Vector3F& GetDirection() = 0;
@@ -42,7 +48,7 @@ protected:
 	class LightDescriptionImpl : public ClassicalLightDescription
 	{
 	public:
-		video::ELightType GetType() { return type; }
+		ELightType GetType() { return type; }
 		const video::ColorF& GetColor() { return finalColor; }
 		const math::Vector3F& GetPosition() { return position; }
 		const math::Vector3F& GetDirection() { return direction; }
@@ -52,7 +58,7 @@ protected:
 		float GetRange() { return range; }
 		bool IsShadowCasting() { return isShadowCasting; }
 
-		video::ELightType type;
+		scene::ELightType type;
 		video::ColorF finalColor;
 
 		math::Vector3F position;
@@ -66,7 +72,7 @@ protected:
 		bool isShadowCasting = true;
 	};
 
-	LUX_API ClassicalLight(video::ELightType type);
+	LUX_API ClassicalLight(scene::ELightType type);
 public:
 	LUX_API void SetRange(float range);
 	LUX_API float GetRange() const;

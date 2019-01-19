@@ -8,7 +8,6 @@ namespace lux
 {
 namespace video
 {
-class ColorF;
 
 //! Real 32-Bit color
 /**

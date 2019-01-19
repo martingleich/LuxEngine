@@ -12,7 +12,7 @@ namespace lux
 namespace scene
 {
 
-ClassicalLight::ClassicalLight(video::ELightType type) :
+ClassicalLight::ClassicalLight(scene::ELightType type) :
 	m_Power(1.0f),
 	m_Color(1,1,1)
 {
@@ -28,9 +28,9 @@ const video::ColorF& ClassicalLight::GetColor() const { return m_Color; }
 bool ClassicalLight::IsShadowCasting() const { return m_Desc.isShadowCasting; }
 void ClassicalLight::SetShadowCasting(bool b) { m_Desc.isShadowCasting = b; }
 
-static bool IsValidLightType(video::ELightType type)
+static bool IsValidLightType(scene::ELightType type)
 {
-	return type == video::ELightType::Point || type == video::ELightType::Spot || type == video::ELightType::Directional;
+	return type == scene::ELightType::Point || type == scene::ELightType::Spot || type == scene::ELightType::Directional;
 }
 
 ClassicalLightDescription* ClassicalLight::GetLightDescription()
@@ -40,13 +40,13 @@ ClassicalLightDescription* ClassicalLight::GetLightDescription()
 	lxAssert(IsValidLightType(m_Desc.type));
 
 	m_Desc.finalColor = m_Color * m_Power;
-	if(m_Desc.type == video::ELightType::Spot ||
-		m_Desc.type == video::ELightType::Directional) {
+	if(m_Desc.type == scene::ELightType::Spot ||
+		m_Desc.type == scene::ELightType::Directional) {
 		m_Desc.direction = node->FromRelativeDir(math::Vector3F::UNIT_Z);
 	}
 
-	if(m_Desc.type == video::ELightType::Spot ||
-		m_Desc.type == video::ELightType::Point) {
+	if(m_Desc.type == scene::ELightType::Spot ||
+		m_Desc.type == scene::ELightType::Point) {
 		m_Desc.position = node->GetAbsolutePosition();
 	}
 
@@ -55,15 +55,15 @@ ClassicalLightDescription* ClassicalLight::GetLightDescription()
 
 
 DirectionalLight::DirectionalLight() :
-	ClassicalLight(video::ELightType::Directional)
+	ClassicalLight(scene::ELightType::Directional)
 {
 }
 PointLight::PointLight() :
-	ClassicalLight(video::ELightType::Point)
+	ClassicalLight(scene::ELightType::Point)
 {
 }
 SpotLight::SpotLight() :
-	ClassicalLight(video::ELightType::Spot)
+	ClassicalLight(scene::ELightType::Spot)
 {
 	m_Desc.innerCone = m_Desc.outerCone = math::AngleF::Degree(45.0f).Radian();
 	m_Desc.falloff = 0.0f;

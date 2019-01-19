@@ -128,26 +128,6 @@ public:
 	{
 	}
 
-	HashSet(int allocated, int bucketCount = 0) :
-		HashSet()
-	{
-		ReserveAndRehash(allocated, bucketCount);
-	}
-
-	HashSet(std::initializer_list<T> values) :
-		HashSet(values.begin(), values.end())
-	{
-	}
-
-	template <typename IterT>
-	HashSet(IterT begin, IterT end) :
-		HashSet()
-	{
-		Reserve(core::IteratorDistance(begin, end));
-		for(auto it = begin; it != end; ++it)
-			Insert(*it);
-	}
-
 	HashSet(const HashSet& other) :
 		HashSet()
 	{
@@ -178,6 +158,9 @@ public:
 
 	HashSet& operator=(const HashSet& other)
 	{
+		if(this == &other)
+			return *this;
+
 		Clear();
 
 		if(m_Allocated < other.m_Size) {
@@ -201,6 +184,9 @@ public:
 
 	HashSet& operator=(HashSet&& old)
 	{
+		if(this == &old)
+			return *this;
+
 		this->~HashSet();
 
 		m_Entries = old.m_Entries;
@@ -385,15 +371,6 @@ public:
 		}
 	}
 
-	float GetLoadFactor() const
-	{
-		return (float)m_Size / (float)m_BucketCount;
-	}
-	float GetMaxLoadFactor() const
-	{
-		return m_MaxLoadFactor;
-	}
-
 	int Size() const
 	{
 		return m_Size;
@@ -421,6 +398,15 @@ public:
 	}
 
 private:
+	float GetLoadFactor() const
+	{
+		return (float)m_Size / (float)m_BucketCount;
+	}
+	float GetMaxLoadFactor() const
+	{
+		return m_MaxLoadFactor;
+	}
+
 	void PureReserve(int allocated)
 	{
 		// No rehash requiered.
@@ -505,7 +491,7 @@ private:
 		if(double(m_Size + 1) / m_BucketCount > GetMaxLoadFactor())
 			Reserve(NewSize(Size()));
 
-		// If rehash happened => Recalculate hash.
+		// Recalculate hash, incase of rehash
 		unsigned int hash = pureHash % m_BucketCount;
 		id = m_Buckets[hash];
 		if(id == INVALID_ID) {

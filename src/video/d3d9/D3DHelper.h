@@ -492,16 +492,6 @@ inline D3DPRIMITIVETYPE GetD3DPrimitiveType(EPrimitiveType type)
 	throw core::GenericInvalidArgumentException("type", "Unknown primitive type");
 }
 
-inline DWORD GetD3DFogType(EFogType type)
-{
-	switch(type) {
-	case EFogType::Exp: return D3DFOG_EXP;
-	case EFogType::ExpSq: return D3DFOG_EXP2;
-	case EFogType::Linear: return D3DFOG_LINEAR;
-	}
-	throw core::GenericInvalidArgumentException("type", "Unknown fogtype");
-}
-
 inline D3DCUBEMAP_FACES GetD3DCubeMapFace(CubeTexture::EFace face)
 {
 	static const D3DCUBEMAP_FACES CONV[6] = {D3DCUBEMAP_FACE_POSITIVE_X, D3DCUBEMAP_FACE_NEGATIVE_X,

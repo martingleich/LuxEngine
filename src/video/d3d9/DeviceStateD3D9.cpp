@@ -5,8 +5,6 @@
 #include "video/d3d9/D3DHelper.h"
 #include "platform/D3D9Exception.h"
 
-#include "video/FogData.h"
-#include "video/LightData.h"
 #include "video/Material.h"
 
 #include "video/BaseTexture.h"
@@ -15,6 +13,16 @@ namespace lux
 {
 namespace video
 {
+
+static DWORD GetD3DFogType(EFixedFogType type)
+{
+	switch(type) {
+	case EFixedFogType::Exp: return D3DFOG_EXP;
+	case EFixedFogType::ExpSq: return D3DFOG_EXP2;
+	case EFixedFogType::Linear: return D3DFOG_LINEAR;
+	}
+	throw core::GenericInvalidArgumentException("type", "Unknown fogtype");
+}
 
 void DeviceStateD3D9::Init(const D3DCAPS9* caps, IDirect3DDevice9* device)
 {
@@ -277,7 +285,7 @@ void DeviceStateD3D9::EnableFixedFog(bool enabled)
 	SetRenderState(D3DRS_FOGENABLE, enabled ? TRUE : FALSE);
 }
 
-void DeviceStateD3D9::ConfigureFixedFog(EFogType type, const ColorF& color, float start, float end, float density)
+void DeviceStateD3D9::ConfigureFixedFog(EFixedFogType type, const ColorF& color, float start, float end, float density)
 {
 	DWORD d3dType = GetD3DFogType(type);
 
@@ -333,13 +341,13 @@ void DeviceStateD3D9::SetLight(u32 id, const LightData& light, ELightingFlag lig
 	D3DLIGHT9 D3DLight;
 
 	switch(light.type) {
-	case ELightType::Point:
+	case EFixedLightType::Point:
 		D3DLight.Type = D3DLIGHT_POINT;
 		break;
-	case ELightType::Spot:
+	case EFixedLightType::Spot:
 		D3DLight.Type = D3DLIGHT_SPOT;
 		break;
-	case ELightType::Directional:
+	case EFixedLightType::Directional:
 		D3DLight.Type = D3DLIGHT_DIRECTIONAL;
 		break;
 	}
