@@ -68,10 +68,10 @@ public:
 
 	STDMETHOD(Close)(THIS_ LPCVOID pData)
 	{
-		auto it = core::LinearSearch(pData, m_Allocated);
-		if(it != m_Allocated.End()) {
-			LUX_FREE_RAW(*it);
-			m_Allocated.Erase(it);
+		auto i = m_Allocated.LinearSearch(pData);
+		if(i != -1) {
+			LUX_FREE_RAW(m_Allocated[i]);
+			m_Allocated.Erase(i);
 		}
 
 		return S_OK;

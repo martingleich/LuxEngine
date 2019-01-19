@@ -254,38 +254,28 @@ core::Range<Element::ConstElementIterator> Element::Elements() const
 	return core::Range<ConstElementIterator>(m_Elements.First(), m_Elements.End());
 }
 
-void Element::RemoveElement(ElementIterator it)
-{
-	(*it)->OnRemove(this);
-	m_Elements.Erase(it);
-}
-
 void Element::RemoveElement(Element* elem)
 {
-	auto it = core::LinearSearch(elem, m_Elements);
-	if(it != m_Elements.End())
-		RemoveElement(it);
+	auto i = m_Elements.LinearSearch(elem);
+	if(i != -1) {
+		elem->OnRemove(this);
+		m_Elements.Erase(i);
+	}
 }
 
 void Element::RemoveAllElements()
 {
-	for(auto e : m_Elements) {
+	for(auto e : m_Elements)
 		e->OnRemove(this);
-	}
 	m_Elements.Clear();
 }
 
 StrongRef<Element> Element::AddElement(Element* elem)
 {
-	return AddElement(elem, m_Elements.End());
-}
-
-StrongRef<Element> Element::AddElement(Element* elem, ElementIterator before)
-{
 	StrongRef<Element> elemPtr = elem;
 	if(elem->GetParent())
 		elem->GetParent()->RemoveElement(elem);
-	m_Elements.Insert(elem, before);
+	m_Elements.PushBack(elem);
 	elem->OnAdd(this);
 	return elem;
 }

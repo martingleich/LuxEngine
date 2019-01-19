@@ -47,9 +47,10 @@ void RawInputReceiver::RegisterDevices(HIDUsagePage usagePage, int usageID, bool
 
 void RawInputReceiver::UnregisterDevice(HIDUsagePage usagePage, int usageID)
 {
-	for(auto it = m_Subscribed.First(); it != m_Subscribed.End();) {
-		if(it->usUsagePage == (int)usagePage && (it->usUsage == usageID || usageID < 0)) {
-			m_Subscribed.Erase(it++);
+	for(int i = 0; i < m_Subscribed.Size();) {
+		auto& entry = m_Subscribed[i];
+		if(entry.usUsagePage == (USHORT)usagePage && (entry.usUsage == usageID || usageID < 0)) {
+			m_Subscribed.Erase(i);
 			RAWINPUTDEVICE device;
 			device.hwndTarget = m_Window;
 			device.usUsage = (USHORT)usageID;
@@ -57,8 +58,10 @@ void RawInputReceiver::UnregisterDevice(HIDUsagePage usagePage, int usageID)
 			device.dwFlags = RIDEV_REMOVE;
 			RegisterRawInputDevices(&device, 1, sizeof(device));
 		} else {
-			++it;
+			++i;
 		}
+	}
+	for(auto it = m_Subscribed.First(); it != m_Subscribed.End();) {
 	}
 }
 

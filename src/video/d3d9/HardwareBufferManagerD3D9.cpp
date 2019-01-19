@@ -34,10 +34,10 @@ BufferManagerD3D9::~BufferManagerD3D9()
 
 void BufferManagerD3D9::RemoveInternalBuffer(HardwareBuffer* buffer, void* handle)
 {
-	auto it = core::LinearSearch(buffer, m_HardwareBuffers);
-	if(it == m_HardwareBuffers.End())
+	auto id = m_HardwareBuffers.LinearSearch(buffer);
+	if(id == -1)
 		return;
-	m_HardwareBuffers.Erase(it);
+	m_HardwareBuffers.Erase(id);
 
 	ULONG remaining = 0;
 	switch(buffer->GetBufferType()) {

@@ -99,11 +99,11 @@ void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 		}
 		if(m_Ranges[i].begin <= lastPrimitive && (m_Ranges.Size() == i + 1 || m_Ranges[i + 1].begin > lastPrimitive)) {
 			mid2 = m_Ranges[i].material;
-			m_Ranges.Erase(m_Ranges.First() + i, true);
+			m_Ranges.Erase(i, true);
 			break;
 		}
 		if(inside) {
-			m_Ranges.Erase(m_Ranges.First() + i, true);
+			m_Ranges.Erase(i, true);
 			--i;
 		}
 	}
@@ -119,13 +119,13 @@ void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 	isn't added.
 	*/
 	if(begin1 != firstPrimitive) {
-		m_Ranges.Insert(MaterialRange(mid1, begin1), m_Ranges.First() + insertAt + 0);
+		m_Ranges.Insert(MaterialRange(mid1, begin1), insertAt);
 		insertAt++;
 	}
 	if(insertAt > 0 && m_Ranges[insertAt - 1].material == mid) {
 		(void)0;
 	} else {
-		m_Ranges.Insert(MaterialRange(mid, firstPrimitive), m_Ranges.First() + insertAt);
+		m_Ranges.Insert(MaterialRange(mid, firstPrimitive), insertAt);
 		++insertAt;
 	}
 
@@ -135,7 +135,7 @@ void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 		if(insertAt > 0 && m_Ranges[insertAt - 1].material == mid2) {
 			(void)0;
 		} else {
-			m_Ranges.Insert(MaterialRange(mid2, lastPrimitive + 1), m_Ranges.First() + insertAt);
+			m_Ranges.Insert(MaterialRange(mid2, lastPrimitive + 1), insertAt);
 		}
 	}
 

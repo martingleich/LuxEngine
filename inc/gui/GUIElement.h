@@ -101,12 +101,10 @@ public:
 	LUX_API core::Range<ElementIterator> Elements();
 	LUX_API core::Range<ConstElementIterator> Elements() const;
 
-	LUX_API virtual void RemoveElement(ElementIterator it);
 	LUX_API void RemoveElement(Element* elem);
 	LUX_API virtual void RemoveAllElements();
 
 	LUX_API StrongRef<Element> AddElement(Element* elem);
-	LUX_API virtual StrongRef<Element> AddElement(Element* elem, ElementIterator where);
 
 	LUX_API virtual math::RectF GetFinalInnerRect() const;
 	LUX_API math::Dimension2F GetFinalInnerSize() const;

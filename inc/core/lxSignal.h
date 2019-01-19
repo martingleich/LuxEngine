@@ -352,11 +352,12 @@ public:
 
 	void DisconnectClass(const void* owner)
 	{
-		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End();) {
-			if(it->GetFunc()->GetOwner() == owner)
-				it = m_Callfuncs.Erase(it, true);
+		for(int i = 0; i < m_Callfuncs.Size();) {
+			auto& func = m_Callfuncs[i];
+			if(func.GetFunc()->GetOwner() == owner)
+				m_Callfuncs.Erase(i);
 			else
-				++it;
+				++i;
 		}
 	}
 
@@ -368,14 +369,14 @@ public:
 	template <typename... Args2>
 	void Broadcast(Args2&&... args) const
 	{
-		for(auto it = m_Callfuncs.First(); it != m_Callfuncs.End();) {
-			if(it->GetFunc()->IsDestroyed()) {
-				it = m_Callfuncs.Erase(it, true);
-				continue;
+		for(int i = 0; i < m_Callfuncs.Size();) {
+			auto& func = m_Callfuncs[i];
+			if(func.GetFunc()->IsDestroyed()) {
+				m_Callfuncs.Erase(i);
+			} else {
+				func.Call(std::forward<Args2>(args)...);
+				++i;
 			}
-
-			it->Call(std::forward<Args2>(args)...);
-			++it;
 		}
 	}
 

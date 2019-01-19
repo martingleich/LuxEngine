@@ -169,9 +169,10 @@ contains elements not fullfilling the condition.
 \return The end iterator of the new sequence.
 */
 template <typename RangeT, typename Predicate>
-auto RemoveIf(RangeT&& range, Predicate pred)
+int RemoveIf(RangeT&& range, Predicate pred)
 {
 	using namespace std;
+	int newSize = 0;
 	auto first = begin(range);
 	auto cursor = first;
 	auto endIt = end(range);
@@ -180,11 +181,12 @@ auto RemoveIf(RangeT&& range, Predicate pred)
 			if(cursor != first)
 				*cursor = std::move(*first);
 			++cursor;
+			++newSize;
 		}
 		++first;
 	}
 
-	return cursor;
+	return newSize;
 }
 
 //! Delete all elements equal to a value

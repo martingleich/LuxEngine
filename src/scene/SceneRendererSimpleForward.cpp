@@ -154,10 +154,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 	m_Scene->VisitComponents(&camCollector);
 
 	// Collect "real" camera nodes
-	auto newEnd = core::RemoveIf(m_Cameras,
-		[](const AbstractCamera* c) { return !c->GetParent()->IsTrulyVisible(); }
-	);
-	m_Cameras.Resize(core::IteratorDistance(m_Cameras.First(), newEnd));
+	m_Cameras.RemoveIf([](const AbstractCamera* c) { return !c->GetParent()->IsTrulyVisible(); });
 	m_Cameras.Sort(CameraSortT());
 
 	if(m_Cameras.Size() == 0) {
@@ -208,7 +205,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 		DrawScene();
 		m_ActiveCamera->PostRender(m_Renderer);
 
-		if(it != m_Cameras.Last() || endScene)
+		if((it+1) != m_Cameras.end() || endScene)
 			m_Renderer->EndScene();
 
 		m_SkyBoxList.Clear();

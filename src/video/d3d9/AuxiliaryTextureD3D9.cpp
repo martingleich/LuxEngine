@@ -62,12 +62,14 @@ UnknownRefCounted<IDirect3DSurface9> AuxiliaryTextureManagerD3D9::GetSurface(DWO
 		surface = nullptr;
 	else {
 		if(m_Surfaces.Size() > MAX_TEXTURES) {
-			for(auto it = m_Surfaces.First(); it != m_Surfaces.End();) {
-				if(it->surface->Release() == 0) {
-					it = m_Surfaces.Erase(it);
+			// Cache is full release unused textures.
+			for(int i = 0; i < m_Surfaces.Size();) {
+				auto& entry = m_Surfaces[i];
+				if(entry.surface->Release() == 0) {
+					m_Surfaces.Erase(i);
 				} else {
-					it->surface->AddRef();
-					++it;
+					entry.surface->AddRef();
+					++i;
 				}
 			}
 		}

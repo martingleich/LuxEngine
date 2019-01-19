@@ -242,7 +242,7 @@ const Path& ArchiveFolderWin32::GetPath() const
 void ArchiveFolderWin32::CreateWin32File(Win32Path& win32Path, bool recursive)
 {
 	Win32Path subPath = win32Path;
-	while(*subPath.Last() != '\\')
+	while(subPath.Back() != '\\')
 		subPath.PopBack();
 	subPath.PushBack(0);
 
@@ -278,7 +278,7 @@ void ArchiveFolderWin32::CreateWin32Directory(Win32Path& win32Path, bool recursi
 	core::Array<wchar_t*> subDirs;
 	subDirs.PushBack(path_ptr);
 	do {
-		**subDirs.Last() = L'\0';
+		*subDirs.Back() = L'\0';
 		BOOL result = CreateDirectoryW(path, nullptr);
 		if(!result) {
 			DWORD le = GetLastError();
@@ -299,7 +299,7 @@ void ArchiveFolderWin32::CreateWin32Directory(Win32Path& win32Path, bool recursi
 		}
 
 		if(result) {
-			**subDirs.Last() = L'\\';
+			*subDirs.Back() = L'\\';
 			subDirs.PopBack();
 		}
 	} while(!subDirs.IsEmpty() && path_ptr - path > 4 && !recursive);

@@ -190,7 +190,7 @@ Animation::~Animation()
 StrongRef<AnimationTrack> Animation::AddTrack(const core::String& valueName, Curve* curve)
 {
 	m_Tracks.PushBack(LUX_NEW(AnimationTrack)(valueName, curve));
-	return *m_Tracks.Last();
+	return m_Tracks.Back();
 }
 
 StrongRef<AnimationTrack> Animation::GetTrack(int id)
@@ -200,15 +200,14 @@ StrongRef<AnimationTrack> Animation::GetTrack(int id)
 
 void Animation::RemoveTrack(int id)
 {
-	m_Tracks.Erase(m_Tracks.First() + id);
+	m_Tracks.Erase(id);
 }
 
 void Animation::RemoveTrack(AnimationTrack* track)
 {
-	auto it = core::LinearSearch(track, m_Tracks);
-	if(it == m_Tracks.End())
-		return;
-	m_Tracks.Erase(it);
+	auto i = m_Tracks.LinearSearch(track);
+	if(i != -1)
+		m_Tracks.Erase(i);
 }
 
 int Animation::GetTrackCount() const

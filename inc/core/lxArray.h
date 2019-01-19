@@ -135,21 +135,24 @@ public:
 	/**
 	Create an empty array
 	*/
-	Array()
+	Array() :
+		m_Data(nullptr),
+		m_Used(0),
+		m_Alloc(0)
 	{
 	}
 
-	Array(std::initializer_list<T> init)
+	Array(std::initializer_list<T> init) :
+		Array()
 	{
 		Reserve((int)init.size());
-		for(auto& e : init)
-			PushBack(std::move(e));
+		PushBack(init.begin(), (int)init.size());
 	}
 
 	//! Destruktor
 	~Array()
 	{
-		Clear();
+		Destroy();
 	}
 
 	//! Move constructor
@@ -164,13 +167,10 @@ public:
 	//! Move assignment 
 	Array<T>& operator=(Array<T>&& old)
 	{
-		lxAssert(this != &old);
+		if(this == &old)
+			return *this;
 
-		if(Data()) {
-			for(int i = 0; i < m_Used; ++i)
-				(Data() + i)->~T();
-			ArrayFree(Data());
-		}
+		Destroy();
 
 		m_Data = old.m_Data;
 		m_Used = old.m_Used;
@@ -191,26 +191,20 @@ public:
 	//! Assignment
 	Array<T>& operator=(const Array<T>& other)
 	{
+		if(this == &other)
+			return *this;
+
 		// Alte Einträge löschen
-		if(Data())
-			Clear();
+		Clear();
 
 		// Neu reservieren
-		if(other.m_Alloc == 0)
-			m_Data = nullptr;
-		else
-			m_Data = (T*)ArrayAllocate(other.m_Alloc * sizeof(T));
+		Reserve(other.Size());
 
 		// Alles kopieren
 		m_Used = other.m_Used;
-		m_Alloc = other.m_Alloc;
 
-		lxAssert(m_Used <= m_Alloc);
-
-		if(Data()) {
-			for(int i = 0; i < m_Used; ++i)
-				new (Data() + i) T(other.Data()[i]);
-		}
+		for(int i = 0; i < m_Used; ++i)
+			new (m_Data + i) T(other.m_Data[i]);
 
 		return *this;
 	}
@@ -221,7 +215,7 @@ public:
 		if(Size() != other.Size())
 			return false;
 		for(int i = 0; i < other.Size(); ++i) {
-			if(Data_c()[i] != other.Data_c()[i])
+			if(m_Data[i] != other.m_Data[i])
 				return false;
 		}
 		return true;
@@ -236,7 +230,7 @@ public:
 	\param entry The new entry
 	\param before entry is build at this position
 	*/
-	void Insert(const T& entry, Iterator before)
+	void Insert(const T& entry, int before)
 	{
 		// Copy if reference point to inside the container.
 		auto ref = &entry;
@@ -257,7 +251,7 @@ public:
 	\param entry The new entry
 	\param before entry is build at this position
 	*/
-	void Insert(T&& entry, Iterator before)
+	void Insert(T&& entry, int before)
 	{
 		// Copy if reference point to inside the container.
 		auto ref = &entry;
@@ -274,7 +268,7 @@ public:
 	}
 
 	template <typename... Ts>
-	T& Emplace(Iterator before, Ts&&... args)
+	T& Emplace(int before, Ts&&... args)
 	{
 		auto ptr = GetInsertPointer(before, true);
 		new (ptr) T(std::forward<Ts>(args)...);
@@ -287,7 +281,7 @@ public:
 	*/
 	void PushBack(const T& entry)
 	{
-		Insert(entry, End());
+		Insert(entry, m_Used);
 	}
 
 	//! Add a new entry to the end of the array(move version)
@@ -296,13 +290,13 @@ public:
 	*/
 	void PushBack(T&& entry)
 	{
-		Insert((T&&)entry, End());
+		Insert((T&&)entry, m_Used);
 	}
 
 	template <typename... Ts>
 	T& EmplaceBack(Ts&&... args)
 	{
-		auto ptr = GetInsertPointer(End());
+		auto ptr = GetInsertPointer(m_Used);
 		new (ptr) T(std::forward<Ts>(args)...);
 		return *ptr;
 	}
@@ -314,7 +308,7 @@ public:
 	*/
 	void PushFront(const T& entry)
 	{
-		Insert(entry, First());
+		Insert(entry, 0);
 	}
 
 	//! Insert a new entry a the beginning of the array(move version)
@@ -324,13 +318,13 @@ public:
 	*/
 	void PushFront(T&& entry)
 	{
-		Insert(entry, First());
+		Insert(entry, 0);
 	}
 
 	template <typename... Ts>
 	T& EmplaceFront(Ts&&... args)
 	{
-		auto ptr = GetInsertPointer(First(), true);
+		auto ptr = GetInsertPointer(0, true);
 		new (ptr) T(std::forward<Ts>(args)...);
 		return *ptr;
 	}
@@ -384,58 +378,23 @@ public:
 	//! Remove the last element in the array
 	void PopBack()
 	{
-		Erase(Last(), true);
+		Erase(m_Used - 1, true);
 	}
 
 	//! Remove the last element in the array
 	void PopFront()
 	{
-		Erase(First(), true);
-	}
-
-	//! Sort the array if it wasnt already sorted
-	/**
-	Uses the operators = and < to sort the array
-	*/
-	void Sort()
-	{
-		if(m_Used > 1)
-			core::Sort(*this, core::CompareType<T>());
-	}
-
-	template <typename CompareT>
-	void Sort(const CompareT& compare)
-	{
-		if(m_Used > 1)
-			core::Sort(*this, compare);
+		Erase(0, true);
 	}
 
 	//! Remove an entry in the array
 	/**
 	\param it The element to remove
 	\param HoldOrder Should the elements in array be in the same order as before
-	\return The iterator of the element that took the place of the erased, if
-		the last element of the array was erased, returns the end iterator.
 	*/
-	Iterator Erase(Iterator it, bool holdOrder = false)
+	void Erase(int pos, bool holdOrder = false)
 	{
-		auto cur = static_cast<int>(it.m_Current - Data());
-		lxAssert(it.m_Current - Data() <= (int)m_Used);
-
-		if(holdOrder) {
-			for(T* i = it.m_Current; i < Data() + m_Used - 1; ++i)
-				*(i) = std::move(*(i + 1));
-		} else {
-			if(m_Used > 1)
-				*it = std::move(*Last());
-		}
-
-		Data()[m_Used - 1].~T();
-		m_Used--;
-		if(m_Used * 2 <= m_Alloc)
-			Optimize();
-
-		return Iterator(Data() + cur);
+		Erase(pos, 1, holdOrder);
 	}
 
 	//! Remove multiple elements from the array
@@ -443,79 +402,54 @@ public:
 	\param from The first element to remove.
 	\param count The number of elements to remove.
 	\param HoldOrder Should the elements in array be in the same order as before
-	\return The iterator of the element that took the place of the first erased, if
-		the last element of the array was erased, returns the end iterator.
 	*/
-	Iterator Erase(Iterator from, int count, bool holdOrder)
+	void Erase(int from, int count, bool holdOrder)
 	{
-		auto cur = static_cast<int>(from.m_Current - Data());
-		lxAssert((from.m_Current - Data()) + count - 1 <= m_Used);
+		lxAssert(from >= 0 && from + count - 1 <= m_Used);
 
 		if(holdOrder) {
-			for(T* i = from.m_Current; i < Data() + m_Used - count; ++i)
-				*(i) = std::move(*(i + count));
+			for(int i = from; i < m_Used - count; ++i)
+				m_Data[i] = std::move(m_Data[i + count]);
 		} else {
-			auto offset = m_Used - count - static_cast<int>(from.m_Current - Data());
-			auto ToCopy = math::Min(count, offset);
+			auto offset = m_Used - count - from;
+			auto toCopy = math::Min(count, offset);
 
-			for(int i = 0; i < ToCopy; ++i)
-				*(from.m_Current + i) = std::move(*(from.m_Current + offset + i));
+			for(int i = 0; i < toCopy; ++i)
+				m_Data[from + i] = std::move(m_Data[offset + i]);
 		}
 
 		for(int i = 0; i < count; ++i)
-			Data()[m_Used - 1 - i].~T();
+			m_Data[m_Used - 1 - i].~T();
 
 		m_Used -= count;
 
 		if(m_Used * 2 <= m_Alloc)
-			Optimize();
-
-		return Iterator(Data() + cur);
+			ShrinkToFit();
 	}
 
 
 	//! Remove all elements from the list
-	/**
-	Elements arent destructed one for one
-	*/
 	void Clear()
 	{
-		if(Data()) {
-			for(int i = 0; i < m_Used; ++i)
-				Data()[i].~T();
-			ArrayFree(Data());
+		for(int i = 0; i < m_Used; ++i)
+			m_Data[i].~T();
 
-			m_Data = nullptr;
-			m_Used = 0;
-			m_Alloc = 0;
-		}
+		m_Used = 0;
+		m_Alloc = 0;
 	}
 
 	//! Release unused memory
-	void Optimize()
+	void ShrinkToFit()
 	{
-		Reserve(m_Used);
+		if(m_Used != m_Alloc)
+			ForceReserve(m_Used);
 	}
 
 	//! Set the reserved size of the list
-	/**
-	\param newSize The new reserved size of the list
-	*/
-	void Reserve(int newSize)
+	void Reserve(int newAlloc)
 	{
-		T* newEntries = (T*)ArrayAllocate(newSize * sizeof(T));
-
-		if(Data()) {
-			int end = m_Used < (int)(newSize) ? m_Used : (int)(newSize);
-			for(int i = 0; i < end; ++i) {
-				new ((void*)&newEntries[i])T(std::move(Data()[i]));
-				(Data() + i)->~T();
-			}
-			ArrayFree(Data());
-		}
-		m_Data = newEntries;
-
-		m_Alloc = newSize;
+		if(newAlloc > m_Alloc)
+			ForceReserve(newAlloc);
 	}
 
 	//! Set the number of used elements aka the size of the array
@@ -561,13 +495,14 @@ public:
 
 		m_Used = used;
 	}
+	
 	//! Iterator to the first element in the array
 	/**
 	\return The first element in the array
 	*/
 	Iterator First()
 	{
-		return Iterator(Data());
+		return Iterator(m_Data);
 	}
 
 	//! ConstIterator to the first element in the array
@@ -576,7 +511,7 @@ public:
 	*/
 	ConstIterator First() const
 	{
-		return ConstIterator(Data());
+		return ConstIterator(m_Data);
 	}
 
 	//! Iterator to the last element in the array
@@ -585,7 +520,7 @@ public:
 	*/
 	Iterator End()
 	{
-		return Iterator(Data() + m_Used);
+		return Iterator(m_Data + m_Used);
 	}
 
 	//! ConstIterator to the last element in the array
@@ -594,80 +529,20 @@ public:
 	*/
 	ConstIterator End() const
 	{
-		return ConstIterator(Data() + m_Used);
-	}
-
-	//! Iterator to the first element in the array
-	/**
-	\return The element before the first in the array
-	*/
-	Iterator Begin()
-	{
-		return Iterator(Data() - 1);
-	}
-
-	//! ConstIterator to the first element in the array
-	/**
-	\return The element before the first in the array
-	*/
-	ConstIterator Begin() const
-	{
-		return ConstIterator(Data() - 1);
-	}
-
-	//! Iterator to the last element in the array
-	/**
-	\return The last element in the array
-	*/
-	Iterator Last()
-	{
-		return Iterator(Data() + m_Used - 1);
-	}
-
-	//! ConstIterator to the last element in the array
-	/**
-	\return The last element in the array
-	*/
-	ConstIterator Last() const
-	{
-		return ConstIterator(Data() + m_Used - 1);
+		return ConstIterator(m_Data + m_Used);
 	}
 
 	//! The i-th element from the back of the array
-	const T& Back(int i = 0) const
-	{
-		lxAssert(i >= 0 && i < m_Used);
-		return Data()[m_Used - i - 1];
-	}
+	const T& Back(int i = 0) const { return At(m_Used - i - 1); }
 
 	//! The i-th element from the back of the array
-	T& Back(int i = 0)
-	{
-		lxAssert(i >= 0 && i < m_Used);
-		return Data()[m_Used - i - 1];
-	}
+	T& Back(int i = 0) { return At(m_Used - i - 1); }
 
 	//! The i-th element from the front of the array
-	const T& Front(int i = 0) const
-	{
-		lxAssert(i >= 0 && i < m_Used);
-		return Data()[i];
-	}
+	const T& Front(int i = 0) const { return At(i); }
 
 	//! The i-th element from the front of the array
-	T& Front(int i = 0)
-	{
-		lxAssert(i >= 0 && i < m_Used);
-		return Data()[i];
-	}
-
-	//! Swap the content of two interators
-	void Swap(Iterator a, Iterator b)
-	{
-		T entry = std::move(*a);
-		*a = std::move(*b);
-		*b = entry;
-	}
+	T& Front(int i = 0) { return At(i); }
 
 	//! Checks if the list is empty
 	/**
@@ -734,29 +609,10 @@ public:
 		return Data()[entry];
 	}
 
-	//! Support for foreach loop
-	Iterator begin()
-	{
-		return Iterator(Data());
-	}
-
-	//! Support for foreach loop
-	ConstIterator begin() const
-	{
-		return ConstIterator(Data());
-	}
-
-	//! Support for foreach loop
-	Iterator end()
-	{
-		return Iterator(Data() + m_Used);
-	}
-
-	//! Support for foreach loop
-	ConstIterator end() const
-	{
-		return ConstIterator(Data() + m_Used);
-	}
+	Iterator begin() { return Iterator(m_Data); }
+	ConstIterator begin() const { return ConstIterator(m_Data); }
+	Iterator end() { return Iterator(m_Data + m_Used); }
+	ConstIterator end() const { return ConstIterator(m_Data + m_Used); }
 
 	//! Access entry with check for array size
 	/**
@@ -778,6 +634,50 @@ public:
 		return Data()[entry];
 	}
 
+	///////////////////////////////////////////////////////
+	// Algorithms
+
+	void Sort()
+	{
+		if(m_Used > 1)
+			core::Sort(*this, core::CompareType<T>());
+	}
+
+	template <typename CompareT>
+	void Sort(const CompareT& compare)
+	{
+		if(m_Used > 1)
+			core::Sort(*this, compare);
+	}
+
+	template <typename ElemT>
+	int LinearSearch(const ElemT& elem)
+	{
+		for(int i = 0; i < m_Used; ++i) {
+			if(m_Data[i] == elem)
+				return i;
+		}
+		return -1;
+	}
+
+	template <typename Predicate>
+	void RemoveIf(Predicate pred)
+	{
+		int first = 0;
+		int cursor = first;
+		int end = m_Used;
+		while(first != end) {
+			if(!pred(m_Data[first])) {
+				if(cursor != first)
+					m_Data[cursor] = std::move(m_Data[first]);
+				++cursor;
+			}
+			++first;
+		}
+		Resize(cursor);
+	}
+
+
 private:
 	static void* ArrayAllocate(int bytes)
 	{
@@ -788,48 +688,68 @@ private:
 		::operator delete(ptr);
 	}
 
-	T* GetInsertPointer(Iterator before, bool destroy = false)
+	T* GetInsertPointer(int before, bool destroy = false)
 	{
-		lxAssert(before.m_Current - Data() <= (int)m_Used);
-
-		auto pos = (int)(before.m_Current - Data());
+		lxAssert(before >= 0 && before <= m_Used);
 
 		if(m_Used == m_Alloc)
 			Reserve((m_Used * 3) / 2 + 1);
 
 		// Shift each element, after the insert one back
 		// Starting at the last element.
-		if(m_Used != pos) {
+		if(m_Used != before) {
 			// Construct the last element
 			new ((void*)(Data() + m_Used)) T(std::move(Data()[m_Used - 1]));
 
 			// Move the remaining
-			for(int i = m_Used - 1; i > pos; --i)
+			for(int i = m_Used - 1; i > before; --i)
 				Data()[i] = std::move(Data()[i - 1]);
 		}
 
-		T* ptr = Data() + pos;
-		if(destroy && pos < m_Used)
+		T* ptr = Data() + before;
+		if(destroy && before < m_Used)
 			ptr->~T();
 		++m_Used;
 		return ptr;
 	}
 
+	void Destroy()
+	{
+		Clear();
+		ArrayFree(Data());
+		m_Data = nullptr;
+	}
+
+	void ForceReserve(int newAlloc)
+	{
+		lxAssert(newAlloc >= m_Used);
+		T* newEntries = (T*)ArrayAllocate(newAlloc * sizeof(T));
+		for(int i = 0; i < m_Used; ++i) {
+			new ((void*)&newEntries[i]) T(std::move(m_Data[i]));
+			m_Data[i].~T();
+		}
+		ArrayFree(m_Data);
+
+		m_Data = newEntries;
+		m_Alloc = newAlloc;
+	}
+
+
 private:
-	T* m_Data = nullptr;
-	int m_Used = 0;
-	int m_Alloc = 0;
+	T* m_Data;
+	int m_Used;
+	int m_Alloc;
 };
 
 template <typename T>
-inline typename Array<T>::Iterator begin(Array<T>& array) { return array.First(); }
+inline typename Array<T>::Iterator begin(Array<T>& array) { return array.begin(); }
 template <typename T>
-inline typename Array<T>::Iterator end(Array<T>& array) { return array.End(); }
+inline typename Array<T>::Iterator end(Array<T>& array) { return array.end(); }
 
 template <typename T>
-inline typename Array<T>::ConstIterator begin(const Array<T>& array) { return array.First(); }
+inline typename Array<T>::ConstIterator begin(const Array<T>& array) { return array.begin(); }
 template <typename T>
-inline typename Array<T>::ConstIterator end(const Array<T>& array) { return array.End(); }
+inline typename Array<T>::ConstIterator end(const Array<T>& array) { return array.end(); }
 
 LUX_API StringView MakeArrayTypeName(Type baseType);
 

@@ -123,19 +123,14 @@ struct ResourceBlock
 		if(it != resources.End())
 			throw ObjectAlreadyExistsException(name.AsView());
 
-		resources.Insert(entry, n);
+		resources.Insert(entry, core::IteratorDistance(resources.First(), n));
 	}
 
 	int RemoveUnused()
 	{
 		auto oldCount = resources.Size();
-		if(resources.Size() > 0) {
-			auto newEnd1 = RemoveIf(resources, [](const Entry& e) -> bool { return e.resource->GetReferenceCount() == 1; });
-			resources.Resize(IteratorDistance(resources.First(), newEnd1));
-		}
-
+		resources.RemoveIf([](const Entry& e) -> bool { return e.resource->GetReferenceCount() == 1; });
 		auto newCount = resources.Size();
-
 		return (oldCount - newCount);
 	}
 };
@@ -330,10 +325,10 @@ int ResourceSystem::GetResourceWriterCount() const
 
 StrongRef<ResourceWriter> ResourceSystem::GetResourceWriter(Name resourceType, StringView ext) const
 {
-	for(auto it = self->writers.Last(); it != self->writers.Begin(); --it) {
-		bool canWrite = (*it)->CanWriteType(ext, resourceType);
+	for(int i = self->writers.Size()-1; i >= 0; --i) {
+		bool canWrite = self->writers[i]->CanWriteType(ext, resourceType);
 		if(canWrite)
-			return *it;
+			return self->writers[i];
 	}
 
 	return nullptr;
@@ -403,13 +398,14 @@ StrongRef<ResourceLoader> ResourceSystem::GetResourceLoader(Name type, io::File*
 {
 	auto fileCursor = file->GetCursor();
 	StrongRef<ResourceLoader> result;
-	for(auto it = self->loaders.Last(); it != self->loaders.Begin(); --it) {
+	for(int i = self->loaders.Size() - 1; i >= 0; --i) {
+		auto& entry = self->loaders[i];
 		try {
-			Name fileType = it->loader->GetResourceType(file, type);
+			Name fileType = entry.loader->GetResourceType(file, type);
 			if(!fileType.IsEmpty()) {
 				if(!type.IsEmpty() || type == fileType) {
 					typeToLoad = fileType;
-					result = it->loader;
+					result = entry.loader;
 				}
 			}
 		} catch(...) {

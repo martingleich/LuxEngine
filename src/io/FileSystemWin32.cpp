@@ -213,12 +213,7 @@ void FileSystemWin32::AddMountPoint(const Path& point, Archive* archive)
 
 void FileSystemWin32::RemoveMountPoint(const Path& point, Archive* archive)
 {
-	for(auto it = m_Mounts.Begin(); it != m_Mounts.End();) {
-		if(it->mountpoint == point && (!archive || archive == it->archive))
-			it = m_Mounts.Erase(it, true);
-		else
-			++it;
-	}
+	m_Mounts.RemoveIf([&point, archive](const MountEntry& entry) { return (entry.mountpoint == point && (!archive || archive == entry.archive)); });
 }
 
 } // namespace io

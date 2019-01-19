@@ -25,11 +25,11 @@ public:
 	{
 	}
 
-	Iterator First() { return m_Data; }
-	Iterator End() { return m_Data + SIZE; }
+	Iterator begin() { return m_Data; }
+	Iterator end() { return m_Data + SIZE; }
 
-	ConstIterator First() const { return m_Data; }
-	ConstIterator End() const { return m_Data + SIZE; }
+	ConstIterator begin() const { return m_Data; }
+	ConstIterator end() const { return m_Data + SIZE; }
 
 	int Size() const
 	{

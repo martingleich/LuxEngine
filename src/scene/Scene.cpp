@@ -30,9 +30,9 @@ void Scene::RegisterObserver(SceneObserver* observer)
 
 void Scene::UnregisterObserver(SceneObserver* observer)
 {
-	auto it = core::LinearSearch(observer, m_Observers);
-	if(it != m_Observers.end())
-		m_Observers.Erase(it);
+	auto i = m_Observers.LinearSearch(observer);
+	if(i != -1)
+		m_Observers.Erase(i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

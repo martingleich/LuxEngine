@@ -13,9 +13,7 @@ namespace core
 {
 
 ///\cond INTERNAL
-struct InputIteratorTag
-{};
-struct ForwardIteratorTag : InputIteratorTag
+struct ForwardIteratorTag
 {};
 struct BidirectionalIteratorTag : ForwardIteratorTag
 {};
@@ -70,18 +68,6 @@ int _IteratorDistance(IterType a, IterType b, BidirectionalIteratorTag)
 }
 
 template <typename IterType>
-int _IteratorDistance(IterType a, IterType b, InputIteratorTag)
-{
-	int count = 0;
-	while(a != b) {
-		count++;
-		a++;
-	}
-
-	return count;
-}
-
-template <typename IterType>
 int _IteratorDistance(IterType a, IterType b, ForwardIteratorTag)
 {
 	int count = 0;
@@ -102,21 +88,18 @@ IterType _IteratorAdvance(IterType iter, int distance, RandomAccessIteratorTag)
 template <typename IterType>
 IterType _IteratorAdvance(IterType iter, int distance, BidirectionalIteratorTag)
 {
-	while(distance > 0) {
-		++iter;
-		--distance;
+	if(distance > 0) {
+		while(distance > 0) {
+			++iter;
+			--distance;
+		}
+	} else {
+		while(distance < 0) {
+			--iter;
+			++distance;
+		}
 	}
 
-	return iter;
-}
-
-template <typename IterType>
-IterType _IteratorAdvance(IterType iter, int distance, InputIteratorTag)
-{
-	while(distance > 0) {
-		++iter;
-		--distance;
-	}
 
 	return iter;
 }
@@ -124,6 +107,7 @@ IterType _IteratorAdvance(IterType iter, int distance, InputIteratorTag)
 template <typename IterType>
 IterType _IteratorAdvance(IterType iter, int distance, ForwardIteratorTag)
 {
+	lxAssert(distance >= 0);
 	while(distance > 0) {
 		++iter;
 		--distance;

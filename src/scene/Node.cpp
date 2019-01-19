@@ -56,18 +56,7 @@ void Node::Animate(float time)
 
 void Node::CleanDeletionQueue()
 {
-	auto entry = m_Components.First();
-	while(entry != m_Components.End()) {
-		SceneNodeComponentList::Iterator next_entry;
-		if(entry->markForDelete) {
-			next_entry = m_Components.Erase(entry);
-		} else {
-			next_entry = entry;
-			++next_entry;
-		}
-
-		entry = next_entry;
-	}
+	m_Components.RemoveIf([](const ComponentEntry& entry) { return entry.markForDelete; });
 }
 
 StrongRef<Component> Node::AddComponent(Component* component)
@@ -102,9 +91,9 @@ bool Node::HasComponents() const
 
 void Node::RemoveComponent(Component* comp)
 {
-	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
-		if(it->comp == comp) {
-			m_Components.Erase(it);
+	for(int i = 0; i < m_Components.Size(); ++i) {
+		if(m_Components[i].comp == comp) {
+			m_Components.Erase(i);
 			OnDetach(comp);
 			break;
 		}
@@ -329,7 +318,7 @@ void Node::MarkForDelete(Component* comp)
 {
 	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
 		if(it->comp == comp) {
-			OnAttach(comp);
+			OnDetach(comp);
 			it->markForDelete = true;
 			break;
 		}
