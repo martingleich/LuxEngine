@@ -343,6 +343,18 @@ public:
 
 		m_Used = used;
 	}
+
+	//! Shrink only resize.
+	/**
+	Doesn't require default construcible elements.
+	*/
+	void ShrinkResize(int used)
+	{
+		lxAssert(m_Alloc >= used);
+		for(int i = used; i < m_Used; ++i)
+			Data()[i].~T();
+		m_Used = used;
+	}
 	
 	//! Iterator to the first element in the array
 	/**
@@ -522,7 +534,7 @@ public:
 			}
 			++first;
 		}
-		Resize(cursor);
+		ShrinkResize(cursor);
 	}
 
 
