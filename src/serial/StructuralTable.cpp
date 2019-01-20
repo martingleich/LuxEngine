@@ -78,9 +78,9 @@ const StructureElement* StructuralTable::GetStructureElement(u32 sid, const core
 
 	auto elemMap = m_ElementMaps.At(sid - 1);
 	auto elemId = elemMap.Find(name);
-	if(elemId == elemMap.End())
+	if(elemId == elemMap.end())
 		return nullptr;
-	return GetStructureElement(sid, *elemId);
+	return GetStructureElement(sid, elemId->value);
 }
 
 const StructureElement* StructuralTable::GetStructureElement(u32 sid, const char* name) const
@@ -89,9 +89,9 @@ const StructureElement* StructuralTable::GetStructureElement(u32 sid, const char
 
 	auto elemMap = m_ElementMaps.At(sid - 1);
 	auto elemId = elemMap.Find(name);
-	if(elemId == elemMap.End())
+	if(elemId == elemMap.end())
 		return nullptr;
-	return GetStructureElement(sid, *elemId);
+	return GetStructureElement(sid, elemId->value);
 }
 
 const StructureElement* StructuralTable::GetStructureElement(u32 sid, u32 elemId) const

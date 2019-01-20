@@ -708,18 +708,14 @@ inline Type GetArrayBase(Type type)
 template <typename T>
 struct HashType<Array<T>>
 {
-	int operator()(const Array<T>& arr) const
+	unsigned int operator()(const Array<T>& arr) const
 	{
-		if(arr.IsEmpty())
-			return 0;
-
-		int out = 7;
 		const T* ptr = arr.Data();
-		const T* end = ptr + arr.Size();
+		SequenceHasher seqHasher;
 		HashType<T> hasher;
-		for(; ptr != end; ++ptr)
-			out = 31 * out + hasher(*ptr);
-		return out;
+		for(int i = 0; i < arr.Size(); ++i)
+			seqHasher.Add(hasher(ptr[i]));
+		return seqHasher.GetHash();
 	}
 };
 

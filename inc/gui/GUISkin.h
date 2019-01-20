@@ -106,19 +106,12 @@ public:
 
 	virtual const Palette& GetDefaultPalette(core::Name name) const
 	{
-		auto it = m_DefaultPalettes.Find(name);
-		if(it == m_DefaultPalettes.End())
-			return m_DefaultPalette;
-		else
-			return *it;
+		return m_DefaultPalettes.Get(name, m_DefaultPalette);
 	}
 
 	float GetPropertyFloat(const core::String& prop, float defaultValue = 0.0f)
 	{
-		auto it = m_PropsF.Find(prop);
-		if(it == m_PropsF.End())
-			return defaultValue;
-		return *it;
+		return m_PropsF.Get(prop, defaultValue);
 	}
 	virtual void SetProperty(const core::String& prop, float v)
 	{
@@ -127,10 +120,7 @@ public:
 
 	math::Vector2F GetPropertyVector(const core::String& prop, math::Vector2F defaultValue = math::Vector2F(0, 0))
 	{
-		auto it = m_PropsV.Find(prop);
-		if(it == m_PropsV.End())
-			return defaultValue;
-		return *it;
+		return m_PropsV.Get(prop, defaultValue);
 	}
 	virtual void SetProperty(const core::String& prop, math::Vector2F v)
 	{
@@ -140,9 +130,9 @@ public:
 	math::Dimension2F GetPropertyDim(const core::String& prop, math::Dimension2F defaultValue = math::Dimension2F(0, 0))
 	{
 		auto it = m_PropsV.Find(prop);
-		if(it == m_PropsV.End())
+		if(it == m_PropsV.end())
 			return defaultValue;
-		return math::Dimension2F(it->x, it->y);
+		return math::Dimension2F(it->value.x, it->value.y);
 	}
 	virtual void SetProperty(const core::String& prop, math::Dimension2F v)
 	{

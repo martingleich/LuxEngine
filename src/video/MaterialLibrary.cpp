@@ -323,17 +323,17 @@ void MaterialLibrary::SetMaterial(
 StrongRef<video::Material> MaterialLibrary::GetMaterial(core::StringView name)
 {
 	auto it = m_MaterialMap.Find(name);
-	if(it == m_MaterialMap.End())
+	if(it == m_MaterialMap.end())
 		throw core::ObjectNotFoundException(name);
-	return m_MaterialList[*it];
+	return m_MaterialList[it->value];
 }
 
 StrongRef<video::Material> MaterialLibrary::TryGetMaterial(core::StringView name)
 {
 	auto it = m_MaterialMap.Find(name);
-	if(it == m_MaterialMap.End())
+	if(it == m_MaterialMap.end())
 		return nullptr;
-	return m_MaterialList[*it];
+	return m_MaterialList[it->value];
 }
 
 StrongRef<video::Material> MaterialLibrary::CloneMaterial(core::StringView name)

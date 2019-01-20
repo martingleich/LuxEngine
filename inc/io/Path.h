@@ -117,7 +117,7 @@ namespace core
 template <>
 struct HashType<io::Path>
 {
-	int operator()(const io::Path& path) const
+	unsigned int operator()(const io::Path& path) const
 	{
 		return HashType<String>()(path.AsView());
 	}

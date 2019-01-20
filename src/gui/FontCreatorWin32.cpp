@@ -136,9 +136,10 @@ static void CalculateImageSize(impl_fontCreatorWin32::Context* ctx)
 {
 	int count = 0;
 	float sum_length = 0;
-	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {
+	for(auto it = ctx->charInfos.begin(); it != ctx->charInfos.end(); ++it) {
 		++count;
-		sum_length += math::Max(it->b, it->a + it->b + it->c);
+		auto& v = it->value;
+		sum_length += math::Max(v.b, v.a + v.b + v.c);
 	}
 
 	int avg_length = (int)(sum_length / count) + 2;
@@ -214,9 +215,9 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 	u32 cur_x = 0;
 	u32 cur_y = 0;
 	core::Array<math::RectI> charRects;
-	for(auto it = ctx->charInfos.First(); it != ctx->charInfos.End(); ++it) {
-		const u32 c = it.key();
-		const impl_fontCreatorWin32::CharInfo& info = it.value();
+	for(auto it = ctx->charInfos.begin(); it != ctx->charInfos.end(); ++it) {
+		const u32 c = it->key;
+		const impl_fontCreatorWin32::CharInfo& info = it->value;
 
 		if(cur_x + info.b + 2 > width) {
 			cur_x = 0;
@@ -252,9 +253,9 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 		auto next = it;
 		++next;
 		float next_a = 0;
-		if(next != ctx->charInfos.End())
-			next_a = next.value().a;
-		cur_x += (u32)math::Max(it->b, it->b + it->c + next_a) + 2;
+		if(next != ctx->charInfos.end())
+			next_a = next->value.a;
+		cur_x += (u32)math::Max(it->value.b, it->value.b + it->value.c + next_a) + 2;
 	}
 
 	BITMAPFILEHEADER Header;
@@ -544,10 +545,10 @@ bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character, CharInfo& 
 		return false;
 
 	auto it = ctx->outCharInfo.Find(character);
-	if(it == ctx->outCharInfo.End())
+	if(it == ctx->outCharInfo.end())
 		return false;
 
-	outInfo = *it;
+	outInfo = it->value;
 
 	return true;
 }

@@ -125,7 +125,7 @@ void ReferableFactory::RegisterType(Name type, CreationFunc create)
 		throw GenericInvalidArgumentException("type", "An empty name is not allowed.");
 	LX_CHECK_NULL_ARG(create);
 
-	bool set = m_Types.SetIfNotExist(type, ReferableType(create));
+	bool set = m_Types.SetIfNotExist(type, ReferableType(create)).addedNew;
 	if(!set)
 		throw core::GenericInvalidArgumentException("type", "Type name is already used");
 

@@ -7,7 +7,6 @@
 #include "video/Color.h"
 #include "video/TextureStageSettings.h"
 #include "video/d3d9/FixedFunctionShaderD3D9.h"
-#include "video/FogData.h"
 
 #include "platform/StrippedD3D9.h"
 #include "platform/UnknownRefCounted.h"

@@ -231,10 +231,10 @@ struct Context
 
 		// Write char info
 		auto& charMap = font->GetCharMap();
-		for(auto it = charMap.First(); it != charMap.End(); ++it) {
-			auto v = *it;
+		for(auto it = charMap.begin(); it != charMap.end(); ++it) {
+			auto& v = it->value;
 			CharInfoV1 c;
-			c.character = it.key();
+			c.character = it->key;
 			c.A = v.A;
 			c.B = v.B;
 			c.C = v.C;

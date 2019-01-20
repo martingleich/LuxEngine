@@ -595,11 +595,11 @@ template<> struct TemplType<String> { static Type Get() { return Types::String()
 template <>
 struct HashType<StringView>
 {
-	int operator()(StringView view) const
+	unsigned int operator()(StringView view) const
 	{
 		return (*this)(view.Data(), view.Size());
 	}
-	int operator()(const char* str, int size) const
+	unsigned int operator()(const char* str, int size) const
 	{
 		if(size == 0)
 			return 0;
@@ -610,7 +610,7 @@ struct HashType<StringView>
 template <>
 struct HashType<String>
 {
-	int operator()(const String& str) const
+	unsigned int operator()(const String& str) const
 	{
 		return HashType<StringView>()(str.Data(), str.Size());
 	}

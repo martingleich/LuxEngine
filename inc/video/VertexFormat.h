@@ -177,16 +177,16 @@ namespace core
 template <>
 struct HashType<video::VertexElement>
 {
-	int operator()(const video::VertexElement& e) const
+	unsigned int operator()(const video::VertexElement& e) const
 	{
 		if(!e.IsValid())
 			return 0;
-
-		int out = 7;
-		out += 31 * out + e.GetOffset();
-		out += 31 * out + (int)e.GetUsage();
-		out += 31 * out + (int)e.GetType();
-		return out;
+		
+		SequenceHasher seqHasher;
+		seqHasher.Add(e.GetOffset());
+		seqHasher.Add((unsigned int)e.GetUsage());
+		seqHasher.Add((unsigned int)e.GetType());
+		return seqHasher.GetHash();
 	}
 };
 } // namespace core
@@ -245,7 +245,7 @@ private:
 		core::String name;
 		core::Array<VertexElement> elements;
 		int stride;
-		int hash;
+		unsigned int hash;
 
 		SharedData(core::StringView name, std::initializer_list<VertexElement> elems, int _stride)
 		{
@@ -354,7 +354,7 @@ public:
 	}
 
 	//! Gets a hash for this element
-	int GetHash() const
+	unsigned int GetHash() const
 	{
 		return m_Data->hash;
 	}
@@ -435,7 +435,7 @@ namespace core
 template <>
 struct HashType<video::VertexFormat>
 {
-	int operator()(const video::VertexFormat& e) const
+	unsigned int operator()(const video::VertexFormat& e) const
 	{
 		return e.GetHash();
 	}

@@ -1,59 +1,111 @@
 #ifndef INCLUDED_LUX_LX_HASH_MAP_H
 #define INCLUDED_LUX_LX_HASH_MAP_H
-#include "core/lxHashSet.h"
+#include "core/BasicHashSet.h"
 
 namespace lux
 {
 namespace core
 {
 
-template <typename K, typename V, typename Hash = HashType<K>, typename Compare = CompareType<K>>
+template <typename K, typename V, typename HasherT = HashType<K>, typename ComparerT = CompareType<K>>
 class HashMap
 {
+	struct RefTuple
+	{
+		const K& key;
+		const V& value;
+		RefTuple(const K& k, const V& v) :
+			key(k),
+			value(v)
+		{
+		}
+	};
+	struct DefaultTuple
+	{
+		const K& key;
+		DefaultTuple(const K& k) :
+			key(k)
+		{
+		}
+	};
+	template <typename CallT>	
+	struct CallTuple
+	{
+		CallTuple(const K& key, CallT& call) :
+			m_Call(call),
+			m_Key(key)
+		{
+		}
+		CallT m_Call;
+		const K& m_Key;
+	};
 	struct Tuple
 	{
 		K key;
 		V value;
 
-		Tuple(const K& k) :
-			key(k)
+		Tuple(const RefTuple& ref) :
+			key(ref.key),
+			value(ref.value)
 		{
 		}
+		Tuple(const DefaultTuple& ref) :
+			key(ref.key)
+		{
+		}
+		template <typename CallT>
+		Tuple(const CallTuple<CallT>& ref) :
+			key(ref.m_Key),
+			value(ref.m_Call())
+		{}
 		Tuple(const K& k, const V& v) :
 			key(k),
 			value(v)
 		{
 		}
 		Tuple(const Tuple&) = default;
-		Tuple(Tuple&& old) :
-			key(std::move(old.key)),
-			value(std::move(old.value))
-		{
-		}
+		Tuple(Tuple&& old) = default;
 		Tuple& operator=(const Tuple&) = default;
-		Tuple& operator=(Tuple&& old)
+		Tuple& operator=(Tuple&& old) = default;
+		Tuple& operator=(const RefTuple& ref)
 		{
-			key = std::move(old.key);
-			value = std::move(old.value);
+			key = ref.key;
+			value = ref.value;
+			return *this;
+		}
+		Tuple& operator=(const DefaultTuple& ref)
+		{
+			key = ref.key;
+			value = V();
 			return *this;
 		}
 	};
-	struct HashTuple
+	struct TupleHasher
 	{
-		Hash hasher;
-		int operator()(const Tuple& e) const
+		HasherT hasher;
+		TupleHasher() {}
+		TupleHasher(const HasherT& _hasher) :
+			hasher(_hasher)
+		{
+		}
+		unsigned int operator()(const Tuple& e) const
 		{
 			return hasher(e.key);
 		}
 		template <typename KeyT>
-		int operator()(const KeyT& key) const
+		unsigned int operator()(const KeyT& key) const
 		{
 			return hasher(key);
 		}
 	};
-	struct CompareTuple
+	struct TupleComparer
 	{
-		Compare comparer;
+		ComparerT comparer;
+		TupleComparer() {}
+		TupleComparer(const ComparerT& _comparer) :
+			comparer(_comparer)
+		{
+		}
 		bool Equal(const Tuple& a, const Tuple& b) const
 		{
 			return comparer.Equal(a.key, b.key);
@@ -75,422 +127,178 @@ class HashMap
 		}
 	};
 
-	using BaseSet = typename HashSet<Tuple, HashTuple, CompareTuple>;
-
 public:
-	template <bool IsConst>
-	class BaseIterator : public core::BaseIterator<BidirectionalIteratorTag, V>
+	struct TupleItState
 	{
-		friend class HashMap;
-	public:
-		static const bool IS_CONST = IsConst;
-
-		BaseIterator() = default;
-		explicit BaseIterator(typename BaseSet::template BaseIterator<IsConst> it) :
-			m_Iterator(it)
-		{
-		}
-		BaseIterator(const BaseIterator<IsConst>& iter) :
-			m_Iterator(iter.m_Iterator)
-		{
-		}
-
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		BaseIterator(const BaseIterator<!U>& iter) :
-			m_Iterator(iter.m_Iterator)
-		{
-		}
-
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		BaseIterator& operator=(const BaseIterator<!U>& iter)
-		{
-			m_Iterator = iter.m_Iterator;
-			return *this;
-		}
-		BaseIterator& operator=(const BaseIterator<IsConst>& iter)
-		{
-			m_Iterator = iter.m_Iterator;
-			return *this;
-		}
-
-		BaseIterator& operator++() { ++m_Iterator; return *this; }
-		BaseIterator& operator--() { --m_Iterator; return *this; }
-		BaseIterator operator++(int) { BaseIterator tmp(*this); ++m_Iterator; return tmp; }
-		BaseIterator operator--(int) { BaseIterator tmp(*this); --m_Iterator; return tmp; }
-
-		template <bool IsConst2>
-		bool operator==(const BaseIterator<IsConst2>& other) const
-		{
-			return m_Iterator == other.m_Iterator;
-		}
-		template <bool IsConst2>
-		bool operator!=(const BaseIterator<IsConst2>& other) const
-		{
-			return m_Iterator != other.m_Iterator;
-		}
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V& value() const { return m_Iterator->value; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const V& value() const { return m_Iterator->value; }
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K& key() const { return m_Iterator->key; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const K& key() const { return m_Iterator->key; }
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V& operator*() const { return m_Iterator->value; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const V& operator*() const { return m_Iterator->value; }
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V* operator->() const { return &m_Iterator->value; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const V* operator->() const { return &m_Iterator->value; }
-
-	private:
-		typename BaseSet::template BaseIterator<IsConst> m_Iterator;
+		TupleItState(const Tuple* t) : ptr(const_cast<Tuple*>(t)) {}
+		void next() { ++ptr; }
+		void prev() { ++ptr; }
+		const Tuple& get_const() const { return *ptr; }
+		Tuple& get_ref() { return *ptr; }
+		bool cmp(TupleItState other) const { return ptr == other.ptr; }
+		Tuple* ptr;
 	};
-
-	template <bool IsConst>
-	class BaseKeyIterator : public core::BaseIterator<core::BidirectionalIteratorTag, K>
+	LX_MAKE_BASE_BI_ITER(Iterator, TupleItState, Tuple);
+	struct KeyItState
 	{
-	public:
-		static const bool IS_CONST = IsConst;
-
-		BaseKeyIterator() = default;
-		explicit BaseKeyIterator(typename BaseSet:: template BaseIterator<IsConst> it) :
-			m_Iterator(it)
-		{
-		}
-		BaseKeyIterator(const BaseKeyIterator<IsConst>& iter) :
-			m_Iterator(iter.m_Iterator)
-		{
-		}
-
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		BaseKeyIterator(const BaseKeyIterator<!U>& iter) :
-			m_Iterator(iter.m_Iterator)
-		{
-		}
-
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		BaseKeyIterator& operator=(const BaseKeyIterator<!U>& iter)
-		{
-			m_Iterator = iter.m_Iterator;
-			return *this;
-		}
-		BaseKeyIterator& operator=(const BaseKeyIterator<IsConst>& iter)
-		{
-			m_Iterator = iter.m_Iterator;
-			return *this;
-		}
-
-		BaseKeyIterator& operator++() { ++m_Iterator; return *this; }
-		BaseKeyIterator& operator--() { --m_Iterator; return *this; }
-		BaseKeyIterator operator++(int) { BaseKeyIterator tmp(*this); ++m_Iterator; return tmp; }
-		BaseKeyIterator operator--(int) { BaseKeyIterator tmp(*this); --m_Iterator; return tmp; }
-
-		template <bool IsConst2>
-		bool operator==(const BaseKeyIterator<IsConst2>& other) const
-		{
-			return m_Iterator == other.m_Iterator;
-		}
-		template <bool IsConst2>
-		bool operator!=(const BaseKeyIterator<IsConst2>& other) const
-		{
-			return m_Iterator != other.m_Iterator;
-		}
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		V& value() const { return m_Iterator->value; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const V& value() const { return m_Iterator->value; }
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K& key() const { return m_Iterator->key; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const K& key() const { return m_Iterator->key; }
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K& operator*() const { return m_Iterator->key; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const K& operator*() const { return m_Iterator->key; }
-
-		template <bool U = !IsConst, std::enable_if_t<U, int> = 0>
-		K* operator->() const { return &m_Iterator->key; }
-		template <bool U = IsConst, std::enable_if_t<U, int> = 0>
-		const K* operator->() const { return &m_Iterator->key; }
-
-	private:
-		typename BaseSet::template BaseIterator<IsConst> m_Iterator;
+		KeyItState(const Tuple* t) : ptr(const_cast<Tuple*>(t)) {}
+		void next() { ++ptr; }
+		void prev() { ++ptr; }
+		const K& get_const() const { return ptr->key; }
+		K& get_ref() { return ptr->key; }
+		bool cmp(KeyItState other) const { return ptr == other.ptr; }
+		Tuple* ptr;
 	};
+	LX_MAKE_BASE_BI_ITER(KeyIterator, KeyItState, K);
+	struct ValueItState
+	{
+		ValueItState(const Tuple* t) : ptr(const_cast<Tuple*>(t)) {}
+		void next() { ++ptr; }
+		void prev() { ++ptr; }
+		const V& get_const() const { return ptr->value; }
+		V& get_ref() { return ptr->value; }
+		bool cmp(ValueItState other) const { return ptr == other.ptr; }
+		Tuple* ptr;
+	};
+	LX_MAKE_BASE_BI_ITER(ValueIterator, ValueItState, V);
 
 	using KeyT = K;
 	using ValueT = V;
-	using HashType = Hash;
-	using CompareType = Compare;
 
-	using Iterator = BaseIterator<false>;
-	using ConstIterator = BaseIterator<true>;
-	using KeyIterator = BaseKeyIterator<false>;
-	using ConstKeyIterator = BaseKeyIterator<true>;
+	struct SetResult
+	{
+		Iterator it;
+		bool addedNew;
+	};
 
 public:
-	HashMap()
-	{
-	}
-	HashMap(int allocated, int bucketCount = 0) :
-		m_Set(allocated, bucketCount)
-	{
-	}
-
-	HashMap(std::initializer_list<K> keys, std::initializer_list<V> values) :
-		HashMap(keys.begin(), keys.end(), values.begin(), values.end())
-	{
-	}
-
-	template <typename IterKeyT, typename IterValueT>
-	HashMap(
-		IterKeyT keysBegin, IterKeyT keysEnd,
-		IterValueT valuesBegin, IterValueT valuesEnd) :
-		m_Set(core::IteratorDistance(keysBegin, keysEnd))
-	{
-		lxAssert(core::IteratorDistance(keysBegin, keysEnd) ==
-			core::IteratorDistance(valuesBegin, valuesEnd));
-		while(keysBegin != keysEnd) {
-			m_Set.Insert(std::move(Tuple(*keysBegin, *valuesBegin)));
-			++keysBegin;
-			++valuesBegin;
-		}
-	}
-
-	// Assignment
-	HashMap(const HashMap& other) :
-		m_Set(other.m_Set)
-	{
-	}
-
-	HashMap(HashMap&& old) :
-		m_Set(std::move(old.m_Set))
-	{
-	}
-
-	HashMap& operator=(const HashMap& other)
-	{
-		m_Set = other.m_Set;
-		return *this;
-	}
-
-	HashMap& operator=(HashMap&& old)
-	{
-		m_Set = std::move(old.m_Set);
-		return *this;
-	}
-
-	// Comparision
-	// No comparisions functions.
+	HashMap() = default;
+	HashMap(const HashMap& other) = default;
+	HashMap(HashMap&& old) = default;
+	HashMap& operator=(const HashMap& other) = default;
+	HashMap& operator=(HashMap&& old) = default;
+	~HashMap() = default;
 
 	// Resizing
-	void Reserve(int allocated)
-	{
-		m_Set.Reserve(allocated);
-	}
+	void Reserve(int allocated) { m_Base.Reserve(allocated); }
+	void Clear() { m_Base.Clear(); }
 
-	void ReserveAndRehash(int allocated, int bucketCount)
+	SetResult Set(const K& key, const V& value)
 	{
-		m_Set.ReserveAndRehash(allocated, bucketCount);
+		auto result = m_Base.Add(key, true, RefTuple(key, value));
+		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
-
-	void Clear()
+	SetResult SetIfNotExist(const K& key, const V& value)
 	{
-		m_Set.Clear();
+		auto result = m_Base.Add(key, false, RefTuple(key, value));
+		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
-
-	// Access 
-	//! Set a new key in the map
-	/**
-	\param key The new key
-	\param value The new value
-	\param [out] out The iterator to the new element.
-	\return True if a new element was created, false if an old one was overwritten.
-	*/
-	bool Set(const K& key, const V& value, Iterator* out = nullptr)
+	template <typename CallT>
+	SetResult MakeIfNotExist(const K& key, const CallT& call)
 	{
-		typename BaseSet::Iterator it;
-		bool added = m_Set.Insert(Tuple(key, value), &it);
-		if(out)
-			*out = Iterator(it);
-		return added;
-	}
-
-	//! Set a new key in the map, only if the same key doesnt already exists
-	/**
-	\param key The new key
-	\param value The new value
-	\return True if a new element was created, false if an old one already existed.
-	*/
-	bool SetIfNotExist(const K& key, const V& value)
-	{
-		auto it = Find(key);
-		if(it != End())
-			return false;
-		return Set(key, value);
+		auto result = m_Base.Add(key, false, CallTuple<CallT>(key, call));
+		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
 
 	template <typename K2 = K>
 	bool HasKey(const K2& key) const
 	{
-		return Find(key) != End();
+		return m_Base.Find<K2>(key).IsValid();
 	}
 
 	template <typename K2 = K>
 	Iterator Find(const K2& key)
 	{
-		return Iterator(m_Set.Find(key));
+		auto result = m_Base.Find(key);
+		if(!result.IsValid())
+			return end();
+		return Iterator(&m_Base.GetValue(result.id));
 	}
 
 	template <typename K2 = K>
 	ConstIterator Find(const K2& key) const
 	{
-		return ConstIterator(m_Set.Find(key));
+		auto result = m_Base.Find(key);
+		if(!result.IsValid())
+			return end();
+		return ConstIterator(&m_Base.GetValue(result.id));
 	}
 
-	bool Erase(const K& key)
+	template <typename K2 = K>
+	bool Erase(const K2& key)
 	{
-		return m_Set.EraseAny(key);
+		auto result = m_Base.Find(key);
+		return m_Base.Erase(result).removed;
 	}
 
-	template <typename K2>
-	bool EraseAny(const K2& key)
+	void EraseIter(Iterator it)
 	{
-		return m_Set.EraseAny(key);
+		Erase(*it);
 	}
 
-	void Erase(Iterator it)
-	{
-		m_Set.Erase(it.m_Iterator);
-	}
-
-	V& operator[](const K& key)
-	{
-		return At(key);
-	}
-	const V& operator[](const K& key) const
-	{
-		return At(key);
-	}
+	V& operator[](const K& key) { return At(key); }
+	const V& operator[](const K& key) const { return Get(key); }
 
 	V& At(const K& key, const V& init)
 	{
-		Tuple tuple(key, init);
-		return m_Set.FindOrAdd(std::move(tuple))->value;
+		return m_Base.GetValue(m_Base.Add(key, false, RefTuple(key, init)).id).value;
 	}
 
 	template <typename K2 = K>
 	V& At(const K2& key)
 	{
-		Tuple tuple(key);
-		return m_Set.FindOrAdd(std::move(tuple))->value;
-	}
-
-	template <typename K2 = K>
-	const V& At(const K2& key) const
-	{
-		auto it = m_Set.Find(key);
-		lxAssert(it != m_Set.End());
-		return it->value;
+		auto result = m_Base.Add(key, false, DefaultTuple(key));
+		return m_Base.GetValue(result.id).value;
 	}
 
 	template <typename K2 = K>
 	const V& Get(const K2& key) const
 	{
-		auto it = m_Set.Find(key);
-		lxAssert(it != m_Set.End());
-		return it->value;
+		auto result = m_Base.Find(key);
+		lxAssert(result.IsValid());
+		return m_Base.GetValue(result.id).value;
 	}
 
 	template <typename K2 = K>
 	const V& Get(const K2& key, const V& def) const
 	{
-		auto it = m_Set.Find(key);
-		if(it == m_Set.End())
+		auto result = m_Base.Find(key);
+		if(result.IsValid())
+			return m_Base.GetValue(result.id).value;
+		else
 			return def;
-		return it->value;
 	}
 
 	// Iterators
+	ConstIterator begin() const { return ConstIterator(&m_Base.GetValue(0)); }
+	ConstIterator end() const { return ConstIterator(&m_Base.GetValue(Size())); }
 
-	ConstIterator First() const { return ConstIterator(m_Set.First()); }
-	ConstIterator End() const { return ConstIterator(m_Set.End()); }
+	Iterator begin() { return Iterator(&m_Base.GetValue(0)); }
+	Iterator end() { return Iterator(&m_Base.GetValue(Size())); }
 
-	Iterator First() { return Iterator(m_Set.First()); }
-	Iterator End() { return Iterator(m_Set.End()); }
-
-	ConstIterator begin() const { return First(); }
-	ConstIterator end() const { return End(); }
-
-	Iterator begin() { return First(); }
-	Iterator end() { return End(); }
-
-	ConstKeyIterator FirstKey() const { return ConstKeyIterator(m_Set.First()); }
-	ConstKeyIterator EndKey() const { return ConstKeyIterator(m_Set.End()); }
-
-	KeyIterator FirstKey() { return KeyIterator(m_Set.First()); }
-	KeyIterator EndKey() { return KeyIterator(m_Set.End()); }
-
-	core::Range<KeyIterator> Keys() { return core::MakeRange(FirstKey(), EndKey()); }
-	core::Range<ConstKeyIterator> Keys() const { return core::MakeRange(FirstKey(), EndKey()); }
-
-	core::Range<Iterator> Values() { return core::MakeRange(First(), End()); }
-	core::Range<ConstIterator> Values() const { return core::MakeRange(First(), End()); }
+	core::Range<KeyIterator> Keys() { return core::MakeRange(KeyIterator(&m_Base.GetValue(0)), KeyIterator(&m_Base.GetValue(Size()))); }
+	core::Range<ConstKeyIterator> Keys() const { return core::MakeRange(ConstKeyIterator(&m_Base.GetValue(0)), ConstKeyIterator(&m_Base.GetValue(Size()))); }
+	core::Range<ValueIterator> Values() { return core::MakeRange(ValueIterator(&m_Base.GetValue(0)), ValueIterator(&m_Base.GetValue(Size()))); }
+	core::Range<ConstValueIterator> Values() const { return core::MakeRange(ConstValueIterator(&m_Base.GetValue(0)), ConstValueIterator(&m_Base.GetValue(Size()))); }
 
 	// Infomations
-	int Size() const
-	{
-		return m_Set.Size();
-	}
-	int Allocated() const
-	{
-		return m_Set.Allocated();
-	}
-	bool IsEmpty() const
-	{
-		return Size() == 0;
-	}
-
-	float GetLoadFactor() const
-	{
-		return m_Set.GetLoadFactor();
-	}
-	float GetMaxLoadFactor() const
-	{
-		return m_Set.GetMaxLoadFactor();
-	}
-
-	const Hash& Hasher() const
-	{
-		return m_Set.Hasher().hasher;
-	}
-	const Compare& Comparer() const
-	{
-		return m_Set.Comparer().comparer;
-	}
+	int Size() const { return m_Base.GetSize(); }
+	int Allocated() const { return m_Base.GetAllocated(); }
+	bool IsEmpty() const { return m_Base.GetSize() == 0; }
 
 private:
-	BaseSet m_Set;
+	BasicHashSet<Tuple, TupleHasher, TupleComparer> m_Base;
 };
 
-template <typename K, typename V, typename Hash, typename Compare>
-typename HashMap<K, V, Hash, Compare>::Iterator begin(HashMap<K, V, Hash, Compare>& map) { return map.First(); }
-template <typename K, typename V, typename Hash, typename Compare>
-typename HashMap<K, V, Hash, Compare>::Iterator end(HashMap<K, V, Hash, Compare>& map) { return map.End(); }
+template <typename K, typename V, typename HasherT, typename ComparerT>
+typename HashMap<K, V, HasherT, ComparerT>::Iterator begin(HashMap<K, V, HasherT, ComparerT>& map) { return map.begin(); }
+template <typename K, typename V, typename HasherT, typename ComparerT>
+typename HashMap<K, V, HasherT, ComparerT>::Iterator end(HashMap<K, V, HasherT, ComparerT>& map) { return map.end(); }
 
-template <typename K, typename V, typename Hash, typename Compare>
-typename HashMap<K, V, Hash, Compare>::ConstIterator begin(const HashMap<K, V, Hash, Compare>& map) { return map.First(); }
-template <typename K, typename V, typename Hash, typename Compare>
-typename HashMap<K, V, Hash, Compare>::ConstIterator end(const HashMap<K, V, Hash, Compare>& map) { return map.End(); }
+template <typename K, typename V, typename HasherT, typename ComparerT>
+typename HashMap<K, V, HasherT, ComparerT>::ConstIterator begin(const HashMap<K, V, HasherT, ComparerT>& map) { return map.begin(); }
+template <typename K, typename V, typename HasherT, typename ComparerT>
+typename HashMap<K, V, HasherT, ComparerT>::ConstIterator end(const HashMap<K, V, HasherT, ComparerT>& map) { return map.end(); }
 
 } // namespace core
 } // namespace lux

@@ -34,7 +34,7 @@ RenderStatistics::RenderStatistics() :
 }
 RenderStatistics::~RenderStatistics()
 {
-	for(auto grp : self->groups)
+	for(auto grp : self->groups.Values())
 		LUX_FREE(grp);
 
 	LUX_FREE(self);
@@ -49,7 +49,7 @@ void RenderStatistics::AddPrimitives(u32 count)
 void RenderStatistics::BeginFrame()
 {
 	self->frameStart = core::Clock::GetTicks();
-	for(auto& grp : self->groups)
+	for(auto& grp : self->groups.Values())
 		grp->Begin();
 	self->total.Begin();
 	self->groupStack.Clear();
@@ -60,7 +60,7 @@ void RenderStatistics::EndFrame()
 {
 	auto frameEnd = core::Clock::GetTicks();
 	self->duration = frameEnd - self->frameStart;
-	for(auto& grp : self->groups)
+	for(auto& grp : self->groups.Values())
 		grp->End();
 	self->total.End();
 }
@@ -91,10 +91,10 @@ void RenderStatistics::PopGroup()
 const RenderStatistics::Group& RenderStatistics::GetGroup(const char* name) const
 {
 	auto it = self->groups.Find<const char*>(name);
-	if(it == self->groups.End())
+	if(it == self->groups.end())
 		return self->empty;
 	else
-		return **it;
+		return *it->value;
 }
 
 }

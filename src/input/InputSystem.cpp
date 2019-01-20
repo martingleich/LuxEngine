@@ -42,8 +42,8 @@ core::Signal<const Event&>& InputSystem::GetEventSignal()
 StrongRef<InputDevice> InputSystem::FindDevice(InputDeviceDesc* desc)
 {
 	auto it = m_GUIDMap.Find(desc->GetGUID());
-	if(it != m_GUIDMap.End())
-		return *it;
+	if(it != m_GUIDMap.end())
+		return it->value;
 
 	StrongRef<InputDevice> device = LUX_NEW(InputDevice)(desc, this);
 
@@ -100,9 +100,9 @@ StrongRef<InputDevice> InputSystem::GetKeyboard()
 	if(m_KeyboardDevice)
 		return m_KeyboardDevice;
 
-	for(auto it = m_GUIDMap.First(); it != m_GUIDMap.End(); ++it) {
-		if((*it)->GetType() == EDeviceType::Keyboard) {
-			m_KeyboardDevice = it->GetWeak();
+	for(auto it = m_GUIDMap.begin(); it != m_GUIDMap.end(); ++it) {
+		if(it->value->GetType() == EDeviceType::Keyboard) {
+			m_KeyboardDevice = it->value.GetWeak();
 			break;
 		}
 	}
@@ -115,9 +115,9 @@ StrongRef<InputDevice> InputSystem::GetMouse()
 	if(m_MouseDevice)
 		return m_MouseDevice;
 
-	for(auto it = m_GUIDMap.First(); it != m_GUIDMap.End(); ++it) {
-		if((*it)->GetType() == EDeviceType::Mouse) {
-			m_MouseDevice = it->GetWeak();
+	for(auto it = m_GUIDMap.begin(); it != m_GUIDMap.end(); ++it) {
+		if(it->value->GetType() == EDeviceType::Mouse) {
+			m_MouseDevice = it->value.GetWeak();
 			break;
 		}
 	}

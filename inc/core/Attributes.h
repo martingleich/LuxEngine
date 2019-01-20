@@ -117,44 +117,44 @@ public:
 	core::VariableAccess Attribute(core::StringView name)
 	{
 		auto it = m_ObjectMap.Find(name);
-		if(it == m_ObjectMap.End()) {
+		if(it == m_ObjectMap.end()) {
 			if(m_Base)
 				return m_Base->Attribute(name);
 			throw core::ObjectNotFoundException(name);
 		}
-		return (*it)->GetAccess(false);
+		return it->value->GetAccess(false);
 	}
 
 	core::VariableAccess Attribute(core::StringView name) const
 	{
 		auto it = m_ObjectMap.Find(name);
-		if(it == m_ObjectMap.End()) {
+		if(it == m_ObjectMap.end()) {
 			if(m_Base)
 				return ((const AttributeListInternal*)m_Base)->Attribute(name);
 			throw core::ObjectNotFoundException(name);
 		}
-		return (*it)->GetAccess(true);
+		return it->value->GetAccess(true);
 	}
 
 	ConstIterator First() const
 	{
-		return m_ObjectMap.FirstKey();
+		return m_ObjectMap.Keys().First();
 	}
 
 	ConstIterator End() const
 	{
-		return m_ObjectMap.EndKey();
+		return m_ObjectMap.Keys().End();
 	}
 
 	AttributePtr Pointer(const core::StringView& name) const
 	{
 		auto it = m_ObjectMap.Find(name);
-		if(it == m_ObjectMap.End()) {
+		if(it == m_ObjectMap.end()) {
 			if(m_Base)
 				return m_Base->Pointer(name);
 			return nullptr;
 		}
-		return (core::Attribute*)(*it);
+		return (core::Attribute*)it->value;
 	}
 
 	AttributeListInternal* GetBase() const
@@ -210,10 +210,10 @@ public:
 		auto& name = attrb->GetName();
 		auto type = attrb->GetType();
 		auto it = Objects().Find(name);
-		if(it != Objects().End()) {
-			if((*it)->GetType() != type)
+		if(it != Objects().end()) {
+			if(it->value->GetType() != type)
 				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
-			*it = attrb;
+			it->value = attrb;
 		} else {
 			Objects()[name] = attrb;
 		}
@@ -225,11 +225,11 @@ public:
 	{
 		AttributePtr ptr;
 		auto it = Objects().Find(name);
-		if(it != Objects().End()) {
-			if((*it)->GetType() != type)
+		if(it != Objects().end()) {
+			if(it->value->GetType() != type)
 				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
-			(*it)->GetAccess().AssignData(value);
-			ptr = (Attribute*)(*it);
+			it->value->GetAccess().AssignData(value);
+			ptr = (Attribute*)it->value;
 		} else {
 			auto p = Objects().At(name, LUX_NEW(AttributeAnyImpl)(name, type, value));
 			Objects()[name] = p;

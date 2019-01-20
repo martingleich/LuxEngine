@@ -735,6 +735,57 @@ using StrideRange = BaseStrideRange<T, false>;
 template <typename T>
 using ConstStrideRange = BaseStrideRange<T, true>;
 
+#define LX_MAKE_BASE_BI_ITER(Iterator, ItState, type) \
+class Base##Iterator : public lux::core::BaseIterator<lux::core::BidirectionalIteratorTag, type>\
+{ \
+public: \
+	Base##Iterator() = default; \
+	Base##Iterator(ItState state) : m_State(state) {} \
+	const ItState& GetState() const { return m_State; } \
+protected: \
+	ItState m_State; \
+}; \
+ \
+class Iterator : public Base##Iterator \
+{ \
+public: \
+	Iterator() = default; \
+	explicit Iterator(ItState state) : Base##Iterator(state) {} \
+	Iterator& operator++() { m_State.next(); return *this; } \
+	Iterator& operator--() { m_State.prev(); return *this; } \
+	Iterator operator++(int) { Iterator tmp(*this); m_State.next(); return tmp; } \
+	Iterator operator--(int) { Iterator tmp(*this); m_State.prev(); return tmp; } \
+ \
+	bool operator==(const Base##Iterator& other) const { return m_State.cmp(other.GetState()); } \
+	bool operator!=(const Base##Iterator& other) const { return !m_State.cmp(other.GetState()); } \
+ \
+	type& operator*() { return m_State.get_ref(); } \
+	const type& operator*() const { return m_State.get_const(); } \
+ \
+	type* operator->() { return &m_State.get_ref(); } \
+	const type* operator->() const { return &m_State.get_const(); } \
+}; \
+ \
+class Const##Iterator : public Base##Iterator \
+{ \
+public: \
+	Const##Iterator() = default; \
+	explicit Const##Iterator(ItState state) : Base##Iterator(state) { } \
+	Const##Iterator(const Iterator& other) : Base##Iterator(other.GetState()) { } \
+	Const##Iterator& operator=(const Iterator& other) { m_State = other.GetState(); return *this; } \
+ \
+	Const##Iterator& operator++() { m_State.next(); return *this; } \
+	Const##Iterator& operator--() { m_State.prev(); return *this; } \
+	Const##Iterator operator++(int) { Const##Iterator tmp(*this); m_State.next(); return tmp; } \
+	Const##Iterator operator--(int) { Const##Iterator tmp(*this); m_State.prev(); return tmp; } \
+ \
+	bool operator==(const Base##Iterator& other) const { return m_State.cmp(other.GetState()); } \
+	bool operator!=(const Base##Iterator& other) const { return !m_State.cmp(other.GetState()); } \
+ \
+	const type& operator*() const { return m_State.get_const(); } \
+	const type* operator->() const { return &m_State.get_const(); } \
+};
+
 } // namespace core
 } // namespace lux
 

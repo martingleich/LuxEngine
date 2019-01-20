@@ -138,8 +138,8 @@ void FontRaster::Init(const FontCreationData& data)
 	core::String errorChars = "�? ";
 	for(auto it = errorChars.CodePoints().First(); it != errorChars.CodePoints().End(); ++it) {
 		auto jt = m_CharMap.Find(*it);
-		if(jt != m_CharMap.End()) {
-			m_ErrorChar = *jt;
+		if(jt != m_CharMap.end()) {
+			m_ErrorChar = jt->value;
 			break;
 		}
 	}
@@ -318,7 +318,7 @@ void FontRaster::GetTextCarets(const FontRenderSettings& settings, const core::S
 const CharInfo& FontRaster::GetCharInfo(u32 c)
 {
 	auto it = m_CharMap.Find(c);
-	return (it != m_CharMap.End()) ? *it : m_ErrorChar;
+	return (it != m_CharMap.end()) ? it->value : m_ErrorChar;
 }
 
 FontRenderSettings FontRaster::GetFinalFontSettings(const FontRenderSettings& _settings)

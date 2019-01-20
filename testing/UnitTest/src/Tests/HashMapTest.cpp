@@ -27,8 +27,8 @@ UNIT_SUITE(HashMap)
 		map.Set(2, 1);
 		UNIT_ASSERT(map.Size() == 2);
 		u32 test = 0;
-		for(auto it = map.FirstKey(); it != map.EndKey(); ++it)
-			if(*it == 1)
+		for(auto k : map.Keys())
+			if(k == 1)
 				test++;
 		UNIT_ASSERT(test == 1);
 		UNIT_ASSERT(map.At(1) == 2);
@@ -101,9 +101,10 @@ UNIT_SUITE(HashMap)
 
 		UNIT_ASSERT(map.Size() == 2);
 		u32 test = 0;
-		for(auto it = map.FirstKey(); it != map.EndKey(); ++it)
-			if(*it == 1)
+		for(auto k : map.Keys()) {
+			if(k == 1)
 				test++;
+		}
 		UNIT_ASSERT(test == 1);
 		UNIT_ASSERT(map.At(1) == 2);
 		UNIT_ASSERT(map.At(2) == 1);
@@ -115,9 +116,9 @@ UNIT_SUITE(HashMap)
 		map.Set(1, 2);
 		map.Set(2, 1);
 
-		UNIT_ASSERT(map.Find(1) != map.End());
-		UNIT_ASSERT(map.Find(2) != map.End());
-		UNIT_ASSERT(map.Find(3) == map.End());
+		UNIT_ASSERT(map.Find(1) != map.end());
+		UNIT_ASSERT(map.Find(2) != map.end());
+		UNIT_ASSERT(map.Find(3) == map.end());
 	}
 
 	UNIT_TEST(DefaultAdd)

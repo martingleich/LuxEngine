@@ -48,31 +48,65 @@ CompareTypeFromIntCompareT<T, FuncT> CompareTypeFromInt(const FuncT& func)
 	return CompareTypeFromIntCompareT<T, FuncT>(func);
 }
 
-inline int HashSequence(const void* _ptr, int size)
+inline unsigned int IntHashFunc(unsigned int x)
 {
-	int out = 7;
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	x = (x >> 16) ^ x;
+	return x;
+}
+
+inline unsigned int InverseIntHashFunc(unsigned int x)
+{  
+	x = ((x >> 16) ^ x) * 0x119de1f3;
+    x = ((x >> 16) ^ x) * 0x119de1f3;
+    x = (x >> 16) ^ x;
+	return x;
+}
+
+// FNV-1a Hasher
+struct SequenceHasher
+{
+	void Add(unsigned int value)
+	{
+		hash ^= value;
+		hash *= 16777619;
+	}
+	unsigned int GetHash() const { return hash; }
+private:
+	unsigned int hash = 2166136261;
+};
+
+inline unsigned int HashSequence(const void* _ptr, int size)
+{
+	SequenceHasher hasher;
 	const u8* ptr = (u8*)_ptr;
-	const u8* end = ptr + size;
-	for(; ptr != end; ++ptr)
-		out = 31 * out + *ptr;
-	return out;
+	for(int i = 0; i < size; ++i)
+		hasher.Add(ptr[i]);
+	return hasher.GetHash();
 }
 
 template <typename T>
 struct BitWiseHash
 {
-	int operator()(const T& t) const
+	unsigned int operator()(const T& t) const
 	{
-		return HashSequence(reinterpret_cast<const u8*>(&t), sizeof(T));
+		ifconst(sizeof(t) <= sizeof(int)) {
+			unsigned int bits;
+			std::memcpy(&bits, &t, sizeof(T));
+			return IntHashFunc(bits);
+		} else {
+			return HashSequence(reinterpret_cast<const u8*>(&t), sizeof(T));
+		}
 	}
 };
 
 template <typename T>
 struct HashType
 {
-	typename std::enable_if<std::is_enum<T>::value, int>::type operator()(T t) const
+	typename std::enable_if<std::is_enum<T>::value, unsigned int>::type operator()(T t) const
 	{
-		return (int)t;
+		return IntHashFunc((unsigned int)t);
 	}
 };
 
@@ -95,7 +129,7 @@ template <> struct HashType<unsigned long long> : BitWiseHash<unsigned long long
 template <>
 struct HashType<float> : BitWiseHash<float>
 {
-	int operator()(float x)
+	unsigned int operator()(float x)
 	{
 		return BitWiseHash<float>::operator()(x == -0 ? +0 : x);
 	}
@@ -104,7 +138,7 @@ struct HashType<float> : BitWiseHash<float>
 template <>
 struct HashType<double> : BitWiseHash<double>
 {
-	int operator()(double x)
+	unsigned int operator()(double x)
 	{
 		return BitWiseHash<double>::operator()(x == -0 ? +0 : x);
 	}
@@ -113,7 +147,7 @@ struct HashType<double> : BitWiseHash<double>
 template <>
 struct HashType<long double> : BitWiseHash<long double>
 {
-	int operator()(long double x)
+	unsigned int operator()(long double x)
 	{
 		return BitWiseHash<long double>::operator()(x == -0 ? +0 : x);
 	}

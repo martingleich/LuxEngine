@@ -72,10 +72,10 @@ StrongRef<Mesh> MeshSystem::CreateMesh(Geometry* geo)
 StrongRef<GeometryCreator> MeshSystem::GetCreatorByName(core::StringView name) const
 {
 	auto it = m_Creators.Find(name);
-	if(it == m_Creators.End())
+	if(it == m_Creators.end())
 		throw core::ObjectNotFoundException(name);
 
-	return *it;
+	return it->value;
 }
 
 StrongRef<GeometryCreator> MeshSystem::AddCreator(core::StringView name, GeometryCreator* creator)
@@ -83,7 +83,7 @@ StrongRef<GeometryCreator> MeshSystem::AddCreator(core::StringView name, Geometr
 	LX_CHECK_NULL_ARG(creator);
 
 	auto it = m_Creators.Find(name);
-	if(it != m_Creators.End())
+	if(it != m_Creators.end())
 		throw core::InvalidOperationException("Geometry creator already exists");
 	m_Creators.Set(name, creator);
 

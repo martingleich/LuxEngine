@@ -256,7 +256,7 @@ private:
 template <>
 struct HashType<Type>
 {
-	int operator()(Type x)
+	unsigned int operator()(Type x)
 	{
 		HashType<const TypeInfo*> hasher;
 		return hasher(x.GetInfo());

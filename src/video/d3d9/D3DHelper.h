@@ -7,7 +7,6 @@
 #include "video/VertexFormat.h"
 #include "video/VideoEnums.h"
 #include "video/TextureLayer.h"
-#include "video/FogData.h"
 #include "video/Pass.h"
 #include "video/CubeTexture.h"
 

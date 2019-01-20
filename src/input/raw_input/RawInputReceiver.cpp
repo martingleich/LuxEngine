@@ -121,9 +121,9 @@ StrongRef<RawInputDevice> RawInputReceiver::CreateDevice(HANDLE rawHandle)
 
 void RawInputReceiver::DestroyDevice(RawInputDevice* device)
 {
-	for(auto it = m_DeviceMap.First(); it != m_DeviceMap.End(); ++it) {
-		if(*it == device) {
-			m_DeviceMap.Erase(it);
+	for(auto it = m_DeviceMap.begin(); it != m_DeviceMap.end(); ++it) {
+		if(it->value == device) {
+			m_DeviceMap.EraseIter(it);
 			break;
 		}
 	}
@@ -151,11 +151,11 @@ StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle, int devi
 		}
 	} else {
 		auto it = m_DeviceMap.Find(rawHandle);
-		if(it == m_DeviceMap.End()) {
+		if(it == m_DeviceMap.end()) {
 			out = CreateDevice(rawHandle);
 			m_DeviceMap.Set(rawHandle, out);
 		} else {
-			out = *it;
+			out = it->value;
 		}
 	}
 

@@ -72,7 +72,7 @@ inline bool operator!=(StringView str, const Name& namestring)
 template <>
 struct HashType<Name>
 {
-	int operator()(const Name& n) const
+	unsigned int operator()(const Name& n) const
 	{
 		return n.GetHandle().GetHash();
 	}

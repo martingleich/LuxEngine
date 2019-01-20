@@ -125,9 +125,9 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 const core::Array<u32>& FontCreatorNull::GetDefaultCharset(const core::String& name) const
 {
 	auto it = m_DefaultCharSets.Find(name);
-	if(it != m_DefaultCharSets.End())
-		return *it;
-	return *m_DefaultCharSets.First();
+	if(it != m_DefaultCharSets.end())
+		return it->value;
+	return m_DefaultCharSets.begin()->value;
 }
 
 void FontCreatorNull::AddDefaultCharSet(const core::String& name, const core::String& data)

@@ -498,12 +498,12 @@ EDeviceState VideoDriverD3D9::GetDeviceState() const
 UnknownRefCounted<IDirect3DVertexDeclaration9> VideoDriverD3D9::GetD3D9VertexDeclaration(const VertexFormat& format)
 {
 	auto it = m_VertexFormats.Find(format);
-	if(it == m_VertexFormats.End()) {
+	if(it == m_VertexFormats.end()) {
 		auto d3d = CreateVertexFormat(format);
 		m_VertexFormats[format] = d3d;
 		return d3d;
 	} else {
-		return *it;
+		return it->value;
 	}
 }
 
