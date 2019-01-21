@@ -33,8 +33,8 @@ PointRendererMachine::PointRendererMachine()
 	m_DefaultPass.zWriteEnabled = false;
 	m_DefaultPass.fogEnabled = false;
 	m_DefaultPass.lighting = video::ELightingFlag::Disabled;
-	video::FixedFunctionParameters paramsDiffuse({}, {}, true);
-	m_DefaultPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramsDiffuse);
+	m_DefaultPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(
+		video::FixedFunctionParameters::VertexColorOnly());
 
 	m_EmitPass = m_DefaultPass;
 	m_EmitPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;

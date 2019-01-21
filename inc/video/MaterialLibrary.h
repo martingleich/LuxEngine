@@ -70,12 +70,6 @@ public:
 		ShaderCompileInfo* compileInfo = nullptr);
 
 	//! Retrieves a shader matching a fixed function description.
-	LUX_API StrongRef<Shader> GetFixedFunctionShader(
-		const core::Array<core::String>& textures,
-		const core::Array<TextureStageSettings>& stages,
-		bool useVertexColors = false);
-
-	//! Retrieves a shader matching a fixed function description.
 	LUX_API StrongRef<Shader> GetFixedFunctionShader(const FixedFunctionParameters& params);
 
 	//! Checks if some shader language and version is supported

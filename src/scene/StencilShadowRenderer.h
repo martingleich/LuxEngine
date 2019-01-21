@@ -82,7 +82,7 @@ public:
 		m_ShadowRenderPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 		m_ShadowRenderPass.alpha.blendOperator = video::EBlendOperator::Add;
 		m_ShadowRenderPass.shader = video::ShaderFactory::Instance()->
-			GetFixedFunctionShader({}, {}, true);
+			GetFixedFunctionShader(video::FixedFunctionParameters::VertexColorOnly());
 
 		m_Silhouette.colorMask = 0;
 		m_Silhouette.gouraudShading = false;
@@ -101,7 +101,7 @@ public:
 		m_Silhouette.fogEnabled = false;
 		m_Silhouette.polygonOffset = -100.0f;
 		m_Silhouette.shader = video::ShaderFactory::Instance()->
-			GetFixedFunctionShader({}, {}, false);
+			GetFixedFunctionShader(video::FixedFunctionParameters::Unlit({}, {}, false));
 	}
 
 	// Begin a new silhouette rendering

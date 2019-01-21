@@ -11,36 +11,39 @@ namespace video
 
 struct FixedFunctionParameters
 {
-	FixedFunctionParameters(
-		const core::Array<core::String>& _textures,
-		const core::Array<TextureStageSettings>& _stages,
-		bool _useVertexColors = false,
-		bool _enableFogging = true,
-		int _maxLightCount = 4) :
-		textures(_textures),
-		stages(_stages),
-		useVertexColors(_useVertexColors),
-		enableFogging(_enableFogging),
-		maxLightCount(_maxLightCount)
+	static FixedFunctionParameters VertexColorOnly()
 	{
+		return FixedFunctionParameters();
 	}
-
+	static FixedFunctionParameters Unlit(
+		const core::Array<core::String>& textures,
+		const core::Array<TextureStageSettings>& stages,
+		bool useVertexColors=false)
+	{
+		FixedFunctionParameters out;
+		out.textures = textures;
+		out.stages = stages;
+		out.enableFogging = false;
+		out.maxLightCount = 0;
+		out.useVertexColors = useVertexColors;
+		return out;
+	}
 	core::Array<core::String> textures;
 	core::Array<TextureStageSettings> stages;
-	bool useVertexColors;
-	bool enableFogging;
-	int maxLightCount;
+	bool useVertexColors = false;
+	bool enableFogging = false;
+	int maxLightCount = 0;
 
 	bool operator==(const FixedFunctionParameters& other) const
 	{
-		return 
+		return
 			textures == other.textures &&
 			stages == other.stages &&
-			useVertexColors == other.useVertexColors && 
-			enableFogging == other.enableFogging && 
+			useVertexColors == other.useVertexColors &&
+			enableFogging == other.enableFogging &&
 			maxLightCount == other.maxLightCount;
 	}
-	
+
 	bool operator!=(const  FixedFunctionParameters& other) const
 	{
 		return !(*this == other);

@@ -168,14 +168,6 @@ StrongRef<Shader> ShaderFactory::CreateShaderFromFile(
 }
 
 StrongRef<Shader> ShaderFactory::GetFixedFunctionShader(
-	const core::Array<core::String>& textures,
-	const core::Array<TextureStageSettings>& stages,
-	bool useVertexColors)
-{
-	return GetFixedFunctionShader(FixedFunctionParameters(textures, stages, useVertexColors));
-}
-
-StrongRef<Shader> ShaderFactory::GetFixedFunctionShader(
 	const FixedFunctionParameters& params)
 {
 	// Why only use the cache sometimes.
@@ -273,7 +265,7 @@ MaterialLibrary::MaterialLibrary() :
 
 	// TODO: Move into dependency injection.
 	{
-		auto shader = m_ShaderFactory->GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
+		auto shader = m_ShaderFactory->GetFixedFunctionShader(video::FixedFunctionParameters::Unlit({"texture"}, {video::TextureStageSettings()}));
 		auto solid = CreateSolidMaterial(shader);
 		m_MaterialMap["solid"] = (int)EKnownMaterial::Solid;
 		lxAssert(EKnownMaterial::Solid == m_MaterialList.Size());
@@ -288,7 +280,7 @@ MaterialLibrary::MaterialLibrary() :
 		video::TextureStageSettings tss;
 		tss.colorOperator = ETextureOperator::SelectArg1;
 		tss.colorArg1 = ETextureArgument::Diffuse;
-		pass.shader = m_ShaderFactory->GetFixedFunctionShader({"texture"}, {tss}, true);
+		pass.shader = m_ShaderFactory->GetFixedFunctionShader(video::FixedFunctionParameters::Unlit({"texture"}, {tss}, true));
 
 		auto debug = CreateMaterial(pass);
 		m_MaterialMap["debugOverlay"] = (int)EKnownMaterial::DebugOverlay;
@@ -297,7 +289,7 @@ MaterialLibrary::MaterialLibrary() :
 	}
 
 	{
-		auto shader = m_ShaderFactory->GetFixedFunctionShader({"texture"}, {video::TextureStageSettings()});
+		auto shader = m_ShaderFactory->GetFixedFunctionShader(video::FixedFunctionParameters::Unlit({"texture"}, {video::TextureStageSettings()}));
 		auto transparent = CreateTransparentMaterial(shader);
 		m_MaterialMap["transparent"] = (int)EKnownMaterial::Transparent;
 		lxAssert(EKnownMaterial::Transparent == m_MaterialList.Size());

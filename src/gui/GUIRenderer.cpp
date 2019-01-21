@@ -43,8 +43,8 @@ Renderer::Renderer(video::Renderer* r)
 		video::ETextureArgument::Diffuse,
 		video::ETextureArgument::Texture,
 		video::ETextureOperator::Modulate);
-	video::FixedFunctionParameters paramsTexture({"texture"}, {tss}, true);
-	m_TexturePass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramsTexture);
+	m_TexturePass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(
+		video::FixedFunctionParameters::Unlit({"texture"}, {tss}, true));
 	g_ShaderParamSet.Init(m_TexturePass.shader);
 
 	m_DiffusePass.culling = video::EFaceSide::None;
@@ -53,8 +53,8 @@ Renderer::Renderer(video::Renderer* r)
 	m_DiffusePass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_DiffusePass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_DiffusePass.alpha.blendOperator = video::EBlendOperator::Add;
-	video::FixedFunctionParameters paramsDiffuse({}, {}, true);
-	m_DiffusePass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(paramsDiffuse);
+	m_DiffusePass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(
+		video::FixedFunctionParameters::VertexColorOnly());
 }
 
 void Renderer::Begin()
@@ -207,9 +207,9 @@ void Renderer::DrawLine(const math::Vector2F& start, const math::Vector2F& end, 
 			if(pos + step > length)
 				step = length - pos;
 			if(state)
-				lineBuffer.DrawLine(base, base + step*dir);
+				lineBuffer.DrawLine(base, base + step * dir);
 			pos += step;
-			base += step*dir;
+			base += step * dir;
 			state = !state;
 		}
 	}

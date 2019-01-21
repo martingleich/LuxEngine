@@ -14,7 +14,7 @@ Canvas3DSystem::Canvas3DSystem()
 {
 	m_PenPass.lighting = video::ELightingFlag::Disabled;
 	m_PenPass.fogEnabled = false;
-	m_PenPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader({}, {}, true);
+	m_PenPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(video::FixedFunctionParameters::VertexColorOnly());
 
 	video::VertexFormatBuilder builder;
 	builder.AddElement(video::VertexElement::EUsage::Position, video::VertexElement::EType::Float3);
@@ -28,7 +28,7 @@ Canvas3DSystem::Canvas3DSystem()
 	m_BrushPass.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
 	m_BrushPass.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
 	m_BrushPass.alpha.blendOperator = video::EBlendOperator::Add;
-	m_BrushPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader({}, {}, true);
+	m_BrushPass.shader = video::ShaderFactory::Instance()->GetFixedFunctionShader(video::FixedFunctionParameters::VertexColorOnly());
 }
 
 Canvas3DSystem::~Canvas3DSystem()
