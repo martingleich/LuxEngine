@@ -257,11 +257,14 @@ UnknownRefCounted<IDirect3DVertexShader9> ShaderD3D9::CreateVertexShader(
 	UnknownRefCounted<ID3DXBuffer> errors;
 	UnknownRefCounted<IDirect3DVertexShader9> shader;
 
-	HRESULT hr = D3DXCompileShader(code.Data(), (UINT)code.Size(),
+	HRESULT hr = D3DXLibraryLoader::Instance().GetD3DXCompileShader()(code.Data(), (UINT)code.Size(),
 		NULL, &g_luxD3DXShaderIncludes, core::NulterminatedStringViewWrapper(entryPoint),
 		core::NulterminatedStringViewWrapper(profile),
 		0, output.Access(), errors.Access(),
 		outTable.Access());
+
+	if(FAILED(hr) && errors == nullptr)
+		throw core::D3D9Exception(hr);
 
 	WriteErrors(errorList, errors, true);
 
@@ -283,12 +286,14 @@ UnknownRefCounted<IDirect3DPixelShader9>  ShaderD3D9::CreatePixelShader(
 	UnknownRefCounted<ID3DXBuffer> errors;
 	UnknownRefCounted<IDirect3DPixelShader9> shader;
 
-	HRESULT hr;
-	hr = D3DXCompileShader(code.Data(), (UINT)code.Size(),
+	HRESULT hr = D3DXLibraryLoader::Instance().GetD3DXCompileShader()(code.Data(), (UINT)code.Size(),
 		NULL, &g_luxD3DXShaderIncludes, core::NulterminatedStringViewWrapper(entryPoint),
 		core::NulterminatedStringViewWrapper(profile),
 		0, output.Access(), errors.Access(),
 		outTable.Access());
+
+	if(FAILED(hr) && errors == nullptr)
+		throw core::D3D9Exception(hr);
 
 	WriteErrors(errorList, errors, false);
 

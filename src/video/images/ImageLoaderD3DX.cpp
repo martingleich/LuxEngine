@@ -103,7 +103,7 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	case D3DRTYPE_TEXTURE:
 	{
 		UnknownRefCounted<IDirect3DTexture9> out;
-		hr = D3DXCreateTextureFromFileInMemoryEx(device,
+		hr = D3DXLibraryLoader::Instance().GetD3DXCreateTextureFromFileInMemoryEx()(device,
 			buffer, bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
@@ -120,7 +120,7 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	case D3DRTYPE_CUBETEXTURE:
 	{
 		UnknownRefCounted<IDirect3DCubeTexture9> out;
-		hr = D3DXCreateCubeTextureFromFileInMemoryEx(device,
+		hr = D3DXLibraryLoader::Instance().GetD3DXCreateCubeTextureFromFileInMemoryEx()(device,
 			buffer, bufferSize,
 			D3DX_DEFAULT, 1, 0,
 			format, D3DPOOL_SYSTEMMEM,
@@ -135,7 +135,7 @@ static UnknownRefCounted<IDirect3DBaseTexture9> LoadTexture(
 	case D3DRTYPE_VOLUMETEXTURE:
 	{
 		UnknownRefCounted<IDirect3DVolumeTexture9> out;
-		hr = D3DXCreateVolumeTextureFromFileInMemoryEx(device,
+		hr = D3DXLibraryLoader::Instance().GetD3DXCreateVolumeTextureFromFileInMemoryEx()(device,
 			buffer, bufferSize,
 			D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT,
 			1, 0, format, D3DPOOL_SYSTEMMEM,
@@ -277,7 +277,7 @@ void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
 		throw core::FileFormatException("Can't loader data from file", "<unknown>");
 
 	D3DXIMAGE_INFO info;
-	hr = D3DXGetImageInfoFromFileInMemory(buffer.ptr, (UINT)buffer.size, &info);
+	hr = D3DXLibraryLoader::Instance().GetD3DXGetImageInfoFromFileInMemory()(buffer.ptr, (UINT)buffer.size, &info);
 	if(FAILED(hr))
 		throw core::FileFormatException("Corrupted or not supported", file->GetPath().GetFileExtension());
 

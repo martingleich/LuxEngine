@@ -78,12 +78,10 @@ if(MSVC)
 	# Check for x64
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		find_library(D3DLIB d3d9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x64/)
-		find_library(D3DXLIB d3dx9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x64/)
 	else()
 		find_library(D3DLIB d3d9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
-		find_library(D3DXLIB d3dx9 HINTS ${PROJECT_SOURCE_DIR}/external/d3d9/x86/)
 	endif()
-	target_link_libraries(LuxEngine ${D3DLIB} ${D3DXLIB} Hid dxerr)
+	target_link_libraries(LuxEngine ${D3DLIB} Hid dxerr)
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34296 ") #'operator': expression is always false
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34062 ") # enumerator 'identifier' in a switch of enum 'enumeration' is not handled

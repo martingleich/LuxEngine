@@ -58,7 +58,7 @@ void CubeTextureD3D9::Init(int size, ColorFormat lxFormat, bool isRendertarget, 
 
 void CubeTextureD3D9::RegenerateMIPMaps()
 {
-	HRESULT hr = D3DXFilterTexture(m_Texture, nullptr, 0, 0);
+	HRESULT hr = D3DXLibraryLoader::Instance().GetD3DXFilterTexture()(m_Texture, nullptr, 0, 0);
 	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
 }

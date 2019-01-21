@@ -20,4 +20,6 @@
 #define IMPL_LX_CONCAT(a, x) a##x
 #define LX_CONCAT(a, x) IMPL_LX_CONCAT(a, x)
 
+#define LX_STRINGIFY2(x) #x
+#define LX_STRINGIFY(x) LX_STRINGIFY2(x)
 #endif // #ifndef INCLUDED_LUX_HELPER_MACROS_H
