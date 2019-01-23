@@ -21,23 +21,24 @@ public:
 		NegZ
 	};
 
+public:
 	CubeTexture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
-	virtual ~CubeTexture() {}
 
 	virtual void Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic) = 0;
 
 	//! Retrieve access to the texturedata
 	/**
 	To make finally changes Unlock() must be called.
-	MipMaps won't be recalculated automatically.
 	\param mode The texturelock mode
 	\param face Which face should be locked
 	\param mipLevel Which mipmap level should be locked
 	\return The locked rectangle
 	*/
-	virtual LockedRect Lock(ELockMode mode, EFace face, int mipLevel = 0) = 0;
+	virtual LockedRect Lock(ELockMode mode, EFace face) = 0;
 
-	virtual void Unlock(bool regenMipMaps) = 0;
+	virtual void Unlock() = 0;
+
+	virtual int GetSize() const = 0;
 
 	core::Name GetReferableType() const
 	{
@@ -47,11 +48,10 @@ public:
 
 struct CubeTextureLock
 {
-	CubeTextureLock(CubeTexture* t, BaseTexture::ELockMode mode, CubeTexture::EFace face, int mipLevel = 0, bool _regenMipMaps = true) :
-		base(t),
-		regenMipsMaps(_regenMipMaps)
+	CubeTextureLock(CubeTexture* t, BaseTexture::ELockMode mode, CubeTexture::EFace face) :
+		base(t)
 	{
-		auto rect = base->Lock(mode, face, mipLevel);
+		auto rect = base->Lock(mode, face);
 		data = rect.bits;
 		pitch = rect.pitch;
 	}
@@ -84,7 +84,7 @@ struct CubeTextureLock
 	void Unlock()
 	{
 		if(base) {
-			base->Unlock(regenMipsMaps);
+			base->Unlock();
 			base = nullptr;
 		}
 	}
@@ -92,7 +92,6 @@ struct CubeTextureLock
 	CubeTexture* base;
 	void* data;
 	u32 pitch;
-	bool regenMipsMaps;
 };
 
 } // namespace video

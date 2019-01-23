@@ -22,38 +22,40 @@ public:
 	void Init(
 		const math::Dimension2I& Size,
 		ColorFormat format,
-		int MipCount, bool isRendertarget, bool isDynamic);
+		int MipCount, bool isRendertarget, bool isDynamic) override;
 
-	LockedRect Lock(ELockMode Mode, int MipLevel);
-	void Unlock(bool regenMipMaps);
-	void RegenerateMIPMaps();
+	int GetMipMapCount() override { return m_Levels; }
+	LockedRect Lock(ELockMode Mode, int mipLevel) override;
+	void Unlock(bool regenMipMaps, int mipLevel) override;
 
-	bool IsRendertarget() const;
-	bool IsDynamic() const;
+	bool IsRendertarget() const override { return (m_Usage == D3DUSAGE_RENDERTARGET); }
+	bool IsDynamic() const override { return (m_Usage == D3DUSAGE_DYNAMIC); }
+	ColorFormat GetColorFormat() const override { return m_Format; }
+	void* GetRealTexture() override { return (void*)(m_Texture); }
+	const math::Dimension2I& GetSize() const override { return m_Dimension; }
 
-	ColorFormat GetColorFormat() const;
-	void* GetRealTexture();
-	int GetLevelCount() const;
-	const math::Dimension2I& GetSize() const;
-
-	const Filter& GetFiltering() const;
-	void SetFiltering(const Filter& f);
+	const BaseTexture::Filter& GetFiltering() const override { return m_Filtering; }
+	void SetFiltering(const Filter& f) override { m_Filtering = f; }
 
 	void ReleaseUnmanaged();
 	void RestoreUnmanaged();
 
 protected:
+	void RegenerateMIPMaps();
+
+protected:
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
 	UnknownRefCounted<IDirect3DTexture9> m_Texture;
-	D3DSURFACE_DESC m_Desc;
+
+	DWORD m_Usage;
+	D3DPOOL m_Pool;
+	D3DFORMAT m_D3DFormat;
 	ColorFormat m_Format;
 	Filter m_Filtering;
 	int m_Levels;
-
 	math::Dimension2I m_Dimension;
 
-	bool m_IsLocked;
-	int m_LockedLevel;
+	u32 m_LockedLevels;
 	ELockMode m_LockedMode;
 	UnknownRefCounted<IDirect3DSurface9> m_TempSurface;
 };

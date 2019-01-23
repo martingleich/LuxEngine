@@ -3,9 +3,9 @@
 #include "TextureD3D9.h"
 
 #include "platform/StrippedD3D9X.h"
-#include "D3DHelper.h"
+#include "video/d3d9/D3DHelper.h"
 #include "platform/D3D9Exception.h"
-#include "AuxiliaryTextureD3D9.h"
+#include "video/d3d9/AuxiliaryTextureD3D9.h"
 
 namespace lux
 {
@@ -13,8 +13,6 @@ namespace video
 {
 TextureD3D9::TextureD3D9(IDirect3DDevice9* device, const core::ResourceOrigin& origin) :
 	Texture(origin),
-	m_LockedLevel(-1),
-	m_IsLocked(false),
 	m_Device(device)
 {
 }
@@ -69,27 +67,28 @@ void TextureD3D9::Init(
 	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
 
-	m_IsLocked = false;
+	m_LockedLevels = 0;
 
-	m_Texture->GetLevelDesc(0, &m_Desc);
+	m_Usage = usage;
+	m_Pool = pool;
+	m_D3DFormat = format;
 
-	m_Dimension.Set(m_Desc.Width, m_Desc.Height);
+	m_Dimension = size;
 	m_Format = lxFormat;
 }
 
 BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 {
-	if(m_IsLocked)
+	if(m_LockedLevels&((u32)1 << mipLevel))
 		throw core::InvalidOperationException("Texture is already locked");
+	if(mipLevel > m_Levels)
+		throw core::InvalidOperationException("Invalid mip level");
 
-	m_LockedLevel = mipLevel;
-	if(m_LockedLevel >= (int)m_Texture->GetLevelCount())
-		m_LockedLevel = (int)m_Texture->GetLevelCount() - 1;
 
 	D3DLOCKED_RECT d3dlocked;
 	DWORD flags;
 	HRESULT hr;
-	if(mode == ELockMode::Overwrite && m_Desc.Usage == D3DUSAGE_DYNAMIC)
+	if(mode == ELockMode::Overwrite && m_Usage == D3DUSAGE_DYNAMIC)
 		flags = D3DLOCK_DISCARD;
 	else if(mode == ELockMode::ReadOnly)
 		flags = D3DLOCK_READONLY;
@@ -99,23 +98,23 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 	hr = m_Texture->LockRect(mipLevel, &d3dlocked, nullptr, flags);
 
 	if(FAILED(hr)) {
-		if(mode == ELockMode::Overwrite && m_Desc.Usage == 0) {
-			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
+		if(mode == ELockMode::Overwrite && m_Usage == 0) {
+			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(DWORD(m_Dimension.width), DWORD(m_Dimension.height), m_D3DFormat);
 			if(m_TempSurface)
 				hr = m_TempSurface->LockRect(&d3dlocked, nullptr, D3DLOCK_DISCARD);
 			if(FAILED(hr)) {
 				m_TempSurface = nullptr;
 				throw core::D3D9Exception(hr);
 			}
-		} else if(mode == ELockMode::ReadOnly && m_Desc.Usage == 0) {
+		} else if(mode == ELockMode::ReadOnly && m_Usage == 0) {
 			throw core::InvalidOperationException("Can't lock static texture in read mode");
-		} else if(mode == ELockMode::ReadWrite && m_Desc.Usage == 0) {
+		} else if(mode == ELockMode::ReadWrite && m_Usage == 0) {
 			throw core::InvalidOperationException("Can't lock static texture in read mode");
-		} else if(mode == ELockMode::ReadOnly && m_Desc.Usage == D3DUSAGE_RENDERTARGET) {
-			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Desc.Width, m_Desc.Height, m_Desc.Format);
+		} else if(mode == ELockMode::ReadOnly && m_Usage == D3DUSAGE_RENDERTARGET) {
+			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Dimension.width, m_Dimension.height, m_D3DFormat);
 			if(m_TempSurface) {
 				UnknownRefCounted<IDirect3DSurface9> surface;
-				hr = m_Texture->GetSurfaceLevel(m_LockedLevel, surface.Access());
+				hr = m_Texture->GetSurfaceLevel(mipLevel, surface.Access());
 				if(SUCCEEDED(hr))
 					hr = m_Device->GetRenderTargetData(surface, m_TempSurface);
 				if(SUCCEEDED(hr))
@@ -128,25 +127,26 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 		}
 	}
 
+	m_LockedLevels |= u32(1) << mipLevel;
+
 	LockedRect locked;
 	locked.bits = (u8*)d3dlocked.pBits;
 	locked.pitch = d3dlocked.Pitch;
-	m_IsLocked = true;
 
 	return locked;
 }
 
-void TextureD3D9::Unlock(bool regenMipMaps)
+void TextureD3D9::Unlock(bool regenMipMaps, int mipLevel)
 {
-	if(!m_IsLocked)
+	if((m_LockedLevels & (u32(1) << mipLevel)) == 0)
 		return;
 
 	HRESULT hr;
 	if(m_TempSurface) {
 		m_TempSurface->UnlockRect();
-		if(m_Desc.Usage == 0) {
+		if(m_Usage == 0) {
 			UnknownRefCounted<IDirect3DSurface9> surface;
-			hr = m_Texture->GetSurfaceLevel(m_LockedLevel, surface.Access());
+			hr = m_Texture->GetSurfaceLevel(mipLevel, surface.Access());
 			if(SUCCEEDED(hr))
 				hr = m_Device->UpdateSurface(m_TempSurface, nullptr, surface, nullptr);
 			if(FAILED(hr))
@@ -155,57 +155,19 @@ void TextureD3D9::Unlock(bool regenMipMaps)
 
 		m_TempSurface = nullptr;
 	} else {
-		m_Texture->UnlockRect(m_LockedLevel);
+		m_Texture->UnlockRect(mipLevel);
 	}
 
-	m_IsLocked = false;
+	m_LockedLevels &= ~(u32(1) << mipLevel);
 	if(regenMipMaps && m_Levels > 1)
 		RegenerateMIPMaps();
 }
 
-bool TextureD3D9::IsRendertarget() const
-{
-	return (m_Desc.Usage == D3DUSAGE_RENDERTARGET);
-}
-bool TextureD3D9::IsDynamic() const
-{
-	return (m_Desc.Usage == D3DUSAGE_DYNAMIC);
-}
-
-ColorFormat TextureD3D9::GetColorFormat() const
-{
-	return m_Format;
-}
-
-void* TextureD3D9::GetRealTexture()
-{
-	return (void*)(m_Texture);
-}
-
-int TextureD3D9::GetLevelCount() const
-{
-	return m_Texture->GetLevelCount();
-}
-
-const math::Dimension2I& TextureD3D9::GetSize() const
-{
-	return m_Dimension;
-}
-
-const BaseTexture::Filter& TextureD3D9::GetFiltering() const
-{
-	return m_Filtering;
-}
-void TextureD3D9::SetFiltering(const Filter& f)
-{
-	m_Filtering = f;
-}
-
 void TextureD3D9::ReleaseUnmanaged()
 {
-	if(m_IsLocked)
-		Unlock(false);
-	if(m_Desc.Pool == D3DPOOL_DEFAULT || m_Desc.Usage == D3DUSAGE_RENDERTARGET)
+	if(m_LockedLevels)
+		throw core::InvalidOperationException("Texture is still locked");
+	if(m_Pool == D3DPOOL_DEFAULT || m_Usage == D3DUSAGE_RENDERTARGET)
 		m_Texture = nullptr;
 }
 
@@ -213,7 +175,7 @@ void TextureD3D9::RestoreUnmanaged()
 {
 	if(IsRendertarget()) {
 		Init(m_Dimension, m_Format, m_Levels, true, false);
-	} else if(m_Desc.Pool == D3DPOOL_DEFAULT) {
+	} else if(m_Pool == D3DPOOL_DEFAULT) {
 		if(GetOrigin().IsAvailable())
 			GetOrigin().Load(this);
 		else

@@ -66,19 +66,11 @@ public:
 public:
 	BaseTexture(const core::ResourceOrigin& origin) : Resource(origin) {}
 
-	virtual ~BaseTexture() {}
-
-	//! The number of mip-maps, these texture contains, 0 for none
-	virtual int GetLevelCount() const = 0;
-
 	//! A pointer to the device depending texture
 	virtual void* GetRealTexture() = 0;
 
 	//! Returns the colorformat of the texture
 	virtual ColorFormat GetColorFormat() const = 0;
-
-	//! Returns the resolution of a texture surface in pixel
-	virtual const math::Dimension2I& GetSize() const = 0;
 
 	//! Is the texture a rendertarget.
 	virtual bool IsRendertarget() const = 0;
@@ -91,12 +83,6 @@ public:
 
 	//! Set the filtering method used for this texture.
 	virtual void SetFiltering(const Filter& f) = 0;
-
-	//! Unlock a locked texture
-	/**
-	No effect if texture is not locked
-	*/
-	virtual void Unlock(bool regenMipMaps=true) = 0;
 };
 
 } // namespace video

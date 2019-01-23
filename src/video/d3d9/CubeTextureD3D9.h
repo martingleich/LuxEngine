@@ -17,22 +17,21 @@ public:
 	CubeTextureD3D9(IDirect3DDevice9* d3dDevice, const core::ResourceOrigin& origin);
 	virtual ~CubeTextureD3D9();
 
-	void Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic);
+	void Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic) override;
 
 	void RegenerateMIPMaps();
 
-	LockedRect Lock(ELockMode mode, EFace face, int mipLevel = 0);
-	void Unlock(bool regenMipMaps);
+	LockedRect Lock(ELockMode mode, EFace face) override;
+	void Unlock() override;
 
-	ColorFormat GetColorFormat() const;
-	void* GetRealTexture();
-	int GetLevelCount() const;
-	const math::Dimension2I& GetSize() const;
-	bool IsRendertarget() const;
-	bool IsDynamic() const;
+	ColorFormat GetColorFormat() const override { return m_Format; }
+	void* GetRealTexture() override { return m_Texture; }
+	int GetSize() const override { return m_Size; }
+	bool IsRendertarget() const override { return m_Usage == D3DUSAGE_RENDERTARGET; }
+	bool IsDynamic() const override { return m_Usage == D3DUSAGE_DYNAMIC; }
 
-	const Filter& GetFiltering() const;
-	void SetFiltering(const Filter& f);
+	const Filter& GetFiltering() const { return m_Filtering; }
+	void SetFiltering(const Filter& f) { m_Filtering = f; }
 
 	void ReleaseUnmanaged();
 	void RestoreUnmanaged();
@@ -41,15 +40,16 @@ private:
 	UnknownRefCounted<IDirect3DDevice9> m_D3DDevice;
 	UnknownRefCounted<IDirect3DCubeTexture9> m_Texture;
 
-	int m_LockedLevel;
+	bool m_IsLocked;
 	D3DCUBEMAP_FACES m_LockedFace;
 	UnknownRefCounted<IDirect3DSurface9> m_TempSurface;
 
-	D3DSURFACE_DESC m_Desc;
+	DWORD m_Usage;
+	D3DPOOL m_Pool;
+	D3DFORMAT m_D3DFormat;
 	ColorFormat m_Format;
 	Filter m_Filtering;
-
-	math::Dimension2I m_Dimension;
+	int m_Size;
 };
 
 }

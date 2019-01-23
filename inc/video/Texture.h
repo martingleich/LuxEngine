@@ -12,15 +12,16 @@ class Texture : public BaseTexture
 {
 public:
 	Texture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
-	virtual ~Texture() {}
 
 	virtual void Init(
 		const math::Dimension2I& size,
 		ColorFormat format,
 		int mipCount, bool isRendertarget, bool isDynamic) = 0;
 
-	virtual LockedRect Lock(ELockMode mode, int mipLevel = 0) = 0;
-	virtual void Unlock(bool regenMipMaps) = 0;
+	virtual const math::Dimension2I& GetSize() const = 0;
+	virtual LockedRect Lock(ELockMode mode, int mipLevel) = 0;
+	virtual void Unlock(bool regenMipMaps, int mipLevel) = 0;
+	virtual int GetMipMapCount() = 0;
 
 	core::Name GetReferableType() const
 	{
@@ -30,9 +31,10 @@ public:
 
 struct TextureLock
 {
-	TextureLock(Texture* t, BaseTexture::ELockMode mode, bool regMips = true, int mipLevel = 0) :
+	TextureLock(Texture* t, BaseTexture::ELockMode mode, bool regMips = true, int _mipLevel = 0) :
 		base(t),
-		regenMipMaps(regMips)
+		regenMipMaps(regMips),
+		mipLevel(_mipLevel)
 	{
 		auto rect = base->Lock(mode, mipLevel);
 		data = rect.bits;
@@ -51,6 +53,8 @@ struct TextureLock
 		base = old.base;
 		data = old.data;
 		pitch = old.pitch;
+		mipLevel = old.mipLevel;
+		regenMipMaps = old.regenMipMaps;
 		old.base = nullptr;
 	}
 
@@ -61,13 +65,15 @@ struct TextureLock
 		base = old.base;
 		data = old.data;
 		pitch = old.pitch;
+		mipLevel = old.mipLevel;
+		regenMipMaps = old.regenMipMaps;
 		old.base = nullptr;
 		return *this;
 	}
 	void Unlock()
 	{
 		if(base) {
-			base->Unlock(regenMipMaps);
+			base->Unlock(regenMipMaps, mipLevel);
 			base = nullptr;
 		}
 	}
@@ -77,6 +83,7 @@ struct TextureLock
 	u32 pitch;
 
 	bool regenMipMaps;
+	int mipLevel;
 };
 
 }

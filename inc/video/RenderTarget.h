@@ -32,7 +32,7 @@ public:
 		m_Texture(t)
 	{
 		if(m_Texture) {
-			m_Size = m_Texture->GetSize();
+			m_Size = t->GetSize();
 			if(!m_Texture->IsRendertarget())
 				throw core::GenericInvalidArgumentException("target", "Must be a rendertarget texture");
 		}
@@ -44,7 +44,7 @@ public:
 	{
 		m_IsCube = true;
 		if(m_Texture) {
-			m_Size = m_Texture->GetSize();
+			m_Size = math::Dimension2I(t->GetSize(), t->GetSize());
 			if(!m_Texture->IsRendertarget())
 				throw core::GenericInvalidArgumentException("target", "Must be a rendertarget texture");
 		}

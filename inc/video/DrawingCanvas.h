@@ -195,15 +195,16 @@ template <>
 class DrawingCanvasAuto<Texture> : public DrawingCanvas, public core::Uncopyable
 {
 public:
-	DrawingCanvasAuto(Texture* tex, const Texture::LockedRect& r, bool _regenMipMaps) :
+	DrawingCanvasAuto(Texture* tex, const Texture::LockedRect& r, int level, bool _regenMipMaps) :
 		DrawingCanvas(r.bits, tex->GetColorFormat(), tex->GetSize(), r.pitch),
 		texture(tex),
-		regenMipMaps(_regenMipMaps)
+		regenMipMaps(_regenMipMaps),
+		lockedLevel(level)
 	{
 	}
 
 	DrawingCanvasAuto(Texture* tex, Texture::ELockMode mode, int level, bool _regenMipMaps) :
-		DrawingCanvasAuto(tex, tex->Lock(mode, level), _regenMipMaps)
+		DrawingCanvasAuto(tex, tex->Lock(mode, level), level, _regenMipMaps)
 	{
 	}
 
@@ -213,6 +214,7 @@ public:
 
 		texture = old.texture;
 		regenMipMaps = old.regenMipMaps;
+		lockedLevel = old.lockedLevel;
 		old.texture = nullptr;
 	}
 
@@ -222,6 +224,7 @@ public:
 		(DrawingCanvas&)*this = std::move(old);
 		texture = old.texture;
 		regenMipMaps = old.regenMipMaps;
+		lockedLevel = old.lockedLevel;
 		old.texture = nullptr;
 		return *this;
 	}
@@ -233,13 +236,14 @@ public:
 	void Unlock()
 	{
 		if(texture) {
-			texture->Unlock(regenMipMaps);
+			texture->Unlock(regenMipMaps, lockedLevel);
 			texture = nullptr;
 		}
 	}
 
 	Texture* texture;
 	bool regenMipMaps;
+	int lockedLevel;
 };
 
 inline DrawingCanvasAuto<Texture> GetCanvas(Texture* texture, BaseTexture::ELockMode mode, int mipLevel = 0, bool regenMipMaps = true)
@@ -251,15 +255,14 @@ template <>
 class DrawingCanvasAuto<CubeTexture> : public DrawingCanvas
 {
 public:
-	DrawingCanvasAuto(CubeTexture* tex, const CubeTexture::LockedRect& r, bool _regenMipMaps) :
-		DrawingCanvas(r.bits, tex->GetColorFormat(), tex->GetSize(), r.pitch),
-		texture(tex),
-		regenMipMaps(_regenMipMaps)
+	DrawingCanvasAuto(CubeTexture* tex, const CubeTexture::LockedRect& r) :
+		DrawingCanvas(r.bits, tex->GetColorFormat(), math::Dimension2I::Square(tex->GetSize()), r.pitch),
+		texture(tex)
 	{
 	}
 
-	DrawingCanvasAuto(CubeTexture* tex, CubeTexture::ELockMode mode, CubeTexture::EFace face, int level, bool _regenMipMaps) :
-		DrawingCanvasAuto(tex, tex->Lock(mode, face, level), _regenMipMaps)
+	DrawingCanvasAuto(CubeTexture* tex, CubeTexture::ELockMode mode, CubeTexture::EFace face) :
+		DrawingCanvasAuto(tex, tex->Lock(mode, face))
 	{
 	}
 
@@ -269,7 +272,6 @@ public:
 	{
 		(DrawingCanvas&)*this = std::move(old);
 		texture = old.texture;
-		regenMipMaps = old.regenMipMaps;
 		old.texture = nullptr;
 	}
 
@@ -281,7 +283,7 @@ public:
 	void Unlock()
 	{
 		if(texture) {
-			texture->Unlock(regenMipMaps);
+			texture->Unlock();
 			texture = nullptr;
 		}
 	}
@@ -293,18 +295,16 @@ public:
 		Unlock();
 		(DrawingCanvas&)*this = std::move(old);
 		texture = old.texture;
-		regenMipMaps = old.regenMipMaps;
 		old.texture = nullptr;
 		return *this;
 	}
 
 	CubeTexture* texture;
-	bool regenMipMaps;
 };
 
-inline DrawingCanvasAuto<CubeTexture> GetCanvas(CubeTexture* texture, BaseTexture::ELockMode mode, CubeTexture::EFace face, int mipLevel = 0, bool regenMipMaps = true)
+inline DrawingCanvasAuto<CubeTexture> GetCanvas(CubeTexture* texture, BaseTexture::ELockMode mode, CubeTexture::EFace face)
 {
-	return DrawingCanvasAuto<CubeTexture>(texture, mode, face, mipLevel, regenMipMaps);
+	return DrawingCanvasAuto<CubeTexture>(texture, mode, face);
 }
 
 }
