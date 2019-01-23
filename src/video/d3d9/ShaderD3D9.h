@@ -1,26 +1,38 @@
 #ifndef INCLUDED_LUX_SHADER_D3D9_H
 #define INCLUDED_LUX_SHADER_D3D9_H
 #include "LuxConfig.h"
+
 #ifdef LUX_COMPILE_WITH_D3D9
 #include "video/Shader.h"
-#include "core/lxMemory.h"
 #include "core/ParamPackage.h"
 
 #include "platform/StrippedD3D9.h"
-#include "platform/StrippedD3D9X.h"
 #include "platform/UnknownRefCounted.h"
 
 namespace lux
 {
 namespace video
 {
-class VideoDriver;
-class Renderer;
+
 class DeviceStateD3D9;
+
+struct ShaderCompileRequest_HLSL_D3DX
+{
+	core::StringView vsCode;
+	core::StringView vsProfile;
+	core::StringView psCode;
+	core::StringView psProfile;
+};
+
+StrongRef<Shader> Compile_HLSL_D3DX(
+	DeviceStateD3D9& deviceState,
+	IDirect3DDevice9* device,
+	const ShaderCompileRequest_HLSL_D3DX& req,
+	core::Array<ShaderCompileMessage>& messages);
 
 class ShaderD3D9 : public Shader
 {
-private:
+public:
 	enum class EParamType
 	{
 		Other,
@@ -50,93 +62,67 @@ private:
 		Structure,
 	};
 
-	struct RegisterLocation
+	struct ParamLocation
 	{
+		/*
+		Register index or samplerStage
+		*/
 		u32 id;
 		u32 count = 0;
 	};
 
-	struct Param
+	struct BasicParam
 	{
-		Param() {}
-
-		RegisterLocation vsLocation;
-		RegisterLocation psLocation;
+		ParamLocation vsLocation;
+		ParamLocation psLocation;
 
 		EType type = EType::Unknown;
+	};
+	struct Param : BasicParam
+	{};
 
-		EParamType paramType = EParamType::Other;
-
-		u32 samplerStage;
-
-		core::StringView name;
-		const void* defaultValue = nullptr;
-
-		core::AttributePtr sceneValue;
+	struct SceneParam : BasicParam
+	{
+		core::String name;
 	};
 
 public:
-	ShaderD3D9(VideoDriver* driver, DeviceStateD3D9& deviceState);
+	ShaderD3D9(
+		DeviceStateD3D9& deviceState,
+		UnknownRefCounted<IDirect3DVertexShader9> vsShader,
+		UnknownRefCounted<IDirect3DPixelShader9> psShader,
+		const core::ParamPackage& paramPackage,
+		const core::Array<Param>& params,
+		const core::Array<SceneParam>& sceneParams);
 	~ShaderD3D9();
-
-	bool Init(
-		core::StringView vsCode, core::StringView vsEntryPoint, core::StringView vsProfile,
-		core::StringView psCode, core::StringView psEntryPoint, core::StringView psProfile,
-		core::Array<core::String>* errorList);
 
 	void Enable() override;
 	void SetParam(int paramId, const void* data) override;
 	void LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass) override;
+	// TODO: Cache params and apply all at once in Render()
+	// This reduces the number of driver calls. and makes caching easier.
+	// Handle settings with DeviceState.
+	// Maybe completly remove Enable/Disable/Render and handle all in DeviceState.
 	void Render() override {}
 	void Disable() override;
 
 	const core::ParamPackage& GetParamPackage() const;
 
 private:
-	UnknownRefCounted<IDirect3DPixelShader9> CreatePixelShader(core::StringView code, core::StringView entryPoint, core::StringView profile,
-		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
-	UnknownRefCounted<IDirect3DVertexShader9> CreateVertexShader(core::StringView code, core::StringView entryPoint, core::StringView profile,
-		core::Array<core::String>* errorList, UnknownRefCounted<ID3DXConstantTable>& outTable);
-
-	bool LoadAllParams(
-		bool isVertex,
-		ID3DXConstantTable* table,
-		core::Array<Param>& outParams,
-		u32& outStringSize,
-		core::Array<core::String>* errorList);
-
-	bool GetParamInfo(
-		D3DXHANDLE structHandle,
-		ID3DXConstantTable* table,
-		u32& samplerStage,
-		EType& outType,
-		RegisterLocation& location,
-		core::StringView& name,
-		const void*& defaultValue,
-		EParamType& paramType);
-
-	void SetShaderValue(const Param& p, const void* data);
-
-	void CastTypeToShader(EType type, const void* in, void* out);
-	void CastShaderToType(EType type, const void* in, void* out);
-
-	static core::Type GetCoreType(EType type);
-	static EType GetTypeFromD3DXDesc(const D3DXCONSTANT_DESC& desc);
+	void SetShaderValue(const BasicParam& p, const void* data);
 
 private:
-	IDirect3DDevice9* m_D3DDevice;
 	DeviceStateD3D9& m_DeviceState;
 
 	UnknownRefCounted<IDirect3DVertexShader9> m_VertexShader;
 	UnknownRefCounted<IDirect3DPixelShader9> m_PixelShader;
 
 	core::Array<Param> m_Params;
-	core::Array<Param> m_SceneValues;
-
-	core::RawMemory m_Names;
+	core::Array<SceneParam> m_SceneValues;
 	core::ParamPackage m_ParamPackage;
 
 	mutable core::AttributeList m_CurAttributes;
+	mutable core::Array<core::AttributePtr> m_SceneValueAttributeCache;
 };
 
 } // namespace video

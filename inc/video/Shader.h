@@ -4,6 +4,7 @@
 #include "core/lxArray.h"
 #include "core/Attributes.h"
 #include "video/videoExceptions.h"
+#include "video/VideoEnums.h"
 
 namespace lux
 {
@@ -13,6 +14,46 @@ class ParamPackage;
 }
 namespace video
 {
+
+enum class EShaderCompileMessageLevel
+{
+	Error,
+	Warning,
+	Info
+};
+
+class ShaderCompileMessage
+{
+public:
+	ShaderCompileMessage() {}
+	ShaderCompileMessage(EShaderType _shaderType, EShaderCompileMessageLevel _level, core::StringView _text, int _line = -1) :
+		shaderType(_shaderType),
+		level(_level),
+		text(_text),
+		line(_line)
+	{
+	}
+	EShaderType shaderType;
+	EShaderCompileMessageLevel level;
+	core::String text;
+	int line;
+
+	core::String ToString() const
+	{
+		const char* type;
+		if(shaderType == EShaderType::Vertex)
+			type = "vertexshader";
+		else if(shaderType == EShaderType::Pixel)
+			type = "pixelshader";
+		else
+			type = nullptr;
+		if(type == nullptr || line < 0)
+			return text;
+		else
+			return core::StringConverter::Format("{}: line {}: {}", type, line, text);
+	}
+};
+
 class Pass;
 class Shader : public ReferenceCounted
 {

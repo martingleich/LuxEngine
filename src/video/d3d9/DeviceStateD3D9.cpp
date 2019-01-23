@@ -38,6 +38,17 @@ DeviceStateD3D9::~DeviceStateD3D9()
 	ReleaseUnmanaged();
 }
 
+void DeviceStateD3D9::EnableHardwareShader(IDirect3DVertexShader9* vs, IDirect3DPixelShader9* ps)
+{
+	HRESULT hr;
+
+	if(FAILED(hr = m_Device->SetVertexShader(vs)))
+		throw core::D3D9Exception(hr);
+
+	if(FAILED(hr = m_Device->SetPixelShader(ps)))
+		throw core::D3D9Exception(hr);
+}
+
 void DeviceStateD3D9::EnableFixedFunctionShader(
 	const core::Array<TextureLayer>& layers,
 	const core::Array<TextureStageSettings>& stages,
@@ -212,7 +223,7 @@ void DeviceStateD3D9::EnableAlpha(AlphaBlendMode mode)
 	m_AlphaMode = mode;
 }
 
-void* DeviceStateD3D9::GetLowLevelDevice()
+IDirect3DDevice9* DeviceStateD3D9::GetLowLevelDevice()
 {
 	return m_Device;
 }

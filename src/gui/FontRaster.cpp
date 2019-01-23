@@ -91,12 +91,12 @@ StrongRef<video::Shader> EnsureFontShader()
 
 	auto shaderFactory = video::ShaderFactory::Instance();
 	StrongRef<video::Shader> shader;
-	if(shaderFactory->IsShaderSupported(video::EShaderLanguage::HLSL, 2, 0, 2, 0)) {
+	if(shaderFactory->IsShaderSupported(video::EShaderLanguage::HLSL, "vs_2_0", "ps_2_0")) {
 		// Use real shader
 		shader = shaderFactory->CreateShaderFromMemory(
 			video::EShaderLanguage::HLSL,
-			g_VSCode, "mainVS", 2, 0,
-			g_PSCode, "mainPS", 2, 0);
+			g_VSCode, "vs_2_0",
+			g_PSCode, "ps_2_0");
 	} else {
 		// Use fixed function shader
 		video::TextureStageSettings tss;

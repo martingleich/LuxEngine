@@ -92,6 +92,8 @@ public:
 
 	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
+	void EnableHardwareShader(IDirect3DVertexShader9* vs, IDirect3DPixelShader9* ps);
+
 	void EnableFixedFunctionShader(
 		const core::Array<TextureLayer>& layer,
 		const core::Array<TextureStageSettings>& settings,
@@ -106,7 +108,7 @@ public:
 
 	void EnableAlpha(AlphaBlendMode mode);
 
-	void* GetLowLevelDevice();
+	IDirect3DDevice9* GetLowLevelDevice();
 	void SetRenderState(D3DRENDERSTATETYPE state, DWORD value);
 	void SetRenderStateF(D3DRENDERSTATETYPE state, float value);
 	void SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value);
@@ -126,9 +128,8 @@ public:
 	{
 		if(s != m_Shader && m_Shader)
 			m_Shader->Disable();
-		if(s) {
+		if(s)
 			s->Enable();
-		}
 
 		m_Shader = s;
 	}

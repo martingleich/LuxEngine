@@ -97,20 +97,17 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////////
 	//! Creates a new shader from code
-	/**
-	\throws UnhandledShaderCompileErrorException
-	*/
 	virtual StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
-		core::StringView VSCode, core::StringView VSEntryPoint, int VSmajorVersion, int VSminorVersion,
-		core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
-		core::Array<core::String>* errorList) = 0;
+		core::StringView vsCode, core::StringView vsProfile,
+		core::StringView psCode, core::StringView psProfile,
+		core::Array<ShaderCompileMessage>& errorList) = 0;
 
 	//! Create a new fixed function shader.
 	virtual StrongRef<Shader> CreateFixedFunctionShader(const FixedFunctionParameters& params) = 0;
 
 	//! Checks if some shader language and version is supported
-	virtual bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor) = 0;
+	virtual bool IsShaderSupported(EShaderLanguage lang, core::StringView vsProfile, core::StringView psProfile) = 0;
 
 	//////////////////////////////////////////////////////////////////////////////
 

@@ -433,43 +433,29 @@ void VideoDriverD3D9::AddTextureToList(BaseTexture* tex)
 		m_Textures.PushBack(tex);
 }
 
-bool VideoDriverD3D9::IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor)
+bool VideoDriverD3D9::IsShaderSupported(EShaderLanguage lang, core::StringView vsProfile, core::StringView psProfile)
 {
 	if(lang != EShaderLanguage::HLSL)
 		return false;
-	auto vsProfile = GetD3DXShaderProfile(false, vsMajor, vsMinor);
-	auto psProfile = GetD3DXShaderProfile(true, psMajor, psMinor);
-	return !vsProfile.IsEmpty() && !psProfile.IsEmpty();
+	// TODO: Implement this
+	return true;
 }
 
 StrongRef<Shader> VideoDriverD3D9::CreateShader(
 	EShaderLanguage language,
-	core::StringView vsCode, core::StringView vsEntryPoint, int vsMajorVersion, int vsMinorVersion,
-	core::StringView psCode, core::StringView psEntryPoint, int psMajorVersion, int psMinorVersion,
-	core::Array<core::String>* errorList)
+	core::StringView vsCode, core::StringView vsProfile,
+	core::StringView psCode, core::StringView psProfile,
+	core::Array<ShaderCompileMessage>& errorList)
 {
 	if(language != EShaderLanguage::HLSL)
 		throw core::GenericInvalidArgumentException("language", "Direct3D9 video driver only supports HLSL shaders.");
 
-	auto vsProfile = GetD3DXShaderProfile(false,
-		vsMajorVersion, vsMinorVersion);
-	auto psProfile = GetD3DXShaderProfile(true,
-		psMajorVersion, psMinorVersion);
-
-	if(vsProfile.IsEmpty())
-		throw core::GenericInvalidArgumentException("vertex shader profile", "Invalid vertex shader profile.");
-
-	if(psProfile.IsEmpty())
-		throw core::GenericInvalidArgumentException("pixel shader profile", "Invalid pixel shader profile.");
-
-	StrongRef<ShaderD3D9> out = LUX_NEW(ShaderD3D9)(this, m_DeviceState);
-	bool compiled = out->Init(
-		vsCode, vsEntryPoint, vsProfile,
-		psCode, psEntryPoint, psProfile,
-		errorList);
-	if(!compiled)
-		return nullptr;
-	return out;
+	ShaderCompileRequest_HLSL_D3DX req;
+	req.vsCode = vsCode;
+	req.vsProfile = vsProfile;
+	req.psCode = psCode;
+	req.psProfile = psProfile;
+	return Compile_HLSL_D3DX(m_DeviceState, m_D3DDevice, req, errorList);
 }
 
 StrongRef<Shader> VideoDriverD3D9::CreateFixedFunctionShader(

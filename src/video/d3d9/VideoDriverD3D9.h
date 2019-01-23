@@ -55,13 +55,13 @@ public:
 
 	void AddTextureToList(BaseTexture* tex);
 
-	bool IsShaderSupported(EShaderLanguage lang, int vsMajor, int vsMinor, int psMajor, int psMinor);
+	bool IsShaderSupported(EShaderLanguage lang, core::StringView vsProfile, core::StringView psProfile) override;
 
 	StrongRef<Shader> CreateShader(
 		EShaderLanguage language,
-		core::StringView VSCode, core::StringView VSEntryPoint, int VSmajorVersion, int VSminorVersion,
-		core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
-		core::Array<core::String>* errorList);
+		core::StringView vsCode, core::StringView vsProfile,
+		core::StringView psCode, core::StringView psProfile,
+		core::Array<ShaderCompileMessage>& errorList) override;
 
 	StrongRef<Shader> CreateFixedFunctionShader(const FixedFunctionParameters& params);
 

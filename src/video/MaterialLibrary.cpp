@@ -115,17 +115,17 @@ ShaderFactory::~ShaderFactory()
 
 StrongRef<Shader> ShaderFactory::CreateShaderFromFile(
 	video::EShaderLanguage language,
-	const io::Path& VSPath, core::StringView VSEntryPoint, int VSMajor, int VSMinor,
-	const io::Path& PSPath, core::StringView PSEntryPoint, int PSMajor, int PSMinor,
+	const io::Path& vsPath, core::StringView vsProfile,
+	const io::Path& psPath, core::StringView psProfile,
 	ShaderCompileInfo* outInfo)
 {
 	StrongRef<io::File> PSFile;
 	StrongRef<io::File> VSFile;
-	if(VSPath == PSPath) {
-		PSFile = VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
+	if(vsPath == vsPath) {
+		PSFile = VSFile = io::FileSystem::Instance()->OpenFile(vsPath);
 	} else {
-		PSFile = io::FileSystem::Instance()->OpenFile(PSPath);
-		VSFile = io::FileSystem::Instance()->OpenFile(VSPath);
+		PSFile = io::FileSystem::Instance()->OpenFile(psPath);
+		VSFile = io::FileSystem::Instance()->OpenFile(vsPath);
 	}
 
 	core::RawMemory vsCodeBuffer;
@@ -155,16 +155,11 @@ StrongRef<Shader> ShaderFactory::CreateShaderFromFile(
 	}
 	core::StringView psCode(psCodePtr, psCodeSize);
 
-	auto shader = m_Driver->CreateShader(
+	return CreateShaderFromMemory(
 		language,
-		vsCode, VSEntryPoint, VSMajor, VSMinor,
-		psCode, PSEntryPoint, PSMajor, PSMinor,
-		outInfo ? &outInfo->messages : nullptr);
-	if(outInfo)
-		outInfo->failed = shader == nullptr;
-	else if(!shader)
-		throw UnhandledShaderCompileErrorException();
-	return shader;
+		vsCode, vsProfile,
+		psCode, psProfile,
+		outInfo);
 }
 
 StrongRef<Shader> ShaderFactory::GetFixedFunctionShader(
@@ -186,33 +181,30 @@ StrongRef<Shader> ShaderFactory::GetFixedFunctionShader(
 
 StrongRef<Shader> ShaderFactory::CreateShaderFromMemory(
 	EShaderLanguage language,
-	core::StringView VSCode, core::StringView VSEntryPoint, int VSmajorVersion, int VSminorVersion,
-	core::StringView PSCode, core::StringView PSEntryPoint, int PSmajorVersion, int PSminorVersion,
+	core::StringView vsCode, core::StringView vsProfile,
+	core::StringView psCode, core::StringView psProfile,
 	ShaderCompileInfo* outInfo)
 {
+	core::Array<ShaderCompileMessage> messages;
 	auto shader = m_Driver->CreateShader(
 		language,
-		VSCode, VSEntryPoint, VSmajorVersion, VSminorVersion,
-		PSCode, PSEntryPoint, PSmajorVersion, PSminorVersion,
-		outInfo ? &outInfo->messages : nullptr);
+		vsCode, vsProfile,
+		psCode, psProfile,
+		messages);
 
-	if(outInfo)
+	if(outInfo) {
 		outInfo->failed = shader == nullptr;
-	else if(!shader)
+		outInfo->messages = messages;
+	} else if(!shader) {
 		throw UnhandledShaderCompileErrorException();
+	}
 
 	return shader;
 }
 
-bool ShaderFactory::IsShaderSupported(
-	EShaderLanguage lang,
-	int vsMajor, int vsMinor,
-	int psMajor, int psMinor)
+bool ShaderFactory::IsShaderSupported(EShaderLanguage lang, core::StringView vsProfile, core::StringView psProfile)
 {
-	return m_Driver->IsShaderSupported(
-		lang,
-		vsMajor, vsMinor,
-		psMajor, psMinor);
+	return m_Driver->IsShaderSupported(lang, vsProfile, psProfile);
 }
 
 bool ShaderFactory::GetShaderInclude(

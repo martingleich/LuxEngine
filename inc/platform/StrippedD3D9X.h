@@ -1,11 +1,9 @@
 #ifndef INCLUDED_LUX_STRIPPED_D3D9X_H
 #define INCLUDED_LUX_STRIPPED_D3D9X_H
 
-#ifndef __D3DX9_H__
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
 #include <d3d9\inc\d3dx9.h>
-#endif
 
 #undef CreateFile
 #undef MoveFile

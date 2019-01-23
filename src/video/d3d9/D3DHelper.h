@@ -362,65 +362,6 @@ inline DWORD GetD3DStencilOperator(EStencilOperator op)
 	}
 }
 
-inline core::StringView GetD3DXShaderProfile(
-	bool isPixel,
-	int major, int minor)
-{
-	if(isPixel) {
-		if(major == 1) {
-			if(minor == 1)
-				return "ps_1_1";
-			if(minor == 2)
-				return "ps_1_2";
-			if(minor == 3)
-				return "ps_1_3";
-			if(minor == 4)
-				return "ps_1_4";
-		} else if(major == 2) {
-			if(minor == 0)
-				return "ps_2_0";
-			if(minor == 1)
-				return "ps_2_a";
-			if(minor == 2)
-				return "ps_2_b";
-		} else if(major == 3) {
-			if(minor == 0)
-				return "ps_3_0";
-		} else if(major == 4) {
-			if(minor == 0)
-				return "ps_4_0";
-			if(minor == 1)
-				return "ps_4_1";
-		} else if(major == 5) {
-			if(minor == 0)
-				return "ps_5_0";
-		}
-	} else {
-		if(major == 1) {
-			if(minor == 1)
-				return "vs_1_1";
-		} else if(major == 2) {
-			if(minor == 0)
-				return "vs_2_0";
-			if(minor == 1)
-				return "vs_2_a";
-		} else if(major == 3) {
-			if(minor == 0)
-				return "vs_3_0";
-		} else if(major == 4) {
-			if(minor == 0)
-				return "vs_4_0";
-			if(minor == 1)
-				return "vs_4_1";
-		} else if(major == 5) {
-			if(minor == 0)
-				return "vs_5_0";
-		}
-	}
-
-	return core::StringView::EMPTY;
-}
-
 inline DWORD GetD3DBlend(EBlendFactor factor)
 {
 	switch(factor) {

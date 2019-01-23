@@ -23,7 +23,7 @@ public:
 	struct ShaderCompileInfo
 	{
 		bool failed;
-		core::Array<core::String> messages;
+		core::Array<ShaderCompileMessage> messages;
 	};
 
 private:
@@ -51,10 +51,8 @@ public:
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromFile(
 		video::EShaderLanguage language,
-		const io::Path& VSPath, core::StringView VSEntryPoint,
-		int VSMajor, int VSMinor,
-		const io::Path& PSPath, core::StringView PSEntryPoint,
-		int PSMajor, int PSMinor,
+		const io::Path& vsPath, core::StringView vsProfile,
+		const io::Path& psPath, core::StringView psProfile,
 		ShaderCompileInfo* compileInfo = nullptr);
 
 	//! Creates a new shader from code
@@ -63,20 +61,15 @@ public:
 	*/
 	LUX_API StrongRef<Shader> CreateShaderFromMemory(
 		EShaderLanguage language,
-		core::StringView VSCode, core::StringView VSEntryPoint,
-		int VSmajorVersion, int VSminorVersion,
-		core::StringView PSCode, core::StringView PSEntryPoint,
-		int PSmajorVersion, int PSminorVersion,
+		core::StringView vsCode, core::StringView vsProfile,
+		core::StringView psCode, core::StringView psProfile,
 		ShaderCompileInfo* compileInfo = nullptr);
 
 	//! Retrieves a shader matching a fixed function description.
 	LUX_API StrongRef<Shader> GetFixedFunctionShader(const FixedFunctionParameters& params);
 
 	//! Checks if some shader language and version is supported
-	LUX_API bool IsShaderSupported(
-		EShaderLanguage lang,
-		int vsMajor, int vsMinor,
-		int psMajor, int psMinor);
+	LUX_API bool IsShaderSupported(EShaderLanguage lang, core::StringView vsProfile, core::StringView psProfile);
 
 	LUX_API bool GetShaderInclude(
 		EShaderLanguage language, core::StringView name,
