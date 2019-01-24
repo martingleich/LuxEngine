@@ -11,7 +11,7 @@ namespace core
 class ReferableFactory : public ReferenceCounted
 {
 public:
-	typedef Referable* (*CreationFunc)(const void*);
+	typedef core::Referable* (*CreationFunc)(const void*);
 
 public:
 	//! Initialize the global referable factory
@@ -46,7 +46,7 @@ public:
 	\param data Additinal data to pass to constructor, depends on type.
 	\return The new object
 	*/
-	LUX_API StrongRef<Referable> Create(Name type, const void* data = nullptr);
+	LUX_API StrongRef<core::Referable> Create(Name type, const void* data = nullptr);
 
 	//! The total number of types
 	/**

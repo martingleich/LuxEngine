@@ -11,23 +11,14 @@ namespace lux
 {
 namespace video
 {
-TextureD3D9::TextureD3D9(IDirect3DDevice9* device, const core::ResourceOrigin& origin) :
-	Texture(origin),
+TextureD3D9::TextureD3D9(IDirect3DDevice9* device) :
 	m_Device(device)
 {
+	LX_CHECK_NULL_ARG(device);
 }
 
 TextureD3D9::~TextureD3D9()
 {
-}
-
-void TextureD3D9::RegenerateMIPMaps()
-{
-	if(m_Format.IsCompressed())
-		return;
-	HRESULT hr = D3DXLibraryLoader::Instance().GetD3DXFilterTexture()(m_Texture, NULL, D3DX_DEFAULT, D3DX_DEFAULT);
-	if(FAILED(hr))
-		throw core::D3D9Exception(hr);
 }
 
 void TextureD3D9::Init(
@@ -35,32 +26,31 @@ void TextureD3D9::Init(
 	video::ColorFormat lxFormat,
 	int mipCount, bool isRendertarget, bool isDynamic)
 {
-	if(!m_Device)
-		throw core::GenericRuntimeException("No driver available");
-
 	if(m_Texture)
 		m_Texture = nullptr;
+
+	if(mipCount == 0)
+		mipCount = math::HighestBitPos(math::Max(size.width, size.height));
 
 	D3DFORMAT format = GetD3DFormat(lxFormat);
 	if(format == D3DFMT_UNKNOWN)
 		throw core::UnsupportedColorFormatException(lxFormat);
 
-	m_Levels = mipCount;
-	if(mipCount == 0)
-		m_Levels = math::HighestBitPos(math::Max(size.width, size.height));
-
-	DWORD usage = 0;
-	// Put in managed pool if there no origin loader
-	D3DPOOL pool = GetOrigin().IsAvailable() ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
+	// TODO: Check if a origin is available for reload.
+	DWORD usage;
+	D3DPOOL pool;
 	if(isDynamic) {
 		usage = D3DUSAGE_DYNAMIC;
 		pool = D3DPOOL_DEFAULT;
 	} if(isRendertarget) {
 		usage = D3DUSAGE_RENDERTARGET;
 		pool = D3DPOOL_DEFAULT;
+	} else {
+		usage = 0;
+		pool = D3DPOOL_MANAGED;
 	}
 
-	HRESULT hr = m_Device->CreateTexture((UINT)size.width, (UINT)size.height, m_Levels,
+	HRESULT hr = m_Device->CreateTexture((UINT)size.width, (UINT)size.height, mipCount,
 		usage, format,
 		pool, m_Texture.Access(), nullptr);
 
@@ -72,8 +62,8 @@ void TextureD3D9::Init(
 	m_Usage = usage;
 	m_Pool = pool;
 	m_D3DFormat = format;
-
-	m_Dimension = size;
+	m_Levels = mipCount;
+	m_Size = size;
 	m_Format = lxFormat;
 }
 
@@ -83,7 +73,6 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 		throw core::InvalidOperationException("Texture is already locked");
 	if(mipLevel > m_Levels)
 		throw core::InvalidOperationException("Invalid mip level");
-
 
 	D3DLOCKED_RECT d3dlocked;
 	DWORD flags;
@@ -99,7 +88,7 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 
 	if(FAILED(hr)) {
 		if(mode == ELockMode::Overwrite && m_Usage == 0) {
-			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(DWORD(m_Dimension.width), DWORD(m_Dimension.height), m_D3DFormat);
+			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(DWORD(m_Size.width), DWORD(m_Size.height), m_D3DFormat);
 			if(m_TempSurface)
 				hr = m_TempSurface->LockRect(&d3dlocked, nullptr, D3DLOCK_DISCARD);
 			if(FAILED(hr)) {
@@ -111,7 +100,7 @@ BaseTexture::LockedRect TextureD3D9::Lock(ELockMode mode, int mipLevel)
 		} else if(mode == ELockMode::ReadWrite && m_Usage == 0) {
 			throw core::InvalidOperationException("Can't lock static texture in read mode");
 		} else if(mode == ELockMode::ReadOnly && m_Usage == D3DUSAGE_RENDERTARGET) {
-			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Dimension.width, m_Dimension.height, m_D3DFormat);
+			m_TempSurface = AuxiliaryTextureManagerD3D9::Instance()->GetSurface(m_Size.width, m_Size.height, m_D3DFormat);
 			if(m_TempSurface) {
 				UnknownRefCounted<IDirect3DSurface9> surface;
 				hr = m_Texture->GetSurfaceLevel(mipLevel, surface.Access());
@@ -159,31 +148,29 @@ void TextureD3D9::Unlock(bool regenMipMaps, int mipLevel)
 	}
 
 	m_LockedLevels &= ~(u32(1) << mipLevel);
-	if(regenMipMaps && m_Levels > 1)
-		RegenerateMIPMaps();
+	if(regenMipMaps && m_Levels > 1) {
+		// Regenerate mip maps
+		if(m_Format.IsCompressed())
+			return;
+		hr = D3DXLibraryLoader::Instance().GetD3DXFilterTexture()(m_Texture, NULL, D3DX_DEFAULT, D3DX_DEFAULT);
+		if(FAILED(hr))
+			throw core::D3D9Exception(hr);
+	}
 }
 
 void TextureD3D9::ReleaseUnmanaged()
 {
-	if(m_LockedLevels)
-		throw core::InvalidOperationException("Texture is still locked");
-	if(m_Pool == D3DPOOL_DEFAULT || m_Usage == D3DUSAGE_RENDERTARGET)
-		m_Texture = nullptr;
+	if(m_Pool == D3DPOOL_MANAGED)
+		return;
+	m_Texture = nullptr;
 }
 
 void TextureD3D9::RestoreUnmanaged()
 {
-	if(IsRendertarget()) {
-		Init(m_Dimension, m_Format, m_Levels, true, false);
-	} else if(m_Pool == D3DPOOL_DEFAULT) {
-		if(GetOrigin().IsAvailable())
-			GetOrigin().Load(this);
-		else
-			Init(m_Dimension, m_Format, m_Levels, false, IsDynamic());
-	} else {
-		// Is a managed texture
-		(void)0;
-	}
+	if(m_Pool == D3DPOOL_MANAGED)
+		return;
+
+	Init(m_Size, m_Format, GetMipMapCount(), IsRendertarget(), IsDynamic());
 }
 
 }

@@ -46,7 +46,7 @@ struct SliderPaintOptions : PaintOptions
 	math::RectF thumbRect;
 };
 
-class Skin : public Referable
+class Skin : public core::Referable
 {
 public:
 	Skin()

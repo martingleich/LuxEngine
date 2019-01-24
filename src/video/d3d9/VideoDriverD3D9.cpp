@@ -39,16 +39,16 @@ VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(UnknownRefCounted<IDirect3DS
 static IDirect3DDevice9* g_D3DDevice9 = nullptr;
 static VideoDriverD3D9* g_Driver = nullptr;
 
-static Referable* CreateTexture(const void* origin)
+static core::Referable* CreateTexture(const void*)
 {
-	auto out = LUX_NEW(TextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
+	auto out = LUX_NEW(TextureD3D9)(g_D3DDevice9);
 	g_Driver->AddTextureToList(out);
 	return out;
 }
 
-static Referable* CreateCubeTexture(const void* origin)
+static core::Referable* CreateCubeTexture(const void*)
 {
-	auto out = LUX_NEW(CubeTextureD3D9)(g_D3DDevice9, origin ? *(core::ResourceOrigin*)origin : core::ResourceOrigin());
+	auto out = LUX_NEW(CubeTextureD3D9)(g_D3DDevice9);
 	g_Driver->AddTextureToList(out);
 	return out;
 }
@@ -386,7 +386,7 @@ bool VideoDriverD3D9::GetFittingTextureFormat(ColorFormat& format, math::Dimensi
 
 StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2I& size, ColorFormat format, int mipCount, bool isDynamic)
 {
-	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
+	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
 	out->Init(size, format, mipCount, false, isDynamic);
 	AddTextureToList(out);
 
@@ -395,7 +395,7 @@ StrongRef<Texture> VideoDriverD3D9::CreateTexture(const math::Dimension2I& size,
 
 StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimension2I& size, ColorFormat format)
 {
-	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice, core::ResourceOrigin());
+	StrongRef<TextureD3D9> out = LUX_NEW(TextureD3D9)(m_D3DDevice);
 	out->Init(size, format, 1, true, false);
 	AddTextureToList(out);
 
@@ -404,7 +404,7 @@ StrongRef<Texture> VideoDriverD3D9::CreateRendertargetTexture(const math::Dimens
 
 StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(int size, ColorFormat format, bool isDynamic)
 {
-	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
+	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
 	out->Init(size, format, false, isDynamic);
 	AddTextureToList(out);
 
@@ -412,7 +412,7 @@ StrongRef<CubeTexture> VideoDriverD3D9::CreateCubeTexture(int size, ColorFormat 
 }
 StrongRef<CubeTexture> VideoDriverD3D9::CreateRendertargetCubeTexture(int size, ColorFormat format)
 {
-	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice, core::ResourceOrigin());
+	StrongRef<CubeTextureD3D9> out = LUX_NEW(CubeTextureD3D9)(m_D3DDevice);
 	out->Init(size, format, true, false);
 	AddTextureToList(out);
 
@@ -435,6 +435,7 @@ void VideoDriverD3D9::AddTextureToList(BaseTexture* tex)
 
 bool VideoDriverD3D9::IsShaderSupported(EShaderLanguage lang, core::StringView vsProfile, core::StringView psProfile)
 {
+	LUX_UNUSED(vsProfile, psProfile);
 	if(lang != EShaderLanguage::HLSL)
 		return false;
 	// TODO: Implement this

@@ -88,12 +88,12 @@ class HashMap
 			hasher(_hasher)
 		{
 		}
-		unsigned int operator()(const Tuple& e) const
+		unsigned int operator()(const Tuple& e)
 		{
 			return hasher(e.key);
 		}
 		template <typename KeyT>
-		unsigned int operator()(const KeyT& key) const
+		unsigned int operator()(const KeyT& key)
 		{
 			return hasher(key);
 		}
@@ -238,6 +238,11 @@ public:
 
 	V& operator[](const K& key) { return At(key); }
 	const V& operator[](const K& key) const { return Get(key); }
+
+	void Add(const K& key, const V& init)
+	{
+		m_Base.Add(key, false, RefTuple(key, init));
+	}
 
 	V& At(const K& key, const V& init)
 	{

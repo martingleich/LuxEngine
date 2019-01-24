@@ -7,7 +7,7 @@
 #include "video/MaterialLibrary.h"
 #include "video/images/ImageSystem.h"
 
-LX_REGISTER_RESOURCE_CLASS("lux.resource.Font", lux::gui::FontRaster);
+LX_REGISTER_REFERABLE_CLASS(lux::gui::FontRaster, "lux.resource.Font");
 
 namespace lux
 {
@@ -116,8 +116,7 @@ StrongRef<video::Shader> EnsureFontShader()
 
 }
 
-FontRaster::FontRaster(const core::ResourceOrigin& origin) :
-	Font(origin)
+FontRaster::FontRaster()
 {
 }
 
@@ -427,7 +426,7 @@ core::Name FontRaster::GetReferableType() const
 	return core::ResourceType::Font;
 }
 
-StrongRef<Referable> FontRaster::Clone() const
+StrongRef<core::Referable> FontRaster::Clone() const
 {
 	return LUX_NEW(FontRaster)(*this);
 }

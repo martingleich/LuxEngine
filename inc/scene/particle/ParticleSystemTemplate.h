@@ -45,7 +45,7 @@ struct ParticleSystemTemplateBuilder
 	StrongRef<ParticleSystemTemplate> MakeTemplate();
 };
 
-class ParticleSystemTemplate : public Referable
+class ParticleSystemTemplate : public core::Referable
 {
 	LX_REFERABLE_MEMBERS_API(ParticleSystemTemplate, LUX_API);
 public:

@@ -3,8 +3,10 @@
 #include "math/Rect.h"
 #include "video/ColorFormat.h"
 #include "video/Color.h"
+
 #include "video/Texture.h"
 #include "video/CubeTexture.h"
+#include "video/images/Image.h"
 
 namespace lux
 {
@@ -305,6 +307,60 @@ public:
 inline DrawingCanvasAuto<CubeTexture> GetCanvas(CubeTexture* texture, BaseTexture::ELockMode mode, CubeTexture::EFace face)
 {
 	return DrawingCanvasAuto<CubeTexture>(texture, mode, face);
+}
+
+template <>
+class DrawingCanvasAuto<Image> : public DrawingCanvas
+{
+public:
+	DrawingCanvasAuto(Image* image, Image::LockedRect r) :
+		DrawingCanvas(r.data, image->GetColorFormat(), image->GetSize(), r.pitch),
+		img(image)
+	{
+	}
+	DrawingCanvasAuto(Image* image) :
+		DrawingCanvasAuto(image, image->Lock())
+	{
+	}
+
+	DrawingCanvasAuto(const DrawingCanvasAuto& other) = delete;
+
+	DrawingCanvasAuto(DrawingCanvasAuto&& old)
+	{
+		(DrawingCanvas&)*this = std::move(old);
+		img = old.img;
+		old.img = nullptr;
+	}
+	~DrawingCanvasAuto()
+	{
+		Unlock();
+	}
+
+	void Unlock()
+	{
+		if(img) {
+			img->Unlock();
+			img = nullptr;
+		}
+	}
+
+	DrawingCanvasAuto& operator=(const DrawingCanvasAuto& other) = delete;
+
+	DrawingCanvasAuto& operator=(DrawingCanvasAuto&& old)
+	{
+		Unlock();
+		(DrawingCanvas&)*this = std::move(old);
+		img = old.img;
+		old.img = nullptr;
+		return *this;
+	}
+
+	Image* img;
+};
+
+inline DrawingCanvasAuto<Image> GetCanvas(Image* image)
+{
+	return DrawingCanvasAuto<Image>(image);
 }
 
 }

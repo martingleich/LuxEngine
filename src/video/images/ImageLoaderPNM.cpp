@@ -227,7 +227,7 @@ const core::String& ImageLoaderPNM::GetName() const
 	return name;
 }
 
-void ImageLoaderPNM::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderPNM::LoadResource(io::File* file, core::Referable* dst)
 {
 	bool result;
 

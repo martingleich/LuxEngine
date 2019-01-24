@@ -17,7 +17,6 @@ namespace core
 namespace ResourceType
 {
 LUX_API extern const Name Image; //!< Resources of type \ref lux::video::Image
-LUX_API extern const Name ImageList; //!< Resources of type \ref lux::video::ImageList
 LUX_API extern const Name Texture; //!< Resources of type \ref lux::video::Texture
 LUX_API extern const Name CubeTexture; //!< Resources of type \ref lux::video::CubeTexture
 LUX_API extern const Name Mesh; //!< Resources of type \ref lux::video::Mesh
@@ -27,102 +26,47 @@ LUX_API extern const Name Material; //!< Resources of type \ref lux::video::Mate
 LUX_API extern const Name Animation; //!< Resources of type \ref lux::scene::Animation
 }
 
-class Resource;
 class OriginResourceLoader
 {
 public:
-	virtual void LoadResource(const core::String& origin, Resource* dst) const = 0;
+	virtual void LoadResource(const core::String& origin, core::Referable* dst) const = 0;
+	virtual const core::String& GetName() const = 0;
 };
-struct ResourceOrigin
-{
-	ResourceOrigin() :
-		loader(nullptr)
-	{}
-	ResourceOrigin(OriginResourceLoader* l, const core::String& s) :
-		str(s),
-		loader(l)
-	{
-	}
 
-	core::String str;
-	OriginResourceLoader* loader;
-
-	inline void Load(Resource* dst) const;
-	inline bool IsAvailable() const
-	{
-		return loader != nullptr;
-	}
-};
-void ResourceOrigin::Load(Resource* dst) const
-{
-	if(loader)
-		loader->LoadResource(str, dst);
-}
-
-//! A engine resource object
-class Resource : public Referable
+class ResourceOrigin
 {
 public:
-	Resource(const ResourceOrigin& origin) :
-		m_Origin(origin),
-		m_Loaded(origin.loader?false:true)
+	ResourceOrigin() :
+		m_Loader(nullptr)
+	{}
+	ResourceOrigin(OriginResourceLoader* l, const core::String& s) :
+		m_String(s),
+		m_Loader(l)
 	{
 	}
 
-	Resource(const Resource& other) :
-		m_Origin(other.m_Origin),
-		m_Loaded(other.m_Loaded)
-	{
+	OriginResourceLoader* GetLoader() const { return m_Loader; }
+	const core::String& GetString() const { return m_String; }
 
-	}
-
-	Resource() :
-		m_Loaded(true)
-	{
-	}
-
-	virtual ~Resource() {}
-
-	virtual void Load()
-	{
-		if(!m_Loaded)
-			m_Origin.Load(this);
-	}
-
-	virtual void Reload()
-	{
-		Unload();
-		Load();
-	}
-
-	virtual void Unload()
-	{
-		m_Loaded = false;
-	}
-
-	bool IsLoaded() const
-	{
-		return m_Loaded;
-	}
-
-	void SetLoaded(bool loaded)
-	{
-		m_Loaded = loaded;
-	}
-
-	const ResourceOrigin& GetOrigin() const
-	{
-		return m_Origin;
-	}
+	bool operator==(const ResourceOrigin& other) const { return m_Loader == other.m_Loader && m_String == other.m_String; }
+	bool operator!=(const ResourceOrigin& other) const { return m_Loader != other.m_Loader || m_String != other.m_String; }
 
 private:
-	ResourceOrigin m_Origin;
-	bool m_Loaded;
+	core::String m_String;
+	OriginResourceLoader* m_Loader;
 };
 
-#define LX_REGISTER_RESOURCE_CLASS(type, class) \
-static ::lux::Referable* LX_CONCAT(InternalCreatorFunc_, __LINE__)(const void* origin) { return LUX_NEW(class)(origin?*(lux::core::ResourceOrigin*)origin:lux::core::ResourceOrigin()); } \
-static ::lux::impl_referableRegister::ReferableRegisterBlock InternalReferableRegisterStaticObject(::lux::core::Name(type), &LX_CONCAT(InternalCreatorFunc_, __LINE__));
+template <>
+struct HashType<ResourceOrigin>
+{
+	unsigned int operator()(const ResourceOrigin& origin) const
+	{
+		SequenceHasher seq;
+		seq.Add(core::HashType<OriginResourceLoader*>()(origin.GetLoader()));
+		seq.Add(core::HashType<core::String>()(origin.GetString()));
+		return seq.GetHash();
+	}
+};
 
 } // namespace core
 } // namespace lux

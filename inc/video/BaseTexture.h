@@ -2,7 +2,7 @@
 #define INCLUDED_LUX_BASETEXTURE_H
 #include "video/Color.h"
 #include "math/Dimension2.h"
-#include "core/Resource.h"
+#include "core/Referable.h"
 
 namespace lux
 {
@@ -10,7 +10,7 @@ namespace video
 {
 
 //! The base class for all textures
-class BaseTexture : public core::Resource
+class BaseTexture : public core::Referable
 {
 public:
 	//! Describes a locked texture
@@ -64,8 +64,6 @@ public:
 	};
 
 public:
-	BaseTexture(const core::ResourceOrigin& origin) : Resource(origin) {}
-
 	//! A pointer to the device depending texture
 	virtual void* GetRealTexture() = 0;
 

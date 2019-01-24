@@ -59,7 +59,7 @@ public:
 		return core::Name::INVALID;
 	}
 
-	void LoadResource(io::File* file, core::Resource* dst)
+	void LoadResource(io::File* file, core::Referable* dst)
 	{
 		auto img = core::ReferableFactory::Instance()->Create(
 			core::ResourceType::Image).StaticCastStrong<video::Image>();
@@ -163,7 +163,7 @@ public:
 		return core::ResourceType::CubeTexture;
 	}
 
-	void LoadResource(io::File* file, core::Resource* dst)
+	void LoadResource(io::File* file, core::Referable* dst)
 	{
 		int order[6] = {0, 1, 2, 3, 4, 5};
 		core::String lines[6];
@@ -289,17 +289,6 @@ StrongRef<Image> ImageSystem::CreateImage(const math::Dimension2I& size, ColorFo
 	auto img = core::ReferableFactory::Instance()->Create(
 		core::ResourceType::Image).AsStrong<Image>();
 	img->Init(size, format);
-	return img;
-}
-
-StrongRef<Image> ImageSystem::CreateImage(
-	const math::Dimension2I& size,
-	ColorFormat format,
-	void* data, bool CopyMem, bool deleteOnDrop)
-{
-	auto img = core::ReferableFactory::Instance()->Create(
-		core::ResourceType::Image).AsStrong<Image>();
-	img->Init(size, format, data, CopyMem, deleteOnDrop);
 	return img;
 }
 

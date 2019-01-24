@@ -204,13 +204,12 @@ private:
 	core::String m_ValueName;
 };
 
-class Animation : public core::Resource
+class Animation : public core::Referable
 {
 	using TrackIterT = core::Array<StrongRef<AnimationTrack>>::Iterator;
 	using ConstTrackIterT = core::Array<StrongRef<AnimationTrack>>::ConstIterator;
 public:
 	LUX_API Animation();
-	LUX_API Animation(const core::ResourceOrigin& origin);
 	LUX_API ~Animation();
 
 	LUX_API StrongRef<AnimationTrack> AddTrack(const core::String& valueName, Curve* curve);

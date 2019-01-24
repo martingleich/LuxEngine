@@ -34,8 +34,6 @@ class luxD3DXShaderIncludes : public ID3DXInclude, core::Uncopyable
 public:
 	virtual ~luxD3DXShaderIncludes()
 	{
-		for(auto p : m_Allocated)
-			LUX_FREE_RAW(p);
 	}
 
 	STDMETHOD(Open)(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
@@ -47,8 +45,8 @@ public:
 			if(io::FileSystem::Instance()->ExistFile(pFileName)) {
 				auto file = io::FileSystem::Instance()->OpenFile(pFileName);
 				*pBytes = core::SafeCast<UINT>(file->GetSize());
-				void* data = LUX_NEW_RAW(*pBytes);
-				m_Allocated.PushBack(data);
+				m_Allocated.EmplaceBack(*pBytes);
+				auto& data = m_Allocated.Back();
 				if(file->ReadBinaryPart(*pBytes, data) != *pBytes)
 					return E_FAIL;
 				*ppData = data;
@@ -72,17 +70,18 @@ public:
 
 	STDMETHOD(Close)(THIS_ LPCVOID pData)
 	{
-		auto i = m_Allocated.LinearSearch(pData);
-		if(i != -1) {
-			LUX_FREE_RAW(m_Allocated[i]);
-			m_Allocated.Erase(i);
+		for(int i = 0; i < m_Allocated.Size(); ++i) {
+			if(m_Allocated[i] == pData) {
+				m_Allocated.Erase(i);
+				break;
+			}
 		}
 
 		return S_OK;
 	}
 
 private:
-	core::Array<const void*> m_Allocated;
+	core::Array<core::RawMemory> m_Allocated;
 };
 
 luxD3DXShaderIncludes g_luxD3DXShaderIncludes;

@@ -1,18 +1,16 @@
 #ifndef INCLUDED_LUX_TEXTURE_H
 #define INCLUDED_LUX_TEXTURE_H
-#include "BaseTexture.h"
+#include "video/BaseTexture.h"
+#include "core/Resource.h"
 
 namespace lux
 {
 namespace video
 {
-class Texture;
 
 class Texture : public BaseTexture
 {
 public:
-	Texture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
-
 	virtual void Init(
 		const math::Dimension2I& size,
 		ColorFormat format,
@@ -23,7 +21,7 @@ public:
 	virtual void Unlock(bool regenMipMaps, int mipLevel) = 0;
 	virtual int GetMipMapCount() = 0;
 
-	core::Name GetReferableType() const
+	core::Name GetReferableType() const override
 	{
 		return core::ResourceType::Texture;
 	}
@@ -61,15 +59,17 @@ struct TextureLock
 	TextureLock& operator=(const TextureLock& other) = delete;
 	TextureLock& operator=(TextureLock&& old)
 	{
-		Unlock();
-		base = old.base;
-		data = old.data;
-		pitch = old.pitch;
-		mipLevel = old.mipLevel;
-		regenMipMaps = old.regenMipMaps;
-		old.base = nullptr;
+		if(this == &old)
+			return *this;
+
+		std::swap(base, old.base);
+		std::swap(data, old.data);
+		std::swap(pitch, old.pitch);
+		std::swap(mipLevel, old.mipLevel);
+		std::swap(regenMipMaps, old.regenMipMaps);
 		return *this;
 	}
+	
 	void Unlock()
 	{
 		if(base) {

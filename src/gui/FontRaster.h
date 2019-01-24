@@ -53,7 +53,7 @@ struct FontCreationData
 class FontRaster : public Font
 {
 public:
-	FontRaster(const core::ResourceOrigin& origin);
+	FontRaster();
 	~FontRaster();
 
 	void Init(const FontCreationData& data);
@@ -75,7 +75,7 @@ public:
 	void GetRawData(const void*& ptr, int& width, int& height, int& channels);
 
 	core::Name GetReferableType() const;
-	StrongRef<Referable> Clone() const;
+	StrongRef<core::Referable> Clone() const;
 
 private:
 	FontRenderSettings GetFinalFontSettings(const FontRenderSettings& settings);

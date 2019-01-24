@@ -26,7 +26,7 @@ LUX_API extern const core::Name SkyBox;
 }
 
 //! A scene node component
-class Component : public Referable
+class Component : public core::Referable
 {
 	friend class Node;
 public:

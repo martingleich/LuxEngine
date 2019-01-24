@@ -110,7 +110,7 @@ private:
 struct ObjLoader
 {
 public:
-	ObjLoader(io::File* file, core::Resource* resource)
+	ObjLoader(io::File* file, core::Referable* resource)
 	{
 		auto mesh = dynamic_cast<video::Mesh*>(resource);
 		if(!mesh)
@@ -318,7 +318,7 @@ public:
 	io::Path basePath;
 };
 
-void MeshLoaderOBJ::LoadResource(io::File* file, core::Resource* dst)
+void MeshLoaderOBJ::LoadResource(io::File* file, core::Referable* dst)
 {
 	ObjLoader(file, dst);
 }

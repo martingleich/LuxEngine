@@ -9,7 +9,8 @@
 
 namespace lux
 {
-
+namespace core
+{
 //! A referable object
 /**
 Referable objects can be cloned from older instances.
@@ -78,7 +79,7 @@ public:
 	/**
 	Automatically implemented by LX_SERIAL_MEMBERS.
 	*/
-	StrongRef<Referable> Clone() const
+	StrongRef<core::Referable> Clone() const
 	{
 		return CloneImpl();
 	}
@@ -99,7 +100,7 @@ public:
 	}
 
 protected:
-	virtual StrongRef<Referable> CloneImpl() const
+	virtual StrongRef<core::Referable> CloneImpl() const
 	{
 		throw core::NotImplementedException("Referable::CloneImpl");
 	}
@@ -119,10 +120,10 @@ LUX_API void RunAllRegisterReferableFunctions();
 struct ReferableRegisterBlock
 {
 	core::Name type;
-	Referable* (*creator)(const void*);
+	core::Referable* (*creator)(const void*);
 	ReferableRegisterBlock* nextBlock;
 
-	ReferableRegisterBlock(core::Name t, Referable* (*_creator)(const void*)) :
+	ReferableRegisterBlock(core::Name t, core::Referable* (*_creator)(const void*)) :
 		type(t),
 		creator(_creator),
 		nextBlock(nullptr)
@@ -159,7 +160,7 @@ API ::lux::core::Name GetReferableType() const; \
 API ::lux::StrongRef<class> Clone() const; \
 API ::lux::u32 GetSerializerStructure() const; \
 protected: \
-API ::lux::StrongRef<::lux::Referable> CloneImpl() const; \
+API ::lux::StrongRef<::lux::core::Referable> CloneImpl() const; \
 private: \
 static ::lux::u32 SERIAL_TYPE_ID; \
 static ::lux::core::Name REFERABLE_TYPE_NAME;
@@ -171,8 +172,8 @@ Use in global namespace in a source file.
 \param class Fully classified name of the class
 */
 #define LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
-static ::lux::Referable* LX_CONCAT(InternalCreatorFunc_, __LINE__)(const void*) { return LUX_NEW(class); } \
-static ::lux::impl_referableRegister::ReferableRegisterBlock LX_CONCAT(InternalReferableRegisterStaticObject_, __LINE__)(::lux::core::Name(ref_name), &LX_CONCAT(InternalCreatorFunc_, __LINE__));
+static ::lux::core::Referable* LX_CONCAT(InternalCreatorFunc_, __LINE__)(const void*) { return LUX_NEW(class); } \
+static ::lux::core::impl_referableRegister::ReferableRegisterBlock LX_CONCAT(InternalReferableRegisterStaticObject_, __LINE__)(::lux::core::Name(ref_name), &LX_CONCAT(InternalCreatorFunc_, __LINE__));
 
 #define LX_REFERABLE_MEMBERS_SRC_SERIAL(class, ref_name) \
 ::lux::u32 class::SERIAL_TYPE_ID = 0; \
@@ -199,10 +200,11 @@ Must be placed in the global namespace in the source file.
 LX_REGISTER_REFERABLE_CLASS(class, ref_name) \
 ::lux::core::Name class::REFERABLE_TYPE_NAME = ::lux::core::Name(ref_name); \
 ::lux::core::Name class::GetReferableType() const { return REFERABLE_TYPE_NAME;} \
-::lux::StrongRef<::lux::Referable> class::CloneImpl() const { return LUX_NEW(class)(*this); } \
+::lux::StrongRef<::lux::core::Referable> class::CloneImpl() const { return LUX_NEW(class)(*this); } \
 ::lux::StrongRef<class> class::Clone() const { return CloneImpl().StaticCastStrong<class>(); } \
 LX_REFERABLE_MEMBERS_SRC_SERIAL(class, ref_name)
 
+} // namespace core
 } // namespace lux
 
 #endif // INCLUDED_LUX_REFERABLE_H

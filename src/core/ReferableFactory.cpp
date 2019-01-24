@@ -6,6 +6,8 @@
 
 namespace lux
 {
+namespace core
+{
 namespace impl_referableRegister
 {
 static ReferableRegisterBlock* g_FirstReferableBlock = nullptr;
@@ -91,8 +93,6 @@ void RunAllRegisterReferableFunctions()
 }
 } // namespace impl_referableRegister
 
-namespace core
-{
 static StrongRef<ReferableFactory> g_ReferableFactory;
 
 void ReferableFactory::Initialize()
@@ -138,11 +138,11 @@ void ReferableFactory::UnregisterType(Name type)
 		log::Debug("Unregistered type {0}.", type);
 }
 
-StrongRef<Referable> ReferableFactory::Create(Name type, const void* data)
+StrongRef<core::Referable> ReferableFactory::Create(Name type, const void* data)
 {
 	auto& entry = m_Types.Get(type, ReferableType());
 	CreationFunc create = entry.create;
-	StrongRef<Referable> r = create ? create(data) : nullptr;
+	StrongRef<core::Referable> r = create ? create(data) : nullptr;
 	if(!r)
 		throw FactoryCreateException(type.AsView(), "Can't create instance of referable.");
 

@@ -16,7 +16,7 @@ class Node;
 /**
 Collision objects contain collision data, and perform collision queries.
 */
-class Collider : public Referable
+class Collider : public core::Referable
 {
 public:
 	//! Execute a collision query.

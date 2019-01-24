@@ -8,11 +8,11 @@ namespace core
 
 struct IDManager::IDList
 {
-	core::Array<Referable*> objects;
+	core::Array<core::Referable*> objects;
 	u32 biggest = 1;
 	core::Array<u32> recycled;
 
-	u32 Get(Referable* object)
+	u32 Get(core::Referable* object)
 	{
 		u32 value;
 		if(!recycled.IsEmpty()) {
@@ -33,7 +33,7 @@ struct IDManager::IDList
 		recycled.PushBack(id);
 	}
 
-	Referable* LookUp(u32 id)
+	core::Referable* LookUp(u32 id)
 	{
 		if(id == 0)
 			return nullptr;
@@ -62,7 +62,7 @@ IDManager::~IDManager()
 	LUX_FREE(m_List);
 }
 
-ID IDManager::Create(Referable* obj)
+ID IDManager::Create(core::Referable* obj)
 {
 	u32 value = m_List->Get(obj);
 	return ID(value);
@@ -74,7 +74,7 @@ void IDManager::Release(ID id)
 	m_List->Release(value);
 }
 
-Referable* IDManager::LookUp(ID id)
+core::Referable* IDManager::LookUp(ID id)
 {
 	return m_List->LookUp(id.GetValue());
 }

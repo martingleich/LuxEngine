@@ -12,7 +12,7 @@ namespace video
 class ImageLoaderBMP : public core::ResourceLoader
 {
 public:
-	void LoadResource(io::File* file, core::Resource* dst);
+	void LoadResource(io::File* file, core::Referable* dst);
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
 	const core::String& GetName() const;
 };

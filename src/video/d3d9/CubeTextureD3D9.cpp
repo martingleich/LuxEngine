@@ -10,10 +10,10 @@ namespace lux
 namespace video
 {
 
-CubeTextureD3D9::CubeTextureD3D9(IDirect3DDevice9* dev, const core::ResourceOrigin& origin) :
-	CubeTexture(origin),
+CubeTextureD3D9::CubeTextureD3D9(IDirect3DDevice9* dev) :
 	m_D3DDevice(dev)
 {
+	LX_CHECK_NULL_ARG(dev);
 }
 
 CubeTextureD3D9::~CubeTextureD3D9()
@@ -22,9 +22,6 @@ CubeTextureD3D9::~CubeTextureD3D9()
 
 void CubeTextureD3D9::Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic)
 {
-	if(!m_D3DDevice)
-		throw core::GenericRuntimeException("No driver available");
-
 	if(m_Texture)
 		m_Texture = nullptr;
 
@@ -32,17 +29,20 @@ void CubeTextureD3D9::Init(int size, ColorFormat lxFormat, bool isRendertarget, 
 	if(format == D3DFMT_UNKNOWN)
 		throw core::UnsupportedColorFormatException(lxFormat);
 
-	DWORD usage = 0;
-	D3DPOOL pool = GetOrigin().loader ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
+	DWORD usage;
+	D3DPOOL pool;
 	if(isDynamic) {
 		usage = D3DUSAGE_DYNAMIC;
 		pool = D3DPOOL_DEFAULT;
 	} if(isRendertarget) {
 		usage = D3DUSAGE_RENDERTARGET;
 		pool = D3DPOOL_DEFAULT;
+	} else {
+		usage = 0;
+		pool = D3DPOOL_MANAGED;
 	}
-	HRESULT hr = m_D3DDevice->CreateCubeTexture((UINT)size, 1, usage, format, pool, m_Texture.Access(), nullptr);
 
+	HRESULT hr = m_D3DDevice->CreateCubeTexture((UINT)size, 1, usage, format, pool, m_Texture.Access(), nullptr);
 	if(FAILED(hr))
 		throw core::D3D9Exception(hr);
 
@@ -53,13 +53,6 @@ void CubeTextureD3D9::Init(int size, ColorFormat lxFormat, bool isRendertarget, 
 	m_D3DFormat = format;
 	m_Size = size;
 	m_Format = lxFormat;
-}
-
-void CubeTextureD3D9::RegenerateMIPMaps()
-{
-	HRESULT hr = D3DXLibraryLoader::Instance().GetD3DXFilterTexture()(m_Texture, nullptr, 0, 0);
-	if(FAILED(hr))
-		throw core::D3D9Exception(hr);
 }
 
 BaseTexture::LockedRect CubeTextureD3D9::Lock(ELockMode mode, EFace face)
@@ -127,25 +120,17 @@ void CubeTextureD3D9::Unlock()
 
 void CubeTextureD3D9::ReleaseUnmanaged()
 {
-	if(m_IsLocked)
-		throw core::InvalidOperationException("Texture is still locked");
-	if(m_Pool == D3DPOOL_DEFAULT || m_Usage == D3DUSAGE_RENDERTARGET)
-		m_Texture = nullptr;
+	if(m_Pool == D3DPOOL_MANAGED)
+		return;
+	m_Texture = nullptr;
 }
 
 void CubeTextureD3D9::RestoreUnmanaged()
 {
-	if(IsRendertarget()) {
-		Init(m_Size, m_Format, true, false);
-	} else if(m_Pool == D3DPOOL_DEFAULT) {
-		if(GetOrigin().IsAvailable())
-			GetOrigin().Load(this);
-		else
-			Init(m_Size, m_Format, false, IsDynamic());
-	} else {
-		// Is a managed texture
-		(void)0;
-	}
+	if(m_Pool == D3DPOOL_MANAGED)
+		return;
+
+	Init(m_Size, m_Format, IsRendertarget(), IsDynamic());
 }
 
 } // namespace video

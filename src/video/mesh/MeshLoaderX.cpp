@@ -1461,7 +1461,7 @@ core::Name MeshLoaderX::GetResourceType(io::File* file, core::Name requestedType
 		return requestedType;
 }
 
-void MeshLoaderX::LoadResource(io::File* file, core::Resource* dst)
+void MeshLoaderX::LoadResource(io::File* file, core::Referable* dst)
 {
 	auto mesh = dynamic_cast<video::Mesh*>(dst);
 	if(mesh)

@@ -1,7 +1,7 @@
 #include "scene/Animation.h"
 #include "core/lxMemory.h"
 
-LX_REGISTER_RESOURCE_CLASS("lux.resource.Animation", lux::scene::Animation);
+LX_REGISTER_REFERABLE_CLASS(lux::scene::Animation, "lux.resource.Animation");
 
 lux::scene::AnimatedObject::SharedAnimatedValueList lux::scene::AnimatedObject::s_SharedAnimatedValues;
 
@@ -175,11 +175,6 @@ AnimatedObject* AnimationController::GetObject()
 /////////////////////////////////////////////////////////////////////
 
 Animation::Animation()
-{
-}
-
-Animation::Animation(const core::ResourceOrigin& origin) :
-	Resource(origin)
 {
 }
 

@@ -22,7 +22,7 @@ The resource system handles caching and loading of engine resources.
 Here can the engine be extended with new file formats.
 The resource system saves data as a map from names to resources.
 */
-class ResourceSystem : public ReferenceCounted, public OriginResourceLoader
+class ResourceSystem : public ReferenceCounted
 {
 public:
 	//! Initialize the global resource system
@@ -56,7 +56,7 @@ public:
 	\throws FileNotFoundException
 	\throws FileFormatException
 	*/
-	LUX_API StrongRef<Resource> GetResource(Name type, const io::Path& name, bool loadIfNotFound = true);
+	LUX_API StrongRef<core::Referable> GetResource(Name type, const io::Path& name, bool loadIfNotFound = true);
 
 	//! Get a resources based on a file.
 	/**
@@ -67,7 +67,7 @@ public:
 	\param file The file from which to load the resource.
 	\return The resource.
 	*/
-	LUX_API StrongRef<Resource> GetResource(Name type, io::File* file, bool loadIfNotFound = true);
+	LUX_API StrongRef<core::Referable> GetResource(Name type, io::File* file, bool loadIfNotFound = true);
 
 	//! Enabled or disables caching for a given resource type.
 	/**
@@ -127,7 +127,7 @@ public:
 	\param ext The extension(i.e. filetype) of the resource
 	\throws FileFormatException
 	*/
-	LUX_API void WriteResource(Resource* resource, io::File* file, StringView ext)  const;
+	LUX_API void WriteResource(core::Referable* resource, io::File* file, StringView ext)  const;
 
 	//! Write a resource to a file
 	/**
@@ -135,7 +135,7 @@ public:
 	\param path The path of the file to write to.
 	\throws FileFormatException
 	*/
-	LUX_API void WriteResource(Resource* resource, const io::Path& path) const;
+	LUX_API void WriteResource(core::Referable* resource, const io::Path& path) const;
 
 	//! Get the type of resource contained in a file.
 	/**
@@ -173,12 +173,10 @@ public:
 	*/
 	LUX_API void AddType(Name name);
 
-
 private:
-	StrongRef<Resource> CreateResource(int typeId, const io::Path& path);
-	StrongRef<Resource> CreateResource(int typeId, io::File* file);
-	StrongRef<Resource> CreateResource(int typeId, io::File* file, const ResourceOrigin& origin);
-	void LoadResource(const String& origin, Resource* dst) const override;
+	StrongRef<core::Referable> CreateResource(int typeId, const io::Path& path);
+	StrongRef<core::Referable> CreateResource(int typeId, io::File* file);
+	StrongRef<core::Referable> CreateResource(int typeId, io::File* file, const ResourceOrigin& origin);
 
 private:
 	int GetTypeID(Name type) const;

@@ -2,7 +2,7 @@
 #define INCLUDED_LUX_MESH_H
 #include "math/AABBox.h"
 
-#include "core/Resource.h"
+#include "core/Referable.h"
 
 #include "video/VertexFormat.h"
 #include "video/VideoEnums.h"
@@ -38,10 +38,10 @@ public:
 };
 
 //! A complex mesh composed of simple Sub-Meshs
-class Mesh : public core::Resource
+class Mesh : public core::Referable
 {
 public:
-	LUX_API Mesh(const core::ResourceOrigin& origin);
+	LUX_API Mesh();
 	LUX_API ~Mesh();
 
 	LUX_API const Geometry* GetGeometry() const;
@@ -139,7 +139,7 @@ public:
 		return nullptr;
 	}
 	
-	LUX_API core::Name GetReferableType() const;
+	LUX_API core::Name GetReferableType() const override;
 
 private:
 	struct MaterialRange

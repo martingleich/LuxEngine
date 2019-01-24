@@ -22,8 +22,6 @@ public:
 	};
 
 public:
-	CubeTexture(const core::ResourceOrigin& origin) : BaseTexture(origin) {}
-
 	virtual void Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic) = 0;
 
 	//! Retrieve access to the texturedata

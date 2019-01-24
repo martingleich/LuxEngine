@@ -259,31 +259,32 @@ bool WindowWin32::Present(
 
 	math::Dimension2<int> imageDim = imageRect.GetSize();
 	void* data = nullptr;
-	if(image->GetBitsPerPixel() == 8) {
+	auto bitsPerPixel = image->GetColorFormat().GetBitsPerPixel();
+	if(bitsPerPixel == 8) {
 		// Immer nach ARGB
-		data = LUX_NEW_ARRAY(u8, 4 * (image->GetBitsPerPixel()*srcRect.GetArea())/8);
+		data = LUX_NEW_ARRAY(u8, 4 * (bitsPerPixel*srcRect.GetArea())/8);
 		video::ColorConverter::ConvertByFormat(
 			mem, image->GetColorFormat(),
 			data, video::ColorFormat::A8R8G8B8,
 			srcRect.GetWidth(), srcRect.GetHeight(),
-			image->GetPitch(), srcRect.GetWidth() * 4);
+			lock.pitch, srcRect.GetWidth() * 4);
 		mem = data;
 		format = video::ColorFormat::A8R8G8B8;
 		imageDim.width = srcRect.GetWidth();
 		imageDim.height = srcRect.GetHeight();
-	} else if(image->GetBitsPerPixel() == 24) {
+	} else if(bitsPerPixel == 24) {
 		// Immer nach ARGB
-		data = LUX_NEW_ARRAY(u8, 4 * (image->GetBitsPerPixel()*srcRect.GetArea())/8);
+		data = LUX_NEW_ARRAY(u8, 4 * (bitsPerPixel*srcRect.GetArea())/8);
 		video::ColorConverter::ConvertByFormat(
 			mem, image->GetColorFormat(),
 			data, video::ColorFormat::A8R8G8B8,
 			srcRect.GetWidth(), srcRect.GetHeight(),
-			image->GetPitch(), srcRect.GetWidth() * 4);
+			lock.pitch, srcRect.GetWidth() * 4);
 		mem = data;
 		format = video::ColorFormat::A8R8G8B8;
 		imageDim.width = srcRect.GetWidth();
 		imageDim.height = srcRect.GetHeight();
-	} else if(image->GetBitsPerPixel() == 16 || image->GetBitsPerPixel() == 32) {
+	} else if(bitsPerPixel == 16 || bitsPerPixel == 32) {
 		/*
 		NO OP
 		*/

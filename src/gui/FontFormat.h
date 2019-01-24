@@ -13,7 +13,7 @@ class FontLoader : public core::ResourceLoader
 {
 public:
 	core::Name GetResourceType(io::File* file, core::Name requestedType);
-	void LoadResource(io::File* file, core::Resource* dst);
+	void LoadResource(io::File* file, core::Referable* dst);
 	const core::String& GetName() const;
 };
 
@@ -21,7 +21,7 @@ class FontWriter : public core::ResourceWriter
 {
 public:
 	bool CanWriteType(const core::String& ext, core::Name requestedType);
-	void WriteResource(io::File* file, core::Resource* resource);
+	void WriteResource(io::File* file, core::Referable* resource);
 	const core::String& GetName() const;
 };
 

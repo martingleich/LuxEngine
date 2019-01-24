@@ -134,7 +134,7 @@ core::Name ImageLoaderTGA::GetResourceType(io::File* file, core::Name requestedT
 		return core::Name::INVALID;
 }
 
-void ImageLoaderTGA::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderTGA::LoadResource(io::File* file, core::Referable* dst)
 {
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)

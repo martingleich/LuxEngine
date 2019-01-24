@@ -2,7 +2,7 @@
 #include "video/Material.h"
 #include "video/mesh/Geometry.h"
 
-LX_REGISTER_RESOURCE_CLASS("lux.resource.Mesh", lux::video::Mesh);
+LX_REGISTER_REFERABLE_CLASS(lux::video::Mesh, "lux.resource.Mesh");
 
 
 namespace lux
@@ -10,8 +10,7 @@ namespace lux
 namespace video
 {
 
-Mesh::Mesh(const core::ResourceOrigin& origin) :
-	Resource(origin)
+Mesh::Mesh()
 {
 }
 

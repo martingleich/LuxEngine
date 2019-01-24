@@ -24,7 +24,7 @@ class Window;
 class Renderer;
 class GUIEnvironment;
 
-class Element : public Referable
+class Element : public core::Referable
 {
 public:
 	using ElementList = core::Array<StrongRef<Element>>;

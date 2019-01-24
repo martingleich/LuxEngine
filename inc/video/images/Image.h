@@ -1,79 +1,34 @@
 #ifndef INCLUDED_LUX_IMAGE_H
 #define INCLUDED_LUX_IMAGE_H
-#include "core/Resource.h"
+#include "core/Referable.h"
 #include "math/Dimension2.h"
 #include "video/Color.h"
-#include "video/DrawingCanvas.h"
+#include "core/lxMemory.h"
 
 namespace lux
 {
 namespace video
 {
-class Image;
-template <>
-class DrawingCanvasAuto<Image>;
-
 //! A image in system memory
-class Image : public core::Resource
+class Image : public core::Referable
 {
 public:
-	Image(const core::ResourceOrigin& origin) :
-		Resource(origin)
+	struct LockedRect
 	{
-	}
+		void* data;
+		int pitch;
+	};
+public:
+	LUX_API Image();
+	LUX_API ~Image();
 
-	virtual ~Image()
-	{
-	}
-
-	virtual void Init(const math::Dimension2I& size, ColorFormat format) = 0;
-	virtual void Init(const math::Dimension2I& size, ColorFormat format, void* data, bool CopyMemory, bool deleteOnDrop) = 0;
+	LUX_API void Init(const math::Dimension2I& size, ColorFormat format);
 
 	//! Get the size of the image in pixel
-	virtual const math::Dimension2I& GetSize() const = 0;
+	LUX_API const math::Dimension2I& GetSize() const;
 
 	//! Get the colorformat of the image
-	virtual ColorFormat GetColorFormat() const = 0;
-
-	//! The number of bits per image pixel
-	virtual int GetBitsPerPixel() const = 0;
-
-	//! The size of the whole image in bytes
-	virtual int GetSizeInBytes() const = 0;
-
-	//! The size of the whole image in pixels
-	virtual int GetSizeInPixels() const = 0;
-
-	//! Get a single pixel of the image
-	/**
-	If the pixel is another format than A8R8G8B8 is automatically converted
-	\param x The x coordinate of the pixel
-	\param y The y coordinate of the pixel
-	\return The color of the pixel
-	*/
-	virtual Color GetPixel(int x, int y) = 0;
-
-	//! Set a single pixel of the image
-	/**
-	If the pixel is another format than A8R8G8B8 is automatically converted
-	\param x The x coordinate of the pixel
-	\param y The y coordinate of the pixel
-	\param color The new color of the pixel
-	*/
-	virtual void SetPixel(int x, int y, Color color) = 0;
-
-	//! Fill the image with a single color
-	/**
-	\param color The color to fill the image with
-	*/
-	virtual void Fill(Color color = Color::Black) = 0;
-
-	//! Get the pitch of the image
-	/**
-	The pitch is the number of bytes between the begin of one line and the start of the next.
-	\return The pitch of the image
-	*/
-	virtual int GetPitch() const = 0;
+	LUX_API ColorFormat GetColorFormat() const;
 
 	//! Locks the image
 	/**
@@ -83,96 +38,55 @@ public:
 
 	\ref Unlock
 	*/
-	virtual void* Lock() = 0;
+	LUX_API LockedRect Lock();
 
 	//! Unlocks the image
 	/**
 	Unlocks a previously locked image.
 	If the image isn't locked nothing happens
 	*/
-	virtual void Unlock() = 0;
+	LUX_API void Unlock();
 
-	inline DrawingCanvasAuto<Image> GetCanvas();
+	LUX_API core::Name GetReferableType() const;
+
+private:
+	math::Dimension2I m_Dimension;
+	ColorFormat m_Format;
+
+	core::RawMemory m_Data;
+
+	bool m_Locked;
 };
 
-template <>
-class DrawingCanvasAuto<Image> : public DrawingCanvas
+class ImageLock
 {
 public:
-	DrawingCanvasAuto(Image* image) :
-		DrawingCanvas(image->Lock(), image->GetColorFormat(),
-			image->GetSize(), image->GetPitch()),
-		img(image)
-	{
-	}
-
-	DrawingCanvasAuto(const DrawingCanvasAuto& other) = delete;
-
-	DrawingCanvasAuto(DrawingCanvasAuto&& old)
-	{
-		(DrawingCanvas&)*this = std::move(old);
-		img = old.img;
-		old.img = nullptr;
-	}
-	~DrawingCanvasAuto()
-	{
-		Unlock();
-	}
-
-	void Unlock()
-	{
-		if(img) {
-			img->Unlock();
-			img = nullptr;
-		}
-	}
-
-	DrawingCanvasAuto& operator=(const DrawingCanvasAuto& other) = delete;
-
-	DrawingCanvasAuto& operator=(DrawingCanvasAuto&& old)
-	{
-		Unlock();
-		(DrawingCanvas&)*this = std::move(old);
-		img = old.img;
-		old.img = nullptr;
-		return *this;
-	}
-
-	Image* img;
-};
-
-inline DrawingCanvasAuto<Image> Image::GetCanvas()
-{
-	return DrawingCanvasAuto<Image>(this);
-}
-
-struct ImageLock
-{
 	ImageLock(Image* i) :
-		base(i),
-		data((u8*)base->Lock()),
-		pitch(base->GetPitch())
+		baseImg(i)
 	{
+		auto rect = baseImg->Lock();
+		data = (u8*)rect.data;
+		pitch = rect.pitch;
 	}
 
 	ImageLock(const ImageLock& old) = delete;
 
 	ImageLock(ImageLock&& old)
 	{
-		base = old.base;
+		baseImg = old.baseImg;
 		data = old.data;
 		pitch = old.pitch;
-		old.base = nullptr;
+		old.baseImg = nullptr;
 	}
 
 	ImageLock& operator=(const ImageLock& other) = delete;
 	ImageLock& operator=(ImageLock&& old)
 	{
 		Unlock();
-		base = old.base;
+		baseImg = old.baseImg;
 		data = old.data;
 		pitch = old.pitch;
-		old.base = nullptr;
+		old.baseImg = nullptr;
 		return *this;
 	}
 
@@ -183,30 +97,19 @@ struct ImageLock
 
 	void Unlock()
 	{
-		if(base)
-			base->Unlock();
-		base = nullptr;
+		if(baseImg)
+			baseImg->Unlock();
+		baseImg = nullptr;
 		data = nullptr;
-		pitch = 0;
+		pitch;
 	}
 
-	Image* base;
+	Image* baseImg;
 	u8* data;
 	int pitch;
 };
 
-class ImageList : public core::Resource
-{
-public:
-	virtual int GetImageCount() const = 0;
-	virtual void AddImage(Image* img) = 0;
-	virtual StrongRef<Image> GetImage(int i) const = 0;
-	virtual void RemoveImage(Image* img) = 0;
-	virtual void Clear() = 0;
-};
-
 }
-
 }
 
 

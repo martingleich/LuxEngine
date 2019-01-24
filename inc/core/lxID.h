@@ -7,10 +7,10 @@
 
 namespace lux
 {
-class Referable;
 namespace core
 {
 
+class Referable;
 class ID
 {
 public:
@@ -56,9 +56,9 @@ public:
 	IDManager(IDManager&) = delete;
 	LUX_API ~IDManager();
 
-	LUX_API ID Create(Referable* obj);
+	LUX_API ID Create(core::Referable* obj);
 	LUX_API void Release(ID id);
-	LUX_API Referable* LookUp(ID id);
+	LUX_API core::Referable* LookUp(ID id);
 
 private:
 	struct IDList;

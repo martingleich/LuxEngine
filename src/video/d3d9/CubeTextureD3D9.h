@@ -14,12 +14,10 @@ namespace video
 class CubeTextureD3D9 : public CubeTexture
 {
 public:
-	CubeTextureD3D9(IDirect3DDevice9* d3dDevice, const core::ResourceOrigin& origin);
-	virtual ~CubeTextureD3D9();
+	CubeTextureD3D9(IDirect3DDevice9* d3dDevice);
+	~CubeTextureD3D9();
 
 	void Init(int size, ColorFormat lxFormat, bool isRendertarget, bool isDynamic) override;
-
-	void RegenerateMIPMaps();
 
 	LockedRect Lock(ELockMode mode, EFace face) override;
 	void Unlock() override;

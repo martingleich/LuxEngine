@@ -165,6 +165,8 @@ private:
 	size_t m_Size;
 };
 
+// TODO: Memory without size
+// TODO: Memory with optional delete on drop.
 }
 }
 

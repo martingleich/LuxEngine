@@ -103,7 +103,7 @@ void BinarySerializer::WriteType(core::Type type, const void* data)
 			WriteBinary(&fileId, type.GetSize());
 		} else if(core::Types::IsRefType(type)) {
 			auto refInfo = dynamic_cast<const core::AbstractRefTypeInfo*>(type.GetInfo());
-			auto referable = dynamic_cast<Referable*>(refInfo->Get(data));
+			auto referable = dynamic_cast<core::Referable*>(refInfo->Get(data));
 			auto objectId = referable->GetUniqueId();
 			u32 fileId = m_ObjectMap->OnIdWrite(objectId);
 			WriteBinary(&fileId, type.GetSize());

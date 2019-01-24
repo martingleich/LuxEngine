@@ -8,6 +8,7 @@
 #include "scene/SceneBuilder.h"
 
 #include "gui/elements/GUIStaticText.h"
+#include "video/DrawingCanvas.h"
 
 using namespace lux;
 

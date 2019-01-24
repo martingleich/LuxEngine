@@ -2,7 +2,8 @@
 
 namespace lux
 {
-
+namespace core
+{
 void Referable::GetAttribute(const core::String& name, core::VariableAccess var)
 {
 	auto elem = serial::StructuralTable::EngineTable()->GetStructureElement(GetSerializerStructure(), name);
@@ -36,4 +37,5 @@ void Referable::GetAttribute(const core::String& name, core::VariableAccess var)
 		var.CopyData((u8*)((Serializable*)this) + elem->objectOffset);
 }
 
+} // namespace core
 } // namespace lux

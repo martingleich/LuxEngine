@@ -14,7 +14,7 @@ namespace scene
 {
 class ParticleGroupData;
 
-class ParticleRenderer : public Referable
+class ParticleRenderer : public core::Referable
 {
 public:
 	StrongRef<ParticleRenderer> Clone() { return CloneImpl().StaticCastStrong<ParticleRenderer>(); }

@@ -34,7 +34,7 @@ public:
 	\param dst The resource which receives the loaded data.
 	\return Return false to indicate a failed load.
 	*/
-	virtual void LoadResource(io::File* file, Resource* dst) = 0;
+	virtual void LoadResource(io::File* file, core::Referable* dst) = 0;
 
 	//! Get the name of the loader
 	/**

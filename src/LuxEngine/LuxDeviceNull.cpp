@@ -62,16 +62,14 @@ LuxDeviceNull::LuxDeviceNull()
 	resourceSystem->AddType(core::ResourceType::CubeTexture);
 	resourceSystem->AddType(core::ResourceType::Font);
 	resourceSystem->AddType(core::ResourceType::Image);
-	resourceSystem->AddType(core::ResourceType::ImageList);
 	resourceSystem->AddType(core::ResourceType::Mesh);
 	resourceSystem->AddType(core::ResourceType::Sound);
 	resourceSystem->AddType(core::ResourceType::Texture);
 
-	resourceSystem->SetCaching(core::ResourceType::ImageList, false);
 	resourceSystem->SetCaching(core::ResourceType::Image, false);
 
 	// Register all referable object registers with LUX_REGISTER_REFERABLE_CLASS
-	lux::impl_referableRegister::RunAllRegisterReferableFunctions();
+	lux::core::impl_referableRegister::RunAllRegisterReferableFunctions();
 
 	AddSceneRenderer(core::Name("SimpleForward"), [](const scene::SceneRendererInitData& data) -> scene::SceneRenderer* {
 		return LUX_NEW(scene::SceneRendererSimpleForward)(data);

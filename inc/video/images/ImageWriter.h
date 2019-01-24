@@ -41,7 +41,7 @@ public:
 		WriteFile(file, lock.data, texture->GetColorFormat(), texture->GetSize(), lock.pitch, writerParam);
 	}
 
-	void WriteResource(io::File* file, core::Resource* resource)
+	void WriteResource(io::File* file, core::Referable* resource)
 	{
 		auto image = dynamic_cast<Image*>(resource);
 		auto texture = dynamic_cast<Texture*>(resource);

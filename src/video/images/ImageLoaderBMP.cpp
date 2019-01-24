@@ -49,17 +49,11 @@ struct Context
 {
 	math::Dimension2I size;
 	ColorFormat format;
-	u8* colorTable;
+	core::Array<u8> colorTable;
 	s64 dataOffset;
 	BITMAPFILEHEADER header;
 	BITMAPINFOHEADER info;
 	SColorMasks colorMasks;
-
-	Context() :
-		colorTable(nullptr),
-		dataOffset(0)
-	{
-	}
 };
 }
 static u32 GetRightZeros(u32 x)
@@ -73,7 +67,7 @@ static u32 GetRightZeros(u32 x)
 
 static bool LoadImageFormat(Context& ctx, io::File* file)
 {
-	ctx.colorTable = nullptr;
+	ctx.colorTable.Clear();
 
 	ctx.dataOffset = file->GetCursor();
 
@@ -122,8 +116,8 @@ static bool LoadImageFormat(Context& ctx, io::File* file)
 		if(ctx.info.ClrUsed == 0)
 			ctx.info.ClrUsed = 1 << ctx.info.BitCount;
 
-		ctx.colorTable = LUX_NEW_ARRAY(u8, ctx.info.ClrUsed * 4);
-		file->ReadBinary(ctx.info.ClrUsed * 4, ctx.colorTable);
+		ctx.colorTable.Resize(ctx.info.ClrUsed * 4);
+		file->ReadBinary(ctx.info.ClrUsed * 4, ctx.colorTable.Data());
 	}
 
 	ctx.format = ColorFormat::R8G8B8;
@@ -156,7 +150,7 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 	if(filePitch % 4 != 0)
 		filePitch = filePitch + (4 - filePitch % 4);    // Auf 4-Byte ausrichten
 
-	u8* lineData = LUX_NEW_ARRAY(u8, filePitch);
+	core::RawMemory lineData(filePitch);
 
 	for(int j = 0; j < ctx.size.height; ++j) {
 		// Read one line from the file
@@ -317,9 +311,6 @@ static bool LoadImageToMemory(Context& ctx, io::File* file, void* dest)
 		}
 	}
 
-	LUX_FREE_ARRAY(lineData);
-	LUX_FREE_ARRAY(ctx.colorTable);
-
 	return true;
 }
 
@@ -344,7 +335,7 @@ const core::String& ImageLoaderBMP::GetName() const
 	return name;
 }
 
-void ImageLoaderBMP::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderBMP::LoadResource(io::File* file, core::Referable* dst)
 {
 	bool result;
 

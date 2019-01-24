@@ -209,7 +209,7 @@ core::Name ImageLoaderPNG::GetResourceType(io::File* file, core::Name requestedT
 	return core::ResourceType::Image;
 }
 
-void ImageLoaderPNG::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderPNG::LoadResource(io::File* file, core::Referable* dst)
 {
 	video::Image* img = dynamic_cast<video::Image*>(dst);
 	if(!img)

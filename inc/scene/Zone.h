@@ -12,7 +12,7 @@ class Randomizer;
 namespace scene
 {
 
-class Zone : public Referable
+class Zone : public core::Referable
 {
 public:
 	virtual bool IsInside(const math::Vector3F& point) const = 0;

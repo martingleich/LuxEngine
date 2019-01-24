@@ -24,7 +24,7 @@ public:
 	virtual bool CanWriteType(const core::String& ext, Name requestedType) = 0;
 
 	//! Write a resource to file
-	virtual void WriteResource(io::File* file, Resource* resource) = 0;
+	virtual void WriteResource(io::File* file, core::Referable* resource) = 0;
 
 	//! Get the name of the writer
 	/**

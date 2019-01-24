@@ -479,7 +479,7 @@ core::Name FontLoader::GetResourceType(io::File* file, core::Name requestedType)
 		return core::ResourceType::Font;
 }
 
-void FontLoader::LoadResource(io::File* file, core::Resource* dst)
+void FontLoader::LoadResource(io::File* file, core::Referable* dst)
 {
 	auto font = dynamic_cast<gui::FontRaster*>(dst);
 	if(!font)
@@ -512,7 +512,7 @@ bool FontWriter::CanWriteType(const core::String& ext, core::Name requestedType)
 	return ext.IsEmpty() || ext.Equal("lxf", core::EStringCompare::CaseInsensitive) || ext.Equal("font", core::EStringCompare::CaseInsensitive);
 }
 
-void FontWriter::WriteResource(io::File* file, core::Resource* resource)
+void FontWriter::WriteResource(io::File* file, core::Referable* resource)
 {
 	auto font = dynamic_cast<gui::FontRaster*>(resource);
 	if(!font)

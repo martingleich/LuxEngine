@@ -256,7 +256,7 @@ struct TempMemory
 	}
 };
 
-void ImageLoaderD3DX::LoadResource(io::File* file, core::Resource* dst)
+void ImageLoaderD3DX::LoadResource(io::File* file, core::Referable* dst)
 {
 	HRESULT hr;
 

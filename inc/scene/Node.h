@@ -16,7 +16,7 @@ class Component;
 class Collider;
 class Scene;
 
-class Node : public Referable
+class Node : public core::Referable
 {
 private:
 	class ComponentEntry
@@ -720,7 +720,7 @@ private:
 		m_IsDirty = false;
 	}
 
-	StrongRef<Referable> CloneImpl() const;
+	StrongRef<core::Referable> CloneImpl() const;
 
 private:
 	Node* m_Parent; //!< Pointer to the parent of this node

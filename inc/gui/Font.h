@@ -1,6 +1,6 @@
 #ifndef INCLUDED_LUX_FONT_H
 #define INCLUDED_LUX_FONT_H
-#include "core/Resource.h"
+#include "core/Referable.h"
 #include "core/lxString.h"
 #include "core/lxArray.h"
 #include "math/Rect.h"
@@ -132,19 +132,9 @@ struct FontCaret
 Render lines of text with this object, or get information about
 textsizes and positioning values
 */
-class Font : public core::Resource
+class Font : public core::Referable
 {
 public:
-	Font() {}
-	Font(const core::ResourceOrigin& origin) :
-		Resource(origin)
-	{
-	}
-
-	virtual ~Font()
-	{
-	}
-
 	//! Draw a line of unformated text
 	/**
 	Characters like newline or tab have no special meaning, i.e.

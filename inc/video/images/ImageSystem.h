@@ -34,22 +34,6 @@ public:
 	*/
 	LUX_API StrongRef<Image> CreateImage(const math::Dimension2I& size, ColorFormat format);
 
-	//! Create a new image from data in memory
-	/**
-	\param size The size of the new image in pixel
-	\param format The colorformat of the new image
-	\param data The imagedata of the image, the size and the format must be euqal to the previous params
-	\param copyMem Should the data from the original location be copied or only referenced
-	\param deleteOnDrop Only if copyMem=true. Should the referenced memory be deleted if the image is destructed(memory is freed via delete[](u8*) operator)
-	\return The newly created image
-	*/
-	LUX_API StrongRef<Image> CreateImage(
-		const math::Dimension2I& size,
-		ColorFormat format,
-		void* data,
-		bool copyMem,
-		bool deleteOnDrop);
-
 	//! Create new sprite bank
 	LUX_API StrongRef<SpriteBank> CreateSpriteBank();
 
