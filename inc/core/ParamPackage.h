@@ -223,7 +223,8 @@ class PackagePuffer
 {
 public:
 	PackagePuffer() :
-		PackagePuffer(&ParamPackage::EMPTY)
+		m_Data(nullptr),
+		m_Pack(&ParamPackage::EMPTY)
 	{
 	}
 
@@ -231,11 +232,13 @@ public:
 	/**
 	\param pack The parameter package on which the data builds up
 	*/
-	explicit PackagePuffer(const ParamPackage* pack)
+	explicit PackagePuffer(const ParamPackage* pack) :
+		m_Data(nullptr),
+		m_Pack(&ParamPackage::EMPTY)
 	{
 		LX_CHECK_NULL_ARG(pack);
+		m_Data = pack->CreatePackage();
 		m_Pack = pack;
-		m_Data = m_Pack->CreatePackage();
 	}
 
 	PackagePuffer(const PackagePuffer& other) :
@@ -255,8 +258,10 @@ public:
 			m_Pack->AssignPackage(m_Data, other.m_Data);
 		} else {
 			m_Pack->DestroyPackage(m_Data);
+			m_Pack = &ParamPackage::EMPTY;
+
+			m_Data = other.m_Pack->CopyPackage(other.m_Data);
 			m_Pack = other.m_Pack;
-			m_Data = m_Pack->CopyPackage(other.m_Data);
 		}
 
 		return *this;
@@ -288,15 +293,22 @@ public:
 			return;
 
 		m_Pack->DestroyPackage(m_Data);
-		m_Pack = pack;
+		m_Pack = &ParamPackage::EMPTY;
+
 		m_Data = pack->CreatePackage();
+		m_Pack = pack;
 	}
 
 	//! Reset the puffer to its default state
 	void Reset()
 	{
+		auto pack = m_Pack;
+
 		m_Pack->DestroyPackage(m_Data);
+		m_Pack = &ParamPackage::EMPTY;
+
 		m_Data = m_Pack->CreatePackage();
+		m_Pack = pack;
 	}
 
 	//! Get a param from its name
