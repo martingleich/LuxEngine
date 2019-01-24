@@ -244,7 +244,8 @@ public:
 		m_Base.Add(key, false, RefTuple(key, init));
 	}
 
-	V& At(const K& key, const V& init)
+	template <typename K2=K>
+	V& At(const K2& key, const V& init)
 	{
 		return m_Base.GetValue(m_Base.Add(key, false, RefTuple(key, init)).id).value;
 	}

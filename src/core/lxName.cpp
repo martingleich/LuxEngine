@@ -12,6 +12,10 @@ Name::Name() :
 {
 }
 
+Name::~Name()
+{
+}
+
 Name::Name(StringView str, int action, StringTable* table) :
 	m_Handle(StringTableHandle::INVALID)
 {

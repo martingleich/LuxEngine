@@ -116,7 +116,7 @@ void ResourceSystem::Destroy()
 }
 
 ResourceSystem::ResourceSystem() :
-	self(LUX_NEW(SelfType))
+	self(std::make_unique<SelfType>())
 {
 	self->fileSystem = io::FileSystem::Instance();
 	self->refFactory = ReferableFactory::Instance();
@@ -124,7 +124,6 @@ ResourceSystem::ResourceSystem() :
 
 ResourceSystem::~ResourceSystem()
 {
-	LUX_FREE(self);
 }
 
 int ResourceSystem::FreeUnusedResources(Name type)

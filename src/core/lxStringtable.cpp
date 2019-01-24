@@ -1,6 +1,5 @@
 #include "core/lxStringTable.h"
 #include "core/lxUtil.h"
-#include <unordered_map>
 #include <cctype>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,57 +52,6 @@ int StringTableHandle::Size() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct CheckEntry
-{
-	CheckEntry(const void* handle) :
-		m_Handle(handle)
-	{
-	}
-
-	const void* m_Handle;
-	struct Hasher
-	{
-		int operator()(const CheckEntry& entry) const
-		{
-			return HashSequence(reinterpret_cast<const u8*>(entry.m_Handle) + sizeof(int),
-				*reinterpret_cast<const int*>(entry.m_Handle));
-		}
-	};
-
-	struct Equal
-	{
-		bool operator()(const CheckEntry& a, const CheckEntry& b) const
-		{
-			int aSize = *reinterpret_cast<const int*>(a.m_Handle) + sizeof(int);
-			int bSize = *reinterpret_cast<const int*>(b.m_Handle) + sizeof(int);
-			if(bSize != aSize)
-				return false;
-			return (memcmp(a.m_Handle, b.m_Handle, aSize) == 0);
-		}
-	};
-};
-
-struct StringTable::MemBlock
-{
-	MemBlock* next;
-	int used;
-	static const int DATA_SIZE = 4000;
-	char data[DATA_SIZE];
-};
-
-struct StringTable::SelfType
-{
-	std::unordered_map<CheckEntry, StringTableHandle, CheckEntry::Hasher, CheckEntry::Equal> map;
-	MemBlock* first;
-	MemBlock* last;
-
-	SelfType() :
-		first(nullptr),
-		last(nullptr)
-	{
-	}
-};
-
 StringTable&  StringTable::GlobalInstance()
 {
 	static StringTable* instance = nullptr;
@@ -113,20 +61,19 @@ StringTable&  StringTable::GlobalInstance()
 }
 
 StringTable::StringTable() :
-	self(LUX_NEW(SelfType))
+	m_First(nullptr),
+	m_Last(nullptr)
 {
 }
 
 StringTable::~StringTable()
 {
-	MemBlock* cur = self->first;
+	MemBlock* cur = m_First;
 	while(cur) {
 		MemBlock* next = cur->next;
 		LUX_FREE(cur);
 		cur = next;
 	}
-
-	LUX_FREE(self);
 }
 
 StringTableHandle StringTable::FindString(const StringView& str)
@@ -154,16 +101,16 @@ StringTableHandle StringTable::AddFindString(const StringView& str, bool find)
 	strPos[strSize] = 0;
 
 	CheckEntry checkEntry(handle);
-	auto it = self->map.find(checkEntry);
-	if(it != self->map.end()) {
-		return it->second;
+	auto it = m_Map.Find(checkEntry);
+	if(it != m_Map.end()) {
+		return it->value;
 	} else {
 		if(find)
 			return StringTableHandle::INVALID;
 
 		block->used += size;
 
-		self->map.emplace(CheckEntry(handle), StringTableHandle(handle));
+		m_Map.Add(CheckEntry(handle), StringTableHandle(handle));
 		return handle;
 	}
 }
@@ -173,7 +120,7 @@ StringTable::MemBlock* StringTable::GetMatchingPosition(int length)
 	if(length > MemBlock::DATA_SIZE)
 		throw GenericInvalidArgumentException("length", "String is to long for string table(max size=4000)");
 
-	MemBlock* cur = self->first;
+	MemBlock* cur = m_First;
 	while(cur) {
 		if(MemBlock::DATA_SIZE - cur->used >= length)
 			return cur;
@@ -191,14 +138,14 @@ StringTable::MemBlock* StringTable::AddNewMemBlock()
 	newBlock->next = nullptr;
 	newBlock->used = 0;
 
-	if(self->last)
-		self->last->next = newBlock;
-	self->last = newBlock;
+	if(m_Last)
+		m_Last->next = newBlock;
+	m_Last = newBlock;
 
-	if(!self->first)
-		self->first = self->last;
+	if(!m_First)
+		m_First = m_Last;
 
-	return self->last;
+	return m_Last;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

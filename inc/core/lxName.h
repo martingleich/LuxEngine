@@ -11,7 +11,7 @@ namespace core
 {
 
 //! A string representing a name
-class LUX_API Name
+class Name
 {
 public:
 	//! The invalid/empty name string
@@ -21,7 +21,8 @@ public:
 	static const int ADD = 0;
 public:
 	//! Construct an empty name string
-	Name();
+	LUX_API Name();
+	LUX_API ~Name();
 
 	//! Construct from name
 	/**
@@ -29,31 +30,31 @@ public:
 	\param findOnly If the name isn't already in the table and this is true, the string isn't put in the table
 		and a empty name is returned, if it's false, the string is added into the table
 	*/
-	explicit Name(StringView str, int action = ADD, StringTable* table = nullptr);
-	explicit Name(const char* str, int action = ADD, StringTable* table = nullptr) :
+	LUX_API explicit Name(StringView str, int action = ADD, StringTable* table = nullptr);
+	LUX_API explicit Name(const char* str, int action = ADD, StringTable* table = nullptr) :
 		Name(StringView(str, strlen(str)), action, table)
 	{}
 
-	void SetHandle(StringTableHandle handle);
-	StringTableHandle GetHandle() const;
-	Name& operator=(const Name& other);
-	Name& operator=(StringView str);
+	LUX_API void SetHandle(StringTableHandle handle);
+	LUX_API StringTableHandle GetHandle() const;
+	LUX_API Name& operator=(const Name& other);
+	LUX_API Name& operator=(StringView str);
 
-	bool operator==(const Name& other) const;
-	bool operator==(StringView other) const;
-	bool operator!=(const Name& other) const;
-	bool operator!=(StringView other) const;
+	LUX_API bool operator==(const Name& other) const;
+	LUX_API bool operator==(StringView other) const;
+	LUX_API bool operator!=(const Name& other) const;
+	LUX_API bool operator!=(StringView other) const;
 
 	StringView AsView() const
 	{
 		return StringView(m_Handle.Data(), Size());
 	}
 
-	bool operator<(const Name& other) const;
-	int Size() const;
-	bool IsEmpty() const;
+	LUX_API bool operator<(const Name& other) const;
+	LUX_API int Size() const;
+	LUX_API bool IsEmpty() const;
 
-	void Set(StringView str, int action = ADD, StringTable* table = nullptr);
+	LUX_API void Set(StringView str, int action = ADD, StringTable* table = nullptr);
 
 private:
 	StringTableHandle m_Handle;

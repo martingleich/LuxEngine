@@ -62,7 +62,7 @@ public:
 
 private:
 	struct IDList;
-	IDList* m_List;
+	std::unique_ptr<IDList> m_List;
 };
 
 namespace Types

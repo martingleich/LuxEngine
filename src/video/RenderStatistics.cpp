@@ -1,100 +1,74 @@
 #include "video/RenderStatistics.h"
 #include "core/Clock.h"
-#include "core/lxArray.h"
-#include "core/lxString.h"
-#include "core/lxHashMap.h"
 
 namespace lux
 {
 namespace video
 {
-static StrongRef<RenderStatistics> g_Stats;
+
+static RenderStatistics g_Stats;
+static RenderStatistics::Group EMPTY_GROUP;
+
 RenderStatistics* RenderStatistics::Instance()
 {
-	if(!g_Stats)
-		g_Stats = LUX_NEW(RenderStatistics);
-	return g_Stats;
+	return &g_Stats;
 }
 
-struct RenderStatistics::SelfT
+RenderStatistics::RenderStatistics()
 {
-	Group empty;
-	Group total;
-	core::HashMap<core::String, Group*> groups;
-	core::Array<Group*> groupStack;
-
-	core::Duration duration;
-	core::Duration frameStart;
-};
-
-RenderStatistics::RenderStatistics() :
-	self(LUX_NEW(SelfT))
-{
-
 }
 RenderStatistics::~RenderStatistics()
 {
-	for(auto grp : self->groups.Values())
-		LUX_FREE(grp);
-
-	LUX_FREE(self);
 }
 
 void RenderStatistics::AddPrimitives(u32 count)
 {
-	for(auto& e : self->groupStack)
+	for(auto& e : m_GroupStack)
 		e->primitiveCounter += count;
 }
 
 void RenderStatistics::BeginFrame()
 {
-	self->frameStart = core::Clock::GetTicks();
-	for(auto& grp : self->groups.Values())
-		grp->Begin();
-	self->total.Begin();
-	self->groupStack.Clear();
-	self->groupStack.PushBack(&self->total);
+	m_FrameStart = core::Clock::GetTicks();
+	for(auto& grp : m_Groups.Values())
+		grp.Begin();
+	auto& total = m_Groups.At("total");
+	m_GroupStack.Clear();
+	m_GroupStack.PushBack(&total);
 }
 
 void RenderStatistics::EndFrame()
 {
 	auto frameEnd = core::Clock::GetTicks();
-	self->duration = frameEnd - self->frameStart;
-	for(auto& grp : self->groups.Values())
-		grp->End();
-	self->total.End();
+	m_Duration = frameEnd - m_FrameStart;
+	for(auto& grp : m_Groups.Values())
+		grp.End();
 }
 
 u32 RenderStatistics::GetPrimitivesDrawn() const
 {
-	return self->total.primitives;
+	return m_Groups.Get("total").primitives;
 }
 
 float RenderStatistics::GetDuration() const
 {
-	return self->duration.AsSeconds();
+	return m_Duration.AsSeconds();
 }
 
-void RenderStatistics::PushGroup(const char* name)
+void RenderStatistics::PushGroup(core::StringView name)
 {
-	auto& grp = self->groups.At(name, nullptr);
-	if(!grp)
-		grp = LUX_NEW(Group);
-	self->groupStack.PushBack(grp);
+	auto& grp = m_Groups.At(name, Group());
+	m_GroupStack.PushBack(&grp);
 }
 
 void RenderStatistics::PopGroup()
 {
-	self->groupStack.PopBack();
+	m_GroupStack.PopBack();
 }
 
-const RenderStatistics::Group& RenderStatistics::GetGroup(const char* name) const
+const RenderStatistics::Group& RenderStatistics::GetGroup(core::StringView name) const
 {
-	auto it = self->groups.Find<const char*>(name);
-	if(it == self->groups.end())
-		return self->empty;
-	else
-		return *it->value;
+	return m_Groups.Get(name, EMPTY_GROUP);
 }
 
 }

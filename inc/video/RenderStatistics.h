@@ -1,6 +1,9 @@
 #ifndef INCLUDED_LUX_RENDERSTATISTICS_H
 #define INCLUDED_LUX_RENDERSTATISTICS_H
 #include "core/ReferenceCounted.h"
+#include "core/lxArray.h"
+#include "core/lxString.h"
+#include "core/lxHashMap.h"
 
 namespace lux
 {
@@ -28,7 +31,7 @@ public:
 
 	struct GroupScope
 	{
-		GroupScope(const char* name)
+		GroupScope(core::StringView name)
 		{
 			RenderStatistics::Instance()->PushGroup(name);
 		}
@@ -49,13 +52,16 @@ public:
 	LUX_API void EndFrame();
 	LUX_API u32 GetPrimitivesDrawn() const;
 	LUX_API float GetDuration() const;
-	LUX_API void PushGroup(const char* name);
+	LUX_API void PushGroup(core::StringView name);
 	LUX_API void PopGroup();
-	LUX_API const Group& GetGroup(const char* name) const;
+	LUX_API const Group& GetGroup(core::StringView name) const;
 
 private:
-	struct SelfT;
-	SelfT* self;
+	core::HashMap<core::String, Group> m_Groups;
+	core::Array<Group*> m_GroupStack;
+
+	core::Duration m_Duration;
+	core::Duration m_FrameStart;
 };
 
 }

@@ -50,11 +50,11 @@ public:
 	}
 
 	RawMemory(RawMemory&& old) :
-		m_Data(old.m_Data),
-		m_Size(old.m_Size)
+		m_Data(nullptr),
+		m_Size(0)
 	{
-		old.m_Size = 0;
-		old.m_Data = nullptr;
+		std::swap(m_Data, old.m_Data);
+		std::swap(m_Size, old.m_Size);
 	}
 
 	void Set(const void* data, int size)
@@ -70,19 +70,14 @@ public:
 
 	RawMemory& operator=(RawMemory&& old)
 	{
-		LUX_FREE_ARRAY(m_Data);
-
-		m_Data = old.m_Data;
-		m_Size = old.m_Size;
-		old.m_Data = nullptr;
-		old.m_Size = 0;
-
+		std::swap(m_Data, old.m_Data);
+		std::swap(m_Size, old.m_Size);
 		return *this;
 	}
 
 	~RawMemory()
 	{
-		LUX_FREE_ARRAY(m_Data);
+		SetSize(0);
 	}
 
 	void SetSize(size_t newSize, int action = NOOP)
@@ -99,30 +94,27 @@ public:
 			return;
 		}
 
-		if(newSize == 0) {
-			LUX_FREE_ARRAY(m_Data);
-			return;
+		u8* newData = nullptr;
+		if(newSize > 0) {
+			newData = LUX_NEW_ARRAY(u8, newSize);
+			if(action == ZERO) {
+				std::memset(newData, 0, newSize);
+			} else if(action & COPY) {
+				if(m_Size) {
+					const size_t toCopy = m_Size < newSize ? m_Size : newSize;
+					std::memcpy(newData, m_Data, toCopy);
+				}
+				if(action & ZERO) {
+					std::memset(newData + m_Size, 0, newSize - m_Size);
+				}
+			} else {
+				(void)0;
+			}
 		}
 
-		u8* data = LUX_NEW_ARRAY(u8, newSize);
-		if(action == ZERO) {
-			std::memset(data, 0, newSize);
-		} else if(action & COPY) {
-			if(m_Size) {
-				const size_t toCopy = m_Size < newSize ? m_Size : newSize;
-				std::memcpy(data, m_Data, toCopy);
-			}
-			if(action & ZERO) {
-				std::memset(data + m_Size, 0, newSize - m_Size);
-			}
-		} else {
-			(void)0;
-		}
+		LUX_FREE_ARRAY(m_Data);
 
-		if(m_Data)
-			LUX_FREE_ARRAY(m_Data);
-
-		m_Data = data;
+		m_Data = newData;
 		m_Size = newSize;
 	}
 
@@ -166,7 +158,85 @@ private:
 };
 
 // TODO: Memory without size
-// TODO: Memory with optional delete on drop.
+
+template <typename T>
+class LazyCopy
+{
+private:
+	struct Data
+	{
+		Data() :
+			refCount(1)
+		{}
+
+		Data(const T& _value) :
+			value(_value),
+			refCount(1)
+		{}
+
+		T value;
+		int refCount;
+	};
+public:
+	LazyCopy()
+	{
+		m_Ptr = LUX_NEW(Data);
+	}
+	LazyCopy(const T& value)
+	{
+		m_Ptr = LUX_NEW(Data)(value);
+	}
+	LazyCopy(const LazyCopy& other)
+	{
+		m_Ptr = other.m_Ptr;
+		m_Ptr->refCount++;
+	}
+	LazyCopy(LazyCopy&& old) :
+		m_Ptr(nullptr)
+	{
+		std::swap(m_Ptr, old.m_Ptr);
+	}
+	~LazyCopy()
+	{
+		Destroy();
+	}
+	LazyCopy& operator=(const LazyCopy& other)
+	{
+		if(this == &other)
+			return *this;
+		Destroy();
+		m_Ptr = other.m_Ptr;
+		m_Ptr->refCount++;
+		return *this;
+	}
+	LazyCopy& operator=(LazyCopy&& old)
+	{
+		std::swap(m_Ptr, old.m_Ptr);
+		return *this;
+	}
+
+	void ForceCopy()
+	{
+		if(m_Ptr->refCount > 1) {
+			m_Ptr = LUX_NEW(Data)(*m_Ptr);
+			m_Ptr->refCount = 1;
+		}
+	}
+
+	T* operator->() { return &m_Ptr->value; }
+	const T* operator->() const { return &m_Ptr->value; }
+
+private:
+	void Destroy()
+	{
+		m_Ptr->refCount--;
+		if(m_Ptr->refCount == 0)
+			LUX_FREE(m_Ptr);
+	}
+public:
+	Data* m_Ptr;
+};
+
 }
 }
 

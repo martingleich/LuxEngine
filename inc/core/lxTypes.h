@@ -4,12 +4,12 @@
 #include "core/lxException.h"
 #include "core/lxUtil.h"
 #include <cstring>
-#include <new>
+#include "core/lxMemory.h"
 
 namespace format
 {
-	class Context;
-	struct Placeholder;
+class Context;
+struct Placeholder;
 } // namespace format
 
 namespace lux
@@ -280,7 +280,8 @@ struct UnknownTypeException : ErrorException
 {
 	explicit UnknownTypeException(StringView symbol) :
 		m_TypeSymbol(symbol)
-	{}
+	{
+	}
 
 	ExceptionSafeString What() const { return ExceptionSafeString("UnknownTypeException: ").Append(m_TypeSymbol); }
 
@@ -334,15 +335,14 @@ class AnyObject
 {
 public:
 	AnyObject() :
-		m_Type(Types::Unknown()),
-		m_Data(nullptr)
+		m_Type(Types::Unknown())
 	{
 	}
 
 	explicit AnyObject(const Type& type, const void* data = nullptr) :
-		m_Type(type.GetBaseType())
+		m_Type(type.GetBaseType()),
+		m_Data(m_Type.GetSize())
 	{
-		m_Data = LUX_NEW_ARRAY(u8, m_Type.GetSize());
 		if(data)
 			m_Type.CopyConstruct(m_Data, data);
 		else
@@ -350,16 +350,14 @@ public:
 	}
 
 	AnyObject(const AnyObject& other) :
-		m_Type(other.m_Type)
+		AnyObject(other.GetType(), other.Data())
 	{
-		m_Data = LUX_NEW_ARRAY(u8, m_Type.GetSize());
-		m_Type.CopyConstruct(m_Data, other.m_Data);
 	}
+	AnyObject(AnyObject&& old) = default;
 
 	~AnyObject()
 	{
 		m_Type.Destruct(m_Data);
-		LUX_FREE_ARRAY((u8*)m_Data);
 	}
 
 	AnyObject& operator=(const AnyObject& other)
@@ -369,22 +367,16 @@ public:
 		} else {
 			m_Type.Destruct(m_Data);
 			m_Type = other.m_Type;
-			LUX_FREE_ARRAY((u8*)m_Data);
-			m_Data = LUX_NEW_ARRAY(u8, m_Type.GetSize());
+			m_Data.SetSize(m_Type.GetSize());
 			m_Type.CopyConstruct(m_Data, other.m_Data);
 		}
 		return *this;
 	}
 
-	void* Data()
-	{
-		return m_Data;
-	}
+	AnyObject& operator=(AnyObject&& old) = default;
 
-	const void* Data() const
-	{
-		return m_Data;
-	}
+	void* Data() { return m_Data; }
+	const void* Data() const { return m_Data; }
 
 	void Assign(const void* data)
 	{
@@ -414,7 +406,7 @@ public:
 
 private:
 	Type m_Type;
-	void* m_Data;
+	core::RawMemory m_Data;
 };
 
 //! Converts between base types.

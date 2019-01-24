@@ -53,13 +53,12 @@ IDManager* IDManager::Instance()
 }
 
 IDManager::IDManager() :
-	m_List(LUX_NEW(IDList))
+	m_List(std::make_unique<IDList>())
 {
 }
 
 IDManager::~IDManager()
 {
-	LUX_FREE(m_List);
 }
 
 ID IDManager::Create(core::Referable* obj)

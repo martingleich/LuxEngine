@@ -184,7 +184,7 @@ private:
 
 private:
 	struct SelfType;
-	SelfType* self;
+	std::unique_ptr<SelfType> self;
 };
 
 } // namespace core

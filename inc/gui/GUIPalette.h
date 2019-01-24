@@ -2,6 +2,7 @@
 #define INCLUDED_LUX_GUI_PALETTE_H
 #include "video/Color.h"
 #include "gui/GUIEnums.h"
+#include "core/lxMemory.h"
 
 namespace lux
 {
@@ -35,24 +36,16 @@ public:
 private:
 	struct Data
 	{
-		Data() :
-			colorFlags(0),
-			refCount(1)
-		{
-		}
-
 		video::Color colors[COLOR_COUNT];
-		u32 colorFlags;
-		int refCount;
+		u32 colorFlags = 0;
 	};
 
-	LUX_API static Data DEFAULT_DATA;
+	LUX_API static core::LazyCopy<Data> DEFAULT_DATA;
 
 public:
-	Palette()
+	Palette() :
+		m_Data(DEFAULT_DATA)
 	{
-		m_Data = &DEFAULT_DATA;
-		m_Data->refCount++;
 	}
 
 	Palette(video::Color color) :
@@ -62,11 +55,7 @@ public:
 			SetColor(i, color);
 	}
 
-	Palette(const Palette& other)
-	{
-		m_Data = other.m_Data;
-		++m_Data->refCount;
-	}
+	Palette(const Palette& other) = default;
 
 	Palette(const Palette& other, const Palette& base) :
 		Palette(other)
@@ -74,20 +63,9 @@ public:
 		Merge(base);
 	}
 
-	~Palette()
-	{
-		--m_Data->refCount;
-		if(!m_Data->refCount)
-			LUX_FREE(m_Data);
-	}
+	~Palette() = default;
 
-	Palette& operator=(const Palette& other)
-	{
-		this->~Palette();
-		m_Data = other.m_Data;
-		++m_Data->refCount;
-		return *this;
-	}
+	Palette& operator=(const Palette& other) = default;
 
 	bool IsSet(EColorGroup state, EColorRole role) const
 	{
@@ -120,7 +98,7 @@ public:
 
 	void SetColor(EColorGroup state, EColorRole role, video::Color color)
 	{
-		EnsureDataCopy();
+		m_Data.ForceCopy();
 		SetColor(GetId(state, role), color);
 	}
 	void SetColor(EColorRole role, video::Color color)
@@ -131,14 +109,14 @@ public:
 
 	void SetColor(u32 id, video::Color color)
 	{
-		EnsureDataCopy();
+		m_Data.ForceCopy();
 		m_Data->colors[id] = color;
 		m_Data->colorFlags |= 1 << id;
 	}
 
 	void ClearColor(EColorGroup state, EColorRole role)
 	{
-		EnsureDataCopy();
+		m_Data.ForceCopy();
 		m_Data->colorFlags &= ~(1 << GetId(state, role));
 	}
 
@@ -157,7 +135,7 @@ public:
 		if((m_Data->colorFlags & BIT_MASK) == BIT_MASK)
 			return;
 
-		EnsureDataCopy();
+		m_Data.ForceCopy();
 		for(int i = 0; i < COLOR_COUNT; ++i) {
 			if((m_Data->colorFlags & (1 << i)) == 0) {
 				m_Data->colors[i] = base.m_Data->colors[i];
@@ -172,14 +150,8 @@ private:
 		return ((u32)state) * 6 + (u32)role;
 	}
 
-	void EnsureDataCopy()
-	{
-		if(m_Data->refCount > 1)
-			m_Data = LUX_NEW(Data)(*m_Data);
-	}
-
 private:
-	Data* m_Data;
+	core::LazyCopy<Data> m_Data;
 };
 
 } // namespace gui
