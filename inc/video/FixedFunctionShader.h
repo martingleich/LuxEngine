@@ -13,7 +13,11 @@ struct FixedFunctionParameters
 {
 	static FixedFunctionParameters VertexColorOnly()
 	{
-		return FixedFunctionParameters();
+		FixedFunctionParameters out;
+		out.enableFogging = false;
+		out.maxLightCount = 0;
+		out.useVertexColors = true;
+		return out;
 	}
 	static FixedFunctionParameters Unlit(
 		const core::Array<core::String>& textures,
