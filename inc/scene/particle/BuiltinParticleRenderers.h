@@ -30,16 +30,16 @@ enum class ELockedAxis
 	Up
 };
 
-class QuadRenderer : public ParticleRenderer
+class QuadParticleRenderer : public ParticleRenderer
 {
-	LX_REFERABLE_MEMBERS_API(QuadRenderer, LUX_API);
+	LX_REFERABLE_MEMBERS_API(QuadParticleRenderer, LUX_API);
 public:
 	class Machine : public ReferenceCounted
 	{
 	public:
-		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadRenderer* renderer) = 0;
+		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadParticleRenderer* renderer) = 0;
 	};
-	QuadRenderer();
+	QuadParticleRenderer();
 	void Render(video::Renderer* videoRenderer, ParticleGroupData* group) override
 	{
 		m_Machine->Render(videoRenderer, group, this);
@@ -65,16 +65,16 @@ private:
 	StrongRef<Machine> m_Machine;
 };
 
-class LineRenderer : public ParticleRenderer
+class LineParticleRenderer : public ParticleRenderer
 {
-	LX_REFERABLE_MEMBERS_API(LineRenderer, LUX_API);
+	LX_REFERABLE_MEMBERS_API(LineParticleRenderer, LUX_API);
 public:
 	class Machine : public ReferenceCounted
 	{
 	public:
-		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, LineRenderer* renderer) = 0;
+		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, LineParticleRenderer* renderer) = 0;
 	};
-	LineRenderer();
+	LineParticleRenderer();
 	void Render(video::Renderer* videoRenderer, ParticleGroupData* group) override
 	{
 		m_Machine->Render(videoRenderer, group, this);
@@ -91,16 +91,16 @@ private:
 	StrongRef<Machine> m_Machine;
 };
 
-class PointRenderer : public ParticleRenderer
+class PointParticleRenderer : public ParticleRenderer
 {
-	LX_REFERABLE_MEMBERS_API(PointRenderer, LUX_API);
+	LX_REFERABLE_MEMBERS_API(PointParticleRenderer, LUX_API);
 public:
 	class Machine : public ReferenceCounted
 	{
 	public:
-		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, PointRenderer* renderer) = 0;
+		virtual void Render(video::Renderer* videoRenderer, ParticleGroupData* group, PointParticleRenderer* renderer) = 0;
 	};
-	PointRenderer();
+	PointParticleRenderer();
 	void Render(video::Renderer* videoRenderer, ParticleGroupData* group) override
 	{
 		m_Machine->Render(videoRenderer, group, this);

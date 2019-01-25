@@ -15,7 +15,7 @@ namespace scene
 {
 class ParticleGroupData;
 
-class LineRendererMachine : public LineRenderer::Machine 
+class LineRendererMachine : public LineParticleRenderer::Machine 
 {
 private:
 	struct LineVertex
@@ -27,13 +27,13 @@ private:
 public:
 	LineRendererMachine();
 	static StrongRef<LineRendererMachine> GetShared();
-	void Render(video::Renderer* videoRenderer, ParticleGroupData* group, LineRenderer* renderer);
+	void Render(video::Renderer* videoRenderer, ParticleGroupData* group, LineParticleRenderer* renderer);
 
 private:
 	void CreateBuffer(ParticleGroupData* group);
 
 private:
-	StrongRef<LineRenderer> m_Data;
+	StrongRef<LineParticleRenderer> m_Data;
 	core::Array<LineVertex> m_Vertices;
 
 	video::Pass m_DefaultPass;

@@ -16,13 +16,13 @@ namespace scene
 {
 
 class ParticleGroupData;
-class QuadRendererMachine : public QuadRenderer::Machine
+class QuadRendererMachine : public QuadParticleRenderer::Machine
 {
 public:
 	QuadRendererMachine();
 	~QuadRendererMachine();
 	static StrongRef<QuadRendererMachine> GetShared();
-	void Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadRenderer* renderer);
+	void Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadParticleRenderer* renderer);
 
 private:
 	bool PrecomputeOrientation(const math::Matrix4& invModelView);
@@ -36,7 +36,7 @@ private:
 
 private:
 	video::VideoDriver* m_Driver;
-	StrongRef<QuadRenderer> m_Data;
+	StrongRef<QuadParticleRenderer> m_Data;
 	StrongRef<ParticleModel> m_Model;
 
 	StrongRef<video::Geometry> m_Buffer;

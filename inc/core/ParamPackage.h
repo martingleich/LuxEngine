@@ -237,6 +237,7 @@ public:
 		m_Pack(&ParamPackage::EMPTY)
 	{
 		LX_CHECK_NULL_ARG(pack);
+		// Exception save ordering.
 		m_Data = pack->CreatePackage();
 		m_Pack = pack;
 	}
@@ -257,6 +258,7 @@ public:
 		if(m_Pack == other.m_Pack) {
 			m_Pack->AssignPackage(m_Data, other.m_Data);
 		} else {
+			// Exception save ordering.
 			m_Pack->DestroyPackage(m_Data);
 			m_Pack = &ParamPackage::EMPTY;
 
@@ -292,6 +294,7 @@ public:
 		if(m_Pack == pack)
 			return;
 
+		// Exception save ordering.
 		m_Pack->DestroyPackage(m_Data);
 		m_Pack = &ParamPackage::EMPTY;
 
@@ -304,6 +307,7 @@ public:
 	{
 		auto pack = m_Pack;
 
+		// Exception save ordering.
 		m_Pack->DestroyPackage(m_Data);
 		m_Pack = &ParamPackage::EMPTY;
 

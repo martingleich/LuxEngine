@@ -3,15 +3,15 @@
 #include "scene/particle/renderer/PointRendererMachine.h"
 #include "scene/particle/renderer/LineRendererMachine.h"
 
-LX_REFERABLE_MEMBERS_SRC(lux::scene::QuadRenderer, "lux.particlerenderer.Quad");
-LX_REFERABLE_MEMBERS_SRC(lux::scene::LineRenderer, "lux.particlerenderer.Line");
-LX_REFERABLE_MEMBERS_SRC(lux::scene::PointRenderer, "lux.particlerenderer.Point");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::QuadParticleRenderer, "lux.particlerenderer.Quad");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::LineParticleRenderer, "lux.particlerenderer.Line");
+LX_REFERABLE_MEMBERS_SRC(lux::scene::PointParticleRenderer, "lux.particlerenderer.Point");
 
 namespace lux
 {
 namespace scene
 {
-QuadRenderer::QuadRenderer() :
+QuadParticleRenderer::QuadParticleRenderer() :
 	LookOrient(ELookOrientation::CameraPlane),
 	UpOrient(EUpOrientation::Direction),
 	LockedAxis(ELockedAxis::Look),
@@ -22,7 +22,7 @@ QuadRenderer::QuadRenderer() :
 	m_Machine = QuadRendererMachine::GetShared();
 }
 
-LineRenderer::LineRenderer() :
+LineParticleRenderer::LineParticleRenderer() :
 	ScaleSpeed(false),
 	Length(1.0f),
 	EmitLight(false),
@@ -30,7 +30,7 @@ LineRenderer::LineRenderer() :
 {
 	m_Machine = LineRendererMachine::GetShared();
 }
-PointRenderer::PointRenderer()
+PointParticleRenderer::PointParticleRenderer()
 {
 	m_Machine = PointRendererMachine::GetShared();
 }

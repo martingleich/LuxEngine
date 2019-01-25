@@ -186,7 +186,7 @@ void QuadRendererMachine::ComputeLocalOrientation(const Particle& particle)
 	m_Side.SetLength(0.5f);
 }
 
-void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadRenderer* renderer)
+void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, QuadParticleRenderer* renderer)
 {
 	if(group->GetParticleCount() == 0)
 		return;

@@ -48,7 +48,7 @@ void PointRendererMachine::CreateBuffer(ParticleGroupData* group)
 		m_Vertices.Resize(group->GetParticleCount());
 }
 
-void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, PointRenderer* renderer)
+void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, PointParticleRenderer* renderer)
 {
 	if(group->GetParticleCount() == 0)
 		return;
