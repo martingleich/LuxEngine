@@ -112,10 +112,14 @@ private:
 		DepthBuffer_d3d9() {}
 		DepthBuffer_d3d9(UnknownRefCounted<IDirect3DSurface9> surface);
 		const math::Dimension2I& GetSize() const { return m_Size; }
+		D3DMULTISAMPLE_TYPE GetMultisampleType() const { return m_MultiType; }
+		DWORD GetMultisampleQuality() const { return m_MultQual; }
 		IDirect3DSurface9* GetSurface() const { return m_Surface; }
 
 	private:
 		math::Dimension2I m_Size;
+		D3DMULTISAMPLE_TYPE m_MultiType;
+		DWORD m_MultQual;
 		UnknownRefCounted<IDirect3DSurface9> m_Surface;
 	};
 

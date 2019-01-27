@@ -31,6 +31,8 @@ VideoDriverD3D9::DepthBuffer_d3d9::DepthBuffer_d3d9(UnknownRefCounted<IDirect3DS
 		m_Surface->GetDesc(&desc);
 		m_Size.width = desc.Width;
 		m_Size.height = desc.Height;
+		m_MultiType = desc.MultiSampleType;
+		m_MultQual = desc.MultiSampleQuality;
 	}
 }
 
@@ -272,7 +274,7 @@ UnknownRefCounted<IDirect3DSurface9> VideoDriverD3D9::GetD3D9MatchingDepthBuffer
 		return nullptr;
 
 	for(auto it = m_DepthBuffers.First(); it != m_DepthBuffers.End(); ++it) {
-		if(size.DoesFitInto(it->GetSize()))
+		if(size.DoesFitInto(it->GetSize()) && it->GetMultisampleQuality() == desc.MultiSampleQuality && it->GetMultisampleType() == desc.MultiSampleType)
 			return it->GetSurface();
 	}
 
