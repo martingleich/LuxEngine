@@ -2,7 +2,7 @@
 #define INCLUDED_LUX_SCENE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
-#include "core/lxOrderedSet.h"
+#include "core/lxHashSet.h"
 #include "core/lxName.h"
 
 #include "scene/Renderable.h"
@@ -13,22 +13,6 @@ namespace scene
 {
 class Component;
 class Node;
-
-class SceneObserver : public virtual ReferenceCounted
-{
-public:
-	// Only called for parent node
-	virtual void OnAttach(Node* child) = 0;
-	// Only called for parent node
-	virtual void OnDetach(Node* child) = 0;
-
-	// Only if component is attached to a node.
-	// Not if a node with components is attached to a node in the scene.
-	virtual void OnAttach(Component* child) = 0;
-	// Only if component is detached to a node.
-	// Not if a node with components is detached to a node in the scene.
-	virtual void OnDetach(Component* child) = 0;
-};
 
 class ComponentVisitor
 {
@@ -48,11 +32,8 @@ public:
 	Scene(const Scene&) = delete;
 	LUX_API ~Scene();
 
-	LUX_API void RegisterObserver(SceneObserver* observer);
-	LUX_API void UnregisterObserver(SceneObserver* observer);
-
-	LUX_API void Clear();
 	LUX_API void AddToDeletionQueue(Node* node);
+	LUX_API void AddToDeletionQueue(Component* node);
 	LUX_API void ClearDeletionQueue();
 
 	////////////////////////////////////////////////////////////////////////////////////
@@ -62,19 +43,17 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API Node* GetRoot() const;
-	LUX_API bool IsEmpty() const;
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API void RegisterAnimated(Node* node);
-	LUX_API void UnregisterAnimated(Node* node);
+	LUX_API void RegisterForTick(Component* c, bool doRegister);
+	LUX_API void RegisterLight(Component* c, bool doRegister);
+	LUX_API void RegisterFog(Component* c, bool doRegister);
+	LUX_API void RegisterCamera(Component* c, bool doRegister);
 
 	////////////////////////////////////////////////////////////////////////////////////
 
 	LUX_API void AnimateAll(float secsPassed);
-	LUX_API void VisitRenderables(
-		RenderableVisitor* visitor,
-		ERenderableTags tags = ERenderableTags::None, Node* root = nullptr);
 
 	//! Visit all components.
 	/*
@@ -88,19 +67,21 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API void OnAttach(Node* node);
-	LUX_API void OnDetach(Node* node);
-
-	LUX_API void OnAttach(Component* comp);
-	LUX_API void OnDetach(Component* comp);
+	core::Range<core::HashSet<Component*>::Iterator> GetLights() { return core::MakeRange(m_LightComps); }
+	core::Range<core::HashSet<Component*>::Iterator> GetFogs() { return core::MakeRange(m_FogComps); }
+	core::Range<core::HashSet<Component*>::Iterator> GetCameras() { return core::MakeRange(m_CamComps); }
 
 private:
 	StrongRef<Node> m_Root; //!< The root of the scenegraph
 
-	core::Array<StrongRef<SceneObserver>> m_Observers;
-	core::Array<StrongRef<Node>> m_DeletionQueue; //!< Nodes to delete on next deletion run
+	core::Array<StrongRef<Node>> m_NodeDeletionQueue; //!< Nodes to delete on next deletion run
+	core::Array<StrongRef<Component>> m_CompDeletionQueue; //!< Nodes to delete on next deletion run
 
-	core::OrderedSet<Node*> m_AnimatedNodes; //!< The animated nodes of the graph
+	// TODO: Use better datastructure for this.
+	core::HashSet<Component*> m_AnimatedComps; //!< The animated nodes of the graph
+	core::HashSet<Component*> m_LightComps; //!< The animated nodes of the graph
+	core::HashSet<Component*> m_FogComps; //!< The animated nodes of the graph
+	core::HashSet<Component*> m_CamComps; //!< The animated nodes of the graph
 };
 
 } // namespace scene

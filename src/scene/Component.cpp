@@ -1,4 +1,6 @@
 #include "scene/Component.h"
+#include "scene/Node.h"
+#include "scene/Scene.h"
 
 namespace lux
 {
@@ -19,7 +21,29 @@ const core::Name DirLight("lux.comp.DirectionalLight");
 const core::Name LinearFog("lux.comp.LinearFog");
 const core::Name ExponentialFog("lux.comp.ExpFog");
 const core::Name SkyBox("lux.comp.SkyBox");
+}
 
+void Component::SetAnimated(bool animated)
+{
+	if(animated == m_IsAnimated)
+		return;
+
+	if(auto s = GetScene())
+		s->RegisterForTick(this, animated);
+	m_IsAnimated = animated;
+}
+
+Scene* Component::GetScene()
+{
+	return m_Node ? m_Node->GetScene() : nullptr;
+}
+
+void Component::Register(bool doRegister)
+{
+	if(auto scene = GetScene()) {
+		if(m_IsAnimated)
+			scene->RegisterForTick(this, doRegister);
+	}
 }
 }
 }

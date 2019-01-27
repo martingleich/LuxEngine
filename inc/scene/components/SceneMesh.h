@@ -14,7 +14,7 @@ namespace scene
 {
 
 //! Represent a single mesh in the scenegraph
-class Mesh : public Component, public Renderable
+class Mesh : public Component
 {
 	LX_REFERABLE_MEMBERS_API(Mesh, LUX_API);
 public:
@@ -27,14 +27,14 @@ public:
 	\return The current model
 	\ref SetMesh
 	*/
-	LUX_API virtual StrongRef<video::Mesh> GetMesh();
+	LUX_API StrongRef<video::Mesh> GetMesh();
 
 	//! Set a new model
 	/**
 	\param mesh The mesh which is rendered by this scenenode
 	\ref GetMesh
 	*/
-	LUX_API virtual void SetMesh(video::Mesh* mesh);
+	LUX_API void SetMesh(video::Mesh* mesh);
 
 	// Benutzt der Scene-Node nur die Materialien der Sub-Meshes
 	// d.h. Wenn man das material der Sub-Meshes ändert, ändert es sich in allen
@@ -49,26 +49,25 @@ public:
 	\param state Should ReadMaterialOnly be set
 	\ref GetReadMaterialsOnly
 	*/
-	LUX_API virtual void SetReadMaterialsOnly(bool state);
+	LUX_API void SetReadMaterialsOnly(bool state);
 
 	//! The state of ReadMaterialsOnly
 	/**
 	\return The state of ReadMaterialsOnly
 	\ref SetReadMaterialsOnly
 	*/
-	LUX_API virtual bool GetReadMaterialsOnly() const;
+	LUX_API bool GetReadMaterialsOnly() const;
 
-	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags);
-	LUX_API virtual void Render(Node* node, video::Renderer* renderer, const SceneData& sceneData);
-	LUX_API virtual ERenderPass GetRenderPass() const;
+	LUX_API void Render(const SceneRenderData& data) override;
+	LUX_API ERenderPass GetRenderPass() const override;
 
-	LUX_API virtual video::Material* GetMaterial(int index);
-	LUX_API virtual const video::Material* GetMaterial(int index) const;
-	LUX_API virtual void SetMaterial(int index, video::Material* m);
+	LUX_API video::Material* GetMaterial(int index);
+	LUX_API const video::Material* GetMaterial(int index) const;
+	LUX_API void SetMaterial(int index, video::Material* m);
 
-	LUX_API virtual int GetMaterialCount() const;
+	LUX_API int GetMaterialCount() const;
 
-	LUX_API virtual const math::AABBoxF& GetBoundingBox() const;
+	LUX_API const math::AABBoxF& GetBoundingBox() const override;
 
 private:
 	void CopyMaterials();

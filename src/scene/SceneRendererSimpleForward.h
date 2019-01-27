@@ -53,40 +53,28 @@ public:
 	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
 	void DisableOverwrite(video::PipelineOverwriteToken& token);
 
-	void AddRenderEntry(Node* n, Renderable* r);
-	void AddCameraEntry(AbstractCamera* cam);
-
-	void AddLight(Light* l);
-	void AddFog(Fog* l);
+	void AddRenderEntry(Node* n, Component* r);
 
 	void DrawScene();
-	bool IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum);
+	bool IsCulled(Node* node, Component* r, const math::ViewFrustum& frustum);
 
 private:
 	struct RenderEntry
 	{
 	public:
 		Node* node;
-		Renderable* renderable;
-		bool isCulled;
+		Component* renderable;
 
 		RenderEntry() :
 			node(nullptr),
-			renderable(nullptr),
-			isCulled(false)
+			renderable(nullptr)
 		{
 		}
 
-		RenderEntry(Node* n, Renderable* r, bool c = false) :
+		RenderEntry(Node* n, Component* r) :
 			node(n),
-			renderable(r),
-			isCulled(c)
+			renderable(r)
 		{
-		}
-
-		bool IsCulled() const
-		{
-			return isCulled;
 		}
 	};
 
@@ -99,8 +87,8 @@ private:
 		{
 		}
 
-		DistanceRenderEntry(Node* n, Renderable* r, bool c) :
-			RenderEntry(n, r, c)
+		DistanceRenderEntry(Node* n, Component* r) :
+			RenderEntry(n, r)
 		{
 			pos = node->GetAbsoluteTransform().TransformPoint(r->GetBoundingBox().GetCenter());
 		}
@@ -129,6 +117,7 @@ private:
 
 	core::Array<RenderEntry> m_SkyBoxList;
 	core::Array<RenderEntry> m_SolidNodeList;
+	core::Array<RenderEntry> m_ShadowCasters;
 	core::Array<DistanceRenderEntry> m_TransparentNodeList;
 
 	core::Array<AbstractCamera*> m_Cameras;
@@ -142,6 +131,7 @@ private:
 	WeakRef<Node> m_ActiveCameraNode;
 	WeakRef<AbstractCamera> m_ActiveCamera;
 	math::Vector3F m_AbsoluteCamPos;
+	math::ViewFrustum m_ActiveFrustum;
 
 	int m_CurLightId;
 

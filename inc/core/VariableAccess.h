@@ -66,7 +66,7 @@ public:
 	template <typename T>
 	struct VariableGetter
 	{
-		static T Get(Type t, const void* data)
+		static T GetCast(Type t, const void* data)
 		{
 			auto dest = core::TemplType<T>::Get();
 			if(!IsConvertible(t, dest))
@@ -76,10 +76,25 @@ public:
 			ConvertBaseType(t, data, dest, &out);
 			return out;
 		}
+		static const T& Get(Type t, const void* data)
+		{
+			auto dest = core::TemplType<T>::Get();
+			if(t != dest)
+				throw TypeCastException(t, dest);
+			return *(T*)data;
+		}
 	};
 
 	template <typename T>
-	T Get() const {
+	const T& Get() const
+	{
+		if(!IsValid())
+			throw InvalidOperationException("Accessed invalid variable access.");
+		return VariableGetter<T>::Get(m_Type, m_Data);
+	}
+	template <typename T>
+	T GetCast() const
+	{
 		if(!IsValid())
 			throw InvalidOperationException("Accessed invalid variable access.");
 		return VariableGetter<T>::Get(m_Type, m_Data);
@@ -88,7 +103,7 @@ public:
 	template <typename T>
 	struct VariableSetter
 	{
-		static void Set(Type t, void* data, const T& value)
+		static void SetCast(Type t, void* data, const T& value)
 		{
 			auto source = core::TemplType<T>::Get();
 			if(!IsConvertible(source, t))
@@ -96,7 +111,22 @@ public:
 
 			ConvertBaseType(t, &value, t, data);
 		}
+		static void Set(Type t, void* data, const T& value)
+		{
+			auto source = core::TemplType<T>::Get();
+			if(source != t)
+				throw TypeCastException(source, t);
+
+			(*(T*)data) = value;
+		}
 	};
+	template <typename T>
+	void SetCast(const T& value) const
+	{
+		if(!IsValid())
+			throw InvalidOperationException("Accessed invalid variable access.");
+		VariableSetter<T>::SetCast(m_Type, m_Data, value);
+	}
 	template <typename T>
 	void Set(const T& value) const
 	{
@@ -106,7 +136,7 @@ public:
 	}
 
 	template <typename T>
-	T GetDefault(const T& defaultValue) const
+	const T& GetDefault(const T& defaultValue) const
 	{
 		if(IsConvertible(m_Type, core::TemplType<T>::Get()) && IsValid())
 			return Get<T>();
@@ -198,9 +228,16 @@ private:
 };
 
 template <>
-struct VariableAccess::VariableGetter<StringView>
+class VariableAccess::VariableGetter<StringView>
 {
-	static core::StringView Get(Type t, const void* data)
+	static const core::StringView& Get(Type t, const void* data)
+	{
+		if(t != core::Types::String())
+			throw TypeCastException(t, core::Types::String());
+
+		return ((const core::String*)data)->AsView();
+	}
+	static core::StringView GetCast(Type t, const void* data)
 	{
 		if(t != core::Types::String())
 			throw TypeCastException(t, core::Types::String());
@@ -210,9 +247,13 @@ struct VariableAccess::VariableGetter<StringView>
 };
 
 template <>
-struct VariableAccess::VariableSetter<video::Color::EPredefinedColors>
+class VariableAccess::VariableSetter<video::Color::EPredefinedColors>
 {
-	static void Get(Type t, void* data, video::Color::EPredefinedColors color)
+	static void Set(Type t, void* data, video::Color::EPredefinedColors color)
+	{
+		SetCast(t, data, color);
+	}
+	static void SetCast(Type t, void* data, video::Color::EPredefinedColors color)
 	{
 		if(t != core::Types::Color() && t != core::Types::ColorF())
 			throw TypeCastException(t, core::Types::Color());
@@ -252,14 +293,18 @@ public:
 	}
 	void Resize(int used)
 	{
+#ifdef LUX_ENABLE_ASSERTS
 		if(m_IsConst)
 			throw core::InvalidOperationException("Can't resize constant array.");
+#endif
 		m_ArrayInfo->Resize(m_ArrayPtr, used);
 	}
 	VariableAccess operator[](int i)
 	{
+#ifdef LUX_ENABLE_ASSERTS
 		if(m_IsConst)
 			throw core::InvalidOperationException("Can't change constant array.");
+#endif
 		return VariableAccess(m_BaseType, m_ArrayInfo->At(m_ArrayPtr, i));
 	}
 

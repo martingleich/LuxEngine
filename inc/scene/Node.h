@@ -18,292 +18,53 @@ class Scene;
 
 class Node : public core::Referable
 {
+	friend class Component;
 private:
-	class ComponentEntry
-	{
-	public:
-		ComponentEntry() {}
-		ComponentEntry(Component* c) : comp(c),
-			markForDelete(false)
-		{
-		}
-
-		StrongRef<Component> comp;
-		bool markForDelete;
-	};
-
-	typedef core::Array<ComponentEntry> SceneNodeComponentList;
+	typedef core::Array<StrongRef<Component>> SceneNodeComponentList;
 
 public:
 	class ComponentIterator : core::BaseIterator<core::BidirectionalIteratorTag, Component*>
 	{
-	private:
-		friend class ConstComponentIterator;
-		friend class Node;
-
-		explicit ComponentIterator(typename SceneNodeComponentList::Iterator begin) : m_Current(begin)
-		{
-		}
-
 	public:
-		ComponentIterator()
-		{
-		}
+		ComponentIterator() {}
+		explicit ComponentIterator(typename SceneNodeComponentList::Iterator begin) : m_Current(begin) {}
 
-		ComponentIterator& operator++()
-		{
-			++m_Current; return *this;
-		}
+		ComponentIterator& operator++() { ++m_Current; return *this; }
+		ComponentIterator operator++(int) { ComponentIterator temp = *this; ++m_Current; return temp; }
 
-		ComponentIterator  operator++(int)
-		{
-			ComponentIterator temp = *this; ++m_Current; return temp;
-		}
+		bool operator==(const ComponentIterator& other) const { return m_Current == other.m_Current; }
+		bool operator!=(const ComponentIterator& other) const { return m_Current != other.m_Current; }
 
-		ComponentIterator& operator+=(unsigned int num)
-		{
-			while(num--) ++(*this);
-
-			return *this;
-		}
-
-		ComponentIterator  operator+ (unsigned int num) const
-		{
-			ComponentIterator temp = *this; return temp += num;
-		}
-
-		bool operator==(const ComponentIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ComponentIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-
-		Component* operator*() const { return Pointer(); }
-		Component* operator->() const { return Pointer(); }
-
-		Component* Pointer() const { return m_Current->comp; }
+		Component* operator*() const { return *m_Current; }
+		Component* operator->() const { return *m_Current; }
 
 	private:
 		SceneNodeComponentList::Iterator m_Current;
 	};
 
-	class ConstComponentIterator : core::BaseIterator<core::BidirectionalIteratorTag, Component*>
-	{
-	private:
-		friend class Node;
-
-		explicit ConstComponentIterator(typename SceneNodeComponentList::ConstIterator begin) : m_Current(begin)
-		{
-		}
-
-	public:
-		ConstComponentIterator()
-		{
-		}
-
-		ConstComponentIterator& operator++()
-		{
-			++m_Current; return *this;
-		}
-
-		ConstComponentIterator  operator++(int)
-		{
-			ConstComponentIterator temp = *this; ++m_Current; return temp;
-		}
-
-		ConstComponentIterator& operator+=(unsigned int num)
-		{
-			while(num--) ++(*this);
-
-			return *this;
-		}
-
-		ConstComponentIterator  operator+ (unsigned int num) const
-		{
-			ConstComponentIterator temp = *this; return temp += num;
-		}
-
-		bool operator==(const ConstComponentIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ConstComponentIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-
-		bool operator==(const ComponentIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-
-		bool operator!=(const ComponentIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-		const Component* operator*() const { return Pointer(); }
-		const Component* operator->() const { return Pointer(); }
-
-		const Component* Pointer() const
-		{
-			return m_Current->comp;
-		}
-
-	private:
-		SceneNodeComponentList::ConstIterator m_Current;
-	};
-	class ConstChildIterator;
-
 	class ChildIterator : public core::BaseIterator<core::BidirectionalIteratorTag, Node*>
 	{
 	public:
-		ChildIterator() : m_Current(nullptr)
-		{
-		}
+		ChildIterator() {}
+		explicit ChildIterator(Node* begin) : m_Current(begin) {}
 
-		ChildIterator& operator++()
-		{
-			m_Current = m_Current->m_Sibling; return *this;
-		}
-		ChildIterator  operator++(int)
-		{
-			ChildIterator Temp = *this; m_Current = m_Current->m_Sibling; return Temp;
-		}
+		ChildIterator& operator++() { m_Current = m_Current->m_Sibling; return *this; }
+		ChildIterator  operator++(int) { ChildIterator Temp = *this; m_Current = m_Current->m_Sibling; return Temp; }
 
-		ChildIterator& operator+=(unsigned int num)
-		{
-			while(num-- && this->m_Current != 0) ++(*this);
-
-			return *this;
-		}
-
-		ChildIterator  operator+ (unsigned int num) const
-		{
-			ChildIterator temp = *this; return temp += num;
-		}
-
-		bool operator==(const ChildIterator&        other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ChildIterator&        other) const
-		{
-			return m_Current != other.m_Current;
-		}
-		bool operator==(const ConstChildIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ConstChildIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-
+		bool operator==(const ChildIterator& other) const { return m_Current == other.m_Current; }
+		bool operator!=(const ChildIterator& other) const { return m_Current != other.m_Current; }
 		Node* operator*() const { return m_Current; }
 		Node* operator->() const { return m_Current; }
-
-		Node* Pointer()
-		{
-			return m_Current;
-		}
-
-	private:
-		explicit ChildIterator(Node* begin) : m_Current(begin)
-		{
-		}
-		friend class Node;
-		friend class ConstChildIterator;
 
 	private:
 		Node* m_Current;
 	};
 
-	class ConstChildIterator : core::BaseIterator<core::BidirectionalIteratorTag, Node*>
-	{
-	public:
-		ConstChildIterator() : m_Current(nullptr)
-		{
-		}
-
-		ConstChildIterator& operator++()
-		{
-			m_Current = m_Current->m_Sibling; return *this;
-		}
-		ConstChildIterator  operator++(int)
-		{
-			ConstChildIterator Temp = *this; m_Current = m_Current->m_Sibling; return Temp;
-		}
-
-		ConstChildIterator& operator+=(unsigned int num)
-		{
-			while(num-- && this->m_Current != nullptr) ++(*this);
-
-			return *this;
-		}
-
-		ConstChildIterator  operator+ (unsigned int num) const
-		{
-			ConstChildIterator temp = *this; return temp += num;
-		}
-
-		bool operator==(const ChildIterator&         other) const
-		{
-			return m_Current == other.m_Current;
-		}
-		bool operator!=(const ChildIterator&         other) const
-		{
-			return m_Current != other.m_Current;
-		}
-		bool operator==(const ConstChildIterator& other) const
-		{
-			return m_Current == other.m_Current;
-		}
-
-		bool operator!=(const ConstChildIterator& other) const
-		{
-			return m_Current != other.m_Current;
-		}
-
-		const Node* operator*()
-		{
-			return m_Current;
-		}
-		const Node* operator->()
-		{
-			return m_Current;
-		}
-
-		ConstChildIterator& operator=(const ChildIterator& iter)
-		{
-			m_Current = iter.m_Current; return *this;
-		}
-
-		const Node* Pointer() const
-		{
-			return m_Current;
-		}
-
-	private:
-		explicit ConstChildIterator(const Node* begin) : m_Current(begin)
-		{
-		}
-
-		friend class ChildIterator;
-		friend class Node;
-
-	private:
-		const Node* m_Current;
-	};
-
 public:
-	LUX_API Node(Scene* scene, bool isRoot = false);
-	LUX_API virtual ~Node();
+	LUX_API Node(Scene* scene);
+	LUX_API ~Node();
 
-	LUX_API virtual void VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags);
-	LUX_API virtual void Animate(float time);
+	LUX_API void Animate(float time);
 
 	////////////////////////////////////////////////////////////////////////////////
 	//! Marks a scene node componenent for deletion.
@@ -314,13 +75,11 @@ public:
 	*/
 	LUX_API void MarkForDelete(Component* comp);
 	LUX_API void MarkForDelete();
-	LUX_API virtual void CleanDeletionQueue();
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API virtual StrongRef<Component> AddComponent(Component* component);
-	LUX_API virtual core::Range<ComponentIterator> Components();
-	LUX_API virtual core::Range<ConstComponentIterator> Components() const;
+	LUX_API StrongRef<Component> AddComponent(Component* component);
+	LUX_API core::Range<ComponentIterator> Components();
 
 	template <typename T>
 	T* GetComponent(T* cur = nullptr)
@@ -335,24 +94,12 @@ public:
 	}
 
 	template <typename T>
-	const T* GetComponent(const T* cur = nullptr) const
-	{
-		for(auto comp : Components()) {
-			const T* p = dynamic_cast<const T*>(comp);
-			if(p && p != cur)
-				return p;
-		}
-
-		return nullptr;
-	}
-
-	template <typename T>
-	bool HasComponent() const
+	bool HasComponent()
 	{
 		return (GetComponent<T>() != nullptr);
 	}
 
-	LUX_API virtual bool HasComponents() const;
+	LUX_API bool HasComponents();
 
 	//! Removes a component from the scene node
 	/**
@@ -361,10 +108,10 @@ public:
 	\param comp The component to remove from the node.
 	\return Was the component found, and deleted.
 	*/
-	LUX_API virtual void RemoveComponent(Component* comp);
+	LUX_API void RemoveComponent(Component* comp);
 
 	//! Removes all components
-	LUX_API virtual void RemoveAllComponents();
+	LUX_API void RemoveAllComponents();
 
 	////////////////////////////////////////////////////////////////////////////////
 	//! Add a tag to this scene node.
@@ -384,16 +131,34 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	void SetInheritScale(bool b) { m_InheritScale = b; }
-	void SetInheritRotation(bool b) { m_InheritRotation = b; }
-	void SetInheritTranslation(bool b) { m_InheritTranslation = b; }
+	void SetInheritScale(bool b)
+	{
+		if(m_InheritScale != b) {
+			m_InheritScale = b;
+			SetTransformDirty();
+		}
+	}
+	void SetInheritRotation(bool b)
+	{
+		if(m_InheritRotation != b) {
+			m_InheritRotation = b;
+			SetTransformDirty();
+		}
+	}
+	void SetInheritTranslation(bool b)
+	{
+		if(m_InheritTranslation != b) {
+			m_InheritTranslation = b;
+			SetTransformDirty();
+		}
+	}
 	bool IsInheritingScale() const { return m_InheritScale; }
 	bool IsInheritingRotation() const { return m_InheritRotation; }
 	bool IsInheritingTranslation() const { return m_InheritTranslation; }
 
 	LUX_API void SetRelativeTransform(const math::Transformation& t);
-	LUX_API const math::Transformation& GetAbsoluteTransform() const;
-	const math::Vector3F& GetAbsolutePosition() const
+	LUX_API const math::Transformation& GetAbsoluteTransform();
+	const math::Vector3F& GetAbsolutePosition()
 	{
 		return GetAbsoluteTransform().translation;
 	}
@@ -407,7 +172,7 @@ public:
 		lxAssert(s >= 0);
 		if(s >= 0) {
 			m_RelativeTrans.scale = s;
-			SetDirty();
+			SetTransformDirty();
 		}
 	}
 
@@ -420,7 +185,7 @@ public:
 		lxAssert(s >= 0);
 		if(s >= 0) {
 			m_RelativeTrans.scale *= s;
-			SetDirty();
+			SetTransformDirty();
 		}
 	}
 
@@ -431,7 +196,7 @@ public:
 	void SetPosition(const math::Vector3F& p)
 	{
 		m_RelativeTrans.translation = p;
-		SetDirty();
+		SetTransformDirty();
 	}
 
 	void SetPosition(float x, float y, float z)
@@ -446,7 +211,7 @@ public:
 	void Translate(const math::Vector3F& p)
 	{
 		m_RelativeTrans.translation += p;
-		SetDirty();
+		SetTransformDirty();
 	}
 
 	void Translate(float x, float y, float z)
@@ -461,7 +226,7 @@ public:
 	void SetOrientation(const math::QuaternionF& o)
 	{
 		m_RelativeTrans.orientation = o;
-		SetDirty();
+		SetTransformDirty();
 	}
 
 	//! Apply a rotation to the transformable
@@ -471,7 +236,7 @@ public:
 	void Rotate(const math::QuaternionF& o)
 	{
 		m_RelativeTrans.orientation *= o;
-		SetDirty();
+		SetTransformDirty();
 	}
 
 	void Rotate(const math::Vector3F& axis, math::AngleF alpha)
@@ -498,7 +263,7 @@ public:
 	/**
 	\return The current relative scale
 	*/
-	float GetScale() const
+	float GetScale()
 	{
 		return m_RelativeTrans.scale;
 	}
@@ -507,7 +272,7 @@ public:
 	/**
 	\return The current relative position
 	*/
-	const math::Vector3F& GetPosition() const
+	const math::Vector3F& GetPosition()
 	{
 		return m_RelativeTrans.translation;
 	}
@@ -516,7 +281,7 @@ public:
 	/**
 	\return The current relative orientation
 	*/
-	const math::QuaternionF& GetOrientation() const
+	const math::QuaternionF& GetOrientation()
 	{
 		return m_RelativeTrans.orientation;
 	}
@@ -530,7 +295,7 @@ public:
 	void SetDirection(const math::Vector3F& dir, const math::Vector3F& local = math::Vector3F::UNIT_Z)
 	{
 		m_RelativeTrans.orientation = math::QuaternionF::FromTo(local, dir);
-		SetDirty();
+		SetTransformDirty();
 	}
 
 	//! Set a directon of the transformable
@@ -549,7 +314,7 @@ public:
 		m_RelativeTrans.orientation = math::QuaternionF::FromTo(
 			local_dir, local_up,
 			dir, up);
-		SetDirty();
+		SetTransformDirty();
 	}
 
 	void LookAt(const math::Vector3F& pos,
@@ -560,7 +325,7 @@ public:
 		SetDirectionUp(pos - GetPosition(), up, local_dir, local_up);
 	}
 
-	const math::Transformation& GetTransform() const
+	const math::Transformation& GetTransform()
 	{
 		return m_RelativeTrans;
 	}
@@ -571,7 +336,7 @@ public:
 	\param target The target coordinate system, use NULL to get absolute coordinates
 	\return The transformed position
 	*/
-	math::Vector3F FromRelativePos(const math::Vector3F& point, const Node* target = nullptr) const
+	math::Vector3F FromRelativePos(const math::Vector3F& point, Node* target = nullptr)
 	{
 		math::Vector3F out = GetAbsoluteTransform().TransformPoint(point);
 		if(target)
@@ -586,7 +351,7 @@ public:
 	\param source The source coordinate system, use NULL for absolute coordinates
 	\return The positon in relative coordinates
 	*/
-	math::Vector3F ToRelativePos(const math::Vector3F& point, const Node* source = nullptr) const
+	math::Vector3F ToRelativePos(const math::Vector3F& point, Node* source = nullptr)
 	{
 		math::Vector3F out;
 		if(source)
@@ -603,7 +368,7 @@ public:
 	\param target The target coordinate system, use NULL for absolute coordinates
 	\return The transformed direction
 	*/
-	math::Vector3F FromRelativeDir(const math::Vector3F& Dir, const Node* target = nullptr) const
+	math::Vector3F FromRelativeDir(const math::Vector3F& Dir, Node* target = nullptr)
 	{
 		math::Vector3F out = GetAbsoluteTransform().TransformDir(Dir);
 		if(target) {
@@ -619,7 +384,7 @@ public:
 	\param source The source coordinate system, use NULL for absolute coordinates
 	\return The direction in relative coordinates
 	*/
-	math::Vector3F ToRelativeDir(const math::Vector3F& dir, const Node* source = nullptr) const
+	math::Vector3F ToRelativeDir(const math::Vector3F& dir, Node* source = nullptr)
 	{
 		math::Vector3F out;
 		if(source)
@@ -632,32 +397,37 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API virtual bool IsVisible() const;
-	LUX_API virtual bool IsTrulyVisible() const;
-	LUX_API virtual void SetVisible(bool visible);
-	LUX_API virtual void SwitchVisible();
+	LUX_API bool IsVisible() const;
+	LUX_API bool IsTrulyVisible() const;
+	LUX_API void SetVisible(bool visible);
+	LUX_API void SwitchVisible();
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API virtual StrongRef<Node> AddChild(Node* child);
-	LUX_API virtual StrongRef<Node> AddChild();
-	LUX_API virtual bool HasChildren() const;
-	LUX_API virtual void RemoveChild(Node* child);
-	LUX_API virtual void RemoveAllChildren();
+	LUX_API StrongRef<Node> AddChild(Node* child);
+	LUX_API StrongRef<Node> AddChild();
+	LUX_API bool HasChildren() const;
+	LUX_API void RemoveChild(Node* child);
+	LUX_API void RemoveAllChildren();
 
 	//! Delete this node from the scene
 	/**
 	Use this method only when currently not animating or rendering a scene.
 	To delete a node while doing this use Scene::AddToDeletionQueue or Node::MarkForDelete
 	*/
-	LUX_API virtual void Remove();
+	void Remove()
+	{
+		Node* parent = GetParent();
+		if(parent)
+			parent->RemoveChild(this);
+	}
 	LUX_API core::Range<ChildIterator> Children();
-	LUX_API core::Range<ConstChildIterator> Children() const;
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API virtual void SetParent(Node* newParent);
+	LUX_API void SetParent(Node* newParent);
 	LUX_API Node* GetParent() const;
+	bool IsRoot() const { return GetParent() == nullptr; }
 	LUX_API Scene* GetScene() const;
 	LUX_API Node* GetRoot();
 
@@ -691,12 +461,14 @@ public:
 	But is not attached to any parent.
 	*/
 	LUX_API StrongRef<Node> Clone() const;
-	LUX_API virtual core::Name GetReferableType() const;
+	LUX_API core::Name GetReferableType() const override;
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API bool IsShadowCasting() const;
-	LUX_API void SetShadowCasting(bool cast);
+	bool IsShadowCasting() const { return m_CastShadow; }
+	void SetShadowCasting(bool cast) { m_CastShadow = cast; }
+
+	LUX_API void Register(bool doRegister);
 
 protected:
 	LUX_API Node(const Node& other);
@@ -708,18 +480,20 @@ private:
 	void OnAttach(Component* c);
 	void OnDetach(Component* c);
 
-	bool UpdateAbsTransform() const;
+	void OnUpdateAnimatedState(Component* c, bool newState);
 
-	bool IsDirty() const
-	{
-		return m_IsDirty;
-	}
-	LUX_API void SetDirty() const;
-	void ClearDirty() const
-	{
-		m_IsDirty = false;
-	}
+	void ConditionalUpdateAbsTransform();
+	void UpdateAbsTransform();
 
+	bool IsTransformDirty() const { return m_IsTransformDirty; }
+	LUX_API void SetTransformDirty();
+	void ClearTransformDirty() { m_IsTransformDirty = false; }
+
+	void UpdateTrulyVisible()
+	{
+		UpdateTrulyVisible(GetParent() ? GetParent()->IsVisible() : true);
+	}
+	LUX_API void UpdateTrulyVisible(bool parentVisible);
 	StrongRef<core::Referable> CloneImpl() const;
 
 private:
@@ -729,12 +503,11 @@ private:
 
 	u32 m_Tags;
 
-	int m_AnimatedCount;
 	SceneNodeComponentList m_Components;
 
 	Scene* m_Scene;
 
-	mutable math::Transformation m_AbsoluteTrans;
+	math::Transformation m_AbsoluteTrans;
 	math::Transformation m_RelativeTrans;
 
 	StrongRef<Collider> m_Collider;
@@ -743,14 +516,14 @@ private:
 
 	// TODO: Merge all this into a single flag
 	bool m_IsVisible;
+	bool m_IsTrulyVisible;
 	//! Is the current bounding box set by the user.
 	bool m_HasUserBoundingBox;
-	bool m_IsRoot;
 	bool m_CastShadow;
 	bool m_InheritTranslation;
 	bool m_InheritRotation;
 	bool m_InheritScale;
-	mutable bool m_IsDirty;
+	bool m_IsTransformDirty;
 };
 
 } // namespace scene

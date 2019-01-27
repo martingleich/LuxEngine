@@ -1,5 +1,7 @@
 #include "scene/components/Camera.h"
 #include "scene/Node.h"
+#include "scene/Scene.h"
+
 #include "video/Renderer.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::scene::Camera, "lux.comp.Camera");
@@ -9,8 +11,15 @@ namespace lux
 namespace scene
 {
 
+void AbstractCamera::Register(bool doRegister)
+{
+	Component::Register(doRegister);
+
+	if(auto s = GetScene())
+		s->RegisterCamera(this, doRegister);
+}
+
 Camera::Camera() :
-	m_HasCustomProjection(false),
 	m_FOV(math::AngleF::Degree(60.0f)),
 	m_XMax(1.0f),
 	m_Aspect(1.0f),
@@ -25,23 +34,6 @@ Camera::Camera() :
 
 Camera::~Camera()
 {
-}
-
-void Camera::SetCustomProjection(const math::Matrix4& proj, const math::ViewFrustum& frustum)
-{
-	m_CustomProjection = proj;
-	m_CustomFrustum = frustum;
-	m_HasCustomProjection = true;
-}
-
-const math::Matrix4& Camera::GetCustomProjection()
-{
-	return m_CustomProjection;
-}
-
-void Camera::ClearCustomProjection()
-{
-	m_HasCustomProjection = false;
 }
 
 void Camera::SetViewModification(const math::Matrix4& mod)
@@ -154,56 +146,48 @@ AbstractCamera::Listener* Camera::GetCameraListener() const
 	return m_Listener;
 }
 
-void Camera::PreRender(video::Renderer* renderer)
+void Camera::PreRender(const SceneRenderData& r)
 {
-	LUX_UNUSED(renderer);
 	if(m_Listener)
 		m_Listener->PreRender(this);
+	m_RenderTarget = r.video->GetRenderTarget();
 }
 
-void Camera::Render(video::Renderer* r)
+void Camera::Render(const SceneRenderData& render)
 {
-	m_ActiveView = CalculateViewMatrix(r);
-	m_ActiveProjection = CalculateProjectionMatrix(r);
-	m_ActiveViewFrustum = CalculateViewFrustum(r, m_ActiveView);
-
-	r->SetTransform(video::ETransform::Projection, m_ActiveProjection);
-	r->SetTransform(video::ETransform::View, m_ActiveView);
+	render.video->SetTransform(video::ETransform::Projection, GetProjection());
+	render.video->SetTransform(video::ETransform::View, GetView());
 }
 
-void Camera::PostRender(video::Renderer* renderer)
+void Camera::PostRender(const SceneRenderData& r)
 {
-	LUX_UNUSED(renderer);
 	if(m_Listener)
 		m_Listener->PostRender(this);
 }
 
-const math::ViewFrustum& Camera::GetActiveFrustum() const
+const math::ViewFrustum& Camera::GetFrustum()
 {
+	m_ActiveViewFrustum = CalculateViewFrustum(CalculateViewMatrix());
 	return m_ActiveViewFrustum;
 }
 
-const math::Matrix4& Camera::GetActiveView() const
+const math::Matrix4& Camera::GetView()
 {
+	m_ActiveView = CalculateViewMatrix();
 	return m_ActiveView;
 }
 
-const math::Matrix4& Camera::GetActiveProjection() const
+const math::Matrix4& Camera::GetProjection()
 {
+	m_ActiveProjection = CalculateProjectionMatrix();
 	return m_ActiveProjection;
 }
 
-math::Matrix4 Camera::CalculateProjectionMatrix(video::Renderer* r)
+math::Matrix4 Camera::CalculateProjectionMatrix()
 {
-	if(m_HasCustomProjection)
-		return m_CustomProjection;
-
 	float aspect;
 	if(m_AutoAspect) {
-		if(m_RenderTarget.GetTexture())
-			aspect = m_RenderTarget.GetSize().GetAspect();
-		else
-			aspect = r->GetRenderTarget().GetSize().GetAspect();
+		aspect = m_RenderTarget.GetSize().GetAspect();
 	} else {
 		aspect = m_Aspect;
 	}
@@ -226,10 +210,9 @@ math::Matrix4 Camera::CalculateProjectionMatrix(video::Renderer* r)
 	return out;
 }
 
-math::Matrix4 Camera::CalculateViewMatrix(video::Renderer* r)
+math::Matrix4 Camera::CalculateViewMatrix()
 {
-	LUX_UNUSED(r);
-	auto n = GetParent();
+	auto n = GetNode();
 	math::Vector3F position = n->GetAbsolutePosition();
 	math::Vector3F direction = n->FromRelativeDir(math::Vector3F::UNIT_Z);
 	math::Vector3F up = n->FromRelativeDir(math::Vector3F::UNIT_Y);
@@ -241,30 +224,20 @@ math::Matrix4 Camera::CalculateViewMatrix(video::Renderer* r)
 	return out;
 }
 
-math::ViewFrustum Camera::CalculateViewFrustum(video::Renderer* r, const math::Matrix4& view)
+math::ViewFrustum Camera::CalculateViewFrustum(const math::Matrix4& view)
 {
-	LUX_UNUSED(r);
-
 	float aspect;
 	if(m_AutoAspect) {
-		if(m_RenderTarget.GetTexture())
-			aspect = m_RenderTarget.GetSize().GetAspect();
-		else
-			aspect = r->GetRenderTarget().GetSize().GetAspect();
+		aspect = m_RenderTarget.GetSize().GetAspect();
 	} else {
 		aspect = m_Aspect;
 	}
 	math::ViewFrustum out;
-	if(m_HasCustomProjection) {
-		out = m_CustomFrustum;
-		out.Transform(view);
-	} else {
-		auto n = GetParent();
-		if(m_IsOrtho)
-			out = math::ViewFrustum::FromOrthoCam(n->GetAbsolutePosition(), view, m_XMax, aspect, m_NearPlane, m_FarPlane);
-		else
-			out = math::ViewFrustum::FromPerspCam(n->GetAbsolutePosition(), view, m_FOV, aspect, m_NearPlane, m_FarPlane);
-	}
+	auto n = GetNode();
+	if(m_IsOrtho)
+		out = math::ViewFrustum::FromOrthoCam(n->GetAbsolutePosition(), view, m_XMax, aspect, m_NearPlane, m_FarPlane);
+	else
+		out = math::ViewFrustum::FromPerspCam(n->GetAbsolutePosition(), view, m_FOV, aspect, m_NearPlane, m_FarPlane);
 
 	return out;
 }

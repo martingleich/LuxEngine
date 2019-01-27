@@ -1,4 +1,5 @@
 #include "scene/components/Fog.h"
+#include "scene/Scene.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::scene::LinearFog, "lux.comp.LinearFog");
 LX_REFERABLE_MEMBERS_SRC(lux::scene::ExponentialFog, "lux.comp.ExpFog");
@@ -7,6 +8,14 @@ namespace lux
 {
 namespace scene
 {
+
+void Fog::Register(bool doRegister)
+{
+	Component::Register(doRegister);
+
+	if(auto s = GetScene())
+		s->RegisterFog(this, doRegister);
+}
 
 LinearFog::LinearFog()
 {

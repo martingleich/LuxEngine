@@ -1,5 +1,6 @@
 #include "scene/components/Light.h"
 #include "scene/Node.h"
+#include "scene/Scene.h"
 #include "video/Renderer.h"
 
 LX_REFERABLE_MEMBERS_SRC(lux::scene::PointLight, "lux.comp.PointLight");
@@ -11,6 +12,14 @@ namespace lux
 {
 namespace scene
 {
+
+void Light::Register(bool doRegister)
+{
+	Component::Register(doRegister);
+
+	if(auto s = GetScene())
+		s->RegisterLight(this, doRegister);
+}
 
 ClassicalLight::ClassicalLight(scene::ELightType type) :
 	m_Power(1.0f),
@@ -35,7 +44,7 @@ static bool IsValidLightType(scene::ELightType type)
 
 ClassicalLightDescription* ClassicalLight::GetLightDescription()
 {
-	auto node = GetParent();
+	auto node = GetNode();
 
 	lxAssert(IsValidLightType(m_Desc.type));
 

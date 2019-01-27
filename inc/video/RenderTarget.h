@@ -16,7 +16,7 @@ class RenderTarget
 {
 public:
 	//! Create a backbuffer rendertarget of a given size
-	RenderTarget(const math::Dimension2I& size = math::Dimension2I(0, 0)) :
+	RenderTarget(const math::Dimension2I& size = math::Dimension2I(1, 1)) :
 		m_Texture(nullptr),
 		m_Size(size)
 	{

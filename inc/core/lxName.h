@@ -15,7 +15,7 @@ class Name
 {
 public:
 	//! The invalid/empty name string
-	static const Name INVALID;
+	LUX_API static const Name INVALID;
 
 	static const int FIND_ONLY = 1;
 	static const int ADD = 0;

@@ -31,7 +31,7 @@ void LinearMoveAnimator::SetData(
 
 void LinearMoveAnimator::Animate(float secsPassed)
 {
-	auto node = GetParent();
+	auto node = GetNode();
 	if(!node)
 		return;
 	if(m_Count == 0) {

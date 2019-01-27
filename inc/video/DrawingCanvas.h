@@ -107,16 +107,16 @@ public:
 				for(int x = 0; x < m_Width; ++x) {
 					Color px = m_Format.FormatToA8R8G8B8(cur);
 					u8 data[4] = {
-						px.GetAlpha(),
-						px.GetRed(),
-						px.GetGreen(),
-						px.GetBlue()};
+						(u8)px.GetAlpha(),
+						(u8)px.GetRed(),
+						(u8)px.GetGreen(),
+						(u8)px.GetBlue()};
 					func(data[0], data[1], data[2], data[3]);
 					px.SetAlpha(data[0]);
 					px.SetRed(data[1]);
 					px.SetGreen(data[2]);
 					px.SetBlue(data[3]);
-					m_Format.A8R8G8B8ToFormat((int)px, cur);
+					m_Format.A8R8G8B8ToFormat(px.ToDWORD(), cur);
 					cur += m_Format.GetBytePerPixel();
 				}
 			}

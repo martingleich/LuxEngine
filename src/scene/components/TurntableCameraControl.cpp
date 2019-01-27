@@ -30,7 +30,7 @@ TurntableCameraControl::~TurntableCameraControl()
 
 void TurntableCameraControl::Animate(float time)
 {
-	auto node = GetParent();
+	auto node = GetNode();
 	if(!node)
 		return;
 

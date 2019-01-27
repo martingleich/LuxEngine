@@ -28,7 +28,7 @@ public:
 		const StrongRef<AbstractParticleEmitter>* emitters;
 		int emitterCount;
 
-		const Node* psSystem;
+		Node* psSystem;
 	};
 
 private:

@@ -3,7 +3,7 @@
 #include "core/ReferenceCounted.h"
 #include "core/Attributes.h"
 
-#include "scene/Renderable.h"
+#include "scene/Component.h"
 
 namespace lux
 {

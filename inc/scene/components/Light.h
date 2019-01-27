@@ -17,6 +17,7 @@ class Light : public Component
 {
 public:
 	virtual LightDescription* GetLightDescription() = 0;
+	LUX_API void Register(bool doRegister) override;
 };
 
 /////////////////////////////////////////////////////////////////////

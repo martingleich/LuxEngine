@@ -48,7 +48,7 @@ SpriteBank::Sprite SpriteBank::AddTextureAsSprite(Texture* texture)
 }
 
 SpriteBank::Sprite SpriteBank::AddAnimatedSprite(
-	SpriteBank::Sprite first, SpriteBank::Sprite last, int frameTime)
+	SpriteBank::Sprite first, SpriteBank::Sprite last, float frameTime, bool looped)
 {
 	LX_CHECK_BOUNDS(first.id, 1, m_Sprites.Size() + 1);
 	LX_CHECK_BOUNDS(last.id, 1, m_Sprites.Size() + 1);
@@ -58,7 +58,8 @@ SpriteBank::Sprite SpriteBank::AddAnimatedSprite(
 	AnimatedSpriteEntry sprite;
 	sprite.firstSprite = GetStaticSpriteId(first);
 	sprite.lastSprite = GetStaticSpriteId(last);
-	sprite.frameTime = frameTime;
+	sprite.time = frameTime;
+	sprite.looped = looped;
 
 	m_AnimatedSprites.PushBack(sprite);
 	return SpriteBank::Sprite(-m_AnimatedSprites.Size());
@@ -71,9 +72,24 @@ void SpriteBank::Clear()
 	m_Textures.Clear();
 }
 
+float SpriteBank::GetProperSpriteTime(Sprite sprite, float time)
+{
+	if(!sprite.IsAnimated())
+		return 0;
+
+	auto& a = m_AnimatedSprites[-sprite.id - 1];
+	if(time >= a.time) {
+		if(a.looped)
+			return std::fmodf(time, a.time);
+		return a.time;
+	} else {
+		return time;
+	}
+}
+
 bool SpriteBank::GetSprite(
 	SpriteBank::Sprite sprite,
-	int time, bool looped, math::RectF*& outCoords, Texture*& outTex)
+	float time, math::RectF*& outCoords, Texture*& outTex)
 {
 	if(sprite.id < 0) {
 		int idx = -sprite.id - 1;
@@ -82,12 +98,14 @@ bool SpriteBank::GetSprite(
 
 		auto& a = m_AnimatedSprites[idx];
 
-		int f = time / a.frameTime;
+		time = GetProperSpriteTime(sprite, time);
+		int f = int((time / a.time) * (a.lastSprite - a.firstSprite));
+		// Might overflow
 		if(f > a.lastSprite - a.firstSprite) {
-			if(looped)
-				f = f % (a.lastSprite - a.firstSprite);
+			if(a.looped)
+				f = 0;
 			else
-				f = a.lastSprite;
+				f = a.lastSprite-a.firstSprite;
 		}
 
 		auto& s = m_Sprites[a.firstSprite + f];
@@ -117,7 +135,7 @@ int SpriteBank::GetTextureId(Texture* texture)
 			return i;
 	}
 	m_Textures.PushBack(texture);
-	return m_Textures.Size();
+	return m_Textures.Size()-1;
 }
 
 } // !namespace video

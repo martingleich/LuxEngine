@@ -12,7 +12,7 @@ class Animator : public Component
 public:
 	Animator()
 	{
-		m_IsAnimated = true;
+		SetAnimated(true);
 	}
 
 	virtual void Animate(float secsPassed) = 0;
@@ -31,7 +31,7 @@ public:
 		m_StartTime(other.m_StartTime),
 		m_RemainingTime(other.m_StartTime)
 	{
-		m_IsAnimated = other.m_IsAnimated;
+		SetAnimated(other.IsAnimated());
 	}
 
 	virtual void Animate(float secsPassed)

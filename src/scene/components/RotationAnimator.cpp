@@ -21,7 +21,7 @@ RotationAnimator::RotationAnimator(const math::Vector3F& axis, math::AngleF RotS
 
 void RotationAnimator::Animate(float time)
 {
-	auto node = GetParent();
+	auto node = GetNode();
 	if(!node)
 		return;
 	math::QuaternionF quat = node->GetOrientation();

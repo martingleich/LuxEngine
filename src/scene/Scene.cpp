@@ -14,7 +14,7 @@ namespace scene
 
 Scene::Scene()
 {
-	m_Root = LUX_NEW(Node)(this, true);
+	m_Root = LUX_NEW(Node)(this);
 }
 
 Scene::~Scene()
@@ -23,41 +23,31 @@ Scene::~Scene()
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-void Scene::RegisterObserver(SceneObserver* observer)
-{
-	m_Observers.PushBack(observer);
-}
-
-void Scene::UnregisterObserver(SceneObserver* observer)
-{
-	auto i = m_Observers.LinearSearch(observer);
-	if(i != -1)
-		m_Observers.Erase(i);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-
-void Scene::Clear()
-{
-	ClearDeletionQueue();
-
-	m_AnimatedNodes.Clear();
-
-	m_Root->RemoveAllChildren();
-}
-
 void Scene::AddToDeletionQueue(Node* node)
 {
 	if(node)
-		m_DeletionQueue.PushBack(node);
+		m_NodeDeletionQueue.PushBack(node);
+}
+void Scene::AddToDeletionQueue(Component* comp)
+{
+	if(comp)
+		m_CompDeletionQueue.PushBack(comp);
 }
 
 void Scene::ClearDeletionQueue()
 {
-	for(auto it = m_DeletionQueue.First(); it != m_DeletionQueue.End(); ++it)
-		(*it)->Remove();
-
-	m_DeletionQueue.Clear();
+	for(auto n : m_NodeDeletionQueue) {
+		auto p = n->GetParent();
+		if(p)
+			p->RemoveChild(n);
+	}
+	m_NodeDeletionQueue.Clear();
+	for(auto c : m_CompDeletionQueue) {
+		auto p = c->GetNode();
+		if(p)
+			p->RemoveComponent(c);
+	}
+	m_CompDeletionQueue.Clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -81,54 +71,49 @@ Node* Scene::GetRoot() const
 	return m_Root;
 }
 
-bool Scene::IsEmpty() const
-{
-	return !GetRoot()->HasChildren();
-}
-
 ////////////////////////////////////////////////////////////////////////////////////
 
-void Scene::RegisterAnimated(Node* node)
+void Scene::RegisterForTick(Component* c, bool doRegister)
 {
-	m_AnimatedNodes.Insert(node);
+	if(doRegister)
+		m_AnimatedComps.Insert(c);
+	else
+		m_AnimatedComps.Erase(c);
+}
+void Scene::RegisterLight(Component* c, bool doRegister)
+{
+	if(doRegister)
+		m_LightComps.Insert(c);
+	else
+		m_LightComps.Erase(c);
 }
 
-void Scene::UnregisterAnimated(Node* node)
+void Scene::RegisterFog(Component* c, bool doRegister)
 {
-	m_AnimatedNodes.Erase(node);
+	if(doRegister)
+		m_FogComps.Insert(c);
+	else
+		m_FogComps.Erase(c);
+}
+
+void Scene::RegisterCamera(Component* c, bool doRegister)
+{
+	if(doRegister)
+		m_CamComps.Insert(c);
+	else
+		m_CamComps.Erase(c);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 void Scene::AnimateAll(float secsPassed)
 {
-	for(auto node : m_AnimatedNodes)
-		node->Animate(secsPassed);
+	for(auto comp : m_AnimatedComps)
+		comp->Animate(secsPassed);
 	ClearDeletionQueue();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-
-static void VisitRenderablesRec(
-	Node* node, RenderableVisitor* visitor,
-	ERenderableTags tags)
-{
-	if(node->IsVisible() || TestFlag(tags, ERenderableTags::Invisible)) {
-		node->VisitRenderables(visitor, tags);
-
-		for(auto child : node->Children())
-			VisitRenderablesRec(child, visitor, tags);
-	}
-}
-
-void Scene::VisitRenderables(
-	RenderableVisitor* visitor,
-	ERenderableTags tags, Node* root)
-{
-	if(!root)
-		root = m_Root;
-	VisitRenderablesRec(root, visitor, tags);
-}
 
 static void VisitComponentsRec(
 	Node* node, ComponentVisitor* visitor)
@@ -150,32 +135,6 @@ void Scene::VisitComponents(
 	if(!root)
 		root = m_Root;
 	VisitComponentsRec(root, visitor);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-
-void Scene::OnAttach(Node* node)
-{
-	for(auto& obs : m_Observers)
-		obs->OnAttach(node);
-}
-
-void Scene::OnDetach(Node* node)
-{
-	for(auto& obs : m_Observers)
-		obs->OnDetach(node);
-}
-
-void Scene::OnAttach(Component* comp)
-{
-	for(auto& obs : m_Observers)
-		obs->OnAttach(comp);
-}
-
-void Scene::OnDetach(Component* comp)
-{
-	for(auto& obs : m_Observers)
-		obs->OnDetach(comp);
 }
 
 } // namespace scene

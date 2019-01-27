@@ -28,9 +28,8 @@ public:
 	};
 
 public:
-	virtual void PreRender(video::Renderer* renderer) = 0;
-	virtual void Render(video::Renderer* renderer) = 0;
-	virtual void PostRender(video::Renderer* renderer) = 0;
+	virtual void PreRender(const SceneRenderData& r) = 0;
+	virtual void PostRender(const SceneRenderData& r) = 0;
 
 	virtual void SetRenderTarget(const video::RenderTarget& target) = 0;
 	virtual const video::RenderTarget& GetRenderTarget() const = 0;
@@ -38,7 +37,7 @@ public:
 	virtual void SetRenderPriority(s32 p) = 0;
 	virtual s32 GetRenderPriority() const = 0;
 
-	virtual const math::ViewFrustum& GetActiveFrustum() const = 0;
+	virtual const math::ViewFrustum& GetFrustum() = 0;
 
 	virtual void SetCameraListener(Listener* l) = 0;
 	virtual Listener* GetCameraListener() const = 0;
@@ -47,6 +46,8 @@ public:
 	{
 		return CloneImpl().StaticCastStrong<AbstractCamera>();
 	}
+
+	LUX_API void Register(bool doRegister) override;
 };
 
 //! Represent a camera in the scenegraph
@@ -57,15 +58,18 @@ public:
 	LUX_API Camera();
 	LUX_API ~Camera();
 
-	LUX_API void SetCustomProjection(const math::Matrix4& proj, const math::ViewFrustum& frustum);
-	LUX_API const math::Matrix4& GetCustomProjection();
-	LUX_API void ClearCustomProjection();
-
 	LUX_API void SetViewModification(const math::Matrix4& mod);
 	LUX_API const math::Matrix4& GetViewModification();
 
 	//! Screen width divided by Screen height
 	LUX_API void SetAspect(float aspect);
+	//! The aspect ratio is automatic calculated from the rendertarget.
+	/**
+	Default value is true.
+	*/
+	LUX_API void SetAutoAspect(bool automatic);
+	//! Is the aspect ratio automatic calculated.
+	LUX_API bool GetAutoAspect();
 	LUX_API float GetAspect() const;
 
 	LUX_API void SetXMax(float xmax);
@@ -90,14 +94,6 @@ public:
 	//! Is the camera orthogonal
 	LUX_API bool IsOrtho() const;
 
-	//! The aspect ratio is automatic calculated from the rendertarget.
-	/**
-	Default value is true.
-	*/
-	LUX_API void SetAutoAspect(bool automatic);
-	//! Is the aspect ratio automatic calculated.
-	LUX_API bool GetAutoAspect();
-
 	LUX_API void SetRenderTarget(const video::RenderTarget& target);
 	LUX_API const video::RenderTarget& GetRenderTarget() const;
 
@@ -107,24 +103,20 @@ public:
 	LUX_API void SetCameraListener(Listener* l);
 	LUX_API Listener* GetCameraListener() const;
 
-	LUX_API void PreRender(video::Renderer* renderer);
-	LUX_API void Render(video::Renderer* r);
-	LUX_API void PostRender(video::Renderer* renderer);
+	LUX_API void PreRender(const SceneRenderData& r) override;
+	LUX_API void Render(const SceneRenderData& r) override;
+	LUX_API void PostRender(const SceneRenderData& r) override;
 
-	LUX_API const math::ViewFrustum& GetActiveFrustum() const;
-	LUX_API const math::Matrix4& GetActiveView() const;
-	LUX_API const math::Matrix4& GetActiveProjection() const;
+	LUX_API const math::ViewFrustum& GetFrustum() override;
 
 private:
-	math::Matrix4 CalculateProjectionMatrix(video::Renderer* r);
-	math::Matrix4 CalculateViewMatrix(video::Renderer* r);
-	math::ViewFrustum CalculateViewFrustum(video::Renderer* r, const math::Matrix4& view);
+	math::Matrix4 CalculateProjectionMatrix();
+	math::Matrix4 CalculateViewMatrix();
+	math::ViewFrustum CalculateViewFrustum(const math::Matrix4& view);
+	const math::Matrix4& GetView();
+	const math::Matrix4& GetProjection();
 
 private:
-	math::ViewFrustum m_CustomFrustum;
-	math::Matrix4 m_CustomProjection;
-	bool m_HasCustomProjection;
-
 	math::Matrix4 m_ViewModification;
 
 	math::AngleF m_FOV;
@@ -134,17 +126,17 @@ private:
 	float m_NearPlane;
 	float m_FarPlane;
 
-	bool m_IsOrtho;
-
 	video::RenderTarget m_RenderTarget;
 	int m_RenderPriority;
 
 	Listener* m_Listener;
 
+	// Active render data.
 	math::Matrix4 m_ActiveProjection;
 	math::Matrix4 m_ActiveView;
 	math::ViewFrustum m_ActiveViewFrustum;
 
+	bool m_IsOrtho;
 	bool m_AutoAspect;
 };
 

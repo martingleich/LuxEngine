@@ -3,29 +3,28 @@
 #include "scene/Renderable.h"
 #include "scene/Collider.h"
 #include "core/Logger.h"
+#include "scene/Component.h"
 
 namespace lux
 {
 namespace scene
 {
 
-Node::Node(Scene* scene, bool isRoot) :
+Node::Node(Scene* scene) :
 	m_Parent(nullptr),
 	m_Sibling(nullptr),
 	m_Child(nullptr),
 	m_Tags(0),
-	m_AnimatedCount(0),
 	m_Scene(scene),
 	m_IsVisible(true),
-	m_IsRoot(isRoot),
 	m_HasUserBoundingBox(false),
 	m_CastShadow(true),
 	m_InheritTranslation(true),
 	m_InheritRotation(true),
 	m_InheritScale(true),
-	m_IsDirty(true)
+	m_IsTransformDirty(true)
 {
-	UpdateAbsTransform();
+	ConditionalUpdateAbsTransform();
 }
 
 Node::~Node()
@@ -34,57 +33,31 @@ Node::~Node()
 	RemoveAllComponents();
 }
 
-void Node::VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags)
-{
-	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
-		if(!it->markForDelete)
-			it->comp->VisitRenderables(visitor, tags);
-	}
-}
-
 void Node::Animate(float time)
 {
-	// Animate the node, i.e. its components
-	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
-		Component* component = it->comp;
-		if(!it->markForDelete) {
-			if(component->IsAnimated())
-				component->Animate(time);
-		}
+	for(auto& c : m_Components) {
+		if(c->IsAnimated())
+			c->Animate(time);
 	}
-}
-
-void Node::CleanDeletionQueue()
-{
-	m_Components.RemoveIf([](const ComponentEntry& entry) { return entry.markForDelete; });
 }
 
 StrongRef<Component> Node::AddComponent(Component* component)
 {
 	LX_CHECK_NULL_ARG(component);
 
-	m_Components.PushBack(ComponentEntry(component));
-
+	m_Components.PushBack(component);
 	OnAttach(component);
-
 	return component;
 }
 
 core::Range<Node::ComponentIterator> Node::Components()
 {
-	return  core::Range<Node::ComponentIterator>(
+	return core::Range<Node::ComponentIterator>(
 		ComponentIterator(m_Components.First()),
 		ComponentIterator(m_Components.End()));
 }
 
-core::Range<Node::ConstComponentIterator> Node::Components() const
-{
-	return  core::Range<Node::ConstComponentIterator>(
-		ConstComponentIterator(m_Components.First()),
-		ConstComponentIterator(m_Components.End()));
-}
-
-bool Node::HasComponents() const
+bool Node::HasComponents()
 {
 	return !m_Components.IsEmpty();
 }
@@ -92,7 +65,7 @@ bool Node::HasComponents() const
 void Node::RemoveComponent(Component* comp)
 {
 	for(int i = 0; i < m_Components.Size(); ++i) {
-		if(m_Components[i].comp == comp) {
+		if(m_Components[i] == comp) {
 			m_Components.Erase(i);
 			OnDetach(comp);
 			break;
@@ -102,8 +75,8 @@ void Node::RemoveComponent(Component* comp)
 
 void Node::RemoveAllComponents()
 {
-	for(auto it = m_Components.First(); it != m_Components.End(); ++it)
-		OnDetach(it->comp);
+	for(auto& c : m_Components)
+		OnDetach(c);
 
 	m_Components.Clear();
 }
@@ -126,22 +99,26 @@ bool Node::HasTag(u32 tag) const
 void Node::SetRelativeTransform(const math::Transformation& t)
 {
 	m_RelativeTrans = t;
-	SetDirty();
+	SetTransformDirty();
 }
 
-const math::Transformation& Node::GetAbsoluteTransform() const
+const math::Transformation& Node::GetAbsoluteTransform()
 {
-	UpdateAbsTransform();
+	ConditionalUpdateAbsTransform();
 	return m_AbsoluteTrans;
 }
 
-bool Node::UpdateAbsTransform() const
+void Node::ConditionalUpdateAbsTransform()
 {
-	if(!IsDirty())
-		return false;
+	if(!IsTransformDirty())
+		return;
+	UpdateAbsTransform();
+}
 
+void Node::UpdateAbsTransform()
+{
 	Node* parent = GetParent();
-	if(parent && !parent->m_IsRoot) {
+	if(parent && !parent->IsRoot()) {
 		auto& pt = parent->GetAbsoluteTransform();
 		math::Vector3F translation = m_RelativeTrans.translation;
 		if(IsInheritingScale()) {
@@ -165,8 +142,7 @@ bool Node::UpdateAbsTransform() const
 		m_AbsoluteTrans = m_RelativeTrans;
 	}
 
-	ClearDirty();
-	return true;
+	ClearTransformDirty();
 }
 
 bool Node::IsVisible() const
@@ -176,23 +152,15 @@ bool Node::IsVisible() const
 
 bool Node::IsTrulyVisible() const
 {
-	const Node* node = this;
-	while(node) {
-		if(node->m_IsRoot)
-			return true;
-
-		if(node->IsVisible() == false)
-			return false;
-
-		node = node->GetParent();
-	}
-
-	return false;
+	return m_IsTrulyVisible;
 }
 
 void Node::SetVisible(bool visible)
 {
-	m_IsVisible = visible;
+	if(m_IsVisible != visible) {
+		m_IsVisible = visible;
+		UpdateTrulyVisible();
+	}
 }
 
 void Node::SwitchVisible()
@@ -289,40 +257,26 @@ void Node::RemoveAllChildren()
 	m_Child = nullptr;
 }
 
-void Node::Remove()
-{
-	Node* parent = GetParent();
-	if(parent)
-		parent->RemoveChild(this);
-}
-
 core::Range<Node::ChildIterator> Node::Children()
 {
 	return core::Range<Node::ChildIterator>(
 		ChildIterator(m_Child), ChildIterator(nullptr));
 }
 
-core::Range<Node::ConstChildIterator> Node::Children() const
-{
-	return core::Range<Node::ConstChildIterator>(
-		ConstChildIterator(m_Child), ConstChildIterator(nullptr));
-}
-
 void Node::MarkForDelete()
 {
 	if(m_Scene)
 		m_Scene->AddToDeletionQueue(this);
+	else
+		Remove();
 }
 
 void Node::MarkForDelete(Component* comp)
 {
-	for(auto it = m_Components.First(); it != m_Components.End(); ++it) {
-		if(it->comp == comp) {
-			OnDetach(comp);
-			it->markForDelete = true;
-			break;
-		}
-	}
+	if(m_Scene)
+		m_Scene->AddToDeletionQueue(comp);
+	else
+		RemoveComponent(comp);
 }
 
 void Node::SetParent(Node* newParent)
@@ -331,7 +285,7 @@ void Node::SetParent(Node* newParent)
 		return;
 
 	newParent->AddChild(this);
-	SetDirty();
+	SetTransformDirty();
 }
 
 Node* Node::GetParent() const
@@ -373,28 +327,25 @@ void Node::SetBoundingBox(const math::AABBoxF& box)
 	m_HasUserBoundingBox = true;
 }
 
+struct BoundingBoxCollector
+{
+	void Add(const math::AABBoxF& b)
+	{
+		if(box.IsEmpty())
+			box = b;
+		else if(!b.IsEmpty())
+			box.AddBox(b);
+	}
+
+	math::AABBoxF box = math::AABBoxF::EMPTY;
+};
+
 void Node::RecalculateBoundingBox()
 {
-	class BoxVisitor : public RenderableVisitor
-	{
-	public:
-		void Visit(Node*, Renderable* r)
-		{
-			if(!r->GetBoundingBox().IsEmpty()) {
-				if(box.IsEmpty())
-					box = r->GetBoundingBox();
-				else
-					box.AddBox(r->GetBoundingBox());
-			}
-		}
-
-		math::AABBoxF box = math::AABBoxF::EMPTY;
-	};
-
-	BoxVisitor visitor;
-	VisitRenderables(&visitor, ERenderableTags::None);
-
-	m_BoundingBox = visitor.box;
+	BoundingBoxCollector boxCol;
+	for(auto& c : m_Components)
+		boxCol.Add(c->GetBoundingBox());
+	m_BoundingBox = boxCol.box;
 	m_HasUserBoundingBox = false;
 }
 
@@ -408,6 +359,15 @@ StrongRef<core::Referable> Node::CloneImpl() const
 	return LUX_NEW(Node)(*this);
 }
 
+void Node::UpdateTrulyVisible(bool parentVisible)
+{
+	auto newVisiblity = m_IsVisible && parentVisible;
+	if(newVisiblity != m_IsTrulyVisible) {
+		m_IsTrulyVisible = newVisiblity;
+		for(auto c : Children())
+			c->UpdateTrulyVisible(m_IsTrulyVisible);
+	}
+}
 core::Name Node::GetReferableType() const
 {
 	static const core::Name name("lux.node");
@@ -419,11 +379,9 @@ Node::Node(const Node& other) :
 	m_Sibling(nullptr),
 	m_Child(nullptr),
 	m_Tags(other.m_Tags),
-	m_AnimatedCount(0),
 	m_Scene(other.m_Scene),
 	m_IsVisible(other.m_IsVisible),
 	m_HasUserBoundingBox(false),
-	m_IsRoot(true),
 	m_CastShadow(true)
 {
 	for(auto child : Children()) {
@@ -431,80 +389,58 @@ Node::Node(const Node& other) :
 		node->SetParent(this);
 	}
 
-	for(auto& ce : m_Components) {
-		StrongRef<Component> comp = ce.comp->Clone();
-		AddComponent(comp);
-	}
+	for(auto& c : m_Components)
+		AddComponent(c->Clone());
 }
 
 void Node::OnAttach()
 {
-	if(m_Scene)
-		m_Scene->OnAttach(this);
+	Register(true);
+	UpdateTrulyVisible();
 }
 
 void Node::OnDetach()
 {
-	if(m_Scene)
-		m_Scene->OnDetach(this);
+	Register(false);
+	UpdateTrulyVisible();
 }
 
 void Node::OnAttach(Component* c)
 {
-	if(m_Scene) {
-		m_Scene->OnAttach(c);
-
-		if(c->IsAnimated()) {
-			if(m_AnimatedCount == 0)
-				m_Scene->RegisterAnimated(this);
-			++m_AnimatedCount;
-		}
-	}
-
 	if(!m_HasUserBoundingBox)
 		RecalculateBoundingBox();
 
 	c->OnAttach(this);
+	c->Register(true);
 }
 
 void Node::OnDetach(Component* c)
 {
-	if(m_Scene) {
-		m_Scene->OnDetach(c);
-
-		if(c->IsAnimated()) {
-			--m_AnimatedCount;
-			if(m_AnimatedCount == 0)
-				m_Scene->UnregisterAnimated(this);
-		}
-	}
-
 	if(!m_HasUserBoundingBox)
 		RecalculateBoundingBox();
 
 	c->OnDetach(this);
+	c->Register(false);
 }
 
-void Node::SetDirty() const
+void Node::SetTransformDirty()
 {
-	if(IsDirty())
+	if(IsTransformDirty())
 		return;
 
-	m_IsDirty = true;
+	m_IsTransformDirty = true;
 
 	// Set all children dirty to
 	for(auto child : Children())
-		child->SetDirty();
+		child->SetTransformDirty();
 }
 
-bool Node::IsShadowCasting() const
+void Node::Register(bool doRegister)
 {
-	return m_CastShadow;
-}
-
-void Node::SetShadowCasting(bool cast)
-{
-	m_CastShadow = cast;
+	for(auto c : Components())
+		c->Register(doRegister);
+	for(auto c : Children())
+		c->Register(doRegister);
 }
 
 } // namespace scene

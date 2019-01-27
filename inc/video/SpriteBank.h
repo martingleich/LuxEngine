@@ -74,7 +74,8 @@ private:
 		int firstSprite;
 		int lastSprite;
 
-		int frameTime;
+		float time;
+		bool looped;
 	};
 
 public:
@@ -103,10 +104,10 @@ public:
 	sprite are played in order of the sprites, which is the order in which they were created
 	\param first The first sprite in the animation
 	\param last The last sprite in the animation
-	\param frameTime The length of a single frame in milliseconds
+	\param time The length of the animation in seconds
 	\return A handle to the new sprite
 	*/
-	LUX_API Sprite AddAnimatedSprite(Sprite first, Sprite last, int frameTime);
+	LUX_API Sprite AddAnimatedSprite(Sprite first, Sprite last, float time, bool loop);
 
 	//! Delete all sprites from the bank
 	LUX_API void Clear();
@@ -114,17 +115,17 @@ public:
 	//! Retrieve information about a single sprite
 	/**
 	\param sprite A handle to the sprite
-	\param time The current animation time in milliseconds
+	\param time The current animation time in seconds
 	\param looped Should the animation be looped, or stop on the last frame
 	\param [out] outCoords The texturecoordinates to use for rendering
 	\param [out] outText The texture to set for rendering
 	\return Could all information be retrieved
 	*/
 	LUX_API bool GetSprite(
-		Sprite sprite,
-		int time, bool looped,
+		Sprite sprite, float time,
 		math::RectF*& outCoords, Texture*& outTex);
 
+	LUX_API float GetProperSpriteTime(Sprite sprite, float time);
 private:
 	int GetTextureId(Texture* texture);
 

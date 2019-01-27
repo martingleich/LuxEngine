@@ -34,6 +34,7 @@ class Fog : public Component
 {
 public:
 	virtual FogDescription* GetFogDescription() = 0;
+	LUX_API void Register(bool doRegister) override;
 };
 
 class LinearFog : public Fog

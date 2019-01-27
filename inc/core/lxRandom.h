@@ -35,17 +35,18 @@ public:
 	void ReSeed()
 	{
 		auto ticks = core::Clock::GetTicks().Count();
-		m_State = (u32)core::HashSequence(&ticks, sizeof(ticks));
-		if(m_State == 0)
+		core::HashType<decltype(ticks)> hasher;
+		m_State = hasher(ticks);
+		if(m_State == 0) // Since initial state 0 isn't allowed
 			m_State = 0x3412353f; // This number is absolutly random.
 	}
 
 	//! Seed the random number generator.
 	void ReSeed(u32 seed)
 	{
-		// Shift the seed a little bit around to fix small seeds.
-		m_State = seed * 31337;
-		if(m_State == 0)
+		core::HashType<decltype(seed)> hasher;
+		m_State = hasher(seed);
+		if(m_State == 0) // Since initial state 0 isn't allowed
 			m_State = 0x3412353f; // This number is absolutly random.
 	}
 
@@ -63,7 +64,7 @@ public:
 
 	//! Generate an integer
 	/**
-	\return A random integer between min and max inclusive
+	\return A random integer between [min; max[
 	*/
 	inline int GetInt(int min, int max) const
 	{
@@ -75,10 +76,10 @@ public:
 		if(min == max)
 			return min;
 
-		const unsigned int range = max - min;
-		const unsigned int maxRand = (0xFFFFFFFF / range)*range;
+		const u32 range = (u32)(max - min);
+		const u32 maxRand = (0xFFFFFFFF / range)*range;
 
-		unsigned int rand;
+		u32 rand;
 		do {
 			rand = GetBits();
 		} while(rand > maxRand);

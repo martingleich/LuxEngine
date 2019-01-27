@@ -72,7 +72,7 @@ SceneRendererSimpleForward::~SceneRendererSimpleForward()
 
 namespace
 {
-class RenderableCollector : public RenderableVisitor
+class RenderableCollector : public ComponentVisitor
 {
 public:
 	RenderableCollector(SceneRendererSimpleForward* _sr) :
@@ -80,66 +80,13 @@ public:
 	{
 	}
 
-	void Visit(Node* node, Renderable* r)
+	void Visit(Node* node, Component* c)
 	{
-		sr->AddRenderEntry(node, r);
+		if(node->IsTrulyVisible())
+			sr->AddRenderEntry(node, c);
 	}
 
 	SceneRendererSimpleForward* sr;
-};
-
-class CameraCollector : public ComponentVisitor
-{
-public:
-	CameraCollector(SceneRendererSimpleForward* _sr) :
-		sr(_sr)
-	{
-	}
-
-	void Visit(Node* node, Component* r)
-	{
-		if(!node->IsVisible()) {
-			AbortChildren();
-			return;
-		}
-		if(auto cam = dynamic_cast<AbstractCamera*>(r))
-			sr->AddCameraEntry(cam);
-	}
-
-	SceneRendererSimpleForward* sr;
-};
-
-class LightFogCollector : public ComponentVisitor
-{
-public:
-	LightFogCollector(SceneRendererSimpleForward* _sr) :
-		sr(_sr)
-	{
-	}
-
-	void Visit(Node* node, Component* comp)
-	{
-		if(!node->IsVisible()) {
-			AbortChildren();
-			return;
-		}
-		auto fog = dynamic_cast<Fog*>(comp);
-		if(fog)
-			sr->AddFog(fog);
-		auto light = dynamic_cast<Light*>(comp);
-		if(light)
-			sr->AddLight(light);
-	}
-
-	SceneRendererSimpleForward* sr;
-};
-
-struct CameraSortT
-{
-	bool Smaller(const AbstractCamera* a, const AbstractCamera* b) const
-	{
-		return a->GetRenderPriority() > b->GetRenderPriority();
-	}
 };
 }
 
@@ -149,17 +96,22 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 
 	video::RenderStatistics::GroupScope grpScope("scene");
 
-	CameraCollector camCollector(this);
+	// Collect visible camera nodes.
+	auto cameras = m_Scene->GetCameras();
 	m_Cameras.Clear();
-	m_Scene->VisitComponents(&camCollector);
+	for(auto c : cameras) {
+		auto c2 = dynamic_cast<AbstractCamera*>(c);
+		if(c2 && c2->GetNode()->IsTrulyVisible())
+			m_Cameras.PushBack(c2);
+	}
 
-	// Collect "real" camera nodes
-	m_Cameras.RemoveIf([](const AbstractCamera* c) { return !c->GetParent()->IsTrulyVisible(); });
-	m_Cameras.Sort(CameraSortT());
+	// Collect lights and fogs.
+	auto lights = m_Scene->GetLights();
+	auto fogs = m_Scene->GetFogs();
 
+	m_Cameras.Sort(core::CompareTypeFromSmaller<AbstractCamera*>([](AbstractCamera* a, AbstractCamera* b) -> bool { return a->GetRenderPriority() < b->GetRenderPriority(); }));
 	if(m_Cameras.Size() == 0) {
-		if(!m_Scene->IsEmpty())
-			log::Warning("No camera in scenegraph.");
+		log::Warning("No camera in scenegraph.");
 		if(beginScene == true) {
 			m_Renderer->Clear(true, true, true);
 			m_Renderer->BeginScene();
@@ -175,8 +127,40 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 
 	for(auto it = m_Cameras.First(); it != m_Cameras.End(); ++it) {
 		m_ActiveCamera = *it;
-		m_ActiveCameraNode = m_ActiveCamera->GetParent();
+		m_ActiveCameraNode = m_ActiveCamera->GetNode();
 		m_AbsoluteCamPos = m_ActiveCameraNode->GetAbsolutePosition();
+		m_ActiveFrustum = m_ActiveCamera->GetFrustum();
+
+		scene::SceneRenderData sceneData;
+		sceneData.video = m_Renderer;
+		sceneData.pass = ERenderPass::None;
+
+		m_ActiveCamera->PreRender(sceneData);
+
+		// Select visible lights and fogs.
+		m_Lights.Clear();
+		for(auto l : lights) {
+			auto l2 = dynamic_cast<Light*>(l);
+			if(l2 && l->GetNode()->IsTrulyVisible())
+				m_Lights.PushBack(l2);
+		}
+		m_Fogs.Clear();
+		for(auto f : fogs) {
+			auto f2 = dynamic_cast<Fog*>(f);
+			if(f2 && f->GetNode()->IsTrulyVisible())
+				m_Fogs.PushBack(f2);
+		}
+
+		// Collect and renderable nodes.
+		RenderableCollector collector(this);
+		m_Scene->VisitComponents(&collector);
+
+		// Update the distances in the transparent nodes
+		for(auto& e : m_TransparentNodeList)
+			e.UpdateDistance(m_AbsoluteCamPos);
+
+		// Sort by distance
+		m_TransparentNodeList.Sort();
 
 		if(it != m_Cameras.First() || beginScene) {
 			// Start a new scene
@@ -192,24 +176,16 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 			m_Renderer->BeginScene();
 		}
 
-		m_ActiveCamera->PreRender(m_Renderer);
-
-		m_ActiveCamera->Render(m_Renderer);
-
-		RenderableCollector collector(this);
-		m_Scene->VisitRenderables(&collector, ERenderableTags::None);
-		// Collect lights, fogs, and other non renderable global things.
-		LightFogCollector lfCollector(this);
-		m_Scene->VisitComponents(&lfCollector);
-
+		m_ActiveCamera->Render(sceneData);
 		DrawScene();
-		m_ActiveCamera->PostRender(m_Renderer);
+		m_ActiveCamera->PostRender(sceneData);
 
 		if((it+1) != m_Cameras.end() || endScene)
 			m_Renderer->EndScene();
 
 		m_SkyBoxList.Clear();
 		m_SolidNodeList.Clear();
+		m_ShadowCasters.Clear();
 		m_TransparentNodeList.Clear();
 		m_Lights.Clear();
 		m_Fogs.Clear();
@@ -249,47 +225,44 @@ void SceneRendererSimpleForward::DisableOverwrite(video::PipelineOverwriteToken&
 	}
 }
 
-void SceneRendererSimpleForward::AddRenderEntry(Node* n, Renderable* r)
+void SceneRendererSimpleForward::AddRenderEntry(Node* n, Component* r)
 {
 	bool isCulled = false;
 
 	switch(r->GetRenderPass()) {
+	case ERenderPass::None:
+		break;
 	case ERenderPass::SkyBox:
 		m_SkyBoxList.EmplaceBack(n, r);
 		break;
 	case ERenderPass::Solid:
-		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
-		m_SolidNodeList.EmplaceBack(n, r, isCulled);
+		isCulled = IsCulled(n, r, m_ActiveFrustum);
+		if(!isCulled)
+			m_SolidNodeList.EmplaceBack(n, r);
+		if(n->IsShadowCasting())
+			m_ShadowCasters.EmplaceBack(n, r);
 		break;
 	case ERenderPass::Transparent:
-		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
-		m_TransparentNodeList.EmplaceBack(n, r, isCulled);
+		isCulled = IsCulled(n, r, m_ActiveFrustum);
+		if(!isCulled)
+			m_TransparentNodeList.EmplaceBack(n, r);
 		break;
 	case ERenderPass::Any:
-		isCulled = IsCulled(n, r, m_ActiveCamera->GetActiveFrustum());
-		m_SolidNodeList.EmplaceBack(n, r, isCulled);
-		m_TransparentNodeList.EmplaceBack(n, r, isCulled);
+		isCulled = IsCulled(n, r, m_ActiveFrustum);
+		if(!isCulled) {
+			m_SolidNodeList.EmplaceBack(n, r);
+			m_TransparentNodeList.EmplaceBack(n, r);
+		}
+		if(n->IsShadowCasting())
+			m_ShadowCasters.EmplaceBack(n, r);
 		break;
 	default:
+		lxAssertNeverReach("Unimplemented render pass");
 		break;
 	}
 }
 
-void SceneRendererSimpleForward::AddCameraEntry(AbstractCamera* cam)
-{
-	m_Cameras.PushBack(cam);
-}
-
-void SceneRendererSimpleForward::AddLight(Light* l)
-{
-	m_Lights.PushBack(l);
-}
-void SceneRendererSimpleForward::AddFog(Fog* l)
-{
-	m_Fogs.PushBack(l);
-}
-
-bool SceneRendererSimpleForward::IsCulled(Node* node, Renderable* r, const math::ViewFrustum& frustum)
+bool SceneRendererSimpleForward::IsCulled(Node* node, Component* r, const math::ViewFrustum& frustum)
 {
 	LUX_UNUSED(r);
 	if(!m_Culling)
@@ -332,7 +305,6 @@ static float LightTypeToFloat(scene::ELightType type)
 		throw core::GenericInvalidArgumentException("type", "Unknown light data type");
 	}
 }
-
 
 static math::Matrix4 GenerateLightMatrix(ClassicalLightDescription* desc)
 {
@@ -411,9 +383,9 @@ void SceneRendererSimpleForward::DrawScene()
 	core::Array<LightEntry> illuminating;
 	core::Array<LightEntry> shadowCasting;
 	core::Array<LightEntry> nonShadowCasting;
-	SceneData sceneData;
+	SceneRenderData sceneData;
+	sceneData.video = m_Renderer;
 	sceneData.activeCamera = m_ActiveCamera;
-	sceneData.activeCameraNode = m_ActiveCameraNode;
 
 	m_Renderer->GetParams()["camPos"].Set(m_ActiveCameraNode->GetAbsolutePosition());
 
@@ -431,7 +403,7 @@ void SceneRendererSimpleForward::DrawScene()
 	for(auto& e : m_Lights) {
 		auto descBase = e->GetLightDescription();
 		if(auto descC = dynamic_cast<ClassicalLightDescription*>(descBase)) {
-			LightEntry entry{descC, e->GetParent()};
+			LightEntry entry{descC, e->GetNode()};
 			illuminating.PushBack(entry);
 			if(descC->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
 				shadowCasting.PushBack(entry);
@@ -472,7 +444,7 @@ void SceneRendererSimpleForward::DrawScene()
 	EnableOverwrite(ERenderPass::SkyBox, pot);
 
 	for(auto& e : m_SkyBoxList)
-		e.renderable->Render(e.node, m_Renderer, sceneData);
+		e.renderable->Render(sceneData);
 
 	DisableOverwrite(pot); // SkyBox
 
@@ -492,10 +464,8 @@ void SceneRendererSimpleForward::DrawScene()
 
 	// Ambient pass for shadows, otherwise the normal renderpass
 	sceneData.pass = ERenderPass::Solid;
-	for(auto& e : m_SolidNodeList) {
-		if(!e.IsCulled())
-			e.renderable->Render(e.node, m_Renderer, sceneData);
-	}
+	for(auto& e : m_SolidNodeList)
+		e.renderable->Render(sceneData);
 	DisableOverwrite(pot); // Solid
 
 	// Stencil shadow rendering
@@ -517,21 +487,19 @@ void SceneRendererSimpleForward::DrawScene()
 			AddLightData(m_Renderer, shadowLight);
 
 			m_StencilShadowRenderer.Begin(m_ActiveCameraNode->GetAbsolutePosition(), m_ActiveCameraNode->GetAbsoluteTransform().TransformDir(math::Vector3F::UNIT_Y));
-			for(auto& e : m_SolidNodeList) {
-				if(e.node->IsShadowCasting()) {
-					auto mesh = dynamic_cast<Mesh*>(e.renderable);
-					if(mesh && mesh->GetMesh()) {
-						bool isInfinite;
-						math::Vector3F lightPos;
-						if(shadowLight->GetType() == scene::ELightType::Directional) {
-							isInfinite = true;
-							lightPos = e.node->ToRelativeDir(shadowNode->FromRelativeDir(math::Vector3F::UNIT_Z));
-						} else {
-							isInfinite = false;
-							lightPos = e.node->ToRelativePos(shadowNode->GetAbsolutePosition());
-						}
-						m_StencilShadowRenderer.AddSilhouette(e.node->GetAbsoluteTransform(), mesh->GetMesh(), lightPos, isInfinite);
+			for(auto& e : m_ShadowCasters) {
+				auto mesh = dynamic_cast<Mesh*>(e.renderable);
+				if(mesh && mesh->GetMesh()) {
+					bool isInfinite;
+					math::Vector3F lightPos;
+					if(shadowLight->GetType() == scene::ELightType::Directional) {
+						isInfinite = true;
+						lightPos = e.node->ToRelativeDir(shadowNode->FromRelativeDir(math::Vector3F::UNIT_Z));
+					} else {
+						isInfinite = false;
+						lightPos = e.node->ToRelativePos(shadowNode->GetAbsolutePosition());
 					}
+					m_StencilShadowRenderer.AddSilhouette(e.node->GetAbsoluteTransform(), mesh->GetMesh(), lightPos, isInfinite);
 				}
 			}
 
@@ -545,10 +513,8 @@ void SceneRendererSimpleForward::DrawScene()
 			EnableOverwrite(ERenderPass::Solid, pot);
 			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 
-			for(auto& e : m_SolidNodeList) {
-				if(!e.IsCulled())
-					e.renderable->Render(e.node, m_Renderer, sceneData);
-			}
+			for(auto& e : m_SolidNodeList)
+				e.renderable->Render(sceneData);
 
 			m_Renderer->PopPipelineOverwrite(&pot);
 			DisableOverwrite(pot); // Solid
@@ -571,10 +537,8 @@ void SceneRendererSimpleForward::DrawScene()
 			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
 
 			sceneData.pass = ERenderPass::Solid;
-			for(auto& e : m_SolidNodeList) {
-				if(!e.IsCulled())
-					e.renderable->Render(e.node, m_Renderer, sceneData);
-			}
+			for(auto& e : m_SolidNodeList)
+				e.renderable->Render(sceneData);
 
 			m_Renderer->PopPipelineOverwrite(&pot);
 			DisableOverwrite(pot); // Solid
@@ -594,17 +558,9 @@ void SceneRendererSimpleForward::DrawScene()
 	EnableOverwrite(ERenderPass::Transparent, pot);
 
 	sceneData.pass = ERenderPass::Transparent;
-	// Update the distances in the transparent nodes
-	for(auto& e : m_TransparentNodeList) {
-		e.UpdateDistance(m_AbsoluteCamPos);
-	}
-
-	// Sort by distance
-	m_TransparentNodeList.Sort();
 
 	for(auto& e : m_TransparentNodeList) {
-		if(!e.IsCulled())
-			e.renderable->Render(e.node, m_Renderer, sceneData);
+		e.renderable->Render(sceneData);
 	}
 
 	DisableOverwrite(pot); // Transparent

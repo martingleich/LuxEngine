@@ -220,7 +220,7 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 			sprite = video::SpriteBank::Sprite(spriteID);
 		}
 		// TODO: Allow more than one texture for particle system.
-		if(m_Data->SpriteBank->GetSprite(sprite, 0, false, rect, texture))
+		if(m_Data->SpriteBank->GetSprite(sprite, 0, rect, texture))
 			particleTexture = video::TextureLayer(texture);
 
 		if(m_Model->IsEnabled(ParticleParam::Angle))
@@ -289,8 +289,7 @@ void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Par
 
 	math::RectF* rect;
 	video::Texture* texture;
-	// Spritebank works in milliseconds instead of seconds
-	if(m_Data->SpriteBank->GetSprite(sprite, (int)(1000.0f * particle.age), true, rect, texture)) {
+	if(m_Data->SpriteBank->GetSprite(sprite, particle.age, rect, texture)) {
 		vertices[0].texture.Set(rect->left, rect->top);
 		vertices[1].texture.Set(rect->right, rect->top);
 		vertices[2].texture.Set(rect->left, rect->bottom);
@@ -334,7 +333,7 @@ void QuadRendererMachine::RenderQuad_ScaledRotated(video::Vertex3D* vertices, co
 
 	math::RectF* rect;
 	video::Texture* texture;
-	if(m_Data->SpriteBank->GetSprite(sprite, (int)(1000.0f * particle.age), true, rect, texture)) {
+	if(m_Data->SpriteBank->GetSprite(sprite, particle.age, rect, texture)) {
 		vertices[0].texture.Set(rect->left, rect->top);
 		vertices[1].texture.Set(rect->right, rect->top);
 		vertices[2].texture.Set(rect->left, rect->bottom);

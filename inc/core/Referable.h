@@ -31,6 +31,7 @@ public:
 	{
 		core::IDManager::Instance()->Release(m_Id);
 	}
+	Referable& operator=(const Referable& other) = delete;
 
 	//! Serialize object into target.
 	virtual void Serialize(serial::Serializer* target)
@@ -144,7 +145,7 @@ public: \
 ::lux::StrongRef<class> Clone() const; \
 ::lux::u32 GetSerializerStructure() const; \
 protected: \
-::lux::StrongRef<::lux::Referable> CloneImpl() const; \
+::lux::StrongRef<::lux::core::Referable> CloneImpl() const; \
 private: \
 static ::lux::u32 SERIAL_TYPE_ID; \
 static ::lux::core::Name REFERABLE_TYPE_NAME;

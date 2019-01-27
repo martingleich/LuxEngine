@@ -42,7 +42,7 @@ FirstPersonCameraControl::~FirstPersonCameraControl()
 
 void FirstPersonCameraControl::Animate(float time)
 {
-	auto node = GetParent();
+	auto node = GetNode();
 	if(!node)
 		return;
 	math::Vector3F pos;

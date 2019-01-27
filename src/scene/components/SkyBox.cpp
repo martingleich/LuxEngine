@@ -45,13 +45,6 @@ SkyBox::~SkyBox()
 {
 }
 
-void SkyBox::VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags)
-{
-	LUX_UNUSED(tags);
-
-	visitor->Visit(GetParent(), this);
-}
-
 static const video::Vertex3DTCoord g_Vertices3D[8] =
 {
 	video::Vertex3DTCoord(-1, +1, +1, -1, +1, +1),
@@ -131,45 +124,47 @@ static const u16 g_Indices[36] =
 	4, 5, 6, 7, 4, 6     // Down
 };
 
-void SkyBox::Render(Node* node, video::Renderer* renderer, const SceneData& data)
+void SkyBox::Render(const SceneRenderData& data)
 {
 	if(data.pass != ERenderPass::SkyBox)
 		return;
 
 	if(!m_Material)
 		return;
+	auto node = GetNode();
+	if(!node)
+		return;
 
 	math::Transformation t = node->GetAbsoluteTransform();
-	t.translation = data.activeCameraNode->GetAbsolutePosition();
+	t.translation = data.activeCamera->GetNode()->GetAbsolutePosition();
 
 	// Place the skybox right between the clipping planes
-	const AbstractCamera* camera = data.activeCamera;
-	auto frustum = camera->GetActiveFrustum();
+	auto frustum = data.activeCamera->GetFrustum();
 	auto near = frustum.Plane(math::ViewFrustum::EPlane::Near).GetDistanceTo(t.translation);
 	auto far = frustum.Plane(math::ViewFrustum::EPlane::Far).GetDistanceTo(t.translation);
 	t.scale = 0.5f * (near + far);
 
 	math::Matrix4 m;
 	t.ToMatrix(m);
-	renderer->SetTransform(video::ETransform::World, m);
+	data.video->SetTransform(video::ETransform::World, m);
 
 	// Disable z comparison for sky box renderering
 	video::PipelineOverwrite over;
 	over.OverwriteZWrite(false);
 	video::PipelineOverwriteToken token;
-	renderer->PushPipelineOverwrite(over, &token);
+	data.video->PushPipelineOverwrite(over, &token);
 
 	if(m_SkyTexture)
 		m_Material->SetTexture(0, m_SkyTexture);
 
-	renderer->SetMaterial(m_Material);
+	data.video->SetMaterial(m_Material);
 	if(m_UseCubeTexture) {
-		renderer->Draw(video::RenderRequest::IndexedFromMemory3D(
+		data.video->Draw(video::RenderRequest::IndexedFromMemory3D(
 			video::EPrimitiveType::Triangles, 12,
 			g_Vertices3D, 8, video::VertexFormat::TEXTURE_3D,
 			g_Indices, video::EIndexFormat::Bit16));
 	} else {
-		renderer->Draw(video::RenderRequest::FromMemory3D(
+		data.video->Draw(video::RenderRequest::FromMemory3D(
 			video::EPrimitiveType::Triangles, 12,
 			g_Vertices2D, 36, video::VertexFormat::STANDARD));
 	}
@@ -213,11 +208,6 @@ const video::Material* SkyBox::GetMaterial() const
 void SkyBox::SetMaterial(video::Material* m)
 {
 	m_Material = m;
-}
-
-const math::AABBoxF& SkyBox::GetBoundingBox() const
-{
-	return math::AABBoxF::EMPTY;
 }
 
 } // namespace scene

@@ -13,6 +13,7 @@ namespace scene
 
 ParticleSystem::ParticleSystem()
 {
+	SetAnimated(true);
 }
 
 ParticleSystem::~ParticleSystem()
@@ -39,16 +40,9 @@ StrongRef<ParticleSystemTemplate> ParticleSystem::GetTemplate()
 	return m_Template;
 }
 
-void ParticleSystem::VisitRenderables(RenderableVisitor* visitor, scene::ERenderableTags tags)
-{
-	LUX_UNUSED(tags);
-
-	visitor->Visit(GetParent(), this);
-}
-
 void ParticleSystem::Animate(float time)
 {
-	auto node = GetParent();
+	auto node = GetNode();
 	if(!node)
 		return;
 
@@ -68,22 +62,25 @@ void ParticleSystem::Animate(float time)
 	}
 }
 
-void ParticleSystem::Render(Node* node, video::Renderer* renderer, const SceneData& sceneData)
+void ParticleSystem::Render(const SceneRenderData& r)
 {
-	if(sceneData.pass != ERenderPass::Transparent)
+	if(r.pass != ERenderPass::Transparent)
+		return;
+	auto node = GetNode();
+	if(!node)
 		return;
 
 	if(m_Template->IsGlobal()) {
-		renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
+		r.video->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 	} else {
 		math::Matrix4 mat;
 		node->GetAbsoluteTransform().ToMatrix(mat);
-		renderer->SetTransform(video::ETransform::World, mat);
+		r.video->SetTransform(video::ETransform::World, mat);
 	}
 
 	for(auto& g : m_GroupData) {
-		auto r = g->GetModel()->GetRenderer();
-		r->Render(renderer, g);
+		auto pr = g->GetModel()->GetRenderer();
+		pr->Render(r.video, g);
 	}
 }
 

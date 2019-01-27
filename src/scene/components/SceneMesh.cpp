@@ -41,18 +41,16 @@ Mesh::~Mesh()
 {
 }
 
-void Mesh::VisitRenderables(RenderableVisitor* visitor, ERenderableTags tags)
+void Mesh::Render(const SceneRenderData& r)
 {
-	LUX_UNUSED(tags);
+	auto node = GetNode();
+	if(!node)
+		return;
+	if(!m_Mesh)
+		return;
 
-	if(m_Mesh)
-		visitor->Visit(GetParent(), this);
-}
-
-void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneData)
-{
 	const auto worldMat = node->GetAbsoluteTransform().ToMatrix();
-	renderer->SetTransform(video::ETransform::World, worldMat);
+	r.video->SetTransform(video::ETransform::World, worldMat);
 
 	video::Geometry* geo = m_Mesh->GetGeometry();
 	for(int i = 0; i < m_Mesh->GetRangeCount(); ++i) {
@@ -65,9 +63,9 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 		auto pass = GetPassFromReq(material->GetRequirements());
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
-		if(pass == sceneData.pass && firstPrimitive <= lastPrimitive) {
-			renderer->SetPass(material->GetPass(), true, material);
-			renderer->Draw(video::RenderRequest::Geometry3D(
+		if(pass == r.pass && firstPrimitive <= lastPrimitive) {
+			r.video->SetPass(material->GetPass(), true, material);
+			r.video->Draw(video::RenderRequest::Geometry3D(
 				geo,
 				firstPrimitive,
 				lastPrimitive - firstPrimitive + 1));
@@ -77,6 +75,9 @@ void Mesh::Render(Node* node, video::Renderer* renderer, const SceneData& sceneD
 
 ERenderPass Mesh::GetRenderPass() const
 {
+	if(!m_Mesh)
+		return ERenderPass::None;
+
 	ERenderPass pass = ERenderPass::None;
 	for(int i = 0; i < GetMaterialCount(); ++i) {
 		auto mat = GetMaterial(i);

@@ -62,8 +62,8 @@ void ParticleGroupData::Update(float secsPassed, const SystemData& data)
 		if(number > 0) {
 			if(m_Model->GetSmoothingModel() > 0) {
 				m_LastEmitTransform[i] = m_EmitTransform[i];
-				if(emitter->GetParent())
-					m_EmitTransform[i] = emitter->GetParent()->GetAbsoluteTransform();
+				if(emitter->GetNode())
+					m_EmitTransform[i] = emitter->GetNode()->GetAbsoluteTransform();
 				else
 					m_EmitTransform[i] = psTrans;
 			} else {
@@ -76,8 +76,8 @@ void ParticleGroupData::Update(float secsPassed, const SystemData& data)
 	for(int i = 0; i < 2; ++i) {
 		for(int j = 0; j < data.affectorsCounts[i]; ++j) {
 			auto& affector = data.affectors[i][j];
-			if(affector->GetParent())
-				affector->Begin(affector->GetParent()->GetAbsoluteTransform());
+			if(affector->GetNode())
+				affector->Begin(affector->GetNode()->GetAbsoluteTransform());
 			else
 				affector->Begin(psTrans);
 		}

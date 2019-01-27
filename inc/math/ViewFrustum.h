@@ -213,6 +213,7 @@ public:
 			bool intersect = m_Planes[a].IntersectWithPlanes(
 				m_Planes[b],
 				m_Planes[c], point);
+			LUX_UNUSED(intersect);
 			lxAssert(intersect);
 			m_Points[i] = point;
 		}
