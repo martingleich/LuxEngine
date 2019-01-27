@@ -175,7 +175,8 @@ public:
 		m_Size--;
 
 		m_Buckets[value.bucketId] = value.prevId != INVALID_ID ? m_NextIds[value.prevId] : INVALID_ID;
-		m_NextIds[value.prevId] = INVALID_ID;
+		if(value.prevId != INVALID_ID)
+			m_NextIds[value.prevId] = INVALID_ID;
 
 		return {true};
 	}
@@ -298,6 +299,7 @@ private:
 	{
 		::operator delete(ptr);
 	}
+
 private:
 	T* m_Values = nullptr;
 	int* m_NextIds = nullptr;
