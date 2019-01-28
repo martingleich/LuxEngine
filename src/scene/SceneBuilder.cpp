@@ -81,14 +81,16 @@ StrongRef<Node> SceneBuilder::AddExponentialFog(float density, const video::Colo
 	return m_Scene->AddNode(CreateExponentialFog(density, color));
 }
 
-StrongRef<Node> SceneBuilder::AddCamera()
+StrongRef<Node> SceneBuilder::AddCamera(float aspect)
 {
-	return m_Scene->AddNode(CreateCamera());
+	return m_Scene->AddNode(CreateCamera(aspect));
 }
 
-StrongRef<Camera> SceneBuilder::CreateCamera() const
+StrongRef<Camera> SceneBuilder::CreateCamera(float aspect) const
 {
-	return CreateComponent(SceneComponentType::Camera).As<Camera>();
+	auto cam = CreateComponent(SceneComponentType::Camera).AsStrong<Camera>();
+	cam->SetAspect(aspect);
+	return cam;
 }
 
 StrongRef<Mesh> SceneBuilder::CreateMesh(const io::Path& path) const

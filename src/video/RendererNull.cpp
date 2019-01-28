@@ -8,13 +8,12 @@ namespace lux
 namespace video
 {
 
-RenderRequest RenderRequest::Geometry3D(const Geometry* geo)
+RenderRequest RenderRequest::FromGeometry(const Geometry* geo)
 {
 	LX_CHECK_NULL_ARG(geo);
 
 	RenderRequest rq;
 	rq.userPointer = false;
-	rq.is3D = true;
 	rq.bufferData.ib = geo->GetIndices();
 	rq.bufferData.vb = geo->GetVertices();
 	rq.indexed = geo->GetIndices();
@@ -24,45 +23,12 @@ RenderRequest RenderRequest::Geometry3D(const Geometry* geo)
 	rq.frontFace = geo->GetFrontFaceWinding();
 	return rq;
 }
-RenderRequest RenderRequest::Geometry2D(const Geometry* geo)
+RenderRequest RenderRequest::FromGeometry(const Geometry* geo, int first, int count)
 {
 	LX_CHECK_NULL_ARG(geo);
 
 	RenderRequest rq;
 	rq.userPointer = false;
-	rq.is3D = false;
-	rq.bufferData.ib = geo->GetIndices();
-	rq.bufferData.vb = geo->GetVertices();
-	rq.indexed = geo->GetIndices();
-	rq.firstPrimitive = 0;
-	rq.primitiveCount = geo->GetPrimitiveCount();
-	rq.primitiveType = geo->GetPrimitiveType();
-	rq.frontFace = geo->GetFrontFaceWinding();
-	return rq;
-}
-RenderRequest RenderRequest::Geometry3D(const Geometry* geo, int first, int count)
-{
-	LX_CHECK_NULL_ARG(geo);
-
-	RenderRequest rq;
-	rq.userPointer = false;
-	rq.is3D = true;
-	rq.bufferData.ib = geo->GetIndices();
-	rq.bufferData.vb = geo->GetVertices();
-	rq.indexed = geo->GetIndices();
-	rq.firstPrimitive = first;
-	rq.primitiveCount = count;
-	rq.primitiveType = geo->GetPrimitiveType();
-	rq.frontFace = geo->GetFrontFaceWinding();
-	return rq;
-}
-RenderRequest RenderRequest::Geometry2D(const Geometry* geo, int first, int count)
-{
-	LX_CHECK_NULL_ARG(geo);
-
-	RenderRequest rq;
-	rq.userPointer = false;
-	rq.is3D = false;
 	rq.bufferData.ib = geo->GetIndices();
 	rq.bufferData.vb = geo->GetVertices();
 	rq.indexed = geo->GetIndices();
@@ -96,18 +62,6 @@ RendererNull::RendererNull(VideoDriver* driver) :
 
 ///////////////////////////////////////////////////////////////////////////
 
-void RendererNull::SetPass(const Pass& pass, bool useOverwrite, ShaderParamSetCallback* paramSetCallback, void* userParam)
-{
-	SetDirty(Dirty_Pass);
-
-	m_Pass = pass;
-	m_ParamSetCallback = paramSetCallback;
-	m_UserParam = userParam;
-	m_UseOverwrite = useOverwrite;
-}
-
-///////////////////////////////////////////////////////////////////////////
-
 void RendererNull::PushPipelineOverwrite(const PipelineOverwrite& over, PipelineOverwriteToken* token)
 {
 	m_PipelineOverwrites.PushBack(over);
@@ -132,7 +86,6 @@ void RendererNull::PopPipelineOverwrite(PipelineOverwriteToken* token)
 
 void RendererNull::UpdatePipelineOverwrite()
 {
-	SetDirty(Dirty_Overwrites);
 	if(m_PipelineOverwrites.IsEmpty()) {
 		m_FinalOverwrite = PipelineOverwrite();
 		return;
@@ -169,21 +122,20 @@ void RendererNull::SetTransform(ETransform transform, const math::Matrix4& matri
 const math::Matrix4& RendererNull::GetTransform(ETransform transform) const
 {
 	switch(transform) {
-	case ETransform::World: return m_TransformWorld;
-	case ETransform::View: return m_TransformView;
-	case ETransform::Projection: return m_TransformProj;
+	case ETransform::World: return m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD);
+	case ETransform::View: return m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW);
+	case ETransform::Projection: return m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ);
 	default: throw core::GenericInvalidArgumentException("transform", "Unknown transform");
 	}
 }
 
 void RendererNull::SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token)
 {
-	if(!token->renderer) {
+	if(token && !token->renderer) {
 		token->renderer = this;
 		token->prev = m_NormalizeNormals;
 	}
 	m_NormalizeNormals = normalize;
-	SetDirty(Dirty_Overwrites);
 }
 
 bool RendererNull::GetNormalizeNormals() const

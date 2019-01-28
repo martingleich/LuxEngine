@@ -22,11 +22,14 @@ FixedFunctionShaderD3D9::FixedFunctionShaderD3D9(DeviceStateD3D9& deviceState, c
 	for(auto& s : params.textures)
 		ppb.AddParam(s, TextureLayer());
 	m_ParamPackage = std::move(ppb.Build());
+	m_LightCount = params.maxLightCount;
+	lxAssert(m_LightCount <= 4);
+	m_UseFog = params.enableFogging;
 }
 
 void FixedFunctionShaderD3D9::Enable()
 {
-	m_IsDirty = true;
+	m_DeviceState.EnableHardwareShader(nullptr, nullptr);
 }
 
 void FixedFunctionShaderD3D9::SetParam(int paramId, const void* data)
@@ -39,7 +42,6 @@ void FixedFunctionShaderD3D9::SetParam(int paramId, const void* data)
 	default:
 		m_Layers.At(paramId - 4) = *(video::TextureLayer*)data;
 	}
-	m_IsDirty = true;
 }
 
 static EFixedLightType FloatToLightType(float type, bool& success)
@@ -89,6 +91,7 @@ static void ParseLightMatrix(const math::Matrix4& mat,
 
 void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass)
 {
+	// Connect attributes.
 	if(m_CurAttributes != sceneAttributes) {
 		m_CurAttributes = sceneAttributes;
 		m_AmbientPtr = m_CurAttributes.Pointer("ambient");
@@ -102,6 +105,7 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 	}
 
 	m_Lighting = pass.lighting;
+
 	if(m_AmbientPtr)
 		m_Ambient = m_AmbientPtr->GetAccess(true).Get<video::ColorF>();
 	else
@@ -127,7 +131,7 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 	}
 
 	m_DeviceState.EnableLight(m_Lighting != ELightingFlag::Disabled);
-	for(int i = 0; i < LIGHT_COUNT; ++i) {
+	for(int i = 0; i < 4; ++i) {
 		if(m_LightPtrs[i]) {
 			video::LightData data;
 			bool active;
@@ -152,11 +156,6 @@ void FixedFunctionShaderD3D9::Render()
 		m_UseVertexColors,
 		m_Diffuse, m_Emissive, m_SpecularHardness, m_SpecularIntensity,
 		m_Ambient, m_Lighting);
-	m_IsDirty = false;
-}
-
-void FixedFunctionShaderD3D9::Disable()
-{
 }
 
 const core::ParamPackage& FixedFunctionShaderD3D9::GetParamPackage() const

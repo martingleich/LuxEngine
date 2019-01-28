@@ -36,46 +36,42 @@ public:
 	void SetRenderTarget(const core::Array<RenderTarget>& targets);
 	void SetRenderTarget(const RenderTarget* targets, int count, bool restore);
 	const RenderTarget& GetRenderTarget();
-	const math::Dimension2I& GetRenderTargetSize();
 
 	void SetScissorRect(const math::RectI& rect, ScissorRectToken* token = nullptr);
 	const math::RectI& GetScissorRect() const;
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void Draw(const RenderRequest& rq);
+	void SendPassSettingsEx(ERenderMode mode, const Pass& pass, bool useOverwrite, ShaderParamSetCallback* paramSetCallback, void* userParam) override;
+	void Draw(const RenderRequest& rq) override;
 
 	///////////////////////////////////////////////////////////////////////////
 	void ReleaseUnmanaged();
 	void Reset();
 
 private:
-	void SetupRendering(EFaceWinding frontFace);
-
-	void SwitchRenderMode(ERenderMode mode);
-
-	void UpdateTransforms(float polygonOffset);
-
+	void UpdateTransforms(
+		float polygonOffset,
+		bool dirtyRendermode,
+		bool dirtyPolygonOffset);
 	void SetVertexFormat(const VertexFormat& format);
 
 private:
+
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
 	DeviceStateD3D9& m_DeviceState;
-
-	core::Array<RendertargetD3D9> m_CurrentRendertargets;
 	RendertargetD3D9 m_BackbufferTarget;
-
-	math::RectI m_ScissorRect;
-
 	VideoDriverD3D9* m_Driver;
 
+	StrongRef<Shader> m_CurrentShader;
+	core::Array<RendertargetD3D9> m_CurrentRendertargets;
 	VertexFormat m_VertexFormat;
+	video::EFaceSide m_CurPassCullMode;
+	math::RectI m_ScissorRect;
 
 	float m_PrevPolyOffset = 0.0f;
 	ELightingFlag m_PrevLighting = ELightingFlag::Disabled;
 	bool m_PrevFog = false;
-
-	u32 m_ActiveFixedLights;
 };
 
 } // namespace video

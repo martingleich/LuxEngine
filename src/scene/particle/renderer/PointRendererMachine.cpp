@@ -76,11 +76,11 @@ void PointRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupD
 	}
 
 	if(data->EmitLight)
-		videoRenderer->SetPass(m_EmitPass, true);
+		videoRenderer->SendPassSettings(m_EmitPass, true);
 	else
-		videoRenderer->SetPass(m_DefaultPass, true);
+		videoRenderer->SendPassSettings(m_DefaultPass, true);
 
-	videoRenderer->Draw(video::RenderRequest::FromMemory3D(
+	videoRenderer->Draw(video::RenderRequest::FromMemory(
 		video::EPrimitiveType::Points, group->GetParticleCount(),
 		m_Vertices.Data_c(), group->GetParticleCount(), m_VertexFormat));
 }

@@ -59,10 +59,10 @@ public:
 	LUX_API StrongRef<Node> AddSpotLight(video::Color color = video::Color::White);
 	LUX_API StrongRef<Node> AddLinearFog(float start, float end, const video::ColorF& color = video::Color::White);
 	LUX_API StrongRef<Node> AddExponentialFog(float density, const video::ColorF& color = video::Color::White);
-	LUX_API StrongRef<Node> AddCamera();
+	LUX_API StrongRef<Node> AddCamera(float aspectRatio);
 
 	// Object components
-	LUX_API StrongRef<Camera> CreateCamera() const;
+	LUX_API StrongRef<Camera> CreateCamera(float aspectRatio) const;
 	LUX_API StrongRef<Mesh> CreateMesh(const io::Path& path) const;
 	LUX_API StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr) const;
 	LUX_API StrongRef<SkyBox> CreateSkyBox(const video::ColorF& color) const;

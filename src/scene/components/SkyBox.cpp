@@ -144,9 +144,7 @@ void SkyBox::Render(const SceneRenderData& data)
 	auto far = frustum.Plane(math::ViewFrustum::EPlane::Far).GetDistanceTo(t.translation);
 	t.scale = 0.5f * (near + far);
 
-	math::Matrix4 m;
-	t.ToMatrix(m);
-	data.video->SetTransform(video::ETransform::World, m);
+	data.video->SetTransform(video::ETransform::World, t.ToMatrix());
 
 	// Disable z comparison for sky box renderering
 	video::PipelineOverwrite over;
@@ -157,14 +155,14 @@ void SkyBox::Render(const SceneRenderData& data)
 	if(m_SkyTexture)
 		m_Material->SetTexture(0, m_SkyTexture);
 
-	data.video->SetMaterial(m_Material);
+	data.video->SendPassSettings(m_Material->GetPass(), true, m_Material);
 	if(m_UseCubeTexture) {
-		data.video->Draw(video::RenderRequest::IndexedFromMemory3D(
+		data.video->Draw(video::RenderRequest::IndexedFromMemory(
 			video::EPrimitiveType::Triangles, 12,
 			g_Vertices3D, 8, video::VertexFormat::TEXTURE_3D,
 			g_Indices, video::EIndexFormat::Bit16));
 	} else {
-		data.video->Draw(video::RenderRequest::FromMemory3D(
+		data.video->Draw(video::RenderRequest::FromMemory(
 			video::EPrimitiveType::Triangles, 12,
 			g_Vertices2D, 36, video::VertexFormat::STANDARD));
 	}

@@ -186,11 +186,10 @@ void FontRaster::Draw(
 	shaderData.texture = video::TextureLayer(m_Texture);
 	shaderData.borderColor = settings.borderColor;
 	shaderData.fontColor = settings.color;
-	renderer->SetPass(m_Pass, false, &g_ParamLoader, &shaderData);
-
 	if(!m_Pass.shader)
 		renderer->SetTransform(video::ETransform::World, math::Matrix4::IDENTITY);
 
+	renderer->SendPassSettingsEx(video::ERenderMode::Mode2D, m_Pass, false, &g_ParamLoader, &shaderData);
 	math::Vector2F cursor = position;
 	video::Vertex2D vertices[600];
 	u32 vertexCursor = 0;
@@ -254,7 +253,7 @@ void FontRaster::Draw(
 		vertexCursor += 6;
 
 		if(vertexCursor >= 600) {
-			renderer->Draw(video::RenderRequest::FromMemory2D(
+			renderer->Draw(video::RenderRequest::FromMemory(
 				video::EPrimitiveType::Triangles, vertexCursor / 3,
 				vertices, vertexCursor, video::VertexFormat::STANDARD_2D));
 
@@ -263,7 +262,7 @@ void FontRaster::Draw(
 	}
 
 	if(vertexCursor > 0) {
-		renderer->Draw(video::RenderRequest::FromMemory2D(
+		renderer->Draw(video::RenderRequest::FromMemory(
 			video::EPrimitiveType::Triangles, vertexCursor / 3,
 			vertices, vertexCursor, video::VertexFormat::STANDARD_2D));
 	}

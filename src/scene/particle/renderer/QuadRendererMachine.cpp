@@ -253,8 +253,8 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	}
 	vertexBuffer->Update();
 
-	videoRenderer->SetPass(pass, true, &g_ParamLoader, &particleTexture);
-	videoRenderer->Draw(video::RenderRequest::Geometry3D(m_Buffer, 0, (int)(pool.GetActiveCount() * 2)));
+	videoRenderer->SendPassSettings(pass, true, &g_ParamLoader, &particleTexture);
+	videoRenderer->Draw(video::RenderRequest::FromGeometry(m_Buffer, 0, (int)(pool.GetActiveCount() * 2)));
 }
 
 void QuadRendererMachine::RenderQuad_Scaled(video::Vertex3D* vertices, const Particle& particle)

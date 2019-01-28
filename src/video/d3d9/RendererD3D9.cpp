@@ -30,11 +30,12 @@ RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
 	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
-	m_ActiveFixedLights = 0;
 }
 
 RendererD3D9::~RendererD3D9()
 {
+	ReleaseUnmanaged();
+
 	// Free all bound objects
 	m_Device->SetVertexDeclaration(nullptr);
 	m_Device->SetVertexShader(nullptr);
@@ -115,7 +116,7 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, int count, bool 
 	if(count == 0)
 		throw core::GenericInvalidArgumentException("count", "There must be at least one rendertarget.");
 	if(count > m_Driver->GetDeviceCapability(EDriverCaps::MaxSimultaneousRT))
-		throw core::GenericInvalidArgumentException("count", "To many rendertargets.");
+		throw core::GenericInvalidArgumentException("count", "Too many rendertargets.");
 
 	// Check if textures are valid
 	math::Dimension2I dim;
@@ -201,11 +202,6 @@ void RendererD3D9::SetRenderTarget(const RenderTarget* targets, int count, bool 
 const RenderTarget& RendererD3D9::GetRenderTarget()
 {
 	return m_CurrentRendertargets[0];
-}
-
-const math::Dimension2I& RendererD3D9::GetRenderTargetSize()
-{
-	return m_CurrentRendertargets[0].GetSize();
 }
 
 void RendererD3D9::SetScissorRect(const math::RectI& rect, ScissorRectToken* token)
@@ -303,9 +299,16 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 	D3DPRIMITIVETYPE d3dPrimitiveType = GetD3DPrimitiveType(rq.primitiveType);
 
 	SetVertexFormat(*vformat);
-	SwitchRenderMode(rq.is3D ? ERenderMode::Mode3D : ERenderMode::Mode2D);
 
-	SetupRendering(rq.frontFace);
+	EFaceSide cullMode = m_CurPassCullMode;
+	if(rq.frontFace == EFaceWinding::CCW)
+		(void)0;
+	else if(rq.frontFace == EFaceWinding::CW)
+		cullMode = FlipFaceSide(m_CurPassCullMode);
+	else if(rq.frontFace == EFaceWinding::ANY)
+		cullMode = EFaceSide::None;
+	m_DeviceState.SetRenderState(D3DRS_CULLMODE, GetD3DCullMode(cullMode));
+
 	HRESULT hr = E_FAIL;
 	if(rq.userPointer) {
 		DWORD stride = (DWORD)vformat->GetStride();
@@ -335,12 +338,109 @@ void RendererD3D9::Draw(const RenderRequest& rq)
 		m_RenderStatistics->AddPrimitives(rq.primitiveCount);
 }
 
+void RendererD3D9::SendPassSettingsEx(
+	ERenderMode newRenderMode,
+	const Pass& _pass,
+	bool useOverwrite,
+	ShaderParamSetCallback*
+	paramSetCallback,
+	void* userParam)
+{
+	auto pass = _pass;
+
+	lxAssert(pass.shader != nullptr);
+
+	// Update the pipelineSettings to fit with the configuration.
+	if(useOverwrite && !m_PipelineOverwrites.IsEmpty())
+		m_FinalOverwrite.Apply(pass);
+	bool isDirtyRendermode = (newRenderMode != m_RenderMode);
+	m_RenderMode = newRenderMode;
+	if(newRenderMode == ERenderMode::Mode2D) {
+		pass.lighting = ELightingFlag::Disabled;
+		pass.fogEnabled = false;
+	}
+
+	m_CurPassCullMode = pass.culling;
+
+	bool changedFogEnable = (pass.fogEnabled != m_PrevFog);
+	bool changedLighting = (pass.lighting != m_PrevLighting);
+	bool changedPolygonOffset = (pass.polygonOffset != m_PrevPolyOffset);
+
+	// Enable shader
+	bool isNewFixedFunction = (pass.shader.As<FixedFunctionShaderD3D9>() != nullptr);
+	bool isCurFixedFunction = m_CurrentShader.As<FixedFunctionShaderD3D9>() != nullptr;
+	if(pass.shader != m_CurrentShader) {
+		pass.shader->Enable();
+		m_CurrentShader = pass.shader;
+	}
+	
+	// Enable pass
+	m_DeviceState.EnableAlpha(pass.alpha);
+	m_DeviceState.SetStencilMode(pass.stencil);
+	m_DeviceState.SetRenderState(D3DRS_COLORWRITEENABLE, pass.colorMask);
+
+	m_DeviceState.SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(pass.zBufferFunc));
+	m_DeviceState.SetRenderState(D3DRS_ZWRITEENABLE, pass.zWriteEnabled ? TRUE : FALSE);
+	m_DeviceState.SetRenderState(D3DRS_FILLMODE, GetD3DFillMode(pass.drawMode));
+	m_DeviceState.SetRenderState(D3DRS_SHADEMODE, pass.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
+
+	m_DeviceState.SetRenderState(D3DRS_NORMALIZENORMALS, m_NormalizeNormals ? TRUE : FALSE);
+
+	// Update projection matrices to include polygon offset, or change for 2D mode
+	UpdateTransforms(
+		pass.polygonOffset,
+		isDirtyRendermode,
+		changedPolygonOffset);
+
+	// TODO: This should be placed in the fixed function shader.
+	// Load fixed function transforms
+	if(isNewFixedFunction) {
+		// Only if matrix changed or a switch to fixed function occured.
+		if(IsDirty(Dirty_ViewProj) || !isCurFixedFunction) {
+			m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
+			m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
+		}
+		if(IsDirty(Dirty_World) || !isCurFixedFunction) {
+			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
+		}
+	}
+
+	// Generate data for fog and light
+	if(changedFogEnable)
+		m_ParamIds.fogEnabled->GetAccess().Set(pass.fogEnabled ? 1.0f : 0.0f); 
+
+	if(changedLighting)
+		m_ParamIds.lighting->GetAccess().Set((float)pass.lighting);
+
+	// Send the generated data to the shader
+	// Only if scene or shader changed.
+	pass.shader->LoadSceneParams(GetParams(), pass);
+
+	// Let the user fill in parameters.
+	// TODO: Allow user to do this per hand.
+	if(paramSetCallback)
+		paramSetCallback->SendShaderSettings(pass, userParam);
+
+	// Start rendering with this shader.
+	// TODO: Move into Draw function.
+	pass.shader->Render();
+
+	// TODO: Remove as many Dirtys from here into the shader as possible.
+	ClearDirty(Dirty_World);
+	ClearDirty(Dirty_ViewProj);
+	ClearDirty(Dirty_Rendertarget);
+	m_PrevFog = pass.fogEnabled;
+	m_PrevLighting = pass.lighting;
+	m_PrevPolyOffset = pass.polygonOffset;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 
 void RendererD3D9::ReleaseUnmanaged()
 {
 	m_CurrentRendertargets.Clear();
 	m_BackbufferTarget = RendertargetD3D9(nullptr);
+	m_CurrentShader = nullptr;
 }
 
 void RendererD3D9::Reset()
@@ -350,138 +450,18 @@ void RendererD3D9::Reset()
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
 	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
-	m_ActiveFixedLights = 0;
+	m_CurrentShader = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void RendererD3D9::SetupRendering(EFaceWinding frontFace)
-{
-	bool dirtyPass = IsDirty(Dirty_Pass);
-	auto pass = m_Pass;
 
-	lxAssert(pass.shader != nullptr);
-
-	// Update the pipelineSettings to fit with the configuration.
-	if(m_UseOverwrite && !m_PipelineOverwrites.IsEmpty()) {
-		m_FinalOverwrite.Apply(pass);
-		dirtyPass = true;
-	}
-	if(m_RenderMode == ERenderMode::Mode2D) {
-		pass.lighting = ELightingFlag::Disabled;
-		pass.fogEnabled = false;
-		dirtyPass = true;
-	}
-	if(frontFace == EFaceWinding::CCW) {
-		(void)0;
-	} else if(frontFace == EFaceWinding::CW) {
-		pass.culling = FlipFaceSide(pass.culling);
-		dirtyPass = true;
-	} else if(frontFace == EFaceWinding::ANY) {
-		pass.culling = EFaceSide::None;
-		dirtyPass = true;
-	}
-
-	bool changedFogEnable = false;
-	bool changedLighting = false;
-	bool changedShader = false;
-	bool useFixedPipeline = (pass.shader.As<FixedFunctionShaderD3D9>() != nullptr);
-	if(dirtyPass) {
-		if(pass.fogEnabled != m_PrevFog) {
-			changedFogEnable = true;
-		}
-		if(pass.lighting != m_PrevLighting) {
-			changedLighting = true;
-		}
-
-		if(pass.polygonOffset != m_PrevPolyOffset) {
-			SetDirty(Dirty_PolygonOffset);
-		}
-
-		// Enable pass settings
-		// First enable shader to mimize stage changes.
-		auto oldShader = m_DeviceState.GetShader();
-		auto oldUseFixedPipeline = dynamic_cast<FixedFunctionShaderD3D9*>(oldShader) != nullptr;
-		if(pass.shader != oldShader) {
-			m_DeviceState.EnableShader(pass.shader);
-
-			// If we switches from a fixed shader to another fixed shader, it's no real switch.
-			changedShader = true;
-			if(oldUseFixedPipeline && useFixedPipeline && oldShader)
-				changedShader = false;
-			else
-				changedShader = true;
-		}
-		
-		// Enable pass
-		m_DeviceState.EnableAlpha(pass.alpha);
-		m_DeviceState.SetStencilMode(pass.stencil);
-		m_DeviceState.SetRenderState(D3DRS_COLORWRITEENABLE, pass.colorMask);
-
-		m_DeviceState.SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(pass.zBufferFunc));
-		m_DeviceState.SetRenderState(D3DRS_ZWRITEENABLE, pass.zWriteEnabled ? TRUE : FALSE);
-		m_DeviceState.SetRenderState(D3DRS_FILLMODE, GetD3DFillMode(pass.drawMode));
-		m_DeviceState.SetRenderState(D3DRS_SHADEMODE, pass.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
-		m_DeviceState.SetRenderState(D3DRS_CULLMODE, GetD3DCullMode(pass.culling));
-	}
-
-	m_DeviceState.SetRenderState(D3DRS_NORMALIZENORMALS, m_NormalizeNormals ? TRUE : FALSE);
-
-	// Update projection matrices to include polygon offset, or change for 2D mode
-	UpdateTransforms(pass.polygonOffset);
-	ClearDirty(Dirty_PolygonOffset);
-
-	// Load fixed function transforms
-	if(useFixedPipeline) {
-		// Only if matrix changed or shader changed
-		if(IsDirty(Dirty_ViewProj) || changedShader) {
-			m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
-			m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
-		}
-		if(IsDirty(Dirty_World) || changedShader) {
-			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
-		}
-	}
-	ClearDirty(Dirty_World);
-	ClearDirty(Dirty_ViewProj);
-
-	// Generate data for fog and light
-	if(changedFogEnable)
-		m_ParamIds.fogEnabled->GetAccess().Set(pass.fogEnabled ? 1.0f : 0.0f);
-
-	if(changedLighting)
-		m_ParamIds.lighting->GetAccess().Set((float)pass.lighting);
-
-	// Send the generated data to the shader
-	// Only if scene or shader changed.
-	pass.shader->LoadSceneParams(GetParams(), pass);
-
-	if(m_ParamSetCallback)
-		m_ParamSetCallback->SendShaderSettings(pass, m_UserParam);
-
-	// Start rendering with this shader
-	pass.shader->Render();
-
-	ClearDirty(Dirty_Rendertarget);
-	ClearDirty(Dirty_RenderMode);
-	ClearDirty(Dirty_Overwrites);
-	m_PrevFog = pass.fogEnabled;
-	m_PrevLighting = pass.lighting;
-	m_PrevPolyOffset = pass.polygonOffset;
-}
-
-void RendererD3D9::SwitchRenderMode(ERenderMode mode)
-{
-	if(m_RenderMode == mode)
-		return;
-
-	SetDirty(Dirty_RenderMode);
-	m_RenderMode = mode;
-}
-
-void RendererD3D9::UpdateTransforms(float polygonOffset)
+void RendererD3D9::UpdateTransforms(
+	float polygonOffset,
+	bool dirtyRendermode,
+	bool dirtyPolygonOffset)
 {
 	if(m_RenderMode == ERenderMode::Mode3D) {
-		if(IsDirty(Dirty_PolygonOffset) || IsDirty(Dirty_RenderMode) || IsDirty(Dirty_ViewProj)) {
+		if(dirtyPolygonOffset || dirtyRendermode || IsDirty(Dirty_ViewProj)) {
 			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
 			if(polygonOffset) {
 				const u8 zBits = m_Driver->GetConfig().zsFormat.zBits;
@@ -493,7 +473,7 @@ void RendererD3D9::UpdateTransforms(float polygonOffset)
 			SetDirty(Dirty_ViewProj);
 		}
 	} else if(m_RenderMode == ERenderMode::Mode2D) {
-		if(IsDirty(Dirty_Rendertarget) || IsDirty(Dirty_RenderMode) || IsDirty(Dirty_ViewProj)) {
+		if(IsDirty(Dirty_Rendertarget) || dirtyRendermode || IsDirty(Dirty_ViewProj)) {
 			auto ssize = GetRenderTarget().GetSize();
 			math::Matrix4 view = math::Matrix4(
 				1,  0, 0, 0,

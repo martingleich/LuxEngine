@@ -31,6 +31,7 @@ enum class EFixedLightType
 	Directional,
 	Spot,
 };
+
 //! Contains all data needed to represent a light
 class LightData
 {
@@ -93,7 +94,6 @@ public:
 	void Init(const D3DCAPS9* caps, IDirect3DDevice9* device);
 
 	void EnableHardwareShader(IDirect3DVertexShader9* vs, IDirect3DPixelShader9* ps);
-
 	void EnableFixedFunctionShader(
 		const core::Array<TextureLayer>& layer,
 		const core::Array<TextureStageSettings>& settings,
@@ -120,21 +120,10 @@ public:
 	void ConfigureFixedFog(EFixedFogType type, const ColorF& color, float start, float end, float density);
 
 	void SetStencilMode(const StencilMode& mode);
+
 	void EnableLight(bool enable);
 	void SetLight(u32 id, const LightData& light, ELightingFlag lighting);
 	void DisableLight(u32 id);
-
-	void EnableShader(Shader* s)
-	{
-		if(s != m_Shader && m_Shader)
-			m_Shader->Disable();
-		if(s)
-			s->Enable();
-
-		m_Shader = s;
-	}
-
-	Shader* GetShader() { return m_Shader; }
 
 	void ReleaseUnmanaged();
 	void Reset();
@@ -147,8 +136,6 @@ private:
 	D3DMATERIAL9 m_D3DMaterial;
 
 	UnknownRefCounted<IDirect3DDevice9> m_Device;
-
-	WeakRef<video::Shader> m_Shader;
 
 	int m_ActiveTextureLayers;
 

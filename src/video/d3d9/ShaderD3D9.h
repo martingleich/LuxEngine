@@ -104,7 +104,6 @@ public:
 	// Handle settings with DeviceState.
 	// Maybe completly remove Enable/Disable/Render and handle all in DeviceState.
 	void Render() override {}
-	void Disable() override;
 
 	const core::ParamPackage& GetParamPackage() const;
 

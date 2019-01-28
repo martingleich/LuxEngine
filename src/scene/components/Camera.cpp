@@ -27,8 +27,7 @@ Camera::Camera() :
 	m_FarPlane(500.0f),
 	m_IsOrtho(false),
 	m_RenderPriority(0),
-	m_Listener(nullptr),
-	m_AutoAspect(true)
+	m_Listener(nullptr)
 {
 }
 
@@ -101,16 +100,6 @@ void Camera::SetOrtho(bool ortho)
 	m_IsOrtho = ortho;
 }
 
-void Camera::SetAutoAspect(bool automatic)
-{
-	m_AutoAspect = automatic;
-}
-
-bool Camera::GetAutoAspect()
-{
-	return m_AutoAspect;
-}
-
 bool Camera::IsOrtho() const
 {
 	return m_IsOrtho;
@@ -150,7 +139,7 @@ void Camera::PreRender(const SceneRenderData& r)
 {
 	if(m_Listener)
 		m_Listener->PreRender(this);
-	m_RenderTarget = r.video->GetRenderTarget();
+	LUX_UNUSED(r);
 }
 
 void Camera::Render(const SceneRenderData& render)
@@ -163,6 +152,7 @@ void Camera::PostRender(const SceneRenderData& r)
 {
 	if(m_Listener)
 		m_Listener->PostRender(this);
+	LUX_UNUSED(r);
 }
 
 const math::ViewFrustum& Camera::GetFrustum()
@@ -185,24 +175,17 @@ const math::Matrix4& Camera::GetProjection()
 
 math::Matrix4 Camera::CalculateProjectionMatrix()
 {
-	float aspect;
-	if(m_AutoAspect) {
-		aspect = m_RenderTarget.GetSize().GetAspect();
-	} else {
-		aspect = m_Aspect;
-	}
-
 	math::Matrix4 out;
 	if(m_IsOrtho) {
 		out.BuildProjection_Ortho(
 			m_XMax,
-			aspect,
+			m_Aspect,
 			m_NearPlane,
 			m_FarPlane);
 	} else {
 		out.BuildProjection_Persp(
 			m_FOV,
-			aspect,
+			m_Aspect,
 			m_NearPlane,
 			m_FarPlane);
 	}
@@ -226,18 +209,12 @@ math::Matrix4 Camera::CalculateViewMatrix()
 
 math::ViewFrustum Camera::CalculateViewFrustum(const math::Matrix4& view)
 {
-	float aspect;
-	if(m_AutoAspect) {
-		aspect = m_RenderTarget.GetSize().GetAspect();
-	} else {
-		aspect = m_Aspect;
-	}
 	math::ViewFrustum out;
 	auto n = GetNode();
 	if(m_IsOrtho)
-		out = math::ViewFrustum::FromOrthoCam(n->GetAbsolutePosition(), view, m_XMax, aspect, m_NearPlane, m_FarPlane);
+		out = math::ViewFrustum::FromOrthoCam(n->GetAbsolutePosition(), view, m_XMax, m_Aspect, m_NearPlane, m_FarPlane);
 	else
-		out = math::ViewFrustum::FromPerspCam(n->GetAbsolutePosition(), view, m_FOV, aspect, m_NearPlane, m_FarPlane);
+		out = math::ViewFrustum::FromPerspCam(n->GetAbsolutePosition(), view, m_FOV, m_Aspect, m_NearPlane, m_FarPlane);
 
 	return out;
 }

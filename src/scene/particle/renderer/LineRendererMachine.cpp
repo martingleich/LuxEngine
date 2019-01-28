@@ -82,11 +82,11 @@ void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	}
 
 	if(m_Data->EmitLight)
-		videoRenderer->SetPass(m_EmitPass, true);
+		videoRenderer->SendPassSettings(m_EmitPass, true);
 	else
-		videoRenderer->SetPass(m_DefaultPass, true);
+		videoRenderer->SendPassSettings(m_DefaultPass, true);
 
-	videoRenderer->Draw(video::RenderRequest::FromMemory3D(
+	videoRenderer->Draw(video::RenderRequest::FromMemory(
 		video::EPrimitiveType::Lines, group->GetParticleCount(),
 		m_Vertices.Data_c(), group->GetParticleCount() * 2, m_VertexFormat));
 }

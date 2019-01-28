@@ -72,11 +72,10 @@ struct RenderRequest
 	EFaceWinding frontFace;
 	EPrimitiveType primitiveType;
 
-	bool is3D;
 	bool userPointer;
 	bool indexed;
 
-	static RenderRequest IndexedFromMemory3D(
+	static RenderRequest IndexedFromMemory(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		const void* indexData, EIndexFormat indexType,
@@ -84,7 +83,6 @@ struct RenderRequest
 	{
 		RenderRequest rq;
 		rq.userPointer = true;
-		rq.is3D = true;
 		rq.userData.vertexData = vertexData;
 		rq.userData.vertexCount = vertexCount;
 		rq.userData.vertexFormat = &vertexFormat;
@@ -97,53 +95,13 @@ struct RenderRequest
 		rq.frontFace = frontFace;
 		return rq;
 	}
-	static RenderRequest IndexedFromMemory2D(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		const void* indexData, EIndexFormat indexType,
-		EFaceWinding frontFace = EFaceWinding::CCW)
-	{
-		RenderRequest rq;
-		rq.userPointer = true;
-		rq.is3D = false;
-		rq.userData.vertexData = vertexData;
-		rq.userData.vertexCount = vertexCount;
-		rq.userData.vertexFormat = &vertexFormat;
-		rq.userData.indexData = indexData;
-		rq.userData.indexFormat = indexType;
-		rq.indexed = true;
-		rq.firstPrimitive = 0;
-		rq.primitiveCount = primitiveCount;
-		rq.primitiveType = primitiveType;
-		rq.frontFace = frontFace;
-		return rq;
-	}
-	static RenderRequest FromMemory3D(
+	static RenderRequest FromMemory(
 		EPrimitiveType primitiveType, u32 primitiveCount,
 		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
 		EFaceWinding frontFace = EFaceWinding::CCW)
 	{
 		RenderRequest rq;
 		rq.userPointer = true;
-		rq.is3D = true;
-		rq.userData.vertexData = vertexData;
-		rq.userData.vertexCount = vertexCount;
-		rq.userData.vertexFormat = &vertexFormat;
-		rq.indexed = false;
-		rq.firstPrimitive = 0;
-		rq.primitiveCount = primitiveCount;
-		rq.primitiveType = primitiveType;
-		rq.frontFace = frontFace;
-		return rq;
-	}
-	static RenderRequest FromMemory2D(
-		EPrimitiveType primitiveType, u32 primitiveCount,
-		const void* vertexData, u32 vertexCount, const VertexFormat& vertexFormat,
-		EFaceWinding frontFace = EFaceWinding::CCW)
-	{
-		RenderRequest rq;
-		rq.userPointer = true;
-		rq.is3D = false;
 		rq.userData.vertexData = vertexData;
 		rq.userData.vertexCount = vertexCount;
 		rq.userData.vertexFormat = &vertexFormat;
@@ -155,10 +113,15 @@ struct RenderRequest
 		return rq;
 	}
 
-	LUX_API static RenderRequest Geometry3D(const Geometry* geo);
-	LUX_API static RenderRequest Geometry2D(const Geometry* geo);
-	LUX_API static RenderRequest Geometry3D(const Geometry* geo, int first, int count);
-	LUX_API static RenderRequest Geometry2D(const Geometry* geo, int first, int count);
+	LUX_API static RenderRequest FromGeometry(const Geometry* geo);
+	LUX_API static RenderRequest FromGeometry(const Geometry* geo, int first, int count);
+};
+
+enum class ERenderMode
+{
+	Mode3D,
+	Mode2D,
+	None,
 };
 
 /**
@@ -234,7 +197,6 @@ public:
 	*/
 	virtual void SetRenderTarget(const RenderTarget& target) = 0;
 	virtual void SetRenderTarget(const core::Array<RenderTarget>& targets) = 0;
-	virtual const math::Dimension2I& GetRenderTargetSize() = 0;
 
 	//! Get the current major rendertarget
 	virtual const RenderTarget& GetRenderTarget() = 0;
@@ -242,13 +204,26 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	//! Set the active pass
-	virtual void SetPass(const Pass& pass, bool useOverwrite = false, ShaderParamSetCallback* paramSetCallback = nullptr, void* userParam = nullptr) = 0;
-
-	//! Set the active material
-	void SetMaterial(AbstractMaterial* material)
+	void SendPassSettings(
+		const Pass& pass,
+		bool useOverwrite = false,
+		ShaderParamSetCallback* paramSetCallback = nullptr,
+		void* userParam = nullptr)
 	{
-		SetPass(material->GetPass(), true, material);
+		SendPassSettingsEx(
+			ERenderMode::Mode3D,
+			pass,
+			useOverwrite,
+			paramSetCallback,
+			userParam);
 	}
+
+	virtual void SendPassSettingsEx(
+		ERenderMode renderMode,
+		const Pass& pass,
+		bool useOverwrite = false,
+		ShaderParamSetCallback* paramSetCallback = nullptr,
+		void* userParam = nullptr) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -273,8 +248,6 @@ public:
 
 	//! Set a transform matrix
 	virtual void SetTransform(ETransform transform, const math::Matrix4& matrix) = 0;
-
-	//! Get a active transform matrix
 	virtual const math::Matrix4& GetTransform(ETransform transform) const = 0;
 
 	//! Renormalize normals after transformation(default = true)
@@ -300,10 +273,7 @@ public:
 struct VideoRendererToken : core::Uncopyable
 {
 	Renderer* renderer = nullptr;
-	void Unlock()
-	{
-		renderer = nullptr;
-	}
+	void Unlock() { renderer = nullptr; }
 };
 
 //! A token to restore the previous state of the overwrite system.

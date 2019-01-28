@@ -326,11 +326,11 @@ void Canvas3D::FlushLineBuffer()
 	lxAssert(m_LineBufferCursor % 2 == 0);
 
 	if(m_LastPass != PenPass) {
-		m_Renderer->SetPass(Canvas3DSystem::Instance()->GetPenPass(), false);
 		m_Renderer->SetTransform(video::ETransform::World, m_Transform);
+		m_Renderer->SendPassSettings(Canvas3DSystem::Instance()->GetPenPass(), false);
 	}
 
-	m_Renderer->Draw(video::RenderRequest::FromMemory3D(
+	m_Renderer->Draw(video::RenderRequest::FromMemory(
 		EPrimitiveType::Lines, m_LineBufferCursor / 2,
 		m_LineBuffer, m_LineBufferCursor, Canvas3DSystem::Instance()->GetPenVertexFormat()));
 	m_LineBufferCursor = 0;
@@ -346,11 +346,11 @@ void Canvas3D::FlushTriBuffer()
 	if(m_LastPass != BrushPass) {
 		auto pass = Canvas3DSystem::Instance()->GetBrushPass();
 		pass.polygonOffset = m_PolyOffset;
-		m_Renderer->SetPass(pass, false, nullptr);
 		m_Renderer->SetTransform(video::ETransform::World, m_Transform);
+		m_Renderer->SendPassSettings(pass, false, nullptr);
 	}
 
-	m_Renderer->Draw(video::RenderRequest::FromMemory3D(
+	m_Renderer->Draw(video::RenderRequest::FromMemory(
 		EPrimitiveType::Triangles, m_TriBufferCursor / 3,
 		m_TriBuffer, m_TriBufferCursor, Canvas3DSystem::Instance()->GetBrushVertexFormat()));
 	m_TriBufferCursor = 0;

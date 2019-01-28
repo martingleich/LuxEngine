@@ -63,9 +63,18 @@ public:
 			return core::Types::Matrix();
 		}
 
+		u32 GetChangeId() override
+		{
+			if(!table->IsUpToDate((EMatrixType)id)) {
+				table->UpdateMatrix((EMatrixType)id);
+				++m_ChangeId;
+			}
+			return m_ChangeId;
+		}
 	private:
 		MatrixTable* table;
 		int id;
+		u32 m_ChangeId=0;
 	};
 
 public:

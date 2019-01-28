@@ -32,6 +32,19 @@ struct FixedFunctionParameters
 		out.useVertexColors = useVertexColors;
 		return out;
 	}
+	static FixedFunctionParameters Lit(
+		const core::Array<core::String>& textures,
+		const core::Array<TextureStageSettings>& stages,
+		bool useVertexColors=false)
+	{
+		FixedFunctionParameters out;
+		out.textures = textures;
+		out.stages = stages;
+		out.enableFogging = true;
+		out.maxLightCount = 4;
+		out.useVertexColors = useVertexColors;
+		return out;
+	}
 	core::Array<core::String> textures;
 	core::Array<TextureStageSettings> stages;
 	bool useVertexColors = false;

@@ -87,8 +87,8 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Color color, const 
 		video::Vertex2D(realRect.right, realRect.top, color),
 	};
 
-	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
-	m_Renderer->Draw(video::RenderRequest::FromMemory2D(
+	m_Renderer->SendPassSettingsEx(video::ERenderMode::Mode2D, m_DiffusePass, false, &g_ShaderParamSet);
+	m_Renderer->Draw(video::RenderRequest::FromMemory(
 		video::EPrimitiveType::TriangleStrip, 2, quad, 4, video::VertexFormat::STANDARD_2D));
 }
 
@@ -107,8 +107,8 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, c
 		video::Vertex2D(realRect.right, realRect.top, color, tCoord.right, tCoord.top)
 	};
 	video::TextureLayer layer(texture);
-	m_Renderer->SetPass(m_TexturePass, false, &g_ShaderParamSet, &layer);
-	m_Renderer->Draw(video::RenderRequest::FromMemory2D(
+	m_Renderer->SendPassSettingsEx(video::ERenderMode::Mode2D, m_TexturePass, false, &g_ShaderParamSet, &layer);
+	m_Renderer->Draw(video::RenderRequest::FromMemory(
 		video::EPrimitiveType::TriangleStrip,
 		2, quad, 4, video::VertexFormat::STANDARD_2D));
 }
@@ -121,8 +121,8 @@ void Renderer::DrawTriangle(const math::Vector2F& a, const math::Vector2F& b, co
 		video::Vertex2D(c.x, c.y, color),
 	};
 
-	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
-	m_Renderer->Draw(video::RenderRequest::FromMemory2D(
+	m_Renderer->SendPassSettingsEx(video::ERenderMode::Mode2D, m_DiffusePass, false, &g_ShaderParamSet);
+	m_Renderer->Draw(video::RenderRequest::FromMemory(
 		video::EPrimitiveType::Triangles,
 		1, tri, 3, video::VertexFormat::STANDARD_2D));
 }
@@ -164,7 +164,7 @@ struct LineBuffer
 	{
 		if(!cursor)
 			return;
-		renderer->Draw(video::RenderRequest::FromMemory2D(
+		renderer->Draw(video::RenderRequest::FromMemory(
 			video::EPrimitiveType::Lines,
 			(u32)cursor / 2,
 			&BUFFER, (u32)cursor,
@@ -182,7 +182,7 @@ void Renderer::DrawLine(const math::Vector2F& start, const math::Vector2F& end, 
 		return;
 	if(style.steps[style.invert] == 0)
 		return;
-	m_Renderer->SetPass(m_DiffusePass, false, &g_ShaderParamSet);
+	m_Renderer->SendPassSettings(m_DiffusePass, false, &g_ShaderParamSet);
 	LineBuffer lineBuffer(m_Renderer, color);
 
 	if(style.steps[1 - style.invert] == 0) {

@@ -50,7 +50,7 @@ public:
 		scene::Node* node;
 		scene::SceneBuilder sceneBuilder(Context.Scene);
 
-		m_Camera = sceneBuilder.CreateCamera();
+		m_Camera = sceneBuilder.CreateCamera(Context.Window->GetSize().GetAspect());
 		m_CameraNode = Context.Scene->AddNode(m_Camera);
 		m_CameraNode->SetPosition(0.0f, 0.0f, -15.0f);
 		m_CameraNode->SetDirectionUp(math::Vector3F(0.0f, 0.0f, 1.0f));

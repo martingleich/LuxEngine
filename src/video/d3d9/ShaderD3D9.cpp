@@ -555,6 +555,8 @@ ShaderD3D9::~ShaderD3D9()
 
 void ShaderD3D9::Enable()
 {
+	m_DeviceState.EnableFixedFog(false);
+	m_DeviceState.EnableLight(false);
 	m_DeviceState.EnableHardwareShader(m_VertexShader, m_PixelShader);
 }
 
@@ -652,11 +654,6 @@ void ShaderD3D9::SetShaderValue(const BasicParam& param, const void* data)
 			lxAssertNeverReach("Unsupported shader variable type.");
 		}
 	}
-}
-
-void ShaderD3D9::Disable()
-{
-	m_DeviceState.EnableHardwareShader(nullptr, nullptr);
 }
 
 const core::ParamPackage& ShaderD3D9::GetParamPackage() const

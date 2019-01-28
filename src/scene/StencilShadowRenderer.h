@@ -119,8 +119,8 @@ public:
 
 		if(!shadowVolume.points.IsEmpty()) {
 			m_Renderer->SetTransform(video::ETransform::World, transform.ToMatrix());
-			m_Renderer->SetPass(m_Silhouette);
-			m_Renderer->Draw(video::RenderRequest::FromMemory3D(
+			m_Renderer->SendPassSettings(m_Silhouette);
+			m_Renderer->Draw(video::RenderRequest::FromMemory(
 				video::EPrimitiveType::Triangles,
 				shadowVolume.points.Size() / 3,
 				shadowVolume.points.Data(),
@@ -229,8 +229,8 @@ public:
 			video::Vertex2D((float)size.width, (float)size.height, color)
 		};
 
-		m_Renderer->SetPass(m_ShadowRenderPass);
-		m_Renderer->Draw(video::RenderRequest::FromMemory3D(
+		m_Renderer->SendPassSettings(m_ShadowRenderPass);
+		m_Renderer->Draw(video::RenderRequest::FromMemory(
 			video::EPrimitiveType::TriangleStrip,
 			2, &points, 4,
 			video::VertexFormat::STANDARD_2D));

@@ -397,14 +397,12 @@ void DeviceStateD3D9::ReleaseUnmanaged()
 		m_Device->SetTexture(i, nullptr);
 	for(int i = 0; i < m_MaxVSTextureCount; ++i)
 		m_Device->SetTexture(D3DVERTEXTEXTURESAMPLER0 + i, nullptr);
-	m_Shader = nullptr;
 	m_Device->SetPixelShader(nullptr);
 	m_Device->SetVertexShader(nullptr);
 }
 
 void DeviceStateD3D9::Reset()
 {
-	m_Shader = nullptr;
 	m_ActiveTextureLayers = 0;
 
 	for(auto i = 0; i < RENDERSTATE_COUNT; ++i)

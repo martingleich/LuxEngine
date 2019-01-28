@@ -109,7 +109,7 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 	auto lights = m_Scene->GetLights();
 	auto fogs = m_Scene->GetFogs();
 
-	m_Cameras.Sort(core::CompareTypeFromSmaller<AbstractCamera*>([](AbstractCamera* a, AbstractCamera* b) -> bool { return a->GetRenderPriority() < b->GetRenderPriority(); }));
+	m_Cameras.Sort(core::CompareTypeFromSmaller<AbstractCamera*>([](AbstractCamera* a, AbstractCamera* b) -> bool { return a->GetRenderPriority() > b->GetRenderPriority(); }));
 	if(m_Cameras.Size() == 0) {
 		log::Warning("No camera in scenegraph.");
 		if(beginScene == true) {
@@ -134,7 +134,6 @@ void SceneRendererSimpleForward::DrawScene(bool beginScene, bool endScene)
 		scene::SceneRenderData sceneData;
 		sceneData.video = m_Renderer;
 		sceneData.pass = ERenderPass::None;
-
 		m_ActiveCamera->PreRender(sceneData);
 
 		// Select visible lights and fogs.

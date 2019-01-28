@@ -63,13 +63,6 @@ public:
 
 	//! Screen width divided by Screen height
 	LUX_API void SetAspect(float aspect);
-	//! The aspect ratio is automatic calculated from the rendertarget.
-	/**
-	Default value is true.
-	*/
-	LUX_API void SetAutoAspect(bool automatic);
-	//! Is the aspect ratio automatic calculated.
-	LUX_API bool GetAutoAspect();
 	LUX_API float GetAspect() const;
 
 	LUX_API void SetXMax(float xmax);
@@ -137,7 +130,6 @@ private:
 	math::ViewFrustum m_ActiveViewFrustum;
 
 	bool m_IsOrtho;
-	bool m_AutoAspect;
 };
 
 } // namespace scene

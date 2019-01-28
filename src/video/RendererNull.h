@@ -14,25 +14,14 @@ namespace lux
 namespace video
 {
 
-enum class ERenderMode
-{
-	Mode3D,
-	Mode2D,
-	None,
-};
-
 class RendererNull : public Renderer
 {
 protected:
 	enum EDirtyFlags
 	{
-		Dirty_Pass,
 		Dirty_World,
 		Dirty_ViewProj,
 		Dirty_Rendertarget,
-		Dirty_RenderMode,
-		Dirty_PolygonOffset,
-		Dirty_Overwrites,
 	};
 
 public:
@@ -41,17 +30,8 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void SetPass(const Pass& pass, bool useOverwrite = false, ShaderParamSetCallback* paramSetCallback = nullptr, void* userParam=nullptr);
-
-	///////////////////////////////////////////////////////////////////////////
-
 	void PushPipelineOverwrite(const PipelineOverwrite& over, PipelineOverwriteToken* token);
 	void PopPipelineOverwrite(PipelineOverwriteToken* token);
-
-private:
-	void UpdatePipelineOverwrite();
-
-public:
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -91,6 +71,9 @@ protected:
 		m_DirtyFlags = 0;
 	}
 
+private:
+	void UpdatePipelineOverwrite();
+
 protected:
 	struct ParamIdCollection
 	{
@@ -103,12 +86,6 @@ protected:
 
 protected:
 	ERenderMode m_RenderMode; //!< Active rendermode
-
-	// The userset parameters are only rememberd they don't have to be activated immediatly
-	bool m_UseOverwrite;
-	ShaderParamSetCallback* m_ParamSetCallback;
-	void* m_UserParam;
-	Pass m_Pass;
 
 	core::Array<PipelineOverwrite> m_PipelineOverwrites; //!< User set pipeline overwrites
 	PipelineOverwrite m_FinalOverwrite;

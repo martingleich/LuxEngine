@@ -10,13 +10,13 @@ namespace lux
 namespace core
 {
 
-
 class Attribute : public ReferenceCounted
 {
 public:
 	virtual const core::String& GetName() const = 0;
 	virtual core::Type GetType() const = 0;
 	virtual VariableAccess GetAccess(bool isConst = false) = 0;
+	virtual u32 GetChangeId() = 0;
 };
 
 class AttributeAnyImpl : public Attribute
@@ -28,27 +28,26 @@ public:
 	{
 	}
 
-	virtual const core::String& GetName() const
-	{
-		return m_Name;
-	}
+	const core::String& GetName() const override { return m_Name; }
 
-	virtual core::Type GetType() const
-	{
-		return m_Any.GetType();
-	}
+	core::Type GetType() const override { return m_Any.GetType(); }
 
-	virtual VariableAccess GetAccess(bool isConst = false)
+	VariableAccess GetAccess(bool isConst = false) override
 	{
+		if(!isConst)
+			m_ChangeId++;
 		auto type = m_Any.GetType();
 		if(isConst)
 			type = type.GetConstantType();
 		return VariableAccess(type, (void*)m_Any.Data());
 	}
 
+	u32 GetChangeId() override { return m_ChangeId; }
+
 private:
 	AnyObject m_Any;
 	core::String m_Name;
+	u32 m_ChangeId=0;
 };
 
 class AttributePtr

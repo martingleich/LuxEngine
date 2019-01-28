@@ -17,7 +17,6 @@ public:
 	void SetParam(int paramId, const void* data) override;
 	void LoadSceneParams(core::AttributeList sceneAttributes, const Pass& pass) override;
 	void Render() override;
-	void Disable() override;
 
 	const core::ParamPackage& GetParamPackage() const override;
 
@@ -36,10 +35,11 @@ public:
 	bool m_IsDirty;
 
 	core::AttributePtr m_AmbientPtr;
+	bool m_UseFog;
 	core::AttributePtr m_FogAPtr;
 	core::AttributePtr m_FogBPtr;
 
-	static const int LIGHT_COUNT = 4;
+	int m_LightCount = 4;
 	core::AttributePtr m_LightPtrs[4];
 
 	mutable core::AttributeList m_CurAttributes;
