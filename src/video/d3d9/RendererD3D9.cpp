@@ -22,11 +22,23 @@ namespace video
 {
 
 RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState) :
-	RendererNull(driver, m_MatrixTable),
+	RendererNull(driver),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
 	m_DeviceState(deviceState),
 	m_Driver(driver)
 {
+	core::AttributeListBuilder alb;
+	m_ParamIds.lighting = alb.AddAttribute("lighting", (float)video::ELightingFlag::Enabled);
+	m_ParamIds.fogEnabled = alb.AddAttribute("fogEnabled", 1.0f);
+
+	m_ParamIds.ambient = alb.AddAttribute("ambient", video::ColorF(0, 0, 0));
+	m_ParamIds.time = alb.AddAttribute("time", 0.0f);
+
+	for(auto a : m_MatrixTable.Attributes())
+		alb.AddAttribute(a);
+
+	m_Params = m_BaseParams = alb.BuildAndReset();
+
 	m_BackbufferTarget = m_Driver->GetBackbufferTarget();
 	m_ScissorRect.Set(0, 0, m_BackbufferTarget.GetSize().width, m_BackbufferTarget.GetSize().height);
 	m_CurrentRendertargets.PushBack(m_BackbufferTarget);
@@ -446,10 +458,10 @@ void RendererD3D9::SendPassSettingsEx(
 
 	// Generate data for fog and light
 	if(changedFogEnable)
-		m_ParamIds.fogEnabled->GetAccess().Set(pass.fogEnabled ? 1.0f : 0.0f); 
+		m_ParamIds.fogEnabled->SetValue<float>(pass.fogEnabled ? 1.0f : 0.0f); 
 
 	if(changedLighting)
-		m_ParamIds.lighting->GetAccess().Set((float)pass.lighting);
+		m_ParamIds.lighting->SetValue<float>(float(pass.lighting));
 
 	// Send the generated data to the shader
 	// Only if scene or shader changed.

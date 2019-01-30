@@ -52,12 +52,6 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	//! Access an attribute of the scene renderer.
-	/**
-	Attributes are options to change the behaviour of the renderer, see the renderer documentaions for available options.
-	*/
-	virtual core::VariableAccess Attribute(core::StringView str) = 0;
-
 	//! Get the list of attributes of the scene renderer.
 	/**
 	Attributes are options to change the behaviour of the renderer, see the renderer documentaions for available options.

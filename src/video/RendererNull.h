@@ -24,7 +24,7 @@ protected:
 	};
 
 public:
-	RendererNull(VideoDriver* driver, video::MatrixTable& matrixTable);
+	RendererNull(VideoDriver* driver);
 	virtual ~RendererNull() {}
 
 	///////////////////////////////////////////////////////////////////////////

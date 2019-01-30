@@ -43,59 +43,53 @@ public:
 	{
 	public:
 		MatrixAttribute(MatrixTable* _table, int _id) :
+			core::Attribute(_table->GetMatrixName((EMatrixType)_id), core::Types::Matrix()),
 			table(_table),
-			id(_id)
+			id((EMatrixType)_id)
 		{
 		}
 
-		core::VariableAccess GetAccess(bool) override
-		{
-			if(!table->IsUpToDate((EMatrixType)id))
-				table->UpdateMatrix((EMatrixType)id);
-			return table->GetParamById(id);
-		}
+		void SetValuePtr(const void* ptr) { table->SetMatrix(id, *(math::Matrix4*)ptr); }
+		const void* GetValuePtr() { return &table->GetMatrix(id); }
 
-		const core::String& GetName() const override
+		void SetDirty()
 		{
-			return table->GetMatrixName(id);
+			++dirty;
+			++m_ChangeId;
 		}
+		void ClearDirty()
+		{
+			dirty = false;
+		}
+		void UpdateChangeId() { m_ChangeId++; }
 
-		core::Type GetType() const override
-		{
-			return core::Types::Matrix();
-		}
-
-		u32 GetChangeId() override
-		{
-			return table->m_ChangeIds[id];
-		}
+		math::Matrix4 value;
+		bool dirty=true;
 	private:
 		MatrixTable* table;
-		int id;
+		EMatrixType id;
 	};
 
 public:
 	MatrixTable();
-
 	void SetMatrix(EMatrixType type, const math::Matrix4& matrix);
-	core::VariableAccess GetParamById(int id) const;
 	const math::Matrix4& GetMatrix(EMatrixType type) const;
-	bool IsDirty(EMatrixType type) const;
-	void ClearDirty(EMatrixType type) const;
 
-	int GetCount() const;
+	core::Range<StrongRef<MatrixAttribute>*> Attributes()
+	{
+		return core::Range<StrongRef<MatrixAttribute>*>(m_Matrices, m_Matrices + MAT_COUNT);
+	}
+
+private:
 	const core::String& GetMatrixName(int id) const;
-	StrongRef<core::Attribute> CreateAttribute(int id);
 
 private:
 	bool IsUpToDate(EMatrixType type) const;
 	void UpdateMatrix(EMatrixType type) const;
 
 private:
-	mutable math::Matrix4 m_Matrices[MAT_COUNT];
-	mutable u32 m_ChangeIds[MAT_COUNT] = {0};
-	mutable u32 m_UpToDate;
-	mutable u32 m_Dirty;
+
+	mutable StrongRef<MatrixAttribute> m_Matrices[MAT_COUNT];
 };
 
 } // namespace video

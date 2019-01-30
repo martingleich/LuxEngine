@@ -32,14 +32,7 @@ public:
 	~SceneRendererSimpleForward();
 
 	void DrawScene(bool beginScene, bool endScene);
-	core::VariableAccess Attribute(core::StringView str)
-	{
-		return m_Attributes[str];
-	}
-	core::AttributeList AttributeList() const
-	{
-		return m_Attributes;
-	}
+	core::AttributeList AttributeList() const { return m_Attributes; }
 
 	void SetPassSettings(ERenderPass pass, const SceneRendererPassSettings& settings)
 	{

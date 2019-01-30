@@ -39,24 +39,12 @@ RenderRequest RenderRequest::FromGeometry(const Geometry* geo, int first, int co
 	return rq;
 }
 
-RendererNull::RendererNull(VideoDriver* driver, video::MatrixTable& matrixTable) :
+RendererNull::RendererNull(VideoDriver* driver) :
 	m_RenderMode(ERenderMode::None),
 	m_NormalizeNormals(true),
 	m_DirtyFlags(0xFFFFFFFF), // Set all dirty flags at start
 	m_Driver(driver)
 {
-	core::AttributeListBuilder alb;
-	m_ParamIds.lighting = alb.AddAttribute("lighting", (float)video::ELightingFlag::Enabled);
-	m_ParamIds.fogEnabled = alb.AddAttribute("fogEnabled", 1.0f);
-
-	m_ParamIds.ambient = alb.AddAttribute("ambient", video::ColorF(0, 0, 0));
-	m_ParamIds.time = alb.AddAttribute("time", 0.0f);
-
-	for(int i = 0; i < matrixTable.GetCount(); ++i)
-		alb.AddAttribute(matrixTable.CreateAttribute(i));
-
-	m_Params = m_BaseParams = alb.BuildAndReset();
-
 	m_RenderStatistics = RenderStatistics::Instance();
 }
 

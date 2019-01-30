@@ -13,47 +13,67 @@ namespace core
 class Attribute : public ReferenceCounted
 {
 public:
-	virtual const core::String& GetName() const = 0;
-	virtual core::Type GetType() const = 0;
-	virtual VariableAccess GetAccess(bool isConst = false) = 0;
-	virtual u32 GetChangeId() = 0;
+	Attribute(core::StringView name, const core::Type& type) :
+		m_Name(name),
+		m_Type(type),
+		m_ChangeId(0)
+	{
+	}
+
+	const core::String& GetName() const { return m_Name; }
+	core::Type GetType() const { return m_Type; }
+	u32 GetChangeId() const { return m_ChangeId; }
 
 	template <typename T>
 	const T& GetValue()
 	{
-		return GetAccess(true).Get<T>();
+		// TODO: Check type
+		return *(const T*)GetValuePtr();
 	}
+	const void* GetValuePointer()
+	{
+		return GetValuePtr();
+	}
+
+	template <typename T>
+	void SetValue(const T& value)
+	{
+		// TODO: Check type
+		SetValuePtr(&value);
+	}
+
+protected:
+	virtual void SetValuePtr(const void* ptr) = 0;
+	virtual const void* GetValuePtr() = 0;
+
+protected:
+	core::String m_Name;
+	core::Type m_Type;
+	u32 m_ChangeId;
 };
 
+template <typename T>
 class AttributeAnyImpl : public Attribute
 {
 public:
-	AttributeAnyImpl(core::StringView name, core::Type type, const void* init = nullptr) :
-		m_Any(type, init),
-		m_Name(name)
+	AttributeAnyImpl(core::StringView name, core::Type type, const T& init) :
+		Attribute(name, type),
+		m_Value(init)
 	{
 	}
 
-	const core::String& GetName() const override { return m_Name; }
-
-	core::Type GetType() const override { return m_Any.GetType(); }
-
-	VariableAccess GetAccess(bool isConst = false) override
+	void SetValuePtr(const void* ptr) override
 	{
-		if(!isConst)
-			m_ChangeId++;
-		auto type = m_Any.GetType();
-		if(isConst)
-			type = type.GetConstantType();
-		return VariableAccess(type, (void*)m_Any.Data());
+		m_ChangeId++;
+		VariableAccess(m_Type, &m_Value).AssignData(ptr);
 	}
-
-	u32 GetChangeId() override { return m_ChangeId; }
+	const void* GetValuePtr() override
+	{
+		return &m_Value;
+	}
 
 private:
-	AnyObject m_Any;
-	core::String m_Name;
-	u32 m_ChangeId=0;
+	T m_Value;
 };
 
 class AttributePtr
@@ -119,37 +139,8 @@ class AttributeListInternal : public ReferenceCounted
 public:
 	using ConstIterator = core::HashMap<core::String, StrongRef<Attribute>>::ConstKeyIterator;
 public:
-	core::VariableAccess Attribute(core::StringView name)
-	{
-		auto it = m_ObjectMap.Find(name);
-		if(it == m_ObjectMap.end()) {
-			if(m_Base)
-				return m_Base->Attribute(name);
-			throw core::ObjectNotFoundException(name);
-		}
-		return it->value->GetAccess(false);
-	}
-
-	core::VariableAccess Attribute(core::StringView name) const
-	{
-		auto it = m_ObjectMap.Find(name);
-		if(it == m_ObjectMap.end()) {
-			if(m_Base)
-				return ((const AttributeListInternal*)m_Base)->Attribute(name);
-			throw core::ObjectNotFoundException(name);
-		}
-		return it->value->GetAccess(true);
-	}
-
-	ConstIterator First() const
-	{
-		return m_ObjectMap.Keys().First();
-	}
-
-	ConstIterator End() const
-	{
-		return m_ObjectMap.Keys().End();
-	}
+	ConstIterator First() const { return m_ObjectMap.Keys().First(); }
+	ConstIterator End() const { return m_ObjectMap.Keys().End(); }
 
 	AttributePtr Pointer(const core::StringView& name) const
 	{
@@ -178,15 +169,23 @@ class AttributeList
 public:
 	using ConstIterator = AttributeListInternal::ConstIterator;
 public:
-	AttributeList()
-	{
-	}
+	AttributeList() { }
 	AttributeList(AttributeListInternal* ptr) :
 		m_Internal(ptr)
 	{
 	}
-	core::VariableAccess operator[](core::StringView name) { return m_Internal->Attribute(name); }
-	core::VariableAccess operator[](core::StringView name) const { return m_Internal->Attribute(name); }
+
+	template <typename T>
+	const T& GetValue(core::StringView name)
+	{
+		return m_Internal->Pointer(name)->GetValue<T>();
+	}
+	template <typename T>
+	void SetValue(core::StringView name, const T& value)
+	{
+		m_Internal->Pointer(name)->SetValue(value);
+	}
+
 	ConstIterator First() const { return m_Internal->First(); }
 	ConstIterator End() const { return m_Internal->End(); }
 	AttributePtr Pointer(const core::StringView& name) const { return m_Internal->Pointer(name); }
@@ -205,7 +204,22 @@ public:
 	template <typename T>
 	AttributePtr AddAttribute(core::StringView name, const T& value)
 	{
-		return AddAttribute(name, core::TemplType<T>::Get(), &value);
+		AttributePtr ptr;
+		auto type = core::TemplType<T>::Get();
+		auto it = Objects().Find(name);
+		if(it != Objects().end()) {
+			if(it->value->GetType() != type)
+				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
+			it->value->SetValue(value);
+			ptr = (Attribute*)it->value;
+		} else {
+			StrongRef<Attribute> p = LUX_NEW(AttributeAnyImpl<T>)(name, type, value);
+			Objects().Add(name, p);
+			Objects()[name] = p;
+			ptr = (Attribute*)p;
+		}
+
+		return ptr;
 	}
 
 	AttributePtr AddAttribute(Attribute* attrb)
@@ -224,24 +238,6 @@ public:
 		}
 
 		return attrb;
-	}
-
-	AttributePtr AddAttribute(const core::String& name, core::Type type, const void* value)
-	{
-		AttributePtr ptr;
-		auto it = Objects().Find(name);
-		if(it != Objects().end()) {
-			if(it->value->GetType() != type)
-				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
-			it->value->GetAccess().AssignData(value);
-			ptr = (Attribute*)it->value;
-		} else {
-			auto p = Objects().At(name, LUX_NEW(AttributeAnyImpl)(name, type, value));
-			Objects()[name] = p;
-			ptr = (Attribute*)p;
-		}
-
-		return ptr;
 	}
 
 	void SetBase(AttributeList base)

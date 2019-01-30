@@ -120,7 +120,7 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 
 	// Update lights
 	{
-		m_DeviceState.SetRenderStateB(D3DRS_LIGHTING, m_Lighting != ELightingFlag::Disabled);
+		m_DeviceState.SetRenderStateB(D3DRS_LIGHTING, pass.lighting != ELightingFlag::Disabled);
 		u32 lightChangeId = 0;
 		for(int i = 0; i < MAX_LIGHT_COUNT; ++i) {
 			auto lptr = m_SharedData->lightPtrs[i];

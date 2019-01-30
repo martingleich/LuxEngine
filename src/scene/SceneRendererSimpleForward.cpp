@@ -277,7 +277,7 @@ static void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc,
 		video::ColorF fogB;
 		video::ColorF fogA;
 		fogA = overwriteColor ? *overwriteColor : desc->GetColor();
-		renderer->GetParams()["fogA"].Set(fogA);
+		renderer->GetParams().SetValue("fogA", fogA);
 		auto type = desc->GetType();
 		fogB.r =
 			type == EFogType::Linear ? 1.0f :
@@ -286,11 +286,11 @@ static void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc,
 		fogB.g = desc->GetStart();
 		fogB.b = desc->GetEnd();
 		fogB.a = desc->GetDensity();
-		renderer->GetParams()["fogB"].Set(fogB);
+		renderer->GetParams().SetValue("fogB", fogB);
 	} else {
 		video::ColorF fogB;
 		fogB.r = 0.0f;
-		renderer->GetParams()["fogB"].Set(fogB);
+		renderer->GetParams().SetValue("fogB", fogB);
 	}
 }
 
@@ -344,10 +344,10 @@ static math::Matrix4 GenerateLightMatrix(ClassicalLightDescription* desc)
 void SceneRendererSimpleForward::ClearLightData(video::Renderer* renderer)
 {
 	m_CurLightId = 0;
-	renderer->GetParams()["light0"].Set(GenerateLightMatrix(nullptr));
-	renderer->GetParams()["light1"].Set(GenerateLightMatrix(nullptr));
-	renderer->GetParams()["light2"].Set(GenerateLightMatrix(nullptr));
-	renderer->GetParams()["light3"].Set(GenerateLightMatrix(nullptr));
+	renderer->GetParams().SetValue("light0", GenerateLightMatrix(nullptr));
+	renderer->GetParams().SetValue("light1", GenerateLightMatrix(nullptr));
+	renderer->GetParams().SetValue("light2", GenerateLightMatrix(nullptr));
+	renderer->GetParams().SetValue("light3", GenerateLightMatrix(nullptr));
 }
 
 void SceneRendererSimpleForward::AddLightData(video::Renderer* renderer, ClassicalLightDescription* desc)
@@ -355,7 +355,7 @@ void SceneRendererSimpleForward::AddLightData(video::Renderer* renderer, Classic
 	if(m_CurLightId < m_MaxLightsPerDraw) {
 		core::String name;
 		format::format(name, &format::InvariantLocale, "light{}", m_CurLightId);
-		renderer->GetParams()[name].Set(GenerateLightMatrix(desc));
+		renderer->GetParams().SetValue(name, GenerateLightMatrix(desc));
 	}
 	++m_CurLightId;
 }
@@ -363,16 +363,16 @@ void SceneRendererSimpleForward::AddLightData(video::Renderer* renderer, Classic
 void SceneRendererSimpleForward::DrawScene()
 {
 	// Check if a stencil buffer is available for shadow rendering
-	bool drawStencilShadows = m_Attributes["drawStencilShadows"].Get<bool>();
+	bool drawStencilShadows = m_Attributes.GetValue<bool>("drawStencilShadows");
 	if(drawStencilShadows) {
 		if(m_Renderer->GetDriver()->GetConfig().zsFormat.sBits == 0) {
 			log::Warning("Scene: Can't draw stencil shadows without stencilbuffer(Disabled shadow rendering).");
 			drawStencilShadows = false;
-			m_Attributes["drawStencilShadows"].Set(false);
+			m_Attributes.SetValue("drawStencilShadows", false);
 		}
 	}
 
-	m_Culling = m_Attributes["culling"].Get<bool>();
+	m_Culling = m_Attributes.GetValue<bool>("culling");
 
 	struct LightEntry
 	{
@@ -386,13 +386,13 @@ void SceneRendererSimpleForward::DrawScene()
 	sceneData.video = m_Renderer;
 	sceneData.activeCamera = m_ActiveCamera;
 
-	m_Renderer->GetParams()["camPos"].Set(m_ActiveCameraNode->GetAbsolutePosition());
+	m_Renderer->GetParams().SetValue("camPos", m_ActiveCameraNode->GetAbsolutePosition());
 
 	//-------------------------------------------------------------------------
 	// The lights
 	ClearLightData(m_Renderer);
 	video::ColorF totalAmbientLight;
-	int maxShadowCastingCount = m_Attributes["maxShadowCasters"].Get<int>();
+	int maxShadowCastingCount = m_Attributes.GetValue<int>("maxShadowCasters");
 	if(!drawStencilShadows)
 		maxShadowCastingCount = 0;
 	maxShadowCastingCount = math::Clamp(maxShadowCastingCount, 0, m_MaxLightsPerDraw);
@@ -417,7 +417,7 @@ void SceneRendererSimpleForward::DrawScene()
 			totalAmbientLight += descA->GetColor();
 		}
 	}
-	m_Renderer->GetParams()["ambient"].Set(totalAmbientLight);
+	m_Renderer->GetParams().SetValue("ambient", totalAmbientLight);
 
 	//-------------------------------------------------------------------------
 	// The fog

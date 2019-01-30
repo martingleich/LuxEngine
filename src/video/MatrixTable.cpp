@@ -5,52 +5,70 @@ namespace lux
 namespace video
 {
 
-MatrixTable::MatrixTable() :
-	m_Dirty(0xFFFFFFFF)
+MatrixTable::MatrixTable()
 {
-	m_UpToDate = 1 | 2 | 4; // world, view and proj are up to date
+	for(int i = 0; i < MAT_COUNT; ++i)
+		m_Matrices[i] = LUX_NEW(MatrixAttribute)(this, i);
 }
+
+static const int worldDependencies[] = {
+	MatrixTable::MAT_WORLD,
+	MatrixTable::MAT_WORLD_INV,
+	MatrixTable::MAT_WORLD_VIEW,
+	MatrixTable::MAT_WORLD_PROJ,
+	MatrixTable::MAT_WORLD_VIEW_PROJ,
+	MatrixTable::MAT_WORLD_VIEW_INV,
+	MatrixTable::MAT_WORLD_TRANS,
+	MatrixTable::MAT_WORLD_INV_TRANS,
+	MatrixTable::MAT_WORLD_VIEW_TRANS,
+	MatrixTable::MAT_WORLD_VIEW_INV_TRANS
+};
+static const int viewDependencies[] = {
+	MatrixTable::MAT_VIEW,
+	MatrixTable::MAT_VIEW_INV,
+	MatrixTable::MAT_WORLD_VIEW,
+	MatrixTable::MAT_VIEW_PROJ,
+	MatrixTable::MAT_WORLD_VIEW_PROJ,
+	MatrixTable::MAT_WORLD_VIEW_INV,
+	MatrixTable::MAT_VIEW_TRANS,
+	MatrixTable::MAT_VIEW_INV_TRANS,
+	MatrixTable::MAT_WORLD_VIEW_TRANS,
+	MatrixTable::MAT_WORLD_VIEW_INV_TRANS,
+};
+static const int projDependencies[] = {
+	MatrixTable::MAT_PROJ,
+	MatrixTable::MAT_WORLD_PROJ,
+	MatrixTable::MAT_VIEW_PROJ,
+	MatrixTable::MAT_WORLD_VIEW_PROJ,
+};
 
 void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 {
 	if(type > MAT_PROJ)
 		throw core::GenericInvalidArgumentException("type", "Can only set base matrices");
 
-	m_Matrices[type] = matrix;
+	m_Matrices[type]->value = matrix;
 	switch(type) {
 	case MAT_WORLD:
 		// Invalide all matrices containing world
-		m_UpToDate &= ~(8 | 32 | 64 | 256 | 512 | 1024 | 4096 | 16384 | 32768);
-		m_UpToDate |= 1; // But world is up to date
-		m_Dirty |= ~m_UpToDate;
-		m_Dirty |= 1;
-		m_ChangeIds[MAT_WORLD]++;
+		for(int i : worldDependencies)
+			m_Matrices[i]->SetDirty();
 		break;
 	case MAT_VIEW:
 		// Invalide all matrices containing view
-		m_UpToDate &= ~(16 | 32 | 128 | 256 | 512 | 2048 | 8192 | 16384 | 32768);
-		m_UpToDate |= 2; // But view is up to data
-		m_Dirty |= ~m_UpToDate;
-		m_Dirty |= 2;
-		m_ChangeIds[MAT_VIEW]++;
+		for(int i : viewDependencies)
+			m_Matrices[i]->SetDirty();
 		break;
 	case MAT_PROJ:
 		// Invalide all matrices containing proj
-		m_UpToDate &= ~(64 | 128 | 256);
-		m_UpToDate |= 4; // But proj is up to date
-		m_Dirty |= ~m_UpToDate;
-		m_Dirty |= 4;
-		m_ChangeIds[MAT_PROJ]++;
+		for(int i : projDependencies)
+			m_Matrices[i]->SetDirty();
 		break;
 	default:
 		return;
 	}
-}
 
-core::VariableAccess MatrixTable::GetParamById(int id) const
-{
-	const math::Matrix4& m = GetMatrix((EMatrixType)id);
-	return core::VariableAccess(core::Types::Matrix().GetConstantType(), m.DataRowMajor());
+	m_Matrices[type]->ClearDirty();
 }
 
 const math::Matrix4& MatrixTable::GetMatrix(EMatrixType type) const
@@ -58,99 +76,83 @@ const math::Matrix4& MatrixTable::GetMatrix(EMatrixType type) const
 	if(!IsUpToDate(type))
 		UpdateMatrix(type);
 
-	return m_Matrices[type];
-}
-
-bool MatrixTable::IsDirty(EMatrixType type) const
-{
-	return (m_Dirty & (1 << type)) != 0;
-}
-
-void MatrixTable::ClearDirty(EMatrixType type) const
-{
-	m_Dirty &= ~(1 << type);
-}
-
-int MatrixTable::GetCount() const
-{
-	return MAT_COUNT;
+	return m_Matrices[type]->value;
 }
 
 bool MatrixTable::IsUpToDate(EMatrixType type) const
 {
-	return (m_UpToDate & (1 << type)) != 0;
+	return !m_Matrices[type]->dirty;
 }
 
 void MatrixTable::UpdateMatrix(EMatrixType type) const
 {
-	m_ChangeIds[type]++;
 	switch(type) {
 	case MAT_WORLD:
 		lxAssert(IsUpToDate(MAT_WORLD_INV));
-		m_Matrices[MAT_WORLD] = m_Matrices[MAT_WORLD_INV].GetTransformInverted();
+		m_Matrices[MAT_WORLD]->value = m_Matrices[MAT_WORLD_INV]->value.GetTransformInverted();
 		break;
 	case MAT_VIEW:
 		lxAssert(IsUpToDate(MAT_VIEW_INV));
-		m_Matrices[MAT_VIEW] = m_Matrices[MAT_VIEW_INV].GetTransformInverted();
+		m_Matrices[MAT_VIEW]->value = m_Matrices[MAT_VIEW_INV]->value.GetTransformInverted();
 		break;
 	case MAT_WORLD_INV:
 		lxAssert(IsUpToDate(MAT_WORLD));
-		m_Matrices[MAT_WORLD_INV] = m_Matrices[MAT_WORLD].GetTransformInverted();
+		m_Matrices[MAT_WORLD_INV]->value = m_Matrices[MAT_WORLD]->value.GetTransformInverted();
 		break;
 	case MAT_VIEW_INV:
 		lxAssert(IsUpToDate(MAT_VIEW));
-		m_Matrices[MAT_VIEW_INV] = m_Matrices[MAT_VIEW].GetTransformInverted();
+		m_Matrices[MAT_VIEW_INV]->value = m_Matrices[MAT_VIEW]->value.GetTransformInverted();
 		break;
 	case MAT_WORLD_VIEW:
-		m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
+		m_Matrices[MAT_WORLD_VIEW]->value.SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
 		break;
 	case MAT_WORLD_PROJ:
-		m_Matrices[MAT_WORLD_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD));
+		m_Matrices[MAT_WORLD_PROJ]->value.SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD));
 		break;
 	case MAT_VIEW_PROJ:
-		m_Matrices[MAT_VIEW_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_VIEW));
+		m_Matrices[MAT_VIEW_PROJ]->value.SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_VIEW));
 		break;
 	case MAT_WORLD_VIEW_PROJ:
 		if(IsUpToDate(MAT_VIEW_PROJ))
-			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_VIEW_PROJ), GetMatrix(MAT_WORLD));
+			m_Matrices[MAT_WORLD_VIEW_PROJ]->value.SetByProduct(GetMatrix(MAT_VIEW_PROJ), GetMatrix(MAT_WORLD));
 		else if(IsUpToDate(MAT_WORLD_VIEW))
-			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD_VIEW));
+			m_Matrices[MAT_WORLD_VIEW_PROJ]->value.SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD_VIEW));
 		else {
-			m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
-			m_UpToDate |= 1 << MAT_WORLD_VIEW;
-			m_Matrices[MAT_WORLD_VIEW_PROJ].SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD_VIEW));
+			m_Matrices[MAT_WORLD_VIEW]->value.SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
+			m_Matrices[MAT_WORLD_VIEW]->ClearDirty();
+			m_Matrices[MAT_WORLD_VIEW_PROJ]->value.SetByProduct(GetMatrix(MAT_PROJ), GetMatrix(MAT_WORLD_VIEW));
 		}
 		break;
 	case MAT_WORLD_VIEW_INV:
 		if(IsUpToDate(MAT_WORLD_VIEW)) {
-			m_Matrices[MAT_WORLD_VIEW].SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
-			m_UpToDate |= 1 << MAT_WORLD_VIEW;
+			m_Matrices[MAT_WORLD_VIEW]->value.SetByProduct(GetMatrix(MAT_VIEW), GetMatrix(MAT_WORLD));
+			m_Matrices[MAT_WORLD_VIEW]->ClearDirty();
 		}
-		m_Matrices[MAT_WORLD_VIEW_INV] = GetMatrix(MAT_WORLD_VIEW).GetTransformInverted();
+		m_Matrices[MAT_WORLD_VIEW_INV]->value = GetMatrix(MAT_WORLD_VIEW).GetTransformInverted();
 		break;
 	case MAT_WORLD_TRANS:
-		m_Matrices[MAT_WORLD_TRANS] = GetMatrix(MAT_WORLD).GetTransposed();
+		m_Matrices[MAT_WORLD_TRANS]->value = GetMatrix(MAT_WORLD).GetTransposed();
 		break;
 	case MAT_VIEW_TRANS:
-		m_Matrices[MAT_VIEW_TRANS] = GetMatrix(MAT_VIEW).GetTransposed();
+		m_Matrices[MAT_VIEW_TRANS]->value = GetMatrix(MAT_VIEW).GetTransposed();
 		break;
 	case MAT_WORLD_INV_TRANS:
-		m_Matrices[MAT_WORLD_INV_TRANS] = GetMatrix(MAT_WORLD_INV).GetTransposed();
+		m_Matrices[MAT_WORLD_INV_TRANS]->value = GetMatrix(MAT_WORLD_INV).GetTransposed();
 		break;
 	case MAT_VIEW_INV_TRANS:
-		m_Matrices[MAT_VIEW_INV_TRANS] = GetMatrix(MAT_VIEW_INV).GetTransposed();
+		m_Matrices[MAT_VIEW_INV_TRANS]->value = GetMatrix(MAT_VIEW_INV).GetTransposed();
 		break;
 	case MAT_WORLD_VIEW_TRANS:
-		m_Matrices[MAT_WORLD_VIEW_TRANS] = GetMatrix(MAT_WORLD_VIEW).GetTransposed();
+		m_Matrices[MAT_WORLD_VIEW_TRANS]->value = GetMatrix(MAT_WORLD_VIEW).GetTransposed();
 		break;
 	case MAT_WORLD_VIEW_INV_TRANS:
-		m_Matrices[MAT_WORLD_VIEW_INV_TRANS] = GetMatrix(MAT_WORLD_VIEW_INV).GetTransposed();
+		m_Matrices[MAT_WORLD_VIEW_INV_TRANS]->value = GetMatrix(MAT_WORLD_VIEW_INV).GetTransposed();
 		break;
 	default:
 		lxAssertNeverReach("Can't generate matrix");
 	}
 
-	m_UpToDate |= (1 << type);
+	m_Matrices[type]->ClearDirty();
 }
 
 const core::String& MatrixTable::GetMatrixName(int id) const
@@ -175,11 +177,6 @@ const core::String& MatrixTable::GetMatrixName(int id) const
 	};
 
 	return MATRIX_NAMES[id];
-}
-
-StrongRef<core::Attribute> MatrixTable::CreateAttribute(int id)
-{
-	return LUX_NEW(MatrixAttribute)(this, id);
 }
 
 } // namespace video

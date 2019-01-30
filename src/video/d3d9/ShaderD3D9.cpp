@@ -586,7 +586,7 @@ void ShaderD3D9::LoadSceneParams(core::AttributeList sceneAttributes, const Pass
 	LUX_UNUSED(pass);
 	for(int i = 0; i < m_SceneValues.Size(); ++i) {
 		if(m_SceneValueAttributeCache[i])
-			SetShaderValue(m_SceneValues[i], m_SceneValueAttributeCache[i]->GetAccess().Pointer());
+			SetShaderValue(m_SceneValues[i], m_SceneValueAttributeCache[i]->GetValuePointer());
 	}
 }
 
