@@ -14,15 +14,6 @@ namespace lux
 namespace video
 {
 
-static DWORD GetD3DFogType(EFixedFogType type)
-{
-	switch(type) {
-	case EFixedFogType::Exp: return D3DFOG_EXP;
-	case EFixedFogType::ExpSq: return D3DFOG_EXP2;
-	case EFixedFogType::Linear: return D3DFOG_LINEAR;
-	}
-	throw core::GenericInvalidArgumentException("type", "Unknown fogtype");
-}
 
 void DeviceStateD3D9::Init(const D3DCAPS9* caps, IDirect3DDevice9* device)
 {
@@ -239,8 +230,13 @@ void DeviceStateD3D9::SetRenderState(D3DRENDERSTATETYPE state, DWORD value)
 void DeviceStateD3D9::SetRenderStateF(D3DRENDERSTATETYPE state, float value)
 {
 	DWORD v;
-	memcpy(&v, &value, 4);
+	std::memcpy(&v, &value, 4);
 	SetRenderState(state, v);
+}
+
+void DeviceStateD3D9::SetRenderStateB(D3DRENDERSTATETYPE state, bool value)
+{
+	SetRenderState(state, value ? TRUE : FALSE);
 }
 
 void DeviceStateD3D9::SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value)
@@ -282,44 +278,6 @@ void DeviceStateD3D9::SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matri
 	m_Device->SetTransform(type, (D3DMATRIX*)m.DataRowMajor());
 }
 
-u32 DeviceStateD3D9::Float2U32(float f)
-{
-	u32 out;
-	static_assert(sizeof(out) == sizeof(f), "Float isn't 4 byte big");
-	memcpy(&out, &f, 4);
-
-	return out;
-}
-
-void DeviceStateD3D9::EnableFixedFog(bool enabled)
-{
-	SetRenderState(D3DRS_FOGENABLE, enabled ? TRUE : FALSE);
-}
-
-void DeviceStateD3D9::ConfigureFixedFog(EFixedFogType type, const ColorF& color, float start, float end, float density)
-{
-	DWORD d3dType = GetD3DFogType(type);
-
-	// TODO: Handle per pixel fog
-	SetRenderState(D3DRS_FOGVERTEXMODE, d3dType);
-	SetRenderState(D3DRS_RANGEFOGENABLE, TRUE);
-
-	SetRenderState(D3DRS_FOGCOLOR, ColorFToColor(color).ToDWORD());
-	SetRenderStateF(D3DRS_FOGSTART, start);
-	SetRenderStateF(D3DRS_FOGEND, end);
-	SetRenderStateF(D3DRS_FOGDENSITY, density);
-}
-
-void DeviceStateD3D9::EnableLight(bool enable)
-{
-	SetRenderState(D3DRS_LIGHTING, enable ? TRUE : FALSE);
-}
-
-void DeviceStateD3D9::DisableLight(u32 id)
-{
-	m_Device->LightEnable((DWORD)id, FALSE);
-}
-
 void DeviceStateD3D9::SetStencilMode(const StencilMode& mode)
 {
 	bool isEnabled = mode.IsEnabled();
@@ -345,49 +303,37 @@ void DeviceStateD3D9::SetStencilMode(const StencilMode& mode)
 	}
 }
 
-void DeviceStateD3D9::SetLight(u32 id, const LightData& light, ELightingFlag lighting)
+u32 DeviceStateD3D9::Float2U32(float f)
 {
-	DWORD lightId = (DWORD)id;
+	u32 out;
+	static_assert(sizeof(out) == sizeof(f), "Float isn't 4 byte big");
+	memcpy(&out, &f, 4);
 
-	D3DLIGHT9 D3DLight;
+	return out;
+}
 
-	switch(light.type) {
-	case EFixedLightType::Point:
-		D3DLight.Type = D3DLIGHT_POINT;
-		break;
-	case EFixedLightType::Spot:
-		D3DLight.Type = D3DLIGHT_SPOT;
-		break;
-	case EFixedLightType::Directional:
-		D3DLight.Type = D3DLIGHT_DIRECTIONAL;
-		break;
-	}
+void DeviceStateD3D9::EnableFixedFog(bool enabled)
+{
+	SetRenderState(D3DRS_FOGENABLE, enabled ? TRUE : FALSE);
+}
 
-	D3DLight.Position = *((D3DVECTOR*)(&light.position));
-	D3DLight.Direction = *((D3DVECTOR*)(&light.direction));
+void DeviceStateD3D9::EnableFixedLighting(bool enable)
+{
+	SetRenderState(D3DRS_LIGHTING, enable ? TRUE : FALSE);
+}
 
-	D3DLight.Range = std::sqrt(FLT_MAX);
-	D3DLight.Falloff = light.falloff;
+void DeviceStateD3D9::DisableLight(u32 id)
+{
+	m_Device->LightEnable((DWORD)id, FALSE);
+}
 
-	D3DCOLORVALUE specular = {1.0f, 1.0f, 1.0f, 1.0f};
-	D3DCOLORVALUE ambient = {0.0f, 0.0f, 0.0f, 0.0f};
-	D3DCOLORVALUE black = {0.0f, 0.0f, 0.0f, 0.0f};
-	D3DLight.Diffuse = TestFlag(lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(light.color) : black;
-	D3DLight.Specular = TestFlag(lighting, ELightingFlag::DiffSpec) ? SColorToD3DColor(light.color) : black;
-	D3DLight.Ambient = TestFlag(lighting, ELightingFlag::AmbientEmit) ? ambient : black;
-
-	D3DLight.Attenuation0 = 0.0f;
-	D3DLight.Attenuation1 = 1.0f;
-	D3DLight.Attenuation2 = 0.0f;
-
-	D3DLight.Theta = light.innerCone * 2.0f;
-	D3DLight.Phi = light.outerCone * 2.0f;
-
+void DeviceStateD3D9::SetAndEnableLight(u32 id, D3DLIGHT9 light)
+{
 	HRESULT hr;
-	if(FAILED(hr = m_Device->SetLight(lightId, &D3DLight)))
+	if(FAILED(hr = m_Device->SetLight(DWORD(id), &light)))
 		throw core::D3D9Exception(hr);
 
-	if(FAILED(hr = m_Device->LightEnable(lightId, TRUE)))
+	if(FAILED(hr = m_Device->LightEnable(DWORD(id), TRUE)))
 		throw core::D3D9Exception(hr);
 }
 

@@ -17,6 +17,12 @@ public:
 	virtual core::Type GetType() const = 0;
 	virtual VariableAccess GetAccess(bool isConst = false) = 0;
 	virtual u32 GetChangeId() = 0;
+
+	template <typename T>
+	const T& GetValue()
+	{
+		return GetAccess(true).Get<T>();
+	}
 };
 
 class AttributeAnyImpl : public Attribute

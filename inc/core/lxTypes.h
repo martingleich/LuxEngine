@@ -33,6 +33,10 @@ public:
 	virtual void Destruct(void* ptr) const = 0;
 	virtual void Assign(void* ptr, const void* other) const = 0;
 	virtual bool Compare(const void* a, const void* b) const = 0;
+	virtual bool EqualInfo(const TypeInfo* other) const
+	{
+		return this == other;
+	}
 	LUX_API virtual void FmtPrint(format::Context& ctx, const void* p, format::Placeholder& placeholder) const;
 
 	//! Unique name of the type
@@ -164,7 +168,7 @@ public:
 	{
 		if(m_Info == other.m_Info)
 			return true;
-		return m_Info->GetName().Equal(other.m_Info->GetName());
+		return m_Info->EqualInfo(other.m_Info) || other.m_Info->EqualInfo(m_Info);
 	}
 
 	bool operator!=(const Type& other) const
@@ -224,7 +228,7 @@ public:
 
 	bool IsUnknown() const
 	{
-		return (*this == Unknown);
+		return m_Info == Unknown.GetInfo();
 	}
 
 	bool IsTrivial() const

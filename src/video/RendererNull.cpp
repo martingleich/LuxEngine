@@ -39,7 +39,7 @@ RenderRequest RenderRequest::FromGeometry(const Geometry* geo, int first, int co
 	return rq;
 }
 
-RendererNull::RendererNull(VideoDriver* driver) :
+RendererNull::RendererNull(VideoDriver* driver, video::MatrixTable& matrixTable) :
 	m_RenderMode(ERenderMode::None),
 	m_NormalizeNormals(true),
 	m_DirtyFlags(0xFFFFFFFF), // Set all dirty flags at start
@@ -52,8 +52,8 @@ RendererNull::RendererNull(VideoDriver* driver) :
 	m_ParamIds.ambient = alb.AddAttribute("ambient", video::ColorF(0, 0, 0));
 	m_ParamIds.time = alb.AddAttribute("time", 0.0f);
 
-	for(int i = 0; i < m_MatrixTable.GetCount(); ++i)
-		alb.AddAttribute(m_MatrixTable.CreateAttribute(i));
+	for(int i = 0; i < matrixTable.GetCount(); ++i)
+		alb.AddAttribute(matrixTable.CreateAttribute(i));
 
 	m_Params = m_BaseParams = alb.BuildAndReset();
 
@@ -97,37 +97,6 @@ void RendererNull::UpdatePipelineOverwrite()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-
-void RendererNull::SetTransform(ETransform transform, const math::Matrix4& matrix)
-{
-	switch(transform) {
-	case ETransform::World:
-		m_TransformWorld = matrix;
-		m_MatrixTable.SetMatrix(MatrixTable::MAT_WORLD, matrix);
-		SetDirty(Dirty_World);
-		break;
-	case ETransform::View:
-		m_TransformView = matrix;
-		m_MatrixTable.SetMatrix(MatrixTable::MAT_VIEW, matrix);
-		SetDirty(Dirty_ViewProj);
-		break;
-	case ETransform::Projection:
-		m_TransformProj = matrix;
-		m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, matrix);
-		SetDirty(Dirty_ViewProj);
-		break;
-	}
-}
-
-const math::Matrix4& RendererNull::GetTransform(ETransform transform) const
-{
-	switch(transform) {
-	case ETransform::World: return m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD);
-	case ETransform::View: return m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW);
-	case ETransform::Projection: return m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ);
-	default: throw core::GenericInvalidArgumentException("transform", "Unknown transform");
-	}
-}
 
 void RendererNull::SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token)
 {

@@ -22,7 +22,7 @@ namespace video
 {
 
 RendererD3D9::RendererD3D9(VideoDriverD3D9* driver, DeviceStateD3D9& deviceState) :
-	RendererNull(driver),
+	RendererNull(driver, m_MatrixTable),
 	m_Device((IDirect3DDevice9*)driver->GetLowLevelDevice()),
 	m_DeviceState(deviceState),
 	m_Driver(driver)
@@ -242,6 +242,34 @@ const math::RectI& RendererD3D9::GetScissorRect() const
 	return m_ScissorRect;
 }
 
+void RendererD3D9::SetTransform(ETransform transform, const math::Matrix4& matrix)
+{
+	switch(transform) {
+	case ETransform::World:
+		m_MatrixTable.SetMatrix(MatrixTable::MAT_WORLD, matrix);
+		break;
+	case ETransform::View:
+		m_MatrixTable.SetMatrix(MatrixTable::MAT_VIEW, matrix);
+		SetDirty(Dirty_ViewProj);
+		break;
+	case ETransform::Projection:
+		m_TransformProj = matrix;
+		m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, matrix);
+		SetDirty(Dirty_ViewProj);
+		break;
+	}
+}
+
+const math::Matrix4& RendererD3D9::GetTransform(ETransform transform) const
+{
+	switch(transform) {
+	case ETransform::World: return m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD);
+	case ETransform::View: return m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW);
+	case ETransform::Projection: return m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ);
+	default: throw core::GenericInvalidArgumentException("transform", "Unknown transform");
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////
 
 void RendererD3D9::Draw(const RenderRequest& rq)
@@ -367,8 +395,6 @@ void RendererD3D9::SendPassSettingsEx(
 	bool changedPolygonOffset = (pass.polygonOffset != m_PrevPolyOffset);
 
 	// Enable shader
-	bool isNewFixedFunction = (pass.shader.As<FixedFunctionShaderD3D9>() != nullptr);
-	bool isCurFixedFunction = m_CurrentShader.As<FixedFunctionShaderD3D9>() != nullptr;
 	if(pass.shader != m_CurrentShader) {
 		pass.shader->Enable();
 		m_CurrentShader = pass.shader;
@@ -387,21 +413,34 @@ void RendererD3D9::SendPassSettingsEx(
 	m_DeviceState.SetRenderState(D3DRS_NORMALIZENORMALS, m_NormalizeNormals ? TRUE : FALSE);
 
 	// Update projection matrices to include polygon offset, or change for 2D mode
-	UpdateTransforms(
-		pass.polygonOffset,
-		isDirtyRendermode,
-		changedPolygonOffset);
-
-	// TODO: This should be placed in the fixed function shader.
-	// Load fixed function transforms
-	if(isNewFixedFunction) {
-		// Only if matrix changed or a switch to fixed function occured.
-		if(IsDirty(Dirty_ViewProj) || !isCurFixedFunction) {
-			m_DeviceState.SetTransform(D3DTS_PROJECTION, m_MatrixTable.GetMatrix(MatrixTable::MAT_PROJ));
-			m_DeviceState.SetTransform(D3DTS_VIEW, m_MatrixTable.GetMatrix(MatrixTable::MAT_VIEW));
+	if(m_RenderMode == ERenderMode::Mode3D) {
+		if(isDirtyRendermode || changedPolygonOffset || IsDirty(Dirty_ViewProj)) {
+			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
+			if(pass.polygonOffset) {
+				const u8 zBits = m_Driver->GetConfig().zsFormat.zBits;
+				const u32 values = 1 << zBits;
+				const float min = 1.0f / values;
+				projCopy.AddTranslation(math::Vector3F(0, 0, -min * pass.polygonOffset));
+			}
+			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, projCopy);
 		}
-		if(IsDirty(Dirty_World) || !isCurFixedFunction) {
-			m_DeviceState.SetTransform(D3DTS_WORLD, m_MatrixTable.GetMatrix(MatrixTable::MAT_WORLD));
+	} else if(m_RenderMode == ERenderMode::Mode2D) {
+		if(isDirtyRendermode || IsDirty(Dirty_Rendertarget) || IsDirty(Dirty_ViewProj)) {
+			auto ssize = GetRenderTarget().GetSize();
+			math::Matrix4 view = math::Matrix4(
+				1,  0, 0, 0,
+				0, -1, 0, 0,
+				0,  0, 1, 0,
+				-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 + 0.5f, 0, 1);
+
+			math::Matrix4 proj = math::Matrix4(
+				2.0f / (float)ssize.width, 0.0f, 0.0f, 0.0f,
+				0.0f, 2.0f / (float)ssize.height, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f);
+
+			m_MatrixTable.SetMatrix(MatrixTable::MAT_VIEW, view);
+			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, proj);
 		}
 	}
 
@@ -426,7 +465,6 @@ void RendererD3D9::SendPassSettingsEx(
 	pass.shader->Render();
 
 	// TODO: Remove as many Dirtys from here into the shader as possible.
-	ClearDirty(Dirty_World);
 	ClearDirty(Dirty_ViewProj);
 	ClearDirty(Dirty_Rendertarget);
 	m_PrevFog = pass.fogEnabled;
@@ -454,46 +492,6 @@ void RendererD3D9::Reset()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-
-void RendererD3D9::UpdateTransforms(
-	float polygonOffset,
-	bool dirtyRendermode,
-	bool dirtyPolygonOffset)
-{
-	if(m_RenderMode == ERenderMode::Mode3D) {
-		if(dirtyPolygonOffset || dirtyRendermode || IsDirty(Dirty_ViewProj)) {
-			math::Matrix4 projCopy = m_TransformProj; // The userset projection matrix
-			if(polygonOffset) {
-				const u8 zBits = m_Driver->GetConfig().zsFormat.zBits;
-				const u32 values = 1 << zBits;
-				const float min = 1.0f / values;
-				projCopy.AddTranslation(math::Vector3F(0, 0, -min * polygonOffset));
-			}
-			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, projCopy);
-			SetDirty(Dirty_ViewProj);
-		}
-	} else if(m_RenderMode == ERenderMode::Mode2D) {
-		if(IsDirty(Dirty_Rendertarget) || dirtyRendermode || IsDirty(Dirty_ViewProj)) {
-			auto ssize = GetRenderTarget().GetSize();
-			math::Matrix4 view = math::Matrix4(
-				1,  0, 0, 0,
-				0, -1, 0, 0,
-				0,  0, 1, 0,
-				-(float)ssize.width / 2 - 0.5f, (float)ssize.height / 2 + 0.5f, 0, 1);
-
-			math::Matrix4 proj = math::Matrix4(
-				2.0f / (float)ssize.width, 0.0f, 0.0f, 0.0f,
-				0.0f, 2.0f / (float)ssize.height, 0.0f, 0.0f,
-				0.0f, 0.0f, 1.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 1.0f);
-
-			m_MatrixTable.SetMatrix(MatrixTable::MAT_VIEW, view);
-			m_MatrixTable.SetMatrix(MatrixTable::MAT_PROJ, proj);
-
-			SetDirty(Dirty_ViewProj);
-		}
-	}
-}
 
 void RendererD3D9::SetVertexFormat(const VertexFormat& format)
 {

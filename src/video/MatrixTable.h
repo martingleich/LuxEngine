@@ -50,6 +50,8 @@ public:
 
 		core::VariableAccess GetAccess(bool) override
 		{
+			if(!table->IsUpToDate((EMatrixType)id))
+				table->UpdateMatrix((EMatrixType)id);
 			return table->GetParamById(id);
 		}
 
@@ -65,16 +67,11 @@ public:
 
 		u32 GetChangeId() override
 		{
-			if(!table->IsUpToDate((EMatrixType)id)) {
-				table->UpdateMatrix((EMatrixType)id);
-				++m_ChangeId;
-			}
-			return m_ChangeId;
+			return table->m_ChangeIds[id];
 		}
 	private:
 		MatrixTable* table;
 		int id;
-		u32 m_ChangeId=0;
 	};
 
 public:
@@ -96,6 +93,7 @@ private:
 
 private:
 	mutable math::Matrix4 m_Matrices[MAT_COUNT];
+	mutable u32 m_ChangeIds[MAT_COUNT] = {0};
 	mutable u32 m_UpToDate;
 	mutable u32 m_Dirty;
 };

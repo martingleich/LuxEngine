@@ -676,6 +676,13 @@ public:
 	{
 		return static_cast<ArrayT*>(ptr)->Resize(size);
 	}
+	bool EqualInfo(const TypeInfo* otherInfo) const
+	{
+		auto other = dynamic_cast<ArrayTypeInfo*>(otherInfo);
+		if(!other)
+			return false;
+		return m_BaseType == other.m_BaseType;
+	}
 
 private:
 	Type m_BaseType;

@@ -40,6 +40,9 @@ public:
 	void SetScissorRect(const math::RectI& rect, ScissorRectToken* token = nullptr);
 	const math::RectI& GetScissorRect() const;
 
+	void SetTransform(ETransform transform, const math::Matrix4& matrix);
+	const math::Matrix4& GetTransform(ETransform transform) const;
+
 	///////////////////////////////////////////////////////////////////////////
 
 	void SendPassSettingsEx(ERenderMode mode, const Pass& pass, bool useOverwrite, ShaderParamSetCallback* paramSetCallback, void* userParam) override;
@@ -50,10 +53,6 @@ public:
 	void Reset();
 
 private:
-	void UpdateTransforms(
-		float polygonOffset,
-		bool dirtyRendermode,
-		bool dirtyPolygonOffset);
 	void SetVertexFormat(const VertexFormat& format);
 
 private:
@@ -68,6 +67,9 @@ private:
 	VertexFormat m_VertexFormat;
 	video::EFaceSide m_CurPassCullMode;
 	math::RectI m_ScissorRect;
+
+	math::Matrix4 m_TransformProj;
+	MatrixTable m_MatrixTable; //!< The currently set matrices, these are used as arguments for shaders and other rendercomponents
 
 	float m_PrevPolyOffset = 0.0f;
 	ELightingFlag m_PrevLighting = ELightingFlag::Disabled;

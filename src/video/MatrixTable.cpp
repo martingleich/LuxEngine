@@ -24,6 +24,7 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 		m_UpToDate |= 1; // But world is up to date
 		m_Dirty |= ~m_UpToDate;
 		m_Dirty |= 1;
+		m_ChangeIds[MAT_WORLD]++;
 		break;
 	case MAT_VIEW:
 		// Invalide all matrices containing view
@@ -31,6 +32,7 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 		m_UpToDate |= 2; // But view is up to data
 		m_Dirty |= ~m_UpToDate;
 		m_Dirty |= 2;
+		m_ChangeIds[MAT_VIEW]++;
 		break;
 	case MAT_PROJ:
 		// Invalide all matrices containing proj
@@ -38,6 +40,7 @@ void MatrixTable::SetMatrix(EMatrixType type, const math::Matrix4& matrix)
 		m_UpToDate |= 4; // But proj is up to date
 		m_Dirty |= ~m_UpToDate;
 		m_Dirty |= 4;
+		m_ChangeIds[MAT_PROJ]++;
 		break;
 	default:
 		return;
@@ -80,6 +83,7 @@ bool MatrixTable::IsUpToDate(EMatrixType type) const
 
 void MatrixTable::UpdateMatrix(EMatrixType type) const
 {
+	m_ChangeIds[type]++;
 	switch(type) {
 	case MAT_WORLD:
 		lxAssert(IsUpToDate(MAT_WORLD_INV));

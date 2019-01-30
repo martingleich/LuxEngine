@@ -110,6 +110,7 @@ public:
 
 	IDirect3DDevice9* GetLowLevelDevice();
 	void SetRenderState(D3DRENDERSTATETYPE state, DWORD value);
+	void SetRenderStateB(D3DRENDERSTATETYPE state, bool value);
 	void SetRenderStateF(D3DRENDERSTATETYPE state, float value);
 	void SetTextureStageState(u32 stage, D3DTEXTURESTAGESTATETYPE state, DWORD value);
 	void SetSamplerState(u32 stage, D3DSAMPLERSTATETYPE state, DWORD value);
@@ -117,12 +118,10 @@ public:
 	void SetTransform(D3DTRANSFORMSTATETYPE type, const math::Matrix4& m);
 
 	void EnableFixedFog(bool enable);
-	void ConfigureFixedFog(EFixedFogType type, const ColorF& color, float start, float end, float density);
-
 	void SetStencilMode(const StencilMode& mode);
 
-	void EnableLight(bool enable);
-	void SetLight(u32 id, const LightData& light, ELightingFlag lighting);
+	void EnableFixedLighting(bool enable);
+	void SetAndEnableLight(u32 id, D3DLIGHT9 light);
 	void DisableLight(u32 id);
 
 	void ReleaseUnmanaged();

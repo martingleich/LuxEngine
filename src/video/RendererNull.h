@@ -19,13 +19,12 @@ class RendererNull : public Renderer
 protected:
 	enum EDirtyFlags
 	{
-		Dirty_World,
 		Dirty_ViewProj,
 		Dirty_Rendertarget,
 	};
 
 public:
-	RendererNull(VideoDriver* driver);
+	RendererNull(VideoDriver* driver, video::MatrixTable& matrixTable);
 	virtual ~RendererNull() {}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -35,8 +34,6 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void SetTransform(ETransform transform, const math::Matrix4& matrix);
-	const math::Matrix4& GetTransform(ETransform transform) const;
 	void SetNormalizeNormals(bool normalize, NormalizeNormalsToken* token);
 	bool GetNormalizeNormals() const;
 
@@ -91,11 +88,7 @@ protected:
 	PipelineOverwrite m_FinalOverwrite;
 
 	bool m_NormalizeNormals;
-	math::Matrix4 m_TransformWorld;
-	math::Matrix4 m_TransformView;
-	math::Matrix4 m_TransformProj;
 
-	MatrixTable m_MatrixTable; //!< The currently set matrices, these are used as arguments for shaders and other rendercomponents
 	core::AttributeList m_BaseParams;
 	core::AttributeList m_Params;
 	ParamIdCollection m_ParamIds;

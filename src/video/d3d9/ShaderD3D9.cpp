@@ -556,7 +556,7 @@ ShaderD3D9::~ShaderD3D9()
 void ShaderD3D9::Enable()
 {
 	m_DeviceState.EnableFixedFog(false);
-	m_DeviceState.EnableLight(false);
+	m_DeviceState.EnableFixedLighting(false);
 	m_DeviceState.EnableHardwareShader(m_VertexShader, m_PixelShader);
 }
 
