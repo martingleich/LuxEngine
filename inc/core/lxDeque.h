@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LUX_DEQUE_H
 #define INCLUDED_LUX_DEQUE_H
 #include "core/LuxBase.h"
-#include "core/lxIterator.h"
 
 namespace lux
 {
@@ -16,17 +15,16 @@ private:
 	struct Block
 	{
 		T data[BLOCK_SIZE];
-		static Block* Alloc()
-		{
-			return (Block*)::operator new(sizeof(Block));
-		}
-
-		static void Free(Block* b)
-		{
-			::operator delete(b);
-		}
+		static Block* Alloc() { return (Block*)::operator new(sizeof(Block)); }
+		static void Free(Block* b) { ::operator delete(b); }
 	};
 
+	/*
+	A list of pointers to blocks
+	|block|block|block|block|block|block|
+	Used blocks are placed in the middle of the list so it can grow into both directions.
+	|free|free|allocated|allocated|allocated|free|
+	*/
 	class BaseList
 	{
 	public:
@@ -53,65 +51,70 @@ private:
 			for(auto it = m_RawFirst; it != m_RawEnd; ++it)
 				Block::Free(*it);
 
-			LUX_FREE_ARRAY(m_RawFirst);
+			delete[] m_RawFirst;
 		}
 
 		void AddFront()
 		{
-			lxAssert(m_RawFirst);
-			if(m_DataFirst == m_RawFirst)
-				Resize(2 * Size(), true);
+			if(m_DataFirst == m_RawFirst) {
+				Balance(true);
+				if(m_DataFirst == m_RawFirst)
+					Resize(2 * Allocated(), true);
+			}
 			--m_DataFirst;
 		}
 
 		void AddBack()
 		{
-			lxAssert(m_RawFirst);
-			if(m_DataEnd == m_RawEnd)
-				Resize(2 * Size(), false);
+			if(m_DataEnd == m_RawEnd) {
+				Balance(false);
+				if(m_DataEnd == m_RawEnd)
+					Resize(2 * Allocated(), false);
+			}
 			++m_DataEnd;
 		}
 
-		void RemoveFront()
-		{
-			lxAssert(m_RawFirst);
-			++m_DataFirst;
-		}
+		void RemoveFront() { ++m_DataFirst; }
+		void RemoveBack() { --m_DataEnd; }
 
-		void RemoveBack()
-		{
-			lxAssert(m_RawFirst);
-			--m_DataEnd;
-		}
+		int Allocated() const { return m_RawEnd - m_RawFirst; }
+		int Size() const { return m_DataEnd - m_DataFirst; }
 
-		int Size() const
+		void Resize(int newAlloc, bool front)
 		{
-			return m_RawEnd - m_RawFirst;
-		}
-
-		void Resize(int newCount, bool front)
-		{
-			int count = m_RawEnd - m_RawFirst;
-			Block** newData = LUX_NEW_ARRAY(Block*, newCount);
-			Block** newFirst = newData + ((newCount - count) / 2);
+			/*
+			Reserve more blocks.
+			\param newCount The new number of blocks.
+			\param front If true enfore at least on member in the front, otherwise enfore at least one at the back.
+			*/
+			int used_count = m_DataEnd - m_DataFirst;
+			int alloc_count = m_RawEnd - m_RawFirst;
+			Block** newRaw = new Block*[newAlloc];
+			int allocDataOffset = m_DataFirst - m_RawFirst;
+			Block** newDataFirst = newRaw + ((newAlloc - used_count) / 2);
 			if(front) {
-				if(newFirst == newData)
-					newFirst++;
+				if(newRaw == newDataFirst)
+					newDataFirst++;
 			}
-			if(count) {
-				memcpy(newFirst, m_DataFirst, count * sizeof(Block*));
-				LUX_FREE_ARRAY(m_RawFirst);
-			}
-			for(auto it = newData; it != newFirst; ++it)
-				*it = Block::Alloc();
-			for(auto it = newFirst + count; it != newData + newCount; ++it)
-				*it = Block::Alloc();
-			m_RawFirst = newData;
-			m_RawEnd = m_RawFirst + newCount;
-			m_DataFirst = newFirst;
-			m_DataEnd = m_DataFirst + count;
 
-			Balance();
+			// Copy the old allocated blocks.
+			if(alloc_count) {
+				std::memcpy(newDataFirst - allocDataOffset, m_RawFirst, alloc_count * sizeof(Block*));
+				delete[] m_RawFirst;
+			}
+			// Alloc the new blocks.
+			for(auto it = newRaw; it != newDataFirst - allocDataOffset; ++it)
+				*it = Block::Alloc();
+			for(auto it = newDataFirst - allocDataOffset + alloc_count; it != newRaw + newAlloc; ++it)
+				*it = Block::Alloc();
+
+			// Fill in members
+			m_RawFirst = newRaw;
+			m_RawEnd = m_RawFirst + newAlloc;
+			m_DataFirst = newDataFirst;
+			m_DataEnd = m_DataFirst + used_count;
+			if(used_count == 0)
+				++m_DataEnd;
 		}
 
 		Block** First() { return m_DataFirst; }
@@ -119,15 +122,34 @@ private:
 		Block** Last() { return m_DataEnd - 1; }
 		Block** Last() const { return m_DataEnd - 1; }
 
-		void Balance()
+		void Balance(bool hint)
 		{
-			lxAssert(m_RawFirst);
+			/*
+			Shift the datarange into the middle of the rawrange.
+			*/
 			intptr_t left = (intptr_t)(m_DataFirst - m_RawFirst);
 			intptr_t right = (intptr_t)(m_RawEnd - m_DataEnd);
-
 			intptr_t shift = (right - left) / 2;
 			if(shift) {
-				memmove(m_RawFirst + left + shift, m_DataFirst, (m_DataEnd - m_DataFirst) * sizeof(Block*));
+				// Swap blocks
+				int count = int(m_DataEnd - m_DataFirst);
+				if(shift < 0) {
+					auto firstSrc = m_DataFirst;
+					auto firstDst = firstSrc + shift;
+					for(int i = 0; i < count; ++i) {
+						std::swap(*firstSrc, *firstDst);
+						++firstSrc;
+						++firstDst;
+					}
+				} else {
+					auto lastSrc = m_DataEnd - 1;
+					auto lastDst = lastSrc + shift;
+					for(int i = 0; i < count; ++i) {
+						std::swap(*lastSrc, *lastDst);
+						--lastSrc;
+						--lastDst;
+					}
+				}
 				m_DataFirst += shift;
 				m_DataEnd += shift;
 			}
@@ -135,12 +157,14 @@ private:
 
 		void Ensure()
 		{
-			if(!m_RawFirst) {
+			/*
+			Ensure at least one block.
+			*/
+			if(!m_RawFirst)
 				Resize(1, false);
-				++m_DataEnd;
-			}
 		}
 
+		// TODO: Only alloc Blocks if necessary.
 	private:
 		Block** m_RawFirst;
 		Block** m_DataFirst;
@@ -148,160 +172,16 @@ private:
 		Block** m_RawEnd;
 	};
 
-	template <bool isConst>
-	class BaseIterator : public core::BaseIterator<core::BidirectionalIteratorTag, T>
-	{
-		friend class BaseIterator<!isConst>;
-	public:
-		using BlockPtr = typename core::Choose<isConst, const Block*const*, Block*const*>::type;
-		BaseIterator() :
-			block(nullptr),
-			id(0)
-		{
-		}
-
-		BaseIterator(const BaseIterator& other) :
-			block(other.block),
-			id(other.id)
-		{
-		}
-
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		BaseIterator(const BaseIterator<!U>& other) :
-			block(other.block),
-			id(other.id)
-		{
-		}
-
-		BaseIterator(BlockPtr b, int i) :
-			block(b),
-			id(i)
-		{
-		}
-
-		BaseIterator& operator=(const BaseIterator& other)
-		{
-			block = other.block;
-			id = other.id;
-			return *this;
-		}
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		BaseIterator& operator=(const BaseIterator<!U>& other)
-		{
-			block = other.block;
-			id = other.id;
-			return *this;
-		}
-
-		BaseIterator& operator+=(intptr_t num)
-		{
-			auto blocks = num / BLOCK_SIZE;
-			block += blocks;
-			id += num % BLOCK_SIZE;
-			return *this;
-		}
-
-		BaseIterator operator+ (intptr_t num) const
-		{
-			auto temp(*this);
-			return temp += num;
-		}
-		BaseIterator& operator-=(intptr_t num)
-		{
-			return (*this) += (-num);
-		}
-		BaseIterator operator- (intptr_t num) const
-		{
-			return (*this) + (-num);
-		}
-
-		intptr_t operator-(BaseIterator other) const
-		{
-			intptr_t blocks = (intptr_t)(block - other.block);
-			return blocks*BLOCK_SIZE + (id - other.id);
-		}
-
-		BaseIterator& operator++()
-		{
-			++id;
-			if(id == BLOCK_SIZE) {
-				id = 0;
-				++block;
-			}
-			return *this;
-		}
-
-		BaseIterator operator++(int)
-		{
-			auto out(*this);
-			this->operator++();
-			return out;
-		}
-
-		BaseIterator& operator--()
-		{
-			if(id == 0) {
-				id = BLOCK_SIZE;
-				--block;
-			}
-			--id;
-			return *this;
-		}
-
-		BaseIterator operator--(int)
-		{
-			auto out(*this);
-			this->operator--();
-			return out;
-		}
-
-		template <bool isConst2>
-		bool operator==(const BaseIterator<isConst2>& other) const
-		{
-			return block == other.block && id == other.id;
-		}
-
-		template <bool isConst2>
-		bool operator!=(const BaseIterator<isConst2>& other) const
-		{
-			return !(*this == other);
-		}
-
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		const T& operator*() const
-		{
-			return (*block)->data[id];
-		}
-		template <bool U = isConst, std::enable_if_t<U, int> = 0>
-		const T* operator->() const
-		{
-			return &((*block)->data[id]);
-		}
-
-		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T& operator*() const
-		{
-			return (*block)->data[id];
-		}
-		template <bool U = !isConst, std::enable_if_t<U, int> = 0>
-		T* operator->() const
-		{
-			return &((*block)->data[id]);
-		}
-
-	private:
-		BlockPtr block;
-		int id;
-	};
-
 public:
-	using Iterator = BaseIterator<false>;
-	using ConstIterator = BaseIterator<true>;
-
 	Deque() :
 		m_FirstId(BLOCK_SIZE / 2),
 		m_EndId(BLOCK_SIZE / 2)
 	{
+	}
+
+	void Reserve(int allocated)
+	{
+		m_Base.Resize((allocated + BLOCK_SIZE - 1) / BLOCK_SIZE, true);
 	}
 
 	Deque(Deque&& old) :
@@ -352,68 +232,33 @@ public:
 		return *this;
 	}
 
-	bool operator==(const Deque& other) const
-	{
-		if(Size() != other.Size())
-			return false;
-
-		for(auto it = First(), jt = other.First(); it != End(); ++it, ++jt) {
-			if(!(*it == *jt))
-				return false;
-		}
-		return true;
-	}
-
-	bool operator!=(const Deque& other) const
-	{
-		return !(*this == other);
-	}
-
 	void Clear()
 	{
-		while(Size() != 0)
+		int i = Size();
+		while(i != 0) {
 			PopBack();
+			--i;
+		}
 
-		m_Base.Balance();
+		m_Base.Balance(true);
 		m_FirstId = BLOCK_SIZE / 2;
 		m_EndId = BLOCK_SIZE / 2;
 	}
 
-	void PushFront(const T& elem)
-	{
-		new (NewFrontPtr()) T(elem);
-	}
-
-	void PushFront(T&& elem)
-	{
-		new (NewFrontPtr()) T(std::move(elem));
-	}
+	void PushFront(const T& elem) { new (NewFrontPtr()) T(elem); }
+	void PushFront(T&& elem) { new (NewFrontPtr()) T(std::move(elem)); }
 
 	template <typename... Ts>
-	void EmplaceFront(Ts&&... args)
-	{
-		new (NewFrontPtr()) T(std::forward<Ts>(args)...);
-	}
+	void EmplaceFront(Ts&&... args) { new (NewFrontPtr()) T(std::forward<Ts>(args)...); }
 
-	void PushBack(const T& elem)
-	{
-		new (NewPackPtr()) T(elem);
-	}
-
-	void PushBack(T&& elem)
-	{
-		new (NewBackPtr()) T(std::move(elem));
-	}
+	void PushBack(const T& elem) { new (NewBackPtr()) T(elem); }
+	void PushBack(T&& elem) { new (NewBackPtr()) T(std::move(elem)); }
 
 	template <typename... Ts>
-	void EmplaceBack(Ts&&... args)
-	{
-		new (NewBackPtr()) T(std::forward<Ts>(args)...);
-	}
+	void EmplaceBack(Ts&&... args) { new (NewBackPtr()) T(std::forward<Ts>(args)...); }
 
 	void PopFront()
 	{
-		lxAssert(Size());
 		Front().~T();
 		++m_FirstId;
 		if(m_FirstId == BLOCK_SIZE) {
@@ -422,16 +267,8 @@ public:
 		}
 	}
 
-	T TakeFront()
-	{
-		T out(std::move(Front()));
-		PopFront();
-		return out;
-	}
-
 	void PopBack()
 	{
-		lxAssert(Size());
 		Back().~T();
 		--m_EndId;
 		if(m_EndId == 0) {
@@ -440,73 +277,32 @@ public:
 		}
 	}
 
-	T TakeBack()
-	{
-		T out(std::move(Back()));
-		PopBack();
-		return out;
-	}
-
 	int Size() const
 	{
-		return  BLOCK_SIZE*(m_Base.Size() - 1) + (m_EndId - m_FirstId);
+		if(m_Base.Size() == 0)
+			return 0;
+		return BLOCK_SIZE * (m_Base.Size() - 1) + (m_EndId - m_FirstId);
 	}
 
-	bool IsEmpty() const
+	bool IsEmpty() const { return Size() == 0; }
+
+	const T& Front() const { return (*m_Base.First())->data[m_FirstId]; }
+	T& Front() { return (*m_Base.First())->data[m_FirstId]; }
+	const T& Back() const { return (*m_Base.Last())->data[m_EndId - 1]; }
+	T& Back() { return (*m_Base.Last())->data[m_EndId - 1]; }
+
+	const T& At(int id) const
 	{
-		return Size() == 0;
+		auto start = m_Base.First();
+		auto absId = m_FirstId + id;
+		return start[absId / BLOCK_SIZE]->data[absId%BLOCK_SIZE];
 	}
-
-	const T& Front() const
+	T& At(int id)
 	{
-		lxAssert(Size());
-		return (*m_Base.First())->data[m_FirstId];
+		auto start = m_Base.First();
+		auto absId = m_FirstId + id;
+		return start[absId / BLOCK_SIZE]->data[absId%BLOCK_SIZE];
 	}
-
-	T& Front()
-	{
-		lxAssert(Size());
-		return (*m_Base.First())->data[m_FirstId];
-	}
-
-	const T& Back() const
-	{
-		lxAssert(Size());
-		return (*m_Base.Last())->data[m_EndId - 1];
-	}
-
-	T& Back()
-	{
-		lxAssert(Size());
-		return (*m_Base.Last())->data[m_EndId - 1];
-	}
-
-	ConstIterator First() const
-	{
-		return ConstIterator(m_Base.First(), m_FirstId);
-	}
-
-	ConstIterator End() const
-	{
-		if(m_EndId == BLOCK_SIZE)
-			return ConstIterator(m_Base.Last() + 1, 0);
-		else
-			return ConstIterator(m_Base.Last(), m_EndId);
-	}
-
-	Iterator First()
-	{
-		return Iterator(m_Base.First(), m_FirstId);
-	}
-
-	Iterator End()
-	{
-		if(m_EndId == BLOCK_SIZE)
-			return Iterator(m_Base.Last() + 1, 0);
-		else
-			return Iterator(m_Base.Last(), m_EndId);
-	}
-
 private:
 	T* NewFrontPtr()
 	{
@@ -538,10 +334,6 @@ private:
 	int m_EndId;
 };
 
-template <typename T> typename Deque<T>::Iterator begin(Deque<T>& dequeu) { return dequeu.Frist(); }
-template <typename T> typename Deque<T>::Iterator end(Deque<T>& dequeu) { return dequeu.End(); }
-template <typename T> typename Deque<T>::ConstIterator begin(const Deque<T>& dequeu) { return dequeu.Frist(); }
-template <typename T> typename Deque<T>::ConstIterator end(const Deque<T>& dequeu) { return dequeu.End(); }
 
 } // namespace core
 } // namespace lux
