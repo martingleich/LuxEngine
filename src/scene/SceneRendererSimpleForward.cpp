@@ -268,7 +268,7 @@ bool SceneRendererSimpleForward::IsCulled(Node* node, Component* r, const math::
 		return false;
 	if(node->GetBoundingBox().IsEmpty())
 		return false;
-	return !frustum.IsBoxVisible(node->GetBoundingBox(), node->GetAbsoluteTransform());
+	return !math::IsOrientedBoxMaybeVisible(frustum, node->GetBoundingBox(), node->GetAbsoluteTransform());
 }
 
 static void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc, video::ColorF* overwriteColor = nullptr)

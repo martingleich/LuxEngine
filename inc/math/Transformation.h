@@ -398,8 +398,7 @@ template <>
 inline math::PlaneF& Transformation::TransformObject(const math::PlaneF& in, math::PlaneF& out) const
 {
 	out.normal = orientation.Transform(in.normal);
-	out.RecalculateD(this->TransformPoint(in.GetMemberPoint()));
-
+	out.d = scale*in.d - out.normal.Dot(translation);
 	return out;
 }
 

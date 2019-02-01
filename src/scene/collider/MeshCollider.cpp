@@ -2,7 +2,7 @@
 
 #include "scene/query/LineQuery.h"
 #include "scene/query/VolumeQuery.h"
-#include "math/CollisionHelper.h"
+#include "math/FreeMathFunctions.h"
 #include "scene/zones/ZoneSphere.h"
 #include "scene/zones/ZoneBox.h"
 #include "scene/Node.h"
@@ -144,14 +144,14 @@ bool MeshCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZon
 bool MeshCollider::SelectFirstTriangle(const math::Line3F& line, math::Vector3F& out_pos, int& triId, float& distance, bool testOnly)
 {
 	if(!m_BoundingBox.IsEmpty()) {
-		if(!m_BoundingBox.IntersectWithLine(line))
+		if(!math::IntersectAABoxWithLine(m_BoundingBox, line))
 			return false;
 	}
 
 	int i = 0;
-	for(auto it = m_Triangles.First(); it != m_Triangles.End(); ++it) {
-		math::Vector3F pos;
-		if(it->IntersectWithLineBary(line, &pos)) {
+	math::Vector3F pos;
+	for(auto& tri : m_Triangles) {
+		if(math::IntersectTriangleWithLineBary(tri, line, pos)) {
 			if(testOnly)
 				return true;
 			m_Temp.PushBack(FindEntry(

@@ -1,9 +1,6 @@
 #ifndef INCLUDED_LUX_MATH_VIEW_FRUSTUM_H
 #define INCLUDED_LUX_MATH_VIEW_FRUSTUM_H
-#include "math/AABBox.h"
-#include "math/Matrix4.h"
 #include "math/Plane.h"
-#include "math/Transformation.h"
 #include "core/lxIterator.h"
 
 namespace lux
@@ -33,13 +30,6 @@ public:
 		Count = 6,
 	};
 
-	enum ERelation
-	{
-		Outside,
-		Clipped,
-		Inside,
-	};
-
 public:
 	//! Create invalid view frustum
 	ViewFrustum()
@@ -53,13 +43,10 @@ public:
 			m_Planes[i] = planes[i];
 			m_Planes[i].Normalize();
 		}
-
-		RecalculateInternals();
 	}
 
 	//! Create view frustum from perspective camera
 	/**
-	\param camPos The position of the camera
 	\param view The view matrix used by the camera
 	\param fovY The vertical field of view in rad.
 	\param aspect The aspect ratio(screenWidth/screenHeight)
@@ -68,7 +55,6 @@ public:
 	\return The generated view frustum
 	*/
 	static ViewFrustum FromPerspCam(
-		const math::Vector3F& camPos,
 		const math::Matrix4& view,
 		math::AngleF fovY, float aspect,
 		float nearPlane, float farPlane)
@@ -79,39 +65,35 @@ public:
 		camUp.Normalize();
 		math::Vector3F camDir(view(0, 2), view(1, 2), view(2, 2));
 		camDir.Normalize();
+		auto camPos = -view(3, 0) * camRight - view(3, 1) * camUp - view(3, 2) * camDir;
 
 		ViewFrustum out;
-		// Near
-		out.m_Planes[0].SetPlane(camPos + camDir * nearPlane, camDir);
-		// Far
-		out.m_Planes[1].SetPlane(camPos + camDir * farPlane, -camDir);
-		// Left
+		out.m_Planes[Near].SetPlane(camPos + camDir * nearPlane, camDir);
+		out.m_Planes[Far].SetPlane(camPos + camDir * farPlane, -camDir);
+		
 		float thorz = math::Tan(fovY*0.5f)*aspect;
 		auto leftSide = camDir - thorz * camRight;
 		auto leftNormal = camUp.Cross(leftSide).Normal();
-		out.m_Planes[2].SetPlane(camPos, leftNormal);
-		// Right
+		out.m_Planes[Left].SetPlane(camPos, leftNormal);
+		
 		auto rightSide = camDir + thorz * camRight;
 		auto rightNormal = rightSide.Cross(camUp).Normal();
-		out.m_Planes[3].SetPlane(camPos, rightNormal);
-		// Top
+		out.m_Planes[Right].SetPlane(camPos, rightNormal);
+		
 		float tvert = math::Tan(fovY*0.5f);
 		auto topSide = camDir + tvert * camUp;
 		auto topNormal = camRight.Cross(topSide).Normal();
-		out.m_Planes[4].SetPlane(camPos, topNormal);
-		// Bottom
+		out.m_Planes[Top].SetPlane(camPos, topNormal);
+		
 		auto bottomSide = camDir - tvert * camUp;
 		auto bottomNormal = bottomSide.Cross(camRight).Normal();
-		out.m_Planes[5].SetPlane(camPos, bottomNormal);
-
-		out.RecalculateInternals();
+		out.m_Planes[Bottom].SetPlane(camPos, bottomNormal);
 
 		return out;
 	}
 
 	//! Create view frustum from orthogonal camera
 	/**
-	\param camPos The position of the camera
 	\param view The view matrix used by the camera
 	\param xMax the maximal visible x offset
 	\param aspect The aspect ratio(screenWidth/screenHeight)
@@ -120,7 +102,6 @@ public:
 	\return The generated view frustum
 	*/
 	static ViewFrustum FromOrthoCam(
-		const math::Vector3F& camPos,
 		const math::Matrix4& view,
 		float xMax, float aspect,
 		float nearPlane, float farPlane)
@@ -132,21 +113,16 @@ public:
 		camUp.Normalize();
 		math::Vector3F camDir(view(0, 2), view(1, 2), view(2, 2));
 		camDir.Normalize();
-		ViewFrustum out;
-		// Near
-		out.m_Planes[0].SetPlane(camPos + camDir*nearPlane, camDir);
-		// Far
-		out.m_Planes[1].SetPlane(camPos + camDir*farPlane, -camDir);
-		// Left
-		out.m_Planes[2].SetPlane(camPos - camRight*xMax, camRight);
-		// Right
-		out.m_Planes[3].SetPlane(camPos + camRight*xMax, -camRight);
-		// Top
-		out.m_Planes[4].SetPlane(camPos + camUp*yMax, -camUp);
-		// Bottom
-		out.m_Planes[5].SetPlane(camPos - camUp*yMax, camUp);
+		auto camPos = -view(3, 0) * camRight - view(3, 1) * camUp - view(3, 2) * camDir;
 
-		out.RecalculateInternals();
+		ViewFrustum out;
+		out.m_Planes[Near].SetPlane(camPos + camDir*nearPlane, camDir);
+		out.m_Planes[Far].SetPlane(camPos + camDir*farPlane, -camDir);
+		out.m_Planes[Left].SetPlane(camPos - camRight*xMax, camRight);
+		out.m_Planes[Right].SetPlane(camPos + camRight*xMax, -camRight);
+		out.m_Planes[Top].SetPlane(camPos + camUp*yMax, -camUp);
+		out.m_Planes[Bottom].SetPlane(camPos - camUp*yMax, camUp);
+
 		return out;
 	}
 
@@ -164,9 +140,6 @@ public:
 	}
 
 	//! Set the value of a plane
-	/**
-	Internal data is not updated \ref RecalculateInternals
-	*/
 	void SetPlane(EPlane p, const math::PlaneF& value)
 	{
 		lxAssert((int)p < Count);
@@ -174,130 +147,8 @@ public:
 		m_Planes[(int)p].Normalize();
 	}
 
-	//! Access the corners
-	/**
-	\param start The first corner to return, a total of 8-start corners are returned
-	\return Range over corners
-	*/
-	core::Range<const math::Vector3F*> Corners(int start = 0) const
-	{
-		lxAssert(start >= 0 && start <= 8);
-		return core::MakeRange(m_Points+start, m_Points+8);
-	}
-
-	//! Access a single corner
-	const math::Vector3F& Corner(int id) const
-	{
-		lxAssert(id >= 0 && id < 8);
-		return m_Points[id];
-	}
-
-	//! Recalculate all internal variables from the planes.
-	void RecalculateInternals()
-	{
-		// Corners
-		for(int i = 0; i < 8; ++i) {
-			int a=0, b=0, c=0;
-			switch(i) {
-			case 0: a = Near; b = Left; c = Top; break;
-			case 1: a = Near; b = Right; c = Top; break;
-			case 2: a = Near; b = Right; c = Bottom; break;
-			case 3: a = Near; b = Left; c = Bottom; break;
-			case 4: a = Far; b = Left; c = Top; break;
-			case 5: a = Far; b = Right; c = Top; break;
-			case 6: a = Far; b = Right; c = Bottom; break;
-			case 7: a = Far; b = Left; c = Bottom; break;
-			}
-
-			math::Vector3F point;
-			bool intersect = m_Planes[a].IntersectWithPlanes(
-				m_Planes[b],
-				m_Planes[c], point);
-			LUX_UNUSED(intersect);
-			lxAssert(intersect);
-			m_Points[i] = point;
-		}
-		
-		// Bounding box
-		m_BoundingBox.Set(Corner(0));
-		for(auto c : Corners(1))
-			m_BoundingBox.AddPoint(c);
-
-	}
-
-	//! Check if a point is inside the frustum
-	/**
-	Including the edge
-	*/
-	bool IsPointInside(const math::Vector3F& point) const
-	{
-		for(auto& p : m_Planes) {
-			if(p.ClassifyPoint(point) == math::PlaneF::ERelation::Back)
-				return false;
-		}
-
-		return true;
-	}
-
-	ERelation ClassifyBox(const math::AABBoxF& box) const
-	{
-		bool fullyInside = true;
-		for(auto& p : m_Planes) {
-			auto cls = p.ClassifyBox(box.minCorner, box.maxCorner);
-			if(cls == math::PlaneF::ERelation::Back)
-				return ERelation::Outside;
-			if(cls == math::PlaneF::ERelation::Clipped)
-				fullyInside = false;
-		}
-
-		return fullyInside ? ERelation::Inside : ERelation::Clipped;
-	}
-
-	//! Check if a axis-aligned box is visible in the frustum
-	/**
-	Including the edge
-	*/
-	bool IsBoxVisible(const math::AABBoxF& box) const
-	{
-		return ClassifyBox(box) != ERelation::Outside;
-	}
-
-	ERelation ClassifyBox(const math::AABBoxF& box, const math::Transformation& boxTransform) const
-	{
-		bool fullyInside = true;
-		auto invTransform = boxTransform.GetInverted();
-		for(auto& p : m_Planes) {
-			auto transPlane = invTransform.TransformObject(p);
-			auto cls = transPlane.ClassifyBox(box.minCorner, box.maxCorner);
-			if(cls == math::PlaneF::ERelation::Back)
-				return ERelation::Outside;
-			if(cls == math::PlaneF::ERelation::Clipped)
-				fullyInside = false;
-		}
-
-		return fullyInside ? ERelation::Inside : ERelation::Clipped;
-	}
-
-	//! Check if a object-oriented box is visible in the frustum
-	/**
-	Including the edge
-	*/
-	bool IsBoxVisible(const math::AABBoxF& box, const math::Transformation& boxTransform) const
-	{
-		return ClassifyBox(box, boxTransform) != ERelation::Outside;
-	}
-
-	//! Transform the box with a matrix
-	void Transform(const math::Matrix4& m)
-	{
-		for(auto& p : m_Planes)
-			p = m.TransformPlane(p);
-	}
-
 private:
 	math::PlaneF m_Planes[6];
-	math::Vector3F m_Points[8];
-	math::AABBoxF m_BoundingBox;
 };
 
 } // namespace math

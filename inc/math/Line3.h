@@ -28,13 +28,10 @@ public:
 	{
 	}
 
-	Line3(T x1, T y1, T z1, T x2, T y2, T z2) : start(x1, y1, z1), end(x2, y2, z2)
+	Line3(T x1, T y1, T z1, T x2, T y2, T z2) :
+		start(x1, y1, z1),
+		end(x2, y2, z2)
 	{
-	}
-
-	Line3<T>& operator=(const Line3<T>& other)
-	{
-		start = other.start; end = other.end; return *this;
 	}
 
 	//! Equality of two lines
@@ -106,98 +103,6 @@ public:
 		return end - start;
 	}
 
-	//! Check if a point is on the line
-	/**
-	\param p The point to check, this point must be kolinear with the line
-	\return Is the point between start and end
-	*/
-	bool IsPointOnLimited(const Vector3<T>& p) const
-	{
-		return p.IsBetweenPoints(start, end);
-	}
-
-	//! The nearest point on the line
-	/**
-	\param Point The point to compare with
-	\return The nearest point to the param, which is on the line
-	*/
-	Vector3<T> GetClosestPoint(const Vector3<T>& Point) const
-	{
-		const Vector3<T> v(end - start);
-		const Vector3<T> w(Point - start);
-
-		const T d = w.Dot(v) / v.GetLengthSq();
-		if(d < (T)0.0)
-			return start;
-		else if(d > (T)0)
-			return end;
-
-		v *= d;
-		return start + v;
-	}
-
-	//! Check for intersection with a sphere
-	/**
-	\param s The center of the sphere
-	\param r The radius of the sphere
-	\param outLineSegment Here the linesegemnt of the first intersection is written
-	\return Is there a intersection between the line and the sphere
-	*/
-	bool HitsSphere(const Vector3<T>& s,
-		T r, float& outLineSegment) const
-	{
-		outLineSegment = (T)0;
-
-		const Vector3<T> p = start - s;
-		if(p.GetLengthSq() <= r*r)
-			return true;
-
-		const Vector3<T> u = GetVector();
-		const T x = u.Dot(p);
-		const T DirSq = u.GetLengthSq();
-
-		const T d = x*x - DirSq * (p.GetLengthSq() - r);
-		if(d < (T)0)
-			return false;
-		else if(IsZero(d))
-			outLineSegment = -x * DirSq;
-		else
-			outLineSegment = (-x - std::sqrt(d)) * DirSq;
-
-		if(outLineSegment < (T)0 || outLineSegment >(T)1)
-			return false;
-		else
-			return true;
-	}
-
-	//! Retrieves the distance to another line
-	/**
-	\param other The other line
-	\return The distance to the other line
-	*/
-	float GetDinstanceTo(const Line3& other) const
-	{
-		Vector3F u = end - start;
-		Vector3F v = other.end - other.start;
-		Vector3F w = start - other.start;
-		float a = u.GetLengthSq();
-		float c = v.GetLengthSq();
-		float b = u.Dot(v);
-		float d = u.Dot(w);
-		float e = v.Dot(w);
-		float D = a*c - b*b;
-
-		if(IsZero(D)) {
-			float tc = b > c ? d / b : e / c;
-
-			return (w - v*tc).GetLength();
-		} else {
-			float sc = (b*e - c*d) / D;
-			float tc = (a*e - b*d) / D;
-
-			return (w + u*sc - v*tc).GetLength();
-		}
-	}
 };
 
 //! typdef for 3D Line with floating precision

@@ -98,7 +98,7 @@ void Canvas3D::DrawLine(const math::Vector3F& start, const math::Vector3F& end)
 void Canvas3D::DrawBox(const math::AABBoxF& box, const math::Matrix4& transform)
 {
 	math::Vector3F corners[8];
-	box.GetCorners(corners);
+	math::GetAABoxCorners(box, corners);
 	if(&transform != &math::Matrix4::IDENTITY)
 		transform.TransformVectorArray(corners, corners, 8);
 	/*

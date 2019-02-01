@@ -205,7 +205,7 @@ public:
 
 	//! Generate a random vector inside the unit cube
 	/**
-	\return A random vector
+	\return A random vector inside the unit cube.
 	*/
 	inline math::Vector3F GetVector3() const
 	{

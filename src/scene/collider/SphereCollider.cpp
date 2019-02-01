@@ -2,7 +2,7 @@
 
 #include "scene/query/LineQuery.h"
 #include "scene/query/VolumeQuery.h"
-#include "math/CollisionHelper.h"
+#include "math/FreeMathFunctions.h"
 #include "scene/zones/ZoneSphere.h"
 #include "scene/zones/ZoneBox.h"
 #include "scene/Node.h"
@@ -42,7 +42,7 @@ bool SphereCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCa
 	math::Vector3F center = owner->GetAbsoluteTransform().TransformPoint(m_Center);
 	float radius = owner->GetAbsoluteTransform().scale * m_Radius;
 
-	math::LineSphereInfo<float> info;
+	math::LineSphereInfo info;
 	bool hit = math::LineHitSphere(line, center, radius, &info);
 
 	if(hit) {
@@ -91,7 +91,7 @@ bool SphereCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZ
 		break;
 	case Query::EQueryLevel::Collision:
 	{
-		math::SphereSphereInfo<float> info;
+		math::SphereSphereInfo info;
 		if(math::SphereHitSphere(centerA, radiusA, centerB, radiusB, &info)) {
 			VolumeQueryResult r;
 			r.colliderData = 0;
@@ -131,7 +131,7 @@ bool SphereCollider::ExecuteBoxQuery(Node* owner, VolumeQuery* query, BoxZone* z
 		break;
 	case Query::EQueryLevel::Collision:
 	{
-		math::SphereBoxInfo<float> info;
+		math::SphereBoxInfo info;
 		if(math::SphereHitBox(center, radius, halfSize, trans, &info)) {
 			VolumeQueryResult r;
 			r.colliderData = 0;

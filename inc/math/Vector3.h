@@ -100,7 +100,7 @@ public:
 	//! Shortmultiplication with scalar.
 	Vector3<T>& operator*= (const T f)
 	{
-		x = x*f; y = y*f; z = z*f; return *this;
+		x = x * f; y = y * f; z = z * f; return *this;
 	}
 	//! Shortdivision with scalaer
 	Vector3<T>& operator/= (const T f)
@@ -116,7 +116,7 @@ public:
 	//! Short componentwise multiplication with other vector.
 	Vector3<T>& operator*= (const Vector3<T>& v)
 	{
-		x = x*v.x; y = y*v.y; z = z*v.z; return *this;
+		x = x * v.x; y = y * v.y; z = z * v.z; return *this;
 	}
 
 	//! Addition
@@ -150,7 +150,6 @@ public:
 	{
 		return Vector3<T>(x / f, y / f, z / f);
 	}
-
 
 	//! Equality
 	bool operator== (const Vector3<T>& other) const
@@ -226,7 +225,7 @@ public:
 	*/
 	T GetLength() const
 	{
-		return (T)(std::sqrt((double)(x*x + y*y + z*z)));
+		return (T)(std::sqrt((double)(x*x + y * y + z * z)));
 	}
 
 	//! The squared length of the vector
@@ -236,7 +235,7 @@ public:
 	*/
 	T GetLengthSq() const
 	{
-		return x*x + y*y + z*z;
+		return x * x + y * y + z * z;
 	}
 
 	//! The distance to another point
@@ -319,9 +318,9 @@ public:
 	*/
 	Vector3<T> Cross(const Vector3<T>& v)    const
 	{
-		return Vector3<T>(y*v.z - z*v.y,
-			z*v.x - x*v.z,
-			x*v.y - y*v.x);
+		return Vector3<T>(y*v.z - z * v.y,
+			z*v.x - x * v.z,
+			x*v.y - y * v.x);
 	}
 
 	//! Calculate the Dotproduct between two vectors
@@ -331,7 +330,7 @@ public:
 	*/
 	T Dot(const Vector3<T>& v) const
 	{
-		return x*v.x + y*v.y + z*v.z;
+		return x * v.x + y * v.y + z * v.z;
 	}
 
 	//! Is this vector between two points
@@ -374,24 +373,18 @@ public:
 		const double cz = cos(z);
 		const double sz = sin(z);
 
-		const double sxsy = sx*sy;
-		const double cxsy = cx*sy;
+		const double sxsy = sx * sy;
+		const double cxsy = cx * sy;
 
 		const double pseudoMatrix[] = {
 			(cy*cz), (cy*sz), (-sy),
-			(sxsy*cz - cx*sz), (sxsy*sz + cx*cz), (sx*cy),
-			(cxsy*cz + sx*sz), (cxsy*sz - sx*cz), (cx*cy)};
+			(sxsy*cz - cx * sz), (sxsy*sz + cx * cz), (sx*cy),
+			(cxsy*cz + sx * sz), (cxsy*sz - sx * cz), (cx*cy)};
 
 		return Vector3<T>(
-			(T)(v.x * pseudoMatrix[0] +
-				v.y * pseudoMatrix[3] +
-				v.z * pseudoMatrix[6]),
-				(T)(v.x * pseudoMatrix[1] +
-					v.y * pseudoMatrix[4] +
-					v.z * pseudoMatrix[7]),
-					(T)(v.x * pseudoMatrix[2] +
-						v.y * pseudoMatrix[5] +
-						v.z * pseudoMatrix[8]));
+			(T)(v.x * pseudoMatrix[0] + v.y * pseudoMatrix[3] + v.z * pseudoMatrix[6]),
+			(T)(v.x * pseudoMatrix[1] + v.y * pseudoMatrix[4] + v.z * pseudoMatrix[7]),
+			(T)(v.x * pseudoMatrix[2] + v.y * pseudoMatrix[5] + v.z * pseudoMatrix[8]));
 	}
 
 	//! Convert this vector to polar coordinates
@@ -403,7 +396,7 @@ public:
 	{
 		Vector3<T> vOut;
 
-		double length = x*x + y*y + z*z;
+		double length = x * x + y * y + z * z;
 		if(length > 0) {
 			length = std::sqrt(length);
 			vOut.z = (T)length;
@@ -433,7 +426,7 @@ public:
 	{
 		Vector3<T> vOut;
 
-		double length = x*x + y*y + z*z;
+		double length = x * x + y * y + z * z;
 		if(length > 0) {
 			vOut.y = (T)(atan2(x, z));
 
@@ -442,7 +435,7 @@ public:
 			if(vOut.y >= math::Constants<T>::two_pi())
 				vOut.y -= math::Constants<T>::two_pi();
 
-			const double tmp = (double)(std::sqrt(x*x + z*z));
+			const double tmp = (double)(std::sqrt(x*x + z * z));
 			vOut.x = (T)(atan2(tmp, double(y)) - math::Constants<T>::half_pi());
 
 			if(vOut.x < 0)
@@ -511,11 +504,11 @@ public:
 	Vector3 GetOrthoNormal() const
 	{
 		if(Abs(x) + Abs(y) > 0)
-			return Vector3(-y, x, 0) / std::sqrt(y*y+x*x);
+			return Vector3(-y, x, 0) / std::sqrt(y*y + x * x);
 		else if(Abs(y) + Abs(z) > 0)
-			return Vector3(0, -z, y) / std::sqrt(y*y+z*z);
+			return Vector3(0, -z, y) / std::sqrt(y*y + z * z);
 		else if(Abs(x) + Abs(z) > 0)
-			return Vector3(-x, 0, z) / std::sqrt(x*x+z*z);
+			return Vector3(-x, 0, z) / std::sqrt(x*x + z * z);
 		else
 			return Vector3(1, 0, 0);
 	}
@@ -525,7 +518,7 @@ public:
 template <typename T>
 inline Vector3<T> operator* (const T f, const Vector3<T>& v)
 {
-	return v*f;
+	return v * f;
 }
 
 template <typename T>

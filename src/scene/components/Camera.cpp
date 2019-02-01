@@ -212,9 +212,9 @@ math::ViewFrustum Camera::CalculateViewFrustum(const math::Matrix4& view)
 	math::ViewFrustum out;
 	auto n = GetNode();
 	if(m_IsOrtho)
-		out = math::ViewFrustum::FromOrthoCam(n->GetAbsolutePosition(), view, m_XMax, m_Aspect, m_NearPlane, m_FarPlane);
+		out = math::ViewFrustum::FromOrthoCam(view, m_XMax, m_Aspect, m_NearPlane, m_FarPlane);
 	else
-		out = math::ViewFrustum::FromPerspCam(n->GetAbsolutePosition(), view, m_FOV, m_Aspect, m_NearPlane, m_FarPlane);
+		out = math::ViewFrustum::FromPerspCam(view, m_FOV, m_Aspect, m_NearPlane, m_FarPlane);
 
 	return out;
 }

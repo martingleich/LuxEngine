@@ -37,11 +37,6 @@ const video::ColorF& ClassicalLight::GetColor() const { return m_Color; }
 bool ClassicalLight::IsShadowCasting() const { return m_Desc.isShadowCasting; }
 void ClassicalLight::SetShadowCasting(bool b) { m_Desc.isShadowCasting = b; }
 
-static bool IsValidLightType(scene::ELightType type)
-{
-	return type == scene::ELightType::Point || type == scene::ELightType::Spot || type == scene::ELightType::Directional;
-}
-
 ClassicalLightDescription* ClassicalLight::GetLightDescription()
 {
 	auto node = GetNode();

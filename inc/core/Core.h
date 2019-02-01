@@ -55,7 +55,7 @@
 
 #include "math/AABBox.h"
 #include "math/Angle.h"
-#include "math/CollisionHelper.h"
+#include "math/FreeMathFunctions.h"
 #include "math/CurveInterpolation.h"
 #include "math/Dimension2.h"
 #include "math/DualQuaternion.h"

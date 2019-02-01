@@ -124,6 +124,7 @@ private:
 
 		void Balance(bool hint)
 		{
+			LUX_UNUSED(hint);
 			/*
 			Shift the datarange into the middle of the rawrange.
 			*/

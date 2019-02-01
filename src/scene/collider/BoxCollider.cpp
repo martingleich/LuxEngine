@@ -2,7 +2,7 @@
 
 #include "scene/query/LineQuery.h"
 #include "scene/query/VolumeQuery.h"
-#include "math/CollisionHelper.h"
+#include "math/FreeMathFunctions.h"
 #include "scene/zones/ZoneSphere.h"
 #include "scene/zones/ZoneBox.h"
 #include "scene/Node.h"
@@ -54,7 +54,7 @@ bool BoxCollider::ExecuteLineQuery(Node* owner, LineQuery* query, LineQueryCallb
 		break;
 	case Query::EQueryLevel::Collision:
 	{
-		math::LineBoxInfo<float> info;
+		math::LineBoxInfo info;
 		if(math::LineHitBox(line, m_HalfSize, fullTransform, &info)) {
 			LineQueryResult r;
 			r.colliderData = 0;
@@ -93,7 +93,7 @@ bool BoxCollider::ExecuteSphereQuery(Node* owner, VolumeQuery* query, SphereZone
 		break;
 	case Query::EQueryLevel::Collision:
 	{
-		math::SphereBoxInfo<float> info;
+		math::SphereBoxInfo info;
 		if(math::SphereHitBox(center, radius, halfSize, trans, &info)) {
 			VolumeQueryResult r;
 			r.colliderData = 0;
