@@ -71,4 +71,23 @@ UNIT_SUITE(Deque)
 		}
 		UNIT_ASSERT(valid);
 	}
+
+	UNIT_TEST(RepeatedQueue)
+	{
+		core::Deque<int> dq;
+		bool isValid = true;
+		for(int i = 0; i < 8; ++i) {
+			for(int j = 0; j < 4; ++j)
+				dq.PushBack(j);
+			for(int j = 0; j < 4; ++j) {
+				int k = dq.Front();
+				if(k != j)
+					isValid = false;
+				dq.PopFront();
+			}
+			if(!dq.IsEmpty())
+				isValid = false;
+		}
+		UNIT_ASSERT(isValid);
+	}
 }

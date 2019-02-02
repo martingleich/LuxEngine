@@ -16,7 +16,7 @@ RenderRequest RenderRequest::FromGeometry(const Geometry* geo)
 	rq.userPointer = false;
 	rq.bufferData.ib = geo->GetIndices();
 	rq.bufferData.vb = geo->GetVertices();
-	rq.indexed = geo->GetIndices();
+	rq.indexed = (geo->GetIndices() != nullptr);
 	rq.firstPrimitive = 0;
 	rq.primitiveCount = geo->GetPrimitiveCount();
 	rq.primitiveType = geo->GetPrimitiveType();
@@ -31,7 +31,7 @@ RenderRequest RenderRequest::FromGeometry(const Geometry* geo, int first, int co
 	rq.userPointer = false;
 	rq.bufferData.ib = geo->GetIndices();
 	rq.bufferData.vb = geo->GetVertices();
-	rq.indexed = geo->GetIndices();
+	rq.indexed = (geo->GetIndices() != nullptr);
 	rq.firstPrimitive = first;
 	rq.primitiveCount = count;
 	rq.primitiveType = geo->GetPrimitiveType();

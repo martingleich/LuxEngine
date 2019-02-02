@@ -303,14 +303,15 @@ public:
 	/**
 	\return The new polar vector
 	*/
-	Vector2<T> ToPolar() const
+	void ToPolar(AngleF& alpha, T& length) const
 	{
-		double length = x*x + y*y;
+		length = x*x + y*y;
 		if(length > 0) {
-			return Vector2<T>(std::atan2(y, x), std::sqrt(length));
+			alpha = ArcTan2<T>(y, x);
+			length = std::sqrt(length);
+		} else {
+			alpha = math::AngleF::ZERO;
 		}
-
-		return Vector2<T>(0.0, 0.0);
 	}
 
 	//! Return the minimum component

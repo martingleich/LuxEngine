@@ -10,7 +10,7 @@ These function should be used when enum classes are use as bit flags.
 template<typename T>
 constexpr bool TestFlag(T a, T b)
 {
-	return int(a)&int(b);
+	return (int(a)&int(b))!=0;
 }
 template<typename T>
 T& SetFlag(T& a, T b)

@@ -300,7 +300,7 @@ core::Array<RawJoystickDevice::ButtonCaps> RawJoystickDevice::GetButtonCaps(
 		ButtonCaps bc;
 		bc.reportId = c.ReportID;
 		bc.usagePage = c.UsagePage;
-		bc.isAbsolute = c.IsAbsolute;
+		bc.isAbsolute = (c.IsAbsolute==TRUE);
 		if(c.IsRange) {
 			USAGE curUsage = c.Range.UsageMin;
 			USHORT curDataIndex = c.Range.DataIndexMin;
@@ -337,7 +337,7 @@ core::Array<RawJoystickDevice::AxisCaps> RawJoystickDevice::GetAxesCaps(
 		AxisCaps ac;
 		ac.reportId = c.ReportID;
 		ac.usagePage = c.UsagePage;
-		ac.isAbsolute = c.IsAbsolute;
+		ac.isAbsolute = (c.IsAbsolute==TRUE);
 
 		ac.logicalMin = c.LogicalMin;
 		ac.logicalMax = c.LogicalMax;

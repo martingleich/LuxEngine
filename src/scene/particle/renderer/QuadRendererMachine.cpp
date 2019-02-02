@@ -134,9 +134,9 @@ void QuadRendererMachine::ComputeGlobalOrientation()
 	m_Up = m_HelpUp;
 	if(m_Look == m_Up) {
 		if(m_Data->LockedAxis == ELockedAxis::Look)
-			m_Up = m_Look.GetOrthoNormal();
+			m_Up = GetOrthoNormalVector(m_Look);
 		else
-			m_Look = m_Up.GetOrthoNormal();
+			m_Look = GetOrthoNormalVector(m_Up);
 	}
 
 	m_Side = m_Look.Cross(m_Up);
@@ -170,9 +170,9 @@ void QuadRendererMachine::ComputeLocalOrientation(const Particle& particle)
 
 	if(m_Look == m_Up) {
 		if(m_Data->LockedAxis == ELockedAxis::Look)
-			m_Up = m_Look.GetOrthoNormal();
+			m_Up = math::GetOrthoNormalVector(m_Look);
 		else
-			m_Look = m_Up.GetOrthoNormal();
+			m_Look = math::GetOrthoNormalVector(m_Up);
 	}
 	m_Side = m_Look.Cross(m_Up);
 	if(m_Data->LockedAxis == ELockedAxis::Look) {

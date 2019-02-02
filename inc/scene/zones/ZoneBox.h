@@ -45,7 +45,7 @@ public:
 		p.y /= m_HalfSize.y;
 		p.z /= m_HalfSize.z;
 
-		return p.GetUnitCubeVector();
+		return GetUnitCubeVector(p);
 	}
 
 	const math::Vector3F& GetHalfSize() const

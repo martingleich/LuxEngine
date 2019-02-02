@@ -318,7 +318,8 @@ public:
 	*/
 	Vector3<T> Cross(const Vector3<T>& v)    const
 	{
-		return Vector3<T>(y*v.z - z * v.y,
+		return Vector3<T>(
+			y*v.z - z * v.y,
 			z*v.x - x * v.z,
 			x*v.y - y * v.x);
 	}
@@ -358,160 +359,41 @@ public:
 		return math::ArcCos<T>(Dot(b)) / (T)std::sqrt(double(GetLengthSq()*b.GetLengthSq()));
 	}
 
-	//! Rotate another vector with this one
-	/**
-	Take this vector contains a eulerroation(XYZ in rad) now the given vector is rotated by this vector
-	\param v The vector to rotate
-	\return The rotated vector
-	*/
-	Vector3<T> RotToDir(const Vector3<T>& v = Vector3<T>::UNIT_Z) const
-	{
-		const double cx = cos(x);
-		const double sx = sin(x);
-		const double cy = cos(y);
-		const double sy = sin(y);
-		const double cz = cos(z);
-		const double sz = sin(z);
-
-		const double sxsy = sx * sy;
-		const double cxsy = cx * sy;
-
-		const double pseudoMatrix[] = {
-			(cy*cz), (cy*sz), (-sy),
-			(sxsy*cz - cx * sz), (sxsy*sz + cx * cz), (sx*cy),
-			(cxsy*cz + sx * sz), (cxsy*sz - sx * cz), (cx*cy)};
-
-		return Vector3<T>(
-			(T)(v.x * pseudoMatrix[0] + v.y * pseudoMatrix[3] + v.z * pseudoMatrix[6]),
-			(T)(v.x * pseudoMatrix[1] + v.y * pseudoMatrix[4] + v.z * pseudoMatrix[7]),
-			(T)(v.x * pseudoMatrix[2] + v.y * pseudoMatrix[5] + v.z * pseudoMatrix[8]));
-	}
-
 	//! Convert this vector to polar coordinates
 	/**
 	The output is horicontal angle, vertical angle, Length
 	\return The vector in polarcoordinates
 	*/
-	Vector3<T> ToPolar() const
+	void ToPolar(Angle<T>& alpha, Angle<T>& beta, T& length) const
 	{
-		Vector3<T> vOut;
-
-		double length = x * x + y * y + z * z;
+		length = x * x + y * y + z * z;
 		if(length > 0) {
-			length = std::sqrt(length);
-			vOut.z = (T)length;
+			length = (T)std::sqrt(length);
 
 			if(x != 0) {
-				vOut.x = (T)(std::atan2(z, x));
+				alpha = ArcTan2<T>(z, x);
 			}
 			// x == 0
 			else if(z < 0) {
-				vOut.x = Constants<T>::half_pi();
+				alpha = Angle<T>::QUATER;
 			}
 			//else
 			// vOut.x = 0;    // vOut.x ist mittels Standardkonstruktor bereits 0
 
-			vOut.y = (T)(acos(y / length));
+			beta = ArcCos<T>(y / length);
 		}
-
-		return vOut;
-	}
-
-
-	//! Give the rotation needed to rotate (0,0,1) to this vector
-	/**
-	\return The needed rotation in Eulerangles(XYZ and rad)
-	*/
-	Vector3<T> GetRotAngles() const
-	{
-		Vector3<T> vOut;
-
-		double length = x * x + y * y + z * z;
-		if(length > 0) {
-			vOut.y = (T)(atan2(x, z));
-
-			if(vOut.y < 0)
-				vOut.y += math::Constants<T>::two_pi();
-			if(vOut.y >= math::Constants<T>::two_pi())
-				vOut.y -= math::Constants<T>::two_pi();
-
-			const double tmp = (double)(std::sqrt(x*x + z * z));
-			vOut.x = (T)(atan2(tmp, double(y)) - math::Constants<T>::half_pi());
-
-			if(vOut.x < 0)
-				vOut.x += math::Constants<T>::two_pi();
-			if(vOut.x >= math::Constants<T>::two_pi())
-				vOut.x -= math::Constants<T>::two_pi();
-		}
-
-		return vOut;
 	}
 
 	//! Return the minimum component
-	T Min() const
-	{
-		return math::Min(x, y, z);
-	}
+	T Min() const { return math::Min(x, y, z); }
 
 	//! Return the maximum component
-	T Max() const
-	{
-		return math::Max(x, y, z);
-	}
+	T Max() const { return math::Max(x, y, z); }
 
 	//! Return the average component
-	T Average() const
-	{
-		return (x + y + z) / 3;
-	}
+	T Average() const { return (x + y + z) / 3; }
 
-	Vector3 Absolute() const
-	{
-		return Vector3(
-			abs(x),
-			abs(y),
-			abs(z));
-	}
-
-	//! Returns a vector with component either 1, 0, or -1, which point in the same direction as this vector.
-	/**
-	The angle between the returned vector and this one, is the smallest of all possibles.
-	If this vector is the null vector, the null vector is returned.
-	This function works with infinite vectors.
-	*/
-	Vector3 GetUnitCubeVector() const
-	{
-		T ax = abs(x), ay = abs(y), az = abs(z);
-		T max = math::Max(ax, ay, az);
-		if(max == 0)
-			return Vector3::ZERO;
-
-		Vector3 out;
-		if(max == ax)
-			out.x = x < 0 ? (T)-1 : (T)1;
-		if(max == ay)
-			out.y = y < 0 ? (T)-1 : (T)1;
-		if(max == az)
-			out.z = z < 0 ? (T)-1 : (T)1;
-
-		return out;
-	}
-
-	//! Returns a vector orthonormal to this one.
-	/**
-	If the null vector is passed (1,0,0) is returned.
-	*/
-	Vector3 GetOrthoNormal() const
-	{
-		if(Abs(x) + Abs(y) > 0)
-			return Vector3(-y, x, 0) / std::sqrt(y*y + x * x);
-		else if(Abs(y) + Abs(z) > 0)
-			return Vector3(0, -z, y) / std::sqrt(y*y + z * z);
-		else if(Abs(x) + Abs(z) > 0)
-			return Vector3(-x, 0, z) / std::sqrt(x*x + z * z);
-		else
-			return Vector3(1, 0, 0);
-	}
+	Vector3 Absolute() const { return Vector3(abs(x), abs(y), abs(z)); }
 };
 
 ///\cond INTERNAL
@@ -582,6 +464,104 @@ template <typename T> float* begin(math::Vector3<T>& v) { return &v.x; }
 template <typename T> float* end(math::Vector3<T>& v) { return (&v.z) + 1; }
 template <typename T> const float* begin(const math::Vector3<T>& v) { return &v.x; }
 template <typename T> const float* end(const math::Vector3<T>& v) { return (&v.z) + 1; }
+
+//! Give the rotation needed to rotate (0,0,1) to this vector
+/**
+\return The needed rotation in Eulerangles(XYZ and rad)
+*/
+inline EulerAngleF GetVectorRotAngles(const Vector3F& v)
+{
+	EulerAngleF out;
+
+	float length = v.GetLengthSq();
+	if(length > 0) {
+		out.y = ArcTan2<float>(v.x, v.z);
+
+		if(out.y < AngleF::ZERO)
+			out.y += math::AngleF::FULL;
+		if(out.y >= AngleF::FULL)
+			out.y -= AngleF::FULL;
+
+		length = std::sqrt(length);
+		out.x = ArcTan2<float>(length, v.y) - math::AngleF::QUATER;
+
+		if(out.x < AngleF::ZERO)
+			out.x += AngleF::FULL;
+		if(out.x >= AngleF::FULL)
+			out.x -= AngleF::FULL;
+	}
+
+	return out;
+}
+
+//! Rotate another vector with this one
+/**
+Take this vector contains a eulerroation(XYZ in rad) now the given vector is rotated by this vector
+\param v The vector to rotate
+\return The rotated vector
+*/
+inline Vector3F RotateVectorEuler(const EulerAngleF& euler, const Vector3F& v = Vector3F::UNIT_Z)
+{
+	const float cx = Cos(euler.x);
+	const float sx = Sin(euler.x);
+	const float cy = Cos(euler.y);
+	const float sy = Sin(euler.y);
+	const float cz = Cos(euler.z);
+	const float sz = Sin(euler.z);
+
+	const float sxsy = sx * sy;
+	const float cxsy = cx * sy;
+
+	const float pseudoMatrix[] = {
+		(cy*cz), (cy*sz), (-sy),
+		(sxsy*cz - cx * sz), (sxsy*sz + cx * cz), (sx*cy),
+		(cxsy*cz + sx * sz), (cxsy*sz - sx * cz), (cx*cy)};
+
+	return Vector3F(
+		v.x * pseudoMatrix[0] + v.y * pseudoMatrix[3] + v.z * pseudoMatrix[6],
+		v.x * pseudoMatrix[1] + v.y * pseudoMatrix[4] + v.z * pseudoMatrix[7],
+		v.x * pseudoMatrix[2] + v.y * pseudoMatrix[5] + v.z * pseudoMatrix[8]);
+}
+
+//! Returns a vector with component either 1, 0, or -1, which point in the same direction as this vector.
+/**
+The angle between the returned vector and this one, is the smallest of all possibles.
+If this vector is the null vector, the null vector is returned.
+This function works with infinite vectors.
+*/
+inline Vector3F GetUnitCubeVector(const Vector3F& v)
+{
+	float ax = abs(v.x), ay = abs(v.y), az = abs(v.z);
+	float max = math::Max(ax, ay, az);
+	if(max == 0)
+		return Vector3F::ZERO;
+
+	Vector3F out;
+	if(max == ax)
+		out.x = v.x < 0 ? -1.0f : 1.0f;
+	if(max == ay)
+		out.y = v.y < 0 ? -1.0f : 1.0f;
+	if(max == az)
+		out.z = v.z < 0 ? -1.0f : 1.0f;
+
+	return out;
+}
+
+//! Returns a vector orthonormal to this one.
+/**
+i.e. The dot product of the returned vector and this one is 0, and the length of returned vector is 1.
+*/
+inline Vector3F GetOrthoNormalVector(const math::Vector3F& v)
+{
+	if(Abs(v.x) + Abs(v.y) > 0)
+		return Vector3F(-v.y, v.x, 0) / std::sqrt(v.y*v.y + v.x * v.x);
+	else if(Abs(v.y) + Abs(v.z) > 0)
+		return Vector3F(0, -v.z, v.y) / std::sqrt(v.y*v.y + v.z * v.z);
+	else if(Abs(v.x) + Abs(v.z) > 0)
+		return Vector3F(-v.x, 0, v.z) / std::sqrt(v.x*v.x + v.z * v.z);
+	else
+		return Vector3F(1, 0, 0);
+}
 
 } // namespace math
 

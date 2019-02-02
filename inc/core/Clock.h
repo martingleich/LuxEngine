@@ -103,7 +103,7 @@ public:
 	constexpr Duration operator+(Duration other) const { return Duration(m_Count + other.m_Count); }
 	Duration& operator-=(Duration other) { m_Count -= other.m_Count; return *this; }
 	constexpr Duration operator-(Duration other) const { return Duration(m_Count - other.m_Count); }
-	constexpr Duration& operator/=(BaseType other) { m_Count /= other; return *this; }
+	Duration& operator/=(BaseType other) { m_Count /= other; return *this; }
 	constexpr Duration operator/(BaseType other) const { return Duration(m_Count/other); }
 
 	void SubtractOrZero(Duration other)

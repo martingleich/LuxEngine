@@ -62,7 +62,6 @@ public:
 		m_Size(s),
 		m_Data(str)
 	{
-		lxAssert(str && s >= 0);
 	}
 
 	StringView(const StringView&) = default;

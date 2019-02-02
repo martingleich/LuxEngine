@@ -188,7 +188,7 @@ void Canvas3D::DrawCircle(const math::Vector3F& pos, const math::Vector3F& _nor,
 {
 	int res = 32;
 	auto nor = _nor.Normal();
-	math::Vector3F ux = nor.GetOrthoNormal();
+	math::Vector3F ux = GetOrthoNormalVector(nor);
 	math::Vector3F uy = nor.Cross(ux);
 	math::Vector3F start = pos + radius*ux;
 	math::Vector3F last = start;

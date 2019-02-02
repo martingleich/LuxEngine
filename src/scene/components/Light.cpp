@@ -41,8 +41,6 @@ ClassicalLightDescription* ClassicalLight::GetLightDescription()
 {
 	auto node = GetNode();
 
-	lxAssert(IsValidLightType(m_Desc.type));
-
 	m_Desc.finalColor = m_Color * m_Power;
 	if(m_Desc.type == scene::ELightType::Spot ||
 		m_Desc.type == scene::ELightType::Directional) {

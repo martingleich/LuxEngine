@@ -210,7 +210,6 @@ math::Matrix4 Camera::CalculateViewMatrix()
 math::ViewFrustum Camera::CalculateViewFrustum(const math::Matrix4& view)
 {
 	math::ViewFrustum out;
-	auto n = GetNode();
 	if(m_IsOrtho)
 		out = math::ViewFrustum::FromOrthoCam(view, m_XMax, m_Aspect, m_NearPlane, m_FarPlane);
 	else

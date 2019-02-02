@@ -247,6 +247,14 @@ inline Angle<T> ArcTan2(T y, T x)
 
 typedef Angle<float> AngleF;
 
+struct EulerAngleF
+{
+public:
+	AngleF x;
+	AngleF y;
+	AngleF z;
+};
+
 } // namespace math
 } // namespace lux
 

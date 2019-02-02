@@ -616,8 +616,8 @@ void GUIEnvironment::OnEvent(const input::Event& event)
 
 void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 {
-	e.shift = m_ShiftState;
-	e.ctrl = m_ControlState;
+	e.shift = m_ShiftState!=0;
+	e.ctrl = m_ControlState!=0;
 	e.leftState = m_LeftState;
 	e.rightState = m_RightState;
 	e.pos = m_CursorPos;
@@ -644,8 +644,8 @@ void GUIEnvironment::SendMouseEvent(MouseEvent& e)
 
 void GUIEnvironment::SendKeyboardEvent(KeyboardEvent& e)
 {
-	e.shift = m_ShiftState;
-	e.ctrl = m_ControlState;
+	e.shift = m_ShiftState!=0;
+	e.ctrl = m_ControlState!=0;
 
 	if(m_Focused) {
 		e.elem = m_Focused;

@@ -133,7 +133,7 @@ bool SphereHitBox(
 		if(out) {
 			float f = std::sqrt(distanceSq);
 			if(nearest == relCenter) {
-				out->seperation = relCenter.GetUnitCubeVector();
+				out->seperation = GetUnitCubeVector(relCenter);
 				if(out->seperation == math::Vector3F::ZERO)
 					out->seperation = math::Vector3F::UNIT_X;
 				else
@@ -230,7 +230,7 @@ bool LineHitBox(
 				transPos.x /= halfSize.x;
 				transPos.y /= halfSize.y;
 				transPos.z /= halfSize.z;
-				out->normal = trans.TransformDir(transPos.GetUnitCubeVector()) / trans.scale;
+				out->normal = trans.TransformDir(GetUnitCubeVector(transPos)) / trans.scale;
 				return true;
 			}
 		}
@@ -589,7 +589,7 @@ Vector3F GetNearestPointOnLineFromPoint(const Line3F& line, const Vector3F& poin
 	else if(d > 0)
 		return line.end;
 
-	return line.start + v*d;
+	return line.start + v * d;
 }
 
 float GetDistanceFromLineToLine(const Line3<float>& aline, const Line3<float>& bline)
@@ -640,14 +640,13 @@ bool IsAABoxMaybeVisible(const ViewFrustum& frustum, const math::AABBoxF& box)
 bool IsOrientedBoxMaybeVisible(const ViewFrustum& frustum, const math::AABBoxF& box, const math::Transformation& boxTransform)
 {
 	auto invTransform = boxTransform.GetInverted();
-	math::PlaneF transPlane;
+	math::PlaneF tplane;
 	for(auto& p : frustum.Planes()) {
-		invTransform.TransformObject(p, transPlane);
-		auto cls = TestPlaneWithAABox(transPlane, box.minCorner, box.maxCorner);
+		invTransform.TransformObject(p, tplane);
+		auto cls = TestPlaneWithAABox(tplane, box.minCorner, box.maxCorner);
 		if(cls == EPlaneRelation::Back)
 			return false;
 	}
-
 	return true;
 }
 
