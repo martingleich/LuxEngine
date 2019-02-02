@@ -113,8 +113,6 @@ private:
 			m_RawEnd = m_RawFirst + newAlloc;
 			m_DataFirst = newDataFirst;
 			m_DataEnd = m_DataFirst + used_count;
-			if(used_count == 0)
-				++m_DataEnd;
 		}
 
 		Block** First() { return m_DataFirst; }
@@ -122,15 +120,22 @@ private:
 		Block** Last() { return m_DataEnd - 1; }
 		Block** Last() const { return m_DataEnd - 1; }
 
-		void Balance(bool hint)
+		void Balance(bool frontHint)
 		{
-			LUX_UNUSED(hint);
 			/*
 			Shift the datarange into the middle of the rawrange.
 			*/
 			intptr_t left = (intptr_t)(m_DataFirst - m_RawFirst);
 			intptr_t right = (intptr_t)(m_RawEnd - m_DataEnd);
 			intptr_t shift = (right - left) / 2;
+
+			if(shift == 0) {
+				if(frontHint&&right>0)
+					shift = 1;
+				else if(!frontHint&&left > 0)
+					shift = -1;
+			}
+
 			if(shift) {
 				// Swap blocks
 				int count = int(m_DataEnd - m_DataFirst);
@@ -161,8 +166,10 @@ private:
 			/*
 			Ensure at least one block.
 			*/
-			if(!m_RawFirst)
+			if(!m_RawFirst) {
 				Resize(1, false);
+				++m_DataEnd;
+			}
 		}
 
 		// TODO: Only alloc Blocks if necessary.
@@ -320,6 +327,7 @@ private:
 	T* NewBackPtr()
 	{
 		m_Base.Ensure();
+		lxAssert(m_EndId <= BLOCK_SIZE);
 		if(m_EndId == BLOCK_SIZE) {
 			m_Base.AddBack();
 			m_EndId = 1;
