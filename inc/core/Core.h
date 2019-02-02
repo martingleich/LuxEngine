@@ -53,6 +53,8 @@
 #include "core/StringConverter.h"
 #include "core/VariableAccess.h"
 
+#include "core/threading/lxThreadPool.h"
+
 #include "math/AABBox.h"
 #include "math/Angle.h"
 #include "math/FreeMathFunctions.h"
