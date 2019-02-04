@@ -64,7 +64,7 @@ enum class EStencilOperator : u8
 	DecrementSat,
 };
 
-enum class EFaceWinding
+enum class EFaceWinding : u8
 {
 	CCW,
 	CW,
@@ -81,7 +81,7 @@ inline EFaceWinding FlipWinding(EFaceWinding winding)
 	return EFaceWinding::ANY;
 }
 
-enum class EFaceSide
+enum class EFaceSide : u8
 {
 	Front,
 	Back,
@@ -111,8 +111,14 @@ inline EFaceSide FlipCulling(EFaceSide cull)
 	return cull;
 }
 
+enum class EShading : u8
+{
+	Gouraud,
+	Flat
+};
+
 //! Different Primitive Types
-enum class EPrimitiveType
+enum class EPrimitiveType : u8
 {
 	//! One point per vertex
 	Points,
@@ -172,13 +178,13 @@ inline int GetPointCount(EPrimitiveType type, int primitiveCount)
 	return 0;
 }
 
-enum class EShaderLanguage
+enum class EShaderLanguage : u8
 {
 	HLSL,
 	Unknown
 };
 
-enum class EShaderType
+enum class EShaderType : u8
 {
 	Vertex,
 	Pixel,
@@ -248,21 +254,21 @@ enum class ETextureRepeat : u8
 };
 
 //! The type of the hardware buffer
-enum class EHardwareBufferType
+enum class EHardwareBufferType : u8
 {
 	Index = 0, //!< A index buffer
 	Vertex, //!< A vertex buffer
 };
 
 //! How should data be saved in hardware
-enum class EHardwareBufferMapping
+enum class EHardwareBufferMapping : u8
 {
 	Static,     //!< data isnt changed often, saved in static area
 	Dynamic,    //!< data is high frequent, saved in dynamic area
 };
 
 //! The data saved in a index buffer
-enum class EIndexFormat
+enum class EIndexFormat : u8
 {
 	Bit16, //!< 16 Bit per index
 	Bit32, //!< 32 Bit per index

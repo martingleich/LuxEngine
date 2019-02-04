@@ -14,11 +14,23 @@ enum class EMaterialReqFlag
 	Transparent = 1,
 };
 
-class AbstractMaterial : public ShaderParamSetCallback, public ReferenceCounted
+enum class EMaterialTechnique
+{
+	Default = 0,
+	ShadowCaster = 1
+};
+
+class AbstractMaterialTechnique : public ShaderParamSetCallback
+{
+public:
+	virtual const Pass& GetPass() const = 0;
+};
+
+class AbstractMaterial : public ReferenceCounted
 {
 public:
 	virtual EMaterialReqFlag GetRequirements() const = 0;
-	virtual const Pass& GetPass() const = 0;
+	virtual AbstractMaterialTechnique* GetTechnique(EMaterialTechnique tech = EMaterialTechnique::Default) const = 0;
 };
 
 } // namespace video

@@ -214,7 +214,7 @@ public:
 			ptr = (Attribute*)it->value;
 		} else {
 			StrongRef<Attribute> p = LUX_NEW(AttributeAnyImpl<T>)(name, type, value);
-			Objects().Add(name, p);
+			Objects().SetAndReplace(name, p);
 			Objects()[name] = p;
 			ptr = (Attribute*)p;
 		}

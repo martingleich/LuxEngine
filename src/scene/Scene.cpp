@@ -76,14 +76,14 @@ Node* Scene::GetRoot() const
 void Scene::RegisterForTick(Component* c, bool doRegister)
 {
 	if(doRegister)
-		m_AnimatedComps.Insert(c);
+		m_AnimatedComps.AddAndReplace(c);
 	else
 		m_AnimatedComps.Erase(c);
 }
 void Scene::RegisterLight(Component* c, bool doRegister)
 {
 	if(doRegister)
-		m_LightComps.Insert(c);
+		m_LightComps.AddAndReplace(c);
 	else
 		m_LightComps.Erase(c);
 }
@@ -91,7 +91,7 @@ void Scene::RegisterLight(Component* c, bool doRegister)
 void Scene::RegisterFog(Component* c, bool doRegister)
 {
 	if(doRegister)
-		m_FogComps.Insert(c);
+		m_FogComps.AddAndReplace(c);
 	else
 		m_FogComps.Erase(c);
 }
@@ -99,7 +99,7 @@ void Scene::RegisterFog(Component* c, bool doRegister)
 void Scene::RegisterCamera(Component* c, bool doRegister)
 {
 	if(doRegister)
-		m_CamComps.Insert(c);
+		m_CamComps.AddAndReplace(c);
 	else
 		m_CamComps.Erase(c);
 }

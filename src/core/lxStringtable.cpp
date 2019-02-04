@@ -110,7 +110,7 @@ StringTableHandle StringTable::AddFindString(const StringView& str, bool find)
 
 		block->used += size;
 
-		m_Map.Add(CheckEntry(handle), StringTableHandle(handle));
+		m_Map.SetAndReplace(CheckEntry(handle), StringTableHandle(handle));
 		return handle;
 	}
 }

@@ -99,7 +99,7 @@ static void GenerateCharInfo(impl_fontCreatorWin32::Context* ctx)
 		info.b = b;
 		info.c = c;
 
-		ctx->charInfos.Set(ch, info);
+		ctx->charInfos.SetAndReplace(ch, info);
 	}
 }
 
@@ -248,7 +248,7 @@ static void GenerateFont(impl_fontCreatorWin32::Context* ctx)
 		out.right = (float)(cur_x + info.b) / width;
 		out.bottom = (float)(cur_y + ctx->fontHeight) / height;
 
-		ctx->outCharInfo.Set(c, out);
+		ctx->outCharInfo.SetAndReplace(c, out);
 
 		auto next = it;
 		++next;

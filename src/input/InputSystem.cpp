@@ -47,7 +47,7 @@ StrongRef<InputDevice> InputSystem::FindDevice(InputDeviceDesc* desc)
 
 	StrongRef<InputDevice> device = LUX_NEW(InputDevice)(desc, this);
 
-	m_GUIDMap.Set(desc->GetGUID(), device);
+	m_GUIDMap.SetAndReplace(desc->GetGUID(), device);
 
 	return device;
 }

@@ -382,9 +382,8 @@ void RendererD3D9::SendPassSettingsEx(
 	ERenderMode newRenderMode,
 	const Pass& _pass,
 	bool useOverwrite,
-	ShaderParamSetCallback*
-	paramSetCallback,
-	void* userParam)
+	ShaderParamSetCallback* paramSetCallback,
+	ShaderParamSetCallback::Data* userParam)
 {
 	auto pass = _pass;
 
@@ -420,7 +419,7 @@ void RendererD3D9::SendPassSettingsEx(
 	m_DeviceState.SetRenderState(D3DRS_ZFUNC, GetD3DComparisonFunc(pass.zBufferFunc));
 	m_DeviceState.SetRenderState(D3DRS_ZWRITEENABLE, pass.zWriteEnabled ? TRUE : FALSE);
 	m_DeviceState.SetRenderState(D3DRS_FILLMODE, GetD3DFillMode(pass.drawMode));
-	m_DeviceState.SetRenderState(D3DRS_SHADEMODE, pass.gouraudShading ? D3DSHADE_GOURAUD : D3DSHADE_FLAT);
+	m_DeviceState.SetRenderState(D3DRS_SHADEMODE, GetD3DShading(pass.shading));
 
 	m_DeviceState.SetRenderState(D3DRS_NORMALIZENORMALS, m_NormalizeNormals ? TRUE : FALSE);
 
@@ -470,7 +469,7 @@ void RendererD3D9::SendPassSettingsEx(
 	// Let the user fill in parameters.
 	// TODO: Allow user to do this per hand.
 	if(paramSetCallback)
-		paramSetCallback->SendShaderSettings(pass, userParam);
+		paramSetCallback->SendShaderSettings(userParam);
 
 	// Start rendering with this shader.
 	// TODO: Move into Draw function.

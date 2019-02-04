@@ -85,7 +85,7 @@ StrongRef<GeometryCreator> MeshSystem::AddCreator(core::StringView name, Geometr
 	auto it = m_Creators.Find(name);
 	if(it != m_Creators.end())
 		throw core::InvalidOperationException("Geometry creator already exists");
-	m_Creators.Set(name, creator);
+	m_Creators.SetAndReplace(name, creator);
 
 	return creator;
 }

@@ -23,8 +23,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(AddKey)
 	{
 		core::HashMap<u32, u32> map;
-		map.Set(1, 2);
-		map.Set(2, 1);
+		map.SetAndReplace(1, 2);
+		map.SetAndReplace(2, 1);
 		UNIT_ASSERT(map.Size() == 2);
 		u32 test = 0;
 		for(auto k : map.Keys())
@@ -38,8 +38,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(TestKey)
 	{
 		core::HashMap<u32, u32> map;
-		map.Set(1, 2);
-		map.Set(2, 1);
+		map.SetAndReplace(1, 2);
+		map.SetAndReplace(2, 1);
 
 		UNIT_ASSERT(map.HasKey(1));
 		UNIT_ASSERT(map.HasKey(2));
@@ -49,8 +49,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(Get)
 	{
 		core::HashMap<u32, u32> map;
-		map.Set(1, 2);
-		map.Set(2, 1);
+		map.SetAndReplace(1, 2);
+		map.SetAndReplace(2, 1);
 
 		UNIT_ASSERT(map.Get(1) == 2);
 		UNIT_ASSERT(map.Get(5, 66) == 66);
@@ -59,8 +59,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(ChangeEntry)
 	{
 		core::HashMap<u32, u32> map;
-		map.Set(1, 2);
-		map.Set(2, 1);
+		map.SetAndReplace(1, 2);
+		map.SetAndReplace(2, 1);
 
 		map.At(2) = 3;
 
@@ -72,8 +72,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(EraseEntry)
 	{
 		core::HashMap<u32, u32> map;
-		map.Set(1, 2);
-		map.Set(2, 1);
+		map.SetAndReplace(1, 2);
+		map.SetAndReplace(2, 1);
 
 		map.Erase(1);
 
@@ -84,8 +84,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(Clear)
 	{
 		core::HashMap<u32, u32> map;
-		map.Set(1, 2);
-		map.Set(2, 1);
+		map.SetAndReplace(1, 2);
+		map.SetAndReplace(2, 1);
 
 		map.Clear();
 		UNIT_ASSERT(map.IsEmpty());
@@ -94,8 +94,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(Copy)
 	{
 		core::HashMap<u32, u32> mapOriginal;
-		mapOriginal.Set(1, 2);
-		mapOriginal.Set(2, 1);
+		mapOriginal.SetAndReplace(1, 2);
+		mapOriginal.SetAndReplace(2, 1);
 
 		core::HashMap<u32, u32> map = mapOriginal;
 
@@ -113,8 +113,8 @@ UNIT_SUITE(HashMap)
 	UNIT_TEST(FindKey)
 	{
 		core::HashMap<u32, u32> map;
-		map.Set(1, 2);
-		map.Set(2, 1);
+		auto result = map.SetAndReplace(1, 2);
+		map.SetAndReplace(2, 1);
 
 		UNIT_ASSERT(map.Find(1) != map.end());
 		UNIT_ASSERT(map.Find(2) != map.end());

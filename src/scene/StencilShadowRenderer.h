@@ -85,7 +85,7 @@ public:
 			GetFixedFunctionShader(video::FixedFunctionParameters::VertexColorOnly());
 
 		m_Silhouette.colorMask = 0;
-		m_Silhouette.gouraudShading = false;
+		m_Silhouette.shading = video::EShading::Flat;
 		if(m_UseZFail) {
 			m_Silhouette.stencil.zFail = video::EStencilOperator::Increment;
 			m_Silhouette.stencil.zFailCCW = video::EStencilOperator::Decrement;

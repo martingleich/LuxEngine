@@ -175,7 +175,7 @@ void INIFile::RemoveSection(int sectionID)
 {
 	SINISection& sec = m_Sections.At(sectionID);
 	if(sec.firstElem != InvalidID)
-		m_Elements.Erase(sec.firstElem, sec.elemCount, true);
+		m_Elements.EraseHoldOrder(sec.firstElem, sec.elemCount);
 
 	for(int i = 0; i < m_Elements.Size(); ++i) {
 		SINIElement& elem = m_Elements[i];
@@ -183,7 +183,7 @@ void INIFile::RemoveSection(int sectionID)
 			elem.section--;
 	}
 
-	m_Sections.Erase(sectionID, true);
+	m_Sections.EraseHoldOrder(sectionID);
 
 	m_CurrentSection = sectionID + 1;
 	if(m_CurrentSection >= m_Sections.Size())
@@ -347,7 +347,7 @@ void INIFile::RemoveElement(int sectionID, int elementID)
 		}
 	}
 
-	m_Elements.Erase(firstElem + elementID, true);
+	m_Elements.EraseHoldOrder(firstElem + elementID);
 	m_Sections[sectionID].elemCount--;
 
 	if(m_CurrentElement > 0)

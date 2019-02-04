@@ -23,7 +23,7 @@ enum class EPipelineSetting
 	Lighting,
 	Fog,
 	ZWrite,
-	GourandShading,
+	Shading,
 	Culling,
 };
 
@@ -32,8 +32,7 @@ class Pass
 public:
 	Pass() :
 		fogEnabled(true),
-		zWriteEnabled(true),
-		gouraudShading(true)
+		zWriteEnabled(true)
 	{
 	}
 
@@ -52,22 +51,19 @@ public:
 	EDrawMode drawMode = EDrawMode::Fill;
 	ELightingFlag lighting = ELightingFlag::Enabled;
 	EFaceSide culling = EFaceSide::Back;
+	EShading shading = EShading::Gouraud;
 
 	bool fogEnabled : 1;
 	bool zWriteEnabled : 1;
-	bool gouraudShading : 1;
 };
 
 class ShaderParamSetCallback
 {
 public:
+	struct Data { virtual ~Data() {} };
 	virtual ~ShaderParamSetCallback() {}
 
-	virtual void SendShaderSettings(const Pass& pass, void* userParam) const
-	{
-		LUX_UNUSED(pass);
-		LUX_UNUSED(userParam);
-	}
+	virtual void SendShaderSettings(Data* userParam) const { LUX_UNUSED(userParam); }
 };
 
 class PipelineOverwrite
@@ -112,6 +108,8 @@ public:
 			zWriteEnabled = next.zWriteEnabled;
 		if(next.IsEnabled(EPipelineSetting::Culling))
 			culling = next.culling;
+		if(next.IsEnabled(EPipelineSetting::Shading))
+			shading = next.shading;
 	}
 
 	void Apply(Pass& pass)
@@ -178,9 +176,9 @@ public:
 		zWriteEnabled = v;
 		Enable(EPipelineSetting::ZWrite);
 	}
-	void OverwriteGourandShading(bool v) {
-		gouraudShading = v;
-		Enable(EPipelineSetting::GourandShading);
+	void OverwriteGouraudShading(EShading v) {
+		shading = v;
+		Enable(EPipelineSetting::Shading);
 	}
 private:
 	PipelineOverwrite& Enable(EPipelineSetting setting)
@@ -205,10 +203,10 @@ private:
 	EDrawMode drawMode;
 	ELightingFlag lighting;
 	EFaceSide culling;
+	EShading shading;
 
 	bool fogEnabled : 1;
 	bool zWriteEnabled : 1;
-	bool gouraudShading : 1;
 };
 
 } // namespace video

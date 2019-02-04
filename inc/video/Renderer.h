@@ -208,7 +208,7 @@ public:
 		const Pass& pass,
 		bool useOverwrite = false,
 		ShaderParamSetCallback* paramSetCallback = nullptr,
-		void* userParam = nullptr)
+		ShaderParamSetCallback::Data* userParam = nullptr)
 	{
 		SendPassSettingsEx(
 			ERenderMode::Mode3D,
@@ -218,12 +218,27 @@ public:
 			userParam);
 	}
 
+	void SendMaterialSettings(
+		Material* material,
+		EMaterialTechnique tech = EMaterialTechnique::Default)
+	{
+		auto realTech = material->GetTechnique(tech);
+		Material::MaterialSetData setData;
+		setData.m = material;
+		SendPassSettingsEx(
+			ERenderMode::Mode3D,
+			realTech->GetPass(),
+			true,
+			realTech,
+			&setData);
+	}
+
 	virtual void SendPassSettingsEx(
 		ERenderMode renderMode,
 		const Pass& pass,
 		bool useOverwrite = false,
 		ShaderParamSetCallback* paramSetCallback = nullptr,
-		void* userParam = nullptr) = 0;
+		ShaderParamSetCallback::Data* userParam = nullptr) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 

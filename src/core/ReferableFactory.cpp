@@ -134,7 +134,7 @@ void ReferableFactory::RegisterType(Name type, CreationFunc create)
 
 void ReferableFactory::UnregisterType(Name type)
 {
-	if(m_Types.Erase(type))
+	if(m_Types.Erase(type).removed)
 		log::Debug("Unregistered type {0}.", type);
 }
 

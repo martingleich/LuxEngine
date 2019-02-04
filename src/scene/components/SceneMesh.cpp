@@ -64,7 +64,7 @@ void Mesh::Render(const SceneRenderData& r)
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
 		if(pass == r.pass && firstPrimitive <= lastPrimitive) {
-			r.video->SendPassSettings(material->GetPass(), true, material);
+			r.video->SendMaterialSettings(material);
 			r.video->Draw(video::RenderRequest::FromGeometry(
 				geo,
 				firstPrimitive,

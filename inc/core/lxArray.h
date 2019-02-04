@@ -18,7 +18,7 @@ template <typename T>
 class Array
 {
 public:
-	using Iterator = T*;
+	using Iterator = T * ;
 	using ConstIterator = const T*;
 
 public:
@@ -230,50 +230,52 @@ public:
 	//! Remove the last element in the array
 	void PopBack()
 	{
-		Erase(m_Used - 1, true);
+		EraseHoldOrder(m_Used - 1);
 	}
 
 	//! Remove the last element in the array
 	void PopFront()
 	{
-		Erase(0, true);
+		EraseHoldOrder(0);
 	}
 
 	//! Remove an entry in the array
 	/**
+	The order of the array may be changed.
 	\param it The element to remove
-	\param HoldOrder Should the elements in array be in the same order as before
 	*/
-	void Erase(int pos, bool holdOrder = false)
+	void Erase(int pos)
 	{
-		Erase(pos, 1, holdOrder);
+		BasicErase(pos, 1, false);
+	}
+	//! Remove an entry in the array
+	/**
+	\param it The element to remove
+	*/
+	void EraseHoldOrder(int pos)
+	{
+		BasicErase(pos, 1, true);
+	}
+
+	//! Remove multiple elements from the array
+	/**
+	The order of the array may be changed.
+	\param from The first element to remove.
+	\param count The number of elements to remove.
+	*/
+	void Erase(int from, int count)
+	{
+		BasicErase(from, count, false);
 	}
 
 	//! Remove multiple elements from the array
 	/**
 	\param from The first element to remove.
 	\param count The number of elements to remove.
-	\param HoldOrder Should the elements in array be in the same order as before
 	*/
-	void Erase(int from, int count, bool holdOrder)
+	void EraseHoldOrder(int from, int count)
 	{
-		lxAssert(from >= 0 && from + count - 1 <= m_Used);
-
-		if(holdOrder) {
-			for(int i = from; i < m_Used - count; ++i)
-				m_Data[i] = std::move(m_Data[i + count]);
-		} else {
-			auto offset = m_Used - count - from;
-			auto toCopy = math::Min(count, offset);
-
-			for(int i = 0; i < toCopy; ++i)
-				m_Data[from + i] = std::move(m_Data[offset + i]);
-		}
-
-		for(int i = 0; i < count; ++i)
-			m_Data[m_Used - 1 - i].~T();
-
-		m_Used -= count;
+		BasicErase(from, count, true);
 	}
 
 	//! Remove all elements from the list
@@ -355,7 +357,7 @@ public:
 			Data()[i].~T();
 		m_Used = used;
 	}
-	
+
 	//! Iterator to the first element in the array
 	/**
 	\return The first element in the array
@@ -547,10 +549,30 @@ private:
 	{
 		::operator delete(ptr);
 	}
-	
+
+	void BasicErase(int from, int count, bool holdOrder)
+	{
+		lxAssert(from >= 0 && from + count - 1 <= m_Used);
+
+		if(holdOrder) {
+			for(int i = from; i < m_Used - count; ++i)
+				m_Data[i] = std::move(m_Data[i + count]);
+		} else {
+			auto offset = m_Used - count - from;
+			auto toCopy = math::Min(count, offset);
+
+			for(int i = 0; i < toCopy; ++i)
+				m_Data[from + i] = std::move(m_Data[offset + i]);
+		}
+
+		for(int i = 0; i < count; ++i)
+			m_Data[m_Used - 1 - i].~T();
+
+		m_Used -= count;
+	}
 	int GetNextSize(int minSize)
 	{
-		int next = (m_Alloc*3)/2;
+		int next = (m_Alloc * 3) / 2;
 		if(next > minSize)
 			return next;
 		return minSize;
@@ -560,7 +582,7 @@ private:
 		lxAssert(before >= 0 && before <= m_Used);
 
 		if(m_Used == m_Alloc)
-			Reserve(GetNextSize(m_Used+1));
+			Reserve(GetNextSize(m_Used + 1));
 
 		// Shift each element, after the insert one back
 		// Starting at the last element.

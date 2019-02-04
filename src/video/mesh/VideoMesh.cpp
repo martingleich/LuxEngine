@@ -98,11 +98,11 @@ void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 		}
 		if(m_Ranges[i].begin <= lastPrimitive && (m_Ranges.Size() == i + 1 || m_Ranges[i + 1].begin > lastPrimitive)) {
 			mid2 = m_Ranges[i].material;
-			m_Ranges.Erase(i, true);
+			m_Ranges.EraseHoldOrder(i);
 			break;
 		}
 		if(inside) {
-			m_Ranges.Erase(i, true);
+			m_Ranges.EraseHoldOrder(i);
 			--i;
 		}
 	}

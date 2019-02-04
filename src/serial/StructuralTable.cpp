@@ -40,13 +40,13 @@ u32 StructuralTable::AddStructure(const Structure& data)
 	auto& newStructure = m_StructureTypes.Back();
 	newStructure.typeId = m_StructureTypes.Size();
 
-	m_TypeMap.Set(data.name, newStructure.typeId);
+	m_TypeMap.SetAndReplace(data.name, newStructure.typeId);
 
 	auto& elemMap = m_ElementMaps.EmplaceBack();
 	elemMap.Reserve(newStructure.elements.Size());
 	u32 elemId = 0;
 	for(auto& e : newStructure.elements) {
-		elemMap.Set(e.name, elemId);
+		elemMap.SetAndReplace(e.name, elemId);
 		++elemId;
 	}
 

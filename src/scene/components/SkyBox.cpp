@@ -20,12 +20,13 @@ namespace scene
 SkyBox::SkyBox() :
 	m_UseCubeTexture(true)
 {
+	// TODO: Use custom shader for the skybox.
 	auto mat = video::MaterialLibrary::Instance()->TryGetMaterial("skybox");
 	if(mat) {
 		m_Material = mat->Clone();
 	} else {
 		auto solid = video::MaterialLibrary::Instance()->GetMaterial("solid");
-		video::Pass pass = solid->GetPass();
+		video::Pass pass = solid->GetTechnique()->GetPass();
 		pass.fogEnabled = false;
 		pass.lighting = video::ELightingFlag::Disabled;
 		mat = video::MaterialLibrary::Instance()->CreateMaterial(pass);
@@ -155,7 +156,7 @@ void SkyBox::Render(const SceneRenderData& data)
 	if(m_SkyTexture)
 		m_Material->SetTexture(0, m_SkyTexture);
 
-	data.video->SendPassSettings(m_Material->GetPass(), true, m_Material);
+	data.video->SendMaterialSettings(m_Material);
 	if(m_UseCubeTexture) {
 		data.video->Draw(video::RenderRequest::IndexedFromMemory(
 			video::EPrimitiveType::Triangles, 12,

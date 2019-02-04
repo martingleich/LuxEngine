@@ -57,7 +57,7 @@ float4 mainPS(float4 uv_pos : TEXCOORD0) : COLOR0
 class ShaderParamLoader : public video::ShaderParamSetCallback
 {
 public:
-	struct Data
+	struct Data : public video::ShaderParamSetCallback::Data
 	{
 		video::TextureLayer texture;
 		video::ColorF borderColor;
@@ -66,18 +66,22 @@ public:
 	int m_TexId;
 	int m_BorderColorId;
 	int m_FontColorId;
+	video::Shader* m_Shader;
 	void Init(video::Shader* shader)
 	{
 		m_TexId = shader->GetParamId("texture");
 		m_BorderColorId = shader->GetParamId("borderColor");
 		m_FontColorId = shader->GetParamId("fontColor");
+		m_Shader = shader;
 	}
 
-	void SendShaderSettings(const video::Pass& pass, void* data) const
+	void SendShaderSettings(ShaderParamSetCallback::Data* data) const override
 	{
-		pass.shader->SetParam(m_TexId, &((Data*)data)->texture);
-		pass.shader->SetParam(m_BorderColorId, &((Data*)data)->borderColor);
-		pass.shader->SetParam(m_FontColorId, &((Data*)data)->fontColor);
+		auto dat = dynamic_cast<Data*>(data);
+		LX_CHECK_NULL_ARG(dat);
+		m_Shader->SetParam(m_TexId, &dat->texture);
+		m_Shader->SetParam(m_BorderColorId, &dat->borderColor);
+		m_Shader->SetParam(m_FontColorId, &dat->fontColor);
 	}
 };
 

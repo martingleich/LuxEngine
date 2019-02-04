@@ -67,7 +67,8 @@ MaterialType
 	# Die Verschiedenen Shadervariants dieses Materials
 	Argument[]*
 	# Die Argumente sind die Hülle um alle Argumente der Techniken.
-	# Die einzelnen Argumentelisten der Techinken müssen vollständig innenander enthalten sein, d.h. Es existiert eine Argumentliste, die die Argumente aller anderen Liste enthält
+	# Die einzelnen Argumentelisten der Techinken müssen vollständig innenander enthalten sein, d.h.
+	# Es existiert eine Argumentliste, die die Argumente aller anderen Liste enthält
 	# Kann also elegant als Zeiger implementiert werden.
 	
 Material

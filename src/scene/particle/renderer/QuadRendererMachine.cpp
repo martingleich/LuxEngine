@@ -21,14 +21,22 @@ class ShaderParamLoader : public video::ShaderParamSetCallback
 {
 public:
 	int m_TexId;
+	video::Shader* m_Shader;
+
+	struct SetData : public video::ShaderParamSetCallback::Data
+	{
+		video::TextureLayer layer;
+	};
 	void Init(video::Shader* shader)
 	{
+		m_Shader = shader;
 		m_TexId = shader->GetParamId("texture");
 	}
 
-	void SendShaderSettings(const video::Pass& pass, void* texLayer) const
+	void SendShaderSettings(Data* texLayer) const override
 	{
-		pass.shader->SetParam(m_TexId, texLayer);
+		if(texLayer)
+			m_Shader->SetParam(m_TexId, &((SetData*)texLayer)->layer);
 	}
 };
 
@@ -253,7 +261,9 @@ void QuadRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupDa
 	}
 	vertexBuffer->Update();
 
-	videoRenderer->SendPassSettings(pass, true, &g_ParamLoader, &particleTexture);
+	ShaderParamLoader::SetData data; 
+	data.layer = particleTexture;
+	videoRenderer->SendPassSettings(pass, true, &g_ParamLoader, &data);
 	videoRenderer->Draw(video::RenderRequest::FromGeometry(m_Buffer, 0, (int)(pool.GetActiveCount() * 2)));
 }
 

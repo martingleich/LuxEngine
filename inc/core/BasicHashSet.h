@@ -19,6 +19,11 @@ class BasicHashSet
 	using HashT = unsigned int;
 
 public:
+	enum class EAddOption
+	{
+		Replace,
+		FailOnDuplicate,
+	};
 	struct AddResult
 	{
 		int id;
@@ -123,14 +128,14 @@ public:
 	}
 
 	template <typename T2, typename T3>
-	AddResult Add(const T2& keyValue, bool replace, const T3& setValue)
+	AddResult Add(const T2& keyValue, EAddOption option, const T3& setValue)
 	{
 		HashT baseHash = GetBaseHash(keyValue);
 		if(m_Size != 0) {
 			int hash = GetHash(baseHash);
 			auto result = GetId(hash, keyValue);
 			if(result.id != INVALID_ID) {
-				if(replace)
+				if(option == EAddOption::Replace)
 					m_Values[result.id] = setValue;
 				return {result.id, false};
 			}

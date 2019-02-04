@@ -158,6 +158,18 @@ inline DWORD GetD3DFillMode(EDrawMode mode)
 	}
 }
 
+inline DWORD GetD3DShading(EShading shading)
+{
+	switch(shading) {
+	case EShading::Flat:
+		return D3DSHADE_FLAT;
+	case EShading::Gouraud:
+		return D3DSHADE_GOURAUD;
+	default:
+		throw core::GenericInvalidArgumentException("mode", "Unknown draw mode");
+	}
+}
+
 inline DWORD GetD3DCullMode(EFaceSide side)
 {
 	if(side == video::EFaceSide::Back)

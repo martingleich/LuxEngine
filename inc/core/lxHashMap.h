@@ -127,6 +127,7 @@ class HashMap
 		}
 	};
 
+	using BaseType = BasicHashSet<Tuple, TupleHasher, TupleComparer>;
 public:
 	struct TupleItState
 	{
@@ -171,6 +172,11 @@ public:
 		bool addedNew;
 	};
 
+	struct EraseResult
+	{
+		bool removed;
+	};
+	
 public:
 	HashMap() = default;
 	HashMap(const HashMap& other) = default;
@@ -183,20 +189,20 @@ public:
 	void Reserve(int allocated) { m_Base.Reserve(allocated); }
 	void Clear() { m_Base.Clear(); }
 
-	SetResult Set(const K& key, const V& value)
+	SetResult SetAndReplace(const K& key, const V& value)
 	{
-		auto result = m_Base.Add(key, true, RefTuple(key, value));
+		auto result = m_Base.Add(key, BaseType::EAddOption::Replace, RefTuple(key, value));
 		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
 	SetResult SetIfNotExist(const K& key, const V& value)
 	{
-		auto result = m_Base.Add(key, false, RefTuple(key, value));
+		auto result = m_Base.Add(key, BaseType::EAddOption::FailOnDuplicate, RefTuple(key, value));
 		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
 	template <typename CallT>
 	SetResult MakeIfNotExist(const K& key, const CallT& call)
 	{
-		auto result = m_Base.Add(key, false, CallTuple<CallT>(key, call));
+		auto result = m_Base.Add(key, BaseType::EAddOption::FailOnDuplicate, CallTuple<CallT>(key, call));
 		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
 
@@ -225,10 +231,10 @@ public:
 	}
 
 	template <typename K2 = K>
-	bool Erase(const K2& key)
+	EraseResult Erase(const K2& key)
 	{
 		auto result = m_Base.Find(key);
-		return m_Base.Erase(result).removed;
+		return {m_Base.Erase(result).removed};
 	}
 
 	void EraseIter(Iterator it)
@@ -239,21 +245,16 @@ public:
 	V& operator[](const K& key) { return At(key); }
 	const V& operator[](const K& key) const { return Get(key); }
 
-	void Add(const K& key, const V& init)
-	{
-		m_Base.Add(key, false, RefTuple(key, init));
-	}
-
 	template <typename K2=K>
 	V& At(const K2& key, const V& init)
 	{
-		return m_Base.GetValue(m_Base.Add(key, false, RefTuple(key, init)).id).value;
+		return m_Base.GetValue(m_Base.Add(key, BaseType::EAddOption::FailOnDuplicate, RefTuple(key, init)).id).value;
 	}
 
 	template <typename K2 = K>
 	V& At(const K2& key)
 	{
-		auto result = m_Base.Add(key, false, DefaultTuple(key));
+		auto result = m_Base.Add(key, BaseType::EAddOption::FailOnDuplicate, DefaultTuple(key));
 		return m_Base.GetValue(result.id).value;
 	}
 
@@ -293,7 +294,7 @@ public:
 	bool IsEmpty() const { return m_Base.GetSize() == 0; }
 
 private:
-	BasicHashSet<Tuple, TupleHasher, TupleComparer> m_Base;
+	BaseType m_Base;
 };
 
 template <typename K, typename V, typename HasherT, typename ComparerT>

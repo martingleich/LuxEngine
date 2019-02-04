@@ -106,7 +106,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	FontCreationData data;
 	for(auto it = charSet.First(); it != charSet.End(); ++it) {
 		if(this->GetFontCharInfo(ctx, *it, info))
-			data.charMap.Set(*it, info);
+			data.charMap.SetAndReplace(*it, info);
 	}
 
 	this->GetFontInfo(ctx, fontHeight, data.desc);

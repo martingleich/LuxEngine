@@ -28,6 +28,11 @@ private:
 	class BaseList
 	{
 	public:
+		enum class EHint
+		{
+			Front,
+			Back,
+		};
 		BaseList() :
 			m_RawFirst(nullptr),
 			m_RawEnd(nullptr),
@@ -57,9 +62,9 @@ private:
 		void AddFront()
 		{
 			if(m_DataFirst == m_RawFirst) {
-				Balance(true);
+				Balance(EHint::Front);
 				if(m_DataFirst == m_RawFirst)
-					Resize(2 * Allocated(), true);
+					Resize(2 * Allocated(), EHint::Front);
 			}
 			--m_DataFirst;
 		}
@@ -67,9 +72,9 @@ private:
 		void AddBack()
 		{
 			if(m_DataEnd == m_RawEnd) {
-				Balance(false);
+				Balance(EHint::Back);
 				if(m_DataEnd == m_RawEnd)
-					Resize(2 * Allocated(), false);
+					Resize(2 * Allocated(), EHint::Back);
 			}
 			++m_DataEnd;
 		}
@@ -80,7 +85,7 @@ private:
 		int Allocated() const { return m_RawEnd - m_RawFirst; }
 		int Size() const { return m_DataEnd - m_DataFirst; }
 
-		void Resize(int newAlloc, bool front)
+		void Resize(int newAlloc, EHint hint)
 		{
 			/*
 			Reserve more blocks.
@@ -92,7 +97,7 @@ private:
 			Block** newRaw = new Block*[newAlloc];
 			int allocDataOffset = m_DataFirst - m_RawFirst;
 			Block** newDataFirst = newRaw + ((newAlloc - used_count) / 2);
-			if(front) {
+			if(hint == EHint::Front) {
 				if(newRaw == newDataFirst)
 					newDataFirst++;
 			}
@@ -120,7 +125,7 @@ private:
 		Block** Last() { return m_DataEnd - 1; }
 		Block** Last() const { return m_DataEnd - 1; }
 
-		void Balance(bool frontHint)
+		void Balance(EHint hint)
 		{
 			/*
 			Shift the datarange into the middle of the rawrange.
@@ -130,9 +135,9 @@ private:
 			intptr_t shift = (right - left) / 2;
 
 			if(shift == 0) {
-				if(frontHint&&right>0)
+				if(hint == EHint::Front&&right>0)
 					shift = 1;
-				else if(!frontHint&&left > 0)
+				else if(hint == EHint::Back&&left > 0)
 					shift = -1;
 			}
 
@@ -167,7 +172,7 @@ private:
 			Ensure at least one block.
 			*/
 			if(!m_RawFirst) {
-				Resize(1, false);
+				Resize(1, EHint::Back);
 				++m_DataEnd;
 			}
 		}
@@ -248,7 +253,7 @@ public:
 			--i;
 		}
 
-		m_Base.Balance(true);
+		m_Base.Balance(BaseList::EHint::Back);
 		m_FirstId = BLOCK_SIZE / 2;
 		m_EndId = BLOCK_SIZE / 2;
 	}

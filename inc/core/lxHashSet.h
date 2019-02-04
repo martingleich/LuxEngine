@@ -19,11 +19,17 @@ template <
 public:
 	using Iterator = T * ;
 	using ConstIterator = const T*;
+	using BaseType = BasicHashSet<T, Hash, Compare>;
 
 	struct FindAddResult
 	{
 		Iterator it;
-		bool added;
+		bool addedNew;
+	};
+
+	struct EraseResult
+	{
+		bool removed;
 	};
 
 public:
@@ -42,16 +48,28 @@ public:
 
 	void Clear() { m_Base.Clear(); }
 
-	bool Insert(const T& value, bool replace = true)
+	FindAddResult AddIfNotExist(const T& value)
 	{
-		return m_Base.Add(value, replace, value).addedNew;
+		FindAddResult out;
+		auto result = m_Base.Add(value, BaseType::EAddOption::FailOnDuplicate, value);
+		out.it = Iterator(m_Base.GetValue(result.id));
+		out.addedNew = result.addedNew;
+		return out;
+	}
+	FindAddResult AddAndReplace(const T& value)
+	{
+		FindAddResult out;
+		auto result = m_Base.Add(value, BaseType::EAddOption::Replace, value);
+		out.it = Iterator(m_Base.GetValue(result.id));
+		out.addedNew = result.addedNew;
+		return out;
 	}
 
-	template <typename T2=T>
-	bool Erase(const T& value)
+	template <typename T2 = T>
+	EraseResult Erase(const T& value)
 	{
 		auto result = m_Base.Find(value);
-		return m_Base.Erase(result).removed;
+		return EraseResult{m_Base.Erase(result).removed};
 	}
 
 	void EraseIter(Iterator it)
@@ -61,7 +79,7 @@ public:
 
 	FindAddResult FindOrAdd(const T& value)
 	{
-		auto result = m_Base.Add(value, false, value);
+		auto result = m_Base.Add(value, BaseType::EAddOption::FailOnDuplicate, value);
 		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
 

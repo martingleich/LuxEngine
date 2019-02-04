@@ -119,7 +119,7 @@ UNIT_SUITE(Array)
 		arr.PushBack(Type(refCount2, 222));
 		arr.PushBack(Type(refCount3, 333));
 
-		arr.Erase(1, true);
+		arr.EraseHoldOrder(1);
 		UNIT_ASSERT(arr.Size() == 2);
 		UNIT_ASSERT(arr[0].value == 111);
 		UNIT_ASSERT(arr[1].value == 333);

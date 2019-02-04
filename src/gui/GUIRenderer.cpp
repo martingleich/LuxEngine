@@ -14,14 +14,21 @@ class ParamSetCallback : public video::ShaderParamSetCallback
 {
 public:
 	int texId;
+	video::Shader* m_Shader;
+
+	struct SetData : public ShaderParamSetCallback::Data
+	{
+		video::TextureLayer layer;
+	};
 	void Init(video::Shader* shader)
 	{
 		texId = shader->GetParamId("texture");
+		m_Shader = shader;
 	}
-	void SendShaderSettings(const video::Pass& pass, void* userParam) const
+	void SendShaderSettings(ShaderParamSetCallback::Data* userParam) const override
 	{
 		if(userParam)
-			pass.shader->SetParam(texId, userParam);
+			m_Shader->SetParam(texId, &((SetData*)userParam)->layer);
 	}
 } g_ShaderParamSet;
 }
@@ -106,8 +113,9 @@ void Renderer::DrawRectangle(const math::RectF& rect, video::Texture* texture, c
 		video::Vertex2D(realRect.left, realRect.top, color, tCoord.left, tCoord.top),
 		video::Vertex2D(realRect.right, realRect.top, color, tCoord.right, tCoord.top)
 	};
-	video::TextureLayer layer(texture);
-	m_Renderer->SendPassSettingsEx(video::ERenderMode::Mode2D, m_TexturePass, false, &g_ShaderParamSet, &layer);
+	ParamSetCallback::SetData dat;
+	dat.layer = video::TextureLayer(texture);
+	m_Renderer->SendPassSettingsEx(video::ERenderMode::Mode2D, m_TexturePass, false, &g_ShaderParamSet, &dat);
 	m_Renderer->Draw(video::RenderRequest::FromMemory(
 		video::EPrimitiveType::TriangleStrip,
 		2, quad, 4, video::VertexFormat::STANDARD_2D));

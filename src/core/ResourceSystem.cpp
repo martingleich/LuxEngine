@@ -217,7 +217,7 @@ StrongRef<core::Referable> ResourceSystem::CreateResource(int typeId, io::File* 
 
 		// Add to cache
 		if(self->types[typeId].isCached)
-			self->resources[typeId].Add(origin, object);
+			self->resources[typeId].SetAndReplace(origin, object);
 	} catch(...) {
 		file->Seek(oldCursor, io::ESeekOrigin::Start);
 		throw;

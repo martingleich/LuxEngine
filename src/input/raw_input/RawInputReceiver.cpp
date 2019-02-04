@@ -153,7 +153,7 @@ StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle, int devi
 		auto it = m_DeviceMap.Find(rawHandle);
 		if(it == m_DeviceMap.end()) {
 			out = CreateDevice(rawHandle);
-			m_DeviceMap.Set(rawHandle, out);
+			m_DeviceMap.SetAndReplace(rawHandle, out);
 		} else {
 			out = it->value;
 		}

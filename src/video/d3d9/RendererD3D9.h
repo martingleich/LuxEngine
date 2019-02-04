@@ -45,7 +45,12 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 
-	void SendPassSettingsEx(ERenderMode mode, const Pass& pass, bool useOverwrite, ShaderParamSetCallback* paramSetCallback, void* userParam) override;
+	void SendPassSettingsEx(
+		ERenderMode mode,
+		const Pass& pass,
+		bool useOverwrite,
+		ShaderParamSetCallback* paramSetCallback,
+		ShaderParamSetCallback::Data* userParam) override;
 	void Draw(const RenderRequest& rq) override;
 
 	///////////////////////////////////////////////////////////////////////////
