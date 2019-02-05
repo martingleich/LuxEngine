@@ -14,6 +14,12 @@ Mesh::Mesh()
 {
 }
 
+Mesh::Mesh(Geometry* geo, Material* mat)
+{
+	SetGeometry(geo);
+	SetMaterial(mat);
+}
+
 Mesh::~Mesh()
 {
 }
@@ -208,6 +214,7 @@ StrongRef<Geometry> Mesh::GetGeometry()
 void Mesh::SetGeometry(Geometry* geo)
 {
 	m_Geometry = geo;
+	RecalculateBoundingBox();
 }
 
 const math::AABBoxF& Mesh::GetBoundingBox() const

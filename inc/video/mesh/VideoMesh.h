@@ -42,6 +42,7 @@ class Mesh : public core::Referable
 {
 public:
 	LUX_API Mesh();
+	LUX_API Mesh(Geometry* geo, Material* mat);
 	LUX_API ~Mesh();
 
 	LUX_API const Geometry* GetGeometry() const;

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_DRIVER_TYPE_H
 #define INCLUDED_LUX_DRIVER_TYPE_H
 #include "core/LuxBase.h"
-#include "core/lxString.h"
+#include "core/lxName.h"
 
 namespace lux
 {

@@ -5,6 +5,7 @@
 #include "scene/components/Camera.h"
 #include "scene/components/SceneMesh.h"
 #include "scene/components/FirstPersonCameraControl.h"
+#include "video/mesh/GeometryBuilder.h"
 #include "scene/SceneBuilder.h"
 
 #include "gui/elements/GUIStaticText.h"
@@ -185,7 +186,8 @@ void MaterialTest::Load()
 	const math::Vector3F startPoint = math::Vector3F(-8.0f, 6.0f, 0.0f);
 	const float delta = 3.0f;
 
-	StrongRef<video::Mesh> geo = Context.MeshSystem->CreateSphereMesh();
+	StrongRef<video::Mesh> geo = Context.MeshSystem->CreateMeshDefaultMaterial(
+		video::GeometryBuilder().CreateUVSphere().Finalize());
 
 	size_t row = 0;
 	size_t col = 0;

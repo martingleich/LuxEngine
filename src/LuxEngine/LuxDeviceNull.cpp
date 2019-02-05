@@ -148,7 +148,7 @@ void LuxDeviceNull::BuildMeshSystem(video::Material* defaultMaterial)
 
 	if(!defaultMaterial)
 		defaultMaterial = video::MaterialLibrary::Instance()->GetMaterial(video::MaterialLibrary::EKnownMaterial::Solid);
-	video::MeshSystem::Initialize(defaultMaterial);
+	video::MeshSystem::Initialize();
 
 	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(video::MeshLoaderOBJ));
 	core::ResourceSystem::Instance()->AddResourceLoader(LUX_NEW(video::MeshLoaderX));
