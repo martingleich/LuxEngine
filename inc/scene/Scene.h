@@ -3,33 +3,43 @@
 #include "core/ReferenceCounted.h"
 #include "core/lxArray.h"
 #include "core/lxHashSet.h"
-#include "core/lxName.h"
+#include "scene/Component.h"
+#include "scene/Node.h"
 
-#include "scene/Renderable.h"
+#include "scene/components/Camera.h"
+#include "scene/components/Fog.h"
+#include "scene/components/Light.h"
 
 namespace lux
 {
 namespace scene
 {
-class Component;
-class Node;
 
 class ComponentVisitor
 {
 public:
-	virtual void Visit(Node* n, Component* c) = 0;
+	virtual void Visit(Component* c) = 0;
 	void AbortChildren() { m_AbortChildren = true; }
 	void ResumeChildren() { m_AbortChildren = false; }
 	bool ShouldAbortChildren() const { return m_AbortChildren; }
+
 private:
 	bool m_AbortChildren = false;
 };
 
-class Scene : public ReferenceCounted
+class SceneRendererPassSettings
+{
+public:
+	virtual ~SceneRendererPassSettings() {}
+	bool wireframe = false;
+	bool disableCulling = false;
+};
+
+class InternalRenderData;
+class Scene : public ReferenceCounted, core::Uncopyable
 {
 public:
 	LUX_API Scene();
-	Scene(const Scene&) = delete;
 	LUX_API ~Scene();
 
 	LUX_API void AddToDeletionQueue(Node* node);
@@ -42,7 +52,7 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////////
 
-	LUX_API Node* GetRoot() const;
+	inline Node* GetRoot() const;
 
 	////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,11 +75,14 @@ public:
 		ComponentVisitor* visitor,
 		Node* root = nullptr);
 
-	////////////////////////////////////////////////////////////////////////////////////
+	LUX_API void DrawScene(bool beginScene, bool endScene);
 
-	core::Range<core::HashSet<Component*>::Iterator> GetLights() { return core::MakeRange(m_LightComps); }
-	core::Range<core::HashSet<Component*>::Iterator> GetFogs() { return core::MakeRange(m_FogComps); }
-	core::Range<core::HashSet<Component*>::Iterator> GetCameras() { return core::MakeRange(m_CamComps); }
+	////////////////////////////////////////////////////////////////////////////////////
+	// TODO: Improve configuration of scenes.
+	inline core::AttributeList AttributeList() const;
+
+	LUX_API void SetPassSettings(ERenderPass pass, const SceneRendererPassSettings& settings);
+	LUX_API const SceneRendererPassSettings& GetPassSettings(ERenderPass pass);
 
 private:
 	StrongRef<Node> m_Root; //!< The root of the scenegraph
@@ -79,10 +92,14 @@ private:
 
 	// TODO: Use better datastructure for this.
 	core::HashSet<Component*> m_AnimatedComps; //!< The animated nodes of the graph
-	core::HashSet<Component*> m_LightComps; //!< The animated nodes of the graph
-	core::HashSet<Component*> m_FogComps; //!< The animated nodes of the graph
-	core::HashSet<Component*> m_CamComps; //!< The animated nodes of the graph
+
+	core::AttributeList m_Attributes;
+
+	std::unique_ptr<InternalRenderData> renderData;
 };
+
+inline Node* Scene::GetRoot() const { return m_Root; }
+inline core::AttributeList Scene::AttributeList() const { return m_Attributes; }
 
 } // namespace scene
 } // namespace lux

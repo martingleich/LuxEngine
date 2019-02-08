@@ -119,7 +119,6 @@ namespace input
 #include "logic/Logic.h"
 
 #include "scene/Scene.h"
-#include "scene/SceneRenderer.h"
 
 #include "scene/Collider.h"
 

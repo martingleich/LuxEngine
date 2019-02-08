@@ -4,7 +4,6 @@
 
 LX_REGISTER_REFERABLE_CLASS(lux::video::Mesh, "lux.resource.Mesh");
 
-
 namespace lux
 {
 namespace video
@@ -193,6 +192,9 @@ void Mesh::GetMaterialRange(int rangeIndex, int& materialIndex, int& firstPrimit
 
 int Mesh::GetRangeCount() const
 {
+	auto geo = GetGeometry();
+	if(!geo)
+		return 0;
 	return m_Ranges.Size();
 }
 

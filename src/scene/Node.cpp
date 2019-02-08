@@ -1,6 +1,5 @@
-#include "scene/Scene.h"
 #include "scene/Node.h"
-#include "scene/Renderable.h"
+#include "scene/Scene.h"
 #include "scene/Collider.h"
 #include "core/Logger.h"
 #include "scene/Component.h"

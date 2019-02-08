@@ -2,6 +2,7 @@
 #define INCLUDED_LUX_SCENE_COMPONENT_H
 #include "core/Referable.h"
 #include "math/AABBox.h"
+#include "scene/SceneRendererData.h"
 
 namespace lux
 {
@@ -30,34 +31,6 @@ LUX_API extern const core::Name SkyBox;
 }
 
 class Scene;
-class AbstractCamera;
-
-enum class ERenderPass
-{
-	None,
-
-	SkyBox,
-
-	Transparent,
-	Solid,
-	Any,
-};
-
-enum class ERenderableTags
-{
-	None = 0,
-	EditView = 1,
-	Invisible = 2,
-};
-
-class SceneRenderData
-{
-public:
-	video::Renderer* video;
-	ERenderPass pass;
-
-	AbstractCamera* activeCamera;
-};
 
 //! A scene node component
 class Component : public core::Referable

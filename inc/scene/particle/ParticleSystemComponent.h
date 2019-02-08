@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LUX_PARTICLESYSTEMNode_H
 #define INCLUDED_LUX_PARTICLESYSTEMNode_H
 #include "scene/components/Animator.h"
-#include "scene/Renderable.h"
 
 #include "scene/particle/ParticleGroupData.h"
 

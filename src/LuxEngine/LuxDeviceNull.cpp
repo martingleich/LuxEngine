@@ -18,8 +18,6 @@
 #include "video/Canvas3D.h"
 
 #include "scene/Scene.h"
-#include "scene/SceneRenderer.h"
-#include "scene/SceneRendererSimpleForward.h"
 
 #include "video/mesh/MeshLoaderOBJ.h"
 #include "video/mesh/MeshLoaderX.h"
@@ -70,10 +68,6 @@ LuxDeviceNull::LuxDeviceNull()
 
 	// Register all referable object registers with LUX_REGISTER_REFERABLE_CLASS
 	lux::core::impl_referableRegister::RunAllRegisterReferableFunctions();
-
-	AddSceneRenderer(core::Name("SimpleForward"), [](const scene::SceneRendererInitData& data) -> scene::SceneRenderer* {
-		return LUX_NEW(scene::SceneRendererSimpleForward)(data);
-	});
 
 	log::Info("Lux core was built.");
 }
@@ -210,14 +204,6 @@ StrongRef<scene::Scene> LuxDeviceNull::CreateScene()
 	return LUX_NEW(scene::Scene);
 }
 
-StrongRef<scene::SceneRenderer> LuxDeviceNull::CreateSceneRenderer(core::Name name, scene::Scene* scene)
-{
-	scene::SceneRendererInitData init;
-	init.scene = scene;
-	auto rendererEntry = m_SceneRenderers.Get(name);
-	return rendererEntry.sceneRendererCreateFunc(init);
-}
-
 namespace
 {
 class DefaultSimpleFrameLoop
@@ -230,7 +216,6 @@ public:
 		m_Window = m_Device->GetWindow();
 		m_GUIEnv = gui::GUIEnvironment::Instance();
 		m_Scene = loop.scene;
-		m_SceneRenderer = loop.sceneRenderer;
 		m_Driver = video::VideoDriver::Instance();
 		m_Renderer = m_Driver->GetRenderer();
 
@@ -317,8 +302,8 @@ private:
 		if(m_FrameLoop.callback)
 			m_FrameLoop.callback->PostMove(secsPassed);
 
-		if(m_SceneRenderer) {
-			m_SceneRenderer->DrawScene(true, false);
+		if(m_Scene) {
+			m_Scene->DrawScene(true, false);
 		} else {
 			m_Renderer->Clear(true, true, true);
 			m_Renderer->BeginScene();
@@ -392,7 +377,6 @@ private:
 	gui::Window* m_Window;
 	gui::GUIEnvironment* m_GUIEnv;
 	scene::Scene* m_Scene;
-	scene::SceneRenderer* m_SceneRenderer;
 	video::VideoDriver* m_Driver;
 	video::Renderer* m_Renderer;
 };

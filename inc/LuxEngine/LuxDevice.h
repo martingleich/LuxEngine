@@ -10,8 +10,6 @@ namespace lux
 namespace scene
 {
 class Scene;
-class SceneRenderer;
-class SceneRendererInitData;
 }
 
 namespace gui
@@ -67,7 +65,6 @@ public:
 
 	//! Creates a new scene.
 	virtual StrongRef<scene::Scene> CreateScene() = 0;
-	virtual StrongRef<scene::SceneRenderer> CreateSceneRenderer(core::Name renderer, scene::Scene* scene) = 0;
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +106,6 @@ public:
 		SimpleFrameLoopCallback* callback = nullptr;
 
 		scene::Scene* scene = nullptr;
-		scene::SceneRenderer* sceneRenderer = nullptr;
 	};
 
 	//! Runs a simple frame loop.
@@ -129,8 +125,6 @@ public:
 	virtual StrongRef<gui::Cursor> GetCursor() const = 0;
 	//! Retrieve system information.
 	virtual StrongRef<LuxSystemInfo> GetSystemInfo() const = 0;
-
-	virtual void AddSceneRenderer(core::Name name, scene::SceneRenderer* (*createFunc)(const scene::SceneRendererInitData&)) = 0;
 };
 
 //! Create a new lux device.

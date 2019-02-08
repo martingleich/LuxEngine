@@ -1,7 +1,6 @@
 #ifndef INCLUDED_LUX_SCENE_SKYBOX_H
 #define INCLUDED_LUX_SCENE_SKYBOX_H
 #include "scene/Component.h"
-#include "scene/Renderable.h"
 
 namespace lux
 {

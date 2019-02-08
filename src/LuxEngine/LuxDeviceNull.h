@@ -15,7 +15,6 @@ public:
 	core::Array<core::Name> GetVideoDriverTypes() override;
 	StrongRef<video::AdapterList> GetVideoAdapters(core::Name driver) override;
 
-	StrongRef<scene::SceneRenderer> CreateSceneRenderer(core::Name name, scene::Scene* scene) override;
 	StrongRef<scene::Scene> CreateScene() override;
 
 	void BuildVideoDriver(const video::DriverConfig& config) override;
@@ -29,11 +28,6 @@ public:
 	void BuildMeshSystem(video::Material* defaultMaterial) override;
 
 	void RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop) override;
-
-	void AddSceneRenderer(core::Name name, scene::SceneRenderer* (*createFunc)(const scene::SceneRendererInitData&))
-	{
-		m_SceneRenderers[name] = SceneRendererEntry(createFunc);
-	}
 
 protected:
 	void ReleaseModules();
@@ -52,20 +46,8 @@ protected:
 		{}
 	};
 
-	struct SceneRendererEntry
-	{
-		scene::SceneRenderer* (*sceneRendererCreateFunc)(const scene::SceneRendererInitData&);
-		SceneRendererEntry() 
-		{}
-		explicit SceneRendererEntry(
-		scene::SceneRenderer* (*_sceneRendererCreateFunc)(const scene::SceneRendererInitData&))  :
-			sceneRendererCreateFunc(_sceneRendererCreateFunc)
-		{}
-	};
-
 protected:
 	core::HashMap<core::Name, VideoDriverEntry> m_VideoDrivers;
-	core::HashMap<core::Name, SceneRendererEntry> m_SceneRenderers;
 };
 
 } // namespace lux

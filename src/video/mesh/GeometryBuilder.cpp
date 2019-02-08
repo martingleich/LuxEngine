@@ -73,10 +73,7 @@ GeometryBuilder& GeometryBuilder::CreatePlane(
 
 	auto GetVertexIndex = [=](u32 x, u32 y) -> u32 { return (u32)(y * tesX + x); };
 
-	StrongRef<Geometry> subMesh = VideoDriver::Instance()->CreateGeometry(
-		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
-		use16Bit ? EIndexFormat::Bit16 : EIndexFormat::Bit32, EHardwareBufferMapping::Static, indexCount,
-		EPrimitiveType::Triangles);
+	StrongRef<Geometry> subMesh = GetGeoPointer(vertexCount, indexCount);
 
 	StrongRef<VertexBuffer> vertexBuffer = subMesh->GetVertices();
 	StrongRef<IndexBuffer> indexBuffer = subMesh->GetIndices();
@@ -706,11 +703,7 @@ GeometryBuilder& GeometryBuilder::CreateTorus(
 
 	// two triangles per sector
 	const u32 indexCount = sectorsMinor*sectorsMajor * 2 * 3;
-	StrongRef<Geometry> geo = VideoDriver::Instance()->CreateGeometry(
-		VertexFormat::STANDARD, EHardwareBufferMapping::Static, vertexCount,
-		EIndexFormat::Bit16, EHardwareBufferMapping::Static, indexCount,
-		EPrimitiveType::Triangles);
-
+	StrongRef<Geometry> geo = GetGeoPointer(vertexCount, indexCount);
 	StrongRef<VertexBuffer> vertexBuffer = geo->GetVertices();
 	StrongRef<IndexBuffer> indexBuffer = geo->GetIndices();
 
