@@ -277,6 +277,9 @@ private:
 };
 
 template <typename... Args>
+using Action = SingleSignal<Args...>;
+
+template <typename... Args>
 class Signal
 {
 	friend class SignalRef<Args...>;

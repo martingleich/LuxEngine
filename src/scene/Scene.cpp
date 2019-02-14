@@ -3,18 +3,14 @@
 #include "core/ReferableFactory.h"
 #include "core/lxAlgorithm.h"
 
-#include "scene/Node.h"
-
 #include "core/Logger.h"
 
 #include "video/DriverConfig.h"
 #include "video/VideoDriver.h"
 #include "video/RenderTarget.h"
 
-#include "video/mesh/VideoMesh.h"
-
-#include "core/lxAlgorithm.h"
-
+#include "scene/components/Fog.h"
+#include "scene/components/Light.h"
 #include "scene/components/SceneMesh.h"
 
 #include "scene/StencilShadowRenderer.h"
@@ -24,43 +20,368 @@ namespace lux
 namespace scene
 {
 
-class InternalRenderData
+// Helper functions.
+namespace
+{
+template <typename T>
+class VisibleComponentCache
 {
 public:
-	struct RenderEntry
+	template <typename RangeT>
+	void Update(const RangeT& range)
 	{
-	public:
-		Component* renderable;
-
-		explicit RenderEntry(Component* r) :
-			renderable(r)
-		{
+		m_Comps.Clear();
+		for(auto& c : range) {
+			auto c2 = dynamic_cast<T>(c);
+			if(c2 && c2->GetNode()->IsTrulyVisible())
+				m_Comps.PushBack(c2);
 		}
-	};
+	}
 
-	struct DistanceRenderEntry : public RenderEntry
-	{
-		float distance;
+	auto begin() { return m_Comps.begin(); }
+	auto end() { return m_Comps.end(); }
 
-		DistanceRenderEntry(Component* r, float _distance) :
-			RenderEntry(r),
-			distance(_distance)
-		{
-		}
+	core::Array<T>& AsArray() const { return m_Comps; }
+private:
+	core::Array<T> m_Comps;
+};
 
-		bool operator<(const DistanceRenderEntry& other) const
-		{
-			// The farthest element must be first in list
-			return distance > other.distance;
-		}
-	};
-
+struct RenderEntry
+{
 public:
-	InternalRenderData(Scene* scene, core::AttributeList* attributes) :
+	Component* renderable;
+
+	explicit RenderEntry(Component* r) :
+		renderable(r)
+	{
+	}
+};
+
+struct DistanceRenderEntry : public RenderEntry
+{
+	float distance;
+
+	DistanceRenderEntry(Component* r, float _distance) :
+		RenderEntry(r),
+		distance(_distance)
+	{
+	}
+
+	bool operator<(const DistanceRenderEntry& other) const
+	{
+		// The farthest element must be first in list
+		return distance > other.distance;
+	}
+};
+
+void VisitComponentsRec(
+	Node* node, ComponentVisitor* visitor)
+{
+	for(auto c : node->Components())
+		visitor->Visit(c);
+	if(visitor->ShouldAbortChildren()) {
+		visitor->ResumeChildren();
+		return;
+	}
+	for(auto child : node->Children())
+		VisitComponentsRec(child, visitor);
+}
+
+class RenderableCollector : public ComponentVisitor
+{
+public:
+	void Update(
+		const math::Vector3F& camPos,
+		Node* root)
+	{
+		m_Culling = false;
+		m_CamPos = camPos;
+		Clear();
+
+		VisitComponentsRec(root, this);
+		transparentNodeList.Sort();
+	}
+
+	void Update(
+		const math::ViewFrustum& visibleFrustum,
+		const math::Vector3F& camPos,
+		Node* root)
+	{
+		m_Culling = true;
+		m_Frustum = visibleFrustum;
+		m_CamPos = camPos;
+
+		Clear();
+		VisitComponentsRec(root, this);
+		transparentNodeList.Sort();
+	}
+
+	void Visit(Component* c)
+	{
+		if(c->GetNode()->IsTrulyVisible())
+			AddRenderEntry(c->GetNode(), c);
+	}
+
+	core::Array<RenderEntry> skyBoxList;
+	core::Array<RenderEntry> solidNodeList;
+	core::Array<RenderEntry> shadowCasters;
+	core::Array<DistanceRenderEntry> transparentNodeList;
+
+private:
+	void AddRenderEntry(Node* n, Component* r)
+	{
+		bool isCulled = false;
+
+		switch(r->GetRenderPass()) {
+		case ERenderPass::None:
+			break;
+		case ERenderPass::SkyBox:
+			skyBoxList.EmplaceBack(r);
+			break;
+		case ERenderPass::Solid:
+			isCulled = IsCulled(n, r, m_Frustum);
+			if(!isCulled)
+				solidNodeList.EmplaceBack(r);
+			if(n->IsShadowCasting())
+				shadowCasters.EmplaceBack(r);
+			break;
+		case ERenderPass::Transparent:
+			isCulled = IsCulled(n, r, m_Frustum);
+			if(!isCulled) {
+				float distance = n->GetAbsolutePosition().GetDistanceToSq(m_CamPos);
+				transparentNodeList.EmplaceBack(r, distance);
+			}
+			break;
+		case ERenderPass::Any:
+			isCulled = IsCulled(n, r, m_Frustum);
+			if(!isCulled) {
+				float distance = n->GetAbsolutePosition().GetDistanceToSq(m_CamPos);
+				solidNodeList.EmplaceBack(r);
+				transparentNodeList.EmplaceBack(r, distance);
+			}
+			if(n->IsShadowCasting())
+				shadowCasters.EmplaceBack(r);
+			break;
+		default:
+			lxAssertNeverReach("Unimplemented render pass");
+			break;
+		}
+	}
+
+	bool IsCulled(Node* node, Component* r, const math::ViewFrustum& frustum)
+	{
+		LUX_UNUSED(r);
+		if(!m_Culling)
+			return false;
+		if(node->GetBoundingBox().IsEmpty())
+			return false;
+		return !math::IsOrientedBoxMaybeVisible(frustum, node->GetBoundingBox(), node->GetAbsoluteTransform());
+	}
+
+	void Clear()
+	{
+		skyBoxList.Clear();
+		solidNodeList.Clear();
+		shadowCasters.Clear();
+		transparentNodeList.Clear();
+	}
+private:
+	math::ViewFrustum m_Frustum;
+	math::Vector3F m_CamPos;
+	bool m_Culling;
+};
+
+void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc, video::ColorF* overwriteColor = nullptr)
+{
+	if(desc) {
+		video::ColorF fogB;
+		video::ColorF fogA;
+		fogA = overwriteColor ? *overwriteColor : desc->GetColor();
+		renderer->GetParams().SetValue("fogA", fogA);
+		auto type = desc->GetType();
+		fogB.r =
+			type == EFogType::Linear ? 1.0f :
+			type == EFogType::Exp ? 2.0f :
+			type == EFogType::ExpSq ? 3.0f : 0.0f;
+		fogB.g = desc->GetStart();
+		fogB.b = desc->GetEnd();
+		fogB.a = desc->GetDensity();
+		renderer->GetParams().SetValue("fogB", fogB);
+	} else {
+		video::ColorF fogB;
+		fogB.r = 0.0f;
+		renderer->GetParams().SetValue("fogB", fogB);
+	}
+}
+
+float LightTypeToFloat(scene::ELightType type)
+{
+	switch(type) {
+	case scene::ELightType::Directional: return 1;
+	case scene::ELightType::Point: return 2;
+	case scene::ELightType::Spot: return 3;
+	default:
+		throw core::GenericInvalidArgumentException("type", "Unknown light data type");
+	}
+}
+
+math::Matrix4 GenerateLightMatrix(ClassicalLightDescription* desc)
+{
+	/*
+	Lux illumination matrix.
+	Only the location of the t value is fixed, all other values depend on the light
+	type, for built-in point/directonal and spot light the matrix is build as
+	following:
+
+	 r  g  b t
+	px py pz 0
+	dx dy dz 0
+	fa ic oc 0
+
+	t = Type of light (0 = Disabled, 1 = Directional, 2 = Point, 3 = Spot)
+
+	(r,g,b) = Diffuse color of the light
+	(px,py,pz) = Position of the light
+	(dx,dy,dz) = Direction of the light
+
+	fa = Falloff for the spotlight
+	ic = Cosine of half inner cone for the spotlight
+	oc = Cosine of half outer cone for the spotlight
+	*/
+
+	math::Matrix4 matrix;
+
+	if(!desc) {
+		matrix(0, 3) = 0.0f;
+		return matrix;
+	}
+	matrix(0, 3) = LightTypeToFloat(desc->GetType());
+
+	auto color = desc->GetColor();
+	matrix(0, 0) = color.r;
+	matrix(0, 1) = color.g;
+	matrix(0, 2) = color.b;
+
+	auto position = desc->GetPosition();
+	matrix(1, 0) = position.x;
+	matrix(1, 1) = position.y;
+	matrix(1, 2) = position.z;
+
+	auto direction = desc->GetDirection();
+	matrix(2, 0) = direction.x;
+	matrix(2, 1) = direction.y;
+	matrix(2, 2) = direction.z;
+
+	matrix(3, 0) = desc->GetFalloff();
+	matrix(3, 1) = cos(desc->GetInnerCone());
+	matrix(3, 2) = cos(desc->GetOuterCone());
+	matrix(3, 3) = 0.0f;
+
+	matrix(1, 3) = 0.0f;
+	matrix(2, 3) = 0.0f;
+
+	return matrix;
+}
+
+class LightDataManager
+{
+public:
+	LightDataManager(video::Renderer* renderer, int maxLightsPerDraw) :
+		m_MaxLightsPerDraw(maxLightsPerDraw),
+		m_Renderer(renderer)
+	{
+	}
+
+	void Reset()
+	{
+		m_CurLightId = 0;
+		for(int i = 0; i < m_MaxLightsPerDraw; ++i)
+			SetLight(i, nullptr);
+	}
+
+	void AddLight(ClassicalLightDescription* desc)
+	{
+		if(m_CurLightId < m_MaxLightsPerDraw)
+			SetLight(m_CurLightId, desc);
+		++m_CurLightId;
+	}
+
+	int GetMaxLightsPerDraw() const
+	{
+		return m_MaxLightsPerDraw;
+	}
+private:
+	core::String GetLightName(int id)
+	{
+		core::String name;
+		format::format(name, &format::InvariantLocale, "light{}", id);
+		return name;
+	}
+
+	void SetLight(int id, ClassicalLightDescription* desc)
+	{
+		auto name = GetLightName(id);
+		auto mat = GenerateLightMatrix(desc);
+		m_Renderer->GetParams().SetValue(name, mat);
+	}
+
+private:
+	video::Renderer* m_Renderer;
+	int m_CurLightId;
+	const int m_MaxLightsPerDraw;
+};
+
+class ScenePassManager
+{
+public:
+	ScenePassManager(video::Renderer* r, Scene* s) :
+		m_Renderer(r),
+		m_Scene(s)
+	{
+	}
+	void StartPass(ERenderPass pass)
+	{
+		if(m_CurPass != pass)
+			EndPass(m_CurPass);
+		m_CurPass = pass;
+
+		auto& debugSettings = m_Scene->GetDebugSettings();
+		if(pass == ERenderPass::Solid || pass == ERenderPass::Solid) {
+			if(debugSettings.renderWireframe) {
+				video::PipelineOverwrite overwrite;
+				if(debugSettings.renderWireframe) {
+					overwrite.OverwriteDrawMode(video::EDrawMode::Wire);
+					m_Renderer->PushPipelineOverwrite(overwrite, &m_Token);
+				}
+			}
+		}
+	}
+
+private:
+	void EndPass(ERenderPass pass)
+	{
+		LUX_UNUSED(pass);
+		if(m_Token.count)
+			m_Renderer->PopPipelineOverwrite(&m_Token);
+	}
+private:
+	video::Renderer* m_Renderer;
+	ERenderPass m_CurPass = ERenderPass::None;
+	Scene* m_Scene;
+	video::PipelineOverwriteToken m_Token;
+};
+
+}
+
+class InternalRenderData : public SceneRenderPassHelper
+{
+public:
+	InternalRenderData(Scene* scene, video::Renderer* renderer, core::AttributeList* attributes) :
 		m_Scene(scene),
+		m_Renderer(renderer),
 		m_SceneAttributes(attributes),
-		m_StencilShadowRenderer(video::VideoDriver::Instance()->GetRenderer(), 0xFFFFFFFF),
-		m_Renderer(video::VideoDriver::Instance()->GetRenderer())
+		m_VideoLights(renderer, 4),
+		m_StencilShadowRenderer(renderer, 0xFFFFFFFF)
 	{
 		core::AttributeListBuilder alb;
 		alb.SetBase(m_Renderer->GetBaseParams());
@@ -75,104 +396,90 @@ public:
 		m_RendererAttributes = alb.BuildAndReset();
 	}
 
-	void AddRenderEntry(Node* n, Component* r);
-	void ClearLightData(video::Renderer* renderer);
-	void AddLightData(video::Renderer* renderer, ClassicalLightDescription* desc);
-
-	// TODO: Pass attributes
-	// TODO: Pass pass options
-	// TODO: Pass scene data(cameras, fogs, etc.)
-
-	void EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token);
-	void DisableOverwrite(video::PipelineOverwriteToken& token);
-
-	void DrawScene(bool beginScene, bool endScene);
 	void DrawScene();
-	bool IsCulled(Node* node, Component* r, const math::ViewFrustum& frustum);
+	void DrawScenePass(const SceneRenderCamData& camData);
+
+	// Scene Render Pass Helper functions.
+	video::Renderer* GetRenderer() override { return m_Renderer; }
+
+	void DefaultRenderScene(const SceneRenderPassDefaultData& data)
+	{
+		auto& camData = data.camData;
+
+		// Setup scene
+		// Select visible lights and fogs.
+		m_VisibleLights.Update(m_LightComps);
+		m_VisibleFogs.Update(m_FogComps);
+
+		// Collect all renderable nodes.
+		if(m_SceneAttributes->GetValue<bool>("culling")) {
+			m_RenderableCollection.Update(
+				camData.frustum, camData.transform.translation, m_Scene->GetRoot());
+		} else {
+			m_RenderableCollection.Update(
+				camData.transform.translation, m_Scene->GetRoot());
+		}
+
+		// Begin scene
+		bool clearColor = true;
+		bool clearZ = true;
+		bool clearStencil = true;
+		if(!m_RenderableCollection.skyBoxList.IsEmpty()) {
+			clearColor = false;
+		}
+
+		m_Renderer->SetRenderTarget(data.renderTarget);
+		m_Renderer->Clear(clearColor, clearZ, clearStencil);
+		m_Renderer->BeginScene();
+
+		if(data.onPreRender.IsBound())
+			data.onPreRender.Call();
+
+		// Render scene.
+		DrawScenePass(camData);
+
+		if(data.onPostRender.IsBound())
+			data.onPostRender.Call();
+
+		// End scene
+		if(m_CurPassId + 1 < m_PassCount)
+			m_Renderer->EndScene();
+	}
 
 public:
-	Scene* m_Scene;
-	core::AttributeList* m_SceneAttributes;
-
-	/////////////////////////////////////////////////////////////////////////
-	// Caches and temporary values
-	/////////////////////////////////////////////////////////////////////////
-
-	core::Array<RenderEntry> m_SkyBoxList;
-	core::Array<RenderEntry> m_SolidNodeList;
-	core::Array<RenderEntry> m_ShadowCasters;
-	core::Array<DistanceRenderEntry> m_TransparentNodeList;
-
 	// Directly written by the Scene.
 	core::HashSet<Component*> m_LightComps; //!< The animated nodes of the graph
 	core::HashSet<Component*> m_FogComps; //!< The animated nodes of the graph
-	core::HashSet<Component*> m_CamComps; //!< The animated nodes of the graph
+	core::HashSet<SceneRenderPassController*> m_PassControllers; //!< The animated nodes of the graph
 
-	core::HashMap<ERenderPass, SceneRendererPassSettings> m_PassSettings;
-	core::Array<AbstractCamera*> m_Cameras;
-	core::Array<Light*> m_Lights;
-	core::Array<Fog*> m_Fogs;
-
-	// Information about the current camera
-	WeakRef<Node> m_ActiveCameraNode;
-	WeakRef<AbstractCamera> m_ActiveCamera;
-	math::Vector3F m_AbsoluteCamPos;
-	math::ViewFrustum m_ActiveFrustum;
-
-	int m_CurLightId;
-
-	/////////////////////////////////////////////////////////////////////////
-	// Settings and parameters
-	/////////////////////////////////////////////////////////////////////////
-	bool m_Culling; // Cached: Read from m_Attributes
-	int m_MaxLightsPerDraw = 4;
+private:
+	Scene* m_Scene;
+	video::Renderer* m_Renderer;
 	core::AttributeList m_RendererAttributes;
 
-	bool m_SettingsActive;
+	core::AttributeList* m_SceneAttributes;
 
-	/////////////////////////////////////////////////////////////////////////
-	// References to other classes
-	/////////////////////////////////////////////////////////////////////////
+	int m_CurPassId;
+	int m_PassCount;
+	RenderableCollector m_RenderableCollection;
+	VisibleComponentCache<Light*> m_VisibleLights;
+	VisibleComponentCache<Fog*> m_VisibleFogs;
 
-	video::Renderer* m_Renderer;
+	LightDataManager m_VideoLights;
 	StencilShadowRenderer m_StencilShadowRenderer;
 };
-
-/*
-Lux illumination matrix.
-Only the location of the t value is fixed, all other values depend on the light
-type, for built-in point/directonal and spot light the matrix is build as
-following:
-
- r  g  b t
-px py pz 0
-dx dy dz 0
-ra ic oc 0
-
-t = Type of light (0 = Disabled, 1 = Directional, 2 = Point, 3 = Spot)
-
-(r,g,b) = Diffuse color of light
-(px,py,pz) = Position of light
-
-fa = Falloff for spotlight
-ic = Cosine of half inner cone for spotlight
-oc = Cosine of half outer cone for spotlight
-*/
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 Scene::Scene() :
 	m_Root(LUX_NEW(Node)(this)),
-	renderData(new InternalRenderData(this, &m_Attributes))
+	renderData(new InternalRenderData(this, video::VideoDriver::Instance()->GetRenderer(), &m_Attributes))
 {
-
-	{
-		core::AttributeListBuilder alb;
-		alb.AddAttribute("drawStencilShadows", false);
-		alb.AddAttribute("maxShadowCasters", 1);
-		alb.AddAttribute("culling", true);
-		m_Attributes = alb.BuildAndReset();
-	}
+	core::AttributeListBuilder alb;
+	alb.AddAttribute("drawStencilShadows", false);
+	alb.AddAttribute("maxShadowCasters", 1);
+	alb.AddAttribute("culling", true);
+	m_Attributes = alb.BuildAndReset();
 }
 
 Scene::~Scene()
@@ -180,26 +487,6 @@ Scene::~Scene()
 	// Explicitly free all nodes
 	m_Root = nullptr;
 	ClearDeletionQueue();
-}
-
-namespace
-{
-class RenderableCollector : public ComponentVisitor
-{
-public:
-	RenderableCollector(InternalRenderData* _sr) :
-		sr(_sr)
-	{
-	}
-
-	void Visit(Component* c)
-	{
-		if(c->GetNode()->IsTrulyVisible())
-			sr->AddRenderEntry(c->GetNode(), c);
-	}
-
-	InternalRenderData* sr;
-};
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -274,22 +561,12 @@ void Scene::RegisterFog(Component* c, bool doRegister)
 	else
 		renderData->m_FogComps.Erase(c);
 }
-void Scene::RegisterCamera(Component* c, bool doRegister)
+void Scene::RegisterRenderController(SceneRenderPassController* c, bool doRegister)
 {
 	if(doRegister)
-		renderData->m_CamComps.AddAndReplace(c);
+		renderData->m_PassControllers.AddAndReplace(c);
 	else
-		renderData->m_CamComps.Erase(c);
-}
-
-void Scene::SetPassSettings(ERenderPass pass, const SceneRendererPassSettings& settings)
-{
-	renderData->m_PassSettings[pass] = settings;
-}
-
-const SceneRendererPassSettings& Scene::GetPassSettings(ERenderPass pass)
-{
-	return renderData->m_PassSettings[pass];
+		renderData->m_PassControllers.Erase(c);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -303,19 +580,6 @@ void Scene::AnimateAll(float secsPassed)
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-static void VisitComponentsRec(
-	Node* node, ComponentVisitor* visitor)
-{
-	for(auto c : node->Components())
-		visitor->Visit(c);
-	if(visitor->ShouldAbortChildren()) {
-		visitor->ResumeChildren();
-		return;
-	}
-	for(auto child : node->Children())
-		VisitComponentsRec(child, visitor);
-}
-
 void Scene::VisitComponents(
 	ComponentVisitor* visitor,
 	Node* root)
@@ -325,276 +589,46 @@ void Scene::VisitComponents(
 	VisitComponentsRec(root, visitor);
 }
 
-void Scene::DrawScene(bool beginScene, bool endScene)
+void Scene::DrawScene()
 {
-	renderData->DrawScene(beginScene, endScene);
-}
-
-void InternalRenderData::DrawScene(bool beginScene, bool endScene)
-{
-	m_Renderer->SetParams(m_RendererAttributes);
-
 	video::RenderStatistics::GroupScope grpScope("scene");
 
-	// Collect visible camera nodes.
-	m_Cameras.Clear();
-	for(auto c : m_CamComps) {
-		auto c2 = dynamic_cast<AbstractCamera*>(c);
-		if(c2 && c2->GetNode()->IsTrulyVisible())
-			m_Cameras.PushBack(c2);
-	}
+	renderData->DrawScene();
 
-	// Collect lights and fogs.
-	auto& lights = m_LightComps;
-	auto& fogs = m_FogComps;
-
-	m_Cameras.Sort(core::CompareTypeFromSmaller<AbstractCamera*>([](AbstractCamera* a, AbstractCamera* b) -> bool { return a->GetRenderPriority() > b->GetRenderPriority(); }));
-	if(m_Cameras.Size() == 0) {
-		log::Warning("No camera in scenegraph.");
-		if(beginScene == true) {
-			m_Renderer->Clear(true, true, true);
-			m_Renderer->BeginScene();
-		} if(endScene)
-			m_Renderer->EndScene();
-		return;
-	}
-
-	if(!beginScene) {
-		if(m_Renderer->GetRenderTarget() != m_Cameras[0]->GetRenderTarget())
-			throw core::GenericRuntimeException("Already started scene uses diffrent rendertarget than first camera.");
-	}
-
-	for(auto it = m_Cameras.First(); it != m_Cameras.End(); ++it) {
-		m_ActiveCamera = *it;
-		m_ActiveCameraNode = m_ActiveCamera->GetNode();
-		m_AbsoluteCamPos = m_ActiveCameraNode->GetAbsolutePosition();
-		m_ActiveFrustum = m_ActiveCamera->GetFrustum();
-
-		scene::SceneRenderData sceneData;
-		sceneData.video = m_Renderer;
-		sceneData.pass = ERenderPass::None;
-		m_ActiveCamera->PreRender(sceneData);
-
-		// Select visible lights and fogs.
-		m_Lights.Clear();
-		for(auto l : lights) {
-			auto l2 = dynamic_cast<Light*>(l);
-			if(l2 && l->GetNode()->IsTrulyVisible())
-				m_Lights.PushBack(l2);
-		}
-		m_Fogs.Clear();
-		for(auto f : fogs) {
-			auto f2 = dynamic_cast<Fog*>(f);
-			if(f2 && f->GetNode()->IsTrulyVisible())
-				m_Fogs.PushBack(f2);
-		}
-
-		// Collect and renderable nodes.
-		RenderableCollector collector(this);
-		m_Scene->VisitComponents(&collector);
-
-		// Sort by distance
-		m_TransparentNodeList.Sort();
-
-		if(it != m_Cameras.First() || beginScene) {
-			// Start a new scene
-			m_Renderer->SetRenderTarget(m_ActiveCamera->GetRenderTarget());
-			bool clearColor = true;
-			bool clearZ = true;
-			bool clearStencil = true;
-			if(!m_SkyBoxList.IsEmpty()) {
-				clearZ = true;
-				clearColor = false;
-			}
-			m_Renderer->Clear(clearColor, clearZ, clearStencil);
-			m_Renderer->BeginScene();
-		}
-
-		m_ActiveCamera->Render(sceneData);
-		DrawScene();
-		m_ActiveCamera->PostRender(sceneData);
-
-		if((it + 1) != m_Cameras.end() || endScene)
-			m_Renderer->EndScene();
-
-		m_SkyBoxList.Clear();
-		m_SolidNodeList.Clear();
-		m_ShadowCasters.Clear();
-		m_TransparentNodeList.Clear();
-		m_Lights.Clear();
-		m_Fogs.Clear();
-	}
-}
-
-void InternalRenderData::EnableOverwrite(ERenderPass pass, video::PipelineOverwriteToken& token)
-{
-	auto anySettings = m_PassSettings[ERenderPass::Any];
-	auto settings = m_PassSettings[pass];
-	settings.wireframe |= anySettings.wireframe;
-	settings.disableCulling |= anySettings.disableCulling;
-	bool useOverwrite = false;
-	video::PipelineOverwrite overwrite;
-	if(settings.wireframe) {
-		overwrite.OverwriteDrawMode(video::EDrawMode::Wire);
-		useOverwrite = true;
-	}
-	if(settings.disableCulling) {
-		overwrite.OverwriteCulling(video::EFaceSide::None);
-		useOverwrite = true;
-	}
-	if(useOverwrite)
-		m_Renderer->PushPipelineOverwrite(overwrite, &token);
-	m_SettingsActive = useOverwrite;
-}
-
-void InternalRenderData::DisableOverwrite(video::PipelineOverwriteToken& token)
-{
-	if(m_SettingsActive) {
-		m_Renderer->PopPipelineOverwrite(&token);
-		m_SettingsActive = false;
-	}
-}
-
-void InternalRenderData::AddRenderEntry(Node* n, Component* r)
-{
-	bool isCulled = false;
-
-	switch(r->GetRenderPass()) {
-	case ERenderPass::None:
-		break;
-	case ERenderPass::SkyBox:
-		m_SkyBoxList.EmplaceBack(r);
-		break;
-	case ERenderPass::Solid:
-		isCulled = IsCulled(n, r, m_ActiveFrustum);
-		if(!isCulled)
-			m_SolidNodeList.EmplaceBack(r);
-		if(n->IsShadowCasting())
-			m_ShadowCasters.EmplaceBack(r);
-		break;
-	case ERenderPass::Transparent:
-		isCulled = IsCulled(n, r, m_ActiveFrustum);
-		if(!isCulled) {
-			float distance = n->GetAbsolutePosition().GetDistanceToSq(m_AbsoluteCamPos);
-			m_TransparentNodeList.EmplaceBack(r, distance);
-		}
-		break;
-	case ERenderPass::Any:
-		isCulled = IsCulled(n, r, m_ActiveFrustum);
-		if(!isCulled) {
-			float distance = n->GetAbsolutePosition().GetDistanceToSq(m_AbsoluteCamPos);
-			m_SolidNodeList.EmplaceBack(r);
-			m_TransparentNodeList.EmplaceBack(r, distance);
-		}
-		if(n->IsShadowCasting())
-			m_ShadowCasters.EmplaceBack(r);
-		break;
-	default:
-		lxAssertNeverReach("Unimplemented render pass");
-		break;
-	}
-}
-
-bool InternalRenderData::IsCulled(Node* node, Component* r, const math::ViewFrustum& frustum)
-{
-	LUX_UNUSED(r);
-	if(!m_Culling)
-		return false;
-	if(node->GetBoundingBox().IsEmpty())
-		return false;
-	return !math::IsOrientedBoxMaybeVisible(frustum, node->GetBoundingBox(), node->GetAbsoluteTransform());
-}
-
-static void SetFogData(video::Renderer* renderer, ClassicalFogDescription* desc, video::ColorF* overwriteColor = nullptr)
-{
-	if(desc) {
-		video::ColorF fogB;
-		video::ColorF fogA;
-		fogA = overwriteColor ? *overwriteColor : desc->GetColor();
-		renderer->GetParams().SetValue("fogA", fogA);
-		auto type = desc->GetType();
-		fogB.r =
-			type == EFogType::Linear ? 1.0f :
-			type == EFogType::Exp ? 2.0f :
-			type == EFogType::ExpSq ? 3.0f : 0.0f;
-		fogB.g = desc->GetStart();
-		fogB.b = desc->GetEnd();
-		fogB.a = desc->GetDensity();
-		renderer->GetParams().SetValue("fogB", fogB);
-	} else {
-		video::ColorF fogB;
-		fogB.r = 0.0f;
-		renderer->GetParams().SetValue("fogB", fogB);
-	}
-}
-
-static float LightTypeToFloat(scene::ELightType type)
-{
-	switch(type) {
-	case scene::ELightType::Directional: return 1;
-	case scene::ELightType::Point: return 2;
-	case scene::ELightType::Spot: return 3;
-	default:
-		throw core::GenericInvalidArgumentException("type", "Unknown light data type");
-	}
-}
-
-static math::Matrix4 GenerateLightMatrix(ClassicalLightDescription* desc)
-{
-	math::Matrix4 matrix;
-
-	if(!desc) {
-		matrix(0, 3) = 0.0f;
-		return matrix;
-	}
-	matrix(0, 3) = LightTypeToFloat(desc->GetType());
-
-	auto color = desc->GetColor();
-	matrix(0, 0) = color.r;
-	matrix(0, 1) = color.g;
-	matrix(0, 2) = color.b;
-
-	auto position = desc->GetPosition();
-	matrix(1, 0) = position.x;
-	matrix(1, 1) = position.y;
-	matrix(1, 2) = position.z;
-
-	auto direction = desc->GetDirection();
-	matrix(2, 0) = direction.x;
-	matrix(2, 1) = direction.y;
-	matrix(2, 2) = direction.z;
-
-	matrix(3, 0) = desc->GetFalloff();
-	matrix(3, 1) = cos(desc->GetInnerCone());
-	matrix(3, 2) = cos(desc->GetOuterCone());
-	matrix(3, 3) = 0.0f;
-
-	matrix(1, 3) = 0.0f;
-	matrix(2, 3) = 0.0f;
-
-	return matrix;
-}
-
-void InternalRenderData::ClearLightData(video::Renderer* renderer)
-{
-	m_CurLightId = 0;
-	renderer->GetParams().SetValue("light0", GenerateLightMatrix(nullptr));
-	renderer->GetParams().SetValue("light1", GenerateLightMatrix(nullptr));
-	renderer->GetParams().SetValue("light2", GenerateLightMatrix(nullptr));
-	renderer->GetParams().SetValue("light3", GenerateLightMatrix(nullptr));
-}
-
-void InternalRenderData::AddLightData(video::Renderer* renderer, ClassicalLightDescription* desc)
-{
-	if(m_CurLightId < m_MaxLightsPerDraw) {
-		core::String name;
-		format::format(name, &format::InvariantLocale, "light{}", m_CurLightId);
-		renderer->GetParams().SetValue(name, GenerateLightMatrix(desc));
-	}
-	++m_CurLightId;
+	ClearDeletionQueue();
 }
 
 void InternalRenderData::DrawScene()
+{
+	if(m_PassControllers.IsEmpty())
+		log::Warning("No renderobject in the scenegraph.");
+
+	// Sort visible cameras by render id
+	core::Array<SceneRenderPassController*> sortedPassControllers;
+	for(auto c : m_PassControllers)
+		sortedPassControllers.PushBack(c);
+	core::Sort(sortedPassControllers,
+		core::CompareTypeFromSmaller<SceneRenderPassController*>([](SceneRenderPassController* a, SceneRenderPassController* b) -> bool {
+		return a->GetPriority() > b->GetPriority();
+	}));
+
+	// Backup and update video renderer scene argument pool.
+	auto oldParams = m_Renderer->GetParams();
+	m_Renderer->SetParams(m_RendererAttributes);
+
+	// Render each pass.
+	m_CurPassId = 0;
+	m_PassCount = sortedPassControllers.Size();
+	for(auto c : sortedPassControllers) {
+		c->Render(this);
+		++m_CurPassId;
+	}
+
+	// Restore old scene argument pool.
+	m_Renderer->SetParams(oldParams);
+}
+
+void InternalRenderData::DrawScenePass(const SceneRenderCamData& camData)
 {
 	// Check if a stencil buffer is available for shadow rendering
 	bool drawStencilShadows = m_SceneAttributes->GetValue<bool>("drawStencilShadows");
@@ -607,46 +641,41 @@ void InternalRenderData::DrawScene()
 		}
 	}
 
-	m_Culling = m_SceneAttributes->GetValue<bool>("culling");
+	core::Array<ClassicalLightDescription*> illuminating;
+	core::Array<ClassicalLightDescription*> shadowCasting;
+	core::Array<ClassicalLightDescription*> nonShadowCasting;
 
-	struct LightEntry
-	{
-		ClassicalLightDescription* desc;
-		Node* node;
-	};
-	core::Array<LightEntry> illuminating;
-	core::Array<LightEntry> shadowCasting;
-	core::Array<LightEntry> nonShadowCasting;
 	SceneRenderData sceneData;
 	sceneData.video = m_Renderer;
-	sceneData.activeCamera = m_ActiveCamera;
+	sceneData.camData = camData;
 
-	m_Renderer->GetParams().SetValue("camPos", m_ActiveCameraNode->GetAbsolutePosition());
+	m_Renderer->GetParams().SetValue("camPos", camData.transform.translation);
 
 	//-------------------------------------------------------------------------
 	// The lights
-	ClearLightData(m_Renderer);
-	video::ColorF totalAmbientLight;
+	m_VideoLights.Reset();
+
 	int maxShadowCastingCount = m_SceneAttributes->GetValue<int>("maxShadowCasters");
 	if(!drawStencilShadows)
 		maxShadowCastingCount = 0;
-	maxShadowCastingCount = math::Clamp(maxShadowCastingCount, 0, m_MaxLightsPerDraw);
+	maxShadowCastingCount = math::Clamp(maxShadowCastingCount, 0, m_VideoLights.GetMaxLightsPerDraw());
 
+	// Select shadowCastingLights, illuminatingLights, nonShadowCastingLights, and Ambient Lights.
 	int count = 0;
 	int shadowCount = 0;
-	for(auto& e : m_Lights) {
+	video::ColorF totalAmbientLight;
+	for(auto& e : m_VisibleLights) {
 		auto descBase = e->GetLightDescription();
 		if(auto descC = dynamic_cast<ClassicalLightDescription*>(descBase)) {
-			LightEntry entry{descC, e->GetNode()};
-			illuminating.PushBack(entry);
+			illuminating.PushBack(descC);
 			if(descC->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
-				shadowCasting.PushBack(entry);
+				shadowCasting.PushBack(descC);
 				++shadowCount;
 			} else {
-				nonShadowCasting.PushBack(entry);
+				nonShadowCasting.PushBack(descC);
 			}
 			++count;
-			if(count >= m_MaxLightsPerDraw)
+			if(count >= m_VideoLights.GetMaxLightsPerDraw())
 				break;
 		} else if(auto descA = dynamic_cast<AmbientLightDescription*>(descBase)) {
 			totalAmbientLight += descA->GetColor();
@@ -656,9 +685,10 @@ void InternalRenderData::DrawScene()
 
 	//-------------------------------------------------------------------------
 	// The fog
-	bool correctFogForStencilShadows = true;
+
+	// Choose fog description.
 	ClassicalFogDescription* fog = nullptr;
-	for(auto& f : m_Fogs) {
+	for(auto& f : m_VisibleFogs) {
 		auto fogDesc = dynamic_cast<ClassicalFogDescription*>(f->GetFogDescription());
 		if(fogDesc) {
 			if(!fog)
@@ -667,61 +697,56 @@ void InternalRenderData::DrawScene()
 				log::Warning("Simple Forward Scene Renderer: Only support one fog element per scene.(all but one fog disabled)");
 		}
 	}
+	// Enable fog.
 	if(fog)
 		SetFogData(m_Renderer, fog);
 
-	video::PipelineOverwriteToken pot;
+	// Real object rendering starts here.
+	ScenePassManager passManager(m_Renderer, m_Scene);
 
 	//-------------------------------------------------------------------------
 	// Skyboxes
 	sceneData.pass = ERenderPass::SkyBox;
-	EnableOverwrite(ERenderPass::SkyBox, pot);
+	passManager.StartPass(ERenderPass::SkyBox);
 
-	for(auto& e : m_SkyBoxList)
+	for(auto& e : m_RenderableCollection.skyBoxList)
 		e.renderable->Render(sceneData);
-
-	DisableOverwrite(pot); // SkyBox
 
 	//-------------------------------------------------------------------------
 	// Solid objects
-
-	EnableOverwrite(ERenderPass::Solid, pot);
-
 	if(drawStencilShadows) {
-		video::PipelineOverwrite illumOver;
-		illumOver.OverwriteLighting(video::ELightingFlag::AmbientEmit);
-		m_Renderer->PushPipelineOverwrite(illumOver, &pot);
-	} else {
-		for(auto& e : illuminating)
-			AddLightData(m_Renderer, e.desc);
-	}
+		passManager.StartPass(ERenderPass::Solid);
+		{
+			video::PipelineOverwriteToken pot;
+			video::PipelineOverwrite illumOver;
+			illumOver.OverwriteLighting(video::ELightingFlag::AmbientEmit);
+			m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 1
 
-	// Ambient pass for shadows, otherwise the normal renderpass
-	sceneData.pass = ERenderPass::Solid;
-	for(auto& e : m_SolidNodeList)
-		e.renderable->Render(sceneData);
-	DisableOverwrite(pot); // Solid
+			// Ambient pass
+			sceneData.pass = ERenderPass::Solid;
+			for(auto& e : m_RenderableCollection.solidNodeList)
+				e.renderable->Render(sceneData);
 
-	// Stencil shadow rendering
-	if(drawStencilShadows) {
+			m_Renderer->PopPipelineOverwrite(&pot); // Pop 1
+		}
 
+		passManager.StartPass(ERenderPass::None);
+		const bool correctFogForStencilShadows = true;
 		// To renderer correct fog, render black fog.
 		if(correctFogForStencilShadows && fog) {
 			auto overwriteColor = video::ColorF(0, 0, 0, 0);
 			SetFogData(m_Renderer, fog, &overwriteColor);
 		}
 
-		m_Renderer->PopPipelineOverwrite(&pot);
-
 		// Shadow pass for each shadow casting light
-		for(auto shadowEntry : shadowCasting) {
-			auto shadowLight = shadowEntry.desc;
-			auto shadowNode = shadowEntry.node;
-			ClearLightData(m_Renderer);
-			AddLightData(m_Renderer, shadowLight);
+		for(auto shadowLight : shadowCasting) {
+			m_VideoLights.Reset();
+			m_VideoLights.AddLight(shadowLight);
 
-			m_StencilShadowRenderer.Begin(m_ActiveCameraNode->GetAbsolutePosition(), m_ActiveCameraNode->GetAbsoluteTransform().TransformDir(math::Vector3F::UNIT_Y));
-			for(auto& e : m_ShadowCasters) {
+			m_StencilShadowRenderer.Begin(
+				camData.transform.translation,
+				camData.transform.TransformDir(math::Vector3F::UNIT_Z));
+			for(auto& e : m_RenderableCollection.shadowCasters) {
 				auto mesh = dynamic_cast<Mesh*>(e.renderable);
 				if(mesh && mesh->GetMesh()) {
 					bool isInfinite;
@@ -729,10 +754,10 @@ void InternalRenderData::DrawScene()
 					auto node = e.renderable->GetNode();
 					if(shadowLight->GetType() == scene::ELightType::Directional) {
 						isInfinite = true;
-						lightPos = node->ToRelativeDir(shadowNode->FromRelativeDir(math::Vector3F::UNIT_Z));
+						lightPos = node->ToRelativeDir(shadowLight->GetDirection());
 					} else {
 						isInfinite = false;
-						lightPos = node->ToRelativePos(shadowNode->GetAbsolutePosition());
+						lightPos = node->ToRelativePos(shadowLight->GetPosition());
 					}
 					m_StencilShadowRenderer.AddSilhouette(node->GetAbsoluteTransform(), mesh->GetMesh(), lightPos, isInfinite);
 				}
@@ -740,65 +765,72 @@ void InternalRenderData::DrawScene()
 
 			m_StencilShadowRenderer.End();
 
-			video::PipelineOverwrite illumOver;
-			illumOver.OverwriteZWrite(false);
-			illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
-			illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
-			illumOver.OverwriteStencil(m_StencilShadowRenderer.GetIllumniatedStencilMode());
-			EnableOverwrite(ERenderPass::Solid, pot);
-			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
+			passManager.StartPass(ERenderPass::Solid);
+			{
+				video::PipelineOverwriteToken pot;
+				video::PipelineOverwrite illumOver;
+				illumOver.OverwriteZWrite(false);
+				illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
+				illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
+				illumOver.OverwriteStencil(m_StencilShadowRenderer.GetIllumniatedStencilMode());
+				m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 2
 
-			for(auto& e : m_SolidNodeList)
-				e.renderable->Render(sceneData);
+				for(auto& e : m_RenderableCollection.solidNodeList)
+					e.renderable->Render(sceneData);
 
-			m_Renderer->PopPipelineOverwrite(&pot);
-			DisableOverwrite(pot); // Solid
+				m_Renderer->PopPipelineOverwrite(&pot); // Pop 2
+			}
 
 			m_Renderer->Clear(false, false, true);
 		}
 
 		if(!nonShadowCasting.IsEmpty()) {
-			ClearLightData(m_Renderer);
+			m_VideoLights.Reset();
 			// Draw with remaining non shadow casting lights
 			for(auto illum : nonShadowCasting)
-				AddLightData(m_Renderer, illum.desc);
+				m_VideoLights.AddLight(illum);
 
-			EnableOverwrite(ERenderPass::Solid, pot);
+			{
+				video::PipelineOverwriteToken pot;
+				video::PipelineOverwrite illumOver;
+				illumOver.OverwriteZWrite(false);
+				illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
+				illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
+				m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 3
 
-			video::PipelineOverwrite illumOver;
-			illumOver.OverwriteZWrite(false);
-			illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
-			illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
-			m_Renderer->PushPipelineOverwrite(illumOver, &pot);
+				sceneData.pass = ERenderPass::Solid;
+				for(auto& e : m_RenderableCollection.solidNodeList)
+					e.renderable->Render(sceneData);
 
-			sceneData.pass = ERenderPass::Solid;
-			for(auto& e : m_SolidNodeList)
-				e.renderable->Render(sceneData);
-
-			m_Renderer->PopPipelineOverwrite(&pot);
-			DisableOverwrite(pot); // Solid
+				m_Renderer->PopPipelineOverwrite(&pot); // Pop 3
+			}
 		}
 
 		// Add shadow casting lights for remaining render jobs
-		for(auto illum : shadowCasting)
-			AddLightData(m_Renderer, illum.desc);
+		for(auto light : shadowCasting)
+			m_VideoLights.AddLight(light);
 
 		// Restore correct fog
 		if(correctFogForStencilShadows && fog)
 			SetFogData(m_Renderer, fog);
+	} else {
+		for(auto light : illuminating)
+			m_VideoLights.AddLight(light);
+
+		// Ambient pass for shadows, otherwise the normal renderpass
+		passManager.StartPass(ERenderPass::Solid);
+		sceneData.pass = ERenderPass::Solid;
+		for(auto& e : m_RenderableCollection.solidNodeList)
+			e.renderable->Render(sceneData);
 	}
 
 	//-------------------------------------------------------------------------
 	// Transparent objects
-	EnableOverwrite(ERenderPass::Transparent, pot);
-
 	sceneData.pass = ERenderPass::Transparent;
+	passManager.StartPass(ERenderPass::Transparent);
 
-	for(auto& e : m_TransparentNodeList) {
+	for(auto& e : m_RenderableCollection.transparentNodeList)
 		e.renderable->Render(sceneData);
-	}
-
-	DisableOverwrite(pot); // Transparent
 }
 
 } // namespace scene

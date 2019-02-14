@@ -50,11 +50,6 @@ struct LuxAppContext
 
 		if(Driver)
 			DriverConfig = Driver->GetConfig();
-
-		if(Driver)
-			Renderer = Driver->GetRenderer();
-		else
-			Renderer = nullptr;
 	}
 
 	// Don't save StrongReferences here.
@@ -63,7 +58,6 @@ struct LuxAppContext
 	*/
 	LuxDevice* Device = nullptr;
 	video::VideoDriver* Driver = nullptr;
-	video::Renderer* Renderer = nullptr;
 	scene::Scene* Scene = nullptr;
 	input::InputSystem* Input = nullptr;
 	io::FileSystem* FileSys = nullptr;

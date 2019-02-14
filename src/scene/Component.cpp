@@ -13,7 +13,7 @@ const core::Name FirstPersonCameraControl("lux.comp.FirstPersonCameraControl");
 const core::Name TurntableCameraControl("lux.comp.TurntableCameraControl");
 const core::Name LinearMove("lux.comp.LinearMove");
 
-const core::Name Camera("lux.comp.Camera");
+const core::Name Camera("lux.comp.PerspCamera");
 const core::Name Mesh("lux.comp.Mesh");
 const core::Name SpotLight("lux.comp.SpotLight");
 const core::Name PointLight("lux.comp.PointLight");

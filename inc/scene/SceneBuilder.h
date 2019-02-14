@@ -22,7 +22,7 @@ class Mesh;
 }
 namespace scene
 {
-class Camera;
+class PerspCamera;
 class Mesh;
 class DirectionalLight;
 class PointLight;
@@ -62,7 +62,7 @@ public:
 	LUX_API StrongRef<Node> AddCamera(float aspectRatio);
 
 	// Object components
-	LUX_API StrongRef<Camera> CreateCamera(float aspectRatio) const;
+	LUX_API StrongRef<PerspCamera> CreateCamera(float aspectRatio) const;
 	LUX_API StrongRef<Mesh> CreateMesh(const io::Path& path) const;
 	LUX_API StrongRef<Mesh> CreateMesh(video::Mesh* mesh = nullptr) const;
 	LUX_API StrongRef<SkyBox> CreateSkyBox(const video::ColorF& color) const;

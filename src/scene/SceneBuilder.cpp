@@ -86,9 +86,9 @@ StrongRef<Node> SceneBuilder::AddCamera(float aspect)
 	return m_Scene->AddNode(CreateCamera(aspect));
 }
 
-StrongRef<Camera> SceneBuilder::CreateCamera(float aspect) const
+StrongRef<PerspCamera> SceneBuilder::CreateCamera(float aspect) const
 {
-	auto cam = CreateComponent(SceneComponentType::Camera).AsStrong<Camera>();
+	auto cam = CreateComponent(SceneComponentType::Camera).AsStrong<PerspCamera>();
 	cam->SetAspect(aspect);
 	return cam;
 }

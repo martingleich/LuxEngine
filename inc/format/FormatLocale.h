@@ -209,7 +209,7 @@ private:
 	std::unique_ptr<SelfData> self;
 };
 
-extern FORMAT_API Locale InvariantLocale; //!< Default locale for the english language
+extern FORMAT_API Locale InvariantLocale; //!< Default locale for the invariant language
 extern FORMAT_API Locale English; //!< Default locale for the english language
 extern FORMAT_API Locale German; //!< Default locale for the german language
 

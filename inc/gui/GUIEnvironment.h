@@ -66,9 +66,6 @@ public:
 	LUX_API StrongRef<Skin> GetSkin() const;
 	LUX_API void SetSkin(Skin* skin);
 
-	LUX_API StrongRef<Renderer> GetRenderer() const;
-	LUX_API void SetRenderer(Renderer* r);
-
 	///////////////////////////////////////////////////////////////////////////
 
 	LUX_API void SetKeyRepeat(float timeToStart, float timeToRepeat);

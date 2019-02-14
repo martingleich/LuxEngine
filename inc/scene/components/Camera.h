@@ -7,113 +7,65 @@
 
 namespace lux
 {
-namespace video
-{
-class Renderer;
-}
 namespace scene
 {
 
-class AbstractCamera : public Component
+//! Base class for simple cameras.
+class BaseCamera : public Component
 {
 public:
+	class Controller : public SceneRenderPassController
+	{
+	public:
+		Controller(BaseCamera* cam) :
+			m_Cam(cam)
+		{
+		}
+		int GetPriority() const { return m_Cam->GetRenderPriority(); }
+		void Render(SceneRenderPassHelper* helper);
+	
+	public:
+		BaseCamera* m_Cam;
+	};
+
 	class Listener
 	{
 	public:
 		//! Called before rendering the camera, after beginning the scene.
-		virtual void PreRender(AbstractCamera* cam) { LUX_UNUSED(cam); }
+		virtual void PreRender(BaseCamera* cam) { LUX_UNUSED(cam); }
 
 		//! Called after rendering all nodes, before ending the scene.
-		virtual void PostRender(AbstractCamera* cam) { LUX_UNUSED(cam); }
+		virtual void PostRender(BaseCamera* cam) { LUX_UNUSED(cam); }
 	};
 
 public:
-	virtual void PreRender(const SceneRenderData& r) = 0;
-	virtual void PostRender(const SceneRenderData& r) = 0;
-
-	virtual void SetRenderTarget(const video::RenderTarget& target) = 0;
-	virtual const video::RenderTarget& GetRenderTarget() const = 0;
-
-	virtual void SetRenderPriority(s32 p) = 0;
-	virtual s32 GetRenderPriority() const = 0;
-
-	virtual const math::ViewFrustum& GetFrustum() = 0;
-
-	virtual void SetCameraListener(Listener* l) = 0;
-	virtual Listener* GetCameraListener() const = 0;
-
-	StrongRef<AbstractCamera> Clone()
-	{
-		return CloneImpl().StaticCastStrong<AbstractCamera>();
-	}
-
-	LUX_API void Register(bool doRegister) override;
-};
-
-//! Represent a camera in the scenegraph
-class Camera : public AbstractCamera
-{
-	LX_REFERABLE_MEMBERS_API(Camera, LUX_API);
-public:
-	LUX_API Camera();
-	LUX_API ~Camera();
-
-	LUX_API void SetViewModification(const math::Matrix4& mod);
-	LUX_API const math::Matrix4& GetViewModification();
+	LUX_API BaseCamera();
 
 	//! Screen width divided by Screen height
-	LUX_API void SetAspect(float aspect);
-	LUX_API float GetAspect() const;
+	void SetAspect(float aspect) { m_Aspect = aspect; }
+	float GetAspect() const { return m_Aspect; }
 
-	LUX_API void SetXMax(float xmax);
-	LUX_API float GetXMax() const;
+	void SetNearPlane(float near) { m_NearPlane = near; }
+	float GetNearPlane() const { return m_NearPlane; }
 
-	//! Set vertical field of vision in rad
-	LUX_API void SetFOV(math::AngleF fovY);
-	//! Get vertical field of vision in rad
-	LUX_API math::AngleF GetFOV() const;
+	void SetFarPlane(float far) { m_FarPlane = far; }
+	float GetFarPlane() const { return m_FarPlane; }
 
-	LUX_API void SetNearPlane(float near);
-	LUX_API float GetNearPlane() const;
+	void SetRenderTarget(const video::RenderTarget& target) { m_RenderTarget = target; }
+	const video::RenderTarget& GetRenderTarget() const { return m_RenderTarget; }
 
-	LUX_API void SetFarPlane(float far);
-	LUX_API float GetFarPlane() const;
+	void SetRenderPriority(int p) { m_RenderPriority = p; }
+	int GetRenderPriority() const { return m_RenderPriority; }
 
-	//! Set if the camera is a orthgonal camera.
-	/**
-	Default value is false.
-	*/
-	LUX_API void SetOrtho(bool ortho);
-	//! Is the camera orthogonal
-	LUX_API bool IsOrtho() const;
+	void SetCameraListener(Listener* l) { m_Listener = l; }
+	Listener* GetCameraListener() const { return m_Listener; }
 
-	LUX_API void SetRenderTarget(const video::RenderTarget& target);
-	LUX_API const video::RenderTarget& GetRenderTarget() const;
+	LUX_API void Register(bool doRegister) override;
 
-	LUX_API void SetRenderPriority(int p);
-	LUX_API int GetRenderPriority() const;
+protected:
+	virtual void CalculateCamData(math::Matrix4& view, math::Matrix4& proj, math::ViewFrustum& frustum) = 0;
 
-	LUX_API void SetCameraListener(Listener* l);
-	LUX_API Listener* GetCameraListener() const;
-
-	LUX_API void PreRender(const SceneRenderData& r) override;
-	LUX_API void Render(const SceneRenderData& r) override;
-	LUX_API void PostRender(const SceneRenderData& r) override;
-
-	LUX_API const math::ViewFrustum& GetFrustum() override;
-
-private:
-	math::Matrix4 CalculateProjectionMatrix();
-	math::Matrix4 CalculateViewMatrix();
-	math::ViewFrustum CalculateViewFrustum(const math::Matrix4& view);
-	const math::Matrix4& GetView();
-	const math::Matrix4& GetProjection();
-
-private:
-	math::Matrix4 m_ViewModification;
-
-	math::AngleF m_FOV;
-	float m_XMax;
+protected:
 	float m_Aspect;
 
 	float m_NearPlane;
@@ -124,12 +76,27 @@ private:
 
 	Listener* m_Listener;
 
-	// Active render data.
-	math::Matrix4 m_ActiveProjection;
-	math::Matrix4 m_ActiveView;
-	math::ViewFrustum m_ActiveViewFrustum;
+	Controller m_Controller;
+};
 
-	bool m_IsOrtho;
+//! Represent a perspective camera in the scenegraph
+class PerspCamera : public BaseCamera
+{
+	LX_REFERABLE_MEMBERS_API(PerspCamera, LUX_API);
+public:
+	LUX_API PerspCamera();
+	LUX_API ~PerspCamera();
+
+	//! Set vertical field of vision.
+	void SetFOV(math::AngleF fovY) { m_FOV = fovY; }
+	//! Get vertical field of vision.
+	math::AngleF GetFOV() const { return m_FOV; }
+
+private:
+	void CalculateCamData(math::Matrix4& view, math::Matrix4& proj, math::ViewFrustum& frustum) override;
+
+protected:
+	math::AngleF m_FOV;
 };
 
 } // namespace scene

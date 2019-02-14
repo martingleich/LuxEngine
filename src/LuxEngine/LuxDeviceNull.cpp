@@ -303,7 +303,7 @@ private:
 			m_FrameLoop.callback->PostMove(secsPassed);
 
 		if(m_Scene) {
-			m_Scene->DrawScene(true, false);
+			m_Scene->DrawScene();
 		} else {
 			m_Renderer->Clear(true, true, true);
 			m_Renderer->BeginScene();

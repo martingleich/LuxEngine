@@ -124,7 +124,9 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 		u32 lightChangeId = 0;
 		for(int i = 0; i < MAX_LIGHT_COUNT; ++i) {
 			auto lptr = m_SharedData->lightPtrs[i];
-			lightChangeId += lptr->GetChangeId();
+			if(lptr) {
+				lightChangeId += lptr->GetChangeId();
+			}
 		}
 
 		if(lightChangeId != m_SharedData->lightChangeId) {

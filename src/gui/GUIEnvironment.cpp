@@ -158,7 +158,7 @@ GUIEnvironment::GUIEnvironment(Window* osWindow, Cursor* osCursor) :
 	SetSkin(core::ReferableFactory::Instance()->Create(core::Name("lux.gui.skin.3D")).As<gui::Skin>());
 	m_Skin->SetDefaultFont(m_BuiltInFont);
 
-	SetRenderer(LUX_NEW(Renderer)(video::VideoDriver::Instance()->GetRenderer()));
+	m_Renderer = LUX_NEW(Renderer)(video::VideoDriver::Instance()->GetRenderer());
 
 	input::InputSystem::Instance()->GetEventSignal().Connect(this, &GUIEnvironment::OnEvent);
 }
@@ -326,16 +326,6 @@ void GUIEnvironment::SetSkin(Skin* skin)
 {
 	m_Skin = skin;
 	m_Root->SetOverwriteSkin(m_Skin);
-}
-
-StrongRef<Renderer> GUIEnvironment::GetRenderer() const
-{
-	return m_Renderer;
-}
-
-void GUIEnvironment::SetRenderer(Renderer* r)
-{
-	m_Renderer = r;
 }
 
 ///////////////////////////////////////////////////////////////////////////

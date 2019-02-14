@@ -137,10 +137,10 @@ void SkyBox::Render(const SceneRenderData& data)
 		return;
 
 	math::Transformation t = node->GetAbsoluteTransform();
-	t.translation = data.activeCamera->GetNode()->GetAbsolutePosition();
+	t.translation = data.camData.transform.translation;
 
 	// Place the skybox right between the clipping planes
-	auto frustum = data.activeCamera->GetFrustum();
+	auto frustum = data.camData.frustum;
 	auto near = math::GetDistanceFromPlaneToPoint(frustum.Plane(math::ViewFrustum::EPlane::Near), t.translation);
 	auto far = math::GetDistanceFromPlaneToPoint(frustum.Plane(math::ViewFrustum::EPlane::Far), t.translation);
 	t.scale = 0.5f * (near + far);

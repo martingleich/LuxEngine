@@ -2,7 +2,6 @@ set(SRCS
 	"src/main.cpp"
 )
 set(INCS
-	"src/Context.h"
 )
 
 include_directories("${PROJECT_SOURCE_DIR}/testing/MaterialTest/src")

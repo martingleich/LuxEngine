@@ -136,7 +136,7 @@ private:
 	bool m_RButton = false;
 
 	StrongRef<scene::Node> m_CameraNode;
-	StrongRef<scene::Camera> m_Camera;
+	StrongRef<scene::PerspCamera> m_Camera;
 	StrongRef<scene::Light> m_Light;
 	StrongRef<scene::SkyBox> m_SkyBox;
 
