@@ -115,7 +115,7 @@ void ParseErrors(core::Array<ShaderCompileMessage>& outList, UnknownRefCounted<I
 {
 	const char* perr = (const char*)errors->GetBufferPointer();
 	core::StringView str(perr, std::strlen(perr));
-	str.BasicSplit("\n", -1, true, [&](core::StringView str) {
+	str.BasicSplit("\n", core::EStringSplit::IgnoreEmpty, [&](core::StringView str) {
 		if(!str.IsWhitespace()) {
 			ShaderCompileMessage msg;
 			if(!ParseD3DXShaderError(str, shaderType, msg)) {
@@ -126,6 +126,7 @@ void ParseErrors(core::Array<ShaderCompileMessage>& outList, UnknownRefCounted<I
 			}
 			outList.PushBack(msg);
 		}
+		return true;
 	});
 }
 

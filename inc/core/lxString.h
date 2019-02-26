@@ -318,7 +318,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The number of written output strings.
 	*/
-	LUX_API int Split(StringView split, String* outArray, int maxCount, bool ignoreEmpty = false) const;
+	LUX_API int Split(StringView split, String* outArray, int maxCount, EStringSplit options = EStringSplit::Normal) const;
 
 	//! Split the string on a character.
 	/**
@@ -327,7 +327,7 @@ public:
 	\param ignoreEmpty Empty split strings aren't added to the output
 	\return The array of substrings
 	*/
-	LUX_API core::Array<String> Split(StringView split, bool ignoreEmpty = false) const;
+	LUX_API core::Array<String> Split(StringView split, EStringSplit options = EStringSplit::Normal) const;
 
 	//! Classify the content of the string
 	/**

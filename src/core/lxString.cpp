@@ -397,15 +397,17 @@ String& String::Strip(int first, int end)
 	return *this;
 }
 
-int String::Split(StringView split, String* outArray, int maxCount, bool ignoreEmpty) const
+int String::Split(StringView split, String* outArray, int maxCount, EStringSplit options) const
 {
-	return AsView().BasicSplit(split, maxCount, ignoreEmpty, [&outArray](core::StringView view) { *outArray++ = view; });
+	int count = 0;
+	AsView().BasicSplit(split, options, [&outArray, &count, maxCount](core::StringView view) { *outArray++ = view; return count++ != maxCount; });
+	return count;
 }
 
-Array<String> String::Split(StringView split, bool ignoreEmpty) const
+Array<String> String::Split(StringView split, EStringSplit options) const
 {
 	Array<String> out;
-	AsView().BasicSplit(split, -1, ignoreEmpty, [&out] (core::StringView view) { out.EmplaceBack(view); });
+	AsView().BasicSplit(split, options, [&out] (core::StringView view) { out.EmplaceBack(view); return true; });
 	return out;
 }
 

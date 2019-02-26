@@ -90,12 +90,13 @@ void TextContainer::Ensure(
 			AddBrokenLine(line.SubString(lineBegin, line.Size() - lineBegin), carets.Back().distance - lastLineDistance);
 	};
 
-	m_Text.AsView().BasicSplit("\n", -1, false, [&](core::StringView line) {
+	m_Text.AsView().BasicSplit("\n", core::EStringSplit::Normal, [&](core::StringView line) {
 		auto lineWidth = font->GetTextWidth(settings, line);
 		if(!wordWrap || lineWidth <= textBoxWidth)
 			AddBrokenLine(line, lineWidth);
 		else
 			AddWordWrapedLine(line);
+		return true;
 	});
 
 	float lineHeight = settings.lineDistance*settings.scale*font->GetFontHeight();

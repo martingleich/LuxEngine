@@ -26,6 +26,12 @@ enum class EStringCompare
 	CaseInsensitive,
 };
 
+enum class EStringSplit
+{
+	Normal,
+	IgnoreEmpty,
+};
+
 //! Dummy string type
 /**
 Alias type for full strings or character-arrays.
@@ -167,41 +173,31 @@ public:
 		return MakeRange<ConstUTF8Iterator>(m_Data, m_Data + m_Size);
 	}
 
-	/*
-	Set maxCount to a negative number to ignore maxCount
-	*/
 	template <typename AddResultT>
-	int BasicSplit(StringView split, int maxCount, bool ignoreEmpty, AddResultT&& outputter)
+	void BasicSplit(StringView split, EStringSplit options, AddResultT&& outputter)
 	{
-		if(maxCount == 0)
-			return 0;
-
-		int count = 0;
+		bool ignoreEmpty = TestFlag(options, EStringSplit::IgnoreEmpty);
 		const char* inCur = this->Data();
 		const char* inEnd = inCur + this->Size();
 		const char* splitCur = inCur;
 		int splitSize = 0;
 		if(split.Size() == 0) {
 			while(inCur != inEnd) {
-				if(count == maxCount)
-					break;
-				outputter(StringView(inCur, 1));
-				++count;
+				if(!outputter(StringView(inCur, 1)))
+					return;
 				++inCur;
 			}
-			return count;
+			return;
 		} else if(split.Size() == 1) {
 			while(inCur+1 <= inEnd) {
 				if(*inCur == *split.Data()) {
 					if(!(ignoreEmpty && splitSize == 0)) {
-						outputter(StringView(splitCur, splitSize));
-						++count;
+						if(!outputter(StringView(splitCur, splitSize)))
+							return;
 					}
 					++inCur;
 					splitCur = inCur;
 					splitSize = 0;
-					if(count == maxCount)
-						break;
 				} else {
 					++splitSize;
 					++inCur;
@@ -211,10 +207,8 @@ public:
 			while(inCur+split.Size() <= inEnd) {
 				if(std::memcmp(inCur, split.Data(), split.Size()) == 0) {
 					if(!(ignoreEmpty && splitSize == 0)) {
-						outputter(StringView(splitCur, splitSize));
-						++count;
-						if(count == maxCount)
-							break;
+						if(!outputter(StringView(splitCur, splitSize)))
+							return;
 					}
 					splitCur = inCur + split.Size();
 					splitSize = 0;
@@ -225,12 +219,10 @@ public:
 			}
 		}
 
-		if(!(ignoreEmpty && splitSize == 0) && count != maxCount) {
+		if(!ignoreEmpty && splitSize > 0)
 			outputter(StringView(splitCur, splitSize));
-			++count;
-		}
-		return count;
 	}
+
 
 private:
 	//! The number of bytes in the string, without the NUL-Byte.
