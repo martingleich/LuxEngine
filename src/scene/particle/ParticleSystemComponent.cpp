@@ -66,6 +66,9 @@ void ParticleSystem::Render(const SceneRenderData& r)
 {
 	if(r.pass != ERenderPass::Transparent)
 		return;
+	if(r.technique != video::EMaterialTechnique::Default)
+		return;
+
 	auto node = GetNode();
 	if(!node)
 		return;

@@ -16,8 +16,7 @@ void BaseCamera::Controller::Render(SceneRenderPassHelper* helper)
 	// In theory only visible cameras should be registers, but better be save
 	lxAssert(m_Cam->GetNode() && m_Cam->GetNode()->IsTrulyVisible());
 
-	if(m_Cam->m_Listener)
-		m_Cam->m_Listener->PreRender(m_Cam);
+	m_Cam->PreRenderAction.Call(helper);
 
 	math::Matrix4 view, proj;
 	math::ViewFrustum frustum;
@@ -38,10 +37,10 @@ void BaseCamera::Controller::Render(SceneRenderPassHelper* helper)
 		video->SetTransform(video::ETransform::View, view);
 	});
 
+	m_Cam->UpdateSceneRendererDefaultData.Call(passData);
 	helper->DefaultRenderScene(passData);
 
-	if(m_Cam->m_Listener)
-		m_Cam->m_Listener->PostRender(m_Cam);
+	m_Cam->PostRenderAction.Call(helper);
 }
 
 BaseCamera::BaseCamera() :
@@ -49,7 +48,6 @@ BaseCamera::BaseCamera() :
 	m_NearPlane(0.1f),
 	m_FarPlane(500.0f),
 	m_RenderPriority(0),
-	m_Listener(nullptr),
 	m_Controller(this)
 {
 }

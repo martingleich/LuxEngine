@@ -8,76 +8,116 @@ namespace lux
 namespace video
 {
 
+/*
+TODO: Make shader reconigurabable, i.e. Set all topological parameters(shader, techniques, requirements) This might require a reset of all parameters of something else.
+But it should be doable. For ease of use we put it all into the normal Material class.
+TODO: Add more references to abstract materials.
+TODO: Allow a more flexible choice in selecting the used material class.
+*/
+
 class Material : public AbstractMaterial
 {
 public:
-	struct MaterialSetData : public ShaderParamSetCallback::Data
+	struct SetData : public ShaderParamSetCallback::Data
 	{
+		explicit SetData(Material* _m) :
+			m(_m)
+		{
+		}
 		Material* m;
 	};
-	struct MaterialTechnique
+	struct TechniqueData
 	{
-		const Pass& pass;
+		TechniqueData() {}
+
+		TechniqueData(const Pass& p, EMaterialTechnique t) :
+			pass(p),
+			tech(t)
+		{
+		}
+		Pass pass;
 		EMaterialTechnique tech;
 	};
+
+	struct Configuration
+	{
+		Configuration(const Pass& defaultPass, EMaterialReqFlag req) :
+			pass(defaultPass),
+			requirments(req)
+		{
+		}
+
+		Configuration& Tech(EMaterialTechnique t, const Pass& p)
+		{
+			additionalTech.EmplaceBack(p, t);
+			return *this;
+		}
+
+		video::Pass pass;
+		EMaterialReqFlag requirments;
+		core::Array<TechniqueData> additionalTech;
+	};
+
+private:
+	class InternalTechnique : public AbstractMaterialTechnique
+	{
+	public:
+		TechniqueData tech;
+
+		// Map material params id to shader id, contains -1 if shaders doesn't contain argument.
+		core::Array<int> paramIdToShaderId;
+
+		InternalTechnique(const TechniqueData& t, const core::ParamPackage& materialParams) :
+			tech(t)
+		{
+			paramIdToShaderId.Resize(materialParams.GetParamCount(), -1);
+			auto& shaderParams = tech.pass.shader->GetParamPackage();
+			for(int j = 0; j < materialParams.GetParamCount(); ++j)
+				paramIdToShaderId[j] = shaderParams.GetParamIdByName(materialParams.GetParamName(j));
+		}
+
+		const Pass& GetPass() const override { return tech.pass; }
+		void SendShaderSettings(ShaderParamSetCallback::Data* data) const override
+		{
+			LX_CHECK_NULL_ARG(data);
+			const Material* mat = dynamic_cast<SetData&>(*data).m;
+			LX_CHECK_NULL_ARG(mat);
+
+			for(int i = 0; i < mat->m_Params.GetParamCount(); ++i) {
+				auto shaderId = paramIdToShaderId[i];
+				if(shaderId != -1) {
+					auto param = mat->m_Params.FromID(i, true);
+					tech.pass.shader->SetParam(shaderId, param.Pointer());
+				}
+			}
+		}
+	};
+
 	class SharedMaterialData : public ReferenceCounted
 	{
 	public:
-		SharedMaterialData(const Pass& defaultPass, EMaterialReqFlag req,
-			const MaterialTechnique* additional, int additionalCount)
+		SharedMaterialData(const Pass& defaultPass, EMaterialReqFlag req, const core::Array<TechniqueData>& additional)
 		{
-			Technique def;
-			def.pass = defaultPass;
-			def.technique = EMaterialTechnique::Default;
-			auto& defaultParams = defaultPass.shader->GetParamPackage();
-			for(int i = 0; i < defaultParams.GetParamCount(); ++i)
-				def.paramIdToShaderId.PushBack(i);
-			m_Techniques.PushBack(def);
-			for(int i = 0; i < additionalCount; ++i) {
-				Technique tech;
-				tech.pass = additional[i].pass;
-				tech.technique = additional[i].tech;
-				tech.paramIdToShaderId.Resize(defaultParams.GetParamCount(), -1);
-				auto& shaderParams = tech.pass.shader->GetParamPackage();
-				for(int j = 0; j < defaultParams.GetParamCount(); ++j)
-					tech.paramIdToShaderId[j] = shaderParams.GetParamIdByName(defaultParams.GetParamName(j));
+			auto& matParams = defaultPass.shader->GetParamPackage();
+			m_Techniques.EmplaceBack(TechniqueData(defaultPass, EMaterialTechnique::Default), matParams);
+
+			for(auto add : additional) {
+				if(add.tech != EMaterialTechnique::Default)
+					m_Techniques.EmplaceBack(add, matParams);
 			}
 
 			m_Requirements = req;
 
-			m_DiffuseId = defaultParams.GetParamIdByName("diffuse");
-			m_EmissiveId = defaultParams.GetParamIdByName("emissive");
-			m_SpecularHardnessId = defaultParams.GetParamIdByName("specularHardness");
-			m_SpecularIntensityId = defaultParams.GetParamIdByName("specularIntensity");
+			m_DiffuseId = matParams.GetParamIdByName("diffuse");
+			m_EmissiveId = matParams.GetParamIdByName("emissive");
+			m_SpecularHardnessId = matParams.GetParamIdByName("specularHardness");
+			m_SpecularIntensityId = matParams.GetParamIdByName("specularIntensity");
 		}
 
-		class Technique : public AbstractMaterialTechnique
-		{
-		public:
-			Pass pass;
-			EMaterialTechnique technique;
-			core::Array<int> paramIdToShaderId;
-
-			const Pass& GetPass() const { return pass; }
-			void SendShaderSettings(ShaderParamSetCallback::Data* data) const override
-			{
-				LX_CHECK_NULL_ARG(data);
-				const Material* mat = dynamic_cast<MaterialSetData&>(*data).m;
-				LX_CHECK_NULL_ARG(mat);
-
-				for(int i = 0; i < mat->m_Params.GetParamCount(); ++i) {
-					auto shaderId = paramIdToShaderId[i];
-					if(shaderId != -1) {
-						auto param = mat->m_Params.FromID(i, true);
-						pass.shader->SetParam(shaderId, param.Pointer());
-					}
-				}
-			}
-		};
-
-		core::Array<Technique> m_Techniques;
+		core::Array<InternalTechnique> m_Techniques;
 		EMaterialReqFlag m_Requirements;
 
+		// Material parameter id of diffuse/emissive/specular hardness/specular intensity or -1 if not available.
 		int m_DiffuseId;
 		int m_EmissiveId;
 		int m_SpecularHardnessId;
@@ -85,19 +125,24 @@ public:
 	};
 
 public:
-	Material(const Pass& pass, EMaterialReqFlag req) :
-		m_Shared(LUX_NEW(SharedMaterialData(pass, req, nullptr, 0))),
-		m_Params(&pass.shader->GetParamPackage())
+	explicit Material(const Configuration& config)
 	{
+		ReConfigure(config);
+	}
+	void ReConfigure(const Configuration& config)
+	{
+		m_Shared = LUX_NEW(SharedMaterialData)(config.pass, config.requirments, config.additionalTech);
+		m_Params.Reset(&config.pass.shader->GetParamPackage());
 	}
 
-	AbstractMaterialTechnique* GetTechnique(EMaterialTechnique technique = EMaterialTechnique::Default) const
+	core::Optional<AbstractMaterialTechnique*> GetTechnique(EMaterialTechnique technique = EMaterialTechnique::Default) const
 	{
 		for(int i = 0; i < m_Shared->m_Techniques.Size(); ++i) {
-			if(m_Shared->m_Techniques[i].technique == technique)
+			if(m_Shared->m_Techniques[i].tech.tech == technique)
 				return &m_Shared->m_Techniques[i];
 		}
-		return &m_Shared->m_Techniques[0];
+
+		return nullptr;
 	}
 
 	EMaterialReqFlag GetRequirements() const override { return m_Shared->m_Requirements; }

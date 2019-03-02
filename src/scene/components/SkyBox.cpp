@@ -25,11 +25,11 @@ SkyBox::SkyBox() :
 	if(mat) {
 		m_Material = mat->Clone();
 	} else {
-		auto solid = video::MaterialLibrary::Instance()->GetMaterial("solid");
-		video::Pass pass = solid->GetTechnique()->GetPass();
+		auto solid = video::MaterialLibrary::Instance()->GetMaterial(video::MaterialLibrary::SolidName);
+		video::Pass pass = solid->GetTechnique().GetValue()->GetPass();
 		pass.fogEnabled = false;
 		pass.lighting = video::ELightingFlag::Disabled;
-		mat = video::MaterialLibrary::Instance()->CreateMaterial(pass);
+		mat = video::MaterialLibrary::Instance()->CreateMaterial(pass, video::EMaterialReqFlag::None);
 		video::MaterialLibrary::Instance()->SetMaterial("skybox", mat);
 		m_Material = mat;
 	}
@@ -129,9 +129,13 @@ void SkyBox::Render(const SceneRenderData& data)
 {
 	if(data.pass != ERenderPass::SkyBox)
 		return;
-
-	if(!m_Material)
+	if(data.technique == video::EMaterialTechnique::ShadowCaster) {
+		data.video->Clear(true, false, false, video::Color::Red);
 		return;
+	}
+	if(data.technique != video::EMaterialTechnique::Default)
+		return;
+
 	auto node = GetNode();
 	if(!node)
 		return;
@@ -206,6 +210,7 @@ const video::Material* SkyBox::GetMaterial() const
 
 void SkyBox::SetMaterial(video::Material* m)
 {
+	LX_CHECK_NULL_ARG(m);
 	m_Material = m;
 }
 

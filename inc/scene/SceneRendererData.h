@@ -2,6 +2,8 @@
 #define INCLUDED_LUX_SCENE_RENDERABLE_H
 #include "math/ViewFrustum.h"
 #include "video/RenderTarget.h"
+#include "video/AbstractMaterial.h"
+#include "core/lxOptional.h"
 
 namespace lux
 {
@@ -37,6 +39,8 @@ public:
 	ERenderPass pass;
 
 	SceneRenderCamData camData;
+
+	video::EMaterialTechnique technique = video::EMaterialTechnique::Default;
 };
 
 class SceneRenderPassDefaultData
@@ -46,6 +50,8 @@ public:
 	SceneRenderCamData camData;
 	//u32 matchAnyTags = 0xFFFFFFFF;
 	//u32 matchAllTags = 0;
+
+	core::Optional<video::EMaterialTechnique> materialTechnique;
 
 	// RenderSettings
 	video::RenderTarget renderTarget;

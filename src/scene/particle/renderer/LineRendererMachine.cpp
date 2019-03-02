@@ -45,7 +45,10 @@ void LineRendererMachine::CreateBuffer(ParticleGroupData* group)
 		m_Vertices.Resize(group->GetParticleCount() * 2);
 }
 
-void LineRendererMachine::Render(video::Renderer* videoRenderer, ParticleGroupData* group, LineParticleRenderer* renderer)
+void LineRendererMachine::Render(
+	video::Renderer* videoRenderer,
+	ParticleGroupData* group,
+	LineParticleRenderer* renderer)
 {
 	if(group->GetParticleCount() == 0)
 		return;

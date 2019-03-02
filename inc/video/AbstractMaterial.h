@@ -1,6 +1,7 @@
 #ifndef INCLUDED_LUX_ABSTRACT_MATERIAL_H
 #define INCLUDED_LUX_ABSTRACT_MATERIAL_H
 #include "core/Referable.h"
+#include "core/lxOptional.h"
 #include "video/Pass.h"
 
 namespace lux
@@ -30,7 +31,7 @@ class AbstractMaterial : public ReferenceCounted
 {
 public:
 	virtual EMaterialReqFlag GetRequirements() const = 0;
-	virtual AbstractMaterialTechnique* GetTechnique(EMaterialTechnique tech = EMaterialTechnique::Default) const = 0;
+	virtual core::Optional<AbstractMaterialTechnique*> GetTechnique(EMaterialTechnique tech = EMaterialTechnique::Default) const = 0;
 };
 
 } // namespace video

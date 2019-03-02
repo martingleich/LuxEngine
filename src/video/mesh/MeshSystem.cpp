@@ -45,7 +45,7 @@ StrongRef<Mesh> MeshSystem::CreateMesh(Geometry* geo, Material* mat)
 
 StrongRef<Mesh> MeshSystem::CreateMeshDefaultMaterial(Geometry* geo)
 {
-	auto defMat = video::MaterialLibrary::Instance()->GetMaterial("solid");
+	auto defMat = video::MaterialLibrary::Instance()->GetMaterial(video::MaterialLibrary::SolidName);
 	return CreateMesh(geo, defMat);
 }
 

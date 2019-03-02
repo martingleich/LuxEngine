@@ -133,7 +133,7 @@ public:
 			throw core::FileFormatException("File contains no geometry", "obj");
 
 		ConvertMaterials();
-		invalidMaterial = video::MaterialLibrary::Instance()->CloneMaterial("debugOverlay");
+		invalidMaterial = video::MaterialLibrary::Instance()->CloneMaterial(video::MaterialLibrary::DebugOverlayName);
 		invalidMaterial->SetDiffuse(video::Color::Pink);
 
 		size_t indexCount = 0;
@@ -266,9 +266,9 @@ public:
 	{
 		StrongRef<Material> lxm;
 		if(mat.dissolve != 1)
-			lxm = video::MaterialLibrary::Instance()->CloneMaterial("transparent");
+			lxm = video::MaterialLibrary::Instance()->CloneMaterial(video::MaterialLibrary::TransparentName);
 		else
-			lxm = video::MaterialLibrary::Instance()->CloneMaterial("solid");
+			lxm = video::MaterialLibrary::Instance()->CloneMaterial(video::MaterialLibrary::SolidName);
 
 		lxm->SetDiffuse(video::ColorF(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], mat.dissolve));
 		lxm->SetEmissive(video::ColorF(mat.emission[0], mat.emission[1], mat.emission[2]).GetLuminance());

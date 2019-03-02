@@ -284,15 +284,13 @@ public:
 		return !(*this == other);
 	}
 
-	//! Set the type of the package puffer
+	//! Reset the puffer to its default state
 	/**
 	\param pack The new type of the package
 	*/
-	void SetType(const ParamPackage* pack)
+	void Reset(const ParamPackage* pack)
 	{
 		LX_CHECK_NULL_ARG(pack);
-		if(m_Pack == pack)
-			return;
 
 		// Exception save ordering.
 		m_Pack->DestroyPackage(m_Data);

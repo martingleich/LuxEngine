@@ -1262,11 +1262,11 @@ public:
 
 	StrongRef<video::Material> MakeLuxMaterial(const XMaterial& xmat)
 	{
-		video::MaterialLibrary::EKnownMaterial matType;
+		core::StringView matType;
 		if(xmat.faceColor.a != 1.0f)
-			matType = video::MaterialLibrary::EKnownMaterial::Transparent;
+			matType = video::MaterialLibrary::TransparentName;
 		else
-			matType = video::MaterialLibrary::EKnownMaterial::Solid;
+			matType = video::MaterialLibrary::SolidName;
 
 		auto material = video::MaterialLibrary::Instance()->CloneMaterial(matType);
 		StrongRef<video::Texture> tex;
@@ -1481,7 +1481,7 @@ void MeshLoaderX::LoadMesh(io::File* file, video::Mesh* dst, const core::String&
 	if(dst->GetMaterialCount() == 0) {
 		dst->SetMaterial(
 			video::MaterialLibrary::Instance()->GetMaterial(
-				video::MaterialLibrary::EKnownMaterial::Solid));
+				video::MaterialLibrary::SolidName));
 	}
 }
 

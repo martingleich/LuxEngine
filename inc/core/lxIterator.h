@@ -309,6 +309,12 @@ auto MakeRange(Class&& obj)
 	return MakeRange(begin(obj), end(obj));
 }
 
+template <typename T>
+Range<T*> MakeEmptyRange()
+{
+	return Range<T*>(nullptr, nullptr);
+}
+
 template <typename BaseT>
 struct IndexIter : public BaseIterator<RandomAccessIteratorTag, BaseT>
 {
@@ -503,6 +509,12 @@ template <typename IterT>
 inline AnyRange<typename IterT::ValueType> MakeAnyRange(IterT first, IterT end)
 {
 	return AnyRange<typename IterT::ValueType>(MakeAnyConstIter(first), MakeAnyConstIter(end));
+}
+
+template <typename T>
+inline AnyRange<T> MakeEmptyAnyRange()
+{
+	return AnyRange<T>(MakeAnyConstIter<T*>(nullptr), MakeAnyConstIter<T*>(nullptr));
 }
 
 template <typename T, bool IsConst>

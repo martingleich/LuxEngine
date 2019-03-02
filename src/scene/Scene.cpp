@@ -397,7 +397,7 @@ public:
 	}
 
 	void DrawScene();
-	void DrawScenePass(const SceneRenderCamData& camData);
+	void DrawScenePass(const SceneRenderCamData& camData, core::Optional<video::EMaterialTechnique> technique);
 
 	// Scene Render Pass Helper functions.
 	video::Renderer* GetRenderer() override { return m_Renderer; }
@@ -421,25 +421,17 @@ public:
 		}
 
 		// Begin scene
-		bool clearColor = true;
-		bool clearZ = true;
-		bool clearStencil = true;
-		if(!m_RenderableCollection.skyBoxList.IsEmpty()) {
-			clearColor = false;
-		}
-
 		m_Renderer->SetRenderTarget(data.renderTarget);
-		m_Renderer->Clear(clearColor, clearZ, clearStencil);
+		m_Renderer->Clear(false, true, true);
+		// Color clear is performed by skybox.
 		m_Renderer->BeginScene();
 
-		if(data.onPreRender.IsBound())
-			data.onPreRender.Call();
+		data.onPreRender.Call();
 
 		// Render scene.
-		DrawScenePass(camData);
+		DrawScenePass(camData, data.materialTechnique);
 
-		if(data.onPostRender.IsBound())
-			data.onPostRender.Call();
+		data.onPostRender.Call();
 
 		// End scene
 		if(m_CurPassId + 1 < m_PassCount)
@@ -628,7 +620,7 @@ void InternalRenderData::DrawScene()
 	m_Renderer->SetParams(oldParams);
 }
 
-void InternalRenderData::DrawScenePass(const SceneRenderCamData& camData)
+void InternalRenderData::DrawScenePass(const SceneRenderCamData& camData, core::Optional<video::EMaterialTechnique> technique)
 {
 	// Check if a stencil buffer is available for shadow rendering
 	bool drawStencilShadows = m_SceneAttributes->GetValue<bool>("drawStencilShadows");
@@ -648,6 +640,7 @@ void InternalRenderData::DrawScenePass(const SceneRenderCamData& camData)
 	SceneRenderData sceneData;
 	sceneData.video = m_Renderer;
 	sceneData.camData = camData;
+	sceneData.technique = technique.HasValue() ? technique.GetValue() : video::EMaterialTechnique::Default;
 
 	m_Renderer->GetParams().SetValue("camPos", camData.transform.translation);
 

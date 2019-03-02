@@ -25,7 +25,7 @@ public:
 	void BuildGUIEnvironment() override;
 
 	void BuildMaterialLibrary() override;
-	void BuildMeshSystem(video::Material* defaultMaterial) override;
+	void BuildMeshSystem() override;
 
 	void RunSimpleFrameLoop(const SimpleFrameLoop& frameLoop) override;
 

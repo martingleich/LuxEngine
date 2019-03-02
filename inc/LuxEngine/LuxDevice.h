@@ -26,7 +26,6 @@ namespace video
 {
 class VideoDriver;
 class VideoDriverInitData;
-class Material;
 }
 class LuxSystemInfo;
 
@@ -59,7 +58,7 @@ public:
 
 	virtual void BuildImageSystem() = 0;
 	virtual void BuildMaterialLibrary() = 0;
-	virtual void BuildMeshSystem(video::Material* defaultMaterial = nullptr) = 0;
+	virtual void BuildMeshSystem() = 0;
 
 	virtual void BuildGUIEnvironment() = 0;
 

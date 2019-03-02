@@ -218,18 +218,17 @@ public:
 			userParam);
 	}
 
-	void SendMaterialSettings(
-		Material* material,
-		EMaterialTechnique tech = EMaterialTechnique::Default)
+	void SendMaterialSettings(Material* material)
 	{
-		auto realTech = material->GetTechnique(tech);
-		Material::MaterialSetData setData;
-		setData.m = material;
+		auto realTech = material->GetTechnique(EMaterialTechnique::Default);
+		lxAssert(realTech.HasValue());
+
+		Material::SetData setData(material);
 		SendPassSettingsEx(
 			ERenderMode::Mode3D,
-			realTech->GetPass(),
+			realTech.GetValue()->GetPass(),
 			true,
-			realTech,
+			realTech.GetValue(),
 			&setData);
 	}
 

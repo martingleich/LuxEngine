@@ -124,12 +124,9 @@ private:
 class MaterialLibrary : public ReferenceCounted
 {
 public:
-	enum EKnownMaterial
-	{
-		Solid,
-		DebugOverlay,
-		Transparent,
-	};
+	static LUX_API core::StringView SolidName;
+	static LUX_API core::StringView DebugOverlayName;
+	static LUX_API core::StringView TransparentName;
 
 private:
 	MaterialLibrary();
@@ -144,13 +141,12 @@ public:
 	LUX_API StrongRef<video::Material> GetMaterial(core::StringView name);
 	LUX_API StrongRef<video::Material> TryGetMaterial(core::StringView name);
 	LUX_API StrongRef<video::Material> CloneMaterial(core::StringView name);
-	LUX_API StrongRef<video::Material> CreateMaterial(video::Pass pass, EMaterialReqFlag reqs = EMaterialReqFlag::None);
+
+	LUX_API StrongRef<video::Material> CreateMaterial(const video::Pass& pass, EMaterialReqFlag reqs);
+	LUX_API StrongRef<video::Material> CreateMaterial(const Material::Configuration& config);
+	
 	LUX_API StrongRef<video::Material> CreateSolidMaterial(video::Shader* shader);
 	LUX_API StrongRef<video::Material> CreateTransparentMaterial(video::Shader* shader);
-
-	LUX_API void SetMaterial(EKnownMaterial name, Material* material);
-	LUX_API StrongRef<video::Material> GetMaterial(EKnownMaterial name);
-	LUX_API StrongRef<video::Material> CloneMaterial(EKnownMaterial name);
 
 private:
 	core::HashMap<core::String, int> m_MaterialMap;
@@ -158,6 +154,8 @@ private:
 
 	VideoDriver* m_Driver;
 	ShaderFactory* m_ShaderFactory;
+
+	StrongRef<Shader> m_ShadowCasterShader;
 };
 
 } // namespace video

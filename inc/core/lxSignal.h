@@ -262,7 +262,8 @@ public:
 
 	void Call(Args... args) const
 	{
-		m_Event->Call(args...);
+		if(m_Event)
+			m_Event->Call(args...);
 	}
 
 	bool IsBound() const
@@ -326,8 +327,7 @@ public:
 		SingleSignal<Args...> signal;
 		signal.Connect(std::forward<Args2>(args)...);
 		m_Callfuncs.PushBack(std::move(signal));
-		if(m_ConnectEvent.IsBound())
-			m_ConnectEvent.Call(*m_Callfuncs.Back().GetFunc());
+		m_ConnectEvent.Call(*m_Callfuncs.Back().GetFunc());
 	}
 
 	template <typename Class>

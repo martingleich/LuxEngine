@@ -35,7 +35,7 @@ void ShaderFactory::Destroy()
 }
 
 ShaderFactory::ShaderFactory() :
-	m_Driver(video::VideoDriver::Instance())
+	m_Driver(VideoDriver::Instance())
 {
 	LX_CHECK_NULL_ARG(m_Driver);
 
@@ -114,7 +114,7 @@ ShaderFactory::~ShaderFactory()
 
 
 StrongRef<Shader> ShaderFactory::CreateShaderFromFile(
-	video::EShaderLanguage language,
+	EShaderLanguage language,
 	const io::Path& vsPath, core::StringView vsProfile,
 	const io::Path& psPath, core::StringView psProfile,
 	ShaderCompileInfo* outInfo)
@@ -231,6 +231,10 @@ void ShaderFactory::SetShaderInclude(
 
 static StrongRef<MaterialLibrary> g_MaterialLibrary;
 
+core::StringView MaterialLibrary::SolidName("solid");
+core::StringView MaterialLibrary::DebugOverlayName("debugOverlay");
+core::StringView MaterialLibrary::TransparentName("transparent");
+
 void MaterialLibrary::Initialize()
 {
 	if(g_MaterialLibrary)
@@ -249,43 +253,53 @@ void MaterialLibrary::Destroy()
 }
 
 MaterialLibrary::MaterialLibrary() :
-	m_Driver(video::VideoDriver::Instance()),
-	m_ShaderFactory(video::ShaderFactory::Instance())
+	m_Driver(VideoDriver::Instance()),
+	m_ShaderFactory(ShaderFactory::Instance())
 {
 	LX_CHECK_NULL_ARG(m_Driver);
 	LX_CHECK_NULL_ARG(m_ShaderFactory);
 
+	m_ShadowCasterShader = ShaderFactory::Instance()->CreateShaderFromMemory(
+		EShaderLanguage::HLSL,
+R"(
+float4x4 scene_worldViewProj;
+void mainVS(float3 pos : POSITION, out float4 hpos : POSITION, out float distance : TEXCOORD0)
+{
+	hpos = mul(float4(pos, 1.0), scene_worldViewProj);
+	distance = hpos.z;
+}
+)", "vs_2_0",
+R"(
+float4 mainPS(float distance : TEXCOORD0) : COLOR0
+{
+	return float4(distance, 0, 0, 1);	
+}
+)", "ps_2_0", nullptr);
 	// TODO: Move into dependency injection.
 	{
-		auto shader = m_ShaderFactory->GetFixedFunctionShader(video::FixedFunctionParameters::Lit({"texture"}, {video::TextureStageSettings()}));
+		auto shader = m_ShaderFactory->GetFixedFunctionShader(FixedFunctionParameters::Lit({"texture"}, {TextureStageSettings()}));
 		auto solid = CreateSolidMaterial(shader);
-		m_MaterialMap["solid"] = (int)EKnownMaterial::Solid;
-		lxAssert(EKnownMaterial::Solid == m_MaterialList.Size());
-		m_MaterialList.PushBack(solid);
+		SetMaterial(SolidName, solid);
 	}
 
 	{
-		video::Pass pass;
+		Pass pass;
 		pass.fogEnabled = false;
-		pass.lighting = video::ELightingFlag::Disabled;
+		pass.lighting = ELightingFlag::Disabled;
 
-		video::TextureStageSettings tss;
+		TextureStageSettings tss;
 		tss.colorOperator = ETextureOperator::SelectArg1;
 		tss.colorArg1 = ETextureArgument::Diffuse;
-		pass.shader = m_ShaderFactory->GetFixedFunctionShader(video::FixedFunctionParameters::Unlit({"texture"}, {tss}, true));
+		pass.shader = m_ShaderFactory->GetFixedFunctionShader(FixedFunctionParameters::Unlit({"texture"}, {tss}, true));
 
-		auto debug = CreateMaterial(pass);
-		m_MaterialMap["debugOverlay"] = (int)EKnownMaterial::DebugOverlay;
-		lxAssert(EKnownMaterial::DebugOverlay == m_MaterialList.Size());
-		m_MaterialList.PushBack(debug);
+		auto debug = CreateMaterial(pass, EMaterialReqFlag::None);
+		SetMaterial(DebugOverlayName, debug);
 	}
 
 	{
-		auto shader = m_ShaderFactory->GetFixedFunctionShader(video::FixedFunctionParameters::Lit({"texture"}, {video::TextureStageSettings()}));
+		auto shader = m_ShaderFactory->GetFixedFunctionShader(FixedFunctionParameters::Lit({"texture"}, {TextureStageSettings()}));
 		auto transparent = CreateTransparentMaterial(shader);
-		m_MaterialMap["transparent"] = (int)EKnownMaterial::Transparent;
-		lxAssert(EKnownMaterial::Transparent == m_MaterialList.Size());
-		m_MaterialList.PushBack(transparent);
+		SetMaterial(TransparentName, transparent);
 	}
 
 }
@@ -295,7 +309,7 @@ MaterialLibrary::~MaterialLibrary()
 }
 
 void MaterialLibrary::SetMaterial(
-	core::StringView name, video::Material* material)
+	core::StringView name, Material* material)
 {
 	auto& key = m_MaterialMap.At(name, m_MaterialList.Size());
 	if(key == m_MaterialList.Size())
@@ -304,7 +318,7 @@ void MaterialLibrary::SetMaterial(
 		m_MaterialList[key] = material;
 }
 
-StrongRef<video::Material> MaterialLibrary::GetMaterial(core::StringView name)
+StrongRef<Material> MaterialLibrary::GetMaterial(core::StringView name)
 {
 	auto it = m_MaterialMap.Find(name);
 	if(it == m_MaterialMap.end())
@@ -312,7 +326,7 @@ StrongRef<video::Material> MaterialLibrary::GetMaterial(core::StringView name)
 	return m_MaterialList[it->value];
 }
 
-StrongRef<video::Material> MaterialLibrary::TryGetMaterial(core::StringView name)
+StrongRef<Material> MaterialLibrary::TryGetMaterial(core::StringView name)
 {
 	auto it = m_MaterialMap.Find(name);
 	if(it == m_MaterialMap.end())
@@ -320,49 +334,41 @@ StrongRef<video::Material> MaterialLibrary::TryGetMaterial(core::StringView name
 	return m_MaterialList[it->value];
 }
 
-StrongRef<video::Material> MaterialLibrary::CloneMaterial(core::StringView name)
+StrongRef<Material> MaterialLibrary::CloneMaterial(core::StringView name)
 {
 	return GetMaterial(name)->Clone();
 }
 
-StrongRef<video::Material> MaterialLibrary::CreateMaterial(video::Pass pass, EMaterialReqFlag reqs)
+StrongRef<Material> MaterialLibrary::CreateMaterial(const Pass& pass, EMaterialReqFlag reqs)
 {
-	return LUX_NEW(Material)(pass, reqs);
+	return LUX_NEW(Material)(Material::Configuration(pass, reqs));
 }
-StrongRef<video::Material> MaterialLibrary::CreateSolidMaterial(video::Shader* shader)
+StrongRef<video::Material> MaterialLibrary::CreateMaterial(const Material::Configuration& config)
 {
-	video::Pass p;
+	return LUX_NEW(Material)(config);
+}
+StrongRef<Material> MaterialLibrary::CreateSolidMaterial(Shader* shader)
+{
+	Pass p;
 	p.shader = shader;
-	return CreateMaterial(p, EMaterialReqFlag::None);
+
+	Pass p2;
+	p2.shader = m_ShadowCasterShader;
+
+	return LUX_NEW(Material)(Material::Configuration(p, EMaterialReqFlag::None).Tech(EMaterialTechnique::ShadowCaster, p2));
 }
 
-StrongRef<video::Material> MaterialLibrary::CreateTransparentMaterial(video::Shader* shader)
+StrongRef<Material> MaterialLibrary::CreateTransparentMaterial(Shader* shader)
 {
-	video::Pass p;
+	Pass p;
 	p.shader = shader;
-	p.alpha.srcFactor = video::EBlendFactor::SrcAlpha;
-	p.alpha.dstFactor = video::EBlendFactor::OneMinusSrcAlpha;
-	p.alpha.blendOperator = video::EBlendOperator::Add;
+	p.alpha.srcFactor = EBlendFactor::SrcAlpha;
+	p.alpha.dstFactor = EBlendFactor::OneMinusSrcAlpha;
+	p.alpha.blendOperator = EBlendOperator::Add;
 	p.zWriteEnabled = false;
 	p.fogEnabled = false;
 	return CreateMaterial(p, EMaterialReqFlag::Transparent);
 }
-
-void MaterialLibrary::SetMaterial(EKnownMaterial name, Material* material)
-{
-	m_MaterialList.At((int)name) = material;
-}
-
-StrongRef<video::Material> MaterialLibrary::GetMaterial(EKnownMaterial name)
-{
-	return m_MaterialList.At((int)name);
-}
-
-StrongRef<video::Material> MaterialLibrary::CloneMaterial(EKnownMaterial name)
-{
-	return GetMaterial(name)->Clone();
-}
-
 
 } // namespace video
 } // namespace lux

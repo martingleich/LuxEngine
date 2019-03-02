@@ -4,6 +4,7 @@
 #include "video/RenderTarget.h"
 #include "math/Matrix4.h"
 #include "math/ViewFrustum.h"
+#include "core/lxSignal.h"
 
 namespace lux
 {
@@ -28,16 +29,6 @@ public:
 		BaseCamera* m_Cam;
 	};
 
-	class Listener
-	{
-	public:
-		//! Called before rendering the camera, after beginning the scene.
-		virtual void PreRender(BaseCamera* cam) { LUX_UNUSED(cam); }
-
-		//! Called after rendering all nodes, before ending the scene.
-		virtual void PostRender(BaseCamera* cam) { LUX_UNUSED(cam); }
-	};
-
 public:
 	LUX_API BaseCamera();
 
@@ -57,8 +48,9 @@ public:
 	void SetRenderPriority(int p) { m_RenderPriority = p; }
 	int GetRenderPriority() const { return m_RenderPriority; }
 
-	void SetCameraListener(Listener* l) { m_Listener = l; }
-	Listener* GetCameraListener() const { return m_Listener; }
+	core::Action<SceneRenderPassHelper*> PreRenderAction;
+	core::Action<SceneRenderPassHelper*> PostRenderAction;
+	core::Action<SceneRenderPassDefaultData&> UpdateSceneRendererDefaultData;
 
 	LUX_API void Register(bool doRegister) override;
 
@@ -74,7 +66,6 @@ protected:
 	video::RenderTarget m_RenderTarget;
 	int m_RenderPriority;
 
-	Listener* m_Listener;
 
 	Controller m_Controller;
 };

@@ -64,11 +64,22 @@ void Mesh::Render(const SceneRenderData& r)
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
 		if(pass == r.pass && firstPrimitive <= lastPrimitive) {
-			r.video->SendMaterialSettings(material);
-			r.video->Draw(video::RenderRequest::FromGeometry(
-				geo,
-				firstPrimitive,
-				lastPrimitive - firstPrimitive + 1));
+			auto realTechOpt = material->GetTechnique(r.technique);
+			if(realTechOpt.HasValue()) {
+				auto realTech = realTechOpt.GetValue();
+
+				video::Material::SetData setData(material);
+				r.video->SendPassSettingsEx(
+					video::ERenderMode::Mode3D,
+					realTech->GetPass(),
+					true,
+					realTech,
+					&setData);
+				r.video->Draw(video::RenderRequest::FromGeometry(
+					geo,
+					firstPrimitive,
+					lastPrimitive - firstPrimitive + 1));
+			}
 		}
 	}
 }
