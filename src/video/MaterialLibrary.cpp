@@ -212,10 +212,10 @@ bool ShaderFactory::GetShaderInclude(
 	core::StringView& outData)
 {
 	ShaderInclude search(language, name);
-	auto it = m_ShaderIncludes.Find(search);
-	if(it == m_ShaderIncludes.End())
+	auto itOpt = m_ShaderIncludes.Find(search);
+	if(!itOpt.HasValue())
 		return false;
-	outData = core::StringView((const char*)it->Pointer(), (int)it->GetSize());
+	outData = core::StringView((const char*)itOpt.GetValue().value->Pointer(), (int)it->GetSize());
 	return true;
 }
 
@@ -320,18 +320,18 @@ void MaterialLibrary::SetMaterial(
 
 StrongRef<Material> MaterialLibrary::GetMaterial(core::StringView name)
 {
-	auto it = m_MaterialMap.Find(name);
-	if(it == m_MaterialMap.end())
+	auto itOpt = m_MaterialMap.Find(name);
+	if(!itOpt.HasValue())
 		throw core::ObjectNotFoundException(name);
-	return m_MaterialList[it->value];
+	return m_MaterialList[itOpt.GetValue()->value];
 }
 
 StrongRef<Material> MaterialLibrary::TryGetMaterial(core::StringView name)
 {
-	auto it = m_MaterialMap.Find(name);
-	if(it == m_MaterialMap.end())
+	auto itOpt = m_MaterialMap.Find(name);
+	if(!itOpt.HasValue())
 		return nullptr;
-	return m_MaterialList[it->value];
+	return m_MaterialList[itOpt.GetValue()->value];
 }
 
 StrongRef<Material> MaterialLibrary::CloneMaterial(core::StringView name)

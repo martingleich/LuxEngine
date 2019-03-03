@@ -20,6 +20,7 @@ namespace gui
 FontCreatorNull::FontCreatorNull()
 {
 	AddDefaultCharSet("german", " AA«»íéáóúôîûâê1234567890AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZzÖöÜüÄäß²³{}[]()<>+-*,;.:!?&%§/\\'#~^°\"_´`$€@µ|=");
+	m_DefaultCharSet = m_DefaultCharSets.begin()->value;
 }
 
 StrongRef<Font> FontCreatorNull::CreateFontFromFile(const io::Path& path,
@@ -95,7 +96,6 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	if(!ctx)
 		throw core::GenericRuntimeException("Font creation failed");
 
-	CharInfo info;
 	u8* image;
 	math::Dimension2I imageSize;
 	int channelCount;
@@ -104,9 +104,10 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 	GetFontImage(ctx, image, imageSize, channelCount);
 
 	FontCreationData data;
-	for(auto it = charSet.First(); it != charSet.End(); ++it) {
-		if(this->GetFontCharInfo(ctx, *it, info))
-			data.charMap.SetAndReplace(*it, info);
+	for(auto c : charSet) {
+		auto infoOpt = this->GetFontCharInfo(ctx, c);
+		if(infoOpt.HasValue())
+			data.charMap.SetAndReplace(c, infoOpt.GetValue());
 	}
 
 	this->GetFontInfo(ctx, fontHeight, data.desc);
@@ -124,10 +125,7 @@ StrongRef<Font> FontCreatorNull::CreateFontFromContext(void* ctx, const core::Ar
 
 const core::Array<u32>& FontCreatorNull::GetDefaultCharset(const core::String& name) const
 {
-	auto it = m_DefaultCharSets.Find(name);
-	if(it != m_DefaultCharSets.end())
-		return it->value;
-	return m_DefaultCharSets.begin()->value;
+	return m_DefaultCharSets.Get(name, m_DefaultCharSet);
 }
 
 void FontCreatorNull::AddDefaultCharSet(const core::String& name, const core::String& data)

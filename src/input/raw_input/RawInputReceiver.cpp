@@ -150,12 +150,12 @@ StrongRef<RawInputDevice> RawInputReceiver::GetDevice(HANDLE rawHandle, int devi
 			}
 		}
 	} else {
-		auto it = m_DeviceMap.Find(rawHandle);
-		if(it == m_DeviceMap.end()) {
+		auto itOpt = m_DeviceMap.Find(rawHandle);
+		if(!itOpt.HasValue()) {
 			out = CreateDevice(rawHandle);
 			m_DeviceMap.SetAndReplace(rawHandle, out);
 		} else {
-			out = it->value;
+			out = itOpt.GetValue()->value;
 		}
 	}
 

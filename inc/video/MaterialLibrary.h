@@ -98,6 +98,13 @@ private:
 				return name < other.name;
 		}
 
+		unsigned int GetHash() const
+		{
+			core::SequenceHasher seq;
+			seq.Add(core::HashType<EShaderLanguage>()(language));
+			seq.Add(core::HashType<core::String>()(name));
+			return seq.GetHash();
+		}
 		bool operator==(const ShaderInclude& other) const
 		{
 			return language == other.language && name == other.name;
@@ -115,7 +122,7 @@ private:
 		StrongRef<Shader> shader;
 	};
 
-	core::OrderedMap<ShaderInclude, core::RawMemory> m_ShaderIncludes;
+	core::HashMap<ShaderInclude, core::RawMemory, core::MemberFuncHashType<ShaderInclude>> m_ShaderIncludes;
 	core::Array<FixedFunctionEntry> m_FixedFunctionShaders;
 
 	VideoDriver* m_Driver;

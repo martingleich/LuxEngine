@@ -323,8 +323,8 @@ Name ResourceSystem::GetType(int id) const
 void ResourceSystem::AddType(Name name)
 {
 	TypeEntry entry(name);
-	int id = self->types.LinearSearch(entry);
-	if(id >= 0)
+	auto idOpt = self->types.LinearSearch(entry);
+	if(idOpt.HasValue())
 		throw ObjectAlreadyExistsException(name.AsView());
 
 	self->types.PushBack(entry);

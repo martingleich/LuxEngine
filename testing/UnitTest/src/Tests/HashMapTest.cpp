@@ -116,9 +116,9 @@ UNIT_SUITE(HashMap)
 		auto result = map.SetAndReplace(1, 2);
 		map.SetAndReplace(2, 1);
 
-		UNIT_ASSERT(map.Find(1) != map.end());
-		UNIT_ASSERT(map.Find(2) != map.end());
-		UNIT_ASSERT(map.Find(3) == map.end());
+		UNIT_ASSERT(map.Find(1).HasValue());
+		UNIT_ASSERT(map.Find(2).HasValue());
+		UNIT_ASSERT(!map.Find(3).HasValue());
 	}
 
 	UNIT_TEST(DefaultAdd)

@@ -129,10 +129,8 @@ public:
 
 	math::Dimension2F GetPropertyDim(const core::String& prop, math::Dimension2F defaultValue = math::Dimension2F(0, 0))
 	{
-		auto it = m_PropsV.Find(prop);
-		if(it == m_PropsV.end())
-			return defaultValue;
-		return math::Dimension2F(it->value.x, it->value.y);
+		auto v = m_PropsV.Get(prop, math::Vector2F(defaultValue.width, defaultValue.height));
+		return math::Dimension2F(v.x, v.y);
 	}
 	virtual void SetProperty(const core::String& prop, math::Dimension2F v)
 	{

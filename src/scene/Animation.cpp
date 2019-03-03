@@ -200,9 +200,7 @@ void Animation::RemoveTrack(int id)
 
 void Animation::RemoveTrack(AnimationTrack* track)
 {
-	auto i = m_Tracks.LinearSearch(track);
-	if(i != -1)
-		m_Tracks.Erase(i);
+	m_Tracks.EraseValue(track);
 }
 
 int Animation::GetTrackCount() const

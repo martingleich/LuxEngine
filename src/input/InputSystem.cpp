@@ -41,9 +41,9 @@ core::Signal<const Event&>& InputSystem::GetEventSignal()
 
 StrongRef<InputDevice> InputSystem::FindDevice(InputDeviceDesc* desc)
 {
-	auto it = m_GUIDMap.Find(desc->GetGUID());
-	if(it != m_GUIDMap.end())
-		return it->value;
+	auto itOpt = m_GUIDMap.Find(desc->GetGUID());
+	if(itOpt.HasValue())
+		return itOpt.GetValue()->value;
 
 	StrongRef<InputDevice> device = LUX_NEW(InputDevice)(desc, this);
 

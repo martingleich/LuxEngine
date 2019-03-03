@@ -36,7 +36,7 @@ class HashMap
 			m_Key(key)
 		{
 		}
-		CallT m_Call;
+		CallT& m_Call;
 		const K& m_Key;
 	};
 	struct Tuple
@@ -128,6 +128,18 @@ class HashMap
 	};
 
 	using BaseType = BasicHashSet<Tuple, TupleHasher, TupleComparer>;
+
+	class KeyNotFoundException : public ErrorException
+	{
+	public:
+		KeyNotFoundException()
+		{
+		}
+		ExceptionSafeString What() const override
+		{
+			return "Key not found";
+		}
+	};
 public:
 	struct TupleItState
 	{
@@ -170,6 +182,11 @@ public:
 	{
 		Iterator it;
 		bool addedNew;
+
+		const V& GetValue() const
+		{
+			return it->value;
+		}
 	};
 
 	struct EraseResult
@@ -200,7 +217,7 @@ public:
 		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
 	}
 	template <typename CallT>
-	SetResult MakeIfNotExist(const K& key, const CallT& call)
+	SetResult MakeIfNotExist(const K& key, CallT&& call)
 	{
 		auto result = m_Base.Add(key, BaseType::EAddOption::FailOnDuplicate, CallTuple<CallT>(key, call));
 		return {Iterator(&m_Base.GetValue(result.id)), result.addedNew};
@@ -213,20 +230,20 @@ public:
 	}
 
 	template <typename K2 = K>
-	Iterator Find(const K2& key)
+	core::Optional<Iterator> Find(const K2& key)
 	{
 		auto result = m_Base.Find(key);
 		if(!result.IsValid())
-			return end();
+			return core::Optional<Iterator>();
 		return Iterator(&m_Base.GetValue(result.id));
 	}
 
 	template <typename K2 = K>
-	ConstIterator Find(const K2& key) const
+	core::Optional<ConstIterator> Find(const K2& key) const
 	{
 		auto result = m_Base.Find(key);
 		if(!result.IsValid())
-			return end();
+			return core::Optional<ConstIterator>();
 		return ConstIterator(&m_Base.GetValue(result.id));
 	}
 
@@ -262,7 +279,8 @@ public:
 	const V& Get(const K2& key) const
 	{
 		auto result = m_Base.Find(key);
-		lxAssert(result.IsValid());
+		if(!result.IsValid())
+			throw KeyNotFoundException();
 		return m_Base.GetValue(result.id).value;
 	}
 

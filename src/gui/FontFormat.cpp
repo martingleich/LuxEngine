@@ -231,10 +231,10 @@ struct Context
 
 		// Write char info
 		auto& charMap = font->GetCharMap();
-		for(auto it = charMap.begin(); it != charMap.end(); ++it) {
-			auto& v = it->value;
+		for(auto& entry : charMap) {
+			auto& v = entry.value;
 			CharInfoV1 c;
-			c.character = it->key;
+			c.character = entry.key;
 			c.A = v.A;
 			c.B = v.B;
 			c.C = v.C;

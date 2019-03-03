@@ -17,7 +17,7 @@ template <
 	class HashSet
 {
 public:
-	using Iterator = T * ;
+	using Iterator = T*;
 	using ConstIterator = const T*;
 	using BaseType = BasicHashSet<T, Hash, Compare>;
 
@@ -84,29 +84,29 @@ public:
 	}
 
 	template <typename T2 = T>
-	Iterator Find(const T2& value)
+	core::Optional<Iterator> Find(const T2& value)
 	{
 		auto result = m_Base.Find(value);
 		if(result.IsValid())
 			return Iterator(&m_Base.GetValue(result.id));
 		else
-			return end();
+			return core::Optional<Iterator>();
 	}
 
 	template <typename T2 = T>
-	ConstIterator Find(const T2& value) const
+	core::Optional<ConstIterator> Find(const T2& value) const
 	{
 		auto result = m_Base.Find(value);
 		if(result.IsValid())
 			return ConstIterator(&m_Base.GetValue(result.id));
 		else
-			return End();
+			return core::Optional<ConstIterator>();
 	}
 
 	template <typename T2 = T>
 	bool Exists(const T2& key) const
 	{
-		return Find(key).IsValid();
+		return m_Base.Find(key).IsValid();
 	}
 
 	Iterator begin() { return Iterator(&m_Base.GetValue(0)); }

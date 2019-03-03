@@ -256,10 +256,10 @@ core::Range<Element::ConstElementIterator> Element::Elements() const
 
 void Element::RemoveElement(Element* elem)
 {
-	auto i = m_Elements.LinearSearch(elem);
-	if(i != -1) {
+	auto iOpt = m_Elements.LinearSearch(elem);
+	if(iOpt.HasValue()) {
 		elem->OnRemove(this);
-		m_Elements.Erase(i);
+		m_Elements.Erase(iOpt.GetValue());
 	}
 }
 

@@ -115,7 +115,7 @@ public:
 	}
 	
 	template <typename T>	
-	T* GetExData(MeshExData* last = nullptr)
+	core::Optional<T*> GetExData(MeshExData* last = nullptr)
 	{
 		if(!last)
 			last = m_ExData;
@@ -124,11 +124,11 @@ public:
 			if(ptr != nullptr)
 				return ptr;
 		}
-		return nullptr;
+		return core::Optional<T*>();
 	}
 	
 	template <typename T>	
-	const T* GetExData(MeshExData* last = nullptr) const
+	core::Optional<const T*> GetExData(MeshExData* last = nullptr) const
 	{
 		if(!last)
 			last = m_ExData;
@@ -137,7 +137,7 @@ public:
 			if(ptr != nullptr)
 				return ptr;
 		}
-		return nullptr;
+		return core::Optional<const T*>();
 	}
 	
 	LUX_API core::Name GetReferableType() const override;

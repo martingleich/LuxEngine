@@ -5,6 +5,7 @@
 #include "core/lxMemory.h"
 #include "core/lxIterator.h"
 #include "core/lxTypes.h"
+#include "core/lxOptional.h"
 #include <initializer_list>
 #include <type_traits>
 
@@ -248,6 +249,14 @@ public:
 	{
 		BasicErase(pos, 1, false);
 	}
+
+	void EraseValue(const T& value)
+	{
+		auto optId = LinearSearch(value);
+		if(optId.HasValue())
+			Erase(optId.GetValue());
+	}
+
 	//! Remove an entry in the array
 	/**
 	\param it The element to remove
@@ -352,7 +361,7 @@ public:
 	*/
 	void ShrinkResize(int used)
 	{
-		lxAssert(m_Alloc >= used);
+		LX_CHECK_BOUNDS(used, 0, m_Alloc);
 		for(int i = used; i < m_Used; ++i)
 			Data()[i].~T();
 		m_Used = used;
@@ -460,15 +469,13 @@ public:
 	//! Access a single element
 	const T& operator[](int entry) const
 	{
-		lxAssert(entry >= 0 || entry < m_Used);
-		return Data()[entry];
+		return At(entry);
 	}
 
 	//! Access a single element
 	T& operator[](int entry)
 	{
-		lxAssert(entry >= 0 || entry < m_Used);
-		return Data()[entry];
+		return At(entry);
 	}
 
 	Iterator begin() { return Iterator(m_Data); }
@@ -513,13 +520,13 @@ public:
 	}
 
 	template <typename ElemT>
-	int LinearSearch(const ElemT& elem)
+	core::Optional<int> LinearSearch(const ElemT& elem)
 	{
 		for(int i = 0; i < m_Used; ++i) {
 			if(m_Data[i] == elem)
 				return i;
 		}
-		return -1;
+		return core::Optional<int>();
 	}
 
 	template <typename Predicate>
@@ -552,7 +559,8 @@ private:
 
 	void BasicErase(int from, int count, bool holdOrder)
 	{
-		lxAssert(from >= 0 && from + count - 1 <= m_Used);
+		if(from < 0 || from + count -1 > m_Used)
+			throw core::GenericInvalidArgumentException("from,count", "Access out of range");
 
 		if(holdOrder) {
 			for(int i = from; i < m_Used - count; ++i)
@@ -579,7 +587,7 @@ private:
 	}
 	T* GetInsertPointer(int before, bool destroy = false)
 	{
-		lxAssert(before >= 0 && before <= m_Used);
+		LX_CHECK_BOUNDS(before, 0, m_Used+1);
 
 		if(m_Used == m_Alloc)
 			Reserve(GetNextSize(m_Used + 1));

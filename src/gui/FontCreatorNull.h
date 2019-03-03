@@ -16,6 +16,7 @@ class FontCreatorNull : public FontCreator
 {
 private:
 	core::HashMap<core::String, core::Array<u32>> m_DefaultCharSets;
+	core::Array<u32> m_DefaultCharSet;
 
 public:
 	FontCreatorNull();
@@ -48,8 +49,8 @@ private:
 		const FontDescription& desc,
 		const core::Array<u32>& charSet) = 0;
 	virtual void GetFontInfo(void*, int& fontHeight, FontDescription& desc) = 0;
-	virtual bool GetFontImage(void*, u8*& image, math::Dimension2I& imageSize, int& channnelCount) = 0;
-	virtual bool GetFontCharInfo(void*, u32 character, CharInfo& outInfo) = 0;
+	virtual void GetFontImage(void*, u8*& image, math::Dimension2I& imageSize, int& channnelCount) = 0;
+	virtual core::Optional<CharInfo> GetFontCharInfo(void*, u32 character) = 0;
 	virtual void EndFontCreation(void*) = 0;
 };
 

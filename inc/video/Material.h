@@ -142,7 +142,7 @@ public:
 				return &m_Shared->m_Techniques[i];
 		}
 
-		return nullptr;
+		return core::Optional<AbstractMaterialTechnique*>();
 	}
 
 	EMaterialReqFlag GetRequirements() const override { return m_Shared->m_Requirements; }

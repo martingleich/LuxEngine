@@ -101,9 +101,9 @@ StringTableHandle StringTable::AddFindString(const StringView& str, bool find)
 	strPos[strSize] = 0;
 
 	CheckEntry checkEntry(handle);
-	auto it = m_Map.Find(checkEntry);
-	if(it != m_Map.end()) {
-		return it->value;
+	auto itOpt = m_Map.Find(checkEntry);
+	if(itOpt.HasValue()) {
+		return itOpt.GetValue()->value;
 	} else {
 		if(find)
 			return StringTableHandle::INVALID;

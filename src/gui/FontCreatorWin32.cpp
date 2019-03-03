@@ -68,8 +68,7 @@ static void GenerateCharInfo(impl_fontCreatorWin32::Context* ctx)
 	SelectObject(ctx->dc, ctx->font);
 	SetTextAlign(ctx->dc, TA_TOP | TA_LEFT);
 
-	for(auto it = ctx->characters.First(); it != ctx->characters.End(); ++it) {
-		u32 ch = *it;
+	for(auto ch : ctx->characters) {
 		SIZE charSize;
 		BOOL result;
 		float a, b, c;
@@ -136,9 +135,8 @@ static void CalculateImageSize(impl_fontCreatorWin32::Context* ctx)
 {
 	int count = 0;
 	float sum_length = 0;
-	for(auto it = ctx->charInfos.begin(); it != ctx->charInfos.end(); ++it) {
+	for(auto& v : ctx->charInfos.Values()) {
 		++count;
-		auto& v = it->value;
 		sum_length += math::Max(v.b, v.a + v.b + v.c);
 	}
 
@@ -510,24 +508,20 @@ void* FontCreatorWin32::BeginFontCreation(bool isFileFont, const core::String& n
 	return ctx.Take();
 }
 
-bool FontCreatorWin32::GetFontImage(void* void_ctx, u8*& image, math::Dimension2I& imageSize, int& channelCount)
+void FontCreatorWin32::GetFontImage(void* void_ctx, u8*& image, math::Dimension2I& imageSize, int& channelCount)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
-	if(!ctx)
-		return false;
+	LX_CHECK_NULL_ARG(ctx);
 
 	image = ctx->image;
 	imageSize = ctx->imageSize;
 	channelCount = ctx->channelCount;
-
-	return true;
 }
 
 void FontCreatorWin32::GetFontInfo(void* void_ctx, int& fontHeight, FontDescription& desc)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
-	if(!ctx)
-		return;
+	LX_CHECK_NULL_ARG(ctx);
 
 	fontHeight = ctx->fontHeight;
 	desc.name = ctx->name;
@@ -538,26 +532,22 @@ void FontCreatorWin32::GetFontInfo(void* void_ctx, int& fontHeight, FontDescript
 	desc.borderSize = ctx->borderSize;
 }
 
-bool FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character, CharInfo& outInfo)
+core::Optional<CharInfo> FontCreatorWin32::GetFontCharInfo(void* void_ctx, u32 character)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
-	if(!ctx)
-		return false;
+	LX_CHECK_NULL_ARG(ctx);
 
-	auto it = ctx->outCharInfo.Find(character);
-	if(it == ctx->outCharInfo.end())
-		return false;
+	auto itOpt = ctx->outCharInfo.Find(character);
+	if(!itOpt.HasValue())
+		return core::Optional<CharInfo>();
 
-	outInfo = it->value;
-
-	return true;
+	return itOpt.GetValue()->value;
 }
 
 void FontCreatorWin32::EndFontCreation(void* void_ctx)
 {
 	impl_fontCreatorWin32::Context* ctx = (impl_fontCreatorWin32::Context*)void_ctx;
-	if(!ctx)
-		return;
+	LX_CHECK_NULL_ARG(ctx);
 
 	delete[] ctx->image;
 	delete ctx;

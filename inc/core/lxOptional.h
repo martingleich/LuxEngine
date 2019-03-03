@@ -9,6 +9,9 @@ namespace core
 template <typename T>
 class Optional
 {
+	// I have to think about possible problems here.
+	static_assert(!std::is_reference<T>::value, "Can't use optional reference.");
+
 public:
 	using ValueType = T;
 

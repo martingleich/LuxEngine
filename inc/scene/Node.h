@@ -81,6 +81,12 @@ public:
 	LUX_API StrongRef<Component> AddComponent(Component* component);
 	LUX_API core::Range<ComponentIterator> Components();
 
+	//! Find a component of this node based on a type.
+	/**
+	Finds a component which inherits from T or is equal to T.
+	\param cur Only components after this one are searched.
+	\return The found component of nullptr if no component could be found.
+	*/
 	template <typename T>
 	T* GetComponent(T* cur = nullptr)
 	{

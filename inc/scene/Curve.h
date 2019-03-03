@@ -163,10 +163,8 @@ inline StrongRef<KeyFrameCurve> MakeKeyFrameCurve(core::Type type)
 		return LUX_NEW(KeyFrameCurveImpl<math::Vector3F>());
 	else if(type == core::Types::ColorF())
 		return LUX_NEW(KeyFrameCurveImpl<video::ColorF>());
-	else {
-		lxAssertNeverReach("Type does not support interpolation.");
-		return nullptr;
-	}
+	else
+		throw core::GenericInvalidArgumentException("type", "Type does not support interpolation.");
 }
 
 } // namespace scene

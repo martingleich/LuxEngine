@@ -576,7 +576,7 @@ void ShaderD3D9::LoadSceneParams(core::AttributeList sceneAttributes, const Pass
 			ptr = sceneAttributes.Pointer(sv.name);
 
 			if(ptr && GetCoreType(sv.type) != ptr->GetType())
-				ptr = nullptr;
+				ptr = core::AttributePtr(nullptr);
 
 			m_SceneValueAttributeCache[i] = ptr;
 			++i;

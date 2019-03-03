@@ -80,7 +80,7 @@ class AttributePtr
 {
 public:
 	AttributePtr() { } 
-	AttributePtr(Attribute* attr) { m_Weak = attr; }
+	explicit AttributePtr(Attribute* attr) { m_Weak = attr; }
 	AttributePtr(const AttributePtr& other) :
 		m_Weak(other.m_Weak)
 	{
@@ -144,13 +144,13 @@ public:
 
 	AttributePtr Pointer(const core::StringView& name) const
 	{
-		auto it = m_ObjectMap.Find(name);
-		if(it == m_ObjectMap.end()) {
+		auto itOpt = m_ObjectMap.Find(name);
+		if(!itOpt.HasValue()) {
 			if(m_Base)
 				return m_Base->Pointer(name);
-			return nullptr;
+			return AttributePtr(nullptr);
 		}
-		return (core::Attribute*)it->value;
+		return AttributePtr(itOpt.GetValue()->value);
 	}
 
 	AttributeListInternal* GetBase() const
@@ -206,17 +206,17 @@ public:
 	{
 		AttributePtr ptr;
 		auto type = core::TemplType<T>::Get();
-		auto it = Objects().Find(name);
-		if(it != Objects().end()) {
-			if(it->value->GetType() != type)
+		auto itOpt = Objects().Find(name);
+		if(itOpt.HasValue()) {
+			if(itOpt.GetValue()->value->GetType() != type)
 				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
-			it->value->SetValue(value);
-			ptr = (Attribute*)it->value;
+			itOpt.GetValue()->value->SetValue(value);
+			ptr = AttributePtr(itOpt.GetValue()->value);
 		} else {
 			StrongRef<Attribute> p = LUX_NEW(AttributeAnyImpl<T>)(name, type, value);
 			Objects().SetAndReplace(name, p);
 			Objects()[name] = p;
-			ptr = (Attribute*)p;
+			ptr = AttributePtr(p);
 		}
 
 		return ptr;
@@ -228,16 +228,16 @@ public:
 
 		auto& name = attrb->GetName();
 		auto type = attrb->GetType();
-		auto it = Objects().Find(name);
-		if(it != Objects().end()) {
-			if(it->value->GetType() != type)
+		auto itOpt = Objects().Find(name);
+		if(itOpt.HasValue()) {
+			if(itOpt.GetValue()->value->GetType() != type)
 				throw core::InvalidOperationException("Attribute is already defined with diffrent type");
-			it->value = attrb;
+			itOpt.GetValue()->value = attrb;
 		} else {
 			Objects()[name] = attrb;
 		}
 
-		return attrb;
+		return AttributePtr(attrb);
 	}
 
 	void SetBase(AttributeList base)

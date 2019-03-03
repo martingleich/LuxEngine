@@ -1,5 +1,6 @@
 #include "core/LuxBase.h"
 #include "core/lxAssert.h"
+#include "core/lxException.h"
 #include <cstdio>
 #include <cstdarg>
 
@@ -46,8 +47,7 @@ HandlingData g_HandlingData;
 
 AssertHandler SetHandler(AssertHandler newHandler)
 {
-	if(!newHandler)
-		return nullptr;
+	LX_CHECK_NULL_ARG(newHandler);
 	AssertHandler old = g_HandlingData.handler;
 	g_HandlingData.handler = newHandler;
 	return old;
