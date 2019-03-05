@@ -95,6 +95,7 @@ public:
 		m_Data(nullptr)
 	{
 	}
+	// May pass nullptr to invalid.
 	Optional(ValueType value) :
 		m_Data(value)
 	{
@@ -103,6 +104,7 @@ public:
 		m_Data(other.m_Data)
 	{
 	}
+
 	~Optional()
 	{
 		Reset();

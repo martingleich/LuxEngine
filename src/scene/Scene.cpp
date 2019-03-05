@@ -130,41 +130,29 @@ public:
 private:
 	void AddRenderEntry(Node* n, Component* r)
 	{
-		bool isCulled = false;
+		bool isCulled = IsCulled(n, r, m_Frustum);
 
-		switch(r->GetRenderPass()) {
-		case ERenderPass::None:
-			break;
-		case ERenderPass::SkyBox:
-			skyBoxList.EmplaceBack(r);
-			break;
-		case ERenderPass::Solid:
-			isCulled = IsCulled(n, r, m_Frustum);
-			if(!isCulled)
-				solidNodeList.EmplaceBack(r);
-			if(n->IsShadowCasting())
-				shadowCasters.EmplaceBack(r);
-			break;
-		case ERenderPass::Transparent:
-			isCulled = IsCulled(n, r, m_Frustum);
-			if(!isCulled) {
-				float distance = n->GetAbsolutePosition().GetDistanceToSq(m_CamPos);
-				transparentNodeList.EmplaceBack(r, distance);
+		for(ERenderPass pass : r->GetRenderPass()) {
+			switch(pass) {
+			case ERenderPass::SkyBox:
+				skyBoxList.EmplaceBack(r);
+				break;
+			case ERenderPass::Solid:
+				if(!isCulled)
+					solidNodeList.EmplaceBack(r);
+				if(n->IsShadowCasting())
+					shadowCasters.EmplaceBack(r);
+				break;
+			case ERenderPass::Transparent:
+				if(!isCulled) {
+					float distance = n->GetAbsolutePosition().GetDistanceToSq(m_CamPos);
+					transparentNodeList.EmplaceBack(r, distance);
+				}
+				break;
+			default:
+				lxAssertNeverReach("Unimplemented render pass");
+				break;
 			}
-			break;
-		case ERenderPass::Any:
-			isCulled = IsCulled(n, r, m_Frustum);
-			if(!isCulled) {
-				float distance = n->GetAbsolutePosition().GetDistanceToSq(m_CamPos);
-				solidNodeList.EmplaceBack(r);
-				transparentNodeList.EmplaceBack(r, distance);
-			}
-			if(n->IsShadowCasting())
-				shadowCasters.EmplaceBack(r);
-			break;
-		default:
-			lxAssertNeverReach("Unimplemented render pass");
-			break;
 		}
 	}
 
@@ -346,7 +334,7 @@ public:
 		m_CurPass = pass;
 
 		auto& debugSettings = m_Scene->GetDebugSettings();
-		if(pass == ERenderPass::Solid || pass == ERenderPass::Solid) {
+		if(pass == ERenderPass::Solid || pass == ERenderPass::Transparent) {
 			if(debugSettings.renderWireframe) {
 				video::PipelineOverwrite overwrite;
 				if(debugSettings.renderWireframe) {
@@ -366,7 +354,7 @@ private:
 	}
 private:
 	video::Renderer* m_Renderer;
-	ERenderPass m_CurPass = ERenderPass::None;
+	ERenderPass m_CurPass = ERenderPass::Unknown;
 	Scene* m_Scene;
 	video::PipelineOverwriteToken m_Token;
 };
@@ -396,8 +384,338 @@ public:
 		m_RendererAttributes = alb.BuildAndReset();
 	}
 
-	void DrawScene();
-	void DrawScenePass(const SceneRenderCamData& camData, core::Optional<video::EMaterialTechnique> technique);
+	void DrawScene()
+	{
+		if(m_PassControllers.IsEmpty())
+			log::Warning("No renderobject in the scenegraph.");
+
+		// Sort visible cameras by render id
+		core::Array<SceneRenderPassController*> sortedPassControllers;
+		for(auto c : m_PassControllers)
+			sortedPassControllers.PushBack(c);
+		core::Sort(sortedPassControllers,
+			core::CompareTypeFromSmaller<SceneRenderPassController*>([](SceneRenderPassController* a, SceneRenderPassController* b) -> bool {
+			return a->GetPriority() > b->GetPriority();
+		}));
+
+		// Backup and update video renderer scene argument pool.
+		auto oldParams = m_Renderer->GetParams();
+		m_Renderer->SetParams(m_RendererAttributes);
+
+		// Render each pass.
+		m_CurPassId = 0;
+		m_PassCount = sortedPassControllers.Size();
+		for(auto c : sortedPassControllers) {
+			c->Render(this);
+			++m_CurPassId;
+		}
+
+		// Restore old scene argument pool.
+		m_Renderer->SetParams(oldParams);
+	}
+
+	// Update and repair broken configurations
+	void UpdateConfiguration()
+	{
+		// Check if a stencil buffer is available for shadow rendering
+		bool drawStencilShadows = m_SceneAttributes->GetValue<bool>("drawStencilShadows");
+		if(drawStencilShadows) {
+			// TODO: Should directly check the backbuffer.
+			if(m_Renderer->GetDriver()->GetConfig().zsFormat.sBits == 0) {
+				log::Warning("Scene: Can't draw stencil shadows without stencilbuffer(Disabled shadow rendering).");
+				drawStencilShadows = false;
+				m_SceneAttributes->SetValue("drawStencilShadows", false);
+			}
+		}
+	}
+
+	core::Optional<ClassicalFogDescription*> ComputeSingleClassicalFog()
+	{
+		core::Optional<ClassicalFogDescription*> fog;
+		bool hasReportError = false;
+		for(auto& f : m_VisibleFogs) {
+			auto fogDesc = dynamic_cast<ClassicalFogDescription*>(f->GetFogDescription());
+			if(fogDesc) {
+				if(!fog.HasValue())
+					fog = fogDesc;
+				else if(!hasReportError) {
+					log::Warning("Simple Forward Scene Renderer: Only support one fog element per scene.(all but one fog disabled)");
+					hasReportError = true;
+				}
+			}
+		}
+		return fog;
+	}
+
+	void ComputeClassicalLights(core::Array<ClassicalLightDescription*>& lights, video::ColorF& ambientLight)
+	{
+		ambientLight = video::ColorF(0,0,0,0);
+		lights.Clear();
+
+		int count = 0;
+		for(auto& e : m_VisibleLights) {
+			auto descBase = e->GetLightDescription();
+			if(auto descC = dynamic_cast<ClassicalLightDescription*>(descBase)) {
+				lights.PushBack(descC);
+				++count;
+				if(count >= m_VideoLights.GetMaxLightsPerDraw())
+					break;
+			} else if(auto descA = dynamic_cast<AmbientLightDescription*>(descBase)) {
+				ambientLight += descA->GetColor();
+			}
+		}
+	}
+
+	void ComputeClassicalShadowingLights(
+		int maxIlluminating,
+		int maxShadowCasters,
+		core::Array<ClassicalLightDescription*> illuminating,
+		core::Array<ClassicalLightDescription*> shadowCasting,
+		core::Array<ClassicalLightDescription*> nonShadowCasting,
+		video::ColorF& ambientLight)
+	{
+		illuminating.Clear();
+		shadowCasting.Clear();
+		nonShadowCasting.Clear();
+		ambientLight = video::ColorF(0,0,0,0);
+
+		int count = 0;
+		int shadowCount = 0;
+		for(auto& e : m_VisibleLights) {
+			auto descBase = e->GetLightDescription();
+			if(auto descC = dynamic_cast<ClassicalLightDescription*>(descBase)) {
+				illuminating.PushBack(descC);
+				if(descC->IsShadowCasting() && shadowCount < maxShadowCasters) {
+					shadowCasting.PushBack(descC);
+					++shadowCount;
+				} else {
+					nonShadowCasting.PushBack(descC);
+				}
+				++count;
+				if(count >= maxIlluminating)
+					break;
+			} else if(auto descA = dynamic_cast<AmbientLightDescription*>(descBase)) {
+				ambientLight += descA->GetColor();
+			}
+		}
+	}
+
+	void DrawScenePass_NoShadow(const SceneRenderCamData& camData)
+	{
+		SceneRenderData sceneData;
+		sceneData.video = m_Renderer;
+		sceneData.camData = camData;
+
+		m_Renderer->GetParams().SetValue("camPos", camData.transform.translation);
+
+		//-------------------------------------------------------------------------
+		// The lights
+		core::Array<ClassicalLightDescription*> illuminating;
+		video::ColorF totalAmbientLight;
+		ComputeClassicalLights(illuminating, totalAmbientLight);
+
+		// Enable lights
+		m_Renderer->GetParams().SetValue("ambient", totalAmbientLight);
+		m_VideoLights.Reset();
+		for(auto light : illuminating)
+			m_VideoLights.AddLight(light);
+
+		//-------------------------------------------------------------------------
+		// The fog
+		auto fog = ComputeSingleClassicalFog();
+		if(fog.HasValue())
+			SetFogData(m_Renderer, fog.GetValue());
+
+		// Real object rendering starts here.
+		ScenePassManager passManager(m_Renderer, m_Scene);
+
+		//-------------------------------------------------------------------------
+		// Skyboxes
+		passManager.StartPass(ERenderPass::SkyBox);
+		sceneData.pass = ERenderPass::SkyBox;
+		for(auto& e : m_RenderableCollection.skyBoxList)
+			e.renderable->Render(sceneData);
+
+		//-------------------------------------------------------------------------
+		// Solid objects
+		passManager.StartPass(ERenderPass::Solid);
+		sceneData.pass = ERenderPass::Solid;
+		for(auto& e : m_RenderableCollection.solidNodeList)
+			e.renderable->Render(sceneData);
+
+		//-------------------------------------------------------------------------
+		// Transparent objects
+		passManager.StartPass(ERenderPass::Transparent);
+		sceneData.pass = ERenderPass::Transparent;
+		for(auto& e : m_RenderableCollection.transparentNodeList)
+			e.renderable->Render(sceneData);
+	}
+
+	void DrawScenePass_StencilShadows(const SceneRenderCamData& camData)
+	{
+		SceneRenderData sceneData;
+		sceneData.video = m_Renderer;
+		sceneData.camData = camData;
+
+		m_Renderer->GetParams().SetValue("camPos", camData.transform.translation);
+
+		//-------------------------------------------------------------------------
+		// The lights
+		m_VideoLights.Reset();
+
+		int maxShadowCastingCount = m_SceneAttributes->GetValue<int>("maxShadowCasters");
+		maxShadowCastingCount = math::Clamp(maxShadowCastingCount, 0, m_VideoLights.GetMaxLightsPerDraw());
+
+		core::Array<ClassicalLightDescription*> illuminating;
+		core::Array<ClassicalLightDescription*> shadowCasting;
+		core::Array<ClassicalLightDescription*> nonShadowCasting;
+		video::ColorF ambientLight;
+		ComputeClassicalShadowingLights(
+			m_VideoLights.GetMaxLightsPerDraw(),
+			maxShadowCastingCount,
+			illuminating, shadowCasting, nonShadowCasting,
+			ambientLight);
+
+		// Enable ambient light.
+		m_Renderer->GetParams().SetValue("ambient", ambientLight);
+
+		//-------------------------------------------------------------------------
+		// The fog
+		core::Optional<ClassicalFogDescription*> fog = ComputeSingleClassicalFog();
+		if(fog.HasValue())
+			SetFogData(m_Renderer, fog.GetValue());
+
+		// Real object rendering starts here.
+		ScenePassManager passManager(m_Renderer, m_Scene);
+
+		//-------------------------------------------------------------------------
+		// Skyboxes
+		passManager.StartPass(ERenderPass::SkyBox);
+		sceneData.pass = ERenderPass::SkyBox;
+		for(auto& e : m_RenderableCollection.skyBoxList)
+			e.renderable->Render(sceneData);
+
+		//-------------------------------------------------------------------------
+		// Solid objects
+		passManager.StartPass(ERenderPass::Solid);
+		{
+			video::PipelineOverwriteToken pot;
+			video::PipelineOverwrite illumOver;
+			illumOver.OverwriteLighting(video::ELightingFlag::AmbientEmit);
+			m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 1
+
+			// Ambient pass
+			sceneData.pass = ERenderPass::Solid;
+			for(auto& e : m_RenderableCollection.solidNodeList)
+				e.renderable->Render(sceneData);
+
+			m_Renderer->PopPipelineOverwrite(&pot); // Pop 1
+		}
+
+		passManager.StartPass(ERenderPass::Unknown);
+		const bool correctFogForStencilShadows = true;
+		// To renderer correct fog, render black fog.
+		if(correctFogForStencilShadows && fog.HasValue()) {
+			auto overwriteColor = video::ColorF(0, 0, 0, 0);
+			SetFogData(m_Renderer, fog.GetValue(), &overwriteColor);
+		}
+
+		// Shadow pass for each shadow casting light
+		for(auto shadowLight : shadowCasting) {
+			m_VideoLights.Reset();
+			m_VideoLights.AddLight(shadowLight);
+
+			m_StencilShadowRenderer.Begin(
+				camData.transform.translation,
+				camData.transform.TransformDir(math::Vector3F::UNIT_Z));
+			for(auto& e : m_RenderableCollection.shadowCasters) {
+				auto mesh = dynamic_cast<Mesh*>(e.renderable);
+				if(mesh && mesh->GetMesh()) {
+					bool isInfinite;
+					math::Vector3F lightPos;
+					auto node = e.renderable->GetNode();
+					if(shadowLight->GetType() == scene::ELightType::Directional) {
+						isInfinite = true;
+						lightPos = node->ToRelativeDir(shadowLight->GetDirection());
+					} else {
+						isInfinite = false;
+						lightPos = node->ToRelativePos(shadowLight->GetPosition());
+					}
+					m_StencilShadowRenderer.AddSilhouette(node->GetAbsoluteTransform(), mesh->GetMesh(), lightPos, isInfinite);
+				}
+			}
+
+			m_StencilShadowRenderer.End();
+
+			passManager.StartPass(ERenderPass::Solid);
+			{
+				video::PipelineOverwriteToken pot;
+				video::PipelineOverwrite illumOver;
+				illumOver.OverwriteZWrite(false);
+				illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
+				illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
+				illumOver.OverwriteStencil(m_StencilShadowRenderer.GetIllumniatedStencilMode());
+				m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 2
+
+				for(auto& e : m_RenderableCollection.solidNodeList)
+					e.renderable->Render(sceneData);
+
+				m_Renderer->PopPipelineOverwrite(&pot); // Pop 2
+			}
+
+			m_Renderer->Clear(false, false, true);
+		}
+
+		if(!nonShadowCasting.IsEmpty()) {
+			m_VideoLights.Reset();
+			// Draw with remaining non shadow casting lights
+			for(auto illum : nonShadowCasting)
+				m_VideoLights.AddLight(illum);
+
+			{
+				video::PipelineOverwriteToken pot;
+				video::PipelineOverwrite illumOver;
+				illumOver.OverwriteZWrite(false);
+				illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
+				illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
+				m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 3
+
+				sceneData.pass = ERenderPass::Solid;
+				for(auto& e : m_RenderableCollection.solidNodeList)
+					e.renderable->Render(sceneData);
+
+				m_Renderer->PopPipelineOverwrite(&pot); // Pop 3
+			}
+		}
+
+		// Add shadow casting lights for remaining render jobs
+		for(auto light : shadowCasting)
+			m_VideoLights.AddLight(light);
+
+		// Restore correct fog
+		if(correctFogForStencilShadows && fog.HasValue())
+			SetFogData(m_Renderer, fog.GetValue());
+
+		//-------------------------------------------------------------------------
+		// Transparent objects
+		passManager.StartPass(ERenderPass::Transparent);
+		sceneData.pass = ERenderPass::Transparent;
+		for(auto& e : m_RenderableCollection.transparentNodeList)
+			e.renderable->Render(sceneData);
+	}
+
+	void DrawScenePass(const SceneRenderCamData& camData)
+	{
+
+		UpdateConfiguration();
+
+		bool drawStencilShadows = m_SceneAttributes->GetValue<bool>("drawStencilShadows");
+
+		if(drawStencilShadows)
+			DrawScenePass_StencilShadows(camData);
+		else
+			DrawScenePass_NoShadow(camData);
+	}
 
 	// Scene Render Pass Helper functions.
 	video::Renderer* GetRenderer() override { return m_Renderer; }
@@ -429,7 +747,7 @@ public:
 		data.onPreRender.Call();
 
 		// Render scene.
-		DrawScenePass(camData, data.materialTechnique);
+		DrawScenePass(camData);
 
 		data.onPostRender.Call();
 
@@ -453,6 +771,7 @@ private:
 
 	int m_CurPassId;
 	int m_PassCount;
+
 	RenderableCollector m_RenderableCollection;
 	VisibleComponentCache<Light*> m_VisibleLights;
 	VisibleComponentCache<Fog*> m_VisibleFogs;
@@ -588,242 +907,6 @@ void Scene::DrawScene()
 	renderData->DrawScene();
 
 	ClearDeletionQueue();
-}
-
-void InternalRenderData::DrawScene()
-{
-	if(m_PassControllers.IsEmpty())
-		log::Warning("No renderobject in the scenegraph.");
-
-	// Sort visible cameras by render id
-	core::Array<SceneRenderPassController*> sortedPassControllers;
-	for(auto c : m_PassControllers)
-		sortedPassControllers.PushBack(c);
-	core::Sort(sortedPassControllers,
-		core::CompareTypeFromSmaller<SceneRenderPassController*>([](SceneRenderPassController* a, SceneRenderPassController* b) -> bool {
-		return a->GetPriority() > b->GetPriority();
-	}));
-
-	// Backup and update video renderer scene argument pool.
-	auto oldParams = m_Renderer->GetParams();
-	m_Renderer->SetParams(m_RendererAttributes);
-
-	// Render each pass.
-	m_CurPassId = 0;
-	m_PassCount = sortedPassControllers.Size();
-	for(auto c : sortedPassControllers) {
-		c->Render(this);
-		++m_CurPassId;
-	}
-
-	// Restore old scene argument pool.
-	m_Renderer->SetParams(oldParams);
-}
-
-void InternalRenderData::DrawScenePass(const SceneRenderCamData& camData, core::Optional<video::EMaterialTechnique> technique)
-{
-	// Check if a stencil buffer is available for shadow rendering
-	bool drawStencilShadows = m_SceneAttributes->GetValue<bool>("drawStencilShadows");
-	if(drawStencilShadows) {
-		// TODO: Should directly check the backbuffer.
-		if(m_Renderer->GetDriver()->GetConfig().zsFormat.sBits == 0) {
-			log::Warning("Scene: Can't draw stencil shadows without stencilbuffer(Disabled shadow rendering).");
-			drawStencilShadows = false;
-			m_SceneAttributes->SetValue("drawStencilShadows", false);
-		}
-	}
-
-	core::Array<ClassicalLightDescription*> illuminating;
-	core::Array<ClassicalLightDescription*> shadowCasting;
-	core::Array<ClassicalLightDescription*> nonShadowCasting;
-
-	SceneRenderData sceneData;
-	sceneData.video = m_Renderer;
-	sceneData.camData = camData;
-	sceneData.technique = technique.HasValue() ? technique.GetValue() : video::EMaterialTechnique::Default;
-
-	m_Renderer->GetParams().SetValue("camPos", camData.transform.translation);
-
-	//-------------------------------------------------------------------------
-	// The lights
-	m_VideoLights.Reset();
-
-	int maxShadowCastingCount = m_SceneAttributes->GetValue<int>("maxShadowCasters");
-	if(!drawStencilShadows)
-		maxShadowCastingCount = 0;
-	maxShadowCastingCount = math::Clamp(maxShadowCastingCount, 0, m_VideoLights.GetMaxLightsPerDraw());
-
-	// Select shadowCastingLights, illuminatingLights, nonShadowCastingLights, and Ambient Lights.
-	int count = 0;
-	int shadowCount = 0;
-	video::ColorF totalAmbientLight;
-	for(auto& e : m_VisibleLights) {
-		auto descBase = e->GetLightDescription();
-		if(auto descC = dynamic_cast<ClassicalLightDescription*>(descBase)) {
-			illuminating.PushBack(descC);
-			if(descC->IsShadowCasting() && shadowCount < maxShadowCastingCount) {
-				shadowCasting.PushBack(descC);
-				++shadowCount;
-			} else {
-				nonShadowCasting.PushBack(descC);
-			}
-			++count;
-			if(count >= m_VideoLights.GetMaxLightsPerDraw())
-				break;
-		} else if(auto descA = dynamic_cast<AmbientLightDescription*>(descBase)) {
-			totalAmbientLight += descA->GetColor();
-		}
-	}
-	m_Renderer->GetParams().SetValue("ambient", totalAmbientLight);
-
-	//-------------------------------------------------------------------------
-	// The fog
-
-	// Choose fog description.
-	ClassicalFogDescription* fog = nullptr;
-	for(auto& f : m_VisibleFogs) {
-		auto fogDesc = dynamic_cast<ClassicalFogDescription*>(f->GetFogDescription());
-		if(fogDesc) {
-			if(!fog)
-				fog = fogDesc;
-			else
-				log::Warning("Simple Forward Scene Renderer: Only support one fog element per scene.(all but one fog disabled)");
-		}
-	}
-	// Enable fog.
-	if(fog)
-		SetFogData(m_Renderer, fog);
-
-	// Real object rendering starts here.
-	ScenePassManager passManager(m_Renderer, m_Scene);
-
-	//-------------------------------------------------------------------------
-	// Skyboxes
-	sceneData.pass = ERenderPass::SkyBox;
-	passManager.StartPass(ERenderPass::SkyBox);
-
-	for(auto& e : m_RenderableCollection.skyBoxList)
-		e.renderable->Render(sceneData);
-
-	//-------------------------------------------------------------------------
-	// Solid objects
-	if(drawStencilShadows) {
-		passManager.StartPass(ERenderPass::Solid);
-		{
-			video::PipelineOverwriteToken pot;
-			video::PipelineOverwrite illumOver;
-			illumOver.OverwriteLighting(video::ELightingFlag::AmbientEmit);
-			m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 1
-
-			// Ambient pass
-			sceneData.pass = ERenderPass::Solid;
-			for(auto& e : m_RenderableCollection.solidNodeList)
-				e.renderable->Render(sceneData);
-
-			m_Renderer->PopPipelineOverwrite(&pot); // Pop 1
-		}
-
-		passManager.StartPass(ERenderPass::None);
-		const bool correctFogForStencilShadows = true;
-		// To renderer correct fog, render black fog.
-		if(correctFogForStencilShadows && fog) {
-			auto overwriteColor = video::ColorF(0, 0, 0, 0);
-			SetFogData(m_Renderer, fog, &overwriteColor);
-		}
-
-		// Shadow pass for each shadow casting light
-		for(auto shadowLight : shadowCasting) {
-			m_VideoLights.Reset();
-			m_VideoLights.AddLight(shadowLight);
-
-			m_StencilShadowRenderer.Begin(
-				camData.transform.translation,
-				camData.transform.TransformDir(math::Vector3F::UNIT_Z));
-			for(auto& e : m_RenderableCollection.shadowCasters) {
-				auto mesh = dynamic_cast<Mesh*>(e.renderable);
-				if(mesh && mesh->GetMesh()) {
-					bool isInfinite;
-					math::Vector3F lightPos;
-					auto node = e.renderable->GetNode();
-					if(shadowLight->GetType() == scene::ELightType::Directional) {
-						isInfinite = true;
-						lightPos = node->ToRelativeDir(shadowLight->GetDirection());
-					} else {
-						isInfinite = false;
-						lightPos = node->ToRelativePos(shadowLight->GetPosition());
-					}
-					m_StencilShadowRenderer.AddSilhouette(node->GetAbsoluteTransform(), mesh->GetMesh(), lightPos, isInfinite);
-				}
-			}
-
-			m_StencilShadowRenderer.End();
-
-			passManager.StartPass(ERenderPass::Solid);
-			{
-				video::PipelineOverwriteToken pot;
-				video::PipelineOverwrite illumOver;
-				illumOver.OverwriteZWrite(false);
-				illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
-				illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
-				illumOver.OverwriteStencil(m_StencilShadowRenderer.GetIllumniatedStencilMode());
-				m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 2
-
-				for(auto& e : m_RenderableCollection.solidNodeList)
-					e.renderable->Render(sceneData);
-
-				m_Renderer->PopPipelineOverwrite(&pot); // Pop 2
-			}
-
-			m_Renderer->Clear(false, false, true);
-		}
-
-		if(!nonShadowCasting.IsEmpty()) {
-			m_VideoLights.Reset();
-			// Draw with remaining non shadow casting lights
-			for(auto illum : nonShadowCasting)
-				m_VideoLights.AddLight(illum);
-
-			{
-				video::PipelineOverwriteToken pot;
-				video::PipelineOverwrite illumOver;
-				illumOver.OverwriteZWrite(false);
-				illumOver.OverwriteLighting(video::ELightingFlag::DiffSpec);
-				illumOver.OverwriteAlpha(video::AlphaBlendMode(video::EBlendFactor::One, video::EBlendFactor::One, video::EBlendOperator::Add));
-				m_Renderer->PushPipelineOverwrite(illumOver, &pot); // Push 3
-
-				sceneData.pass = ERenderPass::Solid;
-				for(auto& e : m_RenderableCollection.solidNodeList)
-					e.renderable->Render(sceneData);
-
-				m_Renderer->PopPipelineOverwrite(&pot); // Pop 3
-			}
-		}
-
-		// Add shadow casting lights for remaining render jobs
-		for(auto light : shadowCasting)
-			m_VideoLights.AddLight(light);
-
-		// Restore correct fog
-		if(correctFogForStencilShadows && fog)
-			SetFogData(m_Renderer, fog);
-	} else {
-		for(auto light : illuminating)
-			m_VideoLights.AddLight(light);
-
-		// Ambient pass for shadows, otherwise the normal renderpass
-		passManager.StartPass(ERenderPass::Solid);
-		sceneData.pass = ERenderPass::Solid;
-		for(auto& e : m_RenderableCollection.solidNodeList)
-			e.renderable->Render(sceneData);
-	}
-
-	//-------------------------------------------------------------------------
-	// Transparent objects
-	sceneData.pass = ERenderPass::Transparent;
-	passManager.StartPass(ERenderPass::Transparent);
-
-	for(auto& e : m_RenderableCollection.transparentNodeList)
-		e.renderable->Render(sceneData);
 }
 
 } // namespace scene

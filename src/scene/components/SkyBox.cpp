@@ -127,14 +127,15 @@ static const u16 g_Indices[36] =
 
 void SkyBox::Render(const SceneRenderData& data)
 {
-	if(data.pass != ERenderPass::SkyBox)
-		return;
-	if(data.technique == video::EMaterialTechnique::ShadowCaster) {
+	switch(data.pass) {
+	case ERenderPass::ShadowCaster:
 		data.video->Clear(true, false, false, video::Color::Red);
 		return;
-	}
-	if(data.technique != video::EMaterialTechnique::Default)
+	case ERenderPass::SkyBox:
+		break;
+	default:
 		return;
+	}
 
 	auto node = GetNode();
 	if(!node)
@@ -160,6 +161,7 @@ void SkyBox::Render(const SceneRenderData& data)
 	if(m_SkyTexture)
 		m_Material->SetTexture(0, m_SkyTexture);
 
+	// Render with default technique.
 	data.video->SendMaterialSettings(m_Material);
 	if(m_UseCubeTexture) {
 		data.video->Draw(video::RenderRequest::IndexedFromMemory(
@@ -173,9 +175,9 @@ void SkyBox::Render(const SceneRenderData& data)
 	}
 }
 
-ERenderPass SkyBox::GetRenderPass() const
+RenderPassSet SkyBox::GetRenderPass() const
 {
-	return ERenderPass::SkyBox;
+	return RenderPassSet(ERenderPass::SkyBox);
 }
 
 void SkyBox::UseCubeTexture(bool cube)

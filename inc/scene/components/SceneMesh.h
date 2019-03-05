@@ -22,7 +22,7 @@ public:
 	LUX_API Mesh(const Mesh& other);
 	LUX_API ~Mesh();
 
-	//! Get the currently used model
+	//! Get the currently used model, may be null.
 	/**
 	\return The current model
 	\ref SetMesh
@@ -36,15 +36,12 @@ public:
 	*/
 	LUX_API void SetMesh(video::Mesh* mesh);
 
-	// Benutzt der Scene-Node nur die Materialien der Sub-Meshes
-	// d.h. Wenn man das material der Sub-Meshes ändert, ändert es sich in allen
-	// Scene-Nodes mit.
 	//! Should materials be copied
 	/**
 	If ReadMaterialsOnly is set, the scene node which access the mesh material directly.
 	If you change the mesh material all nodes will show this new material.
-	If ReadMaterialsOnly is not set, a copy of all materials will be created. And all changes
-	to the node will only affect these.\n
+	If ReadMaterialsOnly is not set, a copy of all materials will be created. And all material changes
+	to the node will only affect ther original mesh.\n
 	The default state is set.
 	\param state Should ReadMaterialOnly be set
 	\ref GetReadMaterialsOnly
@@ -59,7 +56,7 @@ public:
 	LUX_API bool GetReadMaterialsOnly() const;
 
 	LUX_API void Render(const SceneRenderData& data) override;
-	LUX_API ERenderPass GetRenderPass() const override;
+	LUX_API RenderPassSet GetRenderPass() const override;
 
 	LUX_API video::Material* GetMaterial(int index);
 	LUX_API const video::Material* GetMaterial(int index) const;
@@ -79,8 +76,6 @@ protected:
 	core::Array<StrongRef<video::Material>> m_Materials;
 
 	math::AABBoxF m_BoundingBox;
-
-	mutable ERenderPass m_RenderPass;
 };
 
 } // namespace scene

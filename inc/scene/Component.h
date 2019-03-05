@@ -52,7 +52,7 @@ public:
 	}
 
 	virtual void Render(const SceneRenderData&) {}
-	virtual ERenderPass GetRenderPass() const { return ERenderPass::None; }
+	virtual RenderPassSet GetRenderPass() const { return RenderPassSet(); }
 
 	virtual const math::AABBoxF& GetBoundingBox() const { return math::AABBoxF::EMPTY; }
 

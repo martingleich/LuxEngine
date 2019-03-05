@@ -33,57 +33,63 @@ namespace scene
 
 ///////////////////////////////////////////////////////////////////////////////
 
+SceneBuilder::SceneBuilder(Scene* scene, Node* defaultRoot) :
+	m_Scene(scene),
+	m_DefaultRoot(defaultRoot ? defaultRoot : m_Scene->GetRoot())
+{
+}
+
 StrongRef<Node> SceneBuilder::AddNode(Component* baseComp, Node* parent)
 {
-	return m_Scene->AddNode(baseComp, parent);
+	return m_Scene->AddNode(baseComp, parent ? parent : m_DefaultRoot);
 }
 
 StrongRef<Node> SceneBuilder::AddMesh(const io::Path& path)
 {
-	return m_Scene->AddNode(CreateMesh(path));
+	return AddNode(CreateMesh(path));
 }
 
 StrongRef<Node> SceneBuilder::AddMesh(video::Mesh* mesh)
 {
-	return m_Scene->AddNode(CreateMesh(mesh));
+	return AddNode(CreateMesh(mesh));
 }
 
 StrongRef<Node> SceneBuilder::AddSkyBox(const video::ColorF& color)
 {
-	return m_Scene->AddNode(CreateSkyBox(color));
+	return AddNode(CreateSkyBox(color));
 }
 
 StrongRef<Node> SceneBuilder::AddSkyBox(video::CubeTexture* skyTexture)
 {
-	return m_Scene->AddNode(CreateSkyBox(skyTexture));
+	return AddNode(CreateSkyBox(skyTexture));
 }
 
-StrongRef<Node> SceneBuilder::AddDirectionalLight(video::Color color)
+StrongRef<Node> SceneBuilder::AddDirectionalLight(video::ColorF color)
 {
-	return m_Scene->AddNode(CreateDirectionalLight(color));
+	return AddNode(CreateDirectionalLight(color));
 }
-StrongRef<Node> SceneBuilder::AddPointLight(video::Color color)
+StrongRef<Node> SceneBuilder::AddPointLight(video::ColorF color)
 {
-	return m_Scene->AddNode(CreatePointLight(color));
+	return AddNode(CreatePointLight(color));
 }
-StrongRef<Node> SceneBuilder::AddSpotLight(video::Color color)
+StrongRef<Node> SceneBuilder::AddSpotLight(video::ColorF color)
 {
-	return m_Scene->AddNode(CreateSpotLight(color));
+	return AddNode(CreateSpotLight(color));
 }
 
 StrongRef<Node> SceneBuilder::AddLinearFog(float start, float end, const video::ColorF& color)
 {
-	return m_Scene->AddNode(CreateLinearFog(start, end, color));
+	return AddNode(CreateLinearFog(start, end, color));
 }
 
 StrongRef<Node> SceneBuilder::AddExponentialFog(float density, const video::ColorF& color)
 {
-	return m_Scene->AddNode(CreateExponentialFog(density, color));
+	return AddNode(CreateExponentialFog(density, color));
 }
 
 StrongRef<Node> SceneBuilder::AddCamera(float aspect)
 {
-	return m_Scene->AddNode(CreateCamera(aspect));
+	return AddNode(CreateCamera(aspect));
 }
 
 StrongRef<PerspCamera> SceneBuilder::CreateCamera(float aspect) const

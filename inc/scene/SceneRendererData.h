@@ -4,6 +4,7 @@
 #include "video/RenderTarget.h"
 #include "video/AbstractMaterial.h"
 #include "core/lxOptional.h"
+#include "core/lxEnumSet.h"
 
 namespace lux
 {
@@ -16,14 +17,15 @@ namespace scene
 
 enum class ERenderPass
 {
-	None,
+	Unknown,
 
 	SkyBox,
-
 	Transparent,
 	Solid,
-	Any,
+	ShadowCaster,
 };
+
+using RenderPassSet = core::EnumSet<ERenderPass>;
 
 class SceneRenderCamData
 {
@@ -39,8 +41,6 @@ public:
 	ERenderPass pass;
 
 	SceneRenderCamData camData;
-
-	video::EMaterialTechnique technique = video::EMaterialTechnique::Default;
 };
 
 class SceneRenderPassDefaultData
@@ -50,8 +50,6 @@ public:
 	SceneRenderCamData camData;
 	//u32 matchAnyTags = 0xFFFFFFFF;
 	//u32 matchAllTags = 0;
-
-	core::Optional<video::EMaterialTechnique> materialTechnique;
 
 	// RenderSettings
 	video::RenderTarget renderTarget;

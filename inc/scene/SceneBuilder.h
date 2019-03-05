@@ -44,19 +44,16 @@ class LineQuery;
 class SceneBuilder
 {
 public:
-	SceneBuilder(Scene* scene) :
-		m_Scene(scene)
-	{
-	}
+	LUX_API SceneBuilder(Scene* scene, Node* defaultRoot = nullptr);
 
 	LUX_API StrongRef<Node> AddNode(Component* baseComp = nullptr, Node* parent = nullptr);
 	LUX_API StrongRef<Node> AddMesh(const io::Path& path);
 	LUX_API StrongRef<Node> AddMesh(video::Mesh* mesh);
 	LUX_API StrongRef<Node> AddSkyBox(const video::ColorF& color);
 	LUX_API StrongRef<Node> AddSkyBox(video::CubeTexture* skyTexture = nullptr);
-	LUX_API StrongRef<Node> AddDirectionalLight(video::Color color = video::Color::White);
-	LUX_API StrongRef<Node> AddPointLight(video::Color color = video::Color::White);
-	LUX_API StrongRef<Node> AddSpotLight(video::Color color = video::Color::White);
+	LUX_API StrongRef<Node> AddDirectionalLight(video::ColorF color = video::Color::White);
+	LUX_API StrongRef<Node> AddPointLight(video::ColorF color = video::Color::White);
+	LUX_API StrongRef<Node> AddSpotLight(video::ColorF color = video::Color::White);
 	LUX_API StrongRef<Node> AddLinearFog(float start, float end, const video::ColorF& color = video::Color::White);
 	LUX_API StrongRef<Node> AddExponentialFog(float density, const video::ColorF& color = video::Color::White);
 	LUX_API StrongRef<Node> AddCamera(float aspectRatio);
@@ -89,6 +86,7 @@ public:
 
 protected:
 	Scene* m_Scene;
+	Node* m_DefaultRoot;
 };
 
 } // namespace scene

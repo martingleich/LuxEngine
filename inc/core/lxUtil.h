@@ -111,12 +111,6 @@ struct HashType
 };
 
 template <typename T>
-struct MemberFuncHashType
-{
-	unsigned int operator()(const T& t) { return t.GetHash(); }
-};
-
-template <typename T>
 struct HashType<T*> : BitWiseHash<T*> {};
 
 template <> struct HashType<char> : BitWiseHash<char> {};

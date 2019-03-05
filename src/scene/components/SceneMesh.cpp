@@ -5,6 +5,10 @@
 #include "video/mesh/Geometry.h"
 #include "video/Renderer.h"
 
+/*
+Don't allow null mesh.
+Improve handling of readOnlyMaterial.
+*/
 LX_REFERABLE_MEMBERS_SRC(lux::scene::Mesh, "lux.comp.Mesh");
 
 namespace lux
@@ -49,6 +53,22 @@ void Mesh::Render(const SceneRenderData& r)
 	if(!m_Mesh)
 		return;
 
+	video::EMaterialTechnique technique;
+	ERenderPass toRenderPass;
+	switch(r.pass) {
+	case ERenderPass::Solid:
+	case ERenderPass::Transparent:
+		technique = video::EMaterialTechnique::Default;
+		toRenderPass = r.pass;
+		break;
+	case ERenderPass::ShadowCaster:
+		technique = video::EMaterialTechnique::ShadowCaster;
+		toRenderPass = ERenderPass::Solid;
+		break;
+	default:
+		return;
+	}
+
 	const auto worldMat = node->GetAbsoluteTransform().ToMatrix();
 	r.video->SetTransform(video::ETransform::World, worldMat);
 
@@ -63,8 +83,8 @@ void Mesh::Render(const SceneRenderData& r)
 		auto pass = GetPassFromReq(material->GetRequirements());
 
 		// Draw transparent geo meshes in transparent pass, and solid in solid path
-		if(pass == r.pass && firstPrimitive <= lastPrimitive) {
-			auto realTechOpt = material->GetTechnique(r.technique);
+		if(pass == toRenderPass && firstPrimitive <= lastPrimitive) {
+			auto realTechOpt = material->GetTechnique(technique);
 			if(realTechOpt.HasValue()) {
 				auto realTech = realTechOpt.GetValue();
 
@@ -84,23 +104,19 @@ void Mesh::Render(const SceneRenderData& r)
 	}
 }
 
-ERenderPass Mesh::GetRenderPass() const
+RenderPassSet Mesh::GetRenderPass() const
 {
 	if(!m_Mesh)
-		return ERenderPass::None;
+		return RenderPassSet();
 
-	ERenderPass pass = ERenderPass::None;
+	RenderPassSet passSet;
 	for(int i = 0; i < GetMaterialCount(); ++i) {
 		auto mat = GetMaterial(i);
 		ERenderPass nextPass = GetPassFromReq(mat->GetRequirements());
-
-		if(pass != ERenderPass::None && pass != nextPass)
-			return ERenderPass::Any;
-		pass = nextPass;
+		passSet = passSet.Join(nextPass);
 	}
 
-	m_RenderPass = pass;
-	return m_RenderPass;
+	return passSet;
 }
 
 const math::AABBoxF& Mesh::GetBoundingBox() const

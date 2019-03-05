@@ -22,7 +22,7 @@ public:
 
 	LUX_API void Animate(float time) override;
 	LUX_API void Render(const SceneRenderData& sceneData) override;
-	LUX_API ERenderPass GetRenderPass() const override;
+	LUX_API RenderPassSet GetRenderPass() const override;
 	LUX_API const math::AABBoxF& GetBoundingBox() const override;
 
 private:

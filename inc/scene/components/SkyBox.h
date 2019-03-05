@@ -22,7 +22,7 @@ public:
 	LUX_API ~SkyBox();
 
 	LUX_API void Render(const SceneRenderData& data) override;
-	LUX_API ERenderPass GetRenderPass() const override;
+	LUX_API RenderPassSet GetRenderPass() const override;
 
 	LUX_API void UseCubeTexture(bool cube);
 	LUX_API bool IsUsingCubeTexture() const;

@@ -212,10 +212,10 @@ bool ShaderFactory::GetShaderInclude(
 	core::StringView& outData)
 {
 	ShaderInclude search(language, name);
-	auto itOpt = m_ShaderIncludes.Find(search);
-	if(!itOpt.HasValue())
+	auto it = m_ShaderIncludes.Find(search);
+	if(it == m_ShaderIncludes.End())
 		return false;
-	outData = core::StringView((const char*)itOpt.GetValue().value->Pointer(), (int)it->GetSize());
+	outData = core::StringView((const char*)it->Pointer(), (int)it->GetSize());
 	return true;
 }
 

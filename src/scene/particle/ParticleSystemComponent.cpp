@@ -66,9 +66,6 @@ void ParticleSystem::Render(const SceneRenderData& r)
 {
 	if(r.pass != ERenderPass::Transparent)
 		return;
-	if(r.technique != video::EMaterialTechnique::Default)
-		return;
-
 	auto node = GetNode();
 	if(!node)
 		return;
@@ -87,9 +84,9 @@ void ParticleSystem::Render(const SceneRenderData& r)
 	}
 }
 
-ERenderPass ParticleSystem::GetRenderPass() const
+RenderPassSet ParticleSystem::GetRenderPass() const
 {
-	return ERenderPass::Transparent;
+	return RenderPassSet(ERenderPass::Transparent);
 }
 
 const math::AABBoxF& ParticleSystem::GetBoundingBox() const
