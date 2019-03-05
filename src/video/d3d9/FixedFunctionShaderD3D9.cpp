@@ -77,6 +77,7 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 	// Reconnect attributes, if neccessary
 	m_SharedData->Update(sceneAttributes);
 
+	bool lightingChanged = (m_Lighting != pass.lighting);
 	m_Lighting = pass.lighting;
 
 	// Ambient
@@ -129,7 +130,7 @@ void FixedFunctionShaderD3D9::LoadSceneParams(core::AttributeList sceneAttribute
 			}
 		}
 
-		if(lightChangeId != m_SharedData->lightChangeId) {
+		if(lightChangeId != m_SharedData->lightChangeId || lightingChanged) {
 			m_SharedData->lightChangeId = lightChangeId;
 
 			for(int i = 0; i < MAX_LIGHT_COUNT; ++i) {
