@@ -40,8 +40,10 @@ public:
 //! A complex mesh composed of simple Sub-Meshs
 class Mesh : public core::Referable
 {
-public:
+	LX_REFERABLE_MEMBERS_API(Mesh, LUX_API);
+private:
 	LUX_API Mesh();
+public:
 	LUX_API Mesh(Geometry* geo, Material* mat);
 	LUX_API ~Mesh();
 
@@ -94,9 +96,10 @@ public:
 
 	void AddExData(MeshExData* data)
 	{
+		LX_CHECK_NULL_ARG(data);
+
 		if(m_ExData)
 			data->m_NextData = m_ExData->m_NextData;
-		
 		m_ExData = data;
 	}
 	void RemoveExData(MeshExData* data)
@@ -140,8 +143,6 @@ public:
 		return core::Optional<const T*>();
 	}
 	
-	LUX_API core::Name GetReferableType() const override;
-
 private:
 	struct MaterialRange
 	{
@@ -155,6 +156,7 @@ private:
 		}
 	};
 
+private:
 	math::AABBoxF m_BoundingBox;
 
 	core::Array<StrongRef<Material>> m_Materials;

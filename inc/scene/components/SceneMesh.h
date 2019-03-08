@@ -17,23 +17,18 @@ namespace scene
 class Mesh : public Component
 {
 	LX_REFERABLE_MEMBERS_API(Mesh, LUX_API);
-public:
+
+private:
 	LUX_API Mesh();
 	LUX_API Mesh(const Mesh& other);
+public:
+	LUX_API Mesh(video::Mesh* mesh);
 	LUX_API ~Mesh();
 
-	//! Get the currently used model, may be null.
-	/**
-	\return The current model
-	\ref SetMesh
-	*/
+	//! Get the currently used model.
 	LUX_API StrongRef<video::Mesh> GetMesh();
 
 	//! Set a new model
-	/**
-	\param mesh The mesh which is rendered by this scenenode
-	\ref GetMesh
-	*/
 	LUX_API void SetMesh(video::Mesh* mesh);
 
 	//! Should materials be copied

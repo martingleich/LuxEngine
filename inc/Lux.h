@@ -68,7 +68,6 @@ namespace input
 
 #include "core/ReferenceCounted.h"
 #include "core/Logger.h"
-#include "core/lxList.h"
 #include "core/lxArray.h"
 #include "core/lxHashMap.h"
 #include "core/lxOrderedSet.h"

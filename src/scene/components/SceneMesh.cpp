@@ -6,7 +6,6 @@
 #include "video/Renderer.h"
 
 /*
-Don't allow null mesh.
 Improve handling of readOnlyMaterial.
 */
 LX_REFERABLE_MEMBERS_SRC(lux::scene::Mesh, "lux.comp.Mesh");
@@ -29,6 +28,12 @@ Mesh::Mesh() :
 {
 }
 
+Mesh::Mesh(video::Mesh* mesh) :
+	m_OnlyReadMaterials(true)
+{
+	SetMesh(mesh);
+}
+
 Mesh::Mesh(const Mesh& other) :
 	m_Mesh(other.m_Mesh),
 	m_OnlyReadMaterials(other.m_OnlyReadMaterials),
@@ -49,8 +54,6 @@ void Mesh::Render(const SceneRenderData& r)
 {
 	auto node = GetNode();
 	if(!node)
-		return;
-	if(!m_Mesh)
 		return;
 
 	video::EMaterialTechnique technique;
@@ -106,9 +109,6 @@ void Mesh::Render(const SceneRenderData& r)
 
 RenderPassSet Mesh::GetRenderPass() const
 {
-	if(!m_Mesh)
-		return RenderPassSet();
-
 	RenderPassSet passSet;
 	for(int i = 0; i < GetMaterialCount(); ++i) {
 		auto mat = GetMaterial(i);
@@ -126,7 +126,7 @@ const math::AABBoxF& Mesh::GetBoundingBox() const
 
 video::Material* Mesh::GetMaterial(int index)
 {
-	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
+	if(m_OnlyReadMaterials)
 		return m_Mesh->GetMaterial(index);
 	else
 		return m_Materials.At(index);
@@ -134,7 +134,7 @@ video::Material* Mesh::GetMaterial(int index)
 
 const video::Material* Mesh::GetMaterial(int index) const
 {
-	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
+	if(m_OnlyReadMaterials)
 		return m_Mesh->GetMaterial(index);
 	else
 		return m_Materials.At(index);
@@ -142,7 +142,7 @@ const video::Material* Mesh::GetMaterial(int index) const
 
 void Mesh::SetMaterial(int index, video::Material* m)
 {
-	if(m_OnlyReadMaterials && m_Mesh != nullptr && index < m_Mesh->GetMaterialCount())
+	if(m_OnlyReadMaterials)
 		m_Mesh->SetMaterial(index, m);
 	else
 		m_Materials.At(index) = m;
@@ -150,7 +150,7 @@ void Mesh::SetMaterial(int index, video::Material* m)
 
 int Mesh::GetMaterialCount() const
 {
-	if(m_OnlyReadMaterials && m_Mesh != nullptr)
+	if(m_OnlyReadMaterials)
 		return m_Mesh->GetMaterialCount();
 	else
 		return m_Materials.Size();
@@ -163,11 +163,9 @@ StrongRef<video::Mesh> Mesh::GetMesh()
 
 void Mesh::SetMesh(video::Mesh* mesh)
 {
+	LX_CHECK_NULL_ARG(mesh);
 	m_Mesh = mesh;
-	if(m_Mesh)
-		m_BoundingBox = mesh->GetBoundingBox();
-	else
-		m_BoundingBox = math::AABBoxF::EMPTY;
+	m_BoundingBox = mesh->GetBoundingBox();
 
 	CopyMaterials();
 }
@@ -187,15 +185,13 @@ bool Mesh::GetReadMaterialsOnly() const
 void Mesh::CopyMaterials()
 {
 	m_Materials.Clear();
-	if(m_OnlyReadMaterials || !m_Mesh)
+	if(m_OnlyReadMaterials)
 		return;
 
 	int materialCount = m_Mesh->GetMaterialCount();
-	m_Materials.Reserve(materialCount);
-	for(int i = 0; i < materialCount; ++i) {
-		auto material = m_Mesh->GetMaterial(i)->Clone();
-		m_Materials.PushBack(material);
-	}
+	m_Materials.Resize(materialCount);
+	for(int i = 0; i < materialCount; ++i)
+		m_Materials[i] = m_Mesh->GetMaterial(i)->Clone();
 }
 
 } // namespace scene

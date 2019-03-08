@@ -2,7 +2,7 @@
 #include "video/Material.h"
 #include "video/mesh/Geometry.h"
 
-LX_REGISTER_REFERABLE_CLASS(lux::video::Mesh, "lux.resource.Mesh");
+LX_REFERABLE_MEMBERS_SRC(lux::video::Mesh, "lux.resource.Mesh");
 
 namespace lux
 {
@@ -25,14 +25,13 @@ Mesh::~Mesh()
 
 void Mesh::RecalculateBoundingBox()
 {
-	if(m_Geometry)
-		m_BoundingBox = m_Geometry->GetBoundingBox();
-	else
-		m_BoundingBox.Set(0, 0, 0);
+	m_BoundingBox = m_Geometry->GetBoundingBox();
 }
 
 void Mesh::SetMaterial(Material* m)
 {
+	LX_CHECK_NULL_ARG(m);
+
 	m_Ranges.Clear();
 	m_Materials.Clear();
 	m_Materials.PushBack(m);
@@ -41,6 +40,7 @@ void Mesh::SetMaterial(Material* m)
 
 void Mesh::SetMaterial(int index, Material* m)
 {
+	LX_CHECK_NULL_ARG(m);
 	m_Materials.At(index) = m;
 }
 
@@ -61,6 +61,8 @@ int Mesh::GetMaterialCount() const
 
 void Mesh::SetMaterialRange(Material* mat, int firstPrimitive, int lastPrimitive)
 {
+	LX_CHECK_NULL_ARG(mat);
+
 	int mid = 0;
 	for(auto m : m_Materials) {
 		if(m == mat)
@@ -133,8 +135,7 @@ void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 		++insertAt;
 	}
 
-	auto geo = GetGeometry();
-	int primCount = geo ? geo->GetPrimitiveCount() : 0xFFFFFFFF;
+	int primCount = GetGeometry()->GetPrimitiveCount();
 	if(lastPrimitive < primCount) {
 		if(insertAt > 0 && m_Ranges[insertAt - 1].material == mid2) {
 			(void)0;
@@ -181,8 +182,7 @@ void Mesh::SetMaterialRange(int mid, int firstPrimitive, int lastPrimitive)
 
 void Mesh::GetMaterialRange(int rangeIndex, int& materialIndex, int& firstPrimitive, int& lastPrimitive)
 {
-	auto geo = GetGeometry();
-	int primCount = geo ? geo->GetPrimitiveCount() : 0;
+	int primCount = GetGeometry()->GetPrimitiveCount();
 	auto& range = m_Ranges.At(rangeIndex);
 	materialIndex = range.material;
 	firstPrimitive = range.begin;
@@ -192,15 +192,7 @@ void Mesh::GetMaterialRange(int rangeIndex, int& materialIndex, int& firstPrimit
 
 int Mesh::GetRangeCount() const
 {
-	auto geo = GetGeometry();
-	if(!geo)
-		return 0;
 	return m_Ranges.Size();
-}
-
-core::Name Mesh::GetReferableType() const
-{
-	return core::ResourceType::Mesh;
 }
 
 const Geometry* Mesh::GetGeometry() const
@@ -215,6 +207,7 @@ StrongRef<Geometry> Mesh::GetGeometry()
 
 void Mesh::SetGeometry(Geometry* geo)
 {
+	LX_CHECK_NULL_ARG(geo);
 	m_Geometry = geo;
 	RecalculateBoundingBox();
 }

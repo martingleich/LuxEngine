@@ -49,10 +49,5 @@ StrongRef<Mesh> MeshSystem::CreateMeshDefaultMaterial(Geometry* geo)
 	return CreateMesh(geo, defMat);
 }
 
-StrongRef<Mesh> MeshSystem::CreateEmptyMesh()
-{
-	return LUX_NEW(Mesh);
-}
-
 } // namespace scene
 } // namespace lux

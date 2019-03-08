@@ -21,7 +21,6 @@ public:
 	LUX_API static MeshSystem* Instance();
 	LUX_API static void Destroy();
 
-	LUX_API StrongRef<Mesh> CreateEmptyMesh();
 	LUX_API StrongRef<Mesh> CreateMeshDefaultMaterial(Geometry* geo);
 	LUX_API StrongRef<Mesh> CreateMesh(Geometry* geo, Material* mat);
 };

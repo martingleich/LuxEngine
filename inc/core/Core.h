@@ -22,7 +22,6 @@
 #include "core/lxHashSet.h"
 #include "core/lxID.h"
 #include "core/lxIterator.h"
-#include "core/lxList.h"
 #include "core/lxMemory.h"
 #include "core/lxMemoryAlloc.h"
 #include "core/lxName.h"
