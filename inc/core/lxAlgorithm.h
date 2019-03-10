@@ -16,8 +16,8 @@ namespace core
 returns true if the entry matches otherwise false
 \return An iterator to the searched entry if found, otherwise from
 */
-template <typename RangeT, typename type, typename Condition>
-auto LinearSearch(const type& entry, RangeT&& range, Condition con)
+template <typename RangeT, typename T, typename ConditionT>
+auto LinearSearch(const T& entry, RangeT&& range, ConditionT&& con)
 {
 	using namespace std;
 	auto it = begin(range);
@@ -39,8 +39,8 @@ The operation
 \param entry The entry to scan for
 \return An iterator to the searched entry if found, otherwise from
 */
-template <typename RangeT, typename type>
-auto LinearSearch(const type& entry, RangeT&& range)
+template <typename RangeT, typename T>
+auto LinearSearch(const T& entry, RangeT&& range)
 {
 	using namespace std;
 	// Lineare Suche
@@ -53,49 +53,6 @@ auto LinearSearch(const type& entry, RangeT&& range)
 
 	return it;
 }
-#if 0
-//! Performs a reverse linear search for an element
-/**
-The operation (*Iterator == type), must be defined
-
-\param from The forward-iterator which limits the search, must be before to
-\param to The forward-iterator to start the search, must be after from
-\param entry The entry to scan for
-\return An iterator to the searched entry if found, otherwise from
-*/
-template <typename Iterator, typename type>
-Iterator ReverseLinearSearch(const type& entry, Iterator from, Iterator to)
-{
-	// Lineare Suche
-	for(; to != from; --to) {
-		if(*to == entry)
-			break;
-	}
-
-	return from;
-}
-
-//! Performs a reverse linear search for an element, with userdefined condition
-/**
-\param from The forward-iterator which limits the search, must be before to
-\param to The forward-iterator to start the search, must be after from
-\param entry The entry to scan for
-\param Con A binary function with the interface (*Iterator, entry)->bool,
-returns true if the entry matches otherwise false
-\return An iterator to the searched entry if found, otherwise from
-*/
-template <typename Iterator, typename type, typename Condition>
-Iterator ReverseLinearSearch(const type& entry, Iterator from, Iterator to, Condition con)
-{
-	// Lineare Suche
-	for(; to != from; --to) {
-		if(Con(*to, entry))
-			break;
-	}
-
-	return to;
-}
-#endif
 
 //! Performs an action for each element
 /**
@@ -104,8 +61,8 @@ Performs an action for each element between two iterators
 \param to The forward-iterator which limits the elements, must be after from
 \param Action An unary function, taking an *Iterator, which is called for each element
 */
-template <typename RangeT, typename Action>
-void Foreach(RangeT&& range, Action act)
+template <typename RangeT, typename ActionT>
+void Foreach(RangeT&& range, ActionT&& act)
 {
 	using namespace std;
 	auto it = begin(range);
@@ -117,8 +74,7 @@ void Foreach(RangeT&& range, Action act)
 //! Performs a binary search in an sorted array
 /**
 \param entry The entry to search
-\param begin The first interator which is searched.
-\param end The interator after the last interator which is searched.
+\param range The range to search
 \param outNewEntry If not null and the entry was not found here the Interator where it should placed to keep the array sorted is written.
 \return The iterator to the search interator or end if it couldn't be found.
 */
@@ -161,15 +117,13 @@ IterT BinarySearch(const T& entry, RangeT&& range, IterT* outNextEntry = nullptr
 //! Delete all elements fullfilling a condition
 /**
 The order of the not removed elements is preserved.
-After the call the squence from first to the return value, only
-contains elements not fullfilling the condition.
-\param first The begin of the sequence
-\param end The element after the last in the sequence
+The sequence is not resized after this operation, use the return value for this.
+\param range The range of elements
 \param predicate The condition, returns true to delete a element.
-\return The end iterator of the new sequence.
+\return The size of the new sequence
 */
 template <typename RangeT, typename Predicate>
-int RemoveIf(RangeT&& range, Predicate pred)
+int RemoveIf(RangeT&& range, Predicate&& pred)
 {
 	using namespace std;
 	int newSize = 0;
@@ -192,39 +146,26 @@ int RemoveIf(RangeT&& range, Predicate pred)
 //! Delete all elements equal to a value
 /**
 The order of the not removed elements is preserved.
-\param first The begin of the sequence
-\param end The element after the last in the sequence
+The sequence is not resized after this operation, use the return value for this.
+\param range The range of elements
 \param value The value to remove
-\return The end iterator of the new sequence.
+\return The size of the new sequence
 */
 template <typename RangeT, typename ValueT>
-auto Remove(RangeT&& range, ValueT& value)
+int Remove(RangeT&& range, const ValueT& value)
 {
 	using namespace std;
-
-	auto first = begin(range);
-	auto endIt = end(range);
-	auto cursor = first;
-	while(first != endIt) {
-		if(*first != value) {
-			if(cursor != first)
-				*cursor = std::move(*first);
-			++cursor;
-		}
-		++first;
-	}
-
-	return cursor;
+	using IterValueT = decltype(*std::begin(range));
+	return RemoveIf(range, [&value](const IterValueT& v) { return v == value; });
 }
 
 //! Fill the range between two iterators with a given value.
 /**
-\param first The first iterator of the fill range.
-\param end The end iterator of the fill range.
+\param range The range to fill
 \param v The value to fill with.
 */
-template <typename RangeT, typename Value>
-void Fill(RangeT&& range, Value v)
+template <typename RangeT, typename ValueT>
+void Fill(RangeT&& range, const ValueT& v)
 {
 	using namespace std;
 	auto first = begin(range);

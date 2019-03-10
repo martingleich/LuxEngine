@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_SORT_H
 #define INCLUDED_LUX_SORT_H
-#include "lxIterator.h"
-#include "lxUtil.h"
+#include "core/iterators/lxBaseIterator.h"
+#include "core/lxUtil.h"
 
 namespace lux
 {

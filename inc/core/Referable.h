@@ -2,9 +2,6 @@
 #define INCLUDED_LUX_REFERABLE_H
 #include "core/ReferenceCounted.h"
 #include "core/lxName.h"
-#include "core/lxTypes.h"
-#include "core/lxID.h"
-#include "core/VariableAccess.h"
 
 namespace lux
 {
@@ -84,7 +81,6 @@ friend ::lux::core::impl_referableRegister::ReferableRegisterBlock; \
 public: \
 API ::lux::core::Name GetReferableType() const; \
 API ::lux::StrongRef<class> Clone() const; \
-API ::lux::u32 GetSerializerStructure() const; \
 protected: \
 API ::lux::StrongRef<::lux::core::Referable> CloneImpl() const; \
 private: \

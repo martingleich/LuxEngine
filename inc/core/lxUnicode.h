@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_UNICODE_H
 #define INCLUDED_LUX_UNICODE_H
 #include "core/LuxBase.h"
-#include "core/lxIterator.h"
+#include "core/iterators/lxBaseIterator.h"
 
 namespace lux
 {

@@ -508,15 +508,13 @@ public:
 
 	void Sort()
 	{
-		if(m_Used > 1)
-			core::Sort(*this, core::CompareType<T>());
+		core::Sort(*this, core::CompareType<T>());
 	}
 
 	template <typename CompareT>
 	void Sort(const CompareT& compare)
 	{
-		if(m_Used > 1)
-			core::Sort(*this, compare);
+		core::Sort(*this, compare);
 	}
 
 	template <typename ElemT>

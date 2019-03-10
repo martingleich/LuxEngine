@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LUX_STRING_VIEW_H
 #define INCLUDED_LUX_STRING_VIEW_H
 #include "core/LuxBase.h"
-#include "core/lxIterator.h"
+#include "core/iterators/lxRanges.h"
 #include "core/lxUnicode.h"
 
 namespace lux
